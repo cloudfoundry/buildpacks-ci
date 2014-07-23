@@ -16,10 +16,12 @@ unless private_yml_url
   exit 1
 end
 
-unless ENV['GITHUB_USER'] && ENV['GITHUB_PASSWORD']
-  puts 'Github credentials required in ENV'
+unless ENV['GITHUB_CREDENTIALS']
+  puts 'Github credentials required in ENV, used by "hub" command'
   exit 1
 end
+
+ENV['GITHUB_USER'], ENV['GITHUB_PASSWORD'] = ENV['GITHUB_CREDENTIALS'].split(':')
 
 buildpack_filename = File.basename(buildpack_path)
 
