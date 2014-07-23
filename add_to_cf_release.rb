@@ -98,8 +98,8 @@ unless new_blobs.size == 1
 end
 
 blob_name = new_blobs.first.split("\t")[1]
-unless blob_name == buildpack_blob
-  puts "Found #{blob_name}, expected #{buildpack_blob}"
+unless blob_name == buildpack_filename
+  puts "Found #{blob_name}, expected #{buildpack_filename}"
   exit 1
 end
 
