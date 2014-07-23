@@ -88,7 +88,7 @@ blobs.delete(old_buildpack_key)
 File.write('config/blobs.yml', YAML.dump(blobs))
 
 puts 'bosh add blob'
-`bosh add #{buildpack_path}`
+puts `bosh add blob #{buildpack_path}`
 
 new_blobs = `bosh blobs|grep '^new'`.chomp.split("\n")
 puts new_blobs
