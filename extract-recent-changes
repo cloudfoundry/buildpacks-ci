@@ -1,0 +1,5 @@
+#!/bin/bash
+csplit -s -f CHANGES_ CHANGELOG /^v[0-9]/
+mv CHANGES_00 RECENT_CHANGES
+rm CHANGES_*
+
