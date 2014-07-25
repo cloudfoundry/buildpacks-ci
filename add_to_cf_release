@@ -10,6 +10,17 @@ if ARGV.count != 1
 end
 
 language = ENV['BUILDPACK_LANGUAGE']
+unless language
+  puts 'Language required'
+  exit 1
+end
+
+version = ENV['BUILDPACK_VERSION']
+unless version
+  puts 'Version required'
+  exit 1
+end
+
 private_yml_url = ENV['PRIVATE_YML_URL']
 
 unless private_yml_url
@@ -26,13 +37,6 @@ ENV['GITHUB_USER'], ENV['GITHUB_PASSWORD'] = ENV['GITHUB_CREDENTIALS'].split(':'
 
 buildpack_filename = File.basename(buildpack_path)
 
-version = buildpack_filename.match( /-(v.*)\.zip/)[1]
-puts version
-unless version
-  puts 'Could not detect version of buildpack'
-  exit 1
-end
-
 # Assume Jenkins has checked out our cf-release fork
 ##git clone https://github.com/cf-buildpacks/cf-release.git
 
@@ -45,7 +49,7 @@ end
 puts 'Updating cf-release to get newest develop branch'
 puts `git remote update`
 
-branch_name = "#{language}-buildpack-#{version}"
+branch_name = "#{language}-buildpack-v#{version}"
 puts "creating branch: #{branch_name} based on cloudfoundry/develop"
 
 puts `git checkout -b '#{branch_name}' cloudfoundry/develop`
@@ -107,16 +111,15 @@ end
 puts 'bosh upload blobs'
 puts `bosh --non-interactive upload blobs`
 
-
 puts 'Commiting changes'
 puts `git add config/blobs.yml #{spec_file} #{packaging_file}`
-puts `git commit -m 'Upgrading #{language} buildpack to #{version}'`
+puts `git commit -m 'Upgrading #{language} buildpack to v#{version}'`
 
 puts 'Pushing changes to origin'
 puts `git push origin HEAD`
 
 puts 'Submitting pull-request'
-title = "Upgrading #{language} buildpack to #{version}"
+title = "Upgrading #{language} buildpack to v#{version}"
 body = "Upgrading to latest stable version of #{language} buildpack\n --Buildpacks Team"
 
 puts `hub pull-request -m '#{title}\n\n#{body}' -b cloudfoundry:develop < /dev/null`
