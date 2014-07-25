@@ -3,12 +3,13 @@
 require 'yaml'
 
 buildpack_path = ARGV[0]
-language = ARGV[1] # php, ruby, nodejs
-if ARGV.count != 2
-  puts 'add_to_cf_release.rb [path_to_buildpack_zip] [language name]'
+
+if ARGV.count != 1
+  puts "#{$0} [path_to_buildpack_zip]"
   exit 1
 end
 
+language = ENV['BUILDPACK_LANGUAGE']
 private_yml_url = ENV['PRIVATE_YML_URL']
 
 unless private_yml_url
