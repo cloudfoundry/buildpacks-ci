@@ -38,19 +38,17 @@ buildpack_filename = File.basename(buildpack_path)
 # Assume Jenkins has checked out our cf-release fork
 ##git clone https://github.com/cf-buildpacks/cf-release.git
 
-puts `git config remote.cloudfoundry.url`
-
-if $?.exitstatus == 1
-  puts `git remote add cloudfoundry https://github.com/cloudfoundry/cf-release.git`
+unless system 'git config remote.cloudfoundry.url'
+  system 'git remote add cloudfoundry https://github.com/cloudfoundry/cf-release.git'
 end
 
 puts 'Updating cf-release to get newest develop branch'
-puts `git remote update`
+exit 1 unless system 'git remote update'
 
 branch_name = "#{language}-buildpack-v#{version}"
 puts "creating branch: #{branch_name} based on cloudfoundry/develop"
 
-puts `git checkout -b '#{branch_name}' cloudfoundry/develop`
+exit 1 unless system "git checkout -b '#{branch_name}' cloudfoundry/develop"
 
 package_dir = "packages/buildpack_#{language}"
 spec_file = "#{package_dir}/spec"
@@ -73,7 +71,8 @@ cp #{buildpack_blob} ${BOSH_INSTALL_TARGET}
 PACKAGING_FILE
 
 puts 'Removing old buildpack from blobs.yml'
-`rm blobs/#{language}-buildpack/*`
+system "rm blobs/#{language}-buildpack/*"
+
 blobs = YAML.load(File.read('config/blobs.yml'))
 
 old_buildpack_key = blobs.keys.detect do |key|
@@ -88,7 +87,7 @@ blobs.delete(old_buildpack_key)
 File.write('config/blobs.yml', YAML.dump(blobs))
 
 puts 'bosh add blob'
-puts `bosh add blob #{buildpack_path}`
+exit 1 unless system "bosh add blob #{buildpack_path}"
 
 new_blobs = `bosh blobs|grep '^new'`.chomp.split("\n")
 puts new_blobs
@@ -104,18 +103,18 @@ unless blob_name == buildpack_filename
 end
 
 puts 'bosh upload blobs'
-puts `bosh --non-interactive upload blobs`
+exit 1 unless system 'bosh --non-interactive upload blobs'
 
 puts 'Commiting changes'
-puts `git add config/blobs.yml #{spec_file} #{packaging_file}`
-puts `git commit -m 'Upgrading #{language} buildpack to v#{version}'`
+exit 1 unless system "git add config/blobs.yml #{spec_file} #{packaging_file}"
+exit 1 unless system "git commit -m 'Upgrading #{language} buildpack to v#{version}'"
 
 puts 'Pushing changes to origin'
-puts `git push origin HEAD`
+exit 1 unless system 'git push origin HEAD'
 
 puts 'Submitting pull-request'
 title = "Upgrading #{language} buildpack to v#{version}"
 body = "Upgrading to latest stable version of #{language} buildpack\n --Buildpacks Team"
 
-puts `hub pull-request -m '#{title}\n\n#{body}' -b cloudfoundry:develop < /dev/null`
+exit 1 unless system "hub pull-request -m '#{title}\n\n#{body}' -b cloudfoundry:develop < /dev/null"
 
