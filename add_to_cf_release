@@ -21,10 +21,8 @@ unless version
   exit 1
 end
 
-private_yml_url = ENV['PRIVATE_YML_URL']
-
-unless private_yml_url
-  puts 'URL to config/private.yml, required in ENV'
+unless File.exists? 'config/private.yml'
+  puts 'Bosh requires a private.yml file'
   exit 1
 end
 
@@ -73,9 +71,6 @@ set -e -x
 
 cp #{buildpack_blob} ${BOSH_INSTALL_TARGET}
 PACKAGING_FILE
-
-puts 'Downloading private.yml'
-`curl '#{private_yml_url}' -o config/private.yml`
 
 puts 'Removing old buildpack from blobs.yml'
 `rm blobs/#{language}-buildpack/*`
