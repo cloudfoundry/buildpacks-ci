@@ -87,7 +87,7 @@ blobs.delete(old_buildpack_key)
 File.write('config/blobs.yml', YAML.dump(blobs))
 
 puts 'bosh add blob'
-exit 1 unless system "bosh add blob #{buildpack_path}"
+exit 1 unless system "bosh add blob #{buildpack_path} #{language}-buildpack"
 
 new_blobs = `bosh blobs|grep '^new'`.chomp.split("\n")
 puts new_blobs
