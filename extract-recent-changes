@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+
 csplit -s -f CHANGES_ CHANGELOG /^v[0-9]/
 sed "1,3d" CHANGES_00 > RECENT_CHANGES
 rm CHANGES_*
