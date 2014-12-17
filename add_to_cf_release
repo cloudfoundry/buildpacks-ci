@@ -107,7 +107,7 @@ exit 1 unless system 'bosh --non-interactive upload blobs'
 
 puts 'Commiting changes'
 exit 1 unless system "git add config/blobs.yml #{spec_file} #{packaging_file}"
-exit 1 unless system "git commit -m 'Upgrading #{language} buildpack to v#{version}'"
+exit 1 unless system "git commit -m 'Upgrading #{language} buildpack to v#{version}' --author='CF Buildpacks Team <cf-buildpacks-eng@pivotal.io>'"
 
 puts 'Pushing changes to origin'
 exit 1 unless system 'git push origin HEAD'
