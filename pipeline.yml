@@ -1,0 +1,37 @@
+---
+resources:
+  - name: nodejs-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/nodejs-buildpack
+  - name: ci-tools
+    type: git
+    source:
+      branch: concourse
+      uri: https://github.com/cloudfoundry/ci-tools
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/buildpacks-ci
+      private_key: {{buildpacks-private-key}}
+
+jobs:
+  - name: nodejs
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: nodejs-buildpack
+        - get: ci-tools
+        - get: buildpacks-ci
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: nodejs-buildpack
+            - name: ci-tools
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/nodejs-buildpack.sh
+        privileged: true
