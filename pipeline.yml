@@ -4,10 +4,6 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/nodejs-buildpack
-  - name: ruby-buildpack
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/ruby-buildpack
   - name: ci-tools
     type: git
     source:
@@ -38,23 +34,4 @@ jobs:
             - name: buildpacks-ci
           run:
             path: buildpacks-ci/scripts/nodejs-buildpack.sh
-        privileged: true
-  - name: ruby
-    public: true
-    serial: true
-    plan:
-      - aggregate:
-        - get: ruby-buildpack
-        - get: ci-tools
-        - get: buildpacks-ci
-      - task: rspec
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: ruby-buildpack
-            - name: ci-tools
-            - name: buildpacks-ci
-          run:
-            path: buildpacks-ci/scripts/ruby-buildpack.sh
         privileged: true
