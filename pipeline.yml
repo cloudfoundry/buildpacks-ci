@@ -14,6 +14,7 @@ resources:
     source:
       uri: git@github.com:pivotal-cf/buildpacks-ci
       private_key: {{buildpacks-private-key}}
+      branch: concourse
   - name: machete-firewall-tests
     type: git
     source:
@@ -25,26 +26,7 @@ resources:
       private_key: {{buildpacks-private-key}}
 
 jobs:
-  - name: nodejs
-    public: true
-    serial: true
-    plan:
-      - aggregate:
-        - get: nodejs-buildpack
-        - get: ci-tools
-        - get: buildpacks-ci
-      - task: rspec
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: nodejs-buildpack
-          run:
-            path: buildpacks-ci/scripts/nodejs-buildpack.sh
-        privileged: true
-  - name: firewall
+  - name: firewall-bp-ci-9
     public: true
     serial: true
     plan:
@@ -64,4 +46,6 @@ jobs:
             - name: machete-firewall-tests
           run:
             path: buildpacks-ci/scripts/machete-firewall.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
         privileged: true

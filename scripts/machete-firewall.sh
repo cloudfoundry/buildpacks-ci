@@ -2,8 +2,8 @@
 
 pushd deployments-buildpacks
   bundle
-  source ./bin/switch bp-ci-8
+  source ./bin/switch $DEPLOYMENT_NAME
 popd
 
 cd machete-firewall-tests
-../ci-tools/buildpack-builds --host=bp-ci-8.cf-app.com
+../ci-tools/buildpack-builds --host=$DEPLOYMENT_NAME.cf-app.com
