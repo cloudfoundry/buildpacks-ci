@@ -29,3 +29,15 @@ fly c -c pipeline.yml -vf private.yml
 docker build -t cfbuildpacks/ci:buildpack .
 docker push cfbuildpacks/ci:buildpack
 ```
+
+# Debugging the build
+
+```sh
+fly hijack -j $JOB_NAME -t task -n $TASK_NAME -p
+```
+
+# Clearing the git resources
+
+```sh
+fly hijack -c $RESOURCE_NAME rm -rf /tmp/git-resource-repo-cache
+```
