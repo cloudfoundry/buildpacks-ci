@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 pushd deployments-buildpacks
   bundle
