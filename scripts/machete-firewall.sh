@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 set -e
 
 pushd deployments-buildpacks
