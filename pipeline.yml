@@ -5,6 +5,11 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/nodejs-buildpack
       branch: develop
+  - name: ruby-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/ruby-buildpack
+      branch: develop
   - name: ci-tools
     type: git
     source:
@@ -28,6 +33,8 @@ groups:
   jobs:
   - nodejs-buildpack-CF-edge
   - nodejs-buildpack-CF-LTS
+  - ruby-buildpack-CF-edge
+  - ruby-buildpack-CF-LTS
   - machete-firewall-CF-edge
   - machete-firewall-CF-LTS
 - name: nodejs-buildpack
@@ -91,6 +98,62 @@ jobs:
             - name: deployments-buildpacks
           run:
             path: buildpacks-ci/scripts/nodejs-buildpack.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            STACKS: lucid64
+        privileged: true
+  - name: ruby-buildpack-CF-edge
+    public: true
+    serial: true
+    serial_groups: [bp-ci-8]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: ruby-buildpack
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+            - name: ruby-buildpack
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/ruby-buildpack.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            STACKS: lucid64 cflinuxfs2
+        privileged: true
+  - name: ruby-buildpack-CF-LTS
+    public: true
+    serial: true
+    serial_groups: [bp-ci-7]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: ruby-buildpack
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+            - name: ruby-buildpack
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/ruby-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: lucid64
