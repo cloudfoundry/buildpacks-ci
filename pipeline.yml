@@ -221,8 +221,8 @@ jobs:
           inputs:
             - name: buildpacks-ci
             - name: ci-tools
-            - name: ruby-buildpack
-            - name: go-buildpacks
+            - name: go-buildpack
+            - name: deployments-buildpacks
           run:
             path: buildpacks-ci/scripts/go-buildpack.sh
           params:
