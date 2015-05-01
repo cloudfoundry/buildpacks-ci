@@ -10,6 +10,11 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/ruby-buildpack
       branch: develop
+  - name: go-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/go-buildpack
+      branch: develop
   - name: ci-tools
     type: git
     source:
@@ -35,6 +40,8 @@ groups:
   - nodejs-buildpack-CF-LTS
   - ruby-buildpack-CF-edge
   - ruby-buildpack-CF-LTS
+  - go-buildpack-CF-edge
+  - go-buildpack-CF-LTS
   - machete-firewall-CF-edge
   - machete-firewall-CF-LTS
 - name: nodejs-buildpack
@@ -45,6 +52,14 @@ groups:
   jobs:
   - machete-firewall-CF-edge
   - machete-firewall-CF-LTS
+- name: go
+  jobs:
+  - go-CF-edge
+  - go-CF-LTS
+- name: ruby
+  jobs:
+  - ruby-buildpack-CF-edge
+  - ruby-buildpack-CF-LTS
 jobs:
   - name: nodejs-buildpack-CF-edge
     public: true
@@ -154,6 +169,62 @@ jobs:
             - name: deployments-buildpacks
           run:
             path: buildpacks-ci/scripts/ruby-buildpack.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            STACKS: lucid64
+        privileged: true
+  - name: go-CF-edge
+    public: true
+    serial: true
+    serial_groups: [bp-ci-8]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: go-buildpack
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+            - name: go-buildpack
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/go-buildpack.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            STACKS: lucid64 cflinuxfs2
+        privileged: true
+  - name: go-CF-LTS
+    public: true
+    serial: true
+    serial_groups: [bp-ci-7]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: go-buildpack
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+            - name: ruby-buildpack
+            - name: go-buildpacks
+          run:
+            path: buildpacks-ci/scripts/go-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: lucid64
