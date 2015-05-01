@@ -15,7 +15,7 @@ resources:
       uri: git@github.com:pivotal-cf/buildpacks-ci
       private_key: {{buildpacks-private-key}}
       branch: concourse
-  - name: machete-firewall-tests
+  - name: machete-firewall-test
     type: git
     source:
       uri: https://github.com/cf-buildpacks/machete-firewall-test
@@ -26,15 +26,16 @@ resources:
       private_key: {{buildpacks-private-key}}
 
 jobs:
-  - name: firewall-bp-ci-9
+  - name: firewall-bp-ci-8
     public: true
     serial: true
+    serial_groups : [bp-ci-8]
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: machete-firewall-tests
+        - get: machete-firewall-test
       - task: rspec
         config:
           platform: linux
@@ -43,9 +44,35 @@ jobs:
             - name: buildpacks-ci
             - name: ci-tools
             - name: deployments-buildpacks
-            - name: machete-firewall-tests
+            - name: machete-firewall-test
           run:
             path: buildpacks-ci/scripts/machete-firewall.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
+            STACKS: lucid64 cflinuxfs2
+        privileged: true
+  - name: firewall-bp-ci-7
+    public: true
+    serial: true
+    serial_groups : [bp-ci-7]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: machete-firewall-test
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+            - name: deployments-buildpacks
+            - name: machete-firewall-test
+          run:
+            path: buildpacks-ci/scripts/machete-firewall.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            STACKS: lucid64
         privileged: true
