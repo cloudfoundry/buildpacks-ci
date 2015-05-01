@@ -47,9 +47,12 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
+          trigger: false
         - get: ci-tools
-        - get: nodejs-buildpack
+          trigger: false
         - get: deployments-buildpacks
+          trigger: false
+        - get: nodejs-buildpack
       - task: rspec
         config:
           platform: linux
@@ -72,9 +75,12 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
+          trigger: false
         - get: ci-tools
-        - get: nodejs-buildpack
+          trigger: false
         - get: deployments-buildpacks
+          trigger: false
+        - get: nodejs-buildpack
       - task: rspec
         config:
           platform: linux
@@ -97,8 +103,11 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
+          trigger: false
         - get: ci-tools
+          trigger: false
         - get: deployments-buildpacks
+          trigger: false
         - get: machete-firewall-test
       - task: rspec
         config:
@@ -122,8 +131,11 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
+          trigger: false
         - get: ci-tools
+          trigger: false
         - get: deployments-buildpacks
+          trigger: false
         - get: machete-firewall-test
       - task: rspec
         config:
