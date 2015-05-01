@@ -4,6 +4,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/nodejs-buildpack
+      branch: develop
   - name: ci-tools
     type: git
     source:
@@ -24,12 +25,72 @@ resources:
     source:
       uri: git@github.com:pivotal-cf/deployments-buildpacks
       private_key: {{buildpacks-private-key}}
-
+groups:
+- name: all-the-things
+  jobs:
+  - nodejs-buildpack-CF-edge
+  - nodejs-buildpack-CF-LTS
+  - machete-firewall-CF-edge
+  - machete-firewall-CF-LTS
+- name: nodejs-buildpack
+  jobs:
+  - nodejs-buildpack-CF-edge
+  - nodejs-buildpack-CF-LTS
+- name: machete-firewall
+  jobs:
+  - machete-firewall-CF-edge
+  - machete-firewall-CF-LTS
 jobs:
-  - name: firewall-bp-ci-8
+  - name: nodejs-buildpack-CF-edge
     public: true
     serial: true
-    serial_groups : [bp-ci-8]
+    serial_groups: [bp-ci-8]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: nodejs-buildpack
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+            - name: nodejs-buildpack
+          run:
+            path: buildpacks-ci/scripts/nodejs-buildpack.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            STACKS: lucid64 cflinuxfs2
+        privileged: true
+  - name: nodejs-buildpack-CF-LTS
+    public: true
+    serial: true
+    serial_groups: [bp-ci-7]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: nodejs-buildpack
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+            - name: nodejs-buildpack
+          run:
+            path: buildpacks-ci/scripts/nodejs-buildpack.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            STACKS: lucid64
+        privileged: true
+  - name: machete-firewall-CF-edge
+    public: true
+    serial: true
+    serial_groups: [bp-ci-8]
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -51,7 +112,7 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: lucid64 cflinuxfs2
         privileged: true
-  - name: firewall-bp-ci-7
+  - name: machete-firewall-CF-LTS
     public: true
     serial: true
     serial_groups : [bp-ci-7]
