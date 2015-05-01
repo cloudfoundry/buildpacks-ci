@@ -7,4 +7,8 @@ pushd deployments-buildpacks
 popd
 
 cd machete-firewall-tests
-../ci-tools/buildpack-builds --host=$DEPLOYMENT_NAME.cf-app.com
+
+for stack in $STACKS; do
+  ../ci-tools/buildpack-build --uncached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com
+  ../ci-tools/buildpack-build --cached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com
+done
