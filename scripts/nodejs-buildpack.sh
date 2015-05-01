@@ -1,5 +1,14 @@
-#!/bin/sh
+#!/bin/bash -l
 set -e
 
+pushd deployments-buildpacks
+  bundle
+  source ./bin/switch $DEPLOYMENT_NAME
+popd
+
 cd nodejs-buildpack
-../ci-tools/buildpack-builds --host=10.244.0.34.xip.io
+
+for stack in $STACKS; do
+  ../ci-tools/buildpack-build --uncached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com
+  ../ci-tools/buildpack-build --cached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com
+done
