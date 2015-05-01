@@ -40,8 +40,8 @@ groups:
   - nodejs-buildpack-CF-LTS
   - ruby-buildpack-CF-edge
   - ruby-buildpack-CF-LTS
-  - go-buildpack-CF-edge
-  - go-buildpack-CF-LTS
+  - go-CF-edge
+  - go-CF-LTS
   - machete-firewall-CF-edge
   - machete-firewall-CF-LTS
 - name: nodejs-buildpack
