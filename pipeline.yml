@@ -50,6 +50,7 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: nodejs-buildpack
+        - get: deployments-buildpacks
       - task: rspec
         config:
           platform: linux
@@ -58,6 +59,7 @@ jobs:
             - name: buildpacks-ci
             - name: ci-tools
             - name: nodejs-buildpack
+            - name: deployments-buildpacks
           run:
             path: buildpacks-ci/scripts/nodejs-buildpack.sh
           params:
@@ -73,6 +75,7 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: nodejs-buildpack
+        - get: deployments-buildpacks
       - task: rspec
         config:
           platform: linux
@@ -81,6 +84,7 @@ jobs:
             - name: buildpacks-ci
             - name: ci-tools
             - name: nodejs-buildpack
+            - name: deployments-buildpacks
           run:
             path: buildpacks-ci/scripts/nodejs-buildpack.sh
           params:
