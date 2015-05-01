@@ -39,5 +39,5 @@ fly hijack -j $JOB_NAME -t task -n $TASK_NAME -p
 # Clearing the git resources
 
 ```sh
-fly hijack -c $RESOURCE_NAME rm -rf /tmp/git-resource-repo-cache
+fly hijack -c $RESOURCE_NAME -p rm -rf /tmp/git-resource-repo-cache
 ```
