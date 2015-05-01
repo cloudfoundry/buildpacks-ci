@@ -8,7 +8,6 @@ resources:
   - name: ci-tools
     type: git
     source:
-      branch: concourse
       uri: https://github.com/cloudfoundry/ci-tools
   - name: buildpacks-ci
     type: git
