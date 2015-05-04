@@ -3,6 +3,7 @@ FROM ruby:2.1.5-slim
 RUN apt-get update
 RUN apt-get -y install \
   git \
+  golang \
   libsqlite3-dev \
   npm \
   vagrant \
@@ -12,6 +13,9 @@ RUN apt-get -y install \
 RUN vagrant plugin install vagrant-aws
 RUN vagrant box add cloudfoundry/bosh-lite --provider aws
 
-RUN wget -O- 'https://cli.run.pivotal.io/stable?release=linux64-binary&source=github'| tar xz -C /usr/bin
+RUN GOPATH=/go go get github.com/tools/godep
+
+RUN wget -O- 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.10.0&source=github-rel'| tar xz -C /usr/bin
 COPY build/ssh-agent.sh /etc/profile.d/
 COPY build/ruby.sh /etc/profile.d/
+COPY build/go.sh /etc/profile.d/
