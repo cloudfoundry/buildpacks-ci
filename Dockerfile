@@ -4,6 +4,7 @@ RUN apt-get update
 RUN apt-get -y install \
   git \
   golang \
+  libpq-dev \
   libsqlite3-dev \
   npm \
   vagrant \
