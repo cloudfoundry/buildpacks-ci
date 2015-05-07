@@ -1,6 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-csplit -s -f CHANGES_ CHANGELOG /^v[0-9]/
-sed "1,3d" CHANGES_00 > RECENT_CHANGES
-rm CHANGES_*
+if [ $(cat CHANGELOG | grep -c ^v[0-9]) -ge 2 ]; then
+  csplit -s -f CHANGES_ CHANGELOG /^v[0-9]/
+  sed "1,3d" CHANGES_00 > RECENT_CHANGES
+  rm CHANGES_*
+else
+  sed "1,3d" CHANGELOG > RECENT_CHANGES
+fi
