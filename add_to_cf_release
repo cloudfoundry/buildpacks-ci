@@ -79,12 +79,10 @@ old_buildpack_key = blobs.keys.detect do |key|
   key =~ /^#{language}-buildpack\//
 end
 
-unless old_buildpack_key
-  puts 'Did not find key matching buildpack in blobs.yml already'
-  exit 1
+if old_buildpack_key
+  blobs.delete(old_buildpack_key)
+  File.write('config/blobs.yml', YAML.dump(blobs))
 end
-blobs.delete(old_buildpack_key)
-File.write('config/blobs.yml', YAML.dump(blobs))
 
 puts 'bosh add blob'
 exit 1 unless system "bosh add blob #{buildpack_path} #{language}-buildpack"
