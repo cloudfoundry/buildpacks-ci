@@ -33,6 +33,10 @@ resources:
     source:
       uri: git@github.com:pivotal-cf/deployments-buildpacks
       private_key: {{buildpacks-private-key}}
+  - name: buildpack-packager
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-incubator/buildpack-packager.git
 groups:
 - name: all-the-things
   jobs:
@@ -60,6 +64,9 @@ groups:
   jobs:
   - ruby-buildpack-CF-edge
   - ruby-buildpack-CF-LTS
+- name: tooling
+  jobs:
+  - buildpack-packager
 jobs:
   - name: nodejs-buildpack-CF-edge
     public: true
@@ -284,4 +291,22 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: lucid64
+        privileged: true
+  - name: buildpack-packager
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: buildpack-packager
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: buildpack-packager
+          run:
+            path: buildpacks-ci/scripts/buildpack-packager.sh
         privileged: true
