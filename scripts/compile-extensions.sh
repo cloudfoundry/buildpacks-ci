@@ -2,7 +2,6 @@
 
 set -e
 
-pushd compile-extensions
-  bundle
-  bundle exec rspec
-popd
+cd compile-extensions
+bundle
+bundle exec rspec

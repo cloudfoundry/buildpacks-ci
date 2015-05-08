@@ -2,7 +2,6 @@
 
 set -e
 
-pushd machete
-  bundle
-  bundle exec rspec
-popd
+cd machete
+bundle
+bundle exec rspec
