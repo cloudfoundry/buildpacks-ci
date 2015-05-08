@@ -159,11 +159,10 @@ jobs:
             - name: deployments-buildpacks
           run:
             path: buildpacks-ci/scripts/php-buildpack.sh
-            params:
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
           params:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: lucid64 cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
   - name: php-buildpack-CF-LTS
     public: true
@@ -192,6 +191,7 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: lucid64
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
   - name: python-buildpack-CF-edge
     public: true
