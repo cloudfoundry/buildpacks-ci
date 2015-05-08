@@ -41,6 +41,10 @@ resources:
     type: git
     source:
       uri: https://github.com/cf-buildpacks/machete.git
+  - name: compile-extensions
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-incubator/compile-extensions.git
 groups:
 - name: all-the-things
   jobs:
@@ -54,6 +58,7 @@ groups:
   - machete-firewall-CF-LTS
   - buildpack-packager
   - machete
+  - compile-extensions
 - name: nodejs-buildpack
   jobs:
   - nodejs-buildpack-CF-edge
@@ -74,6 +79,7 @@ groups:
   jobs:
   - buildpack-packager
   - machete
+  - compile-extensions
 jobs:
   - name: nodejs-buildpack-CF-edge
     public: true
@@ -334,4 +340,22 @@ jobs:
             - name: machete
           run:
             path: buildpacks-ci/scripts/machete.sh
+        privileged: true
+  - name: compile-extensions
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: compile-extensions
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///ruby#1.9.3-slim
+          inputs:
+            - name: buildpacks-ci
+            - name: compile-extensions
+          run:
+            path: buildpacks-ci/scripts/compile-extensions.sh
         privileged: true
