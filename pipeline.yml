@@ -1,5 +1,10 @@
 ---
 resources:
+  - name: php-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/php-buildpack
+      branch: develop
   - name: python-buildpack
     type: git
     source:
@@ -61,6 +66,8 @@ resources:
 groups:
 - name: all-the-things
   jobs:
+  - php-buildpack-CF-edge
+  - php-buildpack-CF-LTS
   - python-buildpack-CF-edge
   - python-buildpack-CF-LTS
   - nodejs-buildpack-CF-edge
@@ -86,6 +93,10 @@ groups:
   - brats-php-CF-edge
   - brats-ruby-CF-LTS
   - brats-ruby-CF-edge
+- name: php-buildpack
+  jobs:
+  - php-buildpack-CF-edge
+  - php-buildpack-CF-LTS
 - name: python-buildpack
   jobs:
   - python-buildpack-CF-edge
@@ -124,6 +135,64 @@ groups:
   - brats-ruby-CF-LTS
   - brats-ruby-CF-edge
 jobs:
+  - name: php-buildpack-CF-edge
+    public: true
+    serial: true
+    serial_groups: [bp-ci-8]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: php-buildpack
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+            - name: php-buildpack
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/php-buildpack.sh
+            params:
+              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            STACKS: lucid64 cflinuxfs2
+        privileged: true
+  - name: php-buildpack-CF-LTS
+    public: true
+    serial: true
+    serial_groups: [bp-ci-7]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: php-buildpack
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+            - name: php-buildpack
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/php-buildpack.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            STACKS: lucid64
+        privileged: true
   - name: python-buildpack-CF-edge
     public: true
     serial: true
