@@ -45,6 +45,10 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry-incubator/compile-extensions.git
+  - name: heroku-nanny
+    type: git
+    source:
+      uri: https://github.com/cf-buildpacks/upstream-nanny.git
 groups:
 - name: all-the-things
   jobs:
@@ -60,6 +64,7 @@ groups:
   - machete
   - compile-extensions
   - old-releases
+  - heroku-nanny
 - name: nodejs-buildpack
   jobs:
   - nodejs-buildpack-CF-edge
@@ -82,6 +87,7 @@ groups:
   - machete
   - compile-extensions
   - old-releases
+  - heroku-nanny
 jobs:
   - name: nodejs-buildpack-CF-edge
     public: true
@@ -380,4 +386,22 @@ jobs:
             path: buildpacks-ci/scripts/old-releases.sh
           params:
             GITHUB_TOKEN: {{buildpacks-github-token}}
+        privileged: true
+  - name: heroku-nanny
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: heroku-nanny
+      - task: sanity-check-upstream
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: heroku-nanny
+          run:
+            path: buildpacks-ci/scripts/heroku-nanny.sh
         privileged: true
