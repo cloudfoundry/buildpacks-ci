@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'yaml'
+require 'fileutils'
 
 buildpack_path = ARGV[0]
 
@@ -55,11 +56,13 @@ spec_file = "#{package_dir}/spec"
 packaging_file = "#{package_dir}/packaging"
 buildpack_blob = "#{language}-buildpack/#{buildpack_filename}"
 
+FileUtils.mkdir_p(package_dir)
+
 puts 'Updating spec file'
-spec = YAML.load(File.read spec_file)
-spec['files'] = [
-  buildpack_blob
-]
+spec = {
+  'name' => "buildpack_#{language}",
+  'files' => [buildpack_blob]
+}
 
 File.write(spec_file, YAML.dump(spec))
 
