@@ -74,7 +74,7 @@ cp #{buildpack_blob} ${BOSH_INSTALL_TARGET}
 PACKAGING_FILE
 
 puts 'Removing old buildpack from blobs.yml'
-system "rm blobs/#{language}-buildpack/*"
+system "rm -f blobs/#{language}-buildpack/*"
 
 blobs = YAML.load(File.read('config/blobs.yml'))
 
