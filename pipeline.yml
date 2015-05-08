@@ -59,6 +59,7 @@ groups:
   - buildpack-packager
   - machete
   - compile-extensions
+  - old-releases
 - name: nodejs-buildpack
   jobs:
   - nodejs-buildpack-CF-edge
@@ -80,6 +81,7 @@ groups:
   - buildpack-packager
   - machete
   - compile-extensions
+  - old-releases
 jobs:
   - name: nodejs-buildpack-CF-edge
     public: true
@@ -358,4 +360,24 @@ jobs:
             - name: compile-extensions
           run:
             path: buildpacks-ci/scripts/compile-extensions.sh
+        privileged: true
+  - name: old-releases
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+      - task: outdated_buildpack_releases
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+          run:
+            path: buildpacks-ci/scripts/old-releases.sh
+          params:
+            GITHUB_TOKEN: {{buildpacks-github-token}}
         privileged: true
