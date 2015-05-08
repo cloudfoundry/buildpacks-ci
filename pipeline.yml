@@ -94,15 +94,11 @@ groups:
   jobs:
   - nodejs-buildpack-CF-edge
   - nodejs-buildpack-CF-LTS
-- name: machete-firewall
-  jobs:
-  - machete-firewall-CF-edge
-  - machete-firewall-CF-LTS
-- name: go
+- name: go-buildpack
   jobs:
   - go-CF-edge
   - go-CF-LTS
-- name: ruby
+- name: ruby-buildpack
   jobs:
   - ruby-buildpack-CF-edge
   - ruby-buildpack-CF-LTS
@@ -113,6 +109,8 @@ groups:
   - compile-extensions
   - old-releases
   - heroku-nanny
+  - machete-firewall-CF-edge
+  - machete-firewall-CF-LTS
 - name: brats
   jobs:
   - brats-go-CF-LTS
