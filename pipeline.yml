@@ -77,6 +77,8 @@ groups:
   - brats-nodejs-CF-edge
   - brats-php-CF-LTS
   - brats-php-CF-edge
+  - brats-ruby-CF-LTS
+  - brats-ruby-CF-edge
 - name: nodejs-buildpack
   jobs:
   - nodejs-buildpack-CF-edge
@@ -110,6 +112,8 @@ groups:
   - brats-nodejs-CF-edge
   - brats-php-CF-LTS
   - brats-php-CF-edge
+  - brats-ruby-CF-LTS
+  - brats-ruby-CF-edge
 jobs:
   - name: nodejs-buildpack-CF-edge
     public: true
@@ -616,6 +620,54 @@ jobs:
             - name: deployments-buildpacks
           run:
             path: buildpacks-ci/scripts/brats-php.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+        privileged: true
+  - name: brats-ruby-CF-LTS
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: brats
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+      - task: bin-tests
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: brats
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/brats-ruby.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+        privileged: true
+  - name: brats-ruby-CF-edge
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: brats
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+      - task: bin-tests
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: brats
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/brats-ruby.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
         privileged: true
