@@ -71,6 +71,8 @@ groups:
   - heroku-nanny
   - brats-go-CF-LTS
   - brats-go-CF-edge
+  - brats-python-CF-LTS
+  - brats-python-CF-edge
 - name: nodejs-buildpack
   jobs:
   - nodejs-buildpack-CF-edge
@@ -98,6 +100,8 @@ groups:
   jobs:
   - brats-go-CF-LTS
   - brats-go-CF-edge
+  - brats-python-CF-LTS
+  - brats-python-CF-edge
 jobs:
   - name: nodejs-buildpack-CF-edge
     public: true
@@ -460,6 +464,54 @@ jobs:
             - name: deployments-buildpacks
           run:
             path: buildpacks-ci/scripts/brats-go.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+        privileged: true
+  - name: brats-python-CF-LTS
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: brats
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+      - task: bin-tests
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: brats
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/brats-python.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+        privileged: true
+  - name: brats-python-CF-edge
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: brats
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+      - task: bin-tests
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: brats
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/brats-python.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
         privileged: true
