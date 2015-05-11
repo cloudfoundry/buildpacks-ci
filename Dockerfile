@@ -1,6 +1,6 @@
 FROM ruby:2.1.5-slim
 
-ENV LANG="en_US.UTF-8"
+ENV LANG="C.UTF-8"
 
 RUN apt-get update
 RUN apt-get -y install \
@@ -9,6 +9,7 @@ RUN apt-get -y install \
   libpq-dev \
   libsqlite3-dev \
   npm \
+  python-dev \
   vagrant \
   wget \
   zip
