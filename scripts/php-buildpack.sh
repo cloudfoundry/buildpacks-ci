@@ -1,6 +1,8 @@
 #!/bin/bash -l
 set -e
 
+export TMPDIR=$(mktemp -d)
+
 pushd deployments-buildpacks
   bundle
   source ./bin/switch $DEPLOYMENT_NAME
