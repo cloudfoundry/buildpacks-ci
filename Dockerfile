@@ -1,5 +1,7 @@
 FROM ruby:2.1.5-slim
 
+ENV LANG="en_US.UTF-8"
+
 RUN apt-get update
 RUN apt-get -y install \
   git \
