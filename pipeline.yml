@@ -5,6 +5,11 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/php-buildpack
       branch: develop
+  - name: binary-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/binary-buildpack
+      branch: develop
   - name: staticfile-buildpack
     type: git
     source:
@@ -71,6 +76,8 @@ resources:
 groups:
 - name: all-the-things
   jobs:
+  - binary-buildpack-CF-LTS
+  - binary-buildpack-CF-edge
   - go-CF-LTS
   - go-CF-edge
   - nodejs-buildpack-CF-LTS
@@ -100,6 +107,10 @@ groups:
   - brats-php-CF-edge
   - brats-ruby-CF-LTS
   - brats-ruby-CF-edge
+- name: binary-buildpack
+  jobs:
+  - binary-buildpack-CF-edge
+  - binary-buildpack-CF-LTS
 - name: staticfile-buildpack
   jobs:
   - staticfile-buildpack-CF-edge
@@ -146,6 +157,62 @@ groups:
   - brats-ruby-CF-LTS
   - brats-ruby-CF-edge
 jobs:
+  - name: binary-buildpack-CF-edge
+    public: true
+    serial: true
+    serial_groups: [bp-ci-8]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: binary-buildpack
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+            - name: binary-buildpack
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/binary-buildpack.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            STACKS: lucid64 cflinuxfs2
+        privileged: true
+  - name: binary-buildpack-CF-LTS
+    public: true
+    serial: true
+    serial_groups: [bp-ci-7]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: binary-buildpack
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+            - name: binary-buildpack
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/binary-buildpack.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            STACKS: lucid64
+        privileged: true
   - name: staticfile-buildpack-CF-edge
     public: true
     serial: true
