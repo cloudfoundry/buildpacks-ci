@@ -5,6 +5,11 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/php-buildpack
       branch: develop
+  - name: staticfile-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/staticfile-buildpack
+      branch: develop
   - name: python-buildpack
     type: git
     source:
@@ -66,16 +71,18 @@ resources:
 groups:
 - name: all-the-things
   jobs:
-  - php-buildpack-CF-edge
-  - php-buildpack-CF-LTS
-  - python-buildpack-CF-edge
-  - python-buildpack-CF-LTS
-  - nodejs-buildpack-CF-edge
-  - nodejs-buildpack-CF-LTS
-  - ruby-buildpack-CF-edge
-  - ruby-buildpack-CF-LTS
-  - go-CF-edge
   - go-CF-LTS
+  - go-CF-edge
+  - nodejs-buildpack-CF-LTS
+  - nodejs-buildpack-CF-edge
+  - php-buildpack-CF-LTS
+  - php-buildpack-CF-edge
+  - python-buildpack-CF-LTS
+  - python-buildpack-CF-edge
+  - ruby-buildpack-CF-LTS
+  - ruby-buildpack-CF-edge
+  - staticfile-buildpack-CF-LTS
+  - staticfile-buildpack-CF-edge
   - machete-firewall-CF-edge
   - machete-firewall-CF-LTS
   - buildpack-packager
@@ -93,6 +100,10 @@ groups:
   - brats-php-CF-edge
   - brats-ruby-CF-LTS
   - brats-ruby-CF-edge
+- name: staticfile-buildpack
+  jobs:
+  - staticfile-buildpack-CF-edge
+  - staticfile-buildpack-CF-LTS
 - name: php-buildpack
   jobs:
   - php-buildpack-CF-edge
@@ -135,6 +146,62 @@ groups:
   - brats-ruby-CF-LTS
   - brats-ruby-CF-edge
 jobs:
+  - name: staticfile-buildpack-CF-edge
+    public: true
+    serial: true
+    serial_groups: [bp-ci-8]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: staticfile-buildpack
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+            - name: staticfile-buildpack
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/staticfile-buildpack.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            STACKS: lucid64 cflinuxfs2
+        privileged: true
+  - name: staticfile-buildpack-CF-LTS
+    public: true
+    serial: true
+    serial_groups: [bp-ci-7]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: staticfile-buildpack
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: ci-tools
+            - name: staticfile-buildpack
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/staticfile-buildpack.sh
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            STACKS: lucid64
+        privileged: true
   - name: php-buildpack-CF-edge
     public: true
     serial: true
