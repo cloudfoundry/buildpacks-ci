@@ -434,6 +434,7 @@ jobs:
   - name: brats-go-CF-LTS
     public: true
     serial: true
+    serial_groups : [bp-ci-7]
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -458,6 +459,7 @@ jobs:
   - name: brats-go-CF-edge
     public: true
     serial: true
+    serial_groups : [bp-ci-8]
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -482,6 +484,7 @@ jobs:
   - name: brats-python-CF-LTS
     public: true
     serial: true
+    serial_groups : [bp-ci-7]
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -506,6 +509,7 @@ jobs:
   - name: brats-python-CF-edge
     public: true
     serial: true
+    serial_groups : [bp-ci-8]
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -530,6 +534,7 @@ jobs:
   - name: brats-nodejs-CF-LTS
     public: true
     serial: true
+    serial_groups : [bp-ci-7]
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -554,6 +559,7 @@ jobs:
   - name: brats-nodejs-CF-edge
     public: true
     serial: true
+    serial_groups : [bp-ci-8]
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -578,6 +584,7 @@ jobs:
   - name: brats-php-CF-LTS
     public: true
     serial: true
+    serial_groups : [bp-ci-7]
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -602,6 +609,7 @@ jobs:
   - name: brats-php-CF-edge
     public: true
     serial: true
+    serial_groups : [bp-ci-8]
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -626,6 +634,7 @@ jobs:
   - name: brats-ruby-CF-LTS
     public: true
     serial: true
+    serial_groups : [bp-ci-7]
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -650,6 +659,7 @@ jobs:
   - name: brats-ruby-CF-edge
     public: true
     serial: true
+    serial_groups : [bp-ci-8]
     plan:
       - aggregate:
         - get: buildpacks-ci
