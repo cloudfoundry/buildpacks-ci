@@ -1,0 +1,17 @@
+#!/bin/bash -l
+set -e
+
+pushd deployments-buildpacks
+  bundle -j4
+  source ./bin/switch $DEPLOYMENT_NAME
+popd
+
+cp pivotal-buildpacks/*.zip buildpack
+cp pivotal-buildpacks-cached/*.zip buildpack
+cd buildpack
+
+for stack in $STACKS; do
+  ../ci-tools/buildpack-build --uncached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com --no-build
+  ../ci-tools/buildpack-build --cached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com --no-build
+done
+
