@@ -1050,6 +1050,11 @@ jobs:
           trigger: false
         - get: pivotal-buildpacks-cached
           passed: [ "ruby-buildpack-CF-LTS-master", "ruby-buildpack-CF-edge-master" ]
+        - get: buildpack
+          passed: [ "ruby-buildpack-CF-LTS-master", "ruby-buildpack-CF-edge-master" ]
+          resource: ruby-buildpack-master
+      - task: check tag not already added
+        file: buildpacks-ci/tasks/check-tag-not-already-added.yml
       - put: ruby-buildpack-master
         params:
           repository: buildpack

@@ -1,0 +1,8 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci#buildpack
+inputs:
+  - name: buildpacks-ci
+  - name: buildpack
+run:
+  path: buildpacks-ci/scripts/release/check_tag_not_added.sh
