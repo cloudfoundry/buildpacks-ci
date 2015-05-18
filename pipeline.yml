@@ -1060,3 +1060,26 @@ jobs:
           repository: buildpack
           tag: buildpack/VERSION
           tag_prefix: v
+  - name: ruby buildpack to github
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: pivotal-buildpacks-cached
+          passed: [ ruby-buildpack-release ]
+          trigger: false
+        - get: buildpack
+          resource: ruby-buildpack-master
+          passed: [ ruby-buildpack-release ]
+          trigger: false
+      - task: upload to github
+        file: buildpacks-ci/tasks/upload-to-github.yml
+        config:
+          params:
+            GITHUB_ORG: cloudfoundry
+            BUILDPACK_REPOSITORY: ruby-buildpack
+            GITHUB_TOKEN: {{buildpacks-github-token}}

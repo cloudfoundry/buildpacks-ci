@@ -1,0 +1,54 @@
+#!/bin/bash
+set -euo pipefail
+
+wget https://github.com/aktau/github-release/releases/download/v0.5.3/linux-amd64-github-release.tar.bz2 -O release.tar.bz2
+tar xjf release.tar.bz2
+
+PATH=$PATH:`pwd`/bin/linux/amd64/
+
+tag=v`cat buildpack/VERSION`
+pushd buildpack
+description=$(../ci-tools/extract-recent-changes)
+popd
+
+pushd pivotal-buildpacks-cached
+ruby <<RUBY
+require "fileutils"
+Dir.glob("*.zip").map do |filename|
+  filename.match(/(.*)_buildpack-cached-v(.*)\+.*.zip/) do |match|
+    language = match[1]
+    version = match[2]
+    FileUtils.mv(filename, "#{language}_buildpack-cached-v#{version}.zip")
+  end
+end
+RUBY
+popd
+
+offline_file=pivotal-buildpacks-cached/*_buildpack-cached-v*.zip
+
+echo "Creating release"
+github-release release \
+    --user "$GITHUB_ORG" \
+    --repo "$BUILDPACK_REPOSITORY" \
+    --tag "$tag" \
+    --name "$tag" \
+    --description "$description"
+
+echo "Uploading buildpack"
+github-release upload \
+    --user "$GITHUB_ORG" \
+    --repo "$BUILDPACK_REPOSITORY" \
+    --tag "$tag" \
+    --name $(basename $offline_file) \
+    --file  $offline_file
+
+if [ $? -ne 0 ]
+then
+    echo "FAIL: File upload failed, deleting the release."
+    github-release delete \
+    --user "$GITHUB_ORG" \
+    --repo "$BUILDPACK_REPOSITORY" \
+    --tag "$tag"
+
+    exit 1
+fi
