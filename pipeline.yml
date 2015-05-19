@@ -30,6 +30,12 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/ruby-buildpack
       branch: develop
+  - name: ruby-buildpack-master
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/ruby-buildpack.git
+      private_key: {{buildpacks-private-key}}
+      branch: master
   - name: go-buildpack
     type: git
     source:
@@ -73,6 +79,20 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/brats.git
+  - name: pivotal-buildpacks
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: ruby_buildpack-v(.*).zip
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: pivotal-buildpacks-cached
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: ruby_buildpack-cached-v(.*).zip
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 groups:
 - name: all-the-things
   jobs:
@@ -949,3 +969,89 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-8
         privileged: true
+  - name: detect new Ruby buildpack and upload artifacts
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: buildpack
+          resource: ruby-buildpack-master
+      - task: detect and upload
+        file: buildpacks-ci/tasks/detect-and-upload.yml
+        privileged: true
+      - put: pivotal-buildpacks
+        params:
+          from: buildpack/ruby_buildpack-v(.*).zip
+          to: /experimental-buildpacks/ruby/
+      - put: pivotal-buildpacks-cached
+        params:
+          from: buildpack/ruby_buildpack-cached-v(.*).zip
+          to: /experimental-buildpacks/ruby/
+  - name: ruby-buildpack-CF-edge-master
+    public: true
+    serial: true
+    serial_groups: [bp-ci-8]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: buildpack
+          passed: [ "detect new Ruby buildpack and upload artifacts" ]
+          resource: ruby-buildpack-master
+        - get: pivotal-buildpacks
+          passed: [ "detect new Ruby buildpack and upload artifacts" ]
+        - get: pivotal-buildpacks-cached
+          passed: [ "detect new Ruby buildpack and upload artifacts" ]
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack-for-release.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            STACKS: lucid64 cflinuxfs2
+        privileged: true
+  - name: ruby-buildpack-CF-LTS-master
+    public: true
+    serial: true
+    serial_groups: [bp-ci-7]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: buildpack
+          passed: [ "detect new Ruby buildpack and upload artifacts" ]
+          resource: ruby-buildpack-master
+        - get: pivotal-buildpacks
+          passed: [ "detect new Ruby buildpack and upload artifacts" ]
+        - get: pivotal-buildpacks-cached
+          passed: [ "detect new Ruby buildpack and upload artifacts" ]
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack-for-release.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            STACKS: lucid64
+        privileged: true
+  - name: ruby-buildpack-release
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: pivotal-buildpacks-cached
+          passed: [ "ruby-buildpack-CF-LTS-master", "ruby-buildpack-CF-edge-master" ]
+      - put: ruby-buildpack-master
+        params:
+          repository: buildpack
+          tag: buildpack/VERSION
+          tag_prefix: v
