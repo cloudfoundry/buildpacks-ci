@@ -93,6 +93,10 @@ resources:
       regexp: ruby_buildpack-cached-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: cf-release
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-release
 groups:
 - name: all-the-things
   jobs:
@@ -1083,3 +1087,31 @@ jobs:
             GITHUB_ORG: cloudfoundry
             BUILDPACK_REPOSITORY: ruby-buildpack
             GITHUB_TOKEN: {{buildpacks-github-token}}
+  - name: ruby buildpack to cf-release
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: pivotal-buildpacks-cached
+          passed: [ ruby-buildpack-release ]
+          trigger: false
+        - get: buildpack
+          resource: ruby-buildpack-master
+          passed: [ ruby-buildpack-release ]
+          trigger: false
+        - get: cf-release
+          trigger: false
+      - task: upload to cf-release
+        file: buildpacks-ci/tasks/upload-to-cf-release.yml
+        config:
+          params:
+            ACCESS_KEY_ID: {{blobstore-access-key}}
+            SECRET_ACCESS_KEY: {{blobstore-secret-key}}
+            BUILDPACK_LANGUAGE: ruby
+            GITHUB_USER: {{github-username}}
+            GITHUB_PASSWORD: {{github-password}}
+        privileged: true
