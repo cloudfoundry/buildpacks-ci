@@ -98,39 +98,6 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/cf-release
 groups:
-- name: all-the-things
-  jobs:
-  - binary-buildpack-CF-LTS
-  - binary-buildpack-CF-edge
-  - go-CF-LTS
-  - go-CF-edge
-  - nodejs-buildpack-CF-LTS
-  - nodejs-buildpack-CF-edge
-  - php-buildpack-CF-LTS
-  - php-buildpack-CF-edge
-  - python-buildpack-CF-LTS
-  - python-buildpack-CF-edge
-  - ruby-buildpack-CF-LTS
-  - ruby-buildpack-CF-edge
-  - staticfile-buildpack-CF-LTS
-  - staticfile-buildpack-CF-edge
-  - machete-firewall-CF-edge
-  - machete-firewall-CF-LTS
-  - buildpack-packager
-  - machete
-  - compile-extensions
-  - old-releases
-  - heroku-nanny
-  - brats-go-CF-LTS
-  - brats-go-CF-edge
-  - brats-python-CF-LTS
-  - brats-python-CF-edge
-  - brats-nodejs-CF-LTS
-  - brats-nodejs-CF-edge
-  - brats-php-CF-LTS
-  - brats-php-CF-edge
-  - brats-ruby-CF-LTS
-  - brats-ruby-CF-edge
 - name: binary-buildpack
   jobs:
   - binary-buildpack-CF-edge
