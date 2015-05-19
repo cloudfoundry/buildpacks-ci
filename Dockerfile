@@ -4,6 +4,7 @@ ENV LANG="C.UTF-8"
 
 RUN apt-get update
 RUN apt-get -y install \
+  awscli \
   git \
   golang \
   libpq-dev \

@@ -1115,3 +1115,30 @@ jobs:
             GITHUB_USER: {{github-username}}
             GITHUB_PASSWORD: {{github-password}}
         privileged: true
+  - name: ruby buildpack to pivnet
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: pivotal-buildpacks-cached
+          passed: [ ruby-buildpack-release ]
+          trigger: false
+        - get: buildpack
+          resource: ruby-buildpack-master
+          passed: [ ruby-buildpack-release ]
+          trigger: false
+      - task: upload to pivnet
+        file: buildpacks-ci/tasks/upload-to-pivnet.yml
+        config:
+          params:
+            AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
+            PIVNET_S3_BUCKET: pivnet-acceptance
+            PIVNET_ADDRESS: https://network.pivotal.io/
+            PIVNET_APIKEY: {{pivnet-apikey}}
+            PIVNET_PRODUCT_NAME: Ruby Buildpack (offline)
+        privileged: true

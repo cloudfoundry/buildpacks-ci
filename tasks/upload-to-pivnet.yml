@@ -1,0 +1,10 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci#buildpack
+inputs:
+  - name: buildpacks-ci
+  - name: ci-tools
+  - name: pivotal-buildpacks-cached
+  - name: buildpack
+run:
+  path: buildpacks-ci/scripts/release/upload_to_pivnet
