@@ -126,6 +126,13 @@ groups:
   jobs:
   - ruby-buildpack-CF-edge
   - ruby-buildpack-CF-LTS
+  - ruby buildpack to cf-release
+  - ruby buildpack to pivnet
+  - ruby buildpack to github
+  - ruby-buildpack-release
+  - ruby-buildpack-CF-edge-master
+  - ruby-buildpack-CF-LTS-master
+  - detect new Ruby buildpack and upload artifacts
 - name: tooling
   jobs:
   - buildpack-packager
