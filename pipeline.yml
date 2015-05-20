@@ -20,6 +20,12 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/python-buildpack
       branch: develop
+  - name: python-buildpack-master
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/python-buildpack.git
+      private_key: {{buildpacks-private-key}}
+      branch: master
   - name: nodejs-buildpack
     type: git
     source:
@@ -99,6 +105,13 @@ resources:
       regexp: nodejs_buildpack-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: python-pivotal-buildpack
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: python_buildpack-v(.*).zip
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
   - name: ruby-pivotal-buildpack-cached
     type: s3
     source:
@@ -111,6 +124,13 @@ resources:
     source:
       bucket: pivotal-buildpacks
       regexp: nodejs_buildpack-cached-v(.*).zip
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: python-pivotal-buildpack-cached
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: python_buildpack-cached-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
   - name: cf-release
@@ -134,6 +154,13 @@ groups:
   jobs:
   - python-buildpack-CF-edge
   - python-buildpack-CF-LTS
+  - python buildpack to cf-release
+  - python buildpack to pivnet
+  - python buildpack to github
+  - python-buildpack-release
+  - python-buildpack-CF-edge-master
+  - python-buildpack-CF-LTS-master
+  - detect new Python buildpack and upload artifacts
 - name: nodejs-buildpack
   jobs:
   - nodejs-buildpack-CF-edge
@@ -1092,7 +1119,6 @@ jobs:
         config:
           params:
             GITHUB_ORG: cloudfoundry
-            BUILDPACK_REPOSITORY: ruby-buildpack
             GITHUB_TOKEN: {{buildpacks-github-token}}
   - name: ruby buildpack to cf-release
     public: true
@@ -1119,7 +1145,6 @@ jobs:
           params:
             ACCESS_KEY_ID: {{blobstore-access-key}}
             SECRET_ACCESS_KEY: {{blobstore-secret-key}}
-            BUILDPACK_LANGUAGE: ruby
             GITHUB_USER: {{github-username}}
             GITHUB_PASSWORD: {{github-password}}
         privileged: true
@@ -1269,7 +1294,6 @@ jobs:
         config:
           params:
             GITHUB_ORG: cloudfoundry
-            BUILDPACK_REPOSITORY: nodejs-buildpack
             GITHUB_TOKEN: {{buildpacks-github-token}}
   - name: nodejs buildpack to cf-release
     public: true
@@ -1296,7 +1320,6 @@ jobs:
           params:
             ACCESS_KEY_ID: {{blobstore-access-key}}
             SECRET_ACCESS_KEY: {{blobstore-secret-key}}
-            BUILDPACK_LANGUAGE: nodejs
             GITHUB_USER: {{github-username}}
             GITHUB_PASSWORD: {{github-password}}
         privileged: true
@@ -1327,4 +1350,179 @@ jobs:
             PIVNET_ADDRESS: https://network.pivotal.io/
             PIVNET_APIKEY: {{pivnet-apikey}}
             PIVNET_PRODUCT_NAME: NodeJS Buildpack (offline)
+        privileged: true
+  - name: detect new Python buildpack and upload artifacts
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: buildpack
+          resource: python-buildpack-master
+      - task: detect and upload
+        file: buildpacks-ci/tasks/detect-and-upload.yml
+        privileged: true
+      - put: python-pivotal-buildpack
+        params:
+          from: buildpack/python_buildpack-v(.*).zip
+          to: /experimental-buildpacks/python/
+      - put: python-pivotal-buildpack-cached
+        params:
+          from: buildpack/python_buildpack-cached-v(.*).zip
+          to: /experimental-buildpacks/python/
+  - name: python-buildpack-CF-edge-master
+    public: true
+    serial: true
+    serial_groups: [bp-ci-8]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: buildpack
+          passed: [ "detect new Python buildpack and upload artifacts" ]
+          resource: python-buildpack-master
+        - get: pivotal-buildpacks
+          resource: python-pivotal-buildpack
+          passed: [ "detect new Python buildpack and upload artifacts" ]
+        - get: pivotal-buildpacks-cached
+          resource: python-pivotal-buildpack-cached
+          passed: [ "detect new Python buildpack and upload artifacts" ]
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack-for-release.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            STACKS: lucid64 cflinuxfs2
+        privileged: true
+  - name: python-buildpack-CF-LTS-master
+    public: true
+    serial: true
+    serial_groups: [bp-ci-7]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: deployments-buildpacks
+          trigger: false
+        - get: buildpack
+          passed: [ "detect new Python buildpack and upload artifacts" ]
+          resource: python-buildpack-master
+        - get: pivotal-buildpacks
+          resource: python-pivotal-buildpack
+          passed: [ "detect new Python buildpack and upload artifacts" ]
+        - get: pivotal-buildpacks-cached
+          resource: python-pivotal-buildpack-cached
+          passed: [ "detect new Python buildpack and upload artifacts" ]
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack-for-release.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            STACKS: lucid64
+        privileged: true
+  - name: python-buildpack-release
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: pivotal-buildpacks-cached
+          resource: python-pivotal-buildpack-cached
+          passed: [ "python-buildpack-CF-LTS-master", "python-buildpack-CF-edge-master" ]
+        - get: buildpack
+          passed: [ "python-buildpack-CF-LTS-master", "python-buildpack-CF-edge-master" ]
+          resource: python-buildpack-master
+      - task: check tag not already added
+        file: buildpacks-ci/tasks/check-tag-not-already-added.yml
+      - put: python-buildpack-master
+        params:
+          repository: buildpack
+          tag: buildpack/VERSION
+          tag_prefix: v
+  - name: python buildpack to github
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: pivotal-buildpacks-cached
+          resource: python-pivotal-buildpack-cached
+          passed: [ python-buildpack-release ]
+          trigger: false
+        - get: buildpack
+          resource: python-buildpack-master
+          passed: [ python-buildpack-release ]
+          trigger: false
+      - task: upload to github
+        file: buildpacks-ci/tasks/upload-to-github.yml
+        config:
+          params:
+            GITHUB_ORG: cloudfoundry
+            GITHUB_TOKEN: {{buildpacks-github-token}}
+  - name: python buildpack to cf-release
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: pivotal-buildpacks-cached
+          resource: python-pivotal-buildpack-cached
+          passed: [ python-buildpack-release ]
+          trigger: false
+        - get: buildpack
+          resource: python-buildpack-master
+          passed: [ python-buildpack-release ]
+          trigger: false
+        - get: cf-release
+          trigger: false
+      - task: upload to cf-release
+        file: buildpacks-ci/tasks/upload-to-cf-release.yml
+        config:
+          params:
+            ACCESS_KEY_ID: {{blobstore-access-key}}
+            SECRET_ACCESS_KEY: {{blobstore-secret-key}}
+            GITHUB_USER: {{github-username}}
+            GITHUB_PASSWORD: {{github-password}}
+        privileged: true
+  - name: python buildpack to pivnet
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: false
+        - get: ci-tools
+          trigger: false
+        - get: pivotal-buildpacks-cached
+          resource: python-pivotal-buildpack-cached
+          passed: [ python-buildpack-release ]
+          trigger: false
+        - get: buildpack
+          resource: python-buildpack-master
+          passed: [ python-buildpack-release ]
+          trigger: false
+      - task: upload to pivnet
+        file: buildpacks-ci/tasks/upload-to-pivnet.yml
+        config:
+          params:
+            AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
+            PIVNET_S3_BUCKET: pivnet-acceptance
+            PIVNET_ADDRESS: https://network.pivotal.io/
+            PIVNET_APIKEY: {{pivnet-apikey}}
+            PIVNET_PRODUCT_NAME: Python Buildpack (offline)
         privileged: true

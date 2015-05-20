@@ -3,6 +3,7 @@ set -e
 
 export TMPDIR=/tmp
 export BUILDPACK_VERSION=`cat buildpack/VERSION`
+export BUILDPACK_LANGUAGE=`ruby -ryaml -e 'puts YAML.load_file("buildpack/manifest.yml")["language"]'`
 
 wget -O- https://github.com/github/hub/releases/download/v2.2.1/hub-linux-amd64-2.2.1.tar.gz | tar xz -C /usr/bin --strip-components=1 hub-linux-amd64-2.2.1/hub
 

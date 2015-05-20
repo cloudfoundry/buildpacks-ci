@@ -9,6 +9,8 @@ PATH=$PATH:`pwd`/bin/linux/amd64/
 tag=v`cat buildpack/VERSION`
 pushd buildpack
 description=$(../ci-tools/extract-recent-changes)
+BUILDPACK_LANGUAGE=`ruby -ryaml -e 'puts YAML.load_file("manifest.yml")["language"]'`
+BUILDPACK_REPOSITORY=$BUILDPACK_LANGUAGE-buildpack
 popd
 
 pushd pivotal-buildpacks-cached
