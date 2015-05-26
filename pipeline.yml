@@ -324,12 +324,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: binary-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -352,12 +350,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: binary-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -380,12 +376,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: staticfile-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -408,12 +402,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: staticfile-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -436,12 +428,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: php-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -465,12 +455,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: php-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -494,12 +482,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: python-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -522,12 +508,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: python-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -550,12 +534,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: nodejs-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -578,12 +560,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: nodejs-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -606,12 +586,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: ruby-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -634,12 +612,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: ruby-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -662,12 +638,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: go-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -690,12 +664,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: go-buildpack
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -718,12 +690,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: machete-firewall-test
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -746,12 +716,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: machete-firewall-test
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -773,8 +741,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: buildpack-packager
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -791,8 +759,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: machete
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -809,8 +777,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: compile-extensions
+          trigger: true
       - task: rspec
         config:
           platform: linux
@@ -827,8 +795,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
+          trigger: true
       - task: outdated_buildpack_releases
         config:
           platform: linux
@@ -847,8 +815,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: heroku-nanny
+          trigger: true
       - task: sanity-check-upstream
         config:
           platform: linux
@@ -866,11 +834,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: brats
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
       - task: bin-tests
         config:
           platform: linux
@@ -891,11 +856,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: brats
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
       - task: bin-tests
         config:
           platform: linux
@@ -916,11 +878,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: brats
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
       - task: bin-tests
         config:
           platform: linux
@@ -941,11 +900,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: brats
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
       - task: bin-tests
         config:
           platform: linux
@@ -966,11 +922,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: brats
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
       - task: bin-tests
         config:
           platform: linux
@@ -991,11 +944,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: brats
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
       - task: bin-tests
         config:
           platform: linux
@@ -1016,11 +966,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: brats
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
       - task: bin-tests
         config:
           platform: linux
@@ -1041,11 +988,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: brats
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
       - task: bin-tests
         config:
           platform: linux
@@ -1066,11 +1010,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: brats
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
       - task: bin-tests
         config:
           platform: linux
@@ -1091,11 +1032,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: brats
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
       - task: bin-tests
         config:
           platform: linux
@@ -1115,9 +1053,9 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: buildpack
           resource: ruby-buildpack-master
+          trigger: true
       - task: detect and upload
         file: buildpacks-ci/tasks/detect-and-upload.yml
         privileged: true
@@ -1136,20 +1074,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new Ruby buildpack and upload artifacts" ]
           resource: ruby-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: ruby-pivotal-buildpack
           passed: [ "detect new Ruby buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: ruby-pivotal-buildpack-cached
           passed: [ "detect new Ruby buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -1164,20 +1102,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new Ruby buildpack and upload artifacts" ]
           resource: ruby-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: ruby-pivotal-buildpack
           passed: [ "detect new Ruby buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: ruby-pivotal-buildpack-cached
           passed: [ "detect new Ruby buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -1191,13 +1129,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: ruby-pivotal-buildpack-cached
           passed: [ "ruby-buildpack-CF-LTS-master", "ruby-buildpack-CF-edge-master" ]
+          trigger: true
         - get: buildpack
           passed: [ "ruby-buildpack-CF-LTS-master", "ruby-buildpack-CF-edge-master" ]
           resource: ruby-buildpack-master
+          trigger: true
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added.yml
       - put: ruby-buildpack-master
@@ -1211,17 +1150,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: ruby-pivotal-buildpack-cached
           passed: [ ruby-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: ruby-buildpack-master
           passed: [ ruby-buildpack-release ]
-          trigger: false
       - task: upload to github
         file: buildpacks-ci/tasks/upload-to-github.yml
         config:
@@ -1234,19 +1169,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: ruby-pivotal-buildpack-cached
           passed: [ ruby-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: ruby-buildpack-master
           passed: [ ruby-buildpack-release ]
-          trigger: false
         - get: cf-release
-          trigger: false
       - task: upload to cf-release
         file: buildpacks-ci/tasks/upload-to-cf-release.yml
         config:
@@ -1262,17 +1192,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: ruby-pivotal-buildpack-cached
           passed: [ ruby-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: ruby-buildpack-master
           passed: [ ruby-buildpack-release ]
-          trigger: false
       - task: upload to pivnet
         file: buildpacks-ci/tasks/upload-to-pivnet.yml
         config:
@@ -1290,9 +1216,9 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: buildpack
           resource: nodejs-buildpack-master
+          trigger: true
       - task: detect and upload
         file: buildpacks-ci/tasks/detect-and-upload.yml
         privileged: true
@@ -1311,20 +1237,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new NodeJS buildpack and upload artifacts" ]
           resource: nodejs-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: nodejs-pivotal-buildpack
           passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: nodejs-pivotal-buildpack-cached
           passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -1339,20 +1265,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new NodeJS buildpack and upload artifacts" ]
           resource: nodejs-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: nodejs-pivotal-buildpack
           passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: nodejs-pivotal-buildpack-cached
           passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -1366,13 +1292,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: nodejs-pivotal-buildpack-cached
           passed: [ "nodejs-buildpack-CF-LTS-master", "nodejs-buildpack-CF-edge-master" ]
+          trigger: true
         - get: buildpack
           passed: [ "nodejs-buildpack-CF-LTS-master", "nodejs-buildpack-CF-edge-master" ]
           resource: nodejs-buildpack-master
+          trigger: true
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added.yml
       - put: nodejs-buildpack-master
@@ -1386,17 +1313,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: nodejs-pivotal-buildpack-cached
           passed: [ nodejs-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: nodejs-buildpack-master
           passed: [ nodejs-buildpack-release ]
-          trigger: false
       - task: upload to github
         file: buildpacks-ci/tasks/upload-to-github.yml
         config:
@@ -1409,19 +1332,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: nodejs-pivotal-buildpack-cached
           passed: [ nodejs-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: nodejs-buildpack-master
           passed: [ nodejs-buildpack-release ]
-          trigger: false
         - get: cf-release
-          trigger: false
       - task: upload to cf-release
         file: buildpacks-ci/tasks/upload-to-cf-release.yml
         config:
@@ -1437,17 +1355,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: nodejs-pivotal-buildpack-cached
           passed: [ nodejs-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: nodejs-buildpack-master
           passed: [ nodejs-buildpack-release ]
-          trigger: false
       - task: upload to pivnet
         file: buildpacks-ci/tasks/upload-to-pivnet.yml
         config:
@@ -1465,9 +1379,9 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: buildpack
           resource: python-buildpack-master
+          trigger: true
       - task: detect and upload
         file: buildpacks-ci/tasks/detect-and-upload.yml
         privileged: true
@@ -1486,20 +1400,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new Python buildpack and upload artifacts" ]
           resource: python-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: python-pivotal-buildpack
           passed: [ "detect new Python buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: python-pivotal-buildpack-cached
           passed: [ "detect new Python buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -1514,20 +1428,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new Python buildpack and upload artifacts" ]
           resource: python-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: python-pivotal-buildpack
           passed: [ "detect new Python buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: python-pivotal-buildpack-cached
           passed: [ "detect new Python buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -1541,13 +1455,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: python-pivotal-buildpack-cached
           passed: [ "python-buildpack-CF-LTS-master", "python-buildpack-CF-edge-master" ]
+          trigger: true
         - get: buildpack
           passed: [ "python-buildpack-CF-LTS-master", "python-buildpack-CF-edge-master" ]
           resource: python-buildpack-master
+          trigger: true
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added.yml
       - put: python-buildpack-master
@@ -1561,17 +1476,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: python-pivotal-buildpack-cached
           passed: [ python-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: python-buildpack-master
           passed: [ python-buildpack-release ]
-          trigger: false
       - task: upload to github
         file: buildpacks-ci/tasks/upload-to-github.yml
         config:
@@ -1584,19 +1495,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: python-pivotal-buildpack-cached
           passed: [ python-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: python-buildpack-master
           passed: [ python-buildpack-release ]
-          trigger: false
         - get: cf-release
-          trigger: false
       - task: upload to cf-release
         file: buildpacks-ci/tasks/upload-to-cf-release.yml
         config:
@@ -1612,17 +1518,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: python-pivotal-buildpack-cached
           passed: [ python-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: python-buildpack-master
           passed: [ python-buildpack-release ]
-          trigger: false
       - task: upload to pivnet
         file: buildpacks-ci/tasks/upload-to-pivnet.yml
         config:
@@ -1640,9 +1542,9 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: buildpack
           resource: go-buildpack-master
+          trigger: true
       - task: detect and upload
         file: buildpacks-ci/tasks/detect-and-upload.yml
         privileged: true
@@ -1661,20 +1563,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new Go buildpack and upload artifacts" ]
           resource: go-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: go-pivotal-buildpack
           passed: [ "detect new Go buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: go-pivotal-buildpack-cached
           passed: [ "detect new Go buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -1689,20 +1591,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new Go buildpack and upload artifacts" ]
           resource: go-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: go-pivotal-buildpack
           passed: [ "detect new Go buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: go-pivotal-buildpack-cached
           passed: [ "detect new Go buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -1716,13 +1618,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: go-pivotal-buildpack-cached
           passed: [ "go-buildpack-CF-LTS-master", "go-buildpack-CF-edge-master" ]
+          trigger: true
         - get: buildpack
           passed: [ "go-buildpack-CF-LTS-master", "go-buildpack-CF-edge-master" ]
           resource: go-buildpack-master
+          trigger: true
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added.yml
       - put: go-buildpack-master
@@ -1736,17 +1639,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: go-pivotal-buildpack-cached
           passed: [ go-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: go-buildpack-master
           passed: [ go-buildpack-release ]
-          trigger: false
       - task: upload to github
         file: buildpacks-ci/tasks/upload-to-github.yml
         config:
@@ -1759,19 +1658,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: go-pivotal-buildpack-cached
           passed: [ go-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: go-buildpack-master
           passed: [ go-buildpack-release ]
-          trigger: false
         - get: cf-release
-          trigger: false
       - task: upload to cf-release
         file: buildpacks-ci/tasks/upload-to-cf-release.yml
         config:
@@ -1787,17 +1681,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: go-pivotal-buildpack-cached
           passed: [ go-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: go-buildpack-master
           passed: [ go-buildpack-release ]
-          trigger: false
       - task: upload to pivnet
         file: buildpacks-ci/tasks/upload-to-pivnet.yml
         config:
@@ -1815,9 +1705,9 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: buildpack
           resource: php-buildpack-master
+          trigger: true
       - task: detect and upload
         file: buildpacks-ci/tasks/detect-and-upload.yml
         privileged: true
@@ -1836,20 +1726,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new PHP buildpack and upload artifacts" ]
           resource: php-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: php-pivotal-buildpack
           passed: [ "detect new PHP buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: php-pivotal-buildpack-cached
           passed: [ "detect new PHP buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -1865,20 +1755,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new PHP buildpack and upload artifacts" ]
           resource: php-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: php-pivotal-buildpack
           passed: [ "detect new PHP buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: php-pivotal-buildpack-cached
           passed: [ "detect new PHP buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -1893,13 +1783,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: php-pivotal-buildpack-cached
           passed: [ "php-buildpack-CF-LTS-master", "php-buildpack-CF-edge-master" ]
+          trigger: true
         - get: buildpack
           passed: [ "php-buildpack-CF-LTS-master", "php-buildpack-CF-edge-master" ]
           resource: php-buildpack-master
+          trigger: true
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added.yml
       - put: php-buildpack-master
@@ -1913,17 +1804,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: php-pivotal-buildpack-cached
           passed: [ php-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: php-buildpack-master
           passed: [ php-buildpack-release ]
-          trigger: false
       - task: upload to github
         file: buildpacks-ci/tasks/upload-to-github.yml
         config:
@@ -1936,19 +1823,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: php-pivotal-buildpack-cached
           passed: [ php-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: php-buildpack-master
           passed: [ php-buildpack-release ]
-          trigger: false
         - get: cf-release
-          trigger: false
       - task: upload to cf-release
         file: buildpacks-ci/tasks/upload-to-cf-release.yml
         config:
@@ -1964,17 +1846,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: php-pivotal-buildpack-cached
           passed: [ php-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: php-buildpack-master
           passed: [ php-buildpack-release ]
-          trigger: false
       - task: upload to pivnet
         file: buildpacks-ci/tasks/upload-to-pivnet.yml
         config:
@@ -1992,9 +1870,9 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: buildpack
           resource: staticfile-buildpack-master
+          trigger: true
       - task: detect and upload
         file: buildpacks-ci/tasks/detect-and-upload.yml
         privileged: true
@@ -2013,20 +1891,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new Staticfile buildpack and upload artifacts" ]
           resource: staticfile-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: staticfile-pivotal-buildpack
           passed: [ "detect new Staticfile buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: staticfile-pivotal-buildpack-cached
           passed: [ "detect new Staticfile buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -2041,20 +1919,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new Staticfile buildpack and upload artifacts" ]
           resource: staticfile-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: staticfile-pivotal-buildpack
           passed: [ "detect new Staticfile buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: staticfile-pivotal-buildpack-cached
           passed: [ "detect new Staticfile buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -2068,13 +1946,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: staticfile-pivotal-buildpack-cached
           passed: [ "staticfile-buildpack-CF-LTS-master", "staticfile-buildpack-CF-edge-master" ]
+          trigger: true
         - get: buildpack
           passed: [ "staticfile-buildpack-CF-LTS-master", "staticfile-buildpack-CF-edge-master" ]
           resource: staticfile-buildpack-master
+          trigger: true
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added.yml
       - put: staticfile-buildpack-master
@@ -2088,17 +1967,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: staticfile-pivotal-buildpack-cached
           passed: [ staticfile-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: staticfile-buildpack-master
           passed: [ staticfile-buildpack-release ]
-          trigger: false
       - task: upload to github
         file: buildpacks-ci/tasks/upload-to-github.yml
         config:
@@ -2111,19 +1986,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: staticfile-pivotal-buildpack-cached
           passed: [ staticfile-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: staticfile-buildpack-master
           passed: [ staticfile-buildpack-release ]
-          trigger: false
         - get: cf-release
-          trigger: false
       - task: upload to cf-release
         file: buildpacks-ci/tasks/upload-to-cf-release.yml
         config:
@@ -2139,17 +2009,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: staticfile-pivotal-buildpack-cached
           passed: [ staticfile-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: staticfile-buildpack-master
           passed: [ staticfile-buildpack-release ]
-          trigger: false
       - task: upload to pivnet
         file: buildpacks-ci/tasks/upload-to-pivnet.yml
         config:
@@ -2167,9 +2033,9 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: buildpack
           resource: binary-buildpack-master
+          trigger: true
       - task: detect and upload
         file: buildpacks-ci/tasks/detect-and-upload.yml
         privileged: true
@@ -2188,20 +2054,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new Binary buildpack and upload artifacts" ]
           resource: binary-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: binary-pivotal-buildpack
           passed: [ "detect new Binary buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: binary-pivotal-buildpack-cached
           passed: [ "detect new Binary buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -2216,20 +2082,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: deployments-buildpacks
-          trigger: false
         - get: buildpack
           passed: [ "detect new Binary buildpack and upload artifacts" ]
           resource: binary-buildpack-master
+          trigger: true
         - get: pivotal-buildpacks
           resource: binary-pivotal-buildpack
           passed: [ "detect new Binary buildpack and upload artifacts" ]
+          trigger: true
         - get: pivotal-buildpacks-cached
           resource: binary-pivotal-buildpack-cached
           passed: [ "detect new Binary buildpack and upload artifacts" ]
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
@@ -2243,13 +2109,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: binary-pivotal-buildpack-cached
           passed: [ "binary-buildpack-CF-LTS-master", "binary-buildpack-CF-edge-master" ]
+          trigger: true
         - get: buildpack
           passed: [ "binary-buildpack-CF-LTS-master", "binary-buildpack-CF-edge-master" ]
           resource: binary-buildpack-master
+          trigger: true
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added.yml
       - put: binary-buildpack-master
@@ -2263,17 +2130,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: binary-pivotal-buildpack-cached
           passed: [ binary-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: binary-buildpack-master
           passed: [ binary-buildpack-release ]
-          trigger: false
       - task: upload to github
         file: buildpacks-ci/tasks/upload-to-github.yml
         config:
@@ -2286,19 +2149,14 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: binary-pivotal-buildpack-cached
           passed: [ binary-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: binary-buildpack-master
           passed: [ binary-buildpack-release ]
-          trigger: false
         - get: cf-release
-          trigger: false
       - task: upload to cf-release
         file: buildpacks-ci/tasks/upload-to-cf-release.yml
         config:
@@ -2314,17 +2172,13 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-          trigger: false
         - get: ci-tools
-          trigger: false
         - get: pivotal-buildpacks-cached
           resource: binary-pivotal-buildpack-cached
           passed: [ binary-buildpack-release ]
-          trigger: false
         - get: buildpack
           resource: binary-buildpack-master
           passed: [ binary-buildpack-release ]
-          trigger: false
       - task: upload to pivnet
         file: buildpacks-ci/tasks/upload-to-pivnet.yml
         config:
