@@ -318,7 +318,6 @@ groups:
   - brats-ruby-CF-edge
 jobs:
   - name: binary-buildpack-CF-edge
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -344,7 +343,6 @@ jobs:
             STACKS: lucid64 cflinuxfs2
         privileged: true
   - name: binary-buildpack-CF-LTS
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -370,7 +368,6 @@ jobs:
             STACKS: lucid64
         privileged: true
   - name: staticfile-buildpack-CF-edge
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -396,7 +393,6 @@ jobs:
             STACKS: lucid64 cflinuxfs2
         privileged: true
   - name: staticfile-buildpack-CF-LTS
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -422,7 +418,6 @@ jobs:
             STACKS: lucid64
         privileged: true
   - name: php-buildpack-CF-edge
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -449,7 +444,6 @@ jobs:
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
   - name: php-buildpack-CF-LTS
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -476,7 +470,6 @@ jobs:
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
   - name: python-buildpack-CF-edge
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -502,7 +495,6 @@ jobs:
             STACKS: lucid64 cflinuxfs2
         privileged: true
   - name: python-buildpack-CF-LTS
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -528,7 +520,6 @@ jobs:
             STACKS: lucid64
         privileged: true
   - name: nodejs-buildpack-CF-edge
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -554,7 +545,6 @@ jobs:
             STACKS: lucid64 cflinuxfs2
         privileged: true
   - name: nodejs-buildpack-CF-LTS
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -580,7 +570,6 @@ jobs:
             STACKS: lucid64
         privileged: true
   - name: ruby-buildpack-CF-edge
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -606,7 +595,6 @@ jobs:
             STACKS: lucid64 cflinuxfs2
         privileged: true
   - name: ruby-buildpack-CF-LTS
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -632,7 +620,6 @@ jobs:
             STACKS: lucid64
         privileged: true
   - name: go-buildpack-CF-edge
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -658,7 +645,6 @@ jobs:
             STACKS: lucid64 cflinuxfs2
         privileged: true
   - name: go-buildpack-CF-LTS
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -684,7 +670,6 @@ jobs:
             STACKS: lucid64
         privileged: true
   - name: machete-firewall-CF-edge
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -710,7 +695,6 @@ jobs:
             STACKS: lucid64 cflinuxfs2
         privileged: true
   - name: machete-firewall-CF-LTS
-    public: true
     serial: true
     serial_groups : [bp-ci-7]
     plan:
@@ -736,7 +720,6 @@ jobs:
             STACKS: lucid64
         privileged: true
   - name: buildpack-packager
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -754,7 +737,6 @@ jobs:
             path: buildpacks-ci/scripts/buildpack-packager.sh
         privileged: true
   - name: machete
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -772,7 +754,6 @@ jobs:
             path: buildpacks-ci/scripts/machete.sh
         privileged: true
   - name: compile-extensions
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -790,7 +771,6 @@ jobs:
             path: buildpacks-ci/scripts/compile-extensions.sh
         privileged: true
   - name: old-releases
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -810,7 +790,6 @@ jobs:
             GITHUB_TOKEN: {{buildpacks-github-token}}
         privileged: true
   - name: heroku-nanny
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -828,7 +807,6 @@ jobs:
             path: buildpacks-ci/scripts/heroku-nanny.sh
         privileged: true
   - name: brats-go-CF-LTS
-    public: true
     serial: true
     serial_groups : [bp-ci-7]
     plan:
@@ -850,7 +828,6 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
         privileged: true
   - name: brats-go-CF-edge
-    public: true
     serial: true
     serial_groups : [bp-ci-8]
     plan:
@@ -872,7 +849,6 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
         privileged: true
   - name: brats-python-CF-LTS
-    public: true
     serial: true
     serial_groups : [bp-ci-7]
     plan:
@@ -894,7 +870,6 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
         privileged: true
   - name: brats-python-CF-edge
-    public: true
     serial: true
     serial_groups : [bp-ci-8]
     plan:
@@ -916,7 +891,6 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
         privileged: true
   - name: brats-nodejs-CF-LTS
-    public: true
     serial: true
     serial_groups : [bp-ci-7]
     plan:
@@ -938,7 +912,6 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
         privileged: true
   - name: brats-nodejs-CF-edge
-    public: true
     serial: true
     serial_groups : [bp-ci-8]
     plan:
@@ -960,7 +933,6 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
         privileged: true
   - name: brats-php-CF-LTS
-    public: true
     serial: true
     serial_groups : [bp-ci-7]
     plan:
@@ -982,7 +954,6 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
         privileged: true
   - name: brats-php-CF-edge
-    public: true
     serial: true
     serial_groups : [bp-ci-8]
     plan:
@@ -1004,7 +975,6 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
         privileged: true
   - name: brats-ruby-CF-LTS
-    public: true
     serial: true
     serial_groups : [bp-ci-7]
     plan:
@@ -1026,7 +996,6 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
         privileged: true
   - name: brats-ruby-CF-edge
-    public: true
     serial: true
     serial_groups : [bp-ci-8]
     plan:
@@ -1048,7 +1017,6 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
         privileged: true
   - name: detect new Ruby buildpack and upload artifacts
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1068,7 +1036,6 @@ jobs:
           from: buildpack/ruby_buildpack-cached-v(.*).zip
           to: /experimental-buildpacks/ruby/
   - name: ruby-buildpack-CF-edge-master
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -1096,7 +1063,6 @@ jobs:
             STACKS: lucid64 cflinuxfs2
         privileged: true
   - name: ruby-buildpack-CF-LTS-master
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -1124,7 +1090,6 @@ jobs:
             STACKS: lucid64
         privileged: true
   - name: ruby-buildpack-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1145,7 +1110,6 @@ jobs:
           tag: buildpack/VERSION
           tag_prefix: v
   - name: ruby buildpack to github
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1164,7 +1128,6 @@ jobs:
             GITHUB_ORG: cloudfoundry
             GITHUB_TOKEN: {{buildpacks-github-token}}
   - name: ruby buildpack to cf-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1187,7 +1150,6 @@ jobs:
             GITHUB_PASSWORD: {{github-password}}
         privileged: true
   - name: ruby buildpack to pivnet
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1211,7 +1173,6 @@ jobs:
             PIVNET_PRODUCT_NAME: Ruby Buildpack (offline)
         privileged: true
   - name: detect new NodeJS buildpack and upload artifacts
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1231,7 +1192,6 @@ jobs:
           from: buildpack/nodejs_buildpack-cached-v(.*).zip
           to: /experimental-buildpacks/nodejs/
   - name: nodejs-buildpack-CF-edge-master
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -1259,7 +1219,6 @@ jobs:
             STACKS: lucid64 cflinuxfs2
         privileged: true
   - name: nodejs-buildpack-CF-LTS-master
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -1287,7 +1246,6 @@ jobs:
             STACKS: lucid64
         privileged: true
   - name: nodejs-buildpack-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1308,7 +1266,6 @@ jobs:
           tag: buildpack/VERSION
           tag_prefix: v
   - name: nodejs buildpack to github
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1327,7 +1284,6 @@ jobs:
             GITHUB_ORG: cloudfoundry
             GITHUB_TOKEN: {{buildpacks-github-token}}
   - name: nodejs buildpack to cf-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1350,7 +1306,6 @@ jobs:
             GITHUB_PASSWORD: {{github-password}}
         privileged: true
   - name: nodejs buildpack to pivnet
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1374,7 +1329,6 @@ jobs:
             PIVNET_PRODUCT_NAME: NodeJS Buildpack (offline)
         privileged: true
   - name: detect new Python buildpack and upload artifacts
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1394,7 +1348,6 @@ jobs:
           from: buildpack/python_buildpack-cached-v(.*).zip
           to: /experimental-buildpacks/python/
   - name: python-buildpack-CF-edge-master
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -1422,7 +1375,6 @@ jobs:
             STACKS: lucid64 cflinuxfs2
         privileged: true
   - name: python-buildpack-CF-LTS-master
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -1450,7 +1402,6 @@ jobs:
             STACKS: lucid64
         privileged: true
   - name: python-buildpack-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1471,7 +1422,6 @@ jobs:
           tag: buildpack/VERSION
           tag_prefix: v
   - name: python buildpack to github
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1490,7 +1440,6 @@ jobs:
             GITHUB_ORG: cloudfoundry
             GITHUB_TOKEN: {{buildpacks-github-token}}
   - name: python buildpack to cf-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1513,7 +1462,6 @@ jobs:
             GITHUB_PASSWORD: {{github-password}}
         privileged: true
   - name: python buildpack to pivnet
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1537,7 +1485,6 @@ jobs:
             PIVNET_PRODUCT_NAME: Python Buildpack (offline)
         privileged: true
   - name: detect new Go buildpack and upload artifacts
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1557,7 +1504,6 @@ jobs:
           from: buildpack/go_buildpack-cached-v(.*).zip
           to: /experimental-buildpacks/go/
   - name: go-buildpack-CF-edge-master
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -1585,7 +1531,6 @@ jobs:
             STACKS: lucid64 cflinuxfs2
         privileged: true
   - name: go-buildpack-CF-LTS-master
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -1613,7 +1558,6 @@ jobs:
             STACKS: lucid64
         privileged: true
   - name: go-buildpack-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1634,7 +1578,6 @@ jobs:
           tag: buildpack/VERSION
           tag_prefix: v
   - name: go buildpack to github
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1653,7 +1596,6 @@ jobs:
             GITHUB_ORG: cloudfoundry
             GITHUB_TOKEN: {{buildpacks-github-token}}
   - name: go buildpack to cf-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1676,7 +1618,6 @@ jobs:
             GITHUB_PASSWORD: {{github-password}}
         privileged: true
   - name: go buildpack to pivnet
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1700,7 +1641,6 @@ jobs:
             PIVNET_PRODUCT_NAME: Go Buildpack (offline)
         privileged: true
   - name: detect new PHP buildpack and upload artifacts
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1720,7 +1660,6 @@ jobs:
           from: buildpack/php_buildpack-cached-v(.*).zip
           to: /experimental-buildpacks/php/
   - name: php-buildpack-CF-edge-master
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -1749,7 +1688,6 @@ jobs:
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
   - name: php-buildpack-CF-LTS-master
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -1778,7 +1716,6 @@ jobs:
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
   - name: php-buildpack-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1799,7 +1736,6 @@ jobs:
           tag: buildpack/VERSION
           tag_prefix: v
   - name: php buildpack to github
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1818,7 +1754,6 @@ jobs:
             GITHUB_ORG: cloudfoundry
             GITHUB_TOKEN: {{buildpacks-github-token}}
   - name: php buildpack to cf-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1841,7 +1776,6 @@ jobs:
             GITHUB_PASSWORD: {{github-password}}
         privileged: true
   - name: php buildpack to pivnet
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1865,7 +1799,6 @@ jobs:
             PIVNET_PRODUCT_NAME: PHP Buildpack (offline)
         privileged: true
   - name: detect new Staticfile buildpack and upload artifacts
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1885,7 +1818,6 @@ jobs:
           from: buildpack/staticfile_buildpack-cached-v(.*).zip
           to: /experimental-buildpacks/staticfile/
   - name: staticfile-buildpack-CF-edge-master
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -1913,7 +1845,6 @@ jobs:
             STACKS: lucid64 cflinuxfs2
         privileged: true
   - name: staticfile-buildpack-CF-LTS-master
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -1941,7 +1872,6 @@ jobs:
             STACKS: lucid64
         privileged: true
   - name: staticfile-buildpack-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1962,7 +1892,6 @@ jobs:
           tag: buildpack/VERSION
           tag_prefix: v
   - name: staticfile buildpack to github
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -1981,7 +1910,6 @@ jobs:
             GITHUB_ORG: cloudfoundry
             GITHUB_TOKEN: {{buildpacks-github-token}}
   - name: staticfile buildpack to cf-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -2004,7 +1932,6 @@ jobs:
             GITHUB_PASSWORD: {{github-password}}
         privileged: true
   - name: staticfile buildpack to pivnet
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -2028,7 +1955,6 @@ jobs:
             PIVNET_PRODUCT_NAME: Staticfile Buildpack (offline)
         privileged: true
   - name: detect new Binary buildpack and upload artifacts
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -2048,7 +1974,6 @@ jobs:
           from: buildpack/binary_buildpack-cached-v(.*).zip
           to: /experimental-buildpacks/binary/
   - name: binary-buildpack-CF-edge-master
-    public: true
     serial: true
     serial_groups: [bp-ci-8]
     plan:
@@ -2076,7 +2001,6 @@ jobs:
             STACKS: lucid64 cflinuxfs2
         privileged: true
   - name: binary-buildpack-CF-LTS-master
-    public: true
     serial: true
     serial_groups: [bp-ci-7]
     plan:
@@ -2104,7 +2028,6 @@ jobs:
             STACKS: lucid64
         privileged: true
   - name: binary-buildpack-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -2125,7 +2048,6 @@ jobs:
           tag: buildpack/VERSION
           tag_prefix: v
   - name: binary buildpack to github
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -2144,7 +2066,6 @@ jobs:
             GITHUB_ORG: cloudfoundry
             GITHUB_TOKEN: {{buildpacks-github-token}}
   - name: binary buildpack to cf-release
-    public: true
     serial: true
     plan:
       - aggregate:
@@ -2167,7 +2088,6 @@ jobs:
             GITHUB_PASSWORD: {{github-password}}
         privileged: true
   - name: binary buildpack to pivnet
-    public: true
     serial: true
     plan:
       - aggregate:
