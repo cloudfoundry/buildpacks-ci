@@ -1,0 +1,15 @@
+#!/bin/bash -l
+set -e
+
+pushd deployments-buildpacks
+  bundle
+  source ./bin/switch $DEPLOYMENT_NAME
+popd
+
+cd brats
+BUNDLE_GEMFILE=cf.Gemfile bundle install
+if [ "$STACK" == "" ]; then
+  ./bin/tests --language=$LANGUAGE --host=$DEPLOYMENT_NAME.cf-app.com
+else
+  ./bin/tests --language=$LANGUAGE --host=$DEPLOYMENT_NAME.cf-app.com --stack=$STACK
+fi

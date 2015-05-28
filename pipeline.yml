@@ -815,17 +815,12 @@ jobs:
         - get: brats
         - get: deployments-buildpacks
       - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: brats
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/brats-go.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
+            LANGUAGE: go
+            STACK: lucid64
         privileged: true
   - name: brats-go-CF-edge
     serial: true
@@ -836,17 +831,11 @@ jobs:
         - get: brats
         - get: deployments-buildpacks
       - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: brats
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/brats-go.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
+            LANGUAGE: go
         privileged: true
   - name: brats-python-CF-LTS
     serial: true
@@ -857,17 +846,12 @@ jobs:
         - get: brats
         - get: deployments-buildpacks
       - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: brats
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/brats-python.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
+            LANGUAGE: python
+            STACK: lucid64
         privileged: true
   - name: brats-python-CF-edge
     serial: true
@@ -878,17 +862,11 @@ jobs:
         - get: brats
         - get: deployments-buildpacks
       - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: brats
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/brats-python.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
+            LANGUAGE: python
         privileged: true
   - name: brats-nodejs-CF-LTS
     serial: true
@@ -899,17 +877,12 @@ jobs:
         - get: brats
         - get: deployments-buildpacks
       - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: brats
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/brats-nodejs.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
+            LANGUAGE: nodejs
+            STACK: lucid64
         privileged: true
   - name: brats-nodejs-CF-edge
     serial: true
@@ -920,17 +893,11 @@ jobs:
         - get: brats
         - get: deployments-buildpacks
       - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: brats
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/brats-nodejs.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
+            LANGUAGE: nodejs
         privileged: true
   - name: brats-php-CF-LTS
     serial: true
@@ -941,17 +908,12 @@ jobs:
         - get: brats
         - get: deployments-buildpacks
       - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: brats
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/brats-php.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
+            LANGUAGE: php
+            STACK: lucid64
         privileged: true
   - name: brats-php-CF-edge
     serial: true
@@ -962,17 +924,11 @@ jobs:
         - get: brats
         - get: deployments-buildpacks
       - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: brats
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/brats-php.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
+            LANGUAGE: php
         privileged: true
   - name: brats-ruby-CF-LTS
     serial: true
@@ -983,17 +939,12 @@ jobs:
         - get: brats
         - get: deployments-buildpacks
       - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: brats
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/brats-ruby.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
+            LANGUAGE: ruby
+            STACK: lucid64
         privileged: true
   - name: brats-ruby-CF-edge
     serial: true
@@ -1004,17 +955,11 @@ jobs:
         - get: brats
         - get: deployments-buildpacks
       - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: brats
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/brats-ruby.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
+            LANGUAGE: ruby
         privileged: true
   - name: detect new Ruby buildpack and upload artifacts
     serial: true
