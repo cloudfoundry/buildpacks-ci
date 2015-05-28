@@ -217,6 +217,12 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/cf-release
+  - name: brats-time-resource
+    type: time
+    source:
+      interval: 12h
+      start: 19:00 -0400
+      stop: 00:00 -0400
 groups:
 - name: binary-buildpack
   jobs:
@@ -814,6 +820,7 @@ jobs:
         - get: buildpacks-ci
         - get: brats
         - get: deployments-buildpacks
+        - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
         config:
@@ -830,6 +837,7 @@ jobs:
         - get: buildpacks-ci
         - get: brats
         - get: deployments-buildpacks
+        - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
         config:
@@ -845,6 +853,7 @@ jobs:
         - get: buildpacks-ci
         - get: brats
         - get: deployments-buildpacks
+        - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
         config:
@@ -861,6 +870,7 @@ jobs:
         - get: buildpacks-ci
         - get: brats
         - get: deployments-buildpacks
+        - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
         config:
@@ -876,6 +886,7 @@ jobs:
         - get: buildpacks-ci
         - get: brats
         - get: deployments-buildpacks
+        - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
         config:
@@ -892,6 +903,7 @@ jobs:
         - get: buildpacks-ci
         - get: brats
         - get: deployments-buildpacks
+        - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
         config:
@@ -907,6 +919,7 @@ jobs:
         - get: buildpacks-ci
         - get: brats
         - get: deployments-buildpacks
+        - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
         config:
@@ -923,6 +936,7 @@ jobs:
         - get: buildpacks-ci
         - get: brats
         - get: deployments-buildpacks
+        - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
         config:
@@ -938,6 +952,7 @@ jobs:
         - get: buildpacks-ci
         - get: brats
         - get: deployments-buildpacks
+        - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
         config:
@@ -954,6 +969,7 @@ jobs:
         - get: buildpacks-ci
         - get: brats
         - get: deployments-buildpacks
+        - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
         config:
