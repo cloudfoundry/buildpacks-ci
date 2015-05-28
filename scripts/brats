@@ -7,7 +7,7 @@ pushd deployments-buildpacks
 popd
 
 cd brats
-BUNDLE_GEMFILE=cf.Gemfile bundle install
+bundle install
 if [ "$STACK" == "" ]; then
   ./bin/tests --language=$LANGUAGE --host=$DEPLOYMENT_NAME.cf-app.com
 else
