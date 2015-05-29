@@ -216,7 +216,7 @@ resources:
   - name: cf-release
     type: git
     source:
-      uri: https://github.com/cloudfoundry/cf-release
+      uri: https://github.com/cf-buildpacks/cf-release
   - name: brats-time-resource
     type: time
     source:
