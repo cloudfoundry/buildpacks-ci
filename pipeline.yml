@@ -115,6 +115,11 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/brats.git
+  - name: binary-builder
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/binary-builder
+      private_key: {{buildpacks-private-key}}
   - name: ruby-pivotal-buildpack
     type: s3
     source:
@@ -310,6 +315,7 @@ groups:
   - heroku-nanny
   - machete-firewall-CF-edge
   - machete-firewall-CF-LTS
+  - binary-builder
 - name: brats
   jobs:
   - brats-go-CF-LTS
@@ -741,6 +747,23 @@ jobs:
             - name: buildpack-packager
           run:
             path: buildpacks-ci/scripts/buildpack-packager.sh
+        privileged: true
+  - name: binary-builder
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: binary-builder
+          trigger: true
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: binary-builder
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/binary-builder.sh
         privileged: true
   - name: machete
     serial: true
