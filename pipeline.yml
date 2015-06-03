@@ -228,6 +228,12 @@ resources:
       interval: 12h
       start: 19:00 -0400
       stop: 00:00 -0400
+  - name: heroku-nanny-time-resource
+    type: time
+    source:
+      interval: 12h
+      start: 7:00 -0400
+      stop: 12:00 -0400
 groups:
 - name: binary-buildpack
   jobs:
@@ -824,6 +830,7 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: heroku-nanny
+        - get: heroku-nanny-time-resource
           trigger: true
       - task: sanity-check-upstream
         config:
