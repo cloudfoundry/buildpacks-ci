@@ -33,7 +33,7 @@ docker push cfbuildpacks/ci:buildpack
 # Debugging the build
 
 ```sh
-fly hijack -j $JOB_NAME -t task -n $TASK_NAME -p
+fly hijack -j $JOB_NAME -t task -n $TASK_NAME
 ```
 
 # Clearing the git resources
