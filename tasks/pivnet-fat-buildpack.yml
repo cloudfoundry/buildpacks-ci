@@ -1,0 +1,16 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci#buildpack
+inputs:
+  - name: buildpacks-ci
+  - name: ci-tools
+  - name: buildpack
+  - name: deployments-buildpacks
+run:
+  path: buildpacks-ci/scripts/release/pivnet_fat_buildpack.sh
+params:
+  AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
+  AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
+  PIVNET_S3_BUCKET: pivotalnetwork
+  PIVNET_ADDRESS: https://network.pivotal.io/
+  PIVNET_APIKEY: {{pivnet-apikey}}
