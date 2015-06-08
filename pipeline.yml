@@ -1943,7 +1943,7 @@ jobs:
             PIVNET_S3_BUCKET: pivotalnetwork
             PIVNET_ADDRESS: https://network.pivotal.io/
             PIVNET_APIKEY: {{pivnet-apikey}}
-            PIVNET_PRODUCT_NAME: Staticfile Buildpack (offline)
+            PIVNET_PRODUCT_NAME: Staticfile Buildpack
         privileged: true
   - name: detect new Binary buildpack and upload artifacts
     serial: true
@@ -2099,5 +2099,5 @@ jobs:
             PIVNET_S3_BUCKET: pivotalnetwork
             PIVNET_ADDRESS: https://network.pivotal.io/
             PIVNET_APIKEY: {{pivnet-apikey}}
-            PIVNET_PRODUCT_NAME: Binary Buildpack (offline)
+            PIVNET_PRODUCT_NAME: Binary Buildpack
         privileged: true
