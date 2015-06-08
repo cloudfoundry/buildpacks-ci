@@ -279,6 +279,7 @@ groups:
   - python-buildpack-CF-edge-master
   - python-buildpack-CF-LTS-master
   - detect new Python buildpack and upload artifacts
+  - python-fat-buildpack
 - name: nodejs-buildpack
   jobs:
   - nodejs-buildpack-CF-edge
@@ -290,6 +291,7 @@ groups:
   - nodejs-buildpack-CF-edge-master
   - nodejs-buildpack-CF-LTS-master
   - detect new NodeJS buildpack and upload artifacts
+  - nodejs-fat-buildpack
 - name: go-buildpack
   jobs:
   - go-buildpack-CF-edge
@@ -301,6 +303,7 @@ groups:
   - go-buildpack-CF-edge-master
   - go-buildpack-CF-LTS-master
   - detect new Go buildpack and upload artifacts
+  - go-fat-buildpack
 - name: ruby-buildpack
   jobs:
   - ruby-buildpack-CF-edge
@@ -312,6 +315,7 @@ groups:
   - ruby-buildpack-CF-edge-master
   - ruby-buildpack-CF-LTS-master
   - detect new Ruby buildpack and upload artifacts
+  - ruby-fat-buildpack
 - name: tooling
   jobs:
   - buildpack-packager
@@ -335,6 +339,90 @@ groups:
   - brats-ruby-CF-LTS
   - brats-ruby-CF-edge
 jobs:
+  - name: python-fat-buildpack
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          resource: python-buildpack-master
+          passed: [ "python-buildpack-release" ]
+      - task: create fat buildpack and upload to Pivnet
+        file: buildpacks-ci/tasks/pivnet-fat-buildpack.yml
+        config:
+          params:
+            PIVNET_PRODUCT_NAME: Python Buildpack (including unsupported) (offline)
+            AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
+            PIVNET_S3_BUCKET: pivotalnetwork
+            PIVNET_ADDRESS: https://network.pivotal.io/
+            PIVNET_APIKEY: {{pivnet-apikey}}
+        privileged: true
+  - name: nodejs-fat-buildpack
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          resource: nodejs-buildpack-master
+          passed: [ "nodejs-buildpack-release" ]
+      - task: create fat buildpack and upload to Pivnet
+        file: buildpacks-ci/tasks/pivnet-fat-buildpack.yml
+        config:
+          params:
+            PIVNET_PRODUCT_NAME: NodeJS Buildpack (including unsupported) (offline)
+            AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
+            PIVNET_S3_BUCKET: pivotalnetwork
+            PIVNET_ADDRESS: https://network.pivotal.io/
+            PIVNET_APIKEY: {{pivnet-apikey}}
+        privileged: true
+  - name: go-fat-buildpack
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          resource: go-buildpack-master
+          passed: [ "go-buildpack-release" ]
+      - task: create fat buildpack and upload to Pivnet
+        file: buildpacks-ci/tasks/pivnet-fat-buildpack.yml
+        config:
+          params:
+            PIVNET_PRODUCT_NAME: Go Buildpack (including unsupported) (offline)
+            AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
+            PIVNET_S3_BUCKET: pivotalnetwork
+            PIVNET_ADDRESS: https://network.pivotal.io/
+            PIVNET_APIKEY: {{pivnet-apikey}}
+        privileged: true
+  - name: ruby-fat-buildpack
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          resource: ruby-buildpack-master
+          passed: [ "ruby-buildpack-release" ]
+      - task: create fat buildpack and upload to Pivnet
+        file: buildpacks-ci/tasks/pivnet-fat-buildpack.yml
+        config:
+          params:
+            PIVNET_PRODUCT_NAME: Ruby Buildpack (including unsupported) (offline)
+            AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
+            PIVNET_S3_BUCKET: pivotalnetwork
+            PIVNET_ADDRESS: https://network.pivotal.io/
+            PIVNET_APIKEY: {{pivnet-apikey}}
+        privileged: true
   - name: binary-buildpack-CF-edge
     serial: true
     serial_groups: [bp-ci-8]
