@@ -338,6 +338,8 @@ groups:
   - brats-php-CF-edge
   - brats-ruby-CF-LTS
   - brats-ruby-CF-edge
+  - brats-jruby-CF-LTS
+  - brats-jruby-CF-edge
 jobs:
   - name: python-fat-buildpack
     serial: true
