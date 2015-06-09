@@ -937,7 +937,6 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        - get: deployments-buildpacks
         - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
@@ -946,6 +945,8 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             LANGUAGE: go
             STACK: lucid64
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
   - name: brats-go-CF-edge
     serial: true
@@ -954,7 +955,6 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        - get: deployments-buildpacks
         - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
@@ -962,6 +962,8 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-8
             LANGUAGE: go
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
   - name: brats-python-CF-LTS
     serial: true
@@ -970,7 +972,6 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        - get: deployments-buildpacks
         - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
@@ -979,6 +980,8 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             LANGUAGE: python
             STACK: lucid64
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
   - name: brats-python-CF-edge
     serial: true
@@ -987,7 +990,6 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        - get: deployments-buildpacks
         - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
@@ -995,6 +997,8 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-8
             LANGUAGE: python
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
   - name: brats-nodejs-CF-LTS
     serial: true
@@ -1003,7 +1007,6 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        - get: deployments-buildpacks
         - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
@@ -1012,6 +1015,8 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             LANGUAGE: nodejs
             STACK: lucid64
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
   - name: brats-nodejs-CF-edge
     serial: true
@@ -1020,7 +1025,6 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        - get: deployments-buildpacks
         - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
@@ -1028,6 +1032,8 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-8
             LANGUAGE: nodejs
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
   - name: brats-php-CF-LTS
     serial: true
@@ -1036,7 +1042,6 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        - get: deployments-buildpacks
         - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
@@ -1045,6 +1050,8 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             LANGUAGE: php
             STACK: lucid64
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
   - name: brats-php-CF-edge
     serial: true
@@ -1053,7 +1060,6 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        - get: deployments-buildpacks
         - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
@@ -1061,6 +1067,8 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-8
             LANGUAGE: php
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
   - name: brats-ruby-CF-LTS
     serial: true
@@ -1069,7 +1077,6 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        - get: deployments-buildpacks
         - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
@@ -1078,6 +1085,8 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             LANGUAGE: ruby
             STACK: lucid64
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
   - name: brats-ruby-CF-edge
     serial: true
@@ -1086,7 +1095,6 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        - get: deployments-buildpacks
         - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
@@ -1094,6 +1102,43 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-8
             LANGUAGE: ruby
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+        privileged: true
+  - name: brats-jruby-CF-LTS
+    serial: true
+    serial_groups : [bp-ci-7]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: brats
+        - {get: brats-time-resource, trigger: true}
+      - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            LANGUAGE: jruby
+            STACK: lucid64
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+        privileged: true
+  - name: brats-jruby-CF-edge
+    serial: true
+    serial_groups : [bp-ci-8]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: brats
+        - {get: brats-time-resource, trigger: true}
+      - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            LANGUAGE: jruby
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
   - name: detect new Ruby buildpack and upload artifacts
     serial: true

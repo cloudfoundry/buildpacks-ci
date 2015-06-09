@@ -1,15 +1,12 @@
 #!/bin/bash -l
 set -e
 
-pushd deployments-buildpacks
-  bundle
-  source ./bin/switch $DEPLOYMENT_NAME
-popd
-
 cd brats
 bundle install
+cf login -a api.$DEPLOYMENT_NAME.cf-app.com -u $CF_CI_USERNAME -p $CF_CI_PASSWORD -o pivotal -s integration --skip-ssl-validation
+
 if [ "$STACK" == "" ]; then
-  ./bin/tests --language=$LANGUAGE --host=$DEPLOYMENT_NAME.cf-app.com
+  rspec cf_spec/${LANGUAGE}_spec.rb
 else
-  ./bin/tests --language=$LANGUAGE --host=$DEPLOYMENT_NAME.cf-app.com --stack=$STACK
+  rspec -t stack:$STACK cf_spec/${LANGUAGE}_spec.rb
 fi

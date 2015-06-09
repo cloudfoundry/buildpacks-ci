@@ -4,6 +4,5 @@ image: docker:///cfbuildpacks/ci#buildpack
 inputs:
   - name: buildpacks-ci
   - name: brats
-  - name: deployments-buildpacks
 run:
   path: buildpacks-ci/scripts/brats
