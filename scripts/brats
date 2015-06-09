@@ -5,8 +5,10 @@ cd brats
 bundle install
 cf login -a api.$DEPLOYMENT_NAME.cf-app.com -u $CI_CF_USERNAME -p $CI_CF_PASSWORD -o pivotal -s integration --skip-ssl-validation
 
+export BUNDLE_GEMFILE=cf.Gemfile
+
 if [ "$STACK" == "" ]; then
-  rspec cf_spec/integration/${LANGUAGE}_spec.rb
+  bundle exec rspec cf_spec/integration/${LANGUAGE}_spec.rb
 else
-  rspec -t stack:$STACK cf_spec/integration/${LANGUAGE}_spec.rb
+  bundle exec rspec -t stack:$STACK cf_spec/integration/${LANGUAGE}_spec.rb
 fi
