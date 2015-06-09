@@ -3,7 +3,7 @@ set -e
 
 cd brats
 bundle install
-cf login -a api.$DEPLOYMENT_NAME.cf-app.com -u $CF_CI_USERNAME -p $CF_CI_PASSWORD -o pivotal -s integration --skip-ssl-validation
+cf login -a api.$DEPLOYMENT_NAME.cf-app.com -u $CI_CF_USERNAME -p $CI_CF_PASSWORD -o pivotal -s integration --skip-ssl-validation
 
 if [ "$STACK" == "" ]; then
   rspec cf_spec/${LANGUAGE}_spec.rb
