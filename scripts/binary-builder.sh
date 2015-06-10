@@ -5,8 +5,8 @@ set -e
 apt-get -y install ccache
 export PATH=/usr/lib/ccache:$PATH
 
-if [ -f binary-builder-compiler-cache/binary-builder-compiler-cache.tgz ]; then
-  tar xzf binary-builder-compiler-cache/binary-builder-compiler-cache.tgz
+if [ -f binary-builder-compiler-cache/ccache.tgz ]; then
+  tar xzf binary-builder-compiler-cache/ccache.tgz
 fi
 
 export CCACHE_DIR=`pwd`/.ccache
