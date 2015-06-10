@@ -343,6 +343,8 @@ groups:
   - brats-nodejs-CF-edge
   - brats-php-CF-LTS
   - brats-php-CF-edge
+  - brats-hhvm-CF-LTS
+  - brats-hhvm-CF-edge
   - brats-ruby-CF-LTS
   - brats-ruby-CF-edge
   - brats-jruby-CF-LTS
@@ -1081,6 +1083,41 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-8
             LANGUAGE: php
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+        privileged: true
+  - name: brats-hhvm-CF-LTS
+    serial: true
+    serial_groups : [bp-ci-7]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: brats
+        - {get: brats-time-resource, trigger: true}
+      - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            LANGUAGE: hhvm
+            STACK: lucid64
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+        privileged: true
+  - name: brats-hhvm-CF-edge
+    serial: true
+    serial_groups : [bp-ci-8]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: brats
+        - {get: brats-time-resource, trigger: true}
+      - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            LANGUAGE: hhvm
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true

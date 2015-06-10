@@ -20,7 +20,7 @@ vagrant up
 With a proper Concourse deployment, and `private.yml` containing secrets.
 
 ```sh
-fly c -c pipeline.yml -vf private.yml
+fly c main -c pipeline.yml -vf private.yml
 ```
 
 # Building Docker Images
