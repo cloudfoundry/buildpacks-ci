@@ -873,7 +873,6 @@ jobs:
       - put: binary-builder-compiler-cache
         params:
           from: ccache.tgz
-          to: /binary-builder-compiler-cache.tgz
   - name: machete
     serial: true
     plan:
