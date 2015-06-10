@@ -218,6 +218,13 @@ resources:
       regexp: binary_buildpack-cached-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: binary-builder-compiler-cache
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: binary-builder-compiler-cache.tgz
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
   - name: cf-release
     type: git
     source:
@@ -851,6 +858,7 @@ jobs:
         - get: buildpacks-ci
         - get: binary-builder
           trigger: true
+        - get: binary-builder-compiler-cache
       - task: rspec
         config:
           platform: linux
@@ -858,9 +866,14 @@ jobs:
           inputs:
             - name: binary-builder
             - name: buildpacks-ci
+            - name: binary-builder-compiler-cache
           run:
             path: buildpacks-ci/scripts/binary-builder.sh
         privileged: true
+      - put: binary-builder-compiler-cache
+        params:
+          from: binary-builder-compiler-cache/ccache.zip
+          to: /binary-builder-compiler-cache.tgz
   - name: machete
     serial: true
     plan:
