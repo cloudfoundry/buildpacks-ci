@@ -872,7 +872,7 @@ jobs:
         privileged: true
       - put: binary-builder-compiler-cache
         params:
-          from: binary-builder-compiler-cache/ccache.zip
+          from: ccache.tgz
           to: /binary-builder-compiler-cache.tgz
   - name: machete
     serial: true
