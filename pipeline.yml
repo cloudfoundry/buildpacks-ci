@@ -222,7 +222,7 @@ resources:
     type: s3
     source:
       bucket: pivotal-buildpacks
-      regexp: binary-builder-compiler-cache.tgz
+      regexp: ccache.tgz
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
   - name: cf-release
@@ -874,7 +874,7 @@ jobs:
         privileged: true
       - put: binary-builder-compiler-cache
         params:
-          from: ccache.tgz
+          from: new-ccache.tgz
   - name: machete
     serial: true
     plan:

@@ -17,4 +17,4 @@ bundle install -j4
 bundle exec rspec
 popd
 
-tar czf ccache.tgz .ccache
+tar czf new-ccache.tgz .ccache
