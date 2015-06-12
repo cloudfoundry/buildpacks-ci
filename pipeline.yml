@@ -457,7 +457,7 @@ jobs:
             path: buildpacks-ci/scripts/binary-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
         privileged: true
   - name: binary-buildpack-CF-LTS
     serial: true
@@ -482,7 +482,7 @@ jobs:
             path: buildpacks-ci/scripts/binary-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
         privileged: true
   - name: staticfile-buildpack-CF-edge
     serial: true
@@ -507,7 +507,7 @@ jobs:
             path: buildpacks-ci/scripts/staticfile-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
         privileged: true
   - name: staticfile-buildpack-CF-LTS
     serial: true
@@ -532,7 +532,7 @@ jobs:
             path: buildpacks-ci/scripts/staticfile-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
         privileged: true
   - name: php-buildpack-CF-edge
     serial: true
@@ -557,7 +557,7 @@ jobs:
             path: buildpacks-ci/scripts/php-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
   - name: php-buildpack-CF-LTS
@@ -583,7 +583,7 @@ jobs:
             path: buildpacks-ci/scripts/php-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
   - name: python-buildpack-CF-edge
@@ -609,7 +609,7 @@ jobs:
             path: buildpacks-ci/scripts/python-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
         privileged: true
   - name: python-buildpack-CF-LTS
     serial: true
@@ -634,7 +634,7 @@ jobs:
             path: buildpacks-ci/scripts/python-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
         privileged: true
   - name: nodejs-buildpack-CF-edge
     serial: true
@@ -659,7 +659,7 @@ jobs:
             path: buildpacks-ci/scripts/nodejs-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
         privileged: true
   - name: nodejs-buildpack-CF-LTS
     serial: true
@@ -684,7 +684,7 @@ jobs:
             path: buildpacks-ci/scripts/nodejs-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
         privileged: true
   - name: ruby-buildpack-CF-edge
     serial: true
@@ -709,7 +709,7 @@ jobs:
             path: buildpacks-ci/scripts/ruby-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
         privileged: true
   - name: ruby-buildpack-CF-LTS
     serial: true
@@ -734,7 +734,7 @@ jobs:
             path: buildpacks-ci/scripts/ruby-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
         privileged: true
   - name: go-buildpack-CF-edge
     serial: true
@@ -759,7 +759,7 @@ jobs:
             path: buildpacks-ci/scripts/go-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
         privileged: true
   - name: go-buildpack-CF-LTS
     serial: true
@@ -784,7 +784,7 @@ jobs:
             path: buildpacks-ci/scripts/go-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
         privileged: true
   - name: machete-firewall-CF-edge
     serial: true
@@ -809,7 +809,7 @@ jobs:
             path: buildpacks-ci/scripts/machete-firewall.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
         privileged: true
   - name: machete-firewall-CF-LTS
     serial: true
@@ -834,7 +834,7 @@ jobs:
             path: buildpacks-ci/scripts/machete-firewall.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
         privileged: true
   - name: buildpack-packager
     serial: true
@@ -1235,7 +1235,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
         privileged: true
   - name: ruby-buildpack-CF-LTS-master
     serial: true
@@ -1262,7 +1262,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
         privileged: true
   - name: ruby-buildpack-release
     serial: true
@@ -1391,7 +1391,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
         privileged: true
   - name: nodejs-buildpack-CF-LTS-master
     serial: true
@@ -1418,7 +1418,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
         privileged: true
   - name: nodejs-buildpack-release
     serial: true
@@ -1547,7 +1547,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
         privileged: true
   - name: python-buildpack-CF-LTS-master
     serial: true
@@ -1574,7 +1574,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
         privileged: true
   - name: python-buildpack-release
     serial: true
@@ -1703,7 +1703,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
         privileged: true
   - name: go-buildpack-CF-LTS-master
     serial: true
@@ -1730,7 +1730,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
         privileged: true
   - name: go-buildpack-release
     serial: true
@@ -1859,7 +1859,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
   - name: php-buildpack-CF-LTS-master
@@ -1887,7 +1887,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
   - name: php-buildpack-release
@@ -2017,7 +2017,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
         privileged: true
   - name: staticfile-buildpack-CF-LTS-master
     serial: true
@@ -2044,7 +2044,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
         privileged: true
   - name: staticfile-buildpack-release
     serial: true
@@ -2173,7 +2173,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-8
-            STACKS: lucid64 cflinuxfs2
+            STACKS: cflinuxfs2
         privileged: true
   - name: binary-buildpack-CF-LTS-master
     serial: true
@@ -2200,7 +2200,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-7
-            STACKS: lucid64
+            STACKS: cflinuxfs2
         privileged: true
   - name: binary-buildpack-release
     serial: true
