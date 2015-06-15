@@ -241,6 +241,13 @@ resources:
       interval: 12h
       start: 7:00 -0400
       stop: 12:00 -0400
+  - name: cf-edge-environments
+    type: pool
+    source:
+      branch: master
+      pool: cf-edge-environments
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
 groups:
 - name: binary-buildpack
   jobs:
@@ -436,8 +443,10 @@ jobs:
         privileged: true
   - name: binary-buildpack-CF-edge
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -459,6 +468,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: binary-buildpack-CF-LTS
     serial: true
     serial_groups: [bp-ci-7]
@@ -486,8 +499,10 @@ jobs:
         privileged: true
   - name: staticfile-buildpack-CF-edge
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -509,6 +524,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: staticfile-buildpack-CF-LTS
     serial: true
     serial_groups: [bp-ci-7]
@@ -536,8 +555,10 @@ jobs:
         privileged: true
   - name: php-buildpack-CF-edge
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -560,6 +581,10 @@ jobs:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: php-buildpack-CF-LTS
     serial: true
     serial_groups: [bp-ci-7]
@@ -588,8 +613,10 @@ jobs:
         privileged: true
   - name: python-buildpack-CF-edge
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -611,6 +638,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: python-buildpack-CF-LTS
     serial: true
     serial_groups: [bp-ci-7]
@@ -638,8 +669,10 @@ jobs:
         privileged: true
   - name: nodejs-buildpack-CF-edge
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -661,6 +694,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: nodejs-buildpack-CF-LTS
     serial: true
     serial_groups: [bp-ci-7]
@@ -688,8 +725,10 @@ jobs:
         privileged: true
   - name: ruby-buildpack-CF-edge
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -711,6 +750,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: ruby-buildpack-CF-LTS
     serial: true
     serial_groups: [bp-ci-7]
@@ -738,8 +781,10 @@ jobs:
         privileged: true
   - name: go-buildpack-CF-edge
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -761,6 +806,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: go-buildpack-CF-LTS
     serial: true
     serial_groups: [bp-ci-7]
@@ -788,8 +837,10 @@ jobs:
         privileged: true
   - name: machete-firewall-CF-edge
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -811,6 +862,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: machete-firewall-CF-LTS
     serial: true
     serial_groups : [bp-ci-7]
@@ -965,8 +1020,10 @@ jobs:
         privileged: true
   - name: brats-go-CF-edge
     serial: true
-    serial_groups : [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -980,6 +1037,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: brats-python-CF-LTS
     serial: true
     serial_groups : [bp-ci-7]
@@ -999,8 +1060,10 @@ jobs:
         privileged: true
   - name: brats-python-CF-edge
     serial: true
-    serial_groups : [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -1014,6 +1077,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: brats-nodejs-CF-LTS
     serial: true
     serial_groups : [bp-ci-7]
@@ -1033,8 +1100,10 @@ jobs:
         privileged: true
   - name: brats-nodejs-CF-edge
     serial: true
-    serial_groups : [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -1048,6 +1117,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: brats-php-CF-LTS
     serial: true
     serial_groups : [bp-ci-7]
@@ -1067,8 +1140,10 @@ jobs:
         privileged: true
   - name: brats-php-CF-edge
     serial: true
-    serial_groups : [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -1082,6 +1157,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: brats-hhvm-CF-LTS
     serial: true
     serial_groups : [bp-ci-7]
@@ -1101,8 +1180,10 @@ jobs:
         privileged: true
   - name: brats-hhvm-CF-edge
     serial: true
-    serial_groups : [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -1116,6 +1197,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: brats-ruby-CF-LTS
     serial: true
     serial_groups : [bp-ci-7]
@@ -1135,8 +1220,10 @@ jobs:
         privileged: true
   - name: brats-ruby-CF-edge
     serial: true
-    serial_groups : [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -1150,6 +1237,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: brats-jruby-CF-LTS
     serial: true
     serial_groups : [bp-ci-7]
@@ -1169,8 +1260,10 @@ jobs:
         privileged: true
   - name: brats-jruby-CF-edge
     serial: true
-    serial_groups : [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -1184,6 +1277,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: detect new Ruby buildpack and upload artifacts
     serial: true
     plan:
@@ -1205,8 +1302,10 @@ jobs:
           to: /experimental-buildpacks/ruby/
   - name: ruby-buildpack-CF-edge-master
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -1230,6 +1329,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: ruby-buildpack-CF-LTS-master
     serial: true
     serial_groups: [bp-ci-7]
@@ -1361,8 +1464,10 @@ jobs:
           to: /experimental-buildpacks/nodejs/
   - name: nodejs-buildpack-CF-edge-master
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -1386,6 +1491,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: nodejs-buildpack-CF-LTS-master
     serial: true
     serial_groups: [bp-ci-7]
@@ -1517,8 +1626,10 @@ jobs:
           to: /experimental-buildpacks/python/
   - name: python-buildpack-CF-edge-master
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -1542,6 +1653,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: python-buildpack-CF-LTS-master
     serial: true
     serial_groups: [bp-ci-7]
@@ -1673,8 +1788,10 @@ jobs:
           to: /experimental-buildpacks/go/
   - name: go-buildpack-CF-edge-master
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -1698,6 +1815,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: go-buildpack-CF-LTS-master
     serial: true
     serial_groups: [bp-ci-7]
@@ -1829,8 +1950,10 @@ jobs:
           to: /experimental-buildpacks/php/
   - name: php-buildpack-CF-edge-master
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -1855,6 +1978,10 @@ jobs:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: php-buildpack-CF-LTS-master
     serial: true
     serial_groups: [bp-ci-7]
@@ -1987,8 +2114,10 @@ jobs:
           to: /experimental-buildpacks/staticfile/
   - name: staticfile-buildpack-CF-edge-master
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -2012,6 +2141,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: staticfile-buildpack-CF-LTS-master
     serial: true
     serial_groups: [bp-ci-7]
@@ -2143,8 +2276,10 @@ jobs:
           to: /experimental-buildpacks/binary/
   - name: binary-buildpack-CF-edge-master
     serial: true
-    serial_groups: [bp-ci-8]
     plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -2168,6 +2303,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
   - name: binary-buildpack-CF-LTS-master
     serial: true
     serial_groups: [bp-ci-7]
