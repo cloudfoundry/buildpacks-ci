@@ -960,7 +960,6 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-7
             LANGUAGE: go
-            STACK: lucid64
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
@@ -995,7 +994,6 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-7
             LANGUAGE: python
-            STACK: lucid64
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
@@ -1030,7 +1028,6 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-7
             LANGUAGE: nodejs
-            STACK: lucid64
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
@@ -1065,7 +1062,6 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-7
             LANGUAGE: php
-            STACK: lucid64
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
@@ -1100,7 +1096,6 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-7
             LANGUAGE: hhvm
-            STACK: lucid64
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
@@ -1135,7 +1130,6 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-7
             LANGUAGE: ruby
-            STACK: lucid64
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
@@ -1170,7 +1164,6 @@ jobs:
           params:
             DEPLOYMENT_NAME: bp-ci-7
             LANGUAGE: jruby
-            STACK: lucid64
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
