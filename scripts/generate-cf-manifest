@@ -36,4 +36,5 @@ cp ../bosh-lite/manifests/cf-manifest.yml deployments/$DEPLOYMENT_NAME/manifest.
 git config --global user.email "ci@localhost"
 git config --global user.name "CI Bot"
 
-git commit -am "Update manifest for $DEPLOYMENT_NAME"
+git add deployments/$DEPLOYMENT_NAME/manifest.yml
+git commit -m "Update manifest for $DEPLOYMENT_NAME"
