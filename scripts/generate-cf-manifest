@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
-set -ex
+set -e
 
 export CF_RELEASE_DIR=`pwd`/cf-release
 
