@@ -1,0 +1,41 @@
+resources:
+  - name: binary-builder
+    type: git
+    source:
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf/binary-builder.git
+  - name: buildpacks-ci
+    type: git
+    source:
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci
+  - name: node-interpreter
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: node-(.*)-linux-x64.tar.gz
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+
+jobs:
+  - name: build-node
+    plan:
+      - aggregate:
+        - get: binary-builder
+        - get: buildpacks-ci
+      - task: build-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: binary-builder
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/build-binary.sh
+          params:
+            BINARY_NAME: node
+            BINARY_VERSION: 0.12.2
+      - put: node-interpreter
+        params:
+          from: binary-builder/node-(.*)-linux-x64.tar.gz
+          to: /concourse-binaries/nodejs/
