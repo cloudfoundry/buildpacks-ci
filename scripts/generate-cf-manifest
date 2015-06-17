@@ -16,6 +16,8 @@ properties:
   - name: api_z1
     persistent_disk: 30720" > manifests/cf-stub-spiff.yml
 
+gem install bosh_cli --no-ri --no-rdoc
+bosh target api.$DEPLOYMENT_NAME.cf-app.com
 ./bin/make_manifest_spiff
 
 cd ../deployments-buildpacks
