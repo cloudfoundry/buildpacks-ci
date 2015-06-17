@@ -16,6 +16,13 @@ resources:
       regexp: node-(.*)-linux-x64.tar.gz
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: nginx-binary
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: nginx-(.*)-linux-x64.tgz
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
 jobs:
   - name: build-node
@@ -39,3 +46,24 @@ jobs:
         params:
           from: binary-builder/node-(.*)-linux-x64.tar.gz
           to: /concourse-binaries/nodejs/
+  - name: build-nginx
+    plan:
+      - aggregate:
+        - get: binary-builder
+        - get: buildpacks-ci
+      - task: build-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: binary-builder
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/build-binary.sh
+          params:
+            BINARY_NAME: nginx
+            BINARY_VERSION: 1.7.10
+      - put: node-interpreter
+        params:
+          from: binary-builder/nginx-(.*)-linux-x64.tgz
+          to: /concourse-binaries/nginx/
