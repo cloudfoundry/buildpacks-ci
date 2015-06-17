@@ -4,6 +4,11 @@ set -e
 
 export CF_RELEASE_DIR=`pwd`/cf-release
 
+pushd deployments-buildpacks
+  bundle -j4
+  source ./bin/switch $DEPLOYMENT_NAME
+popd
+
 cd bosh-lite
 
 echo "
@@ -16,7 +21,6 @@ properties:
   - name: api_z1
     persistent_disk: 30720" > manifests/cf-stub-spiff.yml
 
-bundle -j4
 ./bin/make_manifest_spiff
 
 cd ../deployments-buildpacks
