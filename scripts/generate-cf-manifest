@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -e
+
+export CF_RELEASE_DIR=`pwd`/cf-release
+
+cd bosh-lite
+
+echo "
+---
+properties:
+  loggregator_endpoint:
+    shared_secret: PLACEHOLDER-LOGGREGATOR-SECRET
+  domain: $DEPLOYMENT_NAME.cf-app.com
+  jobs:
+  - name: api_z1
+    persistent_disk: 30720" > manifests/cf-stub-spiff.yml
+
+./bin/make_manifest_spiff
+
+cd ../deployments-buildpacks
+cp ../bosh-lite/manifests/cf-manifest.yml deployments/$DEPLOYMENT_NAME/manifest.yml
+
+git config --global user.email "ci@localhost"
+git config --global user.name "CI Bot"
+
+git commit -am "Update manifest for $DEPLOYMENT_NAME"
