@@ -13,13 +13,20 @@ cd bosh-lite
 
 echo "
 ---
+name: cf-warden
+director_uuid: PLACEHOLDER-DIRECTOR-UUID
+releases:
+  - name: cf
+    version: latest
 properties:
+  domain: $DEPLOYMENT_NAME.cf-app.com
   loggregator_endpoint:
     shared_secret: PLACEHOLDER-LOGGREGATOR-SECRET
-  domain: $DEPLOYMENT_NAME.cf-app.com
-  jobs:
-  - name: api_z1
-    persistent_disk: 30720" > manifests/cf-stub-spiff.yml
+jobs:
+- name: api_z1
+  # Make the disk size bigger so we can handle
+  # both offline and online buildpacks now.
+  persistent_disk: 30720" > manifests/cf-stub-spiff.yml
 
 ./bin/make_manifest_spiff
 
