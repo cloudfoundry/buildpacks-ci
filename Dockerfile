@@ -30,6 +30,10 @@ RUN mv /usr/bin/composer.phar /usr/bin/composer
 # download the CF-CLI
 RUN wget -O- 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.10.0&source=github-rel'| tar xz -C /usr/bin
 
+#download spiff for spiffy things
+RUN wget -O- 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.7/spiff_linux_amd64.zip' | funzip > /usr/bin/spiff
+RUN chmod 755 /usr/bin/spiff
+
 # when docker container starts, ensure login scripts run
 COPY build/ssh-agent.sh /etc/profile.d/
 COPY build/ruby.sh /etc/profile.d/
