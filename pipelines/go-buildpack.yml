@@ -1,0 +1,298 @@
+---
+resources:
+  - name: ci-tools
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/ci-tools
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/buildpacks-ci
+      private_key: {{buildpacks-private-key}}
+  - name: cf-release
+    type: git
+    source:
+      uri: https://github.com/cf-buildpacks/cf-release
+  - name: cf-edge-environments
+    type: pool
+    source:
+      branch: master
+      pool: cf-edge-environments
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
+  - name: cf-lts-environments
+    type: pool
+    source:
+      branch: master
+      pool: cf-lts-environments
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
+  - name: deployments-buildpacks
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/deployments-buildpacks
+      private_key: {{buildpacks-private-key}}
+  - name: go-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/go-buildpack
+      branch: develop
+  - name: go-buildpack-master
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/go-buildpack.git
+      private_key: {{buildpacks-private-key}}
+      branch: master
+  - name: go-pivotal-buildpack
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: go_buildpack-v(.*).zip
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: go-pivotal-buildpack-cached
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: go_buildpack-cached-v(.*).zip
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+
+jobs:
+  - name: detect new Go buildpack and upload artifacts
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: go-buildpack-master
+          trigger: true
+      - task: detect and upload
+        file: buildpacks-ci/tasks/detect-and-upload.yml
+        privileged: true
+      - put: go-pivotal-buildpack
+        params:
+          from: buildpack/go_buildpack-v(.*).zip
+          to: /experimental-buildpacks/go/
+      - put: go-pivotal-buildpack-cached
+        params:
+          from: buildpack/go_buildpack-cached-v(.*).zip
+          to: /experimental-buildpacks/go/
+  - name: go-buildpack-CF-edge-master
+    serial: true
+    plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          passed: [ "detect new Go buildpack and upload artifacts" ]
+          resource: go-buildpack-master
+          trigger: true
+        - get: pivotal-buildpacks
+          resource: go-pivotal-buildpack
+          passed: [ "detect new Go buildpack and upload artifacts" ]
+          trigger: true
+        - get: pivotal-buildpacks-cached
+          resource: go-pivotal-buildpack-cached
+          passed: [ "detect new Go buildpack and upload artifacts" ]
+          trigger: true
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack-for-release.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            STACKS: cflinuxfs2
+        privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
+  - name: go-buildpack-CF-LTS-master
+    serial: true
+    plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          passed: [ "detect new Go buildpack and upload artifacts" ]
+          resource: go-buildpack-master
+          trigger: true
+        - get: pivotal-buildpacks
+          resource: go-pivotal-buildpack
+          passed: [ "detect new Go buildpack and upload artifacts" ]
+          trigger: true
+        - get: pivotal-buildpacks-cached
+          resource: go-pivotal-buildpack-cached
+          passed: [ "detect new Go buildpack and upload artifacts" ]
+          trigger: true
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack-for-release.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            STACKS: cflinuxfs2
+        privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
+  - name: go-buildpack-release
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: pivotal-buildpacks-cached
+          resource: go-pivotal-buildpack-cached
+          passed: [ "go-buildpack-CF-LTS-master", "go-buildpack-CF-edge-master" ]
+          trigger: true
+        - get: buildpack
+          passed: [ "go-buildpack-CF-LTS-master", "go-buildpack-CF-edge-master" ]
+          resource: go-buildpack-master
+          trigger: true
+      - task: check tag not already added
+        file: buildpacks-ci/tasks/check-tag-not-already-added.yml
+      - put: go-buildpack-master
+        params:
+          repository: buildpack
+          tag: buildpack/VERSION
+          tag_prefix: v
+  - name: go buildpack to github
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: pivotal-buildpacks-cached
+          resource: go-pivotal-buildpack-cached
+          passed: [ go-buildpack-release ]
+        - get: buildpack
+          resource: go-buildpack-master
+          passed: [ go-buildpack-release ]
+      - task: upload to github
+        file: buildpacks-ci/tasks/upload-to-github.yml
+        config:
+          params:
+            GITHUB_ORG: cloudfoundry
+            GITHUB_TOKEN: {{buildpacks-github-token}}
+  - name: go buildpack to cf-release
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: pivotal-buildpacks-cached
+          resource: go-pivotal-buildpack-cached
+          passed: [ go-buildpack-release ]
+        - get: buildpack
+          resource: go-buildpack-master
+          passed: [ go-buildpack-release ]
+        - get: cf-release
+      - task: upload to cf-release
+        file: buildpacks-ci/tasks/upload-to-cf-release.yml
+        config:
+          params:
+            ACCESS_KEY_ID: {{blobstore-access-key}}
+            SECRET_ACCESS_KEY: {{blobstore-secret-key}}
+            GITHUB_USER: {{github-username}}
+            GITHUB_PASSWORD: {{github-password}}
+        privileged: true
+  - name: go buildpack to pivnet
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: pivotal-buildpacks-cached
+          resource: go-pivotal-buildpack-cached
+          passed: [ go-buildpack-release ]
+        - get: buildpack
+          resource: go-buildpack-master
+          passed: [ go-buildpack-release ]
+      - task: upload to pivnet
+        file: buildpacks-ci/tasks/upload-to-pivnet.yml
+        config:
+          params:
+            AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
+            PIVNET_S3_BUCKET: pivotalnetwork
+            PIVNET_ADDRESS: https://network.pivotal.io/
+            PIVNET_APIKEY: {{pivnet-apikey}}
+            PIVNET_PRODUCT_NAME: Go Buildpack (offline)
+        privileged: true
+  - name: go-buildpack-CF-edge
+    serial: true
+    plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          resource: go-buildpack
+          trigger: true
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            STACKS: cflinuxfs2
+        privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
+  - name: go-buildpack-CF-LTS
+    serial: true
+    plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          resource: go-buildpack
+          trigger: true
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            STACKS: cflinuxfs2
+        privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
+  - name: go-fat-buildpack
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          resource: go-buildpack-master
+          passed: [ "go-buildpack-release" ]
+      - task: create fat buildpack and upload to Pivnet
+        file: buildpacks-ci/tasks/pivnet-fat-buildpack.yml
+        config:
+          params:
+            PIVNET_PRODUCT_NAME: Go Buildpack (including unsupported) (offline)
+            AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
+            PIVNET_S3_BUCKET: pivotalnetwork
+            PIVNET_ADDRESS: https://network.pivotal.io/
+            PIVNET_APIKEY: {{pivnet-apikey}}
+        privileged: true
