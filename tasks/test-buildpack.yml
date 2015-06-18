@@ -1,0 +1,10 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci#buildpack
+inputs:
+  - name: buildpacks-ci
+  - name: ci-tools
+  - name: deployments-buildpacks
+  - name: buildpack
+run:
+  path: buildpacks-ci/scripts/test_buildpack

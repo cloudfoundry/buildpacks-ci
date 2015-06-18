@@ -2,11 +2,11 @@
 set -e
 
 pushd deployments-buildpacks
-  bundle
+  bundle -j4
   source ./bin/switch $DEPLOYMENT_NAME
 popd
 
-cd nodejs-buildpack
+cd buildpack
 
 for stack in $STACKS; do
   ../ci-tools/buildpack-build --uncached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com

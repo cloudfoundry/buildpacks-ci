@@ -451,19 +451,12 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: binary-buildpack
+        - get: buildpack
+          resource: binary-buildpack
           trigger: true
       - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: binary-buildpack
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/binary-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
@@ -480,19 +473,12 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: binary-buildpack
+        - get: buildpack
+          resource: binary-buildpack
           trigger: true
       - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: binary-buildpack
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/binary-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
@@ -507,19 +493,12 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: staticfile-buildpack
+        - get: buildpack
+          resource: staticfile-buildpack
           trigger: true
       - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: staticfile-buildpack
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/staticfile-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
@@ -536,19 +515,12 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: staticfile-buildpack
+        - get: buildpack
+          resource: staticfile-buildpack
           trigger: true
       - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: staticfile-buildpack
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/staticfile-buildpack.sh
           params:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
@@ -621,19 +593,11 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: python-buildpack
+        - get: buildpack
+          resource: python-buildpack
           trigger: true
       - task: rspec
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: python-buildpack
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/python-buildpack.sh
+        file: buildpacks-ci/tasks/test-buildpack.yml
           params:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
@@ -650,19 +614,11 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: python-buildpack
+        - get: buildpack
+          resource: python-buildpack
           trigger: true
       - task: rspec
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: python-buildpack
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/python-buildpack.sh
+        file: buildpacks-ci/tasks/test-buildpack.yml
           params:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
@@ -677,19 +633,11 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: nodejs-buildpack
+        - get: buildpack
+          resource: nodejs-buildpack
           trigger: true
       - task: rspec
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: nodejs-buildpack
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/nodejs-buildpack.sh
+        file: buildpacks-ci/tasks/test-buildpack.yml
           params:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
@@ -706,19 +654,11 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: nodejs-buildpack
+        - get: buildpack
+          resource: nodejs-buildpack
           trigger: true
       - task: rspec
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: nodejs-buildpack
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/nodejs-buildpack.sh
+        file: buildpacks-ci/tasks/test-buildpack.yml
           params:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
@@ -733,19 +673,11 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: ruby-buildpack
+        - get: buildpack
+          resource: ruby-buildpack
           trigger: true
       - task: rspec
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: ruby-buildpack
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/ruby-buildpack.sh
+        file: buildpacks-ci/tasks/test-buildpack.yml
           params:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
@@ -762,19 +694,11 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: ruby-buildpack
+        - get: buildpack
+          resource: ruby-buildpack
           trigger: true
       - task: rspec
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: ruby-buildpack
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/ruby-buildpack.sh
+        file: buildpacks-ci/tasks/test-buildpack.yml
           params:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
@@ -789,19 +713,11 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: go-buildpack
+        - get: buildpack
+          resource: go-buildpack
           trigger: true
       - task: rspec
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: go-buildpack
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/go-buildpack.sh
+        file: buildpacks-ci/tasks/test-buildpack.yml
           params:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
@@ -818,19 +734,11 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: go-buildpack
+        - get: buildpack
+          resource: go-buildpack
           trigger: true
       - task: rspec
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: go-buildpack
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/go-buildpack.sh
+        file: buildpacks-ci/tasks/test-buildpack.yml
           params:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
@@ -845,19 +753,11 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: machete-firewall-test
+        - get: buildpack
+          resource: machete-firewall-test
           trigger: true
       - task: rspec
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: deployments-buildpacks
-            - name: machete-firewall-test
-          run:
-            path: buildpacks-ci/scripts/machete-firewall.sh
+        file: buildpacks-ci/tasks/test-buildpack.yml
           params:
             DEPLOYMENT_NAME: bp-ci-8
             STACKS: cflinuxfs2
@@ -874,19 +774,11 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
-        - get: machete-firewall-test
+        - get: buildpack
+          resource: machete-firewall-test
           trigger: true
       - task: rspec
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-            - name: deployments-buildpacks
-            - name: machete-firewall-test
-          run:
-            path: buildpacks-ci/scripts/machete-firewall.sh
+        file: buildpacks-ci/tasks/test-buildpack.yml
           params:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
