@@ -37,4 +37,4 @@ git config --global user.email "ci@localhost"
 git config --global user.name "CI Bot"
 
 git add deployments/$DEPLOYMENT_NAME/manifest.yml
-git commit -m "Update manifest for $DEPLOYMENT_NAME"
+git diff-index --quiet HEAD deployments/$DEPLOYMENT_NAME/manifest.yml || git commit -qm "Update manifest for $DEPLOYMENT_NAME"
