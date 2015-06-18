@@ -34,10 +34,6 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/cf-release
-  - name: lite-stemcell
-    type: bosh-io-stemcell
-    source:
-      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
   - name: cf-release
     type: bosh-io-release
     source:
@@ -51,7 +47,6 @@ jobs:
           acquire: true
       - aggregate:
         - get: deployments-buildpacks
-        - get: lite-stemcell
         - get: cf-release
         - get: bosh-lite
         - get: buildpacks-ci
@@ -78,7 +73,7 @@ jobs:
       - put: bp-ci-8-cf-deployment
         params:
           manifest: deployments-buildpacks/deployments/bp-ci-8/manifest.yml
-          stemcells: [lite-stemcell/*.tgz]
+          stemcells: []
           releases: [cf-release/*.tgz]
       - put: cf-edge-environments
         conditions: [success, failure]
