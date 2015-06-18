@@ -23,6 +23,41 @@ resources:
       regexp: node-(.*)-linux-x64.tar.gz
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: php-interpreter
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: php-(.*)-linux-x64.tgz
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: jruby-interpreter
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: jruby-(.*)-linux-x64.tgz
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: httpd-binary
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: httpd-(.*)-linux-x64.tgz
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: python-interpreter
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: python-(.*)-linux-x64.tgz
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: ruby-interpreter
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: ruby-(.*)-linux-x64.tgz
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
   - name: nginx-binary
     type: s3
     source:
@@ -54,6 +89,119 @@ jobs:
       - put: binary-builder-compiler-cache
         params:
           from: rspec/ccache.tgz
+  - name: build-php
+    plan:
+      - aggregate:
+        - get: binary-builder
+          passed: [binary-builder]
+        - get: buildpacks-ci
+      - task: build-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: binary-builder
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/build-binary.sh
+          params:
+            BINARY_NAME: php
+            BINARY_VERSION: 5.6.9
+        privileged: true
+      - put: php-interpreter
+        params:
+          from: binary-builder/php-(.*)-linux-x64.tgz
+          to: /concourse-binaries/php/
+  - name: build-jruby
+    plan:
+      - aggregate:
+        - get: binary-builder
+          passed: [binary-builder]
+        - get: buildpacks-ci
+      - task: build-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: binary-builder
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/build-binary.sh
+          params:
+            BINARY_NAME: jruby
+            BINARY_VERSION: 9.0.0.0.pre1+ruby-2.2.0
+        privileged: true
+      - put: jruby-interpreter
+        params:
+          from: binary-builder/jruby-(.*)-linux-x64.tgz
+          to: /concourse-binaries/jruby/
+  - name: build-httpd
+    plan:
+      - aggregate:
+        - get: binary-builder
+          passed: [binary-builder]
+        - get: buildpacks-ci
+      - task: build-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: binary-builder
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/build-binary.sh
+          params:
+            BINARY_NAME: httpd
+            BINARY_VERSION: 2.4.12
+        privileged: true
+      - put: httpd-binary
+        params:
+          from: binary-builder/httpd-(.*)-linux-x64.tgz
+          to: /concourse-binaries/httpd/
+  - name: build-python
+    plan:
+      - aggregate:
+        - get: binary-builder
+          passed: [binary-builder]
+        - get: buildpacks-ci
+      - task: build-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: binary-builder
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/build-binary.sh
+          params:
+            BINARY_NAME: python
+            BINARY_VERSION: 3.4.3
+      - put: python-interpreter
+        params:
+          from: binary-builder/python-(.*)-linux-x64.tgz
+          to: /concourse-binaries/python/
+  - name: build-ruby
+    plan:
+      - aggregate:
+        - get: binary-builder
+          passed: [binary-builder]
+        - get: buildpacks-ci
+      - task: build-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: binary-builder
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/build-binary.sh
+          params:
+            BINARY_NAME: ruby
+            BINARY_VERSION: 2.2.2
+      - put: ruby-interpreter
+        params:
+          from: binary-builder/ruby-(.*)-linux-x64.tgz
+          to: /concourse-binaries/ruby/
   - name: build-node
     plan:
       - aggregate:
