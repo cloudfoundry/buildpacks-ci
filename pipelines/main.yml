@@ -70,17 +70,6 @@ resources:
       pool: cf-lts-environments
       private_key: {{buildpacks-private-key}}
       uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
-groups:
-- name: tooling
-  jobs:
-  - buildpack-packager
-  - machete
-  - compile-extensions
-  - old-releases
-  - heroku-nanny
-  - machete-firewall-CF-edge
-  - machete-firewall-CF-LTS
-  - binary-builder
 jobs:
   - name: machete-firewall-CF-edge
     serial: true
