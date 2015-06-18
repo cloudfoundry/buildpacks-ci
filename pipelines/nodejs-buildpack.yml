@@ -1,0 +1,298 @@
+---
+resources:
+  - name: ci-tools
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/ci-tools
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/buildpacks-ci
+      private_key: {{buildpacks-private-key}}
+  - name: cf-release
+    type: git
+    source:
+      uri: https://github.com/cf-buildpacks/cf-release
+  - name: cf-edge-environments
+    type: pool
+    source:
+      branch: master
+      pool: cf-edge-environments
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
+  - name: cf-lts-environments
+    type: pool
+    source:
+      branch: master
+      pool: cf-lts-environments
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
+  - name: deployments-buildpacks
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/deployments-buildpacks
+      private_key: {{buildpacks-private-key}}
+  - name: nodejs-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/nodejs-buildpack
+      branch: develop
+  - name: nodejs-buildpack-master
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/nodejs-buildpack.git
+      private_key: {{buildpacks-private-key}}
+      branch: master
+  - name: nodejs-pivotal-buildpack
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: nodejs_buildpack-v(.*).zip
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: nodejs-pivotal-buildpack-cached
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: nodejs_buildpack-cached-v(.*).zip
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+
+jobs:
+  - name: detect new NodeJS buildpack and upload artifacts
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: nodejs-buildpack-master
+          trigger: true
+      - task: detect and upload
+        file: buildpacks-ci/tasks/detect-and-upload.yml
+        privileged: true
+      - put: nodejs-pivotal-buildpack
+        params:
+          from: buildpack/nodejs_buildpack-v(.*).zip
+          to: /experimental-buildpacks/nodejs/
+      - put: nodejs-pivotal-buildpack-cached
+        params:
+          from: buildpack/nodejs_buildpack-cached-v(.*).zip
+          to: /experimental-buildpacks/nodejs/
+  - name: nodejs-buildpack-CF-edge-master
+    serial: true
+    plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          resource: nodejs-buildpack-master
+          trigger: true
+        - get: pivotal-buildpacks
+          resource: nodejs-pivotal-buildpack
+          passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          trigger: true
+        - get: pivotal-buildpacks-cached
+          resource: nodejs-pivotal-buildpack-cached
+          passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          trigger: true
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack-for-release.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            STACKS: cflinuxfs2
+        privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
+  - name: nodejs-buildpack-CF-LTS-master
+    serial: true
+    plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          resource: nodejs-buildpack-master
+          trigger: true
+        - get: pivotal-buildpacks
+          resource: nodejs-pivotal-buildpack
+          passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          trigger: true
+        - get: pivotal-buildpacks-cached
+          resource: nodejs-pivotal-buildpack-cached
+          passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          trigger: true
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack-for-release.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            STACKS: cflinuxfs2
+        privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
+  - name: nodejs-buildpack-release
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: pivotal-buildpacks-cached
+          resource: nodejs-pivotal-buildpack-cached
+          passed: [ "nodejs-buildpack-CF-LTS-master", "nodejs-buildpack-CF-edge-master" ]
+          trigger: true
+        - get: buildpack
+          passed: [ "nodejs-buildpack-CF-LTS-master", "nodejs-buildpack-CF-edge-master" ]
+          resource: nodejs-buildpack-master
+          trigger: true
+      - task: check tag not already added
+        file: buildpacks-ci/tasks/check-tag-not-already-added.yml
+      - put: nodejs-buildpack-master
+        params:
+          repository: buildpack
+          tag: buildpack/VERSION
+          tag_prefix: v
+  - name: nodejs buildpack to github
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: pivotal-buildpacks-cached
+          resource: nodejs-pivotal-buildpack-cached
+          passed: [ nodejs-buildpack-release ]
+        - get: buildpack
+          resource: nodejs-buildpack-master
+          passed: [ nodejs-buildpack-release ]
+      - task: upload to github
+        file: buildpacks-ci/tasks/upload-to-github.yml
+        config:
+          params:
+            GITHUB_ORG: cloudfoundry
+            GITHUB_TOKEN: {{buildpacks-github-token}}
+  - name: nodejs buildpack to cf-release
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: pivotal-buildpacks-cached
+          resource: nodejs-pivotal-buildpack-cached
+          passed: [ nodejs-buildpack-release ]
+        - get: buildpack
+          resource: nodejs-buildpack-master
+          passed: [ nodejs-buildpack-release ]
+        - get: cf-release
+      - task: upload to cf-release
+        file: buildpacks-ci/tasks/upload-to-cf-release.yml
+        config:
+          params:
+            ACCESS_KEY_ID: {{blobstore-access-key}}
+            SECRET_ACCESS_KEY: {{blobstore-secret-key}}
+            GITHUB_USER: {{github-username}}
+            GITHUB_PASSWORD: {{github-password}}
+        privileged: true
+  - name: nodejs buildpack to pivnet
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: pivotal-buildpacks-cached
+          resource: nodejs-pivotal-buildpack-cached
+          passed: [ nodejs-buildpack-release ]
+        - get: buildpack
+          resource: nodejs-buildpack-master
+          passed: [ nodejs-buildpack-release ]
+      - task: upload to pivnet
+        file: buildpacks-ci/tasks/upload-to-pivnet.yml
+        config:
+          params:
+            AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
+            PIVNET_S3_BUCKET: pivotalnetwork
+            PIVNET_ADDRESS: https://network.pivotal.io/
+            PIVNET_APIKEY: {{pivnet-apikey}}
+            PIVNET_PRODUCT_NAME: NodeJS Buildpack (offline)
+        privileged: true
+  - name: nodejs-buildpack-CF-edge
+    serial: true
+    plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          resource: nodejs-buildpack
+          trigger: true
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-8
+            STACKS: cflinuxfs2
+        privileged: true
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
+  - name: nodejs-buildpack-CF-LTS
+    serial: true
+    plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          resource: nodejs-buildpack
+          trigger: true
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack.yml
+        config:
+          params:
+            DEPLOYMENT_NAME: bp-ci-7
+            STACKS: cflinuxfs2
+        privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
+  - name: nodejs-fat-buildpack
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: ci-tools
+        - get: deployments-buildpacks
+        - get: buildpack
+          resource: nodejs-buildpack-master
+          passed: [ "nodejs-buildpack-release" ]
+      - task: create fat buildpack and upload to Pivnet
+        file: buildpacks-ci/tasks/pivnet-fat-buildpack.yml
+        config:
+          params:
+            PIVNET_PRODUCT_NAME: NodeJS Buildpack (including unsupported) (offline)
+            AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
+            PIVNET_S3_BUCKET: pivotalnetwork
+            PIVNET_ADDRESS: https://network.pivotal.io/
+            PIVNET_APIKEY: {{pivnet-apikey}}
+        privileged: true
