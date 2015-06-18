@@ -63,7 +63,7 @@ jobs:
           params:
             BINARY_NAME: nginx
             BINARY_VERSION: 1.7.10
-      - put: node-interpreter
+      - put: nginx-binary
         params:
           from: binary-builder/nginx-(.*)-linux-x64.tgz
           to: /concourse-binaries/nginx/
