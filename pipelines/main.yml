@@ -248,6 +248,13 @@ resources:
       pool: cf-edge-environments
       private_key: {{buildpacks-private-key}}
       uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
+  - name: cf-lts-environments
+    type: pool
+    source:
+      branch: master
+      pool: cf-lts-environments
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
 groups:
 - name: binary-buildpack
   jobs:
@@ -467,8 +474,10 @@ jobs:
           release: cf-edge-environments
   - name: binary-buildpack-CF-LTS
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -483,6 +492,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: staticfile-buildpack-CF-edge
     serial: true
     plan:
@@ -509,8 +522,10 @@ jobs:
           release: cf-edge-environments
   - name: staticfile-buildpack-CF-LTS
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -525,6 +540,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: php-buildpack-CF-edge
     serial: true
     plan:
@@ -559,8 +578,10 @@ jobs:
           release: cf-edge-environments
   - name: php-buildpack-CF-LTS
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -583,6 +604,10 @@ jobs:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: python-buildpack-CF-edge
     serial: true
     plan:
@@ -609,8 +634,10 @@ jobs:
           release: cf-edge-environments
   - name: python-buildpack-CF-LTS
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -625,6 +652,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: nodejs-buildpack-CF-edge
     serial: true
     plan:
@@ -651,8 +682,10 @@ jobs:
           release: cf-edge-environments
   - name: nodejs-buildpack-CF-LTS
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -667,6 +700,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: ruby-buildpack-CF-edge
     serial: true
     plan:
@@ -693,8 +730,10 @@ jobs:
           release: cf-edge-environments
   - name: ruby-buildpack-CF-LTS
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -709,6 +748,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: go-buildpack-CF-edge
     serial: true
     plan:
@@ -735,8 +778,10 @@ jobs:
           release: cf-edge-environments
   - name: go-buildpack-CF-LTS
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -751,6 +796,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: machete-firewall-CF-edge
     serial: true
     plan:
@@ -777,8 +826,10 @@ jobs:
           release: cf-edge-environments
   - name: machete-firewall-CF-LTS
     serial: true
-    serial_groups : [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -793,6 +844,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: buildpack-packager
     serial: true
     plan:
@@ -905,8 +960,10 @@ jobs:
         privileged: true
   - name: brats-go-CF-LTS
     serial: true
-    serial_groups : [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -920,6 +977,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: brats-go-CF-edge
     serial: true
     plan:
@@ -945,8 +1006,10 @@ jobs:
           release: cf-edge-environments
   - name: brats-python-CF-LTS
     serial: true
-    serial_groups : [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -960,6 +1023,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: brats-python-CF-edge
     serial: true
     plan:
@@ -985,8 +1052,10 @@ jobs:
           release: cf-edge-environments
   - name: brats-nodejs-CF-LTS
     serial: true
-    serial_groups : [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -1000,6 +1069,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: brats-nodejs-CF-edge
     serial: true
     plan:
@@ -1025,8 +1098,10 @@ jobs:
           release: cf-edge-environments
   - name: brats-php-CF-LTS
     serial: true
-    serial_groups : [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -1040,6 +1115,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: brats-php-CF-edge
     serial: true
     plan:
@@ -1065,8 +1144,10 @@ jobs:
           release: cf-edge-environments
   - name: brats-hhvm-CF-LTS
     serial: true
-    serial_groups : [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -1080,6 +1161,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: brats-hhvm-CF-edge
     serial: true
     plan:
@@ -1105,8 +1190,10 @@ jobs:
           release: cf-edge-environments
   - name: brats-ruby-CF-LTS
     serial: true
-    serial_groups : [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -1120,6 +1207,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: brats-ruby-CF-edge
     serial: true
     plan:
@@ -1145,8 +1236,10 @@ jobs:
           release: cf-edge-environments
   - name: brats-jruby-CF-LTS
     serial: true
-    serial_groups : [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -1160,6 +1253,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: brats-jruby-CF-edge
     serial: true
     plan:
@@ -1237,8 +1334,10 @@ jobs:
           release: cf-edge-environments
   - name: ruby-buildpack-CF-LTS-master
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -1262,6 +1361,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: ruby-buildpack-release
     serial: true
     plan:
@@ -1399,8 +1502,10 @@ jobs:
           release: cf-edge-environments
   - name: nodejs-buildpack-CF-LTS-master
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -1424,6 +1529,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: nodejs-buildpack-release
     serial: true
     plan:
@@ -1561,8 +1670,10 @@ jobs:
           release: cf-edge-environments
   - name: python-buildpack-CF-LTS-master
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -1586,6 +1697,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: python-buildpack-release
     serial: true
     plan:
@@ -1723,8 +1838,10 @@ jobs:
           release: cf-edge-environments
   - name: go-buildpack-CF-LTS-master
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -1748,6 +1865,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: go-buildpack-release
     serial: true
     plan:
@@ -1886,8 +2007,10 @@ jobs:
           release: cf-edge-environments
   - name: php-buildpack-CF-LTS-master
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -1912,6 +2035,10 @@ jobs:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: php-buildpack-release
     serial: true
     plan:
@@ -2049,8 +2176,10 @@ jobs:
           release: cf-edge-environments
   - name: staticfile-buildpack-CF-LTS-master
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -2074,6 +2203,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: staticfile-buildpack-release
     serial: true
     plan:
@@ -2211,8 +2344,10 @@ jobs:
           release: cf-edge-environments
   - name: binary-buildpack-CF-LTS-master
     serial: true
-    serial_groups: [bp-ci-7]
     plan:
+      - put: cf-lts-environments
+        params:
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
@@ -2236,6 +2371,10 @@ jobs:
             DEPLOYMENT_NAME: bp-ci-7
             STACKS: cflinuxfs2
         privileged: true
+      - put: cf-lts-environments
+        conditions: [success, failure]
+        params:
+          release: cf-lts-environments
   - name: binary-buildpack-release
     serial: true
     plan:
