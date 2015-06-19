@@ -1,11 +1,4 @@
 resources:
-  - name: cf-edge-environments
-    type: pool
-    source:
-      branch: master
-      pool: cf-edge-environments
-      private_key: {{buildpacks-private-key}}
-      uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
   - name: bp-ci-8-cf-deployment
     type: bosh-deployment
     source:
@@ -42,9 +35,6 @@ jobs:
   - name: deploy-cf-to-bp-ci-8
     serial: true
     plan:
-      - put: cf-edge-environments
-        params:
-          acquire: true
       - aggregate:
         - get: deployments-buildpacks
         - get: cf-release
@@ -75,7 +65,3 @@ jobs:
           manifest: deployments-buildpacks/deployments/bp-ci-8/manifest.yml
           stemcells: []
           releases: [cf-release/*.tgz]
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-edge-environments
