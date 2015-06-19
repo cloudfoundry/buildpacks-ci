@@ -2,6 +2,7 @@
 set -e
 
 export TMPDIR=$(mktemp -d)
+DEPLOYMENT_NAME=`cat cf-environments/name`
 
 pushd deployments-buildpacks
   bundle
