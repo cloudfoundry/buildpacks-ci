@@ -4,6 +4,12 @@ resources:
     source:
       private_key: {{buildpacks-private-key}}
       uri: git@github.com:pivotal-cf/binary-builder.git
+  - name: binary-builder-builds
+    type: git
+    source:
+      branch: binary-builds
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci.git
   - name: binary-builder-compiler-cache
     type: s3
     source:
@@ -90,10 +96,15 @@ jobs:
         params:
           from: rspec/ccache.tgz
   - name: build-php
+    serial: true
     plan:
       - aggregate:
+        - get: builds-yaml
+          resource: binary-builder-builds
+          trigger: true
         - get: binary-builder
           passed: [binary-builder]
+          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
@@ -102,21 +113,26 @@ jobs:
           inputs:
             - name: binary-builder
             - name: buildpacks-ci
+            - name: builds-yaml
           run:
-            path: buildpacks-ci/scripts/build-binary.sh
+            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: php
-            BINARY_VERSION: 5.6.9
         privileged: true
-      - put: php-interpreter
+      - put: binary-builder-builds
         params:
-          from: binary-builder/php-(.*)-linux-x64.tgz
-          to: /concourse-binaries/php/
+          repository: build-binary/builds-yaml
+          rebase: true
   - name: build-jruby
+    serial: true
     plan:
       - aggregate:
+        - get: builds-yaml
+          resource: binary-builder-builds
+          trigger: true
         - get: binary-builder
           passed: [binary-builder]
+          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
@@ -125,21 +141,26 @@ jobs:
           inputs:
             - name: binary-builder
             - name: buildpacks-ci
+            - name: builds-yaml
           run:
-            path: buildpacks-ci/scripts/build-binary.sh
+            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: jruby
-            BINARY_VERSION: 9.0.0.0.pre1+ruby-2.2.0
         privileged: true
-      - put: jruby-interpreter
+      - put: binary-builder-builds
         params:
-          from: binary-builder/jruby(?:9000)?-(.*)-linux-x64.tgz
-          to: /concourse-binaries/jruby/
+          repository: build-binary/builds-yaml
+          rebase: true
   - name: build-httpd
+    serial: true
     plan:
       - aggregate:
+        - get: builds-yaml
+          resource: binary-builder-builds
+          trigger: true
         - get: binary-builder
           passed: [binary-builder]
+          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
@@ -148,21 +169,26 @@ jobs:
           inputs:
             - name: binary-builder
             - name: buildpacks-ci
+            - name: builds-yaml
           run:
-            path: buildpacks-ci/scripts/build-binary.sh
+            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: httpd
-            BINARY_VERSION: 2.4.12
         privileged: true
-      - put: httpd-binary
+      - put: binary-builder-builds
         params:
-          from: binary-builder/httpd-(.*)-linux-x64.tgz
-          to: /concourse-binaries/httpd/
+          repository: build-binary/builds-yaml
+          rebase: true
   - name: build-python
+    serial: true
     plan:
       - aggregate:
+        - get: builds-yaml
+          resource: binary-builder-builds
+          trigger: true
         - get: binary-builder
           passed: [binary-builder]
+          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
@@ -171,20 +197,25 @@ jobs:
           inputs:
             - name: binary-builder
             - name: buildpacks-ci
+            - name: builds-yaml
           run:
-            path: buildpacks-ci/scripts/build-binary.sh
+            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: python
-            BINARY_VERSION: 3.4.3
-      - put: python-interpreter
+      - put: binary-builder-builds
         params:
-          from: binary-builder/python-(.*)-linux-x64.tgz
-          to: /concourse-binaries/python/
+          repository: build-binary/builds-yaml
+          rebase: true
   - name: build-ruby
+    serial: true
     plan:
       - aggregate:
+        - get: builds-yaml
+          resource: binary-builder-builds
+          trigger: true
         - get: binary-builder
           passed: [binary-builder]
+          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
@@ -193,20 +224,25 @@ jobs:
           inputs:
             - name: binary-builder
             - name: buildpacks-ci
+            - name: builds-yaml
           run:
-            path: buildpacks-ci/scripts/build-binary.sh
+            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: ruby
-            BINARY_VERSION: 2.2.2
-      - put: ruby-interpreter
+      - put: binary-builder-builds
         params:
-          from: binary-builder/ruby-(.*)-linux-x64.tgz
-          to: /concourse-binaries/ruby/
+          repository: build-binary/builds-yaml
+          rebase: true
   - name: build-node
+    serial: true
     plan:
       - aggregate:
+        - get: builds-yaml
+          resource: binary-builder-builds
+          trigger: true
         - get: binary-builder
           passed: [binary-builder]
+          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
@@ -215,20 +251,25 @@ jobs:
           inputs:
             - name: binary-builder
             - name: buildpacks-ci
+            - name: builds-yaml
           run:
-            path: buildpacks-ci/scripts/build-binary.sh
+            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: node
-            BINARY_VERSION: 0.12.2
-      - put: node-interpreter
+      - put: binary-builder-builds
         params:
-          from: binary-builder/node-(.*)-linux-x64.tar.gz
-          to: /concourse-binaries/nodejs/
+          repository: build-binary/builds-yaml
+          rebase: true
   - name: build-nginx
+    serial: true
     plan:
       - aggregate:
+        - get: builds-yaml
+          resource: binary-builder-builds
+          trigger: true
         - get: binary-builder
           passed: [binary-builder]
+          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
@@ -237,12 +278,27 @@ jobs:
           inputs:
             - name: binary-builder
             - name: buildpacks-ci
+            - name: builds-yaml
           run:
-            path: buildpacks-ci/scripts/build-binary.sh
+            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: nginx
-            BINARY_VERSION: 1.7.10
-      - put: nginx-binary
+      - task: push-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: build-binary
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/push-binary.rb
+          params:
+            BINARY_NAME: nginx
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
+        privileged: true
+      - put: binary-builder-builds
         params:
-          from: binary-builder/nginx-(.*)-linux-x64.tgz
-          to: /concourse-binaries/nginx/
+          repository: build-binary/builds-yaml
+          rebase: true
