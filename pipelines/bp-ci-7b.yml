@@ -1,0 +1,70 @@
+resources:
+  - name: bp-ci-7b-cf-deployment
+    type: bosh-deployment
+    source:
+      target: https://ec2-54-175-156-216.compute-1.amazonaws.com:25555
+      username: admin
+      password: {{bosh-lite-password}}
+      deployment: cf-warden
+      ignore_ssl: true
+  - name: deployments-buildpacks
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/deployments-buildpacks
+      private_key: {{buildpacks-private-key}}
+      branch: master
+  - name: bosh-lite
+    type: git
+    source:
+      uri: https://github.com/cf-buildpacks/bosh-lite
+      branch: first-instance
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/buildpacks-ci
+      private_key: {{buildpacks-private-key}}
+jobs:
+  - name: deploy-cf-to-bp-ci-7b
+    serial: true
+    plan:
+      - aggregate:
+        - get: deployments-buildpacks
+        - get: bosh-lite
+        - get: buildpacks-ci
+        - task: download-github-release
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci#buildpack
+            run:
+              path: git
+              args: ['clone', '--branch', 'v205', '--depth', '1', '--recursive', 'https://github.com/cloudfoundry/cf-release', '.']
+        - task: download-release
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci#buildpack
+            run:
+              path: curl
+              args: ['-f', '-L', '-o', 'release.tgz', 'https://bosh.io/d/github.com/cloudfoundry/cf-release?v=205']
+      - task: generate-manifest
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: bosh-lite
+            - name: deployments-buildpacks
+            - name: buildpacks-ci
+            - name: download-github-release
+              path: cf-release
+          run:
+            path: buildpacks-ci/scripts/generate-cf-manifest
+          params:
+            DEPLOYMENT_NAME: bp-ci-7b
+        privileged: true
+      - put: deployments-buildpacks
+        params:
+          repository: generate-manifest/deployments-buildpacks
+      - put: bp-ci-7b-cf-deployment
+        params:
+          manifest: deployments-buildpacks/deployments/bp-ci-7b/manifest.yml
+          stemcells: []
+          releases: [download-release/release.tgz]
