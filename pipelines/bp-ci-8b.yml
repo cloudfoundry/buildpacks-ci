@@ -1,0 +1,81 @@
+resources:
+  - name: cf-edge-environments
+    type: pool
+    source:
+      branch: master
+      pool: cf-edge-environments
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
+  - name: bp-ci-8b-cf-deployment
+    type: bosh-deployment
+    source:
+      target: https://ec2-52-6-187-239.compute-1.amazonaws.com:25555
+      username: admin
+      password: {{bosh-lite-password}}
+      deployment: cf-warden
+      ignore_ssl: true
+  - name: deployments-buildpacks
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/deployments-buildpacks
+      private_key: {{buildpacks-private-key}}
+      branch: master
+  - name: bosh-lite
+    type: git
+    source:
+      uri: https://github.com/cf-buildpacks/bosh-lite
+      branch: first-instance
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/buildpacks-ci
+      private_key: {{buildpacks-private-key}}
+  - name: cf-release-github
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-release
+  - name: cf-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/cf-release
+jobs:
+  - name: deploy-cf-to-bp-ci-8b
+    serial: true
+    plan:
+      - put: cf-edge-environments
+        params:
+          acquire: true
+      - aggregate:
+        - get: deployments-buildpacks
+        - get: cf-release
+        - get: bosh-lite
+        - get: buildpacks-ci
+        - get: cf-release-github
+          params: { submodules: [src/loggregator] }
+      - task: generate-manifest
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: bosh-lite
+            - name: deployments-buildpacks
+            - name: buildpacks-ci
+            - name: cf-release-github
+              path: cf-release
+          run:
+            path: buildpacks-ci/scripts/generate-cf-manifest
+          params:
+            DEPLOYMENT_NAME: bp-ci-8b
+        privileged: true
+      - put: deployments-buildpacks
+        params:
+          repository: generate-manifest/deployments-buildpacks
+      - put: bp-ci-8b-cf-deployment
+        params:
+          manifest: deployments-buildpacks/deployments/bp-ci-8b/manifest.yml
+          stemcells: []
+          releases: [cf-release/*.tgz]
+      - put: cf-edge-environments
+        conditions: [success, failure]
+        params:
+          release: cf-edge-environments
