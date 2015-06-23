@@ -12,15 +12,19 @@ if versions.empty?
   exit
 end
 
-while !versions.empty?
-  version = versions.shift
+versions.delete_if do |version|
   system(<<-EOF)
     cd binary-builder
     ./bin/binary-builder #{binary_name} #{version}
-    echo "#{builds.to_yaml}" > #{builds_path}
-    cd ../builds-yaml
-    git config --global user.email "ci@localhost"
-    git config --global user.name "CI Bot"
-    git commit -am "Completed building #{binary_name} - #{version} and removing it from builds"
   EOF
 end
+
+exit 1 unless versions.empty?
+
+system(<<-EOF)
+  echo "#{builds.to_yaml}" > #{builds_path}
+  cd ../builds-yaml
+  git config --global user.email "ci@localhost"
+  git config --global user.name "CI Bot"
+  git commit -am "Completed building #{binary_name} and removing it from builds"
+EOF
