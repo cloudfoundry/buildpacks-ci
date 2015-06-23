@@ -4,12 +4,6 @@ resources:
     source:
       private_key: {{buildpacks-private-key}}
       uri: git@github.com:pivotal-cf/binary-builder.git
-  - name: binary-builder-builds
-    type: git
-    source:
-      branch: binary-builds
-      private_key: {{buildpacks-private-key}}
-      uri: git@github.com:pivotal-cf/buildpacks-ci.git
   - name: binary-builder-compiler-cache
     type: s3
     source:
@@ -22,55 +16,55 @@ resources:
     source:
       private_key: {{buildpacks-private-key}}
       uri: git@github.com:pivotal-cf/buildpacks-ci
-  - name: node-interpreter
-    type: s3
+  - name: nginx-builds
+    type: git
     source:
-      bucket: pivotal-buildpacks
-      regexp: node-(.*)-linux-x64.tar.gz
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-  - name: php-interpreter
-    type: s3
+      branch: binary-builds
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci.git
+      paths: [ nginx-builds.yml ]
+  - name: php-builds
+    type: git
     source:
-      bucket: pivotal-buildpacks
-      regexp: php-(.*)-linux-x64.tgz
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-  - name: jruby-interpreter
-    type: s3
+      branch: binary-builds
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci.git
+      paths: [ php-builds.yml ]
+  - name: nodejs-builds
+    type: git
     source:
-      bucket: pivotal-buildpacks
-      regexp: jruby(?:9000)?-(.*)-linux-x64.tgz
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-  - name: httpd-binary
-    type: s3
+      branch: binary-builds
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci.git
+      paths: [ nodejs-builds.yml ]
+  - name: ruby-builds
+    type: git
     source:
-      bucket: pivotal-buildpacks
-      regexp: httpd-(.*)-linux-x64.tgz
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-  - name: python-interpreter
-    type: s3
+      branch: binary-builds
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci.git
+      paths: [ ruby-builds.yml ]
+  - name: jruby-builds
+    type: git
     source:
-      bucket: pivotal-buildpacks
-      regexp: python-(.*)-linux-x64.tgz
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-  - name: ruby-interpreter
-    type: s3
+      branch: binary-builds
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci.git
+      paths: [ jruby-builds.yml ]
+  - name: httpd-builds
+    type: git
     source:
-      bucket: pivotal-buildpacks
-      regexp: ruby-(.*)-linux-x64.tgz
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-  - name: nginx-binary
-    type: s3
+      branch: binary-builds
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci.git
+      paths: [ httpd-builds.yml ]
+  - name: python-builds
+    type: git
     source:
-      bucket: pivotal-buildpacks
-      regexp: nginx-(.*)-linux-x64.tgz
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+      branch: binary-builds
+      private_key: {{buildpacks-private-key}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci.git
+      paths: [ python-builds.yml ]
 
 jobs:
   - name: binary-builder
@@ -100,7 +94,7 @@ jobs:
     plan:
       - aggregate:
         - get: builds-yaml
-          resource: binary-builder-builds
+          resource: php-builds
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
@@ -119,7 +113,22 @@ jobs:
           params:
             BINARY_NAME: php
         privileged: true
-      - put: binary-builder-builds
+      - task: push-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: build-binary
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/push-binary.rb
+          params:
+            BINARY_NAME: php
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
+        privileged: true
+      - put: php-builds
         params:
           repository: build-binary/builds-yaml
           rebase: true
@@ -128,7 +137,7 @@ jobs:
     plan:
       - aggregate:
         - get: builds-yaml
-          resource: binary-builder-builds
+          resource: jruby-builds
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
@@ -147,7 +156,22 @@ jobs:
           params:
             BINARY_NAME: jruby
         privileged: true
-      - put: binary-builder-builds
+      - task: push-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: build-binary
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/push-binary.rb
+          params:
+            BINARY_NAME: jruby
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
+        privileged: true
+      - put: jruby-builds
         params:
           repository: build-binary/builds-yaml
           rebase: true
@@ -156,7 +180,7 @@ jobs:
     plan:
       - aggregate:
         - get: builds-yaml
-          resource: binary-builder-builds
+          resource: httpd-builds
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
@@ -175,7 +199,22 @@ jobs:
           params:
             BINARY_NAME: httpd
         privileged: true
-      - put: binary-builder-builds
+      - task: push-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: build-binary
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/push-binary.rb
+          params:
+            BINARY_NAME: httpd
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
+        privileged: true
+      - put: httpd-builds
         params:
           repository: build-binary/builds-yaml
           rebase: true
@@ -184,7 +223,7 @@ jobs:
     plan:
       - aggregate:
         - get: builds-yaml
-          resource: binary-builder-builds
+          resource: python-builds
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
@@ -202,7 +241,22 @@ jobs:
             path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: python
-      - put: binary-builder-builds
+      - task: push-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: build-binary
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/push-binary.rb
+          params:
+            BINARY_NAME: python
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
+        privileged: true
+      - put: python-builds
         params:
           repository: build-binary/builds-yaml
           rebase: true
@@ -211,7 +265,7 @@ jobs:
     plan:
       - aggregate:
         - get: builds-yaml
-          resource: binary-builder-builds
+          resource: ruby-builds
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
@@ -229,16 +283,31 @@ jobs:
             path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: ruby
-      - put: binary-builder-builds
+      - task: push-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: build-binary
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/push-binary.rb
+          params:
+            BINARY_NAME: ruby
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
+        privileged: true
+      - put: ruby-builds
         params:
           repository: build-binary/builds-yaml
           rebase: true
-  - name: build-node
+  - name: build-nodejs
     serial: true
     plan:
       - aggregate:
         - get: builds-yaml
-          resource: binary-builder-builds
+          resource: nodejs-builds
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
@@ -256,7 +325,22 @@ jobs:
             path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: node
-      - put: binary-builder-builds
+      - task: push-binary
+        config:
+          platform: linux
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: build-binary
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/push-binary.rb
+          params:
+            BINARY_NAME: node
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
+        privileged: true
+      - put: nodejs-builds
         params:
           repository: build-binary/builds-yaml
           rebase: true
@@ -265,7 +349,7 @@ jobs:
     plan:
       - aggregate:
         - get: builds-yaml
-          resource: binary-builder-builds
+          resource: nginx-builds
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
@@ -298,7 +382,7 @@ jobs:
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1
         privileged: true
-      - put: binary-builder-builds
+      - put: nginx-builds
         params:
           repository: build-binary/builds-yaml
           rebase: true
