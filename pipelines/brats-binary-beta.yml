@@ -136,7 +136,7 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        # - {get: brats-time-resource, trigger: true}
+        - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
         config:
@@ -160,7 +160,7 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        # - {get: brats-time-resource, trigger: true}
+        - {get: brats-time-resource, trigger: true}
       - task: bin-tests
         file: buildpacks-ci/tasks/brats.yml
         config:
