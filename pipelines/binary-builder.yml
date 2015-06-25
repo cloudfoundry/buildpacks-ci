@@ -30,13 +30,13 @@ resources:
       private_key: {{buildpacks-private-key}}
       uri: git@github.com:pivotal-cf/buildpacks-ci.git
       paths: [ php-builds.yml ]
-  - name: nodejs-builds
+  - name: node-builds
     type: git
     source:
       branch: binary-builds
       private_key: {{buildpacks-private-key}}
       uri: git@github.com:pivotal-cf/buildpacks-ci.git
-      paths: [ nodejs-builds.yml ]
+      paths: [ node-builds.yml ]
   - name: ruby-builds
     type: git
     source:
@@ -302,7 +302,7 @@ jobs:
     plan:
       - aggregate:
         - get: builds-yaml
-          resource: nodejs-builds
+          resource: node-builds
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
@@ -334,7 +334,7 @@ jobs:
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1
         privileged: true
-      - put: nodejs-builds
+      - put: node-builds
         params:
           repository: build-binary/builds-yaml
           rebase: true
