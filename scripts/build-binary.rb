@@ -23,8 +23,8 @@ exit 1 unless versions.empty?
 
 system(<<-EOF)
   echo "#{builds.to_yaml}" > #{builds_path}
-  cd ../builds-yaml
+  cd builds-yaml
   git config --global user.email "ci@localhost"
   git config --global user.name "CI Bot"
-  git commit -am "Completed building #{binary_name} and removing it from builds"
+  git commit -am "Complete building #{binary_name} and remove it from builds"
 EOF
