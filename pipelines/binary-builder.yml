@@ -98,7 +98,6 @@ jobs:
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
-          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
@@ -141,7 +140,6 @@ jobs:
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
-          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
@@ -184,7 +182,6 @@ jobs:
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
-          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
@@ -227,7 +224,6 @@ jobs:
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
-          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
@@ -269,7 +265,6 @@ jobs:
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
-          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
@@ -311,7 +306,6 @@ jobs:
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
-          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
@@ -353,7 +347,6 @@ jobs:
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
-          trigger: true
         - get: buildpacks-ci
       - task: build-binary
         config:
