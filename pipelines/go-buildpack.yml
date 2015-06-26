@@ -275,24 +275,3 @@ jobs:
         conditions: [success, failure]
         params:
           release: cf-environments
-  - name: go-fat-buildpack
-    serial: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: ci-tools
-        - get: deployments-buildpacks
-        - get: buildpack
-          resource: go-buildpack-master
-          passed: [ "go-buildpack-release" ]
-      - task: create fat buildpack and upload to Pivnet
-        file: buildpacks-ci/tasks/pivnet-fat-buildpack.yml
-        config:
-          params:
-            PIVNET_PRODUCT_NAME: Go Buildpack (including unsupported) (offline)
-            AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
-            AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
-            PIVNET_S3_BUCKET: pivotalnetwork
-            PIVNET_ADDRESS: https://network.pivotal.io/
-            PIVNET_APIKEY: {{pivnet-apikey}}
-        privileged: true
