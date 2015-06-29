@@ -32,3 +32,10 @@ apt-get -y install make
 make
 
 mv cflinuxfs2.tar.gz cflinuxfs2-`cat ../version/number`.tar.gz
+
+echo "Rootfs SHASUM: `shasum $FILE`" > cflinuxfs2/cflinuxfs2_receipt
+echo "Docker Image: `docker images | grep cloudfoundry/cflinuxfs2 | grep latest | awk '{ print $3 }'`" >> cflinuxfs2/${STACK}_receipt
+echo "" >> cflinuxfs2/cflinuxfs2_receipt
+cat cflinuxfs2/cflinuxfs2_dpkg_l.out >> cflinuxfs2/cflinuxfs2_receipt
+
+mv cflinuxfs2/cflinuxfs2_receipt cflinuxfs2/cflinuxfs2_receipt-`cat ../version/number`
