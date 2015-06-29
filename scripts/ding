@@ -1,3 +1,5 @@
+#!/bin/sh
+
 mkdir -p /var/log
 mkdir -p /var/run
 
@@ -25,4 +27,4 @@ until docker info >/dev/null 2>&1; do
   sleep 1
 done
 
-$@
+cd stacks && apt-get -y install make && make
