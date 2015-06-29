@@ -31,11 +31,11 @@ cd stacks
 apt-get -y install make
 make
 
-mv cflinuxfs2.tar.gz cflinuxfs2-`cat ../version/number`.tar.gz
+versioned_stack_filename=cflinuxfs2-`cat ../version/number`.tar.gz
+mv cflinuxfs2.tar.gz $versioned_stack_filename
 
-echo "Rootfs SHASUM: `shasum $FILE`" > cflinuxfs2/cflinuxfs2_receipt
-echo "Docker Image: `docker images | grep cloudfoundry/cflinuxfs2 | grep latest | awk '{ print $3 }'`" >> cflinuxfs2/${STACK}_receipt
-echo "" >> cflinuxfs2/cflinuxfs2_receipt
-cat cflinuxfs2/cflinuxfs2_dpkg_l.out >> cflinuxfs2/cflinuxfs2_receipt
-
-mv cflinuxfs2/cflinuxfs2_receipt cflinuxfs2/cflinuxfs2_receipt-`cat ../version/number`
+versioned_receipt_filename=cflinuxfs2/cflinuxfs2_receipt-`cat ../version/number`
+echo "Rootfs SHASUM: `shasum $versioned_stack_filename`" > $versioned_receipt_filename 
+echo "Docker Image: `docker images -q cloudfoundry/cflinuxfs2`" >> $versioned_receipt_filename
+echo "" >> $versioned_receipt_filename
+cat cflinuxfs2/cflinuxfs2_dpkg_l.out >> $versioned_receipt_filename
