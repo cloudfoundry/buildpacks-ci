@@ -1,0 +1,64 @@
+---
+resources:
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/buildpacks-ci
+      private_key: {{buildpacks-private-key}}
+  - name: stacks
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/stacks.git
+  - name: stack-s3
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: cflinuxfs2-(.*).tar.gz
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: receipt-s3
+    type: s3
+    source:
+      bucket: pivotal-buildpacks
+      regexp: cflinuxfs2_receipt-(.*)
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: version
+    type: semver
+    source:
+      bucket: pivotal-buildpacks
+      key: versions/stack
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+      initial_version: 1.0.0
+
+jobs:
+  - name: build-rootfs
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: stacks
+        - get: version
+          params: { bump: minor }
+      - task: make-rootfs
+        config:
+          platform: linux
+          image: docker:///jpetazzo/dind
+          inputs:
+            - name: buildpacks-ci
+            - name: stacks
+            - name: version
+          run:
+            path: buildpacks-ci/scripts/make-rootfs
+        privileged: true
+      - put: stack-s3
+        params:
+          from: make-rootfs/stacks/cflinuxfs2-(.*).tar.gz
+          to: /rootfs/
+      - put: receipt-s3
+        params:
+          from: make-rootfs/stacks/cflinuxfs2/cflinuxfs2_receipt-(.*)
+          to: /rootfs/
+      - put: version
+        params: { file: version/number }
