@@ -1,5 +1,7 @@
 #!/bin/sh
 
 mkdir -p cf-release/blobs/rootfs
-mv stacks-s3/*.tgz cf-release/blobs/rootfs/
-bosh create release --force --with-tarball
+mv stack-s3/*.tar.gz cf-release/blobs/rootfs/cflinuxfs2.tar.gz
+pushd cf-release
+bundle
+bosh create release --force --with-tarball --name cf
