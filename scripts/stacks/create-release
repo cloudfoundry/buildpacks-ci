@@ -1,0 +1,5 @@
+#!/bin/sh
+
+mkdir -p cf-release/blobs/rootfs
+mv stacks-s3/*.tgz cf-release/blobs/rootfs/
+bosh create release --force --with-tarball

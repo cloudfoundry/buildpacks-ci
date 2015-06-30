@@ -31,6 +31,33 @@ resources:
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
       initial_version: 1.0.0
+  - name: deployments-buildpacks
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/deployments-buildpacks
+      private_key: {{buildpacks-private-key}}
+  - name: stack-ci-8-cf-deployment
+    type: bosh-deployment
+    source:
+      target: https://ec2-54-172-241-210.compute-1.amazonaws.com:25555
+      username: admin
+      password: {{bosh-lite-password}}
+      deployment: cf-warden
+      ignore_ssl: true
+  - name: bosh-lite
+    type: git
+    source:
+      uri: https://github.com/cf-buildpacks/bosh-lite
+      branch: first-instance
+  - name: cf-release-github
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-release
+      branch: develop
+  - name: lite-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
 
 jobs:
   - name: build-rootfs
@@ -62,3 +89,68 @@ jobs:
           to: /rootfs/
       - put: version
         params: { file: version/number }
+  - name: deploy-cf-to-stack-ci-8
+    serial: true
+    plan:
+      - aggregate:
+        - get: deployments-buildpacks
+        - get: bosh-lite
+        - get: buildpacks-ci
+        - get: cf-release-github
+        - get: lite-stemcell
+        - get: stack-s3
+          passed: [ build-rootfs ]
+      - task: generate-manifest
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: bosh-lite
+            - name: deployments-buildpacks
+            - name: buildpacks-ci
+            - name: cf-release-github
+              path: cf-release
+          run:
+            path: buildpacks-ci/scripts/generate-cf-manifest
+          params:
+            DEPLOYMENT_NAME: stack-ci-8
+        privileged: true
+      - put: deployments-buildpacks
+        params:
+          repository: generate-manifest/deployments-buildpacks
+      - task: create-stack-release
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: cf-release-github
+              path: cf-release
+            - name: stack-s3
+          run:
+            path: buildpacks-ci/scripts/stacks/create-release
+        privileged: true
+      - put: stack-ci-8-cf-deployment
+        params:
+          manifest: deployments-buildpacks/deployments/stack-ci-8/manifest.yml
+          stemcells: [lite-stemcell/*.tgz]
+          releases: [create-stack-release/*.tgz]
+  - name: test-rootfs
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: cf-release-github
+        - get: deployments-buildpacks
+        - get: stack-s3
+      - task: cats
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: cf-release-github
+            - name: deployments-buildpacks
+            - name: stacks
+          run:
+            path: buildpacks-ci/scripts/stacks/cats
