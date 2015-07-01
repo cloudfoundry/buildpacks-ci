@@ -2,28 +2,22 @@
 
 set -e
 
-mkdir -p cf-release/blobs/rootfs
-mv stacks/cflinuxfs2-.*.tar.gz cf-release/blobs/rootfs/cflinixfs2.tar.gz
+cd deployments-buildpacks
+bundle -j4
+. ./bin/switch stack-ci-8
 
-popd cf-release
-  bosh -n create release --force
-  bosh -n upload release
-  bosh -n deploy
-pushd
-
-popd cf-release/src/acceptance-tests
-  godep restore
-  go get -u github.com/cloudfoundry/cf-acceptance-tests
-  # create integration_config.json and set CONFIG env var (see README)
-  cat > integration_config.json <<EOF
-  {
-    "api": "api.10.244.0.34.xip.io",
-    "admin_user": "admin",
-    "admin_password": "admin",
-    "apps_domain": "10.244.0.34.xip.io",
-    "skip_ssl_validation": true
-  }
-  EOF
-  export CONFIG=$PWD/integration_config.json  
-  ./bin/test --nodes=4
-pushd
+cd ../cf-release/src/acceptance-tests
+godep restore
+go get -u github.com/cloudfoundry/cf-acceptance-tests
+# create integration_config.json and set CONFIG env var (see README)
+cat > integration_config.json <<EOF
+{
+  "api": "api.10.244.0.34.xip.io",
+  "admin_user": "admin",
+  "admin_password": "admin",
+  "apps_domain": "10.244.0.34.xip.io",
+  "skip_ssl_validation": true
+}
+EOF
+export CONFIG=$PWD/integration_config.json  
+./bin/test --nodes=4
