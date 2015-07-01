@@ -36,6 +36,7 @@ resources:
     source:
       uri: git@github.com:pivotal-cf/deployments-buildpacks
       private_key: {{buildpacks-private-key}}
+      branch: master
   - name: stack-ci-8-cf-deployment
     type: bosh-deployment
     source:
@@ -53,7 +54,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/cf-release
-      branch: develop
+      branch: runtime-passed
   - name: lite-stemcell
     type: bosh-io-stemcell
     source:
@@ -134,7 +135,7 @@ jobs:
         params:
           manifest: deployments-buildpacks/deployments/stack-ci-8/manifest.yml
           stemcells: [lite-stemcell/*.tgz]
-          releases: [create-stack-release/*.tgz]
+          releases: [create-stack-release/cf-release/dev_releases/cf/*.tgz]
   - name: test-rootfs
     serial: true
     plan:
