@@ -29,6 +29,8 @@ RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the CF-CLI
 RUN wget -O- 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.10.0&source=github-rel'| tar xz -C /usr/bin
+RUN cf install-plugin https://github.com/cloudfoundry-incubator/diego-cli-plugin/raw/master/bin/linux64/diego-beta.linux64
+RUN cf install-plugin https://github.com/cloudfoundry-incubator/diego-ssh/releases/download/plugin-0.1.2/ssh-plugin-linux-amd64
 
 #download spiff for spiffy things
 RUN wget -O- 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.7/spiff_linux_amd64.zip' | funzip > /usr/bin/spiff
