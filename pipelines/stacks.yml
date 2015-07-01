@@ -142,8 +142,8 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: cf-release-github
+          passed: [ deploy-cf-to-stack-ci-8 ]
         - get: deployments-buildpacks
-        - get: stack-s3
       - task: cats
         config:
           platform: linux
@@ -151,7 +151,11 @@ jobs:
           inputs:
             - name: buildpacks-ci
             - name: cf-release-github
+              path: cf-release
             - name: deployments-buildpacks
-            - name: stacks
           run:
             path: buildpacks-ci/scripts/stacks/cats
+          params:
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+        privileged: true
