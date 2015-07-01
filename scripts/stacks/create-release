@@ -5,4 +5,4 @@ mv stack-s3/*.tar.gz cf-release/blobs/rootfs/cflinuxfs2.tar.gz
 cd cf-release
 apt-get -y install libmysqlclient-dev
 bundle
-bosh create release --force --with-tarball --name cf --version `cat ../cf-version/number`
+bosh create release --force --with-tarball --name cf --version 212.0.`date +"%s"`
