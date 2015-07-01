@@ -9,12 +9,6 @@ git clone git@github.com:pivotal-cf/buildpacks-ci
 cd buildpacks-ci
 ```
 
-## Concourse
-
-```sh
-vagrant up
-```
-
 # Usage
 
 With a proper Concourse deployment, and `private.yml` containing secrets.
