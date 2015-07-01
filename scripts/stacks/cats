@@ -13,8 +13,8 @@ godep restore
 cat > integration_config.json <<EOF
 {
   "api": "api.stack-ci-8.cf-app.com",
-  "admin_user": $CI_CF_USERNAME,
-  "admin_password": $CI_CF_USERNAME,
+  "admin_user": "$CI_CF_USERNAME",
+  "admin_password": "$CI_CF_USERNAME",
   "apps_domain": "stack-ci-8.cf-app.com",
   "skip_ssl_validation": true
 }
