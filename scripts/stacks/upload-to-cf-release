@@ -15,12 +15,4 @@ blobstore:
     blobstore_path: /tmp/blobs
 EOF
 
-cat <<EOF > config/private.yml
----
-blobstore:
-  s3:
-    access_key_id: $ACCESS_KEY_ID
-    secret_access_key: $SECRET_ACCESS_KEY
-EOF
-
-bosh upload blobs
+bosh -n upload blobs
