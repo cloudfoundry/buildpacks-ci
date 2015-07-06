@@ -1,0 +1,26 @@
+#!/bin/sh
+
+mkdir -p cf-release/blobs/rootfs
+mv stack-s3/*.tar.gz cf-release/blobs/rootfs/cflinuxfs2.tar.gz
+cd cf-release
+bundle
+
+cat <<EOF > config/final.yml
+---
+final_name: cf
+min_cli_version: 1.5.0.pre.1001
+blobstore:
+  provider: local
+  options:
+    blobstore_path: /tmp/blobs
+EOF
+
+cat <<EOF > config/private.yml
+---
+blobstore:
+  s3:
+    access_key_id: $ACCESS_KEY_ID
+    secret_access_key: $SECRET_ACCESS_KEY
+EOF
+
+bosh upload blobs
