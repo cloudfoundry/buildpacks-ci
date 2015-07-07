@@ -1,9 +1,12 @@
 #!/bin/sh
 
+set -e
+
 mkdir -p cf-release/blobs/rootfs
-mv stack-s3/*.tar.gz cf-release/blobs/rootfs/cflinuxfs2.tar.gz
+cp stack-s3/cflinuxfs2-*.tar.gz cf-release/blobs/rootfs/cflinuxfs2.tar.gz
+cp receipt-s3/cflinuxfs2_receipt cf-release/spec/fixtures/receipts
 cd cf-release
-bundle
+bundle -j4
 
 cat <<EOF > config/final.yml
 ---
@@ -17,8 +20,10 @@ EOF
 
 bosh -n upload blobs
 
+rspec spec/stacks_spec.rb
+
 git config --global user.email "cf-buildpacks-eng@pivotal.io"
 git config --global user.name "CF Buildpacks Team CI Server"
 
 version=`cat ../version/number`
-git commit -m "Bump rootfs to $version" -- config/blobs.yml
+git commit -m "Bump rootfs to $version" -- config/blobs.yml spec/fixtures/receipts
