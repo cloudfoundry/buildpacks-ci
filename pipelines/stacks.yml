@@ -30,7 +30,6 @@ resources:
       key: versions/stack
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-      initial_version: 1.0.0
   - name: deployments-buildpacks
     type: git
     source:
@@ -55,6 +54,12 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/cf-release
       branch: runtime-passed
+  - name: cf-release-develop
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cf-release
+      branch: develop
+      private_key: {{stacks-private-key}}
   - name: lite-stemcell
     type: bosh-io-stemcell
     source:
@@ -75,7 +80,7 @@ jobs:
         - get: buildpacks-ci
         - get: stacks
         - get: version
-          params: { bump: minor }
+          params: { bump: minor, pre: rc }
       - task: make-rootfs
         config:
           platform: linux
@@ -107,6 +112,10 @@ jobs:
         - get: cf-release-github
         - get: lite-stemcell
         - get: stack-s3
+          passed: [ build-rootfs ]
+        - get: version
+          passed: [ build-rootfs ]
+        - get: receipt-s3
           passed: [ build-rootfs ]
       - task: generate-manifest
         config:
@@ -153,6 +162,11 @@ jobs:
         - get: deployments-buildpacks
         - get: stack-s3
           passed: [ deploy-cf-to-stack-ci-8 ]
+        - get: version
+          passed: [ deploy-cf-to-stack-ci-8 ]
+          params: { bump: final }
+        - get: receipt-s3
+          passed: [ deploy-cf-to-stack-ci-8 ]
       - task: cats
         config:
           platform: linux
@@ -168,6 +182,8 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - put: version
+        params: { file: version/number }
   - name: upload-to-docker
     serial: true
     plan:
@@ -176,3 +192,37 @@ jobs:
       - put: docker-cflinuxfs2-rootfs
         params:
           import_file: stack-s3/cflinuxfs2-*.tar.gz
+  - name: upload-to-cf-release
+    serial: true
+    plan:
+      - aggregate:
+        - get: stack-s3
+          passed: [ test-rootfs ]
+        - get: cf-release-github
+          passed: [ test-rootfs ]
+        - get: buildpacks-ci
+        - get: version
+          passed: [ test-rootfs ]
+        - get: receipt-s3
+          passed: [ test-rootfs ]
+      - task: upload
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: cf-release-github
+              path: cf-release
+            - name: stack-s3
+            - name: receipt-s3
+            - name: version
+          run:
+            path: buildpacks-ci/scripts/stacks/upload-to-cf-release
+          params:
+            ACCESS_KEY_ID: {{blobstore-access-key}}
+            SECRET_ACCESS_KEY: {{blobstore-secret-key}}
+        privileged: true
+      - put: cf-release-develop
+        params:
+          repository: upload/cf-release
+          rebase: true
