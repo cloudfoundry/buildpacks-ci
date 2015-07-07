@@ -4,7 +4,7 @@ set -e
 
 mkdir -p cf-release/blobs/rootfs
 cp stack-s3/cflinuxfs2-*.tar.gz cf-release/blobs/rootfs/cflinuxfs2.tar.gz
-cp receipt-s3/cflinuxfs2_receipt cf-release/spec/fixtures/receipts
+cp receipt-s3/cflinuxfs2-*_receipt cf-release/spec/fixtures/receipts/cflinuxfs2_receipt
 cd cf-release
 bundle -j4
 
