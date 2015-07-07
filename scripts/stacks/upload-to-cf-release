@@ -8,7 +8,7 @@ cp receipt-s3/cflinuxfs2_receipt-* cf-release/spec/fixtures/receipts/cflinuxfs2_
 cd cf-release
 bundle -j4
 
-cat <<EOF > cf-release/config/private.yml
+cat <<EOF > config/private.yml
 ---
 blobstore:
   s3:
