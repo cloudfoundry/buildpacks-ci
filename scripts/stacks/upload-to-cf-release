@@ -8,14 +8,12 @@ cp receipt-s3/cflinuxfs2_receipt-* cf-release/spec/fixtures/receipts/cflinuxfs2_
 cd cf-release
 bundle -j4
 
-cat <<EOF > config/final.yml
+cat <<EOF > cf-release/config/private.yml
 ---
-final_name: cf
-min_cli_version: 1.5.0.pre.1001
 blobstore:
-  provider: local
-  options:
-    blobstore_path: /tmp/blobs
+  s3:
+    access_key_id: $ACCESS_KEY_ID
+    secret_access_key: $SECRET_ACCESS_KEY
 EOF
 
 bosh -n upload blobs
