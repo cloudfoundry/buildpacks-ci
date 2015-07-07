@@ -16,3 +16,9 @@ blobstore:
 EOF
 
 bosh -n upload blobs
+
+git config --global user.email "cf-buildpacks-eng@pivotal.io"
+git config --global user.name "CF Buildpacks Team CI Server"
+
+version=`cat ../version/number`
+git commit -m "Bump rootfs to $version" -- config/blobs.yml
