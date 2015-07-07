@@ -17,6 +17,7 @@ blobstore:
 EOF
 
 bosh -n upload blobs
+chmod 644 config/blobs.yml
 
 rspec spec/stacks_spec.rb
 
