@@ -98,7 +98,7 @@ jobs:
             - name: stacks
             - name: version
           run:
-            path: buildpacks-ci/scripts/make-rootfs
+            path: buildpacks-ci/scripts/stacks/make-rootfs
         privileged: true
       - put: stack-s3
         params:
