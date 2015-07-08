@@ -31,7 +31,7 @@ jobs:
         - get: deployments-buildpacks
         - get: bosh-lite
         - get: buildpacks-ci
-        - task: download-github-release
+        - task: cf-release
           config:
             platform: linux
             image: docker:///cfbuildpacks/ci#buildpack
@@ -46,17 +46,8 @@ jobs:
               path: curl
               args: ['-f', '-L', '-o', 'release.tgz', 'https://bosh.io/d/github.com/cloudfoundry/cf-release?v=205']
       - task: generate-manifest
+        file: buildpacks-ci/tasks/make-manifest.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
-          inputs:
-            - name: bosh-lite
-            - name: deployments-buildpacks
-            - name: buildpacks-ci
-            - name: download-github-release
-              path: cf-release
-          run:
-            path: buildpacks-ci/scripts/generate-cf-manifest
           params:
             DEPLOYMENT_NAME: bp-ci-7
         privileged: true
