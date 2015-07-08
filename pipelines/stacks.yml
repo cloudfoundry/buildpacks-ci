@@ -8,7 +8,9 @@ resources:
   - name: stacks
     type: git
     source:
-      uri: https://github.com/cloudfoundry/stacks.git
+      uri: git@github.com:cloudfoundry/stacks.git
+      branch: master
+      private_key: {{buildpacks-private-key}}
   - name: stack-s3
     type: s3
     source:
@@ -71,6 +73,12 @@ resources:
       username: {{stacks-docker-username}}
       password: {{stacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
+  - name: stack-github-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: stacks
+      access_token: {{buildpacks-github-token}}
 
 jobs:
   - name: build-rootfs
@@ -104,6 +112,7 @@ jobs:
         params: { file: version/number }
   - name: deploy-cf-to-stack-ci-8
     serial: true
+    serial_groups: [ stack-ci-8 ]
     plan:
       - aggregate:
         - get: deployments-buildpacks
@@ -116,6 +125,8 @@ jobs:
         - get: version
           passed: [ build-rootfs ]
         - get: receipt-s3
+          passed: [ build-rootfs ]
+        - get: stacks
           passed: [ build-rootfs ]
       - task: generate-manifest
         config:
@@ -154,6 +165,7 @@ jobs:
           releases: [create-stack-release/cf-release/dev_releases/cf/*.tgz]
   - name: test-rootfs
     serial: true
+    serial_groups: [ stack-ci-8 ]
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -164,8 +176,9 @@ jobs:
           passed: [ deploy-cf-to-stack-ci-8 ]
         - get: version
           passed: [ deploy-cf-to-stack-ci-8 ]
-          params: { bump: final }
         - get: receipt-s3
+          passed: [ deploy-cf-to-stack-ci-8 ]
+        - get: stacks
           passed: [ deploy-cf-to-stack-ci-8 ]
       - task: cats
         config:
@@ -182,13 +195,59 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+  - name: shipit
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: stack-s3
+          passed: [ test-rootfs ]
+        - get: receipt-s3
+          passed: [ test-rootfs ]
+        - get: stacks
+          resource: stacks
+          passed: [ test-rootfs ]
+        - get: version
+          passed: [ test-rootfs ]
+          params: { bump: final }
+      - task: update-receipt
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: buildpacks-ci
+            - name: receipt-s3
+            - name: stacks
+            - name: version
+          run:
+            path: buildpacks-ci/scripts/stacks/update-receipt
+      - task: rename-blob
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci#buildpack
+          inputs:
+            - name: stack-s3
+            - name: version
+          run:
+            path: /bin/sh
+            args: ['-c', 'mv stack-s3/cflinuxfs2-*.tar.gz cflinuxfs2-`cat version/number`.tar.gz']
+      - put: stacks
+        params:
+          repository: update-receipt/stacks
+          tag: version/number
+      - put: stack-github-release
+        params:
+          name: version/number
+          tag: version/number
+          globs:
+            - rename-blob/cflinuxfs2-*.tar.gz
       - put: version
         params: { file: version/number }
   - name: upload-to-docker
     serial: true
     plan:
       - get: stack-s3
-        passed: [ test-rootfs ]
+        passed: [ shipit ]
       - put: docker-cflinuxfs2-rootfs
         params:
           import_file: stack-s3/cflinuxfs2-*.tar.gz
@@ -197,21 +256,20 @@ jobs:
     plan:
       - aggregate:
         - get: stack-s3
-          passed: [ test-rootfs ]
-        - get: cf-release-runtime-passed
-          passed: [ test-rootfs ]
+          passed: [ shipit ]
+        - get: cf-release-develop
         - get: buildpacks-ci
         - get: version
-          passed: [ test-rootfs ]
+          passed: [ shipit ]
         - get: receipt-s3
-          passed: [ test-rootfs ]
+          passed: [ shipit ]
       - task: upload
         config:
           platform: linux
           image: docker:///cfbuildpacks/ci#buildpack
           inputs:
             - name: buildpacks-ci
-            - name: cf-release-runtime-passed
+            - name: cf-release-develop
               path: cf-release
             - name: stack-s3
             - name: receipt-s3
