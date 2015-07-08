@@ -16,11 +16,8 @@ blobstore:
     secret_access_key: $SECRET_ACCESS_KEY
 EOF
 
-if [ "x$EXIT_BEFORE_UPLOAD_BLOBS" -ne "x" ]; then
-  exit 0
-fi
-bosh -n upload blobs
 exit 0
+bosh -n upload blobs
 chmod 644 config/blobs.yml
 
 rspec spec/stacks_spec.rb
