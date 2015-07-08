@@ -3,28 +3,22 @@
 require 'yaml'
 
 binary_name = ENV['BINARY_NAME']
-builds_path = File.join(Dir.pwd, 'builds-yaml', "#{binary_name}-builds.yml")
+builds_dir = File.join(Dir.pwd, 'builds-yaml')
+builds_path = File.join(builds_dir, "#{binary_name}-builds.yml")
 builds = YAML.load_file(builds_path)
-versions = builds[binary_name]
+version = builds[binary_name].shift
 
-if versions.empty?
+unless version
   puts "There are no new builds for #{binary_name} requested"
   exit
 end
 
-versions.delete_if do |version|
-  system(<<-EOF)
-    cd binary-builder
-    ./bin/binary-builder #{binary_name} #{version}
-  EOF
-end
-
-exit 1 unless versions.empty?
-
 system(<<-EOF)
+  cd binary-builder
+  ./bin/binary-builder #{binary_name} #{version}
   echo "#{builds.to_yaml}" > #{builds_path}
-  cd builds-yaml
+  cd #{builds_dir}
   git config --global user.email "ci@localhost"
   git config --global user.name "CI Bot"
-  git commit -am "Complete building #{binary_name} and remove it from builds"
+  git commit -am "Complete building #{binary_name} - #{version} and remove it from builds"
 EOF
