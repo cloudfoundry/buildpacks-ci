@@ -9,4 +9,4 @@ git config --global user.email "cf-buildpacks-eng@pivotal.io"
 git config --global user.name "CF Buildpacks Team CI Server"
 
 version=`cat ../version/number`
-git commit -m "Commit receipt for $version" -- stacks/cflinuxfs2/cflinuxfs2_receipt
+git commit -m "Commit receipt for $version" -- cflinuxfs2/cflinuxfs2_receipt
