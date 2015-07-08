@@ -1,0 +1,8 @@
+---
+platform: linux
+image: docker:///cloudfoundry/cflinuxfs2
+inputs:
+  - name: build-binary
+  - name: buildpacks-ci
+run:
+  path: buildpacks-ci/scripts/push-binary.rb
