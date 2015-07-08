@@ -1,0 +1,10 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci#buildpack
+inputs:
+  - name: bosh-lite
+  - name: deployments-buildpacks
+  - name: buildpacks-ci
+  - name: cf-release
+run:
+  path: buildpacks-ci/scripts/generate-cf-manifest
