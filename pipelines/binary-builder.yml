@@ -100,27 +100,14 @@ jobs:
           passed: [binary-builder]
         - get: buildpacks-ci
       - task: build-binary
+        file: buildpacks-ci/tasks/build-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: binary-builder
-            - name: buildpacks-ci
-            - name: builds-yaml
-          run:
-            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: php
         privileged: true
       - task: push-binary
+        file: buildpacks-ci/tasks/push-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-binary
-            - name: buildpacks-ci
-          run:
-            path: buildpacks-ci/scripts/push-binary.rb
           params:
             BINARY_NAME: php
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
@@ -142,27 +129,14 @@ jobs:
           passed: [binary-builder]
         - get: buildpacks-ci
       - task: build-binary
+        file: buildpacks-ci/tasks/build-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: binary-builder
-            - name: buildpacks-ci
-            - name: builds-yaml
-          run:
-            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: jruby
         privileged: true
       - task: push-binary
+        file: buildpacks-ci/tasks/push-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-binary
-            - name: buildpacks-ci
-          run:
-            path: buildpacks-ci/scripts/push-binary.rb
           params:
             BINARY_NAME: jruby
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
@@ -184,27 +158,14 @@ jobs:
           passed: [binary-builder]
         - get: buildpacks-ci
       - task: build-binary
+        file: buildpacks-ci/tasks/build-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: binary-builder
-            - name: buildpacks-ci
-            - name: builds-yaml
-          run:
-            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: httpd
         privileged: true
       - task: push-binary
+        file: buildpacks-ci/tasks/push-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-binary
-            - name: buildpacks-ci
-          run:
-            path: buildpacks-ci/scripts/push-binary.rb
           params:
             BINARY_NAME: httpd
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
@@ -226,26 +187,13 @@ jobs:
           passed: [binary-builder]
         - get: buildpacks-ci
       - task: build-binary
+        file: buildpacks-ci/tasks/build-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: binary-builder
-            - name: buildpacks-ci
-            - name: builds-yaml
-          run:
-            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: python
       - task: push-binary
+        file: buildpacks-ci/tasks/push-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-binary
-            - name: buildpacks-ci
-          run:
-            path: buildpacks-ci/scripts/push-binary.rb
           params:
             BINARY_NAME: python
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
@@ -267,26 +215,13 @@ jobs:
           passed: [binary-builder]
         - get: buildpacks-ci
       - task: build-binary
+        file: buildpacks-ci/tasks/build-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: binary-builder
-            - name: buildpacks-ci
-            - name: builds-yaml
-          run:
-            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: ruby
       - task: push-binary
+        file: buildpacks-ci/tasks/push-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-binary
-            - name: buildpacks-ci
-          run:
-            path: buildpacks-ci/scripts/push-binary.rb
           params:
             BINARY_NAME: ruby
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
@@ -308,26 +243,13 @@ jobs:
           passed: [binary-builder]
         - get: buildpacks-ci
       - task: build-binary
+        file: buildpacks-ci/tasks/build-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: binary-builder
-            - name: buildpacks-ci
-            - name: builds-yaml
-          run:
-            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: node
       - task: push-binary
+        file: buildpacks-ci/tasks/push-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-binary
-            - name: buildpacks-ci
-          run:
-            path: buildpacks-ci/scripts/push-binary.rb
           params:
             BINARY_NAME: node
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
@@ -349,26 +271,13 @@ jobs:
           passed: [binary-builder]
         - get: buildpacks-ci
       - task: build-binary
+        file: buildpacks-ci/tasks/build-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: binary-builder
-            - name: buildpacks-ci
-            - name: builds-yaml
-          run:
-            path: buildpacks-ci/scripts/build-binary.rb
           params:
             BINARY_NAME: nginx
       - task: push-binary
+        file: buildpacks-ci/tasks/push-binary.yml
         config:
-          platform: linux
-          image: docker:///cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-binary
-            - name: buildpacks-ci
-          run:
-            path: buildpacks-ci/scripts/push-binary.rb
           params:
             BINARY_NAME: nginx
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
