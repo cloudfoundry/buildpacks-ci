@@ -38,7 +38,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cf-buildpacks/cf-release
-  - name: heroku-nanny-time-resource
+  - name: nanny-time-resource
     type: time
     source:
       interval: 12h
@@ -165,6 +165,8 @@ jobs:
         - get: buildpacks-ci
         - get: ci-tools
           trigger: true
+        - get: nanny-time-resource
+          trigger: true
       - task: outdated_buildpack_releases
         config:
           platform: linux
@@ -183,7 +185,7 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: heroku-nanny
-        - get: heroku-nanny-time-resource
+        - get: nanny-time-resource
           trigger: true
       - task: sanity-check-upstream
         config:
