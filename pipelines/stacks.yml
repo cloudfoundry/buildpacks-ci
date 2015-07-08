@@ -49,7 +49,7 @@ resources:
     source:
       uri: https://github.com/cf-buildpacks/bosh-lite
       branch: first-instance
-  - name: cf-release-github
+  - name: cf-release-runtime-passed
     type: git
     source:
       uri: https://github.com/cloudfoundry/cf-release
@@ -109,7 +109,7 @@ jobs:
         - get: deployments-buildpacks
         - get: bosh-lite
         - get: buildpacks-ci
-        - get: cf-release-github
+        - get: cf-release-runtime-passed
         - get: lite-stemcell
         - get: stack-s3
           passed: [ build-rootfs ]
@@ -125,7 +125,7 @@ jobs:
             - name: bosh-lite
             - name: deployments-buildpacks
             - name: buildpacks-ci
-            - name: cf-release-github
+            - name: cf-release-runtime-passed
               path: cf-release
           run:
             path: buildpacks-ci/scripts/generate-cf-manifest
@@ -141,7 +141,7 @@ jobs:
           image: docker:///cfbuildpacks/ci#buildpack
           inputs:
             - name: buildpacks-ci
-            - name: cf-release-github
+            - name: cf-release-runtime-passed
               path: cf-release
             - name: stack-s3
           run:
@@ -157,7 +157,7 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: cf-release-github
+        - get: cf-release-runtime-passed
           passed: [ deploy-cf-to-stack-ci-8 ]
         - get: deployments-buildpacks
         - get: stack-s3
@@ -173,7 +173,7 @@ jobs:
           image: docker:///cfbuildpacks/ci#buildpack
           inputs:
             - name: buildpacks-ci
-            - name: cf-release-github
+            - name: cf-release-runtime-passed
               path: cf-release
             - name: deployments-buildpacks
           run:
@@ -198,7 +198,7 @@ jobs:
       - aggregate:
         - get: stack-s3
           passed: [ test-rootfs ]
-        - get: cf-release-github
+        - get: cf-release-runtime-passed
           passed: [ test-rootfs ]
         - get: buildpacks-ci
         - get: version
@@ -211,7 +211,7 @@ jobs:
           image: docker:///cfbuildpacks/ci#buildpack
           inputs:
             - name: buildpacks-ci
-            - name: cf-release-github
+            - name: cf-release-runtime-passed
               path: cf-release
             - name: stack-s3
             - name: receipt-s3
