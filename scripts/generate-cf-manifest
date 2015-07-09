@@ -20,7 +20,7 @@ releases:
     version: latest
 properties:
   domain: $DEPLOYMENT_NAME.cf-app.com
-  loggrgator_endpoint:
+  loggregator_endpoint:
     shared_secret: PLACEHOLDER-LOGGREGATOR-SECRET
 jobs:
 - name: api_z1
