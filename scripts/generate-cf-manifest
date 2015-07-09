@@ -22,6 +22,10 @@ properties:
   domain: $DEPLOYMENT_NAME.cf-app.com
   loggregator_endpoint:
     shared_secret: PLACEHOLDER-LOGGREGATOR-SECRET
+  uaa:
+    scim:
+      users:
+      - admin|$CF_CI_PASSWORD|scim.write,scim.read,openid,cloud_controller.admin,clients.read,clients.write,doppler.firehose        
 jobs:
 - name: api_z1
   # Make the disk size bigger so we can handle
