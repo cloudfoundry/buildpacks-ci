@@ -212,6 +212,21 @@ jobs:
             - name: version
           run:
             path: buildpacks-ci/scripts/stacks/update-receipt
+      - put: stacks
+        params:
+          repository: update-receipt/stacks
+          tag: version/number
+      - put: version
+        params: { file: version/number }
+  - name: upload-to-github
+    serial: true
+    plan:
+      - aggregate:
+        - get: stack-s3
+          passed: [ shipit ]
+        - get: version
+          passed: [ shipit ]
+          params: { bump: final }
       - task: rename-blob
         config:
           platform: linux
@@ -222,25 +237,20 @@ jobs:
           run:
             path: /bin/sh
             args: ['-c', 'mv stack-s3/cflinuxfs2-*.tar.gz cflinuxfs2-`cat version/number`.tar.gz']
-      - put: stacks
-        params:
-          repository: update-receipt/stacks
-          tag: version/number
       - put: stack-github-release
         params:
           name: version/number
           tag: version/number
           globs:
             - rename-blob/cflinuxfs2-*.tar.gz
-      - put: version
-        params: { file: version/number }
   - name: upload-to-docker
     serial: true
     plan:
-      - get: stack-s3
-        passed: [ shipit ]
-      - get: version
-        passed: [ shipit ]
+      - aggregate:
+        - get: stack-s3
+          passed: [ shipit ]
+        - get: version
+          passed: [ shipit ]
       - put: docker-cflinuxfs2-rootfs
         params:
           import_file: stack-s3/cflinuxfs2-*.tar.gz
