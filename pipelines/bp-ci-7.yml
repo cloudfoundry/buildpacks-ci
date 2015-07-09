@@ -50,6 +50,7 @@ jobs:
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-7
+            CF_CI_PASSWORD: {{ci-cf-password}}
         privileged: true
       - put: deployments-buildpacks
         params:

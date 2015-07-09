@@ -23,10 +23,6 @@ resources:
     source:
       uri: git@github.com:pivotal-cf/buildpacks-ci
       private_key: {{buildpacks-ci-private-key}}
-  - name: cf-release-github
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/cf-release
   - name: bosh-cf-release
     type: bosh-io-release
     source:
@@ -40,14 +36,19 @@ jobs:
         - get: bosh-cf-release
         - get: bosh-lite
         - get: buildpacks-ci
-        - get: cf-release
-          resource: cf-release-github
-          params: { submodules: [src/loggregator] }
+        - task: cf-release
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci#buildpack
+            run:
+              path: git
+              args: ['clone', '--branch', 'v212', '--depth', '1', '--recursive', 'https://github.com/cloudfoundry/cf-release', '.']
       - task: generate-manifest
         file: buildpacks-ci/tasks/make-manifest.yml
         config:
           params:
             DEPLOYMENT_NAME: bp-ci-8b
+            CF_CI_PASSWORD: {{ci-cf-password}}
         privileged: true
       - put: deployments-buildpacks
         params:
