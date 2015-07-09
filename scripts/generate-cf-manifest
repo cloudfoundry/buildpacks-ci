@@ -20,12 +20,8 @@ releases:
     version: latest
 properties:
   domain: $DEPLOYMENT_NAME.cf-app.com
-  loggregator_endpoint:
+  loggrgator_endpoint:
     shared_secret: PLACEHOLDER-LOGGREGATOR-SECRET
-  uaa:
-    scim:
-      users:
-      - admin|$CF_CI_PASSWORD|scim.write,scim.read,openid,cloud_controller.admin,clients.read,clients.write,doppler.firehose        
 jobs:
 - name: api_z1
   # Make the disk size bigger so we can handle
@@ -33,6 +29,8 @@ jobs:
   persistent_disk: 30720" > manifests/cf-stub-spiff.yml
 
 ./bin/make_manifest_spiff
+
+ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CF_CI_PASSWORD'])" manifests/cf-manifest.yml
 
 cd ../deployments-buildpacks
 cp ../bosh-lite/manifests/cf-manifest.yml deployments/$DEPLOYMENT_NAME/manifest.yml
