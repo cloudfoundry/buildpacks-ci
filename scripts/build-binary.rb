@@ -3,13 +3,13 @@
 require 'yaml'
 
 binary_name = ENV['BINARY_NAME']
-builds_dir = File.join(Dir.pwd, 'builds-yaml')
+builds_dir  = File.join(Dir.pwd, 'builds-yaml')
 builds_path = File.join(builds_dir, "#{binary_name}-builds.yml")
-builds = YAML.load_file(builds_path)
-version = builds[binary_name].shift
+builds      = YAML.load_file(builds_path)
+version     = builds[binary_name].shift
 
 unless version
-  puts "There are no new builds for #{binary_name} requested"
+  puts "There are no new builds for #{binary_name} requested."
   exit
 end
 
