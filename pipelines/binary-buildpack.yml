@@ -78,6 +78,7 @@ jobs:
         config:
           params:
             STACKS: cflinuxfs2
+            CF_PASSWORD: {{ci-cf-password}}
         privileged: true
       - put: cf-edge-environments
         conditions: [success, failure]
@@ -102,6 +103,7 @@ jobs:
         config:
           params:
             STACKS: cflinuxfs2
+            CF_PASSWORD: {{ci-cf-password}}
         privileged: true
       - put: cf-lts-environments
         conditions: [success, failure]
@@ -154,6 +156,7 @@ jobs:
         config:
           params:
             STACKS: cflinuxfs2
+            CF_PASSWORD: {{ci-cf-password}}
         privileged: true
       - put: cf-edge-environments
         conditions: [success, failure]
@@ -187,6 +190,7 @@ jobs:
         config:
           params:
             STACKS: cflinuxfs2
+            CF_PASSWORD: {{ci-cf-password}}
         privileged: true
       - put: cf-lts-environments
         conditions: [success, failure]

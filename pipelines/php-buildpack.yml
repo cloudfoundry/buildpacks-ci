@@ -87,6 +87,7 @@ jobs:
           params:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
         privileged: true
       - put: cf-edge-environments
         conditions: [success, failure]
@@ -120,6 +121,7 @@ jobs:
           params:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
         privileged: true
       - put: cf-lts-environments
         conditions: [success, failure]
@@ -173,6 +175,7 @@ jobs:
           params:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
         privileged: true
       - put: cf-edge-environments
         conditions: [success, failure]
@@ -207,6 +210,7 @@ jobs:
           params:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
         privileged: true
       - put: cf-lts-environments
         conditions: [success, failure]
