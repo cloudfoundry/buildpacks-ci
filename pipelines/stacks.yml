@@ -125,6 +125,7 @@ jobs:
           passed: [ build-rootfs ]
         - get: version
           passed: [ build-rootfs ]
+          trigger: true
         - get: receipt-s3
           passed: [ build-rootfs ]
         - get: stacks
@@ -167,6 +168,7 @@ jobs:
           passed: [ deploy-cf-to-stack-ci-8 ]
         - get: version
           passed: [ deploy-cf-to-stack-ci-8 ]
+          trigger: true
         - get: receipt-s3
           passed: [ deploy-cf-to-stack-ci-8 ]
         - get: stacks
