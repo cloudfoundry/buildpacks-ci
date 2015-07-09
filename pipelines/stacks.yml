@@ -227,6 +227,7 @@ jobs:
         - get: stack-s3
           passed: [ shipit ]
         - get: version
+          trigger: true
           passed: [ shipit ]
           params: { bump: final }
       - task: rename-blob
@@ -252,6 +253,7 @@ jobs:
         - get: stack-s3
           passed: [ shipit ]
         - get: version
+          trigger: true
           passed: [ shipit ]
       - put: docker-cflinuxfs2-rootfs
         params:
@@ -269,6 +271,7 @@ jobs:
         - get: cf-release-develop
         - get: buildpacks-ci
         - get: version
+          trigger: true
           passed: [ shipit ]
         - get: receipt-s3
           passed: [ shipit ]
