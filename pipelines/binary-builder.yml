@@ -2,8 +2,7 @@ resources:
   - name: binary-builder
     type: git
     source:
-      private_key: {{buildpacks-private-key}}
-      uri: git@github.com:pivotal-cf/binary-builder.git
+      uri: https://github.com/cloudfoundry/binary-builder.git
   - name: binary-builder-compiler-cache
     type: s3
     source:
@@ -14,55 +13,55 @@ resources:
   - name: buildpacks-ci
     type: git
     source:
-      private_key: {{buildpacks-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:pivotal-cf/buildpacks-ci
   - name: nginx-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-private-key}}
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
       uri: git@github.com:pivotal-cf/buildpacks-ci.git
       paths: [ nginx-builds.yml ]
   - name: php-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-private-key}}
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
       uri: git@github.com:pivotal-cf/buildpacks-ci.git
       paths: [ php-builds.yml ]
   - name: node-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-private-key}}
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
       uri: git@github.com:pivotal-cf/buildpacks-ci.git
       paths: [ node-builds.yml ]
   - name: ruby-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-private-key}}
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
       uri: git@github.com:pivotal-cf/buildpacks-ci.git
       paths: [ ruby-builds.yml ]
   - name: jruby-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-private-key}}
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
       uri: git@github.com:pivotal-cf/buildpacks-ci.git
       paths: [ jruby-builds.yml ]
   - name: httpd-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-private-key}}
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
       uri: git@github.com:pivotal-cf/buildpacks-ci.git
       paths: [ httpd-builds.yml ]
   - name: python-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-private-key}}
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
       uri: git@github.com:pivotal-cf/buildpacks-ci.git
       paths: [ python-builds.yml ]
 

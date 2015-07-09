@@ -13,20 +13,20 @@ resources:
     type: git
     source:
       uri: git@github.com:pivotal-cf/buildpacks-ci
-      private_key: {{buildpacks-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
   - name: cf-edge-environments
     type: pool
     source:
       branch: master
       pool: cf-edge-environments
-      private_key: {{buildpacks-private-key}}
+      private_key: {{concourse-locks-private-key}}
       uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
   - name: cf-lts-environments
     type: pool
     source:
       branch: master
       pool: cf-lts-environments
-      private_key: {{buildpacks-private-key}}
+      private_key: {{concourse-locks-private-key}}
       uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
 
 jobs:

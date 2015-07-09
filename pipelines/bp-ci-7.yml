@@ -11,7 +11,7 @@ resources:
     type: git
     source:
       uri: git@github.com:pivotal-cf/deployments-buildpacks
-      private_key: {{buildpacks-private-key}}
+      private_key: {{deployments-private-key}}
       branch: master
   - name: bosh-lite
     type: git
@@ -22,7 +22,7 @@ resources:
     type: git
     source:
       uri: git@github.com:pivotal-cf/buildpacks-ci
-      private_key: {{buildpacks-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
 jobs:
   - name: deploy-cf-to-bp-ci-7
     serial: true

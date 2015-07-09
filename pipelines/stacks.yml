@@ -4,13 +4,13 @@ resources:
     type: git
     source:
       uri: git@github.com:pivotal-cf/buildpacks-ci
-      private_key: {{buildpacks-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
   - name: stacks
     type: git
     source:
       uri: git@github.com:cloudfoundry/stacks.git
       branch: master
-      private_key: {{buildpacks-private-key}}
+      private_key: {{stacks-private-key}}
   - name: stack-s3
     type: s3
     source:
@@ -36,7 +36,7 @@ resources:
     type: git
     source:
       uri: git@github.com:pivotal-cf/deployments-buildpacks
-      private_key: {{buildpacks-private-key}}
+      private_key: {{deployments-private-key}}
       branch: master
   - name: stack-ci-8-cf-deployment
     type: bosh-deployment
@@ -61,7 +61,7 @@ resources:
     source:
       uri: git@github.com:cloudfoundry/cf-release
       branch: develop
-      private_key: {{stacks-private-key}}
+      private_key: {{cf-release-private-key}}
   - name: lite-stemcell
     type: bosh-io-stemcell
     source:

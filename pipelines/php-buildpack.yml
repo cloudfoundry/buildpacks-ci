@@ -8,7 +8,7 @@ resources:
     type: git
     source:
       uri: git@github.com:pivotal-cf/buildpacks-ci
-      private_key: {{buildpacks-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
   - name: cf-release
     type: git
     source:
@@ -18,20 +18,20 @@ resources:
     source:
       branch: master
       pool: cf-edge-environments
-      private_key: {{buildpacks-private-key}}
+      private_key: {{concourse-locks-private-key}}
       uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
   - name: cf-lts-environments
     type: pool
     source:
       branch: master
       pool: cf-lts-environments
-      private_key: {{buildpacks-private-key}}
+      private_key: {{concourse-locks-private-key}}
       uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
   - name: deployments-buildpacks
     type: git
     source:
       uri: git@github.com:pivotal-cf/deployments-buildpacks
-      private_key: {{buildpacks-private-key}}
+      private_key: {{deployments-private-key}}
   - name: php-buildpack
     type: git
     source:
@@ -41,7 +41,7 @@ resources:
     type: git
     source:
       uri: git@github.com:cloudfoundry/php-buildpack.git
-      private_key: {{buildpacks-private-key}}
+      private_key: {{php-buildpack-private-key}}
       branch: master
   - name: php-pivotal-buildpack
     type: s3

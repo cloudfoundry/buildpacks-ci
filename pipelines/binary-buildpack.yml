@@ -4,7 +4,7 @@ resources:
     type: git
     source:
       uri: git@github.com:pivotal-cf/deployments-buildpacks
-      private_key: {{buildpacks-private-key}}
+      private_key: {{deployments-private-key}}
   - name: ci-tools
     type: git
     source:
@@ -13,7 +13,7 @@ resources:
     type: git
     source:
       uri: git@github.com:pivotal-cf/buildpacks-ci
-      private_key: {{buildpacks-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
   - name: binary-buildpack
     type: git
     source:
@@ -23,7 +23,7 @@ resources:
     type: git
     source:
       uri: git@github.com:cloudfoundry/binary-buildpack.git
-      private_key: {{buildpacks-private-key}}
+      private_key: {{binary-buildpack-private-key}}
       branch: master
   - name: binary-pivotal-buildpack
     type: s3
@@ -44,14 +44,14 @@ resources:
     source:
       branch: master
       pool: cf-edge-environments
-      private_key: {{buildpacks-private-key}}
+      private_key: {{concourse-locks-private-key}}
       uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
   - name: cf-lts-environments
     type: pool
     source:
       branch: master
       pool: cf-lts-environments
-      private_key: {{buildpacks-private-key}}
+      private_key: {{concourse-locks-private-key}}
       uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
   - name: cf-release
     type: git
