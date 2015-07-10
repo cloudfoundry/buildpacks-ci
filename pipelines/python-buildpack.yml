@@ -56,6 +56,12 @@ resources:
       regexp: python_buildpack-cached-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: buildpack-github-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: python-buildpack
+      access_token: {{buildpacks-github-token}}
 
 jobs:
   - name: detect new Python buildpack and upload artifacts
@@ -177,12 +183,19 @@ jobs:
         - get: buildpack
           resource: python-buildpack-master
           passed: [ python-buildpack-release ]
-      - task: upload to github
-        file: buildpacks-ci/tasks/upload-to-github.yml
-        config:
-          params:
-            GITHUB_ORG: cloudfoundry
-            GITHUB_TOKEN: {{buildpacks-github-token}}
+      - task: prepare-release
+        file: buildpacks-ci/tasks/prepare-release.yml
+        privileged: true
+      - task: finalize-buildpack
+        file: buildpacks-ci/tasks/finalize-buildpack.yml
+        privileged: true
+      - put: buildpack-github-release
+        params:
+          name: prepare-release/tag
+          tag: prepare-release/tag
+          body: prepare-release/buildpack/RECENT_CHANGES
+          globs:
+            - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip
   - name: python buildpack to cf-release
     serial: true
     plan:
