@@ -36,6 +36,9 @@ RUN cf install-plugin https://github.com/cloudfoundry-incubator/diego-ssh/releas
 RUN wget -O- 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.7/spiff_linux_amd64.zip' | funzip > /usr/bin/spiff
 RUN chmod 755 /usr/bin/spiff
 
+#download hub CLI
+RUN wget -O- https://github.com/github/hub/releases/download/v2.2.1/hub-linux-amd64-2.2.1.tar.gz | tar xz -C /usr/bin --strip-components=1 hub-linux-amd64-2.2.1/hub
+
 # when docker container starts, ensure login scripts run
 COPY build/ssh-agent.sh /etc/profile.d/
 COPY build/ruby.sh /etc/profile.d/
