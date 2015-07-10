@@ -62,6 +62,22 @@ fly hijack -c $RESOURCE_NAME rm -rf /tmp/git-resource-repo-cache
 
 4. `git commit -am 'Build ruby 2.2.2' && git push`
 
-Build should automatically kick off at https://buildpacks.ci.cf-app.com/pipelines/binary-builder and silently upload a binary to the pivotal-buildpacks bucket under concourse-binaries, e.g. https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/ruby/ruby-2.2.2-linux-x64.tgz
+Build should automatically kick off at
+https://buildpacks.ci.cf-app.com/pipelines/binary-builder and silently
+upload a binary to the pivotal-buildpacks bucket under
+concourse-binaries,
+e.g. https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/ruby/ruby-2.2.2-linux-x64.tgz
 
-Note that the array is a stack, which will be emptied when the build succeeds.
+Note that the array is a stack, which will be emptied as the build
+succeeds in packaging successive versions.
+
+
+# Orphaned branches
+
+The `binary-builds` branch is used to instruct the `binary-builder`
+pipeline to generate a new version of a CF rootfs-specific binary.
+
+The `resource-pools` branch is where our pipelines' pool of locks is
+located. You can read more about Concourse resource pools here:
+
+> https://github.com/concourse/pool-resource
