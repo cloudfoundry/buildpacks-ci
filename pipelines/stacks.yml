@@ -3,8 +3,7 @@ resources:
   - name: buildpacks-ci
     type: git
     source:
-      uri: git@github.com:pivotal-cf/buildpacks-ci
-      private_key: {{buildpacks-ci-private-key}}
+      uri: https://github.com/cloudfoundry/buildpacks-ci
   - name: stacks
     type: git
     source:

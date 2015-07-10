@@ -12,8 +12,7 @@ resources:
   - name: buildpacks-ci
     type: git
     source:
-      uri: git@github.com:pivotal-cf/buildpacks-ci
-      private_key: {{buildpacks-ci-private-key}}
+      uri: https://github.com/cloudfoundry/buildpacks-ci
   - name: binary-buildpack
     type: git
     source:
@@ -45,14 +44,14 @@ resources:
       branch: resource-pools
       pool: cf-edge-environments
       private_key: {{resource-pools-private-key}}
-      uri: git@github.com:pivotal-cf/buildpacks-ci.git
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
   - name: cf-lts-environments
     type: pool
     source:
       branch: resource-pools
       pool: cf-lts-environments
       private_key: {{resource-pools-private-key}}
-      uri: git@github.com:pivotal-cf/buildpacks-ci.git
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
   - name: cf-release
     type: git
     source:
