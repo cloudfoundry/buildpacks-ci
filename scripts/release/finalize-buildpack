@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+require "fileutils"
+
+Dir.chdir('pivotal-buildpacks-cached') do
+  Dir.glob("*.zip").map do |filename|
+    filename.match(/(.*)_buildpack-cached-v(.*)\+.*.zip/) do |match|
+      language = match[1]
+      version = match[2]
+      FileUtils.mv(filename, "#{language}_buildpack-cached-v#{version}.zip")
+    end
+  end
+end

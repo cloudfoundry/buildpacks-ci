@@ -1,0 +1,13 @@
+#!/bin/bash
+set -euo pipefail
+
+tag=v`cat buildpack/VERSION`
+echo -n $tag > tag
+pushd buildpack
+../ci-tools/extract-recent-changes
+BUNDLE_GEMFILE=cf.Gemfile bundle -j4
+echo 'Packaged binaries:' >> RECENT_CHANGES
+BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager list >> RECENT_CHANGES
+BUILDPACK_LANGUAGE=`ruby -ryaml -e 'puts YAML.load_file("manifest.yml")["language"]'`
+BUILDPACK_REPOSITORY=$BUILDPACK_LANGUAGE-buildpack
+popd
