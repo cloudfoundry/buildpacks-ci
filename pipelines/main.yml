@@ -47,17 +47,17 @@ resources:
   - name: cf-edge-environments
     type: pool
     source:
-      branch: master
+      branch: resource-pools
       pool: cf-edge-environments
-      private_key: {{concourse-locks-private-key}}
-      uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
+      private_key: {{resource-pools-private-key}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci.git
   - name: cf-lts-environments
     type: pool
     source:
-      branch: master
+      branch: resource-pools
       pool: cf-lts-environments
-      private_key: {{concourse-locks-private-key}}
-      uri: git@github.com:pivotal-cf-experimental/buildpacks-concourse-locks.git
+      private_key: {{resource-pools-private-key}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci.git
 jobs:
   - name: machete-firewall-CF-edge
     serial: true
