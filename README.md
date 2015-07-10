@@ -13,14 +13,14 @@ This contains the configuration for the Cloud Foundry Buildpacks team [Concourse
 * [brats-binary-beta](pipelines/brats-binary-beta.yml): run [BRATS](https://github.com/cloudfoundry/brats) against the binary-beta branch of buildpacks
 * [brats-develop](pipelines/brats-develop.yml): run [BRATS](https://github.com/cloudfoundry/brats) against the develop branch of buildpacks
 * [brats](pipelines/brats.yml): run [BRATS](https://github.com/cloudfoundry/brats) against the master branch of buildpacks
-* [go-buildpack](pipelines/go-buildpack): test and release the [Go buildpack](https://github.com/cloudfoundry/go-buildpack)
-* [main](pipelines/main): tooling
-* [nodejs-buildpack](pipelines/nodejs-buildpack): test and release the [Node.js buildpack](https://github.com/cloudfoundry/nodejs-buildpack)
-* [php-buildpack](pipelines/php-buildpack): test and release the [PHP buildpack](https://github.com/cloudfoundry/php-buildpack)
-* [python-buildpack](pipelines/python-buildpack): test and release the [Python buildpack](https://github.com/cloudfoundry/python-buildpack)
-* [ruby-buildpack](pipelines/ruby-buildpack): test and release the [Ruby buildpack](https://github.com/cloudfoundry/ruby-buildpack)
-* [stacks](pipelines/stacks): test and release Cloud Foundry [stacks](https://github.com/cloudfoundry/stacks)
-* [staticfile-buildpack](pipelines/staticfile-buildpack): test and release the [staticfile buildpack](https://github.com/cloudfoundry/staticfile-buildpack)
+* [go-buildpack](pipelines/go-buildpack.yml): test and release the [Go buildpack](https://github.com/cloudfoundry/go-buildpack)
+* [main](pipelines/main.yml): tooling
+* [nodejs-buildpack](pipelines/nodejs-buildpack.yml): test and release the [Node.js buildpack](https://github.com/cloudfoundry/nodejs-buildpack)
+* [php-buildpack](pipelines/php-buildpack.yml): test and release the [PHP buildpack](https://github.com/cloudfoundry/php-buildpack)
+* [python-buildpack](pipelines/python-buildpack.yml): test and release the [Python buildpack](https://github.com/cloudfoundry/python-buildpack)
+* [ruby-buildpack](pipelines/ruby-buildpack.yml): test and release the [Ruby buildpack](https://github.com/cloudfoundry/ruby-buildpack)
+* [stacks](pipelines/stacks.yml): test and release Cloud Foundry [stacks](https://github.com/cloudfoundry/stacks)
+* [staticfile-buildpack](pipelines/staticfile-buildpack.yml): test and release the [staticfile buildpack](https://github.com/cloudfoundry/staticfile-buildpack)
 
 # Configuration
 
