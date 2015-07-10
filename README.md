@@ -22,9 +22,9 @@ This contains the configuration for the Cloud Foundry Buildpacks team [Concourse
 * [stacks](pipelines/stacks): test and release Cloud Foundry [stacks](https://github.com/cloudfoundry/stacks)
 * [staticfile-buildpack](pipelines/staticfile-buildpack): test and release the [staticfile buildpack](https://github.com/cloudfoundry/staticfile-buildpack)
 
-# Usage
+# Configuration
 
-With a proper Concourse deployment, and `private.yml` containing secrets.
+With a proper Concourse deployment, and `private.yml` containing secrets:
 
 ```sh
 fly c main -c pipeline.yml -vf private.yml
