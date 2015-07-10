@@ -5,18 +5,7 @@ export TMPDIR=/tmp
 export BUILDPACK_VERSION=`cat buildpack/VERSION`
 export BUILDPACK_LANGUAGE=`ruby -ryaml -e 'puts YAML.load_file("buildpack/manifest.yml")["language"]'`
 
-pushd pivotal-buildpacks-cached
-ruby <<RUBY
-require "fileutils"
-Dir.glob("*.zip").map do |filename|
-  filename.match(/(.*)_buildpack-cached-v(.*)\+.*.zip/) do |match|
-    language = match[1]
-    version = match[2]
-    FileUtils.mv(filename, "#{language}_buildpack-cached-v#{version}.zip")
-  end
-end
-RUBY
-popd
+./buildpacks-ci/scripts/release/finalize-buildpack
 
 pushd ci-tools
 bundle install
