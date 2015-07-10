@@ -7,6 +7,7 @@ pushd buildpack
 ../ci-tools/extract-recent-changes
 BUNDLE_GEMFILE=cf.Gemfile bundle -j4
 echo 'Packaged binaries:' >> RECENT_CHANGES
+echo >> RECENT_CHANGES
 BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager list >> RECENT_CHANGES
 BUILDPACK_LANGUAGE=`ruby -ryaml -e 'puts YAML.load_file("manifest.yml")["language"]'`
 BUILDPACK_REPOSITORY=$BUILDPACK_LANGUAGE-buildpack
