@@ -5,4 +5,4 @@ inputs:
   - name: buildpacks-ci
   - name: pivotal-buildpacks-cached
 run:
-  path: buildpacks-ci/scripts/release/finalize-release
+  path: buildpacks-ci/scripts/release/finalize-buildpack
