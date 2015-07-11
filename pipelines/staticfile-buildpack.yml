@@ -71,20 +71,21 @@ jobs:
         resource: cf-edge-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: ci-tools
-        - get: deployments-buildpacks
-        - get: buildpack
-          resource: staticfile-buildpack
-          trigger: true
-      - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack.yml
-        config:
-          params:
-            STACKS: cflinuxfs2
-            CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: ci-tools
+          - get: deployments-buildpacks
+          - get: buildpack
+            resource: staticfile-buildpack
+            trigger: true
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack.yml
+          config:
+            params:
+              STACKS: cflinuxfs2
+              CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
         ensure:
           put: cf-edge-environments
           params:
@@ -96,20 +97,21 @@ jobs:
         resource: cf-lts-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: ci-tools
-        - get: deployments-buildpacks
-        - get: buildpack
-          resource: staticfile-buildpack
-          trigger: true
-      - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack.yml
-        config:
-          params:
-            STACKS: cflinuxfs2
-            CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: ci-tools
+          - get: deployments-buildpacks
+          - get: buildpack
+            resource: staticfile-buildpack
+            trigger: true
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack.yml
+          config:
+            params:
+              STACKS: cflinuxfs2
+              CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
         ensure:
           put: cf-lts-environments
           params:
@@ -140,29 +142,30 @@ jobs:
         resource: cf-edge-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: ci-tools
-        - get: deployments-buildpacks
-        - get: buildpack
-          passed: [ "detect new Staticfile buildpack and upload artifacts" ]
-          resource: staticfile-buildpack-master
-          trigger: true
-        - get: pivotal-buildpacks
-          resource: staticfile-pivotal-buildpack
-          passed: [ "detect new Staticfile buildpack and upload artifacts" ]
-          trigger: true
-        - get: pivotal-buildpacks-cached
-          resource: staticfile-pivotal-buildpack-cached
-          passed: [ "detect new Staticfile buildpack and upload artifacts" ]
-          trigger: true
-      - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack-for-release.yml
-        config:
-          params:
-            STACKS: cflinuxfs2
-            CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: ci-tools
+          - get: deployments-buildpacks
+          - get: buildpack
+            passed: [ "detect new Staticfile buildpack and upload artifacts" ]
+            resource: staticfile-buildpack-master
+            trigger: true
+          - get: pivotal-buildpacks
+            resource: staticfile-pivotal-buildpack
+            passed: [ "detect new Staticfile buildpack and upload artifacts" ]
+            trigger: true
+          - get: pivotal-buildpacks-cached
+            resource: staticfile-pivotal-buildpack-cached
+            passed: [ "detect new Staticfile buildpack and upload artifacts" ]
+            trigger: true
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack-for-release.yml
+          config:
+            params:
+              STACKS: cflinuxfs2
+              CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
         ensure:
           put: cf-edge-environments
           params:
@@ -174,29 +177,30 @@ jobs:
         resource: cf-lts-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: ci-tools
-        - get: deployments-buildpacks
-        - get: buildpack
-          passed: [ "detect new Staticfile buildpack and upload artifacts" ]
-          resource: staticfile-buildpack-master
-          trigger: true
-        - get: pivotal-buildpacks
-          resource: staticfile-pivotal-buildpack
-          passed: [ "detect new Staticfile buildpack and upload artifacts" ]
-          trigger: true
-        - get: pivotal-buildpacks-cached
-          resource: staticfile-pivotal-buildpack-cached
-          passed: [ "detect new Staticfile buildpack and upload artifacts" ]
-          trigger: true
-      - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack-for-release.yml
-        config:
-          params:
-            STACKS: cflinuxfs2
-            CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: ci-tools
+          - get: deployments-buildpacks
+          - get: buildpack
+            passed: [ "detect new Staticfile buildpack and upload artifacts" ]
+            resource: staticfile-buildpack-master
+            trigger: true
+          - get: pivotal-buildpacks
+            resource: staticfile-pivotal-buildpack
+            passed: [ "detect new Staticfile buildpack and upload artifacts" ]
+            trigger: true
+          - get: pivotal-buildpacks-cached
+            resource: staticfile-pivotal-buildpack-cached
+            passed: [ "detect new Staticfile buildpack and upload artifacts" ]
+            trigger: true
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack-for-release.yml
+          config:
+            params:
+              STACKS: cflinuxfs2
+              CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
         ensure:
           put: cf-lts-environments
           params:
