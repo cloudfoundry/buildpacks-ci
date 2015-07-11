@@ -48,10 +48,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-lts-environments
+          params:
+            release: cf-environments
   - name: brats-go-CF-edge
     serial: true
     plan:
@@ -71,10 +71,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-edge-environments
+          params:
+            release: cf-environments
   - name: brats-python-CF-LTS
     serial: true
     plan:
@@ -94,10 +94,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-lts-environments
+          params:
+            release: cf-environments
   - name: brats-python-CF-edge
     serial: true
     plan:
@@ -117,10 +117,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-edge-environments
+          params:
+            release: cf-environments
   - name: brats-nodejs-CF-LTS
     serial: true
     plan:
@@ -140,10 +140,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-lts-environments
+          params:
+            release: cf-environments
   - name: brats-nodejs-CF-edge
     serial: true
     plan:
@@ -163,10 +163,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-edge-environments
+          params:
+            release: cf-environments
   - name: brats-php-CF-LTS
     serial: true
     plan:
@@ -186,10 +186,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-lts-environments
+          params:
+            release: cf-environments
   - name: brats-php-CF-edge
     serial: true
     plan:
@@ -209,10 +209,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-edge-environments
+          params:
+            release: cf-environments
   - name: brats-hhvm-CF-LTS
     serial: true
     plan:
@@ -232,10 +232,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-lts-environments
+          params:
+            release: cf-environments
   - name: brats-hhvm-CF-edge
     serial: true
     plan:
@@ -255,10 +255,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-edge-environments
+          params:
+            release: cf-environments
   - name: brats-ruby-CF-LTS
     serial: true
     plan:
@@ -278,10 +278,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-lts-environments
+          params:
+            release: cf-environments
   - name: brats-ruby-CF-edge
     serial: true
     plan:
@@ -301,10 +301,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-edge-environments
+          params:
+            release: cf-environments
   - name: brats-jruby-CF-LTS
     serial: true
     plan:
@@ -324,10 +324,10 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-lts-environments
+          params:
+            release: cf-environments
   - name: brats-jruby-CF-edge
     serial: true
     plan:
@@ -347,7 +347,7 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-edge-environments
+          params:
+            release: cf-environments

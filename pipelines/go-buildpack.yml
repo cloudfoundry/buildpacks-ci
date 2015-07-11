@@ -113,10 +113,10 @@ jobs:
             STACKS: cflinuxfs2
             CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-edge-environments
+          params:
+            release: cf-environments
   - name: go-buildpack-CF-LTS-master
     serial: true
     plan:
@@ -147,10 +147,10 @@ jobs:
             STACKS: cflinuxfs2
             CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-lts-environments
+          params:
+            release: cf-environments
   - name: go-buildpack-release
     serial: true
     plan:
@@ -262,10 +262,10 @@ jobs:
             STACKS: cflinuxfs2
             CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-edge-environments
+          params:
+            release: cf-environments
   - name: go-buildpack-CF-LTS
     serial: true
     plan:
@@ -287,7 +287,7 @@ jobs:
             STACKS: cflinuxfs2
             CF_PASSWORD: {{ci-cf-password}}
         privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+        ensure:
+          put: cf-lts-environments
+          params:
+            release: cf-environments
