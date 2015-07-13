@@ -189,6 +189,7 @@ jobs:
         config:
           params:
             BINARY_NAME: python
+        privileged: true
       - task: push-binary
         file: buildpacks-ci/tasks/push-binary.yml
         config:
@@ -217,6 +218,7 @@ jobs:
         config:
           params:
             BINARY_NAME: ruby
+        privileged: true
       - task: push-binary
         file: buildpacks-ci/tasks/push-binary.yml
         config:
@@ -245,6 +247,7 @@ jobs:
         config:
           params:
             BINARY_NAME: node
+        privileged: true
       - task: push-binary
         file: buildpacks-ci/tasks/push-binary.yml
         config:
@@ -273,6 +276,7 @@ jobs:
         config:
           params:
             BINARY_NAME: nginx
+        privileged: true
       - task: push-binary
         file: buildpacks-ci/tasks/push-binary.yml
         config:
