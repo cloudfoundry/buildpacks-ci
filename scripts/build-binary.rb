@@ -13,7 +13,9 @@ unless version
   exit
 end
 
-system(<<-EOF)
+exit system(<<-EOF)
+  set -e
+
   cd binary-builder
   ./bin/binary-builder #{binary_name} #{version}
   echo "#{builds.to_yaml}" > #{builds_path}
