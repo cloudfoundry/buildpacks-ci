@@ -65,23 +65,24 @@ jobs:
         resource: cf-edge-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: ci-tools
-        - get: deployments-buildpacks
-        - get: buildpack
-          resource: machete-firewall-test
-          trigger: true
-      - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack.yml
-        config:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: ci-tools
+          - get: deployments-buildpacks
+          - get: buildpack
+            resource: machete-firewall-test
+            trigger: true
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack.yml
+          config:
+            params:
+              STACKS: cflinuxfs2
+          privileged: true
+        ensure:
+          put: cf-edge-environments
           params:
-            STACKS: cflinuxfs2
-        privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+            release: cf-environments
   - name: machete-firewall-CF-LTS
     serial: true
     plan:
@@ -89,23 +90,24 @@ jobs:
         resource: cf-lts-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: ci-tools
-        - get: deployments-buildpacks
-        - get: buildpack
-          resource: machete-firewall-test
-          trigger: true
-      - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack.yml
-        config:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: ci-tools
+          - get: deployments-buildpacks
+          - get: buildpack
+            resource: machete-firewall-test
+            trigger: true
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack.yml
+          config:
+            params:
+              STACKS: cflinuxfs2
+          privileged: true
+        ensure:
+          put: cf-lts-environments
           params:
-            STACKS: cflinuxfs2
-        privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+            release: cf-environments
   - name: buildpack-packager
     serial: true
     plan:

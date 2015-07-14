@@ -36,23 +36,24 @@ jobs:
         resource: cf-lts-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        config:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - {get: brats-time-resource, trigger: true}
+        - task: bin-tests
+          file: buildpacks-ci/tasks/brats.yml
+          config:
+            params:
+              LANGUAGE: python
+              BRATS_BRANCH: cf-binary-beta
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        ensure:
+          put: cf-lts-environments
           params:
-            LANGUAGE: python
-            BRATS_BRANCH: cf-binary-beta
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+            release: cf-environments
   - name: brats-python-CF-edge-binary-beta
     serial: true
     plan:
@@ -60,23 +61,24 @@ jobs:
         resource: cf-edge-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        config:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - {get: brats-time-resource, trigger: true}
+        - task: bin-tests
+          file: buildpacks-ci/tasks/brats.yml
+          config:
+            params:
+              LANGUAGE: python
+              BRATS_BRANCH: cf-binary-beta
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        ensure:
+          put: cf-edge-environments
           params:
-            LANGUAGE: python
-            BRATS_BRANCH: cf-binary-beta
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+            release: cf-environments
   - name: brats-nodejs-CF-LTS-binary-beta
     serial: true
     plan:
@@ -84,23 +86,24 @@ jobs:
         resource: cf-lts-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        config:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - {get: brats-time-resource, trigger: true}
+        - task: bin-tests
+          file: buildpacks-ci/tasks/brats.yml
+          config:
+            params:
+              LANGUAGE: nodejs
+              BRATS_BRANCH: cf-binary-beta
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        ensure:
+          put: cf-lts-environments
           params:
-            LANGUAGE: nodejs
-            BRATS_BRANCH: cf-binary-beta
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+            release: cf-environments
   - name: brats-nodejs-CF-edge-binary-beta
     serial: true
     plan:
@@ -108,23 +111,24 @@ jobs:
         resource: cf-edge-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        config:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - {get: brats-time-resource, trigger: true}
+        - task: bin-tests
+          file: buildpacks-ci/tasks/brats.yml
+          config:
+            params:
+              LANGUAGE: nodejs
+              BRATS_BRANCH: cf-binary-beta
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        ensure:
+          put: cf-edge-environments
           params:
-            LANGUAGE: nodejs
-            BRATS_BRANCH: cf-binary-beta
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+            release: cf-environments
   - name: brats-php-CF-LTS-binary-beta
     serial: true
     plan:
@@ -132,23 +136,24 @@ jobs:
         resource: cf-lts-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        config:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - {get: brats-time-resource, trigger: true}
+        - task: bin-tests
+          file: buildpacks-ci/tasks/brats.yml
+          config:
+            params:
+              LANGUAGE: php
+              BRATS_BRANCH: cf-binary-beta
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        ensure:
+          put: cf-lts-environments
           params:
-            LANGUAGE: php
-            BRATS_BRANCH: cf-binary-beta
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+            release: cf-environments
   - name: brats-php-CF-edge-binary-beta
     serial: true
     plan:
@@ -156,23 +161,24 @@ jobs:
         resource: cf-edge-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        config:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - {get: brats-time-resource, trigger: true}
+        - task: bin-tests
+          file: buildpacks-ci/tasks/brats.yml
+          config:
+            params:
+              LANGUAGE: php
+              BRATS_BRANCH: cf-binary-beta
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        ensure:
+          put: cf-edge-environments
           params:
-            LANGUAGE: php
-            BRATS_BRANCH: cf-binary-beta
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+            release: cf-environments
   - name: brats-ruby-CF-LTS-binary-beta
     serial: true
     plan:
@@ -180,23 +186,24 @@ jobs:
         resource: cf-lts-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        config:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - {get: brats-time-resource, trigger: true}
+        - task: bin-tests
+          file: buildpacks-ci/tasks/brats.yml
+          config:
+            params:
+              LANGUAGE: ruby
+              BRATS_BRANCH: cf-binary-beta
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        ensure:
+          put: cf-lts-environments
           params:
-            LANGUAGE: ruby
-            BRATS_BRANCH: cf-binary-beta
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+            release: cf-environments
   - name: brats-ruby-CF-edge-binary-beta
     serial: true
     plan:
@@ -204,23 +211,24 @@ jobs:
         resource: cf-edge-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        config:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - {get: brats-time-resource, trigger: true}
+        - task: bin-tests
+          file: buildpacks-ci/tasks/brats.yml
+          config:
+            params:
+              LANGUAGE: ruby
+              BRATS_BRANCH: cf-binary-beta
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        ensure:
+          put: cf-edge-environments
           params:
-            LANGUAGE: ruby
-            BRATS_BRANCH: cf-binary-beta
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+            release: cf-environments
   - name: brats-jruby-CF-LTS-binary-beta
     serial: true
     plan:
@@ -228,23 +236,24 @@ jobs:
         resource: cf-lts-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        config:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - {get: brats-time-resource, trigger: true}
+        - task: bin-tests
+          file: buildpacks-ci/tasks/brats.yml
+          config:
+            params:
+              LANGUAGE: jruby
+              BRATS_BRANCH: cf-binary-beta
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        ensure:
+          put: cf-lts-environments
           params:
-            LANGUAGE: jruby
-            BRATS_BRANCH: cf-binary-beta
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-      - put: cf-lts-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+            release: cf-environments
   - name: brats-jruby-CF-edge-binary-beta
     serial: true
     plan:
@@ -252,20 +261,21 @@ jobs:
         resource: cf-edge-environments
         params:
           acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        config:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - {get: brats-time-resource, trigger: true}
+        - task: bin-tests
+          file: buildpacks-ci/tasks/brats.yml
+          config:
+            params:
+              LANGUAGE: jruby
+              BRATS_BRANCH: cf-binary-beta
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        ensure:
+          put: cf-edge-environments
           params:
-            LANGUAGE: jruby
-            BRATS_BRANCH: cf-binary-beta
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-      - put: cf-edge-environments
-        conditions: [success, failure]
-        params:
-          release: cf-environments
+            release: cf-environments
