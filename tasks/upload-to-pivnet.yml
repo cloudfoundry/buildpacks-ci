@@ -1,6 +1,6 @@
 ---
 platform: linux
-image: docker:///cfbuildpacks/ci#buildpack
+image: docker:///cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
   - name: ci-tools

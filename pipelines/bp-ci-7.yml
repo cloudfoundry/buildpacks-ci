@@ -33,14 +33,14 @@ jobs:
         - task: cf-release
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci#buildpack
+            image: docker:///cfbuildpacks/ci
             run:
               path: git
               args: ['clone', '--branch', 'v205', '--depth', '1', '--recursive', 'https://github.com/cloudfoundry/cf-release', '.']
         - task: download-release
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci#buildpack
+            image: docker:///cfbuildpacks/ci
             run:
               path: curl
               args: ['-f', '-L', '-o', 'release.tgz', 'https://bosh.io/d/github.com/cloudfoundry/cf-release?v=205']

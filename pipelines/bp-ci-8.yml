@@ -38,7 +38,7 @@ jobs:
         - task: cf-release
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci#buildpack
+            image: docker:///cfbuildpacks/ci
             run:
               path: git
               args: ['clone', '--branch', 'v212', '--depth', '1', '--recursive', 'https://github.com/cloudfoundry/cf-release', '.']

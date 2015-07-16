@@ -118,7 +118,7 @@ jobs:
       - task: rspec
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
+          image: docker:///cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: buildpack-packager
@@ -135,7 +135,7 @@ jobs:
       - task: rspec
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
+          image: docker:///cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: machete
@@ -171,7 +171,7 @@ jobs:
       - task: outdated_buildpack_releases
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
+          image: docker:///cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: ci-tools
@@ -191,7 +191,7 @@ jobs:
       - task: sanity-check-upstream
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
+          image: docker:///cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: heroku-nanny

@@ -142,7 +142,7 @@ jobs:
       - task: create-stack-release
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
+          image: docker:///cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: cf-release
@@ -176,7 +176,7 @@ jobs:
       - task: cats
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
+          image: docker:///cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: cf-release-runtime-passed
@@ -206,7 +206,7 @@ jobs:
       - task: update-receipt
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
+          image: docker:///cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: receipt-s3
@@ -233,7 +233,7 @@ jobs:
       - task: rename-blob
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
+          image: docker:///cfbuildpacks/ci
           inputs:
             - name: stack-s3
             - name: version
@@ -278,7 +278,7 @@ jobs:
       - task: upload
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci#buildpack
+          image: docker:///cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: cf-release-develop
