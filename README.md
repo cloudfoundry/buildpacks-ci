@@ -33,8 +33,8 @@ fly c main -c pipeline.yml -vf private.yml
 # Building Docker Images
 
 ```sh
-docker build -t cfbuildpacks/ci:buildpack .
-docker push cfbuildpacks/ci:buildpack
+docker build -t cfbuildpacks/ci .
+docker push cfbuildpacks/ci
 ```
 
 # Debugging the build
