@@ -169,27 +169,6 @@ jobs:
           run:
             path: buildpacks-ci/scripts/compile-extensions.sh
         privileged: true
-  - name: old-releases
-    serial: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: ci-tools
-          trigger: true
-        - get: nanny-time-resource
-          trigger: true
-      - task: outdated_buildpack_releases
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: ci-tools
-          run:
-            path: buildpacks-ci/scripts/old-releases.sh
-          params:
-            GITHUB_TOKEN: {{buildpacks-github-token}}
-        privileged: true
   - name: heroku-nanny
     serial: true
     plan:
