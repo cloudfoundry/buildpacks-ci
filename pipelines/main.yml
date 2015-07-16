@@ -61,53 +61,63 @@ jobs:
   - name: machete-firewall-CF-edge
     serial: true
     plan:
-      - put: cf-environments
-        resource: cf-edge-environments
-        params:
-          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
         - get: buildpack
           resource: machete-firewall-test
-          trigger: true
+        - task: cf-environments
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci
+            run: { path: true }
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack.yml
         config:
           params:
             STACKS: cflinuxfs2
             CF_PASSWORD: {{ci-cf-password}}
+            DEPLOYMENT_NAME: bp-ci-8
         privileged: true
-        ensure:
-          put: cf-edge-environments
+      - task: rspec-8b
+        file: buildpacks-ci/tasks/test-buildpack.yml
+        config:
           params:
-            release: cf-environments
+            STACKS: cflinuxfs2
+            CF_PASSWORD: {{ci-cf-password}}
+            DEPLOYMENT_NAME: bp-ci-8b
+        privileged: true
   - name: machete-firewall-CF-LTS
     serial: true
     plan:
-      - put: cf-environments
-        resource: cf-lts-environments
-        params:
-          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: ci-tools
         - get: deployments-buildpacks
         - get: buildpack
           resource: machete-firewall-test
-          trigger: true
+        - task: cf-environments
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci
+            run: { path: true }
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack.yml
         config:
           params:
             STACKS: cflinuxfs2
             CF_PASSWORD: {{ci-cf-password}}
+            DEPLOYMENT_NAME: bp-ci-7
         privileged: true
-        ensure:
-          put: cf-lts-environments
+      - task: rspec-7b
+        file: buildpacks-ci/tasks/test-buildpack.yml
+        config:
           params:
-            release: cf-environments
+            STACKS: cflinuxfs2
+            CF_PASSWORD: {{ci-cf-password}}
+            DEPLOYMENT_NAME: bp-ci-7b
+        privileged: true
   - name: buildpack-packager
     serial: true
     plan:
