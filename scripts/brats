@@ -6,6 +6,7 @@ DEPLOYMENT_NAME=`cat cf-environments/name`
 cd brats
 echo $PATH
 which ruby
+which bundler
 bundle install
 cf login -a api.$DEPLOYMENT_NAME.cf-app.com -u $CI_CF_USERNAME -p $CI_CF_PASSWORD -o pivotal -s integration --skip-ssl-validation
 
