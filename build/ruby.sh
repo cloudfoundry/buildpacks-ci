@@ -1,2 +1,2 @@
 export GEM_HOME=~/.gem
-export PATH=$PATH:~/.gem/bin
+export PATH=/usr/local/bundle/bin:$PATH:~/.gem/bin
