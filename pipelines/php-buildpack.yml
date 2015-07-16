@@ -220,7 +220,7 @@ jobs:
         ensure:
           put: cf-lts-environments
           params:
-          release: cf-environments
+            release: cf-environments
   - name: php-buildpack-release
     serial: true
     plan:
