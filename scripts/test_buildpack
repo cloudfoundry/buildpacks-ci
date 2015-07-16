@@ -1,7 +1,7 @@
 #!/bin/bash -l
 set -e
 
-DEPLOYMENT_NAME=`cat cf-environments/name`
+DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-`cat cf-environments/name`}
 
 pushd deployments-buildpacks
   bundle -j4
