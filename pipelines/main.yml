@@ -185,7 +185,6 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: heroku-nanny
         - get: nanny-time-resource
           trigger: true
       - task: sanity-check-upstream
@@ -194,7 +193,5 @@ jobs:
           image: docker:///cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
-            - name: heroku-nanny
           run:
-            path: buildpacks-ci/scripts/heroku-nanny.sh
-        privileged: true
+            path: buildpacks-ci/scripts/sanity-check-upstream
