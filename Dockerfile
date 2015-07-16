@@ -13,10 +13,12 @@ RUN apt-get -y install \
   php5 \
   python-dev \
   python-pip \
-  vagrant \
   wget \
   zip
 
+RUN wget -q https://dl.bintray.com/mitchellh/vagrant/vagrant_1.7.3_x86_64.deb \
+  && dpkg -i vagrant_1.7.3_x86_64.deb \
+  && rm vagrant_1.7.3_x86_64.deb
 RUN vagrant plugin install vagrant-aws
 RUN vagrant box add cloudfoundry/bosh-lite --provider aws
 
