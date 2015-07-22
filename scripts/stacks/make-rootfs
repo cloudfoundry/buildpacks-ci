@@ -39,4 +39,4 @@ echo "Rootfs SHASUM: `shasum $versioned_stack_filename | awk '{print $1}'`" > $v
 echo "" >> $versioned_receipt_filename
 cat cflinuxfs2/cflinuxfs2_dpkg_l.out >> $versioned_receipt_filename
 
-TERM=xterm-color git diff cflinuxfs2/cflinuxfs2_receipt $versioned_receipt_filename || true
+TERM=xterm-color git --no-pager diff cflinuxfs2/cflinuxfs2_receipt $versioned_receipt_filename || true
