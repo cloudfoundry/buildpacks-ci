@@ -1,9 +1,10 @@
 ---
 resources:
-  - name: ci-tools
+  - name: buildpacks-pivnet-uploader
     type: git
     source:
-      uri: https://github.com/cloudfoundry/ci-tools
+      uri: git@github.com:pivotal-cf/buildpacks-pivnet-uploader
+      private_key: {{buildpacks-pivnet-uploader-private-key}}
   - name: buildpacks-ci
     type: git
     source:
@@ -219,7 +220,7 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
+        - get: buildpacks-pivnet-uploader
         - get: pivotal-buildpacks-cached
           resource: go-pivotal-buildpack-cached
           passed: [ go-buildpack-release ]

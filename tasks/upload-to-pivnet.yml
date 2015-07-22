@@ -3,7 +3,7 @@ platform: linux
 image: docker:///cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: ci-tools
+  - name: buildpacks-pivnet-uploader
   - name: pivotal-buildpacks-cached
   - name: buildpack
 run:
