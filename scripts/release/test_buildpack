@@ -12,8 +12,10 @@ cp pivotal-buildpacks/*.zip buildpack
 cp pivotal-buildpacks-cached/*.zip buildpack
 cd buildpack
 
-for stack in $STACKS; do
-  ../ci-tools/buildpack-build --uncached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com --no-build
-  ../ci-tools/buildpack-build --cached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com --no-build
-done
+export BUNDLE_GEMFILE=cf.Gemfile
+bundle -j4 --no-cache
 
+for stack in $STACKS; do
+  bundle exec buildpack-build --uncached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com --no-build
+  bundle exec buildpack-build --cached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com --no-build
+done

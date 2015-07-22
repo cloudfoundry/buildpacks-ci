@@ -14,7 +14,10 @@ pip install -r requirements.txt
 
 ./run_tests.sh
 
+export BUNDLE_GEMFILE=cf.Gemfile
+bundle -j4 --no-cache
+
 for stack in $STACKS; do
-  ../ci-tools/buildpack-build --uncached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com
-  ../ci-tools/buildpack-build --cached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com
+  bundle exec buildpack-build --uncached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com
+  bundle exec buildpack-build --cached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com
 done
