@@ -10,6 +10,9 @@ pushd deployments-buildpacks
 popd
 
 cd php-buildpack
+
+../buildpacks-ci/scripts/check-unsupported-manifest
+
 pip install -r requirements.txt 
 
 ./run_tests.sh
