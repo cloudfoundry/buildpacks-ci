@@ -4,7 +4,7 @@ set -euo pipefail
 tag=v`cat buildpack/VERSION`
 echo -n $tag > tag
 pushd buildpack
-../ci-tools/extract-recent-changes
+../buildpacks-ci/scripts/release/extract-recent-changes
 BUNDLE_GEMFILE=cf.Gemfile bundle -j4
 echo 'Packaged binaries:' >> RECENT_CHANGES
 echo >> RECENT_CHANGES

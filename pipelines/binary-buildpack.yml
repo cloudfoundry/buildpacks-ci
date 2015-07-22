@@ -226,7 +226,6 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: pivotal-buildpacks-cached
           resource: binary-pivotal-buildpack-cached
           passed: [ binary-buildpack-release ]
@@ -251,7 +250,6 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: pivotal-buildpacks-cached
           resource: binary-pivotal-buildpack-cached
           passed: [ binary-buildpack-release ]

@@ -7,9 +7,7 @@ export BUILDPACK_LANGUAGE=`ruby -ryaml -e 'puts YAML.load_file("buildpack/manife
 
 ./buildpacks-ci/scripts/release/finalize-buildpack
 
-pushd ci-tools
-bundle install
-popd
+gem install bosh_cli --no-rdoc --no-ri
 
 cat <<EOF > cf-release/config/private.yml
 ---
@@ -22,8 +20,8 @@ EOF
 export GITHUB_CREDENTIALS=$GITHUB_USER:$GITHUB_PASSWORD
 
 pushd cf-release
-../ci-tools/jenkins_git_credentials add
+../buildpacks-ci/scripts/release/jenkins_git_credentials add
 git config --global user.email "cf-buildpacks-eng@pivotal.io"
 git config --global user.name "CF Buildpacks Team CI Server"
-../ci-tools/add_to_cf_release ../pivotal-buildpacks-cached/*_buildpack-cached-v*.zip
+../buildpacks-ci/scripts/release/add_to_cf_release ../pivotal-buildpacks-cached/*_buildpack-cached-v*.zip
 popd

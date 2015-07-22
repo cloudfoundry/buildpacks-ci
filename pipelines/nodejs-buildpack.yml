@@ -176,7 +176,6 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: pivotal-buildpacks-cached
           resource: nodejs-pivotal-buildpack-cached
           passed: [ nodejs-buildpack-release ]
@@ -201,7 +200,6 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: pivotal-buildpacks-cached
           resource: nodejs-pivotal-buildpack-cached
           passed: [ nodejs-buildpack-release ]

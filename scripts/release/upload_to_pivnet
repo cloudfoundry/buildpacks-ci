@@ -6,7 +6,7 @@ bundle -j4
 popd
 
 pushd buildpack
-../ci-tools/extract-recent-changes
+../buildpacks-ci/scripts/release/extract-recent-changes
 popd
 
 ./buildpacks-ci/scripts/release/finalize-buildpack
