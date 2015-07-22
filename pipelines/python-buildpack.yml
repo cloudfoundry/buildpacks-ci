@@ -92,7 +92,6 @@ jobs:
           acquire: true
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: deployments-buildpacks
         - get: buildpack
           passed: [ "detect new Python buildpack and upload artifacts" ]
@@ -126,7 +125,6 @@ jobs:
           acquire: true
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: deployments-buildpacks
         - get: buildpack
           passed: [ "detect new Python buildpack and upload artifacts" ]
@@ -248,7 +246,6 @@ jobs:
           acquire: true
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: deployments-buildpacks
         - get: buildpack
           resource: python-buildpack
@@ -273,7 +270,6 @@ jobs:
           acquire: true
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: deployments-buildpacks
         - get: buildpack
           resource: python-buildpack

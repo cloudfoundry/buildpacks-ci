@@ -73,7 +73,6 @@ jobs:
           acquire: true
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: deployments-buildpacks
         - get: php-buildpack
           trigger: true
@@ -83,7 +82,6 @@ jobs:
           image: docker:///cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
-            - name: ci-tools
             - name: php-buildpack
             - name: deployments-buildpacks
             - name: cf-environments
@@ -107,7 +105,6 @@ jobs:
           acquire: true
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: deployments-buildpacks
         - get: php-buildpack
           trigger: true
@@ -117,7 +114,6 @@ jobs:
           image: docker:///cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
-            - name: ci-tools
             - name: php-buildpack
             - name: deployments-buildpacks
             - name: cf-environments
@@ -160,7 +156,6 @@ jobs:
           acquire: true
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: deployments-buildpacks
         - get: buildpack
           passed: [ "detect new PHP buildpack and upload artifacts" ]
@@ -195,7 +190,6 @@ jobs:
           acquire: true
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: deployments-buildpacks
         - get: buildpack
           passed: [ "detect new PHP buildpack and upload artifacts" ]

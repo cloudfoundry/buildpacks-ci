@@ -3,7 +3,6 @@ platform: linux
 image: docker:///cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: ci-tools
   - name: deployments-buildpacks
   - name: buildpack
   - name: cf-environments

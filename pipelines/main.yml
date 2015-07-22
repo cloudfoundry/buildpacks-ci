@@ -1,9 +1,5 @@
 ---
 resources:
-  - name: ci-tools
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/ci-tools
   - name: buildpacks-ci
     type: git
     source:
@@ -63,7 +59,6 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: deployments-buildpacks
         - get: buildpack
           resource: machete-firewall-test
@@ -93,7 +88,6 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: ci-tools
         - get: deployments-buildpacks
         - get: buildpack
           resource: machete-firewall-test
