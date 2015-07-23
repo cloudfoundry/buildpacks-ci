@@ -36,9 +36,6 @@ ENV['GITHUB_USER'], ENV['GITHUB_PASSWORD'] = ENV['GITHUB_CREDENTIALS'].split(':'
 
 buildpack_filename = File.basename(buildpack_path)
 
-# Assume Jenkins has checked out our cf-release fork
-##git clone https://github.com/cf-buildpacks/cf-release.git
-
 unless system 'git config remote.cloudfoundry.url'
   system 'git remote add cloudfoundry https://github.com/cloudfoundry/cf-release.git'
 end

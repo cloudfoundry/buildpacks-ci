@@ -7,7 +7,7 @@ resources:
   - name: machete-firewall-test
     type: git
     source:
-      uri: https://github.com/cf-buildpacks/machete-firewall-test
+      uri: https://github.com/cloudfoundry/machete-firewall-test
   - name: deployments-buildpacks
     type: git
     source:
@@ -20,19 +20,15 @@ resources:
   - name: machete
     type: git
     source:
-      uri: https://github.com/cf-buildpacks/machete.git
+      uri: https://github.com/cloudfoundry/machete.git
   - name: compile-extensions
     type: git
     source:
       uri: https://github.com/cloudfoundry-incubator/compile-extensions.git
-  - name: heroku-nanny
-    type: git
-    source:
-      uri: https://github.com/cf-buildpacks/upstream-nanny.git
   - name: cf-release
     type: git
     source:
-      uri: https://github.com/cf-buildpacks/cf-release
+      uri: https://github.com/cloudfoundry/cf-release
   - name: nanny-time-resource
     type: time
     source:

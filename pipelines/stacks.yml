@@ -48,8 +48,7 @@ resources:
   - name: bosh-lite
     type: git
     source:
-      uri: https://github.com/cf-buildpacks/bosh-lite
-      branch: first-instance
+      uri: https://github.com/cloudfoundry/bosh-lite
   - name: cf-release-runtime-passed
     type: git
     source:
