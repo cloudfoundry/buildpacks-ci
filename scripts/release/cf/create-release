@@ -1,0 +1,13 @@
+#!/bin/sh
+
+release_names=`ls | grep buildpack-github-release | cut -d '-' -f 1`
+
+for name in $release_names; do
+  mkdir -p cf-release/blobs/$name-buildpack
+  filename=`cat cf-release/config/blobs.yml | grep $name-buildpack | cut -d ':' -f 1`
+  mv $name-buildpack-github-release/*.zip cf-release/blobs/$filename
+done
+
+cd cf-release
+bundle
+bosh create release --force --with-tarball --name cf --version 212.0.`date +"%s"`

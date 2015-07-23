@@ -1,0 +1,63 @@
+#!/usr/bin/env ruby
+
+require 'yaml'
+require 'fileutils'
+
+Dir.chdir('cf-release-develop')
+blob_store_private_yml = %Q(
+---
+blobstore:
+  s3:
+    access_key_id: #{ ENV["ACCESS_KEY_ID"] }
+    secret_access_key: #{ ENV["SECRET_ACCESS_KEY"] }
+)
+
+system(<<-EOF)
+  set -e
+
+  gem install bosh_cli --no-rdoc --no-ri
+  echo "#{blob_store_private_yml}" > config/private.yml
+EOF
+
+%w{go}.each do |language|
+  buildpack_blob     = Dir["../#{language}-buildpack-github-release/#{language}_buildpack-cached-*.zip"].first
+  buildpack_path     = "#{language}-buildpack-github-release/#{File.basename(buildpack_blob)}"
+  package_dir        = "packages/buildpack_#{language}"
+  spec_file          = "#{package_dir}/spec"
+  packaging_file     = "#{package_dir}/packaging"
+  spec               = {
+    'name' => "buildpack_#{language}",
+    'files' => [buildpack_blob]
+  }
+
+  FileUtils.mkdir_p(package_dir)
+  puts 'Updating spec file'
+  File.write(spec_file, YAML.dump(spec))
+  puts 'Updating Packaging file'
+  File.write(packaging_file, <<-PACKAGING_FILE)
+    set -e -x
+    cp #{buildpack_path} ${BOSH_INSTALL_TARGET}
+  PACKAGING_FILE
+
+  system "rm -f blobs/#{language}-buildpack/*"
+  blobs = YAML.load(File.read('config/blobs.yml'))
+
+  old_buildpack_key = blobs.keys.detect do |key|
+    key =~ /^#{language}-buildpack\//
+  end
+
+  if old_buildpack_key
+    blobs.delete(old_buildpack_key)
+    File.write('config/blobs.yml', YAML.dump(blobs))
+  end
+
+  exit 1 unless system "bosh add blob #{buildpack_blob} #{language}-buildpack"
+end
+
+exit system(<<-EOF)
+  set -e
+  bosh -n upload blobs
+  git add -A
+  git commit -m 'Upgrading buildpacks to latest versions' \
+      --author='CF Buildpacks Team <cf-buildpacks-eng@pivotal.io>'"
+EOF
