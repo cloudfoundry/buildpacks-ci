@@ -3,7 +3,9 @@
 require 'yaml'
 require 'fileutils'
 
-Dir.chdir('cf-release-develop')
+release_names=`ls | grep buildpack-github-release | cut -d '-' -f 1`.chomp.split
+
+Dir.chdir('cf-release')
 blob_store_private_yml = %Q(
 ---
 blobstore:
@@ -19,7 +21,7 @@ system(<<-EOF)
   echo "#{blob_store_private_yml}" > config/private.yml
 EOF
 
-%w{go}.each do |language|
+release_names.each do |language|
   buildpack_blob     = Dir["../#{language}-buildpack-github-release/#{language}_buildpack-cached-*.zip"].first
   buildpack_path     = "#{language}-buildpack-github-release/#{File.basename(buildpack_blob)}"
   package_dir        = "packages/buildpack_#{language}"
