@@ -172,3 +172,47 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+  - name: ship-it
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: cf-release
+          resource: cf-release-develop
+        - get: go-buildpack-github-release
+          passed: [ cats ]
+        - get: nodejs-buildpack-github-release
+          passed: [ cats ]
+        - get: python-buildpack-github-release
+          passed: [ cats ]
+        - get: ruby-buildpack-github-release
+          passed: [ cats ]
+        - get: php-buildpack-github-release
+          passed: [ cats ]
+        - get: staticfile-buildpack-github-release
+          passed: [ cats ]
+        - get: binary-buildpack-github-release
+          passed: [ cats ]
+      - task: upload-blobs
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: cf-release
+            - name: go-buildpack-github-release
+            - name: python-buildpack-github-release
+            - name: nodejs-buildpack-github-release
+            - name: ruby-buildpack-github-release
+            - name: php-buildpack-github-release
+            - name: staticfile-buildpack-github-release
+            - name: binary-buildpack-github-release
+          run:
+            path: buildpacks-ci/scripts/release/cf/upload_blobs
+          params:
+            ACCESS_KEY_ID: {{blobstore-access-key}}
+            SECRET_ACCESS_KEY: {{blobstore-secret-key}}
+        privileged: true
+      - put: cf-release-develop
+        params:
+          repository: upload-blobs/cf-release
