@@ -61,5 +61,5 @@ exit system(<<-EOF)
   bosh -n upload blobs
   git add -A
   git commit -m 'Upgrading buildpacks to latest versions' \
-      --author='CF Buildpacks Team <cf-buildpacks-eng@pivotal.io>'"
+      --author='CF Buildpacks Team <cf-buildpacks-eng@pivotal.io>'
 EOF
