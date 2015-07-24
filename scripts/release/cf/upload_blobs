@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+$stdout.sync = true
+
 require 'yaml'
 require 'fileutils'
 
@@ -60,6 +62,8 @@ exit system(<<-EOF)
   set -e
   bosh -n upload blobs
   git add -A
-  git commit -m 'Upgrading buildpacks to latest versions' \
-      --author='CF Buildpacks Team <cf-buildpacks-eng@pivotal.io>'
+  git config --global user.email "cf-buildpacks-eng@pivotal.io"
+  git config --global user.name "CF Buildpacks Team"
+
+  git commit -m 'Upgrading buildpacks to latest versions'
 EOF
