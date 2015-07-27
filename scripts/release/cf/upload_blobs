@@ -52,7 +52,7 @@ release_names.each do |language|
   end
 
   if old_buildpack_key
-    new_sha = Digest::SHA256.file(buildpack_path).hexdigest
+    new_sha = Digest::SHA256.file(buildpack_blob).hexdigest
 
     if new_sha != blobs[old_buildpack_key]['sha']
       blobs.delete(old_buildpack_key)
