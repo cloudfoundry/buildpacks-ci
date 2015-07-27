@@ -9,10 +9,6 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
-  - name: cf-release
-    type: git
-    source:
-      uri: https://github.com/cf-buildpacks/cf-release
   - name: cf-edge-environments
     type: pool
     source:
@@ -194,27 +190,6 @@ jobs:
           body: prepare-release/buildpack/RECENT_CHANGES
           globs:
             - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip
-  - name: python buildpack to cf-release
-    serial: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: pivotal-buildpacks-cached
-          resource: python-pivotal-buildpack-cached
-          passed: [ python-buildpack-release ]
-        - get: buildpack
-          resource: python-buildpack-master
-          passed: [ python-buildpack-release ]
-        - get: cf-release
-      - task: upload to cf-release
-        file: buildpacks-ci/tasks/upload-to-cf-release.yml
-        config:
-          params:
-            ACCESS_KEY_ID: {{blobstore-access-key}}
-            SECRET_ACCESS_KEY: {{blobstore-secret-key}}
-            GITHUB_USER: {{github-username}}
-            GITHUB_PASSWORD: {{github-password}}
-        privileged: true
   - name: python buildpack to pivnet
     serial: true
     plan:
