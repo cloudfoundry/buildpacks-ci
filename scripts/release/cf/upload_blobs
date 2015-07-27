@@ -26,13 +26,13 @@ EOF
 
 release_names.each do |language|
   buildpack_blob     = Dir["../#{language}-buildpack-github-release/#{language}_buildpack-cached-*.zip"].first
-  buildpack_path     = "#{language}-buildpack-github-release/#{File.basename(buildpack_blob)}"
+  buildpack_path     = "#{language}-buildpack/#{File.basename(buildpack_blob)}"
   package_dir        = "packages/buildpack_#{language}"
   spec_file          = "#{package_dir}/spec"
   packaging_file     = "#{package_dir}/packaging"
   spec               = {
     'name' => "buildpack_#{language}",
-    'files' => [buildpack_blob]
+    'files' => [buildpack_path]
   }
 
   FileUtils.mkdir_p(package_dir)
