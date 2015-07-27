@@ -4,7 +4,7 @@ $stdout.sync = true
 
 require 'yaml'
 require 'fileutils'
-require 'digest'
+require 'digest/sha1'
 
 release_names=`ls | grep buildpack-github-release | cut -d '-' -f 1`.chomp.split
 
@@ -52,7 +52,7 @@ release_names.each do |language|
   end
 
   if old_buildpack_key
-    new_sha = Digest::SHA256.file(buildpack_blob).hexdigest
+    new_sha = Digest::SHA1.file(buildpack_blob).hexdigest
 
     if new_sha != blobs[old_buildpack_key]['sha']
       blobs.delete(old_buildpack_key)
