@@ -4,6 +4,7 @@ $stdout.sync = true
 
 require 'yaml'
 require 'fileutils'
+require 'digest'
 
 release_names=`ls | grep buildpack-github-release | cut -d '-' -f 1`.chomp.split
 
@@ -51,11 +52,14 @@ release_names.each do |language|
   end
 
   if old_buildpack_key
-    blobs.delete(old_buildpack_key)
-    File.write('config/blobs.yml', YAML.dump(blobs))
-  end
+    new_sha = Digest::SHA256.file(buildpack_path).hexdigest
 
-  exit 1 unless system "bosh add blob #{buildpack_blob} #{language}-buildpack"
+    if new_sha != blobs[old_buildpack_key]['sha']
+      blobs.delete(old_buildpack_key)
+      File.write('config/blobs.yml', YAML.dump(blobs))
+      exit 1 unless system "bosh add blob #{buildpack_blob} #{language}-buildpack"
+    end
+  end
 end
 
 exit system(<<-EOF)
