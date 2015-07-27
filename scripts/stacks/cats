@@ -20,4 +20,4 @@ cat > integration_config.json <<EOF
 }
 EOF
 export CONFIG=$PWD/integration_config.json  
-./bin/test --nodes=4
+./bin/test_default --nodes=4
