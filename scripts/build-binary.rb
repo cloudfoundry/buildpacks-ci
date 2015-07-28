@@ -18,9 +18,11 @@ exit system(<<-EOF)
 
   cd binary-builder
   ./bin/binary-builder #{binary_name} #{version}
+  BINARY_PATH=$(find -name "*.tgz" -o -name "*.tar.gz")
+  CHECKSUM=$(md5sum $BINARY_PATH | cut --delimiter=" " --fields=1)
   echo "#{builds.to_yaml}" > #{builds_path}
   cd #{builds_dir}
   git config --global user.email "ci@localhost"
   git config --global user.name "CI Bot"
-  git commit -am "Complete building #{binary_name} - #{version} and remove it from builds"
+  git commit -am "Build #{binary_name} - #{version}, md5: $CHECKSUM"
 EOF
