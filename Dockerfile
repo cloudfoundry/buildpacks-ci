@@ -14,7 +14,11 @@ RUN apt-get -y install \
   python-dev \
   python-pip \
   wget \
+  vim-nox \
   zip
+
+RUN git clone http://github.com/luan/vimfiles.git ~/.vim
+RUN ~/.vim/install 
 
 RUN wget -q https://dl.bintray.com/mitchellh/vagrant/vagrant_1.7.3_x86_64.deb \
   && dpkg -i vagrant_1.7.3_x86_64.deb \
