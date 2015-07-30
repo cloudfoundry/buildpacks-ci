@@ -212,6 +212,7 @@ jobs:
             PIVNET_ADDRESS: https://network.pivotal.io/
             PIVNET_APIKEY: {{pivnet-apikey}}
             PIVNET_PRODUCT_NAME: Python Buildpack (offline)
+            CREATE_ON_PIVNET: true
         privileged: true
   - name: python-buildpack-CF-edge
     serial: true

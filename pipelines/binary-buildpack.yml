@@ -260,5 +260,6 @@ jobs:
             PIVNET_ADDRESS: https://network.pivotal.io/
             PIVNET_APIKEY: {{pivnet-apikey}}
             PIVNET_PRODUCT_NAME: Binary Buildpack
+            CREATE_ON_PIVNET: true
         privileged: true
 
