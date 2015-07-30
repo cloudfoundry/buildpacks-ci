@@ -15,7 +15,8 @@ buildpacks-pivnet-uploader/upload_to_pivnet \
   "$PIVNET_PRODUCT_NAME" \
   `cat buildpack/VERSION` \
   pivotal-buildpacks-cached/*_buildpack-cached-v*.zip \
-  buildpack/RECENT_CHANGES < /dev/null
+  buildpack/RECENT_CHANGES \
+  "$GITHUB_URL" < /dev/null
 
 # To be deprecated after elastic-runtime lifetime
 unset CREATE_ON_PIVNET
@@ -23,5 +24,5 @@ UPDATE_RUNTIME=true buildpacks-pivnet-uploader/upload_to_pivnet \
   "$PIVNET_PRODUCT_NAME" \
   `cat buildpack/VERSION` \
   pivotal-buildpacks-cached/*_buildpack-cached-v*.zip \
-  buildpack/RECENT_CHANGES < /dev/null
-
+  buildpack/RECENT_CHANGES \
+  "$GITHUB_URL" < /dev/null
