@@ -212,6 +212,7 @@ jobs:
             PIVNET_ADDRESS: https://network.pivotal.io/
             PIVNET_APIKEY: {{pivnet-apikey}}
             PIVNET_PRODUCT_NAME: NodeJS Buildpack (offline)
+            GITHUB_URL: https://github.com/cloudfoundry/nodejs-buildpack
             CREATE_ON_PIVNET: true
         privileged: true
   - name: nodejs-buildpack-CF-edge

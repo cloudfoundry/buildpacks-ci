@@ -260,6 +260,7 @@ jobs:
             PIVNET_ADDRESS: https://network.pivotal.io/
             PIVNET_APIKEY: {{pivnet-apikey}}
             PIVNET_PRODUCT_NAME: Binary Buildpack
+            GITHUB_URL: https://github.com/cloudfoundry/binary-buildpack
             CREATE_ON_PIVNET: true
         privileged: true
 

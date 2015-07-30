@@ -278,5 +278,6 @@ jobs:
             PIVNET_ADDRESS: https://network.pivotal.io/
             PIVNET_APIKEY: {{pivnet-apikey}}
             PIVNET_PRODUCT_NAME: PHP Buildpack (offline)
+            GITHUB_URL: https://github.com/cloudfoundry/php-buildpack
             CREATE_ON_PIVNET: true
         privileged: true
