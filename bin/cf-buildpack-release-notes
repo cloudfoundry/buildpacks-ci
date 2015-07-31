@@ -1,0 +1,136 @@
+#! /usr/bin/env ruby
+
+require 'getoptlong'
+require 'json'
+
+opts = GetoptLong.new(
+  [ '--token',             '-t', GetoptLong::REQUIRED_ARGUMENT],
+  [ '--update-cf-release', '-u', GetoptLong::NO_ARGUMENT]
+)
+
+def usage
+  puts "USAGE: #{File.basename(__FILE__)} <path/to/cf-release> <previous-tag> <current-tag> [--token <github-token>] [--update-cf-release]"
+  exit 1
+end
+
+token = nil
+update_cf_release = false
+opts.each do |opt, arg|
+  case opt
+  when '--token'
+    token = arg
+  when '--update-cf-release'
+    update_cf_release = true
+  else
+    usage
+  end
+end
+
+usage unless ARGV[2]
+
+path = ARGV[0]
+tag1 = ARGV[1]
+tag2 = ARGV[2]
+
+class ReleaseNoteGenerator
+  RELEASES_API_FMT = "/repos/cloudfoundry/%s/releases"
+  RELEASE_FMT      = "https://github.com/cloudfoundry/%s/releases/tag/%s"
+
+  attr :path, :tag1, :tag2, :token, :update_cf_release
+
+  def initialize path, tag1, tag2, token, update_cf_release
+    @path = path
+    @tag1 = tag1
+    @tag2 = tag2
+    @token = token
+    @update_cf_release = update_cf_release
+  end
+
+  def update_cf_release!
+    Dir.chdir path do
+      system "git remote update"
+      system "git checkout develop"
+      system "./update"
+    end
+  end
+
+  def curl_github_api path
+    headers = if token
+                "-H 'Authorization: token #{token}'"
+              end
+    JSON.parse `curl -s #{headers} https://api.github.com#{path}`
+  end
+
+  def main
+    update_cf_release! if update_cf_release
+
+    versions = get_versions
+
+    buildpacks = (versions[tag1].keys + versions[tag2].keys).uniq
+
+    buildpacks.sort.each do |buildpack|
+      v1 = versions[tag1][buildpack]
+      v2 = versions[tag2][buildpack]
+      if v1 != v2
+        print_release_notes_for buildpack, v1, v2
+      end
+    end
+  end
+
+  def print_release_notes_for buildpack, v1, v2
+    releases_path = sprintf RELEASES_API_FMT, buildpack
+    
+    releases_data = curl_github_api releases_path
+
+    releases = releases_data.map do |release|
+      release["tag_name"]
+    end.sort.reverse
+    raise "couldn't find #{buildpack} #{v1} in release notes" unless v1_index = releases.index(v1)
+    raise "couldn't find #{buildpack} #{v2} in release notes" unless v2_index = releases.index(v2)
+
+    puts
+    puts "### #{buildpack}"
+    puts
+    puts "updated to #{v2} (from #{v1})"
+    puts
+
+    (v2_index...v1_index).each do |v_index|
+      release = releases_data[v_index]
+      release_tag = release["tag_name"]
+      release_url = sprintf RELEASE_FMT, buildpack, release_tag
+
+      puts
+      puts "#### [#{release_tag}](#{release_url})"
+      puts
+      puts release["body"].gsub("\r", "")
+      puts
+    end
+  end
+
+  private
+
+  def get_versions
+    Dir.chdir path do
+      outputs = { tag1 => get_blobs(tag1), tag2 => get_blobs(tag2) }
+
+      versions = outputs.inject({}) do |versions, tag_output|
+        tag, output = *tag_output
+
+        versions[tag] = output.inject({}) do |versions, line|
+          buildpack = line.split("/").first
+          version = line.sub(/\.zip.*$/, "").split("-").last
+          versions[buildpack] = version
+          versions
+        end
+
+        versions
+      end
+    end
+  end
+
+  def get_blobs tag
+    `git show #{tag}:config/blobs.yml`.split("\n").grep(/buildpack/)
+  end
+end
+
+ReleaseNoteGenerator.new(path, tag1, tag2, token, update_cf_release).main
