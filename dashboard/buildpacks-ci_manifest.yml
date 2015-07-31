@@ -1,0 +1,7 @@
+---
+applications:
+- name: buildpacks-ci
+  memory: 256M
+  instances: 1
+  host: buildpacks-ci
+  domain: cfapps.io
