@@ -1,4 +1,12 @@
 #! /usr/bin/env ruby
+#
+# This script is intended to be used to generate `cf-release` release notes for the buildpacks.
+#
+# When given two commits, it will examine differences in
+# `config/blobs.yml` to figure out what buildpacks have been
+# updated. Then it hits the github API to pull release notes for all
+# the intervening releases, and formats them appropriately.
+#
 
 require 'getoptlong'
 require 'json'
