@@ -274,6 +274,14 @@ jobs:
           passed: [ shipit ]
         - get: receipt-s3
           passed: [ shipit ]
+      - task: check-can-i-bump
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/release/cf/check-can-i-bump
       - task: upload
         config:
           platform: linux
