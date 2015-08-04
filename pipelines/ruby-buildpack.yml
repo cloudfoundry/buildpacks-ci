@@ -213,7 +213,6 @@ jobs:
             PIVNET_APIKEY: {{pivnet-apikey}}
             PIVNET_PRODUCT_NAME: Ruby Buildpack (offline)
             GITHUB_URL: https://github.com/cloudfoundry/ruby-buildpack
-            CREATE_ON_PIVNET: true
         privileged: true
   - name: ruby-buildpack-CF-edge
     serial: true
