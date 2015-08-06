@@ -28,16 +28,20 @@ cat <<EOF > packages/rootfs_cflinuxfs2/packaging
 set -e -x
 
 echo "Copying rootfs"
-cp rootfs/$file_name ${BOSH_INSTALL_TARGET}/cflinuxfs2.tar.gz
+cp rootfs/$file_name \${BOSH_INSTALL_TARGET}/cflinuxfs2.tar.gz
 EOF
+
+ruby -ryaml -e "
+  blobs=YAML.load_file('config/blobs.yml')
+  blobs.delete_if { |k,_| k =~ %r{rootfs/cflinuxfs2} }
+  File.write('config/blobs.yml', YAML.dump(blobs))
+"
 
 bosh -n upload blobs
 chmod 644 config/blobs.yml
-
-rspec spec/stacks_spec.rb
 
 git config --global user.email "cf-buildpacks-eng@pivotal.io"
 git config --global user.name "CF Buildpacks Team CI Server"
 
 version=`cat ../version/number`
-git commit -m "Bump rootfs to $version" -- config/blobs.yml spec/fixtures/receipts
+git commit -m "Bump rootfs to $version" -- config/blobs.yml spec/fixtures/receipts packages/rootfs_cflinuxfs2/packaging packages/rootfs_cflinuxfs2/spec
