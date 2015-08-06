@@ -1,8 +1,17 @@
 #!/bin/sh
 
 mkdir -p cf-release/blobs/rootfs
-mv stack-s3/*.tar.gz cf-release/blobs/rootfs/cflinuxfs2.tar.gz
+mv stack-s3/*.tar.gz cf-release/blobs/rootfs/
+file_name=$(ls cf-release/blobs/rootfs)
 cd cf-release
+
+cat <<EOF > packages/rootfs_cflinuxfs2/spec
+---
+name: rootfs_cflinuxfs2
+files:
+- rootfs/$file_name
+EOF
+
 apt-get -y install libmysqlclient-dev
 bundle
 bosh create release --force --with-tarball --name cf --version 212.0.`date +"%s"`

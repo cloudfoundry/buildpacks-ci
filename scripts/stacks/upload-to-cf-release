@@ -3,7 +3,8 @@
 set -e
 
 mkdir -p cf-release/blobs/rootfs
-cp stack-s3/cflinuxfs2-*.tar.gz cf-release/blobs/rootfs/cflinuxfs2.tar.gz
+cp stack-s3/cflinuxfs2-*.tar.gz cf-release/blobs/rootfs/
+file_name=$(ls cf-release/blobs/rootfs)
 cp receipt-s3/cflinuxfs2_receipt-* cf-release/spec/fixtures/receipts/cflinuxfs2_receipt
 cd cf-release
 bundle -j4
@@ -14,6 +15,13 @@ blobstore:
   s3:
     access_key_id: $ACCESS_KEY_ID
     secret_access_key: $SECRET_ACCESS_KEY
+EOF
+
+cat <<EOF > packages/rootfs_cflinuxfs2/spec
+---
+name: rootfs_cflinuxfs2
+files:
+- rootfs/$file_name
 EOF
 
 bosh -n upload blobs
