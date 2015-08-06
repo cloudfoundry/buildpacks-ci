@@ -24,6 +24,13 @@ files:
 - rootfs/$file_name
 EOF
 
+cat <<EOF > packages/rootfs_cflinuxfs2/packaging
+set -e -x
+
+echo "Copying rootfs"
+cp rootfs/$file_name ${BOSH_INSTALL_TARGET}/cflinuxfs2.tar.gz
+EOF
+
 bosh -n upload blobs
 chmod 644 config/blobs.yml
 
