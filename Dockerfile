@@ -7,14 +7,15 @@ RUN apt-get -y install \
   awscli \
   git \
   golang \
+  libmysqlclient-dev \
   libpq-dev \
   libsqlite3-dev \
   npm \
   php5 \
   python-dev \
   python-pip \
-  wget \
   vim-nox \
+  wget \
   zip
 
 RUN git clone http://github.com/luan/vimfiles.git ~/.vim
