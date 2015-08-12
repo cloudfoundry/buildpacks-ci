@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 binary_name = ENV['BINARY_NAME']
-file_path   = Dir.glob("build-binary/binary-builder/#{binary_name}-*-linux-x64.{tar.gz,tgz}").first
+file_path   = Dir.glob("build-binary/binary-builder/#{binary_name}-*.{tar.gz,tgz}").first
 unless file_path
   puts "No binaries detected for upload."
   exit
