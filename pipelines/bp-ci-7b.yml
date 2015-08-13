@@ -17,6 +17,12 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/bosh-lite
+  - name: resource-pools
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-ci
+      branch: resource-pools
+      private_key: {{resource-pools-private-key}}
   - name: buildpacks-ci
     type: git
     source:
@@ -26,23 +32,38 @@ jobs:
     serial: true
     plan:
       - aggregate:
+        - get: resource-pools
+        - get: buildpacks-ci
+      - task: claim-from-pool
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: resource-pools
+          run:
+            path: buildpacks-ci/scripts/claim-resource
+            args: ['cf-lts-environments', 'bp-ci-7b']
+      - put: resource-pools
+        params:
+          repository: claim-from-pool/resource-pools
+      - aggregate:
         - get: deployments-buildpacks
         - get: bosh-lite
-        - get: buildpacks-ci
         - task: cf-release
           config:
             platform: linux
             image: docker:///cfbuildpacks/ci
             run:
               path: git
-              args: ['clone', '--branch', 'v205', '--depth', '1', '--recursive', 'https://github.com/cloudfoundry/cf-release', '.']
+              args: ['clone', '--branch', 'v208', '--depth', '1', '--recursive', 'https://github.com/cloudfoundry/cf-release', '.']
         - task: download-release
           config:
             platform: linux
             image: docker:///cfbuildpacks/ci
             run:
               path: curl
-              args: ['-f', '-L', '-o', 'release.tgz', 'https://bosh.io/d/github.com/cloudfoundry/cf-release?v=205']
+              args: ['-f', '-L', '-o', 'release.tgz', 'https://bosh.io/d/github.com/cloudfoundry/cf-release?v=208']
       - task: generate-manifest
         file: buildpacks-ci/tasks/make-manifest.yml
         config:
@@ -58,3 +79,16 @@ jobs:
           manifest: deployments-buildpacks/deployments/bp-ci-7b/manifest.yml
           stemcells: []
           releases: [download-release/release.tgz]
+      - task: unclaim-from-pool
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: resource-pools
+          run:
+            path: buildpacks-ci/scripts/unclaim-resource
+            args: ['cf-lts-environments', 'bp-ci-7b']
+      - put: resource-pools
+        params:
+          repository: unclaim-from-pool/resource-pools
