@@ -4,8 +4,8 @@ set -e
 
 cd resource-pools
 
-local cf_env = $1
-local resource = $2
+cf_env = $1
+resource = $2
 
 git config --global user.email "ci@localhost"
 git config --global user.name "CI Bot"
