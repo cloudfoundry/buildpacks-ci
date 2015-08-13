@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e
+
+cd resource-pools
+
+local cf_env = $1
+local resource = $2
+
+git config --global user.email "ci@localhost"
+git config --global user.name "CI Bot"
+
+git mv $cf_env/claimed/$resource $cf_env/unclaimed/$resource
+
+git add -A
+git commit -m "Unclaiming Resource for bosh deployment $resource"
