@@ -26,9 +26,9 @@ jobs:
 - name: api_z1
   # Make the disk size bigger so we can handle
   # both offline and online buildpacks now.
-  persistent_disk: 30720" > bosh-lite/cf-stub-spiff.yml
+  persistent_disk: 30720" > bosh-lite/cf-stub-spiff-ours.yml
 
-./bosh-lite/make_manifest
+./bosh-lite/make_manifest bosh-lite/cf-stub-spiff-ours.yml
 
 ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CF_CI_PASSWORD'])" bosh-lite/manifests/cf-manifest.yml
 
