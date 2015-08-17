@@ -33,7 +33,7 @@ jobs:
 ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CF_CI_PASSWORD'])" bosh-lite/manifests/cf-manifest.yml
 
 cd ../deployments-buildpacks
-cp ./cf-release/bosh-lite/manifests/cf-manifest.yml deployments/$DEPLOYMENT_NAME/manifest.yml
+cp ../cf-release/bosh-lite/manifests/cf-manifest.yml deployments/$DEPLOYMENT_NAME/manifest.yml
 
 git config --global user.email "ci@localhost"
 git config --global user.name "CI Bot"
