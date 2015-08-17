@@ -28,7 +28,7 @@ jobs:
   # both offline and online buildpacks now.
   persistent_disk: 30720" > bosh-lite/cf-stub-spiff.yml
 
-./bosh-lite/make_manifest_spiff
+./bosh-lite/make_manifest
 
 ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CF_CI_PASSWORD'])" bosh-lite/manifests/cf-manifest.yml
 
