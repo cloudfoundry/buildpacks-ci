@@ -25,22 +25,39 @@ resources:
     type: bosh-io-release
     source:
       repository: cloudfoundry/cf-release
+  - name: resource-pools
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-ci
+      branch: resource-pools
+      private_key: {{resource-pools-private-key}}
 jobs:
   - name: deploy-cf-to-bp-ci-8b
     serial: true
     plan:
+      - aggregate:
+        - get: resource-pools
+        - get: buildpacks-ci
+      - task: claim-from-pool
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: resource-pools
+          run:
+            path: buildpacks-ci/scripts/claim-resource
+            args: ['cf-edge-environments', 'bp-ci-8b']
+      - put: resource-pools
+        params:
+          repository: claim-from-pool/resource-pools
       - aggregate:
         - get: deployments-buildpacks
         - get: bosh-cf-release
         - get: bosh-lite
         - get: buildpacks-ci
         - task: cf-release
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            run:
-              path: git
-              args: ['clone', '--branch', 'v212', '--depth', '1', '--recursive', 'https://github.com/cloudfoundry/cf-release', '.']
+          file: buildpacks-ci/tasks/cf-release-edge.yml
       - task: generate-manifest
         file: buildpacks-ci/tasks/make-manifest.yml
         config:
@@ -56,3 +73,16 @@ jobs:
           manifest: deployments-buildpacks/deployments/bp-ci-8b/manifest.yml
           stemcells: []
           releases: [bosh-cf-release/*.tgz]
+      - task: unclaim-from-pool
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: resource-pools
+          run:
+            path: buildpacks-ci/scripts/unclaim-resource
+            args: ['cf-edge-environments', 'bp-ci-8b']
+      - put: resource-pools
+        params:
+          repository: unclaim-from-pool/resource-pools
