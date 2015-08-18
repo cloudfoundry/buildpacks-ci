@@ -19,5 +19,10 @@ cat > integration_config.json <<EOF
   "skip_ssl_validation": true
 }
 EOF
-export CONFIG=$PWD/integration_config.json  
-./bin/test_default --nodes=4
+export CONFIG=$PWD/integration_config.json
+
+if [ -f ./bin/test_default ]; then
+  ./bin/test_default --nodes=4
+else
+  ./bin/test --nodes=4
+fi
