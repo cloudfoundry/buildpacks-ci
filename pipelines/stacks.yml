@@ -62,11 +62,6 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/cf-release
       branch: runtime-passed
-  - name: cf-release-lts
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/cf-release
-      branch: v208
   - name: cf-release-develop
     type: git
     source:
@@ -176,8 +171,6 @@ jobs:
         - get: deployments-buildpacks
         - get: bosh-lite
         - get: buildpacks-ci
-        - task: cf-release
-          file: buildpacks-ci/tasks/cf-release-lts.yml
         - get: lite-stemcell
         - get: stack-s3
           passed: [ build-rootfs ]
@@ -188,6 +181,8 @@ jobs:
           passed: [ build-rootfs ]
         - get: stacks
           passed: [ build-rootfs ]
+      - task: cf-release
+        file: buildpacks-ci/tasks/cf-release-lts.yml
       - task: generate-manifest
         file: buildpacks-ci/tasks/make-manifest.yml
         config:
@@ -223,8 +218,6 @@ jobs:
         - get: buildpacks-ci
         - get: cf-release-runtime-passed
           passed: [ deploy-cf-to-stack-ci-8 ]
-        - get: cf-release-lts
-          passed: [ deploy-cf-to-stack-ci-7 ]
         - get: deployments-buildpacks
         - get: stack-s3
           passed: [ deploy-cf-to-stack-ci-8, deploy-cf-to-stack-ci-7 ]
@@ -251,6 +244,8 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+      - task: cf-release-lts
+        file: buildpacks-ci/tasks/cf-release-lts.yml
       - task: cats-ci-7
         config:
           platform: linux
