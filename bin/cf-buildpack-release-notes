@@ -72,6 +72,16 @@ class ReleaseNoteGenerator
   def main
     update_cf_release! if update_cf_release
 
+    versions = get_rootfs_versions
+    rootfses = all_keys versions
+    rootfses.sort.each do |rootfs|
+      v1 = versions[tag1][rootfs]
+      v2 = versions[tag2][rootfs]
+      if v1 != v2
+        print_release_notes_for "stacks", v1, v2
+      end
+    end
+
     versions = get_buildpack_versions
     buildpacks = all_keys versions
     buildpacks.sort.each do |buildpack|
@@ -83,19 +93,19 @@ class ReleaseNoteGenerator
     end
   end
 
-  def print_release_notes_for buildpack, v1, v2
-    releases_path = sprintf RELEASES_API_FMT, buildpack
-    
+  def print_release_notes_for thing, v1, v2
+    releases_path = sprintf RELEASES_API_FMT, thing
+
     releases_data = curl_github_api releases_path
 
     releases = releases_data.map do |release|
       release["tag_name"]
     end.sort.reverse
-    raise "couldn't find #{buildpack} #{v1} in release notes" unless v1_index = releases.index(v1)
-    raise "couldn't find #{buildpack} #{v2} in release notes" unless v2_index = releases.index(v2)
+    raise "couldn't find #{thing} #{v1} in release notes" unless v1_index = releases.index(v1)
+    raise "couldn't find #{thing} #{v2} in release notes" unless v2_index = releases.index(v2)
 
     puts
-    puts "### #{buildpack}"
+    puts "### #{thing}"
     puts
     puts "updated to #{v2} (from #{v1})"
     puts
@@ -103,7 +113,7 @@ class ReleaseNoteGenerator
     (v2_index...v1_index).each do |v_index|
       release = releases_data[v_index]
       release_tag = release["tag_name"]
-      release_url = sprintf RELEASE_FMT, buildpack, release_tag
+      release_url = sprintf RELEASE_FMT, thing, release_tag
 
       puts
       puts "#### [#{release_tag}](#{release_url})"
@@ -123,17 +133,31 @@ class ReleaseNoteGenerator
     keys.sort.uniq
   end
 
+  def get_rootfs_versions
+    examine_blobs_for_tags_and_filter(tag1, tag2, /rootfs/) do |versions, line|
+      rootfs = line.split("/").last.split(/\W/).first
+      version = line.sub(/\.tar\.gz.*$/, "").split("-").last
+      versions[rootfs] = version
+    end
+  end
+
   def get_buildpack_versions
+    examine_blobs_for_tags_and_filter(tag1, tag2, /buildpack/) do |versions, line|
+      buildpack = line.split("/").first
+      version = line.sub(/\.zip.*$/, "").split("-").last
+      versions[buildpack] = version
+    end
+  end
+
+  def examine_blobs_for_tags_and_filter tag1, tag2, regex, &block
     Dir.chdir path do
-      outputs = { tag1 => get_blobs(tag1), tag2 => get_blobs(tag2) }
+      outputs = { tag1 => get_blobs(tag1, regex), tag2 => get_blobs(tag2, regex) }
 
       versions = outputs.inject({}) do |versions, tag_output|
         tag, output = *tag_output
 
         versions[tag] = output.inject({}) do |versions, line|
-          buildpack = line.split("/").first
-          version = line.sub(/\.zip.*$/, "").split("-").last
-          versions[buildpack] = version
+          block.call versions, line
           versions
         end
 
@@ -142,8 +166,8 @@ class ReleaseNoteGenerator
     end
   end
 
-  def get_blobs tag
-    `git show #{tag}:config/blobs.yml`.split("\n").grep(/buildpack/)
+  def get_blobs tag, regex
+    `git show #{tag}:config/blobs.yml`.split("\n").grep(regex)
   end
 end
 
