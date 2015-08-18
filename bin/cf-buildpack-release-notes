@@ -72,10 +72,8 @@ class ReleaseNoteGenerator
   def main
     update_cf_release! if update_cf_release
 
-    versions = get_versions
-
-    buildpacks = (versions[tag1].keys + versions[tag2].keys).uniq
-
+    versions = get_buildpack_versions
+    buildpacks = all_keys versions
     buildpacks.sort.each do |buildpack|
       v1 = versions[tag1][buildpack]
       v2 = versions[tag2][buildpack]
@@ -117,7 +115,15 @@ class ReleaseNoteGenerator
 
   private
 
-  def get_versions
+  def all_keys hash_of_hashes
+    keys = []
+    hash_of_hashes.keys.each do |key|
+      keys += hash_of_hashes[key].keys
+    end
+    keys.sort.uniq
+  end
+
+  def get_buildpack_versions
     Dir.chdir path do
       outputs = { tag1 => get_blobs(tag1), tag2 => get_blobs(tag2) }
 
