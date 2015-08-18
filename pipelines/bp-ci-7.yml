@@ -51,12 +51,7 @@ jobs:
         - get: deployments-buildpacks
         - get: bosh-lite
         - task: cf-release
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            run:
-              path: git
-              args: ['clone', '--branch', 'v208', '--depth', '1', '--recursive', 'https://github.com/cloudfoundry/cf-release', '.']
+          file: buildpacks-ci/tasks/cf-release-lts.yml
         - task: download-release
           config:
             platform: linux

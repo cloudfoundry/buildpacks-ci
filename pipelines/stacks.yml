@@ -176,8 +176,8 @@ jobs:
         - get: deployments-buildpacks
         - get: bosh-lite
         - get: buildpacks-ci
-        - get: cf-release
-          resource: cf-release-lts
+        - task: cf-release
+          file: buildpacks-ci/tasks/cf-release-lts.yml
         - get: lite-stemcell
         - get: stack-s3
           passed: [ build-rootfs ]
