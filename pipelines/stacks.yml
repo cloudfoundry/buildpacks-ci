@@ -215,7 +215,7 @@ jobs:
           releases: [create-stack-release/cf-release/dev_releases/cf/*.tgz]
   - name: test-rootfs
     serial: true
-    serial_groups: [ stack-ci-8 ]
+    serial_groups: [ stack-ci-8, stack-ci-7 ]
     plan:
       - aggregate:
         - get: buildpacks-ci
