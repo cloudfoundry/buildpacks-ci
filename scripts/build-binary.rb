@@ -8,13 +8,14 @@ builds_path = File.join(builds_dir, "#{binary_name}-builds.yml")
 builds      = YAML.load_file(builds_path)
 
 latest_version = builds[binary_name].shift
-version        = latest_version['version']
-checksum       = latest_version['checksum']
 
-unless version
+unless latest_version
   puts "There are no new builds for #{binary_name} requested."
   exit
 end
+
+version        = latest_version['version']
+checksum       = latest_version['checksum']
 
 exit system(<<-EOF)
   set -e
