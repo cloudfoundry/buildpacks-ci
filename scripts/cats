@@ -8,6 +8,7 @@ bundle -j4
 
 if [ -d ../cf-release/src/acceptance-tests ]; then
   cd ../cf-release/src/acceptance-tests
+  mkdir -p /go/src/github.com/cloudfoundry/cf-acceptance-tests
   ln -s `pwd` /go/src/github.com/cloudfoundry/cf-acceptance-tests
 else
   cd ../cf-release/src/github.com/cloudfoundry/cf-acceptance-tests
