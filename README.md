@@ -53,11 +53,12 @@ fly hijack -c $RESOURCE_NAME rm -rf /tmp/git-resource-repo-cache
 
 1. Check out the `binary-builds` branch
 2. Edit the YAML file appropriate for the build (e.g. `ruby-builds.yml`)
-3. Add any number of versions to the array, e.g.
+3. Add any number of versions and their checksums to the array, e.g.
 
 	```yaml
 	ruby:
-	  - 2.2.2
+	- version: 2.2.2
+	  checksum: 5ffc0f317e429e6b29d4a98ac521c3ce65481bfd22a8cf845fa02a7b113d9b44
 	```
 
 4. `git commit -am 'Build ruby 2.2.2' && git push`
