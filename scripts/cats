@@ -6,7 +6,12 @@ cd deployments-buildpacks
 bundle -j4
 . ./bin/switch $DEPLOYMENT_NAME
 
-cd ../cf-release/src/github.com/cloudfoundry/cf-acceptance-tests
+if [ -f ../cf-release/src/acceptance-tests ]; then
+  cd ../cf-release/src/acceptance-tests
+else
+  cd ../cf-release/src/github.com/cloudfoundry/cf-acceptance-tests
+fi
+
 go get github.com/tools/godep
 godep restore
 # create integration_config.json and set CONFIG env var (see README)
