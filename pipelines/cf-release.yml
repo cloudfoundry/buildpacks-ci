@@ -32,7 +32,7 @@ resources:
   - name: cf-release-ci-8-cf-deployment
     type: bosh-deployment
     source:
-      target: https://ec2-52-2-48-11.compute-1.amazonaws.com:25555
+      target: https://ec2-52-20-79-34.compute-1.amazonaws.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden
