@@ -6,7 +6,7 @@ cd deployments-buildpacks
 bundle -j4
 . ./bin/switch $DEPLOYMENT_NAME
 
-if [ -f ../cf-release/src/acceptance-tests ]; then
+if [ -d ../cf-release/src/acceptance-tests ]; then
   cd ../cf-release/src/acceptance-tests
 else
   cd ../cf-release/src/github.com/cloudfoundry/cf-acceptance-tests
