@@ -1,0 +1,30 @@
+---
+resources:
+  - name: ruby
+    type: git
+    source:
+      uri: http://github.com/ruby/ruby
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/buildpacks-ci
+
+jobs:
+  - name: Ruby
+    serial: true
+    plan:
+      - aggregate:
+        - get: ruby
+        - get: buildpacks-ci
+      - task: notify
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: ruby
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/notifications/ruby
+          params:
+            SLACK_TOKEN: {{slack-api-token}}
+
