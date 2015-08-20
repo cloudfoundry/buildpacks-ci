@@ -3,5 +3,7 @@ platform: linux
 image: docker:///cfbuildpacks/ci
 run:
   path: bash
-  args: ['git', 'clone', '--branch', 'v208', '--depth', '1', 'https://github.com/cloudfoundry/cf-release', '.', '&&', './update' ]
+  args:
+    - -c
+    - "git clone --branch v208 --depth 1 https://github.com/cloudfoundry/cf-release . && ./update"
 
