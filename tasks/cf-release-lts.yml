@@ -2,6 +2,6 @@
 platform: linux
 image: docker:///cfbuildpacks/ci
 run:
-  path: git
-  args: ['clone', '--branch', 'v208', '--depth', '1', '--recursive', 'https://github.com/cloudfoundry/cf-release', '.']
+  path: bash
+  args: ['git', 'clone', '--branch', 'v208', '--depth', '1', 'https://github.com/cloudfoundry/cf-release', '.', '&&', './update' ]
 
