@@ -2,7 +2,7 @@ resources:
   - name: bp-ci-8-cf-deployment
     type: bosh-deployment
     source:
-      target: https://ec2-52-4-139-56.compute-1.amazonaws.com:25555
+      target: https://bp-ci-8.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden

@@ -40,7 +40,7 @@ resources:
   - name: stack-ci-8-cf-deployment
     type: bosh-deployment
     source:
-      target: https://ec2-54-172-241-210.compute-1.amazonaws.com:25555
+      target: https://stack-ci-8.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden
