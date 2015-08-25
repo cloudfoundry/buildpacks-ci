@@ -1,0 +1,269 @@
+resources:
+  - name: dependency-notifier
+    type: git
+    source:
+      uri: git@github.com:aemengo/depedency-notifier.git
+      branch: master
+      private_key: {{dependency-notifier-private-key}}
+  - name: ruby
+    type: git
+    source:
+      uri: https://github.com/docker-library/official-images.git
+      paths: [ library/ruby ]
+  - name: node
+    type: git
+    source:
+      uri: https://github.com/docker-library/official-images.git
+      paths: [ library/node]
+  - name: php
+    type: git
+    source:
+      uri: https://github.com/docker-library/official-images.git
+      paths: [ library/php]
+  - name: httpd
+    type: git
+    source:
+      uri: https://github.com/docker-library/official-images.git
+      paths: [ library/httpd]
+  - name: jruby
+    type: git
+    source:
+      uri: https://github.com/docker-library/official-images.git
+      paths: [ library/jruby]
+  - name: python
+    type: git
+    source:
+      uri: https://github.com/docker-library/official-images.git
+      paths: [ library/python]
+  - name: nginx
+    type: git
+    source:
+      uri: https://github.com/docker-library/official-images.git
+      paths: [ library/nginx]
+jobs:
+  - name: dependency-notifier
+    plan:
+      - get: dependency-notifier
+        trigger: true
+      - task: rspec
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: dependency-notifier
+          run:
+            path: bash
+            args:
+              - -c
+              - "cd dependency-notifier && bundle install && bundle exec rspec spec"
+  - name: ruby
+    serial: true
+    plan:
+      - aggregate:
+        - get: docker-hub-manifest
+          resource: ruby
+          trigger: true
+        - get: dependency-notifier
+          passed: [dependency-notifier]
+      - task: notify
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: dependency-notifier
+            - name: docker-hub-manifest
+          params:
+            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+            LIBRARY: "ruby"
+          run:
+            path: bash
+            args:
+              - -c
+              - "dependency-notifier/bin/check_for_updates docker-hub-manifest/library/${LIBRARY} && cd dependency-notifier && git add -A && git -c user.name=\"CI Bot\" -c user.email=\"ci@localhost\" commit -m \"Saving state of library dependencies\" "
+      - put: dependency-notifier
+        params:
+          repository: notify/dependency-notifier
+          rebase: true
+  - name: node
+    serial: true
+    plan:
+      - aggregate:
+        - get: docker-hub-manifest
+          resource: node
+          trigger: true
+        - get: dependency-notifier
+          passed: [dependency-notifier]
+      - task: notify
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: dependency-notifier
+            - name: docker-hub-manifest
+          params:
+            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+            LIBRARY: "node"
+          run:
+            path: bash
+            args:
+              - -c
+              - "dependency-notifier/bin/check_for_updates docker-hub-manifest/library/${LIBRARY} && cd dependency-notifier && git add -A && git -c user.name=\"CI Bot\" -c user.email=\"ci@localhost\" commit -m \"Saving state of ${LIBRARY} dependencies\" "
+      - put: dependency-notifier
+        params:
+          repository: notify/dependency-notifier
+          rebase: true
+  - name: php
+    serial: true
+    plan:
+      - aggregate:
+        - get: docker-hub-manifest
+          resource: php
+          trigger: true
+        - get: dependency-notifier
+          passed: [dependency-notifier]
+      - task: notify
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: dependency-notifier
+            - name: docker-hub-manifest
+          params:
+            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+            LIBRARY: "php"
+          run:
+            path: bash
+            args:
+              - -c
+              - "dependency-notifier/bin/check_for_updates docker-hub-manifest/library/${LIBRARY} && cd dependency-notifier && git add -A && git -c user.name=\"CI Bot\" -c user.email=\"ci@localhost\" commit -m \"Saving state of library dependencies\" "
+      - put: dependency-notifier
+        params:
+          repository: notify/dependency-notifier
+          rebase: true
+  - name: httpd
+    serial: true
+    plan:
+      - aggregate:
+        - get: docker-hub-manifest
+          resource: httpd
+          trigger: true
+        - get: dependency-notifier
+          passed: [dependency-notifier]
+      - task: notify
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: dependency-notifier
+            - name: docker-hub-manifest
+          params:
+            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+            LIBRARY: "httpd"
+          run:
+            path: bash
+            args:
+              - -c
+              - "dependency-notifier/bin/check_for_updates docker-hub-manifest/library/${LIBRARY} && cd dependency-notifier && git add -A && git -c user.name=\"CI Bot\" -c user.email=\"ci@localhost\" commit -m \"Saving state of library dependencies\" "
+      - put: dependency-notifier
+        params:
+          repository: notify/dependency-notifier
+          rebase: true
+  - name: jruby
+    serial: true
+    plan:
+      - aggregate:
+        - get: docker-hub-manifest
+          resource: jruby
+          trigger: true
+        - get: dependency-notifier
+          passed: [dependency-notifier]
+      - task: notify
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: dependency-notifier
+            - name: docker-hub-manifest
+          params:
+            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+            LIBRARY: "jruby"
+          run:
+            path: bash
+            args:
+              - -c
+              - "dependency-notifier/bin/check_for_updates docker-hub-manifest/library/${LIBRARY} && cd dependency-notifier && git add -A && git -c user.name=\"CI Bot\" -c user.email=\"ci@localhost\" commit -m \"Saving state of library dependencies\" "
+      - put: dependency-notifier
+        params:
+          repository: notify/dependency-notifier
+          rebase: true
+  - name: python
+    serial: true
+    plan:
+      - aggregate:
+        - get: docker-hub-manifest
+          resource: python
+          trigger: true
+        - get: dependency-notifier
+          passed: [dependency-notifier]
+      - task: notify
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: dependency-notifier
+            - name: docker-hub-manifest
+          params:
+            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+            LIBRARY: "python"
+          run:
+            path: bash
+            args:
+              - -c
+              - "dependency-notifier/bin/check_for_updates docker-hub-manifest/library/${LIBRARY} && cd dependency-notifier && git add -A && git -c user.name=\"CI Bot\" -c user.email=\"ci@localhost\" commit -m \"Saving state of library dependencies\" "
+      - put: dependency-notifier
+        params:
+          repository: notify/dependency-notifier
+          rebase: true
+  - name: nginx
+    serial: true
+    plan:
+      - aggregate:
+        - get: docker-hub-manifest
+          resource: nginx
+          trigger: true
+        - get: dependency-notifier
+          passed: [dependency-notifier]
+      - task: notify
+        privileged: true
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: dependency-notifier
+            - name: docker-hub-manifest
+          params:
+            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+            LIBRARY: "nginx"
+          run:
+            path: bash
+            args:
+              - -c
+              - "dependency-notifier/bin/check_for_updates docker-hub-manifest/library/${LIBRARY} && cd dependency-notifier && git add -A && git -c user.name=\"CI Bot\" -c user.email=\"ci@localhost\" commit -m \"Saving state of library dependencies\" "
+      - put: dependency-notifier
+        params:
+          repository: notify/dependency-notifier
+          rebase: true
