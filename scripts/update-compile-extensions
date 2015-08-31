@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
+set -e
+
 cd buildpack/compile-extensions
 git pull origin master
+bundle install
+bundle exec rspec
 cd ..
 
 git config --global user.email "ci@localhost"
 git config --global user.name "CI Bot"
-git commit -am "Update compile-extensions"
+git add compile-extensions/
+git commit -m "Update compile-extensions"
