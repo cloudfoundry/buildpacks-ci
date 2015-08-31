@@ -1,0 +1,9 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+inputs:
+  - name: compile-extensions
+  - name: buildpacks-ci
+  - name: buildpack
+run:
+  path: buildpacks-ci/scripts/update-compile-extensions
