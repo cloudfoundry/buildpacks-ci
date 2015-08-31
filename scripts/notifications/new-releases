@@ -11,6 +11,8 @@ Octokit.configure do |c|
   c.password = ENV['GITHUB_PASSWORD']
 end
 
+new_releases_dir = ARGV[0]
+
 TAGS = {
   ruby:   -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) },
   jruby:  -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
@@ -25,7 +27,7 @@ TAGS = {
 TAGS.each do |current_depedency, get_tags|
   current_tags = get_tags.call
 
-  filename = "new-releases/#{current_depedency}.yaml"
+  filename = "#{new_releases_dir}/#{current_depedency}.yaml"
   if File.exist?(filename)
     previous_tags = YAML.load_file(filename)
   else
