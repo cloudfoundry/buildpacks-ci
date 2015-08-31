@@ -35,7 +35,8 @@ resources:
   - name: staticfile-buildpack
     type: git
     source:
-      uri: https://github.com/cloudfoundry/staticfile-buildpack
+      uri: git@github.com:cloudfoundry/staticfile-buildpack.git
+      private_key: {{staticfile-buildpack-private-key}}
       branch: develop
   - name: staticfile-buildpack-master
     type: git

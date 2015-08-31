@@ -35,7 +35,8 @@ resources:
   - name: nodejs-buildpack
     type: git
     source:
-      uri: https://github.com/cloudfoundry/nodejs-buildpack
+      uri: git@github.com:cloudfoundry/nodejs-buildpack.git
+      private_key: {{nodejs-buildpack-private-key}}
       branch: develop
   - name: nodejs-buildpack-master
     type: git

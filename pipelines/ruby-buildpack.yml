@@ -35,7 +35,8 @@ resources:
   - name: ruby-buildpack
     type: git
     source:
-      uri: https://github.com/cloudfoundry/ruby-buildpack
+      uri: git@github.com:cloudfoundry/ruby-buildpack.git
+      private_key: {{ruby-buildpack-private-key}}
       branch: develop
   - name: ruby-buildpack-master
     type: git

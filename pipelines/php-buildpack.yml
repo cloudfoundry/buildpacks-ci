@@ -35,7 +35,8 @@ resources:
   - name: php-buildpack
     type: git
     source:
-      uri: https://github.com/cloudfoundry/php-buildpack
+      uri: git@github.com:cloudfoundry/php-buildpack.git
+      private_key: {{php-buildpack-private-key}}
       branch: develop
   - name: php-buildpack-master
     type: git

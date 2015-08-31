@@ -35,7 +35,8 @@ resources:
   - name: python-buildpack
     type: git
     source:
-      uri: https://github.com/cloudfoundry/python-buildpack
+      uri: git@github.com:cloudfoundry/python-buildpack.git
+      private_key: {{python-buildpack-private-key}}
       branch: develop
   - name: python-buildpack-master
     type: git

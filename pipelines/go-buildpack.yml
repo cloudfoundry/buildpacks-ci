@@ -35,7 +35,8 @@ resources:
   - name: go-buildpack
     type: git
     source:
-      uri: https://github.com/cloudfoundry/go-buildpack
+      uri: git@github.com:cloudfoundry/go-buildpack.git
+      private_key: {{go-buildpack-private-key}}
       branch: develop
   - name: go-buildpack-master
     type: git
