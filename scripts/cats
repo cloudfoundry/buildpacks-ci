@@ -2,16 +2,24 @@
 
 set -e
 
-cd deployments-buildpacks
-bundle -j4
-. ./bin/switch $DEPLOYMENT_NAME
+pushd deployments-buildpacks
+  bundle -j4
+  . ./bin/switch $DEPLOYMENT_NAME
+popd
 
-if [ -d ../cf-release/src/acceptance-tests ]; then
-  cd ../cf-release/src/acceptance-tests
+pushd cf-release
+  cat config/blobs.yml | grep cli/cf -A 3 | (cat > config/blobs.yml)
+  bosh sync blobs
+  tar xzf blobs/cli/cf-linux-amd64.tgz -C blobs/cli
+  export PATH=`pwd`/blobs/cli:$PATH
+popd
+
+if [ -d cf-release/src/acceptance-tests ]; then
+  cd cf-release/src/acceptance-tests
   mkdir -p /go/src/github.com/cloudfoundry
   ln -s `pwd` /go/src/github.com/cloudfoundry/cf-acceptance-tests
 else
-  cd ../cf-release/src/github.com/cloudfoundry/cf-acceptance-tests
+  cd cf-release/src/github.com/cloudfoundry/cf-acceptance-tests
 fi
 
 go get github.com/tools/godep
