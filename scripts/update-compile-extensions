@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+cd buildpack/compile-extensions
+git pull
+cd ..
+
+git config --global user.email "ci@localhost"
+git config --global user.name "CI Bot"
+git commit -am "Update compile-extensions"
