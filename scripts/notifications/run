@@ -4,9 +4,8 @@ set -e
 
 base_dir=$(pwd)
 
-bundle install
-
 pushd buildpacks-ci/scripts/notifications
+  bundle install
   ./new-releases $base_dir/new-releases | tee updates | ./slack
 popd
 
