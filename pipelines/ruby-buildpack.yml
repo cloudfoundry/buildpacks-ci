@@ -28,6 +28,10 @@ resources:
     source:
       uri: git@github.com:pivotal-cf/deployments-buildpacks
       private_key: {{deployments-private-key}}
+  - name: compile-extensions
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/compile-extensions.git
   - name: ruby-buildpack
     type: git
     source:
@@ -262,3 +266,19 @@ jobs:
           put: cf-lts-environments
           params:
             release: cf-environments
+  - name: update-compile-extensions
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: compile-extensions
+          trigger: true
+        - get: buildpack
+          resource: ruby-buildpack
+      - task: update-compile-extensions
+        file: buildpacks-ci/tasks/update-compile-extensions.yml
+        privileged: true
+      - put: ruby-buildpack
+        params:
+          repository: update-compile-extensions/buildpack
+          rebase: true
