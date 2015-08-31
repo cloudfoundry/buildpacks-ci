@@ -11,5 +11,5 @@ popd
 
 pushd new-releases
   git add -A
-  git ci -m 'Updates for latest tags'
+  git commit -m 'Updates for latest tags'
 popd
