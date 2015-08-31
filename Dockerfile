@@ -21,6 +21,10 @@ RUN apt-get -y install \
 RUN git clone http://github.com/luan/vimfiles.git ~/.vim
 RUN ~/.vim/install 
 
+
+RUN git config --global user.email "ci@localhost"
+RUN git config --global user.name "CI Bot"
+
 RUN wget -q https://dl.bintray.com/mitchellh/vagrant/vagrant_1.7.3_x86_64.deb \
   && dpkg -i vagrant_1.7.3_x86_64.deb \
   && rm vagrant_1.7.3_x86_64.deb

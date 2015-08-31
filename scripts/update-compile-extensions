@@ -8,7 +8,5 @@ bundle install
 bundle exec rspec
 cd ..
 
-git config --global user.email "ci@localhost"
-git config --global user.name "CI Bot"
 git add compile-extensions/
 git commit -m "Update compile-extensions"
