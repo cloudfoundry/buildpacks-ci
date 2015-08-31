@@ -8,7 +8,7 @@ pushd deployments-buildpacks
 popd
 
 pushd cf-release
-  cat config/blobs.yml | grep cli/cf -A 3 | (cat > config/blobs.yml)
+  cat config/blobs.yml | grep cli/cf -A 3 | tee config/blobs.yml
   bosh sync blobs
   tar xzf blobs/cli/cf-linux-amd64.tgz -C blobs/cli
   export PATH=`pwd`/blobs/cli:$PATH
