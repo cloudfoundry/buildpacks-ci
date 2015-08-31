@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'octokit'
+require 'open-uri'
+require 'yaml'
+
+Octokit.auto_paginate = true
+Octokit.configure do |c|
+  c.login    = ENV['GITHUB_USERNAME']
+  c.password = ENV['GITHUB_PASSWORD']
+end
+
+TAGS = {
+  ruby:   -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) },
+  jruby:  -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
+  nginx:  -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release/) },
+  php:    -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
+  go:     -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
+  httpd:  -> { Octokit.tags('apache/httpd').map(&:name).grep(/^2\./) },
+  maven:  -> { Octokit.tags('apache/maven').map(&:name).grep(/^maven/) },
+  python: -> { JSON.parse(open('https://hg.python.org/cpython/json-tags').read)["tags"].map{ |t| t["tag"] } }
+}
+
+TAGS.each do |current_depedency, get_tags|
+  current_tags = get_tags.call
+
+  filename = "new-releases/#{current_depedency}.yaml"
+  if File.exist?(filename)
+    previous_tags = YAML.load_file(filename)
+  else
+    previous_tags = []
+  end
+
+  diff_tags = current_tags - previous_tags
+
+  if diff_tags.any?
+    File.write(filename, current_tags.to_yaml)
+    puts "There are *#{diff_tags.length}* new updates to the *#{current_depedency}* dependency:\n"
+    diff_tags.each do |tag|
+      puts "- version *#{tag}*\n"
+    end
+
+  else
+    warn "There are no new updates to the *#{current_depedency}* dependency"
+  end
+end
+
+

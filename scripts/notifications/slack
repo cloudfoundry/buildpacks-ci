@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+require 'json'
+
+text = ARGF.read.chomp
+exit if text.empty?
+
+payload = {
+  'text'       => text,
+  'channel'    => ENV['SLACK_CHANNEL'],
+  'username'   => 'dependency-notifier',
+  'icon_emoji' => ':monkey_face:'
+}
+
+`
+    curl \
+    -X POST \
+    --data-urlencode \
+    'payload=#{payload.to_json}' \
+    #{ENV['SLACK_WEBHOOK']}
+`

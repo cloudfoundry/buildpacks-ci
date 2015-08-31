@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -e
+
+base_dir=$(pwd)
+
+bundle install
+
+pushd buildpacks-ci/scripts/notifications
+  ./new-releases $base_dir/new-releases | tee updates | ./slack
+popd
+
+pushd new-releases
+  git add -A
+  git ci -m 'Updates for latest tags'
+popd

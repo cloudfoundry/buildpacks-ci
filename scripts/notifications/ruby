@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-gem install slackcat
-DATE=$(date -d -2days +"%Y-%m-%d")
-echo "@channel: The latests Ruby versions as of $DATE: $(git log --tags --pretty="format:%D" --after=$DATE | grep tag | cut -d " " -f 2)\n\n*This is an automated message*" | slackcat -c buildpacks-firehose -p
