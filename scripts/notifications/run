@@ -6,7 +6,9 @@ base_dir=$(pwd)
 
 pushd buildpacks-ci/scripts/notifications
   bundle install
-  ./new-releases $base_dir/new-releases | tee updates | ./slack
+  new_releases_output=$(./new-releases $base_dir/new-releases)
+  echo $new_releases_output | ./slack
+  echo $new_releases_output | ./pivotal_tracker
 popd
 
 pushd new-releases

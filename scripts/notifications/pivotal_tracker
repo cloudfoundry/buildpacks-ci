@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+
+require 'json'
+
+description = ARGF.read.chomp
+exit if description.empty?
+
+payload = {
+  name: 'New dependencies',
+  description: description
+}.to_json
+
+`
+  curl -X POST \
+       -H "X-TrackerToken: #{ENV['TRACKER_API_TOKEN']}" \
+       -H "Content-Type: application/json" \
+       -d '#{payload}' \
+       "https://www.pivotaltracker.com/services/v5/projects/#{ENV['TRACKER_PROJECT_ID']}/stories"
+`
