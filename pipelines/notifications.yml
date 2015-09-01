@@ -1,30 +1,58 @@
 ---
 resources:
-  - name: ruby
-    type: git
-    source:
-      uri: http://github.com/ruby/ruby
   - name: buildpacks-ci
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
+  - name: new-releases
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      branch: new-release-notifications
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
+  - {name: "ruby", type: "git", source: {uri: "https://github.com/ruby/ruby"}}
+  - {name: "jruby", type: "git", source: {uri: "https://github.com/jruby/jruby"}}
+  - {name: "nginx", type: "git", source: {uri: "https://github.com/nginx/nginx"}}
+  - {name: "php", type: "git", source: {uri: "https://github.com/php/php-src"}}
+  - {name: "go", type: "git", source: {uri: "https://github.com/golang/go"}}
+  - {name: "nodejs", type: "git", source: {uri: "https://github.com/nodejs/node"}}
+  - {name: "httpd", type: "git", source: {uri: "https://github.com/apache/httpd"}}
+  - {name: "maven", type: "git", source: {uri: "https://github.com/apache/maven"}}
+  - {name: "python", type: "git", source: {uri: "https://github.com/python/cpython"}}
 
 jobs:
-  - name: Ruby
+  - name: New Releases
     serial: true
     plan:
       - aggregate:
-        - get: ruby
         - get: buildpacks-ci
+        - get: new-releases
+        - { get: "ruby",   trigger: true}
+        - { get: "jruby",  trigger: true}
+        - { get: "nginx",  trigger: true}
+        - { get: "php",    trigger: true}
+        - { get: "go",     trigger: true}
+        - { get: "nodejs", trigger: true}
+        - { get: "httpd",  trigger: true}
+        - { get: "maven",  trigger: true}
+        - { get: "python", trigger: true}
       - task: notify
         config:
           platform: linux
           image: docker:///cfbuildpacks/ci
           inputs:
-            - name: ruby
+            - name: new-releases
             - name: buildpacks-ci
           run:
-            path: buildpacks-ci/scripts/notifications/ruby
+            path: buildpacks-ci/scripts/notifications/run
           params:
-            SLACK_TOKEN: {{slack-api-token}}
-
+            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+            GITHUB_USERNAME: {{github-username}}
+            GITHUB_PASSWORD: {{github-password}}
+            TRACKER_PROJECT_ID: 1042066
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+      - put: new-releases
+        params:
+          repository: notify/new-releases
+          rebase: true
