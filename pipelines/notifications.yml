@@ -27,15 +27,15 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: new-releases
-        - { get: "ruby",   trigger: true}
-        - { get: "jruby",  trigger: true}
-        - { get: "nginx",  trigger: true}
-        - { get: "php",    trigger: true}
-        - { get: "go",     trigger: true}
-        - { get: "nodejs", trigger: true}
-        - { get: "httpd",  trigger: true}
-        - { get: "maven",  trigger: true}
-        - { get: "python", trigger: true}
+        - { get: "ruby",   trigger: true, params: {depth: 1}}
+        - { get: "jruby",  trigger: true, params: {depth: 1}}
+        - { get: "nginx",  trigger: true, params: {depth: 1}}
+        - { get: "php",    trigger: true, params: {depth: 1}}
+        - { get: "go",     trigger: true, params: {depth: 1}}
+        - { get: "nodejs", trigger: true, params: {depth: 1}}
+        - { get: "httpd",  trigger: true, params: {depth: 1}}
+        - { get: "maven",  trigger: true, params: {depth: 1}}
+        - { get: "python", trigger: true, params: {depth: 1}}
       - task: notify
         config:
           platform: linux
