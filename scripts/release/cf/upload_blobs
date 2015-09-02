@@ -69,5 +69,6 @@ exit system(<<-EOF)
   git config --global user.email "cf-buildpacks-eng@pivotal.io"
   git config --global user.name "CF Buildpacks Team"
 
+  ./scripts/setup-git-hooks
   git commit -m 'Upgrading buildpacks to latest versions'
 EOF
