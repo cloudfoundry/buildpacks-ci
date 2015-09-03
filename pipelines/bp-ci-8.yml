@@ -31,6 +31,10 @@ resources:
       uri: git@github.com:cloudfoundry/buildpacks-ci
       branch: resource-pools
       private_key: {{resource-pools-private-key}}
+  - name: bosh-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
 
 jobs:
   - name: deploy-cf-to-bp-ci-8
@@ -39,6 +43,7 @@ jobs:
       - aggregate:
         - get: resource-pools
         - get: buildpacks-ci
+        - get: bosh-stemcell
       - task: claim-from-pool
         config:
           platform: linux
@@ -72,7 +77,7 @@ jobs:
       - put: bp-ci-8-cf-deployment
         params:
           manifest: deployments-buildpacks/deployments/bp-ci-8/manifest.yml
-          stemcells: []
+          stemcells: ['bosh-stemcell/stemcell.tgz']
           releases: [bosh-cf-release/*.tgz]
       - task: unclaim-from-pool
         config:

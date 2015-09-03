@@ -27,6 +27,11 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
+  - name: bosh-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+
 jobs:
   - name: deploy-cf-to-bp-ci-7
     serial: true
@@ -34,6 +39,7 @@ jobs:
       - aggregate:
         - get: resource-pools
         - get: buildpacks-ci
+        - get: bosh-stemcell
       - task: claim-from-pool
         config:
           platform: linux
@@ -72,7 +78,7 @@ jobs:
       - put: bp-ci-7-cf-deployment
         params:
           manifest: deployments-buildpacks/deployments/bp-ci-7/manifest.yml
-          stemcells: []
+          stemcells: ['bosh-stemcell/stemcell.tgz']
           releases: [download-release/release.tgz]
       - task: unclaim-from-pool
         config:
