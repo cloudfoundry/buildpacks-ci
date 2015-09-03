@@ -66,6 +66,27 @@ resources:
       access_token: {{buildpacks-github-token}}
 
 jobs:
+  - name: ensure manifest has modules
+    serial: true
+    plan:
+      - get: buildpacks-ci
+      - get: php-buildpack
+        trigger: true
+      - task: load-modules
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: php-buildpack
+          run :
+            path: bash
+            args:
+              - -c
+              - "cd php-buildpack && ./bin/populate-modules-in-manifest && (git commit -am 'Updated manifest with supported PHP modules' || true)"
+      - put: php-buildpack
+        params:
+          repository: load-modules/php-buildpack
   - name: php-buildpack-CF-edge
     serial: true
     plan:
@@ -77,6 +98,7 @@ jobs:
         - get: buildpacks-ci
         - get: deployments-buildpacks
         - get: php-buildpack
+          passed: ['ensure manifest has modules']
           trigger: true
       - task: rspec
         config:
@@ -109,6 +131,7 @@ jobs:
         - get: buildpacks-ci
         - get: deployments-buildpacks
         - get: php-buildpack
+          passed: ['ensure manifest has modules']
           trigger: true
       - task: rspec
         config:
