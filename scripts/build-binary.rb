@@ -2,26 +2,27 @@
 
 require 'yaml'
 
-binary_name = ENV['BINARY_NAME']
-builds_dir  = File.join(Dir.pwd, 'builds-yaml')
-builds_path = File.join(builds_dir, "#{binary_name}-builds.yml")
-builds      = YAML.load_file(builds_path)
+binary_name  = ENV['BINARY_NAME']
+builds_dir   = File.join(Dir.pwd, 'builds-yaml')
+builds_path  = File.join(builds_dir, "#{binary_name}-builds.yml")
+builds       = YAML.load_file(builds_path)
+latest_build = builds[binary_name].shift
 
-latest_version = builds[binary_name].shift
-
-unless latest_version
+unless latest_build
   puts "There are no new builds for #{binary_name} requested."
   exit
 end
 
-version        = latest_version['version']
-checksum       = latest_version['checksum']
+flags = "--name=#{binary_name}"
+latest_build.each_pair do |key, value|
+  flags << %Q{ --#{key}="#{value}"}
+end
 
 exit system(<<-EOF)
   set -e
 
   cd binary-builder
-  ./bin/binary-builder #{binary_name} #{version} #{checksum}
+  ./bin/binary-builder #{flags}
   BINARY_PATH=$(find -name "*.tgz" -o -name "*.tar.gz")
   md5checksum=$(md5sum $BINARY_PATH | cut --delimiter=" " --fields=1)
   sha256checksum=$(sha256sum $BINARY_PATH | cut --delimiter=" " --fields=1)
