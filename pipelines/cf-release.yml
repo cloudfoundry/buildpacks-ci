@@ -100,7 +100,7 @@ jobs:
         - get: staticfile-buildpack-github-release
         - get: binary-buildpack-github-release
       - task: generate-manifest
-        file: buildpacks-ci/tasks/make-manifest.yml
+        file: buildpacks-ci/tasks/runtime-passed-make-manifest.yml
         config:
           params:
             DEPLOYMENT_NAME: cf-release-ci-8
