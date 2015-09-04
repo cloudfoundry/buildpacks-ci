@@ -5,8 +5,8 @@ cd buildpack
 git tag v`cat VERSION`
 export BUNDLE_GEMFILE=cf.Gemfile
 bundle install
-bundle exec buildpack-packager uncached
-bundle exec buildpack-packager cached
+bundle exec buildpack-packager --uncached
+bundle exec buildpack-packager --cached
 
 timestamp=$(date +%s)
 ruby <<RUBY
