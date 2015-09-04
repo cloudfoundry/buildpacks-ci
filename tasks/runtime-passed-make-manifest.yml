@@ -1,0 +1,10 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+inputs:
+  - name: bosh-lite
+  - name: buildpacks-ci
+  - name: cf-release
+  - name: deployments-buildpacks
+run:
+  path: buildpacks-ci/scripts/runtime-passed-generate-cf-manifest
