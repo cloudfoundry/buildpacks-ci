@@ -66,7 +66,11 @@ class ReleaseNoteGenerator
     headers = if token
                 "-H 'Authorization: token #{token}'"
               end
-    JSON.parse `curl -s #{headers} https://api.github.com#{path}`
+    result = `curl -s #{headers} https://api.github.com#{path}`
+    if result =~ /API rate limit exceeded/
+      raise result
+    end
+    JSON.parse result
   end
 
   def main
