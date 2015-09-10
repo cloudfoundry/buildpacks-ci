@@ -49,11 +49,11 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/bosh-lite
-  - name: cf-release-runtime-passed
+  - name: cf-release
     type: git
     source:
       uri: https://github.com/cloudfoundry/cf-release
-      branch: runtime-passed
+      branch: develop
   - name: cf-release-develop
     type: git
     source:
@@ -117,7 +117,6 @@ jobs:
         - get: bosh-lite
         - get: buildpacks-ci
         - get: cf-release
-          resource: cf-release-runtime-passed
         - get: lite-stemcell
         - get: stack-s3
           passed: [ build-rootfs ]
@@ -129,7 +128,7 @@ jobs:
         - get: stacks
           passed: [ build-rootfs ]
       - task: generate-manifest
-        file: buildpacks-ci/tasks/runtime-passed-make-manifest.yml
+        file: buildpacks-ci/tasks/make-manifest.yml
         config:
           params:
             DEPLOYMENT_NAME: stack-ci-8
@@ -161,7 +160,7 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: cf-release-runtime-passed
+        - get: cf-release
           passed: [ deploy-cf-to-stack-ci-8 ]
         - get: deployments-buildpacks
         - get: stack-s3
@@ -179,8 +178,7 @@ jobs:
           image: docker:///cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
-            - name: cf-release-runtime-passed
-              path: cf-release
+            - name: cf-release
             - name: deployments-buildpacks
           run:
             path: buildpacks-ci/scripts/cats
