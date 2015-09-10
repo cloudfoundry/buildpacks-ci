@@ -7,4 +7,4 @@ inputs:
   - name: cf-release
   - name: deployments-buildpacks
 run:
-  path: buildpacks-ci/scripts/runtime-passed-generate-cf-manifest
+  path: buildpacks-ci/scripts/develop-generate-cf-manifest
