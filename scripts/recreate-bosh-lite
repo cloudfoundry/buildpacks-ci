@@ -12,7 +12,7 @@ vagrant destroy -f
 vagrant up --provider=aws
 
 git add -A
-git ci -m "recreated deployment $DEPLOYMENT_NAME"
+git commit -m "recreated deployment $DEPLOYMENT_NAME"
 
 unset $(env | grep BOSH_ | cut -d '=' -f 1)
 bosh target $DEPLOYMENT_NAME.cf-app.com
@@ -21,4 +21,4 @@ bosh create user admin $BOSH_LITE_PASSWORD
 
 rm manifest.yml
 git add -A
-git ci -m "remove deployment manifest for $DEPLOYMENT_NAME"
+git commit -m "remove deployment manifest for $DEPLOYMENT_NAME"
