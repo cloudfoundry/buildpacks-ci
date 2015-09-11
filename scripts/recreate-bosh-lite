@@ -2,16 +2,18 @@
 
 set -eux
 
-cd deployments-buildpacks/deployments/$DEPLOYMENT_NAME
+cd deployments-buildpacks
+. ./bin/switch $DEPLOYMENT_NAME
 
+cd deployments/$DEPLOYMENT_NAME
 rm -f .vagrant/machines/default/aws/elastic_ip
-
 vagrant destroy -f
 vagrant up --provider=aws
 
 git add -A
 git ci -m "recreated deployment $DEPLOYMENT_NAME"
 
+unset $(env | grep BOSH_ | cut -d '=' -f 1)
 bosh target $DEPLOYMENT_NAME.cf-app.com
 bosh login admin admin
 bosh create user admin $BOSH_LITE_PASSWORD
