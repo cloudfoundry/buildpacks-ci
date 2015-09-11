@@ -13,7 +13,7 @@ vagrant destroy -f
 vagrant up --provider=aws
 
 bash -c "bosh login admin admin"
-bash -c "bosh create user admin $BOSH_PASSWORD"
+bosh create user admin $BOSH_PASSWORD
 
 rm manifest.yml
 git add -A
