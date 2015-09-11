@@ -6,7 +6,7 @@ cd deployments-buildpacks
 bundle -j4
 . ./bin/switch $DEPLOYMENT_NAME
 
-cd deployemnts/$DEPLOYMENT_NAME
+cd deployments/$DEPLOYMENT_NAME
 rm -f .vagrant/machines/default/aws/elastic_ip
 
 vagrant destroy
