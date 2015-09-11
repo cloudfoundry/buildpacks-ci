@@ -20,9 +20,7 @@ until $(curl -k --output /dev/null --silent --head --fail https://$DEPLOYMENT_NA
 done
 
 unset $(env | grep BOSH_ | cut -d '=' -f 1)
-bosh target $DEPLOYMENT_NAME.cf-app.com
-bosh login admin admin
-bosh create user admin $BOSH_LITE_PASSWORD
+bosh -u admin -p admin -t $DEPLOYMENT_NAME.cf-app.com create user admin $BOSH_LITE_PASSWORD
 
 rm manifest.yml
 git add -A
