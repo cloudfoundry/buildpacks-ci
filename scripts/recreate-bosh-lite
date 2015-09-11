@@ -9,7 +9,7 @@ bundle -j4
 cd deployments/$DEPLOYMENT_NAME
 rm -f .vagrant/machines/default/aws/elastic_ip
 
-vagrant destroy
+vagrant destroy -f
 vagrant up --provider=aws
 
 bash -c "bosh login admin admin"
