@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash
 
 set -eux
 
@@ -19,7 +19,7 @@ until $(curl -k --output /dev/null --silent --head --fail https://$DEPLOYMENT_NA
     sleep 10
 done
 
-bosh -u admin -p admin -t $DEPLOYMENT_NAME.cf-app.com create user admin $BOSH_LITE_PASSWORD
+bosh -u admin -p admin -t $DEPLOYMENT_NAME.cf-app.com create user admin $PASSWORD
 
 rm manifest.yml
 git add -A
