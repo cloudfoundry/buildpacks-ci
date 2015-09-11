@@ -14,6 +14,11 @@ vagrant up --provider=aws
 git add -A
 git commit -m "recreated deployment $DEPLOYMENT_NAME"
 
+until $(curl --output /dev/null --silent --head --fail http://$DEPLOYMENT_NAME.cf-app.com:25555/info); do
+    printf '.'
+    sleep 10
+done
+
 unset $(env | grep BOSH_ | cut -d '=' -f 1)
 bosh target $DEPLOYMENT_NAME.cf-app.com
 bosh login admin admin
