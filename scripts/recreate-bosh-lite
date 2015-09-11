@@ -14,7 +14,7 @@ vagrant up --provider=aws
 git add -A
 git commit -m "recreated deployment $DEPLOYMENT_NAME"
 
-until $(curl --output /dev/null --silent --head --fail http://$DEPLOYMENT_NAME.cf-app.com:25555/info); do
+until $(curl -k --output /dev/null --silent --head --fail https://$DEPLOYMENT_NAME.cf-app.com:25555/info); do
     printf '.'
     sleep 10
 done
