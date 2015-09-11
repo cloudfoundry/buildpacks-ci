@@ -1,0 +1,14 @@
+#!/bin/bash -l
+
+set -eux
+
+pushd deployment-buildpacks
+. ./bin/switch $DEPLOYMENT_NAME
+popd
+
+cf api api.$BOSH_TARGET --skip-ssl-validation
+cf login -u $CF_CI_USERNAME -p $CF_CI_PASSWORD 
+
+cd machete/
+
+yes | ./scripts/configure_deployment
