@@ -4,7 +4,7 @@ set -eux
 
 cd deployments-buildpacks
 bundle install -j4
-. ./bin/switch $DEPLOYMENT_NAME
+. ./bin/switch $DEPLOYMENT_NAME --no-target
 
 cd deployments/$DEPLOYMENT_NAME
 rm -f .vagrant/machines/default/aws/elastic_ip
