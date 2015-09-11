@@ -1,8 +1,8 @@
 resources:
-  - name: bp-ci-7-cf-deployment
+  - name: cf-deployment
     type: bosh-deployment
     source:
-      target: https://bp-ci-7.cf-app.com:25555
+      target: https://{{deployment-name}}.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden
@@ -31,15 +31,22 @@ resources:
     type: bosh-io-stemcell
     source:
       name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+  - name: machete
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/machete.git
+      branch: master
 
 jobs:
-  - name: deploy-cf-to-bp-ci-7
+  - name: deploy-cf
     serial: true
     plan:
       - aggregate:
         - get: resource-pools
         - get: buildpacks-ci
         - get: bosh-stemcell
+        - get: deployments-buildpacks
+        - get: machete
       - task: claim-from-pool
         config:
           platform: linux
@@ -49,37 +56,72 @@ jobs:
             - name: resource-pools
           run:
             path: buildpacks-ci/scripts/claim-resource
-            args: ['cf-lts-environments', 'bp-ci-7']
+            args: [{{resource-pool}}, {{deployment-name}}]
       - put: resource-pools
         params:
           repository: claim-from-pool/resource-pools
+      - task: recreate
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/recreate-bosh-lite
+          params:
+            DEPLOYMENT_NAME: {{deployment-name}}
+            PASSWORD: {{bosh-lite-password}}
+        ensure:
+          put: deployments-buildpacks
+          params:
+            repository: recreate/deployments-buildpacks
+            rebase: true
       - aggregate:
-        - get: deployments-buildpacks
         - get: bosh-lite
         - task: cf-release
-          file: buildpacks-ci/tasks/cf-release-lts.yml
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci
+            run:
+              path: bash
+              args: ['-c', 'git clone --branch v{{cf-version}} --depth 1 https://github.com/cloudfoundry/cf-release . && ./update']
         - task: download-release
           config:
             platform: linux
             image: docker:///cfbuildpacks/ci
             run:
-              path: curl
-              args: ['-f', '-L', '-o', 'release.tgz', 'https://bosh.io/d/github.com/cloudfoundry/cf-release?v=208']
+              path: bash
+              args: ['-c', 'curl -f -L -o release.tgz https://bosh.io/d/github.com/cloudfoundry/cf-release?v={{cf-version}}']
       - task: generate-manifest
         file: buildpacks-ci/tasks/make-manifest.yml
         config:
           params:
-            DEPLOYMENT_NAME: bp-ci-7
+            DEPLOYMENT_NAME: {{deployment-name}}
             CF_CI_PASSWORD: {{ci-cf-password}}
         privileged: true
       - put: deployments-buildpacks
         params:
           repository: generate-manifest/deployments-buildpacks
-      - put: bp-ci-7-cf-deployment
+      - put: cf-deployment
         params:
-          manifest: deployments-buildpacks/deployments/bp-ci-7/manifest.yml
+          manifest: generate-manifest/cf-release/bosh-lite/manifests/cf-manifest.yml
           stemcells: ['bosh-stemcell/stemcell.tgz']
           releases: [download-release/release.tgz]
+      - task: configure-deployment
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: deployments-buildpacks
+            - name: machete
+          run:
+            path: buildpacks-ci/scripts/configure-deployment
+          params:
+            DEPLOYMENT_NAME: {{deployment-name}}
+            CF_CI_PASSWORD: {{ci-cf-password}}
+            CF_CI_USERNAME: {{ci-cf-username}}
       - task: unclaim-from-pool
         config:
           platform: linux
@@ -89,7 +131,9 @@ jobs:
             - name: resource-pools
           run:
             path: buildpacks-ci/scripts/unclaim-resource
-            args: ['cf-lts-environments', 'bp-ci-7']
+            args: [{{resource-pool}}, {{deployment-name}}]
       - put: resource-pools
         params:
           repository: unclaim-from-pool/resource-pools
+          rebase: true
+

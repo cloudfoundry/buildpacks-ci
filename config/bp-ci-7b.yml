@@ -1,0 +1,4 @@
+---
+deployment-name: bp-ci-7b
+resource-pool: cf-lts-environments
+cf-version: 208
