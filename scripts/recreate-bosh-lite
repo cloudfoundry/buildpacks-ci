@@ -12,8 +12,9 @@ rm -f .vagrant/machines/default/aws/elastic_ip
 vagrant destroy -f
 vagrant up --provider=aws
 
-bash -c "bosh login admin admin"
-bosh create user admin $BOSH_PASSWORD
+unset $(env | grep BOSH_ | cut -d '=' -f 1)
+bosh login admin admin
+bosh create user admin $BOSH_LITE_PASSWORD
 
 rm manifest.yml
 git add -A
