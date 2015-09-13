@@ -2,7 +2,7 @@
 
 set -eux
 
-pushd deployment-buildpacks
+pushd deployments-buildpacks
 . ./bin/switch $DEPLOYMENT_NAME
 popd
 
