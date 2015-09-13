@@ -3,6 +3,7 @@
 set -eux
 
 pushd deployments-buildpacks
+bundle install
 . ./bin/switch $DEPLOYMENT_NAME
 popd
 
