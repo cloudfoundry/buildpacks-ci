@@ -103,6 +103,7 @@ jobs:
       - put: deployments-buildpacks
         params:
           repository: generate-manifest/deployments-buildpacks
+          rebase: true
       - put: cf-deployment
         params:
           manifest: generate-manifest/cf-release/bosh-lite/manifests/cf-manifest.yml
