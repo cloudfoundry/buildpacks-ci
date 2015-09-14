@@ -81,6 +81,31 @@ resources:
       access_token: {{buildpacks-github-token}}
 
 jobs:
+  - name: recreate bosh-lite
+    serial: true
+    serial_groups: [ cf-release-ci-8 ]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: deployments-buildpacks
+      - task: recreate
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/recreate-bosh-lite
+          params:
+            DEPLOYMENT_NAME: cf-release
+            PASSWORD: {{bosh-lite-password}}
+        ensure:
+          put: deployments-buildpacks
+          params:
+            repository: recreate/deployments-buildpacks
+            rebase: true
+
   - name: deploy-cf-to-cf-release-ci-8
     serial: true
     serial_groups: [ cf-release-ci-8 ]
