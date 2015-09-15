@@ -1,0 +1,27 @@
+#!/bin/bash -l
+
+set -e
+
+pushd deployments-buildpacks
+#replace ruby Gemfile with the available version
+sed -i '$ s/line number//g' Gemfile
+echo "ruby '$(ruby -v | awk '{split($0,a," ");split(a[2],b,"p"); print b[1]}')'" >> Gemfile
+bundle -j4
+. ./bin/switch $DEPLOYMENT_NAME
+popd
+
+cat > integration_config.json <<EOF
+{
+  "api": "api.$DEPLOYMENT_NAME.cf-app.com",
+  "admin_user": "$CI_CF_USERNAME",
+  "admin_password": "$CI_CF_PASSWORD",
+  "apps_domain": "$DEPLOYMENT_NAME.cf-app.com",
+  "skip_ssl_validation": true
+}
+EOF
+
+export CONFIG=$PWD/integration_config.json
+
+go get -t -v github.com/cloudfoundry-incubator/diego-acceptance-tests/... | true
+cd $GOPATH/src/github.com/cloudfoundry-incubator/diego-acceptance-tests
+./bin/test -skipPackage ssh
