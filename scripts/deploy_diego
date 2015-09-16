@@ -30,7 +30,7 @@ sed -i -E "s/\/cf.yml/\/manifest.yml/g" ./scripts/generate-deployment-manifest
   > diego-deployment.yml
 bosh deployment diego-deployment.yml
 bosh upload release https://bosh.io/d/github.com/cloudfoundry-incubator/garden-linux-release | true
-bosh create release --force &&
+bosh create release --force --name diego &&
   bosh -n upload release &&
   bosh -n deploy
 popd
