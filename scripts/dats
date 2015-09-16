@@ -22,7 +22,8 @@ EOF
 
 export CONFIG=$PWD/integration_config.json
 
-cf login -a api.$BOSH_TARGET  -u $CI_CF_USERNAME -p $CI_CF_PASSWORD --skip-ssl-validation
+cf api api.$BOSH_TARGET --skip-ssl-validation
+cf auth $CI_CF_USERNAME $CI_CF_PASSWORD 
 cf enable-feature-flag diego_docker
 
 pushd diego-release
