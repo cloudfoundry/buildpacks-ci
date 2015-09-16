@@ -31,6 +31,6 @@ pushd diego-release
 export GOPATH=$PWD:$GOPATH
 export PATH=$PWD/bin:$PATH
 pushd src/github.com/cloudfoundry-incubator/diego-acceptance-tests
-./bin/test -skipPackage ssh
+./bin/test -skipPackage ssh --skip="auto detect"
 popd
 popd
