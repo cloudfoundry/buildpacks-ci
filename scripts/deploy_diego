@@ -17,7 +17,7 @@ pushd diego-release
 
 # generate-deployment-manifest is looking for cf.yml, so replace it with
 # manifest.yml
-sed -i -E "s/\/cf.yml/\/manifest.yml/g" ./scripts/generate-cf-manifest
+sed -i -E "s/\/cf.yml/\/manifest.yml/g" ./scripts/generate-deployment-manifest
 
 ./scripts/generate-deployment-manifest \
   /tmp/director.yml \
