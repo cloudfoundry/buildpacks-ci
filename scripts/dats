@@ -24,6 +24,7 @@ export CONFIG=$PWD/integration_config.json
 
 pushd diego-release
 ./scripts/update
+export GOPATH=$PWD:$GOPATH
 pushd src/github.com/cloudfoundry-incubator/diego-acceptance-tests
 ./bin/test -skipPackage ssh
 popd
