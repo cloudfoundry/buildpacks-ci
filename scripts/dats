@@ -22,6 +22,9 @@ EOF
 
 export CONFIG=$PWD/integration_config.json
 
-go get -t -v github.com/cloudfoundry-incubator/diego-acceptance-tests/... | true
-cd $GOPATH/src/github.com/cloudfoundry-incubator/diego-acceptance-tests
+pushd diego-release
+./scripts/update
+pushd src/github.com/cloudfoundry-incubator/diego-acceptance-tests
 ./bin/test -skipPackage ssh
+popd
+popd
