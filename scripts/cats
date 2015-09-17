@@ -37,7 +37,7 @@ EOF
 export CONFIG=$PWD/integration_config.json
 
 if [ -f ./bin/test_default ]; then
-  ./bin/test_default --nodes=4
+  ./bin/test_default --nodes=3
 else
-  ./bin/test --nodes=4
+  ./bin/test --nodes=3
 fi
