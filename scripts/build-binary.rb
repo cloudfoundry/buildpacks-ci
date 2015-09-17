@@ -30,5 +30,5 @@ exit system(<<-EOF)
   cd #{builds_dir}
   git config --global user.email "ci@localhost"
   git config --global user.name "CI Bot"
-  git commit -am "Build #{binary_name} - #{latest_build['version']}, md5: $md5checksum, sha256: $sha256checksum"
+  git commit -am "Build #{binary_name} - #{latest_build['version']}, md5: $md5checksum, sha256: $sha256checksum, filename: `basename $BINARY_PATH`"
 EOF
