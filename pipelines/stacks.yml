@@ -179,7 +179,7 @@ jobs:
           manifest: deployments-buildpacks/deployments/stack-ci-8/manifest.yml
           stemcells: [lite-stemcell/*.tgz]
           releases: [create-stack-release/cf-release/dev_releases/cf/*.tgz]
-  - name: test-rootfs
+  - name: cats
     serial: true
     serial_groups: [ stack-ci-8 ]
     plan:
@@ -197,7 +197,7 @@ jobs:
           passed: [ deploy-cf-to-stack-ci-8 ]
         - get: stacks
           passed: [ deploy-cf-to-stack-ci-8 ]
-      - task: cats-ci-8
+      - task: cats
         config:
           platform: linux
           image: docker:///cfbuildpacks/ci
@@ -212,20 +212,44 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+  - name: dats
+    serial: true
+    serial_groups: [ stack-ci-8 ]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: cf-release
+          passed: [ deploy-cf-to-stack-ci-8 ]
+          trigger: true
+        - get: deployments-buildpacks
+      - task: dats
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/dats
+          params:
+            DEPLOYMENT_NAME: cf-release-ci-8
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+        privileged: true
   - name: shipit
     serial: true
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: stack-s3
-          passed: [ test-rootfs ]
+          passed: [ cats ]
         - get: receipt-s3
-          passed: [ test-rootfs ]
+          passed: [ cats ]
         - get: stacks
           resource: stacks
-          passed: [ test-rootfs ]
+          passed: [ cats ]
         - get: version
-          passed: [ test-rootfs ]
+          passed: [ cats ]
           params: { bump: final }
       - task: update-receipt
         config:

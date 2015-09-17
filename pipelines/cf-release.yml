@@ -79,6 +79,11 @@ resources:
       user: cloudfoundry
       repository: binary-buildpack
       access_token: {{buildpacks-github-token}}
+  - name: diego-release
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-incubator/diego-release
+      branch: develop 
 
 jobs:
   - name: recreate bosh-lite
@@ -98,7 +103,7 @@ jobs:
           run:
             path: buildpacks-ci/scripts/recreate-bosh-lite
           params:
-            DEPLOYMENT_NAME: cf-release
+            DEPLOYMENT_NAME: cf-release-ci-8
             PASSWORD: {{bosh-lite-password}}
         ensure:
           put: deployments-buildpacks
@@ -155,22 +160,21 @@ jobs:
           manifest: deployments-buildpacks/deployments/cf-release-ci-8/manifest.yml
           stemcells: [lite-stemcell/*.tgz]
           releases: [create-cf-release/cf-release/dev_releases/cf/*.tgz]
-
-  - name: cats
-    serial: true
-    serial_groups: [ cf-release-ci-8 ]
+  - name: deploy-diego-to-cf-release-ci-8
     plan:
       - aggregate:
-        - get: buildpacks-ci
         - get: cf-release
           passed: [ deploy-cf-to-cf-release-ci-8 ]
           trigger: true
         - get: deployments-buildpacks
+        - get: bosh-lite
+        - get: buildpacks-ci
+        - get: lite-stemcell
         - get: go-buildpack-github-release
           passed: [ deploy-cf-to-cf-release-ci-8 ]
-        - get: nodejs-buildpack-github-release
-          passed: [ deploy-cf-to-cf-release-ci-8 ]
         - get: python-buildpack-github-release
+          passed: [ deploy-cf-to-cf-release-ci-8 ]
+        - get: nodejs-buildpack-github-release
           passed: [ deploy-cf-to-cf-release-ci-8 ]
         - get: ruby-buildpack-github-release
           passed: [ deploy-cf-to-cf-release-ci-8 ]
@@ -180,6 +184,46 @@ jobs:
           passed: [ deploy-cf-to-cf-release-ci-8 ]
         - get: binary-buildpack-github-release
           passed: [ deploy-cf-to-cf-release-ci-8 ]
+        - get: diego-release
+      - task: create-diego-release
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: deployments-buildpacks
+            - name: diego-release
+          params:
+            DEPLOYMENT_NAME: cf-release-ci-8
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+          run:
+            path: buildpacks-ci/scripts/deploy_diego
+        privileged: true
+  - name: cats
+    serial: true
+    serial_groups: [ cf-release-ci-8 ]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: cf-release
+          passed: [ deploy-diego-to-cf-release-ci-8 ]
+          trigger: true
+        - get: deployments-buildpacks
+        - get: go-buildpack-github-release
+          passed: [ deploy-diego-to-cf-release-ci-8 ]
+        - get: nodejs-buildpack-github-release
+          passed: [ deploy-diego-to-cf-release-ci-8 ]
+        - get: python-buildpack-github-release
+          passed: [ deploy-diego-to-cf-release-ci-8 ]
+        - get: ruby-buildpack-github-release
+          passed: [ deploy-diego-to-cf-release-ci-8 ]
+        - get: php-buildpack-github-release
+          passed: [ deploy-diego-to-cf-release-ci-8 ]
+        - get: staticfile-buildpack-github-release
+          passed: [ deploy-diego-to-cf-release-ci-8 ]
+        - get: binary-buildpack-github-release
+          passed: [ deploy-diego-to-cf-release-ci-8 ]
       - task: cats
         config:
           platform: linux
@@ -195,6 +239,33 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+  - name: dats
+    serial: true
+    serial_groups: [ cf-release-ci-8 ]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: cf-release
+          passed: [ deploy-diego-to-cf-release-ci-8 ]
+          trigger: true
+        - get: diego-release
+          passed: [ deploy-diego-to-cf-release-ci-8 ]
+        - get: deployments-buildpacks
+      - task: dats
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: deployments-buildpacks
+            - name: diego-release
+          run:
+            path: buildpacks-ci/scripts/dats
+          params:
+            DEPLOYMENT_NAME: cf-release-ci-8
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+        privileged: true
   - name: ship-it
     serial: true
     plan:
@@ -203,7 +274,7 @@ jobs:
         - get: cf-release
           resource: cf-release-develop
         - get: go-buildpack-github-release
-          passed: [ cats ]
+          passed: [ cats ] 
         - get: nodejs-buildpack-github-release
           passed: [ cats ]
         - get: python-buildpack-github-release
