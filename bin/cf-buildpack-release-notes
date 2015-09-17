@@ -58,7 +58,7 @@ class ReleaseNoteGenerator
     Dir.chdir path do
       system "git remote update"
       system "git checkout develop"
-      system "./update"
+      system "./scripts/update"
     end
   end
 
