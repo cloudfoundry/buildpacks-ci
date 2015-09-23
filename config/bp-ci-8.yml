@@ -1,4 +1,4 @@
 ---
 deployment-name: bp-ci-8
 resource-pool: cf-edge-environments
-cf-version: 217
+cf-version: 218
