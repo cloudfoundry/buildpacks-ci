@@ -106,7 +106,7 @@ jobs:
           rebase: true
       - put: cf-deployment
         params:
-          manifest: generate-manifest/cf-release/bosh-lite/manifests/cf-manifest.yml
+          manifest: {{generated-manifest-location}}
           stemcells: ['bosh-stemcell/stemcell.tgz']
           releases: [download-release/release.tgz]
       - task: configure-deployment
