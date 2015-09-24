@@ -85,7 +85,7 @@ jobs:
             image: docker:///cfbuildpacks/ci
             run:
               path: bash
-              args: ['-c', 'git clone --branch v{{cf-version}} --depth 1 https://github.com/cloudfoundry/cf-release . && ./update']
+              args: ['-c', 'git clone --branch v{{cf-version}} --depth 1 https://github.com/cloudfoundry/cf-release . && ./update || ./scripts/update']
         - task: download-release
           config:
             platform: linux
