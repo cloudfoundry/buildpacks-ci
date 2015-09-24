@@ -2,3 +2,4 @@
 deployment-name: bp-ci-8
 resource-pool: cf-edge-environments
 cf-version: 218
+generate-manifest: buildpacks-ci/tasks/develop-make-manifest.yml

@@ -94,7 +94,7 @@ jobs:
               path: bash
               args: ['-c', 'curl -f -L -o release.tgz https://bosh.io/d/github.com/cloudfoundry/cf-release?v={{cf-version}}']
       - task: generate-manifest
-        file: buildpacks-ci/tasks/make-manifest.yml
+        file: {{generate-manifest}}
         config:
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
