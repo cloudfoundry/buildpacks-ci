@@ -299,22 +299,22 @@ jobs:
           tag: version/number
           globs:
             - stack-s3/cflinuxfs2-*.tar.gz
-  # - name: upload-to-docker
-    # serial: true
-    # plan:
-      # - aggregate:
-        # - get: stack-s3
-          # passed: [ shipit ]
-        # - get: version
-          # trigger: true
-          # passed: [ shipit ]
-      # - put: docker-cflinuxfs2-rootfs
-        # params:
-          # import_file: stack-s3/cflinuxfs2-*.tar.gz
-      # - put: docker-cflinuxfs2-rootfs
-        # params:
-          # load: docker-cflinuxfs2-rootfs
-          # tag: version/number
+  - name: upload-to-docker
+    serial: true
+    plan:
+      - aggregate:
+        - get: stack-s3
+          passed: [ shipit ]
+        - get: version
+          trigger: true
+          passed: [ shipit ]
+      - put: docker-cflinuxfs2-rootfs
+        params:
+          import_file: stack-s3/cflinuxfs2-*.tar.gz
+      - put: docker-cflinuxfs2-rootfs
+        params:
+          load: docker-cflinuxfs2-rootfs
+          tag: version/number
   - name: upload-to-cf-release
     serial: true
     plan:
