@@ -8,7 +8,7 @@ Dir.chdir('pivotal-buildpacks-cached') do
       version = match[2]
       FileUtils.mv(filename, "#{language}_buildpack-cached-v#{version}.zip")
       `sha256sum #{language}_buildpack-cached-v#{version}.zip > #{language}_buildpack-cached-v#{version}.zip.SHASUM.txt`
-      `sha256sum #{language}_buildpack-cached-v#{version}.zip >> ../buildpack/RECENT_CHANGES`
+      `sha256sum #{language}_buildpack-cached-v#{version}.zip >> ../prepare-release/buildpack/RECENT_CHANGES`
     end
   end
 end
