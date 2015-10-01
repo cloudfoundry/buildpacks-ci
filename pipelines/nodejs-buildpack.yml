@@ -192,9 +192,10 @@ jobs:
         params:
           name: prepare-release/tag
           tag: prepare-release/tag
-          body: prepare-release/buildpack/RECENT_CHANGES
+          body: finalize-buildpack/prepare-release/buildpack/RECENT_CHANGES
           globs:
             - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip
+            - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip.SHASUM.txt
   - name: nodejs buildpack to pivnet
     serial: true
     plan:
