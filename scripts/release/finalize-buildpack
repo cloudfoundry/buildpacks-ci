@@ -10,7 +10,7 @@ Dir.chdir('pivotal-buildpacks-cached') do
 
       system <<-eof
         sha256sum #{language}_buildpack-cached-v#{version}.zip > #{language}_buildpack-cached-v#{version}.zip.SHASUM.txt
-        echo "  * SHA256: `sha256sum #{language}_buildpack-cached-v#{version}.zip` " >> ../prepare-release/buildpack/RECENT_CHANGES
+        echo "  * SHA256: `sha256sum #{language}_buildpack-cached-v#{version}.zip | cut -d ' ' -f 1` " >> ../prepare-release/buildpack/RECENT_CHANGES
       eof
     end
   end
