@@ -7,8 +7,11 @@ Dir.chdir('pivotal-buildpacks-cached') do
       language = match[1]
       version = match[2]
       FileUtils.mv(filename, "#{language}_buildpack-cached-v#{version}.zip")
-      `sha256sum #{language}_buildpack-cached-v#{version}.zip > #{language}_buildpack-cached-v#{version}.zip.SHASUM.txt`
-      `echo "  * \`$(sha256sum #{language}_buildpack-cached-v#{version}.zip) \`" >> ../prepare-release/buildpack/RECENT_CHANGES`
+
+      system <<-eof
+        sha256sum #{language}_buildpack-cached-v#{version}.zip > #{language}_buildpack-cached-v#{version}.zip.SHASUM.txt
+        echo "  * SHA256: `sha256sum #{language}_buildpack-cached-v#{version}.zip` " >> ../prepare-release/buildpack/RECENT_CHANGES
+      eof
     end
   end
 end
