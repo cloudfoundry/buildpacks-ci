@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-checksum="`basename pivotal-buildpacks-cached/*_buildpack-cached-v*.zip`.checksum"
-echo md5: "`md5sum *_buildpack-cached-v*.zip`" > pivotal-buildpacks-cached/$checksum
-echo sha256: "`sha256sum *_buildpack-cached-v*.zip`" >> pivotal-buildpacks-cached/$checksum
-cat pivotal-buildpacks-cached/$checksum >> buildpack/RECENT_CHANGES
+pushd pivotal-buildpacks-cached
+filename="`basename *_buildpack-cached-v*.zip`"
+checksum="${filename}.CHECKSUM.txt"
+echo $checksum
+echo "md5: `md5sum $filename`" > $checksum
+echo "sha256: `sha256sum $filename`" >> $checksum
+cat $checksum >> ../buildpack/RECENT_CHANGES
+popd
