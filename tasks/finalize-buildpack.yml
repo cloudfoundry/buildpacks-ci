@@ -3,6 +3,7 @@ platform: linux
 image: docker:///cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
+  - name: buildpack
   - name: pivotal-buildpacks-cached
 run:
   path: buildpacks-ci/scripts/release/finalize-buildpack
