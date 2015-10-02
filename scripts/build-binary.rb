@@ -23,12 +23,12 @@ exit system(<<-EOF)
 
   cd binary-builder
   ./bin/binary-builder #{flags}
-  BINARY_PATH=$(find -name "*.tgz" -o -name "*.tar.gz")
-  md5checksum=$(md5sum $BINARY_PATH | cut --delimiter=" " --fields=1)
-  sha256checksum=$(sha256sum $BINARY_PATH | cut --delimiter=" " --fields=1)
+  $filename=$(ls *.tgz | head -n 1)
+  md5checksum=$(md5sum $filename | cut --delimiter=" " --fields=1)
+  sha256checksum=$(sha256sum $filename | cut --delimiter=" " --fields=1)
   echo "#{builds.to_yaml}" > #{builds_path}
   cd #{builds_dir}
   git config --global user.email "ci@localhost"
   git config --global user.name "CI Bot"
-  git commit -am "Build #{binary_name} - #{latest_build['version']}, md5: $md5checksum, sha256: $sha256checksum, filename: `basename $BINARY_PATH`"
+  git commit -am "Build #{binary_name} - #{latest_build['version']}, filename: $filename, md5: $md5checksum, sha256: $sha256checksum, filename: `basename $BINARY_PATH`"
 EOF
