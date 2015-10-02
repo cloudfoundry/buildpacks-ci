@@ -23,7 +23,7 @@ exit system(<<-EOF)
 
   cd binary-builder
   ./bin/binary-builder #{flags}
-  $filename=$(ls *.tgz | head -n 1)
+  filename=$(ls *.tgz | head -n 1)
   md5checksum=$(md5sum $filename | cut --delimiter=" " --fields=1)
   sha256checksum=$(sha256sum $filename | cut --delimiter=" " --fields=1)
   echo "#{builds.to_yaml}" > #{builds_path}
