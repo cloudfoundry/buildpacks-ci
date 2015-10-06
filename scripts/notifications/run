@@ -8,7 +8,7 @@ pushd buildpacks-ci/scripts/notifications
   bundle install
   new_releases_output=$(./new-releases $base_dir/new-releases)
   echo "$new_releases_output" | ./slack
-  echo "$new_releases_output" | ./pivotal_tracker
+  ./pivotal_tracker "New Releases" "$new_releases_output"
 popd
 
 pushd new-releases

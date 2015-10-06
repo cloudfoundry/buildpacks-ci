@@ -2,11 +2,10 @@
 
 require 'json'
 
-description = ARGF.read.chomp
-exit if description.empty?
+name, description = ARGV[0], ARGV[1]
 
 payload = {
-  name: 'New dependencies',
+  name: name,
   description: description,
   requested_by_id: 765241 
 }.to_json

@@ -1,5 +1,10 @@
 ---
 resources:
+  - name: monday-funday
+    type: cron
+    source:
+      expression: 0 7 * * 1
+      location: America/New_York
   - name: buildpacks-ci
     type: git
     source:
@@ -56,3 +61,22 @@ jobs:
         params:
           repository: notify/new-releases
           rebase: true
+  - name: create tracker story for Monday Funday
+    serial: true
+    plan:
+      - get: monday-funday
+        trigger: true
+      - task: create tracker story
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: new-releases
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/notifications/pivotal_tracker
+            args: ['Pull latest changes from upstream', 'Check that there are no upstream changes that we are missing.']
+          params:
+            TRACKER_PROJECT_ID: 1042066
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+
