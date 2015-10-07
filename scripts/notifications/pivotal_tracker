@@ -3,6 +3,7 @@
 require 'json'
 
 name, description = ARGV[0], ARGV[1]
+exit if description.empty?
 
 payload = {
   name: name,
