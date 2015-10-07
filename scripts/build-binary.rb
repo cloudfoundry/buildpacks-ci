@@ -15,7 +15,7 @@ end
 
 if (!binary_name.include? "-test")
   builds_path_test  = File.join(builds_dir, "#{binary_name}-test-builds.yml")
-  `echo "#{latest_build.to_yaml}" > #{builds_path_test} && git add #{builds_path_test}`
+  `echo "#{latest_build.to_yaml}" > #{builds_path_test}`
 end
 
 
@@ -36,5 +36,6 @@ exit system(<<-EOF)
   cd #{builds_dir}
   git config --global user.email "ci@localhost"
   git config --global user.name "CI Bot"
-  git commit -am "Build #{binary_name} - #{latest_build['version']}, filename: $filename, md5: $md5checksum, sha256: $sha256checksum"
+  git add -A
+  git commit -m "Build #{binary_name} - #{latest_build['version']}, filename: $filename, md5: $md5checksum, sha256: $sha256checksum"
 EOF
