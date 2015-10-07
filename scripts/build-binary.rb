@@ -6,7 +6,7 @@ binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
 builds_path  = File.join(builds_dir, "#{binary_name.sub('-test','')}-builds.yml")
 builds       = YAML.load_file(builds_path)
-latest_build = builds[binary_name].shift
+latest_build = builds[binary_name.sub('-test','')].shift
 
 unless latest_build
   puts "There are no new builds for #{binary_name} requested."
