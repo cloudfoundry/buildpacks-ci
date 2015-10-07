@@ -15,9 +15,9 @@ end
 
 if (!binary_name.include? "-test")
   builds_path_test  = File.join(builds_dir, "#{binary_name}-test-builds.yml")
-  builds_test       = YAML.load_file(builds_path_test)
-  builds_test[binary_name+"-test"].push(latest_build)
-  `echo "#{builds_test.to_yaml}" > #{builds_path_test}`
+  binary_name_test = binary_name + "-test"
+  test_build = {binary_name_test=>[latest_build]}
+  `echo "#{test_build.to_yaml}" > #{builds_path_test}`
 end
 
 
