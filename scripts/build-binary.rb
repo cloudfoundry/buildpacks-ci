@@ -4,14 +4,21 @@ require 'yaml'
 
 binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
-builds_path  = File.join(builds_dir, "#{binary_name.sub('-test','')}-builds.yml")
+builds_path  = File.join(builds_dir, "#{binary_name}-builds.yml")
 builds       = YAML.load_file(builds_path)
-latest_build = builds[binary_name.sub('-test','')].shift
+latest_build = builds[binary_name].shift
 
 unless latest_build
   puts "There are no new builds for #{binary_name} requested."
   exit
 end
+
+if (!binary_name.include? "-test")
+  builds_path_test  = File.join(builds_dir, "#{binary_name}-test-builds.yml")
+  builds_test       = YAML.load_file(builds_path)
+  `echo "#{latest_build.to_yaml}" > #{builds_path_test}`
+end
+
 
 flags = "--name=#{binary_name}"
 latest_build.each_pair do |key, value|
