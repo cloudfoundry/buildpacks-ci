@@ -15,7 +15,7 @@ end
 
 if (!binary_name.include? "-test")
   builds_path_test  = File.join(builds_dir, "#{binary_name}-test-builds.yml")
-  `echo "#{latest_build.to_yaml}" > #{builds_path_test}`
+  `echo "#{latest_build.to_yaml}" > #{builds_path_test} && git add #{builds_path_test}`
 end
 
 
