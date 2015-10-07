@@ -4,7 +4,7 @@ require 'yaml'
 
 binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
-builds_path  = File.join(builds_dir, "#{binary_name}-builds.yml")
+builds_path  = File.join(builds_dir, "#{binary_name.sub('-test','')}-builds.yml")
 builds       = YAML.load_file(builds_path)
 latest_build = builds[binary_name].shift
 
