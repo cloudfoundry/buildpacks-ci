@@ -63,6 +63,13 @@ resources:
       private_key: {{buildpacks-ci-binary-builds-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ python-builds.yml ]
+  - name: godep-builds
+    type: git
+    source:
+      branch: binary-builds
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      paths: [ godep-builds.yml ]
 
 jobs:
   - name: binary-builder
@@ -287,6 +294,35 @@ jobs:
             AWS_DEFAULT_REGION: us-east-1
         privileged: true
       - put: nginx-builds
+        params:
+          repository: build-binary/builds-yaml
+          rebase: true
+  - name: build-godep
+    serial: true
+    plan:
+      - aggregate:
+        - get: builds-yaml
+          resource: godep-builds
+          trigger: true
+        - get: binary-builder
+          passed: [binary-builder]
+        - get: buildpacks-ci
+      - task: build-binary
+        file: buildpacks-ci/tasks/build-binary.yml
+        config:
+          params:
+            BINARY_NAME: godep
+        privileged: true
+      - task: push-binary
+        file: buildpacks-ci/tasks/push-binary.yml
+        config:
+          params:
+            BINARY_NAME: godep
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
+        privileged: true
+      - put: godep-builds
         params:
           repository: build-binary/builds-yaml
           rebase: true
