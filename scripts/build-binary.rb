@@ -13,14 +13,6 @@ unless latest_build
   exit
 end
 
-if (!binary_name.include? "-test")
-  builds_path_test  = File.join(builds_dir, "#{binary_name}-test-builds.yml")
-  binary_name_test = binary_name + "-test"
-  test_build = {binary_name_test=>[latest_build]}
-  `echo "#{test_build.to_yaml}" > #{builds_path_test}`
-end
-
-
 flags = "--name=#{binary_name}"
 latest_build.each_pair do |key, value|
   flags << %Q{ --#{key}="#{value}"}
@@ -39,4 +31,5 @@ exit system(<<-EOF)
   git config --global user.email "ci@localhost"
   git config --global user.name "CI Bot"
   git commit -am "Build #{binary_name} - #{latest_build['version']}, filename: $filename, md5: $md5checksum, sha256: $sha256checksum"
+  tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/
 EOF
