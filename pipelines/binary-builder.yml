@@ -132,7 +132,7 @@ jobs:
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1
         privileged: true
-      - put: php-builds
+      - put: builds-out
         params:
           repository: build-binary/builds-yaml
           rebase: true
@@ -161,7 +161,7 @@ jobs:
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1
         privileged: true
-      - put: jruby-builds
+      - put: builds-out
         params:
           repository: build-binary/builds-yaml
           rebase: true
@@ -190,7 +190,7 @@ jobs:
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1
         privileged: true
-      - put: httpd-builds
+      - put: builds-out
         params:
           repository: build-binary/builds-yaml
           rebase: true
@@ -219,7 +219,7 @@ jobs:
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1
         privileged: true
-      - put: python-builds
+      - put: builds-out
         params:
           repository: build-binary/builds-yaml
           rebase: true
@@ -248,7 +248,7 @@ jobs:
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1
         privileged: true
-      - put: ruby-builds
+      - put: builds-out
         params:
           repository: build-binary/builds-yaml
           rebase: true
@@ -326,7 +326,7 @@ jobs:
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1
         privileged: true
-      - put: nginx-builds
+      - put: builds-out
         params:
           repository: build-binary/builds-yaml
           rebase: true
@@ -355,7 +355,7 @@ jobs:
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1
         privileged: true
-      - put: godep-builds
+      - put: builds-out
         params:
           repository: build-binary/builds-yaml
           rebase: true
