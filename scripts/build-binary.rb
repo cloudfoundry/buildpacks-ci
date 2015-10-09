@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'yaml'
-require 'dir'
 require 'digest'
 
 binary_name  = ENV['BINARY_NAME']
