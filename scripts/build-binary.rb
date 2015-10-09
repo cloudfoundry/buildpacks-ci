@@ -23,6 +23,7 @@ exit system(<<-EOF)
 
   cd binary-builder
   ./bin/binary-builder #{flags}
+  tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/
   filename=$(ls *.tgz | head -n 1)
   md5checksum=$(md5sum $filename | cut --delimiter=" " --fields=1)
   sha256checksum=$(sha256sum $filename | cut --delimiter=" " --fields=1)
@@ -31,5 +32,4 @@ exit system(<<-EOF)
   git config --global user.email "ci@localhost"
   git config --global user.name "CI Bot"
   git commit -am "Build #{binary_name} - #{latest_build['version']}, filename: $filename, md5: $md5checksum, sha256: $sha256checksum"
-  tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/
 EOF
