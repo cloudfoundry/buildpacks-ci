@@ -24,6 +24,7 @@ resources:
   - {name: "httpd", type: "git", source: {uri: "https://github.com/apache/httpd"}}
   - {name: "maven", type: "git", source: {uri: "https://github.com/apache/maven"}}
   - {name: "python", type: "git", source: {uri: "https://github.com/python/cpython"}}
+  - {name: "godep", type: "git", source: {uri: "https://github.com/tools/godep"}}
 
 jobs:
   - name: New Releases
@@ -41,6 +42,7 @@ jobs:
         - { get: "httpd",  trigger: true, params: {depth: 1}}
         - { get: "maven",  trigger: true, params: {depth: 1}}
         - { get: "python", trigger: true, params: {depth: 1}}
+        - { get: "godep",  trigger: true, params: {depth: 1}}
       - task: notify
         config:
           platform: linux
