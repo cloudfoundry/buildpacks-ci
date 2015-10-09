@@ -32,8 +32,10 @@ git_msg += "\n\n[ci skip]" if builds[binary_name].empty?
 
 File.write(builds_path, builds.to_yaml)
 
-exit system(<<-EOF)
-  git config --global user.email "ci@localhost"
-  git config --global user.name "CI Bot"
-  git commit -am "#{git_msg}"
-EOF
+Dir.chdir(builds_dir) do
+  exit system(<<-EOF)
+    git config --global user.email "ci@localhost"
+    git config --global user.name "CI Bot"
+    git commit -am "#{git_msg}"
+  EOF
+end
