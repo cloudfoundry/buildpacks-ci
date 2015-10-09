@@ -21,5 +21,7 @@ Dir.glob("*.zip").map do |filename|
 end
 RUBY
 
-echo md5: "`md5sum *_buildpack-v*.zip`" sha256: "`sha256sum *_buildpack-v*.zip`"
-echo md5: "`md5sum *_buildpack-cached-v*.zip`" sha256: "`sha256sum *_buildpack-cached-v*.zip`"
+echo md5: "`md5sum *_buildpack-v*.zip`"
+echo sha256: "`sha256sum *_buildpack-v*.zip`"
+echo md5: "`md5sum *_buildpack-cached-v*.zip`"
+echo sha256: "`sha256sum *_buildpack-cached-v*.zip`"
