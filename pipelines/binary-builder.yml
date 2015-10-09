@@ -293,7 +293,7 @@ jobs:
           run:
             path: bash
             args: ["-c", "tar xzf build-tar/binary-builder-source.tgz -C /tmp &&
-              cd /tmp/x86_64-linux-gnu/ports/node/*/* && make test"]
+              cd /tmp/x86_64-linux-gnu/ports/node/*/*/ && make test"]
 
   - name: build-nginx
     serial: true
