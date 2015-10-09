@@ -195,7 +195,7 @@ jobs:
           body: finalize-buildpack/prepare-release/buildpack/RECENT_CHANGES
           globs:
             - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip
-            - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip.SHASUM.txt
+            - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip.SHA256SUM.txt
   - name: ruby buildpack to pivnet
     serial: true
     plan:
