@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 
 require 'yaml'
+require 'dir'
+require 'digest'
 
 binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
@@ -18,18 +20,21 @@ latest_build.each_pair do |key, value|
   flags << %Q{ --#{key}="#{value}"}
 end
 
-exit system(<<-EOF)
-  set -e
+Dir.chdir('binary-builder') do
+  system("./bin/binary-builder #{flags}")
+  system("tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/")
+end
 
-  cd binary-builder
-  ./bin/binary-builder #{flags}
-  tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/
-  filename=$(ls *.tgz | head -n 1)
-  md5checksum=$(md5sum $filename | cut --delimiter=" " --fields=1)
-  sha256checksum=$(sha256sum $filename | cut --delimiter=" " --fields=1)
-  echo "#{builds.to_yaml}" > #{builds_path}
-  cd #{builds_dir}
+filename = Dir["binary-builder/#{binary_name}-*.tgz"].first
+md5sum   = Digest::MD5.file(filename).hexdigest
+shasum   = Digest::SHA256.file(filename).hexdigest
+git_msg  = "Build #{binary_name} - #{latest_build['version']}\n\nfilename: #{filename}, md5: #{md5sum}, sha256: #{shasum}"
+git_msg += "\n\n[ci skip]" if builds[binary_name].empty?
+
+File.write(builds_path, builds.to_yaml)
+
+exit system(<<-EOF)
   git config --global user.email "ci@localhost"
   git config --global user.name "CI Bot"
-  git commit -am "Build #{binary_name} - #{latest_build['version']}, filename: $filename, md5: $md5checksum, sha256: $sha256checksum"
+  git commit -am "#{git_msg}"
 EOF
