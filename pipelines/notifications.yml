@@ -68,12 +68,12 @@ jobs:
     plan:
       - get: monday-funday
         trigger: true
+      - get: buildpacks-ci
       - task: create tracker story
         config:
           platform: linux
           image: docker:///cfbuildpacks/ci
           inputs:
-            - name: new-releases
             - name: buildpacks-ci
           run:
             path: buildpacks-ci/scripts/notifications/pivotal_tracker
