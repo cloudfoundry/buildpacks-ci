@@ -177,7 +177,7 @@ jobs:
               mercurial \
               snmp-mibs-downloader &&
               tar xzf build-tar/binary-builder-source.tgz -C /tmp &&
-              cd /tmp/x86_64-linux-gnu/ports/php/*/*/ && yes n | make test"]
+              cd /tmp/x86_64-linux-gnu/ports/php/*/*/ && yes n | env REPORT_EXIT_STATUS=1 make test"]
   - name: build-jruby
     serial: true
     plan:
