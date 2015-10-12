@@ -424,6 +424,9 @@ jobs:
           params:
             BINARY_NAME: nginx
         privileged: true
+      - put: build-tar
+        params:
+          from: build-binary/binary-builder/build.tgz
       - task: push-binary
         file: buildpacks-ci/tasks/push-binary.yml
         config:
@@ -437,6 +440,26 @@ jobs:
         params:
           repository: build-binary/builds-yaml
           rebase: true
+  - name: test-nginx
+    serial: true
+    plan:
+      - get: build-tar
+        passed: [ build-nginx ]
+        trigger: true
+      - task: run tests
+        config:
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: build-tar
+          platform: linux
+          run:
+            path: bash
+            args: ["-c",
+              "wget http://hg.nginx.org/nginx-tests/archive/tip.tar.gz &&
+              tar -xzf tip.tar.gz -C /tmp/ &&
+              tar xzf build-tar/binary-builder-source.tgz -C /tmp/ &&
+              cd /tmp/nginx-tests* &&
+              TEST_NGINX_BINARY=`ls /tmp/x86_64-linux-gnu/ports/nginx/*/nginx-*/objs/nginx` prove ."]
   - name: build-godep
     serial: true
     plan:
