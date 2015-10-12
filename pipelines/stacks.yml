@@ -1,5 +1,10 @@
 ---
 resources:
+  - name: monday-funday
+    type: cron
+    source:
+      expression: 0 5 * * 1
+      location: America/New_York
   - name: buildpacks-ci
     type: git
     source:
@@ -110,6 +115,8 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: stacks
+        - get: monday-funday
+          trigger: true
         - get: version
           params: { bump: minor, pre: rc }
       - task: make-rootfs
