@@ -17,12 +17,7 @@ blobstore:
     secret_access_key: #{ ENV["SECRET_ACCESS_KEY"] }
 )
 
-system(<<-EOF)
-  set -e
-
-  gem install bosh_cli --no-rdoc --no-ri
-  echo "#{blob_store_private_yml}" > config/private.yml
-EOF
+File.write('config/private.yml', blob_store_private_yml)
 
 release_names.each do |language|
   buildpack_blob     = Dir["../#{language}-buildpack-github-release/#{language}_buildpack-cached-*.zip"].first
