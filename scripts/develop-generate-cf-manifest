@@ -16,6 +16,8 @@ echo "
 name: cf-warden
 properties:
   domain: $DEPLOYMENT_NAME.cf-app.com
+  acceptance_tests:
+    admin_password: $CF_CI_PASSWORD
 jobs:
 - name: api_z1
   # Make the disk size bigger so we can handle

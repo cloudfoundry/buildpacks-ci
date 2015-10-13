@@ -7,37 +7,4 @@ pushd deployments-buildpacks
   . ./bin/switch $DEPLOYMENT_NAME
 popd
 
-pushd cf-release
-  cat config/blobs.yml | grep cli/cf -A 3 | tee config/blobs.yml
-  bosh sync blobs
-  tar xzf blobs/cli/cf-linux-amd64.tgz -C blobs/cli
-  export PATH=`pwd`/blobs/cli:$PATH
-popd
-
-if [ -d cf-release/src/acceptance-tests ]; then
-  cd cf-release/src/acceptance-tests
-  mkdir -p /go/src/github.com/cloudfoundry
-  ln -s `pwd` /go/src/github.com/cloudfoundry/cf-acceptance-tests
-else
-  cd cf-release/src/github.com/cloudfoundry/cf-acceptance-tests
-fi
-
-go get github.com/tools/godep
-godep restore
-# create integration_config.json and set CONFIG env var (see README)
-cat > integration_config.json <<EOF
-{
-  "api": "api.$DEPLOYMENT_NAME.cf-app.com",
-  "admin_user": "$CI_CF_USERNAME",
-  "admin_password": "$CI_CF_PASSWORD",
-  "apps_domain": "$DEPLOYMENT_NAME.cf-app.com",
-  "skip_ssl_validation": true
-}
-EOF
-export CONFIG=$PWD/integration_config.json
-
-if [ -f ./bin/test_default ]; then
-  ./bin/test_default --nodes=5
-else
-  ./bin/test --nodes=5
-fi
+bosh run errand acceptance_tests
