@@ -10,6 +10,13 @@
 
 require 'getoptlong'
 require 'json'
+require 'version_sorter'
+
+module Enumerable # reopening
+  def version_sort
+    VersionSorter.sort self
+  end
+end
 
 opts = GetoptLong.new(
   [ '--token',             '-t', GetoptLong::REQUIRED_ARGUMENT],
@@ -78,7 +85,7 @@ class ReleaseNoteGenerator
 
     versions = get_rootfs_versions
     rootfses = all_keys versions
-    rootfses.sort.each do |rootfs|
+    rootfses.version_sort.each do |rootfs|
       v1 = versions[tag1][rootfs]
       v2 = versions[tag2][rootfs]
       if v1 != v2
@@ -88,7 +95,7 @@ class ReleaseNoteGenerator
 
     versions = get_buildpack_versions
     buildpacks = all_keys versions
-    buildpacks.sort.each do |buildpack|
+    buildpacks.version_sort.each do |buildpack|
       v1 = versions[tag1][buildpack]
       v2 = versions[tag2][buildpack]
       if v1 != v2
@@ -104,7 +111,7 @@ class ReleaseNoteGenerator
 
     releases = releases_data.map do |release|
       release["tag_name"]
-    end.sort.reverse
+    end.version_sort.reverse
     raise "couldn't find #{thing} #{v1} in release notes" unless v1_index = releases.index(v1)
     raise "couldn't find #{thing} #{v2} in release notes" unless v2_index = releases.index(v2)
 
