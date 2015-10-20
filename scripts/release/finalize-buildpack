@@ -11,6 +11,15 @@ Dir.chdir('pivotal-buildpacks-cached') do
       system <<-eof
         sha256sum #{language}_buildpack-cached-v#{version}.zip > #{language}_buildpack-cached-v#{version}.zip.SHA256SUM.txt
         echo "  * SHA256: `sha256sum #{language}_buildpack-cached-v#{version}.zip | cut -d ' ' -f 1` " >> ../prepare-release/buildpack/RECENT_CHANGES
+        cd buildpack-checksums-master
+        cp #{language}_buildpack-cached-v#{version}.zip.SHA256SUM.txt .
+        git add -A
+        git commit -m "SHA256SUM for #{language} v#{version}"
+        ./generate.rb
+        mv build ../buildpack-checksums-gh-pages
+        cd ../buildpack-checksums-gh-pages
+        git add -A
+        git commit -m "Updates for #{language} v#{version}"
       eof
     end
   end
