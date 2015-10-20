@@ -54,16 +54,3 @@ RUN wget -O- https://github.com/github/hub/releases/download/v2.2.1/hub-linux-am
 COPY build/ssh-agent.sh /etc/profile.d/
 COPY build/ruby.sh /etc/profile.d/
 COPY build/go.sh /etc/profile.d/
-
-# prepopulate with some popular used gems
-RUN gem install bosh_cli bosh_cli_plugin_micro rake bundler
-RUN cd /tmp && \
-    git clone --depth 1 https://github.com/cloudfoundry/ruby-buildpack ruby-master && \
-    cd ruby-master && \
-    BUNDLE_GEMFILE=cf.Gemfile bundle install && \
-    cd .. && rm -Rf ruby-master
-RUN cd /tmp && \
-    git clone --depth 1 https://github.com/cloudfoundry/ruby-buildpack ruby-develop && \
-    cd ruby-develop && \
-    BUNDLE_GEMFILE=cf.Gemfile bundle install && \
-    cd .. && rm -Rf ruby-develop
