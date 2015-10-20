@@ -84,14 +84,15 @@ resources:
       access_token: {{buildpacks-github-token}}
 
 jobs:
-  - name: recreate bosh-lite
+  - name: build-rootfs
     serial: true
-    serial_groups: [ stack-ci-8 ]
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: deployments-buildpacks
-      - task: recreate
+        - get: monday-funday
+          trigger: true
+      - task: recreate bosh-lite
         config:
           platform: linux
           image: docker:///cfbuildpacks/ci
@@ -108,15 +109,8 @@ jobs:
           params:
             repository: recreate/deployments-buildpacks
             rebase: true
-
-  - name: build-rootfs
-    serial: true
-    plan:
       - aggregate:
-        - get: buildpacks-ci
         - get: stacks
-        - get: monday-funday
-          trigger: true
         - get: version
           params: { bump: minor, pre: rc }
       - task: make-rootfs
