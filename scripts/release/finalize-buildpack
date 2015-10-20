@@ -16,7 +16,7 @@ Dir.chdir('pivotal-buildpacks-cached') do
         git add -A
         git commit -m "SHA256SUM for #{language} v#{version}"
         ./generate.rb
-        mv build ../buildpack-checksums-gh-pages
+        cp -r build ../buildpack-checksums-gh-pages
         cd ../buildpack-checksums-gh-pages
         git add -A
         git commit -m "Updates for #{language} v#{version}"
