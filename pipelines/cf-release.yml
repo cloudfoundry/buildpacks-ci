@@ -88,7 +88,7 @@ jobs:
       - aggregate:
         - get: deployments-buildpacks
         - get: buildpacks-ci
-      - task: recreate bosh-lite
+      - task: recreate-bosh-lite
         config:
           platform: linux
           image: docker:///cfbuildpacks/ci
@@ -103,7 +103,7 @@ jobs:
         ensure:
           put: deployments-buildpacks
           params:
-            repository: recreate/deployments-buildpacks
+            repository: recreate-bosh-lite/deployments-buildpacks
             rebase: true
       - aggregate:
         - get: bosh-lite
