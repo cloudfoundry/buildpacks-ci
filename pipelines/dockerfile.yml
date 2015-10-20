@@ -3,6 +3,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
+      paths: [ "Dockerfile" ]
   - name: buildpacks-ci-image
     type: docker-image
     source:
@@ -16,6 +17,7 @@ jobs:
     serial: true
     plan:
       - get: buildpacks-ci
+        trigger: true
       - put: buildpacks-ci-image
         params:
           build: buildpacks-ci
