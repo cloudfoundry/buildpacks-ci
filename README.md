@@ -58,7 +58,7 @@ fly hijack -c $RESOURCE_NAME rm -rf /tmp/git-resource-repo-cache
 	```yaml
 	ruby:
 	- version: 2.2.2
-	  checksum: 5ffc0f317e429e6b29d4a98ac521c3ce65481bfd22a8cf845fa02a7b113d9b44
+	  sha256: 5ffc0f317e429e6b29d4a98ac521c3ce65481bfd22a8cf845fa02a7b113d9b44
 	```
 
 4. `git commit -am 'Build ruby 2.2.2' && git push`
