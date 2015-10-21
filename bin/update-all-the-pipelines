@@ -10,4 +10,10 @@ Dir["config/bosh-lite/*.yml"].each do |filename|
   system("fly -t buildpacks c #{deployment_name} -c pipelines/templates/bosh-lite.yml -vf private.yml -vf #{filename}")
 end
 
+Dir["config/buildpack/*.yml"].each do |filename|
+  language = File.basename(filename, '.yml')
+  system("erb language=#{language} pipelines/templates/buildpack.yml > /tmp/pipeline.yml")
+  system("fly -t buildpacks c #{language}-buildpack -c /tmp/pipeline.yml -vf private.yml -vf #{filename}")
+end
+
 puts "Thanks, JT"

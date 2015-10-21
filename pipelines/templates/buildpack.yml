@@ -32,37 +32,37 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/compile-extensions.git
-  - name: nodejs-buildpack
+  - name: buildpack
     type: git
     source:
-      uri: git@github.com:cloudfoundry/nodejs-buildpack.git
-      private_key: {{nodejs-buildpack-private-key}}
+      uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
-  - name: nodejs-buildpack-master
+  - name: buildpack-master
     type: git
     source:
-      uri: git@github.com:cloudfoundry/nodejs-buildpack.git
-      private_key: {{nodejs-buildpack-private-key}}
+      uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
       branch: master
-  - name: nodejs-pivotal-buildpack
+  - name: pivotal-buildpack
     type: s3
     source:
       bucket: pivotal-buildpacks
-      regexp: nodejs_buildpack-v(.*).zip
+      regexp: <%= language %>_buildpack-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-  - name: nodejs-pivotal-buildpack-cached
+  - name: pivotal-buildpack-cached
     type: s3
     source:
       bucket: pivotal-buildpacks
-      regexp: nodejs_buildpack-cached-v(.*).zip
+      regexp: <%= language %>_buildpack-cached-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
   - name: buildpack-github-release
     type: github-release
     source:
       user: cloudfoundry
-      repository: nodejs-buildpack
+      repository: <%= language %>-buildpack
       access_token: {{buildpacks-github-token}}
   - name: buildpack-checksums-master
     type: git
@@ -72,26 +72,50 @@ resources:
       branch: master
 
 jobs:
-  - name: detect new NodeJS buildpack and upload artifacts
+  <% if language == "php" %>
+  - name: ensure-manifest-has-modules
+    serial: true
+    plan:
+      - get: buildpacks-ci
+      - get: buildpack
+        trigger: true
+      - task: load-modules
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: buildpack
+          run :
+            path: bash
+            args:
+              - -c
+              - "cd buildpack && ./bin/populate-modules-in-manifest && (git commit -am 'Updated manifest with supported PHP modules' || true)"
+      - put: buildpack
+        params:
+          repository: load-modules/buildpack
+          rebase: true
+  <% end %>
+  - name: detect-new-buildpack-and-upload-artifacts
     serial: true
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
-          resource: nodejs-buildpack-master
+          resource: buildpack-master
           trigger: true
       - task: detect and upload
         file: buildpacks-ci/tasks/detect-and-upload.yml
         privileged: true
-      - put: nodejs-pivotal-buildpack
+      - put: pivotal-buildpack
         params:
-          from: buildpack/nodejs_buildpack-v(.*).zip
-          to: /experimental-buildpacks/nodejs/
-      - put: nodejs-pivotal-buildpack-cached
+          from: buildpack/.*_buildpack-v(.*).zip
+          to: /experimental-buildpacks/<%= language %>/
+      - put: pivotal-buildpack-cached
         params:
-          from: buildpack/nodejs_buildpack-cached-v(.*).zip
-          to: /experimental-buildpacks/nodejs/
-  - name: nodejs-buildpack-CF-edge-master
+          from: buildpack/.*_buildpack-cached-v(.*).zip
+          to: /experimental-buildpacks/<%= language %>/
+  - name: buildpack-CF-edge-master
     serial: true
     plan:
       - put: cf-environments
@@ -102,29 +126,30 @@ jobs:
         - get: buildpacks-ci
         - get: deployments-buildpacks
         - get: buildpack
-          passed: [ "detect new NodeJS buildpack and upload artifacts" ]
-          resource: nodejs-buildpack-master
+          passed: [ "detect-new-buildpack-and-upload-artifacts" ]
+          resource: buildpack-master
           trigger: true
         - get: pivotal-buildpacks
-          resource: nodejs-pivotal-buildpack
-          passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          resource: pivotal-buildpack
+          passed: [ "detect-new-buildpack-and-upload-artifacts" ]
           trigger: true
         - get: pivotal-buildpacks-cached
-          resource: nodejs-pivotal-buildpack-cached
-          passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          resource: pivotal-buildpack-cached
+          passed: [ "detect-new-buildpack-and-upload-artifacts" ]
           trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
           params:
             STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             CF_PASSWORD: {{ci-cf-password}}
         privileged: true
         ensure:
           put: cf-edge-environments
           params:
             release: cf-environments
-  - name: nodejs-buildpack-CF-LTS-master
+  - name: buildpack-CF-LTS-master
     serial: true
     plan:
       - put: cf-environments
@@ -135,59 +160,60 @@ jobs:
         - get: buildpacks-ci
         - get: deployments-buildpacks
         - get: buildpack
-          passed: [ "detect new NodeJS buildpack and upload artifacts" ]
-          resource: nodejs-buildpack-master
+          passed: [ "detect-new-buildpack-and-upload-artifacts" ]
+          resource: buildpack-master
           trigger: true
         - get: pivotal-buildpacks
-          resource: nodejs-pivotal-buildpack
-          passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          resource: pivotal-buildpack
+          passed: [ "detect-new-buildpack-and-upload-artifacts" ]
           trigger: true
         - get: pivotal-buildpacks-cached
-          resource: nodejs-pivotal-buildpack-cached
-          passed: [ "detect new NodeJS buildpack and upload artifacts" ]
+          resource: pivotal-buildpack-cached
+          passed: [ "detect-new-buildpack-and-upload-artifacts" ]
           trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack-for-release.yml
         config:
           params:
             STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             CF_PASSWORD: {{ci-cf-password}}
         privileged: true
         ensure:
           put: cf-lts-environments
           params:
             release: cf-environments
-  - name: nodejs-buildpack-release
+  - name: buildpack-release
     serial: true
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: pivotal-buildpacks-cached
-          resource: nodejs-pivotal-buildpack-cached
-          passed: [ "nodejs-buildpack-CF-LTS-master", "nodejs-buildpack-CF-edge-master" ]
+          resource: pivotal-buildpack-cached
+          passed: [ "buildpack-CF-LTS-master", "buildpack-CF-edge-master" ]
           trigger: true
         - get: buildpack
-          passed: [ "nodejs-buildpack-CF-LTS-master", "nodejs-buildpack-CF-edge-master" ]
-          resource: nodejs-buildpack-master
+          passed: [ "buildpack-CF-LTS-master", "buildpack-CF-edge-master" ]
+          resource: buildpack-master
           trigger: true
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added.yml
-      - put: nodejs-buildpack-master
+      - put: buildpack-master
         params:
           repository: buildpack
           tag: buildpack/VERSION
           tag_prefix: v
-  - name: nodejs buildpack to github
+  - name: buildpack-to-github
     serial: true
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: pivotal-buildpacks-cached
-          resource: nodejs-pivotal-buildpack-cached
-          passed: [ nodejs-buildpack-release ]
+          resource: pivotal-buildpack-cached
+          passed: [ buildpack-release ]
         - get: buildpack
-          resource: nodejs-buildpack-master
-          passed: [ nodejs-buildpack-release ]
+          resource: buildpack-master
+          passed: [ buildpack-release ]
         - get: buildpack-checksums-master
       - task: prepare-release
         file: buildpacks-ci/tasks/prepare-release.yml
@@ -207,18 +233,18 @@ jobs:
           globs:
             - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip
             - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip.SHA256SUM.txt
-  - name: nodejs buildpack to pivnet
+  - name: buildpack-to-pivnet
     serial: true
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: buildpacks-pivnet-uploader
         - get: pivotal-buildpacks-cached
-          resource: nodejs-pivotal-buildpack-cached
-          passed: [ nodejs-buildpack-release ]
+          resource: pivotal-buildpack-cached
+          passed: [ buildpack-release ]
         - get: buildpack
-          resource: nodejs-buildpack-master
-          passed: [ nodejs-buildpack-release ]
+          resource: buildpack-master
+          passed: [ buildpack-release ]
       - task: upload to pivnet
         file: buildpacks-ci/tasks/upload-to-pivnet.yml
         config:
@@ -228,10 +254,10 @@ jobs:
             PIVNET_S3_BUCKET: pivotalnetwork
             PIVNET_ADDRESS: https://network.pivotal.io/
             PIVNET_APIKEY: {{pivnet-apikey}}
-            PIVNET_PRODUCT_NAME: NodeJS Buildpack (offline)
-            GITHUB_URL: https://github.com/cloudfoundry/nodejs-buildpack
+            PIVNET_PRODUCT_NAME: {{pivnet-product-name}}
+            GITHUB_URL: https://github.com/cloudfoundry/<%= language %>-buildpack
         privileged: true
-  - name: nodejs-buildpack-CF-edge
+  - name: buildpack-CF-edge
     serial: true
     plan:
       - put: cf-environments
@@ -242,20 +268,20 @@ jobs:
         - get: buildpacks-ci
         - get: deployments-buildpacks
         - get: buildpack
-          resource: nodejs-buildpack
           trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack.yml
         config:
           params:
             STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             CF_PASSWORD: {{ci-cf-password}}
         privileged: true
         ensure:
           put: cf-edge-environments
           params:
             release: cf-environments
-  - name: nodejs-buildpack-CF-LTS
+  - name: buildpack-CF-LTS
     serial: true
     plan:
       - put: cf-environments
@@ -266,13 +292,13 @@ jobs:
         - get: buildpacks-ci
         - get: deployments-buildpacks
         - get: buildpack
-          resource: nodejs-buildpack
           trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/test-buildpack.yml
         config:
           params:
             STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             CF_PASSWORD: {{ci-cf-password}}
         privileged: true
         ensure:
@@ -287,11 +313,10 @@ jobs:
         - get: compile-extensions
           trigger: true
         - get: buildpack
-          resource: nodejs-buildpack
       - task: update-compile-extensions
         file: buildpacks-ci/tasks/update-compile-extensions.yml
         privileged: true
-      - put: nodejs-buildpack
+      - put: buildpack
         params:
           repository: update-compile-extensions/buildpack
           rebase: true

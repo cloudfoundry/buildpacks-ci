@@ -12,6 +12,13 @@ cd buildpack
 
 ../buildpacks-ci/scripts/check-unsupported-manifest
 
+# for the PHP buildpack
+if [ -e requirements.txt ]; then
+  export TMPDIR=$(mktemp -d)
+  pip install -r requirements.txt 
+  ./run_tests.sh
+fi
+
 export BUNDLE_GEMFILE=cf.Gemfile
 bundle -j4 --no-cache
 
