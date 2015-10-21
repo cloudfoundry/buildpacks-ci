@@ -1,26 +1,39 @@
 #!/usr/bin/env ruby
-require "fileutils"
+require 'digest'
+require 'fileutils'
 
 Dir.chdir('pivotal-buildpacks-cached') do
   Dir.glob("*.zip").map do |filename|
     filename.match(/(.*)_buildpack-cached-v(.*)\+.*.zip/) do |match|
-      language = match[1]
-      version = match[2]
-      FileUtils.mv(filename, "#{language}_buildpack-cached-v#{version}.zip")
+      _, language, version = match.to_a
+      new_filename = "#{language}_buildpack-cached-v#{version}.zip"
+      sha_filename = "#{new_filename}.SHA256SUM.txt"
 
-      system <<-eof
-        sha256sum #{language}_buildpack-cached-v#{version}.zip > #{language}_buildpack-cached-v#{version}.zip.SHA256SUM.txt
-        echo "  * SHA256: `sha256sum #{language}_buildpack-cached-v#{version}.zip | cut -d ' ' -f 1` " >> ../prepare-release/buildpack/RECENT_CHANGES
-        cp #{language}_buildpack-cached-v#{version}.zip.SHA256SUM.txt ../buildpack-checksums-master
-        cd ../buildpack-checksums-master
-        git add -A
-        git commit -m "SHA256SUM for #{language} v#{version}"
-        ./generate.rb
-        cp -r build ../buildpack-checksums-gh-pages
-        cd ../buildpack-checksums-gh-pages
-        git add -A
-        git commit -m "Updates for #{language} v#{version}"
-      eof
+      FileUtils.mv(filename, new_filename)
+
+      shasum = Digest::SHA256.file(new_filename).hexdigest
+      File.write(sha_filename, "#{shasum} #{new_filename}")
+
+      # append SHA to RELEASE NOTES
+      File.write('../prepare-release/buildpack/RECENT_CHANGES', "  * SHA256: #{shasum}",mode: 'a')
+
+      # commit to buildpack checksums
+      FileUtils.cp(sha_filename, '../buildpack-checksums-master')
+      Dir.chdir('../buildpack-checksums-master') do
+        system <<-eof
+          git add -A
+          git commit -m "SHA256SUM for #{language} v#{version}"
+          ./generate.rb ../buildpack-checksums-gh-pages
+        eof
+      end
+
+      # commit static site buildpack checksums
+      Dir.chdir('../buildpack-checksums-gh-pages') do
+        system <<-eof
+          git add -A
+          git commit -m "Updates for #{language} v#{version}"
+        eof
+      end
     end
   end
 end
