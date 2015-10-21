@@ -5,7 +5,7 @@ Dir["pipelines/*.yml"].each do |filename|
   system("fly -t buildpacks c #{name} -c pipelines/#{name}.yml -vf private.yml")
 end
 
-Dir["config/*.yml"].each do |filename|
+Dir["config/bosh-lite/*.yml"].each do |filename|
   deployment_name = File.basename(filename, '.yml')
   system("fly -t buildpacks c #{deployment_name} -c pipelines/templates/bosh-lite.yml -vf private.yml -vf #{filename}")
 end
