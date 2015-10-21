@@ -23,15 +23,6 @@ Dir.chdir('pivotal-buildpacks-cached') do
         system <<-eof
           git add -A
           git commit -m "SHA256SUM for #{language} v#{version}"
-          ./generate.rb ../buildpack-checksums-gh-pages
-        eof
-      end
-
-      # commit static site buildpack checksums
-      Dir.chdir('../buildpack-checksums-gh-pages') do
-        system <<-eof
-          git add -A
-          git commit -m "Updates for #{language} v#{version}"
         eof
       end
     end

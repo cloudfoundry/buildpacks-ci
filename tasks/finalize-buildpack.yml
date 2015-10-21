@@ -6,6 +6,5 @@ inputs:
   - name: prepare-release
   - name: pivotal-buildpacks-cached
   - name: buildpack-checksums-master
-  - name: buildpack-checksums-gh-pages
 run:
   path: buildpacks-ci/scripts/release/finalize-buildpack

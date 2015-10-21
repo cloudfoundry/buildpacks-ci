@@ -70,12 +70,6 @@ resources:
       uri: git@github.com:pivotal-cf-experimental/buildpack-checksums.git
       private_key: {{buildpack-checksums-private-key}}
       branch: master
-  - name: buildpack-checksums-gh-pages
-    type: git
-    source:
-      uri: git@github.com:pivotal-cf-experimental/buildpack-checksums.git
-      private_key: {{buildpack-checksums-private-key}}
-      branch: gh-pages
 
 jobs:
   - name: detect new Ruby buildpack and upload artifacts
@@ -195,7 +189,6 @@ jobs:
           resource: ruby-buildpack-master
           passed: [ ruby-buildpack-release ]
         - get: buildpack-checksums-master
-        - get: buildpack-checksums-gh-pages
       - task: prepare-release
         file: buildpacks-ci/tasks/prepare-release.yml
         privileged: true
@@ -205,10 +198,6 @@ jobs:
       - put: buildpack-checksums-master
         params:
           repository: finalize-buildpack/buildpack-checksums-master
-          rebase: true
-      - put: buildpack-checksums-gh-pages
-        params:
-          repository: finalize-buildpack/buildpack-checksums-gh-pages
           rebase: true
       - put: buildpack-github-release
         params:
