@@ -1,0 +1,50 @@
+---
+resources:
+  - name: master
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf-experimental/buildpack-checksums.git
+      private_key: {{buildpack-checksums-private-key}}
+      branch: master
+  - name: gh-pages
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf-experimental/buildpack-checksums.git
+      private_key: {{buildpack-checksums-private-key}}
+      branch: gh-pages
+
+jobs:
+  - name: build-site
+    plan:
+      - aggregate:
+        - get: master
+          trigger: true
+        - get: gh-pages
+      - task: run-tests
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: master
+          run:
+            path: bash
+            args:
+              - -c
+              - "cd master && gem install bundle && bundle && rspec"
+      - task: build-site
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: master
+            - name: gh-pages
+          run:
+            path: bash
+            args:
+              - -c
+              - "cd master && ./generate.rb ../gh-pages && cd ../gh-pages && git add -A && git commit -m 'Update site' "
+        privileged: true
+      - put: gh-pages
+        params:
+          repository: build-site/gh-pages
+          rebase: true
