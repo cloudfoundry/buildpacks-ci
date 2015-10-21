@@ -12,7 +12,7 @@ Dir.chdir('pivotal-buildpacks-cached') do
       FileUtils.mv(filename, new_filename)
 
       shasum = Digest::SHA256.file(new_filename).hexdigest
-      File.write(sha_filename, "#{shasum} #{new_filename}")
+      File.write(sha_filename, "#{shasum}  #{new_filename}")
 
       # append SHA to RELEASE NOTES
       File.write('../prepare-release/buildpack/RECENT_CHANGES', "  * SHA256: #{shasum}",mode: 'a')
