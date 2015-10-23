@@ -77,7 +77,7 @@ resources:
       password: {{stacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
   - name: stack-github-release
-    type: github-release
+    type: github-release-test
     source:
       user: cloudfoundry
       repository: stacks
@@ -298,6 +298,7 @@ jobs:
         params:
           name: version/number
           tag: version/number
+          draft: true
           globs:
             - stack-s3/cflinuxfs2-*.tar.gz
   - name: upload-to-docker
