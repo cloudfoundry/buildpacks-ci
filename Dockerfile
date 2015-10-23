@@ -54,3 +54,5 @@ RUN wget -O- https://github.com/github/hub/releases/download/v2.2.1/hub-linux-am
 COPY build/ssh-agent.sh /etc/profile.d/
 COPY build/ruby.sh /etc/profile.d/
 COPY build/go.sh /etc/profile.d/
+
+RUN gem install bosh_cli bosh_cli_plugin_micro rake bundler
