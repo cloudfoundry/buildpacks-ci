@@ -15,7 +15,7 @@ Dir.chdir('pivotal-buildpacks-cached') do
       File.write(sha_filename, "#{shasum}  #{new_filename}")
 
       # append SHA to RELEASE NOTES
-      File.write('../prepare-release/buildpack/RECENT_CHANGES', "  * SHA256: #{shasum}",mode: 'a')
+      File.write('../buildpack/RECENT_CHANGES', "  * SHA256: #{shasum}",mode: 'a')
 
       # commit to buildpack checksums
       FileUtils.cp(sha_filename, '../buildpack-checksums-master')

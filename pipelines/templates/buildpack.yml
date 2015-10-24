@@ -229,7 +229,7 @@ jobs:
         params:
           name: prepare-release/tag
           tag: prepare-release/tag
-          body: finalize-buildpack/prepare-release/buildpack/RECENT_CHANGES
+          body: finalize-buildpack/buildpack/RECENT_CHANGES
           globs:
             - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip
             - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip.SHA256SUM.txt
