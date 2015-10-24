@@ -221,9 +221,12 @@ jobs:
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack.yml
         privileged: true
+      - task: commit-shas
+        file: buildpacks-ci/tasks/commit-shas.yml
+        privileged: true
       - put: buildpack-checksums-master
         params:
-          repository: finalize-buildpack/buildpack-checksums-master
+          repository: commit-shas/buildpack-checksums-master
           rebase: true
       - put: buildpack-github-release
         params:
