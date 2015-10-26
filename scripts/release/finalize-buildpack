@@ -2,17 +2,31 @@
 require 'digest'
 require 'fileutils'
 
+tag = "v#{File.read('buildpack/VERSION')}"
+File.write('tag', tag)
+
+Dir.chdir('buildpack') do
+  system('BUNDLE_GEMFILE=cf.Gemfile bundle -j4')
+
+  changes       = File.read('CHANGELOG').match(/^=+(.*?)^v[0-9]/m)
+  recent_change = changes[1]
+  
+  File.write('RECENT_CHANGES', [
+    recent_change,
+    "Packaged binaries:",
+    `BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --list`
+  ].join("\n"))
+end
+
 Dir.chdir('pivotal-buildpacks-cached') do
   Dir.glob("*.zip").map do |filename|
     filename.match(/(.*)_buildpack-cached-v(.*)\+.*.zip/) do |match|
       _, language, version = match.to_a
       new_filename = "#{language}_buildpack-cached-v#{version}.zip"
-      sha_filename = "#{new_filename}.SHA256SUM.txt"
 
       FileUtils.mv(filename, new_filename)
 
       shasum = Digest::SHA256.file(new_filename).hexdigest
-      File.write(sha_filename, "#{shasum}  #{new_filename}")
 
       # append SHA to RELEASE NOTES
       File.write('../buildpack/RECENT_CHANGES', "  * SHA256: #{shasum}",mode: 'a')

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cp finalize-buildpack/pivotal-buildpacks-cached/*.SHA256SUM.txt ./builpack-checksums-master
-cd buildpack-checksums-master
+cp finalize-buildpack/pivotal-buildpacks-cached/*.SHA256SUM.txt ./builpack-checksums
+cd buildpack-checksums
 git add -A
 git commit -m "SHA256SUM for #{language} v#{version}"

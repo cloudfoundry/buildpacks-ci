@@ -5,15 +5,9 @@ pushd buildpacks-pivnet-uploader
 bundle -j4
 popd
 
-pushd buildpack
-../buildpacks-ci/scripts/release/extract-recent-changes
-popd
-
-./buildpacks-ci/scripts/release/finalize-buildpack
-
 buildpacks-pivnet-uploader/upload_to_pivnet \
   "$PIVNET_PRODUCT_NAME" \
-  `cat buildpack/VERSION` \
+  `cat finalize-buildpack/buildpack/VERSION` \
   pivotal-buildpacks-cached/*_buildpack-cached-v*.zip \
-  buildpack/RECENT_CHANGES \
+  finalize-buildpack/buildpack/RECENT_CHANGES \
   "$GITHUB_URL" < /dev/null

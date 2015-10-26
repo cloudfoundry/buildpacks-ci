@@ -1,8 +1,0 @@
----
-platform: linux
-image: docker:///cfbuildpacks/ci
-inputs:
-  - name: buildpacks-ci
-  - name: buildpack
-run:
-  path: buildpacks-ci/scripts/release/prepare-release

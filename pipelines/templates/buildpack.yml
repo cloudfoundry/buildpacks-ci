@@ -64,7 +64,7 @@ resources:
       user: cloudfoundry
       repository: <%= language %>-buildpack
       access_token: {{buildpacks-github-token}}
-  - name: buildpack-checksums-master
+  - name: buildpack-checksums
     type: git
     source:
       uri: git@github.com:pivotal-cf-experimental/buildpack-checksums.git
@@ -214,24 +214,21 @@ jobs:
         - get: buildpack
           resource: buildpack-master
           passed: [ buildpack-release ]
-        - get: buildpack-checksums-master
-      - task: prepare-release
-        file: buildpacks-ci/tasks/prepare-release.yml
-        privileged: true
+        - get: buildpack-checksums
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack.yml
         privileged: true
       - task: commit-shas
         file: buildpacks-ci/tasks/commit-shas.yml
         privileged: true
-      - put: buildpack-checksums-master
+      - put: buildpack-checksums
         params:
-          repository: commit-shas/buildpack-checksums-master
+          repository: commit-shas/buildpack-checksums
           rebase: true
       - put: buildpack-github-release
         params:
-          name: prepare-release/tag
-          tag: prepare-release/tag
+          name: finalize-buildpack/tag
+          tag: finalize-buildpack/tag
           body: finalize-buildpack/buildpack/RECENT_CHANGES
           globs:
             - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip
@@ -248,6 +245,9 @@ jobs:
         - get: buildpack
           resource: buildpack-master
           passed: [ buildpack-release ]
+      - task: finalize-buildpack
+        file: buildpacks-ci/tasks/finalize-buildpack.yml
+        privileged: true
       - task: upload to pivnet
         file: buildpacks-ci/tasks/upload-to-pivnet.yml
         config:
