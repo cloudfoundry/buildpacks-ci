@@ -239,3 +239,4 @@ jobs:
       - put: cf-release-develop
         params:
           repository: upload-blobs/cf-release
+          rebase: true
