@@ -84,12 +84,11 @@ resources:
       access_token: {{buildpacks-github-token}}
 
 jobs:
-  - name: build-rootfs
+  - name: notification
     serial: true
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: deployments-buildpacks
         - get: monday-funday
           trigger: true
       - task: create-tracker-story
@@ -104,6 +103,15 @@ jobs:
           params:
             TRACKER_PROJECT_ID: 1042066
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+  - name: build-rootfs
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: deployments-buildpacks
+        - get: monday-funday
+          passed: [ "notification" ]
+          trigger: true
       - task: recreate-bosh-lite
         config:
           platform: linux
