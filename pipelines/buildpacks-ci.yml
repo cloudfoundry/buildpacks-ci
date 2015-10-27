@@ -1,0 +1,26 @@
+resources:
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/buildpacks-ci
+      branch: master
+jobs:
+  - name: rspec
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          trigger: true
+      - task: rspec
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+          params:
+            CI_USERNAME: {{ci-username}}
+            CI_PASSWORD: {{ci-password}}
+          run:
+            path: bash
+            args: ["-c", "cd buildpacks-ci && bundle && rspec"]
+        privileged: true

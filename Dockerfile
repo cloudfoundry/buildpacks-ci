@@ -56,3 +56,7 @@ COPY build/ruby.sh /etc/profile.d/
 COPY build/go.sh /etc/profile.d/
 
 RUN gem install bosh_cli bosh_cli_plugin_micro rake bundler
+
+#install fly-cli
+RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly
+RUN chmod +x /usr/local/bin/fly
