@@ -1,0 +1,26 @@
+---
+language: staticfile
+
+exclude_files:
+  - .git/
+  - .gitignore
+  - .gitmodules
+  - .rspec
+  - cf_spec/
+  - log/
+  - test/
+  - buildpack-packager/
+  - staticfile_buildpack-*v*.zip
+
+url_to_dependency_map:
+  - match: nginx.tgz
+    name: nginx
+    version: 1.8.0
+
+dependencies:
+  - name: nginx
+    version: 1.8.0
+    uri: https://s3.amazonaws.com/pivotal-buildpacks/nginx/cflinuxfs2/nginx-1.8.0-linux-x64.tgz
+    cf_stacks:
+      - cflinuxfs2
+    md5: e12cddcba72d5008f94b298a02a8e6d4
