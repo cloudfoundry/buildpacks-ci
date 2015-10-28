@@ -5,6 +5,11 @@ resources:
     source:
       expression: 0 7 * * 1
       location: America/New_York
+  - name: check-interval
+    type: cron
+    source:
+      expression: "*/5 * * * *"
+      location: America/New_York
   - name: buildpacks-ci
     type: git
     source:
@@ -15,16 +20,6 @@ resources:
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       branch: new-release-notifications
       private_key: {{buildpacks-ci-binary-builds-private-key}}
-  - {name: "ruby", type: "git", source: {uri: "https://github.com/ruby/ruby"}}
-  - {name: "jruby", type: "git", source: {uri: "https://github.com/jruby/jruby"}}
-  - {name: "nginx", type: "git", source: {uri: "https://github.com/nginx/nginx"}}
-  - {name: "php", type: "git", source: {uri: "https://github.com/php/php-src"}}
-  - {name: "go", type: "git", source: {uri: "https://github.com/golang/go"}}
-  - {name: "nodejs", type: "git", source: {uri: "https://github.com/nodejs/node"}}
-  - {name: "httpd", type: "git", source: {uri: "https://github.com/apache/httpd"}}
-  - {name: "maven", type: "git", source: {uri: "https://github.com/apache/maven"}}
-  - {name: "python", type: "git", source: {uri: "https://github.com/python/cpython"}}
-  - {name: "godep", type: "git", source: {uri: "https://github.com/tools/godep"}}
 
 jobs:
   - name: New Releases
@@ -33,16 +28,8 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: new-releases
-        - { get: "ruby",   trigger: true, params: {depth: 1}}
-        - { get: "jruby",  trigger: true, params: {depth: 1}}
-        - { get: "nginx",  trigger: true, params: {depth: 1}}
-        - { get: "php",    trigger: true, params: {depth: 1}}
-        - { get: "go",     trigger: true, params: {depth: 1}}
-        - { get: "nodejs", trigger: true, params: {depth: 1}}
-        - { get: "httpd",  trigger: true, params: {depth: 1}}
-        - { get: "maven",  trigger: true, params: {depth: 1}}
-        - { get: "python", trigger: true, params: {depth: 1}}
-        - { get: "godep",  trigger: true, params: {depth: 1}}
+        - get: check-interval
+          trigger: true
       - task: notify
         config:
           platform: linux
