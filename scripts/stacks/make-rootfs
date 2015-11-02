@@ -16,7 +16,7 @@ done
 
 # docker graph dir
 mkdir -p /var/lib/docker
-mount -t tmpfs -o size=10G none /var/lib/docker
+mount -t tmpfs -o size=30G none /var/lib/docker
 
 docker -d >/dev/null 2>&1 &
 
@@ -35,7 +35,7 @@ versioned_stack_filename=cflinuxfs2-`cat ../version/number`.tar.gz
 mv cflinuxfs2.tar.gz $versioned_stack_filename
 
 versioned_receipt_filename=../cflinuxfs2_receipt-`cat ../version/number`
-echo "Rootfs SHASUM: `shasum $versioned_stack_filename | awk '{print $1}'`" > $versioned_receipt_filename 
+echo "Rootfs SHASUM: `shasum $versioned_stack_filename | awk '{print $1}'`" > $versioned_receipt_filename
 echo "" >> $versioned_receipt_filename
 cat cflinuxfs2/cflinuxfs2_dpkg_l.out >> $versioned_receipt_filename
 
