@@ -8,7 +8,7 @@ resources:
   - name: check-interval
     type: cron
     source:
-      expression: "*/5 * * * *"
+      expression: "0 * * * *"
       location: America/New_York
   - name: buildpacks-ci
     type: git
