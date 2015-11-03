@@ -8,3 +8,6 @@ inputs:
   - name: cf-environments
 run:
   path: buildpacks-ci/scripts/test_buildpack
+params:
+  DEPLOYMENT_NAME:
+  STACKS:
