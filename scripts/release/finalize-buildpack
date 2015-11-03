@@ -30,6 +30,7 @@ Dir.chdir('pivotal-buildpacks-cached') do
 
       # append SHA to RELEASE NOTES
       File.write('../buildpack/RECENT_CHANGES', "  * SHA256: #{shasum}",mode: 'a')
+      File.write("#{new_filename}.SHA256SUM.txt", "#{shasum}  #{new_filename}")
     end
   end
 end
