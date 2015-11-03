@@ -12,4 +12,14 @@ RSpec.configure do |config|
     `env #{env_var} fly --target #{target} #{arg}`
   end
 
+  def execute(cmd, env={})
+    @output = fly("execute #{cmd}", env)
+    @id = @output.split("\n").first.split(' ').last
+    puts "latest task id=#{@id}"
+  end
+
+  def run(cmd)
+    fly("i -b #{@id} -s one-off -- bash -c '#{cmd}'")
+  end
+
 end
