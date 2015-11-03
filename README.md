@@ -6,16 +6,19 @@ This contains the configuration for the Cloud Foundry Buildpacks team [Concourse
 
 * [binary-builder](pipelines/binary-builder.yml): build binaries for Cloud Foundry buildpacks
 * [buildpacks](pipelines/templates/buildpack.yml): test and release all of the buildpacks
-* [bp-ci-7](pipelines/bp-ci-7.yml): deploy CF LTS to bp-ci-7
-* [bp-ci-7b](pipelines/bp-ci-7b.yml): deploy CF LTS to bp-ci-7b
-* [bp-ci-8](pipelines/bp-ci-8.yml): deploy CF master to bp-ci-8
-* [bp-ci-8b](pipelines/bp-ci-8b.yml): deploy CF master to bp-ci-8b
-* [brats-binary-beta](pipelines/brats-binary-beta.yml): run [BRATS](https://github.com/cloudfoundry/brats) against the binary-beta branch of buildpacks
+* [bosh-lite](pipelines/templates/bosh-lite.yml): deploy CF LTS/Edge environment
 * [brats-develop](pipelines/brats-develop.yml): run [BRATS](https://github.com/cloudfoundry/brats) against the develop branch of buildpacks
 * [brats](pipelines/brats.yml): run [BRATS](https://github.com/cloudfoundry/brats) against the master branch of buildpacks
+* [buildpack-checksums](pipelines/buildpack-checksums.yml): generate static site for buildpack checksums
+* [buildpacks-ci](pipelines/buildpacks-ci.yml): testing tasks for correct usage
+* [dockerfile](pipelines/dockerfile.yml): rebuild docker image for buildpack
+	pipeline
+* [cf-release](pipelines/cf-release.yml): deployment of latest buildpacks to
+	cf-release develop
 * [main](pipelines/main.yml): tooling
+* [notifications](pipelines/notifications.yml): monitor upstream sources for
+	changes and notify on Slack
 * [stacks](pipelines/stacks.yml): test and release Cloud Foundry [stacks](https://github.com/cloudfoundry/stacks)
-staticfile-buildpack)
 
 # Configuration
 
@@ -23,13 +26,6 @@ With a proper Concourse deployment, and `private.yml` containing secrets:
 
 ```sh
 fly c main -c pipeline.yml -vf private.yml
-```
-
-# Building Docker Images
-
-```sh
-docker build -t cfbuildpacks/ci .
-docker push cfbuildpacks/ci
 ```
 
 # Debugging the build
