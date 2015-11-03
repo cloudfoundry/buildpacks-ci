@@ -104,16 +104,16 @@ jobs:
         - get: buildpack
           resource: buildpack-master
           trigger: true
-      - task: detect and upload
+      - task: detect-and-upload
         file: buildpacks-ci/tasks/detect-and-upload.yml
         privileged: true
       - put: pivotal-buildpack
         params:
-          from: buildpack/.*_buildpack-v(.*).zip
+          from: detect-and-upload/buildpack/.*_buildpack-v(.*).zip
           to: /experimental-buildpacks/<%= language %>/
       - put: pivotal-buildpack-cached
         params:
-          from: buildpack/.*_buildpack-cached-v(.*).zip
+          from: detect-and-upload/buildpack/.*_buildpack-cached-v(.*).zip
           to: /experimental-buildpacks/<%= language %>/
   - name: buildpack-CF-edge-master
     serial: true
@@ -138,7 +138,7 @@ jobs:
           passed: [ "detect-new-buildpack-and-upload-artifacts" ]
           trigger: true
       - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack-for-release.yml
+        file: buildpacks-ci/tasks/test-buildpack.yml
         config:
           params:
             STACKS: cflinuxfs2
@@ -172,7 +172,7 @@ jobs:
           passed: [ "detect-new-buildpack-and-upload-artifacts" ]
           trigger: true
       - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack-for-release.yml
+        file: buildpacks-ci/tasks/test-buildpack.yml
         config:
           params:
             STACKS: cflinuxfs2
