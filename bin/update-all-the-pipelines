@@ -2,18 +2,18 @@
 
 Dir["pipelines/*.yml"].each do |filename|
   name = File.basename(filename, '.yml')
-  system("fly -t buildpacks c #{name} -c pipelines/#{name}.yml -vf private.yml")
+  system("fly -t buildpacks set-pipeline -p #{name} -c pipelines/#{name}.yml -l private.yml")
 end
 
 Dir["config/bosh-lite/*.yml"].each do |filename|
   deployment_name = File.basename(filename, '.yml')
-  system("fly -t buildpacks c #{deployment_name} -c pipelines/templates/bosh-lite.yml -vf private.yml -vf #{filename}")
+  system("fly -t buildpacks set-pipeline -p #{deployment_name} -c pipelines/templates/bosh-lite.yml -l private.yml -l #{filename}")
 end
 
 Dir["config/buildpack/*.yml"].each do |filename|
   language = File.basename(filename, '.yml')
   system("erb language=#{language} pipelines/templates/buildpack.yml > /tmp/pipeline.yml")
-  system("fly -t buildpacks c #{language}-buildpack -c /tmp/pipeline.yml -vf private.yml -vf #{filename}")
+  system("fly -t buildpacks set-pipeline -p #{language}-buildpack -c /tmp/pipeline.yml -l private.yml -l #{filename}")
 end
 
 puts "Thanks, JT"

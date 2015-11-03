@@ -25,7 +25,7 @@ This contains the configuration for the Cloud Foundry Buildpacks team [Concourse
 With a proper Concourse deployment, and `private.yml` containing secrets:
 
 ```sh
-fly c main -c pipeline.yml -vf private.yml
+fly set-pipeline -p main -c pipeline.yml -l private.yml
 ```
 
 # Debugging the build
