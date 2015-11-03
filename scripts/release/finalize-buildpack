@@ -10,10 +10,10 @@ Dir.chdir('buildpack') do
 
   changes       = File.read('CHANGELOG').match(/^=+(.*?)^v[0-9]/m)
   recent_change = changes[1]
-  
+
   File.write('RECENT_CHANGES', [
     recent_change,
-    "Packaged binaries:",
+    "Packaged binaries:\n",
     `BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --list`
   ].join("\n"))
 end

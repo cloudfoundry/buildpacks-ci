@@ -15,6 +15,14 @@ describe 'finalize-buildpack task' do
       end
     end
 
+    it 'should emit a valid markdown table of dependencies' do
+      output = run("cat /tmp/build/*/buildpack/RECENT_CHANGES")
+      expect(output).to include "Packaged binaries:\r\r\n\r\r\n"
+      expect(output).to include "| name  | version | cf_stacks  |\r\r\n"
+      expect(output).to include "|-------|---------|------------|\r\r\n"
+      expect(output).to include "| nginx | 1.8.0   | cflinuxfs2 |\r\r\n"
+    end
+
     it 'should emit tag based on VERSION' do
       output = run("cat /tmp/build/*/tag")
       version = File.read('./spec/finalize-buildpack/VERSION')
