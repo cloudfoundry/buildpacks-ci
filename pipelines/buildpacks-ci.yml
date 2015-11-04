@@ -18,6 +18,7 @@ jobs:
             - name: buildpacks-ci
           params:
             FLYRC: {{buildpacks-flyrc}}
+            TERM: xterm-color
           run:
             path: bash
             args:
