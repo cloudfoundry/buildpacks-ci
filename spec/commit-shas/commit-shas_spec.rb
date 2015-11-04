@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe 'commit-shas' do
   before :context do
+    `git init ./spec/commit-shas`
     execute("-c tasks/commit-shas.yml -i buildpacks-ci=. -i buildpack-checksums=./spec/commit-shas -i buildpack=./spec/commit-shas -i finalize-buildpack=./spec/commit-shas")
   end
 
