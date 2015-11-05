@@ -5,6 +5,7 @@ ENV LANG="C.UTF-8"
 RUN apt-get update
 RUN apt-get -y install \
   awscli \
+  expect \
   git \
   golang \
   libmysqlclient-dev \
@@ -19,8 +20,7 @@ RUN apt-get -y install \
   zip
 
 RUN git clone http://github.com/luan/vimfiles.git ~/.vim
-RUN ~/.vim/install 
-
+RUN ~/.vim/install
 
 RUN git config --global user.email "ci@localhost"
 RUN git config --global user.name "CI Bot"
