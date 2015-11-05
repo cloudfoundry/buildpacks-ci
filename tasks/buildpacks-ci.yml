@@ -1,0 +1,14 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+params:
+  TERM: xterm-color
+  CI_USERNAME:
+  CI_PASSWORD:
+run:
+  path: bash
+  args:
+    - "-c"
+    - cd buildpacks-ci && ./scripts/fly-login $CI_USERNAME $CI_PASSWORD && bundle && rspec

@@ -11,17 +11,9 @@ jobs:
       - get: buildpacks-ci
         trigger: true
       - task: rspec
+        file: buildpacks-ci/tasks/buildpacks-ci.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
           params:
-            FLYRC: {{buildpacks-flyrc}}
-            TERM: xterm-color
-          run:
-            path: bash
-            args:
-              - "-c"
-              - (echo "$FLYRC" > ~/.flyrc) && cd buildpacks-ci && bundle && rspec
+            CI_USERNAME: {{ci-username}}
+            CI_PASSWORD: {{ci-password}}
         privileged: true
