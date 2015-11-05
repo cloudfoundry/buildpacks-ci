@@ -14,6 +14,7 @@ end
 new_releases_dir = ARGV[0]
 
 TAGS = {
+  cfrelease:   -> { Octokit.tags('cloudfoundry/cf-release').map(&:name).grep(/^v/) },
   ruby:   -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) },
   jruby:  -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
   nginx:  -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release/) },
