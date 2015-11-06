@@ -118,15 +118,7 @@ jobs:
         - get: version
           params: { bump: minor, pre: rc }
       - task: make-rootfs
-        config:
-          platform: linux
-          image: docker:///jpetazzo/dind
-          inputs:
-            - name: buildpacks-ci
-            - name: stacks
-            - name: version
-          run:
-            path: buildpacks-ci/scripts/stacks/make-rootfs
+        file: buildpacks-ci/tasks/make-rootfs.yml
         privileged: true
       - put: stack-s3
         params:

@@ -1,0 +1,9 @@
+---
+platform: linux
+image: docker:///docker#dind
+inputs:
+  - name: buildpacks-ci
+  - name: stacks
+  - name: version
+run:
+  path: buildpacks-ci/scripts/stacks/make-rootfs
