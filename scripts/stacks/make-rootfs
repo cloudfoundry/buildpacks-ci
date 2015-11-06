@@ -2,7 +2,7 @@
 
 set -eux
 
-apk add --update bash make
+apk add --update git bash make
 
 mkdir -p /var/log
 mkdir -p /var/run
@@ -42,4 +42,5 @@ echo "Rootfs SHASUM: `shasum $versioned_stack_filename | awk '{print $1}'`" > $v
 echo "" >> $versioned_receipt_filename
 cat cflinuxfs2/cflinuxfs2_dpkg_l.out >> $versioned_receipt_filename
 
+which git
 TERM=xterm-color git --no-pager diff cflinuxfs2/cflinuxfs2_receipt $versioned_receipt_filename || true
