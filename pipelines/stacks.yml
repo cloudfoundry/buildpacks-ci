@@ -116,7 +116,7 @@ jobs:
       - aggregate:
         - get: stacks
         - get: version
-          params: { bump: minor, pre: rc }
+          params: { pre: rc }
       - task: make-rootfs
         file: buildpacks-ci/tasks/make-rootfs.yml
         privileged: true
@@ -298,6 +298,15 @@ jobs:
           tag: version/number
       - put: version
         params: { file: version/number }
+  - name: minor-bump
+    serial: true
+    plan:
+      - get: version
+        trigger: true
+        passed: [ shipit ]
+        params: {bump: minor, pre: rc}
+      - put: version
+        params: {file: version/number}
   - name: upload-to-github
     serial: true
     plan:
