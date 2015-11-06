@@ -2,6 +2,8 @@
 
 set -eux
 
+apk add --update bash make
+
 mkdir -p /var/log
 mkdir -p /var/run
 
@@ -18,7 +20,7 @@ done
 
 # docker graph dir
 mkdir -p /var/lib/docker
-mount -t tmpfs -o size=30G none /var/lib/docker
+mount -t tmpfs -o size=15G none /var/lib/docker
 
 docker -d >/dev/null 2>&1 &
 
@@ -30,7 +32,6 @@ until docker info >/dev/null 2>&1; do
 done
 
 cd stacks
-apk add --update make
 make
 
 versioned_stack_filename=cflinuxfs2-`cat ../version/number`.tar.gz
