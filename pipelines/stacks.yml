@@ -79,7 +79,7 @@ resources:
   - name: stack-github-release
     type: github-release
     source:
-      draft: true
+      drafts: true
       user: cloudfoundry
       repository: stacks
       access_token: {{buildpacks-github-token}}
