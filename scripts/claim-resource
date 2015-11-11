@@ -7,8 +7,12 @@ cd resource-pools
 cf_env=$1
 resource=$2
 
+
 git config --global user.email "ci@localhost"
 git config --global user.name "CI Bot"
+
+echo  "unclaimed resource: $cf_env/unclaimed/$resource"
+echo  "claimed resource: $cf_env/claimed/$resource"
 
 git mv "$cf_env/unclaimed/$resource" "$cf_env/claimed/$resource"
 
