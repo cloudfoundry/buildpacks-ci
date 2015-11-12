@@ -11,12 +11,14 @@ resources:
       uri: https://github.com/cloudfoundry/buildpacks-ci
       branch: develop
 jobs:
-  - name: rspec
+  - name: test-merge-to-master
     serial: true
     plan:
       - aggregate:
-        - get: { ci-develop, trigger: true}
         - get: ci-master
+        - get: buildpacks-ci
+          resource: ci-develop
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/buildpacks-ci.yml
         config:
@@ -24,14 +26,7 @@ jobs:
             CI_USERNAME: {{ci-username}}
             CI_PASSWORD: {{ci-password}}
         privileged: true
-  - name: promote-to-master
-    serial: true
-    plan:
-      - aggregate:
-        - get: ci-master
-          passed: [ "rspec" ]
-          trigger: true
-      - taks: merge
+      - task: merge
         config:
           platform: linux
           image: docker:///cfbuildpacks/ci
@@ -41,10 +36,8 @@ jobs:
             path: bash
             args:
               - -c
-              - "cd ci-master && git fetch origin develop:develop && git merge --ff-only origin/develop"
-      # - task: promote-to-master
-        # put: deployments-buildpacks
-        # params:
-          # repository: recreate-bosh-lite/deployments-buildpacks
-          # rebase: true
-
+              - "cd ci-master && git merge --ff-only origin/develop"
+      - put: ci-master
+        params:
+          repository: merge/ci-master
+          rebase: true
