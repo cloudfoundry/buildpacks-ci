@@ -11,7 +11,7 @@ resources:
       uri: https://github.com/cloudfoundry/buildpacks-ci
       branch: develop
 jobs:
-  - name: test-merge-to-master
+  - name: merge-to-master
     serial: true
     plan:
       - aggregate:
