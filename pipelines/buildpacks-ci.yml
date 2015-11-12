@@ -26,18 +26,7 @@ jobs:
             CI_USERNAME: {{ci-username}}
             CI_PASSWORD: {{ci-password}}
         privileged: true
-      - task: merge
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci
-          inputs:
-            - name: ci-master
-          run:
-            path: bash
-            args:
-              - -c
-              - "cd ci-master && git merge --ff-only origin/develop"
       - put: ci-master
         params:
-          repository: merge/ci-master
+          repository: rspec/buildpacks-ci
           rebase: true
