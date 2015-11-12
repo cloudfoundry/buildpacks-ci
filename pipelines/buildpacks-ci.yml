@@ -1,15 +1,22 @@
 resources:
-  - name: buildpacks-ci
+  - name: ci-master
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-ci
+      branch: master
+      private_key: {{buildpacks-ci-master-private-key}}
+  - name: ci-develop
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
-      branch: master
+      branch: develop
 jobs:
   - name: rspec
     serial: true
     plan:
-      - get: buildpacks-ci
-        trigger: true
+      - aggregate:
+        - get: { ci-develop, trigger: true}
+        - get: ci-master
       - task: rspec
         file: buildpacks-ci/tasks/buildpacks-ci.yml
         config:
@@ -17,3 +24,27 @@ jobs:
             CI_USERNAME: {{ci-username}}
             CI_PASSWORD: {{ci-password}}
         privileged: true
+  - name: promote-to-master
+    serial: true
+    plan:
+      - aggregate:
+        - get: ci-master
+          passed: [ "rspec" ]
+          trigger: true
+      - taks: merge
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: ci-master
+          run:
+            path: bash
+            args:
+              - -c
+              - "cd ci-master && git fetch origin develop:develop && git merge --ff-only origin/develop"
+      # - task: promote-to-master
+        # put: deployments-buildpacks
+        # params:
+          # repository: recreate-bosh-lite/deployments-buildpacks
+          # rebase: true
+
