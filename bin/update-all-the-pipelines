@@ -2,18 +2,30 @@
 
 raise '`brew install lastpass-cli` is required' if `which lpass` == ''
 
+def header(msg)
+  puts "*" * 80
+  puts msg
+  puts "*" * 80
+end
+
+header('For standard pipelines')
 Dir["pipelines/*.yml"].each do |filename|
   name = File.basename(filename, '.yml')
+  puts "   #{name} pipeline"
   system(%Q{bash -c "fly -t buildpacks set-pipeline -p #{name} -c pipelines/#{name}.yml -l <(lpass show 'Shared-Buildpacks/concourse-private.yml' --notes)"})
 end
 
+header('For bosh-lite pipelines')
 Dir["config/bosh-lite/*.yml"].each do |filename|
   deployment_name = File.basename(filename, '.yml')
+  puts "   #{deployment_name} buildpack"
   system(%Q{bash -c "fly -t buildpacks set-pipeline -p #{deployment_name} -c pipelines/templates/bosh-lite.yml -l <(lpass show 'Shared-Buildpacks/concourse-private.yml' --notes) -l #{filename}"})
 end
 
+header('For buildpack pipelines')
 Dir["config/buildpack/*.yml"].each do |filename|
   language = File.basename(filename, '.yml')
+  puts "   #{language} buildpack"
   system("erb language=#{language} pipelines/templates/buildpack.yml > /tmp/pipeline.yml")
   system(%Q{bash -c "fly -t buildpacks set-pipeline -p #{language}-buildpack -c /tmp/pipeline.yml -l <(lpass show 'Shared-Buildpacks/concourse-private.yml' --notes) -l #{filename}"})
 end

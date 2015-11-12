@@ -308,6 +308,7 @@ jobs:
           put: cf-lts-environments
           params:
             release: cf-environments
+<% unless language == "binary" %>
   - name: update-compile-extensions
     serial: true
     plan:
@@ -323,3 +324,4 @@ jobs:
         params:
           repository: update-compile-extensions/buildpack
           rebase: true
+<% end %>
