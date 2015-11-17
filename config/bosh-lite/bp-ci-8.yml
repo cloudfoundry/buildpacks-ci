@@ -1,6 +1,6 @@
 ---
 deployment-name: bp-ci-8
 resource-pool: cf-edge-environments
-cf-version: 224
+cf-version: 225
 generate-manifest: buildpacks-ci/tasks/develop-make-manifest.yml
 generated-manifest-location: generate-manifest/cf-release/bosh-lite/deployments/cf.yml
