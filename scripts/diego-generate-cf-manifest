@@ -2,15 +2,15 @@
 
 set -e
 
-export CF_RELEASE_DIR=`pwd`/cf-release
-
 pushd deployments-buildpacks
   bundle -j4
   source ./bin/switch $DEPLOYMENT_NAME
 popd
 
-cd cf-release 
+export BOSH_RELEASES_DIR=`pwd`
+export CF_RELEASE_DIR=`pwd`/cf-release
 
+pushd cf-release 
 echo "
 ---
 name: cf-warden
@@ -32,15 +32,22 @@ jobs:
   # both offline and online buildpacks now.
   persistent_disk: 30720" >> bosh-lite/cf-stub-spiff-ours.yml
 
-./scripts/generate-bosh-lite-dev-manifest bosh-lite/cf-stub-spiff-ours.yml
+  ./scripts/generate-bosh-lite-dev-manifest bosh-lite/cf-stub-spiff-ours.yml
 
-ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CF_CI_PASSWORD'])" bosh-lite/deployments/cf.yml
+  ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CF_CI_PASSWORD'])" bosh-lite/deployments/cf.yml
+popd
 
-cd ../deployments-buildpacks
+pushd diego-release
+  ./scripts/generate-bosh-lite-manifests 
+popd
+
+cd deployments-buildpacks
 cp ../cf-release/bosh-lite/deployments/cf.yml deployments/$DEPLOYMENT_NAME/manifest.yml
+cp ../diego-release/bosh-lite/deployments/diego.yml deployments/$DEPLOYMENT_NAME/diego.yml
 
 git config --global user.email "ci@localhost"
 git config --global user.name "CI Bot"
 
 git add deployments/$DEPLOYMENT_NAME/manifest.yml
+git add deployments/$DEPLOYMENT_NAME/diego.yml
 git diff-index --quiet HEAD deployments/$DEPLOYMENT_NAME/manifest.yml || git commit -qm "Update manifest for $DEPLOYMENT_NAME"

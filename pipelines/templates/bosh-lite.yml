@@ -7,6 +7,14 @@ resources:
       password: {{bosh-lite-password}}
       deployment: cf-warden
       ignore_ssl: true
+  - name: diego-deployment
+    type: bosh-deployment
+    source:
+      target: https://{{deployment-name}}.cf-app.com:25555
+      username: admin
+      password: {{bosh-lite-password}}
+      deployment: cf-warden-diego
+      ignore_ssl: true
   - name: deployments-buildpacks
     type: git
     source:
@@ -27,10 +35,6 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
-  - name: bosh-stemcell
-    type: bosh-io-stemcell
-    source:
-      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
   - name: machete
     type: git
     source:
@@ -38,15 +42,14 @@ resources:
       branch: master
 
 jobs:
-  - name: deploy-cf
+  - name: recreate-bosh-lite
+    serial_groups: [ deploy ]
     serial: true
     plan:
       - aggregate:
-        - get: resource-pools
         - get: buildpacks-ci
-        - get: bosh-stemcell
+        - get: resource-pools
         - get: deployments-buildpacks
-        - get: machete
       - task: claim-from-pool
         config:
           platform: linux
@@ -77,22 +80,32 @@ jobs:
           params:
             repository: recreate/deployments-buildpacks
             rebase: true
+  - name: generate-manifest
+    serial_groups: [ deploy ]
+    serial: true
+    plan:
       - aggregate:
+        - get: deployments-buildpacks
+          passed: ['recreate-bosh-lite']
+          trigger: true
+        - get: buildpacks-ci
+        - get: deployments-buildpacks
         - get: bosh-lite
+      - aggregate:
         - task: cf-release
+          file: buildpacks-ci/tasks/checkout-release.yml
           config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            run:
-              path: bash
-              args: ['-c', 'git clone --branch v{{cf-version}} --depth 1 https://github.com/cloudfoundry/cf-release . && ./update || ./scripts/update']
-        - task: download-release
+            params:
+              RELEASE_NAME: cloudfoundry/cf-release
+              RELEASE_VERSION: {{cf-version}}
+<% if deployment_name.include?('bp-ci-8') %>
+        - task: diego-release
+          file: buildpacks-ci/tasks/checkout-release.yml
           config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            run:
-              path: bash
-              args: ['-c', 'curl -f -L -o release.tgz https://bosh.io/d/github.com/cloudfoundry/cf-release?v={{cf-version}}']
+            params:
+              RELEASE_NAME: cloudfoundry-incubator/diego-release
+              RELEASE_VERSION: {{diego-version}}
+<% end %>
       - task: generate-manifest
         file: {{generate-manifest}}
         config:
@@ -104,11 +117,109 @@ jobs:
         params:
           repository: generate-manifest/deployments-buildpacks
           rebase: true
+  - name: deploy-cf
+    serial_groups: [ deploy ]
+    serial: true
+    plan:
+      - aggregate:
+        - get: deployments-buildpacks
+          passed: ['generate-manifest']
+          trigger: true
+        - get: bosh-lite
+        - get: buildpacks-ci
+        - task: bosh-stemcell
+          config:
+            image: docker:///cfbuildpacks/ci
+            platform: linux
+            run:
+              path: bash
+              args: ["-c", "curl -L -J -o stemcell.tgz https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent?v=2776"]
+      - aggregate:
+        - task: cf-release
+          file: buildpacks-ci/tasks/checkout-release.yml
+          config:
+            params:
+              RELEASE_NAME: cloudfoundry/cf-release
+              RELEASE_VERSION: {{cf-version}}
+        - task: cf-release-tarball
+          file: buildpacks-ci/tasks/download-release.yml
+          config:
+            params:
+              RELEASE_NAME: cloudfoundry/cf-release
+              RELEASE_VERSION: {{cf-version}}
       - put: cf-deployment
         params:
-          manifest: {{generated-manifest-location}}
+          manifest: {{cf-manifest-location}}
           stemcells: ['bosh-stemcell/stemcell.tgz']
-          releases: [download-release/release.tgz]
+          releases:
+            - cf-release-tarball/release.tgz
+<% if deployment_name.include?('bp-ci-8') %>
+  - name: deploy-diego
+    serial_groups: [ deploy ]
+    serial: true
+    plan:
+      - aggregate:
+        - get: deployments-buildpacks
+          passed: ['deploy-cf']
+          trigger: true
+        - get: buildpacks-ci
+        - task: bosh-stemcell
+          config:
+            image: docker:///cfbuildpacks/ci
+            platform: linux
+            run:
+              path: bash
+              args: ["-c", "curl -L -J -o stemcell.tgz https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent?v=2776"]
+      - aggregate:
+        - task: diego-release
+          file: buildpacks-ci/tasks/checkout-release.yml
+          config:
+            params:
+              RELEASE_NAME: cloudfoundry-incubator/diego-release
+              RELEASE_VERSION: {{diego-version}}
+        - task: diego-release-tarball
+          file: buildpacks-ci/tasks/download-release.yml
+          config:
+            params:
+              RELEASE_NAME: cloudfoundry-incubator/diego-release
+              RELEASE_VERSION: {{diego-version}}
+        - task: garden-linux-release-tarball
+          file: buildpacks-ci/tasks/download-release.yml
+          config:
+            params:
+              RELEASE_NAME: cloudfoundry-incubator/garden-linux-release
+              RELEASE_VERSION: {{garden-linux-version}}
+        - task: etcd-release-tarball
+          file: buildpacks-ci/tasks/download-release.yml
+          config:
+            params:
+              RELEASE_NAME: cloudfoundry-incubator/etcd-release
+              RELEASE_VERSION: {{etcd-version}}
+      - put: diego-deployment
+        params:
+          manifest: {{diego-manifest-location}}
+          stemcells: ['bosh-stemcell/stemcell.tgz']
+          releases:
+            - diego-release-tarball/release.tgz
+            - garden-linux-release-tarball/release.tgz
+            - etcd-release-tarball/release.tgz
+<% end %>
+  - name: update-machete
+    serial_groups: [ deploy ]
+    serial: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: resource-pools
+        - get: buildpacks-ci
+        - get: deployments-buildpacks
+<% if deployment_name.include?('bp-ci-8') %>
+          passed: ['deploy-diego']
+<% else %>
+          passed: ['deploy-cf']
+<% end %>
+          trigger: true
+        - get: machete
       - task: configure-deployment
         config:
           platform: linux
@@ -123,6 +234,14 @@ jobs:
             DEPLOYMENT_NAME: {{deployment-name}}
             CF_CI_PASSWORD: {{ci-cf-password}}
             CF_CI_USERNAME: {{ci-cf-username}}
+  - name: unclaim
+    serial_groups: [ deploy ]
+    serial: true
+    plan:
+      - get: buildpacks-ci
+      - get: resource-pools
+        passed: [ update-machete ]
+        trigger: true
       - task: unclaim-from-pool
         config:
           platform: linux

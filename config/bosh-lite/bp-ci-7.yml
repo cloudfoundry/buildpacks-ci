@@ -4,3 +4,5 @@ resource-pool: cf-lts-environments
 cf-version: 208
 generate-manifest: buildpacks-ci/tasks/make-manifest.yml
 generated-manifest-location: generate-manifest/cf-release/bosh-lite/manifests/cf-manifest.yml
+generate-manifest: buildpacks-ci/tasks/make-manifest.yml
+cf-manifest-location: deployments-buildpacks/deployments/bp-ci-7/manifest.yml

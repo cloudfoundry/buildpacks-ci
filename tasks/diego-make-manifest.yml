@@ -5,6 +5,7 @@ inputs:
   - name: bosh-lite
   - name: buildpacks-ci
   - name: cf-release
+  - name: diego-release
   - name: deployments-buildpacks
 run:
-  path: buildpacks-ci/scripts/develop-generate-cf-manifest
+  path: buildpacks-ci/scripts/diego-generate-cf-manifest

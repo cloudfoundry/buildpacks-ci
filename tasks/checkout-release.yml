@@ -1,0 +1,6 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+run:
+  path: bash
+  args: ['-c', 'git clone --branch v$RELEASE_VERSION --depth 1 https://github.com/$RELEASE_NAME . && ./update || ./scripts/update']

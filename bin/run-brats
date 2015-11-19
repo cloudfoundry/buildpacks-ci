@@ -7,14 +7,14 @@ puts "For pipeline #{pipeline_name}"
 
 flyrc  = YAML.load_file(File.expand_path('~/.flyrc'))
 target = flyrc['targets']['buildpacks'] 
-username, password = target['username'], target['password']
+token  = target['token']['value']
 
 manifest = YAML.load_file(File.join('pipelines', "#{pipeline_name}.yml"))
 jobs     = manifest['jobs']
 jobs.each do |job|
   job_name = job['name']
   print "  Starting job #{job_name} - "
-  `curl -s -u #{username}:#{password} -X POST https://buildpacks.ci.cf-app.com/pipelines/#{pipeline_name}/jobs/#{job_name}/builds`
+  `curl -k -s -H "Authorization: Bearer #{token}" -X POST https://buildpacks.ci.cf-app.com/pipelines/#{pipeline_name}/jobs/#{job_name}/builds`
   if $?.success?
     puts "Success"
   else
