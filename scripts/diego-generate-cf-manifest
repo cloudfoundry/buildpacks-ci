@@ -26,6 +26,9 @@ properties:
     include_services: true
     include_sso: false
     include_v3: false
+  cc:
+    default_to_diego_backend: $(ruby -e "puts ENV['DEPLOYMENT_NAME'].end_with?('b').to_s")
+
 jobs:
 - name: api_z1
   # Make the disk size bigger so we can handle
