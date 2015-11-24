@@ -26,11 +26,12 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/bosh-lite
   - name: resource-pools
-    type: git
+    type: pool
     source:
-      uri: git@github.com:cloudfoundry/buildpacks-ci
       branch: resource-pools
+      pool: {{resource-pool}}
       private_key: {{resource-pools-private-key}}
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
   - name: buildpacks-ci
     type: git
     source:
@@ -48,21 +49,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: resource-pools
         - get: deployments-buildpacks
-      - task: claim-from-pool
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: resource-pools
-          run:
-            path: buildpacks-ci/scripts/claim-resource
-            args: [{{resource-pool}}, {{deployment-name}}]
       - put: resource-pools
         params:
-          repository: claim-from-pool/resource-pools
+          claim: {{deployment-name}}
       - task: recreate
         config:
           platform: linux
@@ -86,10 +76,10 @@ jobs:
     plan:
       - aggregate:
         - get: deployments-buildpacks
+        - get: resource-pools
           passed: ['recreate-bosh-lite']
           trigger: true
         - get: buildpacks-ci
-        - get: deployments-buildpacks
         - get: bosh-lite
       - aggregate:
         - task: cf-release
@@ -123,6 +113,7 @@ jobs:
     plan:
       - aggregate:
         - get: deployments-buildpacks
+        - get: resource-pools
           passed: ['generate-manifest']
           trigger: true
         - get: bosh-lite
@@ -160,6 +151,7 @@ jobs:
     plan:
       - aggregate:
         - get: deployments-buildpacks
+        - get: resource-pools
           passed: ['deploy-cf']
           trigger: true
         - get: buildpacks-ci
@@ -210,9 +202,9 @@ jobs:
     serial: true
     plan:
       - aggregate:
-        - get: resource-pools
         - get: buildpacks-ci
         - get: deployments-buildpacks
+        - get: resource-pools
 <% if deployment_name.include?('bp-ci-8') %>
           passed: ['deploy-diego']
 <% else %>
@@ -242,18 +234,7 @@ jobs:
       - get: resource-pools
         passed: [ update-machete ]
         trigger: true
-      - task: unclaim-from-pool
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: resource-pools
-          run:
-            path: buildpacks-ci/scripts/unclaim-resource
-            args: [{{resource-pool}}, {{deployment-name}}]
       - put: resource-pools
         params:
-          repository: unclaim-from-pool/resource-pools
-          rebase: true
+          release: {{deployment-name}}
 
