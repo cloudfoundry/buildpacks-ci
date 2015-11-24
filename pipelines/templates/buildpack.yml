@@ -261,13 +261,38 @@ jobs:
             PIVNET_PRODUCT_NAME: {{pivnet-product-name}}
             GITHUB_URL: https://github.com/cloudfoundry/<%= language %>-buildpack
         privileged: true
-  - name: buildpack-CF-edge
+  - name: edge-DEA
     serial: true
     plan:
       - put: cf-environments
         resource: cf-edge-environments
         params:
-          acquire: true
+          claim: bp-ci-8
+      - aggregate:
+        - get: buildpacks-ci
+        - get: deployments-buildpacks
+        - get: buildpack
+          trigger: true
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack.yml
+        config:
+          params:
+            STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
+            CF_EDGE: 'true'
+        privileged: true
+        ensure:
+          put: cf-edge-environments
+          params:
+            release: cf-environments
+  - name: edge-Diego
+    serial: true
+    plan:
+      - put: cf-environments
+        resource: cf-edge-environments
+        params:
+          claim: bp-ci-8b
       - aggregate:
         - get: buildpacks-ci
         - get: deployments-buildpacks
