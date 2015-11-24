@@ -25,9 +25,9 @@ RUN ~/.vim/install
 RUN git config --global user.email "ci@localhost"
 RUN git config --global user.name "CI Bot"
 
-RUN wget -q https://dl.bintray.com/mitchellh/vagrant/vagrant_1.7.3_x86_64.deb \
-  && dpkg -i vagrant_1.7.3_x86_64.deb \
-  && rm vagrant_1.7.3_x86_64.deb
+RUN wget -q https://dl.bintray.com/mitchellh/vagrant/vagrant_1.7.4_x86_64.deb \
+  && dpkg -i vagrant_1.7.4_x86_64.deb \
+  && rm vagrant_1.7.4_x86_64.deb
 RUN vagrant plugin install vagrant-aws
 RUN vagrant box add cloudfoundry/bosh-lite --provider aws
 
@@ -39,9 +39,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the CF-CLI
-RUN wget -O- 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.12.2&source=github-rel'| tar xz -C /usr/bin
-RUN cf install-plugin https://github.com/cloudfoundry-incubator/diego-cli-plugin/raw/master/bin/linux64/diego-beta.linux64
-RUN cf install-plugin https://github.com/cloudfoundry-incubator/diego-ssh/releases/download/plugin-0.1.2/ssh-plugin-linux-amd64
+RUN wget -O- 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.14.0&source=github-rel'| tar xz -C /usr/bin
 
 #download spiff for spiffy things
 RUN wget -O- 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.7/spiff_linux_amd64.zip' | funzip > /usr/bin/spiff
