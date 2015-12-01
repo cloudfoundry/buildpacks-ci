@@ -35,7 +35,7 @@ jobs:
       - put: cf-environments
         resource: cf-lts-environments
         params:
-          acquire: true
+          claim: bp-ci-7
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -59,7 +59,7 @@ jobs:
       - put: cf-environments
         resource: cf-edge-environments
         params:
-          acquire: true
+          claim: bp-ci-8
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -83,7 +83,7 @@ jobs:
       - put: cf-environments
         resource: cf-lts-environments
         params:
-          acquire: true
+          claim: bp-ci-7
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -107,7 +107,7 @@ jobs:
       - put: cf-environments
         resource: cf-edge-environments
         params:
-          acquire: true
+          claim: bp-ci-8
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -131,7 +131,7 @@ jobs:
       - put: cf-environments
         resource: cf-lts-environments
         params:
-          acquire: true
+          claim: bp-ci-7
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -155,7 +155,7 @@ jobs:
       - put: cf-environments
         resource: cf-edge-environments
         params:
-          acquire: true
+          claim: bp-ci-8
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -179,7 +179,7 @@ jobs:
       - put: cf-environments
         resource: cf-lts-environments
         params:
-          acquire: true
+          claim: bp-ci-7
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -203,7 +203,7 @@ jobs:
       - put: cf-environments
         resource: cf-edge-environments
         params:
-          acquire: true
+          claim: bp-ci-8
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -227,7 +227,7 @@ jobs:
       - put: cf-environments
         resource: cf-lts-environments
         params:
-          acquire: true
+          claim: bp-ci-7
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -251,7 +251,7 @@ jobs:
       - put: cf-environments
         resource: cf-edge-environments
         params:
-          acquire: true
+          claim: bp-ci-8
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -275,7 +275,7 @@ jobs:
       - put: cf-environments
         resource: cf-lts-environments
         params:
-          acquire: true
+          claim: bp-ci-7
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -299,7 +299,7 @@ jobs:
       - put: cf-environments
         resource: cf-edge-environments
         params:
-          acquire: true
+          claim: bp-ci-8
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -323,7 +323,7 @@ jobs:
       - put: cf-environments
         resource: cf-lts-environments
         params:
-          acquire: true
+          claim: bp-ci-7
       - aggregate:
         - get: buildpacks-ci
         - get: brats
@@ -347,7 +347,7 @@ jobs:
       - put: cf-environments
         resource: cf-edge-environments
         params:
-          acquire: true
+          claim: bp-ci-8
       - aggregate:
         - get: buildpacks-ci
         - get: brats
