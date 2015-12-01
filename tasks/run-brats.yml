@@ -1,0 +1,14 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: brats
+  - name: cf-environments
+run:
+  path: buildpacks-ci/scripts/brats
+params:
+  BRATS_BRANCH:
+  CI_CF_USERNAME:
+  CI_CF_PASSWORD:
+  LANGUAGE:
