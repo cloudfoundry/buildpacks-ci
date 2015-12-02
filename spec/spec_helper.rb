@@ -1,5 +1,6 @@
 RSpec.configure do |config|
   $stdout.sync = true
+  config.filter_run_excluding :concourse_test => true
 
   def fly(arg, env = {})
     target = "buildpacks"

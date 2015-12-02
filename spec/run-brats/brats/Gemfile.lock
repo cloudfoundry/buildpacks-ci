@@ -1,0 +1,76 @@
+GIT
+  remote: https://github.com/cf-buildpacks/machete
+  revision: a73550f9783bd0283c3120e9d8a63fd01e9ccbb2
+  tag: v0.0.18
+  specs:
+    machete (0.0.18)
+      httparty
+
+GIT
+  remote: https://github.com/cloudfoundry-incubator/buildpack-packager
+  revision: 3f20e8cb67f4b92057fbea4944dedd0489fd0260
+  tag: v2.1.0
+  specs:
+    buildpack-packager (0.0.1)
+      activesupport (~> 4.1.8)
+      kwalify
+      rspec
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activesupport (4.1.10)
+      i18n (~> 0.6, >= 0.6.9)
+      json (~> 1.7, >= 1.7.7)
+      minitest (~> 5.1)
+      thread_safe (~> 0.1)
+      tzinfo (~> 1.1)
+    bcrypt (3.1.10)
+    coderay (1.1.0)
+    diff-lcs (1.2.5)
+    httparty (0.13.5)
+      json (~> 1.8)
+      multi_xml (>= 0.5.2)
+    i18n (0.7.0)
+    json (1.8.2)
+    kwalify (0.7.2)
+    method_source (0.8.2)
+    minitest (5.6.1)
+    multi_xml (0.5.5)
+    pry (0.10.1)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
+    rspec (3.2.0)
+      rspec-core (~> 3.2.0)
+      rspec-expectations (~> 3.2.0)
+      rspec-mocks (~> 3.2.0)
+    rspec-core (3.2.3)
+      rspec-support (~> 3.2.0)
+    rspec-expectations (3.2.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.2.0)
+    rspec-instafail (0.2.6)
+      rspec
+    rspec-mocks (3.2.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.2.0)
+    rspec-support (3.2.2)
+    slop (3.6.0)
+    thread_safe (0.3.5)
+    tzinfo (1.2.2)
+      thread_safe (~> 0.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bcrypt
+  buildpack-packager!
+  machete!
+  pry
+  rspec
+  rspec-instafail
+
+BUNDLED WITH
+   1.10.6

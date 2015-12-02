@@ -5,7 +5,9 @@ DEPLOYMENT_NAME=`cat cf-environments/name`
 
 cd brats
 bundle install
-cf login -a api.$DEPLOYMENT_NAME.cf-app.com -u $CI_CF_USERNAME -p $CI_CF_PASSWORD -o pivotal -s integration --skip-ssl-validation
+if [ -n "$CI_CF_PASSWORD" ]; then
+  cf login -a api.$DEPLOYMENT_NAME.cf-app.com -u $CI_CF_USERNAME -p $CI_CF_PASSWORD -o pivotal -s integration --skip-ssl-validation
+fi
 
 if [ "$STACK" == "" ]; then
   bundle exec rspec cf_spec/integration/${LANGUAGE}_spec.rb

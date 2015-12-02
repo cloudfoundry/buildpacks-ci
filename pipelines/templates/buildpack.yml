@@ -70,6 +70,10 @@ resources:
       uri: git@github.com:pivotal-cf-experimental/buildpack-checksums.git
       private_key: {{buildpack-checksums-private-key}}
       branch: master
+  - name: brats
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/brats.git
 
 jobs:
   <% if language == "php" %>
@@ -271,22 +275,34 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: deployments-buildpacks
+        - get: brats
         - get: buildpack
           trigger: true
-      - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack.yml
-        config:
-          params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci-cf-password}}
-            CF_EDGE: 'true'
-        privileged: true
+      - do:
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack.yml
+          config:
+            params:
+              STACKS: cflinuxfs2
+              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+              CF_PASSWORD: {{ci-cf-password}}
+              CF_EDGE: 'true'
+          privileged: true
+<% unless language == "binary" %>
+        - task: brats
+          file: buildpacks-ci/tasks/run-brats.yml
+          config:
+            params:
+              BRATS_BRANCH: develop
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+              LANGUAGE: <%= language %>
+<% end %>
         ensure:
           put: cf-edge-environments
           params:
             release: cf-environments
-  - name: edge-Diego
+  - name: edge-diego
     serial: true
     plan:
       - put: cf-environments
@@ -296,17 +312,29 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: deployments-buildpacks
+        - get: brats
         - get: buildpack
           trigger: true
-      - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack.yml
-        config:
-          params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci-cf-password}}
-            CF_EDGE: 'true'
-        privileged: true
+      - do:
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack.yml
+          config:
+            params:
+              STACKS: cflinuxfs2
+              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+              CF_PASSWORD: {{ci-cf-password}}
+              CF_EDGE: 'true'
+          privileged: true
+<% unless language == "binary" %>
+        - task: brats
+          file: buildpacks-ci/tasks/run-brats.yml
+          config:
+            params:
+              BRATS_BRANCH: develop
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+              LANGUAGE: <%= language %>
+<% end %>
         ensure:
           put: cf-edge-environments
           params:
@@ -321,16 +349,28 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: deployments-buildpacks
+        - get: brats
         - get: buildpack
           trigger: true
-      - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack.yml
-        config:
-          params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
+      - do:
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack.yml
+          config:
+            params:
+              STACKS: cflinuxfs2
+              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+              CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+<% unless language == "binary" %>
+        - task: brats
+          file: buildpacks-ci/tasks/run-brats.yml
+          config:
+            params:
+              BRATS_BRANCH: develop
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+              LANGUAGE: <%= language %>
+<% end %>
         ensure:
           put: cf-lts-environments
           params:
