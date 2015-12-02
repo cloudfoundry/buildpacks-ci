@@ -6,7 +6,7 @@ inputs:
   - name: brats
   - name: cf-environments
 run:
-  path: buildpacks-ci/scripts/brats
+  path: buildpacks-ci/scripts/brats-with-tags
 params:
   BRATS_BRANCH:
   CI_CF_USERNAME:
