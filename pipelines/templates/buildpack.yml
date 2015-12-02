@@ -361,7 +361,6 @@ jobs:
               COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
               CF_PASSWORD: {{ci-cf-password}}
           privileged: true
-<% unless language == "binary" %>
         - task: brats
           file: buildpacks-ci/tasks/run-brats.yml
           config:
@@ -370,7 +369,6 @@ jobs:
               CI_CF_USERNAME: {{ci-cf-username}}
               CI_CF_PASSWORD: {{ci-cf-password}}
               LANGUAGE: <%= language %>
-<% end %>
         ensure:
           put: cf-lts-environments
           params:
