@@ -29,9 +29,8 @@ resources:
   - name: stacks
     type: git
     source:
-      uri: git@github.com:cloudfoundry/stacks.git
+      uri: https://github.com/cloudfoundry/stacks
       branch: master
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
 
 jobs:
   - name: New Releases
@@ -89,7 +88,6 @@ jobs:
         - get: check-interval
           trigger: true
         - get: stacks
-          trigger: true
       - task: notify
         config:
           platform: linux
