@@ -1,0 +1,56 @@
+#!/usr/bin/env ruby
+
+buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
+
+require "#{buildpacks_ci_dir}/lib/cve-tags"
+require "#{buildpacks_ci_dir}/lib/cve-logger"
+require "#{buildpacks_ci_dir}/lib/safe_execution"
+require "#{buildpacks_ci_dir}/lib/tracker-client"
+
+include SafeExecution
+
+stacks_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'stacks'))
+cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'new-cves'))
+
+cve_logger = CVELogger.new(cves_dir)
+cve_filename = 'ubuntu14.04.yaml'
+
+rss_cves = CVETags.new(stacks_dir).related_cves
+
+yaml_cves = cve_logger.read_yaml_cves(cve_filename)
+
+new_cves = rss_cves - yaml_cves
+
+unless new_cves.empty?
+  title = "address: #{new_cves}"
+  description = "Placeholder; we'll figure out what goes here"
+
+  tracker_client = TrackerClient.new(
+    ENV['TRACKER_API_TOKEN'],
+    ENV['TRACKER_PROJECT_ID'],
+    ENV['TRACKER_REQUESTER_ID'].to_i,
+  )
+
+  tracker_client.post_to_tracker title, description
+
+  slack_output = "There are *#{new_cves.length}* new CVEs:\n"
+
+  new_cves.each do |cve|
+    slack_output << "- #{cve}*\n"
+  end
+
+  notifications_dir = File.join(buildpacks_ci_dir, 'scripts', 'notifications')
+  execute_with_console_logging!("echo \"#{slack_output}\" | #{notifications_dir}/slack")
+
+  cve_logger.write_yaml_cves(
+    rss_cves | yaml_cves,
+    File.join(cves_dir, cve_filename)
+  )
+
+  Dir.chdir(cves_dir) do
+    execute_with_console_logging!("git add -A")
+    execute_with_console_logging!("git commit -m 'CVE update'")
+  end
+
+end
+
