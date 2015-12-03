@@ -20,6 +20,18 @@ resources:
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       branch: new-release-notifications
       private_key: {{buildpacks-ci-binary-builds-private-key}}
+  - name: new-cves
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      branch: new-cve-notifications
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
+  - name: stacks
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/stacks.git
+      branch: master
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
 
 jobs:
   - name: New Releases
@@ -68,4 +80,38 @@ jobs:
           params:
             TRACKER_PROJECT_ID: 1042066
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-
+  - name: New CVEs
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: new-cves
+        - get: check-interval
+          trigger: true
+        - get: stacks
+          trigger: true
+      - task: notify
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: new-cves
+            - name: buildpacks-ci
+            - name: stacks
+          run:
+            path: bash
+            args:
+              - -c
+              - "cd buildpacks-ci/ && bundle && bundle exec ./scripts/notifications/check-cves"
+          params:
+            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+            GITHUB_USERNAME: {{github-username}}
+            GITHUB_PASSWORD: {{github-password}}
+            TRACKER_PROJECT_ID: 1042066
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            TRACKER_REQUESTER_ID: 765241
+      - put: new-cves
+        params:
+          repository: notify/new-cves
+          rebase: true

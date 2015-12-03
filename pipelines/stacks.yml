@@ -83,7 +83,12 @@ resources:
       user: cloudfoundry
       repository: stacks
       access_token: {{buildpacks-github-token}}
-
+  - name: new-cves
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      branch: new-cve-notifications
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
 jobs:
   - name: notification
     serial: true
@@ -112,6 +117,8 @@ jobs:
         - get: deployments-buildpacks
         - get: monday-funday
           passed: [ "notification" ]
+          trigger: true
+        - get: new-cves
           trigger: true
       - aggregate:
         - get: stacks
