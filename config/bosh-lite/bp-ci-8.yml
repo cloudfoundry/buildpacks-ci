@@ -1,9 +1,9 @@
 ---
 deployment-name: bp-ci-8
 resource-pool: cf-edge-environments
-cf-version: 225
+cf-version: 226
 diego-version: 0.1442.0
-garden-linux-version: 0.327.0
+garden-linux-version: 0.328.0
 etcd-version: 18
 generate-manifest: buildpacks-ci/tasks/diego-make-manifest.yml
 cf-manifest-location: deployments-buildpacks/deployments/bp-ci-8/manifest.yml
