@@ -1,0 +1,18 @@
+#!/bin/bash
+
+case $1 in
+
+  start)
+    echo "Started"
+
+    ;;
+
+  stop)
+    echo "Stopped"
+
+    ;;
+
+  *)
+    echo "Usage: ctl {start|stop}" ;;
+
+esac
