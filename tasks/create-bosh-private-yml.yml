@@ -4,8 +4,6 @@ image: docker:///cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
   - name: stacks-release
-outputs:
-  - name: stacks-release
 run:
   path: buildpacks-ci/scripts/stacks/create-bosh-private-yml.sh
 params:

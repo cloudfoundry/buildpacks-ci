@@ -6,7 +6,5 @@ inputs:
   - name: stack-s3
   - name: version
   - name: stacks-release
-outputs:
-  - name: stacks-release
 run:
   path: buildpacks-ci/scripts/stacks/create-bosh-stacks-release.sh
