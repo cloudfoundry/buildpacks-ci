@@ -14,23 +14,26 @@ describe 'create bosh stacks release task' do
 
   it 'should modify config/blobs.yml correctly' do
     output = run("cat /tmp/build/*/stacks-release/config/blobs.yml").to_s
-    version = run("cat /tmp/build/*/version/number").to_s.chomp('')
-    # STDERR.puts "version:\n"
-    # STDERR.puts version
-    # first_parts = 'rootfs/cflinuxfs2' + version
-    # STDERR.puts first_parts
-    # STDERR.puts first_parts, ".tar.gz"
-    # this_key = 'rootfs/cflinuxfs2' + version + '.tar.gz'
-    # STDERR.puts "file:\n"
-    # STDERR.puts this_key
+    version = run("cat /tmp/build/*/version/number").strip
+    this_key = 'rootfs/cflinuxfs2-' + version + '.tar.gz'
     blobs_yaml = YAML.load(output)
-    # STDERR.puts blobs_yaml.keys.first
-    # STDERR.puts "here is a longer string that should be alright"
-    # STDOUT.puts "here is a longer string" << version << "this"
     shasum = "005ed7ef85a025b1280cd6133ac4fd9f6f97879b"
-    first_entry = blobs_yaml.keys.first
-    expect(blobs_yaml[first_entry]['sha']).to be == shasum
-    expect(blobs_yaml[first_entry]['size']).to be == 140
+    expect(blobs_yaml[this_key]['sha']).to be == shasum
+    expect(blobs_yaml[this_key]['size']).to be == 140
+  end
+
+  context 'with two individual git commits' do
+    it 'has one that contains the blobs.yml' do
+      output = run('cd /tmp/build/*/stacks-release && git show --pretty="format:" --name-only HEAD~1').strip
+      expect(output).to include "config/blobs.yml"
+    end
+
+    it 'has one that contains the final release' do
+      output = run('cd /tmp/build/*/stacks-release && git show --pretty="format:" --name-only HEAD').strip
+
+      expect(output).to include "releases/stack/stack-1.22.0-rc.2.yml"
+      expect(output).to include "releases/stack/index.yml"
+    end
   end
 end
 
