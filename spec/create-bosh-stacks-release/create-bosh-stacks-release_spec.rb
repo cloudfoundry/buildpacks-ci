@@ -4,6 +4,7 @@ require 'yaml'
 
 describe 'create bosh stacks release task' do
   before(:context) do
+    `git init ./spec/create-bosh-stacks-release/stacks-release`
     execute("-c tasks/create-bosh-stacks-release.yml " +
             "-i buildpacks-ci=. " +
             "-i stack-s3=./spec/create-bosh-stacks-release/stack-s3 " +
