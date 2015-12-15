@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require_relative '../lib/concourse2github'
+
+Concourse2Github.new(
+  git_path: ARGV[0],
+  project_id: ARGV[1],
+  api_token: ARGV[2]
+).process!
