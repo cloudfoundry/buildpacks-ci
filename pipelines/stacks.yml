@@ -368,22 +368,25 @@ jobs:
           passed: [ shipit ]
         - get: stacks-release
       - task: run-both-bosh-scripts
-        platform: linux
-        image: docker:///cfbuildpacks/ci
-        inputs:
-          - name: buildpacks-ci
-          - name: stack-s3
-          - name: version
-          - name: stacks-release
-        run:
-          path: buildpacks-ci/scripts/stacks/create-bosh-stacks-release.sh && buildpacks-ci/scripts/stacks/create-bosh-private-yml.sh
         config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: stack-s3
+            - name: version
+            - name: stacks-release
+          run:
+            path: bash
+            args:
+              - -c
+              - buildpacks-ci/scripts/stacks/create-bosh-private-yml.sh && buildpacks-ci/scripts/stacks/create-bosh-stacks-release.sh
           params:
             ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
       - put: stacks-release
         params:
-          path: run-both-bosh-scripts/stacks-release
+          repository: run-both-bosh-scripts/stacks-release
   - name: upload-to-cf-release
     serial: true
     plan:
