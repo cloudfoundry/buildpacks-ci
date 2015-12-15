@@ -5,6 +5,8 @@ version=$(cat version/number)
 
 pushd stacks-release
 
+git checkout master
+
 rm config/blobs.yml
 bosh -n add blob ../stack-s3/cflinuxfs2-*.tar.gz rootfs
 bosh -n upload blobs
