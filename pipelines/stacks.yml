@@ -167,7 +167,7 @@ jobs:
         config:
           params:
             RELEASE_NAME: cloudfoundry-incubator/diego-release
-            RELEASE_VERSION: {{diego-version}}
+            RELEASE_VERSION: 0.1444.0
       - task: recreate-bosh-lite
         config:
           platform: linux
@@ -366,7 +366,9 @@ jobs:
           passed: [ shipit ]
         - get: version
           passed: [ shipit ]
-        - get: stacks-release
+        - get: build-stacks-release
+          resource: stacks-release
+
       - task: create-bosh-private-yml
         file: buildpacks-ci/tasks/create-bosh-private-yml.yml
         config:
@@ -377,7 +379,7 @@ jobs:
         file: buildpacks-ci/tasks/create-bosh-stacks-release.yml
       - put: stacks-release
         params:
-          path: stacks-release
+          path: create-bosh-stacks-release/stacks-release
   - name: upload-to-cf-release
     serial: true
     plan:
