@@ -3,6 +3,8 @@
 require_relative 'concourse2tracker'
 require 'json'
 
+_ = ARGV.shift
+
 payload = JSON.parse(ARGF.read)
 params  = payload['params']
 
