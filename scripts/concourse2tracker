@@ -1,9 +1,0 @@
-#!/usr/bin/env ruby
-
-require_relative '../lib/concourse2tracker'
-
-Concourse2Tracker.new(
-  git_path: ARGV[0],
-  project_id: ARGV[1],
-  api_token: ARGV[2]
-).process!

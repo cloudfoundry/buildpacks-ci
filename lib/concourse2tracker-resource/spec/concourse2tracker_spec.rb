@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'webmock/rspec'
 require 'tmpdir'
 require 'with_env'
-require_relative '../../lib/concourse2tracker'
+require_relative '../scripts/concourse2tracker'
 
 describe 'When a concourse job finishes' do
   include WithEnv

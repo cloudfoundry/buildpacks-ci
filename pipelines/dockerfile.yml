@@ -3,7 +3,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
-      paths: [ "Dockerfile" ]
+      paths: [ "Dockerfile", "lib/concourse2tracker-resource/Dockerfile" ]
   - name: buildpacks-ci-image
     type: docker-image
     source:
@@ -11,9 +11,16 @@ resources:
       email: cf-buildpacks-eng@pivotal.io
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
+  - name: concourse2tracker-image
+    type: docker-image
+    source:
+      repository: cfbuildpacks/concourse2tracker
+      email: cf-buildpacks-eng@pivotal.io
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
 
 jobs:
-  - name: build
+  - name: ci-build
     serial: true
     plan:
       - get: buildpacks-ci
@@ -21,4 +28,13 @@ jobs:
       - put: buildpacks-ci-image
         params:
           build: buildpacks-ci
+          push: true
+  - name: concourse2tracker-build
+    serial: true
+    plan:
+      - get: buildpacks-ci
+        trigger: true
+      - put: concourse2tracker-image
+        params:
+          build: buildpacks-ci/lib/concourse2tracker-resource
           push: true
