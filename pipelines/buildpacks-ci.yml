@@ -31,11 +31,9 @@ jobs:
           repository: rspec/buildpacks-ci
           rebase: true
       - task: concourse2tracker
+        file: buildpacks-ci/tasks/concourse2tracker.yml
         config:
-          image: docker:///cfbuildpacks/ci
-          platform: linux
-          inputs:
-            - name: buildpacks-ci
-          run:
-            path: buildpacks-ci/scripts/concourse2tracker
-            args: ['buildpacks-ci/','1042066', {{pivotal-tracker-api-token}}]
+          params:
+            RESOURCE_DIR: buildpacks-ci/
+            PROJECT_ID: 1042066
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}

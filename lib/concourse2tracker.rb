@@ -22,7 +22,7 @@ class Concourse2Tracker
     return unless story_id
 
     RestClient.post(
-      "https://www.pivotracker.com/services/v5/projects/#{@project_id}/stories/#{story_id}/comments",
+      "https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories/#{story_id}/comments",
       {text: "Concourse pipeline passed: https://buildpacks.ci.cf-app.com/builds/#{ENV['BUILD_ID']}"}.to_json,
       :content_type => :json,
       'X-TrackerToken' => @api_token
