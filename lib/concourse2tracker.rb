@@ -1,7 +1,7 @@
 require 'rest-client'
 require 'json'
 
-class Concourse2Github
+class Concourse2Tracker
   def initialize(git_path:, api_token:, project_id:)
     @project_id = project_id
     @api_token = api_token

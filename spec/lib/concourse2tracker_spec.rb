@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'webmock/rspec'
 require 'tmpdir'
 require 'with_env'
-require_relative '../../lib/concourse2github'
+require_relative '../../lib/concourse2tracker'
 
 describe 'When a concourse job finishes' do
   include WithEnv
@@ -25,7 +25,7 @@ describe 'When a concourse job finishes' do
           git commit -m 'some commit [#1234567]'
         EOL
 
-        client = Concourse2Github.new(
+        client = Concourse2Tracker.new(
           git_path:   git_dir,
           project_id: 'project_id',
           api_token:  '3695',
@@ -54,7 +54,7 @@ describe 'When a concourse job finishes' do
           git commit -m 'some commit'
         EOL
 
-        client = Concourse2Github.new(
+        client = Concourse2Tracker.new(
           git_path:   git_dir,
           project_id: 'project_id',
           api_token:  '3695',
@@ -72,7 +72,7 @@ describe 'When a concourse job finishes' do
 
   context 'when the resource is not a git resource' do
     it 'does nothing' do
-        client = Concourse2Github.new(
+        client = Concourse2Tracker.new(
           git_path:   Dir.mktmpdir,
           project_id: 'project_id',
           api_token:  '3695',
