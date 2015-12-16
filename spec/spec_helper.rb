@@ -5,7 +5,7 @@ RSpec.configure do |config|
   def fly(arg, env = {})
     target = "buildpacks"
     env_var = env.collect{|k,v| "#{k}=#{v}"}.join(' ')
-    `env #{env_var} fly --target #{target} #{arg}`
+    `env #{env_var} fly --target #{target} #{arg} | tee /tmp/fly.log`
   end
 
   def execute(cmd, env={})
