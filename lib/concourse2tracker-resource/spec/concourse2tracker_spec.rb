@@ -27,13 +27,13 @@ describe 'When a concourse job finishes' do
 
         client = Concourse2Tracker.new(
           git_path:   git_dir,
-          project_id: 'project_id',
+          project_id: 9.87654e05,
           api_token:  '3695',
         )
 
         expect(client.story_id).to eq '1234567'
 
-        stub = stub_request(:post, 'https://www.pivotaltracker.com/services/v5/projects/project_id/stories/1234567/comments')
+        stub = stub_request(:post, 'https://www.pivotaltracker.com/services/v5/projects/987654/stories/1234567/comments')
           .with(body: {text: "Concourse pipeline passed: https://buildpacks.ci.cf-app.com/builds/some_build_id"})
           .with(:headers=>{ 'X-TrackerToken' => '3695', 'Content-Type' => 'application/json' })
 

@@ -25,7 +25,7 @@ class Concourse2Tracker
 
     payload = {text: "Concourse pipeline passed: https://buildpacks.ci.cf-app.com/builds/#{ENV['BUILD_ID']}"}.to_json
 
-    create_comment_uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories/#{story_id}/comments")
+    create_comment_uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id.to_i.to_s}/stories/#{story_id}/comments")
 
     request = Net::HTTP::Post.new(create_comment_uri)
     request.body = payload

@@ -10,6 +10,9 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
       branch: develop
+  - name: concourse2tracker
+    type: concourse2tracker
+
 jobs:
   - name: merge-to-master
     serial: true
@@ -30,10 +33,8 @@ jobs:
         params:
           repository: rspec/buildpacks-ci
           rebase: true
-      - task: concourse2tracker
-        file: buildpacks-ci/tasks/concourse2tracker.yml
-        config:
-          params:
-            RESOURCE_DIR: buildpacks-ci/
-            PROJECT_ID: 1042066
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+      - put: concourse2tracker
+        params:
+          git_path: buildpacks-ci
+          project_id: 1042066
+          api_token: {{pivotal-tracker-api-token}}
