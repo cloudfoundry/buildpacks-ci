@@ -74,6 +74,8 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/brats.git
+  - name: concourse2tracker
+    type: concourse2tracker
 
 jobs:
   <% if language == "php" %>
@@ -373,6 +375,11 @@ jobs:
           put: cf-lts-environments
           params:
             release: cf-environments
+      - put: concourse2tracker
+        params:
+          git_path: buildpacks-ci
+          project_id: 1042066
+          api_token: {{pivotal-tracker-api-token}}
 <% unless language == "binary" %>
   - name: update-compile-extensions
     serial: true
