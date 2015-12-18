@@ -1,0 +1,43 @@
+---
+resources:
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/buildpacks-ci
+      paths: [ "lib/concourse2tracker-resource" ]
+  - name: concourse2tracker-image
+    type: docker-image
+    source:
+      repository: cfbuildpacks/concourse2tracker
+      email: cf-buildpacks-eng@pivotal.io
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+
+jobs:
+  - name: rspec
+    serial: true
+    plan:
+      - get: buildpacks-ci
+        trigger: true
+      - task: rspec
+        config:
+          image: docker:///cfbuildpacks/ci
+          platform: linux
+          inputs:
+            - name: buildpacks-ci
+          run:
+            path: bash
+            args:
+              - -c
+              - cd buildpacks-ci/lib/concourse2tracker-resource && bundle && bundle exec rspec
+  - name: docker image
+    serial: true
+    plan:
+      - get: buildpacks-ci
+        trigger: true
+        passed: [ rspec ]
+      - put: concourse2tracker-image
+        params:
+          build: buildpacks-ci/lib/concourse2tracker-resource
+          push: true
+
