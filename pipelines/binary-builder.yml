@@ -83,6 +83,8 @@ resources:
       private_key: {{buildpacks-ci-binary-builds-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ godep-builds.yml ]
+  - name: concourse2tracker
+    type: concourse2tracker
 
 jobs:
   - name: binary-builder
@@ -139,6 +141,11 @@ jobs:
         params:
           repository: build-binary/builds-yaml
           rebase: true
+      - put: concourse2tracker
+        params:
+          api_token: {{pivotal-tracker-api-token}}
+          git_path: builds-yaml
+          project_id: 1042066
   - name: test-php
     serial: true
     plan:
@@ -210,6 +217,11 @@ jobs:
         params:
           repository: build-binary/builds-yaml
           rebase: true
+      - put: concourse2tracker
+        params:
+          api_token: {{pivotal-tracker-api-token}}
+          git_path: builds-yaml
+          project_id: 1042066
   - name: test-jruby
     serial: true
     plan:
@@ -263,6 +275,11 @@ jobs:
         params:
           repository: build-binary/builds-yaml
           rebase: true
+      - put: concourse2tracker
+        params:
+          api_token: {{pivotal-tracker-api-token}}
+          git_path: builds-yaml
+          project_id: 1042066
   - name: build-python
     serial: true
     plan:
@@ -295,6 +312,11 @@ jobs:
         params:
           repository: build-binary/builds-yaml
           rebase: true
+      - put: concourse2tracker
+        params:
+          api_token: {{pivotal-tracker-api-token}}
+          git_path: builds-yaml
+          project_id: 1042066
   - name: test-python
     serial: true
     plan:
@@ -343,6 +365,11 @@ jobs:
         params:
           repository: build-binary/builds-yaml
           rebase: true
+      - put: concourse2tracker
+        params:
+          api_token: {{pivotal-tracker-api-token}}
+          git_path: builds-yaml
+          project_id: 1042066
   - name: test-ruby
     serial: true
     plan:
@@ -391,6 +418,11 @@ jobs:
         params:
           repository: build-binary/builds-yaml
           rebase: true
+      - put: concourse2tracker
+        params:
+          api_token: {{pivotal-tracker-api-token}}
+          git_path: builds-yaml
+          project_id: 1042066
   - name: test-nodejs
     serial: true
     plan:
@@ -440,6 +472,11 @@ jobs:
         params:
           repository: build-binary/builds-yaml
           rebase: true
+      - put: concourse2tracker
+        params:
+          api_token: {{pivotal-tracker-api-token}}
+          git_path: builds-yaml
+          project_id: 1042066
   - name: test-nginx
     serial: true
     plan:
@@ -489,3 +526,8 @@ jobs:
         params:
           repository: build-binary/builds-yaml
           rebase: true
+      - put: concourse2tracker
+        params:
+          api_token: {{pivotal-tracker-api-token}}
+          git_path: builds-yaml
+          project_id: 1042066
