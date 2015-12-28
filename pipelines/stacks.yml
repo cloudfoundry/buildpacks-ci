@@ -350,9 +350,20 @@ jobs:
         - get: version
           trigger: true
           passed: [ shipit ]
+      - task: rename
+        config:
+          image: docker:///cfbuildpacks/ci
+          platform: linux
+          inputs:
+            - name: stack-s3
+          outputs:
+            - name: docker-s3
+          run:
+            path: bash
+            args: ["-c", "mv stack-s3/cflinuxfs2-*.tar.gz docker-s3/cflinuxfs2.tar.gz"]
       - put: docker-cflinuxfs2-rootfs
         params:
-          import_file: stack-s3/cflinuxfs2-*.tar.gz
+          import_file: docker-s3/cflinuxfs2.tar.gz
       - put: docker-cflinuxfs2-rootfs
         params:
           load: docker-cflinuxfs2-rootfs
