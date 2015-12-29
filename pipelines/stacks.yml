@@ -82,6 +82,13 @@ resources:
       username: {{stacks-docker-username}}
       password: {{stacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
+  - name: docker-cflinuxfs2-rootfs-tagged
+    type: docker-image
+    source:
+      repository: cloudfoundry/cflinuxfs2
+      username: {{stacks-docker-username}}
+      password: {{stacks-docker-password}}
+      email: cf-buildpacks-eng@pivotal.io
   - name: stack-github-release
     type: github-release
     source:
@@ -361,13 +368,16 @@ jobs:
           run:
             path: bash
             args: ["-c", "mv stack-s3/cflinuxfs2-*.tar.gz docker-s3/cflinuxfs2.tar.gz"]
-      - put: docker-cflinuxfs2-rootfs
-        params:
-          import_file: docker-s3/cflinuxfs2.tar.gz
-      - put: docker-cflinuxfs2-rootfs
-        params:
-          load: docker-cflinuxfs2-rootfs
-          tag: version/number
+      - aggregate:
+        - put: docker latest version
+          resource: docker-cflinuxfs2-rootfs
+          params:
+            import_file: docker-s3/cflinuxfs2.tar.gz
+        - put: docker tagged version
+          resource: docker-cflinuxfs2-rootfs-tagged
+          params:
+            import_file: docker-s3/cflinuxfs2.tar.gz
+            tag: version/number
   - name: create-bosh-release
     serial: true
     plan:
