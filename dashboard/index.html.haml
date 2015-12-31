@@ -1,0 +1,26 @@
+%html
+  %head
+    :css
+      body, div, iframe {
+        background: #202020 ;
+        margin: 0 ;
+        border: 0 ;
+      }
+  %body
+    %div{:style => "width:33% ; height: 100% ; float:left"}
+      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/go-buildpack", :width => "100%"}
+      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/nodejs-buildpack", :width => "100%"}
+      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/php-buildpack", :width => "100%"}
+      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/python-buildpack", :width => "100%"}
+      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/ruby-buildpack", :width => "100%"}
+      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/staticfile-buildpack", :width => "100%"}
+      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/binary-buildpack", :width => "100%"}
+    %div{:style => "width: 67% ; height: 33% ; float:left"}
+      %iframe{:height => "50%", :src => "https://buildpacks.ci.cf-app.com/pipelines/stacks", :style => "float: left", :width => "75%"}
+      %iframe{:height => "100%", :src => "https://canibump.cfapps.io", :style => "float: right ; scroll: none", :width => "25%"}
+      %iframe{:height => "50%", :src => "https://buildpacks.ci.cf-app.com/pipelines/cf-release", :style => "float: left", :width => "75%"}
+    %div{:style => "width: 67% ; height: 67% ; float:left"}
+      %iframe{:height => "100%", :src => "https://buildpacks.ci.cf-app.com/pipelines/brats", :style => "float: left", :width => "30%"}
+      %div{:style => "width: 70% ; height: 100% ; float: left ; position: relative"}
+        %iframe{:height => "65%", :src => "https://buildpacks.ci.cf-app.com/pipelines/main", :style => "position: absolute ; bottom: 0 ; left: 0 ; z-index: 1", :width => "45%"}
+        %iframe{:height => "100%", :src => "https://buildpacks.ci.cf-app.com/pipelines/binary-builder", :width => "100%"}
