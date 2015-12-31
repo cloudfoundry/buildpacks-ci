@@ -18,11 +18,18 @@
       - buildpacks.each do |buildpack|
         %iframe.buildpack{:src => pipeline_url("#{buildpack}-buildpack")}
     %div{:style => "width: 67% ; height: 33% ; float:left"}
-      %iframe{:height => "50%", :src => "https://buildpacks.ci.cf-app.com/pipelines/stacks", :style => "float: left", :width => "75%"}
-      %iframe{:height => "100%", :src => "https://canibump.cfapps.io", :style => "float: right ; scroll: none", :width => "25%"}
-      %iframe{:height => "50%", :src => "https://buildpacks.ci.cf-app.com/pipelines/cf-release", :style => "float: left", :width => "75%"}
+      %iframe{:src => pipeline_url("stacks"),
+              :height => "50%", :width => "75%", :style => "float: left"}
+      %iframe{:src => "https://canibump.cfapps.io",
+              :height => "100%", :width => "25%", :style => "float: right"}
+      %iframe{:src => pipeline_url("cf-release"),
+              :height => "50%", :width => "75%", :style => "float: left"}
     %div{:style => "width: 67% ; height: 67% ; float:left"}
-      %iframe{:height => "100%", :src => "https://buildpacks.ci.cf-app.com/pipelines/brats", :style => "float: left", :width => "30%"}
+      %iframe{:src => pipeline_url("brats"),
+              :height => "100%", :width => "30%", :style => "float: left"}
       %div{:style => "width: 70% ; height: 100% ; float: left ; position: relative"}
-        %iframe{:height => "65%", :src => "https://buildpacks.ci.cf-app.com/pipelines/main", :style => "position: absolute ; bottom: 0 ; left: 0 ; z-index: 1", :width => "45%"}
-        %iframe{:height => "100%", :src => "https://buildpacks.ci.cf-app.com/pipelines/binary-builder", :width => "100%"}
+        %iframe{:src => pipeline_url("main"),
+                :height => "65%", :width => "45%",
+                :style => "position: absolute ; bottom: 0 ; left: 0 ; z-index: 1"}
+        %iframe{:src => pipeline_url("binary-builder"),
+                :height => "100%", :width => "100%"}
