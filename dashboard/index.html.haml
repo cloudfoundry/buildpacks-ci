@@ -17,17 +17,17 @@
     %div{:style => "width:33% ; height: 100% ; float:left"}
       - buildpacks.each do |buildpack|
         %iframe.buildpack{:src => pipeline_url("#{buildpack}-buildpack")}
-    %div{:style => "width: 67% ; height: 33% ; float:left"}
+    %div{:style => "width: #{200/3.0}% ; height: #{100/3.0}% ; float:left"}
       %iframe{:src => pipeline_url("stacks"),
               :height => "50%", :width => "75%", :style => "float: left"}
       %iframe{:src => "https://canibump.cfapps.io",
               :height => "100%", :width => "25%", :style => "float: right"}
       %iframe{:src => pipeline_url("cf-release"),
               :height => "50%", :width => "75%", :style => "float: left"}
-    %div{:style => "width: 67% ; height: 67% ; float:left"}
+    %div{:style => "width: #{200/3.0}% ; height: #{200/3.0}% ; float:left"}
       %iframe{:src => pipeline_url("brats"),
-              :height => "100%", :width => "30%", :style => "float: left"}
-      %div{:style => "width: 70% ; height: 100% ; float: left ; position: relative"}
+              :height => "100%", :width => "#{100/3.0}%", :style => "float: left"}
+      %div{:style => "width: #{200/3.0}% ; height: 100% ; float: left ; position: relative"}
         %iframe{:src => pipeline_url("main"),
                 :height => "65%", :width => "45%",
                 :style => "position: absolute ; bottom: 0 ; left: 0 ; z-index: 1"}
