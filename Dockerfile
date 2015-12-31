@@ -40,6 +40,7 @@ RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the CF-CLI
 RUN wget -O- 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.14.0&source=github-rel'| tar xz -C /usr/bin
+RUN cf install-plugin Diego-Enabler -f -r CF-Community
 
 #download spiff for spiffy things
 RUN wget -O- 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.7/spiff_linux_amd64.zip' | funzip > /usr/bin/spiff
