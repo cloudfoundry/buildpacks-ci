@@ -1,3 +1,6 @@
+- buildpacks = %w[go nodejs php python ruby staticfile binary]
+- buildpack_height = 100.0 / buildpacks.length
+- def pipeline_url thing ; "https://buildpacks.ci.cf-app.com/pipelines/#{thing}" ; end
 %html
   %head
     :css
@@ -6,15 +9,14 @@
         margin: 0 ;
         border: 0 ;
       }
+      iframe.buildpack {
+        height: #{buildpack_height}% ;
+        width: 100% ;
+      }
   %body
     %div{:style => "width:33% ; height: 100% ; float:left"}
-      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/go-buildpack", :width => "100%"}
-      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/nodejs-buildpack", :width => "100%"}
-      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/php-buildpack", :width => "100%"}
-      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/python-buildpack", :width => "100%"}
-      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/ruby-buildpack", :width => "100%"}
-      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/staticfile-buildpack", :width => "100%"}
-      %iframe{:height => "14.3%", :src => "https://buildpacks.ci.cf-app.com/pipelines/binary-buildpack", :width => "100%"}
+      - buildpacks.each do |buildpack|
+        %iframe.buildpack{:src => pipeline_url("#{buildpack}-buildpack")}
     %div{:style => "width: 67% ; height: 33% ; float:left"}
       %iframe{:height => "50%", :src => "https://buildpacks.ci.cf-app.com/pipelines/stacks", :style => "float: left", :width => "75%"}
       %iframe{:height => "100%", :src => "https://canibump.cfapps.io", :style => "float: right ; scroll: none", :width => "25%"}

@@ -6,17 +6,21 @@
         margin: 0 ;
         border: 0 ;
       }
+      iframe.buildpack {
+        height: 14.285714285714286% ;
+        width: 100% ;
+      }
     </style>
   </head>
   <body>
     <div style='width:33% ; height: 100% ; float:left'>
-      <iframe height='14.3%' src='https://buildpacks.ci.cf-app.com/pipelines/go-buildpack' width='100%'></iframe>
-      <iframe height='14.3%' src='https://buildpacks.ci.cf-app.com/pipelines/nodejs-buildpack' width='100%'></iframe>
-      <iframe height='14.3%' src='https://buildpacks.ci.cf-app.com/pipelines/php-buildpack' width='100%'></iframe>
-      <iframe height='14.3%' src='https://buildpacks.ci.cf-app.com/pipelines/python-buildpack' width='100%'></iframe>
-      <iframe height='14.3%' src='https://buildpacks.ci.cf-app.com/pipelines/ruby-buildpack' width='100%'></iframe>
-      <iframe height='14.3%' src='https://buildpacks.ci.cf-app.com/pipelines/staticfile-buildpack' width='100%'></iframe>
-      <iframe height='14.3%' src='https://buildpacks.ci.cf-app.com/pipelines/binary-buildpack' width='100%'></iframe>
+      <iframe class='buildpack' src='https://buildpacks.ci.cf-app.com/pipelines/go-buildpack'></iframe>
+      <iframe class='buildpack' src='https://buildpacks.ci.cf-app.com/pipelines/nodejs-buildpack'></iframe>
+      <iframe class='buildpack' src='https://buildpacks.ci.cf-app.com/pipelines/php-buildpack'></iframe>
+      <iframe class='buildpack' src='https://buildpacks.ci.cf-app.com/pipelines/python-buildpack'></iframe>
+      <iframe class='buildpack' src='https://buildpacks.ci.cf-app.com/pipelines/ruby-buildpack'></iframe>
+      <iframe class='buildpack' src='https://buildpacks.ci.cf-app.com/pipelines/staticfile-buildpack'></iframe>
+      <iframe class='buildpack' src='https://buildpacks.ci.cf-app.com/pipelines/binary-buildpack'></iframe>
     </div>
     <div style='width: 67% ; height: 33% ; float:left'>
       <iframe height='50%' src='https://buildpacks.ci.cf-app.com/pipelines/stacks' style='float: left' width='75%'></iframe>
