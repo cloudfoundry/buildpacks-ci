@@ -49,14 +49,18 @@ jobs:
             - name: new-releases
             - name: buildpacks-ci
           run:
-            path: buildpacks-ci/scripts/notifications/run
+            path: bash
+            args:
+              - -c
+              - "cd buildpacks-ci/ && bundle && bundle exec ./scripts/notifications/check-new-releases"
           params:
             SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
             SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
             GITHUB_USERNAME: {{github-username}}
             GITHUB_PASSWORD: {{github-password}}
-            TRACKER_PROJECT_ID: 1042066
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
       - put: new-releases
         params:
           repository: notify/new-releases
@@ -77,7 +81,7 @@ jobs:
             path: buildpacks-ci/scripts/notifications/pivotal_tracker
             args: ['Pull latest changes from upstream', 'Check that there are no upstream changes that we are missing.']
           params:
-            TRACKER_PROJECT_ID: 1042066
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
   - name: New CVEs
     serial: true
@@ -106,9 +110,9 @@ jobs:
             SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
             GITHUB_USERNAME: {{github-username}}
             GITHUB_PASSWORD: {{github-password}}
-            TRACKER_PROJECT_ID: 1042066
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            TRACKER_REQUESTER_ID: 765241
+            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
       - put: new-cves
         params:
           repository: notify/new-cves
