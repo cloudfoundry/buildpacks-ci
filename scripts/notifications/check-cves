@@ -42,12 +42,12 @@ unless new_cves.empty?
     slack_output << "- #{cve[:title]}*\n"
   end
 
-  tracker_client = TrackerClient.new(
-    ENV['TRACKER_API_TOKEN'],
-    ENV['TRACKER_PROJECT_ID'],
-    ENV['TRACKER_REQUESTER_ID'].to_i,
+  slack_client = SlackClient.new(
+    ENV['SLACK_WEBHOOK'],
+    ENV['SLACK_CHANNEL'],
+    'dependency-notifier'
   )
-  tracker_client.post_to_tracker "New releases", slack_output
+  slack_client.post_to_slack slack_output
 
   cve_logger.write_yaml_cves(
     rss_cve_titles | yaml_cve_titles,
