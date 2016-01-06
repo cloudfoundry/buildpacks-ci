@@ -6,6 +6,7 @@ require "#{buildpacks_ci_dir}/lib/cve-tags"
 require "#{buildpacks_ci_dir}/lib/cve-logger"
 require "#{buildpacks_ci_dir}/lib/safe_execution"
 require "#{buildpacks_ci_dir}/lib/tracker-client"
+require "#{buildpacks_ci_dir}/lib/slack-client"
 
 include SafeExecution
 
@@ -41,8 +42,12 @@ unless new_cves.empty?
     slack_output << "- #{cve[:title]}*\n"
   end
 
-  notifications_dir = File.join(buildpacks_ci_dir, 'scripts', 'notifications')
-  execute_with_console_logging!("echo \"#{slack_output}\" | #{notifications_dir}/slack")
+  tracker_client = TrackerClient.new(
+    ENV['TRACKER_API_TOKEN'],
+    ENV['TRACKER_PROJECT_ID'],
+    ENV['TRACKER_REQUESTER_ID'].to_i,
+  )
+  tracker_client.post_to_tracker "New releases", slack_output
 
   cve_logger.write_yaml_cves(
     rss_cve_titles | yaml_cve_titles,
