@@ -10,7 +10,7 @@ popd
 export BOSH_RELEASES_DIR=`pwd`
 export CF_RELEASE_DIR=`pwd`/cf-release
 
-pushd cf-release 
+pushd cf-release
 echo "
 ---
 name: cf-warden
@@ -41,16 +41,18 @@ jobs:
 popd
 
 pushd diego-release
-  ./scripts/generate-bosh-lite-manifests 
+  ./scripts/generate-bosh-lite-manifests
 popd
 
 cd deployments-buildpacks
 cp ../cf-release/bosh-lite/deployments/cf.yml deployments/$DEPLOYMENT_NAME/manifest.yml
 cp ../diego-release/bosh-lite/deployments/diego.yml deployments/$DEPLOYMENT_NAME/diego.yml
+cp ../diego-release/bosh-lite/deployments/diego-acceptance-tests.yml deployments/$DEPLOYMENT_NAME/diego-acceptance-tests.yml
 
 git config --global user.email "ci@localhost"
 git config --global user.name "CI Bot"
 
 git add deployments/$DEPLOYMENT_NAME/manifest.yml
 git add deployments/$DEPLOYMENT_NAME/diego.yml
+git add deployments/$DEPLOYMENT_NAME/diego-acceptance-tests.yml
 git diff-index --quiet HEAD deployments/$DEPLOYMENT_NAME/manifest.yml || git commit -qm "Update manifest for $DEPLOYMENT_NAME"

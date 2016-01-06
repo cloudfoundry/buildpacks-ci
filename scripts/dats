@@ -3,34 +3,9 @@
 set -e
 
 pushd deployments-buildpacks
-#replace ruby Gemfile with the available version
-sed -i '$ s/line number//g' Gemfile
-echo "ruby '$(ruby -v | awk '{split($0,a," ");split(a[2],b,"p"); print b[1]}')'" >> Gemfile
-bundle -j4
-. ./bin/switch $DEPLOYMENT_NAME
+  bundle -j4
+  . ./bin/switch $DEPLOYMENT_NAME
+  bosh deployment deployments/$DEPLOYMENT_NAME/diego-acceptance-tests.yml
 popd
 
-cat > integration_config.json <<EOF
-{
-  "api": "api.$DEPLOYMENT_NAME.cf-app.com",
-  "admin_user": "$CI_CF_USERNAME",
-  "admin_password": "$CI_CF_PASSWORD",
-  "apps_domain": "$DEPLOYMENT_NAME.cf-app.com",
-  "skip_ssl_validation": true
-}
-EOF
-
-export CONFIG=$PWD/integration_config.json
-
-cf api api.$BOSH_TARGET --skip-ssl-validation
-cf auth $CI_CF_USERNAME $CI_CF_PASSWORD 
-cf enable-feature-flag diego_docker
-
-pushd diego-release
-./scripts/update
-export GOPATH=$PWD:$GOPATH
-export PATH=$PWD/bin:$PATH
-pushd src/github.com/cloudfoundry-incubator/diego-acceptance-tests
-./bin/test -skipPackage ssh --skip="auto detect"
-popd
-popd
+bosh run errand acceptance_tests
