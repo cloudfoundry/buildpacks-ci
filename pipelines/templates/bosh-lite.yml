@@ -1,4 +1,9 @@
 resources:
+  - name: nightly-trigger
+    type: cron
+    source:
+      expression: 1 0 * * *
+      location: America/New_York
   - name: cf-deployment
     type: bosh-deployment
     source:
@@ -50,6 +55,8 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: deployments-buildpacks
+        - get: nightly-trigger
+          trigger: true
       - put: resource-pools
         params:
           claim: {{deployment-name}}
