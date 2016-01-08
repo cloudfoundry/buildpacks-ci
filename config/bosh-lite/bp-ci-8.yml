@@ -1,7 +1,7 @@
 ---
 deployment-name: bp-ci-8
 resource-pool: cf-edge-environments
-cf-version: 226
+cf-version: 227
 diego-version: 0.1445.0
 garden-linux-version: 0.330.0
 etcd-version: 20
