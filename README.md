@@ -43,7 +43,8 @@ fly intercept -c $RESOURCE_NAME rm -rf /tmp/git-resource-repo-cache
 
 1. Check out the `binary-builds` branch
 2. Edit the YAML file appropriate for the build (e.g. `ruby-builds.yml`)
-3. Add any number of versions and their checksums to the array, e.g.
+3. Find the version number and package SHA256 of the new binary. For many binaries, the project website provides the SHA256 along with the release (for example, jruby.org/download provides the SHA256 along with each JRuby release). For others (such as Godep), you download the .tar.gz file and run `shasum -a 256 <tar_file>` to obtain the SHA256.
+4. Add any number of versions and their checksums to the array, e.g.
 
 	```yaml
 	ruby:
@@ -51,7 +52,7 @@ fly intercept -c $RESOURCE_NAME rm -rf /tmp/git-resource-repo-cache
 	  sha256: 5ffc0f317e429e6b29d4a98ac521c3ce65481bfd22a8cf845fa02a7b113d9b44
 	```
 
-4. `git commit -am 'Build ruby 2.2.2' && git push`
+5. `git commit -am 'Build ruby 2.2.2' && git push`
 
 Build should automatically kick off at
 https://buildpacks.ci.cf-app.com/pipelines/binary-builder and silently
