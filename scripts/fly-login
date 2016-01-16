@@ -1,13 +1,4 @@
-#!/usr/bin/expect -f
+#!/usr/bin/env bash
 # ./fly-login username password
 
-set username [lrange $argv 0 0]
-set password [lrange $argv 1 1]
-
-spawn fly -t buildpacks login -c https://buildpacks.ci.cf-app.com
-match_max 10000
-expect "*username: "
-send -- "$username\r\n"
-expect "*password: "
-send -- "$password\r\n"
-expect "token saved"
+fly -t buildpacks login -c https://buildpacks.ci.cf-app.com -u $1 -p $2
