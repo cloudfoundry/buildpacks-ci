@@ -248,7 +248,6 @@ jobs:
           trigger: true
         - get: buildpack
           resource: machete-firewall-test
-          trigger: true
         - task: cf-environments
           config:
             platform: linux
@@ -262,6 +261,7 @@ jobs:
             CF_PASSWORD: {{ci-cf-password}}
             DEPLOYMENT_NAME: {{deployment-name}}
         privileged: true
+        attempts: 5
   - name: unclaim
     serial_groups: [ deploy ]
     serial: true
