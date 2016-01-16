@@ -11,6 +11,7 @@ RUN apt-get -y install \
   libmysqlclient-dev \
   libpq-dev \
   libsqlite3-dev \
+  module-init-tools \
   npm \
   php5 \
   python-dev \
