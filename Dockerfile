@@ -5,9 +5,11 @@ ENV LANG="C.UTF-8"
 RUN apt-get update
 RUN apt-get -y install \
   awscli \
+  btrfs-tools \
   expect \
   git \
   golang \
+  iptables \
   libmysqlclient-dev \
   libpq-dev \
   libsqlite3-dev \
