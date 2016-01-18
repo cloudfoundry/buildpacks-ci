@@ -11,3 +11,4 @@ run:
 params:
   DEPLOYMENT_NAME:
   STACKS:
+  CF_PASSWORD:

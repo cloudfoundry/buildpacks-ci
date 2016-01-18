@@ -11,6 +11,7 @@ popd
 cd buildpack
 
 ../buildpacks-ci/scripts/check-unsupported-manifest
+../buildpacks-ci/scripts/start-docker
 
 # for the PHP buildpack
 if [ -e run_tests.sh ]; then
