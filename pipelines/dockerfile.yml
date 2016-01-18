@@ -3,6 +3,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
+      branch: develop
   - name: buildpacks-ci-image
     type: docker-image
     source:
