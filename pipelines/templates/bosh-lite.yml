@@ -46,10 +46,6 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/machete.git
       branch: master
-  - name: machete-firewall-test
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/machete-firewall-test
 
 jobs:
   - name: recreate-bosh-lite
