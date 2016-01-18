@@ -237,38 +237,13 @@ jobs:
             DEPLOYMENT_NAME: {{deployment-name}}
             CF_CI_PASSWORD: {{ci-cf-password}}
             CF_CI_USERNAME: {{ci-cf-username}}
-  - name: machete-firewall
-    serial: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: deployments-buildpacks
-        - get: resource-pools
-          passed: ['update-machete']
-          trigger: true
-        - get: buildpack
-          resource: machete-firewall-test
-        - task: cf-environments
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            run: { path: true }
-      - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack.yml
-        config:
-          params:
-            STACKS: cflinuxfs2
-            CF_PASSWORD: {{ci-cf-password}}
-            DEPLOYMENT_NAME: {{deployment-name}}
-        privileged: true
-        attempts: 5
   - name: unclaim
     serial_groups: [ deploy ]
     serial: true
     plan:
       - get: buildpacks-ci
       - get: resource-pools
-        passed: [ machete-firewall ]
+        passed: [ update-machete ]
         trigger: true
       - put: resource-pools
         params:
