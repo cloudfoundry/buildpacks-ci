@@ -3,6 +3,7 @@ require 'spec_helper.rb'
 describe 'test-buildpack task' do
   before(:context) do
     execute("-c tasks/test-buildpack.yml " \
+            "-p " \
             "-i buildpacks-ci=. -i buildpack=./spec/test-buildpack " \
             "-i deployments-buildpacks=./spec/test-buildpack " \
             "-i cf-environments=./spec/test-buildpack", {
