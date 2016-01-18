@@ -351,3 +351,26 @@ jobs:
           put: cf-edge-environments
           params:
             release: cf-environments
+  - name: brats-safe-CF-edge
+    serial: true
+    plan:
+      - put: cf-environments
+        resource: cf-edge-environments
+        params:
+          claim: bp-ci-8
+      - aggregate:
+        - get: buildpacks-ci
+        - get: brats
+        - {get: brats-time-resource, trigger: true}
+      - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
+        config:
+          params:
+            LANGUAGE: safe
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+        privileged: true
+        ensure:
+          put: cf-edge-environments
+          params:
+            release: cf-environments
