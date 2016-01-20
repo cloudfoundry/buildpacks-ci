@@ -131,7 +131,7 @@ jobs:
             platform: linux
             run:
               path: bash
-              args: ["-c", "curl -L -J -o stemcell.tgz https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent?v=2776"]
+              args: ["-c", "curl -L -J -o stemcell.tgz https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent"]
       - aggregate:
         - task: cf-release
           file: buildpacks-ci/tasks/checkout-release.yml
@@ -168,7 +168,7 @@ jobs:
             platform: linux
             run:
               path: bash
-              args: ["-c", "curl -L -J -o stemcell.tgz https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent?v=2776"]
+              args: ["-c", "curl -L -J -o stemcell.tgz https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent"]
       - aggregate:
         - task: diego-release
           file: buildpacks-ci/tasks/checkout-release.yml
