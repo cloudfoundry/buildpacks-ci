@@ -48,6 +48,15 @@ resources:
       branch: master
 
 jobs:
+  - name: checkout-environment
+    serial_groups: [ deploy ]
+    serial: true
+    plan:
+      - get: nightly-trigger
+        trigger: true
+      - put: resource-pools
+        params:
+          claim: {{deployment-name}}
   - name: recreate-bosh-lite
     serial_groups: [ deploy ]
     serial: true
@@ -55,11 +64,8 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: deployments-buildpacks
-        - get: nightly-trigger
-          trigger: true
-      - put: resource-pools
-        params:
-          claim: {{deployment-name}}
+        - get: resource-pools
+          passed: [checkout-environment]
       - task: recreate
         config:
           platform: linux
