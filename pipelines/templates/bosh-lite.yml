@@ -66,6 +66,7 @@ jobs:
         - get: deployments-buildpacks
         - get: resource-pools
           passed: [checkout-environment]
+          trigger: true
       - task: recreate
         config:
           platform: linux
