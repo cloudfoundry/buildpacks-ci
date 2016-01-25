@@ -12,7 +12,8 @@ header('For standard pipelines')
 Dir["pipelines/*.yml"].each do |filename|
   name = File.basename(filename, '.yml')
   puts "   #{name} pipeline"
-  system(%Q{bash -c "fly -t buildpacks set-pipeline -p #{name} -c pipelines/#{name}.yml -l <(lpass show 'Shared-Buildpacks/concourse-private.yml' --notes)"})
+  system("erb #{filename} > /tmp/pipeline.yml")
+  system(%Q{bash -c "fly -t buildpacks set-pipeline -p #{name} -c /tmp/pipeline.yml -l <(lpass show 'Shared-Buildpacks/concourse-private.yml' --notes)"})
 end
 
 header('For bosh-lite pipelines')
