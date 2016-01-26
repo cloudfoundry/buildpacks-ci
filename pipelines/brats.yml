@@ -60,7 +60,7 @@ jobs:
       - put: cf-environments
         resource: cf-edge-environments
         params:
-          claim: bp-ci-8
+          acquire: true
         timeout: 3h
       - aggregate:
         - get: buildpacks-ci
