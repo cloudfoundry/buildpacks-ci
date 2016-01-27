@@ -238,14 +238,14 @@ jobs:
             path: bash
             args: ["-c",
               "apt-get update &&
-              apt-get install -y openjdk-7-jdk &&
+              apt-get install -y openjdk-7-jdk maven ant &&
               tar xzf build-tar/binary-builder-source.tgz -C /tmp &&
               cd /tmp/x86_64-linux-gnu/ports/jruby/*/*/ &&
               export JAVA_OPTS='-XX:+TieredCompilation -XX:TieredStopAtLevel=1' &&
               export MALLOC_ARENA_MAX=2 &&
               export PHASE='-Ptest' &&
-              ./mvnw -Pbootstrap clean install -Dinvoker.skip -Dmaven.test.skip &&
-              ./mvnw install -Dinvoker.skip=false $PHASE"]
+              mvn -Pbootstrap clean install -Dinvoker.skip -Dmaven.test.skip &&
+              mvn install -Dinvoker.skip=false $PHASE"]
   - name: build-httpd
     serial: true
     plan:
