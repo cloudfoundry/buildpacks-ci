@@ -36,5 +36,5 @@ jobs:
       - put: concourse2tracker
         params:
           git_path: buildpacks-ci
-          project_id: 1042066
+          project_id: {{cf-buildpacks-public-tracker-id}}
           api_token: {{pivotal-tracker-api-token}}

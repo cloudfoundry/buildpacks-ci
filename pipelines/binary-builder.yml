@@ -145,7 +145,7 @@ jobs:
         params:
           api_token: {{pivotal-tracker-api-token}}
           git_path: builds-yaml
-          project_id: 1042066
+          project_id: {{cf-buildpacks-public-tracker-id}}
   - name: test-php
     serial: true
     plan:
@@ -221,7 +221,7 @@ jobs:
         params:
           api_token: {{pivotal-tracker-api-token}}
           git_path: builds-yaml
-          project_id: 1042066
+          project_id: {{cf-buildpacks-public-tracker-id}}
   - name: test-jruby
     serial: true
     plan:
@@ -279,7 +279,7 @@ jobs:
         params:
           api_token: {{pivotal-tracker-api-token}}
           git_path: builds-yaml
-          project_id: 1042066
+          project_id: {{cf-buildpacks-public-tracker-id}}
   - name: build-python
     serial: true
     plan:
@@ -316,7 +316,7 @@ jobs:
         params:
           api_token: {{pivotal-tracker-api-token}}
           git_path: builds-yaml
-          project_id: 1042066
+          project_id: {{cf-buildpacks-public-tracker-id}}
   - name: test-python
     serial: true
     plan:
@@ -369,7 +369,7 @@ jobs:
         params:
           api_token: {{pivotal-tracker-api-token}}
           git_path: builds-yaml
-          project_id: 1042066
+          project_id: {{cf-buildpacks-public-tracker-id}}
   - name: test-ruby
     serial: true
     plan:
@@ -422,7 +422,7 @@ jobs:
         params:
           api_token: {{pivotal-tracker-api-token}}
           git_path: builds-yaml
-          project_id: 1042066
+          project_id: {{cf-buildpacks-public-tracker-id}}
   - name: test-nodejs
     serial: true
     plan:
@@ -476,7 +476,7 @@ jobs:
         params:
           api_token: {{pivotal-tracker-api-token}}
           git_path: builds-yaml
-          project_id: 1042066
+          project_id: {{cf-buildpacks-public-tracker-id}}
   - name: test-nginx
     serial: true
     plan:
@@ -530,4 +530,4 @@ jobs:
         params:
           api_token: {{pivotal-tracker-api-token}}
           git_path: builds-yaml
-          project_id: 1042066
+          project_id: {{cf-buildpacks-public-tracker-id}}
