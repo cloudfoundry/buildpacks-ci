@@ -1,23 +1,16 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
-require 'json'
+buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
+require "#{buildpacks_ci_dir}/lib/tracker-client"
 
 name = ARGV[0]
 description = ARGV[1]
 exit if description.empty?
 
-payload = {
-  name: name,
-  description: description,
-  requested_by_id: 765_241
-}.to_json
-
-`
-  curl -X POST \
-       -vvvv \
-       -H "X-TrackerToken: #{ENV['TRACKER_API_TOKEN']}" \
-       -H "Content-Type: application/json" \
-       -d '#{payload}' \
-       "https://www.pivotaltracker.com/services/v5/projects/#{ENV['TRACKER_PROJECT_ID']}/stories"
-`
+tracker_client = TrackerClient.new(
+  ENV['TRACKER_API_TOKEN'],
+  ENV['TRACKER_PROJECT_ID'],
+  ENV['TRACKER_REQUESTER_ID'].to_i
+)
+tracker_client.post_to_tracker name, description
