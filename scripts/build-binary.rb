@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 
 require 'yaml'
 require 'digest'
@@ -16,12 +17,12 @@ end
 
 flags = "--name=#{binary_name}"
 latest_build.each_pair do |key, value|
-  flags << %Q{ --#{key}="#{value}"}
+  flags << %( --#{key}="#{value}")
 end
 
 Dir.chdir('binary-builder') do
   system("./bin/binary-builder #{flags}")
-  system("tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/")
+  system('tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/')
 end
 
 filename = Dir["binary-builder/#{binary_name}-*.tgz"].first

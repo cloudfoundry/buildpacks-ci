@@ -1,4 +1,5 @@
 #! /usr/bin/env ruby
+# encoding: utf-8
 #
 # This script is intended to be used to generate `cf-release` release notes for the buildpacks.
 #
@@ -19,8 +20,8 @@ module Enumerable # reopening
 end
 
 opts = GetoptLong.new(
-  [ '--token',             '-t', GetoptLong::REQUIRED_ARGUMENT],
-  [ '--update-cf-release', '-u', GetoptLong::NO_ARGUMENT]
+  ['--token',             '-t', GetoptLong::REQUIRED_ARGUMENT],
+  ['--update-cf-release', '-u', GetoptLong::NO_ARGUMENT]
 )
 
 def usage
@@ -48,12 +49,12 @@ tag1 = ARGV[1]
 tag2 = ARGV[2]
 
 class ReleaseNoteGenerator
-  RELEASES_API_FMT = "/repos/cloudfoundry/%s/releases"
-  RELEASE_FMT      = "https://github.com/cloudfoundry/%s/releases/tag/%s"
+  RELEASES_API_FMT = '/repos/cloudfoundry/%s/releases'.freeze
+  RELEASE_FMT      = 'https://github.com/cloudfoundry/%s/releases/tag/%s'.freeze
 
-  attr :path, :tag1, :tag2, :token, :update_cf_release
+  attr_reader :path, :tag1, :tag2, :token, :update_cf_release
 
-  def initialize path, tag1, tag2, token, update_cf_release
+  def initialize(path, tag1, tag2, token, update_cf_release)
     @path = path
     @tag1 = tag1
     @tag2 = tag2
@@ -63,20 +64,16 @@ class ReleaseNoteGenerator
 
   def update_cf_release!
     Dir.chdir path do
-      system "git remote update"
-      system "git checkout develop"
-      system "./scripts/update"
+      system 'git remote update'
+      system 'git checkout develop'
+      system './scripts/update'
     end
   end
 
-  def curl_github_api path
-    headers = if token
-                "-H 'Authorization: token #{token}'"
-              end
+  def curl_github_api(path)
+    headers = ("-H 'Authorization: token #{token}'" if token)
     result = `curl -s #{headers} https://api.github.com#{path}`
-    if result =~ /API rate limit exceeded/
-      raise result
-    end
+    fail result if result =~ /API rate limit exceeded/
     JSON.parse result
   end
 
@@ -88,9 +85,7 @@ class ReleaseNoteGenerator
     rootfses.version_sort.each do |rootfs|
       v1 = versions[tag1][rootfs]
       v2 = versions[tag2][rootfs]
-      if v1 != v2
-        print_release_notes_for "stacks", v1, v2
-      end
+      print_release_notes_for 'stacks', v1, v2 if v1 != v2
     end
 
     versions = get_buildpack_versions
@@ -98,22 +93,20 @@ class ReleaseNoteGenerator
     buildpacks.version_sort.each do |buildpack|
       v1 = versions[tag1][buildpack]
       v2 = versions[tag2][buildpack]
-      if v1 != v2
-        print_release_notes_for buildpack, v1, v2
-      end
+      print_release_notes_for buildpack, v1, v2 if v1 != v2
     end
   end
 
-  def print_release_notes_for thing, v1, v2
+  def print_release_notes_for(thing, v1, v2)
     releases_path = sprintf RELEASES_API_FMT, thing
 
     releases_data = curl_github_api releases_path
 
     releases = releases_data.map do |release|
-      release["tag_name"]
+      release['tag_name']
     end.version_sort.reverse
-    raise "couldn't find #{thing} #{v1} in release notes" unless v1_index = releases.index(v1)
-    raise "couldn't find #{thing} #{v2} in release notes" unless v2_index = releases.index(v2)
+    fail "couldn't find #{thing} #{v1} in release notes" unless v1_index = releases.index(v1)
+    fail "couldn't find #{thing} #{v2} in release notes" unless v2_index = releases.index(v2)
 
     puts
     puts "### #{thing}"
@@ -123,20 +116,20 @@ class ReleaseNoteGenerator
 
     (v2_index...v1_index).each do |v_index|
       release = releases_data[v_index]
-      release_tag = release["tag_name"]
+      release_tag = release['tag_name']
       release_url = sprintf RELEASE_FMT, thing, release_tag
 
       puts
       puts "#### [#{release_tag}](#{release_url})"
       puts
-      puts release["body"].gsub("\r", "")
+      puts release['body'].delete("\r")
       puts
     end
   end
 
   private
 
-  def all_keys hash_of_hashes
+  def all_keys(hash_of_hashes)
     keys = []
     hash_of_hashes.keys.each do |key|
       keys += hash_of_hashes[key].keys
@@ -146,21 +139,21 @@ class ReleaseNoteGenerator
 
   def get_rootfs_versions
     examine_blobs_for_tags_and_filter(tag1, tag2, /rootfs/) do |versions, line|
-      rootfs = line.split("/").last.split(/\W/).first
-      version = line.sub(/\.tar\.gz.*$/, "").split("-").last
+      rootfs = line.split('/').last.split(/\W/).first
+      version = line.sub(/\.tar\.gz.*$/, '').split('-').last
       versions[rootfs] = version
     end
   end
 
   def get_buildpack_versions
     examine_blobs_for_tags_and_filter(tag1, tag2, /buildpack/) do |versions, line|
-      buildpack = line.split("/").first
-      version = line.sub(/\.zip.*$/, "").split("-").last
+      buildpack = line.split('/').first
+      version = line.sub(/\.zip.*$/, '').split('-').last
       versions[buildpack] = version
     end
   end
 
-  def examine_blobs_for_tags_and_filter tag1, tag2, regex, &block
+  def examine_blobs_for_tags_and_filter(tag1, tag2, regex, &_block)
     Dir.chdir path do
       outputs = { tag1 => get_blobs(tag1, regex), tag2 => get_blobs(tag2, regex) }
 
@@ -168,7 +161,7 @@ class ReleaseNoteGenerator
         tag, output = *tag_output
 
         versions[tag] = output.inject({}) do |versions, line|
-          block.call versions, line
+          yield versions, line
           versions
         end
 
@@ -177,7 +170,7 @@ class ReleaseNoteGenerator
     end
   end
 
-  def get_blobs tag, regex
+  def get_blobs(tag, regex)
     `git show #{tag}:config/blobs.yml`.split("\n").grep(regex)
   end
 end

@@ -1,24 +1,25 @@
 #! /usr/bin/env ruby
+# encoding: utf-8
 
 class SanityChecker
-  WORDS_OF_INTEREST = %w{ cedar stack cve }
+  WORDS_OF_INTEREST = %w( cedar stack cve ).freeze
 
   attr_reader :our_repo, :their_repo
 
-  def initialize our_repo, their_repo
+  def initialize(our_repo, their_repo)
     @our_repo = our_repo
     @their_repo = their_repo
     setup_repo
   end
 
   def setup_repo
-    unless File.exists?(File.basename(our_repo))
+    unless File.exist?(File.basename(our_repo))
       run("git clone -q -b develop #{our_repo}")
     end
-    unless run_in_repo("git remote")[/upstream/]
+    unless run_in_repo('git remote')[/upstream/]
       run_in_repo("git remote add upstream #{their_repo}")
     end
-    run_in_repo("git remote update")
+    run_in_repo('git remote update')
   end
 
   def find_dumb_commits_since(commit_hash)
@@ -29,12 +30,10 @@ class SanityChecker
       next if commits_for_word.empty?
 
       commits_for_word.each do |commit_text|
-        hash = commit_text[0,7]
+        hash = commit_text[0, 7]
         logline = commit_text[8, commit_text.length]
 
-        if !@commits[hash]
-          @commits[hash] = UpstreamCommit.new logline
-        end
+        @commits[hash] = UpstreamCommit.new logline unless @commits[hash]
         @commits[hash].words << word
         @commits[hash].words.uniq!
       end
@@ -44,11 +43,11 @@ class SanityChecker
   end
 
   def last_merge_base
-    @merge_base ||= run_in_repo("git merge-base origin/develop upstream/master").chomp
+    @merge_base ||= run_in_repo('git merge-base origin/develop upstream/master').chomp
   end
 
   def has_dumb_commit_since_last_merge_base?
-    ! find_dumb_commits_since(last_merge_base).empty?
+    !find_dumb_commits_since(last_merge_base).empty?
   end
 
   private
@@ -60,12 +59,12 @@ class SanityChecker
   end
 
   def run(command)
-    output = %x{#{command}}
+    output = `#{command}`
 
     puts "$ #{command}"
     puts output
 
-    raise output unless $?.success?
+    fail output unless $CHILD_STATUS.success?
     output
   end
 end
@@ -74,7 +73,7 @@ class UpstreamCommit
   attr_accessor :words
   attr_reader :logline
 
-  def initialize logline
+  def initialize(logline)
     @logline = logline
     @words = []
   end
@@ -83,21 +82,21 @@ end
 reports = {}
 
 {
-  "ruby"   => [
-    "https://github.com/cloudfoundry/ruby-buildpack",
-    "https://github.com/heroku/heroku-buildpack-ruby"
+  'ruby' => [
+    'https://github.com/cloudfoundry/ruby-buildpack',
+    'https://github.com/heroku/heroku-buildpack-ruby'
   ],
-  "python" => [
-    "https://github.com/cloudfoundry/python-buildpack",
-    "https://github.com/heroku/heroku-buildpack-python"
+  'python' => [
+    'https://github.com/cloudfoundry/python-buildpack',
+    'https://github.com/heroku/heroku-buildpack-python'
   ],
-  "nodejs" => [
-    "https://github.com/cloudfoundry/nodejs-buildpack",
-    "https://github.com/heroku/heroku-buildpack-nodejs"
+  'nodejs' => [
+    'https://github.com/cloudfoundry/nodejs-buildpack',
+    'https://github.com/heroku/heroku-buildpack-nodejs'
   ],
-  "go"     => [
-    "https://github.com/cloudfoundry/go-buildpack",
-    "https://github.com/heroku/heroku-buildpack-go"
+  'go' => [
+    'https://github.com/cloudfoundry/go-buildpack',
+    'https://github.com/heroku/heroku-buildpack-go'
   ]
 }.each do |name, repos|
   puts "Checking #{name}"
@@ -110,13 +109,13 @@ reports = {}
   end
 end
 
-if !reports.empty?
+unless reports.empty?
   words_found_column_width = SanityChecker::WORDS_OF_INTEREST.join(', ').length
-  puts "-------------"
-  puts "The following buildpacks failed the nanny test:"
+  puts '-------------'
+  puts 'The following buildpacks failed the nanny test:'
   reports.each do |name, commits|
     puts "** #{name}:"
-    puts "\thash\t#{"words found".ljust(words_found_column_width)}\tlogline\t"
+    puts "\thash\t#{'words found'.ljust(words_found_column_width)}\tlogline\t"
     puts "\t--------------------------------------------------------------------------------"
     commits.each do |hash, commit|
       words_found = commit.words.join(', ').ljust(words_found_column_width)

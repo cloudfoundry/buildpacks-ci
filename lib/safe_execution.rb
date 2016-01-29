@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'open3'
 require 'logger'
 
@@ -12,9 +13,9 @@ module SafeExecution
       logger.info("Output from command { #{command} }:") if logger
       while stdouterr.gets
         if logger
-          logger.info($_.chomp)
+          logger.info($LAST_READ_LINE.chomp)
         else
-          puts $_
+          puts $LAST_READ_LINE
         end
         $stdout.flush
       end

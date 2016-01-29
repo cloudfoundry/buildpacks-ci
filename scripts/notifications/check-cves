@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 
@@ -18,20 +19,20 @@ cve_filename = 'ubuntu14.04.yaml'
 
 rss_cves = CVETags.new(stacks_dir).related_cves
 
-rss_cve_titles = rss_cves.map{ |cve| cve[:title] }
+rss_cve_titles = rss_cves.map { |cve| cve[:title] }
 yaml_cve_titles = cve_logger.read_yaml_cves(cve_filename)
 
 new_cve_titles = rss_cve_titles - yaml_cve_titles
-new_cves = rss_cves.select{ |cve| new_cve_titles.include? cve[:title] }
+new_cves = rss_cves.select { |cve| new_cve_titles.include? cve[:title] }
 
 unless new_cves.empty?
   tracker_title = "address: #{new_cve_titles}"
-  tracker_description = new_cves.map{ |cve| cve[:description] }.join
+  tracker_description = new_cves.map { |cve| cve[:description] }.join
 
   tracker_client = TrackerClient.new(
     ENV['TRACKER_API_TOKEN'],
     ENV['TRACKER_PROJECT_ID'],
-    ENV['TRACKER_REQUESTER_ID'].to_i,
+    ENV['TRACKER_REQUESTER_ID'].to_i
   )
 
   tracker_client.post_to_tracker tracker_title, tracker_description
@@ -55,9 +56,8 @@ unless new_cves.empty?
   )
 
   Dir.chdir(cves_dir) do
-    execute_with_console_logging!("git add -A")
+    execute_with_console_logging!('git add -A')
     execute_with_console_logging!("git commit -m 'CVE update'")
   end
 
 end
-

@@ -1,14 +1,16 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 
 require 'json'
 
-name, description = ARGV[0], ARGV[1]
+name = ARGV[0]
+description = ARGV[1]
 exit if description.empty?
 
 payload = {
   name: name,
   description: description,
-  requested_by_id: 765241 
+  requested_by_id: 765_241
 }.to_json
 
 `

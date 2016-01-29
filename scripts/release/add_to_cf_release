@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 
 require 'yaml'
 require 'fileutils'
@@ -6,7 +7,7 @@ require 'fileutils'
 buildpack_path = ARGV[0]
 
 if ARGV.count != 1
-  puts "#{$0} [path_to_buildpack_zip]"
+  puts '{$PROGRAM_NAME} [path_to_buildpack_zip]'
   exit 1
 end
 
@@ -22,7 +23,7 @@ unless version
   exit 1
 end
 
-unless File.exists? 'config/private.yml'
+unless File.exist? 'config/private.yml'
   puts 'Bosh requires a private.yml file'
   exit 1
 end
@@ -115,4 +116,3 @@ title = "Upgrading #{language} buildpack to v#{version}"
 body = "Upgrading to latest stable version of #{language} buildpack\n --Buildpacks Team"
 
 exit 1 unless system "hub pull-request -m '#{title}\n\n#{body}' -b cloudfoundry:develop < /dev/null"
-

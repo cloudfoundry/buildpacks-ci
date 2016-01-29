@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 
 $stdout.sync = true
 
@@ -6,15 +7,15 @@ require 'yaml'
 require 'fileutils'
 require 'digest/sha1'
 
-release_names=`ls | grep buildpack-github-release | cut -d '-' -f 1`.chomp.split
+release_names = `ls | grep buildpack-github-release | cut -d '-' -f 1`.chomp.split
 
 Dir.chdir('cf-release')
-blob_store_private_yml = %Q(
+blob_store_private_yml = %(
 ---
 blobstore:
   s3:
-    access_key_id: #{ ENV["ACCESS_KEY_ID"] }
-    secret_access_key: #{ ENV["SECRET_ACCESS_KEY"] }
+    access_key_id: #{ENV['ACCESS_KEY_ID']}
+    secret_access_key: #{ENV['SECRET_ACCESS_KEY']}
 )
 
 File.write('config/private.yml', blob_store_private_yml)
@@ -46,15 +47,13 @@ release_names.each do |language|
     key =~ /^#{language}-buildpack\//
   end
 
-  if old_buildpack_key
-    new_sha = Digest::SHA1.file(buildpack_blob).hexdigest
+  next unless old_buildpack_key
+  new_sha = Digest::SHA1.file(buildpack_blob).hexdigest
 
-    if new_sha != blobs[old_buildpack_key]['sha']
-      blobs.delete(old_buildpack_key)
-      File.write('config/blobs.yml', YAML.dump(blobs))
-      exit 1 unless system "bosh add blob #{buildpack_blob} #{language}-buildpack"
-    end
-  end
+  next unless new_sha != blobs[old_buildpack_key]['sha']
+  blobs.delete(old_buildpack_key)
+  File.write('config/blobs.yml', YAML.dump(blobs))
+  exit 1 unless system "bosh add blob #{buildpack_blob} #{language}-buildpack"
 end
 
 exit system(<<-EOF)

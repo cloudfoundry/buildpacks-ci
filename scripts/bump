@@ -1,26 +1,27 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 
 require 'tempfile'
 
-old_version = File.open("VERSION", "r") { |f| f.readline.chomp }
+old_version = File.open('VERSION', 'r') { |f| f.readline.chomp }
 
 version_parts = old_version.match(/(\d+\.\d+\.)(\d+)/)
 new_version = version_parts[1] + (version_parts[2].to_i + 1).to_s
 
-File.open("VERSION", "w") { |f| f.write new_version }
+File.open('VERSION', 'w') { |f| f.write new_version }
 
 new_changelog = Tempfile.new('CHANGELOG')
 begin
   heading = "v#{new_version} #{Time.now.strftime('%b %d, %Y')}\n"
   new_changelog.write heading
-  new_changelog.write "=" * heading.length
+  new_changelog.write '=' * heading.length
   new_changelog.write "\n\n"
 
   log = `git log head...v#{old_version}`
   new_changelog.write log
   new_changelog.write "\n\n"
 
-  File.open("CHANGELOG").each { |line| new_changelog.write line }
+  File.open('CHANGELOG').each { |line| new_changelog.write line }
 ensure
   new_changelog.close
 end

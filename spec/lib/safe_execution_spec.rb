@@ -1,8 +1,9 @@
+# encoding: utf-8
 require 'spec_helper'
 require_relative '../../lib/safe_execution'
 
 describe SafeExecution do
-  include SafeExecution
+  include described_class
 
   before do
     allow(SafeExecution::Exiter).to receive(:exit_now)

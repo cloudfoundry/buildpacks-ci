@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 
 require 'json'
 require 'octokit'
@@ -23,19 +24,19 @@ TAGS = {
   nodejs:    -> { Octokit.tags('nodejs/node').map(&:name).grep(/^v/) },
   httpd:     -> { Octokit.tags('apache/httpd').map(&:name).grep(/^2\./) },
   maven:     -> { Octokit.tags('apache/maven').map(&:name).grep(/^maven/) },
-  python:    -> { JSON.parse(open('https://hg.python.org/cpython/json-tags').read)["tags"].map{ |t| t["tag"] } },
+  python:    -> { JSON.parse(open('https://hg.python.org/cpython/json-tags').read)['tags'].map { |t| t['tag'] } },
   godep:     -> { Octokit.tags('tools/godep').map(&:name).grep(/^v/) },
   openjdk:   -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys }
-}
+}.freeze
 
 TAGS.each do |current_depedency, get_tags|
   current_tags = get_tags.call
 
   filename = "#{new_releases_dir}/#{current_depedency}.yaml"
-  if File.exist?(filename)
-    previous_tags = YAML.load_file(filename)
-  else
-    previous_tags = []
+  previous_tags = if File.exist?(filename)
+                    YAML.load_file(filename)
+                  else
+                    []
   end
 
   diff_tags = current_tags - previous_tags
@@ -51,5 +52,3 @@ TAGS.each do |current_depedency, get_tags|
     warn "There are no new updates to the *#{current_depedency}* dependency"
   end
 end
-
-

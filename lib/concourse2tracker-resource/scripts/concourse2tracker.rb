@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'json'
 require 'net/http'
 require 'net/https'
@@ -23,18 +24,17 @@ class Concourse2Tracker
   def process!
     return unless story_id
 
-    payload = {text: "Concourse pipeline passed: https://buildpacks.ci.cf-app.com/builds/#{ENV['BUILD_ID']}"}.to_json
+    payload = { text: "Concourse pipeline passed: https://buildpacks.ci.cf-app.com/builds/#{ENV['BUILD_ID']}" }.to_json
 
-    create_comment_uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id.to_i.to_s}/stories/#{story_id}/comments")
+    create_comment_uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id.to_i}/stories/#{story_id}/comments")
 
     request = Net::HTTP::Post.new(create_comment_uri)
     request.body = payload
     request['Content-Type'] = 'application/json'
     request['X-TrackerToken'] = @api_token
 
-    response = Net::HTTP.start(create_comment_uri.hostname, create_comment_uri.port, :use_ssl => true) do |http|
+    response = Net::HTTP.start(create_comment_uri.hostname, create_comment_uri.port, use_ssl: true) do |http|
       http.request(request)
     end
   end
-
 end

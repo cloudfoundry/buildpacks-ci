@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 require 'digest'
 require 'fileutils'
 
@@ -19,7 +20,7 @@ Dir.chdir('buildpack') do
 end
 
 Dir.chdir('pivotal-buildpacks-cached') do
-  Dir.glob("*.zip").map do |filename|
+  Dir.glob('*.zip').map do |filename|
     filename.match(/(.*)_buildpack-cached-v(.*)\+.*.zip/) do |match|
       _, language, version = match.to_a
       new_filename = "#{language}_buildpack-cached-v#{version}.zip"
@@ -29,7 +30,7 @@ Dir.chdir('pivotal-buildpacks-cached') do
       shasum = Digest::SHA256.file(new_filename).hexdigest
 
       # append SHA to RELEASE NOTES
-      File.write('../buildpack/RECENT_CHANGES', "  * SHA256: #{shasum}",mode: 'a')
+      File.write('../buildpack/RECENT_CHANGES', "  * SHA256: #{shasum}", mode: 'a')
       File.write("#{new_filename}.SHA256SUM.txt", "#{shasum}  #{new_filename}")
     end
   end
