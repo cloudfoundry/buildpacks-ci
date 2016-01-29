@@ -15,17 +15,23 @@ stacks_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'stacks'))
 cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'new-cves'))
 
 cve_logger = CVELogger.new(cves_dir)
-cve_filename = 'ubuntu14.04.yaml'
 
-rss_cves = CVETags.new(stacks_dir).related_cves
+systems = {
+  'ubuntu14.04' => 'Ubuntu 14.04'
+}
 
-rss_cve_titles = rss_cves.map { |cve| cve[:title] }
-yaml_cve_titles = cve_logger.read_yaml_cves(cve_filename)
+systems.each do |system_shorthand, system_name|
+  cve_filename = "#{system_shorthand}.yaml"
 
-new_cve_titles = rss_cve_titles - yaml_cve_titles
-new_cves = rss_cves.select { |cve| new_cve_titles.include? cve[:title] }
+  rss_cves = CVETags.new(stacks_dir).related_cves(system_name)
 
-unless new_cves.empty?
+  rss_cve_titles = rss_cves.map { |cve| cve[:title] }
+  yaml_cve_titles = cve_logger.read_yaml_cves(cve_filename)
+
+  new_cve_titles = rss_cve_titles - yaml_cve_titles
+  new_cves = rss_cves.select { |cve| new_cve_titles.include? cve[:title] }
+
+  next if new_cves.empty?
   tracker_title = "address: #{new_cve_titles}"
   tracker_description = new_cves.map { |cve| cve[:description] }.join
 
@@ -59,5 +65,4 @@ unless new_cves.empty?
     execute_with_console_logging!('git add -A')
     execute_with_console_logging!("git commit -m 'CVE update'")
   end
-
 end
