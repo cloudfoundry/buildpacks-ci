@@ -8,8 +8,8 @@ require 'yaml'
 
 Octokit.auto_paginate = true
 Octokit.configure do |c|
-  c.login    = ENV['GITHUB_USERNAME']
-  c.password = ENV['GITHUB_PASSWORD']
+  c.login    = ENV.fetch('GITHUB_USERNAME')
+  c.password = ENV.fetch('GITHUB_PASSWORD')
 end
 
 new_releases_dir = ARGV[0]
@@ -29,10 +29,10 @@ TAGS = {
   openjdk:   -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys }
 }.freeze
 
-TAGS.each do |current_depedency, get_tags|
+TAGS.each do |current_dependency, get_tags|
   current_tags = get_tags.call
 
-  filename = "#{new_releases_dir}/#{current_depedency}.yaml"
+  filename = "#{new_releases_dir}/#{current_dependency}.yaml"
   previous_tags = if File.exist?(filename)
                     YAML.load_file(filename)
                   else
@@ -43,12 +43,12 @@ TAGS.each do |current_depedency, get_tags|
 
   if diff_tags.any?
     File.write(filename, current_tags.to_yaml)
-    puts "There are *#{diff_tags.length}* new updates to the *#{current_depedency}* dependency:\n"
+    puts "There are *#{diff_tags.length}* new updates to the *#{current_dependency}* dependency:\n"
     diff_tags.each do |tag|
       puts "- version *#{tag}*\n"
     end
 
   else
-    warn "There are no new updates to the *#{current_depedency}* dependency"
+    warn "There are no new updates to the *#{current_dependency}* dependency"
   end
 end

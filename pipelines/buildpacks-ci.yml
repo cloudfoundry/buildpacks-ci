@@ -28,6 +28,8 @@ jobs:
           params:
             CI_USERNAME: {{ci-username}}
             CI_PASSWORD: {{ci-password}}
+            GITHUB_USERNAME: {{github-username}}
+            GITHUB_PASSWORD: {{github-password}}
         privileged: true
       - put: ci-master
         params:
