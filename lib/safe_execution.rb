@@ -13,7 +13,7 @@ module SafeExecution
       logger.info("Output from command { #{command} }:") if logger
       while stdouterr.gets
         if logger
-          logger.info($LAST_READ_LINE.chomp)
+          logger.info($LAST_READ_LINE.chomp) unless $LAST_READ_LINE.nil?
         else
           puts $LAST_READ_LINE
         end

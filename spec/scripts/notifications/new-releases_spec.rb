@@ -24,6 +24,7 @@ describe 'New Releases script' do
 
     it 'outputs that there are no new updates to dependencies' do
       stdout, stderr, status = Open3.capture3(subject)
+      expect(stdout).to eq('')
       expect(stderr).to include('There are no new updates to the *ruby* dependency')
     end
   end
