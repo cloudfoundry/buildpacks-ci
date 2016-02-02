@@ -1,12 +1,23 @@
 # encoding: utf-8
 require 'spec_helper'
 require 'open3'
+require 'yaml'
 
 describe 'New Releases script' do
   before { @new_releases_dir = Dir.mktmpdir }
+
   after { FileUtils.remove_entry @new_releases_dir }
 
-  subject { "./scripts/notifications/new-releases #{@new_releases_dir}" }
+  subject do
+    new_releases_command = "./scripts/notifications/new-releases #{@new_releases_dir}"
+    if ENV['GITHUB_USERNAME'].nil? || ENV['GITHUB_PASSWORD'].nil?
+      secrets = YAML.load(`lpass show 'Shared-Buildpacks/concourse-private.yml' --notes`)
+      "GITHUB_USERNAME=#{secrets['github-username']} " \
+      "GITHUB_PASSWORD=#{secrets['github-password']} " + new_releases_command
+    else
+      new_releases_command
+    end
+  end
 
   context 'there are new releases' do
     before { `cp ./spec/fixtures/new-release-notifications/ruby_with_missing_releases.yaml #{@new_releases_dir}/ruby.yaml` }

@@ -21,19 +21,21 @@ describe NewReleasesDetector do
   end
 
   context '#perform!' do
+    let(:github_username) { "github_username" }
+    let(:github_password) { "github_password1!" }
+
     before do
       allow(Octokit).to receive(:tags).and_return([])
       allow(subject).to receive(:open).with(/python/).and_return(double(read: {'tags' => []}.to_json))
       allow(subject).to receive(:open).with(/openjdk/).and_return(double(read: {}.to_yaml))
+
+      allow(ENV).to receive(:fetch).with('GITHUB_USERNAME').and_return(github_username)
+      allow(ENV).to receive(:fetch).with('GITHUB_PASSWORD').and_return(github_password)
     end
 
     context 'configures Octokit' do
-      let(:github_username) { "github_username" }
-      let(:github_password) { "github_password1!" }
 
       before do
-        allow(ENV).to receive(:fetch).with('GITHUB_USERNAME').and_return(github_username)
-        allow(ENV).to receive(:fetch).with('GITHUB_PASSWORD').and_return(github_password)
       end
 
       it 'should set the autopaginate to true' do
