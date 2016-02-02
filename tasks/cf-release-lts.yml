@@ -5,5 +5,5 @@ run:
   path: bash
   args:
     - -c
-    - "git clone --branch v208 --depth 1 https://github.com/cloudfoundry/cf-release . && ./update"
+    - "git clone --branch v225 --depth 1 https://github.com/cloudfoundry/cf-release . && ./update"
 

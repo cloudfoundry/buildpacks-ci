@@ -1,7 +1,7 @@
 ---
 deployment-name: bp-ci-7
 resource-pool: cf-lts-environments
-cf-version: 208
+cf-version: 225
 generate-manifest: buildpacks-ci/tasks/make-manifest.yml
 generated-manifest-location: generate-manifest/cf-release/bosh-lite/manifests/cf-manifest.yml
 generate-manifest: buildpacks-ci/tasks/make-manifest.yml

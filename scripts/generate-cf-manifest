@@ -2,15 +2,15 @@
 
 set -e
 
-export CF_RELEASE_DIR=`pwd`/cf-release
-
 pushd deployments-buildpacks
   bundle -j4
   source ./bin/switch $DEPLOYMENT_NAME
 popd
 
-cd cf-release 
+export BOSH_RELEASES_DIR=`pwd`
+export CF_RELEASE_DIR=`pwd`/cf-release
 
+cd cf-release
 echo "
 ---
 name: cf-warden
@@ -26,18 +26,21 @@ properties:
     include_services: true
     include_sso: false
     include_v3: false
+  cc:
+    default_to_diego_backend: false
+
 jobs:
 - name: api_z1
   # Make the disk size bigger so we can handle
   # both offline and online buildpacks now.
   persistent_disk: 30720" >> bosh-lite/cf-stub-spiff-ours.yml
 
-./bosh-lite/make_manifest bosh-lite/cf-stub-spiff-ours.yml
+./scripts/generate-bosh-lite-dev-manifest bosh-lite/cf-stub-spiff-ours.yml
 
-ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CF_CI_PASSWORD'])" bosh-lite/manifests/cf-manifest.yml
+ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CF_CI_PASSWORD'])" bosh-lite/deployments/cf.yml
 
 cd ../deployments-buildpacks
-cp ../cf-release/bosh-lite/manifests/cf-manifest.yml deployments/$DEPLOYMENT_NAME/manifest.yml
+cp ../cf-release/bosh-lite/deployments/cf.yml deployments/$DEPLOYMENT_NAME/manifest.yml
 
 git config --global user.email "ci@localhost"
 git config --global user.name "CI Bot"
