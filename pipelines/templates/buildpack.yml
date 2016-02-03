@@ -78,6 +78,19 @@ resources:
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
+  - name: buildpack-releases
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf-experimental/buildpack-releases.git
+      private_key: {{buildpack-releases-private-key}}
+      branch: master
+  - name: version
+    type: semver
+    source:
+      bucket: pivotal-buildpacks
+      key: versions/<%= language %>-buildpack
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 jobs:
   <% if language == "php" %>
   - name: ensure-manifest-has-modules
@@ -235,6 +248,49 @@ jobs:
           repository: buildpack
           tag: buildpack/VERSION
           tag_prefix: v
+  - name: version-bump
+    serial: true
+    plan:
+      - get: buildpack
+        passed: [ "buildpack-release" ]
+        resource: buildpack-master
+        trigger: true
+      - put: version
+        params:
+          file: buildpack/VERSION
+  - name: bosh-release
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: s3
+          resource: pivotal-buildpack-cached
+          passed: [ buildpack-release ]
+        - get: version
+          passed: [ version-bump ]
+        - get: release
+          resource: buildpack-releases
+      - do:
+        - task: run-both-bosh-scripts
+          file: buildpacks-ci/tasks/create-bosh-release.yml
+          config:
+            params:
+              ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+              SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+              BLOB_NAME: <%= language %>-buildpack
+              BLOB_GLOB: ../s3/<%= language %>_buildpack-cached-*.zip
+              RELEASE_NAME: <%= language %>-buildpack-release
+              RELEASE_DIR: release/<%= language %>-buildpack-release
+        - put: buildpack-releases
+          params:
+            repository: run-both-bosh-scripts/release
+        on_failure:
+          # put: failure-alert
+          # params:
+            # text: "stacks create-bosh-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/create-bosh-release"
+            # channel: {{concourse-job-failure-notifications-slack-channel}}
+            # username: concourse
+            # icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: buildpack-to-github
     serial: true
     plan:
