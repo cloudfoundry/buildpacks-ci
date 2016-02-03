@@ -1,5 +1,0 @@
----
-name: stacks
-
-files:
-- rootfs/cflinuxfs2-*.tar.gz

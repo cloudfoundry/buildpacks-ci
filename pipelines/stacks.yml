@@ -436,29 +436,24 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: stack-s3
+        - get: s3
+          resource: stack-s3
           passed: [ shipit ]
         - get: version
           passed: [ shipit ]
-        - get: stacks-release
+        - get: release
+          resource: stacks-release
       - do:
         - task: run-both-bosh-scripts
+          file: buildpacks-ci/tasks/create-bosh-release.yml
           config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-              - name: stack-s3
-              - name: version
-              - name: stacks-release
-            run:
-              path: bash
-              args:
-                - -c
-                - buildpacks-ci/scripts/stacks/create-bosh-private-yml.sh && buildpacks-ci/scripts/stacks/create-bosh-stacks-release.sh
             params:
               ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
               SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+              BLOB_NAME: rootfs
+              BLOB_GLOB: s3/cflinuxfs2-*.tar.gz
+              RELEASE_NAME: stack
+              RELEASE_DIR: release
         - put: stacks-release
           params:
             repository: run-both-bosh-scripts/stacks-release

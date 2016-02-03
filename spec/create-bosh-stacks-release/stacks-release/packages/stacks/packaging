@@ -1,5 +1,0 @@
-# abort script on any command that exits with a non zero value
-set -e -x
-
-echo "Copying rootfs"
-cp rootfs/cflinuxfs2-*.tar.gz ${BOSH_INSTALL_TARGET}/cflinuxfs2.tar.gz

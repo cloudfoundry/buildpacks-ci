@@ -1,8 +1,0 @@
----
-blobstore:
-  file_name: stacks
-  provider: local
-  options:
-    blobstore_path: .
-final_name: .
-
