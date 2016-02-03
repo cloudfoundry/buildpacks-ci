@@ -74,7 +74,10 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/brats.git
-
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
 jobs:
   <% if language == "php" %>
   - name: ensure-manifest-has-modules
@@ -108,17 +111,25 @@ jobs:
         - get: buildpack
           resource: buildpack-master
           trigger: true
-      - task: detect-and-upload
-        file: buildpacks-ci/tasks/detect-and-upload.yml
-        privileged: true
-      - put: pivotal-buildpack
-        params:
-          from: detect-and-upload/buildpack/.*_buildpack-v(.*).zip
-          to: /experimental-buildpacks/<%= language %>/
-      - put: pivotal-buildpack-cached
-        params:
-          from: detect-and-upload/buildpack/.*_buildpack-cached-v(.*).zip
-          to: /experimental-buildpacks/<%= language %>/
+      - do:
+        - task: detect-and-upload
+          file: buildpacks-ci/tasks/detect-and-upload.yml
+          privileged: true
+        - put: pivotal-buildpack
+          params:
+            from: detect-and-upload/buildpack/.*_buildpack-v(.*).zip
+            to: /experimental-buildpacks/<%= language %>/
+        - put: pivotal-buildpack-cached
+          params:
+            from: detect-and-upload/buildpack/.*_buildpack-cached-v(.*).zip
+            to: /experimental-buildpacks/<%= language %>/
+        on_failure:
+          put: failure-alert
+          params:
+            text: "<%= language %>-buildpack detect-new-buildpack-and-upload-artifacts job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/detect-new-buildpack-and-upload-artifacts"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: buildpack-CF-edge-master
     serial: true
     plan:
@@ -141,19 +152,27 @@ jobs:
           resource: pivotal-buildpack-cached
           passed: [ "detect-new-buildpack-and-upload-artifacts" ]
           trigger: true
-      - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack.yml
-        config:
+      - do:
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack.yml
+          config:
+            params:
+              STACKS: cflinuxfs2
+              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+              CF_PASSWORD: {{ci-cf-password}}
+              CF_EDGE: 'true'
+          privileged: true
+          ensure:
+            put: cf-edge-environments
+            params:
+              release: cf-environments
+        on_failure:
+          put: failure-alert
           params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci-cf-password}}
-            CF_EDGE: 'true'
-        privileged: true
-        ensure:
-          put: cf-edge-environments
-          params:
-            release: cf-environments
+            text: "<%= language %>-buildpack CF-edge-master job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/buildpack-CF-edge-master"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: buildpack-CF-LTS-master
     serial: true
     plan:
@@ -176,18 +195,26 @@ jobs:
           resource: pivotal-buildpack-cached
           passed: [ "detect-new-buildpack-and-upload-artifacts" ]
           trigger: true
-      - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack.yml
-        config:
+      - do:
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack.yml
+          config:
+            params:
+              STACKS: cflinuxfs2
+              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+              CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+          ensure:
+            put: cf-lts-environments
+            params:
+              release: cf-environments
+        on_failure:
+          put: failure-alert
           params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-        ensure:
-          put: cf-lts-environments
-          params:
-            release: cf-environments
+            text: "<%= language %>-buildpack CF-LTS-master job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/buildpack-CF-LTS-master"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: buildpack-release
     serial: true
     plan:
@@ -298,6 +325,13 @@ jobs:
               CI_CF_PASSWORD: {{ci-cf-password}}
               LANGUAGE: <%= language %>
 <% end %>
+        on_failure:
+          put: failure-alert
+          params:
+            text: "<%= language %>-buildpack edge-DEA job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/edge-DEA"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
         ensure:
           put: cf-edge-environments
           params:
@@ -335,6 +369,13 @@ jobs:
               CI_CF_PASSWORD: {{ci-cf-password}}
               LANGUAGE: <%= language %>
 <% end %>
+        on_failure:
+          put: failure-alert
+          params:
+            text: "<%= language %>-buildpack edge-diego job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/edge-diego"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
         ensure:
           put: cf-edge-environments
           params:
@@ -369,6 +410,13 @@ jobs:
               CI_CF_USERNAME: {{ci-cf-username}}
               CI_CF_PASSWORD: {{ci-cf-password}}
               LANGUAGE: <%= language %>
+        on_failure:
+          put: failure-alert
+          params:
+            text: "<%= language %>-buildpack CF-LTS job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/buildpack-CF-LTS"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
         ensure:
           put: cf-lts-environments
           params:
