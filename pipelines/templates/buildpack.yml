@@ -284,13 +284,14 @@ jobs:
         - put: buildpack-releases
           params:
             repository: run-both-bosh-scripts/release
+            rebase: true
         on_failure:
-          # put: failure-alert
-          # params:
-            # text: "stacks create-bosh-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/create-bosh-release"
-            # channel: {{concourse-job-failure-notifications-slack-channel}}
-            # username: concourse
-            # icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+          put: failure-alert
+          params:
+            text: "<%= language %>-buildpack bosh-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/bosh-release"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: buildpack-to-github
     serial: true
     plan:
