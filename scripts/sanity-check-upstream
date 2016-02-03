@@ -1,6 +1,8 @@
 #! /usr/bin/env ruby
 # encoding: utf-8
 
+require 'English'
+
 class SanityChecker
   WORDS_OF_INTEREST = %w( cedar stack cve ).freeze
 
