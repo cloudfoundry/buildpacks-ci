@@ -33,4 +33,12 @@ Dir['config/buildpack/*.yml'].each do |filename|
   system(%{bash -c "fly -t buildpacks set-pipeline -p #{language}-buildpack -c /tmp/pipeline.yml -l <(lpass show 'Shared-Buildpacks/concourse-private.yml' --notes) -l #{filename}"})
 end
 
+header('For buildpack pull request pipelines')
+Dir['config/buildpack/*.yml'].each do |filename|
+  language = File.basename(filename, '.yml')
+  puts "   #{language} pull-request"
+  system("erb language=#{language} pipelines/templates/pull-request.yml > /tmp/pipeline.yml")
+  system(%{bash -c "fly -t buildpacks set-pipeline -p #{language}-pull-request -c /tmp/pipeline.yml -l <(lpass show 'Shared-Buildpacks/concourse-private.yml' --notes) -l #{filename}"})
+end
+
 puts 'Thanks, JT'

@@ -1,0 +1,69 @@
+resources:
+  - name: <%= language %>-buildpack
+    type: pull-request
+    source:
+      access_token: {{buildpacks-github-token}}
+      repo: cloudfoundry/<%= language %>-buildpack
+      base_url: https://buildpacks.ci.cf-app.com
+  - name: cf-edge-environments
+    type: pool
+    source:
+      branch: resource-pools
+      pool: cf-edge-environments
+      private_key: {{resource-pools-private-key}}
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/buildpacks-ci
+  - name: deployments-buildpacks
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/deployments-buildpacks
+      private_key: {{deployments-private-key}}
+
+jobs:
+  - name: <%= language %> pull request
+    public: true
+    plan:
+      - get: buildpacks-ci
+      - get: deployments-buildpacks
+
+      - get: buildpack
+        resource: <%= language %>-buildpack
+        trigger: true
+
+      - put: <%= language %>-buildpack
+        params:
+          path: buildpack
+          status: pending
+
+      - put: cf-environments
+        resource: cf-edge-environments
+        params:
+          acquire: true
+
+      - task: rspec
+        file: buildpacks-ci/tasks/test-buildpack.yml
+        config:
+          params:
+            STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
+        privileged: true
+        ensure:
+          put: cf-edge-environments
+          params:
+            release: cf-environments
+        on_success:
+          put: <%= language %>-buildpack
+          params:
+            path: buildpack
+            status: success
+
+        on_failure:
+          put: <%= language %>-buildpack
+          params:
+            path: buildpack
+            status: failure
+
