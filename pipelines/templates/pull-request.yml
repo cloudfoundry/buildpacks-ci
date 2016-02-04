@@ -25,6 +25,7 @@ resources:
 jobs:
   - name: <%= language %> pull request
     public: true
+    serial: true
     plan:
       - get: buildpacks-ci
       - get: deployments-buildpacks
