@@ -263,14 +263,20 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: s3
+        - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
           passed: [ buildpack-release ]
         - get: version
           passed: [ version-bump ]
         - get: release
           resource: buildpack-releases
+        - get: buildpack
+          resource: buildpack-master
+          passed: [ buildpack-release ]
       - do:
+        - task: s3
+          file: buildpacks-ci/tasks/finalize-buildpack.yml
+          privileged: true
         - task: run-both-bosh-scripts
           file: buildpacks-ci/tasks/create-bosh-release.yml
           config:
@@ -278,7 +284,7 @@ jobs:
               ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
               SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
               BLOB_NAME: <%= language %>-buildpack
-              BLOB_GLOB: ../s3/<%= language %>_buildpack-cached-*.zip
+              BLOB_GLOB: ../s3/pivotal-buildpacks-cached/<%= language %>_buildpack-cached-*.zip
               RELEASE_NAME: <%= language %>-buildpack-release
               RELEASE_DIR: release/<%= language %>-buildpack-release
         - put: buildpack-releases
