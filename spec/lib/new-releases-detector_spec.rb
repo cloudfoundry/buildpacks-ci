@@ -7,7 +7,7 @@ describe NewReleasesDetector do
   before { allow(subject).to receive(:warn) {} }
 
   def to_tags(names)
-    names.collect{|n| OpenStruct.new(name: n) }
+    names.collect { |n| OpenStruct.new(name: n) }
   end
   let(:new_releases_dir) { Dir.mktmpdir }
 
@@ -17,16 +17,15 @@ describe NewReleasesDetector do
     it 'sets new_releases_dir' do
       expect(subject.new_releases_dir).to eq(new_releases_dir)
     end
-
   end
 
   context '#perform!' do
-    let(:github_username) { "github_username" }
-    let(:github_password) { "github_password1!" }
+    let(:github_username) { 'github_username' }
+    let(:github_password) { 'github_password1!' }
 
     before do
       allow(Octokit).to receive(:tags).and_return([])
-      allow(subject).to receive(:open).with(/python/).and_return(double(read: {'tags' => []}.to_json))
+      allow(subject).to receive(:open).with(/python/).and_return(double(read: { 'tags' => [] }.to_json))
       allow(subject).to receive(:open).with(/openjdk/).and_return(double(read: {}.to_yaml))
 
       allow(ENV).to receive(:fetch).with('GITHUB_USERNAME').and_return(github_username)
@@ -34,11 +33,10 @@ describe NewReleasesDetector do
     end
 
     context 'configures Octokit' do
-
       before do
       end
 
-      it 'should set the autopaginate to true' do
+      it 'sets the autopaginate to true' do
         expect(Octokit).to receive(:auto_paginate=).with(true).at_least(:once)
         subject.perform!
       end
@@ -48,14 +46,14 @@ describe NewReleasesDetector do
       it 'outputs new releases' do
         expect(Octokit).to receive(:tags)
           .with('cloudfoundry/cf-release')
-          .and_return(to_tags %w{v1 v2})
+          .and_return(to_tags %w(v1 v2))
 
-        expect {
+        expect do
           subject.perform!
-        }.to output("There are *2* new updates to the *cfrelease* dependency:\n" \
+        end.to output("There are *2* new updates to the *cfrelease* dependency:\n" \
                     "- version *v1*\n" \
                     "- version *v2*\n"
-                   ).to_stdout
+                     ).to_stdout
       end
 
       context 'when there are no new releases' do
@@ -64,13 +62,13 @@ describe NewReleasesDetector do
         it 'outputs there are no new updates' do
           expect(Octokit).to receive(:tags)
             .with('cloudfoundry/cf-release')
-            .and_return(to_tags %w{v1 v2})
+            .and_return(to_tags %w(v1 v2))
 
           subject.perform!
 
-          expect {
+          expect do
             subject.perform!
-          }.to output(/There are no new updates to the \*cfrelease\* dependency\n/).to_stderr
+          end.to output(/There are no new updates to the \*cfrelease\* dependency\n/).to_stderr
         end
       end
     end
@@ -79,14 +77,14 @@ describe NewReleasesDetector do
       it 'outputs new releases' do
         expect(subject).to receive(:open)
           .with('https://hg.python.org/cpython/json-tags')
-          .and_return(double(read: {tags: [{tag: 'a'}, {tag: 'b'}]}.to_json))
+          .and_return(double(read: { tags: [{ tag: 'a' }, { tag: 'b' }] }.to_json))
 
-        expect {
+        expect do
           subject.perform!
-        }.to output("There are *2* new updates to the *python* dependency:\n" \
+        end.to output("There are *2* new updates to the *python* dependency:\n" \
                     "- version *a*\n" \
                     "- version *b*\n"
-                   ).to_stdout
+                     ).to_stdout
       end
 
       context 'when there are no new releases' do
@@ -95,13 +93,13 @@ describe NewReleasesDetector do
         it 'outputs there are no new updates' do
           expect(subject).to receive(:open)
             .with('https://hg.python.org/cpython/json-tags')
-            .and_return(double(read: {tags: [{tag: 'a'}, {tag: 'b'}]}.to_json))
+            .and_return(double(read: { tags: [{ tag: 'a' }, { tag: 'b' }] }.to_json))
 
           subject.perform!
 
-          expect {
+          expect do
             subject.perform!
-          }.to output(/There are no new updates to the \*python\* dependency\n/).to_stderr
+          end.to output(/There are no new updates to the \*python\* dependency\n/).to_stderr
         end
       end
     end
@@ -110,20 +108,20 @@ describe NewReleasesDetector do
       it 'outputs new releases' do
         expect(subject).to receive(:open)
           .with('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml')
-          .and_return(double(read: {v1: 1, v2: 2}.to_yaml))
+          .and_return(double(read: { v1: 1, v2: 2 }.to_yaml))
 
-        expect {
+        expect do
           subject.perform!
-        }.to output("There are *2* new updates to the *openjdk* dependency:\n" \
+        end.to output("There are *2* new updates to the *openjdk* dependency:\n" \
                     "- version *v1*\n" \
                     "- version *v2*\n"
-                   ).to_stdout
+                     ).to_stdout
       end
 
       it 'writes to a file the latest releases' do
         expect(subject).to receive(:open)
           .with('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml')
-          .and_return(double(read: {v1: 1, v2: 2}.to_yaml))
+          .and_return(double(read: { v1: 1, v2: 2 }.to_yaml))
 
         subject.perform!
         expect(YAML.load_file("#{new_releases_dir}/openjdk.yaml")).to eq [:v1, :v2]
@@ -133,18 +131,18 @@ describe NewReleasesDetector do
         it 'only displays the latest release to STDOUT' do
           expect(subject).to receive(:open)
             .with('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml')
-            .and_return(double(read: {v1: 1, v2: 2}.to_yaml))
+            .and_return(double(read: { v1: 1, v2: 2 }.to_yaml))
 
           subject.perform!
           expect(subject).to receive(:open)
             .with('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml')
-            .and_return(double(read: {v1: 1, v2: 2, v3: 3}.to_yaml))
+            .and_return(double(read: { v1: 1, v2: 2, v3: 3 }.to_yaml))
 
-          expect {
+          expect do
             subject.perform!
-          }.to output("There are *1* new updates to the *openjdk* dependency:\n" \
+          end.to output("There are *1* new updates to the *openjdk* dependency:\n" \
                       "- version *v3*\n"
-                     ).to_stdout
+                       ).to_stdout
         end
       end
 
@@ -154,25 +152,25 @@ describe NewReleasesDetector do
         it 'outputs there are no new updates' do
           expect(subject).to receive(:open)
             .with('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml')
-            .and_return(double(read: {v1: 1, v2: 2}.to_yaml))
+            .and_return(double(read: { v1: 1, v2: 2 }.to_yaml))
 
           subject.perform!
 
-          expect {
+          expect do
             subject.perform!
-          }.to output(/There are no new updates to the \*openjdk\* dependency\n/).to_stderr
+          end.to output(/There are no new updates to the \*openjdk\* dependency\n/).to_stderr
         end
 
         it 'does not changes the contents of the file' do
           expect(subject).to receive(:open)
             .with('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml')
-            .and_return(double(read: {v1: 1, v2: 2}.to_yaml))
+            .and_return(double(read: { v1: 1, v2: 2 }.to_yaml))
 
           subject.perform!
 
-          expect {
+          expect do
             subject.perform!
-          }.to_not change { File.read("#{new_releases_dir}/openjdk.yaml") }
+          end.to_not change { File.read("#{new_releases_dir}/openjdk.yaml") }
         end
       end
     end

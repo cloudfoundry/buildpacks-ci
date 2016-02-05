@@ -64,6 +64,4 @@ class NewReleasesDetector
       openjdk:   -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys }
     }
   end
-
-
 end

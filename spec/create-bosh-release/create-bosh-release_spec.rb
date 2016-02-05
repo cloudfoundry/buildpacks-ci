@@ -13,12 +13,10 @@ describe 'create bosh stacks release task' do
               '-i s3=./spec/create-bosh-release/stack-s3 ' \
               '-i version=./spec/create-bosh-release/version ' \
               '-i release=./spec/create-bosh-release/stacks-release ',
-              {
-                'BLOB_NAME' => 'rootfs',
-                'BLOB_GLOB' => 's3/cflinuxfs2-*.tar.gz',
-                'RELEASE_NAME' => 'stack',
-                'RELEASE_DIR' => 'release'
-              })
+              'BLOB_NAME' => 'rootfs',
+              'BLOB_GLOB' => 's3/cflinuxfs2-*.tar.gz',
+              'RELEASE_NAME' => 'stack',
+              'RELEASE_DIR' => 'release')
     end
 
     it 'modifies config/blobs.yml correctly' do
@@ -56,11 +54,9 @@ describe 'create bosh stacks release task' do
               '-i s3=./spec/create-bosh-release/stack-s3 ' \
               '-i version=./spec/create-bosh-release/version ' \
               '-i release=./spec/create-bosh-release/stacks-release ',
-              {
-                'RELEASE_DIR' => 'release',
-                'ACCESS_KEY_ID' => @access_key_id,
-                'SECRET_ACCESS_KEY' => @secret_access_key
-              })
+              'RELEASE_DIR' => 'release',
+              'ACCESS_KEY_ID' => @access_key_id,
+              'SECRET_ACCESS_KEY' => @secret_access_key)
     end
 
     it 'has the correct ACCESS_KEY_ID' do
