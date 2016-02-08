@@ -183,12 +183,6 @@ jobs:
         - get: stacks
           passed: [ build-rootfs ]
       - do:
-        - task: diego-release
-          file: buildpacks-ci/tasks/checkout-release.yml
-          config:
-            params:
-              RELEASE_NAME: cloudfoundry-incubator/diego-release
-              RELEASE_VERSION: 0.1444.0
         - task: recreate-bosh-lite
           config:
             platform: linux
@@ -207,7 +201,7 @@ jobs:
               repository: recreate-bosh-lite/deployments-buildpacks
               rebase: true
         - task: generate-manifest
-          file: buildpacks-ci/tasks/diego-make-manifest.yml
+          file: buildpacks-ci/tasks/develop-make-manifest.yml
           config:
             params:
               DEPLOYMENT_NAME: stack-ci-8
