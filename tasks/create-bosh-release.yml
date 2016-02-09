@@ -3,7 +3,7 @@ platform: linux
 image: docker:///cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: s3
+  - name: blob
   - name: version
   - name: release
 params:

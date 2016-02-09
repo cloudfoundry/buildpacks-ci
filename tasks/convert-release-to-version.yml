@@ -1,0 +1,11 @@
+platform: linux
+image: docker:///cfbuildpacks/ci
+inputs:
+  - name: blob
+outputs:
+  - name: version
+run:
+  path: bash
+  args:
+    - -c
+    - cp blob/version version/number

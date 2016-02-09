@@ -23,22 +23,6 @@ File.write('config/private.yml', blob_store_private_yml)
 release_names.each do |language|
   buildpack_blob     = Dir["../#{language}-buildpack-github-release/#{language}_buildpack-cached-*.zip"].first
   buildpack_path     = "#{language}-buildpack/#{File.basename(buildpack_blob)}"
-  package_dir        = "packages/buildpack_#{language}"
-  spec_file          = "#{package_dir}/spec"
-  packaging_file     = "#{package_dir}/packaging"
-  spec               = {
-    'name' => "buildpack_#{language}",
-    'files' => [buildpack_path]
-  }
-
-  FileUtils.mkdir_p(package_dir)
-  puts 'Updating spec file'
-  File.write(spec_file, YAML.dump(spec))
-  puts 'Updating Packaging file'
-  File.write(packaging_file, <<-PACKAGING_FILE)
-    set -e -x
-    cp #{buildpack_path} ${BOSH_INSTALL_TARGET}
-  PACKAGING_FILE
 
   system "rm -f blobs/#{language}-buildpack/*"
   blobs = YAML.load(File.read('config/blobs.yml'))

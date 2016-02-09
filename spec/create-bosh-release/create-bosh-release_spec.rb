@@ -10,11 +10,11 @@ describe 'create bosh stacks release task' do
 
       execute('-c tasks/create-bosh-release.yml ' \
               '-i buildpacks-ci=. ' \
-              '-i s3=./spec/create-bosh-release/stack-s3 ' \
+              '-i blob=./spec/create-bosh-release/stack-s3 ' \
               '-i version=./spec/create-bosh-release/version ' \
               '-i release=./spec/create-bosh-release/stacks-release ',
               'BLOB_NAME' => 'rootfs',
-              'BLOB_GLOB' => 's3/cflinuxfs2-*.tar.gz',
+              'BLOB_GLOB' => 'blob/cflinuxfs2-*.tar.gz',
               'RELEASE_NAME' => 'stack',
               'RELEASE_DIR' => 'release')
     end
@@ -51,7 +51,7 @@ describe 'create bosh stacks release task' do
 
       execute('-c tasks/create-bosh-release.yml ' \
               '-i buildpacks-ci=. ' \
-              '-i s3=./spec/create-bosh-release/stack-s3 ' \
+              '-i blob=./spec/create-bosh-release/stack-s3 ' \
               '-i version=./spec/create-bosh-release/version ' \
               '-i release=./spec/create-bosh-release/stacks-release ',
               'RELEASE_DIR' => 'release',

@@ -430,7 +430,7 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: s3
+        - get: blob
           resource: stack-s3
           passed: [ shipit ]
           trigger: true
@@ -446,7 +446,7 @@ jobs:
               ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
               SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
               BLOB_NAME: rootfs
-              BLOB_GLOB: s3/cflinuxfs2-*.tar.gz
+              BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
               RELEASE_NAME: stack
               RELEASE_DIR: release
         - put: stacks-release
