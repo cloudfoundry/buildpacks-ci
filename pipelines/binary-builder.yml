@@ -3,13 +3,6 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/binary-builder.git
-  - name: binary-builder-compiler-cache
-    type: s3
-    source:
-      bucket: pivotal-buildpacks
-      versioned_file: ccache.tgz
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
   - name: buildpacks-ci
     type: git
     source:
@@ -34,6 +27,13 @@ resources:
       private_key: {{buildpacks-ci-binary-builds-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ php-builds.yml ]
+  - name: php7-builds
+    type: git
+    source:
+      branch: binary-builds
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      paths: [ php7-builds.yml ]
   - name: node-builds
     type: git
     source:
@@ -97,22 +97,24 @@ jobs:
         - get: buildpacks-ci
         - get: binary-builder
           trigger: true
-        - get: binary-builder-compiler-cache
       - do:
-        - task: rspec
-          config:
-            platform: linux
-            image: docker:///cloudfoundry/cflinuxfs2
-            inputs:
-              - name: binary-builder
-              - name: buildpacks-ci
-              - name: binary-builder-compiler-cache
-            run:
-              path: buildpacks-ci/scripts/binary-builder.sh
-          privileged: true
-        - put: binary-builder-compiler-cache
-          params:
-            from: rspec/ccache.tgz
+        - aggregate:
+          - task: rspec-1
+            file: buildpacks-ci/tasks/binary-builder.yml
+            config: {params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 1 } }
+            privileged: true
+          - task: rspec-2
+            file: buildpacks-ci/tasks/binary-builder.yml
+            config: {params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 2 } }
+            privileged: true
+          - task: rspec-3
+            file: buildpacks-ci/tasks/binary-builder.yml
+            config: {params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 3 } }
+            privileged: true
+          - task: rspec-3
+            file: buildpacks-ci/tasks/binary-builder.yml
+            config: {params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 4 } }
+            privileged: true
         on_failure:
           put: failure-alert
           params:
@@ -179,31 +181,35 @@ jobs:
           platform: linux
           run:
             path: bash
-            args: ["-c", "apt-get update &&
-              apt-get install -y automake \
-              libaspell-dev \
-              libc-client2007e-dev \
-              libcurl4-openssl-dev \
-              libexpat1-dev \
-              libgdbm-dev \
-              libgmp-dev \
-              libjpeg-dev \
-              libldap2-dev \
-              libmcrypt-dev \
-              libmemcached-dev \
-              libpng12-dev \
-              libpspell-dev \
-              libreadline-dev \
-              libsasl2-dev \
-              libsnmp-dev \
-              libsqlite3-dev \
-              libssl-dev \
-              libzip-dev \
-              libzookeeper-mt-dev \
-              mercurial \
-              snmp-mibs-downloader &&
-              tar xzf build-tar/binary-builder-source.tgz -C /tmp &&
-              cd /tmp/x86_64-linux-gnu/ports/php/*/*/ && yes n | env REPORT_EXIT_STATUS=1 make test"]
+            args:
+              - "-c"
+              - |
+                apt-get update
+                apt-get install -y automake \
+                libaspell-dev \
+                libc-client2007e-dev \
+                libcurl4-openssl-dev \
+                libexpat1-dev \
+                libgdbm-dev \
+                libgmp-dev \
+                libjpeg-dev \
+                libldap2-dev \
+                libmcrypt-dev \
+                libmemcached-dev \
+                libpng12-dev \
+                libpspell-dev \
+                libreadline-dev \
+                libsasl2-dev \
+                libsnmp-dev \
+                libsqlite3-dev \
+                libssl-dev \
+                libzip-dev \
+                libzookeeper-mt-dev \
+                mercurial \
+                snmp-mibs-downloader
+                tar xzf build-tar/binary-builder-source.tgz -C /tmp
+                cd /tmp/x86_64-linux-gnu/ports/php/*/*/
+                yes n | env REPORT_EXIT_STATUS=1 make test
   - name: build-jruby
     serial: true
     plan:
@@ -606,3 +612,91 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: build-php7
+    serial: true
+    plan:
+      - aggregate:
+        - get: builds-yaml
+          resource: php7-builds
+          trigger: true
+        - get: binary-builder
+          passed: [binary-builder]
+        - get: buildpacks-ci
+      - do:
+        - task: build-binary
+          file: buildpacks-ci/tasks/build-binary.yml
+          config:
+            params:
+              BINARY_NAME: php7
+          privileged: true
+        - put: build-tar
+          params:
+            from: build-binary/binary-builder/build.tgz
+        - task: push-binary
+          file: buildpacks-ci/tasks/push-binary.yml
+          config:
+            params:
+              BINARY_NAME: php7
+              AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+              AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+              AWS_DEFAULT_REGION: us-east-1
+          privileged: true
+        - put: builds-out
+          params:
+            repository: build-binary/builds-yaml
+            rebase: true
+        - put: concourse2tracker
+          params:
+            api_token: {{pivotal-tracker-api-token}}
+            git_path: builds-yaml
+            project_id: {{cf-buildpacks-public-tracker-id}}
+        on_failure:
+          put: failure-alert
+          params:
+            text: "binary-builder build-php7 job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-php"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: test-php7
+    serial: true
+    plan:
+      - get: build-tar
+        passed: [ build-php7 ]
+        trigger: true
+      - task: run tests
+        config:
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: build-tar
+          platform: linux
+          run:
+            path: bash
+            args:
+              - "-c"
+              - |
+                apt-get update
+                apt-get install -y automake \
+                libaspell-dev \
+                libc-client2007e-dev \
+                libcurl4-openssl-dev \
+                libexpat1-dev \
+                libgdbm-dev \
+                libgmp-dev \
+                libjpeg-dev \
+                libldap2-dev \
+                libmcrypt-dev \
+                libmemcached-dev \
+                libpng12-dev \
+                libpspell-dev \
+                libreadline-dev \
+                libsasl2-dev \
+                libsnmp-dev \
+                libsqlite3-dev \
+                libssl-dev \
+                libzip-dev \
+                libzookeeper-mt-dev \
+                mercurial \
+                snmp-mibs-downloader
+                tar xzf build-tar/binary-builder-source.tgz -C /tmp
+                cd /tmp/x86_64-linux-gnu/ports/php/*/*/
+                yes n | env REPORT_EXIT_STATUS=1 make test
