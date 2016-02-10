@@ -111,7 +111,7 @@ jobs:
             file: buildpacks-ci/tasks/binary-builder.yml
             config: {params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 3 } }
             privileged: true
-          - task: rspec-3
+          - task: rspec-4
             file: buildpacks-ci/tasks/binary-builder.yml
             config: {params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 4 } }
             privileged: true
