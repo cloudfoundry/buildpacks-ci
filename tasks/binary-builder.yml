@@ -1,0 +1,12 @@
+platform: linux
+image: docker:///cloudfoundry/cflinuxfs2
+inputs:
+  - name: binary-builder
+  - name: buildpacks-ci
+  - name: binary-builder-compiler-cache
+params:
+  TOTAL_GROUPS: 1
+  CURRENT_GROUP: 1
+run:
+  path: buildpacks-ci/scripts/binary-builder.sh
+
