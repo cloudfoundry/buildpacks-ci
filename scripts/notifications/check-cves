@@ -98,14 +98,14 @@ end
 
 slack_client = SlackClient.new(
   ENV['SLACK_WEBHOOK'],
-  '#buildpacks_testing',
+  '#buildpacks',
   'dependency-notifier'
 )
 slack_client.post_to_slack slack_output
 
 cve_logger.write_yaml_cves(
   rss_cve_titles | yaml_cve_titles,
-  File.join(buildpack_cves_dir, 'ruby.yml')
+  File.join(buildpack_cves_dir, 'ruby.yaml')
 )
 
 Dir.chdir(buildpack_cves_dir) do
