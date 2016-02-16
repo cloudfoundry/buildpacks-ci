@@ -13,7 +13,7 @@ include SafeExecution
 
 stacks_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'stacks'))
 cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'new-cves'))
-buildpack_cves_dir = File.expand.path(File.join(build_ci_dir, '..', 'new-buildpack-cves'))
+buildpack_cves_dir = File.expand_path(File.join(build_ci_dir, '..', 'new-buildpack-cves'))
 
 cve_logger = CVELogger.new(cves_dir)
 buildpack_cve_logger = CVELogger.new(buildpack_cves_dir)
