@@ -69,7 +69,6 @@ systems.each do |system_shorthand, system_name|
   end
 end
 
-
 rss_cves = BuildpackCVETags.new('ruby').related_cves
 
 rss_cve_titles = rss_cves.map { |cve| cve[:title] }
@@ -78,7 +77,7 @@ yaml_cve_titles = buildpack_cve_logger.read_yaml_cves('ruby.yaml')
 new_cve_titles = rss_cve_titles - yaml_cve_titles
 new_cves = rss_cves.select { |cve| new_cve_titles.include? cve[:title] }
 
-if !new_cves.empty?
+unless new_cves.empty?
   slack_output = "There are *#{new_cves.length}* new Ruby CVEs:\n"
 
   new_cves.each do |cve|
@@ -102,5 +101,5 @@ if !new_cves.empty?
     execute_with_console_logging!("git commit -m 'CVE update for ruby'")
   end
 
-  #post story to tracker
+  # post story to tracker
 end
