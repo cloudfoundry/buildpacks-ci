@@ -433,6 +433,7 @@ jobs:
         - get: s3
           resource: stack-s3
           passed: [ shipit ]
+          trigger: true
         - get: version
           passed: [ shipit ]
         - get: release
@@ -450,7 +451,7 @@ jobs:
               RELEASE_DIR: release
         - put: stacks-release
           params:
-            repository: run-both-bosh-scripts/stacks-release
+            repository: run-both-bosh-scripts/release
         on_failure:
           put: failure-alert
           params:
