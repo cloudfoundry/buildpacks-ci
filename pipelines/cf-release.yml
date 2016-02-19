@@ -270,7 +270,7 @@ jobs:
               - name: buildpacks-ci
             run:
               path: buildpacks-ci/scripts/release/cf/check-can-i-bump
-        - task: upload-blobs-with-buildpack-releases
+        - task: upload-blobs
           config:
             platform: linux
             image: docker:///cfbuildpacks/ci
