@@ -83,10 +83,10 @@ resources:
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
-  - name: buildpacks-releases
+  - name: buildpack-releases
     type: git
     source:
-      uri: git@github.com:pivotal-cf-experimental/buildpack-releases.git
+      uri: git@github.com:cloudfoundry/buildpack-releases.git
       private_key: {{buildpack-releases-private-key}}
       branch: master
 jobs:
@@ -233,74 +233,6 @@ jobs:
           passed: [ cats ]
         - get: binary-buildpack-github-release
           passed: [ cats ]
-  - name: cf-release
-    serial: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: cf-release
-          resource: cf-release-develop
-        - get: go-buildpack-github-release
-          passed: [ ship-it ]
-          trigger: true
-        - get: nodejs-buildpack-github-release
-          passed: [ ship-it ]
-          trigger: true
-        - get: python-buildpack-github-release
-          passed: [ ship-it ]
-          trigger: true
-        - get: ruby-buildpack-github-release
-          passed: [ ship-it ]
-          trigger: true
-        - get: php-buildpack-github-release
-          passed: [ ship-it ]
-          trigger: true
-        - get: staticfile-buildpack-github-release
-          passed: [ ship-it ]
-          trigger: true
-        - get: binary-buildpack-github-release
-          passed: [ ship-it ]
-          trigger: true
-      - do:
-        - task: check-can-i-bump
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-            run:
-              path: buildpacks-ci/scripts/release/cf/check-can-i-bump
-        - task: upload-blobs
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-              - name: cf-release
-              - name: go-buildpack-github-release
-              - name: python-buildpack-github-release
-              - name: nodejs-buildpack-github-release
-              - name: ruby-buildpack-github-release
-              - name: php-buildpack-github-release
-              - name: staticfile-buildpack-github-release
-              - name: binary-buildpack-github-release
-            run:
-              path: buildpacks-ci/scripts/release/cf/upload_blobs
-            params:
-              ACCESS_KEY_ID: {{blobstore-access-key}}
-              SECRET_ACCESS_KEY: {{blobstore-secret-key}}
-          privileged: true
-        - put: cf-release-develop
-          params:
-            repository: upload-blobs/cf-release
-            rebase: true
-        on_failure:
-          put: failure-alert
-          params:
-            text: "cf-release ship-it job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/cf-release/jobs/ship-it"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% %w(go ruby binary staticfile nodejs php python).each do |language| %>
   - name: bosh-release-<%= language %>
     serial: true
@@ -308,7 +240,7 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: release
-          resource: buildpacks-releases
+          resource: buildpack-releases
         - get: blob
           resource: <%= language %>-buildpack-github-release
           trigger: true
@@ -326,7 +258,7 @@ jobs:
               BLOB_GLOB: ../blob/<%= language %>_buildpack-cached-*.zip
               RELEASE_NAME: <%= language %>-buildpack-release
               RELEASE_DIR: release/<%= language %>-buildpack-release
-        - put: buildpacks-releases
+        - put: buildpack-releases
           params:
             repository: create-bosh-release/release
             rebase: true
@@ -334,6 +266,54 @@ jobs:
           put: failure-alert
           params:
             text: "<%= language %>-buildpack bosh-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/bosh-release"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: cf-release for <%= language %>
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack-releases
+          passed: [ bosh-release-<%= language %> ]
+        - get: cf-release
+          resource: cf-release-develop
+        - get: <%= language %>-buildpack-github-release
+          passed: [ bosh-release-<%= language %> ]
+          trigger: true
+      - do:
+        - task: check-can-i-bump
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci
+            inputs:
+              - name: buildpacks-ci
+            run:
+              path: buildpacks-ci/scripts/release/cf/check-can-i-bump
+        - task: upload-blobs
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci
+            inputs:
+              - name: buildpacks-ci
+              - name: cf-release
+              - name: <%=language%>-buildpack-github-release
+              - name: buildpack-releases
+            run:
+              path: buildpacks-ci/scripts/release/cf/upload_blobs
+            params:
+              ACCESS_KEY_ID: {{blobstore-access-key}}
+              SECRET_ACCESS_KEY: {{blobstore-secret-key}}
+              BUILDPACK_NAME: <%= language %>-buildpack
+          privileged: true
+        - put: cf-release-develop
+          params:
+            repository: upload-blobs/cf-release
+            rebase: true
+        on_failure:
+          put: failure-alert
+          params:
+            text: "cf-release ship-it job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/cf-release/jobs/ship-it"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png

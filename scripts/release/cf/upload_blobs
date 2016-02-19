@@ -7,22 +7,22 @@ require 'yaml'
 require 'fileutils'
 require 'digest/sha1'
 
-release_names = `ls | grep buildpack-github-release | cut -d '-' -f 1`.chomp.split
+release_names = Dir['*-buildpack-github-release'].collect{|name| name.split('-')[0]}
 
 Dir.chdir('cf-release')
-blob_store_private_yml = %(
----
-blobstore:
-  s3:
-    access_key_id: #{ENV['ACCESS_KEY_ID']}
-    secret_access_key: #{ENV['SECRET_ACCESS_KEY']}
-)
+blob_store_private_yml = {
+  'blobstore' => {
+    's3' => {
+      'access_key_id' => ENV['ACCESS_KEY_ID'],
+      'secret_access_key' => ENV['SECRET_ACCESS_KEY']
+    }
+  }
+}.to_yaml
 
 File.write('config/private.yml', blob_store_private_yml)
 
 release_names.each do |language|
   buildpack_blob     = Dir["../#{language}-buildpack-github-release/#{language}_buildpack-cached-*.zip"].first
-  buildpack_path     = "#{language}-buildpack/#{File.basename(buildpack_blob)}"
 
   system "rm -f blobs/#{language}-buildpack/*"
   blobs = YAML.load(File.read('config/blobs.yml'))
@@ -41,13 +41,16 @@ release_names.each do |language|
 end
 
 exit system(<<-EOF)
-  set -e
+  set -ex
 
   bosh -n upload blobs
-  git add -A
-  git config --global user.email "cf-buildpacks-eng@pivotal.io"
-  git config --global user.name "CF Buildpacks Team"
-
   /usr/bin/env bash ./scripts/setup-git-hooks
-  git commit -m 'Upgrading buildpacks to latest versions'
+
+  ref=$(cd ../buildpack-releases && git rev-parse HEAD)
+  cd src/buildpacks
+  git fetch
+  git checkout $ref
+  cd ../..
+  git add -A
+  git commit -am "bump $BUILDPACK_NAME"
 EOF
