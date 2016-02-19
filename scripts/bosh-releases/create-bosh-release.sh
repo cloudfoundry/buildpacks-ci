@@ -25,6 +25,6 @@ git commit -m "Updating blobs for $RELEASE_NAME $version"
 
 bosh -n create release --final --version $version --name $RELEASE_NAME --force
 git add releases/**/*-$version.yml releases/**/index.yml
-git commit -m "Final release $version"
+git commit -m "Final release for $BLOB_NAME at $version"
 
 popd
