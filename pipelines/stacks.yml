@@ -79,15 +79,15 @@ resources:
     type: docker-image
     source:
       repository: cloudfoundry/cflinuxfs2
-      username: {{stacks-docker-username}}
-      password: {{stacks-docker-password}}
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
   - name: docker-cflinuxfs2-rootfs-tagged
     type: docker-image
     source:
       repository: cloudfoundry/cflinuxfs2
-      username: {{stacks-docker-username}}
-      password: {{stacks-docker-password}}
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
   - name: stack-github-release
     type: github-release
