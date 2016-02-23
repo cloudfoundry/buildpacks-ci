@@ -275,30 +275,6 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: dats
-    serial: true
-    serial_groups: [ stack-ci-8 ]
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: cf-release
-          passed: [ deploy-cf-to-stack-ci-8 ]
-          trigger: true
-        - get: deployments-buildpacks
-      - task: dats
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/dats
-          params:
-            DEPLOYMENT_NAME: cf-release-ci-8
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
   - name: shipit
     serial: true
     plan:
