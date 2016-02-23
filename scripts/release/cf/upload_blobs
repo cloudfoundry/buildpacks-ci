@@ -7,7 +7,7 @@ require 'yaml'
 require 'fileutils'
 require 'digest/sha1'
 
-release_names = Dir['*-buildpack-github-release'].collect{|name| name.split('-')[0]}
+release_names = Dir['*-buildpack-github-release'].collect { |name| name.split('-')[0] }
 
 Dir.chdir('cf-release')
 blob_store_private_yml = {
@@ -22,7 +22,7 @@ blob_store_private_yml = {
 File.write('config/private.yml', blob_store_private_yml)
 
 release_names.each do |language|
-  buildpack_blob     = Dir["../#{language}-buildpack-github-release/#{language}_buildpack-cached-*.zip"].first
+  buildpack_blob = Dir["../#{language}-buildpack-github-release/#{language}_buildpack-cached-*.zip"].first
 
   system "rm -f blobs/#{language}-buildpack/*"
   blobs = YAML.load(File.read('config/blobs.yml'))
