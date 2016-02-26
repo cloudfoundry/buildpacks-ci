@@ -9,14 +9,14 @@ class SlackClient
     @webhook = webhook
     @channel = channel
     @username = username
-    fail 'invalid webhook for slack' unless validate_string @webhook
-    fail 'invalid channel for slack' unless validate_string @channel
-    fail 'invalid username for slack' unless validate_string @username
+    raise 'invalid webhook for slack' unless validate_string @webhook
+    raise 'invalid channel for slack' unless validate_string @channel
+    raise 'invalid username for slack' unless validate_string @username
   end
 
   def post_to_slack(text)
     text = text.to_s
-    fail 'requested slack post has no text' unless validate_string text
+    raise 'requested slack post has no text' unless validate_string text
 
     payload = {
       text: text,
@@ -34,7 +34,7 @@ class SlackClient
       http.request(request)
     end
 
-    fail response.message if response.code != '200'
+    raise response.message if response.code != '200'
 
     response
   end

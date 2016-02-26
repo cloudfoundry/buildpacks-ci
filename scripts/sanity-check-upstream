@@ -66,7 +66,7 @@ class SanityChecker
     puts "$ #{command}"
     puts output
 
-    fail output unless $CHILD_STATUS.success?
+    raise output unless $CHILD_STATUS.success?
     output
   end
 end
