@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 def release_names
-  puts "################: #{Dir.pwd}"
   Dir['*-buildpack-github-release'].collect { |name| name.gsub(/-buildpack.*/, '') }
 end
 
