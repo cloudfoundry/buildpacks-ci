@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
-fail '`brew install lastpass-cli` is required' if `which lpass` == ''
+raise '`brew install lastpass-cli` is required' if `which lpass` == ''
 
 def header(msg)
   print '*' * 10
@@ -13,7 +13,7 @@ def set_pipeline(name:, cmd:, load: [])
     -p #{name} \
     -c <(#{cmd}) \
     -l <(lpass show 'Shared-Buildpacks/concourse-private.yml' --notes) \
-    #{load.collect{|l| "-l #{l}"}.join(' ')}
+    #{load.collect { |l| "-l #{l}" }.join(' ')}
   "})
 end
 

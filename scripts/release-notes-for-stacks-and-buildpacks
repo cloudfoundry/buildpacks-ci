@@ -73,7 +73,7 @@ class ReleaseNoteGenerator
   def curl_github_api(path)
     headers = ("-H 'Authorization: token #{token}'" if token)
     result = `curl -s #{headers} https://api.github.com#{path}`
-    fail result if result =~ /API rate limit exceeded/
+    raise result if result =~ /API rate limit exceeded/
     JSON.parse result
   end
 
@@ -105,8 +105,8 @@ class ReleaseNoteGenerator
     releases = releases_data.map do |release|
       release['tag_name']
     end.version_sort.reverse
-    fail "couldn't find #{thing} #{v1} in release notes" unless v1_index = releases.index(v1)
-    fail "couldn't find #{thing} #{v2} in release notes" unless v2_index = releases.index(v2)
+    raise "couldn't find #{thing} #{v1} in release notes" unless v1_index = releases.index(v1)
+    raise "couldn't find #{thing} #{v2} in release notes" unless v2_index = releases.index(v2)
 
     puts
     puts "### #{thing}"
