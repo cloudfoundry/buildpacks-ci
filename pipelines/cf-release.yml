@@ -271,12 +271,14 @@ jobs:
               <% case language
                  when /offline/ %>
               BLOB_GLOB: ../blob/java-buildpack-offline*.zip
+              BLOB_NAME: java-buildpack
               <% when /java/ %>
               BLOB_GLOB: ../blob/java-buildpack-v*.zip
+              BLOB_NAME: java-buildpack
               <% else %>
               BLOB_GLOB: ../blob/<%= language %>*.zip
-              <% end %>
               BLOB_NAME: <%= language %>-buildpack
+              <% end %>
               RELEASE_NAME: <%= language %>-buildpack-release
               RELEASE_DIR: release/<%= language %>-buildpack-release
         - put: buildpack-releases
