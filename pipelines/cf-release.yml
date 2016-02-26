@@ -40,14 +40,12 @@ resources:
   - name: java-buildpack-github-release
     type: github-release
     source:
-      globs: java-buildpack-v*.zip
       user: cloudfoundry
       repository: java-buildpack
       access_token: {{buildpacks-github-token}}
   - name: java-offline-buildpack-github-release
     type: github-release
     source:
-      globs: java-buildpack-offline-v*.zip
       user: cloudfoundry
       repository: java-buildpack
       access_token: {{buildpacks-github-token}}
@@ -134,7 +132,13 @@ jobs:
           - get: cf-release
           - get: lite-stemcell
           - get: java-buildpack-github-release
+            params:
+              globs:
+                - java-buildpack-v*.zip
           - get: java-offline-buildpack-github-release
+            params:
+              globs:
+                - java-buildpack-offline-v*.zip
           - get: go-buildpack-github-release
           - get: python-buildpack-github-release
           - get: nodejs-buildpack-github-release
@@ -264,8 +268,15 @@ jobs:
             params:
               ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
               SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-              BLOB_NAME: <%= language %>-buildpack
+              <% case language
+                 when /offline/ %>
+              BLOB_GLOB: ../blob/java-buildpack-offline*.zip
+              <% when /java/ %>
+              BLOB_GLOB: ../blob/java-buildpack-v*.zip
+              <% else %>
               BLOB_GLOB: ../blob/<%= language %>*.zip
+              <% end %>
+              BLOB_NAME: <%= language %>-buildpack
               RELEASE_NAME: <%= language %>-buildpack-release
               RELEASE_DIR: release/<%= language %>-buildpack-release
         - put: buildpack-releases

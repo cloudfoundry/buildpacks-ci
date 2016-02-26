@@ -1,13 +1,15 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
+require_relative 'common'
+
 $stdout.sync = true
 
 require 'yaml'
 require 'fileutils'
 require 'digest/sha1'
 
-release_names = Dir['*-buildpack-github-release'].collect { |name| name.split('-')[0] }
+languages = release_names
 
 Dir.chdir('cf-release')
 blob_store_private_yml = {
@@ -21,15 +23,19 @@ blob_store_private_yml = {
 
 File.write('config/private.yml', blob_store_private_yml)
 
-release_names.each do |language|
-  buildpack_blob = Dir["../#{language}-buildpack-github-release/#{language}_buildpack-cached-*.zip"].first
+def buildpack_destination_dir language
+  language = 'java' if language =~ /offline/
+  "#{language}-buildpack"
+end
 
-  system "rm -f blobs/#{language}-buildpack/*"
+languages.each do |language|
+  buildpack_blob = Dir["../#{language}-buildpack-github-release/*.zip"].first
+
+  destination_dir = buildpack_destination_dir(language)
+  system "rm -f blobs/#{destination_dir}"
   blobs = YAML.load(File.read('config/blobs.yml'))
 
-  old_buildpack_key = blobs.keys.detect do |key|
-    key =~ /^#{language}-buildpack\//
-  end
+  old_buildpack_key = find_buildpack_key blobs, language
 
   next unless old_buildpack_key
   new_sha = Digest::SHA1.file(buildpack_blob).hexdigest
@@ -37,7 +43,7 @@ release_names.each do |language|
   next unless new_sha != blobs[old_buildpack_key]['sha']
   blobs.delete(old_buildpack_key)
   File.write('config/blobs.yml', YAML.dump(blobs))
-  exit 1 unless system "bosh add blob #{buildpack_blob} #{language}-buildpack"
+  exit 1 unless system "bosh add blob #{buildpack_blob} #{destination_dir}"
 end
 
 exit system(<<-EOF)
