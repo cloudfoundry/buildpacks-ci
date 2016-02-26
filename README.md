@@ -73,3 +73,29 @@ The `resource-pools` branch is where our pipelines' pool of locks is
 located. You can read more about Concourse resource pools here:
 
 > https://github.com/concourse/pool-resource
+
+# Running the Test Suite
+
+If you are running the full test suite, some of the integration tests are dependent on the Lastpass CLI and correctly targeting the fly CLI.
+
+To login to the Lastpass CLI:
+
+```sh
+lpass login $USERNAME
+```
+
+You will then be prompted for your Lastpass password and Google Authenticator Code.
+
+To login to the Fly CLI and target the buildpacks CI:
+
+```sh
+fly -t buildpacks login
+```
+
+You will be prompted to select either the Github or Basic Auth authentication methods.
+
+After these are set up, you will be able to run the test suite via:
+
+```sh
+rspec
+```
