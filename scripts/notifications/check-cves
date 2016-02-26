@@ -8,15 +8,12 @@ require "#{buildpacks_ci_dir}/lib/cve-logger"
 require "#{buildpacks_ci_dir}/lib/safe_execution"
 require "#{buildpacks_ci_dir}/lib/tracker-client"
 require "#{buildpacks_ci_dir}/lib/slack-client"
-require "#{buildpacks_ci_dir}/lib/buildpack-cve-tags"
+require "#{buildpacks_ci_dir}/lib/buildpack-cve-notifier"
 include SafeExecution
 
 stacks_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'stacks'))
 cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'new-cves'))
-buildpack_cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'new-buildpack-cves'))
-
 cve_logger = CVELogger.new(cves_dir)
-buildpack_cve_logger = CVELogger.new(buildpack_cves_dir)
 
 systems = {
   'ubuntu14.04' => 'Ubuntu 14.04'
@@ -69,37 +66,8 @@ systems.each do |system_shorthand, system_name|
   end
 end
 
-rss_cves = BuildpackCVETags.new('ruby').related_cves
-
-rss_cve_titles = rss_cves.map { |cve| cve[:title] }
-yaml_cve_titles = buildpack_cve_logger.read_yaml_cves('ruby.yaml')
-
-new_cve_titles = rss_cve_titles - yaml_cve_titles
-new_cves = rss_cves.select { |cve| new_cve_titles.include? cve[:title] }
-
-unless new_cves.empty?
-  slack_output = "There are *#{new_cves.length}* new Ruby CVEs:\n"
-
-  new_cves.each do |cve|
-    slack_output << "- #{cve[:title]} (#{cve[:description]})*\n"
-  end
-
-  slack_client = SlackClient.new(
-    ENV['SLACK_WEBHOOK'],
-    '#buildpacks',
-    'dependency-notifier'
-  )
-  slack_client.post_to_slack slack_output
-
-  buildpack_cve_logger.write_yaml_cves(
-    rss_cve_titles | yaml_cve_titles,
-    File.join(buildpack_cves_dir, 'ruby.yaml')
-  )
-
-  Dir.chdir(buildpack_cves_dir) do
-    execute_with_console_logging!('git add -A')
-    execute_with_console_logging!("git commit -m 'CVE update for ruby'")
-  end
-
-  # post story to tracker
+languages = ['ruby']
+languages.each do |language|
+  rss_cves = BuildpackCVETags.new(language).related_cves
+  BuildpackCVENotifier.run(language, rss_cves)
 end
