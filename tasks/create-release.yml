@@ -1,0 +1,17 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: cf-release
+  - name: java-buildpack-github-release
+  - name: java-offline-buildpack-github-release
+  - name: go-buildpack-github-release
+  - name: python-buildpack-github-release
+  - name: nodejs-buildpack-github-release
+  - name: ruby-buildpack-github-release
+  - name: php-buildpack-github-release
+  - name: staticfile-buildpack-github-release
+  - name: binary-buildpack-github-release
+run:
+  path: buildpacks-ci/scripts/release/cf/create-release

@@ -37,6 +37,20 @@ resources:
       password: {{bosh-lite-password}}
       deployment: cf-warden
       ignore_ssl: true
+  - name: java-buildpack-github-release
+    type: github-release
+    source:
+      globs: java-buildpack-v*.zip
+      user: cloudfoundry
+      repository: java-buildpack
+      access_token: {{buildpacks-github-token}}
+  - name: java-offline-buildpack-github-release
+    type: github-release
+    source:
+      globs: java-buildpack-offline-v*.zip
+      user: cloudfoundry
+      repository: java-buildpack
+      access_token: {{buildpacks-github-token}}
   - name: go-buildpack-github-release
     type: github-release
     source:
@@ -119,6 +133,8 @@ jobs:
           - get: bosh-lite
           - get: cf-release
           - get: lite-stemcell
+          - get: java-buildpack-github-release
+          - get: java-offline-buildpack-github-release
           - get: go-buildpack-github-release
           - get: python-buildpack-github-release
           - get: nodejs-buildpack-github-release
@@ -137,21 +153,7 @@ jobs:
           params:
             repository: generate-manifest/deployments-buildpacks
         - task: create-cf-release
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-              - name: cf-release
-              - name: go-buildpack-github-release
-              - name: python-buildpack-github-release
-              - name: nodejs-buildpack-github-release
-              - name: ruby-buildpack-github-release
-              - name: php-buildpack-github-release
-              - name: staticfile-buildpack-github-release
-              - name: binary-buildpack-github-release
-            run:
-              path: buildpacks-ci/scripts/release/cf/create-release
+          file: buildpacks-ci/tasks/create-release.yml
           privileged: true
         - put: cf-release-ci-8-cf-deployment
           params:
@@ -175,6 +177,10 @@ jobs:
           passed: [ deploy-cf-to-cf-release-ci-8 ]
           trigger: true
         - get: deployments-buildpacks
+        - get: java-buildpack-github-release
+          passed: [ deploy-cf-to-cf-release-ci-8 ]
+        - get: java-offline-buildpack-github-release
+          passed: [ deploy-cf-to-cf-release-ci-8 ]
         - get: go-buildpack-github-release
           passed: [ deploy-cf-to-cf-release-ci-8 ]
         - get: nodejs-buildpack-github-release
@@ -219,6 +225,10 @@ jobs:
         - get: buildpacks-ci
         - get: cf-release
           resource: cf-release-develop
+        - get: java-buildpack-github-release
+          passed: [ cats ]
+        - get: java-offline-buildpack-github-release
+          passed: [ cats ]
         - get: go-buildpack-github-release
           passed: [ cats ]
         - get: nodejs-buildpack-github-release
@@ -233,7 +243,7 @@ jobs:
           passed: [ cats ]
         - get: binary-buildpack-github-release
           passed: [ cats ]
-<% %w(go ruby binary staticfile nodejs php python).each do |language| %>
+<% %w(go ruby binary staticfile nodejs php python java java-offline).each do |language| %>
   - name: bosh-release-<%= language %>
     serial: true
     plan:
@@ -255,7 +265,7 @@ jobs:
               ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
               SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
               BLOB_NAME: <%= language %>-buildpack
-              BLOB_GLOB: ../blob/<%= language %>_buildpack-cached-*.zip
+              BLOB_GLOB: ../blob/<%= language %>*.zip
               RELEASE_NAME: <%= language %>-buildpack-release
               RELEASE_DIR: release/<%= language %>-buildpack-release
         - put: buildpack-releases

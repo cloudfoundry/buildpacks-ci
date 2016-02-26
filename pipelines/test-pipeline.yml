@@ -1,0 +1,94 @@
+resources:
+  - name: dirty-pool
+    type: pool
+    source:
+      uri: git@github.com:jtarchie/resource-pool-test
+      branch: master
+      private_key: |
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIEowIBAAKCAQEAyc8x6bkDViTNzvOugTXt4rjMXXMw25tgCWafJVjWuu58xuJi
+        9Fvu0jeHh6GKSXD64jRebUqQCnoKGUaXNAf9UCt2A4N8fhy4HCxFEzreb9aVRZOZ
+        M1sAg1tUlM0BwAK2wZjypN6M/uaj5QX/B4UOMZky4BDrHTySqkCt93CX+NejXEiN
+        CKh39ru6eu6qwWfKc4QJGfLhVLrbN+e/WzDL6xpOROk3dHzewUbCUOHbIunDgnRp
+        mtq8vPH/Dmc5RB8OcaydFGdDfehzPc01YZX4ubVNK4aZ/O72dWaSNF4dWNKvrqU9
+        9RCLeAGeUsymyOAI9ijGRXosNTcERTe5qEl29wIDAQABAoIBAHejQW/Rosy63NfH
+        Vrh7BB/Ydi8gTuKh5fkswUQeuo3vPEGbjBZZOeedy9b4SUbol5LqgOBBx8quNrZt
+        Rs4tvlp8qWXD2VXaKLtq8zhHOf8LM0sgCT6MwG0fA7GDJ3pxIW78AT0EQooKqTbo
+        qxwGITf+Hk7/OKMIedo8peV+9lkqTsAkvVAvSEKdERH0X+bo4IwWrGcqVUVHj8F9
+        T0TKVSe5m2GQh0w6nTWznIzJwu38b9oQSfp7RUql72zK/wKj+hQsUgJyMsZaGqVD
+        4iiRH/42oLShKeUrnPP2vi6U0WIHepW+W5qvXUI2X9+bbEPPqEvY1AICyXwyXReZ
+        kaV2YuECgYEA+C7lPueMiXI2uHTIoqasyyTD4ytpPPbO5TSZS9UZcqenzWsaaine
+        njN3PQSqmNODnJRSrRP3T06nk8TSqwS+hzfgLhP91ACO+6ftsP8YhSEh9srEbO/B
+        BUGbwPjM4gS9eBOUFmjruSAqHQfnkYkbHsY2OVE5V3wFkiEr/QnWHOMCgYEA0Cpi
+        +rSERh0q0XtfWDuQwGNyDQNJ20vV8lDrSxsFVZzbP+n9w23e16B97sYFIYZAPUpT
+        XYUkAJDtmrzErwzwAgT25+Fc1D8ke/A7jr1l6Vxi9EIDu/DPXICLT39jlSikTV46
+        66ikVZ024A6mEMzGz87KTieGQdHCIljR+00JDd0CgYEAu04BO+FbAlyNidaxmXe7
+        TzF3GVqo+Ra3/Ooei8nPg+WeUfz0GY1x8umaoxWDfwWa/bA/WVqJOnR9KpvP9rwE
+        4147NetmlPq67pjFXeCYa9kenfhYGHM1tLbYSuI7FpVHPXlhOSyEQtpQjkpp7T+R
+        lT84qzdu1GTIe4nHfhhPXMsCgYBsKAnDXvV3BIKR0vsn+dLs0v6YGkROh6mCvF50
+        aHauE9Cq9aWe28Az4rRr0kEqOPm5npuP9LRPAv4hLsE2fo9ZTUEIG8TClogbSSd4
+        s5l21USoyn/sL2NeGX/Ib1TLVBGCDVqpxLaVsRio85N/GRaXNEdSsiCEpDqs498+
+        Jbl1lQKBgD0HhINs9dCX200cqQYMlBH+XpemdoBViBuxr+AS+2zJcrpTsz4TCrOQ
+        4fIe6P1YEjYGa0TGdEraK0mVuyOaMwuqPMV17ASiJLFr7GoshxAcx/c7OuVXZKWj
+        jBgnP7PRm3kEOPIJMt5SARSbfBPMRmKWPUsMxP9LiFJCq8J3Kywz
+        -----END RSA PRIVATE KEY-----
+      pool: dirty
+  - name: dirty-watcher
+    type: git
+    source:
+      uri: https://github.com/jtarchie/resource-pool-test
+      path: ['dirty/unclaimed']
+
+jobs:
+  - name: create resource in pool
+    plan:
+      - task: generate resource
+        config:
+          platform: linux
+          image: /var/vcap/packages/git_resource
+          outputs:
+            - name: resource
+          run:
+            path: sh
+            args:
+              - -c
+              - |
+                touch resource/metadata
+                echo resource-$(date +%s) > resource/name
+      - put: dirty-pool
+        params:
+          add: resource
+
+  - name: gate-keeper
+    plan:
+      - get: dirty-watcher
+      - task: check
+        config:
+          platform: linux
+          image: /var/vcap/packages/git_resource
+          inputs:
+            - name: dirty-watcher
+          run:
+            path: sh
+            args:
+              - -c
+              - |
+                set -e
+                count=$(ls dirty-watcher/dirty/unclaimed | wc -l)
+                if test $count -eq 0
+                then
+                  echo 'No unclaimed resources'
+                  exit 1
+                fi
+                echo 'Unclaimed resources available'
+
+  - name: do-something-dirty
+    plan:
+      - get: dirty-watcher
+        passed: [ gate-keeper ]
+        trigger: true
+      - put: dirty-pool
+        params:
+          acquire: true
+
+

@@ -1,10 +1,14 @@
 #!/bin/sh
 
-release_names=`ls | grep buildpack-github-release | cut -d '-' -f 1`
+release_names=`ls | grep buildpack-github-release | sed 's/-buildpack-github-release//g'`
 
 for name in $release_names; do
   mkdir -p cf-release/blobs/$name-buildpack
-  filename=`cat cf-release/config/blobs.yml | grep $name-buildpack | cut -d ':' -f 1`
+  case $name in
+      *offline*) filename=`cat cf-release/config/blobs.yml | grep java-buildpack-offline | cut -d ':' -f 1`;;
+      *java*)    filename=`cat cf-release/config/blobs.yml | grep java-buildpack-v | cut -d ':' -f 1`;;
+      *)         filename=`cat cf-release/config/blobs.yml | grep $name-buildpack | cut -d ':' -f 1`;;
+  esac
   mv $name-buildpack-github-release/*.zip cf-release/blobs/$filename
 done
 
