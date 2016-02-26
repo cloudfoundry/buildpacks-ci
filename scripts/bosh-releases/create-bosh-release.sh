@@ -16,7 +16,7 @@ blobstore:
 EOF
 fi
 
-rm config/blobs.yml
+rm -f config/blobs.yml
 bosh -n add blob ../$BLOB_GLOB $BLOB_NAME
 bosh -n upload blobs
 
