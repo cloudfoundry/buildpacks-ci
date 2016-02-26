@@ -8,6 +8,7 @@ require "#{buildpacks_ci_dir}/lib/cve-logger"
 require "#{buildpacks_ci_dir}/lib/safe_execution"
 require "#{buildpacks_ci_dir}/lib/tracker-client"
 require "#{buildpacks_ci_dir}/lib/slack-client"
+require "#{buildpacks_ci_dir}/lib/buildpack-cve-tags"
 require "#{buildpacks_ci_dir}/lib/buildpack-cve-notifier"
 include SafeExecution
 
