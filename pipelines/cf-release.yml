@@ -229,6 +229,8 @@ jobs:
         - get: buildpacks-ci
         - get: cf-release
           resource: cf-release-develop
+          params:
+            submodules: none
         - get: java-buildpack-github-release
           passed: [ cats ]
         - get: java-offline-buildpack-github-release
