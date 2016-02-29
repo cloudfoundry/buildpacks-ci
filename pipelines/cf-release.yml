@@ -304,6 +304,15 @@ jobs:
         - get: cf-release
           resource: cf-release-develop
         - get: <%= language %>-buildpack-github-release
+          <% case language; when /offline/ %>
+          params:
+            globs:
+              - java-buildpack-offline-v*.zip
+          <% when /java/ %>
+          params:
+            globs:
+              - java-buildpack-v*.zip
+          <% end %>
           passed: [ bosh-release-<%= language %> ]
           trigger: true
       - do:
