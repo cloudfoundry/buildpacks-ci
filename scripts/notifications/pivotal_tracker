@@ -6,6 +6,8 @@ require "#{buildpacks_ci_dir}/lib/tracker-client"
 
 name = ARGV[0]
 description = ARGV[1]
+tasks_array = ARGV[2..-1]
+
 exit if description.empty?
 
 tracker_client = TrackerClient.new(
@@ -13,4 +15,4 @@ tracker_client = TrackerClient.new(
   ENV['TRACKER_PROJECT_ID'],
   ENV['TRACKER_REQUESTER_ID'].to_i
 )
-tracker_client.post_to_tracker name, description
+tracker_client.post_to_tracker name, description, tasks_array

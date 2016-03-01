@@ -85,7 +85,13 @@ jobs:
             - name: buildpacks-ci
           run:
             path: buildpacks-ci/scripts/notifications/pivotal_tracker
-            args: ['Pull latest changes from upstream', 'Check that there are no upstream changes that we are missing.']
+            args:
+              - 'Pull latest changes from upstream'
+              - 'Check that there are no upstream changes that we are missing.'
+              - 'Go'
+              - 'Nodejs'
+              - 'Python'
+              - 'Ruby'
           params:
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}

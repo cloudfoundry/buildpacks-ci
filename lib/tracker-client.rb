@@ -14,15 +14,18 @@ class TrackerClient
     raise 'invalid requester id for tracker' unless validate_number @requester_id
   end
 
-  def post_to_tracker(name, description)
+  def post_to_tracker(name, description, tasks)
     name = name.to_s
     raise 'requested tracker story has no title' unless validate_string name
     raise 'requested tracker story has no description' unless validate_string description
 
+    task_api_objs = tasks.map { |task| { description: task } }
+
     payload = {
       name: name,
       description: description,
-      requested_by_id: @requester_id
+      requested_by_id: @requester_id,
+      tasks: task_api_objs
     }.to_json
 
     create_story_uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories")
