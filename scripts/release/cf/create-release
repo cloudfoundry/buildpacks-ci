@@ -1,13 +1,19 @@
-#!/bin/sh
+#!/usr/bin/env ruby
 
-release_names=`ls | grep buildpack-github-release | cut -d '-' -f 1`
+require 'fileutils'
+require 'yaml'
+require_relative 'common'
 
-for name in $release_names; do
-  mkdir -p cf-release/blobs/$name-buildpack
-  filename=`cat cf-release/config/blobs.yml | grep $name-buildpack | cut -d ':' -f 1`
-  mv $name-buildpack-github-release/*.zip cf-release/blobs/$filename
-done
+release_names.each do |language|
+  FileUtils.mkdir_p File.join('cf-release', 'blobs', "#{language}-buildpack")
+  blobs = YAML.load File.read('cf-release/config/blobs.yml')
+  key = find_buildpack_key blobs, language
+  src = Dir["#{language}-buildpack-github-release/*.zip"].first
+  next unless src
+  dst = "cf-release/blobs/#{key}"
+  FileUtils.mv src, dst
+end
 
-cd cf-release
-bundle
-bosh create release --force --with-tarball --name cf --version 212.0.`date +"%s"`
+Dir.chdir 'cf-release' do
+  system %Q[bundle && bosh create release --force --with-tarball --name cf --version 212.0.#{Time.now.to_i}]
+end
