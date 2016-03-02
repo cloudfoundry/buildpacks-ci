@@ -28,8 +28,8 @@ RUN chmod +x /usr/local/bin/docker
 RUN git clone http://github.com/luan/vimfiles.git ~/.vim
 RUN ~/.vim/install
 
-RUN git config --global user.email "ci@localhost"
-RUN git config --global user.name "CI Bot"
+RUN git config --global user.email "cf-buildpacks-eng@pivotal.io"
+RUN git config --global user.name "CF Buildpacks Team CI Server"
 RUN git config --global core.pager cat
 
 RUN wget -q https://releases.hashicorp.com/vagrant/1.8.1/vagrant_1.8.1_x86_64.deb \
