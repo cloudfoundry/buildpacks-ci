@@ -43,7 +43,7 @@ chmod 644 config/blobs.yml
 git config --global user.email "cf-buildpacks-eng@pivotal.io"
 git config --global user.name "CF Buildpacks Team CI Server"
 
-# ./scripts/setup-git-hooks
+./scripts/setup-git-hooks
 
 version=`cat ../version/number`
 git commit -m "Bump rootfs to $version" -- config/blobs.yml spec/fixtures/receipts packages/rootfs_cflinuxfs2/packaging packages/rootfs_cflinuxfs2/spec
