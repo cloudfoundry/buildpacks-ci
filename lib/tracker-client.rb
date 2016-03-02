@@ -14,7 +14,7 @@ class TrackerClient
     raise 'invalid requester id for tracker' unless validate_number @requester_id
   end
 
-  def post_to_tracker(name, description, tasks)
+  def post_to_tracker(name, description, tasks=[])
     name = name.to_s
     raise 'requested tracker story has no title' unless validate_string name
     raise 'requested tracker story has no description' unless validate_string description
