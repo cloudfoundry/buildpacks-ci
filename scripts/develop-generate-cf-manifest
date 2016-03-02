@@ -39,8 +39,5 @@ ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CF_CI_PASSWORD'])" bosh-lite/de
 cd ../deployments-buildpacks
 cp ../cf-release/bosh-lite/deployments/cf.yml deployments/$DEPLOYMENT_NAME/manifest.yml
 
-git config --global user.email "ci@localhost"
-git config --global user.name "CI Bot"
-
 git add deployments/$DEPLOYMENT_NAME/manifest.yml
 git diff-index --quiet HEAD deployments/$DEPLOYMENT_NAME/manifest.yml || git commit -qm "Update manifest for $DEPLOYMENT_NAME"

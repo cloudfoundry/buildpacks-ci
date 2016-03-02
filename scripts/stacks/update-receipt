@@ -5,8 +5,6 @@ set -e
 cp receipt-s3/cflinuxfs2_receipt-* stacks/cflinuxfs2/cflinuxfs2_receipt
 
 cd stacks
-git config --global user.email "cf-buildpacks-eng@pivotal.io"
-git config --global user.name "CF Buildpacks Team CI Server"
 
 version=`cat ../version/number`
 git commit -m "Commit receipt for $version" -- cflinuxfs2/cflinuxfs2_receipt

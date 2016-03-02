@@ -23,9 +23,6 @@ main() {
 
   bosh -n upload blobs
 
-  git config --global user.email "cf-buildpacks-eng@pivotal.io"
-  git config --global user.name "CF Buildpacks Team CI Server"
-
   git add -A
   git commit -m "Bump stacks-release to $version"
   popd

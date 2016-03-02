@@ -2,9 +2,6 @@
 
 set -e
 
-git config --global user.email "ci@localhost"
-git config --global user.name "CI Bot"
-
 cd buildpack/compile-extensions
 git checkout master
 git pull origin master

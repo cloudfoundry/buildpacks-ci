@@ -21,7 +21,5 @@ export GITHUB_CREDENTIALS=$GITHUB_USER:$GITHUB_PASSWORD
 
 pushd cf-release
 ../buildpacks-ci/scripts/release/jenkins_git_credentials add
-git config --global user.email "cf-buildpacks-eng@pivotal.io"
-git config --global user.name "CF Buildpacks Team CI Server"
 ../buildpacks-ci/scripts/release/add_to_cf_release ../pivotal-buildpacks-cached/*_buildpack-cached-v*.zip
 popd

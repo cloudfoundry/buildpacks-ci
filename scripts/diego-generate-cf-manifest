@@ -49,9 +49,6 @@ cp ../cf-release/bosh-lite/deployments/cf.yml deployments/$DEPLOYMENT_NAME/manif
 cp ../diego-release/bosh-lite/deployments/diego.yml deployments/$DEPLOYMENT_NAME/diego.yml
 cp ../diego-release/bosh-lite/deployments/diego-acceptance-tests.yml deployments/$DEPLOYMENT_NAME/diego-acceptance-tests.yml
 
-git config --global user.email "ci@localhost"
-git config --global user.name "CI Bot"
-
 git add deployments/$DEPLOYMENT_NAME/manifest.yml
 git add deployments/$DEPLOYMENT_NAME/diego.yml
 git add deployments/$DEPLOYMENT_NAME/diego-acceptance-tests.yml

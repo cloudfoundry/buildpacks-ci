@@ -40,9 +40,6 @@ ruby -ryaml -e "
 bosh -n upload blobs
 chmod 644 config/blobs.yml
 
-git config --global user.email "cf-buildpacks-eng@pivotal.io"
-git config --global user.name "CF Buildpacks Team CI Server"
-
 ./scripts/setup-git-hooks
 
 version=`cat ../version/number`
