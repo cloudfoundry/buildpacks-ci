@@ -28,8 +28,12 @@ def buildpack_destination_dir language
   "#{language}-buildpack"
 end
 
+version = ''
+
 languages.each do |language|
   buildpack_blob = Dir["../#{language}-buildpack-github-release/*.zip"].first
+  matches = /v([\d\.]+)\.zip/.match(buildpack_blob)
+  version = matches[1] if matches.size > 1
 
   destination_dir = buildpack_destination_dir(language)
   system "rm -f blobs/#{destination_dir}"
@@ -58,5 +62,5 @@ exit system(<<-EOF)
   git checkout $ref
   cd ../..
   git add -A
-  git commit -am "bump $BUILDPACK_NAME"
+  git commit -am "Update $BUILDPACK_NAME to v#{version}"
 EOF
