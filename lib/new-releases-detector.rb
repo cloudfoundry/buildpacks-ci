@@ -51,17 +51,18 @@ class NewReleasesDetector
   def tags
     @get_tags_functions = {
       cfrelease: -> { Octokit.tags('cloudfoundry/cf-release').map(&:name).grep(/^v/) },
-      ruby:      -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) },
-      jruby:     -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
-      nginx:     -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release/) },
-      php:       -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
+      composer:  -> { Octokit.tags('composer/composer').map(&:name) },
       go:        -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
-      nodejs:    -> { Octokit.tags('nodejs/node').map(&:name).grep(/^v/) },
-      httpd:     -> { Octokit.tags('apache/httpd').map(&:name).grep(/^2\./) },
-      maven:     -> { Octokit.tags('apache/maven').map(&:name).grep(/^maven/) },
-      python:    -> { JSON.parse(open('https://hg.python.org/cpython/json-tags').read)['tags'].map { |t| t['tag'] } },
       godep:     -> { Octokit.tags('tools/godep').map(&:name).grep(/^v/) },
-      openjdk:   -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys }
+      httpd:     -> { Octokit.tags('apache/httpd').map(&:name).grep(/^2\./) },
+      jruby:     -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
+      maven:     -> { Octokit.tags('apache/maven').map(&:name).grep(/^maven/) },
+      nginx:     -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release/) },
+      nodejs:    -> { Octokit.tags('nodejs/node').map(&:name).grep(/^v/) },
+      openjdk:   -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys },
+      php:       -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
+      python:    -> { JSON.parse(open('https://hg.python.org/cpython/json-tags').read)['tags'].map { |t| t['tag'] } },
+      ruby:      -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) }
     }
   end
 end
