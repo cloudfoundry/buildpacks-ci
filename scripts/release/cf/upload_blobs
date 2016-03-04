@@ -23,7 +23,7 @@ blob_store_private_yml = {
 
 File.write('config/private.yml', blob_store_private_yml)
 
-def buildpack_destination_dir language
+def buildpack_destination_dir(language)
   language = 'java' if language =~ /offline/
   "#{language}-buildpack"
 end

@@ -33,15 +33,15 @@ HERE
               "-i #{language}-buildpack-github-release=./spec/scripts/release/cf/upload_blobs/#{language}-buildpack-github-release")
     end
 
-    let(:dirs) { run("ls /tmp/build/*/cf-release/blobs").lines.map {|dir| File.basename dir.strip } }
+    let(:dirs) { run('ls /tmp/build/*/cf-release/blobs').lines.map { |dir| File.basename dir.strip } }
 
     context 'for java-offline buildpack' do
       let(:language) { 'java-offline' }
 
       it 'removes the corresponding key from the blobs.yml' do
-        blobs = run("cat /tmp/build/*/cf-release/config/blobs.yml")
+        blobs = run('cat /tmp/build/*/cf-release/config/blobs.yml')
         parsed_blobs = YAML.load blobs
-        key = parsed_blobs.find {|k,_| k == 'java-buildpack/java-buildpack-offline-v3.6.zip' }
+        key = parsed_blobs.find { |k, _| k == 'java-buildpack/java-buildpack-offline-v3.6.zip' }
         expect(parsed_blobs.keys.count).to eq(2)
         expect(key).to be_nil
       end
@@ -55,9 +55,9 @@ HERE
       let(:language) { 'java' }
 
       it 'removes the corresponding key from the blobs.yml' do
-        blobs = run("cat /tmp/build/*/cf-release/config/blobs.yml")
+        blobs = run('cat /tmp/build/*/cf-release/config/blobs.yml')
         parsed_blobs = YAML.load blobs
-        key = parsed_blobs.find {|k,_| k == 'java-buildpack/java-buildpack-v3.6.zip' }
+        key = parsed_blobs.find { |k, _| k == 'java-buildpack/java-buildpack-v3.6.zip' }
         expect(parsed_blobs.keys.count).to eq(2)
         expect(key).to be_nil
       end
@@ -71,9 +71,9 @@ HERE
       let(:language) { 'go' }
 
       it 'removes the corresponding key from the blobs.yml' do
-        blobs = run("cat /tmp/build/*/cf-release/config/blobs.yml")
+        blobs = run('cat /tmp/build/*/cf-release/config/blobs.yml')
         parsed_blobs = YAML.load blobs
-        key = parsed_blobs.find {|k,_| k == 'go-buildpack/go_buildpack-cached-v1.7.2.zip' }
+        key = parsed_blobs.find { |k, _| k == 'go-buildpack/go_buildpack-cached-v1.7.2.zip' }
         expect(parsed_blobs.keys.count).to eq(2)
         expect(key).to be_nil
       end
