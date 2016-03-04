@@ -1,3 +1,4 @@
+<% supported_languages = %w(go ruby binary staticfile nodejs php python java java-offline) %>
 ---
 resources:
   - name: buildpacks-ci
@@ -101,6 +102,27 @@ resources:
       uri: git@github.com:cloudfoundry/buildpack-releases.git
       private_key: {{buildpack-releases-private-key}}
       branch: master
+
+groups:
+  - name: buildpacks
+    jobs:
+      - deploy-cf-to-cf-release-ci-8
+      - cats
+      - ship-it
+<% supported_languages.each do |language| %>
+      - bosh-release-<%= language %>
+      - cf-release for <%= language %>
+<% end %>
+  - name: java
+    jobs:
+      - deploy-cf-to-cf-release-ci-8
+      - cats
+      - ship-it-java
+      - bosh-release-java
+      - bosh-release-java-offline
+      - cf-release for java
+      - cf-release for java-offline
+
 jobs:
   - name: deploy-cf-to-cf-release-ci-8
     serial: true
@@ -231,10 +253,6 @@ jobs:
           resource: cf-release-develop
           params:
             submodules: none
-        - get: java-buildpack-github-release
-          passed: [ cats ]
-        - get: java-offline-buildpack-github-release
-          passed: [ cats ]
         - get: go-buildpack-github-release
           passed: [ cats ]
         - get: nodejs-buildpack-github-release
@@ -249,7 +267,20 @@ jobs:
           passed: [ cats ]
         - get: binary-buildpack-github-release
           passed: [ cats ]
-<% %w(go ruby binary staticfile nodejs php python java java-offline).each do |language| %>
+  - name: ship-it-java
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: cf-release
+          resource: cf-release-develop
+          params:
+            submodules: none
+        - get: java-buildpack-github-release
+          passed: [ cats ]
+        - get: java-offline-buildpack-github-release
+          passed: [ cats ]
+<% supported_languages.each do |language| %>
   - name: bosh-release-<%= language %>
     serial: true
     plan:
@@ -260,7 +291,7 @@ jobs:
         - get: blob
           resource: <%= language %>-buildpack-github-release
           trigger: true
-          passed: [ ship-it ]
+          passed: [ <%= language.include?('java') ? 'ship-it-java' : 'ship-it' %> ]
       - do:
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version.yml
