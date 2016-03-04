@@ -3,69 +3,16 @@
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 
-require "#{buildpacks_ci_dir}/lib/cve-tags"
-require "#{buildpacks_ci_dir}/lib/cve-logger"
-require "#{buildpacks_ci_dir}/lib/safe_execution"
-require "#{buildpacks_ci_dir}/lib/tracker-client"
-require "#{buildpacks_ci_dir}/lib/slack-client"
 require "#{buildpacks_ci_dir}/lib/buildpack-cve-tags"
 require "#{buildpacks_ci_dir}/lib/buildpack-cve-notifier"
-include SafeExecution
+require "#{buildpacks_ci_dir}/lib/stack-cve-notifier"
+require "#{buildpacks_ci_dir}/lib/cve-logger"
 
 stacks_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'stacks'))
 cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'new-cves'))
 cve_logger = CVELogger.new(cves_dir)
 
-systems = {
-  'ubuntu14.04' => 'Ubuntu 14.04'
-}
-
-systems.each do |system_shorthand, system_name|
-  cve_filename = "#{system_shorthand}.yaml"
-
-  rss_cves = CVETags.new(stacks_dir).related_cves(system_name)
-
-  rss_cve_titles = rss_cves.map { |cve| cve[:title] }
-  yaml_cve_titles = cve_logger.read_yaml_cves(cve_filename)
-
-  new_cve_titles = rss_cve_titles - yaml_cve_titles
-  new_cves = rss_cves.select { |cve| new_cve_titles.include? cve[:title] }
-
-  next if new_cves.empty?
-  tracker_title = "address: #{new_cve_titles}"
-  tracker_description = new_cves.map { |cve| cve[:description] }.join
-
-  tracker_client = TrackerClient.new(
-    ENV['TRACKER_API_TOKEN'],
-    ENV['TRACKER_PROJECT_ID'],
-    ENV['TRACKER_REQUESTER_ID'].to_i
-  )
-
-  tracker_client.post_to_tracker tracker_title, tracker_description
-
-  slack_output = "There are *#{new_cves.length}* new CVEs:\n"
-
-  new_cves.each do |cve|
-    slack_output << "- #{cve[:title]}*\n"
-  end
-
-  slack_client = SlackClient.new(
-    ENV['SLACK_WEBHOOK'],
-    ENV['SLACK_CHANNEL'],
-    'dependency-notifier'
-  )
-  slack_client.post_to_slack slack_output
-
-  cve_logger.write_yaml_cves(
-    rss_cve_titles | yaml_cve_titles,
-    File.join(cves_dir, cve_filename)
-  )
-
-  Dir.chdir(cves_dir) do
-    execute_with_console_logging!('git add -A')
-    execute_with_console_logging!("git commit -m 'CVE update'")
-  end
-end
+StackCVENotifier.new(cve_logger, cves_dir, stacks_dir).run!('Ubuntu 14.04', 'ubuntu14.04')
 
 languages = ['ruby']
 languages.each do |language|
