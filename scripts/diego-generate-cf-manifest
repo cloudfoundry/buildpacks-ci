@@ -47,9 +47,7 @@ popd
 cd deployments-buildpacks
 cp ../cf-release/bosh-lite/deployments/cf.yml deployments/$DEPLOYMENT_NAME/manifest.yml
 cp ../diego-release/bosh-lite/deployments/diego.yml deployments/$DEPLOYMENT_NAME/diego.yml
-cp ../diego-release/bosh-lite/deployments/diego-acceptance-tests.yml deployments/$DEPLOYMENT_NAME/diego-acceptance-tests.yml
 
 git add deployments/$DEPLOYMENT_NAME/manifest.yml
 git add deployments/$DEPLOYMENT_NAME/diego.yml
-git add deployments/$DEPLOYMENT_NAME/diego-acceptance-tests.yml
 git diff-index --quiet HEAD deployments/$DEPLOYMENT_NAME/manifest.yml || git commit -qm "Update manifest for $DEPLOYMENT_NAME"
