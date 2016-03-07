@@ -301,7 +301,7 @@ jobs:
       - put: cf-environments
         resource: cf-edge-environments
         params:
-          claim: bp-ci-8
+          claim: edge-1.buildpacks.ci
       - aggregate:
         - get: buildpacks-ci
         - get: deployments-buildpacks

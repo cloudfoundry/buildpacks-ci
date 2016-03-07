@@ -225,7 +225,7 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: deployments-buildpacks
-<% if deployment_name.include?('bp-ci-8') %>
+<% if deployment_name.include?('edge') %>
           passed: ['deploy-diego']
 <% else %>
           passed: ['deploy-cf']
