@@ -1,0 +1,10 @@
+---
+deployment-name: edge-1
+resource-pool: cf-edge-environments
+cf-version: 231
+diego-version: 0.1455.0
+garden-linux-version: 0.334.0
+etcd-version: 36
+generate-manifest: buildpacks-ci/tasks/diego-make-manifest.yml
+cf-manifest-location: deployments-buildpacks/deployments/edge-1/manifest.yml
+diego-manifest-location: deployments-buildpacks/deployments/edge-1/diego.yml
