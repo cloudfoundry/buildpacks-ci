@@ -30,10 +30,10 @@ resources:
       uri: git@github.com:pivotal-cf/deployments-buildpacks
       private_key: {{deployments-private-key}}
       branch: master
-  - name: cf-release-ci-8-cf-deployment
+  - name: cf-release-deployment
     type: bosh-deployment
     source:
-      target: https://cf-release-ci-8.cf-app.com:25555
+      target: https://cf-release.buildpacks.ci.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden
@@ -106,7 +106,7 @@ resources:
 groups:
   - name: buildpacks
     jobs:
-      - deploy-cf-to-cf-release-ci-8
+      - deploy-cf-to-cf-release
       - cats
       - ship-it
 <% supported_languages.each do |language| %>
@@ -115,7 +115,7 @@ groups:
 <% end %>
   - name: java
     jobs:
-      - deploy-cf-to-cf-release-ci-8
+      - deploy-cf-to-cf-release
       - cats
       - ship-it-java
       - bosh-release-java
@@ -124,9 +124,9 @@ groups:
       - cf-release for java-offline
 
 jobs:
-  - name: deploy-cf-to-cf-release-ci-8
+  - name: deploy-cf-to-cf-release
     serial: true
-    serial_groups: [ cf-release-ci-8 ]
+    serial_groups: [ cf-release ]
     plan:
       - do:
         - aggregate:
@@ -142,7 +142,7 @@ jobs:
             run:
               path: buildpacks-ci/scripts/recreate-bosh-lite
             params:
-              DEPLOYMENT_NAME: cf-release-ci-8
+              DEPLOYMENT_NAME: cf-release.buildpacks.ci
               PASSWORD: {{bosh-lite-password}}
           ensure:
             put: deployments-buildpacks
@@ -172,7 +172,7 @@ jobs:
           file: buildpacks-ci/tasks/develop-make-manifest.yml
           config:
             params:
-              DEPLOYMENT_NAME: cf-release-ci-8
+              DEPLOYMENT_NAME: cf-release.buildpacks.ci
               CF_CI_PASSWORD: {{ci-cf-password}}
           privileged: true
         - put: deployments-buildpacks
@@ -181,46 +181,46 @@ jobs:
         - task: create-cf-release
           file: buildpacks-ci/tasks/create-release.yml
           privileged: true
-        - put: cf-release-ci-8-cf-deployment
+        - put: cf-release-deployment
           params:
-            manifest: deployments-buildpacks/deployments/cf-release-ci-8/manifest.yml
+            manifest: deployments-buildpacks/deployments/cf-release.buildpacks.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [create-cf-release/cf-release/dev_releases/cf/*.tgz]
         on_failure:
           put: failure-alert
           params:
-            text: "cf-release deploy-cf-to-cf-release-ci-8 job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/cf-release/jobs/deploy-cf-to-cf-release-ci-8"
+            text: "cf-release deploy-cf-to-cf-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/cf-release/jobs/deploy-cf-to-cf-release"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: cats
     serial: true
-    serial_groups: [ cf-release-ci-8 ]
+    serial_groups: [ cf-release ]
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: cf-release
-          passed: [ deploy-cf-to-cf-release-ci-8 ]
+          passed: [ deploy-cf-to-cf-release ]
           trigger: true
         - get: deployments-buildpacks
         - get: java-buildpack-github-release
-          passed: [ deploy-cf-to-cf-release-ci-8 ]
+          passed: [ deploy-cf-to-cf-release ]
         - get: java-offline-buildpack-github-release
-          passed: [ deploy-cf-to-cf-release-ci-8 ]
+          passed: [ deploy-cf-to-cf-release ]
         - get: go-buildpack-github-release
-          passed: [ deploy-cf-to-cf-release-ci-8 ]
+          passed: [ deploy-cf-to-cf-release ]
         - get: nodejs-buildpack-github-release
-          passed: [ deploy-cf-to-cf-release-ci-8 ]
+          passed: [ deploy-cf-to-cf-release ]
         - get: python-buildpack-github-release
-          passed: [ deploy-cf-to-cf-release-ci-8 ]
+          passed: [ deploy-cf-to-cf-release ]
         - get: ruby-buildpack-github-release
-          passed: [ deploy-cf-to-cf-release-ci-8 ]
+          passed: [ deploy-cf-to-cf-release ]
         - get: php-buildpack-github-release
-          passed: [ deploy-cf-to-cf-release-ci-8 ]
+          passed: [ deploy-cf-to-cf-release ]
         - get: staticfile-buildpack-github-release
-          passed: [ deploy-cf-to-cf-release-ci-8 ]
+          passed: [ deploy-cf-to-cf-release ]
         - get: binary-buildpack-github-release
-          passed: [ deploy-cf-to-cf-release-ci-8 ]
+          passed: [ deploy-cf-to-cf-release ]
       - do:
         - task: cats
           config:
@@ -233,7 +233,7 @@ jobs:
             run:
               path: buildpacks-ci/scripts/cats
             params:
-              DEPLOYMENT_NAME: cf-release-ci-8
+              DEPLOYMENT_NAME: cf-release.buildpacks.ci
               CI_CF_USERNAME: {{ci-cf-username}}
               CI_CF_PASSWORD: {{ci-cf-password}}
           privileged: true
