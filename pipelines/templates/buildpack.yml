@@ -38,6 +38,9 @@ resources:
       uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
+      ignore_paths:
+        - VERSION
+        - CHANGELOG
   - name: buildpack-master
     type: git
     source:
