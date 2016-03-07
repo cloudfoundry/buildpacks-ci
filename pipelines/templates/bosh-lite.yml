@@ -2,7 +2,7 @@ resources:
   - name: nightly-trigger
     type: cron
     source:
-      expression: 1 0 * * *
+      expression: 1 <%= rand(10).to_i %> * * *
       location: America/New_York
   - name: cf-deployment
     type: bosh-deployment
@@ -57,6 +57,7 @@ jobs:
       - put: resource-pools
         params:
           claim: {{deployment-name}}
+        timeout: 3h
   - name: recreate-bosh-lite
     serial_groups: [ deploy ]
     serial: true
