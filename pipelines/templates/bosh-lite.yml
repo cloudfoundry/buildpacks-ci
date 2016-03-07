@@ -91,6 +91,8 @@ jobs:
     plan:
       - aggregate:
         - get: deployments-buildpacks
+          passed: ['recreate-bosh-lite']
+          trigger: true
         - get: resource-pools
           passed: ['recreate-bosh-lite']
           trigger: true
@@ -128,6 +130,8 @@ jobs:
     plan:
       - aggregate:
         - get: deployments-buildpacks
+          passed: ['generate-manifest']
+          trigger: true
         - get: resource-pools
           passed: ['generate-manifest']
           trigger: true
@@ -166,6 +170,8 @@ jobs:
     plan:
       - aggregate:
         - get: deployments-buildpacks
+          passed: ['deploy-cf']
+          trigger: true
         - get: resource-pools
           passed: ['deploy-cf']
           trigger: true
@@ -219,6 +225,12 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: deployments-buildpacks
+<% if deployment_name.include?('bp-ci-8') %>
+          passed: ['deploy-diego']
+<% else %>
+          passed: ['deploy-cf']
+<% end %>
+          trigger: true
         - get: resource-pools
 <% if deployment_name.include?('bp-ci-8') %>
           passed: ['deploy-diego']
