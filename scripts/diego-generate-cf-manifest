@@ -27,7 +27,7 @@ properties:
     include_sso: false
     include_v3: false
   cc:
-    default_to_diego_backend: $(ruby -e "puts ENV['DEPLOYMENT_NAME'].end_with?('b').to_s")
+    default_to_diego_backend: $(ruby -e "puts(ENV['DEPLOYMENT_NAME'] == 'edge-2.buildpacks.ci')")
 
 jobs:
 - name: api_z1

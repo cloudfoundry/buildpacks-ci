@@ -2,7 +2,7 @@ resources:
   - name: nightly-trigger
     type: cron
     source:
-      expression: 1 <%= rand(10).to_i %> * * *
+      expression: <%= deployment_name.hash % 10 %> 0 * * *
       location: America/New_York
   - name: cf-deployment
     type: bosh-deployment
@@ -105,7 +105,7 @@ jobs:
             params:
               RELEASE_NAME: cloudfoundry/cf-release
               RELEASE_VERSION: {{cf-version}}
-<% if deployment_name.include?('bp-ci-8') %>
+<% if deployment_name.include?('edge') %>
         - task: diego-release
           file: buildpacks-ci/tasks/checkout-release.yml
           config:
@@ -163,7 +163,7 @@ jobs:
           stemcells: ['bosh-stemcell/stemcell.tgz']
           releases:
             - cf-release-tarball/release.tgz
-<% if deployment_name.include?('bp-ci-8') %>
+<% if deployment_name.include?('edge') %>
   - name: deploy-diego
     serial_groups: [ deploy ]
     serial: true
@@ -232,7 +232,7 @@ jobs:
 <% end %>
           trigger: true
         - get: resource-pools
-<% if deployment_name.include?('bp-ci-8') %>
+<% if deployment_name.include?('edge') %>
           passed: ['deploy-diego']
 <% else %>
           passed: ['deploy-cf']
