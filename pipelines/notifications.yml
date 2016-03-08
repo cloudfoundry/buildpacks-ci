@@ -87,7 +87,7 @@ jobs:
             path: buildpacks-ci/scripts/notifications/pivotal_tracker
             args:
               - 'Pull latest changes from upstream'
-              - 'Check that there are no upstream changes that we are missing.'
+              - 'Check that there are no upstream changes that we are missing. Consult google doc https://sites.google.com/a/pivotal.io/cloudfoundry-buildpacks/check-lists/merging-from-upstream-buildpacks for more details.'
               - 'Go'
               - 'Nodejs'
               - 'Python'
