@@ -6,13 +6,13 @@ buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..
 require "#{buildpacks_ci_dir}/lib/buildpack-cve-tags"
 require "#{buildpacks_ci_dir}/lib/buildpack-cve-notifier"
 require "#{buildpacks_ci_dir}/lib/stack-cve-notifier"
-require "#{buildpacks_ci_dir}/lib/cve-logger"
+require "#{buildpacks_ci_dir}/lib/cve-history"
 
 stacks_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'stacks'))
 cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'new-cves'))
-cve_logger = CVELogger.new(cves_dir)
+cve_history = CVEHistory.new(cves_dir)
 
-StackCVENotifier.new(cve_logger, cves_dir, stacks_dir).run!('Ubuntu 14.04', 'ubuntu14.04')
+StackCVENotifier.new(cve_history, cves_dir, stacks_dir).run!('Ubuntu 14.04', 'ubuntu14.04')
 
 languages = ['ruby']
 languages.each do |language|
