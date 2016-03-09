@@ -37,6 +37,16 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/stacks
       branch: master
+  - name: cves-email
+    type: email
+    source:
+      smtp:
+        host: email-smtp.us-east-1.amazonaws.com
+        port: "25"
+        username: {{cve-amazon-ses-smtp-username}}
+        password: {{cve-amazon-ses-smtp-password}}
+      from: cf-buildpacks-eng@pivotal.io
+      to: ["cf-security@pivotal.io"]
 
 jobs:
   - name: New Releases
@@ -103,9 +113,9 @@ jobs:
         - get: buildpacks-ci
         - get: new-cves
         - get: new-buildpack-cves
+        - get: stacks
         - get: check-interval
           trigger: true
-        - get: stacks
       - task: notify
         config:
           platform: linux
@@ -115,11 +125,14 @@ jobs:
             - name: new-buildpack-cves
             - name: buildpacks-ci
             - name: stacks
+          outputs:
+            - name: cves-email
+            - name: output-new-cves
           run:
             path: bash
             args:
               - -c
-              - "cd buildpacks-ci/ && bundle && bundle exec ./scripts/notifications/check-cves"
+              - "git clone ./new-cves ./output-new-cves && cd buildpacks-ci/ && bundle && bundle exec ./scripts/notifications/check-cves"
           params:
             SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
             SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
@@ -128,11 +141,24 @@ jobs:
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+            EMAIL_PREPARER_DIR: ../cves-email
       - put: new-cves
         params:
-          repository: notify/new-cves
+          repository: output-new-cves
           rebase: true
       - put: new-buildpack-cves
         params:
           repository: notify/new-buildpack-cves
           rebase: true
+      - put: stacks-related-new-cves-email
+        resource: cves-email
+        params:
+          subject: cves-email/subject-stacks-related
+          body: cves-email/body-stacks-related
+          headers: cves-email/headers-stacks-related
+      - put: stacks-unrelated-new-cves-email
+        resource: cves-email
+        params:
+          subject: cves-email/subject-stacks-unrelated
+          body: cves-email/body-stacks-unrelated
+          headers: cves-email/headers-stacks-unrelated
