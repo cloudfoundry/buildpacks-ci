@@ -128,11 +128,17 @@ jobs:
           outputs:
             - name: cves-email
             - name: output-new-cves
+            - name: output-new-buildpack-cves
           run:
             path: bash
             args:
               - -c
-              - "git clone ./new-cves ./output-new-cves && cd buildpacks-ci/ && bundle && bundle exec ./scripts/notifications/check-cves"
+              - |
+                git clone ./new-cves ./output-new-cves && \
+                git clone ./new-buildpack-cves ./output-new-buildpack-cves && \
+                cd buildpacks-ci/ && \
+                bundle && \
+                bundle exec ./scripts/notifications/check-cves
           params:
             SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
             SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
@@ -148,7 +154,7 @@ jobs:
           rebase: true
       - put: new-buildpack-cves
         params:
-          repository: notify/new-buildpack-cves
+          repository: output-new-buildpack-cves
           rebase: true
       - put: stacks-related-new-cves-email
         resource: cves-email
