@@ -48,10 +48,10 @@ resources:
       uri: git@github.com:pivotal-cf/deployments-buildpacks
       private_key: {{deployments-private-key}}
       branch: master
-  - name: stack-cf-develop-cf-deployment
+  - name: stacks-cf-deployment
     type: bosh-deployment
     source:
-      target: https://stack-cf-develop.buildpacks.ci.cf-app.com:25555
+      target: https://stacks.buildpacks.ci.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden
@@ -164,9 +164,9 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: deploy-cf-to-stack-cf-develop
+  - name: deploy-cf-to-stacks
     serial: true
-    serial_groups: [ stack-cf-develop ]
+    serial_groups: [ stacks ]
     plan:
       - aggregate:
         - get: deployments-buildpacks
@@ -194,7 +194,7 @@ jobs:
             run:
               path: buildpacks-ci/scripts/recreate-bosh-lite
             params:
-              DEPLOYMENT_NAME: stack-cf-develop.buildpacks.ci
+              DEPLOYMENT_NAME: stacks.buildpacks.ci
               PASSWORD: {{bosh-lite-password}}
           ensure:
             put: deployments-buildpacks
@@ -205,7 +205,7 @@ jobs:
           file: buildpacks-ci/tasks/develop-make-manifest.yml
           config:
             params:
-              DEPLOYMENT_NAME: stack-cf-develop.buildpacks.ci
+              DEPLOYMENT_NAME: stacks.buildpacks.ci
               CF_CI_PASSWORD: {{ci-cf-password}}
           privileged: true
         - put: deployments-buildpacks
@@ -223,36 +223,36 @@ jobs:
             run:
               path: buildpacks-ci/scripts/stacks/create-release
           privileged: true
-        - put: stack-cf-develop-cf-deployment
+        - put: stacks-cf-deployment
           params:
-            manifest: deployments-buildpacks/deployments/stack-cf-develop.buildpacks.ci/manifest.yml
+            manifest: deployments-buildpacks/deployments/stacks.buildpacks.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [create-stack-release/cf-release/dev_releases/cf/*.tgz]
         on_failure:
           put: failure-alert
           params:
-            text: "stacks deploy-cf-to-stack-cf-develop job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/deploy-cf-to-stack-cf-develop"
+            text: "stacks deploy-cf-to-stacks job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/deploy-cf-to-stacks"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: cats
     serial: true
-    serial_groups: [ stack-cf-develop ]
+    serial_groups: [ stacks ]
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: cf-release
-          passed: [ deploy-cf-to-stack-cf-develop ]
+          passed: [ deploy-cf-to-stacks ]
         - get: deployments-buildpacks
         - get: stack-s3
-          passed: [ deploy-cf-to-stack-cf-develop ]
+          passed: [ deploy-cf-to-stacks ]
         - get: version
-          passed: [ deploy-cf-to-stack-cf-develop ]
+          passed: [ deploy-cf-to-stacks ]
           trigger: true
         - get: receipt-s3
-          passed: [ deploy-cf-to-stack-cf-develop ]
+          passed: [ deploy-cf-to-stacks ]
         - get: stacks
-          passed: [ deploy-cf-to-stack-cf-develop ]
+          passed: [ deploy-cf-to-stacks ]
       - do:
         - task: cats
           config:
@@ -265,7 +265,7 @@ jobs:
             run:
               path: buildpacks-ci/scripts/cats
             params:
-              DEPLOYMENT_NAME: stack-cf-develop.buildpacks.ci
+              DEPLOYMENT_NAME: stacks.buildpacks.ci
               CI_CF_USERNAME: {{ci-cf-username}}
               CI_CF_PASSWORD: {{ci-cf-password}}
           privileged: true
