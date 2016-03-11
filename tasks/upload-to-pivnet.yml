@@ -5,6 +5,7 @@ inputs:
   - name: buildpacks-ci
   - name: buildpacks-pivnet-uploader
   - name: pivotal-buildpacks-cached
-  - name: finalize-buildpack
+  - name: buildpack-artifacts
+  - name: buildpack
 run:
   path: buildpacks-ci/scripts/release/upload_to_pivnet

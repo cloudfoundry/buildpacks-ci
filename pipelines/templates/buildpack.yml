@@ -258,16 +258,16 @@ jobs:
         privileged: true
       - put: buildpack-checksums
         params:
-          repository: commit-shas/buildpack-checksums
+          repository: sha-artifacts
           rebase: true
       - put: buildpack-github-release
         params:
-          name: finalize-buildpack/tag
-          tag: finalize-buildpack/tag
-          body: finalize-buildpack/buildpack/RECENT_CHANGES
+          name: buildpack-artifacts/tag
+          tag: buildpack-artifacts/tag
+          body: buildpack-artifacts/RECENT_CHANGES
           globs:
-            - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip
-            - finalize-buildpack/pivotal-buildpacks-cached/*_buildpack-cached-v*.zip.SHA256SUM.txt
+            - buildpack-artifacts/*_buildpack-cached-v*.zip
+            - buildpack-artifacts/*_buildpack-cached-v*.zip.SHA256SUM.txt
   - name: buildpack-to-pivnet
     serial: true
     plan:

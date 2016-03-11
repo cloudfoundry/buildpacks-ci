@@ -5,5 +5,7 @@ inputs:
   - name: buildpacks-ci
   - name: buildpack
   - name: pivotal-buildpacks-cached
+outputs:
+  - name: buildpack-artifacts
 run:
   path: buildpacks-ci/scripts/release/finalize-buildpack

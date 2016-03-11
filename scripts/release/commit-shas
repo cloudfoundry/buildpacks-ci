@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-latest_shasum=$(ls finalize-buildpack/pivotal-buildpacks-cached/*.SHA256SUM.txt)
-cp $latest_shasum ./buildpack-checksums
-cd buildpack-checksums
+latest_shasum=$(ls buildpack-artifacts/pivotal-buildpacks-cached/*.SHA256SUM.txt)
+rsync -a buildpack-checksums/ sha-artifacts
+cp $latest_shasum ./sha-artifacts
+cd sha-artifacts
 git add -A
 git commit -m "SHA256SUM for $(basename $latest_shasum .SHA256SUM.txt)"

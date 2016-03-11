@@ -4,6 +4,8 @@ image: docker:///cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
   - name: buildpack-checksums
-  - name: finalize-buildpack
+  - name: buildpack-artifacts
+outputs:
+  - name: sha-artifacts
 run:
   path: buildpacks-ci/scripts/release/commit-shas

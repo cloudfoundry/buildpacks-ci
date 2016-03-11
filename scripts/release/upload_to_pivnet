@@ -7,7 +7,7 @@ popd
 
 buildpacks-pivnet-uploader/upload_to_pivnet \
   "$PIVNET_PRODUCT_NAME" \
-  `cat finalize-buildpack/buildpack/VERSION` \
+  `cat buildpack/VERSION` \
   pivotal-buildpacks-cached/*_buildpack-cached-v*.zip \
-  finalize-buildpack/buildpack/RECENT_CHANGES \
+  buildpack-artifacts/RECENT_CHANGES \
   "$GITHUB_URL" < /dev/null
