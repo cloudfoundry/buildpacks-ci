@@ -120,11 +120,11 @@ jobs:
           privileged: true
         - put: pivotal-buildpack
           params:
-            from: detect-and-upload/buildpack/.*_buildpack-v(.*).zip
+            from: buildpack-artifacts/.*_buildpack-v(.*).zip
             to: /experimental-buildpacks/<%= language %>/
         - put: pivotal-buildpack-cached
           params:
-            from: detect-and-upload/buildpack/.*_buildpack-cached-v(.*).zip
+            from: buildpack-artifacts/.*_buildpack-cached-v(.*).zip
             to: /experimental-buildpacks/<%= language %>/
         on_failure:
           put: failure-alert

@@ -4,5 +4,7 @@ image: docker:///cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
   - name: buildpack
+outputs:
+  - name: buildpack-artifacts
 run:
   path: buildpacks-ci/scripts/release/build.sh
