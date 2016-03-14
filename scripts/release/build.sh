@@ -23,8 +23,8 @@ RUBY
 
 cd ../buildpack-artifacts
 
-mv ../buildpacks/*_buildpack-v*.zip .
-mv ../buildpacks/*_buildpack-cached-v*.zip .
+mv ../buildpack/*_buildpack-v*.zip .
+mv ../buildpack/*_buildpack-cached-v*.zip .
 
 echo md5: "`md5sum *_buildpack-v*.zip`"
 echo sha256: "`sha256sum *_buildpack-v*.zip`"
