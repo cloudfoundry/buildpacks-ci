@@ -4,7 +4,7 @@ require 'spec_helper'
 describe 'commit-shas' do
   before :context do
     `git init ./spec/commit-shas`
-    execute('-c tasks/commit-shas.yml -i buildpacks-ci=. -i buildpack-checksums=./spec/commit-shas -i buildpack-artifacts=./spec/commit-shas')
+    execute('-c tasks/commit-shas.yml -i buildpacks-ci=. -i buildpack-checksums=./spec/commit-shas -i buildpack-artifacts=./spec/commit-shas/pivotal-buildpacks-cached')
   end
 
   it 'has a helpful commit message' do

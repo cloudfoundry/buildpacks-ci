@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-latest_shasum=$(ls buildpack-artifacts/pivotal-buildpacks-cached/*.SHA256SUM.txt)
+latest_shasum=$(ls buildpack-artifacts/*.SHA256SUM.txt)
 rsync -a buildpack-checksums/ sha-artifacts
 cp $latest_shasum ./sha-artifacts
 cd sha-artifacts
