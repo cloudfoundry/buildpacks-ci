@@ -15,7 +15,7 @@ stacks_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'stacks'))
 cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'output-new-cves'))
 cve_history = CVEHistory.new(cves_dir)
 
-notifiers = [SystemCVEGithubIssueNotifier, SystemCVEEmailPreparer, SystemCVETrackerNotifier, SystemCVESlackNotifier]
+notifiers = [SystemCVEEmailPreparerAndGithubIssueNotifier, SystemCVETrackerNotifier, SystemCVESlackNotifier]
 StackCVENotifier.new(cve_history, cves_dir, stacks_dir).run!('Ubuntu 14.04', 'ubuntu14.04', notifiers)
 
 languages = ['ruby']
