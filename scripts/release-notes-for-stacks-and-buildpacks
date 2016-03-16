@@ -3,11 +3,11 @@
 #
 # This script is intended to be used to generate `cf-release` release notes for the buildpacks.
 #
-# When given two commits, it will examine differences in
-# `config/blobs.yml` to figure out what buildpacks have been
+# When given two commits, it will examine differences in # `config/blobs.yml` to figure out what buildpacks have been
 # updated. Then it hits the github API to pull release notes for all
 # the intervening releases, and formats them appropriately.
 #
+# USAGE: release-notes-for-stacks-and-buildpacks <path/to/cf-release> <previous-tag> <current-tag> [--token <github-token>] [--update-cf-release]
 
 require 'getoptlong'
 require 'json'
