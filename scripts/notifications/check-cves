@@ -7,10 +7,9 @@ require "#{buildpacks_ci_dir}/lib/buildpack-cve-tags"
 require "#{buildpacks_ci_dir}/lib/buildpack-cve-notifier"
 require "#{buildpacks_ci_dir}/lib/stack-cve-notifier"
 require "#{buildpacks_ci_dir}/lib/cve-history"
-require "#{buildpacks_ci_dir}/lib/notifiers/system-cve-github-issue-notifier"
 require "#{buildpacks_ci_dir}/lib/notifiers/system-cve-tracker-notifier"
 require "#{buildpacks_ci_dir}/lib/notifiers/system-cve-slack-notifier"
-require "#{buildpacks_ci_dir}/lib/notifiers/system-cve-email-preparer"
+require "#{buildpacks_ci_dir}/lib/notifiers/system-cve-email-preparer-and-github-issue-notifier"
 
 stacks_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'stacks'))
 cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'output-new-cves'))
