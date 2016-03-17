@@ -122,7 +122,7 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-<% w(php php7 ruby jruby nginx nodejs python godep httpd).each do |runtime| %>
+<% %w(php php7 ruby jruby nginx node python godep httpd).each do |runtime| %>
   - name: build-<%= runtime %>
     serial: true
     plan:
@@ -268,11 +268,11 @@ jobs:
             path: bash
             args: ["-c", "tar xzf build-tar/binary-builder-source.tgz -C /tmp &&
               cd /tmp/x86_64-linux-gnu/ports/ruby/*/*/ && make test"]
-  - name: test-nodejs
+  - name: test-node
     serial: true
     plan:
       - get: build-tar
-        passed: [ build-nodejs ]
+        passed: [ build-node ]
         trigger: true
       - task: run tests
         config:
