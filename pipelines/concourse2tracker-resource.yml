@@ -27,7 +27,12 @@ jobs:
             - name: buildpacks-ci
           run:
             path: bash
-            args: ["-c", "cd buildpacks-ci/lib/concourse2tracker-resource && bundle && bundle exec rspec"]
+            args:
+              - -c
+              - |
+                cd buildpacks-ci/lib/concourse2tracker-resource
+                bundle
+                bundle exec rspec
       - put: concourse2tracker-image
         params:
           build: buildpacks-ci/lib/concourse2tracker-resource
