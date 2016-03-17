@@ -1,0 +1,16 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+inputs:
+  - name: cf-bosh-release
+outputs:
+  - name: cf-release
+run:
+  path: bash
+  args:
+    - '-c'
+    - |
+      git clone --branch v$( cat cf-bosh-release/version ) --depth 1 https://github.com/$RELEASE_NAME cf-release \
+      cd cf-release \
+      ./update || ./scripts/update
+

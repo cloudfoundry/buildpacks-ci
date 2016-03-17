@@ -46,6 +46,31 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/machete.git
       branch: master
+  - name: cf-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry/cf-release
+  - name: diego-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry-incubator/diego-release
+  - name: etcd-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry-incubator/etcd-release
+  - name: garden-linux-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry-incubator/garden-linux-release
+  - name: bosh-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+
 
 jobs:
   - name: checkout-environment
@@ -98,19 +123,19 @@ jobs:
           trigger: true
         - get: buildpacks-ci
         - get: bosh-lite
+        - get: cf-bosh-release
+        - get: diego-bosh-release
       - aggregate:
-        - task: cf-release
-          file: buildpacks-ci/tasks/checkout-release.yml
+        - task: cf-release-checkout
+          file: buildpacks-ci/tasks/checkout-cf-release.yml
           config:
             params:
               RELEASE_NAME: cloudfoundry/cf-release
-              RELEASE_VERSION: {{cf-version}}
-        - task: diego-release
-          file: buildpacks-ci/tasks/checkout-release.yml
+        - task: diego-release-checkout
+          file: buildpacks-ci/tasks/checkout-diego-release.yml
           config:
             params:
               RELEASE_NAME: cloudfoundry-incubator/diego-release
-              RELEASE_VERSION: {{diego-version}}
       - task: generate-manifest
         file: {{generate-manifest}}
         config:
@@ -135,32 +160,14 @@ jobs:
           trigger: true
         - get: bosh-lite
         - get: buildpacks-ci
-        - task: bosh-stemcell
-          config:
-            image: docker:///cfbuildpacks/ci
-            platform: linux
-            run:
-              path: bash
-              args: ["-c", "curl -L -J -o stemcell.tgz https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent"]
-      - aggregate:
-        - task: cf-release
-          file: buildpacks-ci/tasks/checkout-release.yml
-          config:
-            params:
-              RELEASE_NAME: cloudfoundry/cf-release
-              RELEASE_VERSION: {{cf-version}}
-        - task: cf-release-tarball
-          file: buildpacks-ci/tasks/download-release.yml
-          config:
-            params:
-              RELEASE_NAME: cloudfoundry/cf-release
-              RELEASE_VERSION: {{cf-version}}
+        - get: bosh-stemcell
+        - get: cf-bosh-release
       - put: cf-deployment
         params:
           manifest: {{cf-manifest-location}}
           stemcells: ['bosh-stemcell/stemcell.tgz']
           releases:
-            - cf-release-tarball/release.tgz
+            - cf-bosh-release/release.tgz
   - name: deploy-diego
     serial_groups: [ deploy ]
     serial: true
@@ -173,46 +180,18 @@ jobs:
           passed: ['deploy-cf']
           trigger: true
         - get: buildpacks-ci
-        - task: bosh-stemcell
-          config:
-            image: docker:///cfbuildpacks/ci
-            platform: linux
-            run:
-              path: bash
-              args: ["-c", "curl -L -J -o stemcell.tgz https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent"]
-      - aggregate:
-        - task: diego-release
-          file: buildpacks-ci/tasks/checkout-release.yml
-          config:
-            params:
-              RELEASE_NAME: cloudfoundry-incubator/diego-release
-              RELEASE_VERSION: {{diego-version}}
-        - task: diego-release-tarball
-          file: buildpacks-ci/tasks/download-release.yml
-          config:
-            params:
-              RELEASE_NAME: cloudfoundry-incubator/diego-release
-              RELEASE_VERSION: {{diego-version}}
-        - task: garden-linux-release-tarball
-          file: buildpacks-ci/tasks/download-release.yml
-          config:
-            params:
-              RELEASE_NAME: cloudfoundry-incubator/garden-linux-release
-              RELEASE_VERSION: {{garden-linux-version}}
-        - task: etcd-release-tarball
-          file: buildpacks-ci/tasks/download-release.yml
-          config:
-            params:
-              RELEASE_NAME: cloudfoundry-incubator/etcd-release
-              RELEASE_VERSION: {{etcd-version}}
+        - get: bosh-stemcell
+        - get: diego-bosh-release
+        - get: etcd-bosh-release
+        - get: garden-linux-bosh-release
       - put: diego-deployment
         params:
           manifest: {{diego-manifest-location}}
           stemcells: ['bosh-stemcell/stemcell.tgz']
           releases:
-            - diego-release-tarball/release.tgz
-            - garden-linux-release-tarball/release.tgz
-            - etcd-release-tarball/release.tgz
+            - diego-bosh-release/release.tgz
+            - garden-linux-bosh-release/release.tgz
+            - etcd-bosh-release/release.tgz
   - name: update-machete
     serial_groups: [ deploy ]
     serial: true

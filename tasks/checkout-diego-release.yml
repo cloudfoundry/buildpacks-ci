@@ -1,0 +1,16 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+inputs:
+  - name: diego-bosh-release
+outputs:
+  - name: diego-release
+run:
+  path: bash
+  args:
+    - '-c'
+    - |
+      git clone --branch v$( cat diego-bosh-release/version ) --depth 1 https://github.com/$RELEASE_NAME diego-release \
+      cd diego-release \
+      ./update || ./scripts/update
+
