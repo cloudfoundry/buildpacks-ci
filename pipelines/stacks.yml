@@ -149,11 +149,11 @@ jobs:
           privileged: true
         - put: stack-s3
           params:
-            from: make-rootfs/stacks/cflinuxfs2-(.*).tar.gz
+            from: stacks-artifacts/cflinuxfs2-(.*).tar.gz
             to: /rootfs/
         - put: receipt-s3
           params:
-            from: make-rootfs/cflinuxfs2_receipt-(.*)
+            from: receipt-artifacts/cflinuxfs2_receipt-(.*)
             to: /rootfs/
         - put: version
           params: { file: version/number }
@@ -164,6 +164,24 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: recreate-bosh-lite
+    serial: true
+    serial_groups: [ stacks ]
+    plan:
+      - do:
+        - get: deployments-buildpacks
+        - get: buildpacks-ci
+        - task: recreate-bosh-lite
+          file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+          config:
+            params:
+              DEPLOYMENT_NAME: stacks.buildpacks.ci
+              PASSWORD: {{bosh-lite-password}}
+          ensure:
+            put: deployments-buildpacks
+            params:
+              repository: deployments-buildpacks-artifacts
+              rebase: true
   - name: deploy-cf-to-stacks
     serial: true
     serial_groups: [ stacks ]
@@ -184,23 +202,6 @@ jobs:
         - get: stacks
           passed: [ build-rootfs ]
       - do:
-        - task: recreate-bosh-lite
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-              - name: deployments-buildpacks
-            run:
-              path: buildpacks-ci/scripts/recreate-bosh-lite
-            params:
-              DEPLOYMENT_NAME: stacks.buildpacks.ci
-              PASSWORD: {{bosh-lite-password}}
-          ensure:
-            put: deployments-buildpacks
-            params:
-              repository: recreate-bosh-lite/deployments-buildpacks
-              rebase: true
         - task: generate-manifest
           file: buildpacks-ci/tasks/develop-make-manifest.yml
           config:
@@ -210,7 +211,7 @@ jobs:
           privileged: true
         - put: deployments-buildpacks
           params:
-            repository: generate-manifest/deployments-buildpacks
+            repository: deployments-buildpacks-artifacts
             rebase: true
         - task: create-stack-release
           config:
@@ -220,14 +221,16 @@ jobs:
               - name: buildpacks-ci
               - name: cf-release
               - name: stack-s3
+            outputs:
+              - name: cf-release-artifacts
             run:
               path: buildpacks-ci/scripts/stacks/create-release
           privileged: true
         - put: stacks-cf-deployment
           params:
-            manifest: deployments-buildpacks/deployments/stacks.buildpacks.ci/manifest.yml
+            manifest: deployments-buildpacks-artifacts/deployments/stacks.buildpacks.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
-            releases: [create-stack-release/cf-release/dev_releases/cf/*.tgz]
+            releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
         on_failure:
           put: failure-alert
           params:
@@ -301,6 +304,8 @@ jobs:
               - name: receipt-s3
               - name: stacks
               - name: version
+            outputs:
+              - name: stacks-artifacts
             run:
               path: buildpacks-ci/scripts/stacks/update-receipt
         - task: update-filename
@@ -321,7 +326,7 @@ jobs:
             to: /rootfs/
         - put: stacks
           params:
-            repository: update-receipt/stacks
+            repository: stacks-artifacts/stacks
             tag: version/number
         - put: version
           params: { file: version/number }
@@ -420,15 +425,15 @@ jobs:
           file: buildpacks-ci/tasks/create-bosh-release.yml
           config:
             params:
-              ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-              SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
               BLOB_NAME: rootfs
               BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
               RELEASE_NAME: stack
               RELEASE_DIR: release
+              ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+              SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
         - put: stacks-release
           params:
-            repository: run-both-bosh-scripts/release
+            repository: release-artifacts
         on_failure:
           put: failure-alert
           params:
@@ -469,6 +474,8 @@ jobs:
               - name: stack-s3
               - name: receipt-s3
               - name: version
+            outputs:
+              - name: cf-release-artifacts
             run:
               path: buildpacks-ci/scripts/stacks/upload-to-cf-release
             params:
@@ -478,7 +485,7 @@ jobs:
           privileged: true
         - put: cf-release-develop
           params:
-            repository: upload/cf-release
+            repository: cf-release-artifacts
             rebase: true
         on_failure:
           put: failure-alert

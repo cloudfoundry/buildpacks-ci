@@ -18,3 +18,5 @@ end
 Dir.chdir 'cf-release' do
   system %(bundle && bosh create release --force --with-tarball --name cf --version 212.0.#{Time.now.to_i})
 end
+
+system('rsync -a cf-release/ cf-release-artifacts')

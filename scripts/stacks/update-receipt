@@ -4,7 +4,9 @@ set -e
 
 cp receipt-s3/cflinuxfs2_receipt-* stacks/cflinuxfs2/cflinuxfs2_receipt
 
-cd stacks
+pushd stacks
+    version=`cat ../version/number`
+    git commit -m "Commit receipt for $version" -- cflinuxfs2/cflinuxfs2_receipt
+popd
 
-version=`cat ../version/number`
-git commit -m "Commit receipt for $version" -- cflinuxfs2/cflinuxfs2_receipt
+rsync -a stacks/ stacks-artifacts

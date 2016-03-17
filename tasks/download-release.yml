@@ -1,9 +1,0 @@
----
-platform: linux
-image: docker:///cfbuildpacks/ci
-run:
-  path: bash
-  args: ['-c', 'curl -f -L -o release.tgz https://bosh.io/d/github.com/$RELEASE_NAME?v=$RELEASE_VERSION']
-params:
-  RELEASE_NAME:
-  RELEASE_VERSION:

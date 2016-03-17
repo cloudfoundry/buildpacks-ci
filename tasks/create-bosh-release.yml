@@ -6,6 +6,8 @@ inputs:
   - name: blob
   - name: version
   - name: release
+outputs:
+  - name: release-artifacts
 params:
   BLOB_NAME:
   BLOB_GLOB:

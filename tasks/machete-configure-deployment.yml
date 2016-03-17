@@ -2,14 +2,13 @@
 platform: linux
 image: docker:///cfbuildpacks/ci
 inputs:
-  - name: bosh-lite
   - name: buildpacks-ci
-  - name: cf-release
   - name: deployments-buildpacks
-outputs:
-  - name: deployments-buildpacks-artifacts
+  - name: machete
 run:
-  path: buildpacks-ci/scripts/generate-cf-manifest
+  path: buildpacks-ci/scripts/configure-deployment
 params:
   DEPLOYMENT_NAME:
   CF_CI_PASSWORD:
+  CF_CI_USERNAME:
+

@@ -11,56 +11,63 @@ require 'digest/sha1'
 
 languages = release_names
 
-Dir.chdir('cf-release')
-blob_store_private_yml = {
-  'blobstore' => {
-    's3' => {
-      'access_key_id' => ENV['ACCESS_KEY_ID'],
-      'secret_access_key' => ENV['SECRET_ACCESS_KEY']
+Dir.chdir('cf-release') do 
+  blob_store_private_yml = {
+    'blobstore' => {
+      's3' => {
+        'access_key_id' => ENV['ACCESS_KEY_ID'],
+        'secret_access_key' => ENV['SECRET_ACCESS_KEY']
+      }
     }
-  }
-}.to_yaml
+  }.to_yaml
 
-File.write('config/private.yml', blob_store_private_yml)
+  File.write('config/private.yml', blob_store_private_yml)
 
-def buildpack_destination_dir(language)
-  language = 'java' if language =~ /offline/
-  "#{language}-buildpack"
-end
+  def buildpack_destination_dir(language)
+    language = 'java' if language =~ /offline/
+    "#{language}-buildpack"
+  end
 
-version = ''
+  version = ''
 
-languages.each do |language|
-  buildpack_blob = Dir["../#{language}-buildpack-github-release/*.zip"].first
-  matches = /v([\d\.]+)\.zip/.match(buildpack_blob)
-  version = matches[1] if matches.size > 1
+  languages.each do |language|
+    buildpack_blob = Dir["../#{language}-buildpack-github-release/*.zip"].first
+    matches = /v([\d\.]+)\.zip/.match(buildpack_blob)
+    version = matches[1] if matches.size > 1
 
-  destination_dir = buildpack_destination_dir(language)
-  system "rm -f blobs/#{destination_dir}"
-  blobs = YAML.load(File.read('config/blobs.yml'))
+    destination_dir = buildpack_destination_dir(language)
+    system "rm -f blobs/#{destination_dir}"
+    blobs = YAML.load(File.read('config/blobs.yml'))
 
-  old_buildpack_key = find_buildpack_key blobs, language
+    old_buildpack_key = find_buildpack_key blobs, language
 
-  next unless old_buildpack_key
-  new_sha = Digest::SHA1.file(buildpack_blob).hexdigest
+    next unless old_buildpack_key
+    new_sha = Digest::SHA1.file(buildpack_blob).hexdigest
 
-  next unless new_sha != blobs[old_buildpack_key]['sha']
-  blobs.delete(old_buildpack_key)
-  File.write('config/blobs.yml', YAML.dump(blobs))
-  exit 1 unless system "bosh add blob #{buildpack_blob} #{destination_dir}"
+    next unless new_sha != blobs[old_buildpack_key]['sha']
+    blobs.delete(old_buildpack_key)
+    File.write('config/blobs.yml', YAML.dump(blobs))
+    exit 1 unless system "bosh add blob #{buildpack_blob} #{destination_dir}"
+  end
 end
 
 exit system(<<-EOF)
   set -ex
 
-  bosh -n upload blobs
-  /usr/bin/env bash ./scripts/setup-git-hooks
+  pushd cf-release
+    bosh -n upload blobs
+    /usr/bin/env bash ./scripts/setup-git-hooks
 
-  ref=$(cd ../buildpack-releases && git rev-parse HEAD)
-  cd src/buildpacks
-  git fetch
-  git checkout $ref
-  cd ../..
-  git add -A
-  git commit -am "Update $BUILDPACK_NAME to v#{version}"
+    ref=$(cd ../buildpack-releases && git rev-parse HEAD)
+
+    pushd src/buildpacks
+      git fetch
+      git checkout $ref
+    popd
+
+    git add -A
+    git commit -am "Update $BUILDPACK_NAME to v#{version}"
+  popd
+
+  rsync -a cf-release/ cf-release-artifacts
 EOF

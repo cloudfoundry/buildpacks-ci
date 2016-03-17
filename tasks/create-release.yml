@@ -13,5 +13,7 @@ inputs:
   - name: php-buildpack-github-release
   - name: staticfile-buildpack-github-release
   - name: binary-buildpack-github-release
+outputs:
+  - name: cf-release-artifacts
 run:
   path: buildpacks-ci/scripts/release/cf/create-release

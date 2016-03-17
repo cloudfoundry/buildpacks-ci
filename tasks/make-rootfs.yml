@@ -5,5 +5,8 @@ inputs:
   - name: buildpacks-ci
   - name: stacks
   - name: version
+outputs:
+  - name: stacks-artifacts
+  - name: receipt-artifacts
 run:
   path: buildpacks-ci/scripts/stacks/make-rootfs

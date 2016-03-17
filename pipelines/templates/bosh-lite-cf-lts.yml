@@ -46,6 +46,10 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/machete.git
       branch: master
+  - name: bosh-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
 
 jobs:
   - name: checkout-environment
@@ -68,22 +72,16 @@ jobs:
         - get: resource-pools
           passed: [checkout-environment]
           trigger: true
-      - task: recreate
+      - task: recreate-bosh-lite
+        file: buildpacks-ci/tasks/recreate-bosh-lite.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/recreate-bosh-lite
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
             PASSWORD: {{bosh-lite-password}}
         ensure:
           put: deployments-buildpacks
           params:
-            repository: recreate/deployments-buildpacks
+            repository: deployments-buildpacks-artifacts
             rebase: true
   - name: generate-manifest
     serial_groups: [ deploy ]
@@ -99,14 +97,13 @@ jobs:
         - get: buildpacks-ci
         - get: bosh-lite
       - aggregate:
-        - task: cf-release
-          file: buildpacks-ci/tasks/checkout-release.yml
+        - task: cf-release-checkout
+          file: buildpacks-ci/tasks/checkout-cf-lts-release.yml
           config:
             params:
-              RELEASE_NAME: cloudfoundry/cf-release
               RELEASE_VERSION: {{cf-version}}
       - task: generate-manifest
-        file: {{generate-manifest}}
+        file: buildpacks-ci/tasks/make-manifest.yml
         config:
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
@@ -114,7 +111,7 @@ jobs:
         privileged: true
       - put: deployments-buildpacks
         params:
-          repository: generate-manifest/deployments-buildpacks
+          repository: deployments-buildpacks-artifacts
           rebase: true
   - name: deploy-cf
     serial_groups: [ deploy ]
@@ -129,35 +126,26 @@ jobs:
           trigger: true
         - get: bosh-lite
         - get: buildpacks-ci
-        - task: bosh-stemcell
-          config:
-            image: docker:///cfbuildpacks/ci
-            platform: linux
-            run:
-              path: bash
-              args: ["-c", "curl -L -J -o stemcell.tgz https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent"]
+        - get: bosh-stemcell
       - aggregate:
         - task: cf-release
-          file: buildpacks-ci/tasks/checkout-release.yml
+          file: buildpacks-ci/tasks/checkout-cf-lts-release.yml
           config:
             params:
-              RELEASE_NAME: cloudfoundry/cf-release
               RELEASE_VERSION: {{cf-version}}
         - task: cf-release-tarball
-          file: buildpacks-ci/tasks/download-release.yml
+          file: buildpacks-ci/tasks/cf-bosh-release.yml
           config:
             params:
-              RELEASE_NAME: cloudfoundry/cf-release
               RELEASE_VERSION: {{cf-version}}
       - put: cf-deployment
         params:
           manifest: {{cf-manifest-location}}
           stemcells: ['bosh-stemcell/stemcell.tgz']
           releases:
-            - cf-release-tarball/release.tgz
+            - cf-bosh-release-artifacts/release.tgz
   - name: update-machete
     serial_groups: [ deploy ]
-    serial: true
     serial: true
     plan:
       - aggregate:
@@ -170,15 +158,8 @@ jobs:
           trigger: true
         - get: machete
       - task: configure-deployment
+        file: buildpacks-ci/tasks/machete-configure-deployment.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: deployments-buildpacks
-            - name: machete
-          run:
-            path: buildpacks-ci/scripts/configure-deployment
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
             CF_CI_PASSWORD: {{ci-cf-password}}

@@ -124,6 +124,24 @@ groups:
       - cf-release for java-offline
 
 jobs:
+  - name: recreate-bosh-lite
+    serial: true
+    serial_groups: [ stacks ]
+    plan:
+      - do:
+        - get: deployments-buildpacks
+        - get: buildpacks-ci
+        - task: recreate-bosh-lite
+          file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+          config:
+            params:
+              DEPLOYMENT_NAME: cf-release.buildpacks.ci
+              PASSWORD: {{bosh-lite-password}}
+          ensure:
+            put: deployments-buildpacks
+            params:
+              repository: deployments-buildpacks-artifacts
+              rebase: true
   - name: deploy-cf-to-cf-release
     serial: true
     serial_groups: [ cf-release ]
@@ -132,23 +150,6 @@ jobs:
         - aggregate:
           - get: deployments-buildpacks
           - get: buildpacks-ci
-        - task: recreate-bosh-lite
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-              - name: deployments-buildpacks
-            run:
-              path: buildpacks-ci/scripts/recreate-bosh-lite
-            params:
-              DEPLOYMENT_NAME: cf-release.buildpacks.ci
-              PASSWORD: {{bosh-lite-password}}
-          ensure:
-            put: deployments-buildpacks
-            params:
-              repository: recreate-bosh-lite/deployments-buildpacks
-              rebase: true
         - aggregate:
           - get: bosh-lite
           - get: cf-release
@@ -177,15 +178,15 @@ jobs:
           privileged: true
         - put: deployments-buildpacks
           params:
-            repository: generate-manifest/deployments-buildpacks
+            repository: deployments-buildpacks-artifacts
         - task: create-cf-release
           file: buildpacks-ci/tasks/create-release.yml
           privileged: true
         - put: cf-release-deployment
           params:
-            manifest: deployments-buildpacks/deployments/cf-release.buildpacks.ci/manifest.yml
+            manifest: deployments-buildpacks-artifacts/deployments/cf-release.buildpacks.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
-            releases: [create-cf-release/cf-release/dev_releases/cf/*.tgz]
+            releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
         on_failure:
           put: failure-alert
           params:
@@ -316,7 +317,7 @@ jobs:
               RELEASE_DIR: release/<%= language %>-buildpack-release
         - put: buildpack-releases
           params:
-            repository: create-bosh-release/release
+            repository: release-artifacts
             rebase: true
         on_failure:
           put: failure-alert
@@ -374,7 +375,7 @@ jobs:
           privileged: true
         - put: cf-release-develop
           params:
-            repository: upload-blobs/cf-release
+            repository: cf-release-artifacts
             rebase: true
         on_failure:
           put: failure-alert

@@ -1,0 +1,15 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+outputs:
+  - name: cf-release
+run:
+  path: bash
+  args:
+    - -c
+    - |
+      git clone --branch v$RELEASE_VERSION --depth 1 https://github.com/cloudfoundry/cf-release
+      cd cf-release
+      ./scripts/update
+params:
+  RELEASE_VERSION:

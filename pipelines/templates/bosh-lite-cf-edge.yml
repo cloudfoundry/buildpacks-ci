@@ -93,22 +93,16 @@ jobs:
         - get: resource-pools
           passed: [checkout-environment]
           trigger: true
-      - task: recreate
+      - task: recreate-bosh-lite
+        file: buildpacks-ci/tasks/recreate-bosh-lite.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: deployments-buildpacks
-          run:
-            path: buildpacks-ci/scripts/recreate-bosh-lite
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
             PASSWORD: {{bosh-lite-password}}
         ensure:
           put: deployments-buildpacks
           params:
-            repository: recreate/deployments-buildpacks
+            repository: deployments-buildpacks-artifacts
             rebase: true
   - name: generate-manifest
     serial_groups: [ deploy ]
@@ -128,16 +122,10 @@ jobs:
       - aggregate:
         - task: cf-release-checkout
           file: buildpacks-ci/tasks/checkout-cf-release.yml
-          config:
-            params:
-              RELEASE_NAME: cloudfoundry/cf-release
         - task: diego-release-checkout
           file: buildpacks-ci/tasks/checkout-diego-release.yml
-          config:
-            params:
-              RELEASE_NAME: cloudfoundry-incubator/diego-release
       - task: generate-manifest
-        file: {{generate-manifest}}
+        file: buildpacks-ci/tasks/diego-make-manifest.yml
         config:
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
@@ -145,7 +133,7 @@ jobs:
         privileged: true
       - put: deployments-buildpacks
         params:
-          repository: generate-manifest/deployments-buildpacks
+          repository: generate-manifest-artifacts
           rebase: true
   - name: deploy-cf
     serial_groups: [ deploy ]
@@ -182,8 +170,8 @@ jobs:
         - get: buildpacks-ci
         - get: bosh-stemcell
         - get: diego-bosh-release
-        - get: etcd-bosh-release
         - get: garden-linux-bosh-release
+        - get: etcd-bosh-release
       - put: diego-deployment
         params:
           manifest: {{diego-manifest-location}}
@@ -207,15 +195,8 @@ jobs:
           trigger: true
         - get: machete
       - task: configure-deployment
+        file: buildpacks-ci/tasks/machete-configure-deployment.yml
         config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: deployments-buildpacks
-            - name: machete
-          run:
-            path: buildpacks-ci/scripts/configure-deployment
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
             CF_CI_PASSWORD: {{ci-cf-password}}

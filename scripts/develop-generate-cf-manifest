@@ -9,7 +9,7 @@ pushd deployments-buildpacks
   source ./bin/switch $DEPLOYMENT_NAME
 popd
 
-cd cf-release 
+pushd cf-release 
 
 echo "
 ---
@@ -36,8 +36,13 @@ jobs:
 
 ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CF_CI_PASSWORD'])" bosh-lite/deployments/cf.yml
 
-cd ../deployments-buildpacks
+popd
+pushd deployments-buildpacks
 cp ../cf-release/bosh-lite/deployments/cf.yml deployments/$DEPLOYMENT_NAME/manifest.yml
 
 git add deployments/$DEPLOYMENT_NAME/manifest.yml
 git diff-index --quiet HEAD deployments/$DEPLOYMENT_NAME/manifest.yml || git commit -qm "Update manifest for $DEPLOYMENT_NAME"
+popd
+
+rsync -a deployments-buildpacks/ deployments-buildpacks-artifacts
+

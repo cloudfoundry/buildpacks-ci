@@ -2,7 +2,5 @@
 deployment-name: lts-2.buildpacks.ci
 resource-pool: cf-lts-environments
 cf-version: 225
-generate-manifest: buildpacks-ci/tasks/make-manifest.yml
 generated-manifest-location: generate-manifest/cf-release/bosh-lite/manifests/cf-manifest.yml
-generate-manifest: buildpacks-ci/tasks/make-manifest.yml
 cf-manifest-location: deployments-buildpacks/deployments/lts-2.buildpacks.ci/manifest.yml
