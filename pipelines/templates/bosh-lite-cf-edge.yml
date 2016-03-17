@@ -105,14 +105,12 @@ jobs:
             params:
               RELEASE_NAME: cloudfoundry/cf-release
               RELEASE_VERSION: {{cf-version}}
-<% if deployment_name.include?('edge') %>
         - task: diego-release
           file: buildpacks-ci/tasks/checkout-release.yml
           config:
             params:
               RELEASE_NAME: cloudfoundry-incubator/diego-release
               RELEASE_VERSION: {{diego-version}}
-<% end %>
       - task: generate-manifest
         file: {{generate-manifest}}
         config:
@@ -163,7 +161,6 @@ jobs:
           stemcells: ['bosh-stemcell/stemcell.tgz']
           releases:
             - cf-release-tarball/release.tgz
-<% if deployment_name.include?('edge') %>
   - name: deploy-diego
     serial_groups: [ deploy ]
     serial: true
@@ -216,7 +213,6 @@ jobs:
             - diego-release-tarball/release.tgz
             - garden-linux-release-tarball/release.tgz
             - etcd-release-tarball/release.tgz
-<% end %>
   - name: update-machete
     serial_groups: [ deploy ]
     serial: true
@@ -225,18 +221,10 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: deployments-buildpacks
-<% if deployment_name.include?('edge') %>
           passed: ['deploy-diego']
-<% else %>
-          passed: ['deploy-cf']
-<% end %>
           trigger: true
         - get: resource-pools
-<% if deployment_name.include?('edge') %>
           passed: ['deploy-diego']
-<% else %>
-          passed: ['deploy-cf']
-<% end %>
           trigger: true
         - get: machete
       - task: configure-deployment

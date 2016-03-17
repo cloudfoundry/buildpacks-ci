@@ -1,0 +1,196 @@
+resources:
+  - name: nightly-trigger
+    type: cron
+    source:
+      expression: <%= deployment_name.hash % 10 %> 0 * * *
+      location: America/New_York
+  - name: cf-deployment
+    type: bosh-deployment
+    source:
+      target: https://{{deployment-name}}.cf-app.com:25555
+      username: admin
+      password: {{bosh-lite-password}}
+      deployment: cf-warden
+      ignore_ssl: true
+  - name: diego-deployment
+    type: bosh-deployment
+    source:
+      target: https://{{deployment-name}}.cf-app.com:25555
+      username: admin
+      password: {{bosh-lite-password}}
+      deployment: cf-warden-diego
+      ignore_ssl: true
+  - name: deployments-buildpacks
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/deployments-buildpacks
+      private_key: {{deployments-private-key}}
+      branch: master
+  - name: bosh-lite
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-lite
+  - name: resource-pools
+    type: pool
+    source:
+      branch: resource-pools
+      pool: {{resource-pool}}
+      private_key: {{resource-pools-private-key}}
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/buildpacks-ci
+  - name: machete
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/machete.git
+      branch: master
+
+jobs:
+  - name: checkout-environment
+    serial_groups: [ deploy ]
+    serial: true
+    plan:
+      - get: nightly-trigger
+        trigger: true
+      - put: resource-pools
+        params:
+          claim: {{deployment-name}}
+        timeout: 3h
+  - name: recreate-bosh-lite
+    serial_groups: [ deploy ]
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: deployments-buildpacks
+        - get: resource-pools
+          passed: [checkout-environment]
+          trigger: true
+      - task: recreate
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: deployments-buildpacks
+          run:
+            path: buildpacks-ci/scripts/recreate-bosh-lite
+          params:
+            DEPLOYMENT_NAME: {{deployment-name}}
+            PASSWORD: {{bosh-lite-password}}
+        ensure:
+          put: deployments-buildpacks
+          params:
+            repository: recreate/deployments-buildpacks
+            rebase: true
+  - name: generate-manifest
+    serial_groups: [ deploy ]
+    serial: true
+    plan:
+      - aggregate:
+        - get: deployments-buildpacks
+          passed: ['recreate-bosh-lite']
+          trigger: true
+        - get: resource-pools
+          passed: ['recreate-bosh-lite']
+          trigger: true
+        - get: buildpacks-ci
+        - get: bosh-lite
+      - aggregate:
+        - task: cf-release
+          file: buildpacks-ci/tasks/checkout-release.yml
+          config:
+            params:
+              RELEASE_NAME: cloudfoundry/cf-release
+              RELEASE_VERSION: {{cf-version}}
+      - task: generate-manifest
+        file: {{generate-manifest}}
+        config:
+          params:
+            DEPLOYMENT_NAME: {{deployment-name}}
+            CF_CI_PASSWORD: {{ci-cf-password}}
+        privileged: true
+      - put: deployments-buildpacks
+        params:
+          repository: generate-manifest/deployments-buildpacks
+          rebase: true
+  - name: deploy-cf
+    serial_groups: [ deploy ]
+    serial: true
+    plan:
+      - aggregate:
+        - get: deployments-buildpacks
+          passed: ['generate-manifest']
+          trigger: true
+        - get: resource-pools
+          passed: ['generate-manifest']
+          trigger: true
+        - get: bosh-lite
+        - get: buildpacks-ci
+        - task: bosh-stemcell
+          config:
+            image: docker:///cfbuildpacks/ci
+            platform: linux
+            run:
+              path: bash
+              args: ["-c", "curl -L -J -o stemcell.tgz https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent"]
+      - aggregate:
+        - task: cf-release
+          file: buildpacks-ci/tasks/checkout-release.yml
+          config:
+            params:
+              RELEASE_NAME: cloudfoundry/cf-release
+              RELEASE_VERSION: {{cf-version}}
+        - task: cf-release-tarball
+          file: buildpacks-ci/tasks/download-release.yml
+          config:
+            params:
+              RELEASE_NAME: cloudfoundry/cf-release
+              RELEASE_VERSION: {{cf-version}}
+      - put: cf-deployment
+        params:
+          manifest: {{cf-manifest-location}}
+          stemcells: ['bosh-stemcell/stemcell.tgz']
+          releases:
+            - cf-release-tarball/release.tgz
+  - name: update-machete
+    serial_groups: [ deploy ]
+    serial: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: deployments-buildpacks
+          passed: ['deploy-cf']
+          trigger: true
+        - get: resource-pools
+          passed: ['deploy-cf']
+          trigger: true
+        - get: machete
+      - task: configure-deployment
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: deployments-buildpacks
+            - name: machete
+          run:
+            path: buildpacks-ci/scripts/configure-deployment
+          params:
+            DEPLOYMENT_NAME: {{deployment-name}}
+            CF_CI_PASSWORD: {{ci-cf-password}}
+            CF_CI_USERNAME: {{ci-cf-username}}
+  - name: unclaim
+    serial_groups: [ deploy ]
+    serial: true
+    plan:
+      - get: buildpacks-ci
+      - get: resource-pools
+        passed: [ update-machete ]
+        trigger: true
+      - put: resource-pools
+        params:
+          release: resource-pools

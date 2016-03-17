@@ -27,10 +27,17 @@ end
 header('For bosh-lite pipelines')
 Dir['config/bosh-lite/*.yml'].each do |filename|
   deployment_name = File.basename(filename, '.yml')
+  matches = /(lts|edge)\-\d+/.match(deployment_name)
+  puts deployment_name
+  if matches.nil?
+    puts "Your config/bosh-lite/*.yml files must be named in the following manner: edge-1.yml, edge-2.yml, lts-1.yml, lts-2.yml, etc."
+    exit 1
+  end
+  cf_version_type = matches[1]
   puts "   #{deployment_name} bosh-lite"
   set_pipeline(
     name: deployment_name,
-    cmd: "erb deployment_name=#{deployment_name} pipelines/templates/bosh-lite.yml",
+    cmd: "erb deployment_name=#{deployment_name} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
     load: [filename]
   )
 end
