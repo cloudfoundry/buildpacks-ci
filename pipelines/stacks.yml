@@ -128,14 +128,34 @@ jobs:
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+  - name: recreate-bosh-lite
+    serial: true
+    serial_groups: [ stacks ]
+    plan:
+      - do:
+        - get: deployments-buildpacks
+        - get: monday-funday
+          passed: [ "notification" ]
+          trigger: true
+        - get: buildpacks-ci
+        - task: recreate-bosh-lite
+          file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+          config:
+            params:
+              DEPLOYMENT_NAME: stacks.buildpacks.ci
+              PASSWORD: {{bosh-lite-password}}
+          ensure:
+            put: deployments-buildpacks
+            params:
+              repository: deployments-buildpacks-artifacts
+              rebase: true
   - name: build-rootfs
     serial: true
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: deployments-buildpacks
-        - get: monday-funday
-          passed: [ "notification" ]
+          passed: [ "recreate-bosh-lite" ]
           trigger: true
         - get: new-cves
           trigger: true
@@ -164,24 +184,6 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: recreate-bosh-lite
-    serial: true
-    serial_groups: [ stacks ]
-    plan:
-      - do:
-        - get: deployments-buildpacks
-        - get: buildpacks-ci
-        - task: recreate-bosh-lite
-          file: buildpacks-ci/tasks/recreate-bosh-lite.yml
-          config:
-            params:
-              DEPLOYMENT_NAME: stacks.buildpacks.ci
-              PASSWORD: {{bosh-lite-password}}
-          ensure:
-            put: deployments-buildpacks
-            params:
-              repository: deployments-buildpacks-artifacts
-              rebase: true
   - name: deploy-cf-to-stacks
     serial: true
     serial_groups: [ stacks ]

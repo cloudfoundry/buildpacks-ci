@@ -106,15 +106,17 @@ resources:
 groups:
   - name: buildpacks
     jobs:
+      - recreate-bosh-lite
       - deploy-cf-to-cf-release
       - cats
       - ship-it
-<% supported_languages.each do |language| %>
+<% supported_languages.reject{|l| l.include?('java') }.each do |language| %>
       - bosh-release-<%= language %>
       - cf-release for <%= language %>
 <% end %>
   - name: java
     jobs:
+      - recreate-bosh-lite
       - deploy-cf-to-cf-release
       - cats
       - ship-it-java
@@ -149,6 +151,8 @@ jobs:
       - do:
         - aggregate:
           - get: deployments-buildpacks
+            passed: [ recreate-bosh-lite ]
+            trigger: true
           - get: buildpacks-ci
         - aggregate:
           - get: bosh-lite
