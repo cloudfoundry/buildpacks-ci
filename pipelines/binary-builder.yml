@@ -122,12 +122,13 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: build-php
+<% w(php php7 ruby jruby nginx nodejs python godep httpd).each do |runtime| %>
+  - name: build-<%= runtime %>
     serial: true
     plan:
       - aggregate:
         - get: builds-yaml
-          resource: php-builds
+          resource: <%= runtime %>-builds
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
@@ -137,23 +138,23 @@ jobs:
           file: buildpacks-ci/tasks/build-binary.yml
           config:
             params:
-              BINARY_NAME: php
+              BINARY_NAME: <%= runtime %>
           privileged: true
         - put: build-tar
           params:
-            from: build-binary/binary-builder/build.tgz
+            from: binary-builder-artifacts/build.tgz
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary.yml
           config:
             params:
-              BINARY_NAME: php
+              BINARY_NAME: <%= runtime %>
               AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
               AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
               AWS_DEFAULT_REGION: us-east-1
           privileged: true
         - put: builds-out
           params:
-            repository: build-binary/builds-yaml
+            repository: builds-yaml-artifacts
             rebase: true
         - put: concourse2tracker
           params:
@@ -163,10 +164,11 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "binary-builder build-php job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-php"
+            text: "binary-builder build-<%= runtime %> job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-<%= runtime %>"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
   - name: test-php
     serial: true
     plan:
@@ -210,51 +212,6 @@ jobs:
                 tar xzf build-tar/binary-builder-source.tgz -C /tmp
                 cd /tmp/x86_64-linux-gnu/ports/php/*/*/
                 yes n | env REPORT_EXIT_STATUS=1 make test
-  - name: build-jruby
-    serial: true
-    plan:
-      - aggregate:
-        - get: builds-yaml
-          resource: jruby-builds
-          trigger: true
-        - get: binary-builder
-          passed: [binary-builder]
-        - get: buildpacks-ci
-      - do:
-        - task: build-binary
-          file: buildpacks-ci/tasks/build-binary.yml
-          config:
-            params:
-              BINARY_NAME: jruby
-          privileged: true
-        - put: build-tar
-          params:
-            from: build-binary/binary-builder/build.tgz
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary.yml
-          config:
-            params:
-              BINARY_NAME: jruby
-              AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-              AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-              AWS_DEFAULT_REGION: us-east-1
-          privileged: true
-        - put: builds-out
-          params:
-            repository: build-binary/builds-yaml
-            rebase: true
-        - put: concourse2tracker
-          params:
-            api_token: {{pivotal-tracker-api-token}}
-            git_path: builds-yaml
-            project_id: {{cf-buildpacks-public-tracker-id}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "binary-builder build-jruby job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-jruby"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: test-jruby
     serial: true
     plan:
@@ -279,93 +236,6 @@ jobs:
               export PHASE='-Ptest' &&
               mvn -Pbootstrap clean install -Dinvoker.skip -Dmaven.test.skip &&
               mvn install -Dinvoker.skip=false $PHASE"]
-  - name: build-httpd
-    serial: true
-    plan:
-      - aggregate:
-        - get: builds-yaml
-          resource: httpd-builds
-          trigger: true
-        - get: binary-builder
-          passed: [binary-builder]
-        - get: buildpacks-ci
-      - do:
-        - task: build-binary
-          file: buildpacks-ci/tasks/build-binary.yml
-          config:
-            params:
-              BINARY_NAME: httpd
-          privileged: true
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary.yml
-          config:
-            params:
-              BINARY_NAME: httpd
-              AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-              AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-              AWS_DEFAULT_REGION: us-east-1
-          privileged: true
-        - put: builds-out
-          params:
-            repository: build-binary/builds-yaml
-            rebase: true
-        - put: concourse2tracker
-          params:
-            api_token: {{pivotal-tracker-api-token}}
-            git_path: builds-yaml
-            project_id: {{cf-buildpacks-public-tracker-id}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "binary-builder build-httpd job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-httpd"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: build-python
-    serial: true
-    plan:
-      - aggregate:
-        - get: builds-yaml
-          resource: python-builds
-          trigger: true
-        - get: binary-builder
-          passed: [binary-builder]
-        - get: buildpacks-ci
-      - do:
-        - task: build-binary
-          file: buildpacks-ci/tasks/build-binary.yml
-          config:
-            params:
-              BINARY_NAME: python
-          privileged: true
-        - put: build-tar
-          params:
-            from: build-binary/binary-builder/build.tgz
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary.yml
-          config:
-            params:
-              BINARY_NAME: python
-              AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-              AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-              AWS_DEFAULT_REGION: us-east-1
-          privileged: true
-        - put: builds-out
-          params:
-            repository: build-binary/builds-yaml
-            rebase: true
-        - put: concourse2tracker
-          params:
-            api_token: {{pivotal-tracker-api-token}}
-            git_path: builds-yaml
-            project_id: {{cf-buildpacks-public-tracker-id}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "binary-builder build-python job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-python"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: test-python
     serial: true
     plan:
@@ -382,51 +252,6 @@ jobs:
             path: bash
             args: ["-c", "tar xzf build-tar/binary-builder-source.tgz -C /tmp &&
               cd /tmp/x86_64-linux-gnu/ports/python/*/*/ && make test"]
-  - name: build-ruby
-    serial: true
-    plan:
-      - aggregate:
-        - get: builds-yaml
-          resource: ruby-builds
-          trigger: true
-        - get: binary-builder
-          passed: [binary-builder]
-        - get: buildpacks-ci
-      - do:
-        - task: build-binary
-          file: buildpacks-ci/tasks/build-binary.yml
-          config:
-            params:
-              BINARY_NAME: ruby
-          privileged: true
-        - put: build-tar
-          params:
-            from: build-binary/binary-builder/build.tgz
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary.yml
-          config:
-            params:
-              BINARY_NAME: ruby
-              AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-              AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-              AWS_DEFAULT_REGION: us-east-1
-          privileged: true
-        - put: builds-out
-          params:
-            repository: build-binary/builds-yaml
-            rebase: true
-        - put: concourse2tracker
-          params:
-            api_token: {{pivotal-tracker-api-token}}
-            git_path: builds-yaml
-            project_id: {{cf-buildpacks-public-tracker-id}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "binary-builder build-ruby job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-ruby"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: test-ruby
     serial: true
     plan:
@@ -443,51 +268,6 @@ jobs:
             path: bash
             args: ["-c", "tar xzf build-tar/binary-builder-source.tgz -C /tmp &&
               cd /tmp/x86_64-linux-gnu/ports/ruby/*/*/ && make test"]
-  - name: build-nodejs
-    serial: true
-    plan:
-      - aggregate:
-        - get: builds-yaml
-          resource: node-builds
-          trigger: true
-        - get: binary-builder
-          passed: [binary-builder]
-        - get: buildpacks-ci
-      - do:
-        - task: build-binary
-          file: buildpacks-ci/tasks/build-binary.yml
-          config:
-            params:
-              BINARY_NAME: node
-          privileged: true
-        - put: build-tar
-          params:
-            from: build-binary/binary-builder/build.tgz
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary.yml
-          config:
-            params:
-              BINARY_NAME: node
-              AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-              AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-              AWS_DEFAULT_REGION: us-east-1
-          privileged: true
-        - put: builds-out
-          params:
-            repository: build-binary/builds-yaml
-            rebase: true
-        - put: concourse2tracker
-          params:
-            api_token: {{pivotal-tracker-api-token}}
-            git_path: builds-yaml
-            project_id: {{cf-buildpacks-public-tracker-id}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "binary-builder build-nodejs job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-nodejs"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: test-nodejs
     serial: true
     plan:
@@ -504,52 +284,6 @@ jobs:
             path: bash
             args: ["-c", "tar xzf build-tar/binary-builder-source.tgz -C /tmp &&
               cd /tmp/x86_64-linux-gnu/ports/node/*/*/ && make test"]
-
-  - name: build-nginx
-    serial: true
-    plan:
-      - aggregate:
-        - get: builds-yaml
-          resource: nginx-builds
-          trigger: true
-        - get: binary-builder
-          passed: [binary-builder]
-        - get: buildpacks-ci
-      - do:
-        - task: build-binary
-          file: buildpacks-ci/tasks/build-binary.yml
-          config:
-            params:
-              BINARY_NAME: nginx
-          privileged: true
-        - put: build-tar
-          params:
-            from: build-binary/binary-builder/build.tgz
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary.yml
-          config:
-            params:
-              BINARY_NAME: nginx
-              AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-              AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-              AWS_DEFAULT_REGION: us-east-1
-          privileged: true
-        - put: builds-out
-          params:
-            repository: build-binary/builds-yaml
-            rebase: true
-        - put: concourse2tracker
-          params:
-            api_token: {{pivotal-tracker-api-token}}
-            git_path: builds-yaml
-            project_id: {{cf-buildpacks-public-tracker-id}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "binary-builder build-nginx job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-nginx"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: test-nginx
     serial: true
     plan:
@@ -570,93 +304,6 @@ jobs:
               tar xzf build-tar/binary-builder-source.tgz -C /tmp/ &&
               cd /tmp/nginx-tests* &&
               TEST_NGINX_BINARY=`ls /tmp/x86_64-linux-gnu/ports/nginx/*/nginx-*/objs/nginx` prove ."]
-  - name: build-godep
-    serial: true
-    plan:
-      - aggregate:
-        - get: builds-yaml
-          resource: godep-builds
-          trigger: true
-        - get: binary-builder
-          passed: [binary-builder]
-        - get: buildpacks-ci
-      - do:
-        - task: build-binary
-          file: buildpacks-ci/tasks/build-binary.yml
-          config:
-            params:
-              BINARY_NAME: godep
-          privileged: true
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary.yml
-          config:
-            params:
-              BINARY_NAME: godep
-              AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-              AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-              AWS_DEFAULT_REGION: us-east-1
-          privileged: true
-        - put: builds-out
-          params:
-            repository: build-binary/builds-yaml
-            rebase: true
-        - put: concourse2tracker
-          params:
-            api_token: {{pivotal-tracker-api-token}}
-            git_path: builds-yaml
-            project_id: {{cf-buildpacks-public-tracker-id}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "binary-builder build-godep job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-godep"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: build-php7
-    serial: true
-    plan:
-      - aggregate:
-        - get: builds-yaml
-          resource: php7-builds
-          trigger: true
-        - get: binary-builder
-          passed: [binary-builder]
-        - get: buildpacks-ci
-      - do:
-        - task: build-binary
-          file: buildpacks-ci/tasks/build-binary.yml
-          config:
-            params:
-              BINARY_NAME: php7
-          privileged: true
-        - put: build-tar
-          params:
-            from: build-binary/binary-builder/build.tgz
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary.yml
-          config:
-            params:
-              BINARY_NAME: php7
-              AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-              AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-              AWS_DEFAULT_REGION: us-east-1
-          privileged: true
-        - put: builds-out
-          params:
-            repository: build-binary/builds-yaml
-            rebase: true
-        - put: concourse2tracker
-          params:
-            api_token: {{pivotal-tracker-api-token}}
-            git_path: builds-yaml
-            project_id: {{cf-buildpacks-public-tracker-id}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "binary-builder build-php7 job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-php"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: test-php7
     serial: true
     plan:

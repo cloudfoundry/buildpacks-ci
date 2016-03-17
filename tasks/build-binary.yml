@@ -5,5 +5,8 @@ inputs:
   - name: binary-builder
   - name: buildpacks-ci
   - name: builds-yaml
+outputs:
+  - name: binary-builder-artifacts
+  - name: builds-yaml-artifacts
 run:
   path: buildpacks-ci/scripts/build-binary.rb

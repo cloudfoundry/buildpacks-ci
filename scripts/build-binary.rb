@@ -24,6 +24,7 @@ Dir.chdir('binary-builder') do
   system("./bin/binary-builder #{flags}")
   system('tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/')
 end
+system('cp binary-builder/build.tgz binary-builder-artifacts/build.tgz')
 
 filename = Dir["binary-builder/#{binary_name}-*.tgz"].first
 md5sum   = Digest::MD5.file(filename).hexdigest
@@ -40,3 +41,4 @@ Dir.chdir(builds_dir) do
     git commit -am "#{git_msg}"
   EOF
 end
+system("rsync -a #{builds_dir}/ builds-yaml-artifacts")
