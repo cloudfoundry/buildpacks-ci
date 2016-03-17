@@ -33,7 +33,7 @@ jobs:
         privileged: true
       - put: ci-master
         params:
-          repository: rspec/buildpacks-ci
+          repository: buildpacks-ci
           rebase: true
       - put: concourse2tracker
         params:
