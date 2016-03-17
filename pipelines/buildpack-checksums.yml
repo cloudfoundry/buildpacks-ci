@@ -30,7 +30,12 @@ jobs:
             path: bash
             args:
               - -c
-              - "cd master && gem install bundle && bundle && rspec"
+              - |
+                cd master
+                gem install bundle
+                bundle
+                rspec
+
       - task: build-site
         config:
           platform: linux
@@ -38,13 +43,26 @@ jobs:
           inputs:
             - name: master
             - name: gh-pages
+          outputs:
+            - name: gh-pages-artifacts
           run:
             path: bash
             args:
               - -c
-              - "cd master && ./generate.rb ../gh-pages && cd ../gh-pages && git add -A && git commit -m 'Update site' "
+              - |
+                pushd master
+                  ./generate.rb ../gh-pages
+                popd
+
+                pushd gh-pages
+                  git add -A
+                  git commit -m 'Update site'
+                popd
+
+                rsync -a gh-pages/ gh-pages-artifacts
         privileged: true
+
       - put: gh-pages
         params:
-          repository: build-site/gh-pages
+          repository: gh-pages-artifacts
           rebase: true
