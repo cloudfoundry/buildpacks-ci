@@ -10,7 +10,7 @@ run:
   args:
     - '-c'
     - |
-      git clone --branch v$( cat cf-bosh-release/version ) --depth 1 https://github.com/$RELEASE_NAME \
-      cd cf-release \
+      git clone --branch v$( cat cf-bosh-release/version ) --depth 1 https://github.com/$RELEASE_NAME
+      cd cf-release
       ./update || ./scripts/update
 
