@@ -64,11 +64,18 @@ jobs:
           inputs:
             - name: new-releases
             - name: buildpacks-ci
+          outputs:
+            - name: new-releases-artifacts
           run:
             path: bash
             args:
               - -c
-              - "cd buildpacks-ci/ && bundle && bundle exec ./scripts/notifications/check-new-releases"
+              - |
+                pushd buildpacks-ci
+                  bundle
+                  bundle exec ./scripts/notifications/check-new-releases
+                popd
+                rsync -a new-releases/ new-releases-artifacts
           params:
             SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
             SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
@@ -79,7 +86,7 @@ jobs:
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
       - put: new-releases
         params:
-          repository: notify/new-releases
+          repository: new-releases-artifacts
           rebase: true
   - name: create tracker story for Monday Funday
     serial: true
