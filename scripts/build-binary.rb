@@ -39,6 +39,6 @@ Dir.chdir(builds_dir) do
     git config --global user.email "cf-buildpacks-eng@pivotal.io"
     git config --global user.name "CF Buildpacks Team CI Server"
     git commit -am "#{git_msg}"
+    rsync -a #{builds_dir}/ builds-yaml-artifacts
   EOF
 end
-system("rsync -a #{builds_dir}/ builds-yaml-artifacts")
