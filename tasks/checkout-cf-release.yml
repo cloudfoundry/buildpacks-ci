@@ -10,7 +10,7 @@ run:
   args:
     - '-c'
     - |
-      git clone --branch v$( cat cf-bosh-release/version ) --depth 1 https://github.com/$RELEASE_NAME
+      git clone --branch v$( cat cf-bosh-release/version ) --depth 1 https://github.com/cloudfoundry/cf-release
       cd cf-release
       ./scripts/update
 
