@@ -2,7 +2,7 @@
 
 set -eux
 
-../buildpacks-ci/scripts/start-docker
+buildpacks-ci/scripts/start-docker
 
 pushd stacks
   make
