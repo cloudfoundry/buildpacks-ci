@@ -140,10 +140,9 @@ jobs:
         - get: buildpacks-ci
         - task: recreate-bosh-lite
           file: buildpacks-ci/tasks/recreate-bosh-lite.yml
-          config:
-            params:
-              DEPLOYMENT_NAME: stacks.buildpacks.ci
-              PASSWORD: {{bosh-lite-password}}
+          params:
+            DEPLOYMENT_NAME: stacks.buildpacks.ci
+            PASSWORD: {{bosh-lite-password}}
           ensure:
             put: deployments-buildpacks
             params:
@@ -206,10 +205,9 @@ jobs:
       - do:
         - task: generate-manifest
           file: buildpacks-ci/tasks/develop-make-manifest.yml
-          config:
-            params:
-              DEPLOYMENT_NAME: stacks.buildpacks.ci
-              CF_CI_PASSWORD: {{ci-cf-password}}
+          params:
+            DEPLOYMENT_NAME: stacks.buildpacks.ci
+            CF_CI_PASSWORD: {{ci-cf-password}}
           privileged: true
         - put: deployments-buildpacks
           params:
@@ -425,14 +423,13 @@ jobs:
       - do:
         - task: run-both-bosh-scripts
           file: buildpacks-ci/tasks/create-bosh-release.yml
-          config:
-            params:
-              BLOB_NAME: rootfs
-              BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
-              RELEASE_NAME: stack
-              RELEASE_DIR: release
-              ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-              SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+          params:
+            BLOB_NAME: rootfs
+            BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
+            RELEASE_NAME: stack
+            RELEASE_DIR: release
+            ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
         - put: stacks-release
           params:
             repository: release-artifacts

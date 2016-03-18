@@ -95,10 +95,9 @@ jobs:
           trigger: true
       - task: recreate-bosh-lite
         file: buildpacks-ci/tasks/recreate-bosh-lite.yml
-        config:
-          params:
-            DEPLOYMENT_NAME: {{deployment-name}}
-            PASSWORD: {{bosh-lite-password}}
+        params:
+          DEPLOYMENT_NAME: {{deployment-name}}
+          PASSWORD: {{bosh-lite-password}}
         ensure:
           put: deployments-buildpacks
           params:
@@ -126,10 +125,9 @@ jobs:
           file: buildpacks-ci/tasks/checkout-diego-release.yml
       - task: generate-manifest
         file: buildpacks-ci/tasks/diego-make-manifest.yml
-        config:
-          params:
-            DEPLOYMENT_NAME: {{deployment-name}}
-            CF_CI_PASSWORD: {{ci-cf-password}}
+        params:
+          DEPLOYMENT_NAME: {{deployment-name}}
+          CF_CI_PASSWORD: {{ci-cf-password}}
         privileged: true
       - put: deployments-buildpacks
         params:
@@ -196,11 +194,10 @@ jobs:
         - get: machete
       - task: configure-deployment
         file: buildpacks-ci/tasks/machete-configure-deployment.yml
-        config:
-          params:
-            DEPLOYMENT_NAME: {{deployment-name}}
-            CF_CI_PASSWORD: {{ci-cf-password}}
-            CF_CI_USERNAME: {{ci-cf-username}}
+        params:
+          DEPLOYMENT_NAME: {{deployment-name}}
+          CF_CI_PASSWORD: {{ci-cf-password}}
+          CF_CI_USERNAME: {{ci-cf-username}}
   - name: unclaim
     serial_groups: [ deploy ]
     serial: true

@@ -158,12 +158,11 @@ jobs:
       - do:
         - task: rspec
           file: buildpacks-ci/tasks/test-buildpack.yml
-          config:
-            params:
-              STACKS: cflinuxfs2
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              CF_PASSWORD: {{ci-cf-password}}
-              CF_EDGE: 'true'
+          params:
+            STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
+            CF_EDGE: 'true'
           privileged: true
           ensure:
             put: cf-edge-environments
@@ -201,11 +200,10 @@ jobs:
       - do:
         - task: rspec
           file: buildpacks-ci/tasks/test-buildpack.yml
-          config:
-            params:
-              STACKS: cflinuxfs2
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              CF_PASSWORD: {{ci-cf-password}}
+          params:
+            STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
           privileged: true
           ensure:
             put: cf-lts-environments
@@ -285,15 +283,14 @@ jobs:
         privileged: true
       - task: upload to pivnet
         file: buildpacks-ci/tasks/upload-to-pivnet.yml
-        config:
-          params:
-            AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
-            AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
-            PIVNET_S3_BUCKET: pivotalnetwork
-            PIVNET_ADDRESS: https://network.pivotal.io/
-            PIVNET_APIKEY: {{pivnet-apikey}}
-            PIVNET_PRODUCT_NAME: {{pivnet-product-name}}
-            GITHUB_URL: https://github.com/cloudfoundry/<%= language %>-buildpack
+        params:
+          AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
+          AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
+          PIVNET_S3_BUCKET: pivotalnetwork
+          PIVNET_ADDRESS: https://network.pivotal.io/
+          PIVNET_APIKEY: {{pivnet-apikey}}
+          PIVNET_PRODUCT_NAME: {{pivnet-product-name}}
+          GITHUB_URL: https://github.com/cloudfoundry/<%= language %>-buildpack
         privileged: true
   - name: edge-DEA
     serial: true
@@ -311,22 +308,20 @@ jobs:
       - do:
         - task: rspec
           file: buildpacks-ci/tasks/test-buildpack.yml
-          config:
-            params:
-              STACKS: cflinuxfs2
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              CF_PASSWORD: {{ci-cf-password}}
-              CF_EDGE: 'true'
+          params:
+            STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
+            CF_EDGE: 'true'
           privileged: true
 <% unless language == "binary" %>
         - task: brats
           file: buildpacks-ci/tasks/run-brats.yml
-          config:
-            params:
-              BRATS_BRANCH: develop
-              CI_CF_USERNAME: {{ci-cf-username}}
-              CI_CF_PASSWORD: {{ci-cf-password}}
-              LANGUAGE: <%= language %>
+          params:
+            BRATS_BRANCH: develop
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+            LANGUAGE: <%= language %>
 <% end %>
         on_failure:
           put: failure-alert
@@ -355,22 +350,20 @@ jobs:
       - do:
         - task: rspec
           file: buildpacks-ci/tasks/test-buildpack.yml
-          config:
-            params:
-              STACKS: cflinuxfs2
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              CF_PASSWORD: {{ci-cf-password}}
-              CF_EDGE: 'true'
+          params:
+            STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
+            CF_EDGE: 'true'
           privileged: true
 <% unless language == "binary" %>
         - task: brats
           file: buildpacks-ci/tasks/run-brats.yml
-          config:
-            params:
-              BRATS_BRANCH: develop
-              CI_CF_USERNAME: {{ci-cf-username}}
-              CI_CF_PASSWORD: {{ci-cf-password}}
-              LANGUAGE: <%= language %>
+          params:
+            BRATS_BRANCH: develop
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+            LANGUAGE: <%= language %>
 <% end %>
         on_failure:
           put: failure-alert
@@ -399,20 +392,18 @@ jobs:
       - do:
         - task: rspec
           file: buildpacks-ci/tasks/test-buildpack.yml
-          config:
-            params:
-              STACKS: cflinuxfs2
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              CF_PASSWORD: {{ci-cf-password}}
+          params:
+            STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
           privileged: true
         - task: brats
           file: buildpacks-ci/tasks/run-brats.yml
-          config:
-            params:
-              BRATS_BRANCH: develop
-              CI_CF_USERNAME: {{ci-cf-username}}
-              CI_CF_PASSWORD: {{ci-cf-password}}
-              LANGUAGE: <%= language %>
+          params:
+            BRATS_BRANCH: develop
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+            LANGUAGE: <%= language %>
         on_failure:
           put: failure-alert
           params:

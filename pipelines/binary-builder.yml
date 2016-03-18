@@ -101,19 +101,19 @@ jobs:
         - aggregate:
           - task: rspec-1
             file: buildpacks-ci/tasks/binary-builder.yml
-            config: {params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 1 } }
+            params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 1 }
             privileged: true
           - task: rspec-2
             file: buildpacks-ci/tasks/binary-builder.yml
-            config: {params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 2 } }
+            params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 2 }
             privileged: true
           - task: rspec-3
             file: buildpacks-ci/tasks/binary-builder.yml
-            config: {params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 3 } }
+            params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 3 }
             privileged: true
           - task: rspec-4
             file: buildpacks-ci/tasks/binary-builder.yml
-            config: {params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 4 } }
+            params: { TOTAL_GROUPS: 4, CURRENT_GROUP: 4 }
             privileged: true
         on_failure:
           put: failure-alert
@@ -136,21 +136,19 @@ jobs:
       - do:
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary.yml
-          config:
-            params:
-              BINARY_NAME: <%= runtime %>
+          params:
+            BINARY_NAME: <%= runtime %>
           privileged: true
         - put: build-tar
           params:
             from: binary-builder-artifacts/build.tgz
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary.yml
-          config:
-            params:
-              BINARY_NAME: <%= runtime %>
-              AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-              AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-              AWS_DEFAULT_REGION: us-east-1
+          params:
+            BINARY_NAME: <%= runtime %>
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
           privileged: true
         - put: builds-out
           params:
