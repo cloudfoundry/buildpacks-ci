@@ -6,30 +6,24 @@ describe 'make-rootfs' do
   stacks_artifacts = 'spec/scripts/stacks/fixtures/stacks-artifacts'
   receipt_artifacts = 'spec/scripts/stacks/fixtures/receipt-artifacts'
 
-  context 'should run make' do
+  before(:context) do
+    Dir["#{stacks_artifacts}/*"].each { |f| FileUtils.rm_rf f }
+    Dir["#{receipt_artifacts}/*"].each { |f| FileUtils.rm_rf f }
 
-    before(:context) do
-      Dir["#{stacks_artifacts}/*"].each { |f| FileUtils.rm_rf f }
-      Dir["#{receipt_artifacts}/*"].each { |f| FileUtils.rm_rf f }
+    execute('-c tasks/make-rootfs.yml ' \
+      '-p ' \
+      '-i buildpacks-ci=. ' \
+      '-i stacks=spec/scripts/stacks/fixtures/stacks ' \
+      '-i version=spec/scripts/stacks/fixtures/version ' \
+      "-o stacks-artifacts=#{stacks_artifacts} " \
+      "-o receipt-artifacts=#{receipt_artifacts} ")
+  end
 
-      execute('-c tasks/make-rootfs.yml ' \
-              '-p ' \
-              '-i buildpacks-ci=. ' \
-              '-i stacks=spec/scripts/stacks/fixtures/stacks ' \
-              '-i version=spec/scripts/stacks/fixtures/version ' \
-              "-o stacks-artifacts=#{stacks_artifacts} " \
-              "-o receipt-artifacts=#{receipt_artifacts} ")
-    end
-
-    it 'overwrites the correct buildpack .zip file' do
-      expect(File.exists?("#{stacks_artifacts}/.gitkeep")).to eq(true)
-      expect(File.exists?("#{stacks_artifacts}/Makefile")).to eq(true)
-      expect(File.exists?("#{stacks_artifacts}/cflinuxfs2")).to eq(true)
-      expect(File.exists?("#{stacks_artifacts}/cflinuxfs2-1.0.tar.gz")).to eq(true)
-      expect(Dir["#{stacks_artifacts}/*"].size).to eq(4)
-
-      expect(File.exists?("#{receipt_artifacts}/cflinuxfs2_receipt-1.0")).to eq(true)
-      expect(Dir["#{receipt_artifacts}/*"].size).to eq(1)
-    end
+  it 'overwrites the correct buildpack .zip file' do
+    expect(File.exists?("#{stacks_artifacts}/.gitkeep")).to eq(true)
+    expect(File.exists?("#{stacks_artifacts}/Makefile")).to eq(true)
+    expect(File.exists?("#{stacks_artifacts}/cflinuxfs2")).to eq(true)
+    expect(File.exists?("#{stacks_artifacts}/cflinuxfs2-1.0.tar.gz")).to eq(true)
+    expect(File.exists?("#{receipt_artifacts}/cflinuxfs2_receipt-1.0")).to eq(true)
   end
 end
