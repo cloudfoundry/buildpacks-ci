@@ -10,8 +10,8 @@ popd
 export BOSH_RELEASES_DIR=`pwd`
 export CF_RELEASE_DIR=`pwd`/cf-release
 
-cd cf-release
-echo "
+pushd cf-release
+  echo "
 ---
 name: cf-warden
 properties:
@@ -35,12 +35,16 @@ jobs:
   # both offline and online buildpacks now.
   persistent_disk: 30720" >> bosh-lite/cf-stub-spiff-ours.yml
 
-./scripts/generate-bosh-lite-dev-manifest bosh-lite/cf-stub-spiff-ours.yml
+  ./scripts/generate-bosh-lite-dev-manifest bosh-lite/cf-stub-spiff-ours.yml
 
-ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CF_CI_PASSWORD'])" bosh-lite/deployments/cf.yml
+  ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CF_CI_PASSWORD'])" bosh-lite/deployments/cf.yml
+popd
 
-cd ../deployments-buildpacks
-cp ../cf-release/bosh-lite/deployments/cf.yml deployments/$DEPLOYMENT_NAME/manifest.yml
+pushd deployments-buildpacks
+  cp ../cf-release/bosh-lite/deployments/cf.yml deployments/$DEPLOYMENT_NAME/manifest.yml
 
-git add deployments/$DEPLOYMENT_NAME/manifest.yml
-git diff-index --quiet HEAD deployments/$DEPLOYMENT_NAME/manifest.yml || git commit -qm "Update manifest for $DEPLOYMENT_NAME"
+  git add deployments/$DEPLOYMENT_NAME/manifest.yml
+  git diff-index --quiet HEAD deployments/$DEPLOYMENT_NAME/manifest.yml || git commit -qm "Update manifest for $DEPLOYMENT_NAME"
+popd
+
+rsync -a deployments-buildpacks/ deployments-buildpacks-artifacts
