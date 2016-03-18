@@ -6,6 +6,7 @@ require 'digest'
 
 binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
+builds_yaml_artifacts   = File.join(Dir.pwd, 'builds-yaml-artifacts')
 builds_path  = File.join(builds_dir, "#{binary_name}-builds.yml")
 builds       = YAML.load_file(builds_path)
 latest_build = builds[binary_name].shift
@@ -39,6 +40,6 @@ Dir.chdir(builds_dir) do
     git config --global user.email "cf-buildpacks-eng@pivotal.io"
     git config --global user.name "CF Buildpacks Team CI Server"
     git commit -am "#{git_msg}"
-    rsync -a #{builds_dir}/ builds-yaml-artifacts
+    rsync -a #{builds_dir}/ #{builds_yaml_artifacts}
   EOF
 end
