@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 binary_name = ENV['BINARY_NAME']
-file_path   = Dir.glob("build-binary/binary-builder/#{binary_name}-*.{tar.gz,tgz}").first
+file_path   = Dir.glob("binary-builder-artifacts/#{binary_name}-*.{tar.gz,tgz}").first
 unless file_path
   puts 'No binaries detected for upload.'
   exit
