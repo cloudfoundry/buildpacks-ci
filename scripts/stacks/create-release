@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 mkdir -p cf-release/blobs/rootfs
 filename=`cat cf-release/config/blobs.yml | grep cflinuxfs2 | cut -d ':' -f 1`

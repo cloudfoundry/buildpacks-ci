@@ -1,6 +1,6 @@
 ---
 platform: linux
-image: docker:///docker#dind
+image: docker:///cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
   - name: stacks
