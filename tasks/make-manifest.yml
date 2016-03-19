@@ -12,4 +12,4 @@ run:
   path: buildpacks-ci/scripts/generate-cf-manifest
 params:
   DEPLOYMENT_NAME:
-  CF_CI_PASSWORD:
+  CI_CF_PASSWORD:

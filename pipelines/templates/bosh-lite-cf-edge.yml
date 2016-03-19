@@ -127,7 +127,7 @@ jobs:
         file: buildpacks-ci/tasks/diego-make-manifest.yml
         params:
           DEPLOYMENT_NAME: {{deployment-name}}
-          CF_CI_PASSWORD: {{ci-cf-password}}
+          CI_CF_PASSWORD: {{ci-cf-password}}
         privileged: true
       - put: deployments-buildpacks
         params:
@@ -196,8 +196,8 @@ jobs:
         file: buildpacks-ci/tasks/machete-configure-deployment.yml
         params:
           DEPLOYMENT_NAME: {{deployment-name}}
-          CF_CI_PASSWORD: {{ci-cf-password}}
-          CF_CI_USERNAME: {{ci-cf-username}}
+          CI_CF_PASSWORD: {{ci-cf-password}}
+          CI_CF_USERNAME: {{ci-cf-username}}
   - name: unclaim
     serial_groups: [ deploy ]
     serial: true

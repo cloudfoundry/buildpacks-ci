@@ -17,7 +17,7 @@ name: cf-warden
 properties:
   domain: $DEPLOYMENT_NAME.cf-app.com
   acceptance_tests:
-    admin_password: $CF_CI_PASSWORD
+    admin_password: $CI_CF_PASSWORD
     include_internet_dependent: true
     include_logging: true
     include_operator: false
@@ -37,7 +37,7 @@ jobs:
 
   ./scripts/generate-bosh-lite-dev-manifest bosh-lite/cf-stub-spiff-ours.yml
 
-  ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CF_CI_PASSWORD'])" bosh-lite/deployments/cf.yml
+  ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CI_CF_PASSWORD'])" bosh-lite/deployments/cf.yml
 popd
 
 pushd diego-release

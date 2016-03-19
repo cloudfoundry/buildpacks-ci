@@ -9,6 +9,6 @@ run:
   path: buildpacks-ci/scripts/configure-deployment
 params:
   DEPLOYMENT_NAME:
-  CF_CI_PASSWORD:
-  CF_CI_USERNAME:
+  CI_CF_PASSWORD:
+  CI_CF_USERNAME:
 

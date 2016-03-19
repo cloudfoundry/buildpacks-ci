@@ -207,7 +207,7 @@ jobs:
           file: buildpacks-ci/tasks/develop-make-manifest.yml
           params:
             DEPLOYMENT_NAME: stacks.buildpacks.ci
-            CF_CI_PASSWORD: {{ci-cf-password}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
           privileged: true
         - put: deployments-buildpacks
           params:
