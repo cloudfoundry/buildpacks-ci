@@ -57,20 +57,20 @@ exit system(<<-EOF)
 
   set -ex
 
-  pushd cf-release
+  cd cf-release
     bosh -n upload blobs
     /usr/bin/env bash ./scripts/setup-git-hooks
 
     ref=$(cd ../buildpack-releases && git rev-parse HEAD)
 
-    pushd src/buildpacks
+    cd src/buildpacks
       git fetch
       git checkout $ref
-    popd
+    cd ..
 
     git add -A
     git commit -am "Update $BUILDPACK_NAME to v#{version}"
-  popd
+  cd ..
 
   rsync -a cf-release/ cf-release-artifacts
 EOF
