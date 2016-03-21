@@ -367,6 +367,8 @@ jobs:
               - name: cf-release
               - name: <%=language%>-buildpack-github-release
               - name: buildpack-releases
+            outputs:
+              - name: cf-release-artifacts
             run:
               path: buildpacks-ci/scripts/release/cf/upload_blobs
             params:
