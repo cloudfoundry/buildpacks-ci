@@ -10,3 +10,6 @@ outputs:
   - name: deployments-buildpacks-artifacts
 run:
   path: buildpacks-ci/scripts/develop-generate-cf-manifest
+params:
+  DEPLOYMENT_NAME:
+  CI_CF_PASSWORD:
