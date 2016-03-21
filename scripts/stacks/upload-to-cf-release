@@ -6,7 +6,8 @@ mkdir -p cf-release/blobs/rootfs
 cp stack-s3/cflinuxfs2-*.tar.gz cf-release/blobs/rootfs/
 file_name=$(ls cf-release/blobs/rootfs)
 cp receipt-s3/cflinuxfs2_receipt-* cf-release/spec/fixtures/receipts/cflinuxfs2_receipt
-cd cf-release
+
+pushd cf-release
 bundle -j4
 
 cat <<EOF > config/private.yml
@@ -44,3 +45,6 @@ chmod 644 config/blobs.yml
 
 version=`cat ../version/number`
 git commit -m "Bump rootfs to $version" -- config/blobs.yml spec/fixtures/receipts packages/rootfs_cflinuxfs2/packaging packages/rootfs_cflinuxfs2/spec
+popd
+
+rsync -a cf-release/ cf-release-artifacts
