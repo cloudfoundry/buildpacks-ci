@@ -53,6 +53,8 @@ Dir.chdir('cf-release') do
 end
 
 exit system(<<-EOF)
+  #!/usr/bin/env bash
+
   set -ex
 
   pushd cf-release
