@@ -305,7 +305,7 @@ jobs:
               - name: stacks
               - name: version
             outputs:
-              - name: stacks-artifacts
+              - name: new-stack-commit
             run:
               path: buildpacks-ci/scripts/stacks/update-receipt
         - task: update-filename
@@ -315,18 +315,20 @@ jobs:
             inputs:
               - name: stack-s3
               - name: version
+            outputs:
+              - name: stack-archive
             run:
               path: bash
               args:
                 - -c
-                - "mv stack-s3/cflinuxfs2-*.tar.gz stack-s3/cflinuxfs2-`cat version/number`.tar.gz"
+                - "mv stack-s3/cflinuxfs2-*.tar.gz stack-archive/cflinuxfs2-`cat version/number`.tar.gz"
         - put: stack-s3
           params:
-            from: update-filename/stack-s3/cflinuxfs2-(.*).tar.gz
+            from: stack-archive/cflinuxfs2-(.*).tar.gz
             to: /rootfs/
         - put: stacks
           params:
-            repository: stacks-artifacts/stacks
+            repository: new-stack-commit
             tag: version/number
         - put: version
           params: { file: version/number }

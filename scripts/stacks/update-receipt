@@ -9,4 +9,4 @@ pushd stacks
     git commit -m "Commit receipt for $version" -- cflinuxfs2/cflinuxfs2_receipt
 popd
 
-rsync -a stacks/ stacks-artifacts
+rsync -a stacks/ new-stack-commit
