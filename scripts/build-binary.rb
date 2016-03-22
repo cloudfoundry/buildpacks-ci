@@ -25,7 +25,7 @@ Dir.chdir('binary-builder') do
   system("./bin/binary-builder #{flags}")
   system('tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/')
 end
-system('cp binary-builder/build.tgz binary-builder-artifacts/build.tgz')
+system('cp binary-builder/*.tgz binary-builder-artifacts/')
 
 filename = Dir["binary-builder/#{binary_name}-*.tgz"].first
 md5sum   = Digest::MD5.file(filename).hexdigest
