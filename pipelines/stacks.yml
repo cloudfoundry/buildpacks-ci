@@ -82,6 +82,7 @@ resources:
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
+      skip_download: true
   - name: docker-cflinuxfs2-rootfs-tagged
     type: docker-image
     source:
@@ -89,6 +90,7 @@ resources:
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
+      skip_download: true
   - name: stack-github-release
     type: github-release
     source:
