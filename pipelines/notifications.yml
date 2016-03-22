@@ -88,13 +88,13 @@ jobs:
         params:
           repository: new-releases-artifacts
           rebase: true
-  - name: create tracker story for Monday Funday
+  - name: Monday Funday
     serial: true
     plan:
       - get: monday-funday
         trigger: true
       - get: buildpacks-ci
-      - task: create tracker story
+      - task: create latest upstream changes story
         config:
           platform: linux
           image: docker:///cfbuildpacks/ci
@@ -113,6 +113,20 @@ jobs:
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+      - task: create Open PRs story
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/notifications/create-open-pull-requests-story
+          params:
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+            GITHUB_USERNAME: {{github-username}}
+            GITHUB_PASSWORD: {{github-password}}
   - name: New CVEs
     serial: true
     plan:
