@@ -6,7 +6,7 @@ require 'digest'
 
 binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
-builds_yaml_artifacts   = File.join(Dir.pwd, 'builds-yaml-artifacts')
+builds_yaml_artifacts = File.join(Dir.pwd, 'builds-yaml-artifacts')
 builds_path  = File.join(builds_dir, "#{binary_name}-builds.yml")
 builds       = YAML.load_file(builds_path)
 latest_build = builds[binary_name].shift

@@ -30,7 +30,7 @@ Dir['config/bosh-lite/*.yml'].each do |filename|
   matches = /(lts|edge)\-\d+/.match(deployment_name)
   puts deployment_name
   if matches.nil?
-    puts "Your config/bosh-lite/*.yml files must be named in the following manner: edge-1.yml, edge-2.yml, lts-1.yml, lts-2.yml, etc."
+    puts 'Your config/bosh-lite/*.yml files must be named in the following manner: edge-1.yml, edge-2.yml, lts-1.yml, lts-2.yml, etc.'
     exit 1
   end
   cf_version_type = matches[1]

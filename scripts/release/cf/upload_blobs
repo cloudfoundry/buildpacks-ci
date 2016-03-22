@@ -13,7 +13,7 @@ languages = release_names
 
 version = ''
 
-Dir.chdir('cf-release') do 
+Dir.chdir('cf-release') do
   blob_store_private_yml = {
     'blobstore' => {
       's3' => {
