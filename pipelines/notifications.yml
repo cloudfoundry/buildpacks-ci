@@ -120,7 +120,13 @@ jobs:
           inputs:
             - name: buildpacks-ci
           run:
-            path: buildpacks-ci/scripts/notifications/create-open-pull-requests-story
+            path: bash
+            args:
+              - -c
+              - |
+                cd buildpacks-ci
+                bundle
+                bundle exec ./scripts/notifications/create-open-pull-requests-story
           params:
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
