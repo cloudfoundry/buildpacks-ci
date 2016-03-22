@@ -42,37 +42,6 @@ describe NewReleasesDetector do
       end
     end
 
-    context 'for cf-release' do
-      it 'outputs new releases' do
-        expect(Octokit).to receive(:tags)
-          .with('cloudfoundry/cf-release')
-          .and_return(to_tags %w(v1 v2))
-
-        expect do
-          subject.perform!
-        end.to output("There are *2* new updates to the *cfrelease* dependency:\n" \
-                    "- version *v1*\n" \
-                    "- version *v2*\n"
-                     ).to_stdout
-      end
-
-      context 'when there are no new releases' do
-        before { allow(subject).to receive(:warn).and_call_original }
-
-        it 'outputs there are no new updates' do
-          expect(Octokit).to receive(:tags)
-            .with('cloudfoundry/cf-release')
-            .and_return(to_tags %w(v1 v2))
-
-          subject.perform!
-
-          expect do
-            subject.perform!
-          end.to output(/There are no new updates to the \*cfrelease\* dependency\n/).to_stderr
-        end
-      end
-    end
-
     context 'for python' do
       it 'outputs new releases' do
         expect(subject).to receive(:open)

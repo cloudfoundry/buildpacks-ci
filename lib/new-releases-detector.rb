@@ -50,7 +50,6 @@ class NewReleasesDetector
 
   def tags
     @get_tags_functions = {
-      cfrelease: -> { Octokit.tags('cloudfoundry/cf-release').map(&:name).grep(/^v/) },
       composer:  -> { Octokit.tags('composer/composer').map(&:name) },
       go:        -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
       godep:     -> { Octokit.tags('tools/godep').map(&:name).grep(/^v/) },
