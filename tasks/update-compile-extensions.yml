@@ -1,6 +1,6 @@
 ---
 platform: linux
-image: docker:///cloudfoundry/cflinuxfs2
+image: docker:///cfbuildpacks/ci
 inputs:
   - name: compile-extensions
   - name: buildpacks-ci
