@@ -1,6 +1,6 @@
 ---
 platform: linux
-image: docker:///ruby#1.9.3
+image: docker:///cfbuildpacks/ci
 inputs:
   - name: compile-extensions
   - name: buildpacks-ci
