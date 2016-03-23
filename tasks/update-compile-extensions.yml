@@ -5,5 +5,7 @@ inputs:
   - name: compile-extensions
   - name: buildpacks-ci
   - name: buildpack
+outputs:
+  - name: buildpack-artifacts
 run:
   path: buildpacks-ci/scripts/update-compile-extensions

@@ -429,6 +429,6 @@ jobs:
         privileged: true
       - put: buildpack
         params:
-          repository: update-compile-extensions/buildpack
+          repository: buildpack-artifacts
           rebase: true
 <% end %>

@@ -2,12 +2,16 @@
 
 set -e
 
-cd buildpack/compile-extensions
-git checkout master
-git pull origin master
-bundle install
-bundle exec rspec
-cd ..
+pushd buildpack/compile-extensions
+  git checkout master
+  git pull origin master
+  bundle install
+  bundle exec rspec
+popd
 
-git add compile-extensions/
-git commit -m "Update compile-extensions"
+pushd buildpack
+  git add compile-extensions/
+  git commit -m "Update compile-extensions"
+popd
+
+rsync -a buildpack/ buildpack-artifacts
