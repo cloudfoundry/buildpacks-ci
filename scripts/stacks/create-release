@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 mkdir -p cf-release/blobs/rootfs
 filename=`cat cf-release/config/blobs.yml | grep cflinuxfs2 | cut -d ':' -f 1`
 mv stack-s3/*.tar.gz cf-release/blobs/$filename
