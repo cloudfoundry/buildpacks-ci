@@ -9,9 +9,10 @@ pushd deployments-buildpacks
   source ./bin/switch $DEPLOYMENT_NAME
 popd
 
-pushd cf-release 
+pushd cf-release
 
-echo "
+  mkdir bosh-lite
+  echo "
 ---
 name: cf-warden
 properties:
@@ -32,11 +33,11 @@ jobs:
   # both offline and online buildpacks now.
   persistent_disk: 30720" >> bosh-lite/cf-stub-spiff-ours.yml
 
-./scripts/generate-bosh-lite-dev-manifest bosh-lite/cf-stub-spiff-ours.yml
+  ./scripts/generate-bosh-lite-dev-manifest bosh-lite/cf-stub-spiff-ours.yml
 
-ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CI_CF_PASSWORD'])" bosh-lite/deployments/cf.yml
-
+  ruby -i -pe "gsub('admin|admin', 'admin|' + ENV['CI_CF_PASSWORD'])" bosh-lite/deployments/cf.yml
 popd
+
 pushd deployments-buildpacks
 cp ../cf-release/bosh-lite/deployments/cf.yml deployments/$DEPLOYMENT_NAME/manifest.yml
 
@@ -45,4 +46,3 @@ git diff-index --quiet HEAD deployments/$DEPLOYMENT_NAME/manifest.yml || git com
 popd
 
 rsync -a deployments-buildpacks/ deployments-buildpacks-artifacts
-
