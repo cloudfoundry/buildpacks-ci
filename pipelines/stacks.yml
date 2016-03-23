@@ -322,14 +322,14 @@ jobs:
               args:
                 - -c
                 - "mv stack-s3/cflinuxfs2-*.tar.gz stack-archive/cflinuxfs2-`cat version/number`.tar.gz"
-        - put: stack-s3
-          params:
-            from: stack-archive/cflinuxfs2-(.*).tar.gz
-            to: /rootfs/
         - put: stacks
           params:
             repository: new-stack-commit
             tag: version/number
+        - put: stack-s3
+          params:
+            from: stack-archive/cflinuxfs2-(.*).tar.gz
+            to: /rootfs/
         - put: version
           params: { file: version/number }
         on_failure:
