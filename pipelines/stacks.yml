@@ -82,7 +82,6 @@ resources:
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
-      skip_download: true
   - name: docker-cflinuxfs2-rootfs-tagged
     type: docker-image
     source:
@@ -90,7 +89,6 @@ resources:
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
-      skip_download: true
   - name: stack-github-release
     type: github-release
     source:
@@ -399,9 +397,11 @@ jobs:
             resource: docker-cflinuxfs2-rootfs
             params:
               import_file: docker-s3/cflinuxfs2.tar.gz
+              skip_download: true
           - put: docker tagged version
             resource: docker-cflinuxfs2-rootfs-tagged
             params:
+              skip_download: true
               import_file: docker-s3/cflinuxfs2.tar.gz
               tag: version/number
         on_failure:
