@@ -96,14 +96,16 @@ jobs:
           inputs:
             - name: buildpacks-ci
             - name: buildpack
+          outputs:
+            - name: updated-buildpack
           run :
             path: bash
             args:
               - -c
-              - "cd buildpack && ./bin/populate-modules-in-manifest && (git commit -am 'Updated manifest with supported PHP modules' || true)"
+              - "cd buildpack && ./bin/populate-modules-in-manifest && (git commit -am 'Updated manifest with supported PHP modules' || true) && cd - && rsync -a buildpack/ updated-buildpack"
       - put: buildpack
         params:
-          repository: load-modules/buildpack
+          repository: updated-buildpack
           rebase: true
   <% end %>
   - name: detect-new-buildpack-and-upload-artifacts
