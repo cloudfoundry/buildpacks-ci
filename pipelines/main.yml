@@ -90,7 +90,7 @@ jobs:
       - task: rspec
         config:
           platform: linux
-          image: docker:///ruby#1.9.3-slim
+          image: docker:///ruby#2.3.0
           inputs:
             - name: buildpacks-ci
             - name: compile-extensions
