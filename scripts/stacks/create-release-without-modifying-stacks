@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+pushd cf-release
+    bundle
+    bosh create release --force --with-tarball --name cf --version 212.0.`date +"%s"`
+popd
+
+rsync -a cf-release/ cf-release-artifacts

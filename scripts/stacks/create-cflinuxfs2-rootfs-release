@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e
+
+release_name=cflinuxfs2-rootfs-release
+mkdir -p $release_name/blobs/rootfs
+rm config/blobs.yml
+mv stack-s3/*.tar.gz $release_name/blobs/rootfs/cflinuxfs2.tar.gz
+
+pushd $release_name
+    bosh create release --force --with-tarball --name cflinuxfs2-rootfs --version 212.0.`date +"%s"`
+popd
+
+rsync -a $release_name/ ${release_name}-artifacts
