@@ -9,6 +9,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
+      branch: stacks-dats-pipeline-115888451
   - name: stacks
     type: git
     source:
@@ -56,15 +57,61 @@ resources:
       password: {{bosh-lite-password}}
       deployment: cf-warden
       ignore_ssl: true
+  - name: diego-stacks-cf-deployment
+    type: bosh-deployment
+    source:
+      target: https://diego-stacks.buildpacks.ci.cf-app.com:25555
+      username: admin
+      password: {{bosh-lite-password}}
+      deployment: cf-warden
+      ignore_ssl: true
+  - name: diego-stacks-diego-deployment
+    type: bosh-deployment
+    source:
+      target: https://diego-stacks.buildpacks.ci.cf-app.com:25555
+      username: admin
+      password: {{bosh-lite-password}}
+      deployment: cf-warden-diego
+      ignore_ssl: true
   - name: bosh-lite
     type: git
     source:
       uri: https://github.com/cloudfoundry/bosh-lite
+  - name: cflinuxfs2-rootfs-release
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cflinuxfs2-rootfs-release.git
+      branch: master
   - name: cf-release
     type: git
     source:
       uri: https://github.com/cloudfoundry/cf-release
       branch: develop
+  - name: diego-release
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-incubator/diego-release
+      branch: develop
+  - name: diego-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry-incubator/diego-release
+  - name: etcd-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry-incubator/etcd-release
+  - name: garden-linux-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry-incubator/garden-linux-release
+  - name: cf-release-rc
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-release
+      branch: release-candidate
   - name: cf-release-develop
     type: git
     source:
@@ -130,24 +177,36 @@ jobs:
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
   - name: recreate-bosh-lite
     serial: true
-    serial_groups: [ stacks ]
+    serial_groups:
+      - stacks
+      - diego-stacks
     plan:
-      - do:
+      - aggregate:
         - get: deployments-buildpacks
         - get: monday-funday
           passed: [ "notification" ]
           trigger: true
         - get: buildpacks-ci
-        - task: recreate-bosh-lite
-          file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+      - task: recreate-bosh-lite
+        file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+        params:
+          DEPLOYMENT_NAME: stacks.buildpacks.ci
+          PASSWORD: {{bosh-lite-password}}
+        ensure:
+          put: deployments-buildpacks
           params:
-            DEPLOYMENT_NAME: stacks.buildpacks.ci
-            PASSWORD: {{bosh-lite-password}}
-          ensure:
-            put: deployments-buildpacks
-            params:
-              repository: deployments-buildpacks-artifacts
-              rebase: true
+            repository: deployments-buildpacks-artifacts
+            rebase: true
+      - task: recreate-diego-bosh-lite
+        file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+        params:
+          DEPLOYMENT_NAME: diego-stacks.buildpacks.ci
+          PASSWORD: {{bosh-lite-password}}
+        ensure:
+          put: deployments-buildpacks
+          params:
+            repository: deployments-buildpacks-artifacts
+            rebase: true
   - name: build-rootfs
     serial: true
     plan:
@@ -189,8 +248,12 @@ jobs:
     plan:
       - aggregate:
         - get: deployments-buildpacks
+          passed: [ "build-rootfs" ]
         - get: bosh-lite
         - get: buildpacks-ci
+        - get: diego-release
+          params:
+            submodules: none
         - get: cf-release
         - get: lite-stemcell
         - get: stack-s3
@@ -234,7 +297,119 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "stacks deploy-cf-to-stacks job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/deploy-cf-to-stacks"
+            text: "deploy-cf-to-stacks job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/deploy-cf-to-stacks"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: deploy-cf-to-diego-stacks
+    serial: true
+    serial_groups: [ diego-stacks ]
+    plan:
+      - aggregate:
+        - get: deployments-buildpacks
+          passed: [ "build-rootfs" ]
+        - get: bosh-lite
+        - get: buildpacks-ci
+        - get: cf-release
+          resource: cf-release-rc
+        - get: diego-release
+          params:
+            submodules: none
+        - get: lite-stemcell
+        - get: stack-s3
+          passed: [ build-rootfs ]
+        - get: version
+          passed: [ build-rootfs ]
+          trigger: true
+        - get: receipt-s3
+          passed: [ build-rootfs ]
+        - get: stacks
+          passed: [ build-rootfs ]
+      - do:
+        - task: generate-manifest
+          file: buildpacks-ci/tasks/diego-make-manifest.yml
+          params:
+            DEPLOYMENT_NAME: diego-stacks.buildpacks.ci
+            CI_CF_PASSWORD: {{ci-cf-password}}
+            USE_STACK_BOSH_RELEASE: yes
+          privileged: true
+        - put: deployments-buildpacks
+          params:
+            repository: generate-manifest-artifacts
+            rebase: true
+        - task: create-cf-release
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci
+            inputs:
+              - name: buildpacks-ci
+              - name: cf-release
+              - name: stack-s3
+            outputs:
+              - name: cf-release-artifacts
+            run:
+              path: buildpacks-ci/scripts/stacks/create-release-without-modifying-stacks
+          privileged: true
+        - put: diego-stacks-cf-deployment
+          params:
+            manifest: generate-manifest-artifacts/deployments/diego-stacks.buildpacks.ci/manifest.yml
+            stemcells: [lite-stemcell/*.tgz]
+            releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
+        on_failure:
+          put: failure-alert
+          params:
+            text: "deploy-cf-to-diego-stacks job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/deploy-cf-to-diego-stacks"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: deploy-diego-to-diego-stacks
+    serial: true
+    serial_groups: [ diego-stacks ]
+    plan:
+      - aggregate:
+        - get: lite-stemcell
+        - get: garden-linux-bosh-release
+        - get: diego-bosh-release
+        - get: etcd-bosh-release
+        - get: deployments-buildpacks
+          passed: ['deploy-cf-to-diego-stacks']
+          trigger: true
+        - get: cflinuxfs2-rootfs-release
+        - get: buildpacks-ci
+        - get: stack-s3
+          passed: [ deploy-cf-to-diego-stacks ]
+        - get: version
+          passed: [ deploy-cf-to-diego-stacks ]
+          trigger: true
+        - get: receipt-s3
+          passed: [ deploy-cf-to-diego-stacks ]
+        - get: stacks
+          passed: [ deploy-cf-to-diego-stacks ]
+      - task: create-cflinuxfs2-rootfs-release
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: stack-s3
+            - name: cflinuxfs2-rootfs-release
+          outputs:
+            - name: cflinuxfs2-rootfs-release-artifacts
+          run:
+            path: buildpacks-ci/scripts/stacks/create-cflinuxfs2-rootfs-release
+      - put: diego-stacks-diego-deployment
+        params:
+          manifest: deployments-buildpacks/deployments/diego-stacks.buildpacks.ci/diego.yml
+          stemcells: ['lite-stemcell/stemcell.tgz']
+          releases:
+            - diego-bosh-release/release.tgz
+            - garden-linux-bosh-release/release.tgz
+            - etcd-bosh-release/release.tgz
+            - cflinuxfs2-rootfs-release-artifacts/dev_releases/cflinuxfs2-rootfs/*.tgz
+        on_failure:
+          put: failure-alert
+          params:
+            text: "deploy-diego-to-diego-stacks job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/deploy-diego-to-diego-stacks"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -244,9 +419,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: cf-release
-          passed: [ deploy-cf-to-stacks ]
         - get: deployments-buildpacks
+          passed: ['deploy-cf-to-stacks']
         - get: stack-s3
           passed: [ deploy-cf-to-stacks ]
         - get: version
@@ -263,7 +437,6 @@ jobs:
             image: docker:///cfbuildpacks/ci
             inputs:
               - name: buildpacks-ci
-              - name: cf-release
               - name: deployments-buildpacks
             run:
               path: buildpacks-ci/scripts/cats
@@ -279,20 +452,68 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: dats
+    serial: true
+    serial_groups: [ diego-stacks ]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: deployments-buildpacks
+          passed: ['deploy-diego-to-diego-stacks']
+          trigger: true
+        - get: stack-s3
+          passed: [ deploy-diego-to-diego-stacks ]
+        - get: version
+          passed: [ deploy-diego-to-diego-stacks ]
+          trigger: true
+        - get: receipt-s3
+          passed: [ deploy-diego-to-diego-stacks ]
+        - get: stacks
+          passed: [ deploy-diego-to-diego-stacks ]
+      - do:
+        - task: dats
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci
+            inputs:
+              - name: buildpacks-ci
+              - name: deployments-buildpacks
+            run:
+              path: buildpacks-ci/scripts/cats
+            params:
+              DEPLOYMENT_NAME: diego-stacks.buildpacks.ci
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        on_failure:
+          put: failure-alert
+          params:
+            text: "stacks dats job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/dats"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: shipit
     serial: true
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: stack-s3
-          passed: [ cats ]
+          passed:
+            - cats
+            - dats
         - get: receipt-s3
-          passed: [ cats ]
+          passed:
+            - cats
+            - dats
         - get: stacks
           resource: stacks
-          passed: [ cats ]
+          passed:
+            - cats
+            - dats
         - get: version
-          passed: [ cats ]
+          passed:
+            - cats
+            - dats
           params: { bump: final }
       - do:
         - task: update-receipt
