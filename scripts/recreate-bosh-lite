@@ -23,8 +23,8 @@ done
 
 bosh -u admin -p admin -t $DEPLOYMENT_NAME.cf-app.com create user admin $PASSWORD
 
-if [ -e manifest.yml ]; then
-  rm manifest.yml
+if [ -e manifest.yml -o -e diego.yml ]; then
+  rm -f manifest.yml diego.yml
   git add -A
-  git commit -m "remove deployment manifest for $DEPLOYMENT_NAME"
+  git commit -m "remove deployment manifests for $DEPLOYMENT_NAME"
 fi
