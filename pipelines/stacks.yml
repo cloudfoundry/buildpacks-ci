@@ -82,6 +82,7 @@ resources:
     source:
       uri: git@github.com:cloudfoundry/cflinuxfs2-rootfs-release.git
       branch: master
+      private_key: {{cflinuxfs2-rootfs-private-key}}
   - name: cf-release
     type: git
     source:
@@ -274,7 +275,7 @@ jobs:
           privileged: true
         - put: deployments-buildpacks
           params:
-            repository: deployments-buildpacks-artifacts
+            repository: generate-manifest-artifacts
             rebase: true
         - task: create-stack-release
           config:
@@ -291,7 +292,7 @@ jobs:
           privileged: true
         - put: stacks-cf-deployment
           params:
-            manifest: deployments-buildpacks-artifacts/deployments/stacks.buildpacks.ci/manifest.yml
+            manifest: generate-manifest-artifacts/deployments/stacks.buildpacks.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
         on_failure:
@@ -331,7 +332,7 @@ jobs:
           params:
             DEPLOYMENT_NAME: diego-stacks.buildpacks.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
-            USE_STACK_BOSH_RELEASE: yes
+            USE_STACK_RELEASE: "yes"
           privileged: true
         - put: deployments-buildpacks
           params:
