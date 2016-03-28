@@ -268,7 +268,7 @@ jobs:
           passed: [ build-rootfs ]
       - do:
         - task: generate-manifest
-          file: buildpacks-ci/tasks/develop-make-manifest.yml
+          file: buildpacks-ci/tasks/diego-make-manifest.yml
           params:
             DEPLOYMENT_NAME: stacks.buildpacks.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
