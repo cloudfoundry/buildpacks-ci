@@ -27,7 +27,7 @@ export BOSH_RELEASES_DIR=`pwd`
 export CF_RELEASE_DIR=`pwd`/cf-release
 
 pushd cf-release
-  mkdir bosh-lite
+  mkdir -p bosh-lite
   echo "
 ---
 name: cf-warden
@@ -60,7 +60,7 @@ jobs:
 popd
 
 pushd diego-release
-  if [ "x${USE_STACK_BOSH_RELEASE}" == "xyes" ]; then
+  if [ "x${USE_STACK_RELEASE}" == "xyes" ]; then
       ./scripts/generate-bosh-lite-manifests -r
   else
       ./scripts/generate-bosh-lite-manifests
