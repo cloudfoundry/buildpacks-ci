@@ -13,6 +13,6 @@ Dir.chdir('buildpack-packager') do
   File.write(File.join(artifact_path, 'tag'), tag)
 end
 
-compressed_file_target = "#{artifact_path}/buildpack-packager-#{tag}"
+compressed_file_target = "#{artifact_path}/buildpack-packager-v#{current_version}"
 `zip -r #{compressed_file_target}.zip buildpack-packager`
 `tar -cvzf #{compressed_file_target}.tar.gz buildpack-packager`
