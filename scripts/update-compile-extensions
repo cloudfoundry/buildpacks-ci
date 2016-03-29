@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 
 pushd buildpack/compile-extensions
   git checkout master

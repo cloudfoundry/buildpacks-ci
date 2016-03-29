@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 
 MACHETE_VERSION=$(cat machete/version)
 NEW_VERSION_LINE="gem 'machete', git: 'https://github.com/cloudfoundry/machete', tag: 'v$MACHETE_VERSION'"

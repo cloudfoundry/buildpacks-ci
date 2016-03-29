@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 
 BUILDPACK_PACKAGER_VERSION=$(cat buildpack-packager/version)
 NEW_VERSION_LINE="gem 'buildpack-packager', git: 'https://github.com/cloudfoundry/buildpack-packager', tag: 'v$BUILDPACK_PACKAGER_VERSION'"
