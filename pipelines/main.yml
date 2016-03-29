@@ -24,7 +24,15 @@ resources:
   - name: machete
     type: git
     source:
-      uri: https://github.com/cloudfoundry/machete.git
+      uri: git@github.com:cloudfoundry/machete.git
+      branch: master
+      private_key: {{machete-private-key}}
+  - name: machete-github-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: machete
+      access_token: {{buildpacks-github-token}}
   - name: compile-extensions
     type: git
     source:
@@ -107,7 +115,7 @@ jobs:
           globs:
             - buildpack-packager-artifacts/buildpack-packager-v*.zip
             - buildpack-packager-artifacts/buildpack-packager-v*.tar.gz
-  - name: machete
+  - name: machete-specs
     serial: true
     plan:
       - aggregate:
@@ -124,6 +132,56 @@ jobs:
           run:
             path: buildpacks-ci/scripts/machete.sh
         privileged: true
+  - name: machete-tag
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: machete
+          passed: [ machete-specs ]
+      - task: bump version and push up tag
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: machete
+          outputs:
+            - name: machete-artifacts
+          run:
+            path: buildpacks-ci/scripts/release/machete/bump-version
+      - put: machete
+        params:
+          repository: machete-artifacts
+          tag: machete-artifacts/VERSION
+          tag_prefix: v
+  - name: machete-release
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: machete
+          passed: [ machete-tag ]
+          trigger: true
+      - task: create new release
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: machete
+          outputs:
+            - name: machete-artifacts
+          run:
+            path: buildpacks-ci/scripts/release/machete/finalize-machete
+        privileged: true
+      - put: machete-github-release
+        params:
+          name: machete-artifacts/tag
+          tag: machete-artifacts/tag
+          globs:
+            - machete-artifacts/machete-v*.zip
+            - machete-artifacts/machete-v*.tar.gz
   - name: compile-extensions
     serial: true
     plan:

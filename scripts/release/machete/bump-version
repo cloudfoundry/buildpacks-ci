@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -e
+
+pushd buildpacks-ci
+  bundle install
+popd
+
+pushd machete
+  bump patch
+  bump current | egrep -o '[0-9\.]+' >> VERSION
+popd
+
+rsync -a machete/ machete-artifacts
