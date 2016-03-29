@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -e
+
+MACHETE_VERSION=$(cat machete/version)
+NEW_VERSION_LINE="gem 'machete', git: 'https://github.com/cloudfoundry/machete', tag: 'v$MACHETE_VERSION'"
+
+pushd buildpack
+  sed -i "s|^gem 'machete'.*$|$NEW_VERSION_LINE|" cf.Gemfile
+  BUNDLE_GEMFILE=cf.Gemfile bundle install
+  git add cf.Gemfile cf.Gemfile.lock
+  git commit -m "Update machete to $MACHETE_VERSION"
+popd
+
+rsync -a buildpack/ buildpack-artifacts

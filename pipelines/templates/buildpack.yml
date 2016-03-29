@@ -37,6 +37,11 @@ resources:
     source:
       user: cloudfoundry
       repository: buildpack-packager
+  - name: machete
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: machete
   - name: buildpack
     type: git
     source:
@@ -448,6 +453,20 @@ jobs:
         - get: buildpack
       - task: update-buildpack-packager
         file: buildpacks-ci/tasks/update-buildpack-packager.yml
+        privileged: true
+      - put: buildpack
+        params:
+          repository: buildpack-artifacts
+          rebase: true
+  - name: update-machete
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: machete
+        - get: buildpack
+      - task: update-machete
+        file: buildpacks-ci/tasks/update-machete.yml
         privileged: true
       - put: buildpack
         params:
