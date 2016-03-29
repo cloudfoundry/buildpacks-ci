@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+pushd buildpack-packager
+  gem install bump -v 0.5.3
+  bump patch
+  bump current | egrep -o '[0-9\.]+' >> VERSION
+popd
+
+rsync -a buildpack-packager/ buildpack-packager-artifacts

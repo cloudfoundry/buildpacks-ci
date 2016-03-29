@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+require 'digest'
+require 'fileutils'
+
+artifact_path = File.join(Dir.pwd, 'buildpack-packager-artifacts')
+
+`gem install bump -v 0.5.3`
+
+Dir.chdir('buildpack-packager') do
+  current_version = `bump current | egrep -o '[0-9\.]+'`
+  tag = "v#{current_version}"
+  File.write(File.join(artifact_path, 'tag'), tag)
+end
+
+compressed_file_target = "#{artifact_path}/buildpack-packager-#{tag}"
+`zip -r #{compressed_file_target}.zip buildpack-packager`
+`tar -cvzf #{compressed_file_target}.tar.gz buildpack-packager`
