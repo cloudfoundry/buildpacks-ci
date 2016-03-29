@@ -12,7 +12,15 @@ resources:
   - name: buildpack-packager
     type: git
     source:
-      uri: https://github.com/cloudfoundry-incubator/buildpack-packager.git
+      uri: git@github.com:cloudfoundry/buildpack-packager.git
+      branch: master
+      private_key: {{buildpack-packager-private-key}}
+  - name: buildpack-packager-github-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: buildpack-packager
+      access_token: {{buildpacks-github-token}}
   - name: machete
     type: git
     source:
@@ -31,22 +39,8 @@ resources:
       interval: 12h
       start: 7:00 -0400
       stop: 12:00 -0400
-  - name: cf-edge-environments
-    type: pool
-    source:
-      branch: resource-pools
-      pool: cf-edge-environments
-      private_key: {{resource-pools-private-key}}
-      uri: git@github.com:cloudfoundry/buildpacks-ci.git
-  - name: cf-lts-environments
-    type: pool
-    source:
-      branch: resource-pools
-      pool: cf-lts-environments
-      private_key: {{resource-pools-private-key}}
-      uri: git@github.com:cloudfoundry/buildpacks-ci.git
 jobs:
-  - name: buildpack-packager
+  - name: buildpack-packager-specs
     serial: true
     plan:
       - aggregate:
@@ -63,6 +57,56 @@ jobs:
           run:
             path: buildpacks-ci/scripts/buildpack-packager.sh
         privileged: true
+  - name: buildpack-packager-tag
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack-packager
+          passed: [ buildpack-packager-specs ]
+      - task: bump version and push up tag
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: buildpack-packager
+          outputs:
+            - name: buildpack-packager-artifacts
+          run:
+            path: buildpacks-ci/scripts/release/buildpack-packager/bump-version
+      - put: buildpack-packager
+        params:
+          repository: buildpack-packager-artifacts
+          tag: buildpack-packager-artifacts/VERSION
+          tag_prefix: v
+  - name: buildpack-packager-release
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack-packager
+          passed: [ buildpack-packager-tag ]
+          trigger: true
+      - task: create new release
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+            - name: buildpack-packager
+          outputs:
+            - name: buildpack-packager-artifacts
+          run:
+            path: buildpacks-ci/scripts/release/buildpack-packager/finalize-buildpack-packager
+        privileged: true
+      - put: buildpack-packager-github-release
+        params:
+          name: buildpack-packager-artifacts/tag
+          tag: buildpack-packager-artifacts/tag
+          globs:
+            - buildpack-packager-artifacts/buildpack-packager-v*.zip
+            - buildpack-packager-artifacts/buildpack-packager-v*.tar.gz
   - name: machete
     serial: true
     plan:

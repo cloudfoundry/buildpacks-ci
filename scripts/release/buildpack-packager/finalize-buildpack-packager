@@ -12,7 +12,7 @@ current_version = Dir.chdir('buildpack-packager') do
   current_version = `bump current | egrep -o '[0-9\.]+'`
   tag = "v#{current_version}"
   File.write(File.join(artifact_path, 'tag'), tag)
-  current_version
+  current_version.strip
 end
 
 compressed_file_target = "#{artifact_path}/buildpack-packager-v#{current_version}"
