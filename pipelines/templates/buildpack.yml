@@ -37,11 +37,13 @@ resources:
     source:
       user: cloudfoundry
       repository: buildpack-packager
+      access_token: {{buildpacks-github-token}}
   - name: machete
     type: github-release
     source:
       user: cloudfoundry
       repository: machete
+      access_token: {{buildpacks-github-token}}
   - name: buildpack
     type: git
     source:
