@@ -6,9 +6,9 @@ BUILDPACK_PACKAGER_VERSION=$(cat buildpack-packager/version)
 NEW_VERSION_LINE="gem 'buildpack-packager', git: 'https://github.com/cloudfoundry-incubator/buildpack-packager', tag: 'v$BUILDPACK_PACKAGER_VERSION'"
 
 pushd buildpack
-  sed -i "s|^gem 'buildpack-packager'.*$|$NEW_VERSION_LINE|" Gemfile
-  bundle install
-  git add Gemfile Gemfile.lock
+  sed -i "s|^gem 'buildpack-packager'.*$|$NEW_VERSION_LINE|" cf.Gemfile
+  BUNDLE_GEMFILE=cf.Gemfile bundle install
+  git add cf.Gemfile cf.Gemfile.lock
   git commit -m "Update buildpack-packager to $BUILDPACK_PACKAGER_VERSION"
 popd
 
