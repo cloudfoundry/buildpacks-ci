@@ -32,6 +32,11 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/compile-extensions.git
+  - name: buildpack-packager
+    type: github-release
+    source:
+      user: cloudfoundry-incubator
+      repository: buildpack-packager
   - name: buildpack
     type: git
     source:
@@ -434,3 +439,17 @@ jobs:
           repository: buildpack-artifacts
           rebase: true
 <% end %>
+  - name: update-buildpack-packager
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack-packager
+        - get: buildpack
+      - task: update-buildpack-packager
+        file: buildpacks-ci/tasks/update-buildpack-packager.yml
+        privileged: true
+      - put: buildpack
+        params:
+          repository: buildpack-artifacts
+          rebase: true
