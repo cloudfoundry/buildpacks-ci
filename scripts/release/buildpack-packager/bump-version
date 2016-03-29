@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+pushd buildpacks-ci
+  bundle install
+popd
+
 pushd buildpack-packager
-  gem install bump -v 0.5.3
   bump patch
   bump current | egrep -o '[0-9\.]+' >> VERSION
 popd
