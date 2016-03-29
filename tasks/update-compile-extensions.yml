@@ -2,7 +2,6 @@
 platform: linux
 image: docker:///cfbuildpacks/ci
 inputs:
-  - name: compile-extensions
   - name: buildpacks-ci
   - name: buildpack
 outputs:
