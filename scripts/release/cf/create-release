@@ -11,7 +11,7 @@ release_names.each do |language|
   src = Dir["#{language}-buildpack-github-release/*.zip"].first
   next unless src
   dst = File.join('cf-release', 'blobs', key)
-  FileUtils.mkdir_p dst
+  FileUtils.mkdir_p File.dirname(dst)
   FileUtils.mv src, dst
 end
 
