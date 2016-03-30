@@ -5,6 +5,10 @@ require 'fileutils'
 require 'yaml'
 require_relative 'common'
 
+Dir.chdir 'cf-release' do
+  system %(bundle && bosh --parallel 10 sync blobs)
+end
+
 release_names.each do |language|
   FileUtils.mkdir_p File.join('cf-release', 'blobs', "#{language}-buildpack")
   blobs = YAML.load File.read('cf-release/config/blobs.yml')
@@ -16,7 +20,7 @@ release_names.each do |language|
 end
 
 Dir.chdir 'cf-release' do
-  system %(bundle && bosh create release --force --with-tarball --name cf --version 212.0.#{Time.now.to_i})
+  system %(bosh create release --force --with-tarball --name cf --version 212.0.#{Time.now.to_i})
 end
 
 system('rsync -a cf-release/ cf-release-artifacts')
