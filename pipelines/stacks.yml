@@ -9,7 +9,6 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
-      branch: stacks-dats-pipeline-115888451
   - name: stacks
     type: git
     source:
