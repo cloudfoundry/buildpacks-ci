@@ -9,6 +9,10 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/bosh-lite
+  - name: diego-release
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-incubator/diego-release
   - name: cf-release
     type: git
     source:
@@ -153,9 +157,9 @@ jobs:
             passed: [ recreate-bosh-lite ]
             trigger: true
           - get: buildpacks-ci
-        - aggregate:
           - get: bosh-lite
           - get: cf-release
+          - get: diego-release
           - get: lite-stemcell
           - get: java-buildpack-github-release
             params:
