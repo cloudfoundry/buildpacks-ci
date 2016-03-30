@@ -68,12 +68,11 @@ pushd diego-release
 popd
 
 pushd deployments-buildpacks
-cp ../cf-release/bosh-lite/deployments/cf.yml deployments/$DEPLOYMENT_NAME/manifest.yml
-cp ../diego-release/bosh-lite/deployments/diego.yml deployments/$DEPLOYMENT_NAME/diego.yml
+  cp ../cf-release/bosh-lite/deployments/cf.yml deployments/$DEPLOYMENT_NAME/manifest.yml
+  cp ../diego-release/bosh-lite/deployments/diego.yml deployments/$DEPLOYMENT_NAME/diego.yml
 
-git add deployments/$DEPLOYMENT_NAME/manifest.yml
-git add deployments/$DEPLOYMENT_NAME/diego.yml
-git diff-index --quiet HEAD deployments/$DEPLOYMENT_NAME/manifest.yml || git commit -qm "Update manifest for $DEPLOYMENT_NAME"
+  git add deployments/$DEPLOYMENT_NAME/*.yml
+  git diff-index --quiet HEAD deployments/$DEPLOYMENT_NAME/manifest.yml || git commit -qm "Update manifests for $DEPLOYMENT_NAME"
 popd
 
 rsync -a deployments-buildpacks/ generate-manifest-artifacts

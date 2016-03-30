@@ -1,0 +1,13 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+inputs:
+  - name: bosh-lite
+  - name: buildpacks-ci
+  - name: diego-release
+  - name: cflinuxfs2-rootfs-release
+  - name: deployments-buildpacks
+outputs:
+  - name: generate-manifest-artifacts
+run:
+  path: buildpacks-ci/scripts/make-diego-stacks-manifest
