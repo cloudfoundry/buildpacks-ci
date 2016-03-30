@@ -452,6 +452,7 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack-packager
+          trigger: true
         - get: buildpack
       - task: update-buildpack-packager
         file: buildpacks-ci/tasks/update-buildpack-packager.yml
@@ -466,6 +467,7 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: machete
+          trigger: true
         - get: buildpack
       - task: update-machete
         file: buildpacks-ci/tasks/update-machete.yml
