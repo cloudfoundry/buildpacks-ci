@@ -184,13 +184,13 @@ jobs:
           privileged: true
         - put: deployments-buildpacks
           params:
-            repository: deployments-buildpacks-artifacts
+            repository: generate-manifest-artifacts
         - task: create-cf-release
           file: buildpacks-ci/tasks/create-release.yml
           privileged: true
         - put: cf-release-deployment
           params:
-            manifest: deployments-buildpacks-artifacts/deployments/cf-release.buildpacks.ci/manifest.yml
+            manifest: generate-manifest-artifacts/deployments/cf-release.buildpacks.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
         on_failure:
