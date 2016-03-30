@@ -7,6 +7,7 @@ gem 'rspec'
 gem 'webmock'
 gem 'nokogiri'
 gem 'octokit'
+gem 'bump', '= 0.5.3'
 
 group :development do
   gem 'rubocop'

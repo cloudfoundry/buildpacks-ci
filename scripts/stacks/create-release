@@ -8,6 +8,7 @@ mv stack-s3/*.tar.gz cf-release/blobs/$filename
 
 pushd cf-release
     bundle
+    bosh --parallel 10 sync blobs
     bosh create release --force --with-tarball --name cf --version 212.0.`date +"%s"`
 popd
 

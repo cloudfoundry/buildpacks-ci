@@ -2,9 +2,10 @@
 platform: linux
 image: docker:///cfbuildpacks/ci
 inputs:
+  - name: buildpack-packager
   - name: buildpacks-ci
   - name: buildpack
 outputs:
   - name: buildpack-artifacts
 run:
-  path: buildpacks-ci/scripts/update-compile-extensions
+  path: buildpacks-ci/scripts/update-buildpack-packager

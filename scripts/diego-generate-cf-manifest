@@ -2,6 +2,22 @@
 
 set -e
 
+function acceptance_test_backend {
+    case $DEPLOYMENT_NAME in
+        edge-2.buildpacks.ci)           echo -n "diego";;
+        diego-stacks.buildpacks.ci)     echo -n "diego";;
+        *)                              echo -n "dea";;
+    esac
+}
+
+function use_diego_backend {
+    if [[ `acceptance_test_backend` == "diego" ]]; then
+        echo -n true
+    else
+        echo -n false
+    fi
+}
+
 pushd deployments-buildpacks
   bundle -j4
   source ./bin/switch $DEPLOYMENT_NAME
@@ -11,7 +27,8 @@ export BOSH_RELEASES_DIR=`pwd`
 export CF_RELEASE_DIR=`pwd`/cf-release
 
 pushd cf-release
-echo "
+  mkdir -p bosh-lite
+  echo "
 ---
 name: cf-warden
 properties:
@@ -26,8 +43,10 @@ properties:
     include_services: true
     include_sso: false
     include_v3: false
+    nodes: 4
+    backend: $(acceptance_test_backend)
   cc:
-    default_to_diego_backend: $(ruby -e "puts(ENV['DEPLOYMENT_NAME'] == 'edge-2.buildpacks.ci')")
+    default_to_diego_backend: $(use_diego_backend)
 
 jobs:
 - name: api_z1
@@ -41,7 +60,11 @@ jobs:
 popd
 
 pushd diego-release
-  ./scripts/generate-bosh-lite-manifests
+  if [ "x${USE_STACK_RELEASE}" == "xyes" ]; then
+      ./scripts/generate-bosh-lite-manifests -r
+  else
+      ./scripts/generate-bosh-lite-manifests
+  fi
 popd
 
 pushd deployments-buildpacks

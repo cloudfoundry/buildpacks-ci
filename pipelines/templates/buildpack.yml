@@ -32,6 +32,18 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/compile-extensions.git
+  - name: buildpack-packager
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: buildpack-packager
+      access_token: {{buildpacks-github-token}}
+  - name: machete
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: machete
+      access_token: {{buildpacks-github-token}}
   - name: buildpack
     type: git
     source:
@@ -434,3 +446,33 @@ jobs:
           repository: buildpack-artifacts
           rebase: true
 <% end %>
+  - name: update-buildpack-packager
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack-packager
+          trigger: true
+        - get: buildpack
+      - task: update-buildpack-packager
+        file: buildpacks-ci/tasks/update-buildpack-packager.yml
+        privileged: true
+      - put: buildpack
+        params:
+          repository: buildpack-artifacts
+          rebase: true
+  - name: update-machete
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: machete
+          trigger: true
+        - get: buildpack
+      - task: update-machete
+        file: buildpacks-ci/tasks/update-machete.yml
+        privileged: true
+      - put: buildpack
+        params:
+          repository: buildpack-artifacts
+          rebase: true
