@@ -9,14 +9,18 @@ Dir.chdir 'cf-release' do
   system %(bundle && bosh --parallel 10 sync blobs)
 end
 
+BLOBS_YAML = 'cf-release/config/blobs.yml'
+
 release_names.each do |language|
   FileUtils.mkdir_p File.join('cf-release', 'blobs', "#{language}-buildpack")
-  blobs = YAML.load File.read('cf-release/config/blobs.yml')
+  blobs = YAML.load File.read(BLOBS_YAML)
   key = find_buildpack_key blobs, language
   src = Dir["#{language}-buildpack-github-release/*.zip"].first
   next unless src
   dst = "cf-release/blobs/#{key}"
   FileUtils.mv src, dst
+  blobs.delete(old_buildpack_key)
+  File.write(BLOBS_YAML, YAML.dump(blobs))
 end
 
 Dir.chdir 'cf-release' do
