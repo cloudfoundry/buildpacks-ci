@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -ex
+
+pushd deployments-buildpacks
+  bundle install
+  . ./bin/switch $DEPLOYMENT_NAME
+popd
+
+
+bosh -d deployments-buildpacks/deployments/diego-stacks.buildpacks.ci/rootfs-smoke-test.yml run errand rootfs-smoke-test

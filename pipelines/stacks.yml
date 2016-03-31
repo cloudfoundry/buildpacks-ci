@@ -405,10 +405,7 @@ jobs:
             inputs:
               - name: deployments-buildpacks
             run:
-              path: bash
-              args:
-                - "-ex -c"
-                - bosh -d deployments-buildpacks/deployments/diego-stacks.buildpacks.ci/rootfs-smoke-test.yml run errand rootfs-smoke-test
+              path: buildpacks-ci/scripts/run-rootfs-smoke-test-errand
         on_failure:
           put: failure-alert
           params:
