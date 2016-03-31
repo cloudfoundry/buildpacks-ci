@@ -40,10 +40,12 @@ class OpenGithubStoryCreator
                        'buildpack-packager',
                        'machete',
                        'compile-extensions',
+                       'binary-builder',
                        'buildpacks-ci',
                        'buildpack-releases',
                        'stacks'],
-    'cloudfoundry-incubator' => ['buildpack_app_lifecycle']
+    'cloudfoundry-incubator' => ['buildpack_app_lifecycle'],
+    'pivotal-cf-experimental' => ['stacks-release']
   }
 
   def self.configure_octokit
