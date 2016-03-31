@@ -37,7 +37,7 @@ cat >> diego-release/manifest-generation/bosh-lite-stubs/property-overrides.yml 
 EOF
 
 pushd cflinuxfs2-rootfs-release
-  ./scripts/generate-bosh-lite-manifests
+  ./scripts/generate-bosh-lite-manifest
   cp manifests/bosh-lite/rootfs-smoke-test.yml ../deployments-buildpacks/deployments/$DEPLOYMENT_NAME/
 popd
 
