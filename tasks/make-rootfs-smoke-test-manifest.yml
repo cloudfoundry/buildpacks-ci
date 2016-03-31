@@ -7,7 +7,7 @@ inputs:
   - name: cflinuxfs2-rootfs-release
   - name: deployments-buildpacks
 outputs:
-  - name: rootfs-smoke-test-manifest
+  - name: rootfs-smoke-test-manifest-artifacts
 run:
   path: buildpacks-ci/scripts/make-rootfs-smoke-test-manifest
 params:

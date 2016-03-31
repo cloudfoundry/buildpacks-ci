@@ -337,7 +337,7 @@ jobs:
             repository: rootfs-smoke-test-manifest-artifacts
             rebase: true
         - task: generate-manifest
-          file: buildpacks-ci/tasks/make-diego-stacks-manifest.yml
+          file: buildpacks-ci/tasks/diego-make-manifest.yml
           params:
             DEPLOYMENT_NAME: diego-stacks.buildpacks.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
