@@ -4,7 +4,6 @@ set -e
 
 release_name=cflinuxfs2-rootfs-release
 mkdir -p $release_name/blobs/rootfs
-rm config/blobs.yml
 mv stack-s3/*.tar.gz $release_name/blobs/rootfs/cflinuxfs2.tar.gz
 
 pushd $release_name
