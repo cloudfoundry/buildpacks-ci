@@ -29,7 +29,7 @@ describe 'create bosh release task' do
 
     it 'commits the new deployment manifest' do
       commit_msg = run('cd /tmp/build/*/rootfs-smoke-test-manifest-artifacts && git log -1 --format=oneline')
-      expect(commit_msg).to include('create smoke test deployment manifest for some_deployment')
+      expect(commit_msg).to include('create rootfs with smoke test deployment manifest for some_deployment')
     end
   end
 end

@@ -48,7 +48,7 @@ popd
 
 pushd deployments-buildpacks
   git add .
-  git commit -m "create smoke test deployment manifest for $DEPLOYMENT_NAME"
+  git commit -m "create rootfs with smoke test deployment manifest for $DEPLOYMENT_NAME"
 popd
 
 rsync -a deployments-buildpacks/ rootfs-smoke-test-manifest-artifacts
