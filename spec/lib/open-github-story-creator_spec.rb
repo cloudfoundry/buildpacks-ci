@@ -1,8 +1,8 @@
 # encoding: utf-8
 require 'spec_helper'
-require_relative '../../lib/open-pull-requests-story-creator'
+require_relative '../../lib/open-github-story-creator'
 
-describe OpenPullRequestsStoryCreator do
+describe OpenGithubStoryCreator do
   let(:pull_requests) { [] }
 
   subject { described_class }
@@ -13,17 +13,17 @@ describe OpenPullRequestsStoryCreator do
     allow(Octokit).to receive(:pull_requests).and_return(pull_requests)
   end
 
-  describe '#run!' do
+  describe '#create_pull_requests_story' do
     it 'posts to tracker with a specific story title' do
       open_prs_story_title = 'Review Open Pull Requests'
       expect(described_class).to receive(:create_tracker_story).with(open_prs_story_title, anything, anything)
-      subject.run!
+      subject.create_pull_requests_story
     end
 
     it 'posts to tracker with a specific story description' do
       open_prs_story_description = 'Provide feedback for open pull requests in repos that the buildpacks team owns.'
       expect(described_class).to receive(:create_tracker_story).with(anything, open_prs_story_description, anything)
-      subject.run!
+      subject.create_pull_requests_story
     end
 
     context 'there are open pull requests in buildpacks team repos' do
@@ -49,7 +49,7 @@ describe OpenPullRequestsStoryCreator do
         expect(Octokit).to receive(:pull_requests).with('cloudfoundry/go-buildpack', state: 'open').and_return([go_buildpack_pr])
         expect(Octokit).to receive(:pull_requests).with('cloudfoundry-incubator/buildpack_app_lifecycle', state: 'open').and_return([lifecycle_pr])
         expect(described_class).to receive(:create_tracker_story).with(anything, anything, open_prs_story_tasks)
-        subject.run!
+        subject.create_pull_requests_story
       end
     end
   end
