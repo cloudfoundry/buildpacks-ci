@@ -3,7 +3,7 @@
 set -e
 
 cat >> diego-release/manifest-generation/bosh-lite-stubs/property-overrides.yml <<EOF
-  cflinuxfs2-rootfs
+  cflinuxfs2-rootfs:
     trusted_certs: |
       -----BEGIN CERTIFICATE-----
       MIIFATCCAuugAwIBAgIBATALBgkqhkiG9w0BAQswEjEQMA4GA1UEAxMHZGllZ29D
@@ -41,4 +41,9 @@ pushd cflinuxfs2-rootfs-release
   cp manifests/bosh-lite/rootfs-smoke-test.yml ../deployments-buildpacks/deployments/$DEPLOYMENT_NAME/
 popd
 
-./buildpacks-ci/scripts/diego-generate-cf-manifest
+pushd deployments-buildpacks
+  git add .
+  git commit -m "create smoke test deployment manifest for $DEPLOYMENT_NAME"
+popd
+
+rsync -a deployments-buildpacks/ rootfs-smoke-test-manifest-artifacts

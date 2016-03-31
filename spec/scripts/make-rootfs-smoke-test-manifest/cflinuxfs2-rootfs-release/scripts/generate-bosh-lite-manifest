@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+RELEASE_DIR=$(dirname $0)/..
+cp $RELEASE_DIR/../diego-release/manifest-generation/bosh-lite-stubs/property-overrides.yml $RELEASE_DIR/manifests/bosh-lite/rootfs-smoke-test.yml
