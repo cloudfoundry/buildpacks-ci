@@ -82,6 +82,8 @@ class OpenGithubStoryCreator
         open_issues = Octokit.list_issues(repo_identifier, state: 'open')
         next if open_issues.empty?
         open_issues.each do |open_issue|
+          # do not include pull requests
+          next unless open_issue.pull_request.nil?
           puts "Found open issue in #{repo_identifier}: #{open_issue.title}"
           story_tasks << "#{repo_identifier}: #{open_issue.title} - #{open_issue.html_url}"
         end

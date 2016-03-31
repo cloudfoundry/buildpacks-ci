@@ -76,12 +76,20 @@ describe OpenGithubStoryCreator do
       let(:lifecycle_issue)             { double(:lifecycle_issue) }
       let(:lifecycle_issue_title)       { '.profile change is needed' }
       let(:lifecycle_issue_html_url)    { 'https://github.com/cloudfoundry-incubator/buildpack_app_lifecycle/issues/10' }
+      let(:lifecycle_pr)                { double(:lifecycle_pr) }
+      let(:lifecycle_pr_title)          { 'Make .profile change' }
+      let(:lifecycle_pr_html_url)       { 'https://github.com/cloudfoundry-incubator/buildpack_app_lifecycle/pulls/12' }
 
       before do
         allow(go_buildpack_issue).to receive(:title).and_return(go_buildpack_issue_title)
         allow(go_buildpack_issue).to receive(:html_url).and_return(go_buildpack_issue_html_url)
+        allow(go_buildpack_issue).to receive(:pull_request).and_return(nil)
         allow(lifecycle_issue).to receive(:title).and_return(lifecycle_issue_title)
         allow(lifecycle_issue).to receive(:html_url).and_return(lifecycle_issue_html_url)
+        allow(lifecycle_issue).to receive(:pull_request).and_return(nil)
+        allow(lifecycle_pr).to receive(:title).and_return(lifecycle_pr_title)
+        allow(lifecycle_pr).to receive(:html_url).and_return(lifecycle_pr_html_url)
+        allow(lifecycle_pr).to receive(:pull_request).and_return(double(:pull_request_content))
       end
 
       it 'posts to tracker with tasks that represent open issues' do
@@ -90,7 +98,7 @@ describe OpenGithubStoryCreator do
         open_issues_story_tasks = [task1, task2]
 
         expect(Octokit).to receive(:list_issues).with('cloudfoundry/go-buildpack', state: 'open').and_return([go_buildpack_issue])
-        expect(Octokit).to receive(:list_issues).with('cloudfoundry-incubator/buildpack_app_lifecycle', state: 'open').and_return([lifecycle_issue])
+        expect(Octokit).to receive(:list_issues).with('cloudfoundry-incubator/buildpack_app_lifecycle', state: 'open').and_return([lifecycle_issue, lifecycle_pr])
         expect(described_class).to receive(:create_tracker_story).with(anything, anything, open_issues_story_tasks)
         subject.create_issues_story
       end
