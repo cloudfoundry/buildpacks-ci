@@ -78,7 +78,7 @@ resources:
       target: https://diego-stacks.buildpacks.ci.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
-      deployment: cf-warden-cflinuxfs2-rootfs
+      deployment: rootfs-smoke-test
       ignore_ssl: true
   - name: bosh-lite
     type: git
@@ -395,9 +395,9 @@ jobs:
               path: buildpacks-ci/scripts/stacks/create-cflinuxfs2-rootfs-release
         - put: diego-stacks-rootfs-deployment
           params:
-            manifest: deployment-manifest/deployments/diego-stacks.buildpacks.ci/rootfs-smoke-test.yml
+            manifest: deployments-buildpacks/deployments/diego-stacks.buildpacks.ci/rootfs-smoke-test.yml
             stemcells: [lite-stemcell/*.tgz]
-            releases: [cflinuxfs2-rootfs-release-artifacts/dev_releases/cf/*.tgz]
+            releases: [cflinuxfs2-rootfs-release-artifacts/dev_releases/cflinuxfs2-rootfs/*.tgz]
         - task: run-rootfs-smoke-test
           config:
             platform: linux

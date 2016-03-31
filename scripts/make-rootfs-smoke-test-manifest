@@ -2,6 +2,11 @@
 
 set -e
 
+pushd deployments-buildpacks
+  bundle -j4
+  source ./bin/switch $DEPLOYMENT_NAME
+popd
+
 cat >> diego-release/manifest-generation/bosh-lite-stubs/property-overrides.yml <<EOF
   cflinuxfs2-rootfs:
     trusted_certs: |
