@@ -133,6 +133,26 @@ jobs:
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
             GITHUB_USERNAME: {{github-username}}
             GITHUB_PASSWORD: {{github-password}}
+      - task: create Open Issues story
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: buildpacks-ci
+          run:
+            path: bash
+            args:
+              - -c
+              - |
+                cd buildpacks-ci
+                bundle
+                bundle exec ./scripts/notifications/create-open-issues-story
+          params:
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+            GITHUB_USERNAME: {{github-username}}
+            GITHUB_PASSWORD: {{github-password}}
   - name: New CVEs
     serial: true
     plan:

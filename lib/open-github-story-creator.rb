@@ -17,6 +17,16 @@ class OpenGithubStoryCreator
     puts 'Successfully created tracker story reviewing open PRs'
   end
 
+  def self.create_issues_story
+    story_title = 'Review Open Issues'
+    story_description = 'Provide feedback for open issues in repos that the buildpacks team owns.'
+    story_tasks = get_open_issues_as_formatted_tasks
+
+    puts 'Creating Tracker story for reviewing open issues'
+    create_tracker_story(story_title, story_description, story_tasks)
+    puts 'Successfully created tracker story reviewing open issues'
+  end
+
   private
 
   @@buildpack_repos = {
@@ -51,12 +61,29 @@ class OpenGithubStoryCreator
     @@buildpack_repos.each do |org, repo_list|
       repo_list.each do |repo|
         repo_identifier = "#{org}/#{repo}"
-        # Hit the API and determine if any open pull requests
         open_pull_requests = Octokit.pull_requests(repo_identifier, state: 'open')
         next if open_pull_requests.empty?
         open_pull_requests.each do |open_pull_request|
           puts "Found open PR in #{repo_identifier}: #{open_pull_request.title}"
           story_tasks << "#{repo_identifier}: #{open_pull_request.title} - #{open_pull_request.html_url}"
+        end
+      end
+    end
+    story_tasks
+  end
+
+  def self.get_open_issues_as_formatted_tasks
+    configure_octokit
+
+    story_tasks = []
+    @@buildpack_repos.each do |org, repo_list|
+      repo_list.each do |repo|
+        repo_identifier = "#{org}/#{repo}"
+        open_issues = Octokit.list_issues(repo_identifier, state: 'open')
+        next if open_issues.empty?
+        open_issues.each do |open_issue|
+          puts "Found open issue in #{repo_identifier}: #{open_issue.title}"
+          story_tasks << "#{repo_identifier}: #{open_issue.title} - #{open_issue.html_url}"
         end
       end
     end
