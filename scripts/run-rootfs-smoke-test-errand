@@ -8,4 +8,4 @@ pushd deployments-buildpacks
 popd
 
 
-bosh -d deployments-buildpacks/deployments/diego-stacks.buildpacks.ci/rootfs-smoke-test.yml run errand rootfs-smoke-test
+bosh -d deployments-buildpacks/deployments/diego-stacks.buildpacks.ci/rootfs-smoke-test.yml run errand cflinuxfs2-smoke-test
