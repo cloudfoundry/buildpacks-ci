@@ -452,7 +452,7 @@ jobs:
           privileged: true
         - put: diego-stacks-cf-deployment
           params:
-            manifest: generate-manifest-artifacts/deployments/diego-stacks.buildpacks.ci/manifest.yml
+            manifest: deployments-buildpacks/deployments/diego-stacks.buildpacks.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
         on_failure:
