@@ -1,0 +1,3 @@
+Rootfs SHASUM: 6916f586f76a044280215a6ffc69e456c8cc8eba
+
+dpkg -l

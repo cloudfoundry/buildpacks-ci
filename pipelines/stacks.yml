@@ -397,7 +397,7 @@ jobs:
         - get: stacks
           passed: [ 'generate-diego-stacks-manifests' ]
       - do:
-        - task: create-cflinuxfs2-rootfs-release
+        - task: overwrite-cflinuxfs2-rootfs-release
           config:
             platform: linux
             image: docker:///cfbuildpacks/ci
@@ -408,7 +408,7 @@ jobs:
             outputs:
               - name: cflinuxfs2-rootfs-release-artifacts
             run:
-              path: buildpacks-ci/scripts/stacks/create-cflinuxfs2-rootfs-release
+              path: buildpacks-ci/scripts/stacks/overwrite-cflinuxfs2-rootfs-release
         - put: diego-stacks-rootfs-deployment
           params:
             manifest: deployments-buildpacks/deployments/diego-stacks.buildpacks.ci/rootfs-smoke-test.yml
@@ -420,6 +420,7 @@ jobs:
             image: docker:///cfbuildpacks/ci
             inputs:
               - name: deployments-buildpacks
+              - name: buildpacks-ci
             run:
               path: buildpacks-ci/scripts/run-rootfs-smoke-test-errand
         on_failure:
