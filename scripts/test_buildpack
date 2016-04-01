@@ -17,7 +17,6 @@ cd buildpack
 if [ -e run_tests.sh ]; then
   export TMPDIR=$(mktemp -d)
   pip install -r requirements.txt
-  ./run_tests.sh
 fi
 
 export BUNDLE_GEMFILE=cf.Gemfile
