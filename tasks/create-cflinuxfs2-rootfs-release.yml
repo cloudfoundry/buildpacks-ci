@@ -1,0 +1,20 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: blob
+  - name: cflinuxfs2-rootfs-release-version
+  - name: version
+  - name: cflinuxfs2-rootfs-release
+outputs:
+  - name: release-artifacts
+params:
+  BLOB_NAME:
+  BLOB_GLOB:
+  RELEASE_NAME:
+  RELEASE_DIR:
+  ACCESS_KEY_ID:
+  SECRET_ACCESS_KEY:
+run:
+  path: buildpacks-ci/scripts/bosh-releases/create-cflinuxfs2-rootfs-release.sh

@@ -42,6 +42,14 @@ resources:
       key: versions/stack
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: cflinuxfs2-rootfs-release-version
+    type: semver
+    source:
+      bucket: pivotal-buildpacks
+      initial_version: 0.1.0-rc.1
+      key: versions/cflinuxfs2-rootfs-release
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
   - name: deployments-buildpacks
     type: git
     source:
@@ -229,6 +237,8 @@ jobs:
         - get: stacks
         - get: version
           params: { pre: rc }
+        - get: cflinuxfs2-rootfs-release-version
+          params: { pre: rc }
       - do:
         - task: make-rootfs
           file: buildpacks-ci/tasks/make-rootfs.yml
@@ -243,6 +253,8 @@ jobs:
             to: /rootfs/
         - put: version
           params: { file: version/number }
+        - put: cflinuxfs2-rootfs-release-version
+          params: { file: cflinuxfs2-rootfs-release-version/number }
         on_failure:
           put: failure-alert
           params:
@@ -332,6 +344,8 @@ jobs:
         - get: version
           passed: [ build-rootfs ]
           trigger: true
+        - get: cflinuxfs2-rootfs-release-version
+          passed: [ build-rootfs ]
         - get: receipt-s3
           passed: [ build-rootfs ]
         - get: stacks
@@ -376,6 +390,8 @@ jobs:
         - get: version
           passed: [ 'generate-diego-stacks-manifests' ]
           trigger: true
+        - get: cflinuxfs2-rootfs-release-version
+          passed: [ 'generate-diego-stacks-manifests' ]
         - get: receipt-s3
           passed: [ 'generate-diego-stacks-manifests' ]
         - get: stacks
@@ -432,6 +448,8 @@ jobs:
         - get: version
           passed: [ 'deploy-rootfs-to-diego-stacks' ]
           trigger: true
+        - get: cflinuxfs2-rootfs-release-version
+          passed: [ 'deploy-rootfs-to-diego-stacks' ]
         - get: receipt-s3
           passed: [ 'deploy-rootfs-to-diego-stacks' ]
         - get: stacks
@@ -442,9 +460,7 @@ jobs:
             platform: linux
             image: docker:///cfbuildpacks/ci
             inputs:
-              - name: buildpacks-ci
               - name: cf-release
-              - name: stack-s3
             outputs:
               - name: cf-release-artifacts
             run:
@@ -480,6 +496,8 @@ jobs:
         - get: version
           passed: [ deploy-cf-to-diego-stacks ]
           trigger: true
+        - get: cflinuxfs2-rootfs-release-version
+          passed: [ deploy-cf-to-diego-stacks ]
         - get: receipt-s3
           passed: [ deploy-cf-to-diego-stacks ]
         - get: stacks
@@ -552,6 +570,8 @@ jobs:
         - get: version
           passed: [ deploy-diego-to-diego-stacks ]
           trigger: true
+        - get: cflinuxfs2-rootfs-release-version
+          passed: [ deploy-diego-to-diego-stacks ]
         - get: receipt-s3
           passed: [ deploy-diego-to-diego-stacks ]
         - get: stacks
@@ -601,6 +621,9 @@ jobs:
             - cats
             - dats
           params: { bump: final }
+        - get: cflinuxfs2-rootfs-release-version
+          passed: [ dats ]
+          params: { bump: final }
       - do:
         - task: update-receipt
           config:
@@ -639,6 +662,8 @@ jobs:
             to: /rootfs/
         - put: version
           params: { file: version/number }
+        - put: cflinuxfs2-rootfs-release-version
+          params: { file: cflinuxfs2-rootfs-release-version/number }
         on_failure:
           put: failure-alert
           params:
@@ -646,15 +671,21 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: minor-bump
+  - name: reset-minor-version-to-rc
     serial: true
     plan:
       - get: version
         trigger: true
         passed: [ shipit ]
         params: {bump: minor, pre: rc}
+      - get: cflinuxfs2-rootfs-release-version
+        trigger: true
+        passed: [ shipit ]
+        params: {bump: minor, pre: rc}
       - put: version
         params: {file: version/number}
+      - put: cflinuxfs2-rootfs-release-version
+        params: {file: cflinuxfs2-rootfs-release-version/number}
   - name: upload-to-github
     serial: true
     plan:
@@ -718,7 +749,7 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: create-bosh-release
+  - name: create-bosh-release-deprecated
     serial: true
     plan:
       - aggregate:
@@ -748,6 +779,40 @@ jobs:
           put: failure-alert
           params:
             text: "stacks create-bosh-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/create-bosh-release"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: create-cflinuxfs2-rootfs-release
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: blob
+          resource: stack-s3
+          passed: [ shipit ]
+          trigger: true
+        - get: version
+          passed: [ shipit ]
+        - get: cflinuxfs2-rootfs-release-version
+          passed: [ shipit ]
+        - get: cflinuxfs2-rootfs-release
+      - do:
+        - task: create-cflinuxfs2-rootfs-release
+          file: buildpacks-ci/tasks/create-cflinuxfs2-rootfs-release.yml
+          params:
+            BLOB_NAME: rootfs
+            BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
+            RELEASE_NAME: cflinuxfs2-rootfs
+            RELEASE_DIR: cflinuxfs2-rootfs-release
+            ACCESS_KEY_ID: {{cloudfoundry-s3-access-key}}
+            SECRET_ACCESS_KEY: {{cloudfoundry-s3-secret-key}}
+        - put: cflinuxfs2-rootfs-release
+          params:
+            repository: release-artifacts
+        on_failure:
+          put: failure-alert
+          params:
+            text: "stacks create-cflinuxfs2-rootfs-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/create-cflinuxfs2-rootfs-release"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
