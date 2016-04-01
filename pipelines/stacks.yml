@@ -423,6 +423,8 @@ jobs:
               - name: buildpacks-ci
             run:
               path: buildpacks-ci/scripts/run-rootfs-smoke-test-errand
+            params:
+              DEPLOYMENT_NAME: diego-stacks.buildpacks.ci
         on_failure:
           put: failure-alert
           params:
