@@ -10,7 +10,6 @@ describe 'create bosh release task' do
       execute(
         '-c tasks/make-rootfs-smoke-test-manifest.yml ' \
         '-i buildpacks-ci=. ' \
-        '-i diego-release=./spec/scripts/make-rootfs-smoke-test-manifest/diego-release ' \
         '-i cflinuxfs2-rootfs-release=./spec/scripts/make-rootfs-smoke-test-manifest/cflinuxfs2-rootfs-release ' \
         '-i deployments-buildpacks=./spec/scripts/make-rootfs-smoke-test-manifest/deployments-buildpacks ',
         'DEPLOYMENT_NAME' => 'some_deployment')
@@ -21,10 +20,8 @@ describe 'create bosh release task' do
     end
 
     it 'adds the certs to the property_overrides.yml' do
-      manifest = run('cat /tmp/build/*/rootfs-smoke-test-manifest-artifacts/deployments/some_deployment/rootfs-smoke-test.yml').to_s
-      manifest_yml = YAML.load manifest
-      expect(manifest_yml['property_overrides']['cflinuxfs2-rootfs']['trusted_certs']).to include('BEGIN CERTIFICATE')
-      expect(manifest_yml['property_overrides']['cflinuxfs2-rootfs']['trusted_certs']).to include('END CERTIFICATE')
+      manifest = run('cat /tmp/build/*/rootfs-smoke-test-manifest-artifacts/deployments/some_deployment/rootfs-smoke-test.yml').strip
+      expect(manifest).to eq('manifest')
     end
 
     it 'commits the new deployment manifest' do
