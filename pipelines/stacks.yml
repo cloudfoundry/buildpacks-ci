@@ -820,25 +820,6 @@ jobs:
         - put: cflinuxfs2-rootfs-release
           params:
             repository: release-artifacts
-        on_failure:
-          put: failure-alert
-          params:
-            text: "stacks create-cflinuxfs2-rootfs-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/create-cflinuxfs2-rootfs-release"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: create-cflinuxfs2-rootfs-github-release
-    serial: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: version
-          passed: [ create-cflinuxfs2-rootfs-release ]
-        - get: cflinuxfs2-rootfs-release-version
-          passed: [ create-cflinuxfs2-rootfs-release ]
-        - get: cflinuxfs2-rootfs-release
-          passed: [ create-cflinuxfs2-rootfs-release ]
-      - do:
         - task: create-release-body
           config:
             platform: linux
@@ -857,14 +838,14 @@ jobs:
             platform: linux
             image: docker:///cfbuildpacks/ci
             inputs:
-              - name: cflinuxfs2-rootfs-release
+              - name: release-artifacts
             outputs:
               - name: release-commit
             run:
               path: bash
               args:
                 - "-c"
-                - 'cd cflinuxfs2-rootfs-release && git rev-list HEAD -n1 > ../release-commit/sha'
+                - 'cd release-artifacts && git rev-list HEAD -n1 > ../release-commit/sha'
         - put: cflinuxfs2-rootfs-github-release
           params:
             name: cflinuxfs2-rootfs-release-version/number
@@ -872,10 +853,12 @@ jobs:
             tag_prefix: 'v'
             commitish: release-commit/sha
             body: release-body/body
+            globs:
+              - release-artifacts/releases/cflinuxfs2-rootfs/*.tgz
         on_failure:
           put: failure-alert
           params:
-            text: "stacks create-cflinuxfs2-rootfs-github-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/create-cflinuxfs2-rootfs-github-release"
+            text: "stacks create-cflinuxfs2-rootfs-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/create-cflinuxfs2-rootfs-release"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
