@@ -159,6 +159,13 @@ resources:
       user: cloudfoundry
       repository: stacks
       access_token: {{buildpacks-github-token}}
+  - name: cflinuxfs2-rootfs-github-release
+    type: github-release
+    source:
+      drafts: true
+      user: cloudfoundry
+      repository: cflinuxfs2-rootfs-release
+      access_token: {{buildpacks-github-token}}
   - name: new-cves
     type: git
     source:
@@ -817,6 +824,58 @@ jobs:
           put: failure-alert
           params:
             text: "stacks create-cflinuxfs2-rootfs-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/create-cflinuxfs2-rootfs-release"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: create-cflinuxfs2-rootfs-github-release
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: version
+          passed: [ create-cflinuxfs2-rootfs-release ]
+        - get: cflinuxfs2-rootfs-release-version
+          passed: [ create-cflinuxfs2-rootfs-release ]
+        - get: cflinuxfs2-rootfs-release
+          passed: [ create-cflinuxfs2-rootfs-release ]
+      - do:
+        - task: create-release-body
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci
+            inputs:
+              - name: version
+            outputs:
+              - name: release-body
+            run:
+              path: bash
+              args:
+                - "-c"
+                - 'echo "shipped with stack https://github.com/cloudfoundry/stacks/releases/tag/$(cat version/number)" > release-body/body'
+        - task: create-release-commit
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci
+            inputs:
+              - name: cflinuxfs2-rootfs-release
+            outputs:
+              - name: release-commit
+            run:
+              path: bash
+              args:
+                - "-c"
+                - 'cd cflinuxfs2-rootfs-release && git rev-list HEAD -n1 > ../release-commit/sha'
+        - put: cflinuxfs2-rootfs-github-release
+          params:
+            name: cflinuxfs2-rootfs-release-version/number
+            tag: cflinuxfs2-rootfs-release-version/number
+            tag_prefix: 'v'
+            commitish: release-commit/sha
+            body: release-body/body
+        on_failure:
+          put: failure-alert
+          params:
+            text: "stacks create-cflinuxfs2-rootfs-github-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/create-cflinuxfs2-rootfs-github-release"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
