@@ -21,9 +21,6 @@ describe 'make-rootfs' do
   end
 
   it 'overwrites the correct buildpack .zip file' do
-    expect(File.exist?("#{stacks_artifacts}/.gitkeep")).to eq(true)
-    expect(File.exist?("#{stacks_artifacts}/Makefile")).to eq(true)
-    expect(File.exist?("#{stacks_artifacts}/cflinuxfs2")).to eq(true)
     expect(File.exist?("#{stacks_artifacts}/cflinuxfs2-1.0.tar.gz")).to eq(true)
     expect(File.exist?("#{receipt_artifacts}/cflinuxfs2_receipt-1.0")).to eq(true)
   end
