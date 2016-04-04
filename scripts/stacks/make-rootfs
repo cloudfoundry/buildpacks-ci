@@ -18,5 +18,3 @@ pushd stacks
   which git
   TERM=xterm-color git --no-pager diff cflinuxfs2/cflinuxfs2_receipt $versioned_receipt_filename || true
 popd
-
-rsync -a stacks/ stacks-artifacts
