@@ -3,8 +3,9 @@
 set -e
 
 release_name=cflinuxfs2-rootfs-release
-mkdir -p $release_name/blobs/rootfs
-mv stack-s3/*.tar.gz $release_name/blobs/rootfs/cflinuxfs2-*.tar.gz
+filename=`cat cflinuxfs2-rootfs-release/config/blobs.yml | grep cflinuxfs2 | cut -d ':' -f 1`
+mkdir -p $release_name/blobs/$(dirname $filename)
+cp stack-s3/*.tar.gz $release_name/blobs/$filename
 
 pushd $release_name
     bosh create release --force --with-tarball --name cflinuxfs2-rootfs --version 212.0.`date +"%s"`

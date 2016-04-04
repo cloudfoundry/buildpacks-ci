@@ -7,20 +7,41 @@ describe 'make-rootfs' do
   old_path = ENV['PATH']
   ci_path = Dir.pwd
   test_path = File.join(ci_path, "/spec/scripts/stacks/overwrite-cflinuxfs2-rootfs-release")
+  blobs_dir = File.join(test_path, 'cflinuxfs2-rootfs-release/blobs')
+  blob_destination = File.join(blobs_dir, 'rootfs/cflinuxfs2-1.49.0.tar.gz')
+
   before(:context) do
     ENV['PATH'] = "#{test_path}:#{ENV['PATH']}"
   end
 
   after(:context) do
     ENV['PATH'] = old_path
-    `printf old-tarball > #{test_path}/cflinuxfs2-rootfs-release/blobs/rootfs/cflinuxfs2-1.31.0.tar.gz`
-    `printf new-tarball > #{test_path}/stack-s3/cflinuxfs2-9.9.tar.gz`
   end
 
-  it 'moves cflinuxfs2-*.tar.gz file from stack-s3 to cflinuxfs2-rootfs-release/blobs/rootfs/cflinuxfs2-[currentversion].tar.gz' do
-    Dir.chdir("#{ci_path}/spec/scripts/stacks/overwrite-cflinuxfs2-rootfs-release") do
-      `#{ci_path}/scripts/stacks/overwrite-cflinuxfs2-rootfs-release`
+  RSpec.shared_examples 'creates_the_blob' do
+    it 'moves cflinuxfs2-*.tar.gz file from stack-s3 to cflinuxfs2-rootfs-release/blobs/rootfs/cflinuxfs2-[currentversion].tar.gz' do
+      Dir.chdir("#{ci_path}/spec/scripts/stacks/overwrite-cflinuxfs2-rootfs-release") do
+        system("#{ci_path}/scripts/stacks/overwrite-cflinuxfs2-rootfs-release")
+      end
+      expect(File.exists?(blob_destination)).to eq(true)
+      expect(File.read(blob_destination)).to eq('new-tarball')
     end
-    expect(File.read(Dir["#{ci_path}/spec/**/cflinuxfs2-1.31.0.tar.gz"][0])).to eq('new-tarball')
+  end
+
+  context 'when the blob file exists' do
+    before do
+      `printf old-tarball > #{blob_destination}`
+    end
+
+    include_examples 'creates_the_blob'
+  end
+
+  context 'when the blob file does not exist' do
+    before do
+      # delete the rootfs directory to make sure we create it
+      FileUtils.rm_rf File.dirname(blob_destination)
+    end
+
+    include_examples 'creates_the_blob'
   end
 end
