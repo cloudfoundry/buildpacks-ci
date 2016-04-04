@@ -464,6 +464,7 @@ jobs:
             image: docker:///cfbuildpacks/ci
             inputs:
               - name: cf-release
+              - name: buildpacks-ci
             outputs:
               - name: cf-release-artifacts
             run:
