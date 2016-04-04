@@ -32,24 +32,17 @@ describe OpenGithubStoryCreator do
       let(:go_buildpack_pr)          { double(:go_buildpack_pr) }
       let(:go_buildpack_pr_title)    { 'Add new godep' }
       let(:go_buildpack_pr_html_url) { 'https://github.com/cloudfoundry/go-buildpack/pulls/2' }
-      let(:lifecycle_pr)             { double(:lifecycle_pr) }
-      let(:lifecycle_pr_title)       { 'Make .profile change' }
-      let(:lifecycle_pr_html_url)    { 'https://github.com/cloudfoundry-incubator/buildpack_app_lifecycle/pulls/10' }
 
       before do
         allow(go_buildpack_pr).to receive(:title).and_return(go_buildpack_pr_title)
         allow(go_buildpack_pr).to receive(:html_url).and_return(go_buildpack_pr_html_url)
-        allow(lifecycle_pr).to receive(:title).and_return(lifecycle_pr_title)
-        allow(lifecycle_pr).to receive(:html_url).and_return(lifecycle_pr_html_url)
       end
 
       it 'posts to tracker with tasks that represent open PRs' do
         task1 = 'cloudfoundry/go-buildpack: Add new godep - https://github.com/cloudfoundry/go-buildpack/pulls/2'
-        task2 = 'cloudfoundry-incubator/buildpack_app_lifecycle: Make .profile change - https://github.com/cloudfoundry-incubator/buildpack_app_lifecycle/pulls/10'
-        open_prs_story_tasks = [task1, task2]
+        open_prs_story_tasks = [task1]
 
         expect(Octokit).to receive(:pull_requests).with('cloudfoundry/go-buildpack', state: 'open').and_return([go_buildpack_pr])
-        expect(Octokit).to receive(:pull_requests).with('cloudfoundry-incubator/buildpack_app_lifecycle', state: 'open').and_return([lifecycle_pr])
         expect(described_class).to receive(:create_tracker_story).with(anything, anything, open_prs_story_tasks)
         subject.create_pull_requests_story
       end
@@ -73,32 +66,24 @@ describe OpenGithubStoryCreator do
       let(:go_buildpack_issue)          { double(:go_buildpack_issue) }
       let(:go_buildpack_issue_title)    { 'where my new godep' }
       let(:go_buildpack_issue_html_url) { 'https://github.com/cloudfoundry/go-buildpack/issues/2' }
-      let(:lifecycle_issue)             { double(:lifecycle_issue) }
-      let(:lifecycle_issue_title)       { '.profile change is needed' }
-      let(:lifecycle_issue_html_url)    { 'https://github.com/cloudfoundry-incubator/buildpack_app_lifecycle/issues/10' }
-      let(:lifecycle_pr)                { double(:lifecycle_pr) }
-      let(:lifecycle_pr_title)          { 'Make .profile change' }
-      let(:lifecycle_pr_html_url)       { 'https://github.com/cloudfoundry-incubator/buildpack_app_lifecycle/pulls/12' }
+      let(:go_buildpack_pr)             { double(:go_buildpack_pr) }
+      let(:go_buildpack_pr_title)       { 'Make .profile change' }
+      let(:go_buildpack_pr_html_url)    { 'https://github.com/cloudfoundry/go-buildpack/pulls/12' }
 
       before do
         allow(go_buildpack_issue).to receive(:title).and_return(go_buildpack_issue_title)
         allow(go_buildpack_issue).to receive(:html_url).and_return(go_buildpack_issue_html_url)
         allow(go_buildpack_issue).to receive(:pull_request).and_return(nil)
-        allow(lifecycle_issue).to receive(:title).and_return(lifecycle_issue_title)
-        allow(lifecycle_issue).to receive(:html_url).and_return(lifecycle_issue_html_url)
-        allow(lifecycle_issue).to receive(:pull_request).and_return(nil)
-        allow(lifecycle_pr).to receive(:title).and_return(lifecycle_pr_title)
-        allow(lifecycle_pr).to receive(:html_url).and_return(lifecycle_pr_html_url)
-        allow(lifecycle_pr).to receive(:pull_request).and_return(double(:pull_request_content))
+        allow(go_buildpack_pr).to receive(:title).and_return(go_buildpack_pr_title)
+        allow(go_buildpack_pr).to receive(:html_url).and_return(go_buildpack_pr_html_url)
+        allow(go_buildpack_pr).to receive(:pull_request).and_return(double(:pull_request_content))
       end
 
       it 'posts to tracker with tasks that represent open issues' do
         task1 = 'cloudfoundry/go-buildpack: where my new godep - https://github.com/cloudfoundry/go-buildpack/issues/2'
-        task2 = 'cloudfoundry-incubator/buildpack_app_lifecycle: .profile change is needed - https://github.com/cloudfoundry-incubator/buildpack_app_lifecycle/issues/10'
-        open_issues_story_tasks = [task1, task2]
+        open_issues_story_tasks = [task1]
 
         expect(Octokit).to receive(:list_issues).with('cloudfoundry/go-buildpack', state: 'open').and_return([go_buildpack_issue])
-        expect(Octokit).to receive(:list_issues).with('cloudfoundry-incubator/buildpack_app_lifecycle', state: 'open').and_return([lifecycle_issue, lifecycle_pr])
         expect(described_class).to receive(:create_tracker_story).with(anything, anything, open_issues_story_tasks)
         subject.create_issues_story
       end

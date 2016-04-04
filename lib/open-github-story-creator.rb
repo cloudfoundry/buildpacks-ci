@@ -45,7 +45,6 @@ class OpenGithubStoryCreator
                        'buildpack-releases',
                        'cflinuxfs2-rootfs-release',
                        'stacks'],
-    'cloudfoundry-incubator' => ['buildpack_app_lifecycle'],
     'pivotal-cf-experimental' => ['stacks-release']
   }
 
