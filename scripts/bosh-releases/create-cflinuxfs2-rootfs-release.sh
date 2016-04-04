@@ -28,4 +28,4 @@ EOF
   git commit -m "Final $RELEASE_NAME bosh release version $bosh_release_version, containing cflinuxfs2 version $stacks_version"
 popd
 
-rsync -a release/ release-artifacts
+rsync -a $RELEASE_DIR/ release-artifacts
