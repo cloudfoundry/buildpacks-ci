@@ -24,7 +24,7 @@ EOF
   git commit -m "Updating blobs for $RELEASE_NAME bosh release version $bosh_release_version"
 
   bosh -n create release --final --version $bosh_release_version --name $RELEASE_NAME --with-tarball
-  git add releases/**/*-$bosh_release_version.yml releases/**/index.yml
+  git add *
   git commit -m "Final $RELEASE_NAME bosh release version $bosh_release_version, containing cflinuxfs2 version $stacks_version"
 popd
 
