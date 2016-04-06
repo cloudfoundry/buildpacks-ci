@@ -2,6 +2,9 @@
 
 set -e
 
-cd machete
-bundle
-bundle exec rspec
+../buildpacks-ci/scripts/start-docker
+
+pushd machete
+  bundle
+  bundle exec rspec
+popd
