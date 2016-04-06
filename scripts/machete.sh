@@ -2,7 +2,9 @@
 
 set -e
 
-../buildpacks-ci/scripts/start-docker
+pushd buildpacks-ci
+  ./scripts/start-docker
+popd
 
 pushd machete
   bundle
