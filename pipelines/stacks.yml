@@ -832,7 +832,7 @@ jobs:
               path: bash
               args:
                 - "-c"
-                - 'echo "shipped with stack https://github.com/cloudfoundry/stacks/releases/tag/$(cat version/number)" > release-body/body'
+                - "echo \"This release ships with stacks version $(cat version/number). For more information, see this stack's [release notes](https://github.com/cloudfoundry/stacks/releases/tag/$(cat version/number)).\" > release-body/body"
         - task: create-release-commit
           config:
             platform: linux
