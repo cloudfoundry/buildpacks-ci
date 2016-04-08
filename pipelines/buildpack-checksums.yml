@@ -13,6 +13,16 @@ resources:
       private_key: {{buildpack-checksums-private-key}}
       branch: gh-pages
 
+  - name: deploy-buildpack-verify
+    type: cf
+    source:
+      api: https://api.run.pivotal.io
+      username: {{pws-username}}
+      password: {{pws-password}}
+      organization: {{pws-org}}
+      space: {{pws-space}}
+      skip_cert_check: false
+
 jobs:
   - name: build-site
     plan:
@@ -66,3 +76,8 @@ jobs:
         params:
           repository: gh-pages-artifacts
           rebase: true
+
+      - put: deploy-buildpack-verify
+        params:
+          path: gh-pages-artifacts
+          manifest: gh-pages-artifacts/manifest.yml
