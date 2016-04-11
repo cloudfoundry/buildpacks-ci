@@ -24,7 +24,7 @@ Dir.chdir("#{buildpacks_ci_dir}/scripts/notifications") do
       ENV['TRACKER_PROJECT_ID'],
       ENV['TRACKER_REQUESTER_ID'].to_i
     )
-    tracker_client.post_to_tracker 'New releases', "We have new releases:\n #{new_releases_output}\n See the google doc https://sites.google.com/a/pivotal.io/cloudfoundry-buildpacks/check-lists/adding-a-new-dependency-release-to-a-buildpack for info on building a new release binary and adding it to the buildpack manifest file."
+    tracker_client.post_to_tracker 'Build and/or Include new releases', "We have new releases:\n #{new_releases_output}\n See the google doc https://sites.google.com/a/pivotal.io/cloudfoundry-buildpacks/check-lists/adding-a-new-dependency-release-to-a-buildpack for info on building a new release binary and adding it to the buildpack manifest file."
 
     Dir.chdir(new_releases_dir) do
       raise 'command failed' unless system('git add -A')
