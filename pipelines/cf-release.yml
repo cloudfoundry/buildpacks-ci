@@ -13,6 +13,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry-incubator/diego-release
+      branch: master
   - name: cf-release
     type: git
     source:
@@ -106,6 +107,21 @@ resources:
       uri: git@github.com:cloudfoundry/buildpack-releases.git
       private_key: {{buildpack-releases-private-key}}
       branch: master
+  - name: diego-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry-incubator/diego-release
+  - name: etcd-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry-incubator/etcd-release
+  - name: garden-linux-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry-incubator/garden-linux-release
 
 groups:
   - name: buildpacks
@@ -134,13 +150,24 @@ jobs:
     serial: true
     serial_groups: [ stacks ]
     plan:
-      - do:
+      - aggregate:
         - get: deployments-buildpacks
         - get: buildpacks-ci
+      - aggregate:
         - task: recreate-bosh-lite
           file: buildpacks-ci/tasks/recreate-bosh-lite.yml
           params:
             DEPLOYMENT_NAME: cf-release.buildpacks.ci
+            PASSWORD: {{bosh-lite-password}}
+          ensure:
+            put: deployments-buildpacks
+            params:
+              repository: deployments-buildpacks-artifacts
+              rebase: true
+        - task: recreate-bosh-lite
+          file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+          params:
+            DEPLOYMENT_NAME: diego-cf-release.buildpacks.ci
             PASSWORD: {{bosh-lite-password}}
           ensure:
             put: deployments-buildpacks
@@ -251,6 +278,122 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: deploy-cf-and-diego-to-diego-cf-release
+    serial: true
+    serial_groups: [ diego-cf-release ]
+    plan:
+      - do:
+        - aggregate:
+          - get: deployments-buildpacks
+            passed: [ recreate-bosh-lite ]
+            trigger: true
+          - get: buildpacks-ci
+          - get: bosh-lite
+          - get: cf-release
+          - get: diego-release
+          - get: garden-linux-bosh-release
+          - get: diego-bosh-release
+          - get: etcd-bosh-release
+          - get: lite-stemcell
+          - get: java-buildpack-github-release
+            params:
+              globs:
+                - java-buildpack-v*.zip
+          - get: java-offline-buildpack-github-release
+            params:
+              globs:
+                - java-buildpack-offline-v*.zip
+          - get: go-buildpack-github-release
+          - get: python-buildpack-github-release
+          - get: nodejs-buildpack-github-release
+          - get: ruby-buildpack-github-release
+          - get: php-buildpack-github-release
+          - get: staticfile-buildpack-github-release
+          - get: binary-buildpack-github-release
+        - task: generate-manifest
+          file: buildpacks-ci/tasks/diego-make-manifest.yml
+          params:
+            DEPLOYMENT_NAME: cf-release.buildpacks.ci
+            CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        - put: deployments-buildpacks
+          params:
+            repository: generate-manifest-artifacts
+        - task: create-cf-release
+          file: buildpacks-ci/tasks/create-release.yml
+          privileged: true
+        - put: cf-deployment
+          params:
+            manifest: deployments-buildpacks/deployments/diego-cf-release.buildpacks.ci/manifest.yml
+            stemcells: [lite-stemcell/*.tgz]
+            releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
+        - put: diego-deployment
+          params:
+            manifest: deployments-buildpacks/deployments/diego-cf-release.buildpacks.ci/diego.yml
+            stemcells: ['lite-stemcell/stemcell.tgz']
+            releases:
+              - diego-bosh-release/release.tgz
+              - garden-linux-bosh-release/release.tgz
+              - etcd-bosh-release/release.tgz
+        on_failure:
+          put: failure-alert
+          params:
+            text: "cf-release deploy-cf-and-diego-to-diego-cf-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/cf-release/jobs/deploy-cf-and-diego-to-diego-cf-release"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: dats
+    serial: true
+    serial_groups: [ cf-release ]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: cf-release
+          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+          trigger: true
+        - get: deployments-buildpacks
+        - get: java-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+        - get: java-offline-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+        - get: go-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+        - get: nodejs-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+        - get: python-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+        - get: ruby-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+        - get: php-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+        - get: staticfile-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+        - get: binary-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+      - do:
+        - task: dats
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci
+            inputs:
+              - name: buildpacks-ci
+              - name: cf-release
+              - name: deployments-buildpacks
+            run:
+              path: buildpacks-ci/scripts/cats
+            params:
+              DEPLOYMENT_NAME: diego-cf-release.buildpacks.ci
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        on_failure:
+          put: failure-alert
+          params:
+            text: "cf-release dats job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/cf-release/jobs/dats"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: ship-it
     serial: true
     plan:
@@ -261,19 +404,19 @@ jobs:
           params:
             submodules: none
         - get: go-buildpack-github-release
-          passed: [ cats ]
+          passed: [ cats, dats ]
         - get: nodejs-buildpack-github-release
-          passed: [ cats ]
+          passed: [ cats, dats ]
         - get: python-buildpack-github-release
-          passed: [ cats ]
+          passed: [ cats, dats ]
         - get: ruby-buildpack-github-release
-          passed: [ cats ]
+          passed: [ cats, dats ]
         - get: php-buildpack-github-release
-          passed: [ cats ]
+          passed: [ cats, dats ]
         - get: staticfile-buildpack-github-release
-          passed: [ cats ]
+          passed: [ cats, dats ]
         - get: binary-buildpack-github-release
-          passed: [ cats ]
+          passed: [ cats, dats ]
   - name: ship-it-java
     serial: true
     plan:

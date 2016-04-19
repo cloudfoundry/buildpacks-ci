@@ -7,6 +7,7 @@ function acceptance_test_backend {
         edge-2.buildpacks.ci)           echo -n "diego";;
         edge-4.buildpacks.ci)           echo -n "diego";;
         diego-stacks.buildpacks.ci)     echo -n "diego";;
+        diego-cf-release.buildpacks.ci) echo -n "diego";;
         *)                              echo -n "dea";;
     esac
 }
