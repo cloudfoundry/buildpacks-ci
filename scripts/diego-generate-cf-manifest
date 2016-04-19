@@ -5,6 +5,7 @@ set -e
 function acceptance_test_backend {
     case $DEPLOYMENT_NAME in
         edge-2.buildpacks.ci)           echo -n "diego";;
+        edge-4.buildpacks.ci)           echo -n "diego";;
         diego-stacks.buildpacks.ci)     echo -n "diego";;
         *)                              echo -n "dea";;
     esac
