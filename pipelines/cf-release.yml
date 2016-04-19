@@ -43,6 +43,22 @@ resources:
       password: {{bosh-lite-password}}
       deployment: cf-warden
       ignore_ssl: true
+  - name: diego-cf-release-cf-deployment
+    type: bosh-deployment
+    source:
+      target: https://diego-cf-release.buildpacks.ci.cf-app.com:25555
+      username: admin
+      password: {{bosh-lite-password}}
+      deployment: cf-warden
+      ignore_ssl: true
+  - name: diego-cf-release-diego-deployment
+    type: bosh-deployment
+    source:
+      target: https://diego-cf-release.buildpacks.ci.cf-app.com:25555
+      username: admin
+      password: {{bosh-lite-password}}
+      deployment: cf-warden-diego
+      ignore_ssl: true
   - name: java-buildpack-github-release
     type: github-release
     source:
@@ -129,6 +145,8 @@ groups:
       - recreate-bosh-lite
       - deploy-cf-to-cf-release
       - cats
+      - deploy-cf-and-diego-to-diego-cf-release
+      - dats
       - ship-it
 <% supported_languages.reject{|l| l.include?('java') }.each do |language| %>
       - bosh-release-<%= language %>
@@ -278,7 +296,6 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-
   - name: deploy-cf-and-diego-to-diego-cf-release
     serial: true
     serial_groups: [ diego-cf-release ]
@@ -323,12 +340,12 @@ jobs:
         - task: create-cf-release
           file: buildpacks-ci/tasks/create-release.yml
           privileged: true
-        - put: cf-deployment
+        - put: diego-cf-release-cf-deployment
           params:
             manifest: deployments-buildpacks/deployments/diego-cf-release.buildpacks.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
-        - put: diego-deployment
+        - put: diego-cf-release-diego-deployment
           params:
             manifest: deployments-buildpacks/deployments/diego-cf-release.buildpacks.ci/diego.yml
             stemcells: ['lite-stemcell/stemcell.tgz']
@@ -345,7 +362,7 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: dats
     serial: true
-    serial_groups: [ cf-release ]
+    serial_groups: [ diego-cf-release ]
     plan:
       - aggregate:
         - get: buildpacks-ci
