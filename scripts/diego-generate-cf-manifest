@@ -44,6 +44,8 @@ properties:
     include_services: true
     include_sso: false
     include_v3: false
+    include_diego_ssh: $(use_diego_backend)
+    include_diego_docker: $(use_diego_backend)
     nodes: 4
     backend: $(acceptance_test_backend)
   cc:
