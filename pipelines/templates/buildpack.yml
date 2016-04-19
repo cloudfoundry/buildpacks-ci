@@ -9,11 +9,18 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
-  - name: cf-edge-environments
+  - name: cf-edge-dea-environments
     type: pool
     source:
       branch: resource-pools
-      pool: cf-edge-environments
+      pool: cf-edge-dea-environments
+      private_key: {{resource-pools-private-key}}
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+  - name: cf-edge-diego-environments
+    type: pool
+    source:
+      branch: resource-pools
+      pool: cf-edge-diego-environments
       private_key: {{resource-pools-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
   - name: cf-lts-environments
@@ -147,11 +154,12 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: buildpack-CF-edge-master
+<% %w(dea diego).each do |backend| %>
+  - name: buildpack-CF-edge-<%= backend %>-master
     serial: true
     plan:
       - put: cf-environments
-        resource: cf-edge-environments
+        resource: cf-edge-<%= backend %>-environments
         params:
           acquire: true
       - aggregate:
@@ -179,16 +187,17 @@ jobs:
             CF_EDGE: 'true'
           privileged: true
           ensure:
-            put: cf-edge-environments
+            put: cf-edge-<%= backend %>-environments
             params:
               release: cf-environments
         on_failure:
           put: failure-alert
           params:
-            text: "<%= language %>-buildpack CF-edge-master job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/buildpack-CF-edge-master"
+            text: "<%= language %>-buildpack CF-edge-<%= backend %>-master job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/buildpack-CF-edge-<%= backend %>-master"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
   - name: buildpack-CF-LTS-master
     serial: true
     plan:
@@ -237,10 +246,10 @@ jobs:
         - get: buildpacks-ci
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
-          passed: [ "buildpack-CF-LTS-master", "buildpack-CF-edge-master" ]
+          passed: [ "buildpack-CF-LTS-master", "buildpack-CF-edge-dea-master", "buildpack-CF-edge-diego-master"]
           trigger: true
         - get: buildpack
-          passed: [ "buildpack-CF-LTS-master", "buildpack-CF-edge-master" ]
+          passed: [ "buildpack-CF-LTS-master", "buildpack-CF-edge-dea-master", "buildpack-CF-edge-diego-master" ]
           resource: buildpack-master
           trigger: true
       - task: check tag not already added
@@ -306,13 +315,14 @@ jobs:
           PIVNET_PRODUCT_NAME: {{pivnet-product-name}}
           GITHUB_URL: https://github.com/cloudfoundry/<%= language %>-buildpack
         privileged: true
-  - name: edge-DEA
+<% %w(dea diego).each do |backend| %>
+  - name: edge-<%= backend %>
     serial: true
     plan:
       - put: cf-environments
-        resource: cf-edge-environments
+        resource: cf-edge-<%= backend %>-environments
         params:
-          claim: edge-1.buildpacks.ci
+          acquire: true
       - aggregate:
         - get: buildpacks-ci
         - get: deployments-buildpacks
@@ -340,56 +350,15 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "<%= language %>-buildpack edge-DEA job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/edge-DEA"
+            text: "<%= language %>-buildpack edge-<%= backend %> job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/edge-<%= backend %>"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
         ensure:
-          put: cf-edge-environments
+          put: cf-edge-<%= backend %>-environments
           params:
             release: cf-environments
-  - name: edge-diego
-    serial: true
-    plan:
-      - put: cf-environments
-        resource: cf-edge-environments
-        params:
-          claim: edge-2.buildpacks.ci
-      - aggregate:
-        - get: buildpacks-ci
-        - get: deployments-buildpacks
-        - get: brats
-        - get: buildpack
-          trigger: true
-      - do:
-        - task: rspec
-          file: buildpacks-ci/tasks/test-buildpack.yml
-          params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci-cf-password}}
-            CF_EDGE: 'true'
-          privileged: true
-<% unless language == "binary" %>
-        - task: brats
-          file: buildpacks-ci/tasks/run-brats.yml
-          params:
-            BRATS_BRANCH: develop
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-            LANGUAGE: <%= language %>
 <% end %>
-        on_failure:
-          put: failure-alert
-          params:
-            text: "<%= language %>-buildpack edge-diego job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/edge-diego"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-        ensure:
-          put: cf-edge-environments
-          params:
-            release: cf-environments
   - name: buildpack-CF-LTS
     serial: true
     plan:
