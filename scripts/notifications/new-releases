@@ -1,8 +1,4 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
-buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
-require "#{buildpacks_ci_dir}/lib/new-releases-detector"
 
-new_releases_dir = ARGV[0]
-NewReleasesDetector.new(new_releases_dir).perform!
