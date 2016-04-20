@@ -171,27 +171,26 @@ jobs:
       - aggregate:
         - get: deployments-buildpacks
         - get: buildpacks-ci
-      - aggregate:
-        - task: recreate-bosh-lite
-          file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+      - task: recreate-cf-release-bosh-lite
+        file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+        params:
+          DEPLOYMENT_NAME: cf-release.buildpacks.ci
+          PASSWORD: {{bosh-lite-password}}
+        ensure:
+          put: deployments-buildpacks
           params:
-            DEPLOYMENT_NAME: cf-release.buildpacks.ci
-            PASSWORD: {{bosh-lite-password}}
-          ensure:
-            put: deployments-buildpacks
-            params:
-              repository: deployments-buildpacks-artifacts
-              rebase: true
-        - task: recreate-bosh-lite
-          file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+            repository: deployments-buildpacks-artifacts
+            rebase: true
+      - task: recreate-diego-cf-release-bosh-lite
+        file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+        params:
+          DEPLOYMENT_NAME: diego-cf-release.buildpacks.ci
+          PASSWORD: {{bosh-lite-password}}
+        ensure:
+          put: deployments-buildpacks
           params:
-            DEPLOYMENT_NAME: diego-cf-release.buildpacks.ci
-            PASSWORD: {{bosh-lite-password}}
-          ensure:
-            put: deployments-buildpacks
-            params:
-              repository: deployments-buildpacks-artifacts
-              rebase: true
+            repository: deployments-buildpacks-artifacts
+            rebase: true
   - name: deploy-cf-to-cf-release
     serial: true
     serial_groups: [ cf-release ]
@@ -230,6 +229,7 @@ jobs:
         - put: deployments-buildpacks
           params:
             repository: generate-manifest-artifacts
+            rebase: true
         - task: create-cf-release
           file: buildpacks-ci/tasks/create-release.yml
           privileged: true
@@ -337,6 +337,7 @@ jobs:
         - put: deployments-buildpacks
           params:
             repository: generate-manifest-artifacts
+            rebase: true
         - task: create-cf-release
           file: buildpacks-ci/tasks/create-release.yml
           privileged: true
