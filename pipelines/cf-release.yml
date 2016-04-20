@@ -331,7 +331,7 @@ jobs:
         - task: generate-manifest
           file: buildpacks-ci/tasks/diego-make-manifest.yml
           params:
-            DEPLOYMENT_NAME: cf-release.buildpacks.ci
+            DEPLOYMENT_NAME: diego-cf-release.buildpacks.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
           privileged: true
         - put: deployments-buildpacks
