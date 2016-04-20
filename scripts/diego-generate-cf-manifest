@@ -51,7 +51,6 @@ properties:
     backend: $(acceptance_test_backend)
   cc:
     default_to_diego_backend: $(use_diego_backend)
-    diego_docker: $(use_diego_backend)
 
 jobs:
 - name: api_z1

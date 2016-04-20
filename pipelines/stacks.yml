@@ -601,6 +601,7 @@ jobs:
               DEPLOYMENT_NAME: diego-stacks.buildpacks.ci
               CI_CF_USERNAME: {{ci-cf-username}}
               CI_CF_PASSWORD: {{ci-cf-password}}
+              DIEGO_DOCKER_ON: true
           privileged: true
         on_failure:
           put: failure-alert
