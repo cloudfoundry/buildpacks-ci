@@ -1,6 +1,10 @@
+#!/usr/bin/env bash
 set -e -x
 
 IMAGE_ROOT="$PWD/image-root"
+
+# TODO: remove once this is in the cfbuildpack-ci docker image
+apt-get install aufs-tools
 
 mkdir -p /sys/fs/cgroup
 mountpoint -q /sys/fs/cgroup || \
@@ -12,7 +16,14 @@ for d in `sed -e '1d;s/\([^\t]\)\t.*$/\1/' /proc/cgroups`; do
     mount -n -t cgroup -o $d cgroup /sys/fs/cgroup/$d
 done
 
-docker daemon -g /tmp/build/graph &
+mkdir /tmp/build/graph
+mount -t tmpfs -o size=5g tmpfs /tmp/build/graph
+# dd if=/dev/zero of=/tmp/build/graph.ext4 bs=1M count=10240
+# touch /tmp/build/graph.ext4
+# truncate -s 10GB /tmp/build/graph.ext4
+# mkfs.ext4 -F /tmp/build/graph.ext4
+# mount -t ext4 -o loop /tmp/build/graph.ext4 /tmp/build/graph
+docker daemon -g /tmp/build/graph -s aufs &
 
 until docker info >/dev/null 2>&1; do
   echo waiting for docker to come up...
