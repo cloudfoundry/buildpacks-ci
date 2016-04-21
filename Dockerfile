@@ -22,8 +22,7 @@ RUN apt-get -y install \
   wget \
   zip
 
-ADD https://get.docker.io/builds/Linux/x86_64/docker-latest /usr/local/bin/docker
-RUN chmod +x /usr/local/bin/docker
+RUN curl -sSL https://get.docker.com/ | sh
 
 RUN git clone http://github.com/luan/vimfiles.git ~/.vim
 RUN ~/.vim/install
