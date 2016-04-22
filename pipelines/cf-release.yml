@@ -253,8 +253,9 @@ jobs:
         - get: buildpacks-ci
         - get: cf-release
           passed: [ deploy-cf-to-cf-release ]
-          trigger: true
         - get: deployments-buildpacks
+          passed: [ deploy-cf-to-cf-release ]
+          trigger: true
         - get: java-buildpack-github-release
           passed: [ deploy-cf-to-cf-release ]
         - get: java-offline-buildpack-github-release
@@ -369,8 +370,9 @@ jobs:
         - get: buildpacks-ci
         - get: cf-release
           passed: [ deploy-cf-and-diego-to-diego-cf-release ]
-          trigger: true
         - get: deployments-buildpacks
+          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+          trigger: true
         - get: java-buildpack-github-release
           passed: [ deploy-cf-and-diego-to-diego-cf-release ]
         - get: java-offline-buildpack-github-release
@@ -446,9 +448,9 @@ jobs:
           params:
             submodules: none
         - get: java-buildpack-github-release
-          passed: [ cats ]
+          passed: [ cats, dats ]
         - get: java-offline-buildpack-github-release
-          passed: [ cats ]
+          passed: [ cats, dats ]
 <% supported_languages.each do |language| %>
   - name: bosh-release-<%= language %>
     serial: true
