@@ -17,7 +17,7 @@ begin
   new_changelog.write '=' * heading.length
   new_changelog.write "\n\n"
 
-  log = `git log head...v#{old_version}`
+  log = `git log v#{old_version}..HEAD`
   new_changelog.write log
   new_changelog.write "\n\n"
 
