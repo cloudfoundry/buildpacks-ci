@@ -44,6 +44,7 @@ class OpenGithubStoryCreator
                        'buildpacks-ci',
                        'buildpack-releases',
                        'cflinuxfs2-rootfs-release',
+                       'brats',
                        'stacks'],
     'pivotal-cf-experimental' => ['stacks-release']
   }
