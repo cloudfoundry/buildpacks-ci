@@ -18,14 +18,10 @@ RUN apt-get -y install \
   php5 \
   python-dev \
   python-pip \
-  vim-nox \
   wget \
   zip
 
 RUN curl -sSL https://get.docker.com/ | sh
-
-RUN git clone http://github.com/luan/vimfiles.git ~/.vim
-RUN ~/.vim/install
 
 RUN git config --global user.email "cf-buildpacks-eng@pivotal.io"
 RUN git config --global user.name "CF Buildpacks Team CI Server"
