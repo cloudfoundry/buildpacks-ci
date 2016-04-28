@@ -46,6 +46,7 @@ GEM
       addressable (>= 2.3.5, < 2.5)
       faraday (~> 0.8, < 0.10)
     unicode-display_width (0.3.1)
+    version_sorter (2.0.0)
     webmock (1.24.2)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
@@ -61,6 +62,7 @@ DEPENDENCIES
   rspec
   rubocop
   rubocop-rspec
+  version_sorter
   webmock
 
 BUNDLED WITH
