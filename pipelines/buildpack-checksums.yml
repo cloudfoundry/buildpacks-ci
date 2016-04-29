@@ -41,10 +41,11 @@ jobs:
             args:
               - -c
               - |
+                set -ex
                 cd master
                 gem install bundle
                 bundle
-                rspec
+                bundle exec rspec
 
       - task: build-site
         config:
@@ -60,8 +61,11 @@ jobs:
             args:
               - -c
               - |
+                set -ex
                 pushd master
-                  ./generate.rb ../gh-pages
+                  gem install bundler
+                  bundle
+                  bundle exec ./generate.rb ../gh-pages
                 popd
 
                 pushd gh-pages
