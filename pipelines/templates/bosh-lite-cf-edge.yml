@@ -46,6 +46,11 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/machete.git
       branch: master
+  - name: cflinuxfs2-rootfs-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry/cflinuxfs2-rootfs-release
   - name: cf-bosh-release
     type: bosh-io-release
     tarball: true
@@ -167,6 +172,7 @@ jobs:
           trigger: true
         - get: buildpacks-ci
         - get: bosh-stemcell
+        - get: cflinuxfs2-rootfs-bosh-release
         - get: diego-bosh-release
         - get: garden-linux-bosh-release
         - get: etcd-bosh-release
@@ -175,6 +181,7 @@ jobs:
           manifest: {{diego-manifest-location}}
           stemcells: ['bosh-stemcell/stemcell.tgz']
           releases:
+            - cflinuxfs2-rootfs-bosh-release/release.tgz
             - diego-bosh-release/release.tgz
             - garden-linux-bosh-release/release.tgz
             - etcd-bosh-release/release.tgz
