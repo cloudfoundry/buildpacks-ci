@@ -2,6 +2,7 @@
 require 'spec_helper'
 require 'tmpdir'
 require_relative '../../lib/new-releases-detector'
+require_relative '../../lib/buildpack-dependency'
 
 describe NewReleasesDetector do
   def to_tags(names)
@@ -116,18 +117,22 @@ describe NewReleasesDetector do
 
   describe '#post_to_tracker' do
     let(:tracker_client) { double(:tracker_client) }
+    let(:buildpack_dependency_tasks) { [ :snake, :lizard ] }
 
     before do
       allow(TrackerClient).to receive(:new).and_return(tracker_client)
       allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return(dependency_tags)
+
+      allow(BuildpackDependency).to receive(:for).with(:python).and_return(buildpack_dependency_tasks)
     end
 
     context 'with new versions for a dependency' do
       let(:dependency_tags) { { python: ['a', 'b']} }
 
-      it 'post one story to slack with all new releases of that dependency' do
+      it 'posts one story to tracker with all new releases of that dependency' do
         expect(tracker_client).to receive(:post_to_tracker).with("Build and/or Include new releases: python a, b",
-                                                                 "We have 2 new releases for **python**:\n**version a, b**\n See the google doc https://sites.google.com/a/pivotal.io/cloudfoundry-buildpacks/check-lists/adding-a-new-dependency-release-to-a-buildpack for info on building a new release binary and adding it to the buildpack manifest file.")
+                                                                 "We have 2 new releases for **python**:\n**version a, b**\n See the google doc https://sites.google.com/a/pivotal.io/cloudfoundry-buildpacks/check-lists/adding-a-new-dependency-release-to-a-buildpack for info on building a new release binary and adding it to the buildpack manifest file.",
+                                                                 ["Update python in snake-buildpack", "Update python in lizard-buildpack"])
         subject.post_to_tracker
       end
     end
