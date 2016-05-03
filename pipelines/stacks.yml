@@ -162,7 +162,7 @@ resources:
   - name: cflinuxfs2-rootfs-github-release
     type: github-release
     source:
-      drafts: true
+      drafts: false
       user: cloudfoundry
       repository: cflinuxfs2-rootfs-release
       access_token: {{buildpacks-github-token}}
