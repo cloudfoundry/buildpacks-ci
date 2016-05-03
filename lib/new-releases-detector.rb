@@ -7,6 +7,7 @@ require 'yaml'
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 require "#{buildpacks_ci_dir}/lib/slack-client"
 require "#{buildpacks_ci_dir}/lib/tracker-client"
+require "#{buildpacks_ci_dir}/lib/buildpack-dependency"
 
 class NewReleasesDetector
   attr_reader :new_releases_dir
@@ -40,8 +41,11 @@ class NewReleasesDetector
     dependency_tags.each do |dependency, versions|
       tracker_story_title = "Build and/or Include new releases: #{dependency} #{versions.join(', ')}"
       tracker_story_description = "We have #{versions.count} new releases for **#{dependency}**:\n**version #{versions.join(', ')}**\n See the google doc https://sites.google.com/a/pivotal.io/cloudfoundry-buildpacks/check-lists/adding-a-new-dependency-release-to-a-buildpack for info on building a new release binary and adding it to the buildpack manifest file."
+      tracker_story_tasks = BuildpackDependency.for(dependency).map do |buildpack|
+        "Update #{dependency} in #{buildpack}-buildpack"
+      end
 
-      tracker_client.post_to_tracker tracker_story_title, tracker_story_description
+      tracker_client.post_to_tracker tracker_story_title, tracker_story_description, tracker_story_tasks
     end
   end
 
