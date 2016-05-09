@@ -66,98 +66,118 @@ jobs:
     serial_groups: [ deploy ]
     serial: true
     plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: deployments-buildpacks
-        - get: resource-pools
-          passed: [checkout-environment]
-          trigger: true
-      - task: recreate-bosh-lite
-        file: buildpacks-ci/tasks/recreate-bosh-lite.yml
-        params:
-          DEPLOYMENT_NAME: {{deployment-name}}
-          PASSWORD: {{bosh-lite-password}}
-        ensure:
-          put: deployments-buildpacks
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: deployments-buildpacks
+          - get: resource-pools
+            passed: [checkout-environment]
+            trigger: true
+        - task: recreate-bosh-lite
+          file: buildpacks-ci/tasks/recreate-bosh-lite.yml
           params:
-            repository: deployments-buildpacks-artifacts
-            rebase: true
+            DEPLOYMENT_NAME: {{deployment-name}}
+            PASSWORD: {{bosh-lite-password}}
+          ensure:
+            put: deployments-buildpacks
+            params:
+              repository: deployments-buildpacks-artifacts
+              rebase: true
+        on_failure:
+          put: resource-pools
+          params:
+            release: resource-pools
   - name: generate-manifest
     serial_groups: [ deploy ]
     serial: true
     plan:
-      - aggregate:
-        - get: deployments-buildpacks
-          passed: ['recreate-bosh-lite']
-          trigger: true
-        - get: resource-pools
-          passed: ['recreate-bosh-lite']
-          trigger: true
-        - get: buildpacks-ci
-        - get: bosh-lite
-      - aggregate:
-        - task: cf-release-checkout
-          file: buildpacks-ci/tasks/checkout-cf-lts-release.yml
+      - do:
+        - aggregate:
+          - get: deployments-buildpacks
+            passed: ['recreate-bosh-lite']
+            trigger: true
+          - get: resource-pools
+            passed: ['recreate-bosh-lite']
+            trigger: true
+          - get: buildpacks-ci
+          - get: bosh-lite
+        - aggregate:
+          - task: cf-release-checkout
+            file: buildpacks-ci/tasks/checkout-cf-lts-release.yml
+            params:
+              RELEASE_VERSION: {{cf-version}}
+        - task: generate-manifest
+          file: buildpacks-ci/tasks/make-manifest.yml
           params:
-            RELEASE_VERSION: {{cf-version}}
-      - task: generate-manifest
-        file: buildpacks-ci/tasks/make-manifest.yml
-        params:
-          DEPLOYMENT_NAME: {{deployment-name}}
-          CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-      - put: deployments-buildpacks
-        params:
-          repository: deployments-buildpacks-artifacts
-          rebase: true
+            DEPLOYMENT_NAME: {{deployment-name}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+        - put: deployments-buildpacks
+          params:
+            repository: deployments-buildpacks-artifacts
+            rebase: true
+        on_failure:
+          put: resource-pools
+          params:
+            release: resource-pools
   - name: deploy-cf
     serial_groups: [ deploy ]
     serial: true
     plan:
-      - aggregate:
-        - get: deployments-buildpacks
-          passed: ['generate-manifest']
-          trigger: true
-        - get: resource-pools
-          passed: ['generate-manifest']
-          trigger: true
-        - get: bosh-lite
-        - get: buildpacks-ci
-        - get: bosh-stemcell
-      - aggregate:
-        - task: cf-release
-          file: buildpacks-ci/tasks/checkout-cf-lts-release.yml
+      - do:
+        - aggregate:
+          - get: deployments-buildpacks
+            passed: ['generate-manifest']
+            trigger: true
+          - get: resource-pools
+            passed: ['generate-manifest']
+            trigger: true
+          - get: bosh-lite
+          - get: buildpacks-ci
+          - get: bosh-stemcell
+        - aggregate:
+          - task: cf-release
+            file: buildpacks-ci/tasks/checkout-cf-lts-release.yml
+            params:
+              RELEASE_VERSION: {{cf-version}}
+          - task: cf-release-tarball
+            file: buildpacks-ci/tasks/cf-bosh-release.yml
+            params:
+              RELEASE_VERSION: {{cf-version}}
+        - put: cf-deployment
           params:
-            RELEASE_VERSION: {{cf-version}}
-        - task: cf-release-tarball
-          file: buildpacks-ci/tasks/cf-bosh-release.yml
+            manifest: {{cf-manifest-location}}
+            stemcells: ['bosh-stemcell/stemcell.tgz']
+            releases:
+              - cf-bosh-release-artifacts/release.tgz
+        on_failure:
+          put: resource-pools
           params:
-            RELEASE_VERSION: {{cf-version}}
-      - put: cf-deployment
-        params:
-          manifest: {{cf-manifest-location}}
-          stemcells: ['bosh-stemcell/stemcell.tgz']
-          releases:
-            - cf-bosh-release-artifacts/release.tgz
+            release: resource-pools
   - name: update-machete
     serial_groups: [ deploy ]
     serial: true
     plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: deployments-buildpacks
-          passed: ['deploy-cf']
-          trigger: true
-        - get: resource-pools
-          passed: ['deploy-cf']
-          trigger: true
-        - get: machete
-      - task: configure-deployment
-        file: buildpacks-ci/tasks/machete-configure-deployment.yml
-        params:
-          DEPLOYMENT_NAME: {{deployment-name}}
-          CI_CF_PASSWORD: {{ci-cf-password}}
-          CI_CF_USERNAME: {{ci-cf-username}}
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: deployments-buildpacks
+            passed: ['deploy-cf']
+            trigger: true
+          - get: resource-pools
+            passed: ['deploy-cf']
+            trigger: true
+          - get: machete
+        - task: configure-deployment
+          file: buildpacks-ci/tasks/machete-configure-deployment.yml
+          params:
+            DEPLOYMENT_NAME: {{deployment-name}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+            CI_CF_USERNAME: {{ci-cf-username}}
+        on_failure:
+          put: resource-pools
+          params:
+            release: resource-pools
   - name: unclaim
     serial_groups: [ deploy ]
     serial: true
