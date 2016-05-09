@@ -7,7 +7,7 @@ class BuildpackDependency
 
   def self.for(dependency)
     buildpack_manifests.map do |name, manifest|
-      if (manifest['dependencies'].detect { |d| d['name'] == dependency })
+      if (manifest['dependencies'].detect { |d| d['name'] == dependency.to_s })
         name
       end
     end.compact
