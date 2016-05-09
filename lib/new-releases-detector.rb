@@ -87,6 +87,7 @@ class NewReleasesDetector
 
   def tags
     @get_tags_functions = {
+      bundler:   -> { Octokit.tags('bundler/bundler').map(&:name).grep(/^v/) },
       composer:  -> { Octokit.tags('composer/composer').map(&:name) },
       go:        -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
       godep:     -> { Octokit.tags('tools/godep').map(&:name).grep(/^v/) },
