@@ -3,11 +3,6 @@ set -e
 
 DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-`cat cf-environments/name`}
 
-pushd deployments-buildpacks
-  bundle -j4
-  source ./bin/switch $DEPLOYMENT_NAME
-popd
-
 cd buildpack
 
 ../buildpacks-ci/scripts/check-unsupported-manifest

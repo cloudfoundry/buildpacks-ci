@@ -30,11 +30,6 @@ resources:
       pool: cf-lts-environments
       private_key: {{resource-pools-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
-  - name: deployments-buildpacks
-    type: git
-    source:
-      uri: git@github.com:pivotal-cf/deployments-buildpacks
-      private_key: {{deployments-private-key}}
   - name: compile-extensions
     type: git
     source:
@@ -164,7 +159,6 @@ jobs:
           acquire: true
       - aggregate:
         - get: buildpacks-ci
-        - get: deployments-buildpacks
         - get: buildpack
           passed: [ "detect-new-buildpack-and-upload-artifacts" ]
           resource: buildpack-master
@@ -207,7 +201,6 @@ jobs:
           acquire: true
       - aggregate:
         - get: buildpacks-ci
-        - get: deployments-buildpacks
         - get: buildpack
           passed: [ "detect-new-buildpack-and-upload-artifacts" ]
           resource: buildpack-master
@@ -325,7 +318,6 @@ jobs:
           acquire: true
       - aggregate:
         - get: buildpacks-ci
-        - get: deployments-buildpacks
         - get: brats
         - get: buildpack
           trigger: true
@@ -368,7 +360,6 @@ jobs:
           acquire: true
       - aggregate:
         - get: buildpacks-ci
-        - get: deployments-buildpacks
         - get: brats
         - get: buildpack
           trigger: true
