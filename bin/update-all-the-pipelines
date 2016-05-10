@@ -12,7 +12,7 @@ def set_pipeline(name:, cmd:, load: [])
   puts system(%{bash -c "fly -t buildpacks set-pipeline \
     -p #{name} \
     -c <(#{cmd}) \
-    -l <(lpass show 'Shared-Buildpacks/concourse-private.yml' --notes) \
+    -l <(lpass show 'Shared-Buildpacks/concourse-private.yml' --notes && lpass show 'Shared-Buildpacks/deployments-buildpacks.yml' --notes) \
     #{load.collect { |l| "-l #{l}" }.join(' ')}
   "})
 end
