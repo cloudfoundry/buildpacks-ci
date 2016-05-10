@@ -161,7 +161,6 @@ jobs:
       - do:
         - aggregate:
           - get: buildpacks-ci
-          - get: deployments-buildpacks
             passed: ['deploy-cf']
             trigger: true
           - get: resource-pools
@@ -171,6 +170,7 @@ jobs:
         - task: configure-deployment
           file: buildpacks-ci/tasks/machete-configure-deployment.yml
           params:
+            BOSH_TARGET: {{deployment-name}}.cf-app.com
             DEPLOYMENT_NAME: {{deployment-name}}
             CI_CF_PASSWORD: {{ci-cf-password}}
             CI_CF_USERNAME: {{ci-cf-username}}
