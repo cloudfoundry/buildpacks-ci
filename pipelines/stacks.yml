@@ -372,7 +372,6 @@ jobs:
           params:
             DEPLOYMENT_NAME: diego-stacks.buildpacks.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
-            USE_STACK_RELEASE: "yes"
           privileged: true
         - put: deployments-buildpacks
           params:
