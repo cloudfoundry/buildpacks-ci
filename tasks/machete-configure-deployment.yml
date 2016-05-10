@@ -3,12 +3,11 @@ platform: linux
 image: docker:///cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: deployments-buildpacks
   - name: machete
 run:
   path: buildpacks-ci/scripts/configure-deployment
 params:
+  BOSH_TARGET:
   DEPLOYMENT_NAME:
   CI_CF_PASSWORD:
   CI_CF_USERNAME:
-
