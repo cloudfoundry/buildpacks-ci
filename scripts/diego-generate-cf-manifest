@@ -64,11 +64,7 @@ jobs:
 popd
 
 pushd diego-release
-  if [ "x${USE_STACK_RELEASE}" == "xyes" ]; then
-      ./scripts/generate-bosh-lite-manifests -r
-  else
-      ./scripts/generate-bosh-lite-manifests
-  fi
+  ./scripts/generate-bosh-lite-manifests
 popd
 
 pushd deployments-buildpacks
