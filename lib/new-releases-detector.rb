@@ -45,7 +45,7 @@ class NewReleasesDetector
         "Update #{dependency} in #{buildpack}-buildpack"
       end
 
-      tracker_client.post_to_tracker tracker_story_title, tracker_story_description, tracker_story_tasks
+      tracker_client.post_to_tracker(tracker_story_title, tracker_story_description, tracker_story_tasks, 1)
     end
   end
 
