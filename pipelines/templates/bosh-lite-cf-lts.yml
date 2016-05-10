@@ -78,8 +78,7 @@ jobs:
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
             PASSWORD: {{bosh-lite-password}}
-            BOSH_PRIVATE_KEY: |
-            {{bosh_private_key}}
+            BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
             BOSH_PASSWORD: {{bosh_password}}
             AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
@@ -90,8 +89,8 @@ jobs:
             BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
             BOSH_LITE_PRIVATE_KEY: deployments-buildpacks/keys/bosh.pem
             BOSH_LITE_DISK_SIZE: 100
-            BOSH_GATEWAY_USER: {{buildpacks_ci_gateway_user}}
-            BOSH_TARGET: {{deployment-name}}.cf-app.com
+            BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+            BOSH_TARGET: <%= deployment_name + ".cf-app.com" %>
             BOSH_LITE_NAME: {{deployment-name}}
             VAGRANT_CWD: deployments-buildpacks/deployments/{{deployment-name}}
           ensure:
@@ -127,8 +126,7 @@ jobs:
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
             CI_CF_PASSWORD: {{ci-cf-password}}
-            BOSH_PRIVATE_KEY: |
-            {{bosh_private_key}}
+            BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
             BOSH_PASSWORD: {{bosh_password}}
             AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
@@ -139,8 +137,8 @@ jobs:
             BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
             BOSH_LITE_PRIVATE_KEY: deployments-buildpacks/keys/bosh.pem
             BOSH_LITE_DISK_SIZE: 100
-            BOSH_GATEWAY_USER: {{buildpacks_ci_gateway_user}}
-            BOSH_TARGET: {{deployment-name}}.cf-app.com
+            BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+            BOSH_TARGET: <%= deployment_name + ".cf-app.com" %>
             BOSH_LITE_NAME: {{deployment-name}}
             VAGRANT_CWD: deployments-buildpacks/deployments/{{deployment-name}}
           privileged: true
@@ -202,7 +200,7 @@ jobs:
         - task: configure-deployment
           file: buildpacks-ci/tasks/machete-configure-deployment.yml
           params:
-            BOSH_TARGET: {{deployment-name}}.cf-app.com
+            BOSH_TARGET: <%= deployment_name + ".cf-app.com" %>
             DEPLOYMENT_NAME: {{deployment-name}}
             CI_CF_PASSWORD: {{ci-cf-password}}
             CI_CF_USERNAME: {{ci-cf-username}}
