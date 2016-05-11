@@ -22,7 +22,7 @@ function use_diego_backend {
 
 pushd deployments-buildpacks
   bundle -j4
-  source ./bin/switch $DEPLOYMENT_NAME
+  source ./bin/target_bosh $DEPLOYMENT_NAME
 popd
 
 export BOSH_RELEASES_DIR=`pwd`

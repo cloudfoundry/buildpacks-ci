@@ -4,7 +4,7 @@ set -ex
 
 pushd deployments-buildpacks
   bundle install
-  . ./bin/switch $DEPLOYMENT_NAME
+  . ./bin/target_bosh $DEPLOYMENT_NAME
 popd
 
 
