@@ -4,7 +4,10 @@ set -eux
 
 rsync -a deployments-buildpacks/ deployments-buildpacks-artifacts
 
-cd deployments-buildpacks-artifacts/deployments/$DEPLOYMENT_NAME
+cd deployments-buildpacks-artifacts
+bundle install -j4
+
+cd deployments/$DEPLOYMENT_NAME
 rm -f .vagrant/machines/default/aws/elastic_ip
 vagrant destroy -f
 vagrant up --provider=aws
