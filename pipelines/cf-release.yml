@@ -181,6 +181,19 @@ jobs:
         params:
           DEPLOYMENT_NAME: cf-release.buildpacks.ci
           PASSWORD: {{bosh-lite-password}}
+          BOSH_PRIVATE_KEY: {{bosh_private_key}}
+          BOSH_USER: {{bosh_user}}
+          BOSH_PASSWORD: {{bosh_password}}
+          AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+          AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+          BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+          BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+          BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
+          BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
+          BOSH_LITE_DISK_SIZE: 100
+          BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+          BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
+          BOSH_LITE_NAME: cf-release.buildpacks.ci
         ensure:
           put: deployments-buildpacks
           params:
@@ -191,6 +204,19 @@ jobs:
         params:
           DEPLOYMENT_NAME: diego-cf-release.buildpacks.ci
           PASSWORD: {{bosh-lite-password}}
+          BOSH_PRIVATE_KEY: {{bosh_private_key}}
+          BOSH_USER: {{bosh_user}}
+          BOSH_PASSWORD: {{bosh_password}}
+          AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+          AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+          BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+          BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+          BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
+          BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
+          BOSH_LITE_DISK_SIZE: 100
+          BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+          BOSH_TARGET: diego-cf-release.buildpacks.ci.cf-app.com
+          BOSH_LITE_NAME: diego-cf-release.buildpacks.ci
         ensure:
           put: deployments-buildpacks
           params:
@@ -230,6 +256,19 @@ jobs:
           params:
             DEPLOYMENT_NAME: cf-release.buildpacks.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
+            BOSH_PRIVATE_KEY: {{bosh_private_key}}
+            BOSH_USER: {{bosh_user}}
+            BOSH_PASSWORD: {{bosh_password}}
+            AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
+            BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
+            BOSH_LITE_DISK_SIZE: 100
+            BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+            BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
+            BOSH_LITE_NAME: cf-release.buildpacks.ci
           privileged: true
         - put: deployments-buildpacks
           params:
@@ -281,19 +320,24 @@ jobs:
           passed: [ deploy-cf-to-cf-release ]
       - do:
         - task: cats
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-              - name: cf-release
-              - name: deployments-buildpacks
-            run:
-              path: buildpacks-ci/scripts/cats
-            params:
-              DEPLOYMENT_NAME: cf-release.buildpacks.ci
-              CI_CF_USERNAME: {{ci-cf-username}}
-              CI_CF_PASSWORD: {{ci-cf-password}}
+          file: buildpacks-ci/tasks/run-cats.yml
+          params:
+            DEPLOYMENT_NAME: cf-release.buildpacks.ci
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+            BOSH_PRIVATE_KEY: {{bosh_private_key}}
+            BOSH_USER: {{bosh_user}}
+            BOSH_PASSWORD: {{bosh_password}}
+            AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
+            BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
+            BOSH_LITE_DISK_SIZE: 100
+            BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+            BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
+            BOSH_LITE_NAME: cf-release.buildpacks.ci
           privileged: true
         on_failure:
           put: failure-alert
@@ -340,6 +384,19 @@ jobs:
           params:
             DEPLOYMENT_NAME: diego-cf-release.buildpacks.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
+            BOSH_PRIVATE_KEY: {{bosh_private_key}}
+            BOSH_USER: {{bosh_user}}
+            BOSH_PASSWORD: {{bosh_password}}
+            AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
+            BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
+            BOSH_LITE_DISK_SIZE: 100
+            BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+            BOSH_TARGET: diego-cf-release.buildpacks.ci.cf-app.com
+            BOSH_LITE_NAME: diego-cf-release.buildpacks.ci
           privileged: true
         - put: deployments-buildpacks
           params:
@@ -400,20 +457,25 @@ jobs:
           passed: [ deploy-cf-and-diego-to-diego-cf-release ]
       - do:
         - task: dats
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-              - name: cf-release
-              - name: deployments-buildpacks
-            run:
-              path: buildpacks-ci/scripts/cats
-            params:
-              DEPLOYMENT_NAME: diego-cf-release.buildpacks.ci
-              CI_CF_USERNAME: {{ci-cf-username}}
-              CI_CF_PASSWORD: {{ci-cf-password}}
-              DIEGO_DOCKER_ON: true
+          file: buildpacks-ci/tasks/run-cats.yml
+          params:
+            DEPLOYMENT_NAME: diego-cf-release.buildpacks.ci
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+            BOSH_PRIVATE_KEY: {{bosh_private_key}}
+            BOSH_USER: {{bosh_user}}
+            BOSH_PASSWORD: {{bosh_password}}
+            AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
+            BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
+            BOSH_LITE_DISK_SIZE: 100
+            BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+            BOSH_TARGET: diego-cf-release.buildpacks.ci.cf-app.com
+            BOSH_LITE_NAME: diego-cf-release.buildpacks.ci
+            DIEGO_DOCKER_ON: true
           privileged: true
         on_failure:
           put: failure-alert
