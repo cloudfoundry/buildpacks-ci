@@ -249,6 +249,7 @@ jobs:
         - task: configure-deployment
           file: buildpacks-ci/tasks/machete-configure-deployment.yml
           params:
+            BOSH_TARGET: <%= deployment_name + ".buildpacks.ci.cf-app.com" %>
             DEPLOYMENT_NAME: {{deployment-name}}
             CI_CF_PASSWORD: {{ci-cf-password}}
             CI_CF_USERNAME: {{ci-cf-username}}
