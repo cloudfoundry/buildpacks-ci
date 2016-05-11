@@ -11,3 +11,19 @@ outputs:
   - name: generate-manifest-artifacts
 run:
   path: buildpacks-ci/scripts/diego-generate-cf-manifest
+params:
+  DEPLOYMENT_NAME:
+  CI_CF_PASSWORD:
+  BOSH_PRIVATE_KEY:
+  BOSH_USER:
+  BOSH_PASSWORD:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  BOSH_AWS_ACCESS_KEY_ID:
+  BOSH_AWS_SECRET_ACCESS_KEY:
+  BOSH_LITE_SECURITY_GROUP:
+  BOSH_LITE_SUBNET_ID:
+  BOSH_LITE_DISK_SIZE:
+  BOSH_GATEWAY_USER:
+  BOSH_TARGET:
+  BOSH_LITE_NAME:
