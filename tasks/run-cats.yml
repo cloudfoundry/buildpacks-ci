@@ -3,14 +3,13 @@ platform: linux
 image: docker:///cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: cflinuxfs2-rootfs-release
   - name: deployments-buildpacks
-outputs:
-  - name: rootfs-smoke-test-manifest-artifacts
 run:
-  path: buildpacks-ci/scripts/make-rootfs-smoke-test-manifest
+  path: buildpacks-ci/scripts/cats
 params:
   DEPLOYMENT_NAME:
+  CI_CF_USERNAME:
+  CI_CF_PASSWORD:
   BOSH_PRIVATE_KEY:
   BOSH_USER:
   BOSH_PASSWORD:
@@ -24,3 +23,4 @@ params:
   BOSH_GATEWAY_USER:
   BOSH_TARGET:
   BOSH_LITE_NAME:
+  DIEGO_DOCKER_ON:
