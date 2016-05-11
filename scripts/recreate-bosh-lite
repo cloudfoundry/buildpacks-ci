@@ -7,6 +7,7 @@ rsync -a deployments-buildpacks/ deployments-buildpacks-artifacts
 cd deployments-buildpacks-artifacts
 bundle install -j4
 . bin/target_bosh --no-target
+export BOSH_LITE_PRIVATE_KEY: $(pwd)/keys/bosh.pem
 
 cd deployments/$DEPLOYMENT_NAME
 export VAGRANT_CWD=$(pwd)
