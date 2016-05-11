@@ -9,6 +9,7 @@ bundle install -j4
 . bin/target_bosh --no-target
 
 cd deployments/$DEPLOYMENT_NAME
+export VAGRANT_CWD=$(pwd)
 rm -f .vagrant/machines/default/aws/elastic_ip
 vagrant destroy -f
 vagrant up --provider=aws
