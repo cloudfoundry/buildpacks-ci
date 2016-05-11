@@ -4,7 +4,7 @@ set -e
 
 pushd deployments-buildpacks
   bundle -j4
-  . ./bin/switch $DEPLOYMENT_NAME
+  . ./bin/target_bosh $DEPLOYMENT_NAME
 popd
 
 if [ "$DIEGO_DOCKER_ON" = "true" ]
