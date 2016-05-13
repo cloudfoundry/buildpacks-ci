@@ -6,7 +6,7 @@ require 'yaml'
 describe 'make-rootfs' do
   old_path = ENV['PATH']
   ci_path = Dir.pwd
-  test_path = File.join(ci_path, "/spec/scripts/stacks/overwrite-cflinuxfs2-rootfs-release")
+  test_path = File.join(ci_path, '/spec/scripts/stacks/overwrite-cflinuxfs2-rootfs-release')
   blobs_dir = File.join(test_path, 'cflinuxfs2-rootfs-release/blobs')
   blob_destination = File.join(blobs_dir, 'rootfs/cflinuxfs2-1.49.0.tar.gz')
 
@@ -23,7 +23,7 @@ describe 'make-rootfs' do
       Dir.chdir("#{ci_path}/spec/scripts/stacks/overwrite-cflinuxfs2-rootfs-release") do
         system("#{ci_path}/scripts/stacks/overwrite-cflinuxfs2-rootfs-release")
       end
-      expect(File.exists?(blob_destination)).to eq(true)
+      expect(File.exist?(blob_destination)).to eq(true)
       expect(File.read(blob_destination)).to eq('new-tarball')
     end
   end

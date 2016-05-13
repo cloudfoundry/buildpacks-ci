@@ -6,7 +6,6 @@ require "#{buildpacks_ci_dir}/lib/tracker-client"
 require 'octokit'
 
 class OpenGithubStoryCreator
-
   def self.create_pull_requests_story
     story_title = 'Review Open Pull Requests'
     story_description = 'Provide feedback for open pull requests in repos that the buildpacks team owns.'

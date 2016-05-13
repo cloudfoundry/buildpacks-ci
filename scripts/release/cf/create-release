@@ -16,7 +16,7 @@ release_names.each do |language|
 end
 
 Dir.chdir 'cf-release' do
-  system %(bundle && bosh --parallel 10 sync blobs && bosh create release --force --with-tarball --name cf --version 212.0.#{Time.now.to_i}) or raise "cannot create cf-release"
+  system(%(bundle && bosh --parallel 10 sync blobs && bosh create release --force --with-tarball --name cf --version 212.0.#{Time.now.to_i})) || raise('cannot create cf-release')
 end
 
-system('rsync -a cf-release/ cf-release-artifacts') or raise "cannot rsync directories"
+system('rsync -a cf-release/ cf-release-artifacts') || raise('cannot rsync directories')
