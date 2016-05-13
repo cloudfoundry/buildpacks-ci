@@ -25,7 +25,7 @@ class TrackerClient
       name: name,
       description: description,
       requested_by_id: @requester_id,
-      tasks: task_api_objs,
+      tasks: task_api_objs
     }
 
     payload[:estimate] = point_value if point_value
