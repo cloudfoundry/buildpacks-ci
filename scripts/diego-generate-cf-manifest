@@ -35,6 +35,7 @@ pushd cf-release
 name: cf-warden
 properties:
   domain: $DEPLOYMENT_NAME.cf-app.com
+  system_domain: $DEPLOYMENT_NAME.cf-app.com
   acceptance_tests:
     admin_password: $CI_CF_PASSWORD
     include_internet_dependent: true
