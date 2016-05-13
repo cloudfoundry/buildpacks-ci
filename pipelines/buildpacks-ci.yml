@@ -25,8 +25,8 @@ jobs:
       - task: rspec
         file: buildpacks-ci/tasks/buildpacks-ci.yml
         params:
-          CI_USERNAME: {{ci-username}}
-          CI_PASSWORD: {{ci-password}}
+          CI_USERNAME: buildpacks
+          CI_PASSWORD: {{concourse_basic_auth_password}}
           GITHUB_USERNAME: {{github-username}}
           GITHUB_PASSWORD: {{github-password}}
         privileged: true
