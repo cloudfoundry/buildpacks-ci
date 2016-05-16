@@ -21,13 +21,13 @@ class DependencyBuildEnqueuer
 
     @latest_version = dependency_versions.max
 
-    new_build = {version: latest_version}
+    new_build = {"version" => latest_version}
     dependency_verification_type, dependency_verification_value = DependencyBuildEnqueuer.build_verification_for(dependency, latest_version)
     new_build[dependency_verification_type] = dependency_verification_value
 
     dependency_builds_file = File.join(binary_builds_dir, "#{dependency}-builds.yml")
     File.open(dependency_builds_file, "w") do |file|
-      file.write({godep: [new_build]}.to_yaml)
+      file.write({"godep" => [new_build]}.to_yaml)
     end
   end
 
@@ -36,8 +36,9 @@ class DependencyBuildEnqueuer
   def self.build_verification_for(dependency, version)
     if dependency == "godep"
       godep_download_url = "https://github.com/tools/godep/archive/#{version}.tar.gz"
-      shasum256 = `curl -sL #{godep_download_url} | shasum -a 256`
-      [:sha256, shasum256]
+      # only get the sha value and not the filename
+      shasum256 = `curl -sL #{godep_download_url} | shasum -a 256 | cut -d " " -f 1`
+      ["sha256", shasum256]
     end
   end
 end

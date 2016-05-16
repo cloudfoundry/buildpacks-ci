@@ -25,17 +25,17 @@ describe DependencyBuildEnqueuer do
       File.open(builds_file, "w") do |file|
         file.write godep_builds.to_yaml
       end
-      allow(described_class).to receive(:build_verification_for).with("godep", "v62").and_return([:sha256, sha256])
+      allow(described_class).to receive(:build_verification_for).with("godep", "v62").and_return(['sha256', sha256])
     end
 
     it "enqueues a build for the latest dep version in the correlated builds yml file" do
       subject.enqueue_build
 
       builds = YAML.load_file(builds_file)
-      enqueued_builds = builds[:godep]
+      enqueued_builds = builds['godep']
       expect(enqueued_builds.count).to eq(1)
-      expect(enqueued_builds.first[:version]).to eq("v62")
-      expect(enqueued_builds.first[:sha256]).to eq("sha256-mocked")
+      expect(enqueued_builds.first['version']).to eq("v62")
+      expect(enqueued_builds.first['sha256']).to eq("sha256-mocked")
     end
   end
 end
