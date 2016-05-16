@@ -47,6 +47,12 @@ resources:
         password: {{cve-amazon-ses-smtp-password}}
       from: cf-buildpacks-eng@pivotal.io
       to: ["cf-security@pivotal.io", "cf-buildpacks-eng@pivotal.io"]
+  - name: binary-builds
+    type: git
+    source:
+      branch: binary-builds
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
 
 jobs:
   - name: New Releases
@@ -233,3 +239,36 @@ jobs:
           subject: cves-email/subject-stacks-unrelated
           body: cves-email/body-stacks-unrelated
           headers: cves-email/headers-stacks-unrelated
+  - name: Trigger Godep Build
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: new-releases
+        - get: binary-builds
+      - task: queue-godep-build
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: new-releases
+            - name: buildpacks-ci
+            - name: binary-builds
+          outputs:
+            - name: binary-builds-artifacts
+          run:
+            path: bash
+            args:
+              - -c
+              - |
+                pushd buildpacks-ci
+                  bundle
+                  bundle exec ./scripts/notifications/queue-dependency-build
+                popd
+                rsync -a binary-builds/ binary-builds-artifacts
+          params:
+            DEPENDENCY: godep
+      - put: binary-builds
+        params:
+          repository: binary-builds-artifacts
+          rebase: true
