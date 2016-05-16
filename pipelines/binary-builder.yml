@@ -96,6 +96,37 @@ resources:
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
+  - name: go-buildpack
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/go-buildpack.git
+      private_key: {{go-buildpack-private-key}}
+      branch: develop
+      ignore_paths:
+        - VERSION
+        - CHANGELOG
+  - name: cf-edge-dea-environments
+    type: pool
+    source:
+      branch: resource-pools
+      pool: cf-edge-dea-environments
+      private_key: {{resource-pools-private-key}}
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+  - name: cf-edge-diego-environments
+    type: pool
+    source:
+      branch: resource-pools
+      pool: cf-edge-diego-environments
+      private_key: {{resource-pools-private-key}}
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+  - name: cf-lts-environments
+    type: pool
+    source:
+      branch: resource-pools
+      pool: cf-lts-environments
+      private_key: {{resource-pools-private-key}}
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+
 jobs:
   - name: binary-builder
     serial: true
@@ -352,3 +383,35 @@ jobs:
                 tar xzf build-tar/binary-builder-source.tgz -C /tmp
                 cd /tmp/x86_64-linux-gnu/ports/php/*/*/
                 yes n | env REPORT_EXIT_STATUS=1 make test
+  - name: Update Godep in manifest
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: go-buildpack
+        - get: builds-out
+          passed: [ build-godep ]
+          trigger: true
+      - task: update-godep-in-manifests
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: builds-out
+            - name: buildpacks-ci
+            - name: go-buildpack
+          outputs:
+            - name: go-buildpack-artifacts
+          run:
+            path: bash
+            args:
+              - -c
+              - |
+                pushd buildpacks-ci
+                  bundle
+                  bundle exec scripts/update-dependency-in-buildpack
+                popd
+                rsync -a go-buildpack/ go-buildpack-artifacts
+          params:
+            DEPENDENCY: godep
+

@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
+binary_builds_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'builds-out'))
+
+require "#{buildpacks_ci_dir}/lib/buildpack-manifest-updater"
+
+dependency = ENV['DEPENDENCY']
+
+# can only handle one buildpack update atm
+buildpack = BuildpackDependency.for(dependency).first
+buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "#{buildpack}-buildpack"))
+buildpack_manifest_updater = BuildpackManifestUpdater.new(dependency, buildpack, buildpack_dir, binary_builds_dir)
+
+version = buildpack_manifest_updater.dependency_version
+
+puts "Updating manifest with #{dependency} #{version}..."
+buildpack_manifest_updater.run!
+
+Dir.chdir(buildpack_dir) do
+  raise 'command failed' unless system('git add -A')
+  raise 'command failed' unless system("git commit -m 'Update #{dependency} to #{version}'")
+end
