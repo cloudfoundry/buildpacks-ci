@@ -35,7 +35,7 @@ class DependencyBuildEnqueuer
 
   def self.build_verification_for(dependency, version)
     if dependency == "godep"
-      godep_download_url "https://github.com/tools/godep/archive/#{latest-version}.tar.gz"
+      godep_download_url "https://github.com/tools/godep/archive/#{version}.tar.gz"
       shasum256 = `curl -sL #{godep_download_url} | shasum -a 256`
       [:sha256, shasum256]
     end
