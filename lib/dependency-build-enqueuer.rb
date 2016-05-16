@@ -25,7 +25,7 @@ class DependencyBuildEnqueuer
     dependency_verification_type, dependency_verification_value = DependencyBuildEnqueuer.build_verification_for(dependency, latest_version)
     new_build[dependency_verification_type] = dependency_verification_value
 
-    dependency_builds_file = File.join(binary_builds_dir, "#{dependency}-builds.yaml")
+    dependency_builds_file = File.join(binary_builds_dir, "#{dependency}-builds.yml")
     File.open(dependency_builds_file, "w") do |file|
       file.write({godep: [new_build]}.to_yaml)
     end

@@ -13,7 +13,7 @@ describe DependencyBuildEnqueuer do
 
   describe '#enqueue_build' do
     let(:dependency_versions_file) { File.join(new_releases_dir, "#{dependency}.yaml") }
-    let(:builds_file)              { File.join(binary_builds_dir, "#{dependency}-builds.yaml") }
+    let(:builds_file)              { File.join(binary_builds_dir, "#{dependency}-builds.yml") }
     let(:sha256)                   { "sha256-mocked" }
 
     before do
@@ -28,7 +28,7 @@ describe DependencyBuildEnqueuer do
       allow(described_class).to receive(:build_verification_for).with("godep", "v62").and_return([:sha256, sha256])
     end
 
-    it "enqueues a build for the latest dep version in the correlated builds yaml file" do
+    it "enqueues a build for the latest dep version in the correlated builds yml file" do
       subject.enqueue_build
 
       builds = YAML.load_file(builds_file)
