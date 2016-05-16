@@ -38,7 +38,7 @@ class DependencyBuildEnqueuer
       godep_download_url = "https://github.com/tools/godep/archive/#{version}.tar.gz"
       # only get the sha value and not the filename
       shasum256 = `curl -sL #{godep_download_url} | shasum -a 256 | cut -d " " -f 1`
-      ["sha256", shasum256]
+      ["sha256", shasum256.strip]
     end
   end
 end
