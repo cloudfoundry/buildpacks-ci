@@ -11,7 +11,7 @@ dependency = ENV['DEPENDENCY']
 
 # can only handle one buildpack update atm
 buildpack = BuildpackDependency.for(dependency).first
-buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "#{buildpack}-buildpack"))
+buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "buildpack"))
 buildpack_manifest_updater = BuildpackManifestUpdater.new(dependency, buildpack, buildpack_dir, binary_builds_dir)
 
 version = buildpack_manifest_updater.dependency_version
