@@ -84,7 +84,7 @@ resources:
   - name: buildpack-checksums
     type: git
     source:
-      uri: git@github.com:pivotal-cf-experimental/buildpack-checksums.git
+      uri: git@bitbucket.org:cloudfoundry-buildpacks/buildpack-checksums.git
       private_key: {{buildpack-checksums-private-key}}
       branch: master
   - name: brats

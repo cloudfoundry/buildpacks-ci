@@ -3,15 +3,9 @@ resources:
   - name: master
     type: git
     source:
-      uri: git@github.com:pivotal-cf-experimental/buildpack-checksums.git
+      uri: git@bitbucket.org:cloudfoundry-buildpacks/buildpack-checksums.git
       private_key: {{buildpack-checksums-private-key}}
       branch: master
-  - name: gh-pages
-    type: git
-    source:
-      uri: git@github.com:pivotal-cf-experimental/buildpack-checksums.git
-      private_key: {{buildpack-checksums-private-key}}
-      branch: gh-pages
 
   - name: deploy-buildpack-verify
     type: cf
@@ -29,7 +23,6 @@ jobs:
       - aggregate:
         - get: master
           trigger: true
-        - get: gh-pages
       - task: run-tests
         config:
           platform: linux
@@ -46,16 +39,14 @@ jobs:
                 gem install bundle
                 bundle
                 bundle exec rspec
-
       - task: build-site
         config:
           platform: linux
           image: docker:///cfbuildpacks/ci
           inputs:
             - name: master
-            - name: gh-pages
           outputs:
-            - name: gh-pages-artifacts
+            - name: master-artifacts
           run:
             path: bash
             args:
@@ -65,23 +56,20 @@ jobs:
                 pushd master
                   gem install bundler
                   bundle
-                  bundle exec ./generate.rb ../gh-pages
-                popd
-
-                pushd gh-pages
+                  bundle exec ./generate.rb ./final_site
                   git add -A
-                  git commit -m 'Update site'
+                  git commit -m 'Update site' || true
                 popd
 
-                rsync -a gh-pages/ gh-pages-artifacts
+                rsync -a master/ master-artifacts
         privileged: true
 
-      - put: gh-pages
+      - put: master
         params:
-          repository: gh-pages-artifacts
+          repository: master-artifacts
           rebase: true
 
       - put: deploy-buildpack-verify
         params:
-          path: gh-pages-artifacts
-          manifest: gh-pages-artifacts/manifest.yml
+          path: master-artifacts/final_site/
+          manifest: master-artifacts/final_site/manifest.yml
