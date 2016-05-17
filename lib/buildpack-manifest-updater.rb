@@ -13,7 +13,7 @@ class BuildpackManifestUpdater
     @buildpack = buildpack
     @buildpack_dir = buildpack_dir
     @binary_builds_dir = binary_builds_dir
-    @dependency_version, @url, @md5 = BuildpackManifestUpdater.get_dependency_info(dependency)
+    @dependency_version, @url, @md5 = BuildpackManifestUpdater.get_dependency_info(dependency, binary_builds_dir)
   end
 
   def run!
@@ -56,7 +56,7 @@ class BuildpackManifestUpdater
     buildpack_manifest
   end
 
-  def self.get_dependency_info(dependency)
+  def self.get_dependency_info(dependency, binary_builds_dir)
     Dir.chdir(binary_builds_dir) do
       git_commit_message = `git log --format=%B -n 1 HEAD`
       if dependendency == "godep"
