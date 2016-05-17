@@ -17,5 +17,5 @@ build_enqueuer.enqueue_build
 
 Dir.chdir(binary_builds_dir) do
   raise 'command failed' unless system('git add -A')
-  raise 'command failed' unless system("git commit -m 'Build #{build_enqueuer.dependency} #{build_enqueuer.latest_version}'")
+  raise 'command failed' unless system("git commit -m 'Enqueue build for #{build_enqueuer.dependency} #{build_enqueuer.latest_version}'")
 end
