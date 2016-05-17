@@ -126,6 +126,12 @@ resources:
       pool: cf-lts-environments
       private_key: {{resource-pools-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
+  - name: new-releases
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      branch: new-release-notifications
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
 
 jobs:
   - name: binary-builder
@@ -160,7 +166,7 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-<% %w(php php7 ruby jruby bundler nginx node python godep httpd).each do |runtime| %>
+<% %w(php php7 ruby jruby bundler nginx node python httpd).each do |runtime| %>
   - name: build-<%= runtime %>
     serial: true
     plan:
@@ -383,7 +389,85 @@ jobs:
                 tar xzf build-tar/binary-builder-source.tgz -C /tmp
                 cd /tmp/x86_64-linux-gnu/ports/php/*/*/
                 yes n | env REPORT_EXIT_STATUS=1 make test
-  - name: Update Godep in manifest
+  - name: trigger-godep-build
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: new-releases
+        - get: binary-builds
+          resource: godep-builds
+      - task: queue-binary-build
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: new-releases
+            - name: buildpacks-ci
+            - name: binary-builds
+          outputs:
+            - name: binary-builds-artifacts
+          run:
+            path: bash
+            args:
+              - -c
+              - |
+                pushd buildpacks-ci
+                  bundle
+                  bundle exec ./scripts/notifications/queue-dependency-build
+                popd
+                rsync -a binary-builds/ binary-builds-artifacts
+          params:
+            DEPENDENCY: godep
+      - put: godep-builds
+        params:
+          repository: binary-builds-artifacts
+          rebase: true
+  - name: build-godep
+    serial: true
+    plan:
+      - aggregate:
+        - get: builds-yaml
+          resource: godep-builds
+          passed: [trigger-godep-build]
+          trigger: true
+        - get: binary-builder
+          passed: [binary-builder]
+        - get: buildpacks-ci
+      - do:
+        - task: build-binary
+          file: buildpacks-ci/tasks/build-binary.yml
+          params:
+            BINARY_NAME: godep
+          privileged: true
+        - put: build-tar
+          params:
+            from: binary-builder-artifacts/build.tgz
+        - task: push-binary
+          file: buildpacks-ci/tasks/push-binary.yml
+          params:
+            BINARY_NAME: godep
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
+          privileged: true
+        - put: builds-out
+          params:
+            repository: builds-yaml-artifacts
+            rebase: true
+        - put: concourse2tracker
+          params:
+            api_token: {{pivotal-tracker-api-token}}
+            git_path: builds-yaml
+            project_id: {{cf-buildpacks-public-tracker-id}}
+        on_failure:
+          put: failure-alert
+          params:
+            text: "binary-builder build-godep job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-godep"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: update-godep-in-manifest
     serial: true
     plan:
       - aggregate:
@@ -414,4 +498,3 @@ jobs:
                 rsync -a go-buildpack/ go-buildpack-artifacts
           params:
             DEPENDENCY: godep
-
