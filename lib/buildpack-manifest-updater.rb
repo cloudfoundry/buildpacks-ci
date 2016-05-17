@@ -60,7 +60,7 @@ class BuildpackManifestUpdater
     Dir.chdir(binary_builds_dir) do
       git_commit_message = `git log --format=%B -n 1 HEAD`
       if dependency == "godep"
-        /.*filename:\s+binary-builder\/godep-(\w*)-linux-x64.tgz.*md5:\s+(\w*)\,.*/.match(git_commit_message)
+        /.*filename:\s+binary-builder\/(godep-(\w*)-linux-x64.tgz).*md5:\s+(\w*)\,.*/.match(git_commit_message)
         dependency_filename = $1
         dependency_version = $2
         md5 = $3
