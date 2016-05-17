@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
+require "#{buildpacks_ci_dir}/lib/tracker-client"
+require 'json'
+
+name = ARGV[0] || ''
+description = ARGV[1] || ''
+
+exit if name.empty?
+description += "\n\n" unless description.empty?
+description += "URL | Version\n"
+description += "--- | ---\n"
+
+Dir.glob('./*/input.json').each do |json_file|
+  begin
+    json = JSON.parse(File.read(json_file))
+    if json['source']['url'] && json['version']['version']
+      description += "#{json['source']['url']} | #{json['version']['version']}\n"
+    elsif json['source']['user'] && json['version']['repository']
+      description += "https://github.com/#{json['source']['user']}/#{json['source']['repository']}/releases | #{json['version']['tag']}\n"
+    end
+  rescue
+    description += "#{json_file} | ERROR\n"
+  end
+end
+
+tracker_client = TrackerClient.new(
+  ENV['TRACKER_API_TOKEN'],
+  ENV['TRACKER_PROJECT_ID'],
+  ENV['TRACKER_REQUESTER_ID'].to_i
+)
+tracker_client.post_to_tracker name, description
