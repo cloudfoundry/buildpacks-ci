@@ -239,7 +239,7 @@ jobs:
           run:
             path: ./buildpacks-ci/scripts/notifications/create-new-dependency-story
             args:
-              - 'DELETE ME - Dave test'
+              - 'Build and/or Include new releases: PHP Modules'
               - "There are new versions of dependencies for PHP Modules\n See the google doc https://sites.google.com/a/pivotal.io/cloudfoundry-buildpacks/check-lists/adding-a-new-dependency-release-to-a-buildpack for info on building a new release binary and adding it to the buildpack manifest file.\n"
           params:
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}

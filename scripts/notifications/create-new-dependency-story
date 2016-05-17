@@ -25,7 +25,7 @@ Dir.glob('./*/tag').each do |tag_file|
   begin
     tag = File.read(tag_file)
     version = File.read(tag_file.gsub(/tag$/,'version'))
-    source = tag_file.gsub(/\/tag$/,'')
+    source = tag_file.gsub(/\/tag$/,'').gsub(/^\.\//,'')
     description += "#{source} | #{tag} -- #{version}\n"
   rescue
     description += "#{tag_file} | ERROR\n"
