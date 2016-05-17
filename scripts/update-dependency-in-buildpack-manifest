@@ -5,6 +5,7 @@ buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 binary_builds_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'builds-out'))
 
 require_relative "#{buildpacks_ci_dir}/lib/buildpack-manifest-updater"
+require_relative "#{buildpacks_ci_dir}/lib/buildpack-dependency"
 
 dependency = ENV['DEPENDENCY']
 
