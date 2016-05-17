@@ -409,7 +409,7 @@ jobs:
               - |
                 pushd buildpacks-ci
                   bundle
-                  bundle exec scripts/update-dependency-in-buildpack
+                  bundle exec scripts/update-dependency-in-buildpack-manifest
                 popd
                 rsync -a go-buildpack/ go-buildpack-artifacts
           params:
