@@ -16,15 +16,25 @@ description += "--- | ---\n"
 Dir.glob('./*/input.json').each do |json_file|
   begin
     json = JSON.parse(File.read(json_file))
-    if json['source']['url'] && json['version']['version']
-      description += "#{json['source']['url']} | #{json['version']['version']}\n"
-    elsif json['source']['user'] && json['version']['repository']
-      description += "https://github.com/#{json['source']['user']}/#{json['source']['repository']}/releases | #{json['version']['tag']}\n"
-    end
+    description += "#{json['source']['url']} | #{json['version']['version'].strip.gsub(/\s+/, ' -- ')}\n"
   rescue
     description += "#{json_file} | ERROR\n"
   end
 end
+Dir.glob('./*/tag').each do |tag_file|
+  begin
+    tag = File.read(tag_file)
+    version = File.read(tag_file.gsub(/tag$/,'version'))
+    source = tag_file.gsub(/\/tag$/,'')
+    description += "#{source} | #{tag} -- #{version}\n"
+  rescue
+    description += "#{tag_file} | ERROR\n"
+  end
+end
+
+puts name
+puts ""
+puts description
 
 tracker_client = TrackerClient.new(
   ENV['TRACKER_API_TOKEN'],
