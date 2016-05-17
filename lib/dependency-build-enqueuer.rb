@@ -19,7 +19,7 @@ class DependencyBuildEnqueuer
     dependency_versions_file = File.join(new_releases_dir, "#{dependency}.yaml")
     dependency_versions = YAML.load_file(dependency_versions_file)
 
-    @latest_version = dependency_versions.max
+    @latest_version = DependencyBuildEnqueuer.latest_version_for_dependency(dependency, dependency_versions)
 
     new_build = {"version" => latest_version}
     dependency_verification_type, dependency_verification_value = DependencyBuildEnqueuer.build_verification_for(dependency, latest_version)
@@ -28,6 +28,12 @@ class DependencyBuildEnqueuer
     dependency_builds_file = File.join(binary_builds_dir, "#{dependency}-builds.yml")
     File.open(dependency_builds_file, "w") do |file|
       file.write({"godep" => [new_build]}.to_yaml)
+    end
+  end
+
+  def self.latest_version_for_dependency(dependency, dependency_versions)
+    if dependency == "godep"
+      dependency_versions.max { |a, b| a.gsub("v", "").to_i <=> b.gsub("v", "").to_i }
     end
   end
 
