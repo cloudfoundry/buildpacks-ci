@@ -4,6 +4,11 @@
 require 'yaml'
 require 'digest'
 
+def ci_skip_for(binary)
+  return false if binary == "godep"
+  return true
+end
+
 binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
 builds_yaml_artifacts = File.join(Dir.pwd, 'builds-yaml-artifacts')
@@ -31,7 +36,7 @@ filename = Dir["binary-builder/#{binary_name}-*.tgz"].first
 md5sum   = Digest::MD5.file(filename).hexdigest
 shasum   = Digest::SHA256.file(filename).hexdigest
 git_msg  = "Build #{binary_name} - #{latest_build['version']}\n\nfilename: #{filename}, md5: #{md5sum}, sha256: #{shasum}"
-git_msg += "\n\n[ci skip]" if builds[binary_name].empty?
+git_msg += "\n\n[ci skip]" if builds[binary_name].empty? && ci_skip_for(binary_name)
 
 File.write(builds_path, builds.to_yaml)
 
