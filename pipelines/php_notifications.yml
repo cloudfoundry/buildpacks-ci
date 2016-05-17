@@ -1,0 +1,227 @@
+---
+resource_types:
+- name: new_version_resource
+  type: docker-image
+  source:
+    repository: cfbuildpacks/new_version_resource
+
+resources:
+  - name: month-start
+    type: cron
+    source:
+      expression: 12 5 1 * *
+      location: America/New_York
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/buildpacks-ci
+  - name: pecl-igbinary
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/igbinary
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
+  - name: pecl-imagick
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/imagick
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
+  - name: pecl-mailparse
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/mailparse
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
+  - name: pecl-memcache
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/memcache
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
+  - name: pecl-mongo
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/mongo
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
+  - name: pecl-msgpack
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/msgpack
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th, table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("beta")) th
+  - name: pecl-protocolbuffers
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/protocolbuffers
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th, table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("beta")) th, table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("alpha")) th
+  - name: pecl-redis
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/redis
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
+  - name: pecl-sundown
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/sundown
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th, table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("beta")) th
+  - name: pecl-xdebug
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/xdebug
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
+  - name: pecl-yaf
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/yaf
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
+  - name: pecl-mongodb
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/mongodb
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
+  - name: xhprof
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/xhprof
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th, table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("beta")) th
+  - name: libmemcached
+    type: new_version_resource
+    source:
+      url: https://launchpad.net/libmemcached/+download
+      csspath: table.listing tbody tr td:nth-of-type(2)
+  - name: lua
+    type: new_version_resource
+    source:
+      url: http://www.lua.org/ftp/
+      csspath: table:nth-of-type(1) tbody tr td.name a
+  - name: hiredis
+    type: new_version_resource
+    source:
+      url: https://github.com/redis/hiredis/releases
+      csspath: ul.release-timeline-tags h3 span.tag-name
+  - name: twig
+    type: new_version_resource
+    source:
+      url: https://github.com/twigphp/twig/releases
+      csspath: ul.release-timeline-tags h3 span.tag-name
+  - name: xcache
+    type: new_version_resource
+    source:
+      url: http://xcache.lighttpd.net/pub/Releases/
+      csspath: tr[group="1"] td:nth-of-type(1)
+  - name: ioncube
+    type: new_version_resource
+    source:
+      url: http://www.ioncube.com/loaders.php
+      csspath: tr:contains("Linux (64 bits)") td:nth-of-type(6)
+  - name: rabbitmq-c
+    type: github-release
+    source:
+      user: alanxz
+      repository: rabbitmq-c
+      access_token: {{buildpacks-github-token}}
+  - name: phpiredis
+    type: github-release
+    source:
+      user: nrk
+      repository: phpiredis
+      access_token: {{buildpacks-github-token}}
+  - name: php-protobuf
+    type: github-release
+    source:
+      user: allegro
+      repository: php-protobuf
+      access_token: {{buildpacks-github-token}}
+  - name: cphalcon
+    type: github-release
+    source:
+      user: phalcon
+      repository: cphalcon
+      access_token: {{buildpacks-github-token}}
+  - name: suhosin5
+    type: github-release
+    source:
+      user: stefanesser
+      repository: suhosin
+      access_token: {{buildpacks-github-token}}
+  - name: suhosin7
+    type: github-release
+    source:
+      user: sektioneins
+      repository: suhosin7
+      access_token: {{buildpacks-github-token}}
+jobs:
+  - name: PHP module checker
+    plan:
+      - aggregate:
+        - get: pecl-igbinary
+        - get: pecl-imagick
+        - get: pecl-mailparse
+        - get: pecl-memcache
+        - get: pecl-mongo
+        - get: pecl-msgpack
+        - get: pecl-protocolbuffers
+        - get: pecl-redis
+        - get: pecl-sundown
+        - get: pecl-xdebug
+        - get: pecl-yaf
+        - get: pecl-mongodb
+        - get: libmemcached
+        - get: lua
+        - get: xcache
+        - get: ioncube
+        - get: rabbitmq-c
+        - get: hiredis
+        # - get: phpiredis
+        #   skipped: since does not yet have releases
+        - get: php-protobuf
+        - get: cphalcon
+        - get: twig
+        - get: xhprof
+        # - get: suhosin7
+        #   skipped: since does not yet have releases
+        - get: suhosin5
+        - get: buildpacks-ci
+      - task: check for latest PHP module versions
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: pecl-igbinary
+            - name: pecl-imagick
+            - name: pecl-mailparse
+            - name: pecl-memcache
+            - name: pecl-mongo
+            - name: pecl-msgpack
+            - name: pecl-protocolbuffers
+            - name: pecl-redis
+            - name: pecl-sundown
+            - name: pecl-xdebug
+            - name: pecl-yaf
+            - name: pecl-mongodb
+            - name: libmemcached
+            - name: lua
+            - name: xcache
+            - name: ioncube
+            - name: rabbitmq-c
+            - name: hiredis
+            # - name: phpiredis
+            - name: php-protobuf
+            - name: cphalcon
+            - name: twig
+            - name: xhprof
+            # - name: suhosin7
+            - name: suhosin5
+            - name: buildpacks-ci
+          run:
+            path: buildpacks-ci/scripts/notifications/create-new-dependency-story
+            args:
+              - 'DELETE ME - Dave test'
+              - "There are new versions of dependencies for PHP Modules\n See the google doc https://sites.google.com/a/pivotal.io/cloudfoundry-buildpacks/check-lists/adding-a-new-dependency-release-to-a-buildpack for info on building a new release binary and adding it to the buildpack manifest file.\n"
+          params:
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+
+
+
+
+
+
+
