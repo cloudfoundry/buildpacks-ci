@@ -147,9 +147,36 @@ resources:
       repository: suhosin7
       access_token: {{buildpacks-github-token}}
 jobs:
-  - name: PHP module checker
+  - name: Test
+    serial: true
     plan:
       - aggregate:
+        - get: pecl-igbinary
+        - get: cphalcon
+        - get: buildpacks-ci
+      - task: Test
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: pecl-igbinary
+            - name: cphalcon
+            - name: buildpacks-ci
+          run:
+            path: ./buildpacks-ci/scripts/notifications/create-new-dependency-story
+            args:
+              - 'DELETE ME - Dave test'
+              - "There are new versions of dependencies for PHP Modules\n See the google doc https://sites.google.com/a/pivotal.io/cloudfoundry-buildpacks/check-lists/adding-a-new-dependency-release-to-a-buildpack for info on building a new release binary and adding it to the buildpack manifest file.\n"
+          params:
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+  - name: PHP module checker
+    serial: true
+    plan:
+      - aggregate:
+        # - get: month-start
+        #   trigger: true
         - get: pecl-igbinary
         - get: pecl-imagick
         - get: pecl-mailparse
@@ -210,7 +237,7 @@ jobs:
             - name: suhosin5
             - name: buildpacks-ci
           run:
-            path: buildpacks-ci/scripts/notifications/create-new-dependency-story
+            path: ./buildpacks-ci/scripts/notifications/create-new-dependency-story
             args:
               - 'DELETE ME - Dave test'
               - "There are new versions of dependencies for PHP Modules\n See the google doc https://sites.google.com/a/pivotal.io/cloudfoundry-buildpacks/check-lists/adding-a-new-dependency-release-to-a-buildpack for info on building a new release binary and adding it to the buildpack manifest file.\n"
