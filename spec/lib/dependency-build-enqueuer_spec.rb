@@ -38,4 +38,16 @@ describe DependencyBuildEnqueuer do
       expect(enqueued_builds.first['sha256']).to eq("sha256-mocked")
     end
   end
+
+  describe '#latest_version_for_dependency' do
+    context "godep" do
+      let(:dependency_versions) { %w(v60 v61 v62 v102) }
+
+      it 'returns the latest godep version in the passed versions' do
+        latest_version = described_class.latest_version_for_dependency(dependency, dependency_versions)
+
+        expect(latest_version).to eq("v102")
+      end
+    end
+  end
 end
