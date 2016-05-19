@@ -112,12 +112,13 @@ resources:
       pool: cf-edge-diego-environments
       private_key: {{resource-pools-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
-  - name: new-releases
+  - name: godep-new-releases
     type: git
     source:
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       branch: new-release-notifications
       private_key: {{buildpacks-ci-binary-builds-private-key}}
+      paths: [ godep.yaml ]
 
 jobs:
   - name: binary-builder
@@ -381,6 +382,8 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: new-releases
+          resource: godep-new-releases
+          trigger: true
         - get: binary-builds
           resource: godep-builds
       - task: queue-binary-build
@@ -492,16 +495,26 @@ jobs:
             acquire: true
         - do:
           - task: rspec
-            file: buildpacks-ci/tasks/test-buildpack.yml
-            inputs:
-              - name: buildpack-artifacts
-                path: buildpack
-            params:
-              STACKS: cflinuxfs2
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              CF_PASSWORD: {{ci-cf-password}}
-              CF_EDGE: 'true'
+            config:
+              platform: linux
+              image: docker:///cfbuildpacks/ci
+              inputs:
+                - name: buildpack-artifacts
+                  path: buildpack
+                - name: buildpacks-ci
+                - name: cf-environments
+              run:
+                path: buildpacks-ci/scripts/test_buildpack
+              params:
+                STACKS: cflinuxfs2
+                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+                CF_PASSWORD: {{ci-cf-password}}
+                CF_EDGE: 'true'
             privileged: true
+          - put: go-buildpack
+            params:
+              repository: buildpack-artifacts
+              rebase: true
           ensure:
             put: cf-edge-diego-environments
             params:
