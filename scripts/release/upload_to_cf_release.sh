@@ -20,7 +20,6 @@ EOF
 export GITHUB_CREDENTIALS=$GITHUB_USER:$GITHUB_PASSWORD
 
 pushd cf-release
-  ../buildpacks-ci/scripts/release/jenkins_git_credentials add
   ../buildpacks-ci/scripts/release/add_to_cf_release ../pivotal-buildpacks-cached/*_buildpack-cached-v*.zip
 popd
 
