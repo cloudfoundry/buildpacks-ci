@@ -199,18 +199,3 @@ jobs:
           run:
             path: buildpacks-ci/scripts/compile-extensions.sh
         privileged: true
-  - name: heroku-nanny
-    serial: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: nanny-time-resource
-          trigger: true
-      - task: sanity-check-upstream
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-          run:
-            path: buildpacks-ci/scripts/sanity-check-upstream
