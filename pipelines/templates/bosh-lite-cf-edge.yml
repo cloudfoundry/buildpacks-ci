@@ -126,6 +126,7 @@ jobs:
           put: resource-pools
           params:
             release: resource-pools
+        attempts: 5
   - name: generate-manifest
     serial_groups: [ deploy ]
     serial: true
