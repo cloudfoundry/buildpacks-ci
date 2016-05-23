@@ -96,6 +96,15 @@ resources:
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
+  - name: php-buildpack
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/php-buildpack.git
+      private_key: {{php-buildpack-private-key}}
+      branch: develop
+      ignore_paths:
+        - VERSION
+        - CHANGELOG
   - name: go-buildpack
     type: git
     source:
@@ -119,6 +128,20 @@ resources:
       branch: new-release-notifications
       private_key: {{buildpacks-ci-binary-builds-private-key}}
       paths: [ godep.yaml ]
+  - name: composer-new-releases
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      branch: new-release-notifications
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      paths: [ composer.yaml ]
+  - name: composer-builds
+    type: git
+    source:
+      branch: binary-builds
+      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      paths: [ composer-builds.yml ]
 
 jobs:
   - name: binary-builder
@@ -412,6 +435,150 @@ jobs:
         params:
           repository: binary-builds-artifacts
           rebase: true
+  - name: trigger-composer-build
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: new-releases
+          resource: composer-new-releases
+          trigger: true
+        - get: binary-builds
+          resource: composer-builds
+      - task: queue-binary-build
+        config:
+          platform: linux
+          image: docker:///cfbuildpacks/ci
+          inputs:
+            - name: new-releases
+            - name: buildpacks-ci
+            - name: binary-builds
+          outputs:
+            - name: binary-builds-artifacts
+          run:
+            path: bash
+            args:
+              - -c
+              - |
+                pushd buildpacks-ci
+                  bundle
+                  bundle exec ./scripts/notifications/queue-dependency-build
+                popd
+                rsync -a binary-builds/ binary-builds-artifacts
+          params:
+            DEPENDENCY: composer
+      - put: composer-builds
+        params:
+          repository: binary-builds-artifacts
+          rebase: true
+  - name: build-composer
+    serial: true
+    plan:
+      - aggregate:
+        - get: builds-yaml
+          resource: composer-builds
+          passed: [trigger-composer-build]
+          trigger: true
+        - get: binary-builder
+          passed: [binary-builder]
+        - get: buildpacks-ci
+      - do:
+        - task: build-binary
+          file: buildpacks-ci/tasks/build-binary.yml
+          params:
+            BINARY_NAME: composer
+          privileged: true
+        - task: push-binary
+          file: buildpacks-ci/tasks/push-binary.yml
+          params:
+            BINARY_NAME: composer
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
+          privileged: true
+        - put: builds-out
+          params:
+            repository: builds-yaml-artifacts
+            rebase: true
+        - put: concourse2tracker
+          params:
+            api_token: {{pivotal-tracker-api-token}}
+            git_path: builds-yaml
+            project_id: {{cf-buildpacks-public-tracker-id}}
+        on_failure:
+          put: failure-alert
+          params:
+            text: "binary-builder build-composer job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-composer"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: update-composer-in-manifest
+    serial: true
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: buildpack
+            resource: php-buildpack
+          - get: builds-out
+            passed: [ build-composer ]
+            trigger: true
+        - task: update-dependency-in-manifests
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci
+            inputs:
+              - name: builds-out
+              - name: buildpacks-ci
+              - name: buildpack
+            outputs:
+              - name: buildpack-artifacts
+            run:
+              path: bash
+              args:
+                - -c
+                - |
+                  pushd buildpacks-ci
+                    bundle
+                    bundle exec scripts/update-dependency-in-buildpack-manifest
+                  popd
+                  rsync -a buildpack/ buildpack-artifacts
+            params:
+              DEPENDENCY: composer
+        - put: cf-environments
+          resource: cf-edge-diego-environments
+          params:
+            acquire: true
+        - do:
+          - task: rspec
+            config:
+              platform: linux
+              image: docker:///cfbuildpacks/ci
+              inputs:
+                - name: buildpack-artifacts
+                  path: buildpack
+                - name: buildpacks-ci
+                - name: cf-environments
+              run:
+                path: buildpacks-ci/scripts/test_buildpack
+              params:
+                STACKS: cflinuxfs2
+                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+                CF_PASSWORD: {{ci-cf-password}}
+                CF_EDGE: 'true'
+            privileged: true
+          ensure:
+            put: cf-edge-diego-environments
+            params:
+              release: cf-environments
+        on_failure:
+          put: failure-alert
+          params:
+            text: "update-composer-in-manifest job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-composer-in-manifest"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
   - name: build-godep
     serial: true
     plan:

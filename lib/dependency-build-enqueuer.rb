@@ -27,24 +27,32 @@ class DependencyBuildEnqueuer
 
     dependency_builds_file = File.join(binary_builds_dir, "#{dependency}-builds.yml")
     File.open(dependency_builds_file, "w") do |file|
-      file.write({"godep" => [new_build]}.to_yaml)
+      file.write({dependency => [new_build]}.to_yaml)
     end
   end
 
   def self.latest_version_for_dependency(dependency, dependency_versions)
-    if dependency == "godep"
+    case dependency
+    when "godep"
       dependency_versions.max { |a, b| a.gsub("v", "").to_i <=> b.gsub("v", "").to_i }
+    when "composer"
+      dependency_versions.map do |version|
+        Gem::Version.new(version)
+      end.sort.reverse[0].to_s.gsub(".pre.","-")
     end
   end
 
   private
 
   def self.build_verification_for(dependency, version)
-    if dependency == "godep"
-      godep_download_url = "https://github.com/tools/godep/archive/#{version}.tar.gz"
-      # only get the sha value and not the filename
-      shasum256 = `curl -sL #{godep_download_url} | shasum -a 256 | cut -d " " -f 1`
-      ["sha256", shasum256.strip]
+    case dependency
+    when "godep"
+      download_url = "https://github.com/tools/godep/archive/#{version}.tar.gz"
+    when "composer"
+      download_url = "https://getcomposer.org/download/#{version}/composer.phar"
     end
+    # only get the sha value and not the filename
+    shasum256 = `curl -sL #{download_url} | shasum -a 256 | cut -d " " -f 1`
+    ["sha256", shasum256.strip]
   end
 end

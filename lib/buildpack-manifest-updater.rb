@@ -59,14 +59,20 @@ class BuildpackManifestUpdater
   def self.get_dependency_info(dependency, binary_builds_dir)
     Dir.chdir(binary_builds_dir) do
       git_commit_message = `git log --format=%B -n 1 HEAD`
-      if dependency == "godep"
+      case dependency
+      when "godep"
         /.*filename:\s+binary-builder\/(godep-(\w*)-linux-x64.tgz).*md5:\s+(\w*)\,.*/.match(git_commit_message)
         dependency_filename = $1
         dependency_version = $2
         md5 = $3
         url = "https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/#{dependency}/#{dependency_filename}"
-        [dependency_version, url, md5]
+      when "composer"
+        /.*filename:\s+binary-builder\/composer-(\w*).phar.*md5:\s+(\w*)\,.*/.match(git_commit_message)
+        dependency_version = $1
+        md5 = $2
+        url ="https://pivotal-buildpacks.s3.amazonaws.com/php/binaries/trusty/composer/#{dependency_version}/composer.phar"
       end
+      [dependency_version, url, md5]
     end
   end
 end
