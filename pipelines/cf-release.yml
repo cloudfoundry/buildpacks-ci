@@ -194,6 +194,7 @@ jobs:
           BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
           BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
           BOSH_LITE_NAME: cf-release.buildpacks.ci
+        attempts: 5
         ensure:
           put: deployments-buildpacks
           params:
@@ -217,6 +218,7 @@ jobs:
           BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
           BOSH_TARGET: diego-cf-release.buildpacks.ci.cf-app.com
           BOSH_LITE_NAME: diego-cf-release.buildpacks.ci
+        attempts: 5
         ensure:
           put: deployments-buildpacks
           params:
