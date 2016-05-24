@@ -15,7 +15,6 @@ builds_yaml_artifacts = File.join(Dir.pwd, 'builds-yaml-artifacts')
 builds_path  = File.join(builds_dir, "#{binary_name}-builds.yml")
 builds       = YAML.load_file(builds_path)
 latest_build = builds[binary_name].shift
-version = builds['version']
 
 unless latest_build
   puts "There are no new builds for #{binary_name} requested."
@@ -23,8 +22,8 @@ unless latest_build
 end
 
 if binary_name == "composer" then
-  download_url = "https://getcomposer.org/download/#{version}/composer.phar"
-  system("curl #{download_url} -o binary-builder/composer-#{version}.phar")
+  download_url = "https://getcomposer.org/download/#{latest_build['version']}/composer.phar"
+  system("curl #{download_url} -o binary-builder/composer-#{latest_build['version']}.phar")
   system("cp binary-builder/* binary-builder-artifacts/")
 else
   flags = "--name=#{binary_name}"
