@@ -67,9 +67,8 @@ class BuildpackManifestUpdater
         md5 = $3
         url = "https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/#{dependency}/#{dependency_filename}"
       when "composer"
-        /.*filename:\s+binary-builder\/composer-(\w*).phar.*md5:\s+(\w*)\,.*/.match(git_commit_message)
-        dependency_version = $1
-        md5 = $2
+        dependency_version = git_commit_message[/filename:\s+binary-builder\/composer-([\d\.]*).phar/, 1]
+        md5 = git_commit_message[/md5:\s+(\w+)/, 1]
         url ="https://pivotal-buildpacks.s3.amazonaws.com/php/binaries/trusty/composer/#{dependency_version}/composer.phar"
       end
       [dependency_version, url, md5]
