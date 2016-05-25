@@ -278,6 +278,9 @@ jobs:
         - task: make-rootfs
           file: buildpacks-ci/tasks/make-rootfs.yml
           privileged: true
+        - task: test-rootfs
+          file: buildpacks-ci/tasks/test-rootfs.yml
+          privileged: true
         - put: stack-s3
           params:
             from: stacks-artifacts/cflinuxfs2-(.*).tar.gz

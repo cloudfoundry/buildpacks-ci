@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -eux
+
+buildpacks-ci/scripts/start-docker
+
+pushd stacks
+  cp ../stacks-artifacts/cflinuxfs2-*.tar.gz cflinuxfs2.tar.gz
+
+  bundle -j4
+  bundle exec rspec
+popd

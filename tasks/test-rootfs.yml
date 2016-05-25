@@ -1,0 +1,10 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: stacks
+  - name: version
+  - name: stacks-artifacts
+run:
+  path: buildpacks-ci/scripts/stacks/test-rootfs
