@@ -1,7 +1,8 @@
 # encoding: utf-8
 require 'yaml'
+require_relative 'git-client'
 
-class BuildpackManifestUpdater
+class BuildpackDependencyUpdater
   attr_reader :dependency
   attr_reader :buildpack
   attr_reader :buildpack_dir
@@ -13,7 +14,7 @@ class BuildpackManifestUpdater
     @buildpack = buildpack
     @buildpack_dir = buildpack_dir
     @binary_builds_dir = binary_builds_dir
-    @dependency_version, @url, @md5 = BuildpackManifestUpdater.get_dependency_info(dependency, binary_builds_dir)
+    @dependency_version, @url, @md5 = get_dependency_info(dependency, binary_builds_dir)
   end
 
   def run!
@@ -56,22 +57,20 @@ class BuildpackManifestUpdater
     buildpack_manifest
   end
 
-  def self.get_dependency_info(dependency, binary_builds_dir)
-    Dir.chdir(binary_builds_dir) do
-      git_commit_message = `git log --format=%B -n 1 HEAD`
-      case dependency
-      when "godep"
-        /.*filename:\s+binary-builder\/(godep-(\w*)-linux-x64.tgz).*md5:\s+(\w*)\,.*/.match(git_commit_message)
-        dependency_filename = $1
-        dependency_version = $2
-        md5 = $3
-        url = "https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/#{dependency}/#{dependency_filename}"
-      when "composer"
-        dependency_version = git_commit_message[/filename:\s+binary-builder\/composer-([\d\.]*).phar/, 1]
-        md5 = git_commit_message[/md5:\s+(\w+)/, 1]
-        url ="https://pivotal-buildpacks.s3.amazonaws.com/php/binaries/trusty/composer/#{dependency_version}/composer.phar"
-      end
-      [dependency_version, url, md5]
+  def get_dependency_info(dependency, binary_builds_dir)
+    git_commit_message = GitClient.last_commit_message(binary_builds_dir)
+    case dependency
+    when "godep"
+      /.*filename:\s+binary-builder\/(godep-(\w*)-linux-x64.tgz).*md5:\s+(\w*)\,.*/.match(git_commit_message)
+      dependency_filename = $1
+      dependency_version = $2
+      md5 = $3
+      url = "https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/#{dependency}/#{dependency_filename}"
+    when "composer"
+      dependency_version = git_commit_message[/filename:\s+binary-builder\/composer-([\d\.]*).phar/, 1]
+      md5 = git_commit_message[/md5:\s+(\w+)/, 1]
+      url ="https://pivotal-buildpacks.s3.amazonaws.com/php/binaries/trusty/composer/#{dependency_version}/composer.phar"
     end
+    [dependency_version, url, md5]
   end
 end
