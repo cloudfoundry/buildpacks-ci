@@ -7,7 +7,7 @@ describe BuildpackDependencyUpdater do
   let(:buildpack_dir)     { Dir.mktmpdir }
   let(:binary_builds_dir) { Dir.mktmpdir }
 
-  subject { described_class.new(dependency, buildpack, buildpack_dir, binary_builds_dir) }
+  subject { described_class.create(dependency, buildpack, buildpack_dir, binary_builds_dir) }
 
   describe '#run!' do
     let(:manifest_file) { File.join(buildpack_dir, "manifest.yml") }

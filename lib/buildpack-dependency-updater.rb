@@ -9,6 +9,11 @@ class BuildpackDependencyUpdater
   attr_reader :binary_builds_dir
   attr_reader :dependency_version
 
+  def self.create(dependency, *args)
+    raise "Unsupported dependency" unless const_defined? dependency.capitalize
+    const_get(dependency.capitalize).new(dependency, *args)
+  end
+
   def initialize(dependency, buildpack, buildpack_dir, binary_builds_dir)
     @dependency = dependency
     @buildpack = buildpack
@@ -43,34 +48,45 @@ class BuildpackDependencyUpdater
     buildpack_manifest["dependencies"] << dependency_hash
     buildpack_manifest
   end
+end
 
-  def perform_dependency_specific_changes(buildpack_manifest, dependency)
-    if dependency == "godep"
-      buildpack_manifest["url_to_dependency_map"].delete_if {|dep| dep["name"] == dependency}
-      dependency_hash = {
-        "match"   => dependency,
-        "name"    => dependency,
-        "version" => dependency_version
-      }
-      buildpack_manifest["url_to_dependency_map"] << dependency_hash
-    end
-    buildpack_manifest
-  end
-
+class BuildpackDependencyUpdater::Godep < BuildpackDependencyUpdater
   def get_dependency_info(dependency, binary_builds_dir)
     git_commit_message = GitClient.last_commit_message(binary_builds_dir)
-    case dependency
-    when "godep"
-      /.*filename:\s+binary-builder\/(godep-(\w*)-linux-x64.tgz).*md5:\s+(\w*)\,.*/.match(git_commit_message)
-      dependency_filename = $1
-      dependency_version = $2
-      md5 = $3
-      url = "https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/#{dependency}/#{dependency_filename}"
-    when "composer"
-      dependency_version = git_commit_message[/filename:\s+binary-builder\/composer-([\d\.]*).phar/, 1]
-      md5 = git_commit_message[/md5:\s+(\w+)/, 1]
-      url ="https://pivotal-buildpacks.s3.amazonaws.com/php/binaries/trusty/composer/#{dependency_version}/composer.phar"
-    end
+
+    /.*filename:\s+binary-builder\/(godep-(\w*)-linux-x64.tgz).*md5:\s+(\w*)\,.*/.match(git_commit_message)
+    dependency_filename = $1
+    dependency_version = $2
+    md5 = $3
+    url = "https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/#{dependency}/#{dependency_filename}"
+
     [dependency_version, url, md5]
+  end
+
+  def perform_dependency_specific_changes(buildpack_manifest, dependency)
+    buildpack_manifest["url_to_dependency_map"].delete_if {|dep| dep["name"] == dependency}
+    dependency_hash = {
+      "match"   => dependency,
+      "name"    => dependency,
+      "version" => dependency_version
+    }
+    buildpack_manifest["url_to_dependency_map"] << dependency_hash
+    buildpack_manifest
+  end
+end
+
+class BuildpackDependencyUpdater::Composer < BuildpackDependencyUpdater
+  def get_dependency_info(dependency, binary_builds_dir)
+    git_commit_message = GitClient.last_commit_message(binary_builds_dir)
+
+    dependency_version = git_commit_message[/filename:\s+binary-builder\/composer-([\d\.]*).phar/, 1]
+    md5 = git_commit_message[/md5:\s+(\w+)/, 1]
+    url ="https://pivotal-buildpacks.s3.amazonaws.com/php/binaries/trusty/composer/#{dependency_version}/composer.phar"
+
+    [dependency_version, url, md5]
+  end
+
+  def perform_dependency_specific_changes(buildpack_manifest, dependency)
+    buildpack_manifest
   end
 end
