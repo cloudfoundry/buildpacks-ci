@@ -1,9 +1,9 @@
 # encoding: utf-8
 require 'spec_helper'
 require 'yaml'
-require_relative '../../lib/buildpack-manifest-updater'
+require_relative '../../lib/buildpack-dependency-updater'
 
-describe BuildpackManifestUpdater do
+describe BuildpackDependencyUpdater do
   let(:buildpack_dir)     { Dir.mktmpdir }
   let(:binary_builds_dir) { Dir.mktmpdir }
 
@@ -45,7 +45,10 @@ MANIFEST
         File.open(manifest_file, "w") do |file|
           file.write buildpack_manifest_contents
         end
-        allow(described_class).to receive(:get_dependency_info).and_return([expected_version, dep_url, "md5-mocked"])
+        allow(GitClient).to receive(:last_commit_message).and_return <<-COMMIT
+Build godep - #{expected_version}
+filename: binary-builder/godep-#{expected_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+        COMMIT
       end
 
       it "updates the specified buildpack manifest dependency with the specified version" do
@@ -56,10 +59,11 @@ MANIFEST
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(expected_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/path-to-built-binary")
-        expect(dependency_in_manifest["md5"]).to eq("md5-mocked")
+        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/godep/godep-v65-linux-x64.tgz")
+        expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
       end
     end
+
     context("composer") do
       let(:dependency)        { "composer" }
       let(:buildpack)         { "php" }
@@ -86,7 +90,10 @@ MANIFEST
         File.open(manifest_file, "w") do |file|
           file.write buildpack_manifest_contents
         end
-        allow(described_class).to receive(:get_dependency_info).and_return([expected_version, dep_url, "md5-mocked"])
+        allow(GitClient).to receive(:last_commit_message).and_return <<-COMMIT
+Build composer - #{expected_version}
+filename: binary-builder/composer-#{expected_version}.phar, md5: 05d30d20be1c94c9edc02756420a7d10, sha256: 7f26efee06de5a1a061b6b1e330f5acc9ee69976d1551118c45b21f358cbc332
+        COMMIT
       end
 
       it "updates the specified buildpack manifest dependency with the specified version" do
@@ -95,8 +102,8 @@ MANIFEST
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(expected_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/path-to-built-binary")
-        expect(dependency_in_manifest["md5"]).to eq("md5-mocked")
+        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/php/binaries/trusty/composer/1.1.0/composer.phar")
+        expect(dependency_in_manifest["md5"]).to eq("05d30d20be1c94c9edc02756420a7d10")
       end
     end
  end
