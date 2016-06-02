@@ -13,23 +13,23 @@ resources:
   - name: buildpacks-ci
     type: git
     source:
-      uri: https://github.com/cloudfoundry/buildpacks-ci
+      uri: {{buildpacks-ci-git-uri-public}}
   - name: new-releases
     type: git
     source:
-      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      uri: {{buildpacks-ci-git-uri}}
       branch: new-release-notifications
       private_key: {{buildpacks-ci-private-key}}
   - name: new-cves
     type: git
     source:
-      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      uri: {{buildpacks-ci-git-uri}}
       branch: new-cve-notifications
       private_key: {{buildpacks-ci-private-key}}
   - name: new-buildpack-cves
     type: git
     source:
-      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      uri: {{buildpacks-ci-git-uri}}
       branch: new-buildpack-cve-notifications
       private_key: {{buildpacks-ci-private-key}}
   - name: stacks

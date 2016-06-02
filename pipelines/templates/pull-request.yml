@@ -11,11 +11,11 @@ resources:
       branch: resource-pools
       pool: cf-edge-environments
       private_key: {{buildpacks-ci-private-key}}
-      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      uri: {{buildpacks-ci-git-uri}}
   - name: buildpacks-ci
     type: git
     source:
-      uri: https://github.com/cloudfoundry/buildpacks-ci
+      uri: {{buildpacks-ci-git-uri-public}}
   - name: deployments-buildpacks
     type: git
     source:

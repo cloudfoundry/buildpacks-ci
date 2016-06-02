@@ -3,16 +3,16 @@ resources:
   - name: buildpacks-ci
     type: git
     source:
-      uri: https://github.com/cloudfoundry/buildpacks-ci
+      uri: {{buildpacks-ci-git-uri-public}}
   - name: deployments-buildpacks
     type: git
     source:
-      uri: git@github.com:pivotal-cf/deployments-buildpacks
+      uri: {{deployments-git-url}}
       private_key: {{deployments-private-key}}
   - name: buildpack-packager
     type: git
     source:
-      uri: git@github.com:cloudfoundry/buildpack-packager.git
+      uri: {{buildpack-packager-git-uri}}
       branch: master
       private_key: {{buildpack-packager-private-key}}
   - name: buildpack-packager-github-release
@@ -24,7 +24,7 @@ resources:
   - name: machete
     type: git
     source:
-      uri: git@github.com:cloudfoundry/machete.git
+      uri: {{machete-git-uri}}
       branch: master
       private_key: {{machete-private-key}}
   - name: machete-github-release
@@ -40,7 +40,7 @@ resources:
   - name: cf-release
     type: git
     source:
-      uri: https://github.com/cloudfoundry/cf-release
+      uri: {{cf-release-git-uri}}
   - name: nanny-time-resource
     type: time
     source:
