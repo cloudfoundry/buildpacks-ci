@@ -4,7 +4,7 @@ resources:
   - name: buildpacks-ci
     type: git
     source:
-      uri: https://github.com/cloudfoundry/buildpacks-ci
+      uri: {{buildpacks-ci-git-uri-public}}
   - name: bosh-lite
     type: git
     source:
@@ -17,7 +17,7 @@ resources:
   - name: cf-release
     type: git
     source:
-      uri: https://github.com/cloudfoundry/cf-release
+      uri: {{cf-release-git-uri}}
       branch: develop
   - name: cf-release-develop
     type: git
