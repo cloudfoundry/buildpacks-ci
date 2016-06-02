@@ -60,14 +60,13 @@ jobs:
             put: cf-edge-<%= backend %>-environments
             params:
               release: cf-environments
+          on_failure:
+            put: <%= language %>-buildpack
+            params:
+              path: buildpack
+              status: failure
       <% end %>
-    on_success:
-      put: <%= language %>-buildpack
-      params:
-        path: buildpack
-        status: success
-    on_failure:
-      put: <%= language %>-buildpack
-      params:
-        path: buildpack
-        status: failure
+      - put: <%= language %>-buildpack
+        params:
+          path: buildpack
+          status: success
