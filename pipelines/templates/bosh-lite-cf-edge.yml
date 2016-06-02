@@ -36,11 +36,11 @@ resources:
       branch: resource-pools
       pool: {{resource-pool}}
       private_key: {{buildpacks-ci-private-key}}
-      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      uri: {{buildpacks-ci-git-uri}}
   - name: buildpacks-ci
     type: git
     source:
-      uri: https://github.com/cloudfoundry/buildpacks-ci
+      uri: {{buildpacks-ci-git-uri-public}}
   - name: machete
     type: git
     source:

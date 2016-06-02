@@ -12,21 +12,21 @@ resources:
   - name: buildpacks-ci
     type: git
     source:
-      uri: https://github.com/cloudfoundry/buildpacks-ci
+      uri: {{buildpacks-ci-git-uri-public}}
   - name: cf-edge-environments
     type: pool
     source:
       branch: resource-pools
       pool: cf-edge-environments
       private_key: {{buildpacks-ci-private-key}}
-      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      uri: {{buildpacks-ci-git-uri}}
   - name: cf-lts-environments
     type: pool
     source:
       branch: resource-pools
       pool: cf-lts-environments
       private_key: {{buildpacks-ci-private-key}}
-      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      uri: {{buildpacks-ci-git-uri}}
 
 jobs:
 <% %w(go python nodejs php hhvm ruby jruby).each do |language| %>
