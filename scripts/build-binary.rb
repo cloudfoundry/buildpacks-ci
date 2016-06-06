@@ -24,8 +24,8 @@ end
 
 if binary_name == "composer" then
   download_url = "https://getcomposer.org/download/#{latest_build['version']}/composer.phar"
-  system("curl #{download_url} -o binary-builder/composer-#{latest_build['version']}.phar")
-  system("cp binary-builder/* binary-builder-artifacts/")
+  system("curl #{download_url} -o binary-builder/composer-#{latest_build['version']}.phar") or raise "Could not download composer.phar"
+  FileUtils.cp("binary-builder/*", "binary-builder-artifacts/")
 else
   flags = "--name=#{binary_name}"
   latest_build.each_pair do |key, value|
@@ -33,10 +33,10 @@ else
   end
 
   Dir.chdir('binary-builder') do
-    system("./bin/binary-builder #{flags}")
-    system('tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/')
+    system("./bin/binary-builder #{flags}") or raise "Could not build"
+    system('tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/') or raise "Could not create tar"
   end
-  system('cp binary-builder/*.tgz binary-builder-artifacts/')
+  FileUtils.cp("binary-builder/*.tgz", "binary-builder-artifacts/")
 end
 
 ext = binary_name == "composer" ? "*.phar" : "-*.tgz"
@@ -49,7 +49,7 @@ git_msg += "\n\n[ci skip]" if builds[binary_name].empty? && ci_skip_for(binary_n
 File.write(builds_path, builds.to_yaml)
 
 Dir.chdir(builds_dir) do
-  exit system(<<-EOF)
+  exec(<<-EOF)
     git config --global user.email "cf-buildpacks-eng@pivotal.io"
     git config --global user.name "CF Buildpacks Team CI Server"
     git commit -am "#{git_msg}"
