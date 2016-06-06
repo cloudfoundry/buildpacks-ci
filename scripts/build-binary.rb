@@ -35,7 +35,9 @@ else
 
   Dir.chdir('binary-builder') do
     system("./bin/binary-builder #{flags}") or raise "Could not build"
-    system('tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/') or raise "Could not create tar"
+    if Dir.exist?("/tmp/x86_64-linux-gnu/")
+      system('tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/') or raise "Could not create tar"
+    end
   end
   FileUtils.cp_r(Dir["binary-builder/*.tgz"], "binary-builder-artifacts/")
 end
