@@ -26,7 +26,7 @@ end
 if binary_name == "composer" then
   download_url = "https://getcomposer.org/download/#{latest_build['version']}/composer.phar"
   system("curl #{download_url} -o binary-builder/composer-#{latest_build['version']}.phar") or raise "Could not download composer.phar"
-  FileUtils.cp("binary-builder/*", "binary-builder-artifacts/")
+  FileUtils.cp_r(Dir["binary-builder/*"], "binary-builder-artifacts/")
 else
   flags = "--name=#{binary_name}"
   latest_build.each_pair do |key, value|
@@ -37,7 +37,7 @@ else
     system("./bin/binary-builder #{flags}") or raise "Could not build"
     system('tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/') or raise "Could not create tar"
   end
-  FileUtils.cp("binary-builder/*.tgz", "binary-builder-artifacts/")
+  FileUtils.cp_r(Dir["binary-builder/*.tgz"], "binary-builder-artifacts/")
 end
 
 ext = binary_name == "composer" ? "*.phar" : "-*.tgz"
