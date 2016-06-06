@@ -599,9 +599,6 @@ jobs:
           params:
             BINARY_NAME: godep
           privileged: true
-        - put: build-tar
-          params:
-            from: binary-builder-artifacts/build.tgz
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary.yml
           params:
