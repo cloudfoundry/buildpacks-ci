@@ -1,7 +1,0 @@
-#!/usr/bin/env ruby
-# encoding: utf-8
-
-buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
-require "#{buildpacks_ci_dir}/lib/php-modules-checker"
-
-PHPModulesChecker.create_tracker_story
