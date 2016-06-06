@@ -3,6 +3,7 @@
 
 require 'yaml'
 require 'digest'
+require 'fileutils'
 
 def ci_skip_for(binary)
   return false if binary == "godep"
