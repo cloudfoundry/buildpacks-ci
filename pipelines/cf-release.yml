@@ -43,18 +43,18 @@ resources:
       password: {{bosh-lite-password}}
       deployment: cf-warden
       ignore_ssl: true
-  - name: diego-cf-release-cf-deployment
+  - name: cf-release-cf-deployment
     type: bosh-deployment
     source:
-      target: https://diego-cf-release.buildpacks.ci.cf-app.com:25555
+      target: https://cf-release.buildpacks.ci.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden
       ignore_ssl: true
-  - name: diego-cf-release-diego-deployment
+  - name: cf-release-diego-deployment
     type: bosh-deployment
     source:
-      target: https://diego-cf-release.buildpacks.ci.cf-app.com:25555
+      target: https://cf-release.buildpacks.ci.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden-diego
@@ -148,7 +148,7 @@ groups:
   - name: buildpacks
     jobs:
       - recreate-bosh-lite
-      - deploy-cf-and-diego-to-diego-cf-release
+      - deploy-cf-and-diego-to-cf-release
       - dats
       - ship-it
 <% supported_languages.reject{|l| l.include?('java') }.each do |language| %>
@@ -196,10 +196,10 @@ jobs:
           params:
             repository: deployments-buildpacks-artifacts
             rebase: true
-      - task: recreate-diego-cf-release-bosh-lite
+      - task: recreate-cf-release-bosh-lite
         file: buildpacks-ci/tasks/recreate-bosh-lite.yml
         params:
-          DEPLOYMENT_NAME: diego-cf-release.buildpacks.ci
+          DEPLOYMENT_NAME: cf-release.buildpacks.ci
           PASSWORD: {{bosh-lite-password}}
           BOSH_PRIVATE_KEY: {{bosh_private_key}}
           BOSH_USER: {{bosh_user}}
@@ -212,17 +212,17 @@ jobs:
           BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
           BOSH_LITE_DISK_SIZE: 100
           BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
-          BOSH_TARGET: diego-cf-release.buildpacks.ci.cf-app.com
-          BOSH_LITE_NAME: diego-cf-release.buildpacks.ci
+          BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
+          BOSH_LITE_NAME: cf-release.buildpacks.ci
         attempts: 5
         ensure:
           put: deployments-buildpacks
           params:
             repository: deployments-buildpacks-artifacts
             rebase: true
-  - name: deploy-cf-and-diego-to-diego-cf-release
+  - name: deploy-cf-and-diego-to-cf-release
     serial: true
-    serial_groups: [ diego-cf-release ]
+    serial_groups: [ cf-release ]
     plan:
       - do:
         - aggregate:
@@ -256,7 +256,7 @@ jobs:
         - task: generate-manifest
           file: buildpacks-ci/tasks/diego-make-manifest.yml
           params:
-            DEPLOYMENT_NAME: diego-cf-release.buildpacks.ci
+            DEPLOYMENT_NAME: cf-release.buildpacks.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
@@ -269,8 +269,8 @@ jobs:
             BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
             BOSH_LITE_DISK_SIZE: 100
             BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
-            BOSH_TARGET: diego-cf-release.buildpacks.ci.cf-app.com
-            BOSH_LITE_NAME: diego-cf-release.buildpacks.ci
+            BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
+            BOSH_LITE_NAME: cf-release.buildpacks.ci
           privileged: true
         - put: deployments-buildpacks
           params:
@@ -279,14 +279,14 @@ jobs:
         - task: create-cf-release
           file: buildpacks-ci/tasks/create-release.yml
           privileged: true
-        - put: diego-cf-release-cf-deployment
+        - put: cf-release-cf-deployment
           params:
-            manifest: deployments-buildpacks/deployments/diego-cf-release.buildpacks.ci/manifest.yml
+            manifest: deployments-buildpacks/deployments/cf-release.buildpacks.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
-        - put: diego-cf-release-diego-deployment
+        - put: cf-release-diego-deployment
           params:
-            manifest: deployments-buildpacks/deployments/diego-cf-release.buildpacks.ci/diego.yml
+            manifest: deployments-buildpacks/deployments/cf-release.buildpacks.ci/diego.yml
             stemcells: ['lite-stemcell/stemcell.tgz']
             releases:
               - diego-bosh-release/release.tgz
@@ -296,44 +296,44 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "cf-release deploy-cf-and-diego-to-diego-cf-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/cf-release/jobs/deploy-cf-and-diego-to-diego-cf-release"
+            text: "cf-release deploy-cf-and-diego-to-cf-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/cf-release/jobs/deploy-cf-and-diego-to-cf-release"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: dats
     serial: true
-    serial_groups: [ diego-cf-release ]
+    serial_groups: [ cf-release ]
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: cf-release
-          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+          passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: deployments-buildpacks
-          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+          passed: [ deploy-cf-and-diego-to-cf-release ]
           trigger: true
         - get: java-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+          passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: java-offline-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+          passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: go-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+          passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: nodejs-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+          passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: python-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+          passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: ruby-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+          passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: php-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+          passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: staticfile-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+          passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: binary-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-diego-cf-release ]
+          passed: [ deploy-cf-and-diego-to-cf-release ]
       - do:
         - task: dats
           file: buildpacks-ci/tasks/run-cats.yml
           params:
-            DEPLOYMENT_NAME: diego-cf-release.buildpacks.ci
+            DEPLOYMENT_NAME: cf-release.buildpacks.ci
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
@@ -347,8 +347,8 @@ jobs:
             BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
             BOSH_LITE_DISK_SIZE: 100
             BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
-            BOSH_TARGET: diego-cf-release.buildpacks.ci.cf-app.com
-            BOSH_LITE_NAME: diego-cf-release.buildpacks.ci
+            BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
+            BOSH_LITE_NAME: cf-release.buildpacks.ci
             DIEGO_DOCKER_ON: true
           privileged: true
         on_failure:
