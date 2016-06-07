@@ -2,24 +2,6 @@
 
 set -e
 
-function acceptance_test_backend {
-    case $DEPLOYMENT_NAME in
-        edge-2.buildpacks.ci)           echo -n "diego";;
-        edge-4.buildpacks.ci)           echo -n "diego";;
-        diego-stacks.buildpacks.ci)     echo -n "diego";;
-        diego-cf-release.buildpacks.ci) echo -n "diego";;
-        *)                              echo -n "dea";;
-    esac
-}
-
-function use_diego_backend {
-    if [[ `acceptance_test_backend` == "diego" ]]; then
-        echo -n true
-    else
-        echo -n false
-    fi
-}
-
 pushd deployments-buildpacks
   bundle -j4
   source ./bin/target_bosh $DEPLOYMENT_NAME
@@ -46,12 +28,12 @@ properties:
     include_services: true
     include_sso: false
     include_v3: false
-    include_diego_ssh: $(use_diego_backend)
-    include_diego_docker: $(use_diego_backend)
+    include_diego_ssh: true
+    include_diego_docker: true
     nodes: 4
-    backend: $(acceptance_test_backend)
+    backend: diego
   cc:
-    default_to_diego_backend: $(use_diego_backend)
+    default_to_diego_backend: true
 
 jobs:
 - name: api_z1
