@@ -7,5 +7,4 @@ pushd deployments-buildpacks
   . ./bin/target_bosh $DEPLOYMENT_NAME
 popd
 
-
-bosh -d deployments-buildpacks/deployments/diego-stacks.buildpacks.ci/rootfs-smoke-test.yml run errand cflinuxfs2-smoke-test
+bosh -d deployments-buildpacks/deployments/stacks.buildpacks.ci/rootfs-smoke-test.yml run errand cflinuxfs2-smoke-test
