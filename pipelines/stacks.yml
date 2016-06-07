@@ -98,11 +98,6 @@ resources:
       uri: git@github.com:cloudfoundry/cflinuxfs2-rootfs-release.git
       branch: master
       private_key: {{cflinuxfs2-rootfs-private-key}}
-  - name: cf-release
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/cf-release
-      branch: develop
   - name: diego-release
     type: git
     source:
@@ -297,78 +292,6 @@ jobs:
           put: failure-alert
           params:
             text: "stacks build-rootfs job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/build-rootfs"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: deploy-cf-to-stacks
-    serial: true
-    serial_groups: [ stacks ]
-    plan:
-      - aggregate:
-        - get: deployments-buildpacks
-          passed: [ "build-rootfs" ]
-        - get: bosh-lite
-        - get: buildpacks-ci
-        - get: diego-release
-          params:
-            submodules: none
-        - get: cf-release
-        - get: lite-stemcell
-        - get: stack-s3
-          passed: [ build-rootfs ]
-        - get: version
-          passed: [ build-rootfs ]
-          trigger: true
-        - get: receipt-s3
-          passed: [ build-rootfs ]
-        - get: stacks
-          passed: [ build-rootfs ]
-      - do:
-        - task: generate-manifest
-          file: buildpacks-ci/tasks/diego-make-manifest.yml
-          params:
-            DEPLOYMENT_NAME: stacks.buildpacks.ci
-            CI_CF_PASSWORD: {{ci-cf-password}}
-            BOSH_PRIVATE_KEY: {{bosh_private_key}}
-            BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{bosh_password}}
-            AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-            AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-            BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-            BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-            BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
-            BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
-            BOSH_LITE_DISK_SIZE: 100
-            BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
-            BOSH_TARGET: stacks.buildpacks.ci.cf-app.com
-            BOSH_LITE_NAME: stacks.buildpacks.ci
-          privileged: true
-        - put: deployments-buildpacks
-          params:
-            repository: generate-manifest-artifacts
-            rebase: true
-        - task: create-stack-release
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-              - name: cf-release
-              - name: stack-s3
-            outputs:
-              - name: cf-release-artifacts
-            run:
-              path: buildpacks-ci/scripts/stacks/create-release
-          privileged: true
-        - put: stacks-cf-deployment
-          params:
-            manifest: generate-manifest-artifacts/deployments/stacks.buildpacks.ci/manifest.yml
-            stemcells: [lite-stemcell/*.tgz]
-            releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
-        on_failure:
-          put: failure-alert
-          params:
-            text: "deploy-cf-to-stacks job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/deploy-cf-to-stacks"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -610,51 +533,6 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: cats
-    serial: true
-    serial_groups: [ stacks ]
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: deployments-buildpacks
-          passed: ['deploy-cf-to-stacks']
-        - get: stack-s3
-          passed: [ deploy-cf-to-stacks ]
-        - get: version
-          passed: [ deploy-cf-to-stacks ]
-          trigger: true
-        - get: receipt-s3
-          passed: [ deploy-cf-to-stacks ]
-        - get: stacks
-          passed: [ deploy-cf-to-stacks ]
-      - do:
-        - task: cats
-          file: buildpacks-ci/tasks/run-cats.yml
-          params:
-            DEPLOYMENT_NAME: stacks.buildpacks.ci
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-            BOSH_PRIVATE_KEY: {{bosh_private_key}}
-            BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{bosh_password}}
-            AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-            AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-            BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-            BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-            BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
-            BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
-            BOSH_LITE_DISK_SIZE: 100
-            BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
-            BOSH_TARGET: stacks.buildpacks.ci.cf-app.com
-            BOSH_LITE_NAME: stacks.buildpacks.ci
-          privileged: true
-        on_failure:
-          put: failure-alert
-          params:
-            text: "stacks cats job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/cats"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: dats
     serial: true
     serial_groups: [ diego-stacks ]
@@ -711,20 +589,16 @@ jobs:
         - get: buildpacks-ci
         - get: stack-s3
           passed:
-            - cats
             - dats
         - get: receipt-s3
           passed:
-            - cats
             - dats
         - get: stacks
           resource: stacks
           passed:
-            - cats
             - dats
         - get: version
           passed:
-            - cats
             - dats
           params: { bump: final }
         - get: cflinuxfs2-rootfs-release-version
