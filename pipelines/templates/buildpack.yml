@@ -9,11 +9,11 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
-  - name: cf-edge-diego-environments
+  - name: cf-edge-environments
     type: pool
     source:
       branch: resource-pools
-      pool: cf-edge-diego-environments
+      pool: cf-edge-environments
       private_key: {{resource-pools-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
   - name: cf-lts-environments
@@ -146,7 +146,7 @@ jobs:
     serial: true
     plan:
       - put: cf-environments
-        resource: cf-edge-diego-environments
+        resource: cf-edge-environments
         params:
           acquire: true
       - aggregate:
@@ -173,7 +173,7 @@ jobs:
             CF_EDGE: 'true'
           privileged: true
           ensure:
-            put: cf-edge-diego-environments
+            put: cf-edge-environments
             params:
               release: cf-environments
         on_failure:
@@ -303,7 +303,7 @@ jobs:
     serial: true
     plan:
       - put: cf-environments
-        resource: cf-edge-diego-environments
+        resource: cf-edge-environments
         params:
           acquire: true
       - aggregate:
@@ -337,7 +337,7 @@ jobs:
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
         ensure:
-          put: cf-edge-diego-environments
+          put: cf-edge-environments
           params:
             release: cf-environments
   - name: specs-lts-develop
