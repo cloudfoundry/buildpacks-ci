@@ -2,5 +2,8 @@
 deployment-name: lts-1.buildpacks.ci
 resource-pool: cf-lts-environments
 cf-version: 225
-generated-manifest-location: generate-manifest/cf-release/bosh-lite/manifests/cf-manifest.yml
+diego-version: 0.1441.0
+garden-linux-version: 0.327.0
+etcd-version: 18
 cf-manifest-location: deployments-buildpacks/deployments/lts-1.buildpacks.ci/manifest.yml
+diego-manifest-location: deployments-buildpacks/deployments/lts-1.buildpacks.ci/diego.yml
