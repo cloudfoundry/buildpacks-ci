@@ -141,8 +141,9 @@ jobs:
           - get: buildpacks-ci
           - get: bosh-lite
           - get: cf-bosh-release
-            version: {{cf-version}}
+            version: { version: {{cf-version}} }
           - get: diego-bosh-release
+            version: { version: {{diego-version}} }
         - aggregate:
           - task: cf-release-checkout
             file: buildpacks-ci/tasks/checkout-cf-release.yml
@@ -191,6 +192,7 @@ jobs:
           - get: buildpacks-ci
           - get: bosh-stemcell
           - get: cf-bosh-release
+            version: { version: {{cf-version}} }
         - put: cf-deployment
           params:
             manifest: {{cf-manifest-location}}
@@ -216,11 +218,11 @@ jobs:
           - get: buildpacks-ci
           - get: bosh-stemcell
           - get: diego-bosh-release
-            version: {{diego-version}}
+            version: {version: {{diego-version}}}
           - get: garden-linux-bosh-release
-            version: {{garden-linux-version}}
+            version: {version: {{garden-linux-version}}}
           - get: etcd-bosh-release
-            version: {{etcd-version}}
+            version: {version: {{etcd-version}}}
         - put: diego-deployment
           params:
             manifest: {{diego-manifest-location}}
