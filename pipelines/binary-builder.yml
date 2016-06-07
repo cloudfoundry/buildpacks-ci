@@ -114,11 +114,11 @@ resources:
       ignore_paths:
         - VERSION
         - CHANGELOG
-  - name: cf-edge-diego-environments
+  - name: cf-edge-environments
     type: pool
     source:
       branch: resource-pools
-      pool: cf-edge-diego-environments
+      pool: cf-edge-environments
       private_key: {{resource-pools-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
   - name: godep-new-releases
@@ -546,7 +546,7 @@ jobs:
             params:
               DEPENDENCY: composer
         - put: cf-environments
-          resource: cf-edge-diego-environments
+          resource: cf-edge-environments
           params:
             acquire: true
         - do:
@@ -572,7 +572,7 @@ jobs:
               repository: buildpack-artifacts
               rebase: true
           ensure:
-            put: cf-edge-diego-environments
+            put: cf-edge-environments
             params:
               release: cf-environments
         on_failure:
@@ -657,7 +657,7 @@ jobs:
             params:
               DEPENDENCY: godep
         - put: cf-environments
-          resource: cf-edge-diego-environments
+          resource: cf-edge-environments
           params:
             acquire: true
         - do:
@@ -683,7 +683,7 @@ jobs:
               repository: buildpack-artifacts
               rebase: true
           ensure:
-            put: cf-edge-diego-environments
+            put: cf-edge-environments
             params:
               release: cf-environments
         on_failure:

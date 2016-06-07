@@ -5,11 +5,11 @@ resources:
       access_token: {{buildpacks-github-token}}
       repo: cloudfoundry/<%= language %>-buildpack
       base_url: https://buildpacks.ci.cf-app.com
-  - name: cf-edge-diego-environments
+  - name: cf-edge-environments
     type: pool
     source:
       branch: resource-pools
-      pool: cf-edge-diego-environments
+      pool: cf-edge-environments
       private_key: {{resource-pools-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
   - name: buildpacks-ci
@@ -38,7 +38,7 @@ jobs:
         status: pending
     - do:
       - put: cf-environments
-        resource: cf-edge-diego-environments
+        resource: cf-edge-environments
         params:
           acquire: true
       - task: rspec
@@ -49,7 +49,7 @@ jobs:
           CF_PASSWORD: {{ci-cf-password}}
         privileged: true
         ensure:
-          put: cf-edge-diego-environments
+          put: cf-edge-environments
           params:
             release: cf-environments
       on_success:
