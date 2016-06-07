@@ -142,7 +142,7 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: buildpack-CF-edge-diego-master
+  - name: specs-edge-master
     serial: true
     plan:
       - put: cf-environments
@@ -179,11 +179,11 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "<%= language %>-buildpack CF-edge-diego-master job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/buildpack-CF-edge-diego-master"
+            text: "<%= language %>-buildpack specs-edge-master job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/specs-edge-master"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: buildpack-CF-LTS-master
+  - name: specs-lts-master
     serial: true
     plan:
       - put: cf-environments
@@ -219,7 +219,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "<%= language %>-buildpack CF-LTS-master job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/buildpack-CF-LTS-master"
+            text: "<%= language %>-buildpack specs-lts-master job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/specs-lts-master"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -230,10 +230,10 @@ jobs:
         - get: buildpacks-ci
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
-          passed: [ "buildpack-CF-LTS-master", "buildpack-CF-edge-diego-master"]
+          passed: [ "specs-lts-master", "specs-edge-master"]
           trigger: true
         - get: buildpack
-          passed: [ "buildpack-CF-LTS-master", "buildpack-CF-edge-diego-master" ]
+          passed: [ "specs-lts-master", "specs-edge-master" ]
           resource: buildpack-master
           trigger: true
       - task: check tag not already added
@@ -299,7 +299,7 @@ jobs:
           PIVNET_PRODUCT_NAME: {{pivnet-product-name}}
           GITHUB_URL: https://github.com/cloudfoundry/<%= language %>-buildpack
         privileged: true
-  - name: edge-diego
+  - name: specs-edge-develop
     serial: true
     plan:
       - put: cf-environments
@@ -332,7 +332,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "<%= language %>-buildpack edge-diego job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/edge-diego"
+            text: "<%= language %>-buildpack specs-edge-develop job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/specs-edge-develop"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -340,7 +340,7 @@ jobs:
           put: cf-edge-diego-environments
           params:
             release: cf-environments
-  - name: buildpack-CF-LTS
+  - name: specs-lts-develop
     serial: true
     plan:
       - put: cf-environments
@@ -370,7 +370,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "<%= language %>-buildpack CF-LTS job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/buildpack-CF-LTS"
+            text: "<%= language %>-buildpack specs-lts-develop job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/specs-lts-develop"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
