@@ -13,13 +13,6 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
-  - name: cf-edge-dea-environments
-    type: pool
-    source:
-      branch: resource-pools
-      pool: cf-edge-dea-environments
-      private_key: {{resource-pools-private-key}}
-      uri: git@github.com:cloudfoundry/buildpacks-ci.git
   - name: cf-edge-diego-environments
     type: pool
     source:
@@ -37,7 +30,7 @@ resources:
 
 jobs:
 <% %w(go python nodejs php hhvm ruby jruby).each do |language| %>
-  - name: brats-<%= language %>-CF-LTS
+  - name: brats-<%= language %>-lts
     serial: true
     plan:
       - put: cf-environments
@@ -60,30 +53,7 @@ jobs:
           put: cf-lts-environments
           params:
             release: cf-environments
-  - name: brats-<%= language %>-CF-edge-dea
-    serial: true
-    plan:
-      - put: cf-environments
-        resource: cf-edge-dea-environments
-        params:
-          acquire: true
-        timeout: 3h
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        params:
-          LANGUAGE: <%= language %>
-          CI_CF_USERNAME: {{ci-cf-username}}
-          CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-        ensure:
-          put: cf-edge-dea-environments
-          params:
-            release: cf-environments
-  - name: brats-<%= language %>-CF-edge-diego
+  - name: brats-<%= language %>-edge
     serial: true
     plan:
       - put: cf-environments
@@ -107,30 +77,7 @@ jobs:
           params:
             release: cf-environments
 <% end %>
-  - name: brats-safe-CF-edge-dea
-    serial: true
-    plan:
-      - put: cf-environments
-        resource: cf-edge-dea-environments
-        params:
-          acquire: true
-        timeout: 3h
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        params:
-          LANGUAGE: safe
-          CI_CF_USERNAME: {{ci-cf-username}}
-          CI_CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-        ensure:
-          put: cf-edge-dea-environments
-          params:
-            release: cf-environments
-  - name: brats-safe-CF-edge-diego
+  - name: brats-safe-edge
     serial: true
     plan:
       - put: cf-environments
@@ -151,5 +98,28 @@ jobs:
         privileged: true
         ensure:
           put: cf-edge-diego-environments
+          params:
+            release: cf-environments
+  - name: brats-safe-lts
+    serial: true
+    plan:
+      - put: cf-environments
+        resource: cf-lts-environments
+        params:
+          acquire: true
+        timeout: 3h
+      - aggregate:
+        - get: buildpacks-ci
+        - get: brats
+        - {get: brats-time-resource, trigger: true}
+      - task: bin-tests
+        file: buildpacks-ci/tasks/brats.yml
+        params:
+          LANGUAGE: safe
+          CI_CF_USERNAME: {{ci-cf-username}}
+          CI_CF_PASSWORD: {{ci-cf-password}}
+        privileged: true
+        ensure:
+          put: cf-lts-environments
           params:
             release: cf-environments
