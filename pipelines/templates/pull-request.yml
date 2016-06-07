@@ -5,13 +5,6 @@ resources:
       access_token: {{buildpacks-github-token}}
       repo: cloudfoundry/<%= language %>-buildpack
       base_url: https://buildpacks.ci.cf-app.com
-  - name: cf-edge-dea-environments
-    type: pool
-    source:
-      branch: resource-pools
-      pool: cf-edge-dea-environments
-      private_key: {{resource-pools-private-key}}
-      uri: git@github.com:cloudfoundry/buildpacks-ci.git
   - name: cf-edge-diego-environments
     type: pool
     source:
@@ -43,10 +36,9 @@ jobs:
       params:
         path: buildpack
         status: pending
-    <% %w(dea diego).each do |backend| %>
     - do:
       - put: cf-environments
-        resource: cf-edge-<%= backend %>-environments
+        resource: cf-edge-diego-environments
         params:
           acquire: true
       - task: rspec
@@ -57,10 +49,9 @@ jobs:
           CF_PASSWORD: {{ci-cf-password}}
         privileged: true
         ensure:
-          put: cf-edge-<%= backend %>-environments
+          put: cf-edge-diego-environments
           params:
             release: cf-environments
-    <% end %>
       on_success:
         put: <%= language %>-buildpack
         params:
