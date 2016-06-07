@@ -27,39 +27,39 @@ jobs:
     public: true
     serial: true
     plan:
-    - get: buildpacks-ci
-    - get: deployments-buildpacks
-    - get: buildpack
-      resource: <%= language %>-buildpack
-      trigger: true
-    - put: <%= language %>-buildpack
-      params:
-        path: buildpack
-        status: pending
-    - do:
-      - put: cf-environments
-        resource: cf-edge-environments
+      - get: buildpacks-ci
+      - get: deployments-buildpacks
+      - get: buildpack
+        resource: <%= language %>-buildpack
+        trigger: true
+      - put: <%= language %>-buildpack
         params:
-          acquire: true
-      - task: rspec
-        file: buildpacks-ci/tasks/test-buildpack.yml
-        params:
-          STACKS: cflinuxfs2
-          COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-          CF_PASSWORD: {{ci-cf-password}}
-        privileged: true
-        ensure:
-          put: cf-edge-environments
+          path: buildpack
+          status: pending
+      <% %w(dea diego).each do |backend| %>
+      - do:
+        - put: cf-environments
+          resource: cf-edge-<%= backend %>-environments
           params:
-            release: cf-environments
-      on_success:
-        put: <%= language %>-buildpack
+            acquire: true
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack.yml
+          params:
+            STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+          ensure:
+            put: cf-edge-<%= backend %>-environments
+            params:
+              release: cf-environments
+          on_failure:
+            put: <%= language %>-buildpack
+            params:
+              path: buildpack
+              status: failure
+      <% end %>
+      - put: <%= language %>-buildpack
         params:
           path: buildpack
           status: success
-      on_failure:
-        put: <%= language %>-buildpack
-        params:
-          path: buildpack
-          status: failure
-
