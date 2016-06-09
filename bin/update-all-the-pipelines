@@ -1,15 +1,22 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
+require 'yaml'
+
 raise '`brew install lastpass-cli` is required' if `which lpass` == ''
+
+flyrc  = YAML.load_file(File.expand_path('~/.flyrc'))
+target_name="buildpacks"
+target = flyrc['targets'][target_name]
+concourse_url= target['api']
 
 def header(msg)
   print '*' * 10
   puts " #{msg}"
 end
 
-def set_pipeline(name:, cmd:, load: [])
-  puts system(%{bash -c "fly -t buildpacks set-pipeline \
+def set_pipeline(target_name:,name:, cmd:, load: [])
+  puts system(%{bash -c "fly -t #{target_name} set-pipeline \
     -p #{name} \
     -c <(#{cmd}) \
     -l <(lpass show 'Shared-Buildpacks/concourse-private.yml' --notes && lpass show 'Shared-Buildpacks/deployments-buildpacks.yml' --notes) \
@@ -21,7 +28,7 @@ header('For standard pipelines')
 Dir['pipelines/*.yml'].each do |filename|
   name = File.basename(filename, '.yml')
   puts "   #{name} pipeline"
-  set_pipeline(name: name, cmd: "erb #{filename}")
+  set_pipeline(target_name: target_name,name: name, cmd: "erb concourse_url=#{concourse_url} #{filename}")
 end
 
 header('For bosh-lite pipelines')
@@ -37,7 +44,7 @@ Dir['config/bosh-lite/*.yml'].each do |filename|
   puts "   #{deployment_name} bosh-lite"
   set_pipeline(
     name: deployment_name,
-    cmd: "erb deployment_name=#{deployment_name} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
+    cmd: "erb deployment_name=#{deployment_name} concourse_url=#{concourse_url} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
     load: [filename]
   )
 end
@@ -48,7 +55,7 @@ Dir['config/buildpack/*.yml'].each do |filename|
   puts "   #{language} buildpack"
   set_pipeline(
     name: "#{language}-buildpack",
-    cmd: "erb language=#{language} pipelines/templates/buildpack.yml",
+    cmd: "erb language=#{language} concourse_url=#{concourse_url} pipelines/templates/buildpack.yml",
     load: [filename]
   )
 end
@@ -59,7 +66,7 @@ Dir['config/buildpack/*.yml'].each do |filename|
   puts "   #{language} pull-request"
   set_pipeline(
     name: "#{language}-pull-request",
-    cmd: "erb language=#{language} pipelines/templates/pull-request.yml"
+    cmd: "erb language=#{language} concourse_url=#{concourse_url} pipelines/templates/pull-request.yml"
   )
 end
 
