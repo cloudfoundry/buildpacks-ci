@@ -143,14 +143,14 @@ resources:
     type: github-release
     source:
       drafts: true
-      user: cloudfoundry
+      user: {{buildpacks-github-org}}
       repository: stacks
       access_token: {{buildpacks-github-token}}
   - name: cflinuxfs2-rootfs-github-release
     type: github-release
     source:
       drafts: false
-      user: cloudfoundry
+      user: {{buildpacks-github-org}}
       repository: cflinuxfs2-rootfs-release
       access_token: {{buildpacks-github-token}}
   - name: new-cves

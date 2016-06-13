@@ -30,13 +30,13 @@ resources:
   - name: buildpack-packager
     type: github-release
     source:
-      user: cloudfoundry
+      user: {{buildpacks-github-org}}
       repository: buildpack-packager
       access_token: {{buildpacks-github-token}}
   - name: machete
     type: github-release
     source:
-      user: cloudfoundry
+      user: {{buildpacks-github-org}}
       repository: machete
       access_token: {{buildpacks-github-token}}
   - name: buildpack-develop
@@ -71,7 +71,7 @@ resources:
   - name: buildpack-github-release
     type: github-release
     source:
-      user: cloudfoundry
+      user: {{buildpacks-github-org}}
       repository: <%= language %>-buildpack
       access_token: {{buildpacks-github-token}}
   - name: buildpack-checksums
