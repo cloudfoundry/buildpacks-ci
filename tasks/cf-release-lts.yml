@@ -1,9 +1,0 @@
----
-platform: linux
-image: docker:///cfbuildpacks/ci
-run:
-  path: bash
-  args:
-    - -c
-    - "git clone --branch v225 --depth 1 https://github.com/cloudfoundry/cf-release . && ./update"
-
