@@ -18,7 +18,7 @@ resources:
   - name: buildpack-packager-github-release
     type: github-release
     source:
-      user: cloudfoundry
+      user: {{buildpacks-github-org}}
       repository: buildpack-packager
       access_token: {{buildpacks-github-token}}
   - name: machete
@@ -30,7 +30,7 @@ resources:
   - name: machete-github-release
     type: github-release
     source:
-      user: cloudfoundry
+      user: {{buildpacks-github-org}}
       repository: machete
       access_token: {{buildpacks-github-token}}
   - name: compile-extensions
