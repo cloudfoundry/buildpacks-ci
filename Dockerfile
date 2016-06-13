@@ -59,3 +59,8 @@ RUN gem install bosh_cli bosh_cli_plugin_micro rake bundler
 #install fly-cli
 RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly
 RUN chmod +x /usr/local/bin/fly
+
+# git-hooks and git-secrets
+RUN curl -L https://github.com/git-hooks/git-hooks/releases/download/v1.1.3/git-hooks_linux_amd64.tar.gz | tar -zxf - --to-stdout > /usr/local/bin/git-hooks
+RUN chmod 755 /usr/local/bin/git-hooks
+RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make install
