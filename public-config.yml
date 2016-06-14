@@ -1,4 +1,5 @@
 # This file holds public credentials (like github uri, github organization) to ease creation of a new pipeline instance.
+machete-git-uri-public: https://github.com/cloudfoundry/machete.git
 buildpacks-github-org: cloudfoundry
 buildpacks-binaries-s3-bucket: pivotal-buildpacks
 domain_name: cf-app.com
