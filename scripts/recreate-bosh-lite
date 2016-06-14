@@ -10,10 +10,39 @@ bundle install -j4
 export BOSH_LITE_PRIVATE_KEY=$(pwd)/keys/bosh.pem
 
 cd deployments/$DEPLOYMENT_NAME
-export VAGRANT_CWD=$(pwd)
-rm -f .vagrant/machines/default/aws/elastic_ip
-vagrant destroy -f
-vagrant up --provider=aws
+if [ "$IAAS" = "aws" ] || [ -z "$IAAS" ]; then
+  export VAGRANT_CWD=$(pwd)
+  rm -f .vagrant/machines/default/aws/elastic_ip
+  vagrant destroy -f
+  vagrant up --provider=aws
+elif [ "$IAAS" = "azure" ]; then
+  # Set up BOSH user and password for Azure BOSH, currently bosh-lite user and password
+  BOSH_USER_TO_RESTORE=$BOSH_USER
+  BOSH_PASSWORD_TO_RESTORE=$BOSH_PASSWORD
+  export BOSH_USER=$AZURE_BOSH_USER
+  export BOSH_PASSWORD=$AZURE_BOSH_PASSWORD
+
+  # Clean up and destroy old bosh-lite VM
+  BOSH_TARGET=bosh.buildpacks-azure.ci.cf-app.com ../../bin/target_bosh concourse-azure
+  echo "yes" | bosh delete deployment bosh-lite
+
+  # Boot up new bosh-lite VM
+  # Use correct director uuid in bosh-lite manifest
+  sed -i "s|^director_uuid:.*$|director_uuid: $(bosh status --uuid)|" bosh-lite/bosh-lite.yml
+
+  bosh deployment bosh-lite/bosh-lite.yml
+  echo "yes" | bosh deploy
+
+  # Attach bosh-lite cf-release IP to bosh-lite, made unnecessary by specifying that IP in the bosh-lite manifest vip network?
+  #npm install azure-cli -g
+  #ln -s  /usr/bin/nodejs /usr/bin/node
+  #azure login --username $AZURE_CLIENT_ID --password $AZURE_CLIENT_PASSWORD --service-principal --tenant $AZURE_TENANT_ID --environment $AZURE_ENVIRONMENT
+  #azure config mode arm
+  #azure network nic set -g $AZURE_RESOURCE_GROUP -n $AZURE_CF_RELEASE_NIC -a $AZURE_CF_RELEASE_IP
+  
+  export BOSH_USER=$BOSH_USER_TO_RESTORE
+  export BOSH_PASSWORD=$BOSH_PASSWORD_TO_RESTORE
+fi
 
 git add -A
 git commit -m "recreated deployment $DEPLOYMENT_NAME"
