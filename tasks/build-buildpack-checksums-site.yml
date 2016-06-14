@@ -16,6 +16,7 @@ run:
       set -ex
       pushd buildpack-checksums
         gem install bundler
+        bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
         bundle
         bundle exec ./generate.rb ./final_site
         git add -A

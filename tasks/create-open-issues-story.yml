@@ -12,6 +12,7 @@ run:
     - -c
     - |
       cd buildpacks-ci
+      bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
       bundle
       bundle exec ./scripts/notifications/create-open-issues-story
 params:

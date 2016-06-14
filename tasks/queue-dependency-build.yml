@@ -16,6 +16,7 @@ run:
     - -c
     - |
       pushd buildpacks-ci
+        bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
         bundle
         bundle exec ./scripts/notifications/queue-dependency-build
       popd
