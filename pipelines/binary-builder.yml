@@ -93,7 +93,7 @@ resources:
   - name: <%= language %>-buildpack
     type: git
     source:
-      uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
       ignore_paths:
