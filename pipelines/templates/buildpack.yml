@@ -48,7 +48,7 @@ resources:
   - name: buildpack-develop
     type: git
     source:
-      uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
       ignore_paths:
@@ -57,7 +57,7 @@ resources:
   - name: buildpack-master
     type: git
     source:
-      uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: master
   - name: pivotal-buildpack

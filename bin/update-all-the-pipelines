@@ -45,7 +45,7 @@ header('For standard pipelines')
 Dir['pipelines/*.yml'].each do |filename|
   name = File.basename(filename, '.yml')
   puts "   #{name} pipeline"
-  set_pipeline(target_name: target_name,name: name, cmd: "erb concourse_url=#{concourse_url} #{filename}")
+  set_pipeline(target_name: target_name,name: name, cmd: "erb concourse_url=#{concourse_url} organization=#{full_config["buildpacks-github-org"]} #{filename}")
 end
 
 header('For bosh-lite pipelines')
@@ -75,7 +75,7 @@ Dir['config/buildpack/*.yml'].each do |filename|
   set_pipeline(
     target_name: target_name,
     name: "#{language}-buildpack",
-    cmd: "erb language=#{language} concourse_url=#{concourse_url} pipelines/templates/buildpack.yml",
+    cmd: "erb language=#{language} concourse_url=#{concourse_url} organization=#{full_config["buildpacks-github-org"]} pipelines/templates/buildpack.yml",
     load: [filename]
   )
 end
@@ -87,7 +87,7 @@ Dir['config/buildpack/*.yml'].each do |filename|
   set_pipeline(
     target_name: target_name,
     name: "#{language}-pull-request",
-    cmd: "erb language=#{language} concourse_url=#{concourse_url} pipelines/templates/pull-request.yml"
+    cmd: "erb language=#{language} concourse_url=#{concourse_url} organization=#{full_config["buildpacks-github-org"]} pipelines/templates/pull-request.yml"
   )
 end
 
