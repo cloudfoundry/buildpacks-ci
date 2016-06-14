@@ -3,7 +3,7 @@
 set -ex
 
 MACHETE_VERSION=$(cat machete/version)
-NEW_VERSION_LINE="gem 'machete', git: 'https://github.com/cloudfoundry/machete', tag: 'v$MACHETE_VERSION'"
+NEW_VERSION_LINE="gem 'machete', git: '$MACHETE_REPOSITORY', tag: 'v$MACHETE_VERSION'"
 
 pushd buildpack
   sed -i "s|^gem 'machete'.*$|$NEW_VERSION_LINE|" cf.Gemfile
