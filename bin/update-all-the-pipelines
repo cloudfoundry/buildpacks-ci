@@ -26,6 +26,8 @@ target_name="buildpacks"
 target = flyrc['targets'][target_name]
 concourse_url= target['api']
 
+PIPELINE_PREFIX = ENV['PIPELINE_PREFIX'] || ''
+
 def header(msg)
   print '*' * 10
   puts " #{msg}"
@@ -33,7 +35,7 @@ end
 
 def set_pipeline(target_name:,name:, cmd:, load: [])
   puts system(%{bash -c "fly -t #{target_name} set-pipeline \
-    -p #{name} \
+    -p #{PIPELINE_PREFIX}#{name} \
     -c <(#{cmd}) \
     -l public-config.yml \
     -l <(lpass show #{LPASS_CONCOURSE_PRIVATE} --notes && lpass show #{LPASS_DEPLOYMENTS_BUILDPACKS} --notes && lpass show #{LPASS_REPOS_PRIVATE_KEYS} --notes) \
