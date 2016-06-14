@@ -56,7 +56,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "dotnet-core-buildpack specs-edge-master job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/dotnet-core-buildpack/jobs/specs-edge-master"
+            text: "dotnet-core-buildpack specs-edge-master job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -88,7 +88,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "dotnet-core-buildpack specs-lts-master job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/dotnet-core-buildpack/jobs/specs-lts-master"
+            text: "dotnet-core-buildpack specs-lts-master job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
