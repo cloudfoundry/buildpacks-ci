@@ -22,3 +22,5 @@ run:
       bundle
       rake
       ./scripts/set-status-success
+params:
+  RUBYGEM_MIRROR:

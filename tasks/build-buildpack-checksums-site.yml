@@ -24,3 +24,5 @@ run:
       popd
 
       rsync -a buildpack-checksums/ buildpack-checksums-artifacts
+params:
+  RUBYGEM_MIRROR:

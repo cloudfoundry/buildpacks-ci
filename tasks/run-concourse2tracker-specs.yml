@@ -15,3 +15,6 @@ run:
       bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
       bundle
       bundle exec rspec
+params:
+  RUBYGEM_MIRROR:
+
