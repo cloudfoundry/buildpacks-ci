@@ -1,0 +1,333 @@
+<% supported_languages = %w(go ruby binary staticfile nodejs php python java java-offline) %>
+---
+resources:
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/buildpacks-ci
+      branch: azure-cf-release
+  - name: bosh-lite
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-lite
+  - name: diego-release
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-incubator/diego-release
+      branch: master
+  - name: cf-release
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-release
+      branch: develop
+  - name: cf-release-develop
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cf-release
+      branch: develop
+      private_key: {{cf-release-private-key}}
+  - name: lite-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+  - name: deployments-buildpacks
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/deployments-buildpacks
+      private_key: {{deployments-private-key}}
+      branch: azure-cf-release
+  - name: cf-release-deployment
+    type: bosh-deployment
+    source:
+      target: https://cf-release.buildpacks.ci.cf-app.com:25555
+      username: admin
+      password: {{bosh-lite-password}}
+      deployment: cf-warden
+      ignore_ssl: true
+  - name: cf-release-cf-deployment
+    type: bosh-deployment
+    source:
+      target: https://cf-release.buildpacks.ci.cf-app.com:25555
+      username: admin
+      password: {{bosh-lite-password}}
+      deployment: cf-warden
+      ignore_ssl: true
+  - name: cf-release-diego-deployment
+    type: bosh-deployment
+    source:
+      target: https://cf-release.buildpacks.ci.cf-app.com:25555
+      username: admin
+      password: {{bosh-lite-password}}
+      deployment: cf-warden-diego
+      ignore_ssl: true
+  - name: java-buildpack-github-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: java-buildpack
+      access_token: {{buildpacks-github-token}}
+  - name: java-offline-buildpack-github-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: java-buildpack
+      access_token: {{buildpacks-github-token}}
+  - name: go-buildpack-github-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: go-buildpack
+      access_token: {{buildpacks-github-token}}
+  - name: python-buildpack-github-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: python-buildpack
+      access_token: {{buildpacks-github-token}}
+  - name: nodejs-buildpack-github-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: nodejs-buildpack
+      access_token: {{buildpacks-github-token}}
+  - name: ruby-buildpack-github-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: ruby-buildpack
+      access_token: {{buildpacks-github-token}}
+  - name: php-buildpack-github-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: php-buildpack
+      access_token: {{buildpacks-github-token}}
+  - name: staticfile-buildpack-github-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: staticfile-buildpack
+      access_token: {{buildpacks-github-token}}
+  - name: binary-buildpack-github-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: binary-buildpack
+      access_token: {{buildpacks-github-token}}
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
+  - name: buildpack-releases
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpack-releases.git
+      private_key: {{buildpack-releases-private-key}}
+      branch: master
+  - name: diego-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry-incubator/diego-release
+  - name: cflinuxfs2-rootfs-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry/cflinuxfs2-rootfs-release
+  - name: etcd-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry-incubator/etcd-release
+  - name: garden-linux-bosh-release
+    type: bosh-io-release
+    tarball: true
+    source:
+      repository: cloudfoundry-incubator/garden-linux-release
+
+groups:
+  - name: buildpacks
+    jobs:
+      - recreate-bosh-lite
+      - deploy-cf-and-diego-to-cf-release
+      - dats
+jobs:
+  - name: recreate-bosh-lite
+    serial: true
+    serial_groups: [ stacks ]
+    plan:
+      - aggregate:
+        - get: deployments-buildpacks
+        - get: buildpacks-ci
+      - task: recreate-cf-release-bosh-lite
+        file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+        params:
+          IAAS: azure
+          AZURE_CLIENT_ID: {{azure-client-id}}
+          AZURE_CLIENT_PASSWORD: {{azure-client-password}}
+          AZURE_TENANT_ID: {{azure-tenant-id}}
+          AZURE_ENVIRONMENT: {{azure-environment}}
+          AZURE_RESOURCE_GROUP: {{azure-resource-group}}
+          AZURE_CF_RELEASE_NIC: {{azure-cf-release-nic}}
+          AZURE_CF_RELEASE_IP: {{azure-cf-release-ip}}
+          AZURE_BOSH_USER: {{azure-bosh-user}}
+          AZURE_BOSH_PASSWORD: {{azure-bosh-password}}
+          DEPLOYMENT_NAME: cf-release.buildpacks-azure.ci
+          PASSWORD: {{bosh-lite-password}}
+          BOSH_PRIVATE_KEY: {{bosh_private_key}}
+          BOSH_USER: {{bosh_user}}
+          BOSH_PASSWORD: {{bosh_password}}
+          AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+          AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+          BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+          BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+          BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
+          BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
+          BOSH_LITE_DISK_SIZE: 100
+          BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+          BOSH_TARGET: cf-release.buildpacks-azure.ci.cf-app.com
+          BOSH_LITE_NAME: cf-release.buildpacks-azure.ci
+        attempts: 5
+        ensure:
+          put: deployments-buildpacks
+          params:
+            repository: deployments-buildpacks-artifacts
+            rebase: true
+  - name: deploy-cf-and-diego-to-cf-release
+    serial: true
+    serial_groups: [ cf-release ]
+    plan:
+      - do:
+        - aggregate:
+          - get: deployments-buildpacks
+            passed: [ recreate-bosh-lite ]
+            trigger: true
+          - get: buildpacks-ci
+          - get: bosh-lite
+          - get: cf-release
+          - get: diego-release
+          - get: garden-linux-bosh-release
+          - get: diego-bosh-release
+          - get: cflinuxfs2-rootfs-bosh-release
+          - get: etcd-bosh-release
+          - get: lite-stemcell
+          - get: java-buildpack-github-release
+            params:
+              globs:
+                - java-buildpack-v*.zip
+          - get: java-offline-buildpack-github-release
+            params:
+              globs:
+                - java-buildpack-offline-v*.zip
+          - get: go-buildpack-github-release
+          - get: python-buildpack-github-release
+          - get: nodejs-buildpack-github-release
+          - get: ruby-buildpack-github-release
+          - get: php-buildpack-github-release
+          - get: staticfile-buildpack-github-release
+          - get: binary-buildpack-github-release
+        - task: generate-manifest
+          file: buildpacks-ci/tasks/diego-make-manifest.yml
+          params:
+            DEPLOYMENT_NAME: cf-release.buildpacks.ci
+            CI_CF_PASSWORD: {{ci-cf-password}}
+            BOSH_PRIVATE_KEY: {{bosh_private_key}}
+            BOSH_USER: {{bosh_user}}
+            BOSH_PASSWORD: {{bosh_password}}
+            AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
+            BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
+            BOSH_LITE_DISK_SIZE: 100
+            BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+            BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
+            BOSH_LITE_NAME: cf-release.buildpacks.ci
+          privileged: true
+        - put: deployments-buildpacks
+          params:
+            repository: generate-manifest-artifacts
+            rebase: true
+        - task: create-cf-release
+          file: buildpacks-ci/tasks/create-release.yml
+          privileged: true
+        - put: cf-release-cf-deployment
+          params:
+            manifest: deployments-buildpacks/deployments/cf-release.buildpacks.ci/manifest.yml
+            stemcells: [lite-stemcell/*.tgz]
+            releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
+        - put: cf-release-diego-deployment
+          params:
+            manifest: deployments-buildpacks/deployments/cf-release.buildpacks.ci/diego.yml
+            stemcells: ['lite-stemcell/stemcell.tgz']
+            releases:
+              - diego-bosh-release/release.tgz
+              - cflinuxfs2-rootfs-bosh-release/release.tgz
+              - garden-linux-bosh-release/release.tgz
+              - etcd-bosh-release/release.tgz
+        on_failure:
+          put: failure-alert
+          params:
+            text: "cf-release deploy-cf-and-diego-to-cf-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/cf-release/jobs/deploy-cf-and-diego-to-cf-release"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: dats
+    serial: true
+    serial_groups: [ cf-release ]
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: cf-release
+          passed: [ deploy-cf-and-diego-to-cf-release ]
+        - get: deployments-buildpacks
+          passed: [ deploy-cf-and-diego-to-cf-release ]
+          trigger: true
+        - get: java-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-cf-release ]
+        - get: java-offline-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-cf-release ]
+        - get: go-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-cf-release ]
+        - get: nodejs-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-cf-release ]
+        - get: python-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-cf-release ]
+        - get: ruby-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-cf-release ]
+        - get: php-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-cf-release ]
+        - get: staticfile-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-cf-release ]
+        - get: binary-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-cf-release ]
+      - do:
+        - task: dats
+          file: buildpacks-ci/tasks/run-cats.yml
+          params:
+            DEPLOYMENT_NAME: cf-release.buildpacks.ci
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+            BOSH_PRIVATE_KEY: {{bosh_private_key}}
+            BOSH_USER: {{bosh_user}}
+            BOSH_PASSWORD: {{bosh_password}}
+            AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
+            BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
+            BOSH_LITE_DISK_SIZE: 100
+            BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+            BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
+            BOSH_LITE_NAME: cf-release.buildpacks.ci
+            DIEGO_DOCKER_ON: true
+          privileged: true
+        on_failure:
+          put: failure-alert
+          params:
+            text: "cf-release dats job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/cf-release/jobs/dats"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
