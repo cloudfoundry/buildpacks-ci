@@ -12,3 +12,4 @@ run:
   path: buildpacks-ci/scripts/machete.sh
 params:
   CF_PASSWORD:
+  RUBYGEM_MIRROR:
