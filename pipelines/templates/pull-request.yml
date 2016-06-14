@@ -24,7 +24,7 @@ resources:
   - name: deployments-buildpacks
     type: git
     source:
-      uri: git@github.com:pivotal-cf/deployments-buildpacks
+      uri: {{deployments-git-uri}}
       private_key: {{deployments-private-key}}
 
 jobs:
