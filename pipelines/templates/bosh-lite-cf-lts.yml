@@ -45,7 +45,7 @@ resources:
   - name: machete
     type: git
     source:
-      uri: https://github.com/cloudfoundry/machete.git
+      uri: {{machete-git-uri-public}}
       branch: master
   - name: cflinuxfs2-rootfs-bosh-release
     type: bosh-io-release
