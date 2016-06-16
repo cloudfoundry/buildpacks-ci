@@ -47,7 +47,7 @@ resources:
   - name: cf-release-cf-deployment
     type: bosh-deployment
     source:
-      target: https://cf-release.buildpacks.ci.cf-app.com:25555
+      target: https://cf-release.buildpacks-azure.ci.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden
@@ -55,7 +55,7 @@ resources:
   - name: cf-release-diego-deployment
     type: bosh-deployment
     source:
-      target: https://cf-release.buildpacks.ci.cf-app.com:25555
+      target: https://cf-release.buildpacks-azure.ci.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden-diego
@@ -229,7 +229,7 @@ jobs:
         - task: generate-manifest
           file: buildpacks-ci/tasks/diego-make-manifest.yml
           params:
-            DEPLOYMENT_NAME: cf-release.buildpacks.ci
+            DEPLOYMENT_NAME: cf-release.buildpacks-azure.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
@@ -242,8 +242,8 @@ jobs:
             BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
             BOSH_LITE_DISK_SIZE: 100
             BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
-            BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
-            BOSH_LITE_NAME: cf-release.buildpacks.ci
+            BOSH_TARGET: cf-release.buildpacks-azure.ci.cf-app.com
+            BOSH_LITE_NAME: cf-release.buildpacks-azure.ci.cf-app.com
           privileged: true
         - put: deployments-buildpacks
           params:
@@ -254,12 +254,12 @@ jobs:
           privileged: true
         - put: cf-release-cf-deployment
           params:
-            manifest: deployments-buildpacks/deployments/cf-release.buildpacks.ci/manifest.yml
+            manifest: deployments-buildpacks/deployments/cf-release.buildpacks-azure.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
         - put: cf-release-diego-deployment
           params:
-            manifest: deployments-buildpacks/deployments/cf-release.buildpacks.ci/diego.yml
+            manifest: deployments-buildpacks/deployments/cf-release.buildpacks-azure.ci/diego.yml
             stemcells: ['lite-stemcell/stemcell.tgz']
             releases:
               - diego-bosh-release/release.tgz
@@ -306,7 +306,7 @@ jobs:
         - task: dats
           file: buildpacks-ci/tasks/run-cats.yml
           params:
-            DEPLOYMENT_NAME: cf-release.buildpacks.ci
+            DEPLOYMENT_NAME: cf-release.buildpacks-azure.ci
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
@@ -320,8 +320,8 @@ jobs:
             BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
             BOSH_LITE_DISK_SIZE: 100
             BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
-            BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
-            BOSH_LITE_NAME: cf-release.buildpacks.ci
+            BOSH_TARGET: cf-release.buildpacks-azure.ci.cf-app.com
+            BOSH_LITE_NAME: cf-release.buildpacks-azure.ci
             DIEGO_DOCKER_ON: true
           privileged: true
         on_failure:
