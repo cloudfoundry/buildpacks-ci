@@ -36,10 +36,9 @@ jobs:
         params:
           path: buildpack
           status: pending
-      <% %w(dea diego).each do |backend| %>
       - do:
         - put: cf-environments
-          resource: cf-edge-<%= backend %>-environments
+          resource: cf-edge-environments
           params:
             acquire: true
         - task: rspec
@@ -50,7 +49,7 @@ jobs:
             CF_PASSWORD: {{ci-cf-password}}
           privileged: true
           ensure:
-            put: cf-edge-<%= backend %>-environments
+            put: cf-edge-environments
             params:
               release: cf-environments
           on_failure:
@@ -58,7 +57,6 @@ jobs:
             params:
               path: buildpack
               status: failure
-      <% end %>
       - put: <%= language %>-buildpack
         params:
           path: buildpack
