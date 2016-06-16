@@ -43,6 +43,7 @@ Dir['config/bosh-lite/*.yml'].each do |filename|
   cf_version_type = matches[1]
   puts "   #{deployment_name} bosh-lite"
   set_pipeline(
+    target_name: target_name,
     name: deployment_name,
     cmd: "erb deployment_name=#{deployment_name} concourse_url=#{concourse_url} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
     load: [filename]
@@ -54,6 +55,7 @@ Dir['config/buildpack/*.yml'].each do |filename|
   language = File.basename(filename, '.yml')
   puts "   #{language} buildpack"
   set_pipeline(
+    target_name: target_name,
     name: "#{language}-buildpack",
     cmd: "erb language=#{language} concourse_url=#{concourse_url} pipelines/templates/buildpack.yml",
     load: [filename]
@@ -65,6 +67,7 @@ Dir['config/buildpack/*.yml'].each do |filename|
   language = File.basename(filename, '.yml')
   puts "   #{language} pull-request"
   set_pipeline(
+    target_name: target_name,
     name: "#{language}-pull-request",
     cmd: "erb language=#{language} concourse_url=#{concourse_url} pipelines/templates/pull-request.yml"
   )
