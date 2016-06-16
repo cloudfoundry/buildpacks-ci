@@ -15,6 +15,8 @@ if [ "$IAAS" = "aws" ] || [ -z "$IAAS" ]; then
   rm -f .vagrant/machines/default/aws/elastic_ip
   vagrant destroy -f
   vagrant up --provider=aws
+  git add -A
+  git commit -m "recreated deployment $DEPLOYMENT_NAME"
 elif [ "$IAAS" = "azure" ]; then
   # Set up BOSH user and password for Azure BOSH, currently bosh-lite user and password
   BOSH_USER_TO_RESTORE=$BOSH_USER
@@ -43,9 +45,6 @@ elif [ "$IAAS" = "azure" ]; then
   export BOSH_USER=$BOSH_USER_TO_RESTORE
   export BOSH_PASSWORD=$BOSH_PASSWORD_TO_RESTORE
 fi
-
-git add -A
-git commit -m "recreated deployment $DEPLOYMENT_NAME"
 
 until $(curl -k --output /dev/null --silent --head --fail https://$DEPLOYMENT_NAME.cf-app.com:25555/info); do
     printf '.'
