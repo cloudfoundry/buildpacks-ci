@@ -75,6 +75,11 @@ resources:
     source:
       url: https://pecl.php.net/package/mongodb
       csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
+  - name: pecl-solr
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/solr
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
   - name: xhprof
     type: new_version_resource
     source:
@@ -161,6 +166,7 @@ jobs:
         - get: pecl-msgpack
         - get: pecl-protocolbuffers
         - get: pecl-redis
+        - get: pecl-solr
         - get: pecl-sundown
         - get: pecl-xdebug
         - get: pecl-yaf
@@ -194,6 +200,7 @@ jobs:
             - name: pecl-msgpack
             - name: pecl-protocolbuffers
             - name: pecl-redis
+            - name: pecl-solr
             - name: pecl-sundown
             - name: pecl-xdebug
             - name: pecl-yaf
