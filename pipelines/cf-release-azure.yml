@@ -34,6 +34,7 @@ resources:
     source:
       uri: git@github.com:pivotal-cf/deployments-buildpacks
       private_key: {{deployments-private-key}}
+      branch: master
   - name: cf-release-deployment
     type: bosh-deployment
     source:
