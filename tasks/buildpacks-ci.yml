@@ -15,4 +15,4 @@ run:
       cd buildpacks-ci
       ./scripts/fly-login $CI_USERNAME $CI_PASSWORD
       bundle
-      rspec
+      rspec --format documentation
