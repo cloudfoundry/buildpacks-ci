@@ -8,3 +8,4 @@ etcd-version: 18
 cf-manifest-location: deployments-buildpacks/deployments/lts-1.buildpacks-azure.ci/manifest.yml
 diego-manifest-location: deployments-buildpacks/deployments/lts-1.buildpacks-azure.ci/diego.yml
 iaas: azure
+bosh-lite-name: lts-1-azure-bosh-lite

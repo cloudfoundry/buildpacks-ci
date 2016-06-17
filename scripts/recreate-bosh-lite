@@ -24,7 +24,7 @@ elif [ "$IAAS" = "azure" ]; then
 
   # Clean up and destroy old bosh-lite VM
   BOSH_TARGET=bosh.buildpacks-azure.ci.cf-app.com ../../bin/target_bosh concourse-azure
-  echo "yes" | bosh delete deployment bosh-lite
+  echo "yes" | bosh delete deployment $AZURE_BOSH_LITE_NAME
 
   # Boot up new bosh-lite VM
   # Use correct director uuid in bosh-lite manifest
