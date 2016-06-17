@@ -5,7 +5,6 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
-      branch: azure-cf-release
   - name: bosh-lite
     type: git
     source:
@@ -35,7 +34,6 @@ resources:
     source:
       uri: git@github.com:pivotal-cf/deployments-buildpacks
       private_key: {{deployments-private-key}}
-      branch: azure-cf-release
   - name: cf-release-deployment
     type: bosh-deployment
     source:

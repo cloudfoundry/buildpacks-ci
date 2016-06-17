@@ -7,3 +7,4 @@ garden-linux-version: 0.327.0
 etcd-version: 18
 cf-manifest-location: deployments-buildpacks/deployments/lts-1.buildpacks.ci/manifest.yml
 diego-manifest-location: deployments-buildpacks/deployments/lts-1.buildpacks.ci/diego.yml
+iaas: aws
