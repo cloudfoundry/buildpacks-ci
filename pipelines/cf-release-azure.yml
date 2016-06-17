@@ -163,6 +163,7 @@ jobs:
           IAAS: azure
           AZURE_BOSH_USER: {{azure-bosh-user}}
           AZURE_BOSH_PASSWORD: {{azure-bosh-password}}
+          AZURE_BOSH_LITE_NAME: cf-release-azure-bosh-lite
           DEPLOYMENT_NAME: cf-release.buildpacks-azure.ci
           PASSWORD: {{bosh-lite-password}}
           BOSH_PRIVATE_KEY: {{bosh_private_key}}

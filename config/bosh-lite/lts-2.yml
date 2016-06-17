@@ -8,3 +8,4 @@ etcd-version: 18
 cf-manifest-location: deployments-buildpacks/deployments/lts-2.buildpacks.ci/manifest.yml
 diego-manifest-location: deployments-buildpacks/deployments/lts-2.buildpacks.ci/diego.yml
 iaas: aws
+bosh-lite-name: N/A

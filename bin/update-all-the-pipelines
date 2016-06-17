@@ -46,7 +46,7 @@ Dir['config/bosh-lite/*.yml'].each do |filename|
   set_pipeline(
     target_name: target_name,
     name: deployment_name,
-    cmd: "erb deployment_name=#{deployment_name} concourse_url=#{concourse_url} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
+    cmd: "erb deployment_name=#{deployment_name} full_deployment_name=#{full_deployment_name} concourse_url=#{concourse_url} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
     load: [filename]
   )
 end
