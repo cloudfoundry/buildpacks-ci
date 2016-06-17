@@ -161,13 +161,6 @@ jobs:
         file: buildpacks-ci/tasks/recreate-bosh-lite.yml
         params:
           IAAS: azure
-          AZURE_CLIENT_ID: {{azure-client-id}}
-          AZURE_CLIENT_PASSWORD: {{azure-client-password}}
-          AZURE_TENANT_ID: {{azure-tenant-id}}
-          AZURE_ENVIRONMENT: {{azure-environment}}
-          AZURE_RESOURCE_GROUP: {{azure-resource-group}}
-          AZURE_CF_RELEASE_NIC: {{azure-cf-release-nic}}
-          AZURE_CF_RELEASE_IP: {{azure-cf-release-ip}}
           AZURE_BOSH_USER: {{azure-bosh-user}}
           AZURE_BOSH_PASSWORD: {{azure-bosh-password}}
           DEPLOYMENT_NAME: cf-release.buildpacks-azure.ci

@@ -102,6 +102,8 @@ jobs:
           file: buildpacks-ci/tasks/recreate-bosh-lite.yml
           params:
             IAAS: {{iaas}}
+            AZURE_BOSH_USER: {{azure-bosh-user}}
+            AZURE_BOSH_PASSWORD: {{azure-bosh-password}}
             DEPLOYMENT_NAME: {{deployment-name}}
             PASSWORD: {{bosh-lite-password}}
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
