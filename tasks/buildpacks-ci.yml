@@ -12,7 +12,9 @@ run:
   args:
     - "-c"
     - |
+      set -ex
       cd buildpacks-ci
       ./scripts/fly-login $CI_USERNAME $CI_PASSWORD
       bundle
       rspec --format documentation
+      ./scripts/set-status-success
