@@ -1,6 +1,7 @@
 #!/bin/bash -l
 
 set -eux
+IAAS=${IAAS:-aws}
 
 rsync -a deployments-buildpacks/ deployments-buildpacks-artifacts
 
@@ -10,7 +11,7 @@ bundle install -j4
 export BOSH_LITE_PRIVATE_KEY=$(pwd)/keys/bosh.pem
 
 cd deployments/$DEPLOYMENT_NAME
-if [ "$IAAS" = "aws" ] || [ -z "$IAAS" ]; then
+if [ "$IAAS" = "aws" ]; then
   export VAGRANT_CWD=$(pwd)
   rm -f .vagrant/machines/default/aws/elastic_ip
   vagrant destroy -f
@@ -36,6 +37,9 @@ elif [ "$IAAS" = "azure" ]; then
 
   export BOSH_USER=$BOSH_USER_TO_RESTORE
   export BOSH_PASSWORD=$BOSH_PASSWORD_TO_RESTORE
+else
+  echo "Please specify IAAS=(aws|azure)"
+  exit 1
 fi
 
 git add -A
