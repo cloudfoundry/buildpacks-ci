@@ -163,6 +163,7 @@ jobs:
       - aggregate:
         - get: month-start
           trigger: true
+        - get: pecl-gearman
         - get: pecl-igbinary
         - get: pecl-imagick
         - get: pecl-mailparse
@@ -197,6 +198,7 @@ jobs:
           platform: linux
           image: docker:///cfbuildpacks/ci
           inputs:
+            - name: pecl-gearman
             - name: pecl-igbinary
             - name: pecl-imagick
             - name: pecl-mailparse
