@@ -29,6 +29,7 @@ jobs:
           CI_PASSWORD: {{concourse_basic_auth_password}}
           GITHUB_USERNAME: {{github-username}}
           GITHUB_PASSWORD: {{github-password}}
+          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
         privileged: true
       - put: ci-master
         params:
