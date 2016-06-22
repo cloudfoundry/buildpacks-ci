@@ -2,6 +2,7 @@
 
 set -eux
 IAAS=${IAAS:-aws}
+SCRIPT_DIR=$(pwd)/$(dirname $0)
 
 rsync -a deployments-buildpacks/ deployments-buildpacks-artifacts
 
@@ -12,9 +13,10 @@ export BOSH_LITE_PRIVATE_KEY=$(pwd)/keys/bosh.pem
 
 cd deployments/$DEPLOYMENT_NAME
 if [ "$IAAS" = "aws" ]; then
+  $SCRIPT_DIR/terminate-bosh-lite
+  rm -f .vagrant
+
   export VAGRANT_CWD=$(pwd)
-  rm -f .vagrant/machines/default/aws/elastic_ip
-  vagrant destroy -f
   vagrant up --provider=aws
 elif [ "$IAAS" = "azure" ]; then
   # Set up BOSH user and password for Azure BOSH, currently bosh-lite user and password
@@ -56,7 +58,8 @@ if bosh -u admin -p admin -t $DEPLOYMENT_NAME.cf-app.com create user admin $PASS
 else
   if [ "$IAAS" = "aws" ]; then
     echo "Deployment failed deleting instance"
-    vagrant destroy -f
+    $SCRIPT_DIR/terminate-bosh-lite
+    rm -f .vagrant
     exit 1
   fi
 fi
