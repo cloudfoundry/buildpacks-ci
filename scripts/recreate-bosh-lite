@@ -14,7 +14,7 @@ export BOSH_LITE_PRIVATE_KEY=$(pwd)/keys/bosh.pem
 cd deployments/$DEPLOYMENT_NAME
 if [ "$IAAS" = "aws" ]; then
   $SCRIPT_DIR/terminate-bosh-lite
-  rm -f .vagrant
+  rm -rf .vagrant
 
   export VAGRANT_CWD=$(pwd)
   vagrant up --provider=aws
@@ -59,7 +59,7 @@ else
   if [ "$IAAS" = "aws" ]; then
     echo "Deployment failed deleting instance"
     $SCRIPT_DIR/terminate-bosh-lite
-    rm -f .vagrant
+    rm -rf .vagrant
     exit 1
   fi
 fi
