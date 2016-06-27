@@ -16,7 +16,7 @@ describe 'When a concourse job finishes' do
 
   context 'when the resource is a git resource' do
     context 'and has commits with tracker story IDs' do
-      it 'adds a comment to that tracker story' do
+      before do
         git_dir = Dir.mktmpdir
         system(<<-EOL)
           cd #{git_dir}
@@ -26,21 +26,44 @@ describe 'When a concourse job finishes' do
           git commit -m 'some commit [#1234567]'
         EOL
 
-        client = Concourse2Tracker.new(
+        @client = Concourse2Tracker.new(
           git_path:   git_dir,
           project_id: 9.87654e05,
           api_token:  '3695'
         )
+      end
 
-        expect(client.story_id).to eq '1234567'
+      context 'and the request is successful' do
+        before do
+          @stub = stub_request(:post, 'https://www.pivotaltracker.com/services/v5/projects/987654/stories/1234567/comments')
+                 .with(body: { text: 'Concourse pipeline passed: https://buildpacks.ci.cf-app.com/builds/some_build_id' })
+                 .with(headers: { 'X-TrackerToken' => '3695', 'Content-Type' => 'application/json' })
+        end
 
-        stub = stub_request(:post, 'https://www.pivotaltracker.com/services/v5/projects/987654/stories/1234567/comments')
-               .with(body: { text: 'Concourse pipeline passed: https://buildpacks.ci.cf-app.com/builds/some_build_id' })
-               .with(headers: { 'X-TrackerToken' => '3695', 'Content-Type' => 'application/json' })
+        it 'adds a comment to that tracker story' do
+          expect(@client.story_id).to eq '1234567'
 
-        client.process!
+          @client.process!
 
-        expect(stub).to have_been_requested
+          expect(@stub).to have_been_requested
+        end
+      end
+
+      context 'and the request fails' do
+        before do
+          @stub = stub_request(:post, 'https://www.pivotaltracker.com/services/v5/projects/987654/stories/1234567/comments')
+                 .with(body: { text: 'Concourse pipeline passed: https://buildpacks.ci.cf-app.com/builds/some_build_id' })
+                 .with(headers: { 'X-TrackerToken' => '3695', 'Content-Type' => 'application/json' })
+                 .to_return(status: [500, "Internal Server Error"])
+        end
+
+        it 'adds a comment to that tracker story' do
+          expect(@client.story_id).to eq '1234567'
+
+          expect{@client.process!}.to output(/Failed with response code 500/).to_stdout
+
+          expect(@stub).to have_been_requested
+        end
       end
     end
 
