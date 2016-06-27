@@ -33,6 +33,15 @@ class Concourse2Tracker
     request['Content-Type'] = 'application/json'
     request['X-TrackerToken'] = @api_token
 
+    STDERR.puts "Posting to #{request.uri}"
+    puts "Posting to #{request.uri}"
+    STDERR.puts "Body is #{request.body}"
+    puts "Body is #{request.body}"
+    STDERR.puts "Hostname is #{create_comment_uri.hostname}"
+    puts "Hostname is #{create_comment_uri.hostname}"
+    STDERR.puts "Port is #{create_comment_uri.port}"
+    puts "Port is #{create_comment_uri.port}"
+
     response = Net::HTTP.start(create_comment_uri.hostname, create_comment_uri.port, use_ssl: true) do |http|
       http.request(request)
     end
