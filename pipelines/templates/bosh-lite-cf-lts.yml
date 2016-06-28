@@ -35,7 +35,7 @@ resources:
     source:
       branch: resource-pools
       pool: {{resource-pool}}
-      private_key: {{resource-pools-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
   - name: buildpacks-ci
     type: git

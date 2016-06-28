@@ -158,7 +158,7 @@ resources:
     source:
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       branch: new-cve-notifications
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       paths: [ ubuntu14.04.yaml ]
   - name: failure-alert
     type: slack-notification

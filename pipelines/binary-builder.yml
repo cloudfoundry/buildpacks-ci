@@ -11,69 +11,69 @@ resources:
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
   - name: nginx-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ nginx-builds.yml ]
   - name: php-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ php-builds.yml ]
   - name: php7-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ php7-builds.yml ]
   - name: node-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ node-builds.yml ]
   - name: ruby-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ ruby-builds.yml ]
   - name: jruby-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ jruby-builds.yml ]
   - name: httpd-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ httpd-builds.yml ]
   - name: python-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ python-builds.yml ]
   - name: bundler-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ bundler-builds.yml ]
   - name: build-tar
@@ -87,7 +87,7 @@ resources:
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ godep-builds.yml ]
   - name: concourse2tracker
@@ -119,27 +119,27 @@ resources:
     source:
       branch: resource-pools
       pool: cf-edge-environments
-      private_key: {{resource-pools-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
   - name: godep-new-releases
     type: git
     source:
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       branch: new-release-notifications
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       paths: [ godep.yaml ]
   - name: composer-new-releases
     type: git
     source:
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       branch: new-release-notifications
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       paths: [ composer.yaml ]
   - name: composer-builds
     type: git
     source:
       branch: binary-builds
-      private_key: {{buildpacks-ci-binary-builds-private-key}}
+      private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ composer-builds.yml ]
 
