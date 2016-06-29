@@ -48,7 +48,7 @@ resources:
       ignore_paths:
         - VERSION
         - CHANGELOG
-  - name: buildpack-master
+  - name: buildpack-master-branch
     type: git
     source:
       uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
@@ -121,7 +121,7 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-master
+          resource: buildpack-master-branch
           trigger: true
       - do:
         - task: detect-and-upload
@@ -153,7 +153,7 @@ jobs:
         - get: buildpacks-ci
         - get: buildpack
           passed: [ "detect-new-buildpack-and-upload-artifacts" ]
-          resource: buildpack-master
+          resource: buildpack-master-branch
           trigger: true
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
@@ -194,7 +194,7 @@ jobs:
         - get: buildpacks-ci
         - get: buildpack
           passed: [ "detect-new-buildpack-and-upload-artifacts" ]
-          resource: buildpack-master
+          resource: buildpack-master-branch
           trigger: true
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
@@ -234,11 +234,11 @@ jobs:
           trigger: true
         - get: buildpack
           passed: [ "specs-lts-master", "specs-edge-master" ]
-          resource: buildpack-master
+          resource: buildpack-master-branch
           trigger: true
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added.yml
-      - put: buildpack-master
+      - put: buildpack-master-branch
         params:
           repository: buildpack
           tag: buildpack/VERSION
@@ -252,7 +252,7 @@ jobs:
           resource: pivotal-buildpack-cached
           passed: [ buildpack-release ]
         - get: buildpack
-          resource: buildpack-master
+          resource: buildpack-master-branch
           passed: [ buildpack-release ]
         - get: buildpack-checksums
       - task: finalize-buildpack
@@ -283,7 +283,7 @@ jobs:
           resource: pivotal-buildpack-cached
           passed: [ buildpack-release ]
         - get: buildpack
-          resource: buildpack-master
+          resource: buildpack-master-branch
           passed: [ buildpack-release ]
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack.yml
