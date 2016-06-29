@@ -3,6 +3,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
+      branch:  {{buildpacks-ci-git-uri-public-branch}}
       paths: [ "lib/concourse2tracker-resource" ]
   - name: concourse2tracker-image
     type: docker-image
