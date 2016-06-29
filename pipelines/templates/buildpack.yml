@@ -39,7 +39,7 @@ resources:
       user: cloudfoundry
       repository: machete
       access_token: {{buildpacks-github-token}}
-  - name: buildpack
+  - name: buildpack-develop
     type: git
     source:
       uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
@@ -48,7 +48,7 @@ resources:
       ignore_paths:
         - VERSION
         - CHANGELOG
-  - name: buildpack-master-branch
+  - name: buildpack-master
     type: git
     source:
       uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
@@ -95,6 +95,7 @@ jobs:
     plan:
       - get: buildpacks-ci
       - get: buildpack
+        resource: buildpack-develop
         trigger: true
       - task: load-modules
         config:
@@ -110,7 +111,7 @@ jobs:
             args:
               - -c
               - "cd buildpack && ./bin/populate-modules-in-manifest && (git commit -am 'Updated manifest with supported PHP modules [ci skip]' || true) && cd - && rsync -a buildpack/ updated-buildpack"
-      - put: buildpack
+      - put: buildpack-develop
         params:
           repository: updated-buildpack
           rebase: true
@@ -121,7 +122,7 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-master-branch
+          resource: buildpack-master
           trigger: true
       - do:
         - task: detect-and-upload
@@ -153,7 +154,7 @@ jobs:
         - get: buildpacks-ci
         - get: buildpack
           passed: [ "detect-new-buildpack-and-upload-artifacts" ]
-          resource: buildpack-master-branch
+          resource: buildpack-master
           trigger: true
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
@@ -194,7 +195,7 @@ jobs:
         - get: buildpacks-ci
         - get: buildpack
           passed: [ "detect-new-buildpack-and-upload-artifacts" ]
-          resource: buildpack-master-branch
+          resource: buildpack-master
           trigger: true
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
@@ -234,11 +235,11 @@ jobs:
           trigger: true
         - get: buildpack
           passed: [ "specs-lts-master", "specs-edge-master" ]
-          resource: buildpack-master-branch
+          resource: buildpack-master
           trigger: true
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added.yml
-      - put: buildpack-master-branch
+      - put: buildpack-master
         params:
           repository: buildpack
           tag: buildpack/VERSION
@@ -252,7 +253,7 @@ jobs:
           resource: pivotal-buildpack-cached
           passed: [ buildpack-release ]
         - get: buildpack
-          resource: buildpack-master-branch
+          resource: buildpack-master
           passed: [ buildpack-release ]
         - get: buildpack-checksums
       - task: finalize-buildpack
@@ -283,7 +284,7 @@ jobs:
           resource: pivotal-buildpack-cached
           passed: [ buildpack-release ]
         - get: buildpack
-          resource: buildpack-master-branch
+          resource: buildpack-master
           passed: [ buildpack-release ]
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack.yml
@@ -310,6 +311,7 @@ jobs:
         - get: buildpacks-ci
         - get: brats
         - get: buildpack
+          resource: buildpack-develop
           trigger: true
       - do:
         - task: rspec
@@ -351,6 +353,7 @@ jobs:
         - get: buildpacks-ci
         - get: brats
         - get: buildpack
+          resource: buildpack-develop
           trigger: true
       - do:
         - task: rspec
@@ -387,10 +390,11 @@ jobs:
         - get: compile-extensions
           trigger: true
         - get: buildpack
+          resource: buildpack-develop
       - task: update-compile-extensions
         file: buildpacks-ci/tasks/update-compile-extensions.yml
         privileged: true
-      - put: buildpack
+      - put: buildpack-develop
         params:
           repository: buildpack-artifacts
           rebase: true
@@ -403,10 +407,11 @@ jobs:
         - get: buildpack-packager
           trigger: true
         - get: buildpack
+          resource: buildpack-develop
       - task: update-buildpack-packager
         file: buildpacks-ci/tasks/update-buildpack-packager.yml
         privileged: true
-      - put: buildpack
+      - put: buildpack-develop
         params:
           repository: buildpack-artifacts
           rebase: true
@@ -418,10 +423,11 @@ jobs:
         - get: machete
           trigger: true
         - get: buildpack
+          resource: buildpack-develop
       - task: update-machete
         file: buildpacks-ci/tasks/update-machete.yml
         privileged: true
-      - put: buildpack
+      - put: buildpack-develop
         params:
           repository: buildpack-artifacts
           rebase: true
