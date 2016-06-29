@@ -21,6 +21,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
   - name: deployments-buildpacks
     type: git
     source:
