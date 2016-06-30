@@ -90,6 +90,13 @@ resources:
       private_key: {{buildpacks-ci-private-key}}
       uri: git@github.com:cloudfoundry/buildpacks-ci.git
       paths: [ godep-builds.yml ]
+  - name: glide-builds
+    type: git
+    source:
+      branch: binary-builds
+      private_key: {{buildpacks-ci-private-key}}
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      paths: [ glide-builds.yml ]
   - name: concourse2tracker
     type: concourse2tracker
   - name: failure-alert
@@ -128,6 +135,13 @@ resources:
       branch: new-release-notifications
       private_key: {{buildpacks-ci-private-key}}
       paths: [ godep.yaml ]
+  - name: glide-new-releases
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      branch: new-release-notifications
+      private_key: {{buildpacks-ci-private-key}}
+      paths: [ glide.yaml ]
   - name: composer-new-releases
     type: git
     source:
@@ -399,7 +413,7 @@ jobs:
                 tar xzf build-tar/binary-builder-source.tgz -C /tmp
                 cd /tmp/x86_64-linux-gnu/ports/php/*/*/
                 yes n | env REPORT_EXIT_STATUS=1 make test
-<% %w(godep composer).each do |dependency| %>
+<% %w(godep composer glide).each do |dependency| %>
   - name: trigger-<%= dependency %>-build
     serial: true
     plan:
@@ -597,6 +611,76 @@ jobs:
           put: failure-alert
           params:
             text: "update-godep-in-manifest job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-godep-in-manifest"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: update-glide-in-manifest
+    serial: true
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: buildpack
+            resource: go-buildpack
+          - get: builds-out
+            passed: [ build-glide ]
+            trigger: true
+        - task: update-dependency-in-manifests
+          config:
+            platform: linux
+            image: docker:///cfbuildpacks/ci
+            inputs:
+              - name: builds-out
+              - name: buildpacks-ci
+              - name: buildpack
+            outputs:
+              - name: buildpack-artifacts
+            run:
+              path: bash
+              args:
+                - -c
+                - |
+                  pushd buildpacks-ci
+                    bundle
+                    bundle exec scripts/update-dependency-in-buildpack
+                  popd
+                  rsync -a buildpack/ buildpack-artifacts
+            params:
+              DEPENDENCY: glide
+        - put: cf-environments
+          resource: cf-edge-environments
+          params:
+            acquire: true
+        - do:
+          - task: rspec
+            config:
+              platform: linux
+              image: docker:///cfbuildpacks/ci
+              inputs:
+                - name: buildpack-artifacts
+                  path: buildpack
+                - name: buildpacks-ci
+                - name: cf-environments
+              run:
+                path: buildpacks-ci/scripts/test_buildpack
+              params:
+                STACKS: cflinuxfs2
+                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+                CF_PASSWORD: {{ci-cf-password}}
+                CF_EDGE: 'true'
+            privileged: true
+          - put: go-buildpack
+            params:
+              repository: buildpack-artifacts
+              rebase: true
+          ensure:
+            put: cf-edge-environments
+            params:
+              release: cf-environments
+        on_failure:
+          put: failure-alert
+          params:
+            text: "update-glide-in-manifest job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-glide-in-manifest"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
