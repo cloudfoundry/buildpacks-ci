@@ -7,7 +7,11 @@ SCRIPT_DIR=$(pwd)/$(dirname $0)
 rsync -a deployments-buildpacks/ deployments-buildpacks-artifacts
 
 cd deployments-buildpacks-artifacts
-bundle install -j4
+if [ "${RUBYGEM_MIRROR}" != "none" ]
+then
+    bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
+fi
+bundle install -j4 --retry 5
 . bin/target_bosh --no-target
 export BOSH_LITE_PRIVATE_KEY=$(pwd)/keys/bosh.pem
 
