@@ -399,78 +399,26 @@ jobs:
                 tar xzf build-tar/binary-builder-source.tgz -C /tmp
                 cd /tmp/x86_64-linux-gnu/ports/php/*/*/
                 yes n | env REPORT_EXIT_STATUS=1 make test
-  - name: trigger-godep-build
+<% %w(godep composer).each do |dependency| %>
+  - name: trigger-<%= dependency %>-build
     serial: true
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: new-releases
-          resource: godep-new-releases
+          resource: <%= dependency %>-new-releases
           trigger: true
         - get: binary-builds
-          resource: godep-builds
+          resource: <%= dependency %>-builds
       - task: queue-binary-build
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci
-          inputs:
-            - name: new-releases
-            - name: buildpacks-ci
-            - name: binary-builds
-          outputs:
-            - name: binary-builds-artifacts
-          run:
-            path: bash
-            args:
-              - -c
-              - |
-                pushd buildpacks-ci
-                  bundle
-                  bundle exec ./scripts/notifications/queue-dependency-build
-                popd
-                rsync -a binary-builds/ binary-builds-artifacts
-          params:
-            DEPENDENCY: godep
-      - put: godep-builds
+        file: buildpacks-ci/tasks/queue-dependency-build.yml
+        params:
+          DEPENDENCY: <%= dependency %>
+      - put: <%= dependency %>-builds
         params:
           repository: binary-builds-artifacts
           rebase: true
-  - name: trigger-composer-build
-    serial: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: new-releases
-          resource: composer-new-releases
-          trigger: true
-        - get: binary-builds
-          resource: composer-builds
-      - task: queue-binary-build
-        config:
-          platform: linux
-          image: docker:///cfbuildpacks/ci
-          inputs:
-            - name: new-releases
-            - name: buildpacks-ci
-            - name: binary-builds
-          outputs:
-            - name: binary-builds-artifacts
-          run:
-            path: bash
-            args:
-              - -c
-              - |
-                pushd buildpacks-ci
-                  bundle
-                  bundle exec ./scripts/notifications/queue-dependency-build
-                popd
-                rsync -a binary-builds/ binary-builds-artifacts
-          params:
-            DEPENDENCY: composer
-      - put: composer-builds
-        params:
-          repository: binary-builds-artifacts
-          rebase: true
+<% end %>
   - name: build-composer
     serial: true
     plan:
