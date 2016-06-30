@@ -544,7 +544,8 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: update-godep-in-manifest
+<% %w(godep glide).each do |go_buildpack_dependency| %>
+  - name: update-<%= go_buildpack_dependency %>-in-manifest
     serial: true
     plan:
       - do:
@@ -553,7 +554,7 @@ jobs:
           - get: buildpack
             resource: go-buildpack
           - get: builds-out
-            passed: [ build-godep ]
+            passed: [ build-<%= go_buildpack_dependency %> ]
             trigger: true
         - task: update-dependency-in-manifests
           config:
@@ -576,7 +577,7 @@ jobs:
                   popd
                   rsync -a buildpack/ buildpack-artifacts
             params:
-              DEPENDENCY: godep
+              DEPENDENCY: <%= go_buildpack_dependency %>
         - put: cf-environments
           resource: cf-edge-environments
           params:
@@ -610,77 +611,8 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "update-godep-in-manifest job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-godep-in-manifest"
+            text: "update-<%= go_buildpack_dependency %>-in-manifest job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-<%= go_buildpack_dependency %>-in-manifest"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: update-glide-in-manifest
-    serial: true
-    plan:
-      - do:
-        - aggregate:
-          - get: buildpacks-ci
-          - get: buildpack
-            resource: go-buildpack
-          - get: builds-out
-            passed: [ build-glide ]
-            trigger: true
-        - task: update-dependency-in-manifests
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            inputs:
-              - name: builds-out
-              - name: buildpacks-ci
-              - name: buildpack
-            outputs:
-              - name: buildpack-artifacts
-            run:
-              path: bash
-              args:
-                - -c
-                - |
-                  pushd buildpacks-ci
-                    bundle
-                    bundle exec scripts/update-dependency-in-buildpack
-                  popd
-                  rsync -a buildpack/ buildpack-artifacts
-            params:
-              DEPENDENCY: glide
-        - put: cf-environments
-          resource: cf-edge-environments
-          params:
-            acquire: true
-        - do:
-          - task: rspec
-            config:
-              platform: linux
-              image: docker:///cfbuildpacks/ci
-              inputs:
-                - name: buildpack-artifacts
-                  path: buildpack
-                - name: buildpacks-ci
-                - name: cf-environments
-              run:
-                path: buildpacks-ci/scripts/test_buildpack
-              params:
-                STACKS: cflinuxfs2
-                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-                CF_PASSWORD: {{ci-cf-password}}
-                CF_EDGE: 'true'
-            privileged: true
-          - put: go-buildpack
-            params:
-              repository: buildpack-artifacts
-              rebase: true
-          ensure:
-            put: cf-edge-environments
-            params:
-              release: cf-environments
-        on_failure:
-          put: failure-alert
-          params:
-            text: "update-glide-in-manifest job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-glide-in-manifest"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
