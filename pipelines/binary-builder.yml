@@ -418,14 +418,13 @@ jobs:
         params:
           repository: binary-builds-artifacts
           rebase: true
-<% end %>
-  - name: build-composer
+  - name: build-<%= dependency %>
     serial: true
     plan:
       - aggregate:
         - get: builds-yaml
-          resource: composer-builds
-          passed: [trigger-composer-build]
+          resource: <%= dependency %>-builds
+          passed: [trigger-<%= dependency %>-build]
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
@@ -434,12 +433,12 @@ jobs:
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary.yml
           params:
-            BINARY_NAME: composer
+            BINARY_NAME: <%= dependency %>
           privileged: true
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary.yml
           params:
-            BINARY_NAME: composer
+            BINARY_NAME: <%= dependency %>
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1
@@ -456,10 +455,11 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "binary-builder build-composer job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-composer"
+            text: "binary-builder build-<%= dependency %> job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-<%= dependency %>"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
   - name: update-composer-in-manifest
     serial: true
     plan:
@@ -527,47 +527,6 @@ jobs:
           put: failure-alert
           params:
             text: "update-composer-in-manifest job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-composer-in-manifest"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: build-godep
-    serial: true
-    plan:
-      - aggregate:
-        - get: builds-yaml
-          resource: godep-builds
-          passed: [trigger-godep-build]
-          trigger: true
-        - get: binary-builder
-          passed: [binary-builder]
-        - get: buildpacks-ci
-      - do:
-        - task: build-binary
-          file: buildpacks-ci/tasks/build-binary.yml
-          params:
-            BINARY_NAME: godep
-          privileged: true
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary.yml
-          params:
-            BINARY_NAME: godep
-            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            AWS_DEFAULT_REGION: us-east-1
-          privileged: true
-        - put: builds-out
-          params:
-            repository: builds-yaml-artifacts
-            rebase: true
-        - put: concourse2tracker
-          params:
-            api_token: {{pivotal-tracker-api-token}}
-            git_path: builds-yaml
-            project_id: {{cf-buildpacks-public-tracker-id}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "binary-builder build-godep job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-godep"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
