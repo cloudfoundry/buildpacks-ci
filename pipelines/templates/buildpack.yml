@@ -116,7 +116,7 @@ jobs:
           repository: updated-buildpack
           rebase: true
   <% end %>
-  - name: detect-new-tag-and-upload-artifacts
+  - name: detect-new-version-and-upload-artifacts
     serial: true
     plan:
       - aggregate:
@@ -139,7 +139,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "<%= language %>-buildpack detect-new-tag-and-upload-artifacts job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/detect-new-tag-and-upload-artifacts"
+            text: "<%= language %>-buildpack detect-new-version-and-upload-artifacts job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/detect-new-version-and-upload-artifacts"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -153,16 +153,16 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
-          passed: [ "detect-new-tag-and-upload-artifacts" ]
+          passed: [ "detect-new-version-and-upload-artifacts" ]
           resource: buildpack-master
           trigger: true
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
-          passed: [ "detect-new-tag-and-upload-artifacts" ]
+          passed: [ "detect-new-version-and-upload-artifacts" ]
           trigger: true
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
-          passed: [ "detect-new-tag-and-upload-artifacts" ]
+          passed: [ "detect-new-version-and-upload-artifacts" ]
           trigger: true
       - do:
         - task: rspec
@@ -194,16 +194,16 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
-          passed: [ "detect-new-tag-and-upload-artifacts" ]
+          passed: [ "detect-new-version-and-upload-artifacts" ]
           resource: buildpack-master
           trigger: true
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
-          passed: [ "detect-new-tag-and-upload-artifacts" ]
+          passed: [ "detect-new-version-and-upload-artifacts" ]
           trigger: true
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
-          passed: [ "detect-new-tag-and-upload-artifacts" ]
+          passed: [ "detect-new-version-and-upload-artifacts" ]
           trigger: true
       - do:
         - task: rspec
