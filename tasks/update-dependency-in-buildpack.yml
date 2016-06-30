@@ -1,0 +1,21 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: buildpack
+  - name: builds-out
+outputs:
+  - name: buildpack-artifacts
+run:
+  path: bash
+  args:
+    - -c
+    - |
+      pushd buildpacks-ci
+        bundle
+        bundle exec scripts/update-dependency-in-buildpack
+      popd
+      rsync -a buildpack/ buildpack-artifacts
+params:
+  DEPENDENCY:
