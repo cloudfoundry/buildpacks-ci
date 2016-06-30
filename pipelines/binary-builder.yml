@@ -486,27 +486,9 @@ jobs:
             passed: [ build-composer ]
             trigger: true
         - task: update-dependency-in-manifests
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            inputs:
-              - name: builds-out
-              - name: buildpacks-ci
-              - name: buildpack
-            outputs:
-              - name: buildpack-artifacts
-            run:
-              path: bash
-              args:
-                - -c
-                - |
-                  pushd buildpacks-ci
-                    bundle
-                    bundle exec scripts/update-dependency-in-buildpack
-                  popd
-                  rsync -a buildpack/ buildpack-artifacts
-            params:
-              DEPENDENCY: composer
+          file: buildpacks-ci/tasks/update-dependency-in-buildpack.yml
+          params:
+            DEPENDENCY: composer
         - put: cf-environments
           resource: cf-edge-environments
           params:
@@ -557,27 +539,9 @@ jobs:
             passed: [ build-<%= go_buildpack_dependency %> ]
             trigger: true
         - task: update-dependency-in-manifests
-          config:
-            platform: linux
-            image: docker:///cfbuildpacks/ci
-            inputs:
-              - name: builds-out
-              - name: buildpacks-ci
-              - name: buildpack
-            outputs:
-              - name: buildpack-artifacts
-            run:
-              path: bash
-              args:
-                - -c
-                - |
-                  pushd buildpacks-ci
-                    bundle
-                    bundle exec scripts/update-dependency-in-buildpack
-                  popd
-                  rsync -a buildpack/ buildpack-artifacts
-            params:
-              DEPENDENCY: <%= go_buildpack_dependency %>
+          file: buildpacks-ci/tasks/update-dependency-in-buildpack.yml
+          params:
+            DEPENDENCY: <%= go_buildpack_dependency %>
         - put: cf-environments
           resource: cf-edge-environments
           params:
