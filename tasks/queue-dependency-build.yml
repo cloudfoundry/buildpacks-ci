@@ -1,0 +1,21 @@
+---
+platform: linux
+image: docker:///cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: new-releases
+  - name: binary-builds
+outputs:
+  - name: binary-builds-artifacts
+run:
+  path: bash
+  args:
+    - -c
+    - |
+      pushd buildpacks-ci
+        bundle
+        bundle exec ./scripts/notifications/queue-dependency-build
+      popd
+      rsync -a binary-builds/ binary-builds-artifacts
+params:
+  DEPENDENCY:
