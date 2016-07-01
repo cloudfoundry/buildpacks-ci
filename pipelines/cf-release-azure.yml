@@ -180,6 +180,7 @@ jobs:
           BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
           BOSH_TARGET: cf-release.buildpacks-azure.ci.cf-app.com
           BOSH_LITE_NAME: cf-release.buildpacks-azure.ci
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
         attempts: 5
         ensure:
           put: deployments-buildpacks
