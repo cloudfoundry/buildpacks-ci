@@ -36,8 +36,22 @@ class BuildpackDependencyUpdater
 
   private
 
+  def get_dependency_info(dependency, binary_builds_dir)
+    git_commit_message = GitClient.last_commit_message(binary_builds_dir)
+
+    /.*filename:\s+binary-builder\/(#{dependency}-(.*)-linux-x64.tgz).*md5:\s+(\w*)\,.*/.match(git_commit_message)
+    dependency_filename = $1
+    dependency_version = $2
+    md5 = $3
+
+    url = "https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/#{dependency}/#{dependency_filename}"
+
+    [dependency_version, url, md5]
+  end
+
   def perform_dependency_update(buildpack_manifest)
     buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency}
+
     dependency_hash = {
       "name"      => dependency,
       "version"   => dependency_version,
@@ -48,22 +62,8 @@ class BuildpackDependencyUpdater
     buildpack_manifest["dependencies"] << dependency_hash
     buildpack_manifest
   end
-end
 
-class BuildpackDependencyUpdater::Godep < BuildpackDependencyUpdater
-  def get_dependency_info(dependency, binary_builds_dir)
-    git_commit_message = GitClient.last_commit_message(binary_builds_dir)
-
-    /.*filename:\s+binary-builder\/(godep-(\w*)-linux-x64.tgz).*md5:\s+(\w*)\,.*/.match(git_commit_message)
-    dependency_filename = $1
-    dependency_version = $2
-    md5 = $3
-    url = "https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/#{dependency}/#{dependency_filename}"
-
-    [dependency_version, url, md5]
-  end
-
-  def perform_dependency_specific_changes(buildpack_manifest, dependency)
+  def update_version_in_url_to_dependency_map(buildpack_manifest, dependency)
     buildpack_manifest["url_to_dependency_map"].delete_if {|dep| dep["name"] == dependency}
     dependency_hash = {
       "match"   => dependency,
@@ -72,6 +72,23 @@ class BuildpackDependencyUpdater::Godep < BuildpackDependencyUpdater
     }
     buildpack_manifest["url_to_dependency_map"] << dependency_hash
     buildpack_manifest
+  end
+
+  def perform_dependency_specific_changes(buildpack_manifest, dependency)
+    buildpack_manifest
+  end
+end
+
+
+class BuildpackDependencyUpdater::Godep < BuildpackDependencyUpdater
+  def perform_dependency_specific_changes(buildpack_manifest, dependency)
+    update_version_in_url_to_dependency_map(buildpack_manifest, dependency)
+  end
+end
+
+class BuildpackDependencyUpdater::Glide < BuildpackDependencyUpdater
+  def perform_dependency_specific_changes(buildpack_manifest, dependency)
+    update_version_in_url_to_dependency_map(buildpack_manifest, dependency)
   end
 end
 
@@ -84,9 +101,5 @@ class BuildpackDependencyUpdater::Composer < BuildpackDependencyUpdater
     url ="https://pivotal-buildpacks.s3.amazonaws.com/php/binaries/trusty/composer/#{dependency_version}/composer.phar"
 
     [dependency_version, url, md5]
-  end
-
-  def perform_dependency_specific_changes(buildpack_manifest, dependency)
-    buildpack_manifest
   end
 end
