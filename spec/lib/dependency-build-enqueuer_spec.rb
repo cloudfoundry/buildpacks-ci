@@ -15,18 +15,21 @@ describe DependencyBuildEnqueuer do
     let(:builds_file)              { File.join(binary_builds_dir, "#{dependency}-builds.yml") }
     let(:sha256)                   { "sha256-mocked" }
 
+    before do
+      File.open(dependency_versions_file, "w") do |file|
+        file.write dependency_versions.to_yaml
+      end
+      File.open(builds_file, "w") do |file|
+        file.write dependency_builds.to_yaml
+      end
+    end
 
     context "godep" do
-      let(:dependency)               { "godep" }
+      let(:dependency)          { "godep" }
+      let(:dependency_versions) { %w(v60 v61 v62) }
+      let(:dependency_builds)   { {godep: [] } }
+
       before do
-        godep_versions = %w(v60 v61 v62)
-        File.open(dependency_versions_file, "w") do |file|
-          file.write godep_versions.to_yaml
-        end
-        godep_builds = {godep: []}
-        File.open(builds_file, "w") do |file|
-          file.write godep_builds.to_yaml
-        end
         allow(described_class).to receive(:build_verification_for).with("godep", "v62").and_return(['sha256', sha256])
       end
 
@@ -41,31 +44,46 @@ describe DependencyBuildEnqueuer do
       end
     end
 
-  context "composer" do
-    let(:dependency)               { "composer" }
-    before do
-      composer_versions = %w(1.1.0-RC 1.0.3 1.1.1 1.1.1-alpha1)
-      File.open(dependency_versions_file, "w") do |file|
-        file.write composer_versions.to_yaml
+    context "composer" do
+      let(:dependency)          { "composer" }
+      let(:dependency_versions) { %w(1.1.0-RC 1.0.3 1.1.1 1.1.1-alpha1) }
+      let(:dependency_builds)   { {composer: [] } }
+
+      before do
+        allow(described_class).to receive(:build_verification_for).with("composer", "1.1.1").and_return(['sha256', sha256])
       end
-      composer_builds = {composer: []}
-      File.open(builds_file, "w") do |file|
-        file.write composer_builds.to_yaml
+
+      it "enqueues a build for the latest dep version in the correlated builds yml file" do
+        subject.enqueue_build
+
+        builds = YAML.load_file(builds_file)
+        enqueued_builds = builds['composer']
+        expect(enqueued_builds.count).to eq(1)
+        expect(enqueued_builds.first['version']).to eq("1.1.1")
+        expect(enqueued_builds.first['sha256']).to eq("sha256-mocked")
       end
-      allow(described_class).to receive(:build_verification_for).with("composer", "1.1.1").and_return(['sha256', sha256])
     end
 
-    it "enqueues a build for the latest dep version in the correlated builds yml file" do
-      subject.enqueue_build
+    context "glide" do
+      let(:dependency)          { "glide" }
+      let(:dependency_versions) { %w(0.9.2 0.10.0 0.10.3) }
+      let(:dependency_builds)   { {glide: [] } }
 
-      builds = YAML.load_file(builds_file)
-      enqueued_builds = builds['composer']
-      expect(enqueued_builds.count).to eq(1)
-      expect(enqueued_builds.first['version']).to eq("1.1.1")
-      expect(enqueued_builds.first['sha256']).to eq("sha256-mocked")
+      before do
+        allow(described_class).to receive(:build_verification_for).with("glide", "0.10.3").and_return(['sha256', sha256])
+      end
+
+      it "enqueues a build for the latest dep version in the correlated builds yml file" do
+        subject.enqueue_build
+
+        builds = YAML.load_file(builds_file)
+        enqueued_builds = builds['glide']
+        expect(enqueued_builds.count).to eq(1)
+        expect(enqueued_builds.first['version']).to eq("0.10.3")
+        expect(enqueued_builds.first['sha256']).to eq("sha256-mocked")
+      end
     end
   end
-end
 
   describe '#latest_version_for_dependency' do
     context "godep" do
@@ -78,6 +96,7 @@ end
         expect(latest_version).to eq("v102")
       end
     end
+
     context "composer" do
       let(:dependency)               { "composer" }
       let(:dependency_versions) { %w(1.1.0-RC 1.0.3 1.1.1 1.1.1-alpha1) }
@@ -86,6 +105,17 @@ end
         latest_version = described_class.latest_version_for_dependency(dependency, dependency_versions)
 
         expect(latest_version).to eq("1.1.1")
+      end
+    end
+
+    context "glide" do
+      let(:dependency)               { "glide" }
+      let(:dependency_versions) { %w(0.9.2 0.10.0 0.10.3) }
+
+      it 'returns the latest glide version in the passed versions' do
+        latest_version = described_class.latest_version_for_dependency(dependency, dependency_versions)
+
+        expect(latest_version).to eq("0.10.3")
       end
     end
   end

@@ -35,9 +35,11 @@ class DependencyBuildEnqueuer
     case dependency
     when "godep"
       dependency_versions.max { |a, b| a.gsub("v", "").to_i <=> b.gsub("v", "").to_i }
-    when "composer"
+    when "glide", "composer"
       dependency_versions.map do |version|
         Gem::Version.new(version)
+        # When you create a Gem::Version of some kind of pre-release or RC, it
+        # will replace a '-' with '.pre.', e.g. "1.1.0-RC" -> #<Gem::Version "1.1.0.pre.RC">
       end.sort.reverse[0].to_s.gsub(".pre.","-")
     end
   end
@@ -50,6 +52,8 @@ class DependencyBuildEnqueuer
       download_url = "https://github.com/tools/godep/archive/#{version}.tar.gz"
     when "composer"
       download_url = "https://getcomposer.org/download/#{version}/composer.phar"
+    when "glide"
+      download_url = "https://github.com/Masterminds/glide/archive/#{version}.tar.gz"
     end
     # only get the sha value and not the filename
     shasum256 = `curl -sL #{download_url} | shasum -a 256 | cut -d " " -f 1`
