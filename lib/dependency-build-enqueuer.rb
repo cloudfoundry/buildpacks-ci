@@ -6,20 +6,22 @@ class DependencyBuildEnqueuer
   attr_reader :new_releases_dir
   attr_reader :binary_builds_dir
   attr_reader :latest_version
+  attr_reader :options
 
   # dependency should match the name of the dependency yaml file in
   # buildpacks-ci, binary-builds branch
-  def initialize(dependency, new_releases_dir, binary_builds_dir)
+  def initialize(dependency, new_releases_dir, binary_builds_dir, options = {})
     @dependency = dependency
     @new_releases_dir = new_releases_dir
     @binary_builds_dir = binary_builds_dir
+    @options = options
   end
 
   def enqueue_build
     dependency_versions_file = File.join(new_releases_dir, "#{dependency}.yaml")
     dependency_versions = YAML.load_file(dependency_versions_file)
 
-    @latest_version = DependencyBuildEnqueuer.latest_version_for_dependency(dependency, dependency_versions)
+    @latest_version = DependencyBuildEnqueuer.latest_version_for_dependency(dependency, dependency_versions, options)
 
     new_build = {"version" => latest_version}
     dependency_verification_type, dependency_verification_value = DependencyBuildEnqueuer.build_verification_for(dependency, latest_version)
@@ -31,16 +33,20 @@ class DependencyBuildEnqueuer
     end
   end
 
-  def self.latest_version_for_dependency(dependency, dependency_versions)
+  def self.latest_version_for_dependency(dependency, dependency_versions, options = {})
     case dependency
     when "godep"
       dependency_versions.max { |a, b| a.gsub("v", "").to_i <=> b.gsub("v", "").to_i }
     when "glide", "composer"
       dependency_versions.map do |version|
-        Gem::Version.new(version)
+        gem_version = Gem::Version.new(version)
+        if !options[:pre]
+          gem_version = gem_version.prerelease? ? nil : gem_version
+        end
+        gem_version
         # When you create a Gem::Version of some kind of pre-release or RC, it
         # will replace a '-' with '.pre.', e.g. "1.1.0-RC" -> #<Gem::Version "1.1.0.pre.RC">
-      end.sort.reverse[0].to_s.gsub(".pre.","-")
+      end.compact.sort.reverse[0].to_s.gsub(".pre.","-")
     end
   end
 
