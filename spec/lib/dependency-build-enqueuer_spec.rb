@@ -7,8 +7,9 @@ require 'yaml'
 describe DependencyBuildEnqueuer do
   let(:new_releases_dir)         { Dir.mktmpdir }
   let(:binary_builds_dir)        { Dir.mktmpdir }
+  let(:options)                  { {} }
 
-  subject { described_class.new(dependency, new_releases_dir, binary_builds_dir) }
+  subject { described_class.new(dependency, new_releases_dir, binary_builds_dir, options) }
 
   describe '#enqueue_build' do
     let(:dependency_versions_file) { File.join(new_releases_dir, "#{dependency}.yaml") }
@@ -86,25 +87,31 @@ describe DependencyBuildEnqueuer do
   end
 
   describe '#latest_version_for_dependency' do
+    subject { described_class.latest_version_for_dependency(dependency, dependency_versions, options) }
+
     context "godep" do
       let(:dependency)               { "godep" }
       let(:dependency_versions) { %w(v60 v61 v62 v102) }
 
       it 'returns the latest godep version in the passed versions' do
-        latest_version = described_class.latest_version_for_dependency(dependency, dependency_versions)
-
-        expect(latest_version).to eq("v102")
+        expect(subject).to eq("v102")
       end
     end
 
     context "composer" do
       let(:dependency)               { "composer" }
-      let(:dependency_versions) { %w(1.1.0-RC 1.0.3 1.1.1 1.1.1-alpha1) }
+      let(:dependency_versions) { %w(1.1.0-RC 1.0.3 1.1.1 1.2.0-RC) }
 
-      it 'returns the latest godep version in the passed versions' do
-        latest_version = described_class.latest_version_for_dependency(dependency, dependency_versions)
+      it 'returns the latest composer version in the passed versions' do
+        expect(subject).to eq("1.1.1")
+      end
 
-        expect(latest_version).to eq("1.1.1")
+      context "pre-releases allowed to build" do
+        let(:options) { { pre: true } }
+
+        it 'returns the latest composer version in the passed versions' do
+          expect(subject).to eq("1.2.0-RC")
+        end
       end
     end
 
@@ -113,9 +120,7 @@ describe DependencyBuildEnqueuer do
       let(:dependency_versions) { %w(0.9.2 0.10.0 0.10.3) }
 
       it 'returns the latest glide version in the passed versions' do
-        latest_version = described_class.latest_version_for_dependency(dependency, dependency_versions)
-
-        expect(latest_version).to eq("0.10.3")
+        expect(subject).to eq("0.10.3")
       end
     end
   end
