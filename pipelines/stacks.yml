@@ -8,7 +8,7 @@ resources:
   - name: buildpacks-ci
     type: git
     source:
-      uri: https://github.com/cloudfoundry/buildpacks-ci
+      uri: {{buildpacks-ci-git-uri-public}}
   - name: stacks
     type: git
     source:
@@ -24,28 +24,28 @@ resources:
   - name: stack-s3
     type: s3
     source:
-      bucket: pivotal-buildpacks
+      bucket: {{pivotal-buildpacks-s3-bucket-name}}
       regexp: cflinuxfs2-(.*).tar.gz
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
   - name: receipt-s3
     type: s3
     source:
-      bucket: pivotal-buildpacks
+      bucket: {{pivotal-buildpacks-s3-bucket-name}}
       regexp: cflinuxfs2_receipt-(.*)
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
   - name: version
     type: semver
     source:
-      bucket: pivotal-buildpacks
+      bucket: {{pivotal-buildpacks-s3-bucket-name}}
       key: versions/stack
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
   - name: cflinuxfs2-rootfs-release-version
     type: semver
     source:
-      bucket: pivotal-buildpacks
+      bucket: {{pivotal-buildpacks-s3-bucket-name}}
       initial_version: 0.1.0-rc.1
       key: versions/cflinuxfs2-rootfs-release
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
@@ -113,7 +113,7 @@ resources:
   - name: cf-release-rc
     type: git
     source:
-      uri: https://github.com/cloudfoundry/cf-release
+      uri: {{cf-release-git-uri}}
       branch: release-candidate
   - name: cf-release-develop
     type: git
@@ -156,7 +156,7 @@ resources:
   - name: new-cves
     type: git
     source:
-      uri: git@github.com:cloudfoundry/buildpacks-ci.git
+      uri: {{buildpacks-ci-git-uri}}
       branch: new-cve-notifications
       private_key: {{buildpacks-ci-private-key}}
       paths: [ ubuntu14.04.yaml ]
