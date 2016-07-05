@@ -3,7 +3,7 @@ resources:
   - name: buildpacks-ci
     type: git
     source:
-      uri: https://github.com/cloudfoundry/buildpacks-ci
+      uri: {{buildpacks-ci-git-uri-public}}
       paths: [ "lib/concourse2tracker-resource" ]
   - name: concourse2tracker-image
     type: docker-image
