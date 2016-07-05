@@ -1,7 +1,5 @@
 #! /usr/bin/env bash
 
-git clone https://github.com/geramirez/concourse-filter
-pushd concourse-filter
-	go build
-	exec &> >(./concourse-filter)
-popd
+go install github.com/geramirez/concourse-filter
+export CREDENTIAL_FILTER_WHITELIST=`env | cut -d '=' -f 1 | grep -v '^_$' | xargs echo | tr ' ' ','`
+exec &> >($GOPATH/bin/concourse-filter)
