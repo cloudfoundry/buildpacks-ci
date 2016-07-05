@@ -8,6 +8,7 @@ ls spec/**/*_spec.rb | split -l $(expr `ls spec/**/*_spec.rb | wc -l` / $TOTAL_G
 specs=$(cat $(ls x* | sed -n "$CURRENT_GROUP p"))
 
 gem install bundler --no-ri --no-rdoc
+bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
 bundle install -j4
 bundle exec rspec $specs
 popd

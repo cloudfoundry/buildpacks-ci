@@ -214,6 +214,7 @@ jobs:
           BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
           BOSH_TARGET: stacks.buildpacks.ci.cf-app.com
           BOSH_LITE_NAME: stacks.buildpacks.ci
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
         attempts: 5
         ensure:
           put: deployments-buildpacks
@@ -238,6 +239,7 @@ jobs:
           BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
           BOSH_TARGET: stacks.buildpacks.ci.cf-app.com
           BOSH_LITE_NAME: stacks.buildpacks.ci
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
         attempts: 5
         ensure:
           put: deployments-buildpacks
@@ -356,6 +358,7 @@ jobs:
             BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
             BOSH_TARGET: stacks.buildpacks.ci.cf-app.com
             BOSH_LITE_NAME: stacks.buildpacks.ci
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
         - put: deployments-buildpacks
           params:
