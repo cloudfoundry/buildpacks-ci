@@ -121,6 +121,7 @@ jobs:
             BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
             BOSH_TARGET: <%= full_deployment_name + ".cf-app.com" %>
             BOSH_LITE_NAME: {{deployment-name}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
           ensure:
             put: deployments-buildpacks
             params:
@@ -170,6 +171,7 @@ jobs:
             BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
             BOSH_TARGET: <%= full_deployment_name + ".cf-app.com" %>
             BOSH_LITE_NAME: {{deployment-name}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
         - put: deployments-buildpacks
           params:

@@ -394,6 +394,7 @@ jobs:
       - task: update-compile-extensions
         file: buildpacks-ci/tasks/update-compile-extensions.yml
         privileged: true
+        params: { RUBYGEM_MIRROR: {{rubygem-mirror}}  }
       - put: buildpack-develop
         params:
           repository: buildpack-artifacts

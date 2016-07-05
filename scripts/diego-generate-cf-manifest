@@ -3,6 +3,7 @@
 set -e
 
 pushd deployments-buildpacks
+  bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
   bundle -j4
   source ./bin/target_bosh $DEPLOYMENT_NAME
 popd
