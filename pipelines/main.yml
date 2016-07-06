@@ -7,7 +7,7 @@ resources:
   - name: deployments-buildpacks
     type: git
     source:
-      uri: {{deployments-git-url}}
+      uri: {{deployments-git-uri}}
       private_key: {{deployments-private-key}}
   - name: buildpack-packager
     type: git
