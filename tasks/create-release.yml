@@ -19,4 +19,7 @@ inputs:
 outputs:
   - name: cf-release-artifacts
 run:
-  path: buildpacks-ci/scripts/release/cf/create-release
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/scripts/release/cf/create-release

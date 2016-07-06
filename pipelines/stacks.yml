@@ -179,8 +179,11 @@ jobs:
           inputs:
             - name: buildpacks-ci
           run:
-            path: buildpacks-ci/scripts/notifications/pivotal_tracker
-            args: ['Monday-Funday *stack* release', 'This is a reminder that a stack release was automatically started, please monitor it, and deliver story when done.']
+            path: bash
+            args:
+              - '-cl'
+              - |
+                "buildpacks-ci/scripts/notifications/pivotal_tracker 'Monday-Funday *stack* release' 'This is a reminder that a stack release was automatically started, please monitor it, and deliver story when done.'"
           params:
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
@@ -846,7 +849,10 @@ jobs:
             inputs:
               - name: buildpacks-ci
             run:
-              path: buildpacks-ci/scripts/release/cf/check-can-i-bump
+              path: bash
+              args:
+                - -cl
+                - buildpacks-ci/scripts/release/cf/check-can-i-bump
         - task: upload
           config:
             platform: linux
