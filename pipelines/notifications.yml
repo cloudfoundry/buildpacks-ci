@@ -101,14 +101,11 @@ jobs:
           inputs:
             - name: buildpacks-ci
           run:
-            path: buildpacks-ci/scripts/notifications/pivotal_tracker
+            path: bash
             args:
-              - 'Pull latest changes from upstream'
-              - 'Check that there are no upstream changes that we are missing. Consult google doc https://sites.google.com/a/pivotal.io/cloudfoundry-buildpacks/check-lists/merging-from-upstream-buildpacks for more details.'
-              - 'Go'
-              - 'Nodejs'
-              - 'Python'
-              - 'Ruby'
+              - '-cl'
+              - |
+                "buildpacks-ci/scripts/notifications/pivotal_tracker 'Pull latest changes from upstream' 'Check that there are no upstream changes that we are missing. Consult google doc https://sites.google.com/a/pivotal.io/cloudfoundry-buildpacks/check-lists/merging-from-upstream-buildpacks for more details.' 'Go' 'Nodejs' 'Python' 'Ruby'"
           params:
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}

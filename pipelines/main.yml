@@ -106,7 +106,10 @@ jobs:
           outputs:
             - name: buildpack-packager-artifacts
           run:
-            path: buildpacks-ci/scripts/release/buildpack-packager/finalize-buildpack-packager
+            path: bash
+            args:
+              - -cl
+              - buildpacks-ci/scripts/release/buildpack-packager/finalize-buildpack-packager
         privileged: true
       - put: buildpack-packager-github-release
         params:
@@ -173,7 +176,10 @@ jobs:
           outputs:
             - name: machete-artifacts
           run:
-            path: buildpacks-ci/scripts/release/machete/finalize-machete
+            path: bash
+            args:
+              - -cl
+              - buildpacks-ci/scripts/release/machete/finalize-machete
         privileged: true
       - put: machete-github-release
         params:
