@@ -36,9 +36,5 @@ class Concourse2Tracker
     response = Net::HTTP.start(create_comment_uri.hostname, create_comment_uri.port, use_ssl: true) do |http|
       http.request(request)
     end
-    if response != Net::HTTPSuccess
-      puts "Failed with response code #{response.code}"
-      puts response.body
-    end
   end
 end
