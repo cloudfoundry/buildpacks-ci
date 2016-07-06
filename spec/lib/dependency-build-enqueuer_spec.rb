@@ -67,11 +67,11 @@ describe DependencyBuildEnqueuer do
 
     context "glide" do
       let(:dependency)          { "glide" }
-      let(:dependency_versions) { %w(0.9.2 0.10.0 0.10.3) }
+      let(:dependency_versions) { %w(v0.9.2 v0.10.0 v0.10.3) }
       let(:dependency_builds)   { {glide: [] } }
 
       before do
-        allow(described_class).to receive(:build_verification_for).with("glide", "0.10.3").and_return(['sha256', sha256])
+        allow(described_class).to receive(:build_verification_for).with("glide", "v0.10.3").and_return(['sha256', sha256])
       end
 
       it "enqueues a build for the latest dep version in the correlated builds yml file" do
@@ -80,7 +80,7 @@ describe DependencyBuildEnqueuer do
         builds = YAML.load_file(builds_file)
         enqueued_builds = builds['glide']
         expect(enqueued_builds.count).to eq(1)
-        expect(enqueued_builds.first['version']).to eq("0.10.3")
+        expect(enqueued_builds.first['version']).to eq("v0.10.3")
         expect(enqueued_builds.first['sha256']).to eq("sha256-mocked")
       end
     end
@@ -117,10 +117,10 @@ describe DependencyBuildEnqueuer do
 
     context "glide" do
       let(:dependency)               { "glide" }
-      let(:dependency_versions) { %w(0.9.2 0.10.0 0.10.3) }
+      let(:dependency_versions) { %w(v0.9.2 v0.10.0 v0.10.3) }
 
       it 'returns the latest glide version in the passed versions' do
-        expect(subject).to eq("0.10.3")
+        expect(subject).to eq("v0.10.3")
       end
     end
   end
