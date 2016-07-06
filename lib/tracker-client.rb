@@ -15,18 +15,10 @@ class TrackerClient
   end
 
   def search(name:)
-    uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories")
-    uri.query = "filter=name:#{name}"
-    request = Net::HTTP::Get.new(uri)
-    request['Content-Type'] = 'application/json'
-    request['X-TrackerToken'] = @api_key
-
-    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-      http.request(request)
+    response = http_request do |uri|
+      uri.query = "filter=name:#{name}"
+      Net::HTTP::Get.new(uri)
     end
-
-    raise response.message if response.code != '200'
-
     JSON.parse(response.body)
   end
 
@@ -46,19 +38,11 @@ class TrackerClient
 
     payload[:estimate] = point_value if point_value
 
-    create_story_uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories")
-
-    request = Net::HTTP::Post.new(create_story_uri)
-    request.body = payload.to_json
-    request['Content-Type'] = 'application/json'
-    request['X-TrackerToken'] = @api_key
-
-    response = Net::HTTP.start(create_story_uri.hostname, create_story_uri.port, use_ssl: true) do |http|
-      http.request(request)
+    response = http_request do |uri|
+      request = Net::HTTP::Post.new(uri)
+      request.body = payload.to_json
+      request
     end
-
-    raise response.message if response.code != '200'
-
     response
   end
 
@@ -70,5 +54,20 @@ class TrackerClient
 
   def validate_number(cred)
     !(cred.nil? || !cred.is_a?(Numeric))
+  end
+
+  def http_request(&block)
+    uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories")
+    request = block.call(uri)
+    request['Content-Type'] = 'application/json'
+    request['X-TrackerToken'] = @api_key
+
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+      http.request(request)
+    end
+
+    raise response.message if response.code != '200'
+
+    response
   end
 end
