@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 set -e -x
 
 IMAGE_ROOT="$PWD/image-root"
