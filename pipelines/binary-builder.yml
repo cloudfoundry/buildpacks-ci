@@ -542,6 +542,9 @@ jobs:
           file: buildpacks-ci/tasks/update-dependency-in-buildpack.yml
           params:
             DEPENDENCY: <%= go_buildpack_dependency %>
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
         - put: cf-environments
           resource: cf-edge-environments
           params:
