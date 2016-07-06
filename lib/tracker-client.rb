@@ -14,6 +14,22 @@ class TrackerClient
     raise 'invalid requester id for tracker' unless validate_number @requester_id
   end
 
+  def search(name:)
+    uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories")
+    uri.query = "filter=name:#{name}"
+    request = Net::HTTP::Get.new(uri)
+    request['Content-Type'] = 'application/json'
+    request['X-TrackerToken'] = @api_key
+
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+      http.request(request)
+    end
+
+    raise response.message if response.code != '200'
+
+    JSON.parse(response.body)
+  end
+
   def post_to_tracker(name, description, tasks = [], point_value = nil)
     name = name.to_s
     raise 'requested tracker story has no title' unless validate_string name
