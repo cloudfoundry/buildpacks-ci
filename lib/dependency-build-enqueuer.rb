@@ -37,7 +37,7 @@ class DependencyBuildEnqueuer
     case dependency
     when "godep"
       dependency_versions.max { |a, b| a.gsub("v", "").to_i <=> b.gsub("v", "").to_i }
-    when "glide", "composer"
+    when "composer"
       dependency_versions.map do |version|
         gem_version = Gem::Version.new(version)
         if !options[:pre]
@@ -47,6 +47,14 @@ class DependencyBuildEnqueuer
         # When you create a Gem::Version of some kind of pre-release or RC, it
         # will replace a '-' with '.pre.', e.g. "1.1.0-RC" -> #<Gem::Version "1.1.0.pre.RC">
       end.compact.sort.reverse[0].to_s.gsub(".pre.","-")
+    when "glide"
+      dependency_versions.map do |version|
+        gem_version = Gem::Version.new(version.gsub("v", ""))
+        if !options[:pre]
+          gem_version = gem_version.prerelease? ? nil : gem_version
+        end
+        gem_version
+      end.compact.sort.reverse[0].to_s.gsub(".pre.","-").prepend("v")
     end
   end
 
