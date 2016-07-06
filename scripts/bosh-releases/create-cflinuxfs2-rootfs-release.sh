@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 set -ex
 
 stacks_version=$(cat version/number)
