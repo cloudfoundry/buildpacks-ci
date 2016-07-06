@@ -64,3 +64,7 @@ RUN chmod +x /usr/local/bin/fly
 RUN curl -L https://github.com/git-hooks/git-hooks/releases/download/v1.1.3/git-hooks_linux_amd64.tar.gz | tar -zxf - --to-stdout > /usr/local/bin/git-hooks
 RUN chmod 755 /usr/local/bin/git-hooks
 RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make install
+
+# Add concourse filter to bashrc so all bash scripts are filtered
+COPY bin/credential-filter /etc/
+RUN cat /etc/credential-filter >> $HOME/.bashrc
