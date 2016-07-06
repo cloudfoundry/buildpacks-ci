@@ -75,6 +75,31 @@ describe TrackerClient do
     end
   end
 
+  describe '#search' do
+    context 'the request is successful' do
+      subject { described_class.new(api_key, project_id, requester_id) }
+
+      before do
+        stub_request(:get, tracker_search_uri)
+          .to_return(status: 200, body: response_body.to_json, headers: {})
+      end
+
+      context 'searching for `godep v74`' do
+        let(:tracker_search_uri) { "#{tracker_uri}?filter=name:godep+v74" }
+        let(:response_body) { [
+          { "id"=>"123", "kind"=>"story", "current_state"=>"accepted" },
+          { "id"=>"987", "kind"=>"story", "current_state"=>"accepted" }
+        ] }
+
+        it 'returns matching stories' do
+          response = subject.search name: 'godep v74'
+          expect(WebMock).to have_requested(:get, tracker_search_uri)
+          expect(response).to eq response_body
+        end
+      end
+    end
+  end
+
   describe '#post_to_tracker' do
     describe 'input checking' do
       let(:name)        { 'OH NOOOO' }
