@@ -19,3 +19,6 @@ run:
       rsync -a buildpack/ buildpack-artifacts
 params:
   DEPENDENCY:
+  TRACKER_PROJECT_ID:
+  TRACKER_API_TOKEN:
+  TRACKER_REQUESTER_ID:
