@@ -28,7 +28,7 @@ jobs:
           run:
             path: bash
             args:
-              - -c
+              - -cl
               - |
                 cd buildpacks-ci/lib/concourse2tracker-resource
                 bundle

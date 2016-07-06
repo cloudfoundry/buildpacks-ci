@@ -624,7 +624,7 @@ jobs:
             run:
               path: bash
               args:
-                - -c
+                - -cl
                 - "mv stack-s3/cflinuxfs2-*.tar.gz stack-archive/cflinuxfs2-`cat version/number`.tar.gz"
         - put: stacks
           params:
@@ -703,7 +703,7 @@ jobs:
               - name: docker-s3
             run:
               path: bash
-              args: ["-c", "mv stack-s3/cflinuxfs2-*.tar.gz docker-s3/cflinuxfs2.tar.gz"]
+              args: ["-cl", "mv stack-s3/cflinuxfs2-*.tar.gz docker-s3/cflinuxfs2.tar.gz"]
         - aggregate:
           - put: docker latest version
             resource: docker-cflinuxfs2-rootfs
@@ -794,7 +794,7 @@ jobs:
             run:
               path: bash
               args:
-                - "-c"
+                - "-cl"
                 - "echo \"This release ships with stacks version $(cat version/number). For more information, see this stack's [release notes](https://github.com/cloudfoundry/stacks/releases/tag/$(cat version/number)).\" > release-body/body"
         - task: create-release-commit
           config:
@@ -807,7 +807,7 @@ jobs:
             run:
               path: bash
               args:
-                - "-c"
+                - "-cl"
                 - 'cd release-artifacts && git rev-list HEAD -n1 > ../release-commit/sha'
         - put: cflinuxfs2-rootfs-github-release
           params:
