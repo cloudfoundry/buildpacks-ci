@@ -6,6 +6,7 @@ binary_builds_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'builds-
 
 require_relative "#{buildpacks_ci_dir}/lib/buildpack-dependency-updater"
 require_relative "#{buildpacks_ci_dir}/lib/buildpack-dependency"
+require_relative "#{buildpacks_ci_dir}/lib/tracker-client"
 
 dependency = ENV['DEPENDENCY']
 
@@ -19,7 +20,14 @@ version = buildpack_manifest_updater.dependency_version
 puts "Updating manifest with #{dependency} #{version}..."
 buildpack_manifest_updater.run!
 
+tracker_client = TrackerClient.new(ENV['TRACKER_API_TOKEN'], ENV['TRACKER_PROJECT_ID'], ENV['TRACKER_REQUESTER_ID'].to_i)
+story_ids = tracker_client.search(name: "#{dependency} #{version}").select do |story|
+  story['current_state'] != 'accepted'
+end.map do |story|
+  "[##{story['id']}]"
+end.join
+
 Dir.chdir(buildpack_dir) do
   raise 'command failed' unless system('git add -A')
-  raise 'command failed' unless system("git commit -m 'Update #{dependency} to #{version}'")
+  raise 'command failed' unless system("git commit -m 'Update #{dependency} to #{version}#{story_ids}'")
 end
