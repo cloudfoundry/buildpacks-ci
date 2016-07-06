@@ -5,7 +5,10 @@ inputs:
   - name: buildpacks-ci
   - name: machete
 run:
-  path: buildpacks-ci/scripts/configure-deployment
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/scripts/configure-deployment
 params:
   BOSH_TARGET:
   DEPLOYMENT_NAME:

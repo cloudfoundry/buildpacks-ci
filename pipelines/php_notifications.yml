@@ -227,10 +227,11 @@ jobs:
             - name: suhosin5
             - name: buildpacks-ci
           run:
-            path: ./buildpacks-ci/scripts/notifications/create-new-dependency-story
+            path: bash
             args:
-              - 'Build and/or Include new releases: PHP Modules'
-              - "Check that the PHP Module versions used in building PHP 5 and PHP 7 are up to date. If there are new, compatible versions, update them and build new PHP binaries.\n\nReference the PHP5 and PHP7 recipes and module versions used in cooking these recipes in [binary-builder](https://github.com/cloudfoundry/binary-builder)"
+              - '-cl'
+              - |
+                "buildpacks-ci/scripts/notifications/create-new-dependency-story 'Build and/or Include new releases: PHP Modules' 'Check that the PHP Module versions used in building PHP 5 and PHP 7 are up to date. If there are new, compatible versions, update them and build new PHP binaries.\n\nReference the PHP5 and PHP7 recipes and module versions used in cooking these recipes in [binary-builder](https://github.com/cloudfoundry/binary-builder)'"
           params:
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
