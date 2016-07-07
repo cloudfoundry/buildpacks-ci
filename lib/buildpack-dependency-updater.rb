@@ -103,3 +103,43 @@ class BuildpackDependencyUpdater::Composer < BuildpackDependencyUpdater
     [dependency_version, url, md5]
   end
 end
+
+class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
+  def update_version_in_url_to_dependency_map(buildpack_manifest, dependency)
+    minor_version = dependency_version.split(".")[1].to_i
+    if minor_version.odd? && buildpack == "staticfile"
+      buildpack_manifest["url_to_dependency_map"].delete_if {|dep| dep["name"] == dependency}
+      dependency_hash = {
+        "match"   => dependency,
+        "name"    => dependency,
+        "version" => dependency_version
+      }
+      buildpack_manifest["url_to_dependency_map"] << dependency_hash
+    end
+    buildpack_manifest
+  end
+
+  def perform_dependency_specific_changes(buildpack_manifest, dependency)
+    update_version_in_url_to_dependency_map(buildpack_manifest, dependency)
+  end
+
+  def perform_dependency_update(buildpack_manifest)
+    minor_version = dependency_version.split(".")[1].to_i
+
+    if minor_version.even?
+      buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && dep["version"].split(".")[1].to_i.even?}
+    else
+      buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && dep["version"].split(".")[1].to_i.odd?}
+    end
+
+    dependency_hash = {
+      "name"      => dependency,
+      "version"   => dependency_version,
+      "uri"       => @url,
+      "md5"       => @md5,
+      "cf_stacks" => ["cflinuxfs2"]
+    }
+    buildpack_manifest["dependencies"] << dependency_hash
+    buildpack_manifest
+  end
+end
