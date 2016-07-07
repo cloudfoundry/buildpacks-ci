@@ -7,6 +7,7 @@ binary_builds_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'builds-
 require_relative "#{buildpacks_ci_dir}/lib/buildpack-dependency-updater"
 require_relative "#{buildpacks_ci_dir}/lib/buildpack-dependency"
 require_relative "#{buildpacks_ci_dir}/lib/tracker-client"
+require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
 dependency = ENV['DEPENDENCY']
 
@@ -31,9 +32,14 @@ story_ids = tracker_client.search(name: "#{dependency} #{version}").select do |s
   story['current_state'] != 'accepted'
 end.map do |story|
   "[##{story['id']}]"
-end.join
+end.join("\n")
+
+git_commit_message = GitClient.last_commit_message(binary_builds_dir)
+
+/^(source url: .*)$/.match(git_commit_message)
+source_info = $1
 
 Dir.chdir(buildpack_dir) do
   raise 'command failed' unless system('git add -A')
-  raise 'command failed' unless system("git commit -m 'Update #{dependency} to #{version}#{story_ids}'")
+  raise 'command failed' unless system("git commit -m 'Update #{dependency} to #{version}\n\n#{source_info}\n\n#{story_ids}'")
 end

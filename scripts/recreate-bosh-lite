@@ -55,7 +55,7 @@ done
 
 # Destroy deployment if we are not able to connect and update the user
 if bosh -u admin -p admin -t $DEPLOYMENT_NAME.cf-app.com create user admin $PASSWORD; then
-  echo "Depolyment working!"
+  echo "Deployment working!"
 else
   if [ "$IAAS" = "aws" ]; then
     echo "Deployment failed deleting instance"
