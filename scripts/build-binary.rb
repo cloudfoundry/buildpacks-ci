@@ -9,6 +9,7 @@ def ci_skip_for(binary)
   return false if binary == "godep"
   return false if binary == "composer"
   return false if binary == "glide"
+  return false if binary == "nginx"
   return true
 end
 
@@ -40,7 +41,7 @@ else
 
   Dir.chdir('binary-builder') do
     @binary_builder_output = `./bin/binary-builder #{flags}`
-    raise "Could not build" unless a.success?
+    raise "Could not build" unless $?.success?
     if Dir.exist?("/tmp/x86_64-linux-gnu/")
       system('tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/') or raise "Could not create tar"
     end
