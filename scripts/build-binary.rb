@@ -31,11 +31,16 @@ if binary_name == "composer" then
 else
   flags = "--name=#{binary_name}"
   latest_build.each_pair do |key, value|
+    if key == 'md5' || key == 'sha256'
+      @verification_type = key
+      @verification_value = value
+    end
     flags << %( --#{key}="#{value}")
   end
 
   Dir.chdir('binary-builder') do
-    system("./bin/binary-builder #{flags}") or raise "Could not build"
+    @binary_builder_output = `./bin/binary-builder #{flags}`
+    raise "Could not build" unless a.success?
     if Dir.exist?("/tmp/x86_64-linux-gnu/")
       system('tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/') or raise "Could not create tar"
     end
@@ -43,11 +48,15 @@ else
   FileUtils.cp_r(Dir["binary-builder/*.tgz"], "binary-builder-artifacts/")
 end
 
+/^Source URL:\s(.*)$/.match(@binary_builder_output)
+source_url = $1
+
 ext = binary_name == "composer" ? "*.phar" : "-*.tgz"
 filename = Dir["binary-builder/#{binary_name + ext}"].first
 md5sum   = Digest::MD5.file(filename).hexdigest
 shasum   = Digest::SHA256.file(filename).hexdigest
 git_msg  = "Build #{binary_name} - #{latest_build['version']}\n\nfilename: #{filename}, md5: #{md5sum}, sha256: #{shasum}"
+git_msg += "\n\nsource url: #{source_url}, #{@verification_type}: #{@verification_value}"
 git_msg += "\n\n[ci skip]" if builds[binary_name].empty? && ci_skip_for(binary_name)
 
 File.write(builds_path, builds.to_yaml)
