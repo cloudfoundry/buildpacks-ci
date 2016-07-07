@@ -87,20 +87,21 @@ class NewReleasesDetector
 
   def tags
     @get_tags_functions = {
-      bundler:   -> { Octokit.tags('bundler/bundler').map(&:name).grep(/^v/) },
-      composer:  -> { Octokit.tags('composer/composer').map(&:name) },
-      glide:     -> { Octokit.tags('Masterminds/glide').map(&:name).grep(/^v/) },
-      go:        -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
-      godep:     -> { Octokit.tags('tools/godep').map(&:name).grep(/^v/) },
-      httpd:     -> { Octokit.tags('apache/httpd').map(&:name).grep(/^2\./) },
-      jruby:     -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
-      maven:     -> { Octokit.tags('apache/maven').map(&:name).grep(/^maven/) },
-      nginx:     -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release/) },
-      nodejs:    -> { Octokit.tags('nodejs/node').map(&:name).grep(/^v/) },
-      openjdk:   -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys },
-      php:       -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
-      python:    -> { JSON.parse(open('https://hg.python.org/cpython/json-tags').read)['tags'].map { |t| t['tag'] } },
-      ruby:      -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) }
+      bundler:         -> { Octokit.tags('bundler/bundler').map(&:name).grep(/^v/) },
+      composer:        -> { Octokit.tags('composer/composer').map(&:name) },
+      glide:           -> { Octokit.tags('Masterminds/glide').map(&:name).grep(/^v/) },
+      go:              -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
+      godep:           -> { Octokit.tags('tools/godep').map(&:name).grep(/^v/) },
+      httpd:           -> { Octokit.tags('apache/httpd').map(&:name).grep(/^2\./) },
+      jruby:           -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
+      maven:           -> { Octokit.tags('apache/maven').map(&:name).grep(/^maven/) },
+      nginx_stable:    -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release-\d+\.\d*[02468]\.\d+/) },
+      nginx_mainline:  -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release-\d+\.\d*[13579]\.\d+/) },
+      nodejs:          -> { Octokit.tags('nodejs/node').map(&:name).grep(/^v/) },
+      openjdk:         -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys },
+      php:             -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
+      python:          -> { JSON.parse(open('https://hg.python.org/cpython/json-tags').read)['tags'].map { |t| t['tag'] } },
+      ruby:            -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) }
     }
   end
 end
