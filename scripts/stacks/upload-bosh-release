@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash
 
 aws_cred() {
 cat <<EOF > config/private.yml

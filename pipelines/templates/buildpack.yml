@@ -109,7 +109,7 @@ jobs:
           run :
             path: bash
             args:
-              - -cl
+              - -c
               - "cd buildpack && ./bin/populate-modules-in-manifest && (git commit -am 'Updated manifest with supported PHP modules [ci skip]' || true) && cd - && rsync -a buildpack/ updated-buildpack"
       - put: buildpack-develop
         params:

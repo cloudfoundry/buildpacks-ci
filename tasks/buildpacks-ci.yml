@@ -10,7 +10,7 @@ params:
 run:
   path: bash
   args:
-    - "-cl"
+    - "-c"
     - |
       set -ex
       cd buildpacks-ci
