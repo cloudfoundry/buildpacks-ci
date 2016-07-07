@@ -64,3 +64,6 @@ RUN chmod +x /usr/local/bin/fly
 RUN curl -L https://github.com/git-hooks/git-hooks/releases/download/v1.1.3/git-hooks_linux_amd64.tar.gz | tar -zxf - --to-stdout > /usr/local/bin/git-hooks
 RUN chmod 755 /usr/local/bin/git-hooks
 RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make install
+
+# Ensure that Concoure filtering is on for non-interactive shells
+ENV BASH_ENV /etc/profile.d/filter.sh
