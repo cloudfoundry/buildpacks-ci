@@ -152,5 +152,109 @@ filename: binary-builder/glide-#{expected_version}-linux-x64.tgz, md5: 18bec8f65
       end
     end
 
+    context("nginx_staticfile") do
+      let(:dependency)        { "nginx" }
+      let(:buildpack)         { "staticfile" }
+      let(:expected_version)  { "1.11.2" }
+      before do
+        buildpack_manifest_contents = <<-MANIFEST
+---
+language: staticfile
+
+url_to_dependency_map:
+  - match: nginx
+    name: nginx
+    version: 1.11.1
+
+dependencies:
+  - name: nginx
+    version: 1.10.1
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz
+    cf_stacks:
+      - cflinuxfs2
+    md5: 7d28497395b62221f3380e82f89cd197
+  - name: nginx
+    version: 1.11.1
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.11.1-linux-x64.tgz
+    cf_stacks:
+      - cflinuxfs2
+    md5: 7d28497395b62221f3380e82f89cd197
+MANIFEST
+        File.open(manifest_file, "w") do |file|
+          file.write buildpack_manifest_contents
+        end
+        allow(GitClient).to receive(:last_commit_message).and_return <<-COMMIT
+Build glide - #{expected_version}
+filename: binary-builder/nginx-#{expected_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+        COMMIT
+      end
+
+      it "updates the specified buildpack manifest dependency with the specified version" do
+        subject.run!
+        manifest = YAML.load_file(manifest_file)
+        version_hash = {"match"=>dependency, "name"=>dependency, "version"=>expected_version}
+        expect(manifest["url_to_dependency_map"]).to include(version_hash)
+
+        dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+        expect(dependency_in_manifest["version"]).to eq(expected_version)
+        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.11.2-linux-x64.tgz")
+        expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+
+        dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] != expected_version}
+        expect(dependency_in_manifest["version"]).to eq("1.10.1")
+        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz")
+        expect(dependency_in_manifest["md5"]).to eq("7d28497395b62221f3380e82f89cd197")
+
+      end
+    end
+
+    context("nginx_php") do
+      let(:dependency)        { "nginx" }
+      let(:buildpack)         { "php" }
+      let(:expected_version)  { "1.11.2" }
+      before do
+        buildpack_manifest_contents = <<-MANIFEST
+---
+language: php
+
+dependencies:
+  - name: nginx
+    version: 1.10.1
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz
+    cf_stacks:
+      - cflinuxfs2
+    md5: 7d28497395b62221f3380e82f89cd197
+  - name: nginx
+    version: 1.11.1
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.11.1-linux-x64.tgz
+    cf_stacks:
+      - cflinuxfs2
+    md5: 7d28497395b62221f3380e82f89cd197
+MANIFEST
+        File.open(manifest_file, "w") do |file|
+          file.write buildpack_manifest_contents
+        end
+        allow(GitClient).to receive(:last_commit_message).and_return <<-COMMIT
+Build glide - #{expected_version}
+filename: binary-builder/nginx-#{expected_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+        COMMIT
+      end
+
+      it "updates the specified buildpack manifest dependency with the specified version" do
+        subject.run!
+        manifest = YAML.load_file(manifest_file)
+
+        dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+        expect(dependency_in_manifest["version"]).to eq(expected_version)
+        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.11.2-linux-x64.tgz")
+        expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+
+        dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] != expected_version}
+        expect(dependency_in_manifest["version"]).to eq("1.10.1")
+        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz")
+        expect(dependency_in_manifest["md5"]).to eq("7d28497395b62221f3380e82f89cd197")
+
+      end
+    end
   end
 end
