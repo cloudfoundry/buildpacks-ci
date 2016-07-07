@@ -54,7 +54,6 @@ until $(curl -k --output /dev/null --silent --head --fail https://$DEPLOYMENT_NA
 done
 
 # Destroy deployment if we are not able to connect and update the user
-set +x
 if bosh -u admin -p admin -t $DEPLOYMENT_NAME.cf-app.com create user admin $PASSWORD; then
   echo "Depolyment working!"
 else
@@ -65,7 +64,6 @@ else
     exit 1
   fi
 fi
-set -x
 
 if test -n "$(find . -maxdepth 1 -name '*.yml' -print -quit)"; then
   rm -f *.yml

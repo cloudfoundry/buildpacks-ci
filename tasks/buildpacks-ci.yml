@@ -14,9 +14,7 @@ run:
     - |
       set -ex
       cd buildpacks-ci
-      set +x
       ./scripts/fly-login $CI_USERNAME $CI_PASSWORD
-      set -x
       bundle
       rspec --format documentation
       ./scripts/set-status-success
