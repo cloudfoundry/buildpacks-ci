@@ -12,11 +12,17 @@ require_relative "#{buildpacks_ci_dir}/lib/git-client"
 dependency = ENV['DEPENDENCY']
 
 # can only handle one buildpack update atm
-buildpack = BuildpackDependency.for(dependency).first
+buildpack = ENV.fetch("BUILDPACK_NAME", BuildpackDependency.for(dependency).first)
 buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "buildpack"))
 buildpack_manifest_updater = BuildpackDependencyUpdater.create(dependency, buildpack, buildpack_dir, binary_builds_dir)
 
 version = buildpack_manifest_updater.dependency_version
+
+if buildpack == 'php' && version.split(".")[1].to_i.odd?
+  options = File.read(File.join(buildpacks_dir, "defaults", "options.json"))
+  new_default = options.gsub(/\"NGINX\w+LATEST\":.*/, "\"NGINX_LATEST\": \"#{version}\",")
+  File.open(File.join(buildpacks_dir, "defaults", "options.json"),"w") {|file| file.puts new_default}
+end
 
 puts "Updating manifest with #{dependency} #{version}..."
 buildpack_manifest_updater.run!
