@@ -8,6 +8,7 @@ require 'fileutils'
 def ci_skip_for(binary)
   return false if binary == "godep"
   return false if binary == "composer"
+  return false if binary == "glide"
   return true
 end
 
