@@ -8,7 +8,7 @@ outputs:
 run:
   path: bash
   args:
-    - '-cl'
+    - '-c'
     - |
       git clone --branch v$( cat diego-bosh-release/version ) --depth 1 https://github.com/cloudfoundry-incubator/diego-release
       cd diego-release

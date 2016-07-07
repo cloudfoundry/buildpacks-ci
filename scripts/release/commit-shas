@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/usr/bin/env bash
 
 latest_shasum=$(ls buildpack-artifacts/*.SHA256SUM.txt)
 rsync -a buildpack-checksums/ sha-artifacts

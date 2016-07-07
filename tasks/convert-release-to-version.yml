@@ -7,5 +7,5 @@ outputs:
 run:
   path: bash
   args:
-    - -cl
+    - -c
     - cp blob/version version/number
