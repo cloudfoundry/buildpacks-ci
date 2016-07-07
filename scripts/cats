@@ -7,8 +7,6 @@ pushd deployments-buildpacks
   . ./bin/target_bosh $DEPLOYMENT_NAME
 popd
 
-set +x
-
 if [ "$DIEGO_DOCKER_ON" = "true" ]
 then
   cf api api.$DEPLOYMENT_NAME.cf-app.com --skip-ssl-validation
