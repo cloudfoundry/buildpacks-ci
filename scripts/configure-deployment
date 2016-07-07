@@ -2,7 +2,6 @@
 
 set -eux
 
-set +x
 cf api api.$BOSH_TARGET --skip-ssl-validation
 cf login -u $CI_CF_USERNAME -p $CI_CF_PASSWORD
 
