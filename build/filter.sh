@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 
 git clone https://github.com/geramirez/concourse-filter &>/dev/null
+rm -rf concourse-filter/.git &>/dev/null
 pushd concourse-filter &>/dev/null
   go build &>/dev/null
   CREDENTIAL_FILTER_PARAMS=STACKS,DEPLOYMENT_NAME,SSH_AGENT_PID,CF_EDGE,IAAS,RUBYGEM_MIRROR,BOSH_LITE_NAME,AZURE_BOSH_USER,BOSH_USER,LANGUAGE,CI_CF_USERNAME,BOSH_TARGET,BOSH_LITE_DISK_SIZE,BRATS_BRANCH,DEPENDENCY,CI_USERNAME,BASH_ENV,RELEASE_NAME,RELEASE_DIR
