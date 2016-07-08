@@ -409,6 +409,26 @@ jobs:
                 tar xzf build-tar/binary-builder-source.tgz -C /tmp
                 cd /tmp/x86_64-linux-gnu/ports/php/*/*/
                 yes n | env REPORT_EXIT_STATUS=1 make test
+  - name: test-nginx
+    serial: true
+    plan:
+      - get: build-tar
+        passed: [ update-nginx-staticfile-manifest, update-nginx-php-manifest]
+        trigger: true
+      - task: run tests
+        config:
+          image: docker:///cloudfoundry/cflinuxfs2
+          inputs:
+            - name: build-tar
+          platform: linux
+          run:
+            path: bash
+            args: ["-c",
+              "wget http://hg.nginx.org/nginx-tests/archive/tip.tar.gz &&
+              tar -xzf tip.tar.gz -C /tmp/ &&
+              tar xzf build-tar/binary-builder-source.tgz -C /tmp/ &&
+              cd /tmp/nginx-tests* &&
+              TEST_NGINX_BINARY=`ls /tmp/x86_64-linux-gnu/ports/nginx/*/nginx-*/objs/nginx` prove ."]
 <% %w(godep composer glide nginx).each do |dependency| %>
   - name: trigger-<%= dependency %>-build
     serial: true
