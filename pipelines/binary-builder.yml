@@ -413,7 +413,7 @@ jobs:
     serial: true
     plan:
       - get: build-tar
-        passed: [ update-nginx-staticfile-manifest, update-nginx-php-manifest]
+        passed: [ update-nginx-in-staticfile-buildpack, update-nginx-in-php-buildpack]
         trigger: true
       - task: run tests
         config:
@@ -490,7 +490,7 @@ jobs:
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
-  - name: update-composer-in-manifest
+  - name: update-composer-in-php-buildpack
     serial: true
     plan:
       - do:
@@ -538,12 +538,12 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "update-composer-in-manifest job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-composer-in-manifest"
+            text: "update-composer-in-php-buildpack job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-composer-in-php-buildpack"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% %w(godep glide).each do |go_buildpack_dependency| %>
-  - name: update-<%= go_buildpack_dependency %>-in-manifest
+  - name: update-<%= go_buildpack_dependency %>-in-go-buildpack
     serial: true
     plan:
       - do:
@@ -591,13 +591,13 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "update-<%= go_buildpack_dependency %>-in-manifest job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-<%= go_buildpack_dependency %>-in-manifest"
+            text: "update-<%= go_buildpack_dependency %>-in-go-buildpack job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-<%= go_buildpack_dependency %>-in-go-buildpack"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 <% %w(staticfile php).each do |buildpack| %>
-  - name: update-nginx-<%= buildpack %>-manifest
+  - name: update-nginx-in-<%= buildpack %>-buildpack
     serial: true
     plan:
       - do:
@@ -646,7 +646,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "update-composer-in-manifest job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-composer-in-manifest"
+            text: "update-nginx-in-<%= buildpack %>-buildpack job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-nginx-in-<%= buildpack %>-buildpack"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
