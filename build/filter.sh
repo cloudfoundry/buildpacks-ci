@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 pushd /etc &>/dev/null
-  git clone https://github.com/geramirez/concourse-filter &>/dev/null
+  git clone https://github.com/pivotal-cf-experimental/concourse-filter &>/dev/null
   rm -rf concourse-filter/.git &>/dev/null
   pushd concourse-filter &>/dev/null
     go build &>/dev/null
