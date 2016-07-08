@@ -553,3 +553,58 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   <% end %>
 <% end %>
+<% %w(staticfile php).each do |buildpack| %>
+  - name: update-nginx-<%= buildpack %>-manifest
+    serial: true
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: buildpack
+            resource: <%= buildpack %>-buildpack
+          - get: builds-out
+            passed: [ build-nginx ]
+            trigger: true
+        - task: update-dependency-in-manifests
+          file: buildpacks-ci/tasks/update-dependency-in-buildpack.yml
+          params:
+            DEPENDENCY: nginx
+            BUILDPACK_NAME: <%= buildpack %>
+        - put: cf-environments
+          resource: cf-edge-environments
+          params:
+            acquire: true
+        - do:
+          - task: rspec
+            config:
+              platform: linux
+              image: docker:///cfbuildpacks/ci
+              inputs:
+                - name: buildpack-artifacts
+                  path: buildpack
+                - name: buildpacks-ci
+                - name: cf-environments
+              run:
+                path: buildpacks-ci/scripts/test_buildpack
+              params:
+                STACKS: cflinuxfs2
+                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+                CF_PASSWORD: {{ci-cf-password}}
+                CF_EDGE: 'true'
+            privileged: true
+          - put: <%= buildpack %>-buildpack
+            params:
+              repository: buildpack-artifacts
+              rebase: true
+            ensure:
+            put: cf-edge-environments
+            params:
+              release: cf-environments
+        on_failure:
+          put: failure-alert
+          params:
+            text: "update-composer-in-manifest job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-composer-in-manifest"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>

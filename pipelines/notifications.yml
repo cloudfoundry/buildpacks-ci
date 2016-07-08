@@ -69,7 +69,7 @@ jobs:
           run:
             path: bash
             args:
-              - -c
+              - -cl
               - |
                 pushd buildpacks-ci
                   bundle
@@ -119,7 +119,7 @@ jobs:
           run:
             path: bash
             args:
-              - -c
+              - -cl
               - |
                 cd buildpacks-ci
                 bundle
@@ -139,7 +139,7 @@ jobs:
           run:
             path: bash
             args:
-              - -c
+              - -cl
               - |
                 cd buildpacks-ci
                 bundle
@@ -176,7 +176,7 @@ jobs:
           run:
             path: bash
             args:
-              - -c
+              - -cl
               - |
                 git clone ./new-cves ./output-new-cves && \
                 git clone ./new-buildpack-cves ./output-new-buildpack-cves && \

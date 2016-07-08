@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 # ./fly-login username password
 
 fly -t buildpacks login -c https://buildpacks.ci.cf-app.com -u $1 -p $2
