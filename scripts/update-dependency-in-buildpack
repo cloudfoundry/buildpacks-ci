@@ -14,9 +14,9 @@ dependency = ENV['DEPENDENCY']
 # can only handle one buildpack update atm
 buildpack = ENV.fetch("BUILDPACK_NAME", BuildpackDependency.for(dependency).first)
 buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "buildpack"))
-buildpack_manifest_updater = BuildpackDependencyUpdater.create(dependency, buildpack, buildpack_dir, binary_builds_dir)
+buildpack_updater = BuildpackDependencyUpdater.create(dependency, buildpack, buildpack_dir, binary_builds_dir)
 
-version = buildpack_manifest_updater.dependency_version
+version = buildpack_updater.dependency_version
 
 if buildpack == 'php' && version.split(".")[1].to_i.odd?
   options = File.read(File.join(buildpacks_dir, "defaults", "options.json"))
@@ -25,7 +25,7 @@ if buildpack == 'php' && version.split(".")[1].to_i.odd?
 end
 
 puts "Updating manifest with #{dependency} #{version}..."
-buildpack_manifest_updater.run!
+buildpack_updater.run!
 
 tracker_client = TrackerClient.new(ENV['TRACKER_API_TOKEN'], ENV['TRACKER_PROJECT_ID'], ENV['TRACKER_REQUESTER_ID'].to_i)
 story_ids = tracker_client.search(name: "#{dependency} #{version}").select do |story|
