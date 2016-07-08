@@ -413,7 +413,7 @@ jobs:
     serial: true
     plan:
       - get: build-tar
-        passed: [ update-nginx-in-staticfile-buildpack, update-nginx-in-php-buildpack]
+        passed: [ build-nginx ]
         trigger: true
       - task: run tests
         config:
@@ -465,6 +465,9 @@ jobs:
           params:
             BINARY_NAME: <%= dependency %>
           privileged: true
+        - put: build-tar
+          params:
+            from: binary-builder-artifacts/(build.tgz|*.phar)
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary.yml
           params:
@@ -526,6 +529,9 @@ jobs:
                 COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
                 CF_PASSWORD: {{ci-cf-password}}
                 CF_EDGE: 'true'
+                TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+                TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+                TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
             privileged: true
           - put: php-buildpack
             params:
@@ -579,6 +585,9 @@ jobs:
                 COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
                 CF_PASSWORD: {{ci-cf-password}}
                 CF_EDGE: 'true'
+                TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+                TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+                TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
             privileged: true
           - put: go-buildpack
             params:
@@ -634,6 +643,9 @@ jobs:
                 COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
                 CF_PASSWORD: {{ci-cf-password}}
                 CF_EDGE: 'true'
+                TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+                TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+                TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
             privileged: true
           - put: <%= buildpack %>-buildpack
             params:
