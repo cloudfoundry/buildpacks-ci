@@ -493,120 +493,9 @@ jobs:
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
-  - name: update-composer-in-php-buildpack
-    serial: true
-    plan:
-      - do:
-        - aggregate:
-          - get: buildpacks-ci
-          - get: buildpack
-            resource: php-buildpack
-          - get: builds-out
-            passed: [ build-composer ]
-            trigger: true
-        - task: update-dependency-in-manifests
-          file: buildpacks-ci/tasks/update-dependency-in-buildpack.yml
-          params:
-            DEPENDENCY: composer
-        - put: cf-environments
-          resource: cf-edge-environments
-          params:
-            acquire: true
-        - do:
-          - task: rspec
-            config:
-              platform: linux
-              image: docker:///cfbuildpacks/ci
-              inputs:
-                - name: buildpack-artifacts
-                  path: buildpack
-                - name: buildpacks-ci
-                - name: cf-environments
-              run:
-                path: buildpacks-ci/scripts/test_buildpack
-              params:
-                STACKS: cflinuxfs2
-                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-                CF_PASSWORD: {{ci-cf-password}}
-                CF_EDGE: 'true'
-                TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-                TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-                TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-            privileged: true
-          - put: php-buildpack
-            params:
-              repository: buildpack-artifacts
-              rebase: true
-          ensure:
-            put: cf-edge-environments
-            params:
-              release: cf-environments
-        on_failure:
-          put: failure-alert
-          params:
-            text: "update-composer-in-php-buildpack job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-composer-in-php-buildpack"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-<% %w(godep glide).each do |go_buildpack_dependency| %>
-  - name: update-<%= go_buildpack_dependency %>-in-go-buildpack
-    serial: true
-    plan:
-      - do:
-        - aggregate:
-          - get: buildpacks-ci
-          - get: buildpack
-            resource: go-buildpack
-          - get: builds-out
-            passed: [ build-<%= go_buildpack_dependency %> ]
-            trigger: true
-        - task: update-dependency-in-manifests
-          file: buildpacks-ci/tasks/update-dependency-in-buildpack.yml
-          params:
-            DEPENDENCY: <%= go_buildpack_dependency %>
-        - put: cf-environments
-          resource: cf-edge-environments
-          params:
-            acquire: true
-        - do:
-          - task: rspec
-            config:
-              platform: linux
-              image: docker:///cfbuildpacks/ci
-              inputs:
-                - name: buildpack-artifacts
-                  path: buildpack
-                - name: buildpacks-ci
-                - name: cf-environments
-              run:
-                path: buildpacks-ci/scripts/test_buildpack
-              params:
-                STACKS: cflinuxfs2
-                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-                CF_PASSWORD: {{ci-cf-password}}
-                CF_EDGE: 'true'
-                TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-                TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-                TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-            privileged: true
-          - put: go-buildpack
-            params:
-              repository: buildpack-artifacts
-              rebase: true
-          ensure:
-            put: cf-edge-environments
-            params:
-              release: cf-environments
-        on_failure:
-          put: failure-alert
-          params:
-            text: "update-<%= go_buildpack_dependency %>-in-go-buildpack job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-<%= go_buildpack_dependency %>-in-go-buildpack"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-<% end %>
-<% %w(staticfile php).each do |buildpack| %>
-  - name: update-nginx-in-<%= buildpack %>-buildpack
+<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"]}.each do |buildpack, dependencies| %>
+  <% dependencies.each do |dependency| %>
+  - name: update-<%= dependency %>-in-<%= buildpack %>-buildpack
     serial: true
     plan:
       - do:
@@ -615,13 +504,13 @@ jobs:
           - get: buildpack
             resource: <%= buildpack %>-buildpack
           - get: builds-out
-            passed: [ build-nginx ]
+            passed: [ build-<%= dependency %> ]
             trigger: true
         - task: update-dependency-in-manifests
           file: buildpacks-ci/tasks/update-dependency-in-buildpack.yml
           params:
-            DEPENDENCY: nginx
-            BUILDPACK_NAME: <%= buildpack %>
+            <%= "BUILDPACK_NAME: #{buildpack}" if dependency == "nginx" %>
+            DEPENDENCY: <%= dependency %>
         - put: cf-environments
           resource: cf-edge-environments
           params:
@@ -658,8 +547,9 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "update-nginx-in-<%= buildpack %>-buildpack job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-nginx-in-<%= buildpack %>-buildpack"
+            text: "update-<%= dependency %>-in-<%= buildpack %>-buildpack job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/update-<%= dependency %>-in-<%= buildpack %>-buildpack"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  <% end %>
 <% end %>
