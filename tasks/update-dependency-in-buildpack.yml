@@ -10,7 +10,7 @@ outputs:
 run:
   path: bash
   args:
-    - -c
+    - -cl
     - |
       pushd buildpacks-ci
         bundle
