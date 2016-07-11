@@ -29,6 +29,8 @@ if binary_name == "composer" then
   download_url = "https://getcomposer.org/download/#{latest_build['version']}/composer.phar"
   system("curl #{download_url} -o binary-builder/composer-#{latest_build['version']}.phar") or raise "Could not download composer.phar"
   FileUtils.cp_r(Dir["binary-builder/*"], "binary-builder-artifacts/")
+  FileUtils.mkdir_p('binary-builder-artifacts/final-artifact/')
+  FileUtils.cp_r('binary-builder-artifacts/composer.phar', 'binary-builder-artifacts/final-artifact/')
 else
   flags = "--name=#{binary_name}"
   latest_build.each_pair do |key, value|
@@ -47,6 +49,8 @@ else
     end
   end
   FileUtils.cp_r(Dir["binary-builder/*.tgz"], "binary-builder-artifacts/")
+  FileUtils.mkdir_p('binary-builder-artifacts/final-artifact/')
+  FileUtils.cp_r('binary-builder-artifacts/build.tgz', 'binary-builder-artifacts/final-artifact/')
 end
 
 /^Source URL:\s(.*)$/.match(@binary_builder_output)
