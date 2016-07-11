@@ -16,6 +16,6 @@ RSpec.configure do |config|
   end
 
   def run(cmd)
-    fly("i -b #{@id} -s one-off -- bash -c '#{cmd}'")
+    fly("i -b #{@id} -s one-off -- bash -c '#{cmd} && sleep 5'")
   end
 end

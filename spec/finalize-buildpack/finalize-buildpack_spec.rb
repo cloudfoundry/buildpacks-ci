@@ -8,7 +8,7 @@ describe 'finalize-buildpack task' do
   end
 
   it 'emits shasum in CHANGELOG' do
-    output = run('cat /tmp/build/*/buildpack-artifacts/RECENT_CHANGES')
+    output = run("cat /tmp/build/*/buildpack-artifacts/RECENT_CHANGES && echo '\t'")
     changelog_sha = output.split("\n").last
     Dir.glob('specs/finalize-buildpack/*.zip') do |filename|
       actual_sha = '  * SHA256: ' + Digest::SHA256.file(filename).hexdigest
@@ -17,7 +17,7 @@ describe 'finalize-buildpack task' do
   end
 
   it 'emits a valid markdown table of dependencies' do
-    output = run('cat /tmp/build/*/buildpack-artifacts/RECENT_CHANGES')
+    output = run("cat /tmp/build/*/buildpack-artifacts/RECENT_CHANGES && echo '\t'")
     expect(output).to include "Packaged binaries:\r\r\n\r\r\n"
     expect(output).to include "| name  | version | cf_stacks  |\r\r\n"
     expect(output).to include "|-------|---------|------------|\r\r\n"
@@ -25,13 +25,13 @@ describe 'finalize-buildpack task' do
   end
 
   it 'emits tag based on VERSION' do
-    output = run('cat /tmp/build/*/buildpack-artifacts/tag')
+    output = run("cat /tmp/build/*/buildpack-artifacts/tag && echo '\t'")
     version = File.read('./spec/finalize-buildpack/VERSION')
-    expect(output).to be == "v#{version}"
+    expect(output).to include("v#{version}")
   end
 
   it 'emits a SHA256.txt file' do
-    output = run('cat /tmp/build/*/buildpack-artifacts/*.SHA256SUM.txt')
+    output = run("cat /tmp/build/*/buildpack-artifacts/*.SHA256SUM.txt && echo '\t'")
     expect(output).to include '8965f5f7a2af993f1e0f66a5bf41d5edf0f957368ce7333af6af82dfc8e88c27  staticfile_buildpack-cached-v1.2.1.zip'
   end
 end

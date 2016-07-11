@@ -62,12 +62,13 @@ describe 'create bosh stacks release task' do
     it 'has the correct ACCESS_KEY_ID' do
       private_yml = YAML.load(run('cat /tmp/build/*/release/config/private.yml'))
 
-      expect(private_yml['blobstore']['s3']['access_key_id']).to be == @access_key_id
+      expect(private_yml['blobstore']['s3']['access_key_id']).to be == ["redacted ACCESS_KEY_ID"]
     end
 
     it 'has the correct SECRET_ACCESS_KEY' do
       private_yml = YAML.load(run('cat /tmp/build/*/release/config/private.yml'))
-      expect(private_yml['blobstore']['s3']['secret_access_key']).to be == @secret_access_key
+      puts private_yml
+      expect(private_yml['blobstore']['s3']['secret_access_key']).to be == ["redacted SECRET_ACCESS_KEY"]
     end
   end
 end
