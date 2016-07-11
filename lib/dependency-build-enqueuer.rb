@@ -24,8 +24,10 @@ class DependencyBuildEnqueuer
     @latest_version = DependencyBuildEnqueuer.latest_version_for_dependency(dependency, dependency_versions, options)
 
     new_build = {"version" => latest_version}
-    dependency_verification_type, dependency_verification_value = DependencyBuildEnqueuer.build_verification_for(dependency, latest_version)
-    new_build[dependency_verification_type] = dependency_verification_value
+    dependency_verification_tuples = DependencyBuildEnqueuer.build_verifications_for(dependency, latest_version)
+    dependency_verification_tuples.each do |dependency_verification_type, dependency_verification_value|
+      new_build[dependency_verification_type] = dependency_verification_value
+    end
 
     dependency_builds_file = File.join(binary_builds_dir, "#{dependency}-builds.yml")
     File.open(dependency_builds_file, "w") do |file|
@@ -37,6 +39,10 @@ class DependencyBuildEnqueuer
     case dependency
     when "godep"
       dependency_versions.max { |a, b| a.gsub("v", "").to_i <=> b.gsub("v", "").to_i }
+    when "nginx"
+      dependency_versions.map do |version|
+        Gem::Version.new(version.gsub("release-", ""))
+      end.sort.reverse[0].to_s
     when "composer"
       dependency_versions.map do |version|
         gem_version = Gem::Version.new(version)
@@ -60,15 +66,27 @@ class DependencyBuildEnqueuer
 
   private
 
-  def self.build_verification_for(dependency, version)
+  def self.build_verifications_for(dependency, version)
+    verifications = []
     case dependency
     when "godep"
       download_url = "https://github.com/tools/godep/archive/#{version}.tar.gz"
+      verifications << shasum_256_verification(download_url)
     when "composer"
       download_url = "https://getcomposer.org/download/#{version}/composer.phar"
+      verifications << shasum_256_verification(download_url)
     when "glide"
       download_url = "https://github.com/Masterminds/glide/archive/#{version}.tar.gz"
+      verifications << shasum_256_verification(download_url)
+    when "nginx"
+      gpg_signature_url = "http://nginx.org/download/nginx-#{version}.tar.gz.asc"
+      gpg_signature = `curl -sL #{gpg_signature_url}`
+      verifications << ['gpg-rsa-key-id', 'A1C052F8']
+      verifications << ['gpg-signature', gpg_signature]
     end
+  end
+
+  def self.shasum_256_verification(download_url)
     # only get the sha value and not the filename
     shasum256 = `curl -sL #{download_url} | shasum -a 256 | cut -d " " -f 1`
     ["sha256", shasum256.strip]
