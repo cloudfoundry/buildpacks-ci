@@ -1,4 +1,10 @@
 ---
+resource_types:
+- name: email-sender
+  type: docker-image
+  source:
+    repository: pcfseceng/email-resource
+
 resources:
   - name: monday-funday
     type: cron
@@ -38,7 +44,7 @@ resources:
       uri: https://github.com/cloudfoundry/stacks
       branch: master
   - name: cves-email
-    type: email
+    type: email-sender
     source:
       smtp:
         host: email-smtp.us-east-1.amazonaws.com
