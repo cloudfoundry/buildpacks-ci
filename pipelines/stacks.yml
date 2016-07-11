@@ -181,9 +181,8 @@ jobs:
           run:
             path: bash
             args:
-              - '-cl'
-              - |
-                "buildpacks-ci/scripts/notifications/pivotal_tracker 'Monday-Funday *stack* release' 'This is a reminder that a stack release was automatically started, please monitor it, and deliver story when done.'"
+              - '-c'
+              - "buildpacks-ci/scripts/notifications/pivotal_tracker 'Monday-Funday *stack* release' 'This is a reminder that a stack release was automatically started, please monitor it, and deliver story when done.'"
           params:
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
