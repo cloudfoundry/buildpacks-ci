@@ -230,7 +230,7 @@ jobs:
           privileged: true
         - put: build-tar
           params:
-            from: binary-builder-artifacts/build.tgz
+            file: binary-builder-artifacts/final-artifact/*
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary.yml
           params:
@@ -472,7 +472,7 @@ jobs:
           privileged: true
         - put: build-tar
           params:
-            from: binary-builder-artifacts/(build.tgz|*.phar)
+            file: binary-builder-artifacts/final-artifact/*
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary.yml
           params:
