@@ -19,7 +19,7 @@ class BuildpackDependencyUpdater
     @buildpack = buildpack
     @buildpack_dir = buildpack_dir
     @binary_builds_dir = binary_builds_dir
-    @dependency_version, @url, @md5 = get_dependency_info(dependency, binary_builds_dir)
+    @dependency_version, @url, @md5 = get_dependency_info
   end
 
   def run!
@@ -27,7 +27,7 @@ class BuildpackDependencyUpdater
     buildpack_manifest = YAML.load_file(manifest_file)
 
     buildpack_manifest = perform_dependency_update(buildpack_manifest)
-    buildpack_manifest = perform_dependency_specific_changes(buildpack_manifest, dependency)
+    buildpack_manifest = perform_dependency_specific_changes(buildpack_manifest)
 
     File.open(manifest_file, "w") do |file|
       file.write(buildpack_manifest.to_yaml)
@@ -36,7 +36,7 @@ class BuildpackDependencyUpdater
 
   private
 
-  def get_dependency_info(dependency, binary_builds_dir)
+  def get_dependency_info
     git_commit_message = GitClient.last_commit_message(binary_builds_dir)
 
     /.*filename:\s+binary-builder\/(#{dependency}-(.*)-linux-x64.tgz).*md5:\s+(\w*)\,.*/.match(git_commit_message)
@@ -63,7 +63,7 @@ class BuildpackDependencyUpdater
     buildpack_manifest
   end
 
-  def update_version_in_url_to_dependency_map(buildpack_manifest, dependency)
+  def update_version_in_url_to_dependency_map(buildpack_manifest)
     buildpack_manifest["url_to_dependency_map"].delete_if {|dep| dep["name"] == dependency}
     dependency_hash = {
       "match"   => dependency,
@@ -74,26 +74,26 @@ class BuildpackDependencyUpdater
     buildpack_manifest
   end
 
-  def perform_dependency_specific_changes(buildpack_manifest, dependency)
+  def perform_dependency_specific_changes(buildpack_manifest)
     buildpack_manifest
   end
 end
 
 
 class BuildpackDependencyUpdater::Godep < BuildpackDependencyUpdater
-  def perform_dependency_specific_changes(buildpack_manifest, dependency)
-    update_version_in_url_to_dependency_map(buildpack_manifest, dependency)
+  def perform_dependency_specific_changes(buildpack_manifest)
+    update_version_in_url_to_dependency_map(buildpack_manifest)
   end
 end
 
 class BuildpackDependencyUpdater::Glide < BuildpackDependencyUpdater
-  def perform_dependency_specific_changes(buildpack_manifest, dependency)
-    update_version_in_url_to_dependency_map(buildpack_manifest, dependency)
+  def perform_dependency_specific_changes(buildpack_manifest)
+    update_version_in_url_to_dependency_map(buildpack_manifest)
   end
 end
 
 class BuildpackDependencyUpdater::Composer < BuildpackDependencyUpdater
-  def get_dependency_info(dependency, binary_builds_dir)
+  def get_dependency_info
     git_commit_message = GitClient.last_commit_message(binary_builds_dir)
 
     dependency_version = git_commit_message[/filename:\s+binary-builder\/composer-([\d\.]*).phar/, 1]
@@ -105,9 +105,8 @@ class BuildpackDependencyUpdater::Composer < BuildpackDependencyUpdater
 end
 
 class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
-  def update_version_in_url_to_dependency_map(buildpack_manifest, dependency)
-    minor_version = dependency_version.split(".")[1].to_i
-    if minor_version.odd? && buildpack == "staticfile"
+  def update_version_in_url_to_dependency_map(buildpack_manifest)
+    if mainline_version?(dependency_version) && buildpack == "staticfile"
       buildpack_manifest["url_to_dependency_map"].delete_if {|dep| dep["name"] == dependency}
       dependency_hash = {
         "match"   => dependency,
@@ -119,7 +118,7 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
     buildpack_manifest
   end
 
-  def perform_dependency_specific_changes(buildpack_manifest, dependency)
+  def perform_dependency_specific_changes(buildpack_manifest)
     if buildpack == 'php' && dependency_version.split(".")[1].to_i.odd?
       options = File.read(File.join(buildpack_dir, "defaults", "options.json"))
       /\"(NGINX\w+LATEST)\":.*/.match(options)
@@ -127,7 +126,7 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
       File.open(File.join(buildpack_dir, "defaults", "options.json"),"w") {|file| file.puts new_default}
     end
 
-    update_version_in_url_to_dependency_map(buildpack_manifest, dependency)
+    update_version_in_url_to_dependency_map(buildpack_manifest)
   end
 
   def perform_dependency_update(buildpack_manifest)
