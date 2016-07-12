@@ -375,6 +375,7 @@ jobs:
 <% supported_languages.each do |language| %>
   - name: bosh-release-<%= language %>
     serial: true
+    serial_groups: [cf-release-buildpacks]
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -423,7 +424,6 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack-releases
-          passed: [ bosh-release-<%= language %> ]
         - get: cf-release
           resource: cf-release-develop
         - get: <%= language %>-buildpack-github-release
