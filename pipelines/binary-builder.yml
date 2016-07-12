@@ -532,6 +532,9 @@ jobs:
           params:
             <%= "BUILDPACK_NAME: #{buildpack}" if dependency == "nginx" %>
             DEPENDENCY: <%= dependency %>
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
         - put: cf-environments
           resource: cf-edge-environments
           params:
@@ -553,9 +556,6 @@ jobs:
                 COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
                 CF_PASSWORD: {{ci-cf-password}}
                 CF_EDGE: 'true'
-                TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-                TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-                TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
             privileged: true
           - put: <%= buildpack %>-buildpack
             params:
