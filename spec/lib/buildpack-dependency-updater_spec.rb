@@ -212,6 +212,8 @@ filename: binary-builder/nginx-#{expected_version}-linux-x64.tgz, md5: 18bec8f65
       let(:dependency)        { "nginx" }
       let(:buildpack)         { "php" }
       let(:expected_version)  { "1.11.2" }
+      let(:defaults_options_file) { File.join(buildpack_dir, "defaults/options.json") }
+
       before do
         buildpack_manifest_contents = <<-MANIFEST
 ---
@@ -238,6 +240,16 @@ MANIFEST
 Build glide - #{expected_version}
 filename: binary-builder/nginx-#{expected_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
+
+        buildpack_defaults_options_json = <<-OPTIONS_JSON
+{
+    "NGINX_VERSION": "{NGINX_1_11_LATEST}",
+    "NGINX_1_11_LATEST": "1.11.1",
+    "OTHER_STUFF_WE_DONT_CARE_ABOUT": "IN THIS TEST"
+}
+OPTIONS_JSON
+        FileUtils.mkdir_p(File.join(buildpack_dir, "defaults"))
+        File.write(defaults_options_file, buildpack_defaults_options_json)
       end
 
       it "updates the specified buildpack manifest dependency with the specified version" do
@@ -253,7 +265,13 @@ filename: binary-builder/nginx-#{expected_version}-linux-x64.tgz, md5: 18bec8f65
         expect(dependency_in_manifest["version"]).to eq("1.10.1")
         expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("7d28497395b62221f3380e82f89cd197")
+      end
 
+      it "updates the php buildpack default nginx version configuration" do
+        subject.run!
+
+        defaults_options = JSON.parse(File.read(defaults_options_file))
+        expect(defaults_options['NGINX_1_11_LATEST']).to eq('1.11.2')
       end
     end
   end
