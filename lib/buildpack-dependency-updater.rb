@@ -109,7 +109,7 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
     if mainline_version?(dependency_version) && buildpack == "staticfile"
       buildpack_manifest["url_to_dependency_map"].delete_if {|dep| dep["name"] == dependency}
       dependency_hash = {
-        "match"   => dependency,
+        "match"   => "#{dependency}.tgz",
         "name"    => dependency,
         "version" => dependency_version
       }
