@@ -67,6 +67,7 @@ class NewReleasesDetector
       current_tags = get_tags.call
 
       filename = "#{new_releases_dir}/#{current_dependency}.yaml"
+      filename_diff = "#{new_releases_dir}/#{current_dependency}-new.yaml"
       previous_tags = if File.exist?(filename)
                         YAML.load_file(filename)
                       else
@@ -78,6 +79,7 @@ class NewReleasesDetector
       if diff_tags.any?
         dependency_tags[current_dependency] = diff_tags
         File.write(filename, current_tags.to_yaml)
+        File.write(filename_diff, diff_tags.to_yaml)
       else
         warn "There are no new updates to the *#{current_dependency}* dependency"
       end

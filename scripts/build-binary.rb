@@ -10,6 +10,7 @@ def ci_skip_for(binary)
   return false if binary == "composer"
   return false if binary == "glide"
   return false if binary == "nginx"
+  return false if binary == "node"
   return true
 end
 

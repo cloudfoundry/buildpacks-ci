@@ -157,3 +157,34 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
     !mainline_version?(version)
   end
 end
+
+class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
+  def perform_dependency_update(buildpack_manifest)
+    major_version, minor_version, _ = dependency_version.split(".")
+    version_to_delete = buildpack_manifest["dependencies"].select do |dep|
+      dep_maj, dep_min, _ = dep["version"].split(".")
+
+      if major_version == "0"
+        # node 0.10.x, 0.12.x
+        dep_maj == major_version && dep_min == minor_version && dep["name"] == dependency
+      else
+        # node 4.x, 5.x, 6.x
+        dep_maj == major_version && dep["name"] == dependency
+      end
+    end.map do |dep|
+      Gem::Version.new(dep['version'])
+    end.sort.first.to_s
+
+    buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && dep["version"] == version_to_delete}
+    dependency_hash = {
+      "name"      => dependency,
+      "version"   => dependency_version,
+      "uri"       => @url,
+      "md5"       => @md5,
+      "cf_stacks" => ["cflinuxfs2"]
+    }
+    buildpack_manifest["dependencies"] << dependency_hash
+    buildpack_manifest
+  end
+end
+
