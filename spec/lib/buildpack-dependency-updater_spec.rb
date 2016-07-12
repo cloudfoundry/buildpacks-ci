@@ -168,12 +168,6 @@ url_to_dependency_map:
 
 dependencies:
   - name: nginx
-    version: 1.10.1
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz
-    cf_stacks:
-      - cflinuxfs2
-    md5: 7d28497395b62221f3380e82f89cd197
-  - name: nginx
     version: 1.11.1
     uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.11.1-linux-x64.tgz
     cf_stacks:
@@ -199,12 +193,6 @@ filename: binary-builder/nginx-#{expected_version}-linux-x64.tgz, md5: 18bec8f65
         expect(dependency_in_manifest["version"]).to eq(expected_version)
         expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.11.2-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
-
-        dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] != expected_version}
-        expect(dependency_in_manifest["version"]).to eq("1.10.1")
-        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz")
-        expect(dependency_in_manifest["md5"]).to eq("7d28497395b62221f3380e82f89cd197")
-
       end
     end
 
