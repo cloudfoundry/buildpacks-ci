@@ -120,6 +120,13 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
   end
 
   def perform_dependency_specific_changes(buildpack_manifest, dependency)
+    if buildpack == 'php' && dependency_version.split(".")[1].to_i.odd?
+      options = File.read(File.join(buildpack_dir, "defaults", "options.json"))
+      /\"(NGINX\w+LATEST)\":.*/.match(options)
+      new_default = options.gsub(/\"NGINX\w+LATEST\":.*/, "\"#{$1}\": \"#{dependency_version}\",")
+      File.open(File.join(buildpack_dir, "defaults", "options.json"),"w") {|file| file.puts new_default}
+    end
+
     update_version_in_url_to_dependency_map(buildpack_manifest, dependency)
   end
 

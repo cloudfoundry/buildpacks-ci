@@ -18,12 +18,6 @@ buildpack_updater = BuildpackDependencyUpdater.create(dependency, buildpack, bui
 
 version = buildpack_updater.dependency_version
 
-if buildpack == 'php' && version.split(".")[1].to_i.odd?
-  options = File.read(File.join(buildpack_dir, "defaults", "options.json"))
-  new_default = options.gsub(/\"NGINX\w+LATEST\":.*/, "\"NGINX_LATEST\": \"#{version}\",")
-  File.open(File.join(buildpack_dir, "defaults", "options.json"),"w") {|file| file.puts new_default}
-end
-
 puts "Updating manifest with #{dependency} #{version}..."
 buildpack_updater.run!
 
