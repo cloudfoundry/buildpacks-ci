@@ -126,6 +126,15 @@ resources:
       ignore_paths:
         - VERSION
         - CHANGELOG
+  - name: nodejs-buildpack
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/nodejs-buildpack.git
+      private_key: {{nodejs-buildpack-private-key}}
+      branch: develop
+      ignore_paths:
+        - VERSION
+        - CHANGELOG
   - name: go-buildpack
     type: git
     source:
@@ -156,6 +165,13 @@ resources:
       branch: new-release-notifications
       private_key: {{buildpacks-ci-private-key}}
       paths: [ glide.yaml ]
+  - name: node-new-releases
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri}}
+      branch: new-release-notifications
+      private_key: {{buildpacks-ci-private-key}}
+      paths: [ node-new.yaml ]
   - name: nginx-new-releases
     type: git
     source:
@@ -211,7 +227,7 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-<% %w(php php7 ruby jruby bundler node python httpd).each do |runtime| %>
+<% %w(php php7 ruby jruby bundler python httpd).each do |runtime| %>
   - name: build-<%= runtime %>
     serial: true
     plan:
@@ -434,7 +450,7 @@ jobs:
               tar xzf build-tar/binary-builder-source.tgz -C /tmp/ &&
               cd /tmp/nginx-tests* &&
               TEST_NGINX_BINARY=`ls /tmp/x86_64-linux-gnu/ports/nginx/*/nginx-*/objs/nginx` prove ."]
-<% %w(godep composer glide nginx).each do |dependency| %>
+<% %w(godep composer glide nginx node).each do |dependency| %>
   - name: trigger-<%= dependency %>-build
     serial: true
     plan:
@@ -498,7 +514,7 @@ jobs:
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
-<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"]}.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"]}.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
   - name: update-<%= dependency %>-in-<%= buildpack %>-buildpack
     serial: true

@@ -18,20 +18,33 @@ class DependencyBuildEnqueuer
   end
 
   def enqueue_build
-    dependency_versions_file = File.join(new_releases_dir, "#{dependency}.yaml")
-    dependency_versions = YAML.load_file(dependency_versions_file)
+    # node currently uses the node-new.yaml file to get a list of the new
+    # versions to build. The plan is to eventually migrate the rest of the
+    # dependencies to use a similar file as well
 
-    @latest_version = DependencyBuildEnqueuer.latest_version_for_dependency(dependency, dependency_versions, options)
+    if dependency == "node"
+      new_dependency_versions_file = File.join(new_releases_dir, "#{dependency}-new.yaml")
+      new_dependency_versions = YAML.load_file(new_dependency_versions_file)
+    else
+      dependency_versions_file = File.join(new_releases_dir, "#{dependency}.yaml")
+      dependency_versions = YAML.load_file(dependency_versions_file)
+      @latest_version = DependencyBuildEnqueuer.latest_version_for_dependency(dependency, dependency_versions, options)
+      new_dependency_versions = [latest_version]
+    end
 
-    new_build = {"version" => latest_version}
-    dependency_verification_tuples = DependencyBuildEnqueuer.build_verifications_for(dependency, latest_version)
-    dependency_verification_tuples.each do |dependency_verification_type, dependency_verification_value|
-      new_build[dependency_verification_type] = dependency_verification_value
+    versions_to_build = []
+    new_dependency_versions.each do |ver|
+      new_build = {"version" => ver}
+      dependency_verification_tuples = DependencyBuildEnqueuer.build_verifications_for(dependency, ver)
+      dependency_verification_tuples.each do |dependency_verification_type, dependency_verification_value|
+        new_build[dependency_verification_type] = dependency_verification_value
+      end
+      versions_to_build.push new_build
     end
 
     dependency_builds_file = File.join(binary_builds_dir, "#{dependency}-builds.yml")
     File.open(dependency_builds_file, "w") do |file|
-      file.write({dependency => [new_build]}.to_yaml)
+      file.write({dependency => versions_to_build}.to_yaml)
     end
   end
 
@@ -69,6 +82,9 @@ class DependencyBuildEnqueuer
   def self.build_verifications_for(dependency, version)
     verifications = []
     case dependency
+    when "node"
+      download_url = "https://github.com/nodejs/node/archive/#{version}.tar.gz"
+      verifications << shasum_256_verification(download_url)
     when "godep"
       download_url = "https://github.com/tools/godep/archive/#{version}.tar.gz"
       verifications << shasum_256_verification(download_url)

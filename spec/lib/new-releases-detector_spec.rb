@@ -10,6 +10,7 @@ describe NewReleasesDetector do
   end
   let(:new_releases_dir) { Dir.mktmpdir }
   let(:openjdk_yaml_filename) { "#{new_releases_dir}/openjdk.yaml" }
+  let(:openjdk_yaml_file_new) { "#{new_releases_dir}/openjdk-new.yaml" }
   let(:github_username) { 'github_username' }
   let(:github_password) { 'github_password1!' }
 
@@ -54,6 +55,11 @@ describe NewReleasesDetector do
 
       it 'writes to a file the latest releases' do
         expect(File).to receive(:write).with(openjdk_yaml_filename, "---\n- v1\n- v2\n- v3\n- v4\n")
+        subject
+      end
+
+      it 'writes the diff in releases to a file' do
+        expect(File).to receive(:write).with(openjdk_yaml_file_new, "---\n- v3\n- v4\n")
         subject
       end
     end

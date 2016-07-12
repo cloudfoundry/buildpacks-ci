@@ -12,9 +12,11 @@ describe DependencyBuildEnqueuer do
   subject { described_class.new(dependency, new_releases_dir, binary_builds_dir, options) }
 
   describe '#enqueue_build' do
-    let(:dependency_versions_file) { File.join(new_releases_dir, "#{dependency}.yaml") }
-    let(:builds_file)              { File.join(binary_builds_dir, "#{dependency}-builds.yml") }
-    let(:sha256)                   { "sha256-mocked" }
+    let(:dependency_versions_file)      { File.join(new_releases_dir, "#{dependency}.yaml") }
+    let(:dependency_new_versions_file)  { File.join(new_releases_dir, "#{dependency}-new.yaml") }
+    let(:builds_file)                   { File.join(binary_builds_dir, "#{dependency}-builds.yml") }
+    let(:sha256)                        { "sha256-mocked" }
+    let(:sha256_1)                      { "sha256-mocked-1" }
 
     before do
       File.open(dependency_versions_file, "w") do |file|
@@ -104,6 +106,32 @@ describe DependencyBuildEnqueuer do
         expect(enqueued_builds.first['version']).to eq("1.11.2")
         expect(enqueued_builds.first['gpg-rsa-key-id']).to eq("gpg-key-mocked")
         expect(enqueued_builds.first['gpg-signature']).to eq("gpg-signature-mocked")
+      end
+    end
+
+    context "node" do
+      let(:dependency)          { "node" }
+      let(:dependency_versions) { %w(v4.5.6 v0.12.5 v6.6.9 v0.10.6 v5.7.8) }
+      let(:new_versions)        { %w(v0.12.5 v5.7.8) }
+      let(:dependency_builds)   { {node: [] } }
+
+      before do
+        File.open(dependency_new_versions_file, "w") do |file|
+          file.write new_versions.to_yaml
+        end
+        allow(described_class).to receive(:shasum_256_verification).with("https://github.com/nodejs/node/archive/v5.7.8.tar.gz").and_return(["sha256", sha256])
+        allow(described_class).to receive(:shasum_256_verification).with("https://github.com/nodejs/node/archive/v0.12.5.tar.gz").and_return(["sha256", sha256_1])
+      end
+
+      it "enqueues a build for the all versions in the correlated builds-new yml file" do
+        subject.enqueue_build
+
+        builds = YAML.load_file(builds_file)
+
+        enqueued_builds = builds['node']
+        expect(enqueued_builds.count).to eq(2)
+        expect(enqueued_builds).to include({"version" =>"v0.12.5", "sha256" => sha256_1})
+        expect(enqueued_builds).to include({"version" =>"v5.7.8", "sha256" => sha256})
       end
     end
   end

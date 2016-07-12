@@ -279,5 +279,135 @@ OPTIONS_JSON
         expect(defaults_options['NGINX_1_11_LATEST']).to eq('1.11.2')
       end
     end
+
+    context("node-js") do
+      let(:dependency)        { "node" }
+      let(:buildpack)         { "nodejs" }
+      before(:each) do
+        buildpack_manifest_contents = <<-MANIFEST
+---
+language: nodejs
+
+url_to_dependency_map:
+  - match: node\/v(\d+\.\d+\.\d+)
+    name: node
+    version: $1
+
+dependencies:
+  - name: node
+    version: 0.10.45
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-0.10.45-linux-x64.tgz
+    md5: b6607379e8cdcfa3763acc12fe40cef9
+    cf_stacks:
+      - cflinuxfs2
+  - name: node
+    version: 0.10.46
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-0.10.46-linux-x64.tgz
+    md5: 2e02c3350a0b81e8b501ef3ea637a93b
+    cf_stacks:
+      - cflinuxfs2
+  - name: node
+    version: 0.12.14
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-0.12.14-linux-x64.tgz
+    md5: 510555de82cc985898731dc7c18a6dfb
+    cf_stacks:
+      - cflinuxfs2
+  - name: node
+    version: 0.12.15
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-0.12.15-linux-x64.tgz
+    md5: 317b688dde627bb85e7d575870f08eb2
+    cf_stacks:
+      - cflinuxfs2
+  - name: node
+    version: 4.4.5
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-4.4.5-linux-x64.tgz
+    md5: b2893ffdf42e2c3614872ced633feeea
+    cf_stacks:
+      - cflinuxfs2
+  - name: node
+    version: 4.4.6
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-4.4.6-linux-x64.tgz
+    md5: 33822ae3f92ac9586d73dee3c42a4bf2
+    cf_stacks:
+      - cflinuxfs2
+  - name: node
+    version: 5.11.1
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-5.11.1-linux-x64.tgz
+    md5: c6da910f661470d01e7920a1d3efaee2
+    cf_stacks:
+      - cflinuxfs2
+  - name: node
+    version: 5.12.0
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-5.12.0-linux-x64.tgz
+    md5: 006d5be71aa68c7cccdd5c2c9f1d0fc0
+    cf_stacks:
+      - cflinuxfs2
+  - name: node
+    version: 6.2.1
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-6.2.1-linux-x64.tgz
+    md5: 619a748a2b23f3e0189cf8c3f291b8d3
+    cf_stacks:
+      - cflinuxfs2
+  - name: node
+    version: 6.2.2
+    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-6.2.2-linux-x64.tgz
+    md5: e54ef4e2637d8cc8125a8ccc67c47951
+    cf_stacks:
+      - cflinuxfs2
+MANIFEST
+        File.open(manifest_file, "w") do |file|
+          file.write buildpack_manifest_contents
+        end
+
+        allow(GitClient).to receive(:last_commit_message).and_return <<-COMMIT
+Build node - #{expected_version}
+filename: binary-builder/node-#{expected_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+        COMMIT
+      end
+
+      context("node 0.10") do
+        let (:expected_version) { '0.10.47'}
+
+        it "updates the specified buildpack manifest dependency with the specified version" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '0.10.45'}
+          expect(dependency_in_manifest).to eq(nil)
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+          expect(dependency_in_manifest["version"]).to eq(expected_version)
+          expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
+          expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '0.10.46'}
+          expect(dependency_in_manifest["version"]).to eq("0.10.46")
+          expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-0.10.46-linux-x64.tgz")
+          expect(dependency_in_manifest["md5"]).to eq("2e02c3350a0b81e8b501ef3ea637a93b")
+        end
+      end
+
+      context("node >= 4") do
+        let (:expected_version) { '4.5.0'}
+
+        it "updates the specified buildpack manifest dependency with the specified version" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.5'}
+          expect(dependency_in_manifest).to eq(nil)
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+          expect(dependency_in_manifest["version"]).to eq(expected_version)
+          expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
+          expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.6'}
+          expect(dependency_in_manifest["version"]).to eq("4.4.6")
+          expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-4.4.6-linux-x64.tgz")
+          expect(dependency_in_manifest["md5"]).to eq("33822ae3f92ac9586d73dee3c42a4bf2")
+        end
+      end
+    end
   end
 end
