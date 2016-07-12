@@ -131,12 +131,10 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
   end
 
   def perform_dependency_update(buildpack_manifest)
-    minor_version = dependency_version.split(".")[1].to_i
-
-    if minor_version.even?
-      buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && dep["version"].split(".")[1].to_i.even?}
+    if mainline_version?(dependency_version)
+      buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && mainline_version?(dep["version"])}
     else
-      buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && dep["version"].split(".")[1].to_i.odd?}
+      buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && stable_version?(dep["version"])}
     end
 
     dependency_hash = {
@@ -148,5 +146,13 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
     }
     buildpack_manifest["dependencies"] << dependency_hash
     buildpack_manifest
+  end
+
+  def mainline_version?(version)
+    version.split(".")[1].to_i.odd?
+  end
+
+  def stable_version?(version)
+    !mainline_version?(version)
   end
 end
