@@ -16,7 +16,7 @@ describe BuildpackDependencyUpdater do
     context("godep") do
       let(:dependency)        { "godep" }
       let(:buildpack)         { "go" }
-      let(:expected_version)  { "v65" }
+      let(:new_version)  { "v65" }
       before do
         buildpack_manifest_contents = <<-MANIFEST
 ---
@@ -46,19 +46,19 @@ MANIFEST
           file.write buildpack_manifest_contents
         end
         allow(GitClient).to receive(:last_commit_message).and_return <<-COMMIT
-Build godep - #{expected_version}
-filename: binary-builder/godep-#{expected_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+Build godep - #{new_version}
+filename: binary-builder/godep-#{new_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
       end
 
       it "updates the specified buildpack manifest dependency with the specified version" do
         subject.run!
         manifest = YAML.load_file(manifest_file)
-        version_hash = {"match"=>dependency, "name"=>dependency, "version"=>expected_version}
+        version_hash = {"match"=>dependency, "name"=>dependency, "version"=>new_version}
         expect(manifest["url_to_dependency_map"]).to include(version_hash)
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
-        expect(dependency_in_manifest["version"]).to eq(expected_version)
+        expect(dependency_in_manifest["version"]).to eq(new_version)
         expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/godep/godep-v65-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
       end
@@ -67,7 +67,7 @@ filename: binary-builder/godep-#{expected_version}-linux-x64.tgz, md5: 18bec8f65
     context("composer") do
       let(:dependency)        { "composer" }
       let(:buildpack)         { "php" }
-      let(:expected_version)  { "1.1.0" }
+      let(:new_version)  { "1.1.0" }
       before do
         buildpack_manifest_contents = <<-MANIFEST
 ---
@@ -91,8 +91,8 @@ MANIFEST
           file.write buildpack_manifest_contents
         end
         allow(GitClient).to receive(:last_commit_message).and_return <<-COMMIT
-Build composer - #{expected_version}
-filename: binary-builder/composer-#{expected_version}.phar, md5: 05d30d20be1c94c9edc02756420a7d10, sha256: 7f26efee06de5a1a061b6b1e330f5acc9ee69976d1551118c45b21f358cbc332
+Build composer - #{new_version}
+filename: binary-builder/composer-#{new_version}.phar, md5: 05d30d20be1c94c9edc02756420a7d10, sha256: 7f26efee06de5a1a061b6b1e330f5acc9ee69976d1551118c45b21f358cbc332
         COMMIT
       end
 
@@ -101,7 +101,7 @@ filename: binary-builder/composer-#{expected_version}.phar, md5: 05d30d20be1c94c
         manifest = YAML.load_file(manifest_file)
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
-        expect(dependency_in_manifest["version"]).to eq(expected_version)
+        expect(dependency_in_manifest["version"]).to eq(new_version)
         expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/php/binaries/trusty/composer/1.1.0/composer.phar")
         expect(dependency_in_manifest["md5"]).to eq("05d30d20be1c94c9edc02756420a7d10")
       end
@@ -110,7 +110,7 @@ filename: binary-builder/composer-#{expected_version}.phar, md5: 05d30d20be1c94c
     context("glide") do
       let(:dependency)        { "glide" }
       let(:buildpack)         { "go" }
-      let(:expected_version)  { "0.10.2" }
+      let(:new_version)  { "0.10.2" }
       before do
         buildpack_manifest_contents = <<-MANIFEST
 ---
@@ -134,19 +134,19 @@ MANIFEST
           file.write buildpack_manifest_contents
         end
         allow(GitClient).to receive(:last_commit_message).and_return <<-COMMIT
-Build glide - #{expected_version}
-filename: binary-builder/glide-#{expected_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+Build glide - #{new_version}
+filename: binary-builder/glide-#{new_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
       end
 
       it "updates the specified buildpack manifest dependency with the specified version" do
         subject.run!
         manifest = YAML.load_file(manifest_file)
-        version_hash = {"match"=>dependency, "name"=>dependency, "version"=>expected_version}
+        version_hash = {"match"=>dependency, "name"=>dependency, "version"=>new_version}
         expect(manifest["url_to_dependency_map"]).to include(version_hash)
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
-        expect(dependency_in_manifest["version"]).to eq(expected_version)
+        expect(dependency_in_manifest["version"]).to eq(new_version)
         expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/glide/glide-0.10.2-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
       end
@@ -155,7 +155,6 @@ filename: binary-builder/glide-#{expected_version}-linux-x64.tgz, md5: 18bec8f65
     context("nginx_staticfile") do
       let(:dependency)        { "nginx" }
       let(:buildpack)         { "staticfile" }
-      let(:expected_version)  { "1.11.2" }
       before do
         buildpack_manifest_contents = <<-MANIFEST
 ---
@@ -178,28 +177,46 @@ MANIFEST
           file.write buildpack_manifest_contents
         end
         allow(GitClient).to receive(:last_commit_message).and_return <<-COMMIT
-Build glide - #{expected_version}
-filename: binary-builder/nginx-#{expected_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+Build nginx - #{new_version}
+filename: binary-builder/nginx-#{new_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
       end
 
-      it "updates the specified buildpack manifest dependency with the specified version" do
-        subject.run!
-        manifest = YAML.load_file(manifest_file)
-        version_hash = {"match"=>dependency, "name"=>dependency, "version"=>expected_version}
-        expect(manifest["url_to_dependency_map"]).to include(version_hash)
+      context "new version is mainline (odd minor version)" do
+       let(:new_version)  { "1.11.2" }
 
-        dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
-        expect(dependency_in_manifest["version"]).to eq(expected_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.11.2-linux-x64.tgz")
-        expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+        it "updates the specified buildpack manifest dependency with the specified version" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+          version_hash = {"match"=>dependency, "name"=>dependency, "version"=>new_version}
+          expect(manifest["url_to_dependency_map"]).to include(version_hash)
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
+          expect(dependency_in_manifest["version"]).to eq(new_version)
+          expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.11.2-linux-x64.tgz")
+          expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+        end
+      end
+
+      context "new version is stable (even minor version)" do
+       let(:new_version)  { "1.10.2" }
+
+        it "does not update the specified buildpack manifest dependency with the specified version" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+          version_hash = {"match"=>dependency, "name"=>dependency, "version"=>"1.11.1"}
+          expect(manifest["url_to_dependency_map"]).to include(version_hash)
+
+          new_dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
+          expect(new_dependency_in_manifest).to be_nil
+        end
       end
     end
 
     context("nginx_php") do
       let(:dependency)        { "nginx" }
       let(:buildpack)         { "php" }
-      let(:expected_version)  { "1.11.2" }
+      let(:new_version)  { "1.11.2" }
       let(:defaults_options_file) { File.join(buildpack_dir, "defaults/options.json") }
 
       before do
@@ -225,8 +242,8 @@ MANIFEST
           file.write buildpack_manifest_contents
         end
         allow(GitClient).to receive(:last_commit_message).and_return <<-COMMIT
-Build glide - #{expected_version}
-filename: binary-builder/nginx-#{expected_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+Build nginx - #{new_version}
+filename: binary-builder/nginx-#{new_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
 
         buildpack_defaults_options_json = <<-OPTIONS_JSON
@@ -244,12 +261,12 @@ OPTIONS_JSON
         subject.run!
         manifest = YAML.load_file(manifest_file)
 
-        dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
-        expect(dependency_in_manifest["version"]).to eq(expected_version)
+        dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
+        expect(dependency_in_manifest["version"]).to eq(new_version)
         expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.11.2-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
 
-        dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] != expected_version}
+        dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] != new_version}
         expect(dependency_in_manifest["version"]).to eq("1.10.1")
         expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("7d28497395b62221f3380e82f89cd197")

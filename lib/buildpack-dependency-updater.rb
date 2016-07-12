@@ -133,8 +133,10 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
   def perform_dependency_update(buildpack_manifest)
     if mainline_version?(dependency_version)
       buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && mainline_version?(dep["version"])}
-    else
+    elsif stable_version?(dependency_version) && buildpack == 'php'
       buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && stable_version?(dep["version"])}
+    elsif buildpack == 'staticfile'
+      return buildpack_manifest
     end
 
     dependency_hash = {
