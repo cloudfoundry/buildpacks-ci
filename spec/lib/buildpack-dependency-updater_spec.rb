@@ -4,14 +4,17 @@ require 'yaml'
 require_relative '../../lib/buildpack-dependency-updater'
 
 describe BuildpackDependencyUpdater do
-  let(:buildpack_dir)     { Dir.mktmpdir }
-  let(:binary_builds_dir) { Dir.mktmpdir }
+  let(:buildpack_dir)            { Dir.mktmpdir }
+  let(:binary_builds_dir)        { Dir.mktmpdir }
+  let(:dependencies_host_domain) { 'buildpacks.cloudfoundry.org' }
 
   subject { described_class.create(dependency, buildpack, buildpack_dir, binary_builds_dir) }
 
+  before { allow(ENV).to receive(:fetch).with('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil).and_return(dependencies_host_domain) }
+
   describe '#run!' do
     let(:manifest_file) { File.join(buildpack_dir, "manifest.yml") }
-    let(:dep_url)       { "https://pivotal-buildpacks.s3.amazonaws.com/path-to-built-binary" }
+    let(:dep_url)       { "https://#{dependencies_host_domain}/path-to-built-binary" }
 
     context("godep") do
       let(:dependency)        { "godep" }
@@ -37,7 +40,7 @@ dependencies:
       - cflinuxfs2
   - name: godep
     version: v64
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/godep/godep-v65-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/godep/godep-v65-linux-x64.tgz
     md5: f75da3a0c5ec08514ec2700c2a6d1187
     cf_stacks:
       - cflinuxfs2
@@ -59,7 +62,7 @@ filename: binary-builder/godep-#{new_version}-linux-x64.tgz, md5: 18bec8f6581078
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(new_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/godep/godep-v65-linux-x64.tgz")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/godep/godep-v65-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
       end
     end
@@ -82,7 +85,7 @@ url_to_dependency_map:
 dependencies:
   - name: composer
     version: 1.0.3
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/php/binaries/trusty/composer/1.1.0/composer.phar
+    uri: https://buildpacks.cloudfoundry.org/php/binaries/trusty/composer/1.1.0/composer.phar
     cf_stacks:
       - cflinuxfs2
     md5: aff20443a474112755ff0ef65c4873e5
@@ -102,7 +105,7 @@ filename: binary-builder/composer-#{new_version}.phar, md5: 05d30d20be1c94c9edc0
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(new_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/php/binaries/trusty/composer/1.1.0/composer.phar")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/php/binaries/trusty/composer/1.1.0/composer.phar")
         expect(dependency_in_manifest["md5"]).to eq("05d30d20be1c94c9edc02756420a7d10")
       end
     end
@@ -125,7 +128,7 @@ url_to_dependency_map:
 dependencies:
   - name: glide
     version: 0.9.3
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/glide/glide-0.9.3-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/glide/glide-0.9.3-linux-x64.tgz
     cf_stacks:
       - cflinuxfs2
     md5: aff20443a474112755ff0ef65c4873e5
@@ -147,7 +150,7 @@ filename: binary-builder/glide-#{new_version}-linux-x64.tgz, md5: 18bec8f6581078
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(new_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/glide/glide-0.10.2-linux-x64.tgz")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/glide/glide-0.10.2-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
       end
     end
@@ -168,7 +171,7 @@ url_to_dependency_map:
 dependencies:
   - name: nginx
     version: 1.11.1
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.11.1-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/nginx/nginx-1.11.1-linux-x64.tgz
     cf_stacks:
       - cflinuxfs2
     md5: 7d28497395b62221f3380e82f89cd197
@@ -193,7 +196,7 @@ filename: binary-builder/nginx-#{new_version}-linux-x64.tgz, md5: 18bec8f6581078
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
           expect(dependency_in_manifest["version"]).to eq(new_version)
-          expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.11.2-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/nginx/nginx-1.11.2-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
         end
       end
@@ -227,13 +230,13 @@ language: php
 dependencies:
   - name: nginx
     version: 1.10.1
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz
     cf_stacks:
       - cflinuxfs2
     md5: 7d28497395b62221f3380e82f89cd197
   - name: nginx
     version: 1.11.1
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.11.1-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/nginx/nginx-1.11.1-linux-x64.tgz
     cf_stacks:
       - cflinuxfs2
     md5: 7d28497395b62221f3380e82f89cd197
@@ -263,12 +266,12 @@ OPTIONS_JSON
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
         expect(dependency_in_manifest["version"]).to eq(new_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.11.2-linux-x64.tgz")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/nginx/nginx-1.11.2-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] != new_version}
         expect(dependency_in_manifest["version"]).to eq("1.10.1")
-        expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("7d28497395b62221f3380e82f89cd197")
       end
 
@@ -296,61 +299,61 @@ url_to_dependency_map:
 dependencies:
   - name: node
     version: 0.10.45
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-0.10.45-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.10.45-linux-x64.tgz
     md5: b6607379e8cdcfa3763acc12fe40cef9
     cf_stacks:
       - cflinuxfs2
   - name: node
     version: 0.10.46
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-0.10.46-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.10.46-linux-x64.tgz
     md5: 2e02c3350a0b81e8b501ef3ea637a93b
     cf_stacks:
       - cflinuxfs2
   - name: node
     version: 0.12.14
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-0.12.14-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.12.14-linux-x64.tgz
     md5: 510555de82cc985898731dc7c18a6dfb
     cf_stacks:
       - cflinuxfs2
   - name: node
     version: 0.12.15
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-0.12.15-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.12.15-linux-x64.tgz
     md5: 317b688dde627bb85e7d575870f08eb2
     cf_stacks:
       - cflinuxfs2
   - name: node
     version: 4.4.5
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-4.4.5-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-4.4.5-linux-x64.tgz
     md5: b2893ffdf42e2c3614872ced633feeea
     cf_stacks:
       - cflinuxfs2
   - name: node
     version: 4.4.6
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-4.4.6-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-4.4.6-linux-x64.tgz
     md5: 33822ae3f92ac9586d73dee3c42a4bf2
     cf_stacks:
       - cflinuxfs2
   - name: node
     version: 5.11.1
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-5.11.1-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-5.11.1-linux-x64.tgz
     md5: c6da910f661470d01e7920a1d3efaee2
     cf_stacks:
       - cflinuxfs2
   - name: node
     version: 5.12.0
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-5.12.0-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-5.12.0-linux-x64.tgz
     md5: 006d5be71aa68c7cccdd5c2c9f1d0fc0
     cf_stacks:
       - cflinuxfs2
   - name: node
     version: 6.2.1
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-6.2.1-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-6.2.1-linux-x64.tgz
     md5: 619a748a2b23f3e0189cf8c3f291b8d3
     cf_stacks:
       - cflinuxfs2
   - name: node
     version: 6.2.2
-    uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-6.2.2-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-6.2.2-linux-x64.tgz
     md5: e54ef4e2637d8cc8125a8ccc67c47951
     cf_stacks:
       - cflinuxfs2
@@ -377,12 +380,12 @@ filename: binary-builder/node-#{expected_version}-linux-x64.tgz, md5: 18bec8f658
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
           expect(dependency_in_manifest["version"]).to eq(expected_version)
-          expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '0.10.46'}
           expect(dependency_in_manifest["version"]).to eq("0.10.46")
-          expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-0.10.46-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.10.46-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("2e02c3350a0b81e8b501ef3ea637a93b")
         end
       end
@@ -399,12 +402,12 @@ filename: binary-builder/node-#{expected_version}-linux-x64.tgz, md5: 18bec8f658
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
           expect(dependency_in_manifest["version"]).to eq(expected_version)
-          expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.6'}
           expect(dependency_in_manifest["version"]).to eq("4.4.6")
-          expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-4.4.6-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-4.4.6-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("33822ae3f92ac9586d73dee3c42a4bf2")
         end
       end
