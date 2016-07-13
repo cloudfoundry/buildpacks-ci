@@ -3,11 +3,13 @@ require 'spec_helper'
 require_relative '../../lib/dependency-build-enqueuer'
 require_relative '../../lib/buildpack-dependency'
 require 'yaml'
+require 'tmpdir'
 
 describe DependencyBuildEnqueuer do
-  let(:new_releases_dir)         { Dir.mktmpdir }
-  let(:binary_builds_dir)        { Dir.mktmpdir }
-  let(:options)                  { {} }
+  let(:new_releases_dir)    { Dir.mktmpdir }
+  let(:binary_builds_dir)   { File.expand_path(File.join(File.dirname(__FILE__),'..','..')) }
+  let(:options)             { {} }
+  let(:test_branch_name)    { "dependency-build-enqueuer-test-#{(10000*(Random.rand)).to_i}" }
 
   subject { described_class.new(dependency, new_releases_dir, binary_builds_dir, options) }
 
@@ -25,6 +27,12 @@ describe DependencyBuildEnqueuer do
       File.open(builds_file, "w") do |file|
         file.write dependency_builds.to_yaml
       end
+      `git checkout -b #{test_branch_name}`
+    end
+
+    after do
+      `git checkout develop`
+      `git branch -D #{test_branch_name}`
     end
 
     context "godep" do
@@ -116,22 +124,46 @@ describe DependencyBuildEnqueuer do
       let(:dependency_builds)   { {node: [] } }
 
       before do
+        allow(described_class).to receive(:shasum_256_verification).with("https://github.com/nodejs/node/archive/v5.7.8.tar.gz").and_return(["sha256", sha256])
+        allow(described_class).to receive(:shasum_256_verification).with("https://github.com/nodejs/node/archive/v0.12.5.tar.gz").and_return(["sha256", sha256_1])
+
         File.open(dependency_new_versions_file, "w") do |file|
           file.write new_versions.to_yaml
         end
-        allow(described_class).to receive(:shasum_256_verification).with("https://github.com/nodejs/node/archive/v5.7.8.tar.gz").and_return(["sha256", sha256])
-        allow(described_class).to receive(:shasum_256_verification).with("https://github.com/nodejs/node/archive/v0.12.5.tar.gz").and_return(["sha256", sha256_1])
+
+        subject.enqueue_build
       end
 
-      it "enqueues a build for the all versions in the correlated builds-new yml file" do
-        subject.enqueue_build
 
-        builds = YAML.load_file(builds_file)
+      context 'there are multiple versions submitted to be built' do
+        it 'creates a commit for each version' do
+          count_of_git_commits = `git log --oneline develop..#{test_branch_name} | wc -l`.to_i
+          expect(count_of_git_commits).to eq 2
+        end
 
-        enqueued_builds = builds['node']
-        expect(enqueued_builds.count).to eq(2)
-        expect(enqueued_builds).to include({"version" =>"0.12.5", "sha256" => sha256_1})
-        expect(enqueued_builds).to include({"version" =>"5.7.8", "sha256" => sha256})
+        context 'for each distinct version' do
+          let(:committed_dependency) { YAML.load_file(builds_file) }
+
+          it 'has a single version number in a commit message' do
+            commit_msg = `git log --oneline -1 HEAD`
+            expect(commit_msg).to include '5.7.8'
+
+            commit_msg = `git log --oneline -1 HEAD~`
+            expect(commit_msg).to include '0.12.5'
+          end
+
+          it 'has a single version number in the node-builds.yml file' do
+            expect(committed_dependency['node'].size).to eq 1
+          end
+
+          it 'has the version number in the node-builds.yml file' do
+            expect(committed_dependency['node'][0]['version']).to eq '5.7.8'
+          end
+
+          it 'has the SHA256 in the node-builds.yml file' do
+            expect(committed_dependency['node'][0]['sha256']).to eq sha256
+          end
+        end
       end
     end
   end
