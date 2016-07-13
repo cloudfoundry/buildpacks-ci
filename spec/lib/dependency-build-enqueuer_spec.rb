@@ -130,8 +130,8 @@ describe DependencyBuildEnqueuer do
 
         enqueued_builds = builds['node']
         expect(enqueued_builds.count).to eq(2)
-        expect(enqueued_builds).to include({"version" =>"v0.12.5", "sha256" => sha256_1})
-        expect(enqueued_builds).to include({"version" =>"v5.7.8", "sha256" => sha256})
+        expect(enqueued_builds).to include({"version" =>"0.12.5", "sha256" => sha256_1})
+        expect(enqueued_builds).to include({"version" =>"5.7.8", "sha256" => sha256})
       end
     end
   end

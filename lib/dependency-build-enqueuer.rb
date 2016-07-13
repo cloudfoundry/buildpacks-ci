@@ -34,6 +34,7 @@ class DependencyBuildEnqueuer
 
     versions_to_build = []
     new_dependency_versions.each do |ver|
+      ver = massage_version(ver)
       new_build = {"version" => ver}
       dependency_verification_tuples = DependencyBuildEnqueuer.build_verifications_for(dependency, ver)
       dependency_verification_tuples.each do |dependency_verification_type, dependency_verification_value|
@@ -79,11 +80,20 @@ class DependencyBuildEnqueuer
 
   private
 
+  def massage_version(version)
+    case dependency
+    when "node"
+      version.gsub("v","")
+    else
+      version
+    end
+  end
+
   def self.build_verifications_for(dependency, version)
     verifications = []
     case dependency
     when "node"
-      download_url = "https://github.com/nodejs/node/archive/#{version}.tar.gz"
+      download_url = "https://github.com/nodejs/node/archive/v#{version}.tar.gz"
       verifications << shasum_256_verification(download_url)
     when "godep"
       download_url = "https://github.com/tools/godep/archive/#{version}.tar.gz"
