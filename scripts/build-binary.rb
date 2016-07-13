@@ -38,6 +38,9 @@ else
     if key == 'md5' || key == 'sha256'
       @verification_type = key
       @verification_value = value
+    elsif key == 'gpg-signature'
+      @verification_type = key
+      @verification_value = "\n#{value}"
     end
     flags << %( --#{key}="#{value}")
   end
