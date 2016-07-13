@@ -41,12 +41,16 @@ class DependencyBuildEnqueuer
       dependency_verification_tuples.each do |dependency_verification_type, dependency_verification_value|
         new_build[dependency_verification_type] = dependency_verification_value
       end
+
       File.open(dependency_builds_file, "w") do |file|
         file.write({dependency => [new_build]}.to_yaml)
       end
-      puts `git add #{dependency_builds_file}`
-      commit_msg = "Enqueue #{dependency} - #{ver}"
-      puts `git commit -m '#{commit_msg}'`
+
+      Dir.chdir(binary_builds_dir) do
+        puts `git add #{dependency_builds_file}`
+        commit_msg = "Enqueue #{dependency} - #{ver}"
+        puts `git commit -m '#{commit_msg}'`
+      end
     end
   end
 
