@@ -30,7 +30,12 @@ end.join("\n")
 
 git_commit_message = GitClient.last_commit_message(binary_builds_dir)
 
-/^(source url: .*)$/.match(git_commit_message)
+if git_commit_message.include?('gpg-signature:')
+  /^(source url: .*END PGP SIGNATURE-----)/m.match(git_commit_message)
+else
+  /^(source url: .*)$/.match(git_commit_message)
+end
+
 source_info = $1
 
 Dir.chdir(buildpack_dir) do
