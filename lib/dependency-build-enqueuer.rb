@@ -98,7 +98,7 @@ class DependencyBuildEnqueuer
     verifications = []
     case dependency
     when "node"
-      download_url = "https://github.com/nodejs/node/archive/v#{version}.tar.gz"
+      download_url = "https://nodejs.org/dist/v#{version}/node-v#{version}.tar.gz"
       verifications << shasum_256_verification(download_url)
     when "godep"
       download_url = "https://github.com/tools/godep/archive/#{version}.tar.gz"
