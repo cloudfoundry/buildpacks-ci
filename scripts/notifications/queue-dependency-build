@@ -14,8 +14,3 @@ build_enqueuer = DependencyBuildEnqueuer.new(dependency, new_releases_dir, binar
 #currently just trigger build for the latest dependency version
 puts "Queueing build for #{build_enqueuer.dependency} #{build_enqueuer.latest_version}..."
 build_enqueuer.enqueue_build
-
-Dir.chdir(binary_builds_dir) do
-  raise 'command failed' unless system('git add -A')
-  raise 'command failed' unless system("git commit -m 'Enqueue build for #{build_enqueuer.dependency} #{build_enqueuer.latest_version}'")
-end
