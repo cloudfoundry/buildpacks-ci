@@ -22,7 +22,7 @@ puts "Updating manifest with #{dependency} #{version}..."
 buildpack_updater.run!
 
 tracker_client = TrackerClient.new(ENV['TRACKER_API_TOKEN'], ENV['TRACKER_PROJECT_ID'], ENV['TRACKER_REQUESTER_ID'].to_i)
-story_ids = tracker_client.search(name: "#{dependency} #{version}").select do |story|
+story_ids = tracker_client.search(name: "include new #{dependency} #{version}").select do |story|
   story['current_state'] != 'accepted'
 end.map do |story|
   "[##{story['id']}]"
