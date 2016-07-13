@@ -413,7 +413,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "<%= language %>-buildpack bosh-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/<%= language %>-buildpack/jobs/bosh-release"
+            text: "<%= language %>-buildpack bosh-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/cf-release/jobs/bosh-release"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
