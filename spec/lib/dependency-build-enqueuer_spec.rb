@@ -124,8 +124,8 @@ describe DependencyBuildEnqueuer do
       let(:dependency_builds)   { {node: [] } }
 
       before do
-        allow(described_class).to receive(:shasum_256_verification).with("https://github.com/nodejs/node/archive/v5.7.8.tar.gz").and_return(["sha256", sha256])
-        allow(described_class).to receive(:shasum_256_verification).with("https://github.com/nodejs/node/archive/v0.12.5.tar.gz").and_return(["sha256", sha256_1])
+        allow(described_class).to receive(:shasum_256_verification).with("https://nodejs.org/dist/v5.7.8/node-v5.7.8.tar.gz").and_return(["sha256", sha256])
+        allow(described_class).to receive(:shasum_256_verification).with("https://nodejs.org/dist/v0.12.5/node-v0.12.5.tar.gz").and_return(["sha256", sha256_1])
         allow(Dir).to receive(:chdir).and_call_original
 
         File.open(dependency_new_versions_file, "w") do |file|
