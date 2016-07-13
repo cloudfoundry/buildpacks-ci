@@ -476,6 +476,7 @@ jobs:
         - get: builds-yaml
           resource: <%= dependency %>-builds
           passed: [trigger-<%= dependency %>-build]
+          version: every
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
