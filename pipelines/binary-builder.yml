@@ -178,7 +178,7 @@ resources:
       uri: {{buildpacks-ci-git-uri}}
       branch: new-release-notifications
       private_key: {{buildpacks-ci-private-key}}
-      paths: [ nginx.yaml ]
+      paths: [ nginx-new.yaml ]
   - name: composer-new-releases
     type: git
     source:
