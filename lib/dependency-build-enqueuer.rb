@@ -22,7 +22,7 @@ class DependencyBuildEnqueuer
     # versions to build. The plan is to eventually migrate the rest of the
     # dependencies to use a similar file as well
 
-    if dependency == "node"
+    if dependency == "node" || dependency == "nginx"
       new_dependency_versions_file = File.join(new_releases_dir, "#{dependency}-new.yaml")
       new_dependency_versions = YAML.load_file(new_dependency_versions_file)
     else
@@ -60,10 +60,6 @@ class DependencyBuildEnqueuer
     case dependency
     when "godep"
       dependency_versions.max { |a, b| a.gsub("v", "").to_i <=> b.gsub("v", "").to_i }
-    when "nginx"
-      dependency_versions.map do |version|
-        Gem::Version.new(version.gsub("release-", ""))
-      end.sort.reverse[0].to_s
     when "composer"
       dependency_versions.map do |version|
         gem_version = Gem::Version.new(version)
@@ -89,6 +85,8 @@ class DependencyBuildEnqueuer
     case dependency
     when "node"
       version.gsub("v","")
+    when "nginx"
+      version.gsub("release-","")
     else
       version
     end
