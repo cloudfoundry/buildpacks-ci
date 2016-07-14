@@ -35,86 +35,78 @@ describe DependencyBuildEnqueuer do
       `git branch -D #{test_branch_name}`
     end
 
+    shared_examples_for "a build is enqueued verified by sha256" do
+      before do
+        allow(described_class).to receive(:shasum_256_verification).with(source_url).and_return(["sha256", sha256])
+      end
+
+      it "enqueues a build with a version and sha256" do
+        subject.enqueue_build
+
+        builds = YAML.load_file(builds_file)
+
+        enqueued_builds = builds[dependency]
+        expect(enqueued_builds.count).to eq(1)
+        expect(enqueued_builds.first['version']).to eq(expected_version)
+        expect(enqueued_builds.first['sha256']).to eq(sha256)
+      end
+    end
+
+    shared_examples_for "a build is enqueued verified by gpg-key" do
+      before do
+        allow(described_class).to receive(:build_verifications_for).with(dependency, expected_version).and_return([['gpg-rsa-key-id', 'gpg-key-mocked'], ['gpg-signature', 'gpg-signature-mocked']])
+      end
+
+      it "enqueues a build with a version and gpg info" do
+        subject.enqueue_build
+
+        builds = YAML.load_file(builds_file)
+
+        enqueued_builds = builds[dependency]
+        expect(enqueued_builds.count).to eq(1)
+        expect(enqueued_builds.first['version']).to eq(expected_version)
+        expect(enqueued_builds.first['gpg-rsa-key-id']).to eq("gpg-key-mocked")
+        expect(enqueued_builds.first['gpg-signature']).to eq("gpg-signature-mocked")
+      end
+    end
+
     context "godep" do
       let(:dependency)          { "godep" }
       let(:dependency_versions) { %w(v60 v61 v62) }
       let(:dependency_builds)   { {godep: [] } }
+      let(:expected_version)    { "v62" }
+      let(:source_url)          { "https://github.com/tools/godep/archive/#{expected_version}.tar.gz" }
 
-      before do
-        allow(described_class).to receive(:build_verifications_for).with("godep", "v62").and_return([['sha256', sha256]])
-      end
-
-      it "enqueues a build for the latest dep version in the correlated builds yml file" do
-        subject.enqueue_build
-
-        builds = YAML.load_file(builds_file)
-        enqueued_builds = builds['godep']
-        expect(enqueued_builds.count).to eq(1)
-        expect(enqueued_builds.first['version']).to eq("v62")
-        expect(enqueued_builds.first['sha256']).to eq("sha256-mocked")
-      end
+      it_behaves_like "a build is enqueued verified by sha256"
     end
 
     context "composer" do
       let(:dependency)          { "composer" }
       let(:dependency_versions) { %w(1.1.0-RC 1.0.3 1.1.1 1.1.1-alpha1) }
       let(:dependency_builds)   { {composer: [] } }
+      let(:expected_version)    { "1.1.1" }
+      let(:source_url)          { "https://getcomposer.org/download/#{expected_version}/composer.phar" }
 
-      before do
-        allow(described_class).to receive(:build_verifications_for).with("composer", "1.1.1").and_return([['sha256', sha256]])
-      end
-
-      it "enqueues a build for the latest dep version in the correlated builds yml file" do
-        subject.enqueue_build
-
-        builds = YAML.load_file(builds_file)
-        enqueued_builds = builds['composer']
-        expect(enqueued_builds.count).to eq(1)
-        expect(enqueued_builds.first['version']).to eq("1.1.1")
-        expect(enqueued_builds.first['sha256']).to eq("sha256-mocked")
-      end
+      it_behaves_like "a build is enqueued verified by sha256"
     end
 
     context "glide" do
       let(:dependency)          { "glide" }
       let(:dependency_versions) { %w(v0.9.2 v0.10.0 v0.10.3) }
       let(:dependency_builds)   { {glide: [] } }
+      let(:expected_version)    { "v0.10.3" }
+      let(:source_url)          { "https://github.com/Masterminds/glide/archive/#{expected_version}.tar.gz" }
 
-      before do
-        allow(described_class).to receive(:build_verifications_for).with("glide", "v0.10.3").and_return([['sha256', sha256]])
-      end
-
-      it "enqueues a build for the latest dep version in the correlated builds yml file" do
-        subject.enqueue_build
-
-        builds = YAML.load_file(builds_file)
-        enqueued_builds = builds['glide']
-        expect(enqueued_builds.count).to eq(1)
-        expect(enqueued_builds.first['version']).to eq("v0.10.3")
-        expect(enqueued_builds.first['sha256']).to eq("sha256-mocked")
-      end
+      it_behaves_like "a build is enqueued verified by sha256"
     end
 
     context "nginx" do
       let(:dependency)          { "nginx" }
       let(:dependency_versions) { %w(release-1.5.8 release-1.4.1 release-1.11.2) }
       let(:dependency_builds)   { {nginx: [] } }
+      let(:expected_version)    { "1.11.2" }
 
-      before do
-        allow(described_class).to receive(:build_verifications_for).with("nginx", "1.11.2").and_return([['gpg-rsa-key-id', 'gpg-key-mocked'], ['gpg-signature', 'gpg-signature-mocked']])
-      end
-
-      it "enqueues a build for the latest dep version in the correlated builds yml file" do
-        subject.enqueue_build
-
-        builds = YAML.load_file(builds_file)
-
-        enqueued_builds = builds['nginx']
-        expect(enqueued_builds.count).to eq(1)
-        expect(enqueued_builds.first['version']).to eq("1.11.2")
-        expect(enqueued_builds.first['gpg-rsa-key-id']).to eq("gpg-key-mocked")
-        expect(enqueued_builds.first['gpg-signature']).to eq("gpg-signature-mocked")
-      end
+     it_behaves_like "a build is enqueued verified by gpg-key"
     end
 
     context "node" do
@@ -134,7 +126,6 @@ describe DependencyBuildEnqueuer do
 
         subject.enqueue_build
       end
-
 
       context 'there are multiple versions submitted to be built' do
         it 'switches to the binary-builds directory to commit, then back' do
@@ -169,54 +160,6 @@ describe DependencyBuildEnqueuer do
             expect(committed_dependency['node'][0]['sha256']).to eq sha256
           end
         end
-      end
-    end
-  end
-
-  describe '#latest_version_for_dependency' do
-    subject { described_class.latest_version_for_dependency(dependency, dependency_versions, options) }
-
-    context "godep" do
-      let(:dependency)          { "godep" }
-      let(:dependency_versions) { %w(v60 v61 v62 v102) }
-
-      it 'returns the latest godep version in the passed versions' do
-        expect(subject).to eq("v102")
-      end
-    end
-
-    context "composer" do
-      let(:dependency)          { "composer" }
-      let(:dependency_versions) { %w(1.1.0-RC 1.0.3 1.1.1 1.2.0-RC) }
-
-      it 'returns the latest composer version in the passed versions' do
-        expect(subject).to eq("1.1.1")
-      end
-
-      context "pre-releases allowed to build" do
-        let(:options) { { pre: true } }
-
-        it 'returns the latest composer version in the passed versions' do
-          expect(subject).to eq("1.2.0-RC")
-        end
-      end
-    end
-
-    context "glide" do
-      let(:dependency)          { "glide" }
-      let(:dependency_versions) { %w(v0.9.2 v0.10.0 v0.10.3) }
-
-      it 'returns the latest glide version in the passed versions' do
-        expect(subject).to eq("v0.10.3")
-      end
-    end
-
-    context "nginx" do
-      let(:dependency)          { "nginx" }
-      let(:dependency_versions) { %w(release-1.5.8 release-1.4.1 release-1.11.2) }
-
-      it 'returns the latest nginx version in the passed versions' do
-        expect(subject).to eq("1.11.2")
       end
     end
   end
