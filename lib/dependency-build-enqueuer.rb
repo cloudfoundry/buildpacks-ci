@@ -54,6 +54,8 @@ class DependencyBuildEnqueuer
     end
   end
 
+  private
+
   def self.latest_version_for_dependency(dependency, dependency_versions, options = {})
     case dependency
     when "godep"
@@ -82,8 +84,6 @@ class DependencyBuildEnqueuer
       end.compact.sort.reverse[0].to_s.gsub(".pre.","-").prepend("v")
     end
   end
-
-  private
 
   def massage_version(version)
     case dependency
