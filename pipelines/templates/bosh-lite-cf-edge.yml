@@ -60,7 +60,7 @@ resources:
     type: bosh-io-release
     tarball: true
     source:
-      repository: cloudfoundry-incubator/diego-release
+      repository: cloudfoundry/diego-release
   - name: etcd-bosh-release
     type: bosh-io-release
     tarball: true

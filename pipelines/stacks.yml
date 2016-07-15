@@ -93,13 +93,13 @@ resources:
   - name: diego-release
     type: git
     source:
-      uri: https://github.com/cloudfoundry-incubator/diego-release
+      uri: https://github.com/cloudfoundry/diego-release
       branch: develop
   - name: diego-bosh-release
     type: bosh-io-release
     tarball: true
     source:
-      repository: cloudfoundry-incubator/diego-release
+      repository: cloudfoundry/diego-release
   - name: etcd-bosh-release
     type: bosh-io-release
     tarball: true

@@ -12,7 +12,7 @@ resources:
   - name: diego-release
     type: git
     source:
-      uri: https://github.com/cloudfoundry-incubator/diego-release
+      uri: https://github.com/cloudfoundry/diego-release
       branch: master
   - name: cf-release
     type: git
@@ -127,7 +127,7 @@ resources:
     type: bosh-io-release
     tarball: true
     source:
-      repository: cloudfoundry-incubator/diego-release
+      repository: cloudfoundry/diego-release
   - name: cflinuxfs2-rootfs-bosh-release
     type: bosh-io-release
     tarball: true
