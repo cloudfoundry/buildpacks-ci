@@ -424,6 +424,7 @@ jobs:
             resource: <%= buildpack %>-buildpack
           - get: builds-out
             passed: [ build-<%= dependency %> ]
+            version: every
             trigger: true
         - task: update-dependency-in-manifests
           file: buildpacks-ci/tasks/update-dependency-in-buildpack.yml
