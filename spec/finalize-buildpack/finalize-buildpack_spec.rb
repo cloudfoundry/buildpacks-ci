@@ -17,7 +17,7 @@ describe 'finalize-buildpack task' do
   end
 
   it 'emits a valid markdown table of dependencies' do
-    output = run("cat /tmp/build/*/buildpack-artifacts/RECENT_CHANGES && echo '\t'")
+    output = run("cat /tmp/build/*/buildpack-artifacts/RECENT_CHANGES && echo '\t'",20)
     expect(output).to include "Packaged binaries:\r\r\n\r\r\n"
     expect(output).to include "| name  | version | cf_stacks  |\r\r\n"
     expect(output).to include "|-------|---------|------------|\r\r\n"
