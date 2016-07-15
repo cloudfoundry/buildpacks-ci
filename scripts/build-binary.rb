@@ -5,11 +5,11 @@ require 'yaml'
 require 'digest'
 require 'fileutils'
 
-def add_ssh_key
+def add_ssh_key_and_update(dir)
   File.write("/tmp/git_ssh_key",ENV['GIT_SSH_KEY'])
-  exec(<<-HEREDOC)
+  system(<<-HEREDOC)
     eval "$(ssh-agent)"
-    mkdir ~/.ssh
+    mkdir -p ~/.ssh
     ssh-keyscan -t rsa github.com > ~/.ssh/known_hosts
 
     set +x
@@ -17,6 +17,9 @@ def add_ssh_key
     ssh-add -D
     ssh-add /tmp/git_ssh_key
     set -x
+    cd #{dir}
+    git checkout binary-builds-test
+    git pull
   HEREDOC
 end
 
@@ -35,13 +38,8 @@ end
 # built.yml
 
 #get latest version of <binary>-built.yml
-add_ssh_key
 built_dir    = File.join(Dir.pwd, 'built-yaml')
-Dir.chdir(built_dir) do
-  puts `git checkout binary-builds-test`
-  puts `git pull`
-end
-
+add_ssh_key_and_update(built_dir)
 
 binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
