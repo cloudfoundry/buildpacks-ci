@@ -5,6 +5,21 @@ require 'yaml'
 require 'digest'
 require 'fileutils'
 
+def add_ssh_key
+  File.write("/tmp/git_ssh_key",ENV['GIT_SSH_KEY'])
+  exec(<<-HEREDOC)
+    eval "$(ssh-agent)"
+    mkdir ~/.ssh
+    ssh-keyscan -t rsa github.com > ~/.ssh/known_hosts
+
+    set +x
+    chmod 600 /tmp/git_ssh_key
+    ssh-add -D
+    ssh-add /tmp/git_ssh_key
+    set -x
+  HEREDOC
+end
+
 def is_automated(binary)
   automated = %w(composer godep glide nginx node)
   return automated.include? binary
@@ -19,9 +34,17 @@ end
 # we want to use a specific version of builds.yml, but the latest version of
 # built.yml
 
+#get latest version of <binary>-built.yml
+add_ssh_key
+built_dir    = File.join(Dir.pwd, 'built-yaml')
+Dir.chdir(built_dir) do
+  puts `git checkout binary-builds-test`
+  puts `git pull`
+end
+
+
 binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
-built_dir    = File.join(Dir.pwd, 'built-yaml')
 builds_yaml_artifacts = File.join(Dir.pwd, 'builds-yaml-artifacts')
 builds_path  = File.join(builds_dir, "#{binary_name}-builds.yml")
 
