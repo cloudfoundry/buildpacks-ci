@@ -17,12 +17,12 @@ end
 
 binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
+built_dir    = File.join(Dir.pwd, 'built-yaml')
 builds_yaml_artifacts = File.join(Dir.pwd, 'builds-yaml-artifacts')
 builds_path  = File.join(builds_dir, "#{binary_name}-builds.yml")
-built_path   = File.join(builds_dir, "#{binary_name}-built.yml")
 
 builds       = YAML.load_file(builds_path)
-built        = YAML.load_file(built_path)
+built        = YAML.load_file(File.join(built_dir, "#{binary_name}-built.yml")
 
 latest_build = builds[binary_name].shift
 built[binary_name].push latest_build
@@ -80,7 +80,8 @@ if !is_automated(binary_name)
 end
 
 built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
-File.write(built_path, built.to_yaml)
+File.write(File.join(builds_dir, "#{binary_name}-built.yml"), built.to_yaml)
+
 
 Dir.chdir(builds_dir) do
   exec(<<-EOF)

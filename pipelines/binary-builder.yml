@@ -51,6 +51,13 @@ resources:
 <% end %>
 
 <% %w(composer glide godep nginx node).each do |auto_dep| %>
+  - name: <%= auto_dep %>-built-in
+    type: git
+    source:
+      branch: binary-builds
+      private_key: {{buildpacks-ci-private-key}}
+      uri: {{buildpacks-ci-git-uri}}
+      paths: [ <%= auto_dep %>-built.yml ]
   - name: <%= auto_dep %>-builds-in
     type: git
     source:
@@ -371,6 +378,8 @@ jobs:
     serial: true
     plan:
       - aggregate:
+        - get: built-yaml
+          resource: <%= dependency %>-built-in
         - get: builds-yaml
           resource: <%= dependency %>-builds-in
           version: every
