@@ -18,69 +18,7 @@ resources:
       branch: binary-builds
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
-  - name: nginx-builds
-    type: git
-    source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ nginx-builds.yml ]
-  - name: php-builds
-    type: git
-    source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ php-builds.yml ]
-  - name: php7-builds
-    type: git
-    source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ php7-builds.yml ]
-  - name: node-builds
-    type: git
-    source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ node-builds.yml ]
-  - name: ruby-builds
-    type: git
-    source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ ruby-builds.yml ]
-  - name: jruby-builds
-    type: git
-    source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ jruby-builds.yml ]
-  - name: httpd-builds
-    type: git
-    source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ httpd-builds.yml ]
-  - name: python-builds
-    type: git
-    source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ python-builds.yml ]
-  - name: bundler-builds
-    type: git
-    source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ bundler-builds.yml ]
+
   - name: build-tar
     type: s3
     source:
@@ -88,62 +26,12 @@ resources:
       versioned_file: /concourse-artifacts/binary-builder-source.tgz
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-  - name: godep-builds
-    type: git
-    source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ godep-builds.yml ]
-  - name: glide-builds
-    type: git
-    source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ glide-builds.yml ]
   - name: concourse2tracker
     type: concourse2tracker
   - name: failure-alert
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
-  - name: php-buildpack
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/php-buildpack.git
-      private_key: {{php-buildpack-private-key}}
-      branch: develop
-      ignore_paths:
-        - VERSION
-        - CHANGELOG
-  - name: staticfile-buildpack
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/staticfile-buildpack.git
-      private_key: {{staticfile-buildpack-private-key}}
-      branch: develop
-      ignore_paths:
-        - VERSION
-        - CHANGELOG
-  - name: nodejs-buildpack
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/nodejs-buildpack.git
-      private_key: {{nodejs-buildpack-private-key}}
-      branch: develop
-      ignore_paths:
-        - VERSION
-        - CHANGELOG
-  - name: go-buildpack
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/go-buildpack.git
-      private_key: {{go-buildpack-private-key}}
-      branch: develop
-      ignore_paths:
-        - VERSION
-        - CHANGELOG
   - name: cf-edge-environments
     type: pool
     source:
@@ -151,50 +39,18 @@ resources:
       pool: cf-edge-environments
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
-  - name: godep-new-releases
-    type: git
-    source:
-      uri: {{buildpacks-ci-git-uri}}
-      branch: new-release-notifications
-      private_key: {{buildpacks-ci-private-key}}
-      paths: [ godep.yaml ]
-  - name: glide-new-releases
-    type: git
-    source:
-      uri: {{buildpacks-ci-git-uri}}
-      branch: new-release-notifications
-      private_key: {{buildpacks-ci-private-key}}
-      paths: [ glide.yaml ]
-  - name: node-new-releases
-    type: git
-    source:
-      uri: {{buildpacks-ci-git-uri}}
-      branch: new-release-notifications
-      private_key: {{buildpacks-ci-private-key}}
-      paths: [ node-new.yaml ]
-  - name: nginx-new-releases
-    type: git
-    source:
-      uri: {{buildpacks-ci-git-uri}}
-      branch: new-release-notifications
-      private_key: {{buildpacks-ci-private-key}}
-      paths: [ nginx-new.yaml ]
-  - name: composer-new-releases
-    type: git
-    source:
-      uri: {{buildpacks-ci-git-uri}}
-      branch: new-release-notifications
-      private_key: {{buildpacks-ci-private-key}}
-      paths: [ composer.yaml ]
-  - name: composer-builds
+
+<% %w(bundler composer glide godep httpd jruby php php7 python node nginx ruby).each do |dep| %>
+  - name: <%= dep %>-builds
     type: git
     source:
       branch: binary-builds
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
-      paths: [ composer-builds.yml ]
+      paths: [ <%= dep %>-builds.yml ]
+<% end %>
 
-<% %w(godep composer glide nginx node).each do |auto_dep| %>
+<% %w(composer glide godep nginx node).each do |auto_dep| %>
   - name: <%= auto_dep %>-builds-in
     type: git
     source:
@@ -204,6 +60,37 @@ resources:
       paths: [ <%= auto_dep %>-builds.yml ]
 <% end %>
 
+<% %w(composer glide godep).each do |auto_old| %>
+  - name: <%= auto_old %>-new-releases
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri}}
+      branch: new-release-notifications
+      private_key: {{buildpacks-ci-private-key}}
+      paths: [ <%= auto_old %>.yaml ]
+<% end %>
+
+<% %w(nginx node).each do |auto_new| %>
+  - name: <%= auto_new %>-new-releases
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri}}
+      branch: new-release-notifications
+      private_key: {{buildpacks-ci-private-key}}
+      paths: [ <%= auto_new %>-new.yaml ]
+<% end %>
+
+<% %w(go nodejs php staticfile).each do |language| %>
+  - name: <%= language %>-buildpack
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
+      branch: develop
+      ignore_paths:
+        - VERSION
+        - CHANGELOG
+<% end %>
 
 jobs:
   - name: binary-builder
