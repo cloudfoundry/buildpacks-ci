@@ -15,7 +15,7 @@ RSpec.configure do |config|
     puts "latest task id=#{@id}"
   end
 
-  def run(cmd)
-    fly("i -b #{@id} -s one-off -- bash -c '#{cmd} && sleep 5'")
+  def run(cmd, sleep_time = 5)
+    fly("i -b #{@id} -s one-off -- bash -c '#{cmd} && sleep #{sleep_time}'")
   end
 end
