@@ -26,7 +26,6 @@ built        = YAML.load_file(built_path)
 
 latest_build = builds[binary_name].shift
 built[binary_name].push latest_build
-built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
 
 unless latest_build
   puts "There are no new builds for #{binary_name} requested."
@@ -80,6 +79,7 @@ if !is_automated(binary_name)
   File.write(builds_path, builds.to_yaml)
 end
 
+built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
 File.write(built_path, built.to_yaml)
 
 Dir.chdir(builds_dir) do
