@@ -14,6 +14,10 @@ def ci_skip_for(binary)
   return !is_automated(binary)
 end
 
+# We read the <binary>-builds.yml file from the ./builds-yaml directory
+# and the <binary>-built.yml from the ./built-yaml directory. This is because
+# we want to use a specific version of builds.yml, but the latest version of
+# built.yml
 
 binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
@@ -22,7 +26,7 @@ builds_yaml_artifacts = File.join(Dir.pwd, 'builds-yaml-artifacts')
 builds_path  = File.join(builds_dir, "#{binary_name}-builds.yml")
 
 builds       = YAML.load_file(builds_path)
-built        = YAML.load_file(File.join(built_dir, "#{binary_name}-built.yml")
+built        = YAML.load_file(File.join(built_dir, "#{binary_name}-built.yml"))
 
 latest_build = builds[binary_name].shift
 built[binary_name].push latest_build
