@@ -391,6 +391,7 @@ jobs:
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary.yml
           params:
+            GIT_SSH_KEY: {{buildpacks-ci-private-key}}
             BINARY_NAME: <%= dependency %>
           privileged: true
         - put: build-tar
