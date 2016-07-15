@@ -5,6 +5,7 @@ inputs:
   - name: binary-builder
   - name: buildpacks-ci
   - name: builds-yaml
+  - name: built-yaml
 outputs:
   - name: binary-builder-artifacts
   - name: builds-yaml-artifacts
