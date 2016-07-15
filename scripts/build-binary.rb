@@ -26,6 +26,7 @@ built        = YAML.load_file(built_path)
 
 latest_build = builds[binary_name].shift
 built[binary_name].push latest_build
+built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
 
 unless latest_build
   puts "There are no new builds for #{binary_name} requested."
