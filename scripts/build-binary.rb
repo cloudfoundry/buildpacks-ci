@@ -99,20 +99,26 @@ git_msg  = "Build #{binary_name} - #{latest_build['version']}\n\nfilename: #{fil
 git_msg += "\n\nsource url: #{source_url}, #{@verification_type}: #{@verification_value}"
 git_msg += "\n\n[ci skip]" if builds[binary_name].empty? && ci_skip_for(binary_name)
 
+add_ssh_key_and_update(builds_dir)
+files_to_add=""
+
 #don't change behavior for non-automated builds
 if !is_automated(binary_name)
   File.write(builds_path, builds.to_yaml)
+  files_to_add += "#{builds_path} "
 end
 
 built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
-File.write(File.join(builds_dir, "#{binary_name}-built.yml"), built.to_yaml)
-
+built_output = File.join(builds_dir, "#{binary_name}-built.yml")
+File.write(built_output, built.to_yaml)
+files_to_add += built_output
 
 Dir.chdir(builds_dir) do
   exec(<<-EOF)
     git config --global user.email "cf-buildpacks-eng@pivotal.io"
     git config --global user.name "CF Buildpacks Team CI Server"
-    git commit -am "#{git_msg}"
+    git add #{files_to_add}
+    git commit -m "#{git_msg}"
     rsync -a #{builds_dir}/ #{builds_yaml_artifacts}
   EOF
 end
