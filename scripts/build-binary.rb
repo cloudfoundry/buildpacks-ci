@@ -5,7 +5,7 @@ require 'yaml'
 require 'digest'
 require 'fileutils'
 
-def add_ssh_key_and_update(dir)
+def add_ssh_key_and_update(dir, repo)
   File.write("/tmp/git_ssh_key",ENV['GIT_SSH_KEY'])
   system(<<-HEREDOC)
     eval "$(ssh-agent)"
@@ -18,8 +18,8 @@ def add_ssh_key_and_update(dir)
     ssh-add /tmp/git_ssh_key
     set -x
     cd #{dir}
-    git checkout binary-builds-test
-    git pull
+    git checkout #{repo}
+    git pull -r
   HEREDOC
 end
 
@@ -39,7 +39,7 @@ end
 
 #get latest version of <binary>-built.yml
 built_dir    = File.join(Dir.pwd, 'built-yaml')
-add_ssh_key_and_update(built_dir)
+add_ssh_key_and_update(built_dir, "binary-builds-test")
 
 binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
@@ -99,7 +99,7 @@ git_msg  = "Build #{binary_name} - #{latest_build['version']}\n\nfilename: #{fil
 git_msg += "\n\nsource url: #{source_url}, #{@verification_type}: #{@verification_value}"
 git_msg += "\n\n[ci skip]" if builds[binary_name].empty? && ci_skip_for(binary_name)
 
-add_ssh_key_and_update(builds_dir)
+add_ssh_key_and_update(builds_dir,"binary-builds")
 files_to_add=""
 
 #don't change behavior for non-automated builds
