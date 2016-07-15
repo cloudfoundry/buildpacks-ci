@@ -194,6 +194,17 @@ resources:
       uri: {{buildpacks-ci-git-uri}}
       paths: [ composer-builds.yml ]
 
+<% %w(godep composer glide nginx node).each do |auto_dep| %>
+  - name: <%= auto_dep %>-builds-in
+    type: git
+    source:
+      branch: binary-builds
+      private_key: {{buildpacks-ci-private-key}}
+      uri: {{buildpacks-ci-git-uri}}
+      paths: [ <%= auto_dep %>-builds.yml ]
+<% end %>
+
+
 jobs:
   - name: binary-builder
     serial: true
@@ -474,8 +485,7 @@ jobs:
     plan:
       - aggregate:
         - get: builds-yaml
-          resource: <%= dependency %>-builds
-          passed: [trigger-<%= dependency %>-build]
+          resource: <%= dependency %>-builds-in
           version: every
           trigger: true
         - get: binary-builder

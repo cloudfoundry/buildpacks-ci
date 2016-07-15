@@ -5,21 +5,27 @@ require 'yaml'
 require 'digest'
 require 'fileutils'
 
-def ci_skip_for(binary)
-  return false if binary == "godep"
-  return false if binary == "composer"
-  return false if binary == "glide"
-  return false if binary == "nginx"
-  return false if binary == "node"
-  return true
+def is_automated(binary)
+  automated = %w(composer godep glide nginx node)
+  return automated.include? binary
 end
+
+def ci_skip_for(binary)
+  return !is_automated(binary)
+end
+
 
 binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
 builds_yaml_artifacts = File.join(Dir.pwd, 'builds-yaml-artifacts')
 builds_path  = File.join(builds_dir, "#{binary_name}-builds.yml")
+built_path   = File.join(builds_dir, "#{binary_name}-built.yml")
+
 builds       = YAML.load_file(builds_path)
+built        = YAML.load_file(built_path)
+
 latest_build = builds[binary_name].shift
+built[binary_name].push latest_build
 
 unless latest_build
   puts "There are no new builds for #{binary_name} requested."
@@ -68,7 +74,12 @@ git_msg  = "Build #{binary_name} - #{latest_build['version']}\n\nfilename: #{fil
 git_msg += "\n\nsource url: #{source_url}, #{@verification_type}: #{@verification_value}"
 git_msg += "\n\n[ci skip]" if builds[binary_name].empty? && ci_skip_for(binary_name)
 
-File.write(builds_path, builds.to_yaml)
+#don't change behavior for non-automated builds
+if !is_automated(binary_name)
+  File.write(builds_path, builds.to_yaml)
+end
+
+File.write(built_path, built.to_yaml)
 
 Dir.chdir(builds_dir) do
   exec(<<-EOF)
