@@ -48,16 +48,16 @@ resources:
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
       paths: [ <%= dep %>-builds.yml ]
-<% end %>
-
-<% %w(composer glide godep nginx node).each do |auto_dep| %>
-  - name: <%= auto_dep %>-built-output
+  - name: <%= dep %>-built-output
     type: git
     source:
       branch: binary-built-output
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
-      paths: [ <%= auto_dep %>-built.yml ]
+      paths: [ <%= dep %>-built.yml ]
+<% end %>
+
+<% %w(composer glide godep nginx node).each do |auto_dep| %>
   - name: <%= auto_dep %>-builds-in
     type: git
     source:
@@ -176,11 +176,14 @@ jobs:
         - get: binary-builder
           passed: [binary-builder]
         - get: buildpacks-ci
+        - get: built-yaml
+          resource: <%= runtime %>-built-output
       - do:
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary.yml
           params:
             BINARY_NAME: <%= runtime %>
+            GIT_SSH_KEY: {{buildpacks-ci-private-key}}
           privileged: true
         - put: build-tar
           params:
