@@ -121,7 +121,7 @@ if !is_automated(binary_name)
 else
   built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
   File.write(built_file, built.to_yaml)
-  commit_and_rsync(built_dir,builds_yaml_artifiacts,git_msg,built_file)
+  commit_and_rsync(built_dir, builds_yaml_artifacts, git_msg, built_file)
 end
 
 
