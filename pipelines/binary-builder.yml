@@ -99,6 +99,39 @@ resources:
         - CHANGELOG
 <% end %>
 
+groups:
+  - name: enqueue-automated-builds
+    jobs:
+<% %w(composer glide godep nginx node).each do |auto_dep| %>
+    - trigger-<%= auto_dep %>-build
+<% end %>
+  - name: automated-builds
+    jobs:
+<% %w(composer glide godep nginx node).each do |auto_dep| %>
+    - build-<%= auto_dep %>
+<% end %>
+<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"]}.each do |buildpack, dependencies| %>
+  <% dependencies.each do |dependency| %>
+    - update-<%= dependency %>-in-<%= buildpack %>-buildpack
+  <% end %>
+<% end %>
+    - test-node
+    - test-nginx
+  - name: manual-builds
+    jobs:
+<% %w(php php7 ruby jruby bundler python httpd).each do |runtime| %>
+    - build-<%= runtime %>
+<% end %>
+    - test-php
+    - test-php7
+    - test-python
+    - test-jruby
+    - test-ruby
+  - name: binary-builder
+    jobs:
+      - binary-builder
+
+
 jobs:
   - name: binary-builder
     serial: true
