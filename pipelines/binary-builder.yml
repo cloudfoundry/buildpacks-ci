@@ -51,10 +51,10 @@ resources:
 <% end %>
 
 <% %w(composer glide godep nginx node).each do |auto_dep| %>
-  - name: <%= auto_dep %>-built-in
+  - name: <%= auto_dep %>-built-output
     type: git
     source:
-      branch: binary-builds
+      branch: binary-built-output
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
       paths: [ <%= auto_dep %>-built.yml ]
@@ -379,7 +379,7 @@ jobs:
     plan:
       - aggregate:
         - get: built-yaml
-          resource: <%= dependency %>-built-in
+          resource: <%= dependency %>-built-output
         - get: builds-yaml
           resource: <%= dependency %>-builds-in
           version: every
@@ -432,7 +432,8 @@ jobs:
           - get: buildpacks-ci
           - get: buildpack
             resource: <%= buildpack %>-buildpack
-          - get: builds-out
+          - get: built-out
+            resource: <%= dependency %>-built-output
             passed: [ build-<%= dependency %> ]
             version: every
             trigger: true
