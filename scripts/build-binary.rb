@@ -53,7 +53,7 @@ binary_name  = ENV['BINARY_NAME']
 
 #get latest version of <binary>-built.yml
 built_dir    = File.join(Dir.pwd, 'built-yaml')
-built_file   = File.joint(built_dir, "#{binary_name}-built.yml")
+built_file   = File.join(built_dir, "#{binary_name}-built.yml")
 add_ssh_key_and_update(built_dir, "binary-built-output")
 
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
