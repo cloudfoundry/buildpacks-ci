@@ -44,6 +44,8 @@ def commit_and_rsync(in_dir, out_dir, git_msg,files)
   end
 end
 
+binary_name  = ENV['BINARY_NAME']
+
 # We read the <binary>-builds.yml file from the ./builds-yaml directory
 # and the <binary>-built.yml from the ./built-yaml directory. This is because
 # we want to use a specific version of builds.yml, but the latest version of
@@ -54,7 +56,6 @@ built_dir    = File.join(Dir.pwd, 'built-yaml')
 built_file   = File.joint(built_dir, "#{binary_name}-built.yml")
 add_ssh_key_and_update(built_dir, "binary-built-output")
 
-binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
 builds_file  = File.join(builds_dir, "#{binary_name}-builds.yml")
 builds_yaml_artifacts = File.join(Dir.pwd, 'builds-yaml-artifacts')

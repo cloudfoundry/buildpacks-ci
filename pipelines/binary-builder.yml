@@ -406,6 +406,7 @@ jobs:
             AWS_DEFAULT_REGION: us-east-1
           privileged: true
         - put: builds-out
+          resource: <%= dependency %>-built-output
           params:
             repository: builds-yaml-artifacts
             rebase: true
