@@ -4,7 +4,7 @@ image: docker:///cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
   - name: buildpack
-  - name: builds-out
+  - name: built-out
 outputs:
   - name: buildpack-artifacts
 run:

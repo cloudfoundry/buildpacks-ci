@@ -5,7 +5,7 @@ require 'yaml'
 require 'digest'
 require 'fileutils'
 
-def add_ssh_key_and_update(dir, repo)
+def add_ssh_key_and_update(dir, branch)
   File.write("/tmp/git_ssh_key",ENV['GIT_SSH_KEY'])
   system(<<-HEREDOC)
     eval "$(ssh-agent)"
@@ -18,7 +18,7 @@ def add_ssh_key_and_update(dir, repo)
     ssh-add /tmp/git_ssh_key
     set -x
     cd #{dir}
-    git checkout #{repo}
+    git checkout #{branch}
     git pull -r
   HEREDOC
 end
@@ -32,6 +32,18 @@ def ci_skip_for(binary)
   return !is_automated(binary)
 end
 
+def commit_and_rsync(in_dir, out_dir, git_msg,files)
+  Dir.chdir(in_dir) do
+    exec(<<-EOF)
+      git config --global user.email "cf-buildpacks-eng@pivotal.io"
+      git config --global user.name "CF Buildpacks Team CI Server"
+      git add #{files}
+      git commit -m "#{git_msg}"
+      rsync -a #{in_dir}/ #{out_dir}
+    EOF
+  end
+end
+
 # We read the <binary>-builds.yml file from the ./builds-yaml directory
 # and the <binary>-built.yml from the ./built-yaml directory. This is because
 # we want to use a specific version of builds.yml, but the latest version of
@@ -39,15 +51,16 @@ end
 
 #get latest version of <binary>-built.yml
 built_dir    = File.join(Dir.pwd, 'built-yaml')
-add_ssh_key_and_update(built_dir, "binary-builds-test")
+built_file   = File.joint(built_dir, "#{binary_name}-built.yml")
+add_ssh_key_and_update(built_dir, "binary-built-output")
 
 binary_name  = ENV['BINARY_NAME']
 builds_dir   = File.join(Dir.pwd, 'builds-yaml')
+builds_file  = File.join(builds_dir, "#{binary_name}-builds.yml")
 builds_yaml_artifacts = File.join(Dir.pwd, 'builds-yaml-artifacts')
-builds_path  = File.join(builds_dir, "#{binary_name}-builds.yml")
 
-builds       = YAML.load_file(builds_path)
-built        = YAML.load_file(File.join(built_dir, "#{binary_name}-built.yml"))
+builds       = YAML.load_file(builds_file)
+built        = YAML.load_file(built_file)
 
 latest_build = builds[binary_name].shift
 built[binary_name].push latest_build
@@ -99,26 +112,15 @@ git_msg  = "Build #{binary_name} - #{latest_build['version']}\n\nfilename: #{fil
 git_msg += "\n\nsource url: #{source_url}, #{@verification_type}: #{@verification_value}"
 git_msg += "\n\n[ci skip]" if builds[binary_name].empty? && ci_skip_for(binary_name)
 
-add_ssh_key_and_update(builds_dir,"binary-builds")
-files_to_add=""
 
 #don't change behavior for non-automated builds
 if !is_automated(binary_name)
-  File.write(builds_path, builds.to_yaml)
-  files_to_add += "#{builds_path} "
+  File.write(builds_file, builds.to_yaml)
+  commit_and_rsync(builds_dir, builds_yaml_artifacts, git_msg, builds_file)
+else
+  built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
+  File.write(built_file, built.to_yaml)
+  commit_and_rsync(built_dir,builds_yaml_artifiacts,git_msg,built_file)
 end
 
-built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
-built_output = File.join(builds_dir, "#{binary_name}-built.yml")
-File.write(built_output, built.to_yaml)
-files_to_add += built_output
 
-Dir.chdir(builds_dir) do
-  exec(<<-EOF)
-    git config --global user.email "cf-buildpacks-eng@pivotal.io"
-    git config --global user.name "CF Buildpacks Team CI Server"
-    git add #{files_to_add}
-    git commit -m "#{git_msg}"
-    rsync -a #{builds_dir}/ #{builds_yaml_artifacts}
-  EOF
-end
