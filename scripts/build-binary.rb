@@ -76,7 +76,7 @@ if binary_name == "composer" then
   system("curl #{download_url} -o binary-builder/composer-#{latest_build['version']}.phar") or raise "Could not download composer.phar"
   FileUtils.cp_r(Dir["binary-builder/*"], "binary-builder-artifacts/")
   FileUtils.mkdir_p('binary-builder-artifacts/final-artifact/')
-  FileUtils.cp_r('binary-builder-artifacts/composer.phar', 'binary-builder-artifacts/final-artifact/')
+  FileUtils.cp("binary-builder-artifacts/composer-#{latest_build['version']}.phar", 'binary-builder-artifacts/final-artifact/composer.phar')
 else
   flags = "--name=#{binary_name}"
   latest_build.each_pair do |key, value|
