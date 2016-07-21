@@ -95,6 +95,12 @@ else
     raise "Could not build" unless $?.success?
     if Dir.exist?("/tmp/x86_64-linux-gnu/")
       system('tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/') or raise "Could not create tar"
+    elsif Dir.exist?("/tmp/src/")
+      # godep and glide are written in Go, so their source is downloaded to
+      # "/tmp/src"
+      system('tar -zcf build.tgz -C /tmp ./src/') or raise "Could not create tar"
+    else
+      raise "Could not find original source after build"
     end
   end
   FileUtils.cp_r(Dir["binary-builder/*.tgz"], "binary-builder-artifacts/")
