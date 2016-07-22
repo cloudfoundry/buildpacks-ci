@@ -36,7 +36,7 @@ resources:
   - name: compile-extensions
     type: git
     source:
-      uri: https://github.com/cloudfoundry-incubator/compile-extensions.git
+      uri: https://github.com/cloudfoundry/compile-extensions.git
   - name: cf-release
     type: git
     source:
