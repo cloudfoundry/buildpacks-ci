@@ -156,8 +156,8 @@ describe DependencyBuildEnqueuer do
 
     context "node" do
       let(:dependency)          { "node" }
-      let(:dependency_versions) { %w(v4.5.6 v0.12.5 v6.6.9 v0.10.6 v5.7.8) }
-      let(:new_versions)        { %w(v0.12.5 v5.7.8) }
+      let(:dependency_versions) { %w(4.5.6 0.12.5 6.6.9 0.10.6 5.7.8) }
+      let(:new_versions)        { %w(0.12.5 5.7.8) }
       let(:expected_version_1)  { "5.7.8" }
       let(:expected_version_2)  { "0.12.5" }
       let(:source_url_1)        { "https://nodejs.org/dist/v#{expected_version_1}/node-v#{expected_version_1}.tar.gz" }

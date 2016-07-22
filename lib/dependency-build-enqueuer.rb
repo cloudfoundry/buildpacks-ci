@@ -83,8 +83,6 @@ class DependencyBuildEnqueuer
 
   def massage_version(version)
     case dependency
-    when "node"
-      version.gsub("v","")
     when "nginx"
       version.gsub("release-","")
     else
