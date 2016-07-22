@@ -1,4 +1,4 @@
-FROM ruby:2.2.3-slim
+FROM ruby:2.3.1-slim
 
 ENV LANG="C.UTF-8"
 
@@ -27,11 +27,12 @@ RUN git config --global user.email "cf-buildpacks-eng@pivotal.io"
 RUN git config --global user.name "CF Buildpacks Team CI Server"
 RUN git config --global core.pager cat
 
-RUN wget -q https://releases.hashicorp.com/vagrant/1.8.1/vagrant_1.8.1_x86_64.deb \
-  && dpkg -i vagrant_1.8.1_x86_64.deb \
-  && rm vagrant_1.8.1_x86_64.deb
-RUN vagrant plugin install vagrant-aws
-RUN vagrant box add cloudfoundry/bosh-lite --provider aws
+RUN wget -q https://releases.hashicorp.com/vagrant/1.8.5/vagrant_1.8.5_x86_64.deb \
+  && dpkg -i vagrant_1.8.5_x86_64.deb \
+  && rm vagrant_1.8.5_x86_64.deb
+RUN vagrant plugin install vagrant-aws --verbose
+ENV PATH /usr/bin:$PATH
+RUN echo $PATH && vagrant box add cloudfoundry/bosh-lite --provider aws
 
 # godep is a package manager for golang apps
 RUN GOPATH=/go go get github.com/tools/godep
