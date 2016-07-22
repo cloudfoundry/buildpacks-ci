@@ -64,7 +64,7 @@ class NewReleasesDetector
     dependency_tags = {}
 
     tags.each do |current_dependency, get_tags|
-      current_tags = get_tags.call
+      current_tags = massage_version(get_tags.call, current_dependency)
 
       filename = "#{new_releases_dir}/#{current_dependency}.yaml"
       filename_diff = "#{new_releases_dir}/#{current_dependency}-new.yaml"
@@ -104,5 +104,17 @@ class NewReleasesDetector
       python:          -> { JSON.parse(open('https://hg.python.org/cpython/json-tags').read)['tags'].map { |t| t['tag'] } },
       ruby:            -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) }
     }
+  end
+
+  # take the list of tags and format the version so it matches
+  # the version in the buildpack manifest.yml. This way, the version format
+  # is consistent throughout the whole pipeline.
+  def massage_version(tags,dependency)
+    case dependency
+    when "node"
+      tags.map {|tag| tag.gsub(/v/,"")}
+    else
+      tags
+    end
   end
 end
