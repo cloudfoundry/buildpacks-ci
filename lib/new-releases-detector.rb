@@ -111,7 +111,7 @@ class NewReleasesDetector
   # is consistent throughout the whole pipeline.
   def massage_version(tags,dependency)
     case dependency
-    when "node"
+    when :node
       tags.map {|tag| tag.gsub(/v/,"")}
     else
       tags
