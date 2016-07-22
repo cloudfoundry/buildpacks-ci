@@ -18,6 +18,9 @@ if [ "$IAAS" = "aws" ]; then
   rm -rf .vagrant
 
   export VAGRANT_CWD=$(pwd)
+  # Temp workaround for https://github.com/bundler/bundler/issues/4602#issuecomment-233619696
+  bundle_path=$(which bundle)
+  sed -i -e "s/activate_bin_path/bin_path/g" $bundle_path
   vagrant up --provider=aws
 elif [ "$IAAS" = "azure" ]; then
   # Set up BOSH user and password for Azure BOSH, currently bosh-lite user and password
