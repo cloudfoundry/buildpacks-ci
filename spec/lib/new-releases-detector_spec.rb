@@ -137,7 +137,7 @@ describe NewReleasesDetector do
 
       it 'posts one story to tracker with all new releases of that dependency' do
         expect(tracker_client).to receive(:post_to_tracker).with('Build and/or Include new releases: python a, b',
-                                                                 "We have 2 new releases for **python**:\n**version a, b**\n See the documentation at http://docs.cloudfoundry.org/buildpacks/new_dependency_releases.html for info on building a new release binary and adding it to the buildpack manifest file.",
+                                                                 "We have 2 new releases for **python**:\n**version a, b**\n See the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file.",
                                                                  ['Update python in snake-buildpack', 'Update python in lizard-buildpack'],
                                                                  1)
         subject.post_to_tracker
