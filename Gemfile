@@ -4,6 +4,7 @@ source 'http://rubygems.org'
 ruby '2.3.1'
 
 gem 'rspec'
+gem 'rspec-rerun'
 gem 'webmock'
 gem 'nokogiri'
 gem 'octokit'
