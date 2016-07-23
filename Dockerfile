@@ -66,5 +66,5 @@ RUN curl -L https://github.com/git-hooks/git-hooks/releases/download/v1.1.3/git-
 RUN chmod 755 /usr/local/bin/git-hooks
 RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make install
 
-# Ensure that Concoure filtering is on for non-interactive shells
+# Ensure that Concourse filtering is on for non-interactive shells
 ENV BASH_ENV /etc/profile.d/filter.sh
