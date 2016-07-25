@@ -29,7 +29,7 @@ resources:
       uri: {{buildpacks-ci-git-uri}}
 
 jobs:
-<% %w(go python nodejs php hhvm ruby jruby).each do |language| %>
+<% %w(go python nodejs php ruby jruby).each do |language| %>
   - name: brats-<%= language %>-lts
     serial: true
     plan:
