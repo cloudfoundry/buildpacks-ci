@@ -1,0 +1,93 @@
+---
+resources:
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+  - name: cf-edge-environments
+    type: pool
+    source:
+      branch: resource-pools
+      pool: cf-edge-environments
+      private_key: {{buildpacks-ci-private-key}}
+      uri: {{buildpacks-ci-git-uri}}
+  - name: cf-lts-environments
+    type: pool
+    source:
+      branch: resource-pools
+      pool: cf-lts-environments
+      private_key: {{buildpacks-ci-private-key}}
+      uri: {{buildpacks-ci-git-uri}}
+  - name: buildpack-master
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-community/dotnet-core-buildpack
+      branch: master
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
+jobs:
+  - name: specs-edge-master
+    serial: true
+    plan:
+      - put: cf-environments
+        resource: cf-edge-environments
+        params:
+          acquire: true
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-master
+          trigger: true
+      - do:
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack.yml
+          params:
+            STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
+            CF_EDGE: 'true'
+          privileged: true
+          ensure:
+            put: cf-edge-environments
+            params:
+              release: cf-environments
+        on_failure:
+          put: failure-alert
+          params:
+            text: "dotnet-core-buildpack specs-edge-master job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/dotnet-core-buildpack/jobs/specs-edge-master"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: specs-lts-master
+    serial: true
+    plan:
+      - put: cf-environments
+        resource: cf-lts-environments
+        params:
+          acquire: true
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-master
+          trigger: true
+      - do:
+        - task: rspec
+          file: buildpacks-ci/tasks/test-buildpack.yml
+          params:
+            STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci-cf-password}}
+          privileged: true
+          ensure:
+            put: cf-lts-environments
+            params:
+              release: cf-environments
+        on_failure:
+          put: failure-alert
+          params:
+            text: "dotnet-core-buildpack specs-lts-master job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/dotnet-core-buildpack/jobs/specs-lts-master"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
