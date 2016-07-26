@@ -196,7 +196,10 @@ jobs:
       - task: check for latest PHP module versions
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
           inputs:
             - name: pecl-gearman
             - name: pecl-igbinary

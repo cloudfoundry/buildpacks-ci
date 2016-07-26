@@ -442,7 +442,10 @@ jobs:
         - task: check-can-i-bump
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
             inputs:
               - name: buildpacks-ci
             run:
@@ -453,7 +456,10 @@ jobs:
         - task: upload-blobs
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
             inputs:
               - name: buildpacks-ci
               - name: cf-release

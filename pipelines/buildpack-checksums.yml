@@ -26,7 +26,10 @@ jobs:
       - task: run-tests
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
           inputs:
             - name: master
           run:
@@ -42,7 +45,10 @@ jobs:
       - task: build-site
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
           inputs:
             - name: master
           outputs:

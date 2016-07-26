@@ -11,7 +11,10 @@ describe 'create bosh release task' do
       File.open(task_file, 'w') do |f|
         f.puts <<HERE
 platform: linux
-image: docker:///cfbuildpacks/ci
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
   - name: cf-release

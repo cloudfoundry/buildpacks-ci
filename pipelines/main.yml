@@ -58,7 +58,10 @@ jobs:
       - task: rspec
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: buildpack-packager
@@ -75,7 +78,10 @@ jobs:
       - task: bump version and push up tag
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: buildpack-packager
@@ -99,7 +105,10 @@ jobs:
       - task: create new release
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: buildpack-packager
@@ -128,7 +137,10 @@ jobs:
       - task: rspec
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: machete
@@ -145,7 +157,10 @@ jobs:
       - task: bump version and push up tag
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: machete
@@ -169,7 +184,10 @@ jobs:
       - task: create new release
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: machete
@@ -198,7 +216,10 @@ jobs:
       - task: rspec
         config:
           platform: linux
-          image: docker:///ruby#2.3.1
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
             - name: compile-extensions
