@@ -181,18 +181,21 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
       Gem::Version.new(dep['version'])
     end.sort.first.to_s
 
-    buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && dep["version"] == version_to_delete}
-    dependency_hash = {
-      "name"      => dependency,
-      "version"   => dependency_version,
-      "uri"       => @url,
-      "md5"       => @md5,
-      "cf_stacks" => ["cflinuxfs2"]
-    }
-    buildpack_manifest["dependencies"] << dependency_hash
+    if buildpack == "nodejs" || (buildpack == "ruby" && major_version == "4")
+      buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && dep["version"] == version_to_delete}
+      dependency_hash = {
+        "name"      => dependency,
+        "version"   => dependency_version,
+        "uri"       => @url,
+        "md5"       => @md5,
+        "cf_stacks" => ["cflinuxfs2"]
+      }
+      buildpack_manifest["dependencies"] << dependency_hash
+      buildpack_manifest = update_version_in_url_to_dependency_map(buildpack_manifest) if buildpack == "ruby"
+    end
 
-    # Make latest node 4.x.y version default node version
-    if major_version == "4"
+    # Make latest node 4.x.y version default node version for node buildpack
+    if major_version == "4" && buildpack == "nodejs"
       buildpack_manifest["default_versions"].delete_if {|dep| dep["name"] == dependency}
       default_dependency_hash = {
         "name"    => dependency,
@@ -200,6 +203,17 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
       }
       buildpack_manifest["default_versions"] << default_dependency_hash
     end
+    buildpack_manifest
+  end
+
+  def update_version_in_url_to_dependency_map(buildpack_manifest)
+    buildpack_manifest["url_to_dependency_map"].delete_if {|dep| dep["name"] == dependency}
+    dependency_hash = {
+      "match"   => "node-v?(d+.d+.d+)",
+      "name"    => dependency,
+      "version" => dependency_version
+    }
+    buildpack_manifest["url_to_dependency_map"] << dependency_hash
     buildpack_manifest
   end
 end

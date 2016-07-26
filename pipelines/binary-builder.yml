@@ -480,7 +480,7 @@ jobs:
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
-<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"]}.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"]}.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
   - name: update-<%= dependency %>-in-<%= buildpack %>-buildpack
     serial: true
@@ -498,7 +498,7 @@ jobs:
         - task: update-dependency-in-manifests
           file: buildpacks-ci/tasks/update-dependency-in-buildpack.yml
           params:
-            <%= "BUILDPACK_NAME: #{buildpack}" if dependency == "nginx" %>
+            <%= "BUILDPACK_NAME: #{buildpack}" if ["node", "nginx"].include? dependency %>
             DEPENDENCY: <%= dependency %>
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
