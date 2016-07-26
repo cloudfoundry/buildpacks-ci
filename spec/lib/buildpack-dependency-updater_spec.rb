@@ -395,6 +395,17 @@ MANIFEST
             expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.10.46-linux-x64.tgz")
             expect(dependency_in_manifest["md5"]).to eq("2e02c3350a0b81e8b501ef3ea637a93b")
           end
+
+          it "does not update the nodejs buildpack manifest dependency default with the specified version" do
+            subject.run!
+            manifest = YAML.load_file(manifest_file)
+
+            default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.6'}
+            expect(default_in_manifest["version"]).to eq('4.4.6')
+
+            default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+            expect(default_in_manifest).to eq(nil)
+          end
         end
 
         context("node >= 4") do
@@ -438,6 +449,11 @@ MANIFEST
           buildpack_manifest_contents = <<-MANIFEST
 ---
 language: ruby
+default_versions:
+  - name: ruby
+    version: 2.3.0
+  - name: node
+    version: 4.4.4
 url_to_dependency_map:
   - match: ruby-(\d+\.\d+\.\d+)
     name: ruby
@@ -488,6 +504,17 @@ MANIFEST
             expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-4.4.4-linux-x64.tgz")
             expect(dependency_in_manifest["md5"]).to eq("8beeb9a17a81b9832a1ccce02e6d6897")
           end
+
+          it "does not update the ruby buildpack manifest dependency default with the specified version" do
+            subject.run!
+            manifest = YAML.load_file(manifest_file)
+
+            default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.4'}
+            expect(default_in_manifest["version"]).to eq('4.4.4')
+
+            default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+            expect(default_in_manifest).to eq(nil)
+          end
         end
 
         context("node >= 4") do
@@ -507,6 +534,17 @@ MANIFEST
             expect(dependency_in_manifest["version"]).to eq(expected_version)
             expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
             expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+          end
+
+          it "updates the ruby buildpack manifest dependency default with the specified version" do
+            subject.run!
+            manifest = YAML.load_file(manifest_file)
+
+            default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+            expect(default_in_manifest["version"]).to eq(expected_version)
+
+            default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.4'}
+            expect(default_in_manifest).to eq(nil)
           end
         end
       end

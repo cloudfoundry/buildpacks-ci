@@ -195,7 +195,7 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
     end
 
     # Make latest node 4.x.y version default node version for node buildpack
-    if major_version == "4" && buildpack == "nodejs"
+    if major_version == "4"
       buildpack_manifest["default_versions"].delete_if {|dep| dep["name"] == dependency}
       default_dependency_hash = {
         "name"    => dependency,
