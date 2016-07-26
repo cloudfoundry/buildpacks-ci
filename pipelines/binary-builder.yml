@@ -221,7 +221,10 @@ jobs:
         trigger: true
       - task: run tests
         config:
-          image: docker:///cloudfoundry/cflinuxfs2
+          image_resource:
+            type: docker-image
+            source:
+              repository: cloudfoundry/cflinuxfs2
           inputs:
             - name: build-tar
           platform: linux
@@ -264,7 +267,10 @@ jobs:
         trigger: true
       - task: run tests
         config:
-          image: docker:///cloudfoundry/cflinuxfs2
+          image_resource:
+            type: docker-image
+            source:
+              repository: cloudfoundry/cflinuxfs2
           inputs:
             - name: build-tar
           platform: linux
@@ -288,7 +294,10 @@ jobs:
         trigger: true
       - task: run tests
         config:
-          image: docker:///cloudfoundry/cflinuxfs2
+          image_resource:
+            type: docker-image
+            source:
+              repository: cloudfoundry/cflinuxfs2
           inputs:
             - name: build-tar
           platform: linux
@@ -304,7 +313,10 @@ jobs:
         trigger: true
       - task: run tests
         config:
-          image: docker:///cloudfoundry/cflinuxfs2
+          image_resource:
+            type: docker-image
+            source:
+              repository: cloudfoundry/cflinuxfs2
           inputs:
             - name: build-tar
           platform: linux
@@ -320,7 +332,10 @@ jobs:
         trigger: true
       - task: run tests
         config:
-          image: docker:///cloudfoundry/cflinuxfs2
+          image_resource:
+            type: docker-image
+            source:
+              repository: cloudfoundry/cflinuxfs2
           inputs:
             - name: build-tar
           platform: linux
@@ -336,7 +351,10 @@ jobs:
         trigger: true
       - task: run tests
         config:
-          image: docker:///cloudfoundry/cflinuxfs2
+          image_resource:
+            type: docker-image
+            source:
+              repository: cloudfoundry/cflinuxfs2
           inputs:
             - name: build-tar
           platform: linux
@@ -379,7 +397,10 @@ jobs:
         trigger: true
       - task: run tests
         config:
-          image: docker:///cloudfoundry/cflinuxfs2
+          image_resource:
+            type: docker-image
+            source:
+              repository: cloudfoundry/cflinuxfs2
           inputs:
             - name: build-tar
           platform: linux
@@ -491,7 +512,10 @@ jobs:
           - task: rspec
             config:
               platform: linux
-              image: docker:///cfbuildpacks/ci
+              image_resource:
+                type: docker-image
+                source:
+                  repository: cfbuildpacks/ci
               inputs:
                 - name: buildpack-artifacts
                   path: buildpack

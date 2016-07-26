@@ -175,7 +175,10 @@ jobs:
       - task: create-tracker-story
         config:
           platform: linux
-          image: docker:///cfbuildpacks/ci
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
           inputs:
             - name: buildpacks-ci
           run:
@@ -395,7 +398,10 @@ jobs:
         - task: overwrite-cflinuxfs2-rootfs-release
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
             inputs:
               - name: buildpacks-ci
               - name: stack-s3
@@ -412,7 +418,10 @@ jobs:
         - task: run-rootfs-smoke-test
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
             inputs:
               - name: deployments-buildpacks
               - name: buildpacks-ci
@@ -469,7 +478,10 @@ jobs:
         - task: create-cf-release
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
             inputs:
               - name: cf-release
               - name: buildpacks-ci
@@ -604,7 +616,10 @@ jobs:
         - task: update-receipt
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
             inputs:
               - name: buildpacks-ci
               - name: receipt-s3
@@ -617,7 +632,10 @@ jobs:
         - task: update-filename
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
             inputs:
               - name: stack-s3
               - name: version
@@ -697,7 +715,10 @@ jobs:
       - do:
         - task: rename
           config:
-            image: docker:///cfbuildpacks/ci
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
             platform: linux
             inputs:
               - name: stack-s3
@@ -788,7 +809,10 @@ jobs:
         - task: create-release-body
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
             inputs:
               - name: version
             outputs:
@@ -801,7 +825,10 @@ jobs:
         - task: create-release-commit
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
             inputs:
               - name: release-artifacts
             outputs:
@@ -844,7 +871,10 @@ jobs:
         - task: check-can-i-bump
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
             inputs:
               - name: buildpacks-ci
             run:
@@ -855,7 +885,10 @@ jobs:
         - task: upload
           config:
             platform: linux
-            image: docker:///cfbuildpacks/ci
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
             inputs:
               - name: buildpacks-ci
               - name: cf-release-develop

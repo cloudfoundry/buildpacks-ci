@@ -1,6 +1,9 @@
 ---
 platform: linux
-image: docker:///cloudfoundry/cflinuxfs2
+image_resource:
+  type: docker-image
+  source:
+    repository: cloudfoundry/cflinuxfs2
 inputs:
   - name: binary-builder-artifacts
   - name: buildpacks-ci
