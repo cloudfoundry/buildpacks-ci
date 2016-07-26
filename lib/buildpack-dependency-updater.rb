@@ -190,6 +190,16 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
       "cf_stacks" => ["cflinuxfs2"]
     }
     buildpack_manifest["dependencies"] << dependency_hash
+
+    # Make latest node 4.x.y version default node version
+    if major_version == "4"
+      buildpack_manifest["default_versions"].delete_if {|dep| dep["name"] == dependency}
+      default_dependency_hash = {
+        "name"    => dependency,
+        "version" => dependency_version
+      }
+      buildpack_manifest["default_versions"] << default_dependency_hash
+    end
     buildpack_manifest
   end
 end
