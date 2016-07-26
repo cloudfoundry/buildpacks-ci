@@ -290,12 +290,13 @@ OPTIONS_JSON
         buildpack_manifest_contents = <<-MANIFEST
 ---
 language: nodejs
-
 url_to_dependency_map:
   - match: node\/v(\d+\.\d+\.\d+)
     name: node
     version: $1
-
+default_versions:
+  - name: node
+    version: 4.4.6
 dependencies:
   - name: node
     version: 0.10.45
@@ -409,6 +410,17 @@ filename: binary-builder/node-#{expected_version}-linux-x64.tgz, md5: 18bec8f658
           expect(dependency_in_manifest["version"]).to eq("4.4.6")
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-4.4.6-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("33822ae3f92ac9586d73dee3c42a4bf2")
+        end
+
+        it "updates the specified buildpack manifest dependency default with the specified version" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+
+          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.6'}
+          expect(default_in_manifest).to eq(nil)
+
+          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+          expect(default_in_manifest["version"]).to eq(expected_version)
         end
       end
     end
