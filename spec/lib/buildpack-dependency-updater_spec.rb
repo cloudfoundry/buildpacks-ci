@@ -57,6 +57,7 @@ filename: binary-builder/godep-#{new_version}-linux-x64.tgz, md5: #{new_md5}, sh
       end
 
       it "updates the specified buildpack manifest dependency with the specified version" do
+        expect(STDOUT).to receive(:puts).with("Adding godep v65 to the go buildpack and manifest.")
         subject.run!
         manifest = YAML.load_file(manifest_file)
         version_hash = {"match"=>dependency, "name"=>dependency, "version"=>new_version}
@@ -75,6 +76,8 @@ filename: binary-builder/godep-#{new_version}-linux-x64.tgz, md5: #{new_md5}, sh
         it "does not try to update the manifest or buildpack" do
           expect(subject).not_to receive(:perform_dependency_update)
           expect(subject).not_to receive(:perform_dependency_specific_changes)
+          expect(STDOUT).to receive(:puts).with('godep v64 is already in the manifest for the go buildpack.')
+          expect(STDOUT).to receive(:puts).with('No updates were made to the manifest or buildpack.')
           subject.run!
         end
       end
