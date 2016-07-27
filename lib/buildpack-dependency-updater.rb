@@ -8,6 +8,9 @@ class BuildpackDependencyUpdater
   attr_reader :buildpack_dir
   attr_reader :binary_builds_dir
   attr_reader :dependency_version
+  attr_reader :md5
+  attr_reader :uri
+  attr_accessor :buildpack_manifest
 
   def self.create(dependency, *args)
     raise "Unsupported dependency" unless const_defined? dependency.capitalize
@@ -19,22 +22,34 @@ class BuildpackDependencyUpdater
     @buildpack = buildpack
     @buildpack_dir = buildpack_dir
     @binary_builds_dir = binary_builds_dir
-    @dependency_version, @url, @md5 = get_dependency_info
+    @dependency_version, @uri, @md5 = get_dependency_info
   end
 
   def run!
     manifest_file = File.join(buildpack_dir, "manifest.yml")
-    buildpack_manifest = YAML.load_file(manifest_file)
+    @buildpack_manifest = YAML.load_file(manifest_file)
 
-    buildpack_manifest = perform_dependency_update(buildpack_manifest)
-    buildpack_manifest = perform_dependency_specific_changes(buildpack_manifest)
+    if !dependency_version_currently_in_manifest
+      perform_dependency_update
+      perform_dependency_specific_changes
 
-    File.open(manifest_file, "w") do |file|
-      file.write(buildpack_manifest.to_yaml)
+      File.open(manifest_file, "w") do |file|
+        file.write(buildpack_manifest.to_yaml)
+      end
     end
   end
 
   private
+
+  def dependency_version_currently_in_manifest
+    dependencies = buildpack_manifest['dependencies']
+    dependencies.select do |dep|
+      dep['name'] == dependency &&
+      dep['version'] == dependency_version &&
+      dep['uri'] == uri &&
+      dep['md5'] == md5
+    end.count > 0
+  end
 
   def get_dependency_info
     git_commit_message = GitClient.last_commit_message(binary_builds_dir)
@@ -52,21 +67,20 @@ class BuildpackDependencyUpdater
     [dependency_version, url, md5]
   end
 
-  def perform_dependency_update(buildpack_manifest)
+  def perform_dependency_update
     buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency}
 
     dependency_hash = {
       "name"      => dependency,
       "version"   => dependency_version,
-      "uri"       => @url,
+      "uri"       => @uri,
       "md5"       => @md5,
       "cf_stacks" => ["cflinuxfs2"]
     }
     buildpack_manifest["dependencies"] << dependency_hash
-    buildpack_manifest
   end
 
-  def update_version_in_url_to_dependency_map(buildpack_manifest)
+  def update_version_in_url_to_dependency_map
     buildpack_manifest["url_to_dependency_map"].delete_if {|dep| dep["name"] == dependency}
     dependency_hash = {
       "match"   => dependency,
@@ -74,24 +88,21 @@ class BuildpackDependencyUpdater
       "version" => dependency_version
     }
     buildpack_manifest["url_to_dependency_map"] << dependency_hash
-    buildpack_manifest
   end
 
-  def perform_dependency_specific_changes(buildpack_manifest)
-    buildpack_manifest
-  end
+  def perform_dependency_specific_changes; end
 end
 
 
 class BuildpackDependencyUpdater::Godep < BuildpackDependencyUpdater
-  def perform_dependency_specific_changes(buildpack_manifest)
-    update_version_in_url_to_dependency_map(buildpack_manifest)
+  def perform_dependency_specific_changes
+    update_version_in_url_to_dependency_map
   end
 end
 
 class BuildpackDependencyUpdater::Glide < BuildpackDependencyUpdater
-  def perform_dependency_specific_changes(buildpack_manifest)
-    update_version_in_url_to_dependency_map(buildpack_manifest)
+  def perform_dependency_specific_changes
+    update_version_in_url_to_dependency_map
   end
 end
 
@@ -111,7 +122,7 @@ class BuildpackDependencyUpdater::Composer < BuildpackDependencyUpdater
 end
 
 class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
-  def update_version_in_url_to_dependency_map(buildpack_manifest)
+  def update_version_in_url_to_dependency_map
     if mainline_version?(dependency_version) && buildpack == "staticfile"
       buildpack_manifest["url_to_dependency_map"].delete_if {|dep| dep["name"] == dependency}
       dependency_hash = {
@@ -121,10 +132,9 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
       }
       buildpack_manifest["url_to_dependency_map"] << dependency_hash
     end
-    buildpack_manifest
   end
 
-  def perform_dependency_specific_changes(buildpack_manifest)
+  def perform_dependency_specific_changes
     if buildpack == 'php' && dependency_version.split(".")[1].to_i.odd?
       options = File.read(File.join(buildpack_dir, "defaults", "options.json"))
       /\"(NGINX\w+LATEST)\":.*/.match(options)
@@ -132,27 +142,26 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
       File.open(File.join(buildpack_dir, "defaults", "options.json"),"w") {|file| file.puts new_default}
     end
 
-    update_version_in_url_to_dependency_map(buildpack_manifest)
+    update_version_in_url_to_dependency_map
   end
 
-  def perform_dependency_update(buildpack_manifest)
+  def perform_dependency_update
     if mainline_version?(dependency_version)
       buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && mainline_version?(dep["version"])}
     elsif stable_version?(dependency_version) && buildpack == 'php'
       buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && stable_version?(dep["version"])}
     elsif buildpack == 'staticfile'
-      return buildpack_manifest
+      return
     end
 
     dependency_hash = {
       "name"      => dependency,
       "version"   => dependency_version,
-      "uri"       => @url,
-      "md5"       => @md5,
+      "uri"       => uri,
+      "md5"       => md5,
       "cf_stacks" => ["cflinuxfs2"]
     }
     buildpack_manifest["dependencies"] << dependency_hash
-    buildpack_manifest
   end
 
   def mainline_version?(version)
@@ -165,11 +174,10 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
 end
 
 class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
-  def perform_dependency_update(buildpack_manifest)
+  def perform_dependency_update
     major_version, minor_version, _ = dependency_version.split(".")
     version_to_delete = buildpack_manifest["dependencies"].select do |dep|
       dep_maj, dep_min, _ = dep["version"].to_s.split(".")
-
       if major_version == "0"
         # node 0.10.x, 0.12.x
         dep_maj == major_version && dep_min == minor_version && dep["name"] == dependency
@@ -186,12 +194,12 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
       dependency_hash = {
         "name"      => dependency,
         "version"   => dependency_version,
-        "uri"       => @url,
-        "md5"       => @md5,
+        "uri"       => uri,
+        "md5"       => md5,
         "cf_stacks" => ["cflinuxfs2"]
       }
       buildpack_manifest["dependencies"] << dependency_hash
-      buildpack_manifest = update_version_in_url_to_dependency_map(buildpack_manifest) if buildpack == "ruby"
+      update_version_in_url_to_dependency_map if buildpack == "ruby"
     end
 
     # Make latest node 4.x.y version default node version for node buildpack
@@ -203,10 +211,9 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
       }
       buildpack_manifest["default_versions"] << default_dependency_hash
     end
-    buildpack_manifest
   end
 
-  def update_version_in_url_to_dependency_map(buildpack_manifest)
+  def update_version_in_url_to_dependency_map
     buildpack_manifest["url_to_dependency_map"].delete_if {|dep| dep["name"] == dependency}
     dependency_hash = {
       "match"   => "node-v?(d+.d+.d+)",
@@ -214,7 +221,5 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
       "version" => dependency_version
     }
     buildpack_manifest["url_to_dependency_map"] << dependency_hash
-    buildpack_manifest
   end
 end
-

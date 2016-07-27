@@ -17,9 +17,11 @@ describe BuildpackDependencyUpdater do
     let(:dep_url)       { "https://#{dependencies_host_domain}/path-to-built-binary" }
 
     context("godep") do
-      let(:dependency)        { "godep" }
-      let(:buildpack)         { "go" }
-      let(:new_version)  { "v65" }
+      let(:dependency)  { "godep" }
+      let(:buildpack)   { "go" }
+      let(:new_version) { "v65" }
+      let(:new_md5)     { "18bec8f65810786c846d8b21fe73064f" }
+
       before do
         buildpack_manifest_contents = <<-MANIFEST
 ---
@@ -40,7 +42,7 @@ dependencies:
       - cflinuxfs2
   - name: godep
     version: v64
-    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/godep/godep-v65-linux-x64.tgz
+    uri: https://buildpacks.cloudfoundry.org/concourse-binaries/godep/godep-v64-linux-x64.tgz
     md5: f75da3a0c5ec08514ec2700c2a6d1187
     cf_stacks:
       - cflinuxfs2
@@ -50,7 +52,7 @@ MANIFEST
         end
         allow(GitClient).to receive(:last_commit_message).and_return <<-COMMIT
 Build godep - #{new_version}
-filename: binary-builder/godep-#{new_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+filename: binary-builder/godep-#{new_version}-linux-x64.tgz, md5: #{new_md5}, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
       end
 
@@ -62,8 +64,19 @@ filename: binary-builder/godep-#{new_version}-linux-x64.tgz, md5: 18bec8f6581078
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(new_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/godep/godep-v65-linux-x64.tgz")
-        expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/godep/godep-#{new_version}-linux-x64.tgz")
+        expect(dependency_in_manifest["md5"]).to eq(new_md5)
+      end
+
+      context "dependency version to add is already in manifest" do
+        let(:new_version) { "v64" }
+        let(:new_md5)     { "f75da3a0c5ec08514ec2700c2a6d1187" }
+
+        it "does not try to update the manifest or buildpack" do
+          expect(subject).not_to receive(:perform_dependency_update)
+          expect(subject).not_to receive(:perform_dependency_specific_changes)
+          subject.run!
+        end
       end
     end
 
