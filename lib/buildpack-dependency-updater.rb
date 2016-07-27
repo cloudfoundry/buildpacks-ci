@@ -168,7 +168,7 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
   def perform_dependency_update(buildpack_manifest)
     major_version, minor_version, _ = dependency_version.split(".")
     version_to_delete = buildpack_manifest["dependencies"].select do |dep|
-      dep_maj, dep_min, _ = dep["version"].split(".")
+      dep_maj, dep_min, _ = dep["version"].to_s.split(".")
 
       if major_version == "0"
         # node 0.10.x, 0.12.x
