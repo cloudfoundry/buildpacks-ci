@@ -30,12 +30,17 @@ class BuildpackDependencyUpdater
     @buildpack_manifest = YAML.load_file(manifest_file)
 
     if !dependency_version_currently_in_manifest
+      puts "Adding #{dependency} #{dependency_version} to the #{buildpack} buildpack and manifest."
+
       perform_dependency_update
       perform_dependency_specific_changes
 
       File.open(manifest_file, "w") do |file|
         file.write(buildpack_manifest.to_yaml)
       end
+    else
+      puts "#{dependency} #{dependency_version} is already in the manifest for the #{buildpack} buildpack."
+      puts 'No updates were made to the manifest or buildpack.'
     end
   end
 
