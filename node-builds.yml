@@ -1,0 +1,4 @@
+---
+node:
+- version: 0.12.5
+  sha256: sha256-mocked-1
