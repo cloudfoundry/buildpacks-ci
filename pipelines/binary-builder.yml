@@ -18,7 +18,6 @@ resources:
       branch: binary-builds
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
-
   - name: build-tar
     type: s3
     source:
@@ -39,7 +38,6 @@ resources:
       pool: cf-edge-environments
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
-
 <% %w(bundler composer glide godep httpd jruby php php7 python node nginx ruby).each do |dep| %>
   - name: <%= dep %>-builds
     type: git
@@ -87,7 +85,7 @@ resources:
       paths: [ <%= auto_new %>-new.yaml ]
 <% end %>
 
-<% %w(go nodejs php staticfile).each do |language| %>
+<% %w(go nodejs ruby php staticfile).each do |language| %>
   - name: <%= language %>-buildpack
     type: git
     source:
