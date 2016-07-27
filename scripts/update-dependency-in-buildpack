@@ -40,5 +40,8 @@ source_info = $1
 
 Dir.chdir(buildpack_dir) do
   raise 'command failed' unless system('git add -A')
-  raise 'command failed' unless system("git commit -m 'Update #{dependency} to #{version}\n\n#{source_info}\n\n#{story_ids}'")
+  no_changes_present = system('git diff --cached --exit-code')
+  unless no_changes_present
+    raise 'command failed' unless system("git commit -m 'Update #{dependency} to #{version}\n\n#{source_info}\n\n#{story_ids}'")
+  end
 end
