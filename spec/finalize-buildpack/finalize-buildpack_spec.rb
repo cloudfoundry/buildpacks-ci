@@ -18,10 +18,10 @@ describe 'finalize-buildpack task' do
 
   it 'emits a valid markdown table of dependencies' do
     output = run("cat /tmp/build/*/buildpack-artifacts/RECENT_CHANGES && echo '\t'",20)
-    expect(output).to include "Packaged binaries:\r\r\n\r\r\n"
-    expect(output).to include "| name  | version | cf_stacks  |\r\r\n"
-    expect(output).to include "|-------|---------|------------|\r\r\n"
-    expect(output).to include "| nginx | 1.8.0   | cflinuxfs2 |\r\r\n"
+    expect(output).to include "Packaged binaries:"
+    expect(output).to include "| name  | version | cf_stacks  |"
+    expect(output).to include "|-------|---------|------------|"
+    expect(output).to include "| nginx | 1.8.0   | cflinuxfs2 |"
   end
 
   it 'emits tag based on VERSION' do
