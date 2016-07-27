@@ -108,7 +108,7 @@ groups:
 <% %w(composer glide godep nginx node).each do |auto_dep| %>
     - build-<%= auto_dep %>
 <% end %>
-<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"]}.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"]}.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
     - update-<%= dependency %>-in-<%= buildpack %>-buildpack
   <% end %>
