@@ -15,6 +15,23 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
+  - name: pecl-cassandra
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/cassandra
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
+  - name: cassandra-libuv
+    type: new_version_resource
+    source:
+      url: http://downloads.datastax.com/cpp-driver/ubuntu/14.04/dependencies/libuv/
+      csspath: a[href^='v']
+      use_semver: true
+  - name: cassandra-cpp-driver
+    type: new_version_resource
+    source:
+      url: http://downloads.datastax.com/cpp-driver/ubuntu/14.04/cassandra/
+      csspath: a[href^='v']
+      use_semver: true
   - name: pecl-gearman
     type: new_version_resource
     source:
@@ -163,6 +180,9 @@ jobs:
       - aggregate:
         - get: month-start
           trigger: true
+        - get: cassandra-cpp-driver
+        - get: cassandra-libuv
+        - get: pecl-cassandra
         - get: pecl-gearman
         - get: pecl-igbinary
         - get: pecl-imagick
@@ -201,6 +221,9 @@ jobs:
             source:
               repository: cfbuildpacks/ci
           inputs:
+            - name: cassandra-cpp-driver
+            - name: cassandra-libuv
+            - name: pecl-cassandra
             - name: pecl-gearman
             - name: pecl-igbinary
             - name: pecl-imagick
