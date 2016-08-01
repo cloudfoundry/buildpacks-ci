@@ -426,7 +426,8 @@ jobs:
         - get: buildpack-releases
         - get: cf-release
           resource: cf-release-develop
-        - get: <%= language %>-buildpack-github-release
+        - get: buildpack-github-release
+          resource: <%= language %>-buildpack-github-release
           <% case language; when /offline/ %>
           params:
             globs:
@@ -440,42 +441,13 @@ jobs:
           trigger: true
       - do:
         - task: check-can-i-bump
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-            run:
-              path: bash
-              args:
-                - -cl
-                - buildpacks-ci/scripts/release/cf/check-can-i-bump
+          file: buildpacks-ci/tasks/check-can-i-bump.yml
         - task: upload-blobs
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-              - name: cf-release
-              - name: <%=language%>-buildpack-github-release
-              - name: buildpack-releases
-            outputs:
-              - name: cf-release-artifacts
-            run:
-              path: bash
-              args:
-                - -cl
-                - buildpacks-ci/scripts/release/cf/upload_blobs
-            params:
-              ACCESS_KEY_ID: {{blobstore-access-key}}
-              SECRET_ACCESS_KEY: {{blobstore-secret-key}}
-              BUILDPACK_NAME: <%= language %>-buildpack
+          file: buildpacks-ci/tasks/upload-bosh-blobs-to-cf-release.yml
+          params:
+            ACCESS_KEY_ID: {{blobstore-access-key}}
+            SECRET_ACCESS_KEY: {{blobstore-secret-key}}
+            BUILDPACK: <%= language %>
           privileged: true
         - put: cf-release-develop
           params:

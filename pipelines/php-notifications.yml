@@ -213,51 +213,9 @@ jobs:
         #   skipped: since does not yet have releases
         - get: suhosin5
         - get: buildpacks-ci
-      - task: check for latest PHP module versions
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: cassandra-cpp-driver
-            - name: cassandra-libuv
-            - name: pecl-cassandra
-            - name: pecl-gearman
-            - name: pecl-igbinary
-            - name: pecl-imagick
-            - name: pecl-mailparse
-            - name: pecl-memcache
-            - name: pecl-mongo
-            - name: pecl-msgpack
-            - name: pecl-protocolbuffers
-            - name: pecl-redis
-            - name: pecl-solr
-            - name: pecl-sundown
-            - name: pecl-xdebug
-            - name: pecl-yaf
-            - name: pecl-mongodb
-            - name: libmemcached
-            - name: lua
-            - name: xcache
-            - name: ioncube
-            - name: rabbitmq-c
-            - name: hiredis
-            # - name: phpiredis
-            - name: php-protobuf
-            - name: cphalcon
-            - name: twig
-            - name: xhprof
-            # - name: suhosin7
-            - name: suhosin5
-            - name: buildpacks-ci
-          run:
-            path: bash
-            args:
-              - '-cl'
-              - "buildpacks-ci/scripts/notifications/create-new-dependency-story 'Build and/or Include new releases: PHP Modules' 'Check that the PHP Module versions used in building PHP 5 and PHP 7 are up to date. If there are new, compatible versions, update them and build new PHP binaries.\n\nReference the PHP5 and PHP7 recipes and module versions used in cooking these recipes in [binary-builder](https://github.com/cloudfoundry/binary-builder)'"
-          params:
+      - task: check-for-latest-php-module-versions
+        file: buildpacks-ci/tasks/check-for-latest-php-module-versions.yml
+        params:
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}

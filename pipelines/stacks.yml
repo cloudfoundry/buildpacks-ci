@@ -173,23 +173,11 @@ jobs:
         - get: monday-funday
           trigger: true
       - task: create-tracker-story
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-          run:
-            path: bash
-            args:
-              - '-c'
-              - "buildpacks-ci/scripts/notifications/pivotal_tracker 'Monday-Funday *stack* release' 'This is a reminder that a stack release was automatically started, please monitor it, and deliver story when done.'"
-          params:
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+        file: buildpacks-ci/tasks/create-new-stacks-release-story.yml
+        params:
+          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
   - name: recreate-bosh-lite
     serial: true
     serial_groups:
@@ -396,52 +384,29 @@ jobs:
           passed: [ 'generate-stacks-manifests' ]
       - do:
         - task: overwrite-cflinuxfs2-rootfs-release
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-              - name: stack-s3
-              - name: cflinuxfs2-rootfs-release
-            outputs:
-              - name: cflinuxfs2-rootfs-release-artifacts
-            run:
-              path: buildpacks-ci/scripts/stacks/overwrite-cflinuxfs2-rootfs-release
+          file: buildpacks-ci/tasks/overwrite-cflinuxfs2-rootfs-release.yml
         - put: stacks-rootfs-deployment
           params:
             manifest: deployments-buildpacks/deployments/stacks.buildpacks.ci/rootfs-smoke-test.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cflinuxfs2-rootfs-release-artifacts/dev_releases/cflinuxfs2-rootfs/*.tgz]
         - task: run-rootfs-smoke-test
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: cfbuildpacks/ci
-            inputs:
-              - name: deployments-buildpacks
-              - name: buildpacks-ci
-            run:
-              path: buildpacks-ci/scripts/run-rootfs-smoke-test-errand
-            params:
-              DEPLOYMENT_NAME: stacks.buildpacks.ci
-              BOSH_PRIVATE_KEY: {{bosh_private_key}}
-              BOSH_USER: {{bosh_user}}
-              BOSH_PASSWORD: {{bosh_password}}
-              AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-              AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-              BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-              BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-              BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
-              BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
-              BOSH_LITE_DISK_SIZE: 100
-              BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
-              BOSH_TARGET: stacks.buildpacks.ci.cf-app.com
-              BOSH_LITE_NAME: stacks.buildpacks.ci
+          file: buildpacks-ci/tasks/run-rootfs-smoke-test.yml
+          params:
+            DEPLOYMENT_NAME: stacks.buildpacks.ci
+            BOSH_PRIVATE_KEY: {{bosh_private_key}}
+            BOSH_USER: {{bosh_user}}
+            BOSH_PASSWORD: {{bosh_password}}
+            AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
+            BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
+            BOSH_LITE_DISK_SIZE: 100
+            BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+            BOSH_TARGET: stacks.buildpacks.ci.cf-app.com
+            BOSH_LITE_NAME: stacks.buildpacks.ci
         on_failure:
           put: failure-alert
           params:
@@ -476,19 +441,7 @@ jobs:
           passed: [ 'deploy-rootfs-to-stacks' ]
       - do:
         - task: create-cf-release
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: cfbuildpacks/ci
-            inputs:
-              - name: cf-release
-              - name: buildpacks-ci
-            outputs:
-              - name: cf-release-artifacts
-            run:
-              path: buildpacks-ci/scripts/stacks/create-release-without-modifying-stacks
+          file: buildpacks-ci/tasks/create-cf-release-without-modifying-stacks.yml
           privileged: true
         - put: stacks-cf-deployment
           params:
@@ -614,38 +567,9 @@ jobs:
           params: { bump: final }
       - do:
         - task: update-receipt
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-              - name: receipt-s3
-              - name: stacks
-              - name: version
-            outputs:
-              - name: new-stack-commit
-            run:
-              path: buildpacks-ci/scripts/stacks/update-receipt
+          file: buildpacks-ci/tasks/update-rootfs-receipt.yml
         - task: update-filename
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: cfbuildpacks/ci
-            inputs:
-              - name: stack-s3
-              - name: version
-            outputs:
-              - name: stack-archive
-            run:
-              path: bash
-              args:
-                - -c
-                - "mv stack-s3/cflinuxfs2-*.tar.gz stack-archive/cflinuxfs2-`cat version/number`.tar.gz"
+          file: buildpacks-ci/tasks/update-rootfs-filename.yml
         - put: stacks
           params:
             repository: new-stack-commit
@@ -714,19 +638,7 @@ jobs:
           passed: [ shipit ]
       - do:
         - task: rename
-          config:
-            image_resource:
-              type: docker-image
-              source:
-                repository: cfbuildpacks/ci
-            platform: linux
-            inputs:
-              - name: stack-s3
-            outputs:
-              - name: docker-s3
-            run:
-              path: bash
-              args: ["-c", "mv stack-s3/cflinuxfs2-*.tar.gz docker-s3/cflinuxfs2.tar.gz"]
+          file: buildpacks-ci/tasks/rename-rootfs-for-docker.yml
         - aggregate:
           - put: docker latest version
             resource: docker-cflinuxfs2-rootfs
@@ -807,37 +719,9 @@ jobs:
           params:
             repository: release-artifacts
         - task: create-release-body
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: cfbuildpacks/ci
-            inputs:
-              - name: version
-            outputs:
-              - name: release-body
-            run:
-              path: bash
-              args:
-                - "-c"
-                - "echo \"This release ships with stacks version $(cat version/number). For more information, see this stack's [release notes](https://github.com/cloudfoundry/stacks/releases/tag/$(cat version/number)).\" > release-body/body"
+          file: buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes.yml
         - task: create-release-commit
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: cfbuildpacks/ci
-            inputs:
-              - name: release-artifacts
-            outputs:
-              - name: release-commit
-            run:
-              path: bash
-              args:
-                - "-c"
-                - 'cd release-artifacts && git rev-list HEAD -n1 > ../release-commit/sha'
+          file: buildpacks-ci/tasks/create-rootfs-bosh-release-commit.yml
         - put: cflinuxfs2-rootfs-github-release
           params:
             name: cflinuxfs2-rootfs-release-version/number
@@ -869,41 +753,13 @@ jobs:
           passed: [ shipit ]
       - do:
         - task: check-can-i-bump
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-            run:
-              path: bash
-              args:
-                - -cl
-                - buildpacks-ci/scripts/release/cf/check-can-i-bump
+          file: buildpacks-ci/tasks/check-can-i-bump.yml
         - task: upload
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: cfbuildpacks/ci
-            inputs:
-              - name: buildpacks-ci
-              - name: cf-release-develop
-                path: cf-release
-              - name: stack-s3
-              - name: receipt-s3
-              - name: version
-            outputs:
-              - name: cf-release-artifacts
-            run:
-              path: buildpacks-ci/scripts/stacks/upload-to-cf-release
-            params:
-              TERM: xterm-color
-              ACCESS_KEY_ID: {{blobstore-access-key}}
-              SECRET_ACCESS_KEY: {{blobstore-secret-key}}
+          file: buildpacks-ci/tasks/upload-stacks-to-cf-release.yml
+          params:
+            TERM: xterm-color
+            ACCESS_KEY_ID: {{blobstore-access-key}}
+            SECRET_ACCESS_KEY: {{blobstore-secret-key}}
           privileged: true
         - put: cf-release-develop
           params:

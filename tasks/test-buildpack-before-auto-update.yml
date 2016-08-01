@@ -5,13 +5,13 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
+  - name: buildpack-artifacts
+    path: buildpack
   - name: buildpacks-ci
-  - name: buildpack
   - name: cf-environments
 run:
   path: buildpacks-ci/scripts/test_buildpack
 params:
   COMPOSER_GITHUB_OAUTH_TOKEN:
-  DEPLOYMENT_NAME:
   STACKS:
   CF_PASSWORD:
