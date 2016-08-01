@@ -190,6 +190,7 @@ jobs:
           file: buildpacks-ci/tasks/push-binary.yml
           params:
             BINARY_NAME: <%= runtime %>
+            BUCKET_NAME: {{pivotal-buildpacks-s3-bucket-name}}
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1

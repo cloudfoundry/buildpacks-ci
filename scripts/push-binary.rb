@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 binary_name = ENV['BINARY_NAME']
+bucket_name= ENV['BUCKET_NAME']
 file_path   = Dir.glob("binary-builder-artifacts/#{binary_name}-*.{tar.gz,tgz,phar}").first
 unless file_path
   puts 'No binaries detected for upload.'
@@ -13,10 +14,10 @@ file_name = File.basename(file_path)
 
 if binary_name == "composer" then
   version = file_name.gsub("composer-","").gsub(".phar","")
-  aws_url =  "s3://pivotal-buildpacks/php/binaries/trusty/composer/#{version}"
+  aws_url =  "s3://#{bucket_name}/php/binaries/trusty/composer/#{version}"
   file_name = "composer.phar"
 else
-  aws_url =  "s3://pivotal-buildpacks/concourse-binaries/#{binary_name}"
+  aws_url =  "s3://#{bucket_name}/concourse-binaries/#{binary_name}"
 end
 
 
