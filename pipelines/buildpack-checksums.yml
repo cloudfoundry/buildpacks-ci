@@ -1,6 +1,6 @@
 ---
 resources:
-  - name: master
+  - name: buildpack-checksums
     type: git
     source:
       uri: git@bitbucket.org:cloudfoundry-buildpacks/buildpack-checksums.git
@@ -21,61 +21,18 @@ jobs:
   - name: build-site
     plan:
       - aggregate:
-        - get: master
+        - get: buildpack-checksums
           trigger: true
       - task: run-tests
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: master
-          run:
-            path: bash
-            args:
-              - -c
-              - |
-                set -ex
-                cd master
-                gem install bundle
-                bundle
-                bundle exec rspec
+        file: buildpacks-ci/tasks/run-buildpack-checksums-specs.yml
       - task: build-site
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: master
-          outputs:
-            - name: master-artifacts
-          run:
-            path: bash
-            args:
-              - -c
-              - |
-                set -ex
-                pushd master
-                  gem install bundler
-                  bundle
-                  bundle exec ./generate.rb ./final_site
-                  git add -A
-                  git commit -m 'Update site' || true
-                popd
-
-                rsync -a master/ master-artifacts
+        file: buildpacks-ci/tasks/build-buildpack-checksums-site.yml
         privileged: true
-
-      - put: master
+      - put: buildpack-checksums
         params:
-          repository: master-artifacts
+          repository: buildpack-checksums-artifacts
           rebase: true
-
       - put: deploy-buildpack-verify
         params:
-          path: master-artifacts/final_site/
-          manifest: master-artifacts/final_site/manifest.yml
+          path: buildpack-checksums-artifacts/final_site/
+          manifest: buildpack-checksums-artifacts/final_site/manifest.yml

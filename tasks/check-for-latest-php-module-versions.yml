@@ -1,0 +1,47 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: cassandra-cpp-driver
+  - name: cassandra-libuv
+  - name: pecl-cassandra
+  - name: pecl-gearman
+  - name: pecl-igbinary
+  - name: pecl-imagick
+  - name: pecl-mailparse
+  - name: pecl-memcache
+  - name: pecl-mongo
+  - name: pecl-msgpack
+  - name: pecl-protocolbuffers
+  - name: pecl-redis
+  - name: pecl-solr
+  - name: pecl-sundown
+  - name: pecl-xdebug
+  - name: pecl-yaf
+  - name: pecl-mongodb
+  - name: libmemcached
+  - name: lua
+  - name: xcache
+  - name: ioncube
+  - name: rabbitmq-c
+  - name: hiredis
+  # - name: phpiredis
+  - name: php-protobuf
+  - name: cphalcon
+  - name: twig
+  - name: xhprof
+  # - name: suhosin7
+  - name: suhosin5
+  - name: buildpacks-ci
+run:
+  path: bash
+  args:
+    - '-cl'
+    - "buildpacks-ci/scripts/notifications/create-new-dependency-story 'Build and/or Include new releases: PHP Modules' 'Check that the PHP Module versions used in building PHP 5 and PHP 7 are up to date. If there are new, compatible versions, update them and build new PHP binaries.\n\nReference the PHP5 and PHP7 recipes and module versions used in cooking these recipes in [binary-builder](https://github.com/cloudfoundry/binary-builder)'"
+params:
+  TRACKER_PROJECT_ID:
+  TRACKER_API_TOKEN:
+  TRACKER_REQUESTER_ID:

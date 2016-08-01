@@ -1,0 +1,17 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+run:
+  path: bash
+  args:
+    - '-c'
+    - "buildpacks-ci/scripts/notifications/pivotal_tracker 'Pull latest changes from upstream' 'Check that there are no upstream changes that we are missing. Consult the documentation at http://docs.cloudfoundry.org/buildpacks/merging_upstream.html for more details.\n\nEasy way to check for changes: Ex. https://github.com/cloudfoundry/ruby-buildpack/compare/develop...heroku:master' 'Go' 'Nodejs' 'Python' 'Ruby'"
+params:
+  TRACKER_PROJECT_ID:
+  TRACKER_API_TOKEN:
+  TRACKER_REQUESTER_ID:

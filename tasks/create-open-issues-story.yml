@@ -1,0 +1,22 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+run:
+  path: bash
+  args:
+    - -c
+    - |
+      cd buildpacks-ci
+      bundle
+      bundle exec ./scripts/notifications/create-open-issues-story
+params:
+  TRACKER_PROJECT_ID:
+  TRACKER_API_TOKEN:
+  TRACKER_REQUESTER_ID:
+  GITHUB_USERNAME:
+  GITHUB_PASSWORD:

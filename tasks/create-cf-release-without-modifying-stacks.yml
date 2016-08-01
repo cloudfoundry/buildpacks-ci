@@ -1,0 +1,16 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: cf-release
+  - name: buildpacks-ci
+outputs:
+  - name: cf-release-artifacts
+inputs:
+  - name: deployments-buildpacks
+  - name: buildpacks-ci
+run:
+  path: buildpacks-ci/scripts/stacks/create-release-without-modifying-stacks
