@@ -5,35 +5,16 @@ require 'yaml'
 
 describe 'create bosh release task' do
   context 'when modifying release blobs' do
-    let(:task_file) { 'spec/scripts/release/cf/upload_blobs/upload_blobs.yml' }
+    let(:task_file) { 'tasks/upload-bosh-blobs-to-cf-release.yml' }
 
     before(:each) do
-      File.open(task_file, 'w') do |f|
-        f.puts <<HERE
-platform: linux
-image_resource:
-  type: docker-image
-  source:
-    repository: cfbuildpacks/ci
-inputs:
-  - name: buildpacks-ci
-  - name: cf-release
-  - name: buildpack-releases
-  - name: #{language}-buildpack-github-release
-params:
-  ACCESS_KEY_ID:
-  SECRET_ACCESS_KEY:
-  BUILDPACK_NAME:
-run:
-  path: buildpacks-ci/scripts/release/cf/upload_blobs
-HERE
-      end
-
       execute("-c #{task_file} " \
               '-i buildpacks-ci=. ' \
               '-i cf-release=./spec/scripts/release/cf/upload_blobs/cf-release ' \
               '-i buildpack-releases=. ' \
-              "-i #{language}-buildpack-github-release=./spec/scripts/release/cf/upload_blobs/#{language}-buildpack-github-release")
+              "-i buildpack-github-release=./spec/scripts/release/cf/upload_blobs/#{language}-buildpack-github-release",
+              'BUILDPACK' => "#{language}")
+
     end
 
     let(:dirs) { run('ls /tmp/build/*/cf-release/blobs').lines.map { |dir| File.basename dir.strip } }
