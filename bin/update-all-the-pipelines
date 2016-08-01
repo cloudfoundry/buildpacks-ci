@@ -19,7 +19,7 @@ def set_pipeline(target_name:,name:, cmd:, load: [])
   puts system(%{bash -c "fly -t #{target_name} set-pipeline \
     -p #{name} \
     -c <(#{cmd}) \
-    -l public-credentials \
+    -l public-config.yml \
     -l <(lpass show 'Shared-Buildpacks/concourse-private.yml' --notes && lpass show 'Shared-Buildpacks/deployments-buildpacks.yml' --notes && lpass show 'Shared-Buildpacks/buildpack-repos-private-keys.yml' --notes) \
     #{load.collect { |l| "-l #{l}" }.join(' ')}
   "})
