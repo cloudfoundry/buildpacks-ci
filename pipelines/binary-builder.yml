@@ -117,8 +117,8 @@ groups:
     - test-nginx
   - name: manual-builds
     jobs:
-<% %w(php php7 ruby jruby bundler python httpd).each do |runtime| %>
-    - build-<%= runtime %>
+<% %w(php php7 ruby jruby bundler python httpd).each do |dependency| %>
+    - build-<%= dependency %>
 <% end %>
     - test-php
     - test-php7
@@ -163,24 +163,24 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-<% %w(php php7 ruby jruby bundler python httpd).each do |runtime| %>
-  - name: build-<%= runtime %>
+<% %w(php php7 ruby jruby bundler python httpd).each do |dependency| %>
+  - name: build-<%= dependency %>
     serial: true
     plan:
       - aggregate:
         - get: builds-yaml
-          resource: <%= runtime %>-builds
+          resource: <%= dependency %>-builds
           trigger: true
         - get: binary-builder
           passed: [binary-builder]
         - get: buildpacks-ci
         - get: built-yaml
-          resource: <%= runtime %>-built-output
+          resource: <%= dependency %>-built-output
       - do:
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary.yml
           params:
-            BINARY_NAME: <%= runtime %>
+            BINARY_NAME: <%= dependency %>
             GIT_SSH_KEY: {{buildpacks-ci-private-key}}
           privileged: true
         - put: build-tar
@@ -189,7 +189,7 @@ jobs:
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary.yml
           params:
-            BINARY_NAME: <%= runtime %>
+            BINARY_NAME: <%= dependency %>
             BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
@@ -207,7 +207,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "binary-builder build-<%= runtime %> job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-<%= runtime %>"
+            text: "binary-builder build-<%= dependency %> job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/binary-builder/jobs/build-<%= dependency %>"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
