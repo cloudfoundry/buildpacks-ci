@@ -1,0 +1,34 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: new-cves
+  - name: new-buildpack-cves
+  - name: buildpacks-ci
+  - name: stacks
+outputs:
+  - name: cves-email
+  - name: output-new-cves
+  - name: output-new-buildpack-cves
+run:
+  path: bash
+  args:
+    - -c
+    - |
+      git clone ./new-cves ./output-new-cves && \
+      git clone ./new-buildpack-cves ./output-new-buildpack-cves && \
+      cd buildpacks-ci/ && \
+      bundle && \
+      bundle exec ./scripts/notifications/check-cves
+params:
+  SLACK_CHANNEL:
+  SLACK_WEBHOOK:
+  GITHUB_USERNAME:
+  GITHUB_PASSWORD:
+  TRACKER_PROJECT_ID:
+  TRACKER_API_TOKEN:
+  TRACKER_REQUESTER_ID:
+  EMAIL_PREPARER_DIR:

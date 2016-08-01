@@ -63,36 +63,16 @@ jobs:
         - get: new-releases
         - get: check-interval
           trigger: true
-      - task: notify
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: new-releases
-            - name: buildpacks-ci
-          outputs:
-            - name: new-releases-artifacts
-          run:
-            path: bash
-            args:
-              - -c
-              - |
-                pushd buildpacks-ci
-                  bundle
-                  bundle exec ./scripts/notifications/check-new-releases
-                popd
-                rsync -a new-releases/ new-releases-artifacts
-          params:
-            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
-            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
-            GITHUB_USERNAME: {{github-username}}
-            GITHUB_PASSWORD: {{github-password}}
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+      - task: check-for-new-dependency-releases
+        file: buildpacks-ci/tasks/check-for-new-buildpack-dependency-releases.yml
+        params:
+          SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+          SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+          GITHUB_USERNAME: {{github-username}}
+          GITHUB_PASSWORD: {{github-password}}
+          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
       - put: new-releases
         params:
           repository: new-releases-artifacts
@@ -103,70 +83,28 @@ jobs:
       - get: monday-funday
         trigger: true
       - get: buildpacks-ci
-      - task: create latest upstream changes story
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-          run:
-            path: bash
-            args:
-              - '-c'
-              - "buildpacks-ci/scripts/notifications/pivotal_tracker 'Pull latest changes from upstream' 'Check that there are no upstream changes that we are missing. Consult the documentation at http://docs.cloudfoundry.org/buildpacks/merging_upstream.html for more details.\n\nEasy way to check for changes: Ex. https://github.com/cloudfoundry/ruby-buildpack/compare/develop...heroku:master' 'Go' 'Nodejs' 'Python' 'Ruby'"
-          params:
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-      - task: create Open PRs story
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-          run:
-            path: bash
-            args:
-              - -c
-              - |
-                cd buildpacks-ci
-                bundle
-                bundle exec ./scripts/notifications/create-open-pull-requests-story
-          params:
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-            GITHUB_USERNAME: {{github-username}}
-            GITHUB_PASSWORD: {{github-password}}
-      - task: create Open Issues story
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-          run:
-            path: bash
-            args:
-              - -c
-              - |
-                cd buildpacks-ci
-                bundle
-                bundle exec ./scripts/notifications/create-open-issues-story
-          params:
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-            GITHUB_USERNAME: {{github-username}}
-            GITHUB_PASSWORD: {{github-password}}
+      - task: create-latest-upstream-changes-story
+        file: buildpacks-ci/tasks/create-latest-upstream-changes-story.yml
+        params:
+          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+      - task: create-open-pull-requests-story
+        file: buildpacks-ci/tasks/create-open-pull-requests-story.yml
+        params:
+          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+          GITHUB_USERNAME: {{github-username}}
+          GITHUB_PASSWORD: {{github-password}}
+      - task: create-open-issues-story
+        file: buildpacks-ci/tasks/create-open-issues-story.yml
+        params:
+          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+          GITHUB_USERNAME: {{github-username}}
+          GITHUB_PASSWORD: {{github-password}}
   - name: New CVEs
     serial: true
     plan:
@@ -177,41 +115,17 @@ jobs:
         - get: stacks
         - get: check-interval
           trigger: true
-      - task: notify
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: new-cves
-            - name: new-buildpack-cves
-            - name: buildpacks-ci
-            - name: stacks
-          outputs:
-            - name: cves-email
-            - name: output-new-cves
-            - name: output-new-buildpack-cves
-          run:
-            path: bash
-            args:
-              - -c
-              - |
-                git clone ./new-cves ./output-new-cves && \
-                git clone ./new-buildpack-cves ./output-new-buildpack-cves && \
-                cd buildpacks-ci/ && \
-                bundle && \
-                bundle exec ./scripts/notifications/check-cves
-          params:
-            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
-            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
-            GITHUB_USERNAME: {{github-username}}
-            GITHUB_PASSWORD: {{github-password}}
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-            EMAIL_PREPARER_DIR: ../cves-email
+      - task: check-for-new-rootfs-cves
+        file: buildpacks-ci/tasks/create-for-new-rootfs-cves.yml
+        params:
+          SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+          SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+          GITHUB_USERNAME: {{github-username}}
+          GITHUB_PASSWORD: {{github-password}}
+          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+          EMAIL_PREPARER_DIR: ../cves-email
       - put: new-cves
         params:
           repository: output-new-cves

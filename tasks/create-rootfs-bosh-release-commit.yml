@@ -1,0 +1,15 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: release-artifacts
+outputs:
+  - name: release-commit
+run:
+  path: bash
+  args:
+    - "-c"
+    - 'cd release-artifacts && git rev-list HEAD -n1 > ../release-commit/sha'

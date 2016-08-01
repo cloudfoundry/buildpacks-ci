@@ -55,18 +55,8 @@ jobs:
         - get: buildpacks-ci
         - get: buildpack-packager
           trigger: true
-      - task: rspec
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: buildpack-packager
-          run:
-            path: buildpacks-ci/scripts/buildpack-packager.sh
+      - task: run-buildpack-packager-specs
+        file: buildpacks-ci/tasks/run-buildpack-packager-specs.yml
         privileged: true
   - name: buildpack-packager-tag
     serial: true
@@ -75,20 +65,8 @@ jobs:
         - get: buildpacks-ci
         - get: buildpack-packager
           passed: [ buildpack-packager-specs ]
-      - task: bump version and push up tag
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: buildpack-packager
-          outputs:
-            - name: buildpack-packager-artifacts
-          run:
-            path: buildpacks-ci/scripts/release/buildpack-packager/bump-version
+      - task: bump-buildpack-packager-version
+        file: buildpacks-ci/tasks/bump-buildpack-packager-version.yml
       - put: buildpack-packager
         params:
           repository: buildpack-packager-artifacts
@@ -102,23 +80,8 @@ jobs:
         - get: buildpack-packager
           passed: [ buildpack-packager-tag ]
           trigger: true
-      - task: create new release
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: buildpack-packager
-          outputs:
-            - name: buildpack-packager-artifacts
-          run:
-            path: bash
-            args:
-              - -cl
-              - buildpacks-ci/scripts/release/buildpack-packager/finalize-buildpack-packager
+      - task: create-new-buildpack-packager-release
+        file: buildpacks-ci/tasks/release-buildpack-packager.yml
         privileged: true
       - put: buildpack-packager-github-release
         params:
@@ -134,18 +97,8 @@ jobs:
         - get: buildpacks-ci
         - get: machete
           trigger: true
-      - task: rspec
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: machete
-          run:
-            path: buildpacks-ci/scripts/machete.sh
+      - task: run-machete-specs
+        file: buildpacks-ci/tasks/run-machete-specs.yml
         privileged: true
   - name: machete-tag
     serial: true
@@ -154,20 +107,8 @@ jobs:
         - get: buildpacks-ci
         - get: machete
           passed: [ machete-specs ]
-      - task: bump version and push up tag
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: machete
-          outputs:
-            - name: machete-artifacts
-          run:
-            path: buildpacks-ci/scripts/release/machete/bump-version
+      - task: bump-machete-version
+        file: buildpacks-ci/tasks/bump-machete-version.yml
       - put: machete
         params:
           repository: machete-artifacts
@@ -181,23 +122,8 @@ jobs:
         - get: machete
           passed: [ machete-tag ]
           trigger: true
-      - task: create new release
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: machete
-          outputs:
-            - name: machete-artifacts
-          run:
-            path: bash
-            args:
-              - -cl
-              - buildpacks-ci/scripts/release/machete/finalize-machete
+      - task: create-new-machete-release
+        file: buildpacks-ci/tasks/release-machete.yml
         privileged: true
       - put: machete-github-release
         params:
@@ -213,16 +139,6 @@ jobs:
         - get: buildpacks-ci
         - get: compile-extensions
           trigger: true
-      - task: rspec
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-            - name: compile-extensions
-          run:
-            path: buildpacks-ci/scripts/compile-extensions.sh
+      - task: run-compile-extensions-specs
+        file: buildpacks-ci/tasks/run-compile-extensions-specs.yml
         privileged: true

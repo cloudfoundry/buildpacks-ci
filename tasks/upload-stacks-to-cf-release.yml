@@ -1,0 +1,21 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: cf-release-develop
+    path: cf-release
+  - name: stack-s3
+  - name: receipt-s3
+  - name: version
+outputs:
+  - name: cf-release-artifacts
+run:
+  path: buildpacks-ci/scripts/stacks/upload-to-cf-release
+params:
+  TERM:
+  ACCESS_KEY_ID:
+  SECRET_ACCESS_KEY:
