@@ -57,14 +57,14 @@ resources:
   - name: pivotal-buildpack
     type: s3
     source:
-      bucket: {{pivotal-buildpacks-s3-bucket-name}}
+      bucket: {{buildpacks-binaries-s3-bucket}}
       regexp: <%= language %>_buildpack-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
   - name: pivotal-buildpack-cached
     type: s3
     source:
-      bucket: {{pivotal-buildpacks-s3-bucket-name}}
+      bucket: {{buildpacks-binaries-s3-bucket}}
       regexp: <%= language %>_buildpack-cached-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
