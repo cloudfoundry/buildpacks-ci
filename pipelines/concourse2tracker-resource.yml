@@ -11,30 +11,14 @@ resources:
       email: cf-buildpacks-eng@pivotal.io
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
-
 jobs:
   - name: concourse2tracker-build
     serial: true
     plan:
       - get: buildpacks-ci
         trigger: true
-      - task: rspec
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: buildpacks-ci
-          run:
-            path: bash
-            args:
-              - -c
-              - |
-                cd buildpacks-ci/lib/concourse2tracker-resource
-                bundle
-                bundle exec rspec
+      - task: run-concourse2tracker-specs
+        file: buildpacks-ci/tasks/run-concourse2tracker-specs.yml
       - put: concourse2tracker-image
         params:
           build: buildpacks-ci/lib/concourse2tracker-resource

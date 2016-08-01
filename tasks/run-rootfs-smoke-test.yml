@@ -1,0 +1,26 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: deployments-buildpacks
+  - name: buildpacks-ci
+run:
+  path: buildpacks-ci/scripts/run-rootfs-smoke-test-errand
+params:
+  DEPLOYMENT_NAME:
+  BOSH_PRIVATE_KEY:
+  BOSH_USER:
+  BOSH_PASSWORD:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  BOSH_AWS_ACCESS_KEY_ID:
+  BOSH_AWS_SECRET_ACCESS_KEY:
+  BOSH_LITE_SECURITY_GROUP:
+  BOSH_LITE_SUBNET_ID:
+  BOSH_LITE_DISK_SIZE:
+  BOSH_GATEWAY_USER:
+  BOSH_TARGET:
+  BOSH_LITE_NAME:

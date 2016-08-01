@@ -219,45 +219,7 @@ jobs:
         passed: [ build-php ]
         trigger: true
       - task: run tests
-        config:
-          image_resource:
-            type: docker-image
-            source:
-              repository: cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-tar
-          platform: linux
-          run:
-            path: bash
-            args:
-              - "-c"
-              - |
-                apt-get update
-                apt-get install -y automake \
-                libaspell-dev \
-                libc-client2007e-dev \
-                libcurl4-openssl-dev \
-                libexpat1-dev \
-                libgdbm-dev \
-                libgmp-dev \
-                libjpeg-dev \
-                libldap2-dev \
-                libmcrypt-dev \
-                libmemcached-dev \
-                libpng12-dev \
-                libpspell-dev \
-                libreadline-dev \
-                libsasl2-dev \
-                libsnmp-dev \
-                libsqlite3-dev \
-                libssl-dev \
-                libzip-dev \
-                libzookeeper-mt-dev \
-                mercurial \
-                snmp-mibs-downloader
-                tar xzf build-tar/binary-builder-source.tgz -C /tmp
-                cd /tmp/x86_64-linux-gnu/ports/php/*/*/
-                yes n | env REPORT_EXIT_STATUS=1 make test
+        file: buildpacks-ci/tasks/run-unit-tests-for-php
   - name: test-jruby
     serial: true
     plan:
@@ -265,26 +227,7 @@ jobs:
         passed: [ build-jruby ]
         trigger: true
       - task: run tests
-        config:
-          image_resource:
-            type: docker-image
-            source:
-              repository: cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-tar
-          platform: linux
-          run:
-            path: bash
-            args: ["-c",
-              "apt-get update &&
-              apt-get install -y openjdk-7-jdk maven ant &&
-              tar xzf build-tar/binary-builder-source.tgz -C /tmp &&
-              cd /tmp/x86_64-linux-gnu/ports/jruby/*/*/ &&
-              export JAVA_OPTS='-XX:+TieredCompilation -XX:TieredStopAtLevel=1' &&
-              export MALLOC_ARENA_MAX=2 &&
-              export PHASE='-Ptest' &&
-              mvn -Pbootstrap clean install -Dinvoker.skip -Dmaven.test.skip &&
-              mvn install -Dinvoker.skip=false $PHASE"]
+        file: buildpacks-ci/tasks/run-unit-tests-for-jruby
   - name: test-python
     serial: true
     plan:
@@ -292,18 +235,7 @@ jobs:
         passed: [ build-python ]
         trigger: true
       - task: run tests
-        config:
-          image_resource:
-            type: docker-image
-            source:
-              repository: cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-tar
-          platform: linux
-          run:
-            path: bash
-            args: ["-c", "tar xzf build-tar/binary-builder-source.tgz -C /tmp &&
-              cd /tmp/x86_64-linux-gnu/ports/python/*/*/ && make test"]
+        file: buildpacks-ci/tasks/run-unit-tests-for-python
   - name: test-ruby
     serial: true
     plan:
@@ -311,18 +243,7 @@ jobs:
         passed: [ build-ruby ]
         trigger: true
       - task: run tests
-        config:
-          image_resource:
-            type: docker-image
-            source:
-              repository: cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-tar
-          platform: linux
-          run:
-            path: bash
-            args: ["-c", "tar xzf build-tar/binary-builder-source.tgz -C /tmp &&
-              cd /tmp/x86_64-linux-gnu/ports/ruby/*/*/ && make test"]
+        file: buildpacks-ci/tasks/run-unit-tests-for-ruby
   - name: test-node
     serial: true
     plan:
@@ -330,18 +251,7 @@ jobs:
         passed: [ build-node ]
         trigger: true
       - task: run tests
-        config:
-          image_resource:
-            type: docker-image
-            source:
-              repository: cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-tar
-          platform: linux
-          run:
-            path: bash
-            args: ["-c", "tar xzf build-tar/binary-builder-source.tgz -C /tmp &&
-              cd /tmp/x86_64-linux-gnu/ports/node/*/*/ && make test"]
+        file: buildpacks-ci/tasks/run-unit-tests-for-node
   - name: test-php7
     serial: true
     plan:
@@ -349,45 +259,7 @@ jobs:
         passed: [ build-php7 ]
         trigger: true
       - task: run tests
-        config:
-          image_resource:
-            type: docker-image
-            source:
-              repository: cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-tar
-          platform: linux
-          run:
-            path: bash
-            args:
-              - "-c"
-              - |
-                apt-get update
-                apt-get install -y automake \
-                libaspell-dev \
-                libc-client2007e-dev \
-                libcurl4-openssl-dev \
-                libexpat1-dev \
-                libgdbm-dev \
-                libgmp-dev \
-                libjpeg-dev \
-                libldap2-dev \
-                libmcrypt-dev \
-                libmemcached-dev \
-                libpng12-dev \
-                libpspell-dev \
-                libreadline-dev \
-                libsasl2-dev \
-                libsnmp-dev \
-                libsqlite3-dev \
-                libssl-dev \
-                libzip-dev \
-                libzookeeper-mt-dev \
-                mercurial \
-                snmp-mibs-downloader
-                tar xzf build-tar/binary-builder-source.tgz -C /tmp
-                cd /tmp/x86_64-linux-gnu/ports/php/*/*/
-                yes n | env REPORT_EXIT_STATUS=1 make test
+        file: buildpacks-ci/tasks/run-unit-tests-for-php7
   - name: test-nginx
     serial: true
     plan:
@@ -395,22 +267,7 @@ jobs:
         passed: [ build-nginx ]
         trigger: true
       - task: run tests
-        config:
-          image_resource:
-            type: docker-image
-            source:
-              repository: cloudfoundry/cflinuxfs2
-          inputs:
-            - name: build-tar
-          platform: linux
-          run:
-            path: bash
-            args: ["-c",
-              "wget http://hg.nginx.org/nginx-tests/archive/tip.tar.gz &&
-              tar -xzf tip.tar.gz -C /tmp/ &&
-              tar xzf build-tar/binary-builder-source.tgz -C /tmp/ &&
-              cd /tmp/nginx-tests* &&
-              TEST_NGINX_BINARY=`ls /tmp/x86_64-linux-gnu/ports/nginx/*/nginx-*/objs/nginx` prove ."]
+        file: buildpacks-ci/tasks/run-unit-tests-for-nginx
 <% %w(godep composer glide nginx node).each do |dependency| %>
   - name: trigger-<%= dependency %>-build
     serial: true
@@ -510,24 +367,7 @@ jobs:
             acquire: true
         - do:
           - task: rspec
-            config:
-              platform: linux
-              image_resource:
-                type: docker-image
-                source:
-                  repository: cfbuildpacks/ci
-              inputs:
-                - name: buildpack-artifacts
-                  path: buildpack
-                - name: buildpacks-ci
-                - name: cf-environments
-              run:
-                path: buildpacks-ci/scripts/test_buildpack
-              params:
-                STACKS: cflinuxfs2
-                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-                CF_PASSWORD: {{ci-cf-password}}
-                CF_EDGE: 'true'
+            file: buildpacks-ci/tasks/test-buildpack-before-auto-update.yml
             privileged: true
           - put: <%= buildpack %>-buildpack
             params:

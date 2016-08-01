@@ -1,0 +1,14 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: stack-s3
+  - name: cflinuxfs2-rootfs-release
+outputs:
+  - name: cflinuxfs2-rootfs-release-artifacts
+run:
+  path: buildpacks-ci/scripts/stacks/overwrite-cflinuxfs2-rootfs-release

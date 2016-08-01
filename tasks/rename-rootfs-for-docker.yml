@@ -1,0 +1,13 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: stack-s3
+outputs:
+  - name: docker-s3
+run:
+  path: bash
+  args: ["-c", "mv stack-s3/cflinuxfs2-*.tar.gz docker-s3/cflinuxfs2.tar.gz"]
