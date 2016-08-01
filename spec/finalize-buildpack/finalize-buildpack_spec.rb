@@ -24,6 +24,14 @@ describe 'finalize-buildpack task' do
     expect(output).to include "| nginx | 1.8.0   | cflinuxfs2 |"
   end
 
+  it 'emits a valid markdown table of dependency default versions' do
+    output = run("cat /tmp/build/*/buildpack-artifacts/RECENT_CHANGES && echo '\t'",20)
+    expect(output).to include "Default binary versions:"
+    expect(output).to include "| name  | version |"
+    expect(output).to include "|-------|---------|"
+    expect(output).to include "| nginx | 1.8.0   |"
+  end
+
   it 'emits tag based on VERSION' do
     output = run("cat /tmp/build/*/buildpack-artifacts/tag && echo '\t'")
     version = File.read('./spec/finalize-buildpack/VERSION')
