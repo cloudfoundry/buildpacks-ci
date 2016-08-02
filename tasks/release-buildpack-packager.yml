@@ -6,11 +6,11 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: machete
+  - name: buildpack-packager
 outputs:
-  - name: machete-artifacts
+  - name: buildpack-packager-artifacts
 run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/scripts/release/machete/finalize-machete
+    - buildpacks-ci/scripts/release/buildpack-packager/finalize-buildpack-packager
