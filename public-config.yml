@@ -1,3 +1,4 @@
 # This file holds public credentials (like github uri, github organization) to ease creation of a new pipeline instance.
 buildpacks-github-org: cloudfoundry
 buildpacks-binaries-s3-bucket: pivotal-buildpacks
+domain-name: cf-apps.com

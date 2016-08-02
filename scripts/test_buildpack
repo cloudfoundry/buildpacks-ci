@@ -2,7 +2,7 @@
 set -e
 
 DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-`cat cf-environments/name`}
-
+DOMAIN_NAME=${DOMAIN_NAME:-cf-app.com}
 cd buildpack
 
 ../buildpacks-ci/scripts/check-unsupported-manifest
@@ -18,6 +18,6 @@ export BUNDLE_GEMFILE=cf.Gemfile
 bundle -j4 --no-cache
 
 for stack in $STACKS; do
-  bundle exec buildpack-build --uncached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com
-  bundle exec buildpack-build --cached --stack=$stack --host=$DEPLOYMENT_NAME.cf-app.com
+  bundle exec buildpack-build --uncached --stack=$stack --host=$DEPLOYMENT_NAME.$DOMAIN_NAME
+  bundle exec buildpack-build --cached --stack=$stack --host=$DEPLOYMENT_NAME.$DOMAIN_NAME
 done
