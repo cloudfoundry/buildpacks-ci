@@ -1,6 +1,7 @@
 #!/bin/bash -l
 
 set -e
+DOMAIN_NAME=${DOMAIN_NAME:-cf-app.com}
 
 pushd deployments-buildpacks
   bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
@@ -17,8 +18,8 @@ pushd cf-release
 ---
 name: cf-warden
 properties:
-  domain: $DEPLOYMENT_NAME.cf-app.com
-  system_domain: $DEPLOYMENT_NAME.cf-app.com
+  domain: $DEPLOYMENT_NAME.$DOMAIN_NAME
+  system_domain: $DEPLOYMENT_NAME.$DOMAIN_NAME
   acceptance_tests:
     admin_password: stub_to_be_gsubbed
     include_internet_dependent: true
