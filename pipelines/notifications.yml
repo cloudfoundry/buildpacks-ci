@@ -116,7 +116,7 @@ jobs:
         - get: check-interval
           trigger: true
       - task: check-for-new-rootfs-cves
-        file: buildpacks-ci/tasks/create-for-new-rootfs-cves.yml
+        file: buildpacks-ci/tasks/check-for-new-rootfs-cves.yml
         params:
           SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
           SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
