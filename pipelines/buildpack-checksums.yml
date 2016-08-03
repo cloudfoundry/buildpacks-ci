@@ -6,7 +6,10 @@ resources:
       uri: git@bitbucket.org:cloudfoundry-buildpacks/buildpack-checksums.git
       private_key: {{buildpack-checksums-private-key}}
       branch: master
-
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
   - name: deploy-buildpack-verify
     type: cf
     source:
@@ -23,6 +26,7 @@ jobs:
       - aggregate:
         - get: buildpack-checksums
           trigger: true
+        - get: buildpacks-ci
       - task: run-tests
         file: buildpacks-ci/tasks/run-buildpack-checksums-specs.yml
       - task: build-site
