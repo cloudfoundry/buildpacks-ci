@@ -5,6 +5,22 @@ require 'yaml'
 
 raise '`brew install lastpass-cli` is required' if `which lpass` == ''
 
+LPASS_CONCOURSE_PRIVATE = ENV['LPASS_CONCOURSE_PRIVATE_FILE'] || 'Shared-Buildpacks/concourse-private.yml'
+LPASS_DEPLOYMENTS_BUILDPACKS = ENV['LPASS_DEPLOYMENTS_BUILDPACKS_FILE'] || 'Shared-Buildpacks/deployments-buildpacks.yml'
+LPASS_REPOS_PRIVATE_KEYS = ENV['LPASS_REPOS_PRIVATE_KEYS_FILE'] || 'Shared-Buildpacks/buildpack-repos-private-keys.yml'
+
+public_config = YAML.load_file("public-config.yml")
+
+lpass_config= {}
+lpass_yaml_data=%x{lpass show #{LPASS_CONCOURSE_PRIVATE} --notes && lpass show #{LPASS_DEPLOYMENTS_BUILDPACKS} --notes}
+if $?.exitstatus != 0
+  puts "WARNING: ignoring lastpass config file. An error occured while processing #{LPASS_CONCOURSE_PRIVATE} and #{LPASS_DEPLOYMENTS_BUILDPACKS}"
+else
+  lpass_config = YAML.load(lpass_yaml_data)
+end
+
+full_config = public_config.merge(lpass_config)
+
 flyrc  = YAML.load_file(File.expand_path('~/.flyrc'))
 target_name="buildpacks"
 target = flyrc['targets'][target_name]
@@ -20,7 +36,7 @@ def set_pipeline(target_name:,name:, cmd:, load: [])
     -p #{name} \
     -c <(#{cmd}) \
     -l public-config.yml \
-    -l <(lpass show 'Shared-Buildpacks/concourse-private.yml' --notes && lpass show 'Shared-Buildpacks/deployments-buildpacks.yml' --notes && lpass show 'Shared-Buildpacks/buildpack-repos-private-keys.yml' --notes) \
+    -l <(lpass show #{LPASS_CONCOURSE_PRIVATE} --notes && lpass show #{LPASS_DEPLOYMENTS_BUILDPACKS} --notes && lpass show #{LPASS_REPOS_PRIVATE_KEYS} --notes) \
     #{load.collect { |l| "-l #{l}" }.join(' ')}
   "})
 end
@@ -47,7 +63,7 @@ Dir['config/bosh-lite/*.yml'].each do |filename|
   set_pipeline(
     target_name: target_name,
     name: deployment_name,
-    cmd: "erb deployment_name=#{deployment_name} full_deployment_name=#{full_deployment_name} concourse_url=#{concourse_url} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
+    cmd: "erb domain-name=#{full_config["domain-name"]} deployment_name=#{deployment_name} full_deployment_name=#{full_deployment_name} concourse_url=#{concourse_url} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
     load: [filename]
   )
 end
