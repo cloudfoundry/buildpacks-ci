@@ -37,6 +37,13 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/compile-extensions.git
+  - name: cf-edge-environments
+    type: pool
+    source:
+      branch: resource-pools
+      pool: cf-edge-environments
+      private_key: {{buildpacks-ci-private-key}}
+      uri: {{buildpacks-ci-git-uri}}
   - name: cf-release
     type: git
     source:
@@ -97,9 +104,19 @@ jobs:
         - get: buildpacks-ci
         - get: machete
           trigger: true
+      - put: cf-environments
+        resource: cf-edge-environments
+        params:
+          acquire: true
       - task: run-machete-specs
         file: buildpacks-ci/tasks/run-machete-specs.yml
+        params:
+          CF_PASSWORD: {{ci-cf-password}}
         privileged: true
+        ensure:
+          put: cf-edge-environments
+          params:
+            release: cf-environments
   - name: machete-tag
     serial: true
     plan:
