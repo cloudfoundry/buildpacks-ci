@@ -103,7 +103,7 @@ else
       raise "Could not find original source after build"
     end
   end
-  FileUtils.cp_r(Dir["binary-builder/*.tgz"], "binary-builder-artifacts/")
+  FileUtils.cp_r(Dir["binary-builder/*.tgz", "binary-builder/*.tar.gz"], "binary-builder-artifacts/")
   FileUtils.mkdir_p('binary-builder-artifacts/final-artifact/')
   FileUtils.cp_r('binary-builder-artifacts/build.tgz', 'binary-builder-artifacts/final-artifact/')
 end
@@ -111,7 +111,12 @@ end
 /^Source URL:\s(.*)$/.match(@binary_builder_output)
 source_url = $1
 
-ext = binary_name == "composer" ? "*.phar" : "-*.tgz"
+ext = case binary_name
+        when 'composer' then '*.phar'
+        when 'go' then '*.tar.gz'
+        else '-*.tgz'
+      end
+
 filename = Dir["binary-builder/#{binary_name + ext}"].first
 md5sum   = Digest::MD5.file(filename).hexdigest
 shasum   = Digest::SHA256.file(filename).hexdigest
