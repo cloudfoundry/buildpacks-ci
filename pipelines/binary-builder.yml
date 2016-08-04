@@ -219,59 +219,73 @@ jobs:
   - name: test-php
     serial: true
     plan:
-      - get: build-tar
-        passed: [ build-php ]
-        trigger: true
+      - aggregate:
+        - get: build-tar
+          passed: [ build-php ]
+          trigger: true
+        - get: buildpacks-ci
       - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-php
+        file: buildpacks-ci/tasks/run-unit-tests-for-php.yml
   - name: test-jruby
     serial: true
     plan:
-      - get: build-tar
-        passed: [ build-jruby ]
-        trigger: true
+      - aggregate:
+        - get: build-tar
+          passed: [ build-jruby ]
+          trigger: true
+        - get: buildpacks-ci
       - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-jruby
+        file: buildpacks-ci/tasks/run-unit-tests-for-jruby.yml
   - name: test-python
     serial: true
     plan:
-      - get: build-tar
-        passed: [ build-python ]
-        trigger: true
+      - aggregate:
+        - get: build-tar
+          passed: [ build-python ]
+          trigger: true
+        - get: buildpacks-ci
       - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-python
+        file: buildpacks-ci/tasks/run-unit-tests-for-python.yml
   - name: test-ruby
     serial: true
     plan:
-      - get: build-tar
-        passed: [ build-ruby ]
-        trigger: true
+      - aggregate:
+        - get: build-tar
+          passed: [ build-ruby ]
+          trigger: true
+        - get: buildpacks-ci
       - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-ruby
+        file: buildpacks-ci/tasks/run-unit-tests-for-ruby.yml
   - name: test-node
     serial: true
     plan:
-      - get: build-tar
-        passed: [ build-node ]
-        trigger: true
+      - aggregate:
+        - get: build-tar
+          passed: [ build-node ]
+          trigger: true
+        - get: buildpacks-ci
       - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-node
+        file: buildpacks-ci/tasks/run-unit-tests-for-node.yml
   - name: test-php7
     serial: true
     plan:
-      - get: build-tar
-        passed: [ build-php7 ]
-        trigger: true
+      - aggregate:
+        - get: build-tar
+          passed: [ build-php7 ]
+          trigger: true
+        - get: buildpacks-ci
       - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-php7
+        file: buildpacks-ci/tasks/run-unit-tests-for-php7.yml
   - name: test-nginx
     serial: true
     plan:
-      - get: build-tar
-        passed: [ build-nginx ]
-        trigger: true
+      - aggregate:
+        - get: build-tar
+          passed: [ build-nginx ]
+          trigger: true
+        - get: buildpacks-ci
       - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-nginx
+        file: buildpacks-ci/tasks/run-unit-tests-for-nginx.yml
 <% %w(godep composer glide nginx node).each do |dependency| %>
   - name: trigger-<%= dependency %>-build
     serial: true
