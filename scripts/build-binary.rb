@@ -126,13 +126,13 @@ git_msg += "\n\n[ci skip]" if builds[binary_name].empty? && ci_skip_for(binary_n
 
 
 #don't change behavior for non-automated builds
-if !is_automated(binary_name)
-  File.write(builds_file, builds.to_yaml)
-  commit_and_rsync(builds_dir, builds_yaml_artifacts, git_msg, builds_file)
-else
+if is_automated(binary_name)
   built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
   File.write(built_file, built.to_yaml)
   commit_and_rsync(built_dir, builds_yaml_artifacts, git_msg, built_file)
+else
+  File.write(builds_file, builds.to_yaml)
+  commit_and_rsync(builds_dir, builds_yaml_artifacts, git_msg, builds_file)
 end
 
 
