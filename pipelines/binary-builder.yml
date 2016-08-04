@@ -373,6 +373,10 @@ jobs:
           - task: rspec
             file: buildpacks-ci/tasks/test-buildpack-before-auto-update.yml
             privileged: true
+            params:
+              STACKS: cflinuxfs2
+              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+              CF_PASSWORD: {{ci-cf-password}}
           - put: <%= buildpack %>-buildpack
             params:
               repository: buildpack-artifacts
