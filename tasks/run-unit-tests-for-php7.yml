@@ -35,5 +35,5 @@ run:
       mercurial \
       snmp-mibs-downloader
       tar xzf build-tar/binary-builder-source.tgz -C /tmp
-      cd /tmp/x86_64-linux-gnu/ports/php/*/*/
+      cd /tmp/x86_64-linux-gnu/ports/php7/*/*/
       yes n | env REPORT_EXIT_STATUS=1 make test
