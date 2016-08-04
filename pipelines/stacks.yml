@@ -10,7 +10,7 @@ resources:
     type: cron
     source:
       expression: 0 5 * * 1
-      location: America/New_York
+      location: {{current-timezone}}
   - name: buildpacks-ci
     type: git
     source:

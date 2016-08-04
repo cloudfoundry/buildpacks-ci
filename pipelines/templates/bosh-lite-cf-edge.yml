@@ -3,7 +3,7 @@ resources:
     type: cron
     source:
       expression: <%= deployment_name.bytes.reduce(&:+) % 10 %> 0 * * *
-      location: America/New_York
+      location: {{current-timezone}}
   - name: cf-deployment
     type: bosh-deployment
     source:
