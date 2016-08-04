@@ -3,7 +3,7 @@
 
 binary_name = ENV['BINARY_NAME']
 bucket_name= ENV['BUCKET_NAME']
-file_path   = Dir.glob("binary-builder-artifacts/#{binary_name}-*.{tar.gz,tgz,phar}").first
+file_path   = Dir.glob("binary-builder-artifacts/#{binary_name}*.{tar.gz,tgz,phar}").first
 unless file_path
   puts 'No binaries detected for upload.'
   exit
