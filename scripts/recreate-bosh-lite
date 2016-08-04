@@ -1,6 +1,7 @@
 #!/bin/bash -l
 
 set -eux
+DOMAIN_NAME=${DOMAIN_NAME:-cf-app.com}
 IAAS=${IAAS:-aws}
 SCRIPT_DIR=$(pwd)/$(dirname $0)
 
@@ -27,7 +28,7 @@ elif [ "$IAAS" = "azure" ]; then
   export BOSH_PASSWORD=$AZURE_BOSH_PASSWORD
 
   # Clean up and destroy old bosh-lite VM
-  BOSH_TARGET=bosh.buildpacks-azure.ci.cf-app.com ../../bin/target_bosh concourse-azure
+  BOSH_TARGET=bosh.buildpacks-azure.ci.$DOMAIN_NAME ../../bin/target_bosh concourse-azure
   echo "yes" | bosh delete deployment $AZURE_BOSH_LITE_NAME
 
   # Boot up new bosh-lite VM
@@ -48,13 +49,13 @@ fi
 git add -A
 git commit -m "recreated deployment $DEPLOYMENT_NAME"
 
-until $(curl -k --output /dev/null --silent --head --fail https://$DEPLOYMENT_NAME.cf-app.com:25555/info); do
+until $(curl -k --output /dev/null --silent --head --fail https://$DEPLOYMENT_NAME.$DOMAIN_NAME:25555/info); do
     printf '.'
     sleep 10
 done
 
 # Destroy deployment if we are not able to connect and update the user
-if bosh -u admin -p admin -t $DEPLOYMENT_NAME.cf-app.com create user admin $PASSWORD; then
+if bosh -u admin -p admin -t $DEPLOYMENT_NAME.$DOMAIN_NAME create user admin $PASSWORD; then
   echo "Deployment working!"
 else
   if [ "$IAAS" = "aws" ]; then
