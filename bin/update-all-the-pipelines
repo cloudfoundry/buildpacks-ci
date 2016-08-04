@@ -22,7 +22,7 @@ end
 full_config = public_config.merge(lpass_config)
 
 flyrc  = YAML.load_file(File.expand_path('~/.flyrc'))
-target_name="buildpacks"
+target_name= ENV['TARGET_NAME'] || "buildpacks"
 target = flyrc['targets'][target_name]
 concourse_url= target['api']
 
