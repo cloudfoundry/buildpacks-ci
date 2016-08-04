@@ -9,8 +9,9 @@ pushd buildpacks-ci
   ./scripts/start-docker
 popd
 
+host="$DEPLOYMENT_NAME.$DOMAIN_NAME"
 pushd machete
-  ./scripts/cf_login_and_setup $DOMAIN_NAME
+  ./scripts/cf_login_and_setup $host
   bundle
   bundle exec rspec
 popd
