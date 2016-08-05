@@ -284,7 +284,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "stacks build-rootfs job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/build-rootfs"
+            text: "stacks build-rootfs job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -417,7 +417,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "deploy-rootfs-to-stacks job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/deploy-rootfs-to-stacks"
+            text: "deploy-rootfs-to-stacks job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -458,7 +458,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "deploy-cf-to-stacks job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/deploy-cf-to-stacks"
+            text: "deploy-cf-to-stacks job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -497,7 +497,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "deploy-diego-to-stacks job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/deploy-diego-to-stacks"
+            text: "deploy-diego-to-stacks job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -546,7 +546,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "stacks dats job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/dats"
+            text: "stacks dats job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -592,7 +592,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "stacks shipit job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/shipit"
+            text: "stacks shipit job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -630,7 +630,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "stacks upload-to-github job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/upload-to-github"
+            text: "stacks upload-to-github job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -661,7 +661,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "stacks upload-to-docker job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/upload-to-docker"
+            text: "stacks upload-to-docker job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -694,7 +694,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "stacks create-bosh-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/create-bosh-release"
+            text: "stacks create-bosh-release job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -741,7 +741,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "stacks create-cflinuxfs2-rootfs-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/create-cflinuxfs2-rootfs-release"
+            text: "stacks create-cflinuxfs2-rootfs-release job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -775,7 +775,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "stacks upload-to-cf-release job on Concourse failed! \n Check: https://buildpacks.ci.cf-app.com/pipelines/stacks/jobs/upload-to-cf-release"
+            text: "stacks upload-to-cf-release job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
