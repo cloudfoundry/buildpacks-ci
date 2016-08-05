@@ -4,29 +4,34 @@ require 'fileutils'
 
 class ConcourseBinaryBuilder
 
-  attr_reader :binary_name, :git_ssh_key, :task_root_dir, :binary_builder_dir
+  attr_reader :binary_name, :git_ssh_key, :task_root_dir
+  attr_reader :binary_builder_dir, :built_dir, :builds_dir
+  attr_reader :builds_yaml_artifacts, :binary_artifacts_dir, :final_artifacts_dir
 
-  def initialize(binary_name, task_root_dir, binary_builder_dir, git_ssh_key)
+  def initialize(binary_name, task_root_dir, git_ssh_key)
     @git_ssh_key = git_ssh_key
     @binary_name = binary_name
     @task_root_dir = task_root_dir
-    @binary_builder_dir = binary_builder_dir
+    @binary_builder_dir = File.join(task_root_dir,'binary-builder')
+    @built_dir = File.join(task_root_dir, 'built-yaml')
+    @builds_dir = File.join(task_root_dir ,'builds-yaml')
+    @builds_yaml_artifacts = File.join(task_root_dir, 'builds-yaml-artifacts')
+    @binary_artifacts_dir = File.join(task_root_dir, 'binary-builder-artifacts')
+    @final_artifacts_dir = File.join(binary_artifacts_dir, 'final-artifact')
+    FileUtils.mkdir_p(final_artifacts_dir)
   end
 
   def run
-# We read the <binary>-builds.yml file from the ./builds-yaml directory
-# and the <binary>-built.yml from the ./built-yaml directory. This is because
-# we want to use a specific version of builds.yml, but the latest version of
-# built.yml
+    # We read the <binary>-builds.yml file from the ./builds-yaml directory
+    # and the <binary>-built.yml from the ./built-yaml directory. This is because
+    # we want to use a specific version of builds.yml, but the latest version of
+    # built.yml
 
-#get latest version of <binary>-built.yml
-    built_dir = File.join(task_root_dir, 'built-yaml')
-    built_file = File.join(built_dir, "#{binary_name}-built.yml")
+    #get latest version of <binary>-built.yml
     add_ssh_key_and_update(built_dir, 'binary-built-output')
 
-    builds_dir = File.join(task_root_dir ,'builds-yaml')
+    built_file = File.join(built_dir, "#{binary_name}-built.yml")
     builds_file = File.join(builds_dir, "#{binary_name}-builds.yml")
-    builds_yaml_artifacts = File.join(task_root_dir, 'builds-yaml-artifacts')
 
     builds = YAML.load_file(builds_file)
     built = YAML.load_file(built_file)
@@ -40,11 +45,15 @@ class ConcourseBinaryBuilder
     end
 
     if binary_name == "composer" then
-      download_url = "https://getcomposer.org/download/#{latest_build['version']}/composer.phar"
-      system("curl #{download_url} -o binary-builder/composer-#{latest_build['version']}.phar") or raise "Could not download composer.phar"
-      FileUtils.cp_r(Dir["binary-builder/*"], "binary-builder-artifacts/")
-      FileUtils.mkdir_p('binary-builder-artifacts/final-artifact/')
-      FileUtils.cp("binary-builder-artifacts/composer-#{latest_build['version']}.phar", 'binary-builder-artifacts/final-artifact/composer.phar')
+      source_url = "https://getcomposer.org/download/#{latest_build['version']}/composer.phar"
+      @verification_type  = 'sha256'
+      @verification_value = latest_build['sha256']
+
+      Dir.chdir(binary_builder_dir) do
+        system("curl #{source_url} -o #{binary_builder_dir}/composer-#{latest_build['version']}.phar") or raise "Could not download composer.phar"
+        FileUtils.cp_r(Dir["*"], binary_artifacts_dir)
+        FileUtils.cp("#{binary_artifacts_dir}/composer-#{latest_build['version']}.phar", "#{final_artifacts_dir}/composer.phar")
+      end
     else
       flags = "--name=#{binary_name}"
       latest_build.each_pair do |key, value|
@@ -61,18 +70,12 @@ class ConcourseBinaryBuilder
 
       @binary_builder_output = run_binary_builder(flags)
 
-
-      binary_artifacts_dir = File.join(task_root_dir, 'binary-builder-artifacts')
-      binary_final_artifacts_dir = File.join(binary_artifacts_dir, 'final-artifact')
-      FileUtils.mkdir_p(binary_final_artifacts_dir)
-
       FileUtils.cp_r(Dir["#{binary_builder_dir}/*.tgz", "#{binary_builder_dir}/*.tar.gz"], binary_artifacts_dir)
-      FileUtils.cp_r("#{binary_artifacts_dir}/build.tgz", binary_final_artifacts_dir)
+      FileUtils.cp_r("#{binary_artifacts_dir}/build.tgz", final_artifacts_dir)
+
+      /- url:\s(.*)$/.match(@binary_builder_output)
+      source_url = $1
     end
-
-
-    /- url:\s(.*)$/.match(@binary_builder_output)
-    source_url = $1
 
     ext = case binary_name
             when 'composer' then
@@ -94,8 +97,7 @@ class ConcourseBinaryBuilder
     git_msg += "\n\nsource url: #{source_url}, source #{@verification_type}: #{@verification_value}"
     git_msg += "\n\n[ci skip]" if builds[binary_name].empty? && ci_skip_for(binary_name)
 
-
-#don't change behavior for non-automated builds
+    #don't change behavior for non-automated builds
     if is_automated(binary_name)
       built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
       File.write(built_file, built.to_yaml)
@@ -109,6 +111,8 @@ class ConcourseBinaryBuilder
   private
 
   def run_binary_builder(flags)
+    output = ""
+
     Dir.chdir(binary_builder_dir) do
       output = `./bin/binary-builder #{flags}`
       raise "Could not build" unless $?.success?
