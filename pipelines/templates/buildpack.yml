@@ -422,6 +422,8 @@ jobs:
       - task: update-machete
         file: buildpacks-ci/tasks/update-machete.yml
         privileged: true
+        params:
+          MACHETE_REPOSITORY: {{machete-git-uri-public}}
       - put: buildpack-develop
         params:
           repository: buildpack-artifacts
