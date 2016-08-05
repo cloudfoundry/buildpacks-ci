@@ -10,3 +10,4 @@ buildpacks-docker-ci-repo: cfbuildpacks/ci
 buildpacks-docker-user-email: cf-buildpacks-eng@pivotal.io
 
 deployments-git-uri: git@github.com:pivotal-cf/deployments-buildpacks
+current-timezone: America/New_York
