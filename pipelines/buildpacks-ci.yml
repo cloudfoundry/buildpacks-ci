@@ -38,7 +38,6 @@ jobs:
       - put: ci-master
         params:
           repository: buildpacks-ci
-          rebase: true
       - put: concourse2tracker
         params:
           git_path: buildpacks-ci
