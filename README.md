@@ -19,6 +19,12 @@ This contains the configuration for the Cloud Foundry Buildpacks team [Concourse
 	changes and notify on Slack
 * [stacks](pipelines/stacks.yml): test and release Cloud Foundry [stacks](https://github.com/cloudfoundry/stacks)
 
+# Updating all the Pipelines
+
+```sh
+./bin/update-all-the-pipelines
+```
+
 # Configuration
 
 With a proper Concourse deployment, and `private.yml` containing secrets:
