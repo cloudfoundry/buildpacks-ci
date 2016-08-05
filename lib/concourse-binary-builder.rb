@@ -6,7 +6,8 @@ class ConcourseBinaryBuilder
 
   attr_reader :binary_name, :git_ssh_key, :task_root_dir
   attr_reader :binary_builder_dir, :built_dir, :builds_dir
-  attr_reader :builds_yaml_artifacts, :binary_artifacts_dir, :final_artifacts_dir
+  attr_reader :builds_yaml_artifacts, :binary_artifacts_dir, :final_artifacts_dir, :source_url
+  attr_reader :verification_type, :verification_value, :flags, :latest_build, :remaining_builds
 
   def initialize(binary_name, task_root_dir, git_ssh_key)
     @git_ssh_key = git_ssh_key
@@ -22,60 +23,87 @@ class ConcourseBinaryBuilder
   end
 
   def run
-    # We read the <binary>-builds.yml file from the ./builds-yaml directory
-    # and the <binary>-built.yml from the ./built-yaml directory. This is because
-    # we want to use a specific version of builds.yml, but the latest version of
-    # built.yml
-
-    #get latest version of <binary>-built.yml
-    add_ssh_key_and_update(built_dir, 'binary-built-output')
-
-    built_file = File.join(built_dir, "#{binary_name}-built.yml")
-    builds_file = File.join(builds_dir, "#{binary_name}-builds.yml")
-
-    builds = YAML.load_file(builds_file)
-    built = YAML.load_file(built_file)
-
-    latest_build = builds[binary_name].shift
-    built[binary_name].push latest_build
+    load_builds_yaml
 
     unless latest_build
       puts "There are no new builds for #{binary_name} requested."
       exit
     end
 
-    if binary_name == "composer" then
-      source_url = "https://getcomposer.org/download/#{latest_build['version']}/composer.phar"
-      @verification_type  = 'sha256'
-      @verification_value = latest_build['sha256']
+    build_dependency
 
-      Dir.chdir(binary_builder_dir) do
-        system("curl #{source_url} -o #{binary_builder_dir}/composer-#{latest_build['version']}.phar") or raise "Could not download composer.phar"
-        FileUtils.cp_r(Dir["*"], binary_artifacts_dir)
-        FileUtils.cp("#{binary_artifacts_dir}/composer-#{latest_build['version']}.phar", "#{final_artifacts_dir}/composer.phar")
+    tar_dependency_source
+
+    copy_binaries_to_output_directory
+
+    git_msg = create_git_commit_msg
+
+    commit_yaml_artifacts(git_msg)
+  end
+
+  private
+
+  def load_builds_yaml
+    builds_file = File.join(builds_dir, "#{binary_name}-builds.yml")
+    builds = YAML.load_file(builds_file)
+
+    @latest_build = builds[binary_name].shift
+    @remaining_builds = builds
+
+    @flags = "--name=#{binary_name}"
+    latest_build.each_pair do |key, value|
+      if key == 'md5' || key == 'sha256'
+        @verification_type = key
+        @verification_value = value
+      elsif key == 'gpg-signature'
+        @verification_type = key
+        @verification_value = "\n#{value}"
       end
-    else
-      flags = "--name=#{binary_name}"
-      latest_build.each_pair do |key, value|
-        if key == 'md5' || key == 'sha256'
-          @verification_type = key
-          @verification_value = value
-        elsif key == 'gpg-signature'
-          @verification_type = key
-          @verification_value = "\n#{value}"
-        end
-        flags << %( --#{key}="#{value}")
-      end
-
-
-      @binary_builder_output = run_binary_builder(flags)
-
-      FileUtils.cp_r(Dir["#{binary_builder_dir}/*.tgz", "#{binary_builder_dir}/*.tar.gz"], binary_artifacts_dir)
-      FileUtils.cp_r("#{binary_artifacts_dir}/build.tgz", final_artifacts_dir)
-
-      /- url:\s(.*)$/.match(@binary_builder_output)
-      source_url = $1
+      @flags << %( --#{key}="#{value}")
     end
+  end
+
+  def build_dependency
+    if binary_name == "composer"
+      version_to_build = latest_build['version']
+      @source_url = "https://getcomposer.org/download/#{version_to_build}/composer.phar"
+      system("curl #{source_url} -o #{binary_builder_dir}/composer-#{version_to_build}.phar") or raise "Could not download composer.phar"
+    else
+      binary_builder_output = run_binary_builder(flags)
+      /- url:\s(.*)$/.match(binary_builder_output)
+      @source_url = $1
+    end
+  end
+
+  def tar_dependency_source
+    version_to_build = latest_build['version']
+
+    dependency_source = case binary_name
+                        when "composer" then "#{binary_builder_dir}/composer-#{version_to_build}.phar"
+                        when "glide" then "src/"
+                        when "godep" then "src/"
+                        else "x86_64-linux-gnu/"
+                        end
+
+    if binary_name == "composer"
+      system("tar -zcf #{binary_builder_dir}/build.tgz #{dependency_source}") or raise "Could not tar composer-#{version_to_build}.phar"
+    else
+      if Dir.exist?(File.join("/tmp",dependency_source))
+        system("tar -zcf #{binary_builder_dir}/build.tgz -C /tmp ./#{dependency_source}") or raise "Could not create tar"
+      else
+        raise "Could not find original source after build"
+      end
+    end
+  end
+
+  def copy_binaries_to_output_directory
+      FileUtils.cp_r(Dir["#{binary_builder_dir}/*.tgz", "#{binary_builder_dir}/*.tar.gz", "#{binary_builder_dir}/*.phar"], binary_artifacts_dir)
+      FileUtils.cp_r("#{binary_artifacts_dir}/build.tgz", final_artifacts_dir)
+  end
+
+
+  def create_git_commit_msg
+    version_built = latest_build['version']
 
     ext = case binary_name
             when 'composer' then
@@ -93,43 +121,45 @@ class ConcourseBinaryBuilder
     md5sum = Digest::MD5.file(filename).hexdigest
     shasum = Digest::SHA256.file(filename).hexdigest
 
-    git_msg = "Build #{binary_name} - #{latest_build['version']}\n\nfilename: #{short_filename}, md5: #{md5sum}, sha256: #{shasum}"
-    git_msg += "\n\nsource url: #{source_url}, source #{@verification_type}: #{@verification_value}"
-    git_msg += "\n\n[ci skip]" if builds[binary_name].empty? && ci_skip_for(binary_name)
+    ci_skip = remaining_builds[binary_name].empty? && !is_automated
 
+    git_msg = "Build #{binary_name} - #{version_built}\n\nfilename: #{short_filename}, md5: #{md5sum}, sha256: #{shasum}"
+    git_msg += "\n\nsource url: #{source_url}, source #{verification_type}: #{verification_value}"
+    git_msg += "\n\n[ci skip]" if ci_skip
+    git_msg
+  end
+
+  def commit_yaml_artifacts(git_msg)
     #don't change behavior for non-automated builds
-    if is_automated(binary_name)
+    if is_automated
+      #get latest version of <binary>-built.yml
+      add_ssh_key_and_update(built_dir, 'binary-built-output')
+
+      built_file = File.join(built_dir, "#{binary_name}-built.yml")
+      built = YAML.load_file(built_file)
+
+      built[binary_name].push latest_build
       built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
+
       File.write(built_file, built.to_yaml)
       commit_and_rsync(built_dir, builds_yaml_artifacts, git_msg, built_file)
     else
-      File.write(builds_file, builds.to_yaml)
+      builds_file = File.join(builds_dir, "#{binary_name}-builds.yml")
+      File.write(builds_file, remaining_builds.to_yaml)
       commit_and_rsync(builds_dir, builds_yaml_artifacts, git_msg, builds_file)
     end
   end
 
-  private
-
   def run_binary_builder(flags)
-    output = ""
+    output = ''
 
     Dir.chdir(binary_builder_dir) do
       output = `./bin/binary-builder #{flags}`
       raise "Could not build" unless $?.success?
-      if Dir.exist?("/tmp/x86_64-linux-gnu/")
-        system('tar -zcf build.tgz -C /tmp ./x86_64-linux-gnu/') or raise "Could not create tar"
-      elsif Dir.exist?("/tmp/src/")
-        # godep and glide are written in Go, so their source is downloaded to
-        # "/tmp/src"
-        system('tar -zcf build.tgz -C /tmp ./src/') or raise "Could not create tar"
-      else
-        raise "Could not find original source after build"
-      end
     end
 
     output
   end
-
 
   def add_ssh_key_and_update(dir, branch)
     File.write("/tmp/git_ssh_key", git_ssh_key)
@@ -149,13 +179,9 @@ class ConcourseBinaryBuilder
     HEREDOC
   end
 
-  def is_automated(binary)
+  def is_automated
     automated = %w(composer godep glide nginx node)
-    return automated.include? binary
-  end
-
-  def ci_skip_for(binary)
-    return !is_automated(binary)
+    automated.include? binary_name
   end
 
   def commit_and_rsync(in_dir, out_dir, git_msg, files)
