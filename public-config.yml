@@ -4,6 +4,7 @@ buildpacks-binaries-s3-bucket: pivotal-buildpacks
 domain_name: cf-app.com
 
 buildpacks-ci-git-uri-public-develop-branch: develop
+buildpacks-ci-git-uri-public-branch: master
 
 buildpacks-docker-ci-repo: cfbuildpacks/ci
 buildpacks-docker-user-email: cf-buildpacks-eng@pivotal.io
