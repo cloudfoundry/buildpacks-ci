@@ -14,12 +14,12 @@ resources:
     type: cron
     source:
       expression: 0 7 * * 1
-      location: America/New_York
+      location: {{current-timezone}}
   - name: check-interval
     type: cron
     source:
       expression: "0 * * * *"
-      location: America/New_York
+      location: {{current-timezone}}
   - name: buildpacks-ci
     type: git
     source:
