@@ -1,0 +1,78 @@
+resources:
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: unclaim-testing
+  - name: resource-pools
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri}}
+      branch: resource-pools
+      private_key: {{buildpacks-ci-private-key}}
+
+jobs:
+  - name: unclaim-edge-1
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: resource-pools
+      - do:
+        - task: unclaim-bosh-lite-resource
+          file: buildpacks-ci/tasks/unclaim-bosh-lite-resource.yml
+          params:
+            RESOURCE_NAME: edge-1.buildpacks.ci
+            RESOURCE_TYPE: cf-edge-environments
+            PIPELINE_NAME: unclaim-bosh-lites
+        - put: resource-pools
+          params:
+            repository: resource-pools-artifacts
+            rebase: true
+  - name: unclaim-edge-2
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: resource-pools
+      - do:
+        - task: unclaim-bosh-lite-resource
+          file: buildpacks-ci/tasks/unclaim-bosh-lite-resource.yml
+          params:
+            RESOURCE_NAME: edge-1.buildpacks.ci
+            RESOURCE_TYPE: cf-edge-environments
+            PIPELINE_NAME: unclaim-bosh-lites
+        - put: resource-pools
+          params:
+            repository: resource-pools-artifacts
+            rebase: true
+  - name: unclaim-lts-1
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: resource-pools
+      - do:
+        - task: unclaim-bosh-lite-resource
+          file: buildpacks-ci/tasks/unclaim-bosh-lite-resource.yml
+          params:
+            RESOURCE_NAME: lts-1.buildpacks.ci
+            RESOURCE_TYPE: cf-lts-environments
+            PIPELINE_NAME: unclaim-bosh-lites
+        - put: resource-pools
+          params:
+            repository: resource-pools-artifacts
+            rebase: true
+  - name: unclaim-lts-2
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: resource-pools
+      - do:
+        - task: unclaim-bosh-lite-resource
+          file: buildpacks-ci/tasks/unclaim-bosh-lite-resource.yml
+          params:
+            RESOURCE_NAME: lts-2.buildpacks.ci
+            RESOURCE_TYPE: cf-lts-environments
+            PIPELINE_NAME: unclaim-bosh-lites
+        - put: resource-pools
+          params:
+            repository: resource-pools-artifacts
+            rebase: true
