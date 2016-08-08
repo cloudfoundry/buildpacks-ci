@@ -9,8 +9,5 @@ inputs:
   - name: buildpacks-ci
 outputs:
   - name: cf-release-artifacts
-inputs:
-  - name: deployments-buildpacks
-  - name: buildpacks-ci
 run:
   path: buildpacks-ci/scripts/stacks/create-release-without-modifying-stacks
