@@ -12,7 +12,9 @@ resources:
       private_key: {{buildpacks-ci-private-key}}
 
 jobs:
-  - name: unclaim-edge-1
+<% {'cf-edge-environments': ['edge-1', 'edge-2'], 'cf-lts-environments': ['lts-1', 'lts-2'] }.each do |resource_type, resources| %>
+  <% resources.each do |resource_name| %>
+  - name: unclaim-<%= resource_name %>
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -21,58 +23,12 @@ jobs:
         - task: unclaim-bosh-lite-resource
           file: buildpacks-ci/tasks/unclaim-bosh-lite-resource.yml
           params:
-            RESOURCE_NAME: edge-1.buildpacks.ci
-            RESOURCE_TYPE: cf-edge-environments
+            RESOURCE_NAME: <%= resource_name + '.buildpacks.ci' %>
+            RESOURCE_TYPE: <%= resource_type %>
             PIPELINE_NAME: unclaim-bosh-lites
         - put: resource-pools
           params:
             repository: resource-pools-artifacts
             rebase: true
-  - name: unclaim-edge-2
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: resource-pools
-      - do:
-        - task: unclaim-bosh-lite-resource
-          file: buildpacks-ci/tasks/unclaim-bosh-lite-resource.yml
-          params:
-            RESOURCE_NAME: edge-1.buildpacks.ci
-            RESOURCE_TYPE: cf-edge-environments
-            PIPELINE_NAME: unclaim-bosh-lites
-        - put: resource-pools
-          params:
-            repository: resource-pools-artifacts
-            rebase: true
-  - name: unclaim-lts-1
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: resource-pools
-      - do:
-        - task: unclaim-bosh-lite-resource
-          file: buildpacks-ci/tasks/unclaim-bosh-lite-resource.yml
-          params:
-            RESOURCE_NAME: lts-1.buildpacks.ci
-            RESOURCE_TYPE: cf-lts-environments
-            PIPELINE_NAME: unclaim-bosh-lites
-        - put: resource-pools
-          params:
-            repository: resource-pools-artifacts
-            rebase: true
-  - name: unclaim-lts-2
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: resource-pools
-      - do:
-        - task: unclaim-bosh-lite-resource
-          file: buildpacks-ci/tasks/unclaim-bosh-lite-resource.yml
-          params:
-            RESOURCE_NAME: lts-2.buildpacks.ci
-            RESOURCE_TYPE: cf-lts-environments
-            PIPELINE_NAME: unclaim-bosh-lites
-        - put: resource-pools
-          params:
-            repository: resource-pools-artifacts
-            rebase: true
+  <% end %>
+<% end %>
