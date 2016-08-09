@@ -82,15 +82,4 @@ Dir['config/buildpack/*.yml'].each do |filename|
   )
 end
 
-header('For buildpack pull request pipelines')
-Dir['config/buildpack/*.yml'].each do |filename|
-  language = File.basename(filename, '.yml')
-  puts "   #{language} pull-request"
-  set_pipeline(
-    target_name: target_name,
-    name: "#{language}-pull-request",
-    cmd: "erb language=#{language} organization=#{full_config["buildpacks-github-org"]} pipelines/templates/pull-request.yml"
-  )
-end
-
 puts 'Thanks, JT'
