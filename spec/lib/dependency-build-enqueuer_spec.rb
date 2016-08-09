@@ -14,7 +14,6 @@ describe DependencyBuildEnqueuer do
   subject { described_class.new(dependency, new_releases_dir, binary_builds_dir, options) }
 
   describe '#enqueue_build' do
-    let(:dependency_versions_file)      { File.join(new_releases_dir, "#{dependency}.yaml") }
     let(:dependency_new_versions_file)  { File.join(new_releases_dir, "#{dependency}-new.yaml") }
     let(:builds_file)                   { File.join(binary_builds_dir, "#{dependency}-builds.yml") }
     let(:dependency_builds)             { {dependency.to_sym => [] } }
@@ -24,9 +23,6 @@ describe DependencyBuildEnqueuer do
     let(:gpg_signature_mocked_2)        { "gpg_signature_mocked_2" }
 
     before do
-      File.open(dependency_versions_file, "w") do |file|
-        file.write dependency_versions.to_yaml
-      end
       File.open(builds_file, "w") do |file|
         file.write dependency_builds.to_yaml
       end
@@ -38,7 +34,7 @@ describe DependencyBuildEnqueuer do
       `git branch -D #{test_branch_name}`
     end
 
-    shared_examples_for "builds are triggered by <dependency>-new.yaml" do |verification_type|
+    shared_examples_for "non pre-release builds are triggered by <dependency>-new.yaml" do |verification_type|
       before do
         if verification_type == 'sha256'
           allow(described_class).to receive(:shasum_256_verification).with(source_url_1).and_return(["sha256", sha256])
@@ -102,60 +98,55 @@ describe DependencyBuildEnqueuer do
 
     context "godep" do
       let(:dependency)          { "godep" }
-      let(:dependency_versions) { %w(v60 v61 v62 v63 v64) }
       let(:new_versions)        { %w(v63 v64) }
       let(:expected_version_1)  { "v64" }
       let(:expected_version_2)  { "v63" }
       let(:source_url_1)        { "https://github.com/tools/godep/archive/#{expected_version_1}.tar.gz" }
       let(:source_url_2)        { "https://github.com/tools/godep/archive/#{expected_version_2}.tar.gz" }
 
-      it_behaves_like "builds are triggered by <dependency>-new.yaml", 'sha256'
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'sha256'
     end
 
     context "composer" do
       let(:dependency)          { "composer" }
-      let(:dependency_versions) { %w(1.1.0-RC 1.0.3 1.1.1 1.1.1-alpha1 1.1.2 1.1.3) }
-      let(:new_versions)        { %w(1.1.3 1.1.2) }
+      let(:new_versions)        { %w(1.1.0-RC 1.1.1-alpha1 1.1.3 1.1.2) }
       let(:expected_version_1)  { "1.1.2" }
       let(:expected_version_2)  { "1.1.3" }
       let(:source_url_1)        { "https://getcomposer.org/download/#{expected_version_1}/composer.phar" }
       let(:source_url_2)        { "https://getcomposer.org/download/#{expected_version_2}/composer.phar" }
 
-      it_behaves_like "builds are triggered by <dependency>-new.yaml", 'sha256'
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'sha256'
     end
 
     context "glide" do
       let(:dependency)          { "glide" }
-      let(:dependency_versions) { %w(v0.9.2 v0.10.0 v0.9.0 v0.10.3) }
-      let(:new_versions)        { %w(v0.10.3 v0.9.2) }
+      let(:new_versions)        { %w(v0.10.3 v0.9.2 v0.10.10-rc1) }
       let(:expected_version_1)  { "v0.9.2" }
       let(:expected_version_2)  { "v0.10.3" }
       let(:source_url_1)        { "https://github.com/Masterminds/glide/archive/#{expected_version_1}.tar.gz" }
       let(:source_url_2)        { "https://github.com/Masterminds/glide/archive/#{expected_version_2}.tar.gz" }
 
-      it_behaves_like "builds are triggered by <dependency>-new.yaml", 'sha256'
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'sha256'
     end
 
     context "nginx" do
       let(:dependency)          { "nginx" }
-      let(:dependency_versions) { %w(release-1.11.8 release-1.10.5 release-1.11.9 release-1.10.4) }
       let(:new_versions)        { %w(release-1.11.9 release-1.10.5) }
       let(:expected_version_1)  { "1.10.5" }
       let(:expected_version_2)  { "1.11.9" }
 
-      it_behaves_like "builds are triggered by <dependency>-new.yaml", 'gpg'
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'gpg'
     end
 
     context "node" do
       let(:dependency)          { "node" }
-      let(:dependency_versions) { %w(4.5.6 0.12.5 6.6.9 0.10.6 5.7.8) }
-      let(:new_versions)        { %w(0.12.5 5.7.8) }
+      let(:new_versions)        { %w(0.12.5 5.7.8 5.7.9-rc.4) }
       let(:expected_version_1)  { "5.7.8" }
       let(:expected_version_2)  { "0.12.5" }
       let(:source_url_1)        { "https://nodejs.org/dist/v#{expected_version_1}/node-v#{expected_version_1}.tar.gz" }
       let(:source_url_2)        { "https://nodejs.org/dist/v#{expected_version_2}/node-v#{expected_version_2}.tar.gz" }
 
-      it_behaves_like "builds are triggered by <dependency>-new.yaml", 'sha256'
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'sha256'
     end
   end
 end
