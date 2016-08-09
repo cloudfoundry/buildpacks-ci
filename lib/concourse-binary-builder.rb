@@ -131,19 +131,27 @@ class ConcourseBinaryBuilder
     git_msg
   end
 
+  def dependency_version_not_built(built_versions)
+    !built_versions.any? do |version_hash|
+      version_hash['version'] == latest_build['version']
+    end
+  end
+
   def commit_yaml_artifacts(git_msg)
     #don't change behavior for non-automated builds
     if is_automated
       #get latest version of <binary>-built.yml
       add_ssh_key_and_update(built_dir, 'binary-built-output')
-
       built_file = File.join(built_dir, "#{binary_name}-built.yml")
       built = YAML.load_file(built_file)
+      built_versions = built[binary_name]
 
-      built[binary_name].push latest_build
-      built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
+      if dependency_version_not_built(built_versions)
+        built[binary_name].push latest_build
+        built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
 
-      File.write(built_file, built.to_yaml)
+        File.write(built_file, built.to_yaml)
+      end
       commit_and_rsync(built_dir, builds_yaml_artifacts, git_msg, built_file)
     else
       builds_file = File.join(builds_dir, "#{binary_name}-builds.yml")
@@ -187,6 +195,7 @@ class ConcourseBinaryBuilder
   end
 
   def commit_and_rsync(in_dir, out_dir, git_msg, files)
+
     Dir.chdir(in_dir) do
       system(<<-EOF)
       git config --global user.email "cf-buildpacks-eng@pivotal.io"
