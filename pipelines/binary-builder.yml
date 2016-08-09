@@ -69,17 +69,7 @@ resources:
       paths: [ <%= auto_dep %>-builds.yml ]
 <% end %>
 
-<% %w(composer glide godep).each do |auto_old| %>
-  - name: <%= auto_old %>-new-releases
-    type: git
-    source:
-      uri: {{buildpacks-ci-git-uri}}
-      branch: new-release-notifications
-      private_key: {{buildpacks-ci-private-key}}
-      paths: [ <%= auto_old %>.yaml ]
-<% end %>
-
-<% %w(nginx node).each do |auto_new| %>
+<% %w(composer glide godep nginx node).each do |auto_new| %>
   - name: <%= auto_new %>-new-releases
     type: git
     source:
