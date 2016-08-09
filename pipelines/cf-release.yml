@@ -175,6 +175,7 @@ jobs:
   - name: recreate-bosh-lite
     serial: true
     serial_groups: [ stacks ]
+    public: true
     plan:
       - aggregate:
         - get: deployments-buildpacks
@@ -207,6 +208,7 @@ jobs:
   - name: deploy-cf-and-diego-to-cf-release
     serial: true
     serial_groups: [ cf-release ]
+    public: true
     plan:
       - do:
         - aggregate:
@@ -288,6 +290,7 @@ jobs:
   - name: cats
     serial: true
     serial_groups: [ cf-release ]
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -345,6 +348,7 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: ship-it
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -368,6 +372,7 @@ jobs:
           passed: [ cats ]
   - name: ship-it-java
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -383,6 +388,7 @@ jobs:
   - name: bosh-release-<%= language %>
     serial: true
     serial_groups: [cf-release-buildpacks]
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -427,6 +433,7 @@ jobs:
   - name: cf-release for <%= language %>
     serial: true
     serial_groups: [cf-release-buildpacks]
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci

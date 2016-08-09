@@ -15,6 +15,7 @@ jobs:
 <% {'cf-edge-environments': ['edge-1', 'edge-2'], 'cf-lts-environments': ['lts-1', 'lts-2'] }.each do |resource_type, resources| %>
   <% resources.each do |resource_name| %>
   - name: unclaim-<%= resource_name %>
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci

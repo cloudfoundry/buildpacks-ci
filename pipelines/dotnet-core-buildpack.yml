@@ -29,8 +29,8 @@ resources:
       url: {{concourse-job-failure-notifications-slack-webhook}}
 jobs:
   - name: specs-edge-master
-    public: true
     serial: true
+    public: true
     plan:
       - put: cf-environments
         resource: cf-edge-environments
@@ -61,8 +61,8 @@ jobs:
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: specs-lts-master
-    public: true
     serial: true
+    public: true
     plan:
       - put: cf-environments
         resource: cf-lts-environments

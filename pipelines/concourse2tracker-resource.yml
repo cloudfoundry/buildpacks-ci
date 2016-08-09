@@ -15,6 +15,7 @@ resources:
 jobs:
   - name: concourse2tracker-build
     serial: true
+    public: true
     plan:
       - get: buildpacks-ci
         trigger: true

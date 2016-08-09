@@ -15,6 +15,7 @@ resources:
 jobs:
   - name: ci-build
     serial: true
+    public: true
     plan:
       - get: buildpacks-ci
         trigger: true
