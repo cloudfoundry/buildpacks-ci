@@ -501,7 +501,7 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: dats
+  - name: cats
     serial: true
     serial_groups: [ stacks ]
     plan:
@@ -522,7 +522,7 @@ jobs:
         - get: stacks
           passed: [ deploy-diego-to-stacks ]
       - do:
-        - task: dats
+        - task: cats
           file: buildpacks-ci/tasks/run-cats.yml
           params:
             DEPLOYMENT_NAME: stacks.buildpacks.ci
@@ -546,7 +546,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "stacks dats job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            text: "stacks cats job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -557,20 +557,20 @@ jobs:
         - get: buildpacks-ci
         - get: stack-s3
           passed:
-            - dats
+            - cats
         - get: receipt-s3
           passed:
-            - dats
+            - cats
         - get: stacks
           resource: stacks
           passed:
-            - dats
+            - cats
         - get: version
           passed:
-            - dats
+            - cats
           params: { bump: final }
         - get: cflinuxfs2-rootfs-release-version
-          passed: [ dats ]
+          passed: [ cats ]
           params: { bump: final }
       - do:
         - task: update-receipt
