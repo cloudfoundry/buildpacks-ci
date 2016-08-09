@@ -38,23 +38,6 @@ describe DependencyBuildEnqueuer do
       `git branch -D #{test_branch_name}`
     end
 
-    shared_examples_for "a build is enqueued verified by sha256" do
-      before do
-        allow(described_class).to receive(:shasum_256_verification).with(source_url).and_return(["sha256", sha256])
-      end
-
-      it "enqueues a build with a version and sha256" do
-        subject.enqueue_build
-
-        builds = YAML.load_file(builds_file)
-
-        enqueued_builds = builds[dependency]
-        expect(enqueued_builds.count).to eq(1)
-        expect(enqueued_builds.first['version']).to eq(expected_version)
-        expect(enqueued_builds.first['sha256']).to eq(sha256)
-      end
-    end
-
     shared_examples_for "builds are triggered by <dependency>-new.yaml" do |verification_type|
       before do
         if verification_type == 'sha256'
@@ -119,29 +102,38 @@ describe DependencyBuildEnqueuer do
 
     context "godep" do
       let(:dependency)          { "godep" }
-      let(:dependency_versions) { %w(v60 v61 v62) }
-      let(:expected_version)    { "v62" }
-      let(:source_url)          { "https://github.com/tools/godep/archive/#{expected_version}.tar.gz" }
+      let(:dependency_versions) { %w(v60 v61 v62 v63 v64) }
+      let(:new_versions)        { %w(v63 v64) }
+      let(:expected_version_1)  { "v64" }
+      let(:expected_version_2)  { "v63" }
+      let(:source_url_1)        { "https://github.com/tools/godep/archive/#{expected_version_1}.tar.gz" }
+      let(:source_url_2)        { "https://github.com/tools/godep/archive/#{expected_version_2}.tar.gz" }
 
-      it_behaves_like "a build is enqueued verified by sha256"
+      it_behaves_like "builds are triggered by <dependency>-new.yaml", 'sha256'
     end
 
     context "composer" do
       let(:dependency)          { "composer" }
-      let(:dependency_versions) { %w(1.1.0-RC 1.0.3 1.1.1 1.1.1-alpha1) }
-      let(:expected_version)    { "1.1.1" }
-      let(:source_url)          { "https://getcomposer.org/download/#{expected_version}/composer.phar" }
+      let(:dependency_versions) { %w(1.1.0-RC 1.0.3 1.1.1 1.1.1-alpha1 1.1.2 1.1.3) }
+      let(:new_versions)        { %w(1.1.3 1.1.2) }
+      let(:expected_version_1)  { "1.1.2" }
+      let(:expected_version_2)  { "1.1.3" }
+      let(:source_url_1)        { "https://getcomposer.org/download/#{expected_version_1}/composer.phar" }
+      let(:source_url_2)        { "https://getcomposer.org/download/#{expected_version_2}/composer.phar" }
 
-      it_behaves_like "a build is enqueued verified by sha256"
+      it_behaves_like "builds are triggered by <dependency>-new.yaml", 'sha256'
     end
 
     context "glide" do
       let(:dependency)          { "glide" }
-      let(:dependency_versions) { %w(v0.9.2 v0.10.0 v0.10.3) }
-      let(:expected_version)    { "v0.10.3" }
-      let(:source_url)          { "https://github.com/Masterminds/glide/archive/#{expected_version}.tar.gz" }
+      let(:dependency_versions) { %w(v0.9.2 v0.10.0 v0.9.0 v0.10.3) }
+      let(:new_versions)        { %w(v0.10.3 v0.9.2) }
+      let(:expected_version_1)  { "v0.9.2" }
+      let(:expected_version_2)  { "v0.10.3" }
+      let(:source_url_1)        { "https://github.com/Masterminds/glide/archive/#{expected_version_1}.tar.gz" }
+      let(:source_url_2)        { "https://github.com/Masterminds/glide/archive/#{expected_version_2}.tar.gz" }
 
-      it_behaves_like "a build is enqueued verified by sha256"
+      it_behaves_like "builds are triggered by <dependency>-new.yaml", 'sha256'
     end
 
     context "nginx" do
