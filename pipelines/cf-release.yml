@@ -156,7 +156,7 @@ groups:
     jobs:
       - recreate-bosh-lite
       - deploy-cf-and-diego-to-cf-release
-      - dats
+      - cats
       - ship-it
 <% supported_languages.reject{|l| l.include?('java') }.each do |language| %>
       - bosh-release-<%= language %>
@@ -285,7 +285,7 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: dats
+  - name: cats
     serial: true
     serial_groups: [ cf-release ]
     plan:
@@ -315,7 +315,7 @@ jobs:
         - get: binary-buildpack-github-release
           passed: [ deploy-cf-and-diego-to-cf-release ]
       - do:
-        - task: dats
+        - task: cats
           file: buildpacks-ci/tasks/run-cats.yml
           params:
             DEPLOYMENT_NAME: cf-release.buildpacks.ci
@@ -339,7 +339,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "cf-release dats job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            text: "cf-release cats job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -353,19 +353,19 @@ jobs:
           params:
             submodules: none
         - get: go-buildpack-github-release
-          passed: [ dats ]
+          passed: [ cats ]
         - get: nodejs-buildpack-github-release
-          passed: [ dats ]
+          passed: [ cats ]
         - get: python-buildpack-github-release
-          passed: [ dats ]
+          passed: [ cats ]
         - get: ruby-buildpack-github-release
-          passed: [ dats ]
+          passed: [ cats ]
         - get: php-buildpack-github-release
-          passed: [ dats ]
+          passed: [ cats ]
         - get: staticfile-buildpack-github-release
-          passed: [ dats ]
+          passed: [ cats ]
         - get: binary-buildpack-github-release
-          passed: [ dats ]
+          passed: [ cats ]
   - name: ship-it-java
     serial: true
     plan:
@@ -376,9 +376,9 @@ jobs:
           params:
             submodules: none
         - get: java-buildpack-github-release
-          passed: [ dats ]
+          passed: [ cats ]
         - get: java-offline-buildpack-github-release
-          passed: [ dats ]
+          passed: [ cats ]
 <% supported_languages.each do |language| %>
   - name: bosh-release-<%= language %>
     serial: true

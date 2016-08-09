@@ -149,7 +149,7 @@ groups:
     jobs:
       - recreate-bosh-lite
       - deploy-cf-and-diego-to-cf-release
-      - dats
+      - cats
 jobs:
   - name: recreate-bosh-lite
     serial: true
@@ -268,7 +268,7 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: dats
+  - name: cats
     serial: true
     serial_groups: [ cf-release ]
     plan:
@@ -298,7 +298,7 @@ jobs:
         - get: binary-buildpack-github-release
           passed: [ deploy-cf-and-diego-to-cf-release ]
       - do:
-        - task: dats
+        - task: cats
           file: buildpacks-ci/tasks/run-cats.yml
           params:
             DEPLOYMENT_NAME: cf-release.buildpacks-azure.ci
@@ -322,7 +322,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "cf-release dats job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            text: "cf-release cats job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
