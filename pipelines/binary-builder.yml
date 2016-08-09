@@ -375,7 +375,7 @@ jobs:
         - task: update-dependency-in-manifests
           file: buildpacks-ci/tasks/update-dependency-in-buildpack.yml
           params:
-            <%= "BUILDPACK_NAME: #{buildpack}" if ["node", "nginx"].include? dependency %>
+            BUILDPACK_NAME: <%= buildpack %>
             DEPENDENCY: <%= dependency %>
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
