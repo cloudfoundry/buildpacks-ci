@@ -33,6 +33,7 @@ jobs:
 <% %w(go python nodejs php ruby jruby).each do |language| %>
   - name: brats-<%= language %>-lts
     serial: true
+    public: true
     plan:
       - put: cf-environments
         resource: cf-lts-environments
@@ -56,6 +57,7 @@ jobs:
             release: cf-environments
   - name: brats-<%= language %>-edge
     serial: true
+    public: true
     plan:
       - put: cf-environments
         resource: cf-edge-environments
@@ -80,6 +82,7 @@ jobs:
 <% end %>
   - name: brats-safe-edge
     serial: true
+    public: true
     plan:
       - put: cf-environments
         resource: cf-edge-environments
@@ -103,6 +106,7 @@ jobs:
             release: cf-environments
   - name: brats-safe-lts
     serial: true
+    public: true
     plan:
       - put: cf-environments
         resource: cf-lts-environments

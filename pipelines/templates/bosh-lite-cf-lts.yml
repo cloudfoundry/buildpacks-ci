@@ -81,6 +81,7 @@ jobs:
   - name: checkout-environment
     serial_groups: [ deploy ]
     serial: true
+    public: true
     plan:
       - get: nightly-trigger
         trigger: true
@@ -91,6 +92,7 @@ jobs:
   - name: recreate-bosh-lite
     serial_groups: [ deploy ]
     serial: true
+    public: true
     plan:
       - do:
         - aggregate:
@@ -136,6 +138,7 @@ jobs:
   - name: generate-manifest
     serial_groups: [ deploy ]
     serial: true
+    public: true
     plan:
       - do:
         - aggregate:
@@ -188,6 +191,7 @@ jobs:
   - name: deploy-cf
     serial_groups: [ deploy ]
     serial: true
+    public: true
     plan:
       - do:
         - aggregate:
@@ -215,6 +219,7 @@ jobs:
   - name: deploy-diego
     serial_groups: [ deploy ]
     serial: true
+    public: true
     plan:
       - do:
         - aggregate:
@@ -247,7 +252,7 @@ jobs:
   - name: update-machete
     serial_groups: [ deploy ]
     serial: true
-    serial: true
+    public: true
     plan:
       - do:
         - aggregate:
@@ -274,6 +279,7 @@ jobs:
   - name: unclaim
     serial_groups: [ deploy ]
     serial: true
+    public: true
     plan:
       - get: buildpacks-ci
       - get: resource-pools

@@ -174,6 +174,7 @@ resources:
 jobs:
   - name: notification
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -189,6 +190,7 @@ jobs:
     serial: true
     serial_groups:
       - stacks
+    public: true
     plan:
       - aggregate:
         - get: deployments-buildpacks
@@ -248,6 +250,7 @@ jobs:
             rebase: true
   - name: build-rootfs
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -291,6 +294,7 @@ jobs:
   - name: generate-stacks-manifests
     serial: true
     serial_groups: [ stacks ]
+    public: true
     plan:
       - aggregate:
         - get: deployments-buildpacks
@@ -367,6 +371,7 @@ jobs:
   - name: deploy-rootfs-to-stacks
     serial: true
     serial_groups: [ stacks ]
+    public: true
     plan:
       - aggregate:
         - get: lite-stemcell
@@ -424,6 +429,7 @@ jobs:
   - name: deploy-cf-to-stacks
     serial: true
     serial_groups: [ stacks ]
+    public: true
     plan:
       - aggregate:
         - get: lite-stemcell
@@ -465,6 +471,7 @@ jobs:
   - name: deploy-diego-to-stacks
     serial: true
     serial_groups: [ stacks ]
+    public: true
     plan:
       - aggregate:
         - get: lite-stemcell
@@ -504,6 +511,7 @@ jobs:
   - name: cats
     serial: true
     serial_groups: [ stacks ]
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -552,6 +560,7 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: shipit
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -598,6 +607,7 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: reset-minor-version-to-rc
     serial: true
+    public: true
     plan:
       - get: version
         trigger: true
@@ -613,6 +623,7 @@ jobs:
         params: {file: cflinuxfs2-rootfs-release-version/number}
   - name: upload-to-github
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: stack-s3
@@ -636,6 +647,7 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: upload-to-docker
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -668,6 +680,7 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: create-bosh-release-deprecated
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -701,6 +714,7 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: create-cflinuxfs2-rootfs-release
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -748,6 +762,7 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: upload-to-cf-release
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: stack-s3

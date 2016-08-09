@@ -22,6 +22,7 @@ resources:
 
 jobs:
   - name: build-site
+    public: true
     plan:
       - aggregate:
         - get: buildpack-checksums

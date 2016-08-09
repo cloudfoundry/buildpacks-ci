@@ -154,6 +154,7 @@ jobs:
   - name: recreate-bosh-lite
     serial: true
     serial_groups: [ stacks ]
+    public: true
     plan:
       - aggregate:
         - get: deployments-buildpacks
@@ -190,6 +191,7 @@ jobs:
   - name: deploy-cf-and-diego-to-cf-release
     serial: true
     serial_groups: [ cf-release ]
+    public: true
     plan:
       - do:
         - aggregate:
@@ -271,6 +273,7 @@ jobs:
   - name: cats
     serial: true
     serial_groups: [ cf-release ]
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci

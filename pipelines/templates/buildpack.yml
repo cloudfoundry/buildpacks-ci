@@ -99,6 +99,7 @@ jobs:
   <% if language == "php" %>
   - name: ensure-manifest-has-modules
     serial: true
+    public: true
     plan:
       - get: buildpacks-ci
       - get: buildpack
@@ -114,6 +115,7 @@ jobs:
   <% end %>
   - name: detect-new-version-and-upload-artifacts
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -141,6 +143,7 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: specs-edge-master
     serial: true
+    public: true
     plan:
       - put: cf-environments
         resource: cf-edge-environments
@@ -181,6 +184,7 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: specs-lts-master
     serial: true
+    public: true
     plan:
       - put: cf-environments
         resource: cf-lts-environments
@@ -221,6 +225,7 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: buildpack-release
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -241,6 +246,7 @@ jobs:
           tag_prefix: v
   - name: buildpack-to-github
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -271,6 +277,7 @@ jobs:
             - buildpack-artifacts/*_buildpack-cached-v*.zip.SHA256SUM.txt
   - name: buildpack-to-pivnet
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -297,6 +304,7 @@ jobs:
         privileged: true
   - name: specs-edge-develop
     serial: true
+    public: true
     plan:
       - put: cf-environments
         resource: cf-edge-environments
@@ -338,6 +346,7 @@ jobs:
             release: cf-environments
   - name: specs-lts-develop
     serial: true
+    public: true
     plan:
       - put: cf-environments
         resource: cf-lts-environments
@@ -378,6 +387,7 @@ jobs:
 <% unless language == "binary" %>
   - name: update-compile-extensions
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -396,6 +406,7 @@ jobs:
 <% end %>
   - name: update-buildpack-packager
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -412,6 +423,7 @@ jobs:
           rebase: true
   - name: update-machete
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci

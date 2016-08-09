@@ -20,6 +20,7 @@ resources:
 jobs:
   - name: merge-to-master
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: ci-master

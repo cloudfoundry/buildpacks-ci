@@ -137,6 +137,7 @@ groups:
 jobs:
   - name: binary-builder
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -170,6 +171,7 @@ jobs:
 <% %w(go php php7 ruby jruby bundler python httpd).each do |dependency| %>
   - name: build-<%= dependency %>
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: builds-yaml
@@ -218,6 +220,7 @@ jobs:
 <% end %>
   - name: test-php
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: build-tar
@@ -228,6 +231,7 @@ jobs:
         file: buildpacks-ci/tasks/run-unit-tests-for-php.yml
   - name: test-jruby
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: build-tar
@@ -238,6 +242,7 @@ jobs:
         file: buildpacks-ci/tasks/run-unit-tests-for-jruby.yml
   - name: test-python
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: build-tar
@@ -248,6 +253,7 @@ jobs:
         file: buildpacks-ci/tasks/run-unit-tests-for-python.yml
   - name: test-ruby
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: build-tar
@@ -258,6 +264,7 @@ jobs:
         file: buildpacks-ci/tasks/run-unit-tests-for-ruby.yml
   - name: test-node
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: build-tar
@@ -268,6 +275,7 @@ jobs:
         file: buildpacks-ci/tasks/run-unit-tests-for-node.yml
   - name: test-php7
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: build-tar
@@ -278,6 +286,7 @@ jobs:
         file: buildpacks-ci/tasks/run-unit-tests-for-php7.yml
   - name: test-nginx
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: build-tar
@@ -289,6 +298,7 @@ jobs:
 <% %w(godep composer glide nginx node).each do |dependency| %>
   - name: trigger-<%= dependency %>-build
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -307,6 +317,7 @@ jobs:
           rebase: true
   - name: build-<%= dependency %>
     serial: true
+    public: true
     plan:
       - aggregate:
         - get: built-yaml
@@ -359,6 +370,7 @@ jobs:
   <% dependencies.each do |dependency| %>
   - name: update-<%= dependency %>-in-<%= buildpack %>-buildpack
     serial: true
+    public: true
     plan:
       - do:
         - aggregate:
