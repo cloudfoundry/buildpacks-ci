@@ -638,6 +638,7 @@ jobs:
     serial: true
     plan:
       - aggregate:
+        - get: buildpacks-ci
         - get: stack-s3
           passed: [ shipit ]
         - get: version
