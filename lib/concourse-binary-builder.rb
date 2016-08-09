@@ -50,6 +50,8 @@ class ConcourseBinaryBuilder
     @latest_build = builds[binary_name].shift
     @remaining_builds = builds
 
+    return if @latest_build.nil?
+
     @flags = "--name=#{binary_name}"
     latest_build.each_pair do |key, value|
       if key == 'md5' || key == 'sha256'
