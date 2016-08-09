@@ -14,7 +14,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: develop
+      branch: {{buildpacks-ci-git-uri-public-develop-branch}}
   - name: concourse2tracker
     type: concourse2tracker
 jobs:
