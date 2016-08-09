@@ -27,7 +27,6 @@ describe ConcourseBinaryBuilder do
 
     let(:flags) { "--name=#{dependency} --version=\"#{version}\" --sha256=\"#{source_sha256}\"" }
 
-
     subject { described_class.new(dependency, task_root_dir, git_ssh_key) }
 
     before(:each) do
@@ -40,6 +39,8 @@ describe ConcourseBinaryBuilder do
           file.write built_yaml_contents
         end
         `git init`
+        `git add #{dependency}-built.yml`
+        `git commit -m "Initial commit of #{dependency}-built.yml"`
       end
 
       Dir.chdir(builds_dir) do
@@ -47,6 +48,8 @@ describe ConcourseBinaryBuilder do
           file.write builds_yaml_contents
         end
         `git init`
+        `git add #{dependency}-builds.yml`
+        `git commit -m "Initial commit of #{dependency}-builds.yml"`
       end
 
       allow(subject).to receive(:add_ssh_key_and_update).with(built_dir, 'binary-built-output')
@@ -98,7 +101,7 @@ describe ConcourseBinaryBuilder do
         expect(commit_msg).to include("sha256: #{shasum}")
       end
 
-      it 'has ci skip if necessary ' do
+      it 'has ci skip if necessary' do
         commit_msg = `cd #{builds_yaml_artifacts_dir} && git log -1 HEAD`
 
         if automation == 'automated'
@@ -190,11 +193,34 @@ describe ConcourseBinaryBuilder do
       let(:source_url)    { 'https://getcomposer.org/download/1.2.0/composer.phar' }
       let(:version)       { '1.2.0' }
 
-
       before { subject.run }
 
       it_behaves_like 'a commit is made in builds-yaml-artifacts with the proper git message', 'automated'
       it_behaves_like 'the resulting tar files are copied to the proper location'
+
+      context 'dependency has already been built' do
+        let(:built_yaml_contents) do
+          {dependency => [
+            {'version' => '1.2.0',
+           'sha256' => '4ed7a99985f8afee337cc22d5fef61b495ab4238dfff3750ac9019e87fc6aae6',
+           'timestamp' => '2016-07-18 15:31:35 UTC'}
+          ]}.to_yaml
+        end
+
+        it 'does not make a commit in builds-yaml-artifacts' do
+          Dir.chdir(builds_yaml_artifacts_dir) do
+            count_of_git_commits = `git log --oneline | wc -l`.to_i
+            expect(count_of_git_commits).to eq 1
+          end
+        end
+
+        it 'syncs the -built file in builds-yaml-artifacts' do
+          built_file = File.join(builds_yaml_artifacts_dir, "#{dependency}-built.yml")
+          expect(File.exist?(built_file)).to be_truthy
+        end
+
+        it_behaves_like 'the resulting tar files are copied to the proper location'
+      end
     end
   end
 end
