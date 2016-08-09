@@ -18,19 +18,13 @@ class DependencyBuildEnqueuer
   end
 
   def enqueue_build
-    # node currently uses the node-new.yaml file to get a list of the new
-    # versions to build. The plan is to eventually migrate the rest of the
-    # dependencies to use a similar file as well
+    # We use the <dependency>-new.yaml file to get a list of the new
+    # versions to build. For each version in this file, we make a commit to
+    # <dependency>-builds.yaml with the proper build information
+    # Automated deps: node, nginx, glide, godep, composer
 
-    if dependency == "node" || dependency == "nginx"
-      new_dependency_versions_file = File.join(new_releases_dir, "#{dependency}-new.yaml")
-      new_dependency_versions = YAML.load_file(new_dependency_versions_file)
-    else
-      dependency_versions_file = File.join(new_releases_dir, "#{dependency}.yaml")
-      dependency_versions = YAML.load_file(dependency_versions_file)
-      @latest_version = DependencyBuildEnqueuer.latest_version_for_dependency(dependency, dependency_versions, options)
-      new_dependency_versions = [latest_version]
-    end
+    new_dependency_versions_file = File.join(new_releases_dir, "#{dependency}-new.yaml")
+    new_dependency_versions = YAML.load_file(new_dependency_versions_file)
 
     dependency_builds_file = File.join(binary_builds_dir, "#{dependency}-builds.yml")
 
@@ -55,31 +49,6 @@ class DependencyBuildEnqueuer
   end
 
   private
-
-  def self.latest_version_for_dependency(dependency, dependency_versions, options = {})
-    case dependency
-    when "godep"
-      dependency_versions.max { |a, b| a.gsub("v", "").to_i <=> b.gsub("v", "").to_i }
-    when "composer"
-      dependency_versions.map do |version|
-        gem_version = Gem::Version.new(version)
-        if !options[:pre]
-          gem_version = gem_version.prerelease? ? nil : gem_version
-        end
-        gem_version
-        # When you create a Gem::Version of some kind of pre-release or RC, it
-        # will replace a '-' with '.pre.', e.g. "1.1.0-RC" -> #<Gem::Version "1.1.0.pre.RC">
-      end.compact.sort.reverse[0].to_s.gsub(".pre.","-")
-    when "glide"
-      dependency_versions.map do |version|
-        gem_version = Gem::Version.new(version.gsub("v", ""))
-        if !options[:pre]
-          gem_version = gem_version.prerelease? ? nil : gem_version
-        end
-        gem_version
-      end.compact.sort.reverse[0].to_s.gsub(".pre.","-").prepend("v")
-    end
-  end
 
   def massage_version(version)
     case dependency
