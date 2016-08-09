@@ -8,4 +8,7 @@ inputs:
   - name: binary-builder-artifacts
   - name: buildpacks-ci
 run:
-  path: buildpacks-ci/scripts/push-binary.rb
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/scripts/push-binary.rb

@@ -13,4 +13,7 @@ outputs:
   - name: binary-builder-artifacts
   - name: builds-yaml-artifacts
 run:
-  path: buildpacks-ci/scripts/build-binary.rb
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/scripts/build-binary.rb
