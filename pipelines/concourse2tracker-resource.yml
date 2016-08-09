@@ -4,6 +4,11 @@ resources:
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch:  {{buildpacks-ci-git-uri-public-branch}}
+  - name: concourse2tracker-source
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch:  {{buildpacks-ci-git-uri-public-branch}}
       paths: [ "lib/concourse2tracker-resource" ]
   - name: concourse2tracker-image
     type: docker-image
@@ -18,10 +23,11 @@ jobs:
     public: true
     plan:
       - get: buildpacks-ci
+      - get: concourse2tracker-source
         trigger: true
       - task: run-concourse2tracker-specs
         file: buildpacks-ci/tasks/run-concourse2tracker-specs.yml
       - put: concourse2tracker-image
         params:
-          build: buildpacks-ci/lib/concourse2tracker-resource
+          build: concourse2tracker-source/lib/concourse2tracker-resource
           push: true

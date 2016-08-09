@@ -5,12 +5,12 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
-  - name: buildpacks-ci
+  - name: concourse2tracker-source
 run:
   path: bash
   args:
     - -c
     - |
-      cd buildpacks-ci/lib/concourse2tracker-resource
+      cd concourse2tracker-source/lib/concourse2tracker-resource
       bundle
       bundle exec rspec
