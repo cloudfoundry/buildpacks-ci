@@ -29,7 +29,9 @@ class DependencyBuildEnqueuer
     dependency_builds_file = File.join(binary_builds_dir, "#{dependency}-builds.yml")
 
     new_dependency_versions.each do |ver|
-      ver = massage_version(ver)
+      next if prerelease_version?(ver)
+      ver = massage_version_for_manifest_format(ver)
+
       new_build = {"version" => ver}
       dependency_verification_tuples = DependencyBuildEnqueuer.build_verifications_for(dependency, ver)
       dependency_verification_tuples.each do |dependency_verification_type, dependency_verification_value|
@@ -50,12 +52,25 @@ class DependencyBuildEnqueuer
 
   private
 
-  def massage_version(version)
+  def massage_version_for_manifest_format(version)
     case dependency
-    when "nginx"
-      version.gsub("release-","")
-    else
-      version
+      when "nginx" then version.gsub("release-","")
+      else version
+    end
+  end
+
+  def prerelease_version?(version)
+    version = massage_version_for_semver(version)
+    Gem::Version.new(version).prerelease?
+  end
+
+
+  def massage_version_for_semver(version)
+    case dependency
+      when "godep" then version.gsub("v","")
+      when "glide" then version.gsub("v","")
+      when "nginx" then version.gsub("release-","")
+      else version
     end
   end
 
