@@ -9,7 +9,16 @@ pushd buildpack
   sed -i "s|^gem 'machete'.*$|$NEW_VERSION_LINE|" cf.Gemfile
   BUNDLE_GEMFILE=cf.Gemfile bundle install
   git add cf.Gemfile cf.Gemfile.lock
-  git commit -m "Update machete to $MACHETE_VERSION"
+
+  diff=$(git diff --cached --exit-code)
+  no_changes=$?
+
+  if [ $no_changes -ne 0 ]
+  then
+    git commit -m "Update machete to $MACHETE_VERSION"
+  else
+    echo "machete in buildpack is up to date"
+  fi
 popd
 
 rsync -a buildpack/ buildpack-artifacts

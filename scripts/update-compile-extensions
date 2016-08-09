@@ -8,11 +8,21 @@ pushd buildpack/compile-extensions
   bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
   bundle install
   bundle exec rspec
+  compile_extensions_head=$(git rev-parse HEAD)
 popd
 
 pushd buildpack
   git add compile-extensions/
-  git commit -m "Update compile-extensions"
+
+  diff=$(git diff --cached --exit-code)
+  no_changes=$?
+
+  if [ $no_changes -ne 0 ]
+  then
+    git commit -m "Update compile-extensions to $compile_extensions_head"
+  else
+    echo "compile-extensions in buildpack is up to date"
+  fi
 popd
 
 rsync -a buildpack/ buildpack-artifacts
