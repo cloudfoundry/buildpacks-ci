@@ -124,7 +124,7 @@ jobs:
             BOSH_TARGET: <%= full_deployment_name +  '.' + domain_name %>
             BOSH_LITE_NAME: {{deployment-name}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
-            DOMAIN_NAME: {{domain_name}}
+            DOMAIN_NAME: {{domain-name}}
           ensure:
             put: deployments-buildpacks
             params:
@@ -178,7 +178,7 @@ jobs:
             BOSH_TARGET: <%= full_deployment_name +  '.' + domain_name %>
             BOSH_LITE_NAME: {{deployment-name}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
-            DOMAIN_NAME: {{domain_name}}
+            DOMAIN_NAME: {{domain-name}}
           privileged: true
         - put: deployments-buildpacks
           params:
@@ -271,7 +271,7 @@ jobs:
             DEPLOYMENT_NAME: {{deployment-name}}
             CI_CF_PASSWORD: {{ci-cf-password}}
             CI_CF_USERNAME: {{ci-cf-username}}
-            DOMAIN_NAME: {{domain_name}}
+            DOMAIN_NAME: {{domain-name}}
         on_failure:
           put: resource-pools
           params:
