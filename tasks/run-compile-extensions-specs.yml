@@ -9,3 +9,5 @@ inputs:
   - name: compile-extensions
 run:
   path: buildpacks-ci/scripts/compile-extensions.sh
+params:
+  RUBYGEM_MIRROR:
