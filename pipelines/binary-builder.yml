@@ -301,6 +301,7 @@ jobs:
         file: buildpacks-ci/tasks/queue-dependency-build.yml
         params:
           DEPENDENCY: <%= dependency %>
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: <%= dependency %>-builds
         params:
           repository: binary-builds-artifacts
@@ -381,6 +382,7 @@ jobs:
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
             BUILDPACK_DEPENDENCIES_HOST_DOMAIN: {{buildpack-dependencies-host-domain}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
         - put: cf-environments
           resource: cf-edge-environments
           params:

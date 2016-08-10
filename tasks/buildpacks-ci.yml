@@ -18,6 +18,9 @@ run:
       set -ex
       cd buildpacks-ci
       ./scripts/fly-login $CI_USERNAME $CI_PASSWORD
+      bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
       bundle
       rake
       ./scripts/set-status-success
+params:
+  RUBYGEM_MIRROR:
