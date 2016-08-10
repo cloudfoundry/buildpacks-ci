@@ -33,6 +33,11 @@ resources:
       url: http://downloads.datastax.com/cpp-driver/ubuntu/14.04/cassandra/
       csspath: a[href^='v']
       use_semver: true
+  - name: pecl-amqp
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/amqp
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
   - name: pecl-gearman
     type: new_version_resource
     source:
@@ -184,6 +189,7 @@ jobs:
           trigger: true
         - get: cassandra-cpp-driver
         - get: cassandra-libuv
+        - get: pecl-amqp
         - get: pecl-cassandra
         - get: pecl-gearman
         - get: pecl-igbinary
