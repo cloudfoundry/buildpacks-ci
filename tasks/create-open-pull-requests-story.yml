@@ -12,6 +12,7 @@ run:
     - -c
     - |
       cd buildpacks-ci
+      bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
       bundle
       bundle exec ./scripts/notifications/create-open-pull-requests-story
 params:
@@ -20,3 +21,4 @@ params:
   TRACKER_REQUESTER_ID:
   GITHUB_USERNAME:
   GITHUB_PASSWORD:
+  RUBYGEM_MIRROR:

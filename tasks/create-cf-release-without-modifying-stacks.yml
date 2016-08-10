@@ -11,3 +11,5 @@ outputs:
   - name: cf-release-artifacts
 run:
   path: buildpacks-ci/scripts/stacks/create-release-without-modifying-stacks
+params:
+  RUBYGEM_MIRROR:

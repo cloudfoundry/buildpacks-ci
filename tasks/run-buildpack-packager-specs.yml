@@ -9,4 +9,5 @@ inputs:
   - name: buildpack-packager
 run:
   path: buildpacks-ci/scripts/buildpack-packager.sh
-
+params:
+  RUBYGEM_MIRROR:
