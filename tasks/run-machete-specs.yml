@@ -13,3 +13,4 @@ run:
 params:
   CF_PASSWORD:
   RUBYGEM_MIRROR:
+  DOMAIN_NAME:
