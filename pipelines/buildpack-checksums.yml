@@ -30,9 +30,13 @@ jobs:
         - get: buildpacks-ci
       - task: run-tests
         file: buildpacks-ci/tasks/run-buildpack-checksums-specs.yml
+        params:
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - task: build-site
         file: buildpacks-ci/tasks/build-buildpack-checksums-site.yml
         privileged: true
+        params:
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: buildpack-checksums
         params:
           repository: buildpack-checksums-artifacts

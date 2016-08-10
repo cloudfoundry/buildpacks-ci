@@ -167,3 +167,5 @@ jobs:
       - task: run-compile-extensions-specs
         file: buildpacks-ci/tasks/run-compile-extensions-specs.yml
         privileged: true
+        params:
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
