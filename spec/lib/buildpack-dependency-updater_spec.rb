@@ -456,6 +456,19 @@ describe BuildpackDependencyUpdater do
             expect(default_in_manifest["version"]).to eq(expected_version)
           end
         end
+
+        context "dependency version to add is already in manifest" do
+          let(:expected_version) { "6.2.2" }
+
+          it "does not try to update the manifest or buildpack" do
+            expect(subject).not_to receive(:perform_dependency_update)
+            expect(subject).not_to receive(:perform_dependency_specific_changes)
+            expect(STDOUT).to receive(:puts).with('node 6.2.2 is already in the manifest for the nodejs buildpack.')
+            expect(STDOUT).to receive(:puts).with('No updates will be made to the manifest or buildpack.')
+            subject.run!
+          end
+        end
+
       end
 
       context "and ruby buildpack" do
