@@ -7,6 +7,7 @@ image_resource:
 inputs:
   - name: cassandra-cpp-driver
   - name: cassandra-libuv
+  - name: pecl-amqp
   - name: pecl-cassandra
   - name: pecl-gearman
   - name: pecl-igbinary
@@ -29,11 +30,13 @@ inputs:
   - name: rabbitmq-c
   - name: hiredis
   # - name: phpiredis
+  #   skipped: since does not yet have releases
   - name: php-protobuf
   - name: cphalcon
   - name: twig
   - name: xhprof
   # - name: suhosin7
+  #   skipped: since does not yet have releases
   - name: suhosin5
   - name: buildpacks-ci
 run:
