@@ -117,6 +117,7 @@ jobs:
         file: buildpacks-ci/tasks/run-machete-specs.yml
         params:
           CF_PASSWORD: {{ci-cf-password}}
+          DOMAIN_NAME: {{domain-name}}
         privileged: true
         ensure:
           put: cf-edge-environments
