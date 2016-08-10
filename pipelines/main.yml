@@ -67,6 +67,8 @@ jobs:
       - task: run-buildpack-packager-specs
         file: buildpacks-ci/tasks/run-buildpack-packager-specs.yml
         privileged: true
+        params:
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
   - name: buildpack-packager-tag
     serial: true
     public: true
