@@ -25,16 +25,6 @@ class BuildpackDoSomethingToItBecauseStuff
     return buildpack_dir, dependency, version
   end
 
-  def find_tracker_ids_by_text(text_to_search_for)
-    tracker_client = TrackerClient.new(ENV['TRACKER_API_TOKEN'], ENV['TRACKER_PROJECT_ID'], ENV['TRACKER_REQUESTER_ID'].to_i)
-    
-    story_ids = tracker_client.search(name: text_to_search_for).select do |story|
-      story['current_state'] != 'accepted'
-    end.map do |story|
-      "[##{story['id']}]"
-    end.join("\n")
-  end
-
   def write_git_commit(binary_builds_dir, buildpack_dir, dependency, story_ids, version)
     git_commit_message = GitClient.last_commit_message(binary_builds_dir)
 
@@ -45,19 +35,23 @@ class BuildpackDoSomethingToItBecauseStuff
     end
 
     source_info = $1
+    formatted_story_ids = story_ids.map {|story_id| "[##{story_id}]"}
 
     Dir.chdir(buildpack_dir) do
       raise 'command failed' unless system('git add -A')
       no_changes_present = system('git diff --cached --exit-code')
       unless no_changes_present
-        raise 'command failed' unless system("git commit -m 'Update #{dependency} to #{version}\n\n#{source_info}\n\n#{story_ids}'")
+        raise 'command failed' unless system("git commit -m 'Update #{dependency} to #{version}\n\n#{source_info}\n\n#{formatted_story_ids.join("\n")}'")
       end
     end
   end
 
   def run!
     buildpack_dir, dependency, version = update_buildpack(binary_builds_dir, buildpacks_ci_dir)
-    story_ids = find_tracker_ids_by_text("include new #{dependency} #{version}")
+
+    tracker_client = TrackerClient.new(ENV['TRACKER_API_TOKEN'], ENV['TRACKER_PROJECT_ID'], ENV['TRACKER_REQUESTER_ID'].to_i)
+    story_ids = tracker_client.find_unaccepted_story_ids("include new #{dependency} #{version}")
+
     write_git_commit(binary_builds_dir, buildpack_dir, dependency, story_ids, version)
   end
 end

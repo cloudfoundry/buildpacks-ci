@@ -100,6 +100,38 @@ describe TrackerClient do
     end
   end
 
+  describe '#find_unaccepted_story_ids' do
+    subject { described_class.new(api_key, project_id, requester_id) }
+    let(:text_to_search_for) { 'text of interest' }
+
+    before do
+      allow(subject).to receive(:search).and_return(stories)
+    end
+
+    context 'with accepted and unaccepted stories that match query text' do
+      let(:stories) {
+        [
+          { 'id' => 111_111_111, 'current_state' => 'accepted' },
+          { 'id' => 999_999_999, 'current_state' => 'not even vaguely accepted, lol' },
+        ]
+      }
+
+      it 'should return only story ids of unaccepted stories' do
+        story_ids = subject.find_unaccepted_story_ids(text_to_search_for)
+        expect(story_ids).to eq [999_999_999]
+      end
+    end
+
+    context 'with no stories that match query text' do
+      let(:stories) { [] }
+
+      it 'should return no story ids' do
+        story_ids = subject.find_unaccepted_story_ids(text_to_search_for)
+        expect(story_ids).to be_empty
+      end
+    end
+  end
+
   describe '#post_to_tracker' do
     describe 'input checking' do
       let(:name)        { 'OH NOOOO' }
