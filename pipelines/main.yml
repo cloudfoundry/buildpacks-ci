@@ -79,6 +79,8 @@ jobs:
           passed: [ buildpack-packager-specs ]
       - task: bump-buildpack-packager-version
         file: buildpacks-ci/tasks/bump-buildpack-packager-version.yml
+        params:
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: buildpack-packager
         params:
           repository: buildpack-packager-artifacts
@@ -96,6 +98,8 @@ jobs:
       - task: create-new-buildpack-packager-release
         file: buildpacks-ci/tasks/release-buildpack-packager.yml
         privileged: true
+        params:
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: buildpack-packager-github-release
         params:
           name: buildpack-packager-artifacts/tag
@@ -120,6 +124,7 @@ jobs:
         params:
           CF_PASSWORD: {{ci-cf-password}}
           DOMAIN_NAME: {{domain-name}}
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
         privileged: true
         ensure:
           put: cf-edge-environments
@@ -135,6 +140,8 @@ jobs:
           passed: [ machete-specs ]
       - task: bump-machete-version
         file: buildpacks-ci/tasks/bump-machete-version.yml
+        params:
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: machete
         params:
           repository: machete-artifacts
@@ -152,6 +159,8 @@ jobs:
       - task: create-new-machete-release
         file: buildpacks-ci/tasks/release-machete.yml
         privileged: true
+        params:
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: machete-github-release
         params:
           name: machete-artifacts/tag
