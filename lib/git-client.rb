@@ -15,4 +15,14 @@ class GitClient
   def self.add_everything
     raise 'Could not add files' unless system('git add -A')
   end
+
+  def self.safe_commit(message)
+    changes_staged_for_commit = !system('git diff --cached --exit-code')
+
+    if changes_staged_for_commit
+      raise 'Commit failed' unless system("git commit -m '#{message}'")
+    else
+      puts 'No staged changes were available to commit, doing nothing.'
+    end
+  end
 end
