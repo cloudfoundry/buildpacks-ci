@@ -12,11 +12,10 @@ require_relative "#{buildpacks_ci_dir}/lib/git-client"
 class BuildpackDoSomethingToItBecauseStuff
   def update_buildpack(binary_builds_dir, buildpacks_ci_dir)
     dependency = ENV['DEPENDENCY']
-
-# can only handle one buildpack update atm
-    buildpack = ENV.fetch("BUILDPACK_NAME", BuildpackDependency.for(dependency).first)
+    buildpack_name = ENV['BUILDPACK_NAME']
     buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "buildpack"))
-    buildpack_updater = BuildpackDependencyUpdater.create(dependency, buildpack, buildpack_dir, binary_builds_dir)
+
+    buildpack_updater = BuildpackDependencyUpdater.create(dependency, buildpack_name, buildpack_dir, binary_builds_dir)
 
     version = buildpack_updater.dependency_version
 
