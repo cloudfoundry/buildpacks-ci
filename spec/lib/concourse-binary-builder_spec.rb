@@ -13,7 +13,7 @@ describe ConcourseBinaryBuilder do
     let(:binary_builder_dir) { File.join(task_root_dir, 'binary-builder') }
     let(:builds_yaml_artifacts_dir) { File.join(task_root_dir, 'builds-yaml-artifacts') }
     let(:binary_artifacts_dir) {File.join(task_root_dir, 'binary-builder-artifacts')}
-    let(:final_artifact_dir) {File.join(binary_artifacts_dir, 'final-artifact')}
+    let(:original_source_code_dir) {File.join(binary_artifacts_dir, 'original-source-code')}
 
     let(:built_dir) { File.join(task_root_dir, 'built-yaml') }
     let(:built_yaml_contents) { {dependency => []}.to_yaml }
@@ -128,7 +128,7 @@ describe ConcourseBinaryBuilder do
       end
 
       it 'copies the source to build.tgz' do
-        expect(File.exist? "#{final_artifact_dir}/build.tgz").to eq true
+        expect(File.exist? "#{original_source_code_dir}/build.tgz").to eq true
       end
     end
 
@@ -193,7 +193,13 @@ describe ConcourseBinaryBuilder do
       let(:source_url)    { 'https://getcomposer.org/download/1.2.0/composer.phar' }
       let(:version)       { '1.2.0' }
 
-      before { subject.run }
+      before do
+        allow(subject).to receive(:download_composer).with(source_url) do
+          `touch #{binary_builder_dir}/composer-#{version}.phar`
+        end
+
+        subject.run
+      end
 
       it_behaves_like 'a commit is made in builds-yaml-artifacts with the proper git message', 'automated'
       it_behaves_like 'the resulting tar files are copied to the proper location'
