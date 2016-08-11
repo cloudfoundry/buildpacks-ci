@@ -2,6 +2,7 @@
 set -ex
 
 pushd buildpacks-ci
+  bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
   bundle install
 popd
 

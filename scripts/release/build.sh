@@ -4,6 +4,7 @@ set -e
 cd buildpack
 git tag v`cat VERSION`
 export BUNDLE_GEMFILE=cf.Gemfile
+bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
 bundle install
 bundle exec buildpack-packager --uncached
 bundle exec buildpack-packager --cached
