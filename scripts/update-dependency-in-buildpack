@@ -9,7 +9,7 @@ require_relative "#{buildpacks_ci_dir}/lib/buildpack-dependency"
 require_relative "#{buildpacks_ci_dir}/lib/tracker-client"
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
-class BuildpackDoSomethingToItBecauseStuff
+class UpdateDependencyInBuildpackJob
   def update_buildpack(binary_builds_dir, buildpacks_ci_dir)
     dependency = ENV['DEPENDENCY']
     buildpack_name = ENV['BUILDPACK_NAME']
@@ -57,4 +57,4 @@ class BuildpackDoSomethingToItBecauseStuff
   end
 end
 
-BuildpackDoSomethingToItBecauseStuff.new.run!
+UpdateDependencyInBuildpackJob.new.run!
