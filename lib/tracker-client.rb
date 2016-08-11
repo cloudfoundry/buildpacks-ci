@@ -46,6 +46,14 @@ class TrackerClient
     response
   end
 
+  def find_unaccepted_story_ids(text_to_search_for)
+    search(name: text_to_search_for).select do |story|
+      story['current_state'] != 'accepted'
+    end.map do |story|
+      story['id']
+    end
+  end
+
   private
 
   def validate_string(cred)
