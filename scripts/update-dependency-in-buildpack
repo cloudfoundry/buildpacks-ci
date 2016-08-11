@@ -27,19 +27,24 @@ class BuildpackDoSomethingToItBecauseStuff
   def write_git_commit(binary_builds_dir, buildpack_dir, dependency, story_ids, version)
     git_commit_message = GitClient.last_commit_message(binary_builds_dir)
 
-    if git_commit_message.include?('gpg-signature:')
-      /^(source url: .*END PGP SIGNATURE-----)/m.match(git_commit_message)
-    else
-      /^(source url: .*)$/.match(git_commit_message)
-    end
+    source_info = extract_source_info(git_commit_message)
 
-    source_info = $1
     formatted_story_ids = story_ids.map {|story_id| "[##{story_id}]"}
 
     Dir.chdir(buildpack_dir) do
       GitClient.add_everything
       GitClient.safe_commit("Update #{dependency} to #{version}\n\n#{source_info}\n\n#{formatted_story_ids.join("\n")}")
     end
+  end
+
+  def extract_source_info(git_commit_message)
+    if git_commit_message.include?('gpg-signature:')
+      result = /^(?<source_info>source url: .*END PGP SIGNATURE-----)/m.match(git_commit_message)
+    else
+      result = /^(?<source_info>source url: .*)$/.match(git_commit_message)
+    end
+
+    result['source_info']
   end
 
   def run!
