@@ -14,3 +14,5 @@ run:
   args:
     - -cl
     - buildpacks-ci/scripts/release/machete/finalize-machete
+params:
+  RUBYGEM_MIRROR:
