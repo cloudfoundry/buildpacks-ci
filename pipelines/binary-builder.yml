@@ -182,7 +182,7 @@ jobs:
           privileged: true
         - put: build-tar
           params:
-            file: binary-builder-artifacts/final-artifact/*
+            file: binary-builder-artifacts/original-source-code/*
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary.yml
           params:
@@ -330,7 +330,7 @@ jobs:
           privileged: true
         - put: build-tar
           params:
-            file: binary-builder-artifacts/final-artifact/*
+            file: binary-builder-artifacts/original-source-code/*
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary.yml
           params:

@@ -6,7 +6,7 @@ class ConcourseBinaryBuilder
 
   attr_reader :binary_name, :git_ssh_key, :task_root_dir
   attr_reader :binary_builder_dir, :built_dir, :builds_dir
-  attr_reader :builds_yaml_artifacts, :binary_artifacts_dir, :final_artifacts_dir, :source_url
+  attr_reader :builds_yaml_artifacts, :binary_artifacts_dir, :original_source_code_dir, :source_url
   attr_reader :verification_type, :verification_value, :flags, :latest_build, :remaining_builds
 
   def initialize(binary_name, task_root_dir, git_ssh_key)
@@ -18,8 +18,8 @@ class ConcourseBinaryBuilder
     @builds_dir = File.join(task_root_dir ,'builds-yaml')
     @builds_yaml_artifacts = File.join(task_root_dir, 'builds-yaml-artifacts')
     @binary_artifacts_dir = File.join(task_root_dir, 'binary-builder-artifacts')
-    @final_artifacts_dir = File.join(binary_artifacts_dir, 'final-artifact')
-    FileUtils.mkdir_p(final_artifacts_dir)
+    @original_source_code_dir = File.join(binary_artifacts_dir, 'original-source-code')
+    FileUtils.mkdir_p(original_source_code_dir)
   end
 
   def run
@@ -32,7 +32,7 @@ class ConcourseBinaryBuilder
 
     build_dependency
 
-    tar_dependency_source
+    tar_dependency_source_code
 
     copy_binaries_to_output_directory
 
@@ -67,9 +67,8 @@ class ConcourseBinaryBuilder
 
   def build_dependency
     if binary_name == "composer"
-      version_to_build = latest_build['version']
-      @source_url = "https://getcomposer.org/download/#{version_to_build}/composer.phar"
-      system("curl #{source_url} -o #{binary_builder_dir}/composer-#{version_to_build}.phar") or raise "Could not download composer.phar"
+      @source_url = "https://getcomposer.org/download/#{latest_build['version']}/composer.phar"
+      download_composer(source_url)
     else
       binary_builder_output = run_binary_builder(flags)
       /- url:\s(.*)$/.match(binary_builder_output)
@@ -77,7 +76,11 @@ class ConcourseBinaryBuilder
     end
   end
 
-  def tar_dependency_source
+  def download_composer(url)
+      system("curl #{url} -o #{binary_builder_dir}/composer-#{latest_build['version']}.phar") or raise "Could not download composer.phar"
+  end
+
+  def tar_dependency_source_code
     version_to_build = latest_build['version']
 
     dependency_source = case binary_name
@@ -100,7 +103,7 @@ class ConcourseBinaryBuilder
 
   def copy_binaries_to_output_directory
       FileUtils.cp_r(Dir["#{binary_builder_dir}/*.tgz", "#{binary_builder_dir}/*.tar.gz", "#{binary_builder_dir}/*.phar"], binary_artifacts_dir)
-      FileUtils.cp_r("#{binary_artifacts_dir}/build.tgz", final_artifacts_dir)
+      FileUtils.cp_r("#{binary_artifacts_dir}/build.tgz", original_source_code_dir)
   end
 
 
