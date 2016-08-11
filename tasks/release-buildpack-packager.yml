@@ -14,3 +14,5 @@ run:
   args:
     - -cl
     - buildpacks-ci/scripts/release/buildpack-packager/finalize-buildpack-packager
+params:
+  RUBYGEM_MIRROR:

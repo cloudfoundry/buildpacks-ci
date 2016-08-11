@@ -11,3 +11,5 @@ outputs:
   - name: buildpack-artifacts
 run:
   path: buildpacks-ci/scripts/release/build.sh
+params:
+  RUBYGEM_MIRROR:
