@@ -38,10 +38,7 @@ class BuildpackDoSomethingToItBecauseStuff
 
     Dir.chdir(buildpack_dir) do
       GitClient.add_everything
-      no_changes_present = system('git diff --cached --exit-code')
-      unless no_changes_present
-        raise 'command failed' unless system("git commit -m 'Update #{dependency} to #{version}\n\n#{source_info}\n\n#{formatted_story_ids.join("\n")}'")
-      end
+      GitClient.safe_commit("Update #{dependency} to #{version}\n\n#{source_info}\n\n#{formatted_story_ids.join("\n")}")
     end
   end
 

@@ -57,4 +57,39 @@ describe GitClient do
       end
     end
   end
+
+  describe '#safe_commit' do
+    let(:git_commit_message) { 'Beautiful commits for all' }
+
+    subject { described_class.safe_commit(git_commit_message) }
+
+    before { allow(described_class).to receive(:system).with('git diff --cached --exit-code').and_return(no_changes_staged) }
+
+    context 'changes are staged' do
+      let(:no_changes_staged) { false }
+
+      context 'commit succeeds' do
+        it 'makes a commit with the specified message' do
+          expect(described_class).to receive(:system).with("git commit -m 'Beautiful commits for all'").and_return(true)
+
+          subject
+        end
+      end
+
+      context 'commit fails' do
+        it 'throws an exception about committing' do
+          expect(described_class).to receive(:system).with("git commit -m 'Beautiful commits for all'").and_return(false)
+          expect{ subject }.to raise_error('Commit failed')
+        end
+      end
+    end
+
+    context 'no changes are staged' do
+      let(:no_changes_staged) { true }
+
+      it 'advises that no changes were committed' do
+        expect{ subject }.to output("No staged changes were available to commit, doing nothing.\n").to_stdout
+      end
+    end
+  end
 end
