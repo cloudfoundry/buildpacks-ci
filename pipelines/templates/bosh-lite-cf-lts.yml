@@ -7,7 +7,7 @@ resources:
   - name: cf-deployment
     type: bosh-deployment
     source:
-      target: https://{{deployment-name}}.<%= domain_name %>:25555
+      target: https://<%= full_deployment_name +  '.' + domain_name %>:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden
@@ -15,7 +15,7 @@ resources:
   - name: diego-deployment
     type: bosh-deployment
     source:
-      target: https://{{deployment-name}}.<%= domain_name %>:25555
+      target: https://<%= full_deployment_name +  '.' + domain_name %>:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden-diego
