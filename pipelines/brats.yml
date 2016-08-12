@@ -50,6 +50,7 @@ jobs:
           LANGUAGE: <%= language %>
           CI_CF_USERNAME: {{ci-cf-username}}
           CI_CF_PASSWORD: {{ci-cf-password}}
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
         privileged: true
         ensure:
           put: cf-lts-environments
@@ -74,6 +75,7 @@ jobs:
           LANGUAGE: <%= language %>
           CI_CF_USERNAME: {{ci-cf-username}}
           CI_CF_PASSWORD: {{ci-cf-password}}
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
         privileged: true
         ensure:
           put: cf-edge-environments
@@ -99,6 +101,7 @@ jobs:
           LANGUAGE: safe
           CI_CF_USERNAME: {{ci-cf-username}}
           CI_CF_PASSWORD: {{ci-cf-password}}
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
         privileged: true
         ensure:
           put: cf-edge-environments
@@ -123,6 +126,7 @@ jobs:
           LANGUAGE: safe
           CI_CF_USERNAME: {{ci-cf-username}}
           CI_CF_PASSWORD: {{ci-cf-password}}
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
         privileged: true
         ensure:
           put: cf-lts-environments

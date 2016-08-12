@@ -179,6 +179,7 @@ jobs:
           params:
             BINARY_NAME: <%= dependency %>
             GIT_SSH_KEY: {{buildpacks-ci-private-key}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
         - put: build-tar
           params:
@@ -327,6 +328,7 @@ jobs:
           params:
             GIT_SSH_KEY: {{buildpacks-ci-private-key}}
             BINARY_NAME: <%= dependency %>
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
         - put: build-tar
           params:
@@ -396,6 +398,7 @@ jobs:
               STACKS: cflinuxfs2
               COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
               CF_PASSWORD: {{ci-cf-password}}
+              RUBYGEM_MIRROR: {{rubygem-mirror}}
           - put: <%= buildpack %>-buildpack
             params:
               repository: buildpack-artifacts
