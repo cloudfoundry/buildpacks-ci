@@ -8,7 +8,6 @@ RUN apt-get -y install \
   aufs-tools \
   expect \
   git \
-  golang \
   iptables \
   libmysqlclient-dev \
   libpq-dev \
@@ -33,9 +32,6 @@ RUN wget -q https://releases.hashicorp.com/vagrant/1.8.5/vagrant_1.8.5_x86_64.de
 RUN vagrant plugin install vagrant-aws --verbose
 ENV PATH /usr/bin:$PATH
 RUN echo $PATH && vagrant box add cloudfoundry/bosh-lite --provider aws
-
-# godep is a package manager for golang apps
-RUN GOPATH=/go go get github.com/tools/godep
 
 # composer is a package manager for PHP apps
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
