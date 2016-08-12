@@ -69,6 +69,11 @@ describe BuildpackDependencyUpdater do
         expect(dependency_in_manifest["md5"]).to eq(new_md5)
       end
 
+      it 'records which versions were removed' do
+        subject.run!
+        expect(subject.removed_versions).to eq(['v64'])
+      end
+
       context "dependency version to add is already in manifest" do
         let(:new_version) { "v64" }
         let(:new_md5)     { "f75da3a0c5ec08514ec2700c2a6d1187" }
@@ -84,8 +89,8 @@ describe BuildpackDependencyUpdater do
     end
 
     context("composer") do
-      let(:dependency)        { "composer" }
-      let(:buildpack)         { "php" }
+      let(:dependency)   { "composer" }
+      let(:buildpack)    { "php" }
       let(:new_version)  { "1.1.0" }
       before do
         buildpack_manifest_contents = <<~MANIFEST
@@ -124,12 +129,17 @@ describe BuildpackDependencyUpdater do
         expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/php/binaries/trusty/composer/1.1.0/composer.phar")
         expect(dependency_in_manifest["md5"]).to eq("05d30d20be1c94c9edc02756420a7d10")
       end
+
+      it 'records which versions were removed' do
+        subject.run!
+        expect(subject.removed_versions).to eq(['1.0.3'])
+      end
     end
 
     context("glide") do
-      let(:dependency)        { "glide" }
-      let(:buildpack)         { "go" }
-      let(:new_version)  { "0.10.2" }
+      let(:dependency)  { "glide" }
+      let(:buildpack)   { "go" }
+      let(:new_version) { "0.10.2" }
       before do
         buildpack_manifest_contents = <<~MANIFEST
           ---
@@ -169,11 +179,16 @@ describe BuildpackDependencyUpdater do
         expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/glide/glide-0.10.2-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
       end
+
+      it 'records which versions were removed' do
+        subject.run!
+        expect(subject.removed_versions).to eq(['0.9.3'])
+      end
     end
 
     context("nginx_staticfile") do
-      let(:dependency)        { "nginx" }
-      let(:buildpack)         { "staticfile" }
+      let(:dependency) { "nginx" }
+      let(:buildpack)  { "staticfile" }
       before do
         buildpack_manifest_contents = <<~MANIFEST
           ---
@@ -215,6 +230,11 @@ describe BuildpackDependencyUpdater do
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/nginx/nginx-1.11.2-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
         end
+
+        it 'records which versions were removed' do
+          subject.run!
+          expect(subject.removed_versions).to eq(['1.11.1'])
+        end
       end
 
       context "new version is stable (even minor version)" do
@@ -229,12 +249,17 @@ describe BuildpackDependencyUpdater do
           new_dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
           expect(new_dependency_in_manifest).to be_nil
         end
+
+        it 'records which versions were removed' do
+          subject.run!
+          expect(subject.removed_versions).to eq([])
+        end
       end
     end
 
     context("nginx_php") do
-      let(:dependency)        { "nginx" }
-      let(:buildpack)         { "php" }
+      let(:dependency)   { "nginx" }
+      let(:buildpack)    { "php" }
       let(:new_version)  { "1.11.2" }
       let(:defaults_options_file) { File.join(buildpack_dir, "defaults/options.json") }
 
@@ -296,6 +321,11 @@ describe BuildpackDependencyUpdater do
 
         defaults_options = JSON.parse(File.read(defaults_options_file))
         expect(defaults_options['NGINX_1_11_LATEST']).to eq('1.11.2')
+      end
+
+      it 'records which versions were removed' do
+        subject.run!
+        expect(subject.removed_versions).to eq(['1.11.1'])
       end
     end
 
@@ -422,6 +452,11 @@ describe BuildpackDependencyUpdater do
             default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
             expect(default_in_manifest).to eq(nil)
           end
+
+          it 'records which versions were removed' do
+            subject.run!
+            expect(subject.removed_versions).to eq(['0.10.45'])
+          end
         end
 
         context("node >= 4") do
@@ -455,6 +490,11 @@ describe BuildpackDependencyUpdater do
             default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
             expect(default_in_manifest["version"]).to eq(expected_version)
           end
+
+          it 'records which versions were removed' do
+            subject.run!
+            expect(subject.removed_versions).to eq(['4.4.5'])
+          end
         end
 
         context "dependency version to add is already in manifest" do
@@ -468,7 +508,6 @@ describe BuildpackDependencyUpdater do
             subject.run!
           end
         end
-
       end
 
       context "and ruby buildpack" do
@@ -550,6 +589,11 @@ describe BuildpackDependencyUpdater do
             default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
             expect(default_in_manifest).to eq(nil)
           end
+
+          it 'records which versions were removed' do
+            subject.run!
+            expect(subject.removed_versions).to eq([])
+          end
         end
 
         context("node >= 4") do
@@ -580,6 +624,11 @@ describe BuildpackDependencyUpdater do
 
             default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.4'}
             expect(default_in_manifest).to eq(nil)
+          end
+
+          it 'records which versions were removed' do
+            subject.run!
+            expect(subject.removed_versions).to eq(['4.4.4'])
           end
         end
       end

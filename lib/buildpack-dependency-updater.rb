@@ -18,6 +18,7 @@ class BuildpackDependencyUpdater
   attr_reader :dependency_version
   attr_reader :md5
   attr_reader :uri
+  attr_reader :removed_versions
   attr_accessor :buildpack_manifest
 
   def self.create(dependency, *args)
@@ -30,6 +31,7 @@ class BuildpackDependencyUpdater
     @buildpack = buildpack
     @buildpack_dir = buildpack_dir
     @binary_builds_dir = binary_builds_dir
+    @removed_versions = []
     @dependency_version, @uri, @md5 = get_dependency_info
   end
 
@@ -81,7 +83,9 @@ class BuildpackDependencyUpdater
   end
 
   def perform_dependency_update
-    buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency}
+    original_dependencies = buildpack_manifest["dependencies"].clone
+    new_dependencies = buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency}
+    @removed_versions = (original_dependencies - new_dependencies).map{|dep| dep['version']} unless new_dependencies == original_dependencies
 
     dependency_hash = {
       "name"      => dependency,

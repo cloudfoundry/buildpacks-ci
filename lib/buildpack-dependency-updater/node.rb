@@ -14,8 +14,11 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
       Gem::Version.new(dep['version'])
     end.sort.first.to_s
 
+    original_dependencies = buildpack_manifest["dependencies"].clone
+    new_dependencies = buildpack_manifest["dependencies"].clone
+
     if buildpack == "nodejs" || (buildpack == "ruby" && major_version == "4")
-      buildpack_manifest["dependencies"].delete_if { |dep| dep["name"] == dependency && dep["version"] == version_to_delete }
+      new_dependencies = buildpack_manifest["dependencies"].delete_if { |dep| dep["name"] == dependency && dep["version"] == version_to_delete }
       dependency_hash = {
         "name" => dependency,
         "version" => dependency_version,
@@ -36,6 +39,8 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
       }
       buildpack_manifest["default_versions"] << default_dependency_hash
     end
+
+    @removed_versions = (original_dependencies - new_dependencies).map{|dep| dep['version']} unless new_dependencies == original_dependencies
   end
 
   def update_version_in_url_to_dependency_map
