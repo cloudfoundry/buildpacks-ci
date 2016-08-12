@@ -1,11 +1,5 @@
 #! /usr/bin/env bash
 
-pushd /etc &>/dev/null
-  git clone https://github.com/pivotal-cf-experimental/concourse-filter &>/dev/null
-  rm -rf concourse-filter/.git &>/dev/null
-  pushd concourse-filter &>/dev/null
-    go build &>/dev/null
-
 export CREDENTIAL_FILTER_WHITELIST="STACKS,DEPLOYMENT_NAME,SSH_AGENT_PID,IAAS,\
 RUBYGEM_MIRROR,BOSH_LITE_NAME,AZURE_BOSH_USER,BOSH_USER,LANGUAGE,CI_CF_USERNAME,\
 BOSH_TARGET,BOSH_LITE_DISK_SIZE,BRATS_BRANCH,DEPENDENCY,\
@@ -20,6 +14,7 @@ SHLVL,HOME,RUBY_VERSION,BUNDLER_VERSION,OLDPWD,\
 BUILDPACK_DEPENDENCIES_HOST_DOMAIN,PIVNET_ADDRESS,GITHUB_URL,\
 PIVNET_PRODUCT_NAME,GOPATH,TMPDIR"
 
-    exec &> >(./concourse-filter)
-  popd &>/dev/null
+pushd /etc &>/dev/null
+  wget https://github.com/pivotal-cf-experimental/new_version_resource/releases/download/v0.0.1/concourse-filter
+  exec &> >(./concourse-filter)
 popd &>/dev/null
