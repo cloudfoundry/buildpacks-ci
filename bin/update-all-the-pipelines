@@ -18,6 +18,10 @@ opt_parser = OptionParser.new do |opts|
   opts.on("--match=MATCH", "-mMATCH", "Only update matched pipelines") do |match_string|
     OPTIONS[:match] = match_string
   end
+
+  opts.on("--template=TEMPLATE", "-tTEMPLATE", "Only update pipelines from the specified template") do |template_string|
+    OPTIONS[:template] = template_string
+  end
 end
 opt_parser.parse!
 
@@ -63,39 +67,54 @@ def set_pipeline(target_name:,name:, cmd:, load: [])
   "})
 end
 
-header('For standard pipelines')
-Dir['pipelines/*.yml'].each do |filename|
-  name = File.basename(filename, '.yml')
-  set_pipeline(target_name: target_name,name: name, cmd: "erb organization=#{full_config["buildpacks-github-org"]} #{filename}")
-end
-
-header('For bosh-lite pipelines')
-Dir['config/bosh-lite/*.yml'].each do |filename|
-  deployment_name = File.basename(filename, '.yml')
-  full_deployment_name = YAML.load_file(filename)['deployment-name']
-  matches = /(lts|edge)\-\d+(\-azure)?/.match(deployment_name)
-  if matches.nil?
-    puts 'Your config/bosh-lite/*.yml files must be named in the following manner: edge-1.yml, edge-2.yml, lts-1.yml, lts-2.yml, etc.'
-    exit 1
+def update_standard_pipelines(target_name, full_config)
+  header('For standard pipelines')
+  Dir['pipelines/*.yml'].each do |filename|
+    name = File.basename(filename, '.yml')
+    set_pipeline(target_name: target_name, name: name, cmd: "erb organization=#{full_config["buildpacks-github-org"]} #{filename}")
   end
-  cf_version_type = matches[1]
-  set_pipeline(
-    target_name: target_name,
-    name: deployment_name,
-    cmd: "erb domain_name='#{full_config["domain-name"]}' deployment_name=#{deployment_name} full_deployment_name=#{full_deployment_name} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
-    load: [filename]
-  )
 end
 
-header('For buildpack pipelines')
-Dir['config/buildpack/*.yml'].each do |filename|
-  language = File.basename(filename, '.yml')
-  set_pipeline(
-    target_name: target_name,
-    name: "#{language}-buildpack",
-    cmd: "erb language=#{language} organization=#{full_config["buildpacks-github-org"]} pipelines/templates/buildpack.yml",
-    load: [filename]
-  )
+def update_bosh_lite_pipelines(target_name, full_config)
+  header('For bosh-lite pipelines')
+  Dir['config/bosh-lite/*.yml'].each do |filename|
+    next if OPTIONS.has_key?(:template) && !filename.include?(OPTIONS[:template])
+    deployment_name = File.basename(filename, '.yml')
+    full_deployment_name = YAML.load_file(filename)['deployment-name']
+    matches = /(lts|edge)\-\d+(\-azure)?/.match(deployment_name)
+    if matches.nil?
+      puts 'Your config/bosh-lite/*.yml files must be named in the following manner: edge-1.yml, edge-2.yml, lts-1.yml, lts-2.yml, etc.'
+      exit 1
+    end
+    cf_version_type = matches[1]
+    set_pipeline(
+      target_name: target_name,
+      name: deployment_name,
+      cmd: "erb domain_name='#{full_config["domain-name"]}' deployment_name=#{deployment_name} full_deployment_name=#{full_deployment_name} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
+      load: [filename]
+    )
+  end
 end
 
-puts 'Thanks, JT'
+def update_buildpack_pipelines(target_name, full_config)
+  header('For buildpack pipelines')
+  Dir['config/buildpack/*.yml'].each do |filename|
+    next if OPTIONS.has_key?(:template) && !filename.include?(OPTIONS[:template])
+
+    language = File.basename(filename, '.yml')
+    set_pipeline(
+      target_name: target_name,
+      name: "#{language}-buildpack",
+      cmd: "erb language=#{language} organization=#{full_config["buildpacks-github-org"]} pipelines/templates/buildpack.yml",
+      load: [filename]
+    )
+  end
+end
+
+if !OPTIONS.has_key?(:template)
+  update_standard_pipelines(target_name, full_config)
+end
+update_bosh_lite_pipelines(target_name, full_config)
+update_buildpack_pipelines(target_name, full_config)
+
+puts 'Thanks, JT + JW'
