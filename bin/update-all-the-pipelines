@@ -15,8 +15,8 @@ opt_parser = OptionParser.new do |opts|
     OPTIONS[:without] = without_string
   end
 
-  opts.on("--target=TARGET", "-tTARGET", "Only update matched pipelines") do |target_string|
-    OPTIONS[:target] = target_string
+  opts.on("--match=MATCH", "-mMATCH", "Only update matched pipelines") do |match_string|
+    OPTIONS[:match] = match_string
   end
 end
 opt_parser.parse!
@@ -50,7 +50,7 @@ def header(msg)
 end
 
 def set_pipeline(target_name:,name:, cmd:, load: [])
-  return if OPTIONS.has_key?(:target) && !name.include?(OPTIONS[:target])
+  return if OPTIONS.has_key?(:match) && !name.include?(OPTIONS[:match])
   return if OPTIONS.has_key?(:without) && name.include?(OPTIONS[:without])
   puts "   #{name} pipeline"
 
