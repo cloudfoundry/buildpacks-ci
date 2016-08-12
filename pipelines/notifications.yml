@@ -137,6 +137,7 @@ jobs:
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
           TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
           EMAIL_PREPARER_DIR: ../cves-email
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: new-cves
         params:
           repository: output-new-cves

@@ -10,3 +10,5 @@ inputs:
   - name: cf-environments
 run:
   path: buildpacks-ci/scripts/brats
+params:
+  RUBYGEM_MIRROR:

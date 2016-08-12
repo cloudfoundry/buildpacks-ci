@@ -12,3 +12,5 @@ outputs:
   - name: buildpack-artifacts
 run:
   path: buildpacks-ci/scripts/update-machete
+params:
+  RUBYGEM_MIRROR:

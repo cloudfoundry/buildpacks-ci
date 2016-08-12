@@ -126,6 +126,8 @@ jobs:
         - task: detect-and-upload
           file: buildpacks-ci/tasks/detect-and-upload.yml
           privileged: true
+          params:
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
         - put: pivotal-buildpack
           params:
             from: buildpack-artifacts/.*_buildpack-v(.*).zip
@@ -332,6 +334,7 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
             LANGUAGE: <%= language %>
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
 <% end %>
         on_failure:
           put: failure-alert
@@ -373,6 +376,7 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
             LANGUAGE: <%= language %>
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
         on_failure:
           put: failure-alert
           params:
@@ -417,6 +421,8 @@ jobs:
       - task: update-buildpack-packager
         file: buildpacks-ci/tasks/update-buildpack-packager.yml
         privileged: true
+        params:
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: buildpack-develop
         params:
           repository: buildpack-artifacts
@@ -436,6 +442,7 @@ jobs:
         privileged: true
         params:
           MACHETE_REPOSITORY: {{machete-git-uri-public}}
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: buildpack-develop
         params:
           repository: buildpack-artifacts
