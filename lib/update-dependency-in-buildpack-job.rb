@@ -23,7 +23,8 @@ class UpdateDependencyInBuildpackJob
 
     puts "Updating manifest with #{dependency} #{version}..."
     buildpack_updater.run!
-    return buildpack_dir, dependency, version
+    removed_versions = buildpack_updater.removed_versions
+    return buildpack_dir, dependency, version, removed_versions
   end
 
   def extract_source_info(git_commit_message)
@@ -36,7 +37,7 @@ class UpdateDependencyInBuildpackJob
     result['source_info']
   end
 
-  def write_git_commit(buildpack_dir, dependency, story_ids, version)
+  def write_git_commit(buildpack_dir, dependency, story_ids, version, removed_versions)
     git_commit_message = GitClient.last_commit_message(binary_builds_dir)
 
     source_info = extract_source_info(git_commit_message)
@@ -45,16 +46,19 @@ class UpdateDependencyInBuildpackJob
 
     Dir.chdir(buildpack_dir) do
       GitClient.add_everything
-      GitClient.safe_commit("Update #{dependency} to #{version}\n\n#{source_info}\n\n#{formatted_story_ids.join("\n")}")
+      add_remove_message = "Add #{dependency} #{version}"
+      add_remove_message += ", remove #{dependency} #{removed_versions.join(', ')}" unless removed_versions.empty?
+      update_commit_message = "#{add_remove_message}\n\n#{source_info}\n\n#{formatted_story_ids.join("\n")}"
+      GitClient.safe_commit(update_commit_message)
     end
   end
 
   def run!
-    buildpack_dir, dependency, version = update_buildpack
+    buildpack_dir, dependency, version, removed_versions = update_buildpack
 
     tracker_client = TrackerClient.new(ENV['TRACKER_API_TOKEN'], ENV['TRACKER_PROJECT_ID'], ENV['TRACKER_REQUESTER_ID'].to_i)
     story_ids = tracker_client.find_unaccepted_story_ids("include new #{dependency} #{version}")
 
-    write_git_commit(buildpack_dir, dependency, story_ids, version)
+    write_git_commit(buildpack_dir, dependency, story_ids, version, removed_versions)
   end
 end

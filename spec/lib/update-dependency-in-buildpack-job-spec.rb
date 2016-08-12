@@ -103,11 +103,12 @@ describe UpdateDependencyInBuildpackJob do
 
   describe '#write_git_commit' do
     let(:git_commit_message) { double(:git_commit_message) }
-    let(:source_info)   { 'source info here' }
-    let(:buildpack_dir) { Dir.mktmpdir }
-    let(:dependency)    { 'node' }
-    let(:story_ids)     { [123456] }
-    let(:version)       { '4.4.7' }
+    let(:source_info)        { 'source info here' }
+    let(:buildpack_dir)      { Dir.mktmpdir }
+    let(:dependency)         { 'node' }
+    let(:story_ids)          { [123456] }
+    let(:version)            { '4.4.7' }
+    let(:removed_versions)   { ['4.4.4', '4.4.5'] }
 
     before do
       allow(GitClient).to receive(:last_commit_message).with(binary_builds_dir).and_return(git_commit_message)
@@ -118,8 +119,8 @@ describe UpdateDependencyInBuildpackJob do
 
     it "git adds everything and makes a git commit" do
       expect(GitClient).to receive(:add_everything)
-      expect(GitClient).to receive(:safe_commit).with("Update node to 4.4.7\n\nsource info here\n\n[#123456]")
-      subject.write_git_commit(buildpack_dir, dependency, story_ids, version)
+      expect(GitClient).to receive(:safe_commit).with("Add node 4.4.7, remove node 4.4.4, 4.4.5\n\nsource info here\n\n[#123456]")
+      subject.write_git_commit(buildpack_dir, dependency, story_ids, version, removed_versions)
     end
   end
 
