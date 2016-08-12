@@ -16,5 +16,6 @@ PIVNET_PRODUCT_NAME,GOPATH,TMPDIR"
 
 pushd /etc &>/dev/null
   wget https://github.com/pivotal-cf-experimental/new_version_resource/releases/download/v0.0.1/concourse-filter
+  chmod +x concourse-filter
   exec &> >(./concourse-filter)
 popd &>/dev/null
