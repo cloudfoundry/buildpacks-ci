@@ -2,8 +2,22 @@
 # encoding: utf-8
 
 require 'yaml'
+require 'optparse'
 
 raise '`brew install lastpass-cli` is required' if `which lpass` == ''
+
+# Argument parsing
+OPTIONS = {}
+opt_parser = OptionParser.new do |opts|
+  opts.banner = "Usage: ./bin/update-all-the-pipelines [options]"
+
+  opts.on("--without=WITHOUT", "-wWITHOUT", "Don't update matched pipelines") do |without_string|
+    OPTIONS[:without] = without_string
+  end
+end
+opt_parser.parse!
+
+OPTIONS
 
 LPASS_CONCOURSE_PRIVATE = ENV['LPASS_CONCOURSE_PRIVATE_FILE'] || 'Shared-Buildpacks/concourse-private.yml'
 LPASS_DEPLOYMENTS_BUILDPACKS = ENV['LPASS_DEPLOYMENTS_BUILDPACKS_FILE'] || 'Shared-Buildpacks/deployments-buildpacks.yml'
@@ -34,6 +48,9 @@ def header(msg)
 end
 
 def set_pipeline(target_name:,name:, cmd:, load: [])
+  return if OPTIONS.has_key?(:without) && name.include?(OPTIONS[:without])
+  puts "   #{name} pipeline"
+
   puts system(%{bash -c "fly -t #{target_name} set-pipeline \
     -p #{PIPELINE_PREFIX}#{name} \
     -c <(#{cmd}) \
@@ -46,7 +63,6 @@ end
 header('For standard pipelines')
 Dir['pipelines/*.yml'].each do |filename|
   name = File.basename(filename, '.yml')
-  puts "   #{name} pipeline"
   set_pipeline(target_name: target_name,name: name, cmd: "erb organization=#{full_config["buildpacks-github-org"]} #{filename}")
 end
 
@@ -61,7 +77,6 @@ Dir['config/bosh-lite/*.yml'].each do |filename|
     exit 1
   end
   cf_version_type = matches[1]
-  puts "   #{deployment_name} bosh-lite"
   set_pipeline(
     target_name: target_name,
     name: deployment_name,
@@ -73,7 +88,6 @@ end
 header('For buildpack pipelines')
 Dir['config/buildpack/*.yml'].each do |filename|
   language = File.basename(filename, '.yml')
-  puts "   #{language} buildpack"
   set_pipeline(
     target_name: target_name,
     name: "#{language}-buildpack",
