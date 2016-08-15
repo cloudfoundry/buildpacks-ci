@@ -18,4 +18,4 @@ run:
     - -cl
     - buildpacks-ci/scripts/build-binary.rb
 params:
-  RUBYGEM_MIRROR: {{rubygem-mirror}}
+  RUBYGEM_MIRROR:
