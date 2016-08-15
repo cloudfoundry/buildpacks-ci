@@ -64,3 +64,6 @@ RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make i
 
 # Ensure that Concourse filtering is on for non-interactive shells
 ENV BASH_ENV /etc/profile.d/filter.sh
+
+# Install go 1.6.2
+RUN cd /usr/local && curl -L https://storage.googleapis.com/golang/go1.6.2.linux-amd64.tar.gz -o go.tar.gz && tar xf go.tar.gz && mv go/bin/go /usr/local/bin/go
