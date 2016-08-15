@@ -3,7 +3,7 @@
 require 'fileutils'
 
 Dir.chdir('buildpacks-ci') do
-  `bundle config mirror.https://rubygems.org ENV['RUBYGEM_MIRROR']`
+  `bundle config mirror.https://rubygems.org #{ENV['RUBYGEM_MIRROR']}`
   `bundle install`
 end
 
