@@ -126,4 +126,39 @@ describe GitClient do
       end
     end
   end
+
+  describe '#get_file_contents_at_sha' do
+    let(:dir)             { Dir.mktmpdir }
+    let(:git_show_output) { <<~OUTPUT
+                              CONTENT OF FILE
+                            OUTPUT
+    }
+    let(:stderr_output)   { 'this should not matter but is here to avoid undefined symbols' }
+    let(:process_status)  { double(:process_status) }
+    let(:sha)             { 'sha1' }
+    let(:file)            { 'important_file.txt' }
+
+    subject { described_class.get_file_contents_at_sha(dir, sha, file) }
+
+    before { allow(Open3).to receive(:capture3).with('git show sha1:important_file.txt').and_return([git_show_output, stderr_output, process_status]) }
+
+    context 'git works properly' do
+      before { allow(process_status).to receive(:success?).and_return(true) }
+
+      it 'should return the last git commit message' do
+        expect(subject).to eq("CONTENT OF FILE\n")
+      end
+    end
+
+    context 'git fails' do
+      let(:stderr_output) { 'stderr output' }
+
+      before { allow(process_status).to receive(:success?).and_return(false) }
+
+      it 'throws an exception about being unable to show the file at specified sha' do
+        expect{ subject }.to raise_error('Could not show important_file.txt at sha1. STDERR was: stderr output')
+      end
+    end
+  end
+
 end
