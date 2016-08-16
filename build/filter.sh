@@ -15,7 +15,7 @@ BUILDPACK_DEPENDENCIES_HOST_DOMAIN,PIVNET_ADDRESS,GITHUB_URL,\
 PIVNET_PRODUCT_NAME,GOPATH,TMPDIR"
 
 pushd /etc &>/dev/null
-  wget https://github.com/pivotal-cf-experimental/new_version_resource/releases/download/v0.0.1/concourse-filter &>/dev/null
+  wget https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.0.1/concourse-filter &>/dev/null
   chmod +x concourse-filter &>/dev/null
   exec &> >(./concourse-filter)
 popd &>/dev/null
