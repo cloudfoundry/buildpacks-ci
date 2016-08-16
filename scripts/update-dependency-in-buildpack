@@ -4,7 +4,7 @@
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 binary_builds_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'built-out'))
 
-require_relative "#{buildpacks_ci_dir}/lib/update_dependency_in_buildpack_job.rb"
+require_relative "#{buildpacks_ci_dir}/lib/update-dependency-in-buildpack-job.rb"
 
 update_job = UpdateDependencyInBuildpackJob.new(buildpacks_ci_dir: buildpacks_ci_dir, binary_builds_dir: binary_builds_dir)
 update_job.run!
