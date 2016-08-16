@@ -46,7 +46,7 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
   def update_version_in_url_to_dependency_map
     buildpack_manifest["url_to_dependency_map"].delete_if { |dep| dep["name"] == dependency }
     dependency_hash = {
-      "match" => "node-v?(d+.d+.d+)",
+      "match" => "node",
       "name" => dependency,
       "version" => dependency_version
     }
