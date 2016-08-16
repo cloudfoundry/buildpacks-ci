@@ -526,7 +526,7 @@ describe BuildpackDependencyUpdater do
               - match: ruby-(\d+\.\d+\.\d+)
                 name: ruby
                 version: $1
-              - match: node-v?(\d+\.\d+\.\d+)
+              - match: node
                 name: node
                 version: 4.4.4
             dependencies:
@@ -566,8 +566,7 @@ describe BuildpackDependencyUpdater do
           it "does not update the ruby buildpack manifest dependency with the specified version" do
             subject.run!
             manifest = YAML.load_file(manifest_file)
-
-            version_hash = {"match"=>"node-v?(\d+\.\d+\.\d+)", "name"=>dependency, "version"=>"4.4.4"}
+            version_hash = {"match"=>"node", "name"=>dependency, "version"=>"4.4.4"}
             expect(manifest["url_to_dependency_map"]).to include(version_hash)
 
             dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
@@ -603,7 +602,7 @@ describe BuildpackDependencyUpdater do
             subject.run!
             manifest = YAML.load_file(manifest_file)
 
-            version_hash = {"match"=>"node-v?(\d+\.\d+\.\d+)", "name"=>dependency, "version"=>expected_version}
+            version_hash = {"match"=>"node", "name"=>dependency, "version"=>expected_version}
             expect(manifest["url_to_dependency_map"]).to include(version_hash)
 
             dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.4'}
