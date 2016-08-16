@@ -36,4 +36,16 @@ class GitClient
       stdout_str.split("\n").map(&:split).map(&:first)
     end
   end
+
+  def self.get_file_contents_at_sha(dir, sha, file)
+    Dir.chdir(dir) do
+      command = "git show #{sha}:#{file}"
+      stdout_str, stderr_str, status = Open3.capture3(command)
+
+      raise "Could not show #{file} at #{sha}. STDERR was: #{stderr_str}" unless status.success?
+
+      stdout_str
+    end
+  end
+
 end
