@@ -386,6 +386,7 @@ jobs:
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
             BUILDPACK_DEPENDENCIES_HOST_DOMAIN: {{buildpack-dependencies-host-domain}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
+            DOMAIN_NAME: {{domain-name}}
         - put: cf-environments
           resource: cf-edge-environments
           params:
@@ -399,6 +400,7 @@ jobs:
               COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
               CF_PASSWORD: {{ci-cf-password}}
               RUBYGEM_MIRROR: {{rubygem-mirror}}
+              DOMAIN_NAME: {{domain-name}}
           - put: <%= buildpack %>-buildpack
             params:
               repository: buildpack-artifacts
