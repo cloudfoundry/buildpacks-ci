@@ -92,4 +92,38 @@ describe GitClient do
       end
     end
   end
+
+  describe '#git_tag_shas' do
+    let(:dir)            { Dir.mktmpdir }
+    let(:git_tag_output) { <<~OUTPUT
+                             sha1   refs/tags/v1.0.0
+                             sha2   refs/tags/v1.0.1
+                             sha3   refs/tags/v1.1.0
+                           OUTPUT
+    }
+    let(:stderr_output)  { 'this should not matter but is here to avoid undefined symbols' }
+    let(:process_status) { double(:process_status) }
+
+    subject { described_class.git_tag_shas(dir) }
+
+    before { allow(Open3).to receive(:capture3).and_return([git_tag_output, stderr_output, process_status]) }
+
+    context 'git works properly' do
+      before { allow(process_status).to receive(:success?).and_return(true) }
+
+      it 'should return the last git commit message' do
+        expect(subject).to eq(['sha1', 'sha2', 'sha3'])
+      end
+    end
+
+    context 'git fails' do
+      let(:stderr_output) { 'stderr output' }
+
+      before { allow(process_status).to receive(:success?).and_return(false) }
+
+      it 'throws an exception about being unable to get the shas of the git tags' do
+        expect{ subject }.to raise_error('Could not get git tag shas. STDERR was: stderr output')
+      end
+    end
+  end
 end
