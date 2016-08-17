@@ -338,6 +338,7 @@ jobs:
             BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
             BOSH_LITE_NAME: cf-release.buildpacks.ci
             DIEGO_DOCKER_ON: true
+
           privileged: true
         on_failure:
           put: failure-alert
