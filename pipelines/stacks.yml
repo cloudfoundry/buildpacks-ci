@@ -359,6 +359,7 @@ jobs:
             BOSH_TARGET: stacks.buildpacks.ci.cf-app.com
             BOSH_LITE_NAME: stacks.buildpacks.ci
             RUBYGEM_MIRROR: {{rubygem-mirror}}
+            DOMAIN_NAME: {{domain-name}}
           privileged: true
         - put: deployments-buildpacks
           params:
@@ -547,6 +548,7 @@ jobs:
             BOSH_TARGET: stacks.buildpacks.ci.cf-app.com
             BOSH_LITE_NAME: stacks.buildpacks.ci
             DIEGO_DOCKER_ON: true
+            DOMAIN_NAME: {{domain-name}}
           privileged: true
         on_failure:
           put: failure-alert

@@ -172,6 +172,8 @@ jobs:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             CF_PASSWORD: {{ci-cf-password}}
+            DOMAIN_NAME: {{domain-name}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
           ensure:
             put: cf-edge-environments
@@ -213,6 +215,8 @@ jobs:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             CF_PASSWORD: {{ci-cf-password}}
+            DOMAIN_NAME: {{domain-name}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
           ensure:
             put: cf-lts-environments
@@ -325,6 +329,8 @@ jobs:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             CF_PASSWORD: {{ci-cf-password}}
+            DOMAIN_NAME: {{domain-name}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
 <% unless language == "binary" %>
         - task: brats
@@ -335,6 +341,7 @@ jobs:
             CI_CF_PASSWORD: {{ci-cf-password}}
             LANGUAGE: <%= language %>
             RUBYGEM_MIRROR: {{rubygem-mirror}}
+            DOMAIN_NAME: {{domain-name}}
 <% end %>
         on_failure:
           put: failure-alert
@@ -368,6 +375,8 @@ jobs:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             CF_PASSWORD: {{ci-cf-password}}
+            DOMAIN_NAME: {{domain-name}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
         - task: brats
           file: buildpacks-ci/tasks/run-brats.yml
@@ -377,6 +386,7 @@ jobs:
             CI_CF_PASSWORD: {{ci-cf-password}}
             LANGUAGE: <%= language %>
             RUBYGEM_MIRROR: {{rubygem-mirror}}
+            DOMAIN_NAME: {{domain-name}}
         on_failure:
           put: failure-alert
           params:
