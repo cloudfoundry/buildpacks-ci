@@ -173,6 +173,7 @@ jobs:
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             CF_PASSWORD: {{ci-cf-password}}
             DOMAIN_NAME: {{domain-name}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
           ensure:
             put: cf-edge-environments
@@ -215,6 +216,7 @@ jobs:
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             CF_PASSWORD: {{ci-cf-password}}
             DOMAIN_NAME: {{domain-name}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
           ensure:
             put: cf-lts-environments
@@ -328,6 +330,7 @@ jobs:
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             CF_PASSWORD: {{ci-cf-password}}
             DOMAIN_NAME: {{domain-name}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
 <% unless language == "binary" %>
         - task: brats
@@ -373,6 +376,7 @@ jobs:
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             CF_PASSWORD: {{ci-cf-password}}
             DOMAIN_NAME: {{domain-name}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
         - task: brats
           file: buildpacks-ci/tasks/run-brats.yml
