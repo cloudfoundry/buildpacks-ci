@@ -101,7 +101,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/diego-release
-      branch: develop
+      branch: master
   - name: diego-bosh-release
     type: bosh-io-release
     tarball: true
@@ -303,11 +303,7 @@ jobs:
         - get: buildpacks-ci
         - get: cf-release
           resource: cf-release-rc
-          params:
-            submodules: none
         - get: diego-release
-          params:
-            submodules: none
         - get: cflinuxfs2-rootfs-release
         - get: lite-stemcell
         - get: stack-s3
