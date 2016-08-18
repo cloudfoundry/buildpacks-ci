@@ -1,0 +1,125 @@
+# encoding: utf-8
+require 'spec_helper'
+require_relative '../../lib/buildpack-binary-md5-validator'
+
+describe BuildpackBinaryMD5Validator do
+  describe '#get_uri_md5_sha_values' do
+    let(:buildpack_dir) { Dir.mktmpdir }
+    let(:git_tag_shas)  { ['sha1', 'sha2']}
+    let(:manifest1) { <<~TEST
+                        dependencies:
+                        - name: ruby
+                          uri: uri_stub1
+                          md5: md5_stub1
+                      TEST
+                    }
+    let(:manifest2) { <<~TEST
+                        dependencies:
+                        - name: ruby
+                          uri: uri_stub2
+                          md5: md5_stub2
+                      TEST
+                    }
+
+    before do
+      allow(GitClient).to receive(:git_tag_shas).with(buildpack_dir).and_return(git_tag_shas)
+      allow(GitClient).to receive(:get_file_contents_at_sha).with(buildpack_dir, 'sha1', 'manifest.yml').and_return(manifest1)
+      allow(GitClient).to receive(:get_file_contents_at_sha).with(buildpack_dir, 'sha2', 'manifest.yml').and_return(manifest2)
+    end
+
+    subject { described_class.get_uri_md5_sha_values(buildpack_dir) }
+
+    it "gets a hash of buildpack binary uris with their expected md5s and the shas they came from" do
+      expect(subject).to eq({
+                             'uri_stub1' =>
+                              {'md5' => 'md5_stub1',
+                               'sha' => 'sha1'},
+                             'uri_stub2' =>
+                              {'md5' => 'md5_stub2',
+                               'sha' => 'sha2'}
+                            })
+    end
+
+    context 'repeat binary uris' do
+      let(:manifest2) { manifest1 }
+
+      it "gets a hash of buildpack binary uris without repeats" do
+        expect(subject).to eq({
+                               'uri_stub1' =>
+                                {'md5' => 'md5_stub1',
+                                 'sha' => 'sha1'}
+                              })
+      end
+    end
+
+    context 'dependencies missing md5s' do
+      let(:manifest2) { <<~TEST
+                          dependencies:
+                          - name: ruby
+                            uri: uri_stub2
+                        TEST
+                      }
+
+      it "gets a hash of only buildpack binary uris that had md5s" do
+        expect(subject).to eq({
+                               'uri_stub1' =>
+                                {'md5' => 'md5_stub1',
+                                 'sha' => 'sha1'}
+                              })
+      end
+    end
+
+    context 'no manifest at sha' do
+      before do
+        allow(GitClient).to receive(:git_tag_shas).with(buildpack_dir).and_return(git_tag_shas)
+        allow(GitClient).to receive(:get_file_contents_at_sha).with(buildpack_dir, 'sha1', 'manifest.yml').and_return(manifest1)
+        allow(GitClient).to receive(:get_file_contents_at_sha).with(buildpack_dir, 'sha2', 'manifest.yml').and_raise(RuntimeError.new("git file error message"))
+      end
+
+      it "outputs manifest errors but still gets a hash of buildpack binary uris that had md5s" do
+        expect{ subject }.to output("failed to parse manifest at sha2: git file error message\n").to_stdout
+        expect(subject).to eq({
+                               'uri_stub1' =>
+                                {'md5' => 'md5_stub1',
+                                 'sha' => 'sha1'}
+                              })
+      end
+    end
+  end
+
+  describe '#show_mismatches' do
+    let(:uri) { 'https://buildpacks.cloudfoundry.org/concourse-binaries/bundler/bundler-1.12.5.tgz' }
+    let(:uri_mapping) {{
+      uri => {'md5' => 'md5_stub1', 'sha' => 'sha_stub1'}
+    }}
+    let(:gsubbed_file_name) { "https___buildpacks.cloudfoundry.org_concourse_binaries_bundler_bundler_1.12.5.tgz" }
+    let(:md5_stub)          { double(:md5_stub) }
+    let(:actual_md5_stub)   { 'md5_stub1' }
+
+    subject { described_class.show_mismatches(uri_mapping) }
+
+    before do
+      allow(described_class).to receive(:system)
+      allow(Digest::MD5).to receive(:file).with(gsubbed_file_name).and_return(md5_stub)
+      allow(md5_stub).to receive(:to_s).and_return(actual_md5_stub)
+    end
+
+    context 'md5s match' do
+      it "should print a dot (.)" do
+        expect{ subject }.to output(/working in .*\.$/m).to_stdout
+      end
+    end
+
+    context 'md5s do not match' do
+      let(:actual_md5_stub) { 'different_md5_stub' }
+
+      it "should print an F" do
+        expect{ subject }.to output(/working in .*\R$/m).to_stdout
+      end
+
+      it "should print the actual vs desired md5s and the release sha" do
+        expect{ subject }.to output(/#{uri}: actual different_md5_stub != desired md5_stub1, release sha: sha_stub1/).to_stdout
+      end
+    end
+  end
+end
