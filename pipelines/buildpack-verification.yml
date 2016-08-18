@@ -1,4 +1,9 @@
 ---
+resource_types:
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
 resources:
   - name: buildpack-checksums
     type: git
@@ -10,7 +15,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: {{buildpacks-ci-git-uri-public-branch}}
+      branch: add-job-verify-buildpack-md5s
   - name: deploy-buildpack-verify
     type: cf
     source:
@@ -20,6 +25,17 @@ resources:
       organization: {{pws-org}}
       space: {{pws-space}}
       skip_cert_check: false
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
+<% %w(go nodejs ruby python php staticfile binary).each do |language| %>
+  - name: <%= language %>-buildpack
+    type: git
+    source:
+      uri: https://github.com/<%= organization %>/<%= language %>-buildpack
+      branch: master
+<% end %>
 
 jobs:
   - name: build-site
@@ -46,3 +62,25 @@ jobs:
         params:
           path: buildpack-checksums-artifacts/final_site/
           manifest: buildpack-checksums-artifacts/final_site/manifest.yml
+  - name: verify-buildpack-binaries
+    public: true
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: nodejs-buildpack
+          - get: ruby-buildpack
+          - get: go-buildpack
+          - get: python-buildpack
+          - get: staticfile-buildpack
+          - get: binary-buildpack
+          - get: php-buildpack
+        - task: verify-buildpack-binaries
+          file: buildpacks-ci/tasks/verify-buildpack-binaries.yml
+        on_failure:
+          put: failure-alert
+          params:
+            text: "buildpack-verification verify-buildpack-binaries job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png

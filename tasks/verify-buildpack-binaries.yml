@@ -1,0 +1,19 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: nodejs-buildpack
+  - name: ruby-buildpack
+  - name: go-buildpack
+  - name: python-buildpack
+  - name: staticfile-buildpack
+  - name: binary-buildpack
+  - name: php-buildpack
+outputs:
+  - name: buildpack-artifacts
+run:
+  path: buildpacks-ci/scripts/verify-buildpack-binaries.rb
