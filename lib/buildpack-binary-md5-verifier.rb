@@ -64,5 +64,6 @@ class BuildpackBinaryMD5Verifier
 
     puts ""
     puts mismatches.join("\n")
+    mismatches.empty?
   end
 end
