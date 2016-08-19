@@ -1,7 +1,7 @@
 #! /usr/bin/env ruby
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
-require_relative "#{buildpacks_ci_dir}/lib/buildpack-binary-md5-validator"
+require_relative "#{buildpacks_ci_dir}/lib/buildpack-binary-md5-verifier"
 
 # uris that should not be checked because the binaries are already replaced and
 # we have vetted these uris/agree that they're not a concern
