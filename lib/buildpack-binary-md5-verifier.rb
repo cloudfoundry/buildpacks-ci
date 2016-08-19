@@ -4,7 +4,7 @@ require 'yaml'
 require 'tmpdir'
 require 'digest/md5'
 
-class BuildpackBinaryMD5Validator
+class BuildpackBinaryMD5Verifier
   def self.run!(buildpack_dir, whitelist_file)
     uris_to_ignore = YAML.load_file(whitelist_file)
     uri_to_md5_mapping = get_uri_md5_sha_values(buildpack_dir, uris_to_ignore)
