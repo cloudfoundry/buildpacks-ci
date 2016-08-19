@@ -5,13 +5,14 @@ require 'tmpdir'
 require 'digest/md5'
 
 class BuildpackBinaryMD5Validator
-  def self.run!(buildpack_dir)
-    uri_to_md5_mapping = get_uri_md5_sha_values(buildpack_dir)
+  def self.run!(buildpack_dir, whitelist_file)
+    uris_to_ignore = YAML.load_file(whitelist_file)
+    uri_to_md5_mapping = get_uri_md5_sha_values(buildpack_dir, uris_to_ignore)
     show_mismatches(uri_to_md5_mapping)
   end
 
   # uri -> md5
-  def self.get_uri_md5_sha_values(buildpack_dir)
+  def self.get_uri_md5_sha_values(buildpack_dir, uris_to_ignore)
     data = {}
 
     release_tag_shas = GitClient.git_tag_shas(buildpack_dir)
@@ -21,10 +22,12 @@ class BuildpackBinaryMD5Validator
         manifest = YAML.load(manifest_contents)
 
         manifest["dependencies"].each do |dependency|
-          next if data[dependency["uri"]]
+          uri = dependency["uri"]
+          next if data[uri]
+          next if uris_to_ignore.include?(uri)
 
           if dependency.key?( "md5")
-            data[dependency["uri"]] = { "md5" => dependency["md5"], "sha" => release_sha }
+            data[uri] = { "md5" => dependency["md5"], "sha" => release_sha }
           end
         end
       rescue Exception => e

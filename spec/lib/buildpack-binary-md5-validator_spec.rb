@@ -3,8 +3,34 @@ require 'spec_helper'
 require_relative '../../lib/buildpack-binary-md5-validator'
 
 describe BuildpackBinaryMD5Validator do
+  let(:buildpack_dir) { Dir.mktmpdir }
+
+  describe '#run!' do
+    let(:whitelist_file) { 'whitelist.yml' }
+    let(:mapping) { double(:mapping) }
+
+    before do
+      whitelist = <<~WHITELIST
+                  #this was vetted already
+                  - https://download-binary.org
+                  WHITELIST
+      File.write(whitelist_file, whitelist)
+    end
+
+    after do
+      File.delete(whitelist_file)
+    end
+
+    subject { described_class.run!(buildpack_dir, whitelist_file) }
+
+    it "gets the uri to md5 mapping and shows mismatches of actual binaries" do
+      expect(described_class).to receive(:get_uri_md5_sha_values).with(buildpack_dir, ['https://download-binary.org']).and_return(mapping)
+      expect(described_class).to receive(:show_mismatches).with(mapping)
+      subject
+    end
+  end
+
   describe '#get_uri_md5_sha_values' do
-    let(:buildpack_dir) { Dir.mktmpdir }
     let(:git_tag_shas)  { ['sha1', 'sha2']}
     let(:manifest1) { <<~TEST
                         dependencies:
@@ -20,6 +46,7 @@ describe BuildpackBinaryMD5Validator do
                           md5: md5_stub2
                       TEST
                     }
+    let(:uris_to_ignore) { [] }
 
     before do
       allow(GitClient).to receive(:git_tag_shas).with(buildpack_dir).and_return(git_tag_shas)
@@ -27,7 +54,7 @@ describe BuildpackBinaryMD5Validator do
       allow(GitClient).to receive(:get_file_contents_at_sha).with(buildpack_dir, 'sha2', 'manifest.yml').and_return(manifest2)
     end
 
-    subject { described_class.get_uri_md5_sha_values(buildpack_dir) }
+    subject { described_class.get_uri_md5_sha_values(buildpack_dir, uris_to_ignore) }
 
     it "gets a hash of buildpack binary uris with their expected md5s and the shas they came from" do
       expect(subject).to eq({
@@ -65,6 +92,18 @@ describe BuildpackBinaryMD5Validator do
                                'uri_stub1' =>
                                 {'md5' => 'md5_stub1',
                                  'sha' => 'sha1'}
+                              })
+      end
+    end
+
+    context 'uris to ignore are present' do
+      let(:uris_to_ignore) { ['uri_stub1'] }
+
+      it "gets a hash of only buildpack binary uris that are not ignored" do
+        expect(subject).to eq({
+                               'uri_stub2' =>
+                                {'md5' => 'md5_stub2',
+                                 'sha' => 'sha2'}
                               })
       end
     end
