@@ -15,7 +15,12 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: add-job-verify-buildpack-md5s
+      branch: master
+  - name: verification-whitelist
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: binary-verification-whitelist
   - name: deploy-buildpack-verify
     type: cf
     source:
@@ -68,6 +73,7 @@ jobs:
       - do:
         - aggregate:
           - get: buildpacks-ci
+          - get: verification-whitelist
           - get: nodejs-buildpack
           - get: ruby-buildpack
           - get: go-buildpack
