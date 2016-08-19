@@ -25,8 +25,8 @@ describe BuildpackBinaryMD5Verifier do
 
     it "gets the uri to md5 mapping and shows mismatches of actual binaries" do
       expect(described_class).to receive(:get_uri_md5_sha_values).with(buildpack_dir, ['https://download-binary.org']).and_return(mapping)
-      expect(described_class).to receive(:show_mismatches).with(mapping)
-      subject
+      expect(described_class).to receive(:show_mismatches).with(mapping).and_return(true)
+      expect(subject).to be_truthy
     end
   end
 
@@ -146,6 +146,7 @@ describe BuildpackBinaryMD5Verifier do
     context 'md5s match' do
       it "should print a dot (.)" do
         expect{ subject }.to output(/working in .*\.$/m).to_stdout
+        expect(subject).to be_truthy
       end
     end
 
@@ -154,6 +155,7 @@ describe BuildpackBinaryMD5Verifier do
 
       it "should print an F" do
         expect{ subject }.to output(/working in .*\R$/m).to_stdout
+        expect(subject).to be_falsey
       end
 
       it "should print the actual vs desired md5s and the release sha" do
