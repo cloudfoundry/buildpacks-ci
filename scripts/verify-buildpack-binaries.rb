@@ -10,5 +10,5 @@ whitelist_file = File.join(Dir.pwd, 'binary-verification-whitelist', 'whitelist.
 Dir["*-buildpack"].each do |buildpack|
   puts "Now validating md5s for the #{buildpack}"
   buildpack_dir = File.join(Dir.pwd, buildpack)
-  BuildpackBinaryMD5Validator.run!(buildpack_dir, whitelist_file)
+  BuildpackBinaryMD5Verifier.run!(buildpack_dir, whitelist_file)
 end

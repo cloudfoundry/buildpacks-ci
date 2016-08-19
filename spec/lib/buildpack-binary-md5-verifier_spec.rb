@@ -1,8 +1,8 @@
 # encoding: utf-8
 require 'spec_helper'
-require_relative '../../lib/buildpack-binary-md5-validator'
+require_relative '../../lib/buildpack-binary-md5-verifier'
 
-describe BuildpackBinaryMD5Validator do
+describe BuildpackBinaryMD5Verifier do
   let(:buildpack_dir) { Dir.mktmpdir }
 
   describe '#run!' do
