@@ -5,7 +5,7 @@ require_relative "#{buildpacks_ci_dir}/lib/buildpack-binary-md5-verifier"
 
 # uris that should not be checked because the binaries are already replaced and
 # we have vetted these uris/agree that they're not a concern
-whitelist_file = File.join(Dir.pwd, 'binary-verification-whitelist', 'whitelist.yml')
+whitelist_file = File.join(Dir.pwd, 'verification-whitelist', 'whitelist.yml')
 
 all_md5s_correct = true
 Dir["*-buildpack"].each do |buildpack|
