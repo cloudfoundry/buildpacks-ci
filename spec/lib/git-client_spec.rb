@@ -58,6 +58,32 @@ describe GitClient do
     end
   end
 
+  describe '#add_file' do
+    let(:file_to_add) {'test_file.yml'}
+
+    subject { described_class.add_file(file_to_add) }
+
+    before { allow(described_class).to receive(:system).and_return(git_successful) }
+
+    context 'git works properly' do
+      let(:git_successful) { true }
+
+      it 'should git add the file' do
+        expect(described_class).to receive(:system).with("git add #{file_to_add}")
+
+        subject
+      end
+    end
+
+    context 'git fails' do
+      let(:git_successful) { false }
+
+      it 'throws an exception about not adding the file ' do
+        expect{ subject }.to raise_error("Could not add file: #{file_to_add}")
+      end
+    end
+  end
+
   describe '#safe_commit' do
     let(:git_commit_message) { 'Beautiful commits for all' }
 
