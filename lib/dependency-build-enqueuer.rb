@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'yaml'
+require_relative 'git-client'
 
 class DependencyBuildEnqueuer
   attr_reader :dependency
@@ -43,9 +44,9 @@ class DependencyBuildEnqueuer
       end
 
       Dir.chdir(binary_builds_dir) do
-        puts `git add #{dependency_builds_file}`
+        GitClient.add_file(dependency_builds_file)
         commit_msg = "Enqueue #{dependency} - #{ver}"
-        puts `git commit -m '#{commit_msg}'`
+        GitClient.safe_commit(commit_msg)
       end
     end
   end
