@@ -8,11 +8,16 @@ describe NewReleasesDetector do
   def to_tags(names)
     names.collect { |n| OpenStruct.new(name: n) }
   end
-  let(:new_releases_dir) { Dir.mktmpdir }
+
+  let(:new_releases_dir)      { Dir.mktmpdir }
   let(:openjdk_yaml_filename) { "#{new_releases_dir}/openjdk.yaml" }
   let(:openjdk_yaml_file_new) { "#{new_releases_dir}/openjdk-new.yaml" }
-  let(:github_username) { 'github_username' }
-  let(:github_password) { 'github_password1!' }
+  let(:python_yaml_filename)  { "#{new_releases_dir}/python.yaml" }
+  let(:python_yaml_file_new)  { "#{new_releases_dir}/python-new.yaml" }
+  let(:node_yaml_filename)    { "#{new_releases_dir}/node.yaml" }
+  let(:node_yaml_file_new)    { "#{new_releases_dir}/node-new.yaml" }
+  let(:github_username)       { 'github_username' }
+  let(:github_password)       { 'github_password1!' }
 
   before do
     allow_any_instance_of(described_class).to receive(:warn) {}
@@ -20,6 +25,7 @@ describe NewReleasesDetector do
     allow(Octokit).to receive(:tags).and_return([])
     allow_any_instance_of(described_class).to receive(:open).with(/python/).and_return(double(read: { 'tags' => [] }.to_json))
     allow_any_instance_of(described_class).to receive(:open).with(/openjdk/).and_return(double(read: {}.to_yaml))
+    allow_any_instance_of(described_class).to receive(:open).with(/node/).and_return(double(read: [].to_json))
     allow(File).to receive(:exist?).and_call_original
     allow(File).to receive(:write).and_call_original
 
@@ -41,25 +47,38 @@ describe NewReleasesDetector do
         allow_any_instance_of(described_class).to receive(:open)
           .with('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml')
           .and_return(double(read: { 'v1' => 1, 'v2' => 2, 'v3' => 3, 'v4' => 4 }.to_yaml))
+
         python_yaml_filename = "#{new_releases_dir}/python.yaml"
         allow(File).to receive(:exist?).with(python_yaml_filename).and_return(true)
         allow(YAML).to receive(:load_file).with(python_yaml_filename).and_return(%w(a b))
         allow_any_instance_of(described_class).to receive(:open)
           .with('https://hg.python.org/cpython/json-tags')
           .and_return(double(read: { tags: [{ tag: 'a' }, { tag: 'b' }, { tag: 'c' }] }.to_json))
+
+        node_yaml_filename = "#{new_releases_dir}/node.yaml"
+        allow(File).to receive(:exist?).with(node_yaml_filename).and_return(true)
+        allow(YAML).to receive(:load_file).with(node_yaml_filename).and_return(%w(1.2.3 1.2.4))
+        allow_any_instance_of(described_class).to receive(:open)
+          .with('https://nodejs.org/dist/index.json')
+          .and_return(double(read: [{ 'version' => 'v1.2.3'}, { 'version' => 'v1.2.4'}, { 'version' => 'v1.2.5'}].to_json))
+
       end
 
       it 'sets dependency_tags to a hash of dependencies as keys and array of diffs as values' do
-        expect(subject.dependency_tags).to eq(openjdk: %w(v3 v4), python: ['c'])
+        expect(subject.dependency_tags).to eq(openjdk: %w(v3 v4), python: ['c'], node: ['1.2.5'])
       end
 
       it 'writes to a file the latest releases' do
+        expect(File).to receive(:write).with(node_yaml_filename, "---\n- 1.2.3\n- 1.2.4\n- 1.2.5\n")
         expect(File).to receive(:write).with(openjdk_yaml_filename, "---\n- v1\n- v2\n- v3\n- v4\n")
+        expect(File).to receive(:write).with(python_yaml_filename, "---\n- a\n- b\n- c\n")
         subject
       end
 
       it 'writes the diff in releases to a file' do
+        expect(File).to receive(:write).with(node_yaml_file_new, "---\n- 1.2.5\n")
         expect(File).to receive(:write).with(openjdk_yaml_file_new, "---\n- v3\n- v4\n")
+        expect(File).to receive(:write).with(python_yaml_file_new, "---\n- c\n")
         subject
       end
     end
