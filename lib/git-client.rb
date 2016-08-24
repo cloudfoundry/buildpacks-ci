@@ -14,6 +14,22 @@ class GitClient
     end
   end
 
+  def self.last_commit_author(dir, previous = 0)
+    Dir.chdir(dir) do
+      command = "git log -n 1 HEAD~#{previous}"
+      stdout_str, stderr_str, status = Open3.capture3(command)
+
+      raise "Could not get last commit message. STDERR was: #{stderr_str}" unless status.success?
+
+      stdout_str.match /Author: (.*) </
+      $1
+    end
+  end
+
+  def self.set_global_config(option, value)
+    raise "Could not set #{option} to #{value}" unless system("git config --global #{option} \"#{value}\"")
+  end
+
   def self.add_everything
     raise GitError.new('Could not add files') unless system('git add -A')
   end

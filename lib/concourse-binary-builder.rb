@@ -1,6 +1,7 @@
 require 'yaml'
 require 'digest'
 require 'fileutils'
+require_relative 'git-client'
 
 class ConcourseBinaryBuilder
 
@@ -197,16 +198,16 @@ class ConcourseBinaryBuilder
     automated.include? binary_name
   end
 
-  def commit_and_rsync(in_dir, out_dir, git_msg, files)
+  def commit_and_rsync(in_dir, out_dir, git_msg, file)
 
     Dir.chdir(in_dir) do
-      system(<<-EOF)
-      git config --global user.email "cf-buildpacks-eng@pivotal.io"
-      git config --global user.name "CF Buildpacks Team CI Server"
-      git add #{files}
-      git commit -m "#{git_msg}"
-      rsync -a #{in_dir}/ #{out_dir}
-      EOF
+
+      GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
+      GitClient.set_global_config('user.name', 'CF Buildpacks Team CI Server')
+      GitClient.add_file(file)
+      GitClient.safe_commit(git_msg)
+
+      system("rsync -a #{in_dir}/ #{out_dir}")
     end
   end
 end

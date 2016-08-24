@@ -1,6 +1,7 @@
 # encoding: utf-8
 require 'spec_helper'
 require_relative '../../lib/concourse-binary-builder'
+require_relative '../../lib/git-client'
 require 'yaml'
 require 'tmpdir'
 require 'fileutils'
@@ -21,11 +22,11 @@ describe ConcourseBinaryBuilder do
     let(:builds_dir) { File.join(task_root_dir, 'builds-yaml') }
     let(:builds_yaml_contents) do
       yaml_hash = {}
-      yaml_hash[dependency] = [{'version' => version, 'sha256' => source_sha256}]
+      yaml_hash[dependency] = [{'version' => version, verification_type => verification_value}]
       yaml_hash.to_yaml
     end
 
-    let(:flags) { "--name=#{dependency} --version=\"#{version}\" --sha256=\"#{source_sha256}\"" }
+    let(:flags) { "--name=#{dependency} --version=\"#{version}\" --#{verification_type}=\"#{verification_value}\"" }
 
     subject { described_class.new(dependency, task_root_dir, git_ssh_key) }
 
@@ -38,18 +39,12 @@ describe ConcourseBinaryBuilder do
         File.open("#{dependency}-built.yml", "w") do |file|
           file.write built_yaml_contents
         end
-        `git init`
-        `git add #{dependency}-built.yml`
-        `git commit -m "Initial commit of #{dependency}-built.yml"`
       end
 
       Dir.chdir(builds_dir) do
         File.open("#{dependency}-builds.yml", "w") do |file|
           file.write builds_yaml_contents
         end
-        `git init`
-        `git add #{dependency}-builds.yml`
-        `git commit -m "Initial commit of #{dependency}-builds.yml"`
       end
 
       allow(subject).to receive(:add_ssh_key_and_update).with(built_dir, 'binary-built-output')
@@ -70,6 +65,10 @@ describe ConcourseBinaryBuilder do
 
         "- url: #{source_url}"
       end
+
+      allow(GitClient).to receive(:add_file)
+      allow(GitClient).to receive(:safe_commit)
+      allow(GitClient).to receive(:set_global_config)
     end
 
     after(:each) do
@@ -77,38 +76,34 @@ describe ConcourseBinaryBuilder do
     end
 
     shared_examples_for 'a commit is made in builds-yaml-artifacts with the proper git message' do |automation|
+      let(:md5sum) { md5sum = Digest::MD5.file(File.join(binary_builder_dir, output_file)).hexdigest }
+      let(:shasum) { shasum = Digest::SHA256.file(File.join(binary_builder_dir, output_file)).hexdigest }
 
-      it 'makes the commit with dependency + version' do
-        commit_msg = `cd #{builds_yaml_artifacts_dir} && git log -1 HEAD`
-        expect(commit_msg).to include("Build #{dependency} - #{version}")
+      let(:commit_msg) do
+        git_msg = "Build #{dependency} - #{version}\n\nfilename: binary-builder/#{output_file}, md5: #{md5sum}, sha256: #{shasum}"
+        git_msg += "\n\nsource url: #{source_url}, source #{verification_type}: #{verification_value}"
+        git_msg += "\n\n[ci skip]" if automation == 'not automated'
+        git_msg
       end
 
-      it 'makes the commit with source url and sha256' do
-        commit_msg = `cd #{builds_yaml_artifacts_dir} && git log -1 HEAD`
-
-        expect(commit_msg).to include("source sha256: #{source_sha256}")
-        expect(commit_msg).to include("source url: #{source_url}")
-      end
-
-      it 'makes the commit with output filename, md5, and sha256' do
-        commit_msg = `cd #{builds_yaml_artifacts_dir} && git log -1 HEAD`
-
-        md5sum = Digest::MD5.file(File.join(binary_builder_dir, output_file)).hexdigest
-        shasum = Digest::SHA256.file(File.join(binary_builder_dir, output_file)).hexdigest
-
-        expect(commit_msg).to include(output_file)
-        expect(commit_msg).to include("md5: #{md5sum}")
-        expect(commit_msg).to include("sha256: #{shasum}")
-      end
-
-      it 'has ci skip if necessary' do
-        commit_msg = `cd #{builds_yaml_artifacts_dir} && git log -1 HEAD`
-
+      it 'adds the correct file' do
         if automation == 'automated'
-          expect(commit_msg).not_to include("[ci skip]")
+          file_to_commit = File.join(built_dir, "#{dependency}-built.yml")
         elsif automation == 'not automated'
-          expect(commit_msg).to include("[ci skip]")
+          file_to_commit = File.join(builds_dir, "#{dependency}-builds.yml")
         end
+
+        expect(GitClient).to have_received(:add_file).with(file_to_commit)
+      end
+
+      it 'makes the commit with the correct message' do
+        expect(GitClient).to have_received(:safe_commit).with(commit_msg)
+      end
+
+
+      it 'makes the commit as buildpacks ci robot' do
+        expect(GitClient).to have_received(:set_global_config).with('user.email','cf-buildpacks-eng@pivotal.io')
+        expect(GitClient).to have_received(:set_global_config).with('user.name','CF Buildpacks Team CI Server')
       end
 
       if automation == 'automated'
@@ -135,7 +130,8 @@ describe ConcourseBinaryBuilder do
     context 'the dependency is go' do
       let(:dependency) { 'go' }
       let(:output_file) { 'go1.6.3.linux-amd64.tar.gz' }
-      let(:source_sha256) { '6326aeed5f86cf18f16d6dc831405614f855e2d416a91fd3fdc334f772345b00' }
+      let(:verification_type) { 'sha256' }
+      let(:verification_value) { '6326aeed5f86cf18f16d6dc831405614f855e2d416a91fd3fdc334f772345b00' }
       let(:source_url) { 'https://storage.googleapis.com/golang/go1.6.3.src.tar.gz' }
       let(:version) { '1.6.3' }
 
@@ -148,7 +144,8 @@ describe ConcourseBinaryBuilder do
     context 'the dependency is python' do
       let(:dependency) { 'python' }
       let(:output_file) { 'python-2.7.12-linux-x64.tgz' }
-      let(:source_sha256) { 'f036b03f2ffd401742bb053f41c25dbe4491e52fc06e49b0dd0e9c1ae5a7baf7' }
+      let(:verification_type) { 'sha256' }
+      let(:verification_value) { 'f036b03f2ffd401742bb053f41c25dbe4491e52fc06e49b0dd0e9c1ae5a7baf7' }
       let(:source_url) { 'https://www.python.org/ftp/python/2.7.12/Python-2.7.12.tgz' }
       let(:version) { '2.7.12' }
 
@@ -161,7 +158,8 @@ describe ConcourseBinaryBuilder do
     context 'the dependency is glide' do
       let(:dependency) { 'glide' }
       let(:output_file) { 'glide-v0.11.1-linux-x64.tgz' }
-      let(:source_sha256) { '3c4958d1ab9446e3d7b2dc280cd43b84c588d50eb692487bcda950d02b9acc4c' }
+      let(:verification_type) { 'sha256' }
+      let(:verification_value) { '3c4958d1ab9446e3d7b2dc280cd43b84c588d50eb692487bcda950d02b9acc4c' }
       let(:source_url) { 'https://github.com/Masterminds/glide/archive/v0.11.1.tar.gz' }
       let(:version) { 'v0.11.1' }
 
@@ -175,7 +173,8 @@ describe ConcourseBinaryBuilder do
     context 'the dependency is node' do
       let(:dependency) { 'node' }
       let(:output_file) { 'node-4.4.7-linux-x64.tgz' }
-      let(:source_sha256) { 'cbe1c6e421969dd5639d0fbaa6d3c1f56c0463b87efe75be8594638da4d8fc4f' }
+      let(:verification_type) { 'sha256' }
+      let(:verification_value) { 'cbe1c6e421969dd5639d0fbaa6d3c1f56c0463b87efe75be8594638da4d8fc4f' }
       let(:source_url) { 'https://nodejs.org/dist/v4.4.7/node-v4.4.7.tar.gz' }
       let(:version) { '4.4.7' }
 
@@ -188,8 +187,9 @@ describe ConcourseBinaryBuilder do
 
     context 'the dependency is composer' do
       let(:dependency)    { 'composer' }
-      let(:output_file)   { 'composer-1.2.0.phar' }
-      let(:source_sha256) { 'dc80131545ed7f7b1369ae058824587f0718892f6a84bd86cfb0f28ab5e39095' }
+      let(:output_file)        { 'composer-1.2.0.phar' }
+      let(:verification_type)  { 'sha256' }
+      let(:verification_value) { 'dc80131545ed7f7b1369ae058824587f0718892f6a84bd86cfb0f28ab5e39095' }
       let(:source_url)    { 'https://getcomposer.org/download/1.2.0/composer.phar' }
       let(:version)       { '1.2.0' }
 
@@ -213,11 +213,9 @@ describe ConcourseBinaryBuilder do
           ]}.to_yaml
         end
 
-        it 'does not make a commit in builds-yaml-artifacts' do
-          Dir.chdir(builds_yaml_artifacts_dir) do
-            count_of_git_commits = `git log --oneline | wc -l`.to_i
-            expect(count_of_git_commits).to eq 1
-          end
+        it 'has not changed the <dep>-built.yml file' do
+          file_yaml_contents = YAML.load_file(File.join(built_dir, "#{dependency}-built.yml")).to_yaml
+          expect(built_yaml_contents).to eq(file_yaml_contents)
         end
 
         it 'syncs the -built file in builds-yaml-artifacts' do
