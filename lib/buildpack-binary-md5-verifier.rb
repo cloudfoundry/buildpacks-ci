@@ -30,6 +30,8 @@ class BuildpackBinaryMD5Verifier
             data[uri] = { "md5" => dependency["md5"], "sha" => release_sha }
           end
         end
+      rescue GitClient::GitError => e
+        # No manifest present at that release sha
       rescue Exception => e
         puts "failed to parse manifest at #{release_sha}: #{e}"
       end
