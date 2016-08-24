@@ -1,3 +1,8 @@
+resource_types:
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
 resources:
   - name: buildpacks-ci
     type: git
@@ -12,6 +17,10 @@ resources:
       email: {{buildpacks-docker-user-email}}
       username: {{buildpacks-docker-user-username}}
       password: {{buildpacks-docker-user-password}}
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
 jobs:
   - name: ci-build
     serial: true
@@ -24,3 +33,10 @@ jobs:
           build: buildpacks-ci
           push: true
         attempts: 5
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
