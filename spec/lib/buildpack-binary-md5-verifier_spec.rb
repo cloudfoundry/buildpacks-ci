@@ -112,11 +112,11 @@ describe BuildpackBinaryMD5Verifier do
       before do
         allow(GitClient).to receive(:git_tag_shas).with(buildpack_dir).and_return(git_tag_shas)
         allow(GitClient).to receive(:get_file_contents_at_sha).with(buildpack_dir, 'sha1', 'manifest.yml').and_return(manifest1)
-        allow(GitClient).to receive(:get_file_contents_at_sha).with(buildpack_dir, 'sha2', 'manifest.yml').and_raise(RuntimeError.new("git file error message"))
+        allow(GitClient).to receive(:get_file_contents_at_sha).with(buildpack_dir, 'sha2', 'manifest.yml').and_raise(GitClient::GitError.new("git file error message"))
       end
 
       it "outputs manifest errors but still gets a hash of buildpack binary uris that had md5s" do
-        expect{ subject }.to output("failed to parse manifest at sha2: git file error message\n").to_stdout
+        expect{ subject }.to_not output.to_stdout
         expect(subject).to eq({
                                'uri_stub1' =>
                                 {'md5' => 'md5_stub1',
@@ -124,6 +124,26 @@ describe BuildpackBinaryMD5Verifier do
                               })
       end
     end
+
+    context 'manifest at sha cannot be parsed' do
+      let(:manifest1) { <<~TEST
+                          dependencies:
+                          - name: ruby
+                          uri: uri_stub1
+                            md5: md5_stub1
+                        TEST
+                      }
+
+      it "outputs manifest errors but still gets a hash of buildpack binary uris that had md5s" do
+        expect{ subject }.to output(/failed to parse manifest/).to_stdout
+        expect(subject).to eq({
+                               'uri_stub2' =>
+                                {'md5' => 'md5_stub2',
+                                 'sha' => 'sha2'}
+                              })
+      end
+    end
+
   end
 
   describe '#show_mismatches' do
