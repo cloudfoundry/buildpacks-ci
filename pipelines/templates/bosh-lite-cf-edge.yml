@@ -75,7 +75,7 @@ resources:
   - name: bosh-stemcell
     type: bosh-io-stemcell
     source:
-      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+      name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 
 
 jobs:
