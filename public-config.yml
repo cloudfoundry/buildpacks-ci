@@ -22,3 +22,5 @@ buildpacks-docker-user-email: cf-buildpacks-eng@pivotal.io
 
 deployments-git-uri: git@github.com:pivotal-cf/deployments-buildpacks
 current-timezone: America/New_York
+
+run-oracle-php-tests: true
