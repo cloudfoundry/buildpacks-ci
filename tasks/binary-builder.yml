@@ -9,6 +9,9 @@ inputs:
 params:
   TOTAL_GROUPS: 1
   CURRENT_GROUP: 1
+  RUN_ORACLE_PHP_TESTS: false
+  RUBYGEM_MIRROR:
+  AWS_ACCESS_KEY:
+  AWS_SECRET_ACCESS_KEY:
 run:
   path: buildpacks-ci/scripts/binary-builder.sh
-

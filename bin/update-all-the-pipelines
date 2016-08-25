@@ -71,7 +71,7 @@ def update_standard_pipelines(target_name, full_config)
   header('For standard pipelines')
   Dir['pipelines/*.yml'].each do |filename|
     name = File.basename(filename, '.yml')
-    set_pipeline(target_name: target_name, name: name, cmd: "erb organization=#{full_config["buildpacks-github-org"]} #{filename}")
+    set_pipeline(target_name: target_name, name: name, cmd: "erb organization=#{full_config["buildpacks-github-org"]} run_oracle_php_tests=#{full_config['run-oracle-php-tests']} #{filename}")
   end
 end
 
