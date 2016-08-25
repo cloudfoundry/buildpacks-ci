@@ -143,8 +143,9 @@ jobs:
               RUBYGEM_MIRROR: {{rubygem-mirror}}
               RUN_ORACLE_PHP_TESTS: <%= run_oracle_php_tests %>
             <% if run_oracle_php_tests == 'true' %>
-              AWS_ACCESS_KEY: {{oracle-client-library-s3-download-access-key}}
+              AWS_ACCESS_KEY_ID: {{oracle-client-library-s3-download-access-key}}
               AWS_SECRET_ACCESS_KEY: {{oracle-client-library-s3-download-secret-key}}
+              AWS_DEFAULT_REGION: us-east-1
             <% end %>
             privileged: true
           - task: rspec-2
@@ -155,8 +156,9 @@ jobs:
               RUBYGEM_MIRROR: {{rubygem-mirror}}
               RUN_ORACLE_PHP_TESTS: <%= run_oracle_php_tests %>
             <% if run_oracle_php_tests == 'true' %>
-              AWS_ACCESS_KEY: {{oracle-client-library-s3-download-access-key}}
+              AWS_ACCESS_KEY_ID: {{oracle-client-library-s3-download-access-key}}
               AWS_SECRET_ACCESS_KEY: {{oracle-client-library-s3-download-secret-key}}
+              AWS_DEFAULT_REGION: us-east-1
             <% end %>
             privileged: true
           - task: rspec-3
@@ -167,8 +169,9 @@ jobs:
               RUBYGEM_MIRROR: {{rubygem-mirror}}
               RUN_ORACLE_PHP_TESTS: <%= run_oracle_php_tests %>
             <% if run_oracle_php_tests == 'true' %>
-              AWS_ACCESS_KEY: {{oracle-client-library-s3-download-access-key}}
+              AWS_ACCESS_KEY_ID: {{oracle-client-library-s3-download-access-key}}
               AWS_SECRET_ACCESS_KEY: {{oracle-client-library-s3-download-secret-key}}
+              AWS_DEFAULT_REGION: us-east-1
             <% end %>
             privileged: true
           - task: rspec-4
@@ -179,8 +182,9 @@ jobs:
               RUBYGEM_MIRROR: {{rubygem-mirror}}
               RUN_ORACLE_PHP_TESTS: <%= run_oracle_php_tests %>
             <% if run_oracle_php_tests == 'true' %>
-              AWS_ACCESS_KEY: {{oracle-client-library-s3-download-access-key}}
+              AWS_ACCESS_KEY_ID: {{oracle-client-library-s3-download-access-key}}
               AWS_SECRET_ACCESS_KEY: {{oracle-client-library-s3-download-secret-key}}
+              AWS_DEFAULT_REGION: us-east-1
             <% end %>
             privileged: true
         on_failure:
