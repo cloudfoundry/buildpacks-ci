@@ -131,7 +131,7 @@ resources:
   - name: lite-stemcell
     type: bosh-io-stemcell
     source:
-      name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
   - name: docker-cflinuxfs2-rootfs
     type: docker-image
     source:
