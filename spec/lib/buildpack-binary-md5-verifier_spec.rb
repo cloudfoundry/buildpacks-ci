@@ -168,6 +168,20 @@ describe BuildpackBinaryMD5Verifier do
         expect{ subject }.to output(/working in .*\.$/m).to_stdout
         expect(subject).to be_truthy
       end
+
+      context 'download and md5 check flakes' do
+        before do
+          allow(described_class).to receive(:system)
+          allow(Digest::MD5).to receive(:file).with(gsubbed_file_name).and_return(md5_stub)
+          allow(md5_stub).to receive(:to_s).and_return("flake", actual_md5_stub)
+        end
+
+        it "should retry and print a dot (.)" do
+          expect(described_class).to receive(:system).exactly(2).times
+          expect{ subject }.to output(/working in .*\.$/m).to_stdout
+          expect(subject).to be_truthy
+        end
+      end
     end
 
     context 'md5s do not match' do
@@ -175,6 +189,11 @@ describe BuildpackBinaryMD5Verifier do
 
       it "should print an F" do
         expect{ subject }.to output(/working in .*\R$/m).to_stdout
+        expect(subject).to be_falsey
+      end
+
+      it "should attempt to retry downloading and checking up to 3 times" do
+        expect(described_class).to receive(:system).exactly(3).times
         expect(subject).to be_falsey
       end
 

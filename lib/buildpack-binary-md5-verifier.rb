@@ -45,16 +45,27 @@ class BuildpackBinaryMD5Verifier
     Dir.mktmpdir do |tmpdir_path|
       Dir.chdir(tmpdir_path) do
         puts "working in #{tmpdir_path}"
-
         uri_mapping.each do |uri, metadata_hash|
-          desired_md5 = metadata_hash['md5']
-          release_tag_sha = metadata_hash['sha']
-          file = uri.gsub(/[^a-zA-Z0-9\.]/, "_")
+          attempts = 0
+          max_attempts = 3
+          md5_match = false
 
-          system "wget -q -c #{uri} -O #{file}"
-          actual_md5 = Digest::MD5.file(file).to_s
+          while !md5_match && attempts < max_attempts do
+            desired_md5 = metadata_hash['md5']
+            release_tag_sha = metadata_hash['sha']
+            file = uri.gsub(/[^a-zA-Z0-9\.]/, "_")
 
-          if desired_md5 == actual_md5
+            system "wget -q -c #{uri} -O #{file}"
+            actual_md5 = Digest::MD5.file(file).to_s
+
+            if desired_md5 == actual_md5
+              md5_match = true
+            else
+              attempts += 1
+            end
+          end
+
+          if md5_match
             print '.'
           else
             print 'F'
