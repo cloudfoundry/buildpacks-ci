@@ -8,7 +8,7 @@ class GitClient
       command = "git log --format=%B -n 1 HEAD~#{previous}"
       stdout_str, stderr_str, status = Open3.capture3(command)
 
-      raise GitError.new("Could not get last commit message. STDERR was: #{stderr_str}") unless status.success?
+      raise GitError.new("Could not get commit message for HEAD~#{previous}. STDERR was: #{stderr_str}") unless status.success?
 
       stdout_str
     end
@@ -19,7 +19,7 @@ class GitClient
       command = "git log -n 1 HEAD~#{previous}"
       stdout_str, stderr_str, status = Open3.capture3(command)
 
-      raise "Could not get last commit message. STDERR was: #{stderr_str}" unless status.success?
+      raise GitError.new("Could not get author of commit HEAD~#{previous}. STDERR was: #{stderr_str}") unless status.success?
 
       stdout_str.match /Author: (.*) </
       $1
@@ -27,7 +27,7 @@ class GitClient
   end
 
   def self.set_global_config(option, value)
-    raise "Could not set #{option} to #{value}" unless system("git config --global #{option} \"#{value}\"")
+    raise GitError.new("Could not set #{option} to #{value}") unless system("git config --global #{option} \"#{value}\"")
   end
 
   def self.add_everything

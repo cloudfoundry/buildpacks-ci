@@ -28,8 +28,8 @@ describe GitClient do
 
       before { allow(process_status).to receive(:success?).and_return(false) }
 
-      it 'throws an exception about being unable to read last commit message' do
-        expect{ subject }.to raise_error('Could not get last commit message. STDERR was: stderr output')
+      it 'throws an exception about being unable to read the commit message' do
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not get commit message for HEAD~0. STDERR was: stderr output')
       end
     end
   end
@@ -53,7 +53,7 @@ describe GitClient do
       let(:git_successful) { false }
 
       it 'throws an exception about not adding files' do
-        expect{ subject }.to raise_error('Could not add files')
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not add files')
       end
     end
   end
@@ -79,7 +79,7 @@ describe GitClient do
       let(:git_successful) { false }
 
       it 'throws an exception about not adding the file ' do
-        expect{ subject }.to raise_error("Could not add file: #{file_to_add}")
+        expect{ subject }.to raise_error(GitClient::GitError, "Could not add file: #{file_to_add}")
       end
     end
   end
@@ -105,7 +105,7 @@ describe GitClient do
       context 'commit fails' do
         it 'throws an exception about committing' do
           expect(described_class).to receive(:system).with("git commit -m 'Beautiful commits for all'").and_return(false)
-          expect{ subject }.to raise_error('Commit failed')
+          expect{ subject }.to raise_error(GitClient::GitError, 'Commit failed')
         end
       end
     end
@@ -148,7 +148,7 @@ describe GitClient do
       before { allow(process_status).to receive(:success?).and_return(false) }
 
       it 'throws an exception about being unable to get the shas of the git tags' do
-        expect{ subject }.to raise_error('Could not get git tag shas. STDERR was: stderr output')
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not get git tag shas. STDERR was: stderr output')
       end
     end
   end
@@ -182,7 +182,7 @@ describe GitClient do
       before { allow(process_status).to receive(:success?).and_return(false) }
 
       it 'throws an exception about being unable to show the file at specified sha' do
-        expect{ subject }.to raise_error('Could not show important_file.txt at sha1. STDERR was: stderr output')
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not show important_file.txt at sha1. STDERR was: stderr output')
       end
     end
   end
