@@ -9,8 +9,11 @@ class ConcourseBinaryBuilder
   attr_reader :binary_builder_dir, :built_dir, :builds_dir
   attr_reader :builds_yaml_artifacts, :binary_artifacts_dir, :original_source_code_dir, :source_url
   attr_reader :verification_type, :verification_value, :flags, :latest_build, :remaining_builds
+  attr_reader :platform, :os_name
 
-  def initialize(binary_name, task_root_dir, git_ssh_key)
+  def initialize(binary_name, task_root_dir, git_ssh_key, platform, os_name)
+    @platform = platform.to_sym
+    @os_name = os_name.to_sym
     @git_ssh_key = git_ssh_key
     @binary_name = binary_name
     @task_root_dir = task_root_dir
@@ -88,7 +91,7 @@ class ConcourseBinaryBuilder
                         when "composer" then "#{binary_builder_dir}/composer-#{version_to_build}.phar"
                         when "glide" then "src/"
                         when "godep" then "src/"
-                        else "x86_64-linux-gnu/"
+                        else source_directory
                         end
 
     if binary_name == "composer"
@@ -210,4 +213,21 @@ class ConcourseBinaryBuilder
       system("rsync -a #{in_dir}/ #{out_dir}")
     end
   end
+
+  # given a platform architecture (e.g. output of `uname -m`) and an
+  # os name (e.g. output of `uname -o`), output the name of the
+  # directory binary-builder places the source it uses to
+  # build the dependency
+
+  def source_directory
+    platform_map = { 'x86_64':  'x86_64',
+                     'ppc64le': 'powerpc64le'}
+
+    os_name_map = {'GNU/Linux': 'linux-gnu'}
+
+
+    "#{platform_map[platform]}-#{os_name_map[os_name]}/"
+  end
+
+
 end

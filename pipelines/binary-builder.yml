@@ -215,6 +215,8 @@ jobs:
             BINARY_NAME: <%= dependency %>
             GIT_SSH_KEY: {{buildpacks-ci-private-key}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
+            BINARY_BUILDER_PLATFORM: {{binary-builder-platform}}
+            BINARY_BUILDER_OS_NAME: {{binary-builder-os-name}}
           privileged: true
         - put: build-tar
           params:
@@ -364,6 +366,8 @@ jobs:
             GIT_SSH_KEY: {{buildpacks-ci-private-key}}
             BINARY_NAME: <%= dependency %>
             RUBYGEM_MIRROR: {{rubygem-mirror}}
+            BINARY_BUILDER_PLATFORM: {{binary-builder-platform}}
+            BINARY_BUILDER_OS_NAME: {{binary-builder-os-name}}
           privileged: true
         - put: build-tar
           params:
