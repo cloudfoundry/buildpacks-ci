@@ -7,10 +7,6 @@ inputs:
   - name: binary-builder
   - name: buildpacks-ci
 params:
-  SPEC_TO_RUN:
-  RUN_ORACLE_PHP_TESTS: false
   RUBYGEM_MIRROR:
-  AWS_ACCESS_KEY:
-  AWS_SECRET_ACCESS_KEY:
 run:
-  path: buildpacks-ci/scripts/binary-builder.sh
+  path: buildpacks-ci/scripts/binary-builder-unit.sh
