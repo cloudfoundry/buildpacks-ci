@@ -5,7 +5,7 @@ set -ex
 pushd binary-builder
   gem install bundler --no-ri --no-rdoc
   bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
-  bundle install -j4
+  bundle install --jobs=$(nproc)
 
   bundle exec rspec spec/unit
 popd

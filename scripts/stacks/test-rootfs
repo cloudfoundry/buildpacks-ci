@@ -7,6 +7,7 @@ buildpacks-ci/scripts/start-docker
 pushd stacks
   cp ../stacks-artifacts/cflinuxfs2-*.tar.gz cflinuxfs2.tar.gz
 
-  bundle -j4
+  bundle install --jobs=$(nproc)
+
   bundle exec rspec
 popd

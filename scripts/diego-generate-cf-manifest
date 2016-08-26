@@ -5,7 +5,7 @@ DOMAIN_NAME=${DOMAIN_NAME:-cf-app.com}
 
 pushd deployments-buildpacks
   bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
-  bundle -j4
+  bundle install --jobs=$(nproc)
   source ./bin/target_bosh $DEPLOYMENT_NAME
 popd
 

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 pushd buildpacks-pivnet-uploader
-bundle -j4
+  bundle install --jobs=$(nproc)
 popd
 
 buildpacks-pivnet-uploader/upload_to_pivnet \

@@ -17,7 +17,8 @@ fi
 export BUNDLE_GEMFILE=cf.Gemfile
 
 bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
-bundle -j4 --no-cache
+
+bundle install --jobs=$(nproc) --no-cache
 
 for stack in $STACKS; do
   bundle exec buildpack-build --uncached --stack=$stack --host=$DEPLOYMENT_NAME.$DOMAIN_NAME

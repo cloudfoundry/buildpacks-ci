@@ -8,7 +8,8 @@ file_name=$(ls cf-release/blobs/rootfs)
 cp receipt-s3/cflinuxfs2_receipt-* cf-release/spec/fixtures/receipts/cflinuxfs2_receipt
 
 pushd cf-release
-bundle -j4
+
+bundle install --jobs=$(nproc)
 
 cat <<EOF > config/private.yml
 ---
