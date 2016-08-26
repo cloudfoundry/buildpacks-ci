@@ -3,17 +3,14 @@
 set -ex
 
 pushd binary-builder
-  ls spec/**/*_spec.rb | split -l $(expr `ls spec/**/*_spec.rb | wc -l` / $TOTAL_GROUPS)
-  specs=$(cat $(ls x* | sed -n "$CURRENT_GROUP p"))
-
   gem install bundler --no-ri --no-rdoc
   bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
   bundle install -j4
 
   if [ ${RUN_ORACLE_PHP_TESTS-false} = "true" ]; then
     apt-get update && apt-get -y install awscli
-    bundle exec rspec $specs
+    bundle exec rspec spec/integration/${SPEC_TO_RUN}_spec.rb
   else
-    bundle exec rspec $specs --tag ~run_oracle_php_tests
+    bundle exec rspec spec/integration/${SPEC_TO_RUN}_spec.rb --tag ~run_oracle_php_tests
   fi
 popd
