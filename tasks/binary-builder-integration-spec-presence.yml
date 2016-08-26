@@ -1,0 +1,12 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: binary-builder
+  - name: buildpacks-ci
+params:
+  SPEC_NAMES:
+run:
+  path: buildpacks-ci/scripts/binary-builder-integration-spec-presence.rb
