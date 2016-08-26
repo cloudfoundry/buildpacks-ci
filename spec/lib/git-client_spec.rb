@@ -34,6 +34,65 @@ describe GitClient do
     end
   end
 
+  describe '#last_commit_author' do
+    let(:dir)                 { Dir.mktmpdir }
+    let(:last_commit_message) { 'this should not matter but is here to avoid undefined symbols' }
+    let(:stderr_output)       { 'this should not matter but is here to avoid undefined symbols' }
+    let(:process_status)      { double(:process_status) }
+
+    subject { described_class.last_commit_author(dir) }
+
+    before { allow(Open3).to receive(:capture3).and_return([last_commit_message, stderr_output, process_status]) }
+
+    context 'git works properly' do
+      let(:last_commit_message) { "I was last committed\n Author: Firstname Lastname <flastname@example.com>" }
+
+      before { allow(process_status).to receive(:success?).and_return(true) }
+
+      it 'should return the name of the author of the last git commit' do
+        expect(subject).to eq('Firstname Lastname')
+      end
+    end
+
+    context 'git fails' do
+      let(:stderr_output) { 'stderr output' }
+
+      before { allow(process_status).to receive(:success?).and_return(false) }
+
+      it 'throws an exception about being unable to get the author of the commit' do
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not get author of commit HEAD~0. STDERR was: stderr output')
+      end
+    end
+  end
+
+  describe '#set_global_config' do
+    let(:test_option) { 'test.option' }
+    let(:test_value)  { 'value_to_set' }
+
+    subject { described_class.set_global_config(test_option,test_value) }
+
+    before { allow(described_class).to receive(:system).and_return(git_successful) }
+
+    context 'git works properly' do
+      let(:git_successful) { true }
+
+      it 'should set the global git config' do
+        expect(described_class).to receive(:system).with('git config --global test.option "value_to_set"')
+
+        subject
+      end
+    end
+
+    context 'git fails' do
+      let(:git_successful) { false }
+
+      it 'throws an exception about not setting global config' do
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not set global config test.option to value_to_set')
+      end
+    end
+  end
+
+
   describe '#add_everything' do
     subject { described_class.add_everything }
 
