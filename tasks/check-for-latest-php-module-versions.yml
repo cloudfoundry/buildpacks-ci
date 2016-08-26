@@ -23,6 +23,7 @@ inputs:
   - name: pecl-xdebug
   - name: pecl-yaf
   - name: pecl-mongodb
+  - name: pecl-lua
   - name: libmemcached
   - name: lua
   - name: xcache
