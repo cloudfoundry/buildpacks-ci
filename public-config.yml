@@ -1,4 +1,4 @@
-# This file holds public credentials (like github uri, github organization) to ease creation of a new pipeline instance.
+# This file holds public configuration (like github uri, github organization) to ease creation of a new pipeline instance.
 machete-git-uri-public: https://github.com/cloudfoundry/machete.git
 machete-git-uri: git@github.com:cloudfoundry/machete.git
 
@@ -24,3 +24,5 @@ deployments-git-uri: git@github.com:pivotal-cf/deployments-buildpacks
 current-timezone: America/New_York
 
 run-oracle-php-tests: true
+binary-builder-platform: x86_64
+binary-builder-os-name: GNU/Linux

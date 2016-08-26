@@ -9,6 +9,8 @@ require 'fileutils'
 describe ConcourseBinaryBuilder do
   context('binary builder is run') do
 
+    let(:platform) { 'x86_64' }
+    let(:os_name)  { 'GNU/Linux' }
     let(:git_ssh_key) { 'mock-git-ssh-key' }
     let(:task_root_dir) { Dir.mktmpdir }
     let(:binary_builder_dir) { File.join(task_root_dir, 'binary-builder') }
@@ -28,7 +30,7 @@ describe ConcourseBinaryBuilder do
 
     let(:flags) { "--name=#{dependency} --version=\"#{version}\" --#{verification_type}=\"#{verification_value}\"" }
 
-    subject { described_class.new(dependency, task_root_dir, git_ssh_key) }
+    subject { described_class.new(dependency, task_root_dir, git_ssh_key, platform, os_name) }
 
     before(:each) do
       FileUtils.mkdir_p([built_dir, builds_dir, binary_builder_dir])
