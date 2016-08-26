@@ -23,6 +23,7 @@ class BuildpackBinaryMD5Verifier
 
         manifest["dependencies"].each do |dependency|
           uri = dependency["uri"]
+          next if uri.nil?
           next if data[uri]
           next if uris_to_ignore.include?(uri)
 
