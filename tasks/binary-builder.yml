@@ -7,8 +7,7 @@ inputs:
   - name: binary-builder
   - name: buildpacks-ci
 params:
-  TOTAL_GROUPS: 1
-  CURRENT_GROUP: 1
+  SPEC_TO_RUN:
   RUN_ORACLE_PHP_TESTS: false
   RUBYGEM_MIRROR:
   AWS_ACCESS_KEY:

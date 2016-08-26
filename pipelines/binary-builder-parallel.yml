@@ -1,0 +1,165 @@
+resource_types:
+  - name: concourse2tracker
+    type: docker-image
+    source:
+      repository: cfbuildpacks/concourse2tracker
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+resources:
+  - name: binary-builder
+    type: git
+    source:
+      uri: {{binary-builder-git-uri}}
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: binary-builder-parallel
+  - name: builds-out
+    type: git
+    source:
+      branch: binary-builds
+      private_key: {{buildpacks-ci-private-key}}
+      uri: {{buildpacks-ci-git-uri}}
+  - name: build-tar
+    type: s3
+    source:
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      versioned_file: /concourse-artifacts/binary-builder-source.tgz
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  - name: concourse2tracker
+    type: concourse2tracker
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
+  - name: cf-edge-environments
+    type: pool
+    source:
+      branch: resource-pools
+      pool: cf-edge-environments
+      private_key: {{buildpacks-ci-private-key}}
+      uri: {{buildpacks-ci-git-uri}}
+<% %w(go bundler composer glide godep httpd jruby php php7 python node nginx ruby).each do |dep| %>
+  - name: <%= dep %>-builds
+    type: git
+    source:
+      branch: binary-builds
+      private_key: {{buildpacks-ci-private-key}}
+      uri: {{buildpacks-ci-git-uri}}
+      paths: [ <%= dep %>-builds.yml ]
+  - name: <%= dep %>-built-output
+    type: git
+    source:
+      branch: binary-built-output
+      private_key: {{buildpacks-ci-private-key}}
+      uri: {{buildpacks-ci-git-uri}}
+      paths: [ <%= dep %>-built.yml ]
+<% end %>
+
+<% %w(composer glide godep nginx node).each do |auto_dep| %>
+  - name: <%= auto_dep %>-builds-in
+    type: git
+    source:
+      branch: binary-builds
+      private_key: {{buildpacks-ci-private-key}}
+      uri: {{buildpacks-ci-git-uri}}
+      paths: [ <%= auto_dep %>-builds.yml ]
+<% end %>
+
+<% %w(composer glide godep nginx node).each do |auto_new| %>
+  - name: <%= auto_new %>-new-releases
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri}}
+      branch: new-release-notifications
+      private_key: {{buildpacks-ci-private-key}}
+      paths: [ <%= auto_new %>-new.yaml ]
+<% end %>
+
+<% %w(go nodejs ruby php staticfile).each do |language| %>
+  - name: <%= language %>-buildpack
+    type: git
+    source:
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
+      branch: develop
+      ignore_paths:
+        - VERSION
+        - CHANGELOG
+<% end %>
+
+groups:
+  - name: enqueue-automated-builds
+    jobs:
+<% %w(composer glide godep nginx node).each do |auto_dep| %>
+    - trigger-<%= auto_dep %>-build
+<% end %>
+  - name: automated-builds
+    jobs:
+<% %w(composer glide godep nginx node).each do |auto_dep| %>
+    - build-<%= auto_dep %>
+<% end %>
+<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"]}.each do |buildpack, dependencies| %>
+  <% dependencies.each do |dependency| %>
+    - update-<%= dependency %>-in-<%= buildpack %>-buildpack
+  <% end %>
+<% end %>
+    - test-node
+    - test-nginx
+  - name: manual-builds
+    jobs:
+<% %w(go php php7 ruby jruby bundler python httpd).each do |dependency| %>
+    - build-<%= dependency %>
+<% end %>
+    - test-php
+    - test-php7
+    - test-python
+    - test-jruby
+    - test-ruby
+  - name: binary-builder
+    jobs:
+      - binary-builder
+
+jobs:
+  - name: binary-builder
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: binary-builder
+          trigger: true
+      - do:
+        #- task: all-unit-tests
+        #  #...
+        <% integration_spec_names = %w(bundler glide go godep httpd jruby nginx nodejs php5 php7 php_with_oracle python ruby url_output yaml_flag) %>
+        # - task: list-of-spec-names-same-as-files-in-integration-directory
+        #   file:
+        #   params:
+        #     SPEC_NAMES: <%= spec_names.join(',') %>
+        - aggregate:
+          <% integration_spec_names.each do |spec_name| %>
+          - task: integration-<%= spec_name %>
+            file: buildpacks-ci/tasks/binary-builder.yml
+            params:
+              SPEC_TO_RUN: <%= spec_name %>
+              RUBYGEM_MIRROR: {{rubygem-mirror}}
+              RUN_ORACLE_PHP_TESTS: <%= run_oracle_php_tests %>
+            <% if run_oracle_php_tests == 'true' %>
+              AWS_ACCESS_KEY_ID: {{oracle-client-library-s3-download-access-key}}
+              AWS_SECRET_ACCESS_KEY: {{oracle-client-library-s3-download-secret-key}}
+              AWS_DEFAULT_REGION: us-east-1
+            <% end %>
+            privileged: true
+          <% end %>
+        on_failure:
+          put: failure-alert
+          params:
+            text: "binary-builder binary-builder job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
