@@ -69,4 +69,34 @@ class GitClient
       stdout_str
     end
   end
+
+  def self.get_list_of_one_line_commits(dir, number)
+    Dir.chdir(dir) do
+      command = "git log --oneline -#{number}"
+      stdout_str, stderr_str, status = Open3.capture3(command)
+
+      raise GitError.new("Could not get last #{number} commits. STDERR was: #{stderr_str}") unless status.success?
+
+      stdout_str.split("\n")
+    end
+  end
+
+  def self.get_current_branch(dir)
+    Dir.chdir(dir) do
+      command = 'git rev-parse --abbrev-ref HEAD'
+      stdout_str, stderr_str, status = Open3.capture3(command)
+
+      raise GitError.new("Could not get current branch. STDERR was: #{stderr_str}") unless status.success?
+
+      stdout_str.strip
+    end
+  end
+
+  def self.checkout_branch(branch)
+    raise GitError.new("Could not checkout branch: #{branch}") unless system("git checkout #{branch}")
+  end
+
+  def self.pull_current_branch
+    raise GitError.new('Could not pull branch') unless system('git pull -r')
+  end
 end

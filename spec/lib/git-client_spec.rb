@@ -65,6 +65,127 @@ describe GitClient do
     end
   end
 
+  describe '#get_current_branch' do
+    let(:dir)                 { Dir.mktmpdir }
+    let(:current_branch)      { 'this should not matter but is here to avoid undefined symbols' }
+    let(:stderr_output)       { 'this should not matter but is here to avoid undefined symbols' }
+    let(:process_status)      { double(:process_status) }
+
+    subject { described_class.get_current_branch(dir) }
+
+    before { allow(Open3).to receive(:capture3).and_return([current_branch, stderr_output, process_status]) }
+
+    context 'git works properly' do
+      let(:current_branch) { 'the-current-git-branch' }
+
+      before { allow(process_status).to receive(:success?).and_return(true) }
+
+      it 'should return the current git branch' do
+        expect(subject).to eq('the-current-git-branch')
+      end
+    end
+
+    context 'git fails' do
+      let(:stderr_output) { 'stderr output' }
+
+      before { allow(process_status).to receive(:success?).and_return(false) }
+
+      it 'throws an exception about being unable to get the current branch' do
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not get current branch. STDERR was: stderr output')
+      end
+    end
+  end
+
+  describe '#get_list_of_one_line_commits' do
+    let(:dir)                 { Dir.mktmpdir }
+    let(:number)              { 3 }
+    let(:last_few_commits)    { 'this should not matter but is here to avoid undefined symbols' }
+    let(:stderr_output)       { 'this should not matter but is here to avoid undefined symbols' }
+    let(:process_status)      { double(:process_status) }
+
+    subject { described_class.get_list_of_one_line_commits(dir,number) }
+
+    before { allow(Open3).to receive(:capture3).and_return([last_few_commits, stderr_output, process_status]) }
+
+    context 'git works properly' do
+      let(:last_few_commits)    { "7652882 recent commit 1\n34e6f44 recent commit 2\n0b5a735 recent commit 3\n" }
+
+      before { allow(process_status).to receive(:success?).and_return(true) }
+
+      it 'should be an array of size 3' do
+        expect(subject.class).to eq(Array)
+        expect(subject.count).to eq(3)
+      end
+
+      it 'should contain the commits' do
+        expect(subject).to include('7652882 recent commit 1')
+        expect(subject).to include('34e6f44 recent commit 2')
+        expect(subject).to include('0b5a735 recent commit 3')
+      end
+    end
+
+    context 'git fails' do
+      let(:stderr_output) { 'stderr output' }
+
+      before { allow(process_status).to receive(:success?).and_return(false) }
+
+      it 'throws an exception about being unable to get the most recent commits' do
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not get last 3 commits. STDERR was: stderr output')
+      end
+    end
+  end
+
+  describe '#checkout_branch' do
+    let(:git_branch) {'a-different-git-branch'}
+
+    subject { described_class.checkout_branch(git_branch) }
+
+    before { allow(described_class).to receive(:system).and_return(git_successful) }
+
+    context 'git works properly' do
+      let(:git_successful) { true }
+
+      it 'checks out the specified branch' do
+        expect(described_class).to receive(:system).with('git checkout a-different-git-branch')
+
+        subject
+      end
+    end
+
+    context 'git fails' do
+      let(:git_successful) { false }
+
+      it 'throws an exception about not checking out the branch' do
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not checkout branch: a-different-git-branch')
+      end
+    end
+  end
+
+  describe '#pull_current_branch' do
+
+    subject { described_class.pull_current_branch }
+
+    before { allow(described_class).to receive(:system).and_return(git_successful) }
+
+    context 'git works properly' do
+      let(:git_successful) { true }
+
+      it 'pulls the current branch' do
+        expect(described_class).to receive(:system).with('git pull -r')
+
+        subject
+      end
+    end
+
+    context 'git fails' do
+      let(:git_successful) { false }
+
+      it 'throws an exception about not checking out the branch' do
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not pull branch')
+      end
+    end
+  end
+
   describe '#set_global_config' do
     let(:test_option) { 'test.option' }
     let(:test_value)  { 'value_to_set' }
@@ -91,7 +212,6 @@ describe GitClient do
       end
     end
   end
-
 
   describe '#add_everything' do
     subject { described_class.add_everything }
