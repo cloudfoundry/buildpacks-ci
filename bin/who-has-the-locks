@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+require_relative '../lib/state-of-bosh-lites'
+
+state_object = StateOfBoshLites.new
+state_object.get_states!
+
+display_type = ARGV[0] || 'text'
+state_object.display_state(display_type.downcase)
