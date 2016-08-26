@@ -144,6 +144,25 @@ describe BuildpackBinaryMD5Verifier do
       end
     end
 
+    context 'manifest at sha is in an old, deprecated format' do
+      let(:manifest1) { <<~TEST
+                          dependencies:
+                          - uri_stub1
+                        TEST
+                      }
+      let(:manifest2) { <<~TEST
+                          dependencies:
+                          - uri_stub2
+                        TEST
+                      }
+
+      it "outputs manifest errors but still gets a hash of buildpack binary uris that had md5s" do
+        expect{ subject }.to output(/failed to parse manifest/).to_stdout
+        expect(subject).to eq({})
+      end
+    end
+
+
   end
 
   describe '#show_mismatches' do
