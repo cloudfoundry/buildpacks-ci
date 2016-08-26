@@ -92,38 +92,6 @@ resources:
         - CHANGELOG
 <% end %>
 
-groups:
-  - name: enqueue-automated-builds
-    jobs:
-<% %w(composer glide godep nginx node).each do |auto_dep| %>
-    - trigger-<%= auto_dep %>-build
-<% end %>
-  - name: automated-builds
-    jobs:
-<% %w(composer glide godep nginx node).each do |auto_dep| %>
-    - build-<%= auto_dep %>
-<% end %>
-<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"]}.each do |buildpack, dependencies| %>
-  <% dependencies.each do |dependency| %>
-    - update-<%= dependency %>-in-<%= buildpack %>-buildpack
-  <% end %>
-<% end %>
-    - test-node
-    - test-nginx
-  - name: manual-builds
-    jobs:
-<% %w(go php php7 ruby jruby bundler python httpd).each do |dependency| %>
-    - build-<%= dependency %>
-<% end %>
-    - test-php
-    - test-php7
-    - test-python
-    - test-jruby
-    - test-ruby
-  - name: binary-builder
-    jobs:
-      - binary-builder
-
 jobs:
   - name: binary-builder
     serial: true
@@ -134,17 +102,17 @@ jobs:
         - get: binary-builder
           trigger: true
       - do:
-        #- task: all-unit-tests
-        #  #...
+        - task: all-unit-tests
+          file: buildpacks-ci/tasks/binary-builder-unit.yml
         <% integration_spec_names = %w(bundler glide go godep httpd jruby nginx nodejs php5 php7 php_with_oracle python ruby url_output yaml_flag) %>
         # - task: list-of-spec-names-same-as-files-in-integration-directory
         #   file:
         #   params:
-        #     SPEC_NAMES: <%= spec_names.join(',') %>
+        #     SPEC_NAMES: <%= integration_spec_names.join(',') %>
         - aggregate:
           <% integration_spec_names.each do |spec_name| %>
           - task: integration-<%= spec_name %>
-            file: buildpacks-ci/tasks/binary-builder.yml
+            file: buildpacks-ci/tasks/binary-builder-integration.yml
             params:
               SPEC_TO_RUN: <%= spec_name %>
               RUBYGEM_MIRROR: {{rubygem-mirror}}
