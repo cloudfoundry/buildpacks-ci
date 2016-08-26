@@ -27,7 +27,7 @@ class GitClient
   end
 
   def self.set_global_config(option, value)
-    raise GitError.new("Could not set #{option} to #{value}") unless system("git config --global #{option} \"#{value}\"")
+    raise GitError.new("Could not set global config #{option} to #{value}") unless system("git config --global #{option} \"#{value}\"")
   end
 
   def self.add_everything
