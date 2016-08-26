@@ -9,7 +9,8 @@ tag = "v#{File.read('buildpack/VERSION')}"
 File.write(File.join(artifact_path, 'tag'), tag)
 
 Dir.chdir('buildpack') do
-  system('BUNDLE_GEMFILE=cf.Gemfile bundle -j4')
+  num_cores = `nproc`
+  system("BUNDLE_GEMFILE=cf.Gemfile bundle install --jobs=#{num_cores}")
 
   changes       = File.read('CHANGELOG').match(/^=+(.*?)^v[0-9]/m)
   recent_change = changes[1]

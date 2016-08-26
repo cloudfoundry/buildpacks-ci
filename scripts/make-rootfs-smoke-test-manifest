@@ -3,7 +3,7 @@
 set -e
 
 pushd deployments-buildpacks
-  bundle -j4
+  bundle install --jobs=$(nproc)
   source ./bin/target_bosh $DEPLOYMENT_NAME
 popd
 
