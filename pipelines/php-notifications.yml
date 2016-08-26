@@ -108,6 +108,11 @@ resources:
     source:
       url: https://pecl.php.net/package/solr
       csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
+  - name: pecl-lua
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/lua
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
   - name: xhprof
     type: new_version_resource
     source:
@@ -205,6 +210,7 @@ jobs:
         - get: pecl-xdebug
         - get: pecl-yaf
         - get: pecl-mongodb
+        - get: pecl-lua
         - get: libmemcached
         - get: lua
         - get: xcache
