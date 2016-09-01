@@ -51,7 +51,7 @@ describe PivnetMetadataWriter do
       expect(release['version']).to eq '.NET Core 1.0.0 (BETA)'
       expect(release['release_type']).to eq 'Beta Release'
       expect(release['eula_slug']).to eq 'pivotal_beta_eula'
-      expect(release['release_notes_url']).to eq "https://github.com/cloudfoundry-community/dotnet-core-buildpack/releases/tag/v1.0"
+      expect(release['release_notes_url']).to eq "https://github.com/cloudfoundry-community/dotnet-core-buildpack/releases/tag/v1.0.0"
       expect(release['availability']).to eq 'Admins Only'
     end
 
