@@ -141,6 +141,8 @@ jobs:
             SPEC_NAMES: <%= integration_spec_names.join(',') %>
         - task: all-unit-tests
           file: buildpacks-ci/tasks/binary-builder-unit.yml
+          params:
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
         - aggregate:
           <% integration_spec_names.each do |spec_name| %>
           - task: integration-<%= spec_name %>
