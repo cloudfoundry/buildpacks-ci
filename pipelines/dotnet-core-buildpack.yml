@@ -7,11 +7,11 @@ resource_types:
     tag: latest-final
 
 resources:
-  - name: pivnet-integration
+  - name: pivnet-production
     type: pivnet
     source:
-      endpoint: https://pivnet-integration.cfapps.io/
-      bucket: pivotal-network-staging
+      endpoint: https://network.pivotal.io
+      bucket: pivotalnetwork
       api_token: {{pivnet-apikey}}
       product_slug: buildpacks
       access_key_id: {{pivnet-access-key}}
@@ -166,7 +166,7 @@ jobs:
           repository: pivnet-dotnet-core-metadata-artifacts
           rebase: true
 
-  - name: release-to-pivnet-integration
+  - name: release-to-pivnet
     public: true
     plan:
       - get: pivotal-buildpack-cached
@@ -174,7 +174,7 @@ jobs:
       - get: pivnet-dotnet-core-metadata
         passed: [ write-pivnet-metadata ]
         trigger: true
-      - put: pivnet-integration
+      - put: pivnet-production
         params:
           file_glob: pivotal-buildpack-cached/dotnet-core_buildpack-cached-v*.zip
           s3_filepath_prefix: PCF-Buildpacks
