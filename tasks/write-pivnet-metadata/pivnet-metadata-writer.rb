@@ -26,7 +26,7 @@ class PivnetMetadataWriter
       'version' => ".NET Core #{get_version} (BETA)",
       'release_type' => 'Beta Release',
       'eula_slug' => 'pivotal_beta_eula',
-      'release_notes_url' => "https://github.com/cloudfoundry-community/dotnet-core-buildpack/releases/tag/v#{version_to_tag}",
+      'release_notes_url' => "https://github.com/cloudfoundry-community/dotnet-core-buildpack/releases/tag/v#{get_version}",
       'availability' => 'Admins Only'
     }
     metadata['product_files'] = [ {
@@ -40,16 +40,6 @@ class PivnetMetadataWriter
     puts "\n\n"
 
     File.write(metadata_yml, metadata.to_yaml)
-  end
-
-  private
-
-  # To be removed once this is resolved:
-  # https://github.com/cloudfoundry-community/dotnet-core-buildpack/issues/92
-  def version_to_tag
-    sections = get_version.split('.')
-    sections.pop
-    sections.join('.')
   end
 end
 
