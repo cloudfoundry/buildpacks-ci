@@ -45,3 +45,13 @@ jobs:
           git_path: buildpacks-ci
           project_id: {{cf-buildpacks-public-tracker-id}}
           api_token: {{pivotal-tracker-api-token}}
+
+  - name: shellcheck-buildpacks-ci
+    public: true
+    plan:
+      - get: ci-develop
+        trigger: true
+      - task: run-shellcheck
+        file: ci-develop/tasks/run-shellcheck/task.yml
+        params:
+          DIRECTORY_TO_CHECK: ci-develop
