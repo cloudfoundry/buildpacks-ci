@@ -22,18 +22,20 @@ class TrackerClient
     JSON.parse(response.body)
   end
 
-  def post_to_tracker(name:, description:, tasks: [], point_value: nil)
+  def post_to_tracker(name:, description:, tasks: [], point_value: nil, labels: [])
     name = name.to_s
     raise 'requested tracker story has no name' unless validate_string name
     raise 'requested tracker story has no description' unless validate_string description
 
     task_api_objs = tasks.map { |task| { description: task } }
+    label_api_objs = labels.map { |label| { name: label } }
 
     payload = {
       name: name,
       description: description,
       requested_by_id: @requester_id,
-      tasks: task_api_objs
+      tasks: task_api_objs,
+      labels: label_api_objs
     }
 
     payload[:estimate] = point_value if point_value
