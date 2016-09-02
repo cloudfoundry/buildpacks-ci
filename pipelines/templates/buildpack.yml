@@ -179,6 +179,8 @@ jobs: ##########################################################################
     public: true
     plan:
       - aggregate:
+        - get: pivotal-buildpack
+        - get: pivotal-buildpack-cached
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-master
@@ -199,9 +201,11 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-master
           trigger: true
+        - get: pivotal-buildpack-cached
+        - get: pivotal-buildpack
       - do:
         - task: detect-and-upload
-          file: buildpacks-ci/tasks/detect-and-upload.yml
+          file: buildpacks-ci/tasks/detect-and-upload/task.yml
           privileged: true
           params:
             RUBYGEM_MIRROR: {{rubygem-mirror}}
