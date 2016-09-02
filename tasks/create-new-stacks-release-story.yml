@@ -9,8 +9,12 @@ inputs:
 run:
   path: bash
   args:
-    - '-c'
-    - "buildpacks-ci/scripts/notifications/pivotal_tracker 'Monday-Funday *stack* release' 'This is a reminder that a stack release was automatically started, please monitor it, and deliver story when done.'"
+    - -c
+    - |
+      cd buildpacks-ci
+      bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
+      bundle
+      bundle exec ./scripts/notifications/create-new-stacks-release-story
 params:
   TRACKER_PROJECT_ID:
   TRACKER_API_TOKEN:

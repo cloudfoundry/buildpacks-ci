@@ -9,8 +9,16 @@ inputs:
 run:
   path: bash
   args:
+    - -c
+    - |
+      cd buildpacks-ci
+      bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
+      bundle
+      bundle exec ./scripts/notifications/create-latest-upstream-changes-story
+run:
+  path: bash
+  args:
     - '-c'
-    - "buildpacks-ci/scripts/notifications/pivotal_tracker 'Pull latest changes from upstream' 'Check that there are no upstream changes that we are missing. Consult the documentation at http://docs.cloudfoundry.org/buildpacks/merging_upstream.html for more details.\n\nEasy way to check for changes: Ex. https://github.com/cloudfoundry/ruby-buildpack/compare/develop...heroku:master' 'Go' 'Nodejs' 'Python' 'Ruby'"
 params:
   TRACKER_PROJECT_ID:
   TRACKER_API_TOKEN:

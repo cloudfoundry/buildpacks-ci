@@ -4,15 +4,13 @@
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require "#{buildpacks_ci_dir}/lib/tracker-client"
 
-name = ARGV[0]
-description = ARGV[1]
-tasks_array = ARGV[2..-1]
-
-exit if description.empty?
+name = 'Monday-Funday *stack* release'
+description = 'This is a reminder that a stack release was automatically started, please monitor it, and deliver story when done.'
+labels = %w(pm-only)
 
 tracker_client = TrackerClient.new(
   ENV['TRACKER_API_TOKEN'],
   ENV['TRACKER_PROJECT_ID'],
   ENV['TRACKER_REQUESTER_ID'].to_i
 )
-tracker_client.post_to_tracker(name: name, description: description, tasks: tasks_array, point_value: 1)
+tracker_client.post_to_tracker(name: name, description: description, point_value: 1, labels: labels)
