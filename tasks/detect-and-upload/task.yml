@@ -5,11 +5,13 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
+  - name: pivotal-buildpack
+  - name: pivotal-buildpack-cached
   - name: buildpacks-ci
   - name: buildpack
 outputs:
   - name: buildpack-artifacts
 run:
-  path: buildpacks-ci/scripts/release/build.sh
+  path: buildpacks-ci/tasks/detect-and-upload/run.rb
 params:
   RUBYGEM_MIRROR:
