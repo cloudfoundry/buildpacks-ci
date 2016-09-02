@@ -22,9 +22,9 @@ class TrackerClient
     JSON.parse(response.body)
   end
 
-  def post_to_tracker(name, description, tasks = [], point_value = nil)
+  def post_to_tracker(name:, description:, tasks: [], point_value: nil)
     name = name.to_s
-    raise 'requested tracker story has no title' unless validate_string name
+    raise 'requested tracker story has no name' unless validate_string name
     raise 'requested tracker story has no description' unless validate_string description
 
     task_api_objs = tasks.map { |task| { description: task } }

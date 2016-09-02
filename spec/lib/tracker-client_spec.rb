@@ -150,7 +150,7 @@ describe TrackerClient do
         end
 
         it 'receives the 200 status code' do
-          response = subject.post_to_tracker name, description, tasks, point_value
+          response = subject.post_to_tracker(name: name, description: description, tasks: tasks, point_value: point_value)
           expect(WebMock).to have_requested(:post, tracker_uri)
           expect(response.code).to eq '200'
         end
@@ -164,14 +164,14 @@ describe TrackerClient do
             estimate: 1
           }.to_json
 
-          response = subject.post_to_tracker name, description, tasks, point_value
+          response = subject.post_to_tracker(name: name, description: description, tasks: tasks, point_value: point_value)
 
           expect(WebMock).to have_requested(:post, tracker_uri)
             .with(body: expected_payload, headers: { 'Content-Type' => 'application/json' })
         end
 
         it 'has the api key that was passed to it in the header' do
-          response = subject.post_to_tracker name, description, tasks, point_value
+          response = subject.post_to_tracker(name: name, description: description, tasks: tasks, point_value: point_value)
 
           expected_headers = {
             'Content-Type' => 'application/json',
@@ -187,7 +187,7 @@ describe TrackerClient do
         subject { described_class.new(api_key, project_id, requester_id) }
 
         it 'raises an exception without posting to Tracker' do
-          expect { subject.post_to_tracker '', 'WHAT HAVE YOU DOONNNNNNNNNNE', tasks, point_value }.to raise_error(RuntimeError)
+          expect { subject.post_to_tracker name: '', description: 'WHAT HAVE YOU DOONNNNNNNNNNE', tasks: tasks, point_value: point_value }.to raise_error(RuntimeError)
           expect(WebMock).not_to have_requested(:post, tracker_uri)
         end
       end
@@ -196,7 +196,7 @@ describe TrackerClient do
         subject { described_class.new(api_key, project_id, requester_id) }
 
         it 'raises an exception without posting to Tracker' do
-          expect { subject.post_to_tracker nil, 'WHAT HAVE YOU DOONNNNNNNNNNE', tasks, point_value }.to raise_error(RuntimeError)
+          expect { subject.post_to_tracker name: nil, description: 'WHAT HAVE YOU DOONNNNNNNNNNE', tasks: tasks, point_value: point_value }.to raise_error(RuntimeError)
           expect(WebMock).not_to have_requested(:post, tracker_uri)
         end
       end
@@ -205,7 +205,7 @@ describe TrackerClient do
         subject { described_class.new(api_key, project_id, requester_id) }
 
         it 'raises an exception without posting to Tracker' do
-          expect { subject.post_to_tracker 'a', '', tasks, point_value }.to raise_error(RuntimeError)
+          expect { subject.post_to_tracker name: 'a', description: '', tasks: tasks, point_value: point_value }.to raise_error(RuntimeError)
           expect(WebMock).not_to have_requested(:post, tracker_uri)
         end
       end
@@ -214,7 +214,7 @@ describe TrackerClient do
         subject { described_class.new(api_key, project_id, requester_id) }
 
         it 'raises an exception without posting to Tracker' do
-          expect { subject.post_to_tracker 'a', nil, tasks, point_value }.to raise_error(RuntimeError)
+          expect { subject.post_to_tracker name: 'a', description: nil, tasks: tasks, point_value: point_value }.to raise_error(RuntimeError)
           expect(WebMock).not_to have_requested(:post, tracker_uri)
         end
       end
@@ -235,7 +235,7 @@ describe TrackerClient do
       context 'API call is not successful' do
         subject { described_class.new(api_key, project_id, requester_id) }
         it 'raises an HTTP error' do
-          expect { subject.post_to_tracker 'YOU FOOL', 'WHAT HAVE YOU DOONNNNNNNNNNE', [] }
+          expect { subject.post_to_tracker name: 'YOU FOOL', description: 'WHAT HAVE YOU DOONNNNNNNNNNE', point_value: [] }
             .to raise_error(RuntimeError)
         end
       end
