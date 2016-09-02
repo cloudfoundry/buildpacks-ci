@@ -8,7 +8,7 @@ This contains the configuration for the Cloud Foundry Buildpacks team [Concourse
 * [buildpacks](pipelines/templates/buildpack.yml): test and release all of the buildpacks
 * [bosh-lite](pipelines/templates/bosh-lite.yml): deploy CF LTS/Edge environment
 * [brats](pipelines/brats.yml): run [BRATS](https://github.com/cloudfoundry/brats) against the master branch of buildpacks
-* [buildpack-checksums](pipelines/buildpack-checksums.yml): generate static site for buildpack checksums
+* [buildpack-verification](pipelines/buildpack-verification.yml): generate static site for buildpack verification
 * [buildpacks-ci](pipelines/buildpacks-ci.yml): testing tasks for correct usage
 * [dockerfile](pipelines/dockerfile.yml): rebuild docker image for buildpack
 	pipeline
