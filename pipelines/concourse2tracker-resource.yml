@@ -13,8 +13,8 @@ resources:
   - name: concourse2tracker-image
     type: docker-image
     source:
-      repository: cfbuildpacks/concourse2tracker
-      email: cf-buildpacks-eng@pivotal.io
+      repository: {{buildpacks-concourse2tracker-docker-repo}}
+      email: {{buildpacks-docker-user-email}}
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
 jobs:
