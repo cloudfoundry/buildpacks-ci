@@ -15,10 +15,6 @@ run:
       bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
       bundle
       bundle exec ./scripts/notifications/create-latest-upstream-changes-story
-run:
-  path: bash
-  args:
-    - '-c'
 params:
   TRACKER_PROJECT_ID:
   TRACKER_API_TOKEN:
