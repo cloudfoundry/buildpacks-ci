@@ -127,7 +127,7 @@ resources:
   - name: buildpack-releases
     type: git
     source:
-      uri: git@github.com:cloudfoundry/buildpack-releases.git
+      uri: git@github.com:cloudfoundry-attic/buildpack-releases.git
       private_key: {{buildpack-releases-private-key}}
       branch: master
   - name: diego-bosh-release
