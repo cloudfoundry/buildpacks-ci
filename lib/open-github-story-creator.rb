@@ -44,8 +44,18 @@ class OpenGithubStoryCreator
                        'buildpack-releases',
                        'cflinuxfs2-rootfs-release',
                        'brats',
-                       'stacks'],
-    'pivotal-cf-experimental' => ['stacks-release']
+                       'stacks',
+                       'go-buildpack-release',
+                       'ruby-buildpack-release',
+                       'python-buildpack-release',
+                       'php-buildpack-release',
+                       'nodejs-buildpack-release',
+                       'staticfile-buildpack-release',
+                       'binary-buildpack-release',
+                       'java-offline-buildpack-release',
+                       'java-buildpack-release'],
+    'cloudfoundry-incubator' => ['multi-buildpack'],
+    'pivotal-cf-experimental' => ['stacks-release', 'concourse-filter', 'new_version_resource']
   }
 
   def self.configure_octokit
