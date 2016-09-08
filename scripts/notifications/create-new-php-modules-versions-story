@@ -12,6 +12,7 @@ Check that the PHP Module versions used in building PHP 5 and PHP 7 are up to da
 Reference the PHP5 and PHP7 recipes and module versions used in cooking these recipes in [binary-builder](https://github.com/cloudfoundry/binary-builder)
 DESCRIPTION
 tasks = ['Check each PHP module for updates', 'Rebuild PHP versions if any module updates', 'Update PHP Buildpack with new PHP versions']
+labels = %w(maintenance)
 
 exit if name.empty?
 description += "\n\n" unless description.empty?
@@ -46,4 +47,4 @@ tracker_client = TrackerClient.new(
   ENV['TRACKER_PROJECT_ID'],
   ENV['TRACKER_REQUESTER_ID'].to_i
 )
-tracker_client.post_to_tracker(name: name, description: description, tasks: tasks)
+tracker_client.post_to_tracker(name: name, description: description, tasks: tasks, labels: labels)
