@@ -150,6 +150,14 @@ resources:
     tarball: true
     source:
       repository: cloudfoundry-incubator/garden-linux-release
+<% supported_languages.each do |language| %>
+  - name: <%= language %>-buildpack-bosh-release
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/<%= language %>-buildpack-release.git
+      private_key: {{buildpack-releases-private-key}}
+      branch: master
+<% end %>
 
 groups:
   - name: buildpacks
@@ -159,15 +167,18 @@ groups:
       - cats
       - ship-it
 <% supported_languages.reject{|l| l.include?('java') }.each do |language| %>
-      - bosh-release-<%= language %>
+      - deprecated-bosh-release-<%= language %>
+      - update-<%= language %>-buildpack-bosh-release
       - cf-release for <%= language %>
 <% end %>
   - name: java
     jobs:
       - recreate-bosh-lite
       - ship-it-java
-      - bosh-release-java
-      - bosh-release-java-offline
+      - deprecated-bosh-release-java
+      - deprecated-bosh-release-java-offline
+      - update-java-buildpack-bosh-release
+      - update-java-offline-buildpack-bosh-release
       - cf-release for java
       - cf-release for java-offline
 
@@ -386,7 +397,7 @@ jobs:
         - get: java-offline-buildpack-github-release
           passed: [ cats ]
 <% supported_languages.each do |language| %>
-  - name: bosh-release-<%= language %>
+  - name: deprecated-bosh-release-<%= language %>
     serial: true
     serial_groups: [cf-release-buildpacks]
     public: true
@@ -427,7 +438,52 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "<%= language %>-buildpack bosh-release job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            text: "<%= language %>-buildpack-depcreated-bosh-release job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: update-<%= language %>-buildpack-bosh-release
+    serial: true
+    serial_groups: [cf-release-buildpacks]
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: release
+          resource: <%= language %>-buildpack-bosh-release
+        - get: blob
+          resource: <%= language %>-buildpack-github-release
+          trigger: true
+          passed: [ <%= language.include?('java') ? 'ship-it-java' : 'ship-it' %> ]
+      - do:
+        - task: convert release version to version resource
+          file: buildpacks-ci/tasks/convert-release-to-version.yml
+        - task: create-bosh-release
+          file: buildpacks-ci/tasks/create-bosh-release.yml
+          params:
+            ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            <% case language
+               when /offline/ %>
+            BLOB_GLOB: blob/java-buildpack-offline*.zip
+            BLOB_NAME: java-buildpack
+            <% when /java/ %>
+            BLOB_GLOB: blob/java-buildpack-v*.zip
+            BLOB_NAME: java-buildpack
+            <% else %>
+            BLOB_GLOB: blob/<%= language %>*.zip
+            BLOB_NAME: <%= language %>-buildpack
+            <% end %>
+            RELEASE_NAME: <%= language %>-buildpack-release
+            RELEASE_DIR: release
+        - put: <%= language %>-buildpack-bosh-release
+          params:
+            repository: release-artifacts
+            rebase: true
+        on_failure:
+          put: failure-alert
+          params:
+            text: "<%= language %>-buildpack-bosh-release job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -452,7 +508,9 @@ jobs:
             globs:
               - java-buildpack-v*.zip
           <% end %>
-          passed: [ bosh-release-<%= language %> ]
+          passed:
+            - deprecated-bosh-release-<%= language %>
+            - update-<%= language %>-buildpack-bosh-release
           trigger: true
       - do:
         - task: check-can-i-bump
