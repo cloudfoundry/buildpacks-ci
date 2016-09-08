@@ -66,60 +66,6 @@ resources:
       password: {{bosh-lite-password}}
       deployment: cf-warden-diego
       ignore_ssl: true
-  - name: java-buildpack-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: java-buildpack
-      access_token: {{buildpacks-github-token}}
-  - name: java-offline-buildpack-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: java-buildpack
-      access_token: {{buildpacks-github-token}}
-  - name: go-buildpack-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: go-buildpack
-      access_token: {{buildpacks-github-token}}
-  - name: python-buildpack-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: python-buildpack
-      access_token: {{buildpacks-github-token}}
-  - name: nodejs-buildpack-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: nodejs-buildpack
-      access_token: {{buildpacks-github-token}}
-  - name: ruby-buildpack-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: ruby-buildpack
-      access_token: {{buildpacks-github-token}}
-  - name: php-buildpack-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: php-buildpack
-      access_token: {{buildpacks-github-token}}
-  - name: staticfile-buildpack-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: staticfile-buildpack
-      access_token: {{buildpacks-github-token}}
-  - name: binary-buildpack-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: binary-buildpack
-      access_token: {{buildpacks-github-token}}
   - name: failure-alert
     type: slack-notification
     source:
@@ -150,7 +96,14 @@ resources:
     tarball: true
     source:
       repository: cloudfoundry-incubator/garden-linux-release
+
 <% supported_languages.each do |language| %>
+  - name: <%= language %>-buildpack-github-release
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: <%= language.gsub('-offline', '') %>-buildpack
+      access_token: {{buildpacks-github-token}}
   - name: <%= language %>-buildpack-bosh-release
     type: git
     source:
