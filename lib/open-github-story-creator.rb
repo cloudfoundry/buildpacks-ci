@@ -10,9 +10,10 @@ class OpenGithubStoryCreator
     story_name = 'Review Open Pull Requests'
     story_description = 'Provide feedback for open pull requests in repos that the buildpacks team owns.'
     story_tasks = get_open_pull_requests_as_formatted_tasks
+    labels = %w(maintenance)
 
     puts 'Creating Tracker story for reviewing open PRs'
-    create_tracker_story(story_name, story_description, story_tasks)
+    create_tracker_story(story_name, story_description, story_tasks, labels)
     puts 'Successfully created tracker story reviewing open PRs'
   end
 
@@ -20,9 +21,10 @@ class OpenGithubStoryCreator
     story_name = 'Review Open Issues'
     story_description = 'Provide feedback for open issues in repos that the buildpacks team owns.'
     story_tasks = get_open_issues_as_formatted_tasks
+    labels = %w(maintenance)
 
     puts 'Creating Tracker story for reviewing open issues'
-    create_tracker_story(story_name, story_description, story_tasks)
+    create_tracker_story(story_name, story_description, story_tasks, labels)
     puts 'Successfully created tracker story reviewing open issues'
   end
 
@@ -104,12 +106,12 @@ class OpenGithubStoryCreator
     story_tasks
   end
 
-  def self.create_tracker_story(story_name, story_description, story_tasks)
+  def self.create_tracker_story(story_name, story_description, story_tasks, labels)
     tracker_client = TrackerClient.new(
       ENV['TRACKER_API_TOKEN'],
       ENV['TRACKER_PROJECT_ID'],
       ENV['TRACKER_REQUESTER_ID'].to_i
     )
-    tracker_client.post_to_tracker(name: story_name, description: story_description, tasks: story_tasks)
+    tracker_client.post_to_tracker(name: story_name, description: story_description, tasks: story_tasks, labels: labels)
   end
 end

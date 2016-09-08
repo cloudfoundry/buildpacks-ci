@@ -6,7 +6,7 @@ require "#{buildpacks_ci_dir}/lib/tracker-client"
 
 name = 'Monday-Funday *stack* release'
 description = 'This is a reminder that a stack release was automatically started, please monitor it, and deliver story when done.'
-labels = %w(pm-only)
+labels = %w(pm-only maintenance)
 
 tracker_client = TrackerClient.new(
   ENV['TRACKER_API_TOKEN'],
