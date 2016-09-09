@@ -41,8 +41,29 @@ elif [ "$IAAS" = "azure" ]; then
 
   export BOSH_USER=$BOSH_USER_TO_RESTORE
   export BOSH_PASSWORD=$BOSH_PASSWORD_TO_RESTORE
+elif [ "$IAAS" = gcp ]; then
+
+  BOSH_USER_TO_RESTORE=$BOSH_USER
+  BOSH_PASSWORD_TO_RESTORE=$BOSH_PASSWORD
+  export BOSH_USER=$GCP_BOSH_USER
+  export BOSH_PASSWORD=$GCP_BOSH_PASSWORD
+
+  # Clean up and destroy old bosh-lite VM
+  BOSH_TARGET="10.0.0.6" ../../bin/target_bosh concourse-gcp
+  echo "yes" | bosh delete deployment $GCP_BOSH_LITE_NAME
+
+  # Boot up new bosh-lite VM
+  # Use correct director uuid in bosh-lite manifest
+  cp bosh-lite/bosh-lite-template.yml bosh-lite.yml
+  sed -i "s|^director_uuid:.*$|director_uuid: $(bosh status --uuid)|" bosh-lite.yml
+
+  bosh deployment bosh-lite.yml
+  echo "yes" | bosh deploy
+
+  export BOSH_USER=$BOSH_USER_TO_RESTORE
+  export BOSH_PASSWORD=$BOSH_PASSWORD_TO_RESTORE
 else
-  echo "Please specify IAAS=(aws|azure)"
+  echo "Please specify IAAS=(aws|azure|gcp)"
   exit 1
 fi
 

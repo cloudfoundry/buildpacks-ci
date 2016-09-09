@@ -25,7 +25,7 @@ resources:
     source:
       uri: {{deployments-git-uri}}
       private_key: {{deployments-private-key}}
-      branch: master
+      branch: gcp-bosh-lite-recreation
   - name: bosh-lite
     type: git
     source:
@@ -41,7 +41,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: {{buildpacks-ci-git-uri-public-branch}}
+      branch: gcp-bosh-lite
   - name: machete
     type: git
     source:
@@ -84,8 +84,8 @@ jobs:
     serial: true
     public: true
     plan:
-      - get: nightly-trigger
-        trigger: true
+#      - get: nightly-trigger
+#        trigger: true
       - put: resource-pools
         params:
           claim: {{deployment-name}}
@@ -109,6 +109,9 @@ jobs:
             AZURE_BOSH_USER: {{azure-bosh-user}}
             AZURE_BOSH_PASSWORD: {{azure-bosh-password}}
             AZURE_BOSH_LITE_NAME: {{bosh-lite-name}}
+            GCP_BOSH_USER: {{gcp-bosh-user}}
+            GCP_BOSH_PASSWORD: {{gcp-bosh-password}}
+            GCP_BOSH_LITE_NAME: {{bosh-lite-name}}
             DEPLOYMENT_NAME: {{deployment-name}}
             PASSWORD: {{bosh-lite-password}}
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
