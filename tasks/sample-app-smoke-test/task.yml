@@ -1,0 +1,14 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+
+inputs:
+  - name: sample-app
+  - name: buildpacks-ci
+
+run:
+  path: buildpacks-ci/tasks/sample-app-smoke-test/run.rb
