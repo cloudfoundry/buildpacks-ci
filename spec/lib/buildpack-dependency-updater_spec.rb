@@ -103,6 +103,9 @@ describe BuildpackDependencyUpdater do
             - match: "\/composer\/(.*)\/composer.phar"
               name: composer
               version: "$1"
+          default_versions:
+            - name: composer
+              version: 1.0.3
           dependencies:
             - name: composer
               version: 1.0.3
@@ -128,6 +131,17 @@ describe BuildpackDependencyUpdater do
         expect(dependency_in_manifest["version"]).to eq(new_version)
         expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/php/binaries/trusty/composer/1.1.0/composer.phar")
         expect(dependency_in_manifest["md5"]).to eq("05d30d20be1c94c9edc02756420a7d10")
+      end
+
+      it "updates the php buildpack manifest default_versions section with the specified version for composer" do
+        subject.run!
+        manifest = YAML.load_file(manifest_file)
+
+        default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '1.0.3'}
+        expect(default_in_manifest).to eq(nil)
+
+        default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
+        expect(default_in_manifest["version"]).to eq(new_version)
       end
 
       it 'records which versions were removed' do
