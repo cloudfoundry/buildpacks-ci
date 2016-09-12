@@ -28,6 +28,7 @@ opt_parser.parse!
 LPASS_CONCOURSE_PRIVATE = ENV['LPASS_CONCOURSE_PRIVATE_FILE'] || 'Shared-Buildpacks/concourse-private.yml'
 LPASS_DEPLOYMENTS_BUILDPACKS = ENV['LPASS_DEPLOYMENTS_BUILDPACKS_FILE'] || 'Shared-Buildpacks/deployments-buildpacks.yml'
 LPASS_REPOS_PRIVATE_KEYS = ENV['LPASS_REPOS_PRIVATE_KEYS_FILE'] || 'Shared-Buildpacks/buildpack-repos-private-keys.yml'
+LPASS_BOSH_RELEASE_PRIVATE_KEYS = ENV['LPASS_BOSH_RELEASE_PRIVATE_KEYS_FILE'] || 'Shared-Buildpacks/buildpack-bosh-release-repos-private-keys.yml'
 
 public_config = YAML.load_file("public-config.yml")
 
@@ -62,7 +63,7 @@ def set_pipeline(target_name:,name:, cmd:, load: [])
     -p #{PIPELINE_PREFIX}#{name} \
     -c <(#{cmd}) \
     -l public-config.yml \
-    -l <(lpass show #{LPASS_CONCOURSE_PRIVATE} --notes && lpass show #{LPASS_DEPLOYMENTS_BUILDPACKS} --notes && lpass show #{LPASS_REPOS_PRIVATE_KEYS} --notes) \
+    -l <(lpass show #{LPASS_CONCOURSE_PRIVATE} --notes && lpass show #{LPASS_DEPLOYMENTS_BUILDPACKS} --notes && lpass show #{LPASS_REPOS_PRIVATE_KEYS} --notes && lpass show #{LPASS_BOSH_RELEASE_PRIVATE_KEYS}) \
     #{load.collect { |l| "-l #{l}" }.join(' ')}
   "})
 end
