@@ -108,7 +108,7 @@ resources:
     type: git
     source:
       uri: git@github.com:cloudfoundry/<%= language %>-buildpack-release.git
-      private_key: {{buildpack-releases-private-key}}
+      private_key: {{<%= language %>-buildpack-bosh-release-private-key}}
       branch: master
 <% end %>
 
