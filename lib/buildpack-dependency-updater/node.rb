@@ -30,6 +30,12 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
       update_version_in_url_to_dependency_map if buildpack == "ruby"
     end
 
+    @removed_versions = (original_dependencies - new_dependencies).map{|dep| dep['version']} unless new_dependencies == original_dependencies
+  end
+
+  def perform_dependency_specific_changes
+    major_version, minor_version, _ = dependency_version.split(".")
+
     # Make latest node 4.x.y version default node version for node buildpack
     if major_version == "4"
       buildpack_manifest["default_versions"].delete_if { |dep| dep["name"] == dependency }
@@ -39,8 +45,6 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
       }
       buildpack_manifest["default_versions"] << default_dependency_hash
     end
-
-    @removed_versions = (original_dependencies - new_dependencies).map{|dep| dep['version']} unless new_dependencies == original_dependencies
   end
 
   def update_version_in_url_to_dependency_map
