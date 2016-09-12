@@ -281,7 +281,9 @@ describe BuildpackDependencyUpdater do
         buildpack_manifest_contents = <<~MANIFEST
           ---
           language: php
-
+          default_versions:
+            - name: nginx
+              version: 1.11.1
           dependencies:
             - name: nginx
               version: 1.10.1
@@ -303,16 +305,6 @@ describe BuildpackDependencyUpdater do
           Build nginx - #{new_version}
           filename: binary-builder/nginx-#{new_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
-
-        buildpack_defaults_options_json = <<~OPTIONS_JSON
-          {
-              "NGINX_VERSION": "{NGINX_1_11_LATEST}",
-              "NGINX_1_11_LATEST": "1.11.1",
-              "OTHER_STUFF_WE_DONT_CARE_ABOUT": "IN THIS TEST"
-          }
-        OPTIONS_JSON
-        FileUtils.mkdir_p(File.join(buildpack_dir, "defaults"))
-        File.write(defaults_options_file, buildpack_defaults_options_json)
       end
 
       it "updates the specified buildpack manifest dependency with the specified version" do
@@ -330,11 +322,15 @@ describe BuildpackDependencyUpdater do
         expect(dependency_in_manifest["md5"]).to eq("7d28497395b62221f3380e82f89cd197")
       end
 
-      it "updates the php buildpack default nginx version configuration" do
+      it "updates the php buildpack manifest default_versions section with the specified version for nginx" do
         subject.run!
+        manifest = YAML.load_file(manifest_file)
 
-        defaults_options = JSON.parse(File.read(defaults_options_file))
-        expect(defaults_options['NGINX_1_11_LATEST']).to eq('1.11.2')
+        default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '1.11.1'}
+        expect(default_in_manifest).to eq(nil)
+
+        default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
+        expect(default_in_manifest["version"]).to eq(new_version)
       end
 
       it 'records which versions were removed' do
