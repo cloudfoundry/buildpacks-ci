@@ -170,10 +170,8 @@ BOSH releases are used in the assembly of [`cf-release`](https://github.com/clou
 
 These buildpacks are possible candidates for promotion, or experimental architecture explorations.
 
-Unlike the official buildpacks, they *only* have a `master` branch.
-
-* [dotnet-core-buildpack](https://github.com/cloudfoundry-community/dotnet-core-buildpack)
-* [multi-buildpack](https://github.com/cloudfoundry-incubator/multi-buildpackgo)
+* [dotnet-core-buildpack](https://github.com/cloudfoundry-community/dotnet-core-buildpack) Unlike other buildpacks, this buildpack has no `develop` branch.
+* [multi-buildpack](https://github.com/cloudfoundry-incubator/multi-buildpack)
 
 ### Tools
 
