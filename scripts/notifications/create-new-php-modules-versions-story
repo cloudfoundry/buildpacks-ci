@@ -16,7 +16,7 @@ labels = %w(maintenance)
 
 exit if name.empty?
 description += "\n\n" unless description.empty?
-description += "URL | Our Version\n"
+description += "URL | Latest Version\n"
 description += "--- | ---\n"
 
 Dir.glob('./*/input.json').each do |json_file|
