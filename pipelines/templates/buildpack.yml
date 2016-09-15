@@ -46,6 +46,23 @@ resources:
       user: {{buildpacks-github-org}}
       repository: machete
       access_token: {{buildpacks-github-token}}
+<% if language == 'multi' %>
+  - name: buildpack-develop
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry-incubator/multi-buildpack.git
+      private_key: {{multi-buildpack-private-key}}
+      branch: develop
+      ignore_paths:
+        - VERSION
+        - CHANGELOG
+  - name: buildpack-master
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry-incubator/multi-buildpack.git
+      private_key: {{multi-buildpack-private-key}}
+      branch: master
+<% else %>
   - name: buildpack-develop
     type: git
     source:
@@ -61,6 +78,7 @@ resources:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: master
+<% end %>
   - name: pivotal-buildpack
     type: s3
     source:
@@ -281,6 +299,7 @@ jobs:
           globs:
             - buildpack-artifacts/*_buildpack-cached-v*.zip
             - buildpack-artifacts/*_buildpack-cached-v*.zip.SHA256SUM.txt
+<% unless language == "multi" %>
   - name: buildpack-to-pivnet
     serial: true
     public: true
@@ -308,6 +327,7 @@ jobs:
           PIVNET_PRODUCT_NAME: {{pivnet-product-name}}
           GITHUB_URL: https://github.com/cloudfoundry/<%= language %>-buildpack
         privileged: true
+<% end %>
   - name: specs-edge-develop
     serial: true
     public: true
@@ -398,7 +418,7 @@ jobs:
           put: cf-lts-environments
           params:
             release: cf-environments
-<% unless language == "binary" %>
+<% unless language == "binary" || language == "multi" %>
   - name: update-compile-extensions
     serial: true
     public: true
