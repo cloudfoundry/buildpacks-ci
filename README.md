@@ -14,7 +14,7 @@ This contains the configuration for the Cloud Foundry Buildpacks team [Concourse
 	pipeline
 * [cf-release](pipelines/cf-release.yml): deployment of latest buildpacks to
 	cf-release develop
-* [main](pipelines/main.yml): tooling
+* [gems-and-extensions](pipelines/gems-and-extensions.yml): gems and extensions that support buildpack development and deployment
 * [notifications](pipelines/notifications.yml): monitor upstream sources for
 	changes and notify on Slack
 * [stacks](pipelines/stacks.yml): test and release Cloud Foundry [stacks](https://github.com/cloudfoundry/stacks)
