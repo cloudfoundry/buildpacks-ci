@@ -3,6 +3,27 @@ require 'open3'
 class GitClient
   class GitError < StandardError;end
 
+  def self.update_submodule_to_latest(source_dir, dir_to_update)
+    latest_ref = GitClient.get_commit_sha(source_dir, 0)
+
+    GitClient.fetch(dir_to_update)
+
+    Dir.chdir(dir_to_update) do
+      GitClient.checkout_branch(latest_ref)
+    end
+  end
+
+  def self.get_commit_sha(dir, number_commits_before_head)
+    Dir.chdir(dir) do
+      command = "git rev-parse HEAD~#{number_commits_before_head}"
+      stdout_str, stderr_str, status = Open3.capture3(command)
+
+      raise GitError.new("Could not get commit SHA for HEAD~#{number_commits_before_head}. STDERR was: #{stderr_str}") unless status.success?
+
+      stdout_str
+    end
+  end
+
   def self.last_commit_message(dir, previous = 0)
     Dir.chdir(dir) do
       command = "git log --format=%B -n 1 HEAD~#{previous}"
@@ -98,5 +119,11 @@ class GitClient
 
   def self.pull_current_branch
     raise GitError.new('Could not pull branch') unless system('git pull -r')
+  end
+
+  def self.fetch(dir)
+    Dir.chdir(dir) do
+      raise GitError.new('Could not fetch') unless system('git fetch')
+    end
   end
 end

@@ -3,6 +3,59 @@ require 'spec_helper'
 require_relative '../../lib/git-client'
 
 describe GitClient do
+
+  describe '#update_submodule_to_latest' do
+    let(:source_dir)    { Dir.mktmpdir }
+    let(:dir_to_update) { Dir.mktmpdir }
+    let(:latest_sha)    { "latest_sha" }
+
+    subject { described_class.update_submodule_to_latest(source_dir, dir_to_update) }
+
+    it "should update target repo's submodule to latest submodule sha" do
+      expect(GitClient).to receive(:get_commit_sha).with(source_dir, 0).and_return(latest_sha)
+      expect(GitClient).to receive(:fetch).with(dir_to_update)
+      expect(GitClient).to receive(:checkout_branch).with(latest_sha)
+
+      subject
+    end
+  end
+
+
+  describe '#get_commit_sha' do
+    let(:dir)                        { Dir.mktmpdir }
+    let(:stderr_output)              { 'this should not matter but is here to avoid undefined symbols' }
+    let(:commit_sha)                 { 'this should not matter but is here to avoid undefined symbols' }
+    let(:process_status)             { double(:process_status) }
+    let(:number_commits_before_head) { 3 }
+
+    subject { described_class.get_commit_sha(dir, number_commits_before_head) }
+
+    before { allow(Open3).to receive(:capture3) }
+
+    context 'git works properly' do
+      let(:commit_sha) { 'ffffaaaaaec7c534f0e1c6a295a2450d17f711a1' }
+
+      before { allow(process_status).to receive(:success?).and_return(true) }
+
+      it 'should return the last git commit message' do
+        expect(Open3).to receive(:capture3).with('git rev-parse HEAD~3').and_return([commit_sha, stderr_output, process_status])
+        expect(subject).to eq('ffffaaaaaec7c534f0e1c6a295a2450d17f711a1')
+      end
+    end
+
+    context 'git fails' do
+      let(:stderr_output) { 'stderr output' }
+
+      before { allow(process_status).to receive(:success?).and_return(false) }
+
+      it 'throws an exception about being unable to read the commit message' do
+        expect(Open3).to receive(:capture3).with('git rev-parse HEAD~3').and_return([commit_sha, stderr_output, process_status])
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not get commit SHA for HEAD~3. STDERR was: stderr output')
+      end
+    end
+
+  end
+
   describe '#last_commit_message' do
     let(:dir)                 { Dir.mktmpdir }
     let(:last_commit_message) { 'this should not matter but is here to avoid undefined symbols' }
@@ -362,6 +415,31 @@ describe GitClient do
 
       it 'throws an exception about being unable to show the file at specified sha' do
         expect{ subject }.to raise_error(GitClient::GitError, 'Could not show important_file.txt at sha1. STDERR was: stderr output')
+      end
+    end
+  end
+
+  describe '#fetch' do
+    let(:dir) {Dir.mktmpdir }
+    subject { described_class.fetch(dir) }
+
+    before { allow(described_class).to receive(:system).and_return(git_successful) }
+
+    context 'git works properly' do
+      let(:git_successful) { true }
+
+      it 'should git fetch' do
+        expect(described_class).to receive(:system).with('git fetch')
+
+        subject
+      end
+    end
+
+    context 'git fails' do
+      let(:git_successful) { false }
+
+      it 'throws an exception about not fetching' do
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not fetch')
       end
     end
   end
