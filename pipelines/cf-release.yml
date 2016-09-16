@@ -468,7 +468,7 @@ jobs:
           trigger: true
       - do:
         - task: check-can-i-bump
-          file: buildpacks-ci/tasks/check-can-i-bump.yml
+          file: buildpacks-ci/tasks/check-can-i-bump/task.yml
         - task: upload-blobs
           file: buildpacks-ci/tasks/upload-bosh-blobs-to-cf-release/task.yml
           params:
