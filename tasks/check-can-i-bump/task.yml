@@ -10,4 +10,4 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/scripts/release/cf/check-can-i-bump
+    - buildpacks-ci/tasks/check-can-i-bump/run.rb

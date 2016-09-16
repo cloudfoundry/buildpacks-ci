@@ -775,7 +775,7 @@ jobs:
           passed: [ shipit ]
       - do:
         - task: check-can-i-bump
-          file: buildpacks-ci/tasks/check-can-i-bump.yml
+          file: buildpacks-ci/tasks/check-can-i-bump/task.yml
         - task: upload
           file: buildpacks-ci/tasks/upload-stacks-to-cf-release.yml
           params:
