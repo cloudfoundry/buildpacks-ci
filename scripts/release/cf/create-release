@@ -3,7 +3,7 @@
 
 require 'fileutils'
 require 'yaml'
-require_relative 'common'
+require_relative '../../../lib/cf-release-common'
 
 release_names.each do |language|
   blobs = YAML.load File.read('cf-release/config/blobs.yml')

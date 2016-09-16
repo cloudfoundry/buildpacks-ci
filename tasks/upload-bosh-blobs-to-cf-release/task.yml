@@ -15,7 +15,7 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/scripts/release/cf/upload_blobs
+    - buildpacks-ci/tasks/upload-bosh-blobs-to-cf-release/run.rb
 params:
   ACCESS_KEY_ID:
   SECRET_ACCESS_KEY:

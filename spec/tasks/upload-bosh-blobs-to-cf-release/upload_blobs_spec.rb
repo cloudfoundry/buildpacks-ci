@@ -5,14 +5,14 @@ require 'yaml'
 
 describe 'create bosh release task' do
   context 'when modifying release blobs' do
-    let(:task_file) { 'tasks/upload-bosh-blobs-to-cf-release.yml' }
+    let(:task_file) { 'tasks/upload-bosh-blobs-to-cf-release/task.yml' }
 
     before(:each) do
       execute("-c #{task_file} " \
               '-i buildpacks-ci=. ' \
-              '-i cf-release=./spec/scripts/release/cf/upload_blobs/cf-release ' \
+              '-i cf-release=./spec/tasks/upload-bosh-blobs-to-cf-release/cf-release ' \
               '-i buildpack-bosh-release=. ' \
-              "-i buildpack-github-release=./spec/scripts/release/cf/upload_blobs/#{language}-buildpack-github-release",
+              "-i buildpack-github-release=./spec/tasks/upload-bosh-blobs-to-cf-release/#{language}-buildpack-github-release",
               'BUILDPACK' => "#{language}")
 
     end
