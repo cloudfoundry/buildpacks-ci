@@ -447,7 +447,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: buildpack-releases
+        - get: buildpack-bosh-release
+          resource: <%= language %>-buildpack-bosh-release
         - get: cf-release
           resource: cf-release-develop
         - get: buildpack-github-release
