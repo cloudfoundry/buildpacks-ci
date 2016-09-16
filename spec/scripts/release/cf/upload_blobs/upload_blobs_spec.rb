@@ -11,7 +11,7 @@ describe 'create bosh release task' do
       execute("-c #{task_file} " \
               '-i buildpacks-ci=. ' \
               '-i cf-release=./spec/scripts/release/cf/upload_blobs/cf-release ' \
-              '-i buildpack-releases=. ' \
+              '-i buildpack-bosh-release=. ' \
               "-i buildpack-github-release=./spec/scripts/release/cf/upload_blobs/#{language}-buildpack-github-release",
               'BUILDPACK' => "#{language}")
 

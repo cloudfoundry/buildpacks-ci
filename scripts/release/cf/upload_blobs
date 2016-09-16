@@ -9,26 +9,29 @@ require 'yaml'
 require 'fileutils'
 require 'digest/sha1'
 
+def buildpack_destination_dir(buildpack)
+  buildpack = 'java' if buildpack =~ /offline/
+  "#{buildpack}-buildpack"
+end
+
+buildpack = ENV['BUILDPACK']
 version = ''
 
-Dir.chdir('cf-release') do
-  blob_store_private_yml = {
-    'blobstore' => {
-      's3' => {
-        'access_key_id' => ENV['ACCESS_KEY_ID'],
-        'secret_access_key' => ENV['SECRET_ACCESS_KEY']
-      }
+blob_store_private_yml = {
+  'blobstore' => {
+    's3' => {
+      'access_key_id' => ENV['ACCESS_KEY_ID'],
+      'secret_access_key' => ENV['SECRET_ACCESS_KEY']
     }
-  }.to_yaml
+  }
+}.to_yaml
 
+buildpack_bosh_dir = File.join(Dir.pwd, 'buildpack-bosh-release')
+cf_release_buildpack_submodule_dir = File.join(Dir.pwd, 'cf-release', 'src', "#{buildpack}-buildpack-release")
+
+Dir.chdir('cf-release') do
   File.write('config/private.yml', blob_store_private_yml)
 
-  def buildpack_destination_dir(buildpack)
-    buildpack = 'java' if buildpack =~ /offline/
-    "#{buildpack}-buildpack"
-  end
-
-  buildpack = ENV['BUILDPACK']
   buildpack_blob = Dir["../buildpack-github-release/*.zip"].first
   matches = /v([\d\.]+)\.zip/.match(buildpack_blob)
   version = matches[1] if matches.size > 1
@@ -47,27 +50,14 @@ Dir.chdir('cf-release') do
   blobs.delete(old_buildpack_key)
   File.write('config/blobs.yml', YAML.dump(blobs))
   exit 1 unless system "bosh add blob #{buildpack_blob} #{destination_dir}"
+
+  exit 1 unless system "bosh -n upload blobs"
+  exit 1 unless system "/usr/bin/env bash ./scripts/setup-git-hooks"
+
+  GitClient.update_submodule_to_latest(buildpack_bosh_dir, cf_release_buildpack_submodule_dir)
+  GitClient.add_everything
+  GitClient.safe_commit("Update #{buildpack}-buildpack to v#{version}")
 end
 
-exit system(<<-EOF)
-  #!/usr/bin/env bash
 
-  set -ex
-
-  cd cf-release
-    bosh -n upload blobs
-    /usr/bin/env bash ./scripts/setup-git-hooks
-
-    ref=$(cd ../buildpack-releases && git rev-parse HEAD)
-
-    cd src/buildpacks
-      git fetch
-      git checkout $ref
-    cd ../..
-
-    git add -A
-    git commit -am "Update $BUILDPACK-buildpack to v#{version}"
-  cd ..
-
-  rsync -a cf-release/ cf-release-artifacts
-EOF
+puts `rsync -a cf-release/ cf-release-artifacts`

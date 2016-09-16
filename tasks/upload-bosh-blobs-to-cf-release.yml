@@ -7,8 +7,8 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: cf-release
+  - name: buildpack-bosh-release
   - name: buildpack-github-release
-  - name: buildpack-releases
 outputs:
   - name: cf-release-artifacts
 run:
