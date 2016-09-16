@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
-require_relative 'common'
+require_relative '../../lib/cf-release-common'
 
 $stdout.sync = true
 

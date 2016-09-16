@@ -470,7 +470,7 @@ jobs:
         - task: check-can-i-bump
           file: buildpacks-ci/tasks/check-can-i-bump.yml
         - task: upload-blobs
-          file: buildpacks-ci/tasks/upload-bosh-blobs-to-cf-release.yml
+          file: buildpacks-ci/tasks/upload-bosh-blobs-to-cf-release/task.yml
           params:
             ACCESS_KEY_ID: {{blobstore-access-key}}
             SECRET_ACCESS_KEY: {{blobstore-secret-key}}
