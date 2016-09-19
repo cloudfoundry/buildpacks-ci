@@ -12,8 +12,8 @@ Dir.chdir('buildpack') do
   num_cores = `nproc`
   system("BUNDLE_GEMFILE=cf.Gemfile bundle install --jobs=#{num_cores}")
 
-  changes       = File.read('CHANGELOG').match(/^=+(.*?)^v[0-9]/m)
-  recent_change = changes[1]
+  changes       = File.read('CHANGELOG')
+  recent_change = changes.split(/^v[0-9\.]+.*?=+$/m)[1].strip
 
   File.write(File.join(artifact_path, 'RECENT_CHANGES'), [
     recent_change,
