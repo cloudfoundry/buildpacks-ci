@@ -62,6 +62,12 @@ resources:
       uri: git@github.com:cloudfoundry-incubator/multi-buildpack.git
       private_key: {{multi-buildpack-private-key}}
       branch: master
+  - name: buildpack-github-release
+    type: github-release
+    source:
+      user: cloudfoundry-incubator
+      repository: <%= language %>-buildpack
+      access_token: {{buildpacks-github-token}}
 <% else %>
   - name: buildpack-develop
     type: git
@@ -78,6 +84,12 @@ resources:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: master
+  - name: buildpack-github-release
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: <%= language %>-buildpack
+      access_token: {{buildpacks-github-token}}
 <% end %>
   - name: pivotal-buildpack
     type: s3
@@ -93,12 +105,6 @@ resources:
       regexp: <%= language %>_buildpack-cached-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-  - name: buildpack-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: <%= language %>-buildpack
-      access_token: {{buildpacks-github-token}}
   - name: buildpack-checksums
     type: git
     source:
