@@ -17,5 +17,7 @@ run:
   args:
     - -c
     - |
+      pushd buildpacks-ci
       bundle
-      bundle exec ./scripts/release/commit-shas.rb
+      popd
+      bundle exec buildpacks-ci/scripts/release/commit-shas.rb
