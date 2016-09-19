@@ -11,4 +11,11 @@ inputs:
 outputs:
   - name: sha-artifacts
 run:
-  path: buildpacks-ci/scripts/release/commit-shas
+  path: buildpacks-ci/scripts/release/commit-shas.rb
+run:
+  path: bash
+  args:
+    - -c
+    - |
+      bundle
+      bundle exec ./scripts/release/commit-shas.rb
