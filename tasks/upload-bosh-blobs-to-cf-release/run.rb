@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 require_relative '../../lib/cf-release-common'
+require_relative '../../lib/git-client'
 
 $stdout.sync = true
 
