@@ -10,6 +10,7 @@ rsync -a deployments-buildpacks/ deployments-buildpacks-artifacts
 cd deployments-buildpacks-artifacts
 bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
 bundle install --jobs=$(nproc) --retry 5
+# Add key to ssh-agent
 . bin/target_bosh --no-target
 export BOSH_LITE_PRIVATE_KEY=$(pwd)/keys/bosh.pem
 
@@ -67,6 +68,7 @@ else
   exit 1
 fi
 
+# Commit AWS artifacts
 git add -A
 git commit -m "recreated deployment $DEPLOYMENT_NAME"
 
@@ -76,6 +78,7 @@ until $(curl -k --output /dev/null --silent --head --fail https://$DEPLOYMENT_NA
 done
 
 # Destroy deployment if we are not able to connect and update the user
+# Updates admin user's password from admin to our specified password
 if bosh -u admin -p admin -t $DEPLOYMENT_NAME.$DOMAIN_NAME create user admin $PASSWORD; then
   echo "Deployment working!"
 else
@@ -87,6 +90,8 @@ else
   fi
 fi
 
+# Remove deployment manifests generated from the previous recreation cycle
+# So this recreation cycle's manifest generation is fresh
 if test -n "$(find . -maxdepth 1 -name '*.yml' -print -quit)"; then
   rm -f *.yml
   git add -A
