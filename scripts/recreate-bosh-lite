@@ -49,7 +49,7 @@ elif [ "$IAAS" = gcp ]; then
   export BOSH_PASSWORD=$GCP_BOSH_PASSWORD
 
   # Clean up and destroy old bosh-lite VM
-  BOSH_TARGET="10.0.0.6" ../../bin/target_bosh concourse-gcp
+  BOSH_TARGET="bosh.buildpacks-gcp.ci.$DOMAIN_NAME" ../../bin/target_bosh concourse-gcp
   echo "yes" | bosh delete deployment $GCP_BOSH_LITE_NAME
 
   # Boot up new bosh-lite VM
