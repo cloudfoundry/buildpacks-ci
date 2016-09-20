@@ -22,10 +22,10 @@ if [ "$IAAS" = "aws" ]; then
   /usr/bin/vagrant up --provider=aws
 elif [ "$IAAS" = "azure" ]; then
   # Set up BOSH user and password for Azure BOSH, currently bosh-lite user and password
-  BOSH_USER_TO_RESTORE=$BOSH_USER
-  BOSH_PASSWORD_TO_RESTORE=$BOSH_PASSWORD
-  export BOSH_USER=$AZURE_BOSH_USER
-  export BOSH_PASSWORD=$AZURE_BOSH_PASSWORD
+  BOSH_LITE_USER=$BOSH_USER
+  BOSH_LITE_PASSWORD=$BOSH_PASSWORD
+  export BOSH_USER=$AZURE_BOSH_DIRECTOR_USER
+  export BOSH_PASSWORD=$AZURE_BOSH_DIRECTOR_PASSWORD
 
   # Clean up and destroy old bosh-lite VM
   BOSH_TARGET=bosh.buildpacks-azure.ci.$DOMAIN_NAME ../../bin/target_bosh concourse-azure
@@ -39,14 +39,14 @@ elif [ "$IAAS" = "azure" ]; then
   bosh deployment bosh-lite.yml
   echo "yes" | bosh deploy
 
-  export BOSH_USER=$BOSH_USER_TO_RESTORE
-  export BOSH_PASSWORD=$BOSH_PASSWORD_TO_RESTORE
+  export BOSH_USER=$BOSH_LITE_USER
+  export BOSH_PASSWORD=$BOSH_LITE_PASSWORD
 elif [ "$IAAS" = gcp ]; then
 
-  BOSH_USER_TO_RESTORE=$BOSH_USER
-  BOSH_PASSWORD_TO_RESTORE=$BOSH_PASSWORD
-  export BOSH_USER=$GCP_BOSH_USER
-  export BOSH_PASSWORD=$GCP_BOSH_PASSWORD
+  BOSH_LITE_USER=$BOSH_USER
+  BOSH_LITE_PASSWORD=$BOSH_PASSWORD
+  export BOSH_USER=$GCP_BOSH_DIRECTOR_USER
+  export BOSH_PASSWORD=$GCP_BOSH_DIRECTOR_PASSWORD
 
   # Clean up and destroy old bosh-lite VM
   BOSH_TARGET="bosh.buildpacks-gcp.ci.$DOMAIN_NAME" ../../bin/target_bosh concourse-gcp
@@ -60,8 +60,8 @@ elif [ "$IAAS" = gcp ]; then
   bosh deployment bosh-lite.yml
   echo "yes" | bosh deploy
 
-  export BOSH_USER=$BOSH_USER_TO_RESTORE
-  export BOSH_PASSWORD=$BOSH_PASSWORD_TO_RESTORE
+  export BOSH_USER=$BOSH_LITE_USER
+  export BOSH_PASSWORD=$BOSH_LITE_PASSWORD
 else
   echo "Please specify IAAS=(aws|azure|gcp)"
   exit 1
@@ -80,7 +80,7 @@ if bosh -u admin -p admin -t $DEPLOYMENT_NAME.$DOMAIN_NAME create user admin $PA
   echo "Deployment working!"
 else
   if [ "$IAAS" = "aws" ]; then
-    echo "Deployment failed deleting instance"
+    echo "Deployment failed: deleting instance"
     $SCRIPT_DIR/terminate-bosh-lite
     rm -rf .vagrant
     exit 1
