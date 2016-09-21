@@ -161,14 +161,13 @@ jobs:
         - get: deployments-buildpacks
         - get: buildpacks-ci
       - task: recreate-cf-release-bosh-lite
-        file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+        file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
         params:
           IAAS: azure
           AZURE_BOSH_DIRECTOR_USER: {{azure-bosh-director-user}}
           AZURE_BOSH_DIRECTOR_PASSWORD: {{azure-bosh-director--password}}
           AZURE_BOSH_LITE_NAME: cf-release-azure-bosh-lite
           DEPLOYMENT_NAME: cf-release.buildpacks-azure.ci
-          PASSWORD: {{bosh-lite-password}}
           BOSH_PRIVATE_KEY: {{bosh_private_key}}
           BOSH_USER: {{bosh_user}}
           BOSH_PASSWORD: {{bosh_password}}

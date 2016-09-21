@@ -145,10 +145,9 @@ jobs:
         - get: deployments-buildpacks
         - get: buildpacks-ci
       - task: recreate-cf-release-bosh-lite
-        file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+        file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
         params:
           DEPLOYMENT_NAME: cf-release.buildpacks.ci
-          PASSWORD: {{bosh-lite-password}}
           BOSH_PRIVATE_KEY: {{bosh_private_key}}
           BOSH_USER: {{bosh_user}}
           BOSH_PASSWORD: {{bosh_password}}
