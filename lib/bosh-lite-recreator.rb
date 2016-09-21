@@ -50,7 +50,13 @@ class BoshLiteRecreator
       deploy_bosh_lite
     end
 
-    wait_for_bosh_lite
+    if bosh_lite_running?
+      puts 'Successfully contacted BOSH lite'
+    else
+      puts 'Unable to contact BOSH lite after 30 minutes. Timing out'
+      exit 1
+    end
+
     update_admin_password
 
     # Remove deployment manifests generated from the previous recreation cycle
@@ -58,13 +64,10 @@ class BoshLiteRecreator
     cleanup_deployment_manifests
   end
 
-  def run_or_exit(command)
-    exit 1 unless system(command)
-  end
 
   def deploy_aws_bosh_lite
     Dir.chdir(deployment_dir) do
-      ENV['VAGRANT_CWD'] = Dir.pwd
+      ENV['VAGRANT_CWD'] = deployment_dir
       run_or_exit "/usr/bin/vagrant up --provider=aws"
     end
   end
@@ -99,22 +102,22 @@ class BoshLiteRecreator
   end
 
   def install_ssh_key(install_dir)
-    ssh_key_file = File.join(install_dir,'keys','bosh.pem')
+    ssh_key_file = File.join(install_dir, 'keys', 'bosh.pem')
     File.write(ssh_key_file, bosh_private_key)
 
-    run_or_exit "chmod 0600 #{bosh_private_key}"
-    run_or_exit "ssh-add #{bosh_private_key}"
+    run_or_exit "chmod 0600 #{ssh_key_file}"
+    run_or_exit "ssh-add #{ssh_key_file}"
 
     ENV['BOSH_LITE_PRIVATE_KEY'] = ssh_key_file
   end
 
   def update_admin_password
-    able_to_update_admin = system "bosh -u admin -p admin -t #{bosh_lite_url} create user admin #{bosh_lite_password}"
+    able_to_update_admin = system "bosh -u #{bosh_lite_user} -p admin -t #{bosh_lite_url} create user #{bosh_lite_user} #{bosh_lite_password}"
     if able_to_update_admin
       puts "Deployment working!"
     elsif iaas == 'aws'
       puts "Deployment failed: deleting instance"
-      delete_aws_instances(deployment_dir)
+      delete_aws_instances
       exit 1
     else
       puts 'Deployment failed'
@@ -125,18 +128,18 @@ class BoshLiteRecreator
   def delete_aws_instances
     Dir.chdir(deployment_dir) do
       lib_directory = File.expand_path(File.dirname(__FILE__))
-      terminate_bosh_lite_script = File.join(lib_directory, '..', 'scripts', 'terminate-bosh-lite')
+      terminate_bosh_lite_script = File.expand_path(File.join(lib_directory, '..', 'scripts', 'terminate-bosh-lite'))
 
       run_or_exit terminate_bosh_lite_script
       FileUtils.rm_rf('.vagrant')
     end
   end
 
-  def wait_for_bosh_lite
+  def bosh_lite_running?
     curl_command = "curl -k --output /dev/null --silent --head --fail #{bosh_lite_url}:25555/info"
     puts "Checking BOSH Lite via curl command: #{curl_command}"
 
-    max_wait_time = 1800
+    max_wait_time = 30*60
     wait_time = 0
     wait_interval = 10
     bosh_lite_unresponsive = !system(curl_command)
@@ -147,6 +150,8 @@ class BoshLiteRecreator
       wait_time += wait_interval
       sleep(wait_interval)
     end
+
+    wait_time < max_wait_time
   end
 
   def cleanup_deployment_manifests
@@ -157,5 +162,11 @@ class BoshLiteRecreator
         GitClient.safe_commit("remove deployment manifests for #{deployment_id}")
       end
     end
+  end
+
+  private
+
+  def run_or_exit(command)
+    exit 1 unless system(command)
   end
 end
