@@ -84,8 +84,8 @@ jobs:
     serial: true
     public: true
     plan:
-     - get: nightly-trigger
-       trigger: true
+      - get: nightly-trigger
+        trigger: true
       - put: resource-pools
         params:
           claim: {{deployment-name}}
