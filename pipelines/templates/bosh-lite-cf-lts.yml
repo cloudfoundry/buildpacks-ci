@@ -102,7 +102,7 @@ jobs:
             passed: [checkout-environment]
             trigger: true
         - task: recreate-bosh-lite
-          file: buildpacks-ci/tasks/recreate-bosh-lite.yml
+          file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
           params:
             IAAS: {{iaas}}
             AZURE_BOSH_DIRECTOR_USER: {{azure-bosh-director-user}}
@@ -112,7 +112,6 @@ jobs:
             GCP_BOSH_DIRECTOR_PASSWORD: {{gcp-bosh-director-password}}
             GCP_BOSH_LITE_NAME: {{bosh-lite-name}}
             DEPLOYMENT_NAME: {{deployment-name}}
-            PASSWORD: {{bosh-lite-password}}
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
             BOSH_PASSWORD: {{bosh_password}}
