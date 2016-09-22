@@ -16,4 +16,7 @@ outputs:
   - name: pivnet-dotnet-core-metadata-artifacts
 
 run:
-  path: buildpacks-ci/tasks/write-pivnet-metadata/run.rb
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/write-pivnet-metadata/run.rb
