@@ -11,4 +11,7 @@ inputs:
   - name: buildpacks-ci
 
 run:
-  path: buildpacks-ci/tasks/sample-app-smoke-test/run.rb
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/sample-app-smoke-test/run.rb

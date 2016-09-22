@@ -10,7 +10,10 @@ inputs:
 outputs:
   - name: deployments-buildpacks-artifacts
 run:
-  path: buildpacks-ci/tasks/recreate-bosh-lite/run.rb
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/recreate-bosh-lite/run.rb
 params:
   DEPLOYMENT_NAME:
   PASSWORD:
