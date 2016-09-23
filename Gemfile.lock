@@ -3,14 +3,30 @@ GEM
   specs:
     addressable (2.4.0)
     ast (2.3.0)
+    axiom-types (0.1.1)
+      descendants_tracker (~> 0.0.4)
+      ice_nine (~> 0.11.0)
+      thread_safe (~> 0.3, >= 0.3.1)
     bump (0.5.3)
+    coercible (1.0.0)
+      descendants_tracker (~> 0.0.1)
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
+    declarative (0.0.8)
+      uber (>= 0.0.15)
+    descendants_tracker (0.0.4)
+      thread_safe (~> 0.3, >= 0.3.1)
     diff-lcs (1.2.5)
+    equalizer (0.0.11)
+    excon (0.52.0)
     faraday (0.9.2)
       multipart-post (>= 1.2, < 3)
+    faraday_middleware (0.10.0)
+      faraday (>= 0.7.4, < 0.10)
     hashdiff (0.3.0)
+    ice_nine (0.11.2)
     mini_portile2 (2.1.0)
+    multi_json (1.12.1)
     multipart-post (2.0.0)
     nokogiri (1.6.8)
       mini_portile2 (~> 2.1.0)
@@ -22,6 +38,9 @@ GEM
     pkg-config (1.1.7)
     powerpack (0.1.1)
     rainbow (2.1.0)
+    representable (3.0.0)
+      declarative (~> 0.0.5)
+      uber (~> 0.0.15)
     rspec (3.5.0)
       rspec-core (~> 3.5.0)
       rspec-expectations (~> 3.5.0)
@@ -50,8 +69,24 @@ GEM
     sawyer (0.7.0)
       addressable (>= 2.3.5, < 2.5)
       faraday (~> 0.8, < 0.10)
+    thread_safe (0.3.5)
+    tracker_api (1.4.0)
+      addressable
+      equalizer
+      excon
+      faraday (~> 0.9.0)
+      faraday_middleware
+      multi_json
+      representable
+      virtus
+    uber (0.0.15)
     unicode-display_width (1.1.0)
     version_sorter (2.0.0)
+    virtus (1.0.5)
+      axiom-types (~> 0.1)
+      coercible (~> 1.0)
+      descendants_tracker (~> 0.0, >= 0.0.3)
+      equalizer (~> 0.0, >= 0.0.9)
     webmock (2.1.0)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
@@ -68,6 +103,7 @@ DEPENDENCIES
   rspec-rerun
   rubocop
   rubocop-rspec
+  tracker_api
   version_sorter
   webmock
 
@@ -75,4 +111,4 @@ RUBY VERSION
    ruby 2.3.1p112
 
 BUNDLED WITH
-   1.12.5
+   1.13.1

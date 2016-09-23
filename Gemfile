@@ -9,6 +9,7 @@ gem 'webmock'
 gem 'nokogiri'
 gem 'octokit'
 gem 'bump', '= 0.5.3'
+gem 'tracker_api'
 
 group :development do
   gem 'version_sorter'
