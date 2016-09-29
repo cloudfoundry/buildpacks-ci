@@ -2,7 +2,9 @@
 
 set -e
 
-cp receipt-s3/cflinuxfs2_receipt-* stacks/cflinuxfs2/cflinuxfs2_receipt
+SUFFIX="${ROOTFS_SUFFIX-}"
+
+cp receipt-s3/cflinuxfs2_receipt$SUFFIX-* stacks/cflinuxfs2/cflinuxfs2_receipt
 
 pushd stacks
     version=`cat ../version/number`

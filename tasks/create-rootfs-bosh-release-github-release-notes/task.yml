@@ -1,0 +1,15 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: version
+outputs:
+  - name: release-body
+run:
+  path: bash
+  args:
+    - "-cl"
+    - "buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes/run.rb"

@@ -2,6 +2,7 @@
 
 set -e
 DOMAIN_NAME=${DOMAIN_NAME:-cf-app.com}
+ROOTFS_RELEASE="${ROOTFS_RELEASE:-cflinuxfs2-rootfs}"
 
 pushd deployments-buildpacks
   bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
@@ -52,6 +53,7 @@ popd
 
 pushd diego-release
   ./scripts/generate-bosh-lite-manifests
+  ../buildpacks-ci/scripts/swap-diego-rootfs-release.rb $(pwd) bosh-lite/deployments/diego.yml
 popd
 
 pushd deployments-buildpacks

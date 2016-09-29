@@ -1,0 +1,18 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: version
+  - name: cflinuxfs2-rootfs-release-version
+  - name: rootfs-pivnet-metadata
+outputs:
+  - name: pivnet-metadata-artifacts
+run:
+  path: bash
+  args:
+    - "-cl"
+    - "buildpacks-ci/tasks/write-cflinuxfs2-release-pivnet-metadata/run.rb"

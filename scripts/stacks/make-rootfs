@@ -2,15 +2,17 @@
 
 set -eux
 
+SUFFIX="${STACKS_SUFFIX-}"
+
 buildpacks-ci/scripts/start-docker
 
 pushd stacks
   make
 
-  versioned_stack_filename="../stacks-artifacts/cflinuxfs2-$(cat ../version/number).tar.gz"
+  versioned_stack_filename="../stacks-artifacts/cflinuxfs2$SUFFIX-$(cat ../version/number).tar.gz"
   mv cflinuxfs2.tar.gz $versioned_stack_filename
 
-  versioned_receipt_filename="../receipt-artifacts/cflinuxfs2_receipt-$(cat ../version/number)"
+  versioned_receipt_filename="../receipt-artifacts/cflinuxfs2_receipt$SUFFIX-$(cat ../version/number)"
   echo "Rootfs SHASUM: `sha1sum $versioned_stack_filename | awk '{print $1}'`" > $versioned_receipt_filename
   echo "" >> $versioned_receipt_filename
   cat cflinuxfs2/cflinuxfs2_dpkg_l.out >> $versioned_receipt_filename

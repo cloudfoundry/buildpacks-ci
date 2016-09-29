@@ -2,13 +2,27 @@
 
 set -e
 
-release_name=cflinuxfs2-rootfs-release
-filename=`cat cflinuxfs2-rootfs-release/config/blobs.yml | grep cflinuxfs2 | cut -d ':' -f 1`
-mkdir -p $release_name/blobs/$(dirname $filename)
-cp stack-s3/*.tar.gz $release_name/blobs/$filename
+release_name="${ROOTFS_RELEASE:-cflinuxfs2-rootfs}"
 
-pushd $release_name
-    bosh create release --force --with-tarball --name cflinuxfs2-rootfs --version 212.0.`date +"%s"`
+echo "Overwriting BOSH release $release_name"
+
+release_dir=cflinuxfs2-rootfs-release
+filename=`cat cflinuxfs2-rootfs-release/config/blobs.yml | grep cflinuxfs2 | cut -d ':' -f 1`
+
+echo "Creating $release_dir directory"
+
+mkdir -p $release_dir/blobs/$(dirname $filename)
+
+echo "Moving stack-s3/*.tar.gz to $release_dir/blobs/$filename"
+
+cp stack-s3/*.tar.gz $release_dir/blobs/$filename
+
+pushd $release_dir
+    echo "Running 'bosh create release' in $release_dir"
+
+    bosh create release --force --with-tarball --name $ROOTFS_RELEASE --version 212.0.`date +"%s"`
 popd
 
-rsync -a $release_name/ ${release_name}-artifacts
+echo "rsyncing $release_dir to ${release_dir}-artifacts"
+
+rsync -a $release_dir/ ${release_dir}-artifacts

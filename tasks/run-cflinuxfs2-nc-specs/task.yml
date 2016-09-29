@@ -1,0 +1,14 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: cflinuxfs2-rootfs-release
+run:
+  path: buildpacks-ci/tasks/run-cflinuxfs2-nc-specs/run.sh
+params:
+  DEPLOYMENT_NAME:
+  CF_PASSWORD:

@@ -1,0 +1,19 @@
+  templates:
+  - name: nsync
+    release: cf
+  - name: cflinuxfs2-rootfs-setup
+    release: cflinuxfs2-rootfs
+  - name: route_emitter
+    release: diego
+
+releases:
+- name: diego
+  version: latest
+- name: cflinuxfs2-rootfs
+  version: latest
+- name: etcd
+  version: latest
+- name: garden-linux
+  version: latest
+- name: cf
+  version: latest
