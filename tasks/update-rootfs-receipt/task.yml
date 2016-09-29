@@ -12,4 +12,4 @@ inputs:
 outputs:
   - name: new-stack-commit
 run:
-  path: buildpacks-ci/scripts/stacks/update-receipt
+  path: buildpacks-ci/tasks/update-rootfs-receipt/run.sh

@@ -9,7 +9,6 @@ popd
 
 DOMAIN_NAME=${DOMAIN_NAME:-cf-app.com}
 
-
 if [ "$DIEGO_DOCKER_ON" = "true" ]
 then
   cf api api.$DEPLOYMENT_NAME.$DOMAIN_NAME --skip-ssl-validation

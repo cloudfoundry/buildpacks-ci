@@ -12,6 +12,7 @@ inputs:
   - name: pivotal-buildpacks-cached
   - name: pivnet-buildpack-metadata
   - name: buildpack-artifacts
+  - name: cflinuxfs2-rootfs-release
 
 outputs:
   - name: pivnet-buildpack-metadata-artifacts
