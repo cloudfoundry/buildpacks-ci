@@ -1,0 +1,23 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+
+inputs:
+  - name: buildpacks-ci
+  - name: buildpack
+
+run:
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/create-buildpack-release-tracker-story/run.rb
+
+params:
+  BUILDPACK_NAME:
+  TRACKER_PROJECT_ID:
+  TRACKER_REQUESTER_ID:
+  TRACKER_API_TOKEN:

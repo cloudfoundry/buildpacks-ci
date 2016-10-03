@@ -4,7 +4,7 @@ require_relative '../../lib/buildpack-release-story-creator'
 
 describe BuildpackReleaseStoryCreator do
   let(:buildpack_name) { 'elixir' }
-  let(:previous_buildpack_version) { 'v2.10.3' }
+  let(:previous_buildpack_version) { '2.10.3' }
   let(:tracker_project_id) { 'tracker_project_id_stub' }
   let(:tracker_requester_id) { 555555 }
   let(:tracker_api_token) { 'tracker_api_token_stub' }
@@ -55,7 +55,7 @@ describe BuildpackReleaseStoryCreator do
                                                            double(id: 222222222, name: 'Buildpack should tweet on stage')])
 
     expect(buildpack_project).to receive(:create_story).
-        with(name: '**Release:** elixir-buildpack v2.10.4',
+        with(name: '**Release:** elixir-buildpack 2.10.4',
              description: <<~DESCRIPTION,
                           Stories:
 
@@ -65,7 +65,8 @@ describe BuildpackReleaseStoryCreator do
                           Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
                           DESCRIPTION
              estimate: 1,
-             labels: %w(elixir release)
+             labels: %w(elixir release),
+             requested_by_id: 555555
         )
 
     subject.run!
