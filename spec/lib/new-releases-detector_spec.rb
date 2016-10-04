@@ -35,6 +35,7 @@ describe NewReleasesDetector do
     let(:all_versions)      { old_versions + new_versions }
 
     before do
+      allow_any_instance_of(described_class).to receive(:warn).and_call_original
       allow(File).to receive(:exist?).with(yaml_filename).and_return(true)
       allow(YAML).to receive(:load_file).with(yaml_filename).and_return(old_versions)
       allow_any_instance_of(described_class).to receive(:open)
@@ -54,6 +55,12 @@ describe NewReleasesDetector do
     it 'writes the diff in releases to a file' do
       expect(File).to receive(:write).with(yaml_new_filename, new_versions.to_yaml)
       subject
+    end
+
+    it 'outputs to stderr that there are new updates' do
+      expect do
+        subject
+      end.to output(/There are updates to the \*#{dependency}\* dependency:(.*)\n/).to_stderr
     end
   end
 
