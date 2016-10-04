@@ -77,6 +77,14 @@ class NewReleasesDetector
       diff_tags = current_tags - previous_tags
 
       if diff_tags.any?
+        output = "There are updates to the *#{current_dependency}* dependency:"
+
+        diff_tags.each do |tag|
+          output += " #{tag}"
+        end
+
+        warn output
+
         dependency_tags[current_dependency] = diff_tags
         File.write(filename, current_tags.to_yaml)
         File.write(filename_diff, diff_tags.to_yaml)
