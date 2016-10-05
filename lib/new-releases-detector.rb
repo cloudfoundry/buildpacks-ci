@@ -99,6 +99,7 @@ class NewReleasesDetector
     @get_tags_functions = {
       bundler:         -> { Octokit.tags('bundler/bundler').map(&:name).grep(/^v/) },
       composer:        -> { Octokit.tags('composer/composer').map(&:name) },
+      dotnet:          -> { Octokit.tags('dotnet/cli').map(&:name).grep(/^v/) },
       glide:           -> { Octokit.tags('Masterminds/glide').map(&:name).grep(/^v/) },
       go:              -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
       godep:           -> { Octokit.tags('tools/godep').map(&:name).grep(/^v/) },
