@@ -58,7 +58,7 @@ class ConcourseBinaryBuilder
 
     @flags = "--name=#{binary_name}"
     latest_build.each_pair do |key, value|
-      if key == 'md5' || key == 'sha256'
+      if key == 'md5' || key == 'sha256' || key == 'git-commit-sha'
         @verification_type = key
         @verification_value = value
       elsif key == 'gpg-signature'
@@ -117,7 +117,7 @@ class ConcourseBinaryBuilder
     ext = case binary_name
             when 'composer' then
               '*.phar'
-            when 'go' then
+            when 'go', 'dotnet' then
               '*.tar.gz'
             else
               '-*.tgz'
@@ -197,7 +197,7 @@ class ConcourseBinaryBuilder
   end
 
   def is_automated
-    automated = %w(composer godep glide nginx node)
+    automated = %w(composer dotnet godep glide nginx node)
     automated.include? binary_name
   end
 
