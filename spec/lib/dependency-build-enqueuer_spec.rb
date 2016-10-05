@@ -145,5 +145,56 @@ describe DependencyBuildEnqueuer do
 
       it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'sha256'
     end
+
+    context "dotnet" do
+      let(:dependency)          { "dotnet" }
+      let(:new_versions)        { %w(v1.0.0-preview2.0.1) }
+      let(:expected_version)    { "v1.0.0-preview2.0.1" }
+      let(:commit_message)      {"Enqueue #{dependency} - #{expected_version}"}
+
+      context 'there is a pre-release version submitted to be built' do
+        before do
+          allow(Dir).to receive(:chdir).and_call_original
+          allow(GitClient).to receive(:add_file).and_return(nil)
+          allow(GitClient).to receive(:safe_commit).with(commit_message).and_return(nil)
+
+          File.open(dependency_new_versions_file, "w") do |file|
+            file.write new_versions.to_yaml
+          end
+
+          subject.enqueue_build
+        end
+
+        it 'switches to the binary-builds directory to commit, then back' do
+          expect(Dir).to have_received(:chdir).with(binary_builds_dir)
+        end
+
+        it 'git adds <dep>-builds.yml once for each version' do
+          expect(GitClient).to have_received(:add_file).with(builds_file)
+        end
+
+        context 'for each distinct version' do
+          let(:committed_dependency) { YAML.load_file(builds_file) }
+
+          it 'has a single version number in a commit message' do
+            expect(GitClient).to have_received(:safe_commit).with(commit_message)
+          end
+
+          it 'has a single version number in the <dependency>-builds.yml file' do
+            expect(committed_dependency[dependency].size).to eq 1
+          end
+
+          it 'has the version number in the <dependency>-builds.yml file' do
+            expect(committed_dependency[dependency][0]['version']).to eq expected_version
+          end
+
+          it 'has the git-commit-sha verification in the <dependency>-builds.yml file' do
+              puts committed_dependency
+              expect(committed_dependency[dependency][0].size).to eq 2
+              expect(committed_dependency[dependency][0]['git-commit-sha']).to eq '635cf40e58ede8a53e8b9555e19a6e1ccd6f9fbe'
+          end
+        end
+      end
+    end
   end
 end

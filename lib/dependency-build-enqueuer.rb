@@ -1,4 +1,5 @@
 # encoding: utf-8
+require 'octokit'
 require 'yaml'
 require_relative 'git-client'
 
@@ -30,7 +31,7 @@ class DependencyBuildEnqueuer
     dependency_builds_file = File.join(binary_builds_dir, "#{dependency}-builds.yml")
 
     new_dependency_versions.each do |ver|
-      next if prerelease_version?(ver)
+      next if (prerelease_version?(ver) && dependency != 'dotnet')
       ver = massage_version_for_manifest_format(ver)
 
       new_build = {"version" => ver}
@@ -68,6 +69,7 @@ class DependencyBuildEnqueuer
 
   def massage_version_for_semver(version)
     case dependency
+      when "dotnet" then version.gsub("v","")
       when "godep" then version.gsub("v","")
       when "glide" then version.gsub("v","")
       when "nginx" then version.gsub("release-","")
@@ -95,7 +97,16 @@ class DependencyBuildEnqueuer
       gpg_signature = `curl -sL #{gpg_signature_url}`
       verifications << ['gpg-rsa-key-id', 'A1C052F8']
       verifications << ['gpg-signature', gpg_signature]
+    when "dotnet"
+      verifications << git_commit_sha_verification('dotnet/cli', version)
     end
+  end
+
+  def self.git_commit_sha_verification(repo, version)
+    t = Octokit.tags(repo).find do |t|
+      t.name == version
+    end
+    [ 'git-commit-sha', t[:commit][:sha] ]
   end
 
   def self.shasum_256_verification(download_url)
