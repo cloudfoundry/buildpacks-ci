@@ -187,6 +187,20 @@ describe ConcourseBinaryBuilder do
       it_behaves_like 'the resulting tar files are copied to the proper location'
     end
 
+    context 'the dependency is dotnet' do
+      let(:dependency) { 'dotnet' }
+      let(:output_file) { 'dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz' }
+      let(:verification_type) { 'git-commit-sha' }
+      let(:verification_value) { 'this-is-a-commit-sha' }
+      let(:source_url) { 'https://github.com/dotnet/cli' }
+      let(:version) { 'v1.0.0-preview2.0.1' }
+
+      before { subject.run }
+
+      it_behaves_like 'a commit is made in builds-yaml-artifacts with the proper git message', 'automated'
+      it_behaves_like 'the resulting tar files are copied to the proper location'
+    end
+
     context 'the dependency is composer' do
       let(:dependency)    { 'composer' }
       let(:output_file)        { 'composer-1.2.0.phar' }
