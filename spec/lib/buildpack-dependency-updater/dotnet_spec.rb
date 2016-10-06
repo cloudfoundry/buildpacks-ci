@@ -124,7 +124,7 @@ describe BuildpackDependencyUpdater do
 
     it 'records that no versions were removed' do
       subject.run!
-      expect(subject.removed_versions).to eq(nil)
+      expect(subject.removed_versions).to eq([])
     end
   end
 

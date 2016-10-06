@@ -28,7 +28,7 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
   end
 
   def perform_dependency_update
-    @removed_versions = nil
+    @removed_versions = []
 
     dependency_hash = {
       "name" => dependency,
