@@ -28,13 +28,7 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
   end
 
   def perform_dependency_update
-    original_dependencies = buildpack_manifest["dependencies"].clone
-
-    oldest_version = find_oldest_version(buildpack_manifest["dependencies"].map {|dep| dep['version'] })
-
-    new_dependencies = buildpack_manifest["dependencies"].delete_if { |dep| dep["name"] == dependency  && dep['version'] == oldest_version}
-
-    @removed_versions = (original_dependencies - new_dependencies).map{|dep| dep['version']} unless new_dependencies == original_dependencies
+    @removed_versions = nil
 
     dependency_hash = {
       "name" => dependency,
@@ -44,12 +38,6 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
       "cf_stacks" => ["cflinuxfs2"]
     }
     buildpack_manifest["dependencies"] << dependency_hash
-  end
-
-  def find_oldest_version(versions)
-    versions.sort do |v1, v2|
-      Gem::Version.new(v1) <=> Gem::Version.new(v2)
-    end.first
   end
 
   def perform_dependency_specific_changes
@@ -71,9 +59,6 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
 
     versions_file = File.join(buildpack_dir,'dotnet-versions.yml')
     versions = YAML.load_file(versions_file)
-
-    oldest_version = find_oldest_version(versions.map { |v| v['dotnet']})
-    versions.delete_if { |v| v['dotnet'] == oldest_version }
 
     version_hash = {
       'dotnet' => dependency_version,
