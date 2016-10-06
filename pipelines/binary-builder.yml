@@ -80,11 +80,15 @@ resources:
       paths: [ <%= auto_new %>-new.yaml ]
 <% end %>
 
-<% %w(go nodejs ruby php staticfile).each do |language| %>
+<% %w(go dotnet-core nodejs ruby php staticfile).each do |language| %>
   - name: <%= language %>-buildpack
     type: git
     source:
+      <% if language == 'dotnet-core' %>
+      uri: git@github.com:cloudfoundry-incubator/<%= language %>-buildpack.git
+      <% else %>
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
+      <% end %>
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
       ignore_paths:
@@ -103,7 +107,7 @@ groups:
 <% %w(composer dotnet glide godep nginx node).each do |auto_dep| %>
     - build-<%= auto_dep %>
 <% end %>
-<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"]}.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"], 'dotnet-core' => ['dotnet'] }.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
     - update-<%= dependency %>-in-<%= buildpack %>-buildpack
   <% end %>
@@ -370,7 +374,7 @@ jobs:
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
-<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"]}.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"], 'dotnet-core' => ['dotnet']}.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
   - name: update-<%= dependency %>-in-<%= buildpack %>-buildpack
     serial: true
