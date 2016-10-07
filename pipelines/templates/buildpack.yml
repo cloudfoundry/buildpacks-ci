@@ -4,13 +4,29 @@ resource_types:
     type: docker-image
     source:
       repository: cfcommunity/slack-notification-resource
+  - name: pivnet
+    type: docker-image
+    source:
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final
 
 resources: ############################################################################################################
-  - name: buildpacks-pivnet-uploader
+  - name: pivnet-integration
+    type: pivnet
+    source:
+      endpoint: https://pivnet-integration.cfapps.io
+      bucket: pivotal-network-staging
+      api_token: {{pivnet-apikey}}
+      product_slug: buildpacks
+      access_key_id: {{pivnet-access-key}}
+      secret_access_key: {{pivnet-secret-key}}
+  - name: pivnet-buildpack-metadata
     type: git
     source:
-      uri: git@github.com:pivotal-cf/buildpacks-pivnet-uploader
-      private_key: {{buildpacks-pivnet-uploader-private-key}}
+      branch: master
+      private_key: {{pivotal-cf-buildpacks-ci-robots}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci-robots.git # pivotal-cf because pivnet is not foundation's
+      paths: [ pivnet-metadata/<%= language %>.yml ]
   - name: buildpacks-ci
     type: git
     source:
@@ -324,13 +340,13 @@ jobs: ##########################################################################
             - buildpack-artifacts/*_buildpack-cached-v*.zip
             - buildpack-artifacts/*_buildpack-cached-v*.zip.SHA256SUM.txt
 <% unless language == "multi" %>
-  - name: buildpack-to-pivnet
+  - name: write-pivnet-metadata
     serial: true
     public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: buildpacks-pivnet-uploader
+        - get: pivnet-buildpack-metadata
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
           passed: [ buildpack-release ]
@@ -340,16 +356,10 @@ jobs: ##########################################################################
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack.yml
         privileged: true
-      - task: upload to pivnet
-        file: buildpacks-ci/tasks/upload-to-pivnet.yml
+      - task: write-pivnet-metadata
+        file: buildpacks-ci/tasks/write-buildpack-pivnet-metadata/task.yml
         params:
-          AWS_ACCESS_KEY_ID: {{pivnet-access-key}}
-          AWS_SECRET_ACCESS_KEY: {{pivnet-secret-key}}
-          PIVNET_S3_BUCKET: pivotalnetwork
-          PIVNET_ADDRESS: https://network.pivotal.io/
-          PIVNET_APIKEY: {{pivnet-apikey}}
-          PIVNET_PRODUCT_NAME: {{pivnet-product-name}}
-          GITHUB_URL: https://github.com/cloudfoundry/<%= language %>-buildpack
+          BUILDPACK: <%= language %>
         privileged: true
 <% end %>
   - name: specs-edge-develop
