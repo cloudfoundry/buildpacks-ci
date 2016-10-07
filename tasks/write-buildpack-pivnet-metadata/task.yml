@@ -10,10 +10,11 @@ inputs:
   - name: buildpack-master
   - name: buildpacks-ci
   - name: pivotal-buildpack-cached
-  - name: pivnet-dotnet-core-metadata
+  - name: pivnet-buildpack-metadata
+  - name: buildpack-artifacts
 
 outputs:
-  - name: pivnet-dotnet-core-metadata-artifacts
+  - name: pivnet-buildpack-metadata-artifacts
 
 run:
   path: bash
