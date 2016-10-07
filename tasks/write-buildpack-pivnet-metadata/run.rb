@@ -8,7 +8,7 @@ require_relative "#{root_dir}/buildpacks-ci/lib/git-client"
 buildpack = ENV['BUILDPACK']
 metadata_dir  = File.join(root_dir, 'pivnet-buildpack-metadata', 'pivnet-metadata')
 buildpack_dir = File.join(root_dir, 'buildpack')
-recent_changes_file = File.join(root_dir, 'buildpack-artifacts', 'RECENT_CHANGES')
+recent_changes_filename = File.join(root_dir, 'buildpack-artifacts', 'RECENT_CHANGES')
 
 buildpack_files = ''
 
