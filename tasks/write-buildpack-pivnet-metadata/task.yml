@@ -7,9 +7,9 @@ image_resource:
     repository: cfbuildpacks/ci
 
 inputs:
-  - name: buildpack-master
+  - name: buildpack
   - name: buildpacks-ci
-  - name: pivotal-buildpack-cached
+  - name: pivotal-buildpacks-cached
   - name: pivnet-buildpack-metadata
   - name: buildpack-artifacts
 
