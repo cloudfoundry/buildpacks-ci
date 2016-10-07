@@ -361,6 +361,24 @@ jobs: ##########################################################################
         params:
           BUILDPACK: <%= language %>
         privileged: true
+      - put: pivnet-buildpack-metadata
+        params:
+          repository: pivnet-buildpack-metadata-artifacts
+          rebase: true
+
+  - name: release-to-pivnet
+    public: true
+    plan:
+      - get: pivotal-buildpack-cached
+        passed: [ write-pivnet-metadata ]
+      - get: pivnet-buildpack-metadata
+        passed: [ write-pivnet-metadata ]
+        trigger: true
+      - put: pivnet-integration
+        params:
+          file_glob: pivotal-buildpack-cached/<%= language %>_buildpack-cached-v*.zip
+          s3_filepath_prefix: PCF-Buildpacks
+          metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
   - name: specs-edge-develop
     serial: true
