@@ -2,7 +2,7 @@
 
 require 'yaml'
 
-class PivnetMetadataWriter
+class BuildpackPivnetMetadataWriter
 
   attr_reader :output_dir, :buildpack_dir, :cached_buildpack_filename
 
