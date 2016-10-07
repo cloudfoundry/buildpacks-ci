@@ -62,12 +62,12 @@ resources: #####################################################################
       user: {{buildpacks-github-org}}
       repository: machete
       access_token: {{buildpacks-github-token}}
-<% if language == 'multi' %>
+<% if language == 'multi' || language == 'dotnet-core' %>
   - name: buildpack-develop
     type: git
     source:
-      uri: git@github.com:cloudfoundry-incubator/multi-buildpack.git
-      private_key: {{multi-buildpack-private-key}}
+      uri: git@github.com:cloudfoundry-incubator/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
       ignore_paths:
         - VERSION
@@ -75,8 +75,8 @@ resources: #####################################################################
   - name: buildpack-master
     type: git
     source:
-      uri: git@github.com:cloudfoundry-incubator/multi-buildpack.git
-      private_key: {{multi-buildpack-private-key}}
+      uri: git@github.com:cloudfoundry-incubator/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
       branch: master
   - name: buildpack-github-release
     type: github-release
@@ -404,7 +404,6 @@ jobs: ##########################################################################
             DOMAIN_NAME: {{domain-name}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
-<% unless language == "binary" %>
         - task: brats
           file: buildpacks-ci/tasks/run-brats.yml
           params:
@@ -414,7 +413,6 @@ jobs: ##########################################################################
             LANGUAGE: <%= language %>
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             DOMAIN_NAME: {{domain-name}}
-<% end %>
         on_failure:
           put: failure-alert
           params:
