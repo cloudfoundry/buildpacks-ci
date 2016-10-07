@@ -23,7 +23,7 @@ if buildpack_files.count != 1
 else
   cached_buildpack_filename = buildpack_files.first
 
-  writer = PivnetMetadataWriter.new(buildpack, metadata_dir, buildpack_dir, cached_buildpack_filename, recent_changes_filename)
+  writer = BuildpackPivnetMetadataWriter.new(buildpack, metadata_dir, buildpack_dir, cached_buildpack_filename, recent_changes_filename)
   writer.run!
 
   Dir.chdir(metadata_dir) do
