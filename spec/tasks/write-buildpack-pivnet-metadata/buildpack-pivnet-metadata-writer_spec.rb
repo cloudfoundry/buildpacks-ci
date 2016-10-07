@@ -3,10 +3,10 @@ require 'tmpdir'
 require 'fileutils'
 require 'spec_helper.rb'
 require 'yaml'
-require_relative '../../../tasks/write-pivnet-metadata/pivnet-metadata-writer.rb'
+require_relative '../../../tasks/write-buildpack-pivnet-metadata/buildpack-pivnet-metadata-writer.rb'
 
 
-describe PivnetMetadataWriter do
+describe BuildpackPivnetMetadataWriter do
   let(:root_dir)                  { Dir.mktmpdir }
   let(:buildpack_dir)             { File.join(root_dir, 'buildpack-master') }
   let(:metadata_dir)              { File.join(root_dir, 'pivnet-dotnet-core-metadata', 'pivnet-metadata') }

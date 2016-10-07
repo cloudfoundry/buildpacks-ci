@@ -19,4 +19,4 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/tasks/write-pivnet-metadata/run.rb
+    - buildpacks-ci/tasks/write-buildpack-pivnet-metadata/run.rb
