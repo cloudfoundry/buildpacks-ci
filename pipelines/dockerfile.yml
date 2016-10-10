@@ -9,7 +9,7 @@ resources:
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-develop-branch}}
-      paths: [ "Dockerfile", "build/*"]
+      paths: [ "Dockerfile", "build/*", "Gemfile"]
   - name: buildpacks-ci-image
     type: docker-image
     source:
