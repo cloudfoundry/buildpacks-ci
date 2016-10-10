@@ -18,6 +18,7 @@ RUN apt-get -y install \
   python-dev \
   python-pip \
   wget \
+  curl \
   zip
 
 RUN curl -sSL https://get.docker.com/ | sh
