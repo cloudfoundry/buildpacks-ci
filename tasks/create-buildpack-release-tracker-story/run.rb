@@ -1,4 +1,7 @@
 #!/usr/bin/env ruby
+
+require_relative '../../lib/buildpack-release-story-creator'
+
 buildpack_name = ENV['BUILDPACK_NAME']
 previous_buildpack_version = File.read('buildpack/VERSION')
 tracker_project_id = ENV['TRACKER_PROJECT_ID']
