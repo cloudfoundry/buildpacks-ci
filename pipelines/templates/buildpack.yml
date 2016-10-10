@@ -11,6 +11,92 @@ resource_types:
       tag: latest-final
 
 resources: ############################################################################################################
+
+  ## Git ##
+
+    <% if language == 'multi' || language == 'dotnet-core' %>
+      <% git_repo_organization = 'cloudfoundry-incubator' %>
+    <% else %>
+      <% git_repo_organization = organization %>
+    <% end %>
+  - name: buildpack-develop
+    type: git
+    source:
+      uri: git@github.com:<%= git_repo_organization %>/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
+      branch: develop
+      ignore_paths:
+        - VERSION
+        - CHANGELOG
+
+  - name: buildpack-master
+    type: git
+    source:
+      uri: git@github.com:<%= git_repo_organization %>/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
+      branch: master
+
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
+
+  - name: brats
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/brats.git
+
+  - name: pivnet-buildpack-metadata
+    type: git
+    source:
+      branch: master
+      private_key: {{pivotal-cf-buildpacks-ci-robots}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci-robots.git # pivotal-cf because pivnet is not foundation's
+      paths: [ pivnet-metadata/<%= language %>.yml ]
+
+  - name: compile-extensions
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/compile-extensions.git
+
+  - name: buildpack-checksums
+    type: git
+    source:
+      uri: git@bitbucket.org:cloudfoundry-buildpacks/buildpack-checksums.git
+      private_key: {{buildpack-checksums-private-key}}
+      branch: master
+
+  ## Github Releases ##
+
+    <% if language == 'multi' || language == 'dotnet-core' %>
+      <% github_release_user = 'cloudfoundry-incubator' %>
+    <% else %>
+      <% github_release_user = '{{buildpacks-github-org}}' %>
+    <% end %>
+  - name: buildpack-github-release
+    type: github-release
+    source:
+      user: <%= github_release_user %>
+      repository: <%= language %>-buildpack
+      access_token: {{buildpacks-github-token}}
+
+  - name: buildpack-packager
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: buildpack-packager
+      access_token: {{buildpacks-github-token}}
+
+  - name: machete
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: machete
+      access_token: {{buildpacks-github-token}}
+
+  ## Pivnet Release ##
+
   - name: pivnet-production
     type: pivnet
     source:
@@ -20,93 +106,9 @@ resources: #####################################################################
       product_slug: buildpacks
       access_key_id: {{pivnet-access-key}}
       secret_access_key: {{pivnet-secret-key}}
-  - name: pivnet-buildpack-metadata
-    type: git
-    source:
-      branch: master
-      private_key: {{pivotal-cf-buildpacks-ci-robots}}
-      uri: git@github.com:pivotal-cf/buildpacks-ci-robots.git # pivotal-cf because pivnet is not foundation's
-      paths: [ pivnet-metadata/<%= language %>.yml ]
-  - name: buildpacks-ci
-    type: git
-    source:
-      uri: {{buildpacks-ci-git-uri-public}}
-      branch: {{buildpacks-ci-git-uri-public-branch}}
-  - name: cf-edge-environments
-    type: pool
-    source:
-      branch: resource-pools
-      pool: cf-edge-environments
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-  - name: cf-lts-environments
-    type: pool
-    source:
-      branch: resource-pools
-      pool: cf-lts-environments
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-  - name: compile-extensions
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/compile-extensions.git
-  - name: buildpack-packager
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: buildpack-packager
-      access_token: {{buildpacks-github-token}}
-  - name: machete
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: machete
-      access_token: {{buildpacks-github-token}}
-<% if language == 'multi' || language == 'dotnet-core' %>
-  - name: buildpack-develop
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry-incubator/<%= language %>-buildpack.git
-      private_key: {{<%= language %>-buildpack-private-key}}
-      branch: develop
-      ignore_paths:
-        - VERSION
-        - CHANGELOG
-  - name: buildpack-master
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry-incubator/<%= language %>-buildpack.git
-      private_key: {{<%= language %>-buildpack-private-key}}
-      branch: master
-  - name: buildpack-github-release
-    type: github-release
-    source:
-      user: cloudfoundry-incubator
-      repository: <%= language %>-buildpack
-      access_token: {{buildpacks-github-token}}
-<% else %>
-  - name: buildpack-develop
-    type: git
-    source:
-      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: {{<%= language %>-buildpack-private-key}}
-      branch: develop
-      ignore_paths:
-        - VERSION
-        - CHANGELOG
-  - name: buildpack-master
-    type: git
-    source:
-      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: {{<%= language %>-buildpack-private-key}}
-      branch: master
-  - name: buildpack-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: <%= language %>-buildpack
-      access_token: {{buildpacks-github-token}}
-<% end %>
+
+  ## S3 Buckets ##
+
   - name: pivotal-buildpack
     type: s3
     source:
@@ -114,6 +116,7 @@ resources: #####################################################################
       regexp: <%= language %>_buildpack-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+
   - name: pivotal-buildpack-cached
     type: s3
     source:
@@ -121,21 +124,31 @@ resources: #####################################################################
       regexp: <%= language %>_buildpack-cached-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-  - name: buildpack-checksums
-    type: git
+
+  ## Resource Pools ##
+
+  - name: cf-edge-environments
+    type: pool
     source:
-      uri: git@bitbucket.org:cloudfoundry-buildpacks/buildpack-checksums.git
-      private_key: {{buildpack-checksums-private-key}}
-      branch: master
-  - name: brats
-    type: git
+      branch: resource-pools
+      pool: cf-edge-environments
+      private_key: {{buildpacks-ci-private-key}}
+      uri: {{buildpacks-ci-git-uri}}
+
+  - name: cf-lts-environments
+    type: pool
     source:
-      uri: https://github.com/cloudfoundry/brats.git
+      branch: resource-pools
+      pool: cf-lts-environments
+      private_key: {{buildpacks-ci-private-key}}
+      uri: {{buildpacks-ci-git-uri}}
+
+  ## Alerts ##
+
   - name: failure-alert
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
-
 
 jobs: ################################################################################################################
   <% if language == "php" %>
