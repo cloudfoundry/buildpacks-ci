@@ -38,15 +38,32 @@ describe BuildpackReleaseStoryCreator do
                                      .with({filter: "label:release AND label:#{buildpack_name}"})
   end
 
-  it 'finds all the accepted buildpack_name-tagged stories since the last release' do
-    allow(buildpack_project).to receive_messages(stories: [double(id:1)],
-                                                 stories: [double(id:111111111, name:'noname'), double(id:222222222, name:'noname')],
-                                                 create_story: true)
+  context 'previous release stories exist' do
+    it 'finds all the accepted buildpack_name-tagged stories since the last release' do
+      allow(buildpack_project).to receive_messages(stories: [double(id:1)],
+                                                   stories: [double(id:111111111, name:'noname'), double(id:222222222, name:'noname')],
+                                                   create_story: true)
 
-    subject.run!
+      subject.run!
 
-    expect(buildpack_project).to have_received(:stories)
-                                     .with({after_story_id: 222222222, with_label: 'elixir'})
+      expect(buildpack_project).to have_received(:stories)
+                                       .with({after_story_id: 222222222, with_label: 'elixir'})
+    end
+  end
+
+  context 'no previous release stories exist' do
+    before { allow(subject).to receive(:most_recent_release_story).and_return(nil) }
+
+    it 'finds all the accepted buildpack_name-tagged stories' do
+      allow(buildpack_project).to receive_messages(stories: [double(id:1)],
+                                                   stories: [double(id:111111111, name:'noname'), double(id:222222222, name:'noname')],
+                                                   create_story: true)
+
+      subject.run!
+
+      expect(buildpack_project).to have_received(:stories)
+                                       .with({with_label: 'elixir'})
+    end
   end
 
   it 'posts a new buildpack release story to Tracker' do
