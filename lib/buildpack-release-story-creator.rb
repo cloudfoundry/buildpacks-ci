@@ -33,12 +33,16 @@ class BuildpackReleaseStoryCreator
   end
 
   def stories_since_last_release
-    buildpack_project.stories(with_label: buildpack_name,
-                              after_story_id: most_recent_release_story.id
-                             )
+    if most_recent_release_story
+      buildpack_project.stories(with_label: buildpack_name,
+                                after_story_id: most_recent_release_story.id
+                               )
+    else
+      buildpack_project.stories(with_label: buildpack_name)
+    end
   end
 
   def most_recent_release_story
-    buildpack_project.stories(filter: "label:release AND label:#{buildpack_name}").last
+    @latest_release_story ||= buildpack_project.stories(filter: "label:release AND label:#{buildpack_name}").last
   end
 end
