@@ -7,6 +7,7 @@ image_resource:
 inputs:
   - name: cassandra-cpp-driver
   - name: cassandra-libuv
+  - name: librdkafka
   - name: pecl-amqp
   - name: pecl-cassandra
   - name: pecl-gearman
@@ -17,6 +18,7 @@ inputs:
   - name: pecl-mongo
   - name: pecl-msgpack
   - name: pecl-protocolbuffers
+  - name: pecl-rdkafka
   - name: pecl-redis
   - name: pecl-solr
   - name: pecl-sundown

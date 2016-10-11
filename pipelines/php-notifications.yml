@@ -16,6 +16,17 @@ resources:
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch:  {{buildpacks-ci-git-uri-public-branch}}
+  - name: pecl-rdkafka
+    type: new_version_resource
+    source:
+      url: https://pecl.php.net/package/rdkafka
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
+  - name: librdkafka
+    type: github-release
+    source:
+      user: edenhill
+      repository: librdkafka
+      access_token: {{buildpacks-github-token}}
   - name: pecl-cassandra
     type: new_version_resource
     source:
@@ -194,6 +205,7 @@ jobs:
           trigger: true
         - get: cassandra-cpp-driver
         - get: cassandra-libuv
+        - get: librdkafka
         - get: pecl-amqp
         - get: pecl-cassandra
         - get: pecl-gearman
@@ -204,6 +216,7 @@ jobs:
         - get: pecl-mongo
         - get: pecl-msgpack
         - get: pecl-protocolbuffers
+        - get: pecl-rdkafka
         - get: pecl-redis
         - get: pecl-solr
         - get: pecl-sundown
