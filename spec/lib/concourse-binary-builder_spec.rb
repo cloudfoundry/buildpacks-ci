@@ -16,7 +16,6 @@ describe ConcourseBinaryBuilder do
     let(:binary_builder_dir) { File.join(task_root_dir, 'binary-builder') }
     let(:builds_yaml_artifacts_dir) { File.join(task_root_dir, 'builds-yaml-artifacts') }
     let(:binary_artifacts_dir) {File.join(task_root_dir, 'binary-builder-artifacts')}
-    let(:original_source_code_dir) {File.join(binary_artifacts_dir, 'original-source-code')}
 
     let(:built_dir) { File.join(task_root_dir, 'built-yaml') }
     let(:built_yaml_contents) { {dependency => []}.to_yaml }
@@ -33,7 +32,7 @@ describe ConcourseBinaryBuilder do
     subject { described_class.new(dependency, task_root_dir, git_ssh_key, platform, os_name) }
 
     before(:each) do
-      FileUtils.mkdir_p([built_dir, builds_dir, binary_builder_dir])
+      FileUtils.mkdir_p([built_dir, builds_dir, binary_builder_dir, binary_artifacts_dir])
       FileUtils.rm_rf('/tmp/src')
       FileUtils.rm_rf('/tmp/x86_64-linux-gnu')
 
@@ -55,15 +54,6 @@ describe ConcourseBinaryBuilder do
         Dir.chdir(binary_builder_dir) do
           `touch #{output_file}`
         end
-
-        if dependency == "glide" or dependency == "godep" then
-            FileUtils.mkdir_p('/tmp/src')
-            `touch /tmp/src/main.go`
-        else
-            FileUtils.mkdir_p('/tmp/x86_64-linux-gnu')
-            `touch /tmp/x86_64-linux-gnu/main.c`
-        end
-
 
         "- url: #{source_url}"
       end
@@ -122,10 +112,6 @@ describe ConcourseBinaryBuilder do
     shared_examples_for 'the resulting tar files are copied to the proper location' do
       it 'copies the built binaries' do
         expect(File.exist? "#{binary_artifacts_dir}/#{output_file}").to eq true
-      end
-
-      it 'copies the source to build.tgz' do
-        expect(File.exist? "#{original_source_code_dir}/build.tgz").to eq true
       end
     end
 
