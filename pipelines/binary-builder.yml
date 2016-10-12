@@ -112,24 +112,17 @@ groups:
     - update-<%= dependency %>-in-<%= buildpack %>-buildpack
   <% end %>
 <% end %>
-    - test-node
-    - test-nginx
   - name: manual-builds
     jobs:
 <% %w(go php php7 ruby jruby bundler python httpd).each do |dependency| %>
     - build-<%= dependency %>
 <% end %>
-    - test-php
-    - test-php7
-    - test-python
-    - test-jruby
-    - test-ruby
-  - name: binary-builder
+  - name: binary-builder-specs
     jobs:
-      - binary-builder
+      - binary-builder-specs
 
 jobs:
-  - name: binary-builder
+  - name: binary-builder-specs
     serial: true
     public: true
     plan:
@@ -165,7 +158,7 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "binary-builder binary-builder job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            text: "binary-builder-specs binary-builder-specs job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
@@ -179,7 +172,7 @@ jobs:
           resource: <%= dependency %>-builds
           trigger: true
         - get: binary-builder
-          passed: [binary-builder]
+          passed: [binary-builder-specs]
         - get: buildpacks-ci
         - get: built-yaml
           resource: <%= dependency %>-built-output
@@ -222,83 +215,6 @@ jobs:
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
-  - name: test-php
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: build-tar
-          passed: [ build-php ]
-          trigger: true
-        - get: buildpacks-ci
-      - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-php.yml
-  - name: test-jruby
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: build-tar
-          passed: [ build-jruby ]
-          trigger: true
-        - get: buildpacks-ci
-      - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-jruby.yml
-  - name: test-python
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: build-tar
-          passed: [ build-python ]
-          trigger: true
-        - get: buildpacks-ci
-      - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-python.yml
-  - name: test-ruby
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: build-tar
-          passed: [ build-ruby ]
-          trigger: true
-        - get: buildpacks-ci
-      - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-ruby.yml
-  - name: test-node
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: build-tar
-          passed: [ build-node ]
-          trigger: true
-        - get: buildpacks-ci
-      - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-node.yml
-  - name: test-php7
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: build-tar
-          passed: [ build-php7 ]
-          trigger: true
-        - get: buildpacks-ci
-      - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-php7.yml
-  - name: test-nginx
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: build-tar
-          passed: [ build-nginx ]
-          trigger: true
-        - get: buildpacks-ci
-      - task: run tests
-        file: buildpacks-ci/tasks/run-unit-tests-for-nginx.yml
 <% %w(godep dotnet composer glide nginx node).each do |dependency| %>
   - name: trigger-<%= dependency %>-build
     serial: true
@@ -332,7 +248,7 @@ jobs:
           version: every
           trigger: true
         - get: binary-builder
-          passed: [binary-builder]
+          passed: [binary-builder-specs]
         - get: buildpacks-ci
       - do:
         - task: build-binary
