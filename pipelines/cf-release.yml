@@ -11,7 +11,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch:  {{buildpacks-ci-git-uri-public-branch}}
+      branch: cf-release-gcp
   - name: bosh-lite
     type: git
     source:
@@ -45,7 +45,7 @@ resources:
   - name: cf-release-cf-deployment
     type: bosh-deployment
     source:
-      target: https://cf-release.buildpacks.ci.cf-app.com:25555
+      target: https://cf-release.buildpacks-gcp.ci.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden
@@ -53,7 +53,7 @@ resources:
   - name: cf-release-diego-deployment
     type: bosh-deployment
     source:
-      target: https://cf-release.buildpacks.ci.cf-app.com:25555
+      target: https://cf-release.buildpacks-gcp.ci.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden-diego
@@ -137,8 +137,8 @@ jobs:
       - task: recreate-cf-release-bosh-lite
         file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
         params:
-          DEPLOYMENT_NAME: cf-release.buildpacks.ci
-          AWS_BOSH_LITE_NAME: cf-release.buildpacks.ci
+          IAAS: gcp
+          DEPLOYMENT_NAME: cf-release.buildpacks-gcp.ci
           BOSH_PRIVATE_KEY: {{bosh_private_key}}
           BOSH_USER: {{bosh_user}}
           BOSH_PASSWORD: {{bosh_password}}
@@ -150,8 +150,10 @@ jobs:
           BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
           BOSH_LITE_DISK_SIZE: 100
           BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
-          BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
-          BOSH_LITE_NAME: cf-release.buildpacks.ci
+          BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
+          GCP_BOSH_LITE_NAME: cf-release-gcp-bosh-lite
+          GCP_BOSH_DIRECTOR_USER: {{gcp-bosh-director-user}}
+          GCP_BOSH_DIRECTOR_PASSWORD: {{gcp-bosh-director-password}}
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           IAAS: aws
@@ -198,7 +200,7 @@ jobs:
         - task: generate-manifest
           file: buildpacks-ci/tasks/generate-cf-and-diego-manifests/task.yml
           params:
-            DEPLOYMENT_NAME: cf-release.buildpacks.ci
+            DEPLOYMENT_NAME: cf-release.buildpacks-gcp.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
@@ -211,9 +213,14 @@ jobs:
             BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
             BOSH_LITE_DISK_SIZE: 100
             BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+<<<<<<< 1fdb18c547cfde4d5e217d018edface61443e626
             BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
             BOSH_LITE_NAME: cf-release.buildpacks.ci
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+=======
+            BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
+            BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
+>>>>>>> cf-release pipeline on GCP
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             ROOTFS_RELEASE: cflinuxfs2-rootfs
           privileged: true
@@ -226,24 +233,17 @@ jobs:
           privileged: true
         - put: cf-release-cf-deployment
           params:
-            manifest: deployments-buildpacks/deployments/cf-release.buildpacks.ci/manifest.yml
+            manifest: deployments-buildpacks/deployments/cf-release.buildpacks-gcp.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
         - put: cf-release-diego-deployment
           params:
-            manifest: deployments-buildpacks/deployments/cf-release.buildpacks.ci/diego.yml
+            manifest: deployments-buildpacks/deployments/cf-release.buildpacks-gcp.ci/diego.yml
             stemcells: ['lite-stemcell/stemcell.tgz']
             releases:
               - diego-bosh-release/release.tgz
               - cflinuxfs2-rootfs-bosh-release/release.tgz
               - garden-runc-bosh-release/release.tgz
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: cats
     serial: true
     serial_groups: [ cf-release ]
@@ -280,7 +280,7 @@ jobs:
         - task: cats
           file: buildpacks-ci/tasks/run-cats/task.yml
           params:
-            DEPLOYMENT_NAME: cf-release.buildpacks.ci
+            DEPLOYMENT_NAME: cf-release.buildpacks-gcp.ci
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
@@ -294,9 +294,14 @@ jobs:
             BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
             BOSH_LITE_DISK_SIZE: 100
             BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+<<<<<<< 1fdb18c547cfde4d5e217d018edface61443e626
             BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
             BOSH_LITE_NAME: cf-release.buildpacks.ci
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+=======
+            BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
+            BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
+>>>>>>> cf-release pipeline on GCP
             DIEGO_DOCKER_ON: true
           privileged: true
         on_failure:
