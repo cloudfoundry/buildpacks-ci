@@ -50,7 +50,7 @@ RUN chmod 755 /usr/bin/spiff
 RUN wget -O- https://github.com/github/hub/releases/download/v2.2.1/hub-linux-amd64-2.2.1.tar.gz | tar xz -C /usr/bin --strip-components=1 hub-linux-amd64-2.2.1/hub
 
 # Ensure Concourse Filter binary is present
-RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.0.1/concourse-filter' && mv concourse-filter /usr/local/bin && chmod +x /usr/local/bin/concourse-filter
+RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.0.2/concourse-filter' && mv concourse-filter /usr/local/bin && chmod +x /usr/local/bin/concourse-filter
 
 # when docker container starts, ensure login scripts run
 COPY build/*.sh /etc/profile.d/
