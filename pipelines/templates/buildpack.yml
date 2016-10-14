@@ -390,7 +390,7 @@ jobs: ##########################################################################
       - put: pivnet-production
         params:
           file_glob: pivotal-buildpack-cached/<%= language %>_buildpack-cached-v*.zip
-          s3_filepath_prefix: PCF-Buildpacks
+          s3_filepath_prefix: product-files/buildpacks
           metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
   - name: specs-edge-develop
