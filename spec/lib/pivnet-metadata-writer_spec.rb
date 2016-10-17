@@ -91,14 +91,9 @@ describe PivnetMetadataWriter do
       it 'writes the product files metadata to the file' do
         subject.run!
         product_files = yaml_contents['product_files']
-        expect(product_files.count).to eq 3
+        expect(product_files.count).to eq 2
 
-        stack = product_files.first
-        expect(stack['file']).to eq 'stack-s3/cflinuxfs2_nc-4.43.tar.gz'
-        expect(stack['upload_as']).to eq 'Compilerless RootFS'
-        expect(stack['description']).to eq 'Compilerless RootFS for PCF'
-
-        release = product_files[1]
+        release = product_files.first
         expect(release['file']).to eq 'bosh-release-s3/cflinuxfs2-nc-rootfs-7.2.1.tgz'
         expect(release['upload_as']).to eq 'BOSH release of Compilerless RootFS'
         expect(release['description']).to eq 'BOSH release of Compilerless RootFS for PCF'
