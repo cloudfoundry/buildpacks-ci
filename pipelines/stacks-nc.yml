@@ -14,6 +14,12 @@ resources: #####################################################################
 
   ## Git Repos ##
 
+  - name: monday-funday
+    type: cron
+    source:
+      expression: 0 5 * * 1
+      location: {{current-timezone}}
+
   - name: buildpacks-ci
     type: git
     source:
@@ -197,6 +203,22 @@ resources: #####################################################################
 
 jobs: ################################################################################################################
 
+  - name: notification
+    serial: true
+    serial_groups:
+      - stacks
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: monday-funday
+          trigger: true
+      - task: create-tracker-story
+        file: buildpacks-ci/tasks/create-new-stacks-release-story.yml
+        params:
+          TRACKER_PROJECT_ID: {{cf-buildpacks-private-tracker-id}}
+          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+
   - name: recreate-bosh-lite
     serial: true
     serial_groups:
@@ -205,6 +227,9 @@ jobs: ##########################################################################
       - aggregate:
         - get: deployments-buildpacks
         - get: buildpacks-ci
+        - get: monday-funday
+          passed: [ "notification" ]
+          trigger: true
       - task: recreate-bosh-lite
         file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
         params:
