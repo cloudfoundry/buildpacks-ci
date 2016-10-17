@@ -704,10 +704,10 @@ jobs:
         - task: create-cflinuxfs2-rootfs-release
           file: buildpacks-ci/tasks/create-cflinuxfs2-rootfs-release.yml
           params:
-            BLOB_NAME: rootfs-nc
+            BLOB_NAME: rootfs
             BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
-            RELEASE_NAME: cflinuxfs2-rootfs-nc
-            RELEASE_DIR: cflinuxfs2-rootfs-nc-release
+            RELEASE_NAME: cflinuxfs2-rootfs
+            RELEASE_DIR: cflinuxfs2-rootfs-release
             ACCESS_KEY_ID: {{cloudfoundry-s3-access-key}}
             SECRET_ACCESS_KEY: {{cloudfoundry-s3-secret-key}}
         - put: cflinuxfs2-rootfs-release
