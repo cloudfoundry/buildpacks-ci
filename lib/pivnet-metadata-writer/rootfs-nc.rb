@@ -31,7 +31,7 @@ class PivnetMetadataWriter::RootfsNC < PivnetMetadataWriter
               'upload_as' => "BOSH release of Compilerless RootFS",
               'description' => 'BOSH release of Compilerless RootFS for PCF'
     }
-    deployment_instructions = { 'file' => 'cflinuxfs2-nc-rootfs-release/README.md',
+    deployment_instructions = { 'file' => 'cflinuxfs2-rootfs-release/README.md',
                                 'upload_as' => 'Deployment Instructions',
                                 'description' => 'Deployment instructions for the BOSH release of Compilerless RootFS for PCF'
     }

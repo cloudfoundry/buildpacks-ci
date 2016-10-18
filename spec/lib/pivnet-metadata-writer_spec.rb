@@ -99,7 +99,7 @@ describe PivnetMetadataWriter do
         expect(release['description']).to eq 'BOSH release of Compilerless RootFS for PCF'
 
         deployment_instructions = product_files.last
-        expect(deployment_instructions['file']).to eq 'cflinuxfs2-nc-rootfs-release/README.md'
+        expect(deployment_instructions['file']).to eq 'cflinuxfs2-rootfs-release/README.md'
         expect(deployment_instructions['upload_as']).to eq 'Deployment Instructions'
         expect(deployment_instructions['description']).to eq 'Deployment instructions for the BOSH release of Compilerless RootFS for PCF'
       end
