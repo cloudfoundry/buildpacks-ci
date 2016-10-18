@@ -1,5 +1,6 @@
+require 'yaml'
 
-class PivnetMetadataWriter::RootfsNC < PivnetMetadataWriter
+class Cflinuxfs2PivnetMetadataWriter
 
   attr_reader :output_dir, :stack_version, :release_version
 
