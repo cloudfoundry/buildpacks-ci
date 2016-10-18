@@ -738,5 +738,5 @@ jobs: ##########################################################################
       - put: pivnet-integration
         params:
           file_glob: 'files-to-upload/*'
-          s3_filepath_prefix: Pivotal-RootFS
+          s3_filepath_prefix: product-files/rootfs
           metadata_file: rootfs-pivnet-metadata/pivnet-metadata/rootfs-nc.yml
