@@ -24,7 +24,7 @@ resources: #####################################################################
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: stacks-nc
+      branch: {{buildpacks-ci-git-uri-public-branch}}
 
   - name: stacks
     type: git
@@ -191,11 +191,11 @@ resources: #####################################################################
 
   ## Pivnet Resource ##
 
-  - name: pivnet-integration
+  - name: pivnet-production
     type: pivnet
     source:
-      endpoint: https://pivnet-integration.cfapps.io
-      bucket: pivotal-network-staging
+      endpoint: https://network.pivotal.io
+      bucket: pivotalnetwork
       api_token: {{pivnet-apikey}}
       product_slug: rootfs
       access_key_id: {{pivnet-access-key}}
@@ -735,7 +735,7 @@ jobs: ##########################################################################
           passed: [ write-pivnet-metadata ]
       - task: collect-cflinuxfs2-nc-files
         file: buildpacks-ci/tasks/collect-cflinuxfs2-nc-files/task.yml
-      - put: pivnet-integration
+      - put: pivnet-production
         params:
           file_glob: 'files-to-upload/*'
           s3_filepath_prefix: product-files/rootfs
