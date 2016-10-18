@@ -26,11 +26,9 @@ describe BuildpackReleaseStoryCreator do
   end
 
   it 'finds the previous release' do
-    allow(tracker_client).to receive(:create_story)
-
-    allow(buildpack_project).to receive_messages(stories: [double(id:1)],
-                                                 stories: [double(id:20, name:'noname'), double(id:10, name:'noname')],
-                                                 create_story: true)
+    allow(buildpack_project).to receive(:stories).and_return([double(id: 1)],
+                                                             [double(id:111111111, name:'this does not matter for this test')])
+    allow(buildpack_project).to receive(:create_story).and_return(true)
 
     subject.run!
 
@@ -40,24 +38,22 @@ describe BuildpackReleaseStoryCreator do
 
   context 'previous release stories exist' do
     it 'finds all the accepted buildpack_name-tagged stories since the last release' do
-      allow(buildpack_project).to receive_messages(stories: [double(id:1)],
-                                                   stories: [double(id:111111111, name:'noname'), double(id:222222222, name:'noname')],
-                                                   create_story: true)
+      allow(buildpack_project).to receive(:stories).and_return([double(id: 1)],
+                                                               [double(id:111111111, name:'this does not matter for this test')])
+      allow(buildpack_project).to receive(:create_story).and_return(true)
 
       subject.run!
 
       expect(buildpack_project).to have_received(:stories)
-                                       .with({after_story_id: 222222222, with_label: 'elixir'})
+                                       .with({with_label: 'elixir', after_story_id: 1})
     end
   end
 
   context 'no previous release stories exist' do
-    before { allow(subject).to receive(:most_recent_release_story).and_return(nil) }
-
     it 'finds all the accepted buildpack_name-tagged stories' do
-      allow(buildpack_project).to receive_messages(stories: [double(id:1)],
-                                                   stories: [double(id:111111111, name:'noname'), double(id:222222222, name:'noname')],
-                                                   create_story: true)
+      allow(buildpack_project).to receive(:stories).and_return([],
+                                                               [double(id:111111111, name:'noname'), double(id:222222222, name:'noname')])
+      allow(buildpack_project).to receive(:create_story).and_return(true)
 
       subject.run!
 
@@ -67,9 +63,9 @@ describe BuildpackReleaseStoryCreator do
   end
 
   it 'posts a new buildpack release story to Tracker' do
-    allow(buildpack_project).to receive_messages(stories: [double(id:1)],
-                                                 stories: [double(id: 111111111, name: 'Elixir should be faster'),
-                                                           double(id: 222222222, name: 'Buildpack should tweet on stage')])
+    allow(buildpack_project).to receive(:stories).and_return([double(id: 1)],
+                                                             [double(id:111111111, name:'Elixir should be faster'),
+                                                              double(id:222222222, name:'Buildpack should tweet on stage')])
 
     expect(buildpack_project).to receive(:create_story).
         with(name: '**Release:** elixir-buildpack 2.10.4',
