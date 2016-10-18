@@ -1,0 +1,18 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: bosh-release-s3
+  - name: rootfs-pivnet-metadata
+  - name: cflinuxfs2-rootfs-release
+outputs:
+  - name: files-to-upload
+run:
+  path: bash
+  args:
+    - "-cl"
+    - "buildpacks-ci/tasks/collect-cflinuxfs2-nc-files/run.rb"

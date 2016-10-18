@@ -726,8 +726,6 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: stack-s3
-          passed: [ write-pivnet-metadata ]
         - get: bosh-release-s3
           passed: [ write-pivnet-metadata ]
         - get: rootfs-pivnet-metadata
@@ -735,8 +733,10 @@ jobs: ##########################################################################
           trigger: true
         - get: cflinuxfs2-rootfs-release
           passed: [ write-pivnet-metadata ]
+      - task: collect-cflinuxfs2-nc-files
+        file: buildpacks-ci/tasks/collect-cflinuxfs2-nc-files/task.yml
       - put: pivnet-integration
         params:
-          file_glob: '*s3/cflinuxfs2*gz'
+          file_glob: 'files-to-upload/*'
           s3_filepath_prefix: Pivotal-RootFS
           metadata_file: rootfs-pivnet-metadata/pivnet-metadata/rootfs-nc.yml

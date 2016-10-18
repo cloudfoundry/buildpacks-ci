@@ -27,11 +27,11 @@ class PivnetMetadataWriter::RootfsNC < PivnetMetadataWriter
     metadata['release'] = metadata_release
 
     metadata_files = []
-    release = { 'file' => "bosh-release-s3/cflinuxfs2-nc-rootfs-#{release_version}.tgz",
+    release = { 'file' => "files-to-upload/cflinuxfs2-nc-rootfs-#{release_version}.tgz",
               'upload_as' => "BOSH release of Compilerless RootFS",
               'description' => 'BOSH release of Compilerless RootFS for PCF'
     }
-    deployment_instructions = { 'file' => 'cflinuxfs2-rootfs-release/README.md',
+    deployment_instructions = { 'file' => 'files-to-upload/README.md',
                                 'upload_as' => 'Deployment Instructions',
                                 'description' => 'Deployment instructions for the BOSH release of Compilerless RootFS for PCF'
     }
