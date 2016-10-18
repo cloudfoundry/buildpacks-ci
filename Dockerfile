@@ -6,6 +6,7 @@ RUN apt-get update
 RUN apt-get -y install \
   awscli \
   aufs-tools \
+  curl \
   expect \
   git \
   iptables \
@@ -17,8 +18,8 @@ RUN apt-get -y install \
   php5 \
   python-dev \
   python-pip \
+  shellcheck \
   wget \
-  curl \
   zip
 
 RUN curl -sSL https://get.docker.com/ | sh
