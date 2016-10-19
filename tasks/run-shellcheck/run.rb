@@ -14,6 +14,9 @@ puts ''
 count = 0
 
 shell_checker.each do |file_path, shellcheck_output|
+  # don't match the spec files which are intended to have errors
+  next if file_path.match /spec\/tasks\/run-shellcheck\/fixtures/
+
   unless shellcheck_output.empty?
     puts '########################################################################################'
     puts "## shellcheck results for #{file_path}"

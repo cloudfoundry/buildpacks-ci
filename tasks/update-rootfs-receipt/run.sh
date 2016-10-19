@@ -4,14 +4,14 @@ set -e
 
 SUFFIX="${ROOTFS_SUFFIX-}"
 
-cp receipt-s3/cflinuxfs2_receipt$SUFFIX-* stacks/cflinuxfs2/cflinuxfs2_receipt
+cp receipt-s3/cflinuxfs2_receipt"$SUFFIX"-* stacks/cflinuxfs2/cflinuxfs2_receipt
 
 pushd stacks
-    version=`cat ../version/number`
+    version=$(cat ../version/number)
     git add cflinuxfs2/cflinuxfs2_receipt
 
     set +e
-      diff=$(git diff --cached --exit-code)
+      git diff --cached --exit-code
       no_changes=$?
     set -e
 

@@ -3,9 +3,10 @@
 set -ex
 
 pushd deployments-buildpacks
-  bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
+  bundle config mirror.https://rubygems.org "$RUBYGEM_MIRROR"
   bundle install
-  . ./bin/target_bosh $DEPLOYMENT_NAME
+  # shellcheck disable=SC1091
+  . ./bin/target_bosh "$DEPLOYMENT_NAME"
 popd
 
 bosh -d "deployments-buildpacks/deployments/$DEPLOYMENT_NAME/rootfs-smoke-test.yml" run errand cflinuxfs2-smoke-test

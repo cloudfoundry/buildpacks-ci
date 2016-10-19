@@ -14,7 +14,8 @@ EOF
 main() {
   set -e
   local dest="stacks-release/blobs/rootfs"
-  local version=$(cat version/number)
+  local version
+  version=$(cat version/number)
   mkdir -p $dest
   cp stacks-s3/cflinuxfs2-*.tar.gz $dest
 

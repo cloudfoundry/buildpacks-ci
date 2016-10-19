@@ -1,8 +1,9 @@
 #!/bin/bash -l
 set -e
 
-DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-`cat cf-environments/name`}
+DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$(cat cf-environments/name)}
 BOSH_LITE_DOMAIN_NAME=${BOSH_LITE_DOMAIN_NAME:-cf-app.com}
+
 cd buildpack
 
 ../buildpacks-ci/scripts/check-unsupported-manifest
@@ -10,17 +11,18 @@ cd buildpack
 
 # for the PHP buildpack
 if [ -e run_tests.sh ]; then
-  export TMPDIR=$(mktemp -d)
+  export TMPDIR
+  TMPDIR=$(mktemp -d)
   pip install -r requirements.txt
 fi
 
 export BUNDLE_GEMFILE=cf.Gemfile
 
-bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
+bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
 
-bundle install --jobs=$(nproc) --no-cache
+bundle install --jobs="$(nproc)" --no-cache
 
 for stack in $STACKS; do
-  bundle exec buildpack-build --uncached --stack=$stack --host=$DEPLOYMENT_NAME.$BOSH_LITE_DOMAIN_NAME
-  bundle exec buildpack-build --cached --stack=$stack --host=$DEPLOYMENT_NAME.$BOSH_LITE_DOMAIN_NAME
+  bundle exec buildpack-build --uncached --stack="$stack" --host="$DEPLOYMENT_NAME.$BOSH_LITE_DOMAIN_NAME"
+  bundle exec buildpack-build --cached --stack="$stack" --host="$DEPLOYMENT_NAME.$BOSH_LITE_DOMAIN_NAME"
 done
