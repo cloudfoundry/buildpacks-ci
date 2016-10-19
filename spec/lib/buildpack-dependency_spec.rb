@@ -37,7 +37,7 @@ describe BuildpackDependency do
     end
 
     it 'returns the buildpacks which include this dependency' do
-      expect(described_class.for(:snake)).to eq([:python, :php])
+      expect(described_class.for(:snake)).to eq([:php, :python])
     end
   end
 end
