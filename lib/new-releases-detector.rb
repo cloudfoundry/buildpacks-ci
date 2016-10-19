@@ -98,6 +98,7 @@ class NewReleasesDetector
   def tags
     @get_tags_functions = {
       bundler:         -> { Octokit.tags('bundler/bundler').map(&:name).grep(/^v/) },
+      bower:           -> { JSON.parse(open('https://registry.npmjs.org/bower').read)['versions'].keys },
       composer:        -> { Octokit.tags('composer/composer').map(&:name) },
       dotnet:          -> { Octokit.tags('dotnet/cli').map(&:name).grep(/^v/) },
       glide:           -> { Octokit.tags('Masterminds/glide').map(&:name).grep(/^v/) },

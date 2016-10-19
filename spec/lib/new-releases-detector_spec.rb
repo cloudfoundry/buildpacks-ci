@@ -20,6 +20,7 @@ describe NewReleasesDetector do
     allow_any_instance_of(described_class).to receive(:open).with(/python/).and_return(double(read: { 'tags' => [] }.to_json))
     allow_any_instance_of(described_class).to receive(:open).with(/openjdk/).and_return(double(read: {}.to_yaml))
     allow_any_instance_of(described_class).to receive(:open).with(/node/).and_return(double(read: [].to_json))
+    allow_any_instance_of(described_class).to receive(:open).with(/bower/).and_return(double(read: { 'versions' => {} }.to_json))
     allow(File).to receive(:exist?).and_call_original
     allow(File).to receive(:write).and_call_original
 
@@ -153,6 +154,25 @@ describe NewReleasesDetector do
 
       context 'when there are no new releases' do
         let(:new_releases_response) { double(read: [{ 'version' => 'v1.2.3'}, { 'version' => 'v1.2.4'}].to_json) }
+
+        it_behaves_like 'there are no new versions to potentially build'
+      end
+    end
+
+    context 'for bower' do
+      let(:dependency)          { :bower }
+      let(:old_versions)        { %w(1.7.6 1.7.7) }
+      let(:new_releases_source) { 'https://registry.npmjs.org/bower' }
+
+      context 'when there are new releases' do
+        let(:new_versions)          { %w(1.7.9) }
+        let(:new_releases_response) { double(read: { 'versions' => { '1.7.6': 'data', '1.7.7': 'data', '1.7.9': 'data' } }.to_json) }
+
+        it_behaves_like 'there are new versions to potentially build'
+      end
+
+      context 'when there are no new releases' do
+        let(:new_releases_response) { double(read: { 'versions' => { '1.7.6': 'data', '1.7.7': 'data' } }.to_json) }
 
         it_behaves_like 'there are no new versions to potentially build'
       end
