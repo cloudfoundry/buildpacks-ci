@@ -50,6 +50,10 @@ private
 def product_version
   if buildpack == 'dotnet-core'
     ".NET Core #{get_version} (BETA)"
+  elsif buildpack == 'php'
+    "PHP #{get_version}"
+  elsif buildpack == 'nodejs'
+    "NodeJS #{get_version}"
   else
     "#{buildpack.capitalize} #{get_version}"
   end
@@ -90,6 +94,10 @@ end
 def display_name
   if buildpack == "dotnet-core"
     ".NET Core Buildpack BETA (offline)"
+  elsif buildpack == 'php'
+    "PHP Buildpack (offline)"
+  elsif buildpack == 'nodejs'
+    "NodeJS Buildpack (offline)"
   else
     "#{buildpack.capitalize} Buildpack (offline)"
   end
