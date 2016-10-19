@@ -3,7 +3,7 @@ require 'open-uri'
 require 'yaml'
 
 class BuildpackDependency
-  BUILDPACKS = %i(ruby python php go nodejs binary staticfile).freeze
+  BUILDPACKS = %i(binary dotnet-core go nodejs php python ruby staticfile).freeze
 
   def self.for(dependency)
     buildpack_manifests.map do |name, manifest|
