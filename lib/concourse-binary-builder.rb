@@ -66,9 +66,13 @@ class ConcourseBinaryBuilder
   end
 
   def build_dependency
-    if binary_name == "composer"
+    case binary_name
+    when 'bower'
+      @source_url = "https://registry.npmjs.org/bower/-/bower-#{latest_build['version']}.tgz"
+      download_non_build_dependency(source_url, 'bower', 'tgz')
+    when 'composer'
       @source_url = "https://getcomposer.org/download/#{latest_build['version']}/composer.phar"
-      download_composer(source_url)
+      download_non_build_dependency(source_url, 'composer', 'phar')
     else
       binary_builder_output = run_binary_builder(flags)
       /- url:\s(.*)$/.match(binary_builder_output)
@@ -76,8 +80,8 @@ class ConcourseBinaryBuilder
     end
   end
 
-  def download_composer(url)
-      system("curl #{url} -o #{binary_builder_dir}/composer-#{latest_build['version']}.phar") or raise "Could not download composer.phar"
+  def download_non_build_dependency(url, dependency_name, file_extension)
+      system("curl #{url} -o #{binary_builder_dir}/#{dependency_name}-#{latest_build['version']}.#{file_extension}") or raise "Could not download #{url}"
   end
 
   def copy_binaries_to_output_directory
@@ -170,7 +174,7 @@ class ConcourseBinaryBuilder
   end
 
   def is_automated
-    automated = %w(composer dotnet godep glide nginx node)
+    automated = %w(bower composer dotnet godep glide nginx node)
     automated.include? binary_name
   end
 
