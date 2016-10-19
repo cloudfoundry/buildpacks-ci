@@ -42,14 +42,6 @@ resources:
       uri: {{deployments-git-uri}}
       private_key: {{deployments-private-key}}
       branch: master
-  - name: cf-release-deployment
-    type: bosh-deployment
-    source:
-      target: https://cf-release.buildpacks.ci.cf-app.com:25555
-      username: admin
-      password: {{bosh-lite-password}}
-      deployment: cf-warden
-      ignore_ssl: true
   - name: cf-release-cf-deployment
     type: bosh-deployment
     source:
