@@ -48,6 +48,7 @@ describe ConcourseBinaryBuilder do
         end
       end
 
+      allow(subject).to receive(:system).and_call_original
       allow(subject).to receive(:add_ssh_key_and_update).with(built_dir, 'binary-built-output')
 
       allow(subject).to receive(:run_binary_builder).with(flags) do |flags|
@@ -187,6 +188,26 @@ describe ConcourseBinaryBuilder do
       it_behaves_like 'the resulting tar files are copied to the proper location'
     end
 
+    context 'the dependency is bower' do
+      let(:dependency)         { 'bower' }
+      let(:output_file)        { 'bower-1.77.90.tgz' }
+      let(:verification_type)  { 'sha256' }
+      let(:verification_value) { 'aaabbbccc111222333' }
+      let(:source_url)         { 'https://registry.npmjs.org/bower/-/bower-1.77.90.tgz' }
+      let(:version)            { '1.77.90' }
+
+      before do
+        expect(subject).to receive(:system).with("curl #{source_url} -o #{binary_builder_dir}/bower-1.77.90.tgz") do
+          `touch #{binary_builder_dir}/bower-#{version}.tgz`
+        end
+
+        subject.run
+      end
+
+      it_behaves_like 'a commit is made in builds-yaml-artifacts with the proper git message', 'automated'
+      it_behaves_like 'the resulting tar files are copied to the proper location'
+    end
+
     context 'the dependency is composer' do
       let(:dependency)    { 'composer' }
       let(:output_file)        { 'composer-1.2.0.phar' }
@@ -196,7 +217,7 @@ describe ConcourseBinaryBuilder do
       let(:version)       { '1.2.0' }
 
       before do
-        allow(subject).to receive(:download_composer).with(source_url) do
+        expect(subject).to receive(:system).with("curl #{source_url} -o #{binary_builder_dir}/composer-1.2.0.phar") do
           `touch #{binary_builder_dir}/composer-#{version}.phar`
         end
 
