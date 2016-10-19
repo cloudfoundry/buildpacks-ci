@@ -5,6 +5,7 @@ require_relative '../../lib/buildpack-dependency'
 require_relative '../../lib/git-client'
 require 'yaml'
 require 'tmpdir'
+require 'webmock/rspec'
 
 describe DependencyBuildEnqueuer do
   let(:new_releases_dir)    { Dir.mktmpdir }
@@ -24,9 +25,14 @@ describe DependencyBuildEnqueuer do
     let(:gpg_signature_mocked_2)        { "gpg_signature_mocked_2" }
 
     before do
+      WebMock.disable!
       File.open(builds_file, "w") do |file|
         file.write dependency_builds.to_yaml
       end
+    end
+
+    after do
+      WebMock.enable!
     end
 
     shared_examples_for "non pre-release builds are triggered by <dependency>-new.yaml" do |verification_type|
