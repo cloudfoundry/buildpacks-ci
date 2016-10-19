@@ -14,7 +14,7 @@ resources: #####################################################################
 
   ## Git ##
 
-    <% if language == 'multi' || language == 'dotnet-core' %>
+    <% if language == 'multi' %>
       <% git_repo_organization = 'cloudfoundry-incubator' %>
     <% else %>
       <% git_repo_organization = organization %>
@@ -69,7 +69,7 @@ resources: #####################################################################
 
   ## Github Releases ##
 
-    <% if language == 'multi' || language == 'dotnet-core' %>
+    <% if language == 'multi' %>
       <% github_release_user = 'cloudfoundry-incubator' %>
     <% else %>
       <% github_release_user = '{{buildpacks-github-org}}' %>

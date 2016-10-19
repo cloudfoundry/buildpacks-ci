@@ -77,11 +77,7 @@ resources:
   - name: <%= language %>-buildpack
     type: git
     source:
-      <% if language == 'dotnet-core' %>
-      uri: git@github.com:cloudfoundry-incubator/<%= language %>-buildpack.git
-      <% else %>
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      <% end %>
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
       ignore_paths:
