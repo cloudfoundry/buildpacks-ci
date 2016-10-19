@@ -152,6 +152,17 @@ describe DependencyBuildEnqueuer do
       it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'sha256'
     end
 
+    context "bower" do
+      let(:dependency)          { "bower" }
+      let(:new_versions)        { %w(1.6.7 2.8.9) }
+      let(:expected_version_1)  { "2.8.9" }
+      let(:expected_version_2)  { "1.6.7" }
+      let(:source_url_1)        { "https://registry.npmjs.org/bower/-/bower-#{expected_version_1}.tgz" }
+      let(:source_url_2)        { "https://registry.npmjs.org/bower/-/bower-#{expected_version_2}.tgz" }
+
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'sha256'
+    end
+
     context "dotnet" do
       let(:dependency)          { "dotnet" }
       let(:new_versions)        { %w(v1.0.0-preview2.0.1) }
@@ -195,7 +206,6 @@ describe DependencyBuildEnqueuer do
           end
 
           it 'has the git-commit-sha verification in the <dependency>-builds.yml file' do
-              puts committed_dependency
               expect(committed_dependency[dependency][0].size).to eq 2
               expect(committed_dependency[dependency][0]['git-commit-sha']).to eq '635cf40e58ede8a53e8b9555e19a6e1ccd6f9fbe'
           end

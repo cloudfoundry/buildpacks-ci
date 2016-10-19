@@ -23,7 +23,7 @@ class DependencyBuildEnqueuer
     # We use the <dependency>-new.yaml file to get a list of the new
     # versions to build. For each version in this file, we make a commit to
     # <dependency>-builds.yaml with the proper build information
-    # Automated deps: node, nginx, glide, godep, composer
+    # Automated deps: bower, dotnet, node, nginx, glide, godep, composer
 
     new_dependency_versions_file = File.join(new_releases_dir, "#{dependency}-new.yaml")
     new_dependency_versions = YAML.load_file(new_dependency_versions_file)
@@ -80,6 +80,9 @@ class DependencyBuildEnqueuer
   def self.build_verifications_for(dependency, version)
     verifications = []
     case dependency
+    when 'bower'
+      download_url = "https://registry.npmjs.org/bower/-/bower-#{version}.tgz"
+      verifications << shasum_256_verification(download_url)
     when "node"
       download_url = "https://nodejs.org/dist/v#{version}/node-v#{version}.tar.gz"
       verifications << shasum_256_verification(download_url)
