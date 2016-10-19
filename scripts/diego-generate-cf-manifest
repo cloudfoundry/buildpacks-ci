@@ -5,13 +5,16 @@ BOSH_LITE_DOMAIN_NAME=${BOSH_LITE_DOMAIN_NAME:-cf-app.com}
 ROOTFS_RELEASE="${ROOTFS_RELEASE:-cflinuxfs2-rootfs}"
 
 pushd deployments-buildpacks
-  bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
-  bundle install --jobs=$(nproc)
-  source ./bin/target_bosh $DEPLOYMENT_NAME
+  bundle config mirror.https://rubygems.org "$RUBYGEM_MIRROR"
+  bundle install --jobs="$(nproc)"
+  # shellcheck disable=SC1091
+  source ./bin/target_bosh "$DEPLOYMENT_NAME"
 popd
 
-export BOSH_RELEASES_DIR=`pwd`
-export CF_RELEASE_DIR=`pwd`/cf-release
+export BOSH_RELEASES_DIR
+BOSH_RELEASES_DIR=$(pwd)
+export CF_RELEASE_DIR
+CF_RELEASE_DIR="$(pwd)/cf-release"
 
 pushd cf-release
   mkdir -p bosh-lite
@@ -46,22 +49,22 @@ jobs:
 
   ./scripts/generate-bosh-lite-dev-manifest bosh-lite/cf-stub-spiff-ours.yml
 
-  ../buildpacks-ci/scripts/swap-cf-release-scim-admin-password.rb $(pwd) bosh-lite/deployments/cf.yml
+  ../buildpacks-ci/scripts/swap-cf-release-scim-admin-password.rb "$(pwd)" bosh-lite/deployments/cf.yml
 
   ruby -i -pe "gsub('admin_password: stub_to_be_gsubbed', 'admin_password: ' + ENV['CI_CF_PASSWORD'])" bosh-lite/deployments/cf.yml
 popd
 
 pushd diego-release
   USE_SQL='postgres' ./scripts/generate-bosh-lite-manifests
-  ../buildpacks-ci/scripts/swap-diego-rootfs-release.rb $(pwd) bosh-lite/deployments/diego.yml
+  ../buildpacks-ci/scripts/swap-diego-rootfs-release.rb "$(pwd)" bosh-lite/deployments/diego.yml
 popd
 
 pushd deployments-buildpacks
-  cp ../cf-release/bosh-lite/deployments/cf.yml deployments/$DEPLOYMENT_NAME/manifest.yml
-  cp ../diego-release/bosh-lite/deployments/diego.yml deployments/$DEPLOYMENT_NAME/diego.yml
+  cp ../cf-release/bosh-lite/deployments/cf.yml "deployments/$DEPLOYMENT_NAME/manifest.yml"
+  cp ../diego-release/bosh-lite/deployments/diego.yml "deployments/$DEPLOYMENT_NAME/diego.yml"
 
-  git add deployments/$DEPLOYMENT_NAME/*.yml
-  git diff-index --quiet HEAD deployments/$DEPLOYMENT_NAME/manifest.yml || git commit -qm "Update manifests for $DEPLOYMENT_NAME"
+  git add "deployments/$DEPLOYMENT_NAME/*.yml"
+  git diff-index --quiet HEAD "deployments/$DEPLOYMENT_NAME/manifest.yml" || git commit -qm "Update manifests for $DEPLOYMENT_NAME"
 popd
 
 rsync -a deployments-buildpacks/ generate-manifest-artifacts

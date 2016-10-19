@@ -3,9 +3,9 @@
 set -e
 
 pushd cf-release
-    bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
+    bundle config mirror.https://rubygems.org "$RUBYGEM_MIRROR"
     bundle
-    bosh create release --force --with-tarball --name cf --version 212.0.`date +"%s"`
+    bosh create release --force --with-tarball --name cf --version "212.0.$(date +"%s")"
 popd
 
 rsync -a cf-release/ cf-release-artifacts

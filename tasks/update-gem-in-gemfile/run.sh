@@ -7,12 +7,12 @@ NEW_VERSION_LINE="gem '$GEM_NAME', git: '$GEM_GIT_REPOSITORY', tag: 'v$GEM_VERSI
 
 pushd repo-with-gemfile
   sed -i "s|^gem '$GEM_NAME'.*$|$NEW_VERSION_LINE|" "$GEMFILE_NAME"
-  bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
+  bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
   BUNDLE_GEMFILE="$GEMFILE_NAME" bundle install
   git add "$GEMFILE_NAME" "$GEMFILE_NAME.lock"
 
   set +e
-    diff=$(git diff --cached --exit-code)
+    git diff --cached --exit-code
     no_changes=$?
   set -e
 

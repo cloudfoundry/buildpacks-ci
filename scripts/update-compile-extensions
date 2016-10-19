@@ -5,7 +5,7 @@ set -ex
 pushd buildpack/compile-extensions
   git checkout master
   git pull origin master
-  bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
+  bundle config mirror.https://rubygems.org "$RUBYGEM_MIRROR"
   bundle install
   bundle exec rspec
   compile_extensions_head=$(git rev-parse HEAD)
@@ -15,7 +15,7 @@ pushd buildpack
   git add compile-extensions/
 
   set +e
-    diff=$(git diff --cached --exit-code)
+    git diff --cached --exit-code
     no_changes=$?
   set -e
 
