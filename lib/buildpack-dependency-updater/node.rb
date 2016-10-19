@@ -17,7 +17,7 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
     original_dependencies = buildpack_manifest["dependencies"].clone
     new_dependencies = buildpack_manifest["dependencies"].clone
 
-    if buildpack == "nodejs" || (buildpack == "ruby" && major_version == "4")
+    if buildpack == "nodejs" || (buildpack == "ruby" && major_version == "4") || (buildpack == 'dotnet-core' && major_version == '6')
       new_dependencies = buildpack_manifest["dependencies"].delete_if { |dep| dep["name"] == dependency && dep["version"] == version_to_delete }
       dependency_hash = {
         "name" => dependency,
@@ -36,8 +36,13 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
   def perform_dependency_specific_changes
     major_version, minor_version, _ = dependency_version.split(".")
 
-    # Make latest node 4.x.y version default node version for node buildpack
-    if major_version == "4"
+    # Make latest node 4.x.y version default node version for node buildpack & ruby buildpack
+    # Make latest node 6.x.y version default node version for dotnet-core buildpack
+    update_default_versions = (buildpack == "nodejs" && major_version == "4") ||
+                              (buildpack == "ruby" && major_version == "4")   ||
+                              (buildpack == 'dotnet-core' && major_version == '6')
+
+    if update_default_versions
       buildpack_manifest["default_versions"].delete_if { |dep| dep["name"] == dependency }
       default_dependency_hash = {
         "name" => dependency,

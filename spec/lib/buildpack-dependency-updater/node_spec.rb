@@ -15,7 +15,6 @@ describe BuildpackDependencyUpdater do
 
   before { allow(ENV).to receive(:fetch).with('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil).and_return(dependencies_host_domain) }
 
-  
   describe '#run!' do
 
     before do
@@ -314,6 +313,120 @@ describe BuildpackDependencyUpdater do
         it 'records which versions were removed' do
           subject.run!
           expect(subject.removed_versions).to eq(['4.4.4'])
+        end
+      end
+    end
+
+    context "the buildpack is dotnet-core" do
+      let(:buildpack)    { "dotnet-core" }
+
+      before(:each) do
+        buildpack_manifest_contents = <<~MANIFEST
+         ---
+         language: dotnet-core
+
+         default_versions:
+           - name: dotnet
+             version: 1.0.0-preview2-003131
+           - name: node
+             version: 6.9.0
+
+         url_to_dependency_map:
+           - match: dotnet\.(.*)\.linux-amd64\.tar\.gz
+             name: dotnet
+             version: $1
+           - match: node(.*)(\d+\.\d+\.\d+)-linux-x64.tar.gz
+             name: node
+             version: $2
+
+         dependencies:
+           - name: dotnet
+             version: 1.0.0-preview2-003121
+             cf_stacks:
+               - cflinuxfs2
+             uri: https://buildpacks.cloudfoundry.org/concourse-binaries/dotnet/dotnet.1.0.0-preview2-003121.linux-amd64.tar.gz
+             md5: 8496b07e910f3b7997196e23427f3676
+           - name: dotnet
+             version: 1.0.0-preview2-003131
+             cf_stacks:
+               - cflinuxfs2
+             uri: https://buildpacks.cloudfoundry.org/concourse-binaries/dotnet/dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz
+             md5: 0abbf8aaae612c02aa529ca2a80d091a
+           - name: node
+             version: 6.9.0
+             cf_stacks:
+               - cflinuxfs2
+             uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-6.9.0-linux-x64.tgz
+             md5: 6c1e3fcff5c9275206543d5a7fe92d57
+        MANIFEST
+        File.open(manifest_file, "w") do |file|
+          file.write buildpack_manifest_contents
+        end
+      end
+
+      context("the new version of node is 0.10.47") do
+        let (:expected_version) { '0.10.47'}
+
+        it "does not add the new version to the buildpack manifest" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+          expect(dependency_in_manifest).to eq(nil)
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == "6.9.0"}
+          expect(dependency_in_manifest["version"]).to eq("6.9.0")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-6.9.0-linux-x64.tgz")
+          expect(dependency_in_manifest["md5"]).to eq("6c1e3fcff5c9275206543d5a7fe92d57")
+        end
+
+        it "does not change the default node version" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+
+          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '6.9.0'}
+          expect(default_in_manifest["version"]).to eq('6.9.0')
+
+          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+          expect(default_in_manifest).to eq(nil)
+        end
+
+        it 'records which versions were removed' do
+          subject.run!
+          expect(subject.removed_versions).to eq([])
+        end
+      end
+
+      context("the new version of node is >= 6") do
+        let (:expected_version) { '6.15.32'}
+
+        it "adds the new version to the buildpack manifest" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '6.9.0'}
+          expect(dependency_in_manifest).to eq(nil)
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+          expect(dependency_in_manifest["version"]).to eq(expected_version)
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
+          expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+        end
+
+        it "updates the ruby buildpack manifest dependency default with the specified version" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+
+          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+          expect(default_in_manifest["version"]).to eq(expected_version)
+
+          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '6.9.0'}
+          expect(default_in_manifest).to eq(nil)
+        end
+
+        it 'records which versions were removed' do
+          subject.run!
+          expect(subject.removed_versions).to eq(['6.9.0'])
         end
       end
     end
