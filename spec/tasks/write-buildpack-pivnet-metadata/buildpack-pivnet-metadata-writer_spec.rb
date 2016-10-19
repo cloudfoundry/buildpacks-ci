@@ -78,6 +78,40 @@ describe BuildpackPivnetMetadataWriter do
       end
     end
 
+    context 'the buildpack is php' do
+      let(:version)                   { "1.23.45" }
+      let(:buildpack)                 { 'php' }
+      let(:recent_changes)            { 'new php modules' }
+
+      before { allow(subject).to receive(:get_version).and_return(version) }
+
+      it "capitalizes filenames correctly" do
+        subject.run!
+        release = yaml_contents['release']
+        product_file = yaml_contents['product_files'].first
+
+        expect(release['version']).to eq 'PHP 1.23.45'
+        expect(product_file['upload_as']).to eq 'PHP Buildpack (offline)'
+      end
+    end
+
+    context 'the buildpack is nodejs' do
+      let(:version)                   { "6.78.99" }
+      let(:buildpack)                 { 'nodejs' }
+      let(:recent_changes)            { 'node security fixes' }
+
+      before { allow(subject).to receive(:get_version).and_return(version) }
+
+      it "capitalizes filenames correctly" do
+        subject.run!
+        release = yaml_contents['release']
+        product_file = yaml_contents['product_files'].first
+
+        expect(release['version']).to eq 'NodeJS 6.78.99'
+        expect(product_file['upload_as']).to eq 'NodeJS Buildpack (offline)'
+      end
+    end
+
     context 'the buildpack is ruby' do
       let(:version)                   { "1.7.45" }
       let(:buildpack)                 { 'ruby' }
