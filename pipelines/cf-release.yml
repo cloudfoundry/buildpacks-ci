@@ -373,7 +373,7 @@ jobs:
             BLOB_GLOB: ../blob/<%= language %>*.zip
             BLOB_NAME: <%= language %>-buildpack
             <% end %>
-            RELEASE_NAME: <%= language %>-buildpack-release
+            RELEASE_NAME: <%= language %>-buildpack
             RELEASE_DIR: release/<%= language %>-buildpack-release
         - put: buildpack-releases
           params:
@@ -418,7 +418,7 @@ jobs:
             BLOB_GLOB: blob/<%= language %>*.zip
             BLOB_NAME: <%= language %>-buildpack
             <% end %>
-            RELEASE_NAME: <%= language %>-buildpack-release
+            RELEASE_NAME: <%= language %>-buildpack
             RELEASE_DIR: release
         - put: <%= language %>-buildpack-bosh-release
           params:
