@@ -99,11 +99,13 @@ resources: #####################################################################
       url: {{concourse-job-failure-notifications-slack-webhook}}
 
 groups: ###############################################################################################################
+
   - name: enqueue-automated-builds
     jobs:
 <% %w(composer dotnet glide godep nginx node).each do |auto_dep| %>
     - trigger-<%= auto_dep %>-build
 <% end %>
+
   - name: automated-builds
     jobs:
 <% %w(composer dotnet glide godep nginx node).each do |auto_dep| %>
@@ -114,16 +116,19 @@ groups: ########################################################################
     - update-<%= dependency %>-in-<%= buildpack %>-buildpack
   <% end %>
 <% end %>
+
   - name: manual-builds
     jobs:
 <% %w(go php php7 ruby jruby bundler python httpd).each do |dependency| %>
     - build-<%= dependency %>
 <% end %>
+
   - name: binary-builder-specs
     jobs:
       - binary-builder-specs
 
 jobs: #################################################################################################################
+
   - name: binary-builder-specs
     serial: true
     public: true
@@ -164,6 +169,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
 <% %w(go php php7 ruby jruby bundler python httpd).each do |dependency| %>
   - name: build-<%= dependency %>
     serial: true
@@ -214,6 +220,7 @@ jobs: ##########################################################################
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
+
 <% %w(godep dotnet composer glide nginx node).each do |dependency| %>
   - name: trigger-<%= dependency %>-build
     serial: true
@@ -235,6 +242,7 @@ jobs: ##########################################################################
         params:
           repository: binary-builds-artifacts
           rebase: true
+
   - name: build-<%= dependency %>
     serial: true
     public: true
@@ -286,6 +294,7 @@ jobs: ##########################################################################
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
+
 <% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"], 'dotnet-core' => ['dotnet', 'node']}.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
   - name: update-<%= dependency %>-in-<%= buildpack %>-buildpack
