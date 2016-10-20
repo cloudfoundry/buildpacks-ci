@@ -47,6 +47,7 @@ resources: #####################################################################
     source:
       uri: https://github.com/cloudfoundry/brats.git
 
+<% unless language == 'multi' %>
   - name: pivnet-buildpack-metadata
     type: git
     source:
@@ -54,11 +55,14 @@ resources: #####################################################################
       private_key: {{pivotal-cf-buildpacks-ci-robots}}
       uri: git@github.com:pivotal-cf/buildpacks-ci-robots.git # pivotal-cf because pivnet is not foundation's
       paths: [ pivnet-metadata/<%= language %>.yml ]
+<% end %>
 
+<% unless language == 'binary' || language == 'multi' %>
   - name: compile-extensions
     type: git
     source:
       uri: https://github.com/cloudfoundry/compile-extensions.git
+<% end %>
 
   - name: buildpack-checksums
     type: git
@@ -97,6 +101,7 @@ resources: #####################################################################
 
   ## Pivnet Release ##
 
+<% unless language == 'multi' %>
   - name: pivnet-production
     type: pivnet
     source:
@@ -106,6 +111,7 @@ resources: #####################################################################
       product_slug: buildpacks
       access_key_id: {{pivnet-access-key}}
       secret_access_key: {{pivnet-secret-key}}
+<% end %>
 
   ## S3 Buckets ##
 
