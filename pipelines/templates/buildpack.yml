@@ -418,7 +418,7 @@ jobs: ##########################################################################
             RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
         - task: brats
-          file: buildpacks-ci/tasks/run-brats.yml
+          file: buildpacks-ci/tasks/run-brats/task.yml
           params:
             BRATS_BRANCH: develop
             CI_CF_USERNAME: {{ci-cf-username}}
@@ -462,7 +462,7 @@ jobs: ##########################################################################
             RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
         - task: brats
-          file: buildpacks-ci/tasks/run-brats.yml
+          file: buildpacks-ci/tasks/run-brats/task.yml
           params:
             BRATS_BRANCH: develop
             CI_CF_USERNAME: {{ci-cf-username}}

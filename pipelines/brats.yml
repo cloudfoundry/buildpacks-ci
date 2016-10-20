@@ -45,7 +45,7 @@ jobs:
         - get: brats
         - {get: brats-time-resource, trigger: true}
       - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
+        file: buildpacks-ci/tasks/run-brats/task.yml
         params:
           LANGUAGE: <%= language %>
           CI_CF_USERNAME: {{ci-cf-username}}
@@ -71,7 +71,7 @@ jobs:
         - get: brats
         - {get: brats-time-resource, trigger: true}
       - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
+        file: buildpacks-ci/tasks/run-brats/task.yml
         params:
           LANGUAGE: <%= language %>
           CI_CF_USERNAME: {{ci-cf-username}}
@@ -84,55 +84,3 @@ jobs:
           params:
             release: cf-environments
 <% end %>
-  - name: brats-safe-edge
-    serial: true
-    public: true
-    plan:
-      - put: cf-environments
-        resource: cf-edge-environments
-        params:
-          acquire: true
-        timeout: 3h
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        params:
-          LANGUAGE: safe
-          CI_CF_USERNAME: {{ci-cf-username}}
-          CI_CF_PASSWORD: {{ci-cf-password}}
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-          DOMAIN_NAME: {{domain-name}}
-        privileged: true
-        ensure:
-          put: cf-edge-environments
-          params:
-            release: cf-environments
-  - name: brats-safe-lts
-    serial: true
-    public: true
-    plan:
-      - put: cf-environments
-        resource: cf-lts-environments
-        params:
-          acquire: true
-        timeout: 3h
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/brats.yml
-        params:
-          LANGUAGE: safe
-          CI_CF_USERNAME: {{ci-cf-username}}
-          CI_CF_PASSWORD: {{ci-cf-password}}
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-          DOMAIN_NAME: {{domain-name}}
-        privileged: true
-        ensure:
-          put: cf-lts-environments
-          params:
-            release: cf-environments
