@@ -48,61 +48,41 @@ end
 private
 
 def product_version
-  if buildpack == 'dotnet-core'
-    ".NET Core #{get_version} (BETA)"
-  elsif buildpack == 'php'
-    "PHP #{get_version}"
-  elsif buildpack == 'nodejs'
-    "NodeJS #{get_version}"
-  else
-    "#{buildpack.capitalize} #{get_version}"
-  end
+  "#{formatted_name} #{get_version}"
 end
 
 def release_type
-  if buildpack == 'dotnet-core'
-    "Beta Release"
-  else
-    "Minor Release"
-  end
+  "Minor Release"
 end
 
 def eula_slug
-  if buildpack == "dotnet-core"
-    "pivotal_beta_eula"
-  else
-    "pivotal_software_eula"
-  end
+  "pivotal_software_eula"
 end
 
 def release_notes_url
-  if buildpack == "dotnet-core"
-    "https://github.com/cloudfoundry-incubator/dotnet-core-buildpack/releases/tag/v#{get_version}"
-  else
-    "https://github.com/cloudfoundry/#{buildpack}-buildpack/releases/tag/v#{get_version}"
-  end
+  "https://github.com/cloudfoundry/#{buildpack}-buildpack/releases/tag/v#{get_version}"
 end
 
 def availability
-  if buildpack == "dotnet-core"
-    "Admins Only"
-  else
-    "All Users"
-  end
+  "All Users"
 end
 
 def display_name
-  if buildpack == "dotnet-core"
-    ".NET Core Buildpack BETA (offline)"
-  elsif buildpack == 'php'
-    "PHP Buildpack (offline)"
-  elsif buildpack == 'nodejs'
-    "NodeJS Buildpack (offline)"
-  else
-    "#{buildpack.capitalize} Buildpack (offline)"
-  end
+  "#{formatted_name} Buildpack (offline)"
 end
 
 def description
   File.read(recent_changes_filename)
+end
+
+def formatted_name
+  if buildpack == "dotnet-core"
+    ".NET Core"
+  elsif buildpack == 'php'
+    "PHP"
+  elsif buildpack == 'nodejs'
+    "NodeJS"
+  else
+    "#{buildpack.capitalize}"
+  end
 end
