@@ -1,4 +1,4 @@
-resource_types:
+resource_types: #######################################################################################################
   - name: concourse2tracker
     type: docker-image
     source:
@@ -7,35 +7,29 @@ resource_types:
     type: docker-image
     source:
       repository: cfcommunity/slack-notification-resource
-resources:
+
+resources: ############################################################################################################
+
+  ## Git Repos ##
+
   - name: binary-builder
     type: git
     source:
       uri: {{binary-builder-git-uri}}
+
   - name: buildpacks-ci
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
+
   - name: builds-out
     type: git
     source:
       branch: binary-builds
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
-  - name: concourse2tracker
-    type: concourse2tracker
-  - name: failure-alert
-    type: slack-notification
-    source:
-      url: {{concourse-job-failure-notifications-slack-webhook}}
-  - name: cf-edge-environments
-    type: pool
-    source:
-      branch: resource-pools
-      pool: cf-edge-environments
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
+
 <% %w(go bundler composer dotnet glide godep httpd jruby php php7 python node nginx ruby).each do |dep| %>
   - name: <%= dep %>-builds
     type: git
@@ -85,7 +79,26 @@ resources:
         - CHANGELOG
 <% end %>
 
-groups:
+  ## Resource Pools ##
+
+  - name: cf-edge-environments
+    type: pool
+    source:
+      branch: resource-pools
+      pool: cf-edge-environments
+      private_key: {{buildpacks-ci-private-key}}
+      uri: {{buildpacks-ci-git-uri}}
+
+  ## Concourse2Tracker ##
+
+  - name: concourse2tracker
+    type: concourse2tracker
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
+
+groups: ###############################################################################################################
   - name: enqueue-automated-builds
     jobs:
 <% %w(composer dotnet glide godep nginx node).each do |auto_dep| %>
@@ -110,7 +123,7 @@ groups:
     jobs:
       - binary-builder-specs
 
-jobs:
+jobs: #################################################################################################################
   - name: binary-builder-specs
     serial: true
     public: true
