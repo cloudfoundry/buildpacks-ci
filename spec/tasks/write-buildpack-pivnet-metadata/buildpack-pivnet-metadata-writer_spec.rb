@@ -47,7 +47,7 @@ describe BuildpackPivnetMetadataWriter do
     context 'the buildpack is dotnet core' do
       let(:version)                   { "1.0.0" }
       let(:buildpack)                 { 'dotnet-core' }
-      let(:recent_changes)            { '.NET Core Buildpack BETA for PCF' }
+      let(:recent_changes)            { '.NET Core Buildpack for PCF' }
 
       before { allow(subject).to receive(:get_version).and_return(version) }
 
@@ -59,11 +59,11 @@ describe BuildpackPivnetMetadataWriter do
       it "writes the release metadata to the file" do
         subject.run!
         release = yaml_contents['release']
-        expect(release['version']).to eq '.NET Core 1.0.0 (BETA)'
-        expect(release['release_type']).to eq 'Beta Release'
-        expect(release['eula_slug']).to eq 'pivotal_beta_eula'
-        expect(release['release_notes_url']).to eq "https://github.com/cloudfoundry-incubator/dotnet-core-buildpack/releases/tag/v1.0.0"
-        expect(release['availability']).to eq 'Admins Only'
+        expect(release['version']).to eq '.NET Core 1.0.0'
+        expect(release['release_type']).to eq 'Minor Release'
+        expect(release['eula_slug']).to eq 'pivotal_software_eula'
+        expect(release['release_notes_url']).to eq "https://github.com/cloudfoundry/dotnet-core-buildpack/releases/tag/v1.0.0"
+        expect(release['availability']).to eq 'All Users'
       end
 
       it 'writes the product files metadata to the file' do
@@ -73,8 +73,8 @@ describe BuildpackPivnetMetadataWriter do
 
         product_file = product_files.first
         expect(product_file['file']).to eq File.join('pivotal-buildpack-cached', cached_buildpack_filename)
-        expect(product_file['upload_as']).to eq '.NET Core Buildpack BETA (offline)'
-        expect(product_file['description']).to eq '.NET Core Buildpack BETA for PCF'
+        expect(product_file['upload_as']).to eq '.NET Core Buildpack (offline)'
+        expect(product_file['description']).to eq '.NET Core Buildpack for PCF'
       end
     end
 
