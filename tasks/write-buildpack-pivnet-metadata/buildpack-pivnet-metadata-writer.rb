@@ -31,6 +31,12 @@ class BuildpackPivnetMetadataWriter
       'release_notes_url' => release_notes_url,
       'availability' => availability
     }
+
+    if buildpack != 'dotnet-core'
+      metadata['release']['eccn'] = eccn
+      metadata['release']['license_exception'] = license_exception
+    end
+
     metadata['product_files'] = [ {
       'file' => File.join('pivotal-buildpack-cached', cached_buildpack_filename),
       'upload_as' => display_name,
@@ -65,6 +71,14 @@ end
 
 def availability
   "All Users"
+end
+
+def eccn
+  '5D002'
+end
+
+def license_exception
+  'TSU'
 end
 
 def display_name
