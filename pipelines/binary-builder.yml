@@ -99,6 +99,16 @@ resources: #####################################################################
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
 
+ ## Docker Images ##
+
+  - name: docker-cflinuxfs2-rootfs
+    type: docker-image
+    source:
+      repository: cloudfoundry/cflinuxfs2
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+      email: cf-buildpacks-eng@pivotal.io
+
 groups: ###############################################################################################################
 
   - name: enqueue-automated-builds
@@ -136,6 +146,8 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: docker-cflinuxfs2-rootfs
+          trigger: true
         - get: binary-builder
           trigger: true
       - do:
