@@ -30,7 +30,7 @@ resources: #####################################################################
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
 
-<% %w(go bundler composer dotnet glide godep httpd jruby php php7 python node nginx ruby).each do |dep| %>
+<% %w(bower go bundler composer dotnet glide godep httpd jruby php php7 python node nginx ruby).each do |dep| %>
   - name: <%= dep %>-builds
     type: git
     source:
@@ -48,7 +48,7 @@ resources: #####################################################################
       paths: [ <%= dep %>-built.yml ]
 <% end %>
 
-<% %w(composer dotnet glide godep nginx node).each do |auto_dep| %>
+<% %w(bower composer dotnet glide godep nginx node).each do |auto_dep| %>
   - name: <%= auto_dep %>-builds-in
     type: git
     source:
@@ -58,7 +58,7 @@ resources: #####################################################################
       paths: [ <%= auto_dep %>-builds.yml ]
 <% end %>
 
-<% %w(composer dotnet glide godep nginx node).each do |auto_new| %>
+<% %w(bower composer dotnet glide godep nginx node).each do |auto_new| %>
   - name: <%= auto_new %>-new-releases
     type: git
     source:
