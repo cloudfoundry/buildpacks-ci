@@ -9,7 +9,7 @@ inputs:
   - name: brats
   - name: cf-environments
 run:
-  path: buildpacks-ci/scripts/brats-with-tags
+  path: buildpacks-ci/tasks/run-brats/run.sh
 params:
   BRATS_BRANCH:
   CI_CF_USERNAME:
