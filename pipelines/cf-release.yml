@@ -130,7 +130,7 @@ groups:
 jobs:
   - name: recreate-bosh-lite
     serial: true
-    serial_groups: [ stacks ]
+    serial_groups: [ cf-release ]
     public: true
     plan:
       - aggregate:
