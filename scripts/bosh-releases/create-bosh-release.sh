@@ -25,6 +25,7 @@ EOF
 
   bosh -n create release --final --version $version --name $RELEASE_NAME --force
   git add releases/**/*-$version.yml releases/**/index.yml
+  git add .final_builds/**/index.yml
   git commit -m "Final release for $BLOB_NAME at $version"
 popd
 
