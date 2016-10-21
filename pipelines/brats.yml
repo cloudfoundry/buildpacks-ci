@@ -30,7 +30,7 @@ resources:
       uri: {{buildpacks-ci-git-uri}}
 
 jobs:
-<% %w(go python nodejs php ruby jruby dotnet-core).each do |language| %>
+<% %w(go python nodejs php ruby jruby dotnet-core java).each do |language| %>
   - name: brats-<%= language %>-lts
     serial: true
     public: true
