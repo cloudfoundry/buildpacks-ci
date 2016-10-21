@@ -52,6 +52,7 @@ jobs:
           CI_CF_PASSWORD: {{ci-cf-password}}
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           DOMAIN_NAME: {{domain-name}}
+          BRATS_BRANCH: master
         privileged: true
         ensure:
           put: cf-lts-environments
@@ -78,6 +79,7 @@ jobs:
           CI_CF_PASSWORD: {{ci-cf-password}}
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           DOMAIN_NAME: {{domain-name}}
+          BRATS_BRANCH: master
         privileged: true
         ensure:
           put: cf-edge-environments
