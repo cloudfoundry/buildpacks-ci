@@ -712,13 +712,13 @@ jobs:
             RELEASE_DIR: cflinuxfs2-rootfs-release
             ACCESS_KEY_ID: {{cloudfoundry-s3-access-key}}
             SECRET_ACCESS_KEY: {{cloudfoundry-s3-secret-key}}
-        - put: cflinuxfs2-rootfs-release
-          params:
-            repository: release-artifacts
         - task: create-release-body
           file: buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes/task.yml
         - task: create-release-commit
           file: buildpacks-ci/tasks/create-rootfs-bosh-release-commit/task.yml
+        - put: cflinuxfs2-rootfs-release
+          params:
+            repository: release-artifacts
         - put: cflinuxfs2-rootfs-github-release
           params:
             name: cflinuxfs2-rootfs-release-version/number
