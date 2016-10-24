@@ -45,6 +45,10 @@ class NewReleasesDetector
         "Update #{dependency} in #{buildpack}-buildpack"
       end
 
+      if dependency == :dotnet
+        tracker_story_tasks.push 'Remove any dotnet versions MS no longer supports'
+      end
+
       tracker_client.post_to_tracker(name: tracker_story_name, description: tracker_story_description, tasks: tracker_story_tasks, point_value: 1)
     end
   end
