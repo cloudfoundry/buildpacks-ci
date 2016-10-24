@@ -2,9 +2,7 @@
 
 set -e
 
-release_name="${ROOTFS_RELEASE:-cflinuxfs2-rootfs}"
-
-echo "Overwriting BOSH release $release_name"
+echo "Overwriting BOSH release $ROOTFS_RELEASE"
 
 release_dir=cflinuxfs2-rootfs-release
 filename=`cat cflinuxfs2-rootfs-release/config/blobs.yml | grep cflinuxfs2 | cut -d ':' -f 1`

@@ -368,6 +368,8 @@ jobs:
       - do:
         - task: overwrite-cflinuxfs2-rootfs-release
           file: buildpacks-ci/tasks/overwrite-cflinuxfs2-rootfs-release.yml
+          params:
+            ROOTFS_RELEASE: cflinuxfs2-rootfs
         - put: stacks-rootfs-deployment
           params:
             manifest: deployments-buildpacks/deployments/stacks.buildpacks.ci/rootfs-smoke-test.yml
