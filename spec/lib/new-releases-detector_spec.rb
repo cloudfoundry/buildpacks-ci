@@ -215,10 +215,11 @@ describe NewReleasesDetector do
       allow(TrackerClient).to receive(:new).and_return(tracker_client)
       allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return(dependency_tags)
 
-      allow(BuildpackDependency).to receive(:for).with(:python).and_return(buildpack_dependency_tasks)
+      allow(BuildpackDependency).to receive(:for).with(dependency).and_return(buildpack_dependency_tasks)
     end
 
     context 'with new versions for a dependency' do
+      let(:dependency) { :python }
       let(:dependency_tags) { { python: %w(a b) } }
 
       it 'posts one story to tracker with all new releases of that dependency' do
@@ -230,7 +231,22 @@ describe NewReleasesDetector do
       end
     end
 
+    context 'there are new versions of dotnet' do
+      let(:dependency) { :dotnet }
+      let(:buildpack_dependency_tasks) { [:microsoft] }
+      let(:dependency_tags) { { dotnet: %w(1.0.0-preview43) } }
+
+      it 'adds a task to the tracker story to remove non-MS supported versions of dotnet' do
+        expect(tracker_client).to receive(:post_to_tracker).with(tasks: ['Update dotnet in microsoft-buildpack', 'Remove any dotnet versions MS no longer supports'],
+                                                                 name: anything, description: anything, point_value: anything
+        )
+
+        subject.post_to_tracker
+      end
+    end
+
     context 'with no new versions for a dependency' do
+      let(:dependency) { :python }
       let(:dependency_tags) { {} }
 
       it 'posts to slack for each new release of that dependency' do
