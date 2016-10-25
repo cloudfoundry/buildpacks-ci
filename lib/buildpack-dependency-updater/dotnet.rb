@@ -41,8 +41,11 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
   end
 
   def perform_dependency_specific_changes
-    update_default_versions
-    update_dotnet_versions
+    framework_version = get_framework_version
+
+    update_default_versions unless Gem::Version.new(framework_version).prerelease?
+
+    update_dotnet_versions(framework_version)
   end
 
   def update_default_versions
@@ -54,9 +57,7 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
     buildpack_manifest["default_versions"] << default_dependency_hash
   end
 
-  def update_dotnet_versions
-    framework_version = get_framework_version
-
+  def update_dotnet_versions(framework_version)
     versions_file = File.join(buildpack_dir,'dotnet-versions.yml')
     versions = YAML.load_file(versions_file)
 
