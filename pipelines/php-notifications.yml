@@ -20,13 +20,7 @@ resources:
     type: new_version_resource
     source:
       url: https://pecl.php.net/package/rdkafka
-      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("stable")) th
-  - name: librdkafka
-    type: github-release
-    source:
-      user: edenhill
-      repository: librdkafka
-      access_token: {{buildpacks-github-token}}
+      csspath: table[cellpadding="2"][cellspacing="1"] tr:has(td:contains("beta")) th
   - name: pecl-cassandra
     type: new_version_resource
     source:
@@ -159,42 +153,43 @@ resources:
     source:
       url: http://www.ioncube.com/loaders.php
       csspath: tr:contains("Linux (64 bits)") td:nth-of-type(6)
+  - name: librdkafka
+    type: new_version_resource
+    source:
+      url: https://github.com/edenhill/librdkafka/releases
+      csspath: ul.release-timeline-tags h3 span.tag-name
   - name: rabbitmq-c
-    type: github-release
+    type: new_version_resource
     source:
-      user: alanxz
-      repository: rabbitmq-c
-      access_token: {{buildpacks-github-token}}
-  - name: phpiredis
-    type: github-release
-    source:
-      user: nrk
-      repository: phpiredis
-      access_token: {{buildpacks-github-token}}
+      url: https://github.com/alanxz/rabbitmq-c/releases
+      csspath: ul.release-timeline-tags h3 span.tag-name
+#  skipped: since does not yet have releases
+#  - name: phpiredis
+#    type: new_version_resource
+#    source:
+#      url: https://github.com/nrk/phpiredis/releases
+#      csspath: ul.release-timeline-tags h3 span.tag-name
   - name: php-protobuf
-    type: github-release
+    type: new_version_resource
     source:
-      user: allegro
-      repository: php-protobuf
-      access_token: {{buildpacks-github-token}}
+      url: https://github.com/allegro/php-protobuf/releases
+      csspath: ul.release-timeline-tags h3 span.tag-name
   - name: cphalcon
-    type: github-release
+    type: new_version_resource
     source:
-      user: phalcon
-      repository: cphalcon
-      access_token: {{buildpacks-github-token}}
+      url: https://github.com/phalcon/cphalcon/releases
+      csspath: ul.release-timeline-tags h3 span.tag-name
   - name: suhosin5
-    type: github-release
+    type: new_version_resource
     source:
-      user: stefanesser
-      repository: suhosin
-      access_token: {{buildpacks-github-token}}
-  - name: suhosin7
-    type: github-release
-    source:
-      user: sektioneins
-      repository: suhosin7
-      access_token: {{buildpacks-github-token}}
+      url: https://github.com/stefanesser/suhosin/releases
+      csspath: ul.release-timeline-tags h3 span.tag-name
+#  skipped: since does not yet have releases
+#  - name: suhosin7
+#    type: new_version_resource
+#    source:
+#      url: https://github.com/sektioneins/suhosin7/releases
+#      csspath: ul.release-timeline-tags h3 span.tag-name
 jobs:
   - name: PHP Module Checker
     serial: true
