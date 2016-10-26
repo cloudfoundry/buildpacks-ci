@@ -1,4 +1,4 @@
-<% supported_languages = %w(go ruby binary staticfile nodejs php python java java-offline) %>
+<% supported_languages = %w(dotnet-core go ruby binary staticfile nodejs php python java java-offline) %>
 ---
 resource_types:
   - name: slack-notification
@@ -111,8 +111,10 @@ groups:
       - deploy-cf-and-diego-to-cf-release
       - cats
       - ship-it
-<% supported_languages.reject{|l| l.include?('java') }.each do |language| %>
+<% (supported_languages - %w(java java-offline dotnet-core)).each do |language| %>
       - deprecated-bosh-release-<%= language %>
+<% end %>
+<% (supported_languages - %w(java java-offline)).each do |language| %>
       - update-<%= language %>-buildpack-bosh-release
       - cf-release for <%= language %>
 <% end %>
@@ -194,6 +196,7 @@ jobs:
           - get: php-buildpack-github-release
           - get: staticfile-buildpack-github-release
           - get: binary-buildpack-github-release
+          - get: dotnet-core-buildpack-github-release
         - task: generate-manifest
           file: buildpacks-ci/tasks/diego-make-manifest.yml
           params:
@@ -272,6 +275,8 @@ jobs:
           passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: binary-buildpack-github-release
           passed: [ deploy-cf-and-diego-to-cf-release ]
+        - get: dotnet-core-buildpack-github-release
+          passed: [ deploy-cf-and-diego-to-cf-release ]
       - do:
         - task: cats
           file: buildpacks-ci/tasks/run-cats.yml
@@ -326,6 +331,8 @@ jobs:
           passed: [ cats ]
         - get: binary-buildpack-github-release
           passed: [ cats ]
+        - get: dotnet-core-buildpack-github-release
+          passed: [ cats ]
   - name: ship-it-java
     serial: true
     public: true
@@ -341,6 +348,7 @@ jobs:
         - get: java-offline-buildpack-github-release
           passed: [ cats ]
 <% supported_languages.each do |language| %>
+  <% if language != 'dotnet-core'%>
   - name: deprecated-bosh-release-<%= language %>
     serial: true
     serial_groups: [cf-release-buildpacks]
@@ -386,6 +394,7 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+    <% end %>
   - name: update-<%= language %>-buildpack-bosh-release
     serial: true
     serial_groups: [cf-release-buildpacks]
@@ -454,7 +463,9 @@ jobs:
               - java-buildpack-v*.zip
           <% end %>
           passed:
+          <% if language != 'dotnet-core'%>
             - deprecated-bosh-release-<%= language %>
+          <% end %>
             - update-<%= language %>-buildpack-bosh-release
           trigger: true
       - do:
