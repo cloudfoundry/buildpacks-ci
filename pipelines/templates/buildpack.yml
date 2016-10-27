@@ -208,6 +208,8 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/detect-and-upload/task.yml
           privileged: true
           params:
+            GIT_REPO_ORG: <%= git_repo_organization %>
+            BUILDPACK_NAME: <%= language %>
             RUBYGEM_MIRROR: {{rubygem-mirror}}
         - put: pivotal-buildpack
           params:
