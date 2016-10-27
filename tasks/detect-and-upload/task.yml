@@ -16,6 +16,7 @@ run:
   args:
     - -c
     - |
+      set -e
       pushd buildpacks-ci
         bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
         bundle

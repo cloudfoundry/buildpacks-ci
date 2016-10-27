@@ -209,7 +209,7 @@ jobs: ##########################################################################
           privileged: true
           params:
             GIT_REPO_ORG: <%= git_repo_organization %>
-            BUILDPACK_NAME: <%= language %>
+            BUILDPACK_NAME: <%= language %>-buildpack
             RUBYGEM_MIRROR: {{rubygem-mirror}}
         - put: pivotal-buildpack
           params:
