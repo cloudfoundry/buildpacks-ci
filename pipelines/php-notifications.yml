@@ -137,17 +137,18 @@ resources:
     type: new_version_resource
     source:
       url: https://github.com/redis/hiredis/releases
-      csspath: ul.release-timeline-tags h3 span.tag-name
+      csspath: div.release-meta ul.tag-references li:nth-of-type(1)
   - name: twig
     type: new_version_resource
     source:
       url: https://github.com/twigphp/twig/releases
-      csspath: ul.release-timeline-tags h3 span.tag-name
+      csspath: div.release-meta ul.tag-references li:nth-of-type(1)
   - name: xcache
     type: new_version_resource
     source:
       url: http://xcache.lighttpd.net/pub/Releases/
-      csspath: tr[group="1"] td:nth-of-type(1)
+      csspath: tr[group="1"] td a
+      use_semver: true
   - name: ioncube
     type: new_version_resource
     source:
@@ -157,39 +158,39 @@ resources:
     type: new_version_resource
     source:
       url: https://github.com/edenhill/librdkafka/releases
-      csspath: ul.release-timeline-tags h3 span.tag-name
+      csspath: div.release-meta ul.tag-references li:nth-of-type(1)
   - name: rabbitmq-c
     type: new_version_resource
     source:
       url: https://github.com/alanxz/rabbitmq-c/releases
-      csspath: ul.release-timeline-tags h3 span.tag-name
+      csspath: div.release-meta ul.tag-references li:nth-of-type(1)
 #  skipped: since does not yet have releases
 #  - name: phpiredis
 #    type: new_version_resource
 #    source:
 #      url: https://github.com/nrk/phpiredis/releases
-#      csspath: ul.release-timeline-tags h3 span.tag-name
+#      csspath: div.release-meta ul.tag-references li:nth-of-type(1)
   - name: php-protobuf
     type: new_version_resource
     source:
       url: https://github.com/allegro/php-protobuf/releases
-      csspath: ul.release-timeline-tags h3 span.tag-name
+      csspath: div.release-meta ul.tag-references li:nth-of-type(1)
   - name: cphalcon
     type: new_version_resource
     source:
       url: https://github.com/phalcon/cphalcon/releases
-      csspath: ul.release-timeline-tags h3 span.tag-name
+      csspath: div.release-meta ul.tag-references li:nth-of-type(1)
   - name: suhosin5
     type: new_version_resource
     source:
       url: https://github.com/stefanesser/suhosin/releases
-      csspath: ul.release-timeline-tags h3 span.tag-name
+      csspath: div.release-meta ul.tag-references li:nth-of-type(1)
 #  skipped: since does not yet have releases
 #  - name: suhosin7
 #    type: new_version_resource
 #    source:
 #      url: https://github.com/sektioneins/suhosin7/releases
-#      csspath: ul.release-timeline-tags h3 span.tag-name
+#      csspath: div.release-meta ul.tag-references li:nth-of-type(1)
 jobs:
   - name: PHP Module Checker
     serial: true
