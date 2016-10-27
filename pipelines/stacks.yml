@@ -220,6 +220,7 @@ resources: #####################################################################
       url: {{concourse-job-failure-notifications-slack-webhook}}
 
 jobs: ################################################################################################################
+
   - name: notification
     serial: true
     public: true
@@ -234,6 +235,7 @@ jobs: ##########################################################################
           TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
           TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+
   - name: recreate-bosh-lite
     serial: true
     serial_groups:
@@ -270,6 +272,7 @@ jobs: ##########################################################################
           params:
             repository: deployments-buildpacks-artifacts
             rebase: true
+
   - name: build-rootfs
     serial: true
     public: true
@@ -313,6 +316,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
   - name: generate-stacks-manifests
     serial: true
     serial_groups: [ stacks ]
@@ -387,6 +391,7 @@ jobs: ##########################################################################
           params:
             repository: generate-manifest-artifacts
             rebase: true
+
   - name: deploy-rootfs-to-stacks
     serial: true
     serial_groups: [ stacks ]
@@ -448,6 +453,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
   - name: deploy-cf-to-stacks
     serial: true
     serial_groups: [ stacks ]
@@ -490,6 +496,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
   - name: deploy-diego-to-stacks
     serial: true
     serial_groups: [ stacks ]
@@ -530,6 +537,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
   - name: cats
     serial: true
     serial_groups: [ stacks ]
@@ -581,6 +589,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
   - name: shipit
     serial: true
     public: true
@@ -628,6 +637,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
   - name: reset-minor-version-to-rc
     serial: true
     public: true
@@ -644,6 +654,7 @@ jobs: ##########################################################################
         params: {file: version/number}
       - put: cflinuxfs2-rootfs-release-version
         params: {file: cflinuxfs2-rootfs-release-version/number}
+
   - name: upload-to-github
     serial: true
     public: true
@@ -668,6 +679,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
   - name: upload-to-docker
     serial: true
     public: true
@@ -701,6 +713,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
   - name: create-bosh-release-deprecated
     serial: true
     public: true
@@ -735,6 +748,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
   - name: create-cflinuxfs2-rootfs-release
     serial: true
     public: true
@@ -783,6 +797,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
   - name: upload-to-cf-release
     serial: true
     public: true
