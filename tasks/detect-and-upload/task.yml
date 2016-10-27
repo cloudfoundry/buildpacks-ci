@@ -12,6 +12,15 @@ inputs:
 outputs:
   - name: buildpack-artifacts
 run:
-  path: buildpacks-ci/tasks/detect-and-upload/run.rb
+  path: bash
+  args:
+    - -c
+    - |
+      pushd buildpacks-ci
+        bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
+        bundle
+        bundle exec tasks/detect-and-upload/run.rb
+      popd
+
 params:
   RUBYGEM_MIRROR:
