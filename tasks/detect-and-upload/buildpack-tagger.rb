@@ -1,10 +1,13 @@
 require 'fileutils'
+require 'octokit'
 
 class BuildpackTagger
-  attr_reader :buildpack_dir
+  attr_reader :buildpack_dir, :buildpack_name, :git_repo_org
 
-  def initialize(buildpack_dir)
+  def initialize(buildpack_dir, buildpack_name, git_repo_org)
     @buildpack_dir = buildpack_dir
+    @buildpack_name = buildpack_name
+    @git_repo_org = git_repo_org
   end
 
 
@@ -13,7 +16,7 @@ class BuildpackTagger
       tag_to_add = "v#{File.read('VERSION')}".strip
       puts "Tag to add: #{tag_to_add}"
 
-      existing_tags = `git tag`.split("\n")
+      existing_tags = Octokit.tags("#{git_repo_org}/#{buildpack_name}").map(&:name)
       puts "Existing tags: #{existing_tags}"
 
       if existing_tags.include? tag_to_add

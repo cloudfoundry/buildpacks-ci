@@ -6,9 +6,11 @@ require_relative '../../../tasks/detect-and-upload/buildpack-tagger'
 
 describe BuildpackTagger do
   let(:task_dir) { Dir.mktmpdir }
-  let(:old_version)   { '3.3.3' }
-  let(:old_timestamp) {'12345'}
-  let(:git_tags)      {"v1.1.1\nv2.2.2\nv3.3.3\n"}
+  let(:old_version)    { '3.3.3' }
+  let(:old_timestamp)  {'12345'}
+  let(:git_tags)       { [double(name: 'v1.1.1'), double(name: 'v2.2.2'), double(name: 'v3.3.3')] }
+  let(:git_repo_org)   {'some-sort-of-org'}
+  let(:buildpack_name) {'testlang'}
   let(:buildpack_package_command) do
     <<~EOF
        export BUNDLE_GEMFILE=cf.Gemfile
@@ -53,13 +55,14 @@ describe BuildpackTagger do
         File.write("testlang_buildpack-cached-v#{@new_version}.zip",'specfile')
       end
     end
+    allow(Octokit).to receive(:tags).with("#{git_repo_org}/#{buildpack_name}").and_return(git_tags)
   end
 
   after(:each) do
     FileUtils.rm_rf(task_dir)
   end
 
-  subject { described_class.new(File.join(task_dir, 'buildpack')) }
+  subject { described_class.new(File.join(task_dir, 'buildpack'), buildpack_name, git_repo_org) }
 
   context 'the tag already exists' do
     let(:new_version)  { '3.3.3' }
