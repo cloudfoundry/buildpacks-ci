@@ -12,13 +12,15 @@ resource_types:
 
 resources: ###########################################################################################################
 
-  ## Git Repos ##
+  ## Cron Resource ##
 
   - name: monday-funday
     type: cron
     source:
       expression: 0 5 * * 1
       location: {{current-timezone}}
+
+  ## Git Repos ##
 
   - name: buildpacks-ci
     type: git
