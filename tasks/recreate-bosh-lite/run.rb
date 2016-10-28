@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require_relative '../../lib/bosh-lite-recreator.rb'
+require_relative '../../lib/bosh-lite-manager.rb'
 
 iaas = ENV['IAAS'] || 'aws'
 deployment_id = ENV['DEPLOYMENT_NAME']
@@ -34,17 +34,17 @@ end
 
 deployment_dir = File.join(Dir.pwd,'deployments-buildpacks-artifacts', 'deployments', deployment_id)
 
-recreator = BoshLiteRecreator.new(iaas: iaas,
-                                  deployment_dir: deployment_dir,
-                                  deployment_id: deployment_id,
-                                  bosh_lite_user: bosh_lite_user,
-                                  bosh_lite_password: bosh_lite_password,
-                                  bosh_lite_deployment_name: bosh_lite_deployment_name,
-                                  bosh_lite_url: bosh_lite_url,
-                                  bosh_director_user: bosh_director_user,
-                                  bosh_director_password: bosh_director_password,
-                                  bosh_director_target: bosh_director_target,
-                                  bosh_private_key: bosh_private_key
-                                 )
+mangager = BoshLiteManager.new(iaas: iaas,
+                               deployment_dir: deployment_dir,
+                               deployment_id: deployment_id,
+                               bosh_lite_user: bosh_lite_user,
+                               bosh_lite_password: bosh_lite_password,
+                               bosh_lite_deployment_name: bosh_lite_deployment_name,
+                               bosh_lite_url: bosh_lite_url,
+                               bosh_director_user: bosh_director_user,
+                               bosh_director_password: bosh_director_password,
+                               bosh_director_target: bosh_director_target,
+                               bosh_private_key: bosh_private_key
+                              )
 
-recreator.run!
+manager.recreate

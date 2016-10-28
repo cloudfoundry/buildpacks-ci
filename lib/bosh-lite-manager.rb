@@ -5,7 +5,7 @@ require 'fileutils'
 require 'net/http'
 require_relative 'git-client'
 
-class BoshLiteRecreator
+class BoshLiteManager
   attr_reader :deployment_dir, :iaas, :deployment_id, :bosh_lite_user,
               :bosh_lite_password, :bosh_lite_deployment_name, :bosh_lite_url,
               :bosh_director_user, :bosh_director_password, :bosh_director_target,
@@ -29,26 +29,18 @@ class BoshLiteRecreator
     @bosh_private_key = bosh_private_key
   end
 
-  def run!
-    if iaas == 'aws'
-      install_ssh_key(File.join(deployment_dir, '..', '..'))
-      delete_aws_instances
-      deploy_aws_bosh_lite
+  def destroy
+    setup_bosh_connection
 
-      # Commit AWS artifacts
-      Dir.chdir(deployment_dir) do
-        GitClient.add_everything
-        GitClient.safe_commit("recreated deployment #{deployment_id}")
-      end
-    elsif iaas == 'azure' || iaas == 'gcp'
-      target_bosh_director
+    destroy_old_bosh_lite
+  end
 
-      # Clean up and destroy old bosh-lite VM
-      delete_bosh_deployment
+  def recreate
+    setup_bosh_connection
 
-      # Boot up new bosh-lite VM
-      deploy_bosh_lite
-    end
+    destroy_old_bosh_lite
+
+    deploy_new_bosh_lite
 
     if bosh_lite_running?
       puts 'Successfully contacted BOSH lite'
@@ -64,6 +56,39 @@ class BoshLiteRecreator
     cleanup_deployment_manifests
   end
 
+  private
+
+  def setup_bosh_connection
+    if iaas == 'aws'
+      install_ssh_key(File.join(deployment_dir, '..', '..'))
+    elsif iaas == 'azure' || iaas == 'gcp'
+      target_bosh_director
+    end
+  end
+
+  def destroy_old_bosh_lite
+    if iaas == 'aws'
+      delete_aws_instances
+    elsif iaas == 'azure' || iaas == 'gcp'
+      # Clean up and destroy old bosh-lite VM
+      delete_bosh_deployment
+    end
+  end
+
+  def deploy_new_bosh_lite
+    if iaas == 'aws'
+      deploy_aws_bosh_lite
+
+      # Commit AWS artifacts
+      Dir.chdir(deployment_dir) do
+        GitClient.add_everything
+        GitClient.safe_commit("recreated deployment #{deployment_id}")
+      end
+    elsif iaas == 'azure' || iaas == 'gcp'
+      # Boot up new bosh-lite VM
+      deploy_bosh_lite
+    end
+  end
 
   def deploy_aws_bosh_lite
     Dir.chdir(deployment_dir) do
