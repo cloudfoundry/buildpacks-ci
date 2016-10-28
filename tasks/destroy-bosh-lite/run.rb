@@ -21,16 +21,14 @@ else
   exit 1
 end
 
-exit 1 unless system "rsync -a deployments-buildpacks/ deployments-buildpacks-artifacts"
-
-Dir.chdir ('deployments-buildpacks-artifacts') do
+Dir.chdir ('deployments-buildpacks') do
   rubygem_mirror = ENV['RUBYGEM_MIRROR']
   exit 1 unless system "bundle config mirror.https://rubygems.org #{rubygem_mirror}"
   num_cores = `nproc`.strip
   exit 1 unless system "bundle install --jobs=#{num_cores} --retry 5"
 end
 
-deployment_dir = File.join(Dir.pwd,'deployments-buildpacks-artifacts', 'deployments', deployment_id)
+deployment_dir = File.join(Dir.pwd,'deployments-buildpacks', 'deployments', deployment_id)
 
 manager = BoshLiteManager.new(iaas: iaas,
                                deployment_dir: deployment_dir,

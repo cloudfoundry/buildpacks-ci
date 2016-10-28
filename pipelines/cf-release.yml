@@ -326,14 +326,16 @@ jobs:
           BOSH_PRIVATE_KEY: {{bosh_private_key}}
           AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
           AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-          AWS_BOSH_LITE_NAME: cf-release.buildpacks.ci
+          BOSH_LITE_NAME: cf-release.buildpacks.ci
           RUBYGEM_MIRROR: {{rubygem-mirror}}
         attempts: 5
-        ensure:
-          put: deployments-buildpacks
-          params:
-            repository: deployments-buildpacks-artifacts
-            rebase: true
+      on_failure:
+        put: failure-alert
+        params:
+          text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+          channel: {{concourse-job-failure-notifications-slack-channel}}
+          username: concourse
+          icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
   - name: ship-it
     serial: true
