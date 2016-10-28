@@ -222,11 +222,43 @@ describe NewReleasesDetector do
       let(:dependency) { :python }
       let(:dependency_tags) { { python: %w(a b) } }
 
-      it 'posts one story to tracker with all new releases of that dependency' do
-        expect(tracker_client).to receive(:post_to_tracker).with(name: 'Build and/or Include new releases: python a, b',
-                                                                 description: "We have 2 new releases for **python**:\n**version a, b**\n See the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file.",
-                                                                 tasks: ['Update python in snake-buildpack', 'Update python in lizard-buildpack'],
-                                                                 point_value: 1)
+      it 'posts a tracker story with the dependency and versions in the story title' do
+        expect(tracker_client).to receive(:post_to_tracker).
+          with(name: 'Build and/or Include new releases: python a, b',
+               description: anything, tasks: anything, point_value: anything, labels: anything)
+
+        subject.post_to_tracker
+      end
+
+      it 'posts a tracker story with the dependency and versions in the story description' do
+        expect(tracker_client).to receive(:post_to_tracker).
+          with(description: "We have 2 new releases for **python**:\n**version a, b**\n See the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file.",
+               name: anything, tasks: anything, point_value: anything, labels: anything)
+
+        subject.post_to_tracker
+      end
+
+      it 'posts a tracker story with tasks to update the dependency in buildpacks' do
+        expect(tracker_client).to receive(:post_to_tracker).
+          with(tasks: ['Update python in snake-buildpack', 'Update python in lizard-buildpack'],
+               name: anything, description: anything, point_value: anything, labels: anything)
+
+        subject.post_to_tracker
+      end
+
+      it 'posts a tracker story worth 1 story point' do
+        expect(tracker_client).to receive(:post_to_tracker).
+          with(point_value: 1,
+               name: anything, description: anything, tasks: anything, labels: anything)
+
+        subject.post_to_tracker
+      end
+
+      it 'posts a tracker story with the buildpack names as labels' do
+        expect(tracker_client).to receive(:post_to_tracker).
+          with(labels: %w(snake lizard),
+               name: anything, description: anything, tasks: anything, point_value: anything)
+
         subject.post_to_tracker
       end
     end
@@ -237,8 +269,9 @@ describe NewReleasesDetector do
       let(:dependency_tags) { { dotnet: %w(1.0.0-preview43) } }
 
       it 'adds a task to the tracker story to remove non-MS supported versions of dotnet' do
-        expect(tracker_client).to receive(:post_to_tracker).with(tasks: ['Update dotnet in microsoft-buildpack', 'Remove any dotnet versions MS no longer supports'],
-                                                                 name: anything, description: anything, point_value: anything
+        expect(tracker_client).to receive(:post_to_tracker).
+          with(tasks: ['Update dotnet in microsoft-buildpack', 'Remove any dotnet versions MS no longer supports'],
+               name: anything, description: anything, point_value: anything, labels: anything
         )
 
         subject.post_to_tracker

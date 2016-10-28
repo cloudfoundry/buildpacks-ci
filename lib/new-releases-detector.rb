@@ -41,15 +41,24 @@ class NewReleasesDetector
     dependency_tags.each do |dependency, versions|
       tracker_story_name = "Build and/or Include new releases: #{dependency} #{versions.join(', ')}"
       tracker_story_description = "We have #{versions.count} new releases for **#{dependency}**:\n**version #{versions.join(', ')}**\n See the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file."
-      tracker_story_tasks = BuildpackDependency.for(dependency).map do |buildpack|
+
+      buildpack_names = BuildpackDependency.for(dependency)
+      tracker_story_tasks = buildpack_names.map do |buildpack|
         "Update #{dependency} in #{buildpack}-buildpack"
+      end
+      tracker_story_labels = buildpack_names.map do |buildpack|
+        buildpack.to_s
       end
 
       if dependency == :dotnet
         tracker_story_tasks.push 'Remove any dotnet versions MS no longer supports'
       end
 
-      tracker_client.post_to_tracker(name: tracker_story_name, description: tracker_story_description, tasks: tracker_story_tasks, point_value: 1)
+      tracker_client.post_to_tracker(name: tracker_story_name,
+                                     description: tracker_story_description,
+                                     tasks: tracker_story_tasks,
+                                     labels: tracker_story_labels,
+                                     point_value: 1)
     end
   end
 
