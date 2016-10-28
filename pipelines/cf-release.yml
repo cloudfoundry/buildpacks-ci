@@ -110,6 +110,7 @@ groups:
       - recreate-bosh-lite
       - deploy-cf-and-diego-to-cf-release
       - cats
+      - destroy-bosh-lite
       - ship-it
 <% (supported_languages - %w(java java-offline dotnet-core)).each do |language| %>
       - deprecated-bosh-release-<%= language %>
