@@ -11,7 +11,7 @@ description = <<~DESCRIPTION
                 Easy way to check for changes: Ex. https://github.com/cloudfoundry/ruby-buildpack/compare/develop...heroku:master
               DESCRIPTION
 tasks = %w(Go Nodejs Python Ruby)
-tasks += "Tag story with all affected buildpacks"
+tasks << "Tag story with all affected buildpacks"
 labels = %w(maintenance)
 
 tracker_client = TrackerClient.new(
