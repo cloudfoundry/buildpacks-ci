@@ -1,12 +1,12 @@
 # encoding: utf-8
 require 'spec_helper'
-require_relative '../../lib/bosh-lite-recreator'
+require_relative '../../lib/bosh-lite-manager'
 
 require 'tmpdir'
 require 'fileutils'
 require 'yaml'
 
-describe BoshLiteRecreator do
+describe BoshLiteManager do
   let(:iaas) { 'aws' }
   let(:deployment_id) { "edge-17.buildpacks.ci" }
   let(:deployment_dir) { File.join(Dir.mktmpdir, deployment_id) }
@@ -40,7 +40,7 @@ describe BoshLiteRecreator do
 
   after { FileUtils.rm_rf(deployment_dir) }
 
-  describe '#run!' do
+  describe '#recreate' do
     let(:bosh_lite_running) { true }
 
     before do
@@ -66,7 +66,7 @@ describe BoshLiteRecreator do
         expect(GitClient).to receive(:add_everything).ordered
         expect(GitClient).to receive(:safe_commit).with('recreated deployment edge-17.buildpacks.ci').ordered
 
-        subject.run!
+        subject.recreate
       end
     end
 
@@ -78,7 +78,7 @@ describe BoshLiteRecreator do
         expect(subject).to receive(:delete_bosh_deployment).ordered
         expect(subject).to receive(:deploy_bosh_lite).ordered
 
-        subject.run!
+        subject.recreate
       end
     end
 
@@ -86,13 +86,13 @@ describe BoshLiteRecreator do
       it "updates bosh-lite admin password" do
         expect(subject).to receive(:update_admin_password)
 
-        subject.run!
+        subject.recreate
       end
 
       it "cleans up the deployment manifests" do
         expect(subject).to receive(:cleanup_deployment_manifests)
 
-        subject.run!
+        subject.recreate
       end
     end
 
@@ -100,21 +100,128 @@ describe BoshLiteRecreator do
       let(:bosh_lite_running) { false }
 
       it "exits" do
-        expect{subject.run!}.to raise_exception(SystemExit)
+        expect{subject.recreate}.to raise_exception(SystemExit)
       end
     end
   end
 
+  describe '#destroy' do
+    before do
+      allow(subject).to receive(:install_ssh_key)
+      allow(subject).to receive(:delete_aws_instances)
+      allow(subject).to receive(:target_bosh_director)
+      allow(subject).to receive(:delete_bosh_deployment)
+    end
+
+    context 'iaas is aws' do
+      it 'deletes the aws instance ' do
+        expect(subject).to receive(:install_ssh_key).with("#{deployment_dir}/../..").ordered
+        expect(subject).to receive(:delete_aws_instances).ordered
+
+        subject.destroy
+      end
+    end
+
+    context 'iaas is azure or gcp' do
+      let(:iaas) { 'azure' }
+
+      it 'deletes the azure bosh-lite deployment' do
+        expect(subject).to receive(:target_bosh_director).ordered
+        expect(subject).to receive(:delete_bosh_deployment).ordered
+
+        subject.destroy
+      end
+    end
+  end
+
+  describe 'setup_bosh_connection' do
+    before do
+      allow(subject).to receive(:install_ssh_key)
+      allow(subject).to receive(:target_bosh_director)
+    end
+
+    context 'iaas is aws' do
+      it 'installs the ssh key' do
+        expect(subject).to receive(:install_ssh_key).with("#{deployment_dir}/../..")
+        subject.send :setup_bosh_connection
+      end
+    end
+
+    context 'iaas is azure or gcp' do
+      let(:iaas) { 'gcp' }
+
+      it 'targets the BOSH director' do
+        expect(subject).to receive(:target_bosh_director)
+        subject.send :setup_bosh_connection
+      end
+    end
+  end
+
+  describe 'destroy_old_bosh_lite' do
+    before do
+      allow(subject).to receive(:delete_aws_instances)
+      allow(subject).to receive(:delete_bosh_deployment)
+    end
+
+    context 'iaas is aws' do
+      it 'deletes the aws instance' do
+        expect(subject).to receive(:delete_aws_instances)
+        subject.send :destroy_old_bosh_lite
+      end
+    end
+
+    context 'iaas is azure or gcp' do
+      let(:iaas) { 'gcp' }
+
+      it 'deletes the bosh deployment' do
+        expect(subject).to receive(:delete_bosh_deployment)
+        subject.send :destroy_old_bosh_lite
+      end
+    end
+  end
+
+  describe 'deploy_new_bosh_lite' do
+    before do
+      allow(subject).to receive(:deploy_aws_bosh_lite)
+      allow(subject).to receive(:deploy_bosh_lite)
+      allow(GitClient).to receive(:add_everything)
+      allow(GitClient).to receive(:safe_commit)
+    end
+
+    context 'iaas is aws' do
+      it 'deploys bosh lite' do
+        expect(subject).to receive(:deploy_aws_bosh_lite)
+        subject.send :deploy_new_bosh_lite
+      end
+
+      it 'commits the AWS artifacts' do
+        expect(GitClient).to receive(:add_everything)
+        expect(GitClient).to receive(:safe_commit).with('recreated deployment edge-17.buildpacks.ci')
+        subject.send :deploy_new_bosh_lite
+      end
+    end
+
+    context 'iaas is azure or gcp' do
+      let(:iaas) { 'gcp' }
+
+      it 'deploys bosh lite' do
+        expect(subject).to receive(:deploy_bosh_lite)
+        subject.send :deploy_new_bosh_lite
+      end
+    end
+  end
+
+
   describe '#deploy_aws_bosh_lite' do
     it "sets VAGRANT_CWD to deployment directory" do
-      subject.deploy_aws_bosh_lite
+      subject.send :deploy_aws_bosh_lite
       expect(ENV['VAGRANT_CWD']).to eq(deployment_dir)
     end
 
     it "runs vagrant up with aws provider" do
       expect(subject).to receive(:run_or_exit).with("/usr/bin/vagrant up --provider=aws")
 
-      subject.deploy_aws_bosh_lite
+      subject.send :deploy_aws_bosh_lite
     end
   end
 
@@ -123,7 +230,7 @@ describe BoshLiteRecreator do
       expect(subject).to receive(:run_or_exit).with("bosh target bosh.example.com")
       expect(subject).to receive(:run_or_exit).with("bosh login admin_director also_a_password")
 
-      subject.target_bosh_director
+      subject.send :target_bosh_director
     end
   end
 
@@ -142,7 +249,7 @@ describe BoshLiteRecreator do
     end
 
     it 'creates a new bosh-lite.yml with an updated director_uuid' do
-      subject.setup_bosh_lite_manifest
+      subject.send :setup_bosh_lite_manifest
 
       bosh_lite_manifest_contents = YAML.load_file(File.join(deployment_dir, 'bosh-lite.yml') )
       expect(bosh_lite_manifest_contents['director_uuid']).to eq 'aaaa-bbbb-cccc-dddd'
@@ -153,7 +260,7 @@ describe BoshLiteRecreator do
     it 'deletes the bosh-lite deployment using the correct credentials' do
       expect(subject).to receive(:run_or_exit).with("echo 'yes' | bosh -u admin_director -p also_a_password delete deployment edge-17")
 
-      subject.delete_bosh_deployment
+      subject.send :delete_bosh_deployment
     end
   end
 
@@ -162,7 +269,7 @@ describe BoshLiteRecreator do
       expect(subject).to receive(:setup_bosh_lite_manifest).ordered
       expect(subject).to receive(:run_or_exit).with("bosh deployment bosh-lite.yml").ordered
       expect(subject).to receive(:run_or_exit).with("echo 'yes' | bosh -u admin_director -p also_a_password deploy").ordered
-      subject.deploy_bosh_lite
+      subject.send :deploy_bosh_lite
     end
   end
 
@@ -178,18 +285,18 @@ describe BoshLiteRecreator do
     after { FileUtils.rm_rf(install_dir) }
 
     it 'creates a bosh.pem file with the bosh private key' do
-      subject.install_ssh_key(install_dir)
+      subject.send(:install_ssh_key, install_dir)
       expect(File.read(key_file)).to eq('APRIVATESSHKEY')
     end
 
     it 'chmods and adds that key to the ssh agent' do
       expect(subject).to receive(:run_or_exit).with("chmod 0600 #{key_file}").ordered
       expect(subject).to receive(:run_or_exit).with("ssh-add #{key_file}").ordered
-      subject.install_ssh_key(install_dir)
+      subject.send(:install_ssh_key, install_dir)
     end
 
     it 'sets the BOSH_LITE_PRIVATE_KEY env var to key file path' do
-      subject.install_ssh_key(install_dir)
+      subject.send(:install_ssh_key, install_dir)
       expect(ENV['BOSH_LITE_PRIVATE_KEY']).to eq(key_file)
     end
   end
@@ -205,7 +312,7 @@ describe BoshLiteRecreator do
       let(:admin_update_succeeded) { true }
 
       it 'reports that it is working' do
-        expect { subject.update_admin_password }.to output("Deployment working!\n").to_stdout
+        expect { subject.send :update_admin_password }.to output("Deployment working!\n").to_stdout
       end
     end
 
@@ -216,7 +323,7 @@ describe BoshLiteRecreator do
         it "reports that deployment failed, deletes aws instances, and exits" do
           expect(subject).to receive(:puts).with("Deployment failed: deleting instance")
           expect(subject).to receive(:delete_aws_instances)
-          expect { subject.update_admin_password }.to raise_exception(SystemExit)
+          expect { subject.send :update_admin_password }.to raise_exception(SystemExit)
         end
       end
 
@@ -225,7 +332,7 @@ describe BoshLiteRecreator do
 
         it "reports that deployment failed and exits" do
           expect(subject).to receive(:puts).with("Deployment failed")
-          expect { subject.update_admin_password }.to raise_exception(SystemExit)
+          expect { subject.send :update_admin_password }.to raise_exception(SystemExit)
         end
       end
     end
@@ -243,12 +350,12 @@ describe BoshLiteRecreator do
 
     it 'runs the terminate bosh lite script' do
       expect(subject).to receive(:run_or_exit).with(script_file)
-      subject.delete_aws_instances
+      subject.send :delete_aws_instances
     end
 
     it 'removes the .vagrant file' do
       expect(FileUtils).to receive(:rm_rf).with('.vagrant')
-      subject.delete_aws_instances
+      subject.send :delete_aws_instances
     end
   end
 
@@ -264,7 +371,7 @@ describe BoshLiteRecreator do
       let (:bosh_lite_is_running) { true }
 
       it 'returns true' do
-        expect(subject.bosh_lite_running?).to eq true
+        expect(subject.send :bosh_lite_running?).to eq true
       end
     end
 
@@ -274,11 +381,11 @@ describe BoshLiteRecreator do
       it 'waits for 30 min' do
         expect(subject).to receive(:sleep).with(10).exactly(180).times
 
-        subject.bosh_lite_running?
+        subject.send :bosh_lite_running?
       end
 
       it 'returns false' do
-        expect(subject.bosh_lite_running?).to eq false
+        expect(subject.send :bosh_lite_running?).to eq false
       end
     end
   end
@@ -301,14 +408,14 @@ describe BoshLiteRecreator do
       it 'deletes all yaml files from deployment dir' do
         expect(FileUtils).to receive(:rm).with([ 'some_manifest.yml' ] )
 
-        subject.cleanup_deployment_manifests
+        subject.send :cleanup_deployment_manifests
       end
 
       it 'adds and commits the deletion' do
         expect(GitClient).to receive(:add_everything)
         expect(GitClient).to receive(:safe_commit).with('remove deployment manifests for edge-17.buildpacks.ci')
 
-        subject.cleanup_deployment_manifests
+        subject.send :cleanup_deployment_manifests
       end
     end
 
@@ -316,14 +423,14 @@ describe BoshLiteRecreator do
       it 'does not try to delete yaml files from deployment dir' do
         expect(FileUtils).to_not receive(:rm)
 
-        subject.cleanup_deployment_manifests
+        subject.send :cleanup_deployment_manifests
       end
 
       it 'does not git add or make a commit' do
         expect(GitClient).to_not receive(:add_everything)
         expect(GitClient).to_not receive(:safe_commit)
 
-        subject.cleanup_deployment_manifests
+        subject.send :cleanup_deployment_manifests
       end
     end
   end
