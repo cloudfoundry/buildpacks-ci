@@ -32,7 +32,7 @@ end
 
 deployment_dir = File.join(Dir.pwd,'deployments-buildpacks-artifacts', 'deployments', deployment_id)
 
-mangager = BoshLiteManager.new(iaas: iaas,
+manager = BoshLiteManager.new(iaas: iaas,
                                deployment_dir: deployment_dir,
                                deployment_id: deployment_id,
                                bosh_lite_deployment_name: bosh_lite_deployment_name,
