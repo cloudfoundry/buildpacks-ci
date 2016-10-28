@@ -37,6 +37,8 @@ mangager = BoshLiteManager.new(iaas: iaas,
                                deployment_id: deployment_id,
                                bosh_lite_deployment_name: bosh_lite_deployment_name,
                                bosh_lite_url: bosh_lite_url,
+                               bosh_lite_user: nil
+                               bosh_lite_password: nil
                                bosh_director_user: bosh_director_user,
                                bosh_director_password: bosh_director_password,
                                bosh_director_target: bosh_director_target,
