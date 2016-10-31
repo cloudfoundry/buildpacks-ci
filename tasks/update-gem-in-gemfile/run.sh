@@ -5,7 +5,7 @@ set -ex
 GEM_VERSION=$(cat gem/version)
 NEW_VERSION_LINE="gem '$GEM_NAME', git: '$GEM_GIT_REPOSITORY', tag: 'v$GEM_VERSION'"
 
-pushd buildpack
+pushd repo-with-gemfile
   sed -i "s|^gem '$GEM_NAME'.*$|$NEW_VERSION_LINE|" "$GEMFILE_NAME"
   bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
   BUNDLE_GEMFILE="$GEMFILE_NAME" bundle install
@@ -24,5 +24,4 @@ pushd buildpack
   fi
 popd
 
-rsync -a buildpack/ buildpack-artifacts
-
+rsync -a repo-with-gemfile/ repo-with-gemfile-artifacts
