@@ -3,6 +3,7 @@ require 'json'
 require 'octokit'
 require 'open-uri'
 require 'yaml'
+require 'git'
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 require "#{buildpacks_ci_dir}/lib/slack-client"
@@ -125,7 +126,8 @@ class NewReleasesDetector
       openjdk:         -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys },
       php:             -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
       python:          -> { JSON.parse(open('https://hg.python.org/cpython/json-tags').read)['tags'].map { |t| t['tag'] } },
-      ruby:            -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) }
+      ruby:            -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) },
+      libunwind:       -> { Git.ls_remote('http://git.savannah.gnu.org/cgit/libunwind.git')['tags'].keys }
     }
   end
 
