@@ -17,6 +17,7 @@ describe NewReleasesDetector do
     allow_any_instance_of(described_class).to receive(:warn) {}
     allow(Octokit).to receive(:configure)
     allow(Octokit).to receive(:tags).and_return([])
+    allow(Git).to receive(:ls_remote).with('http://git.savannah.gnu.org/cgit/libunwind.git').and_return({'tags' => {}})
     allow_any_instance_of(described_class).to receive(:open).with(/python/).and_return(double(read: { 'tags' => [] }.to_json))
     allow_any_instance_of(described_class).to receive(:open).with(/openjdk/).and_return(double(read: {}.to_yaml))
     allow_any_instance_of(described_class).to receive(:open).with(/node/).and_return(double(read: [].to_json))
@@ -173,6 +174,31 @@ describe NewReleasesDetector do
 
       context 'when there are no new releases' do
         let(:new_releases_response) { double(read: { 'versions' => { '1.7.6': 'data', '1.7.7': 'data' } }.to_json) }
+
+        it_behaves_like 'there are no new versions to potentially build'
+      end
+    end
+
+    context 'for libunwind' do
+      let(:dependency)          { :libunwind }
+      let(:old_versions)        { %w(1.0 1.1) }
+      let(:new_releases_source) { 'http://git.savannah.gnu.org/cgit/libunwind.git' }
+
+      before do
+        allow(Git).to receive(:ls_remote).
+          with('http://git.savannah.gnu.org/cgit/libunwind.git').
+          and_return(new_releases_response)
+      end
+
+      context 'when there are new releases' do
+        let(:new_versions)          { %w(1.2 1.2-rc3) }
+        let(:new_releases_response) { { 'tags' => { '1.0' => {}, '1.1' => {}, '1.2' => {}, '1.2-rc3' => {} } } }
+
+        it_behaves_like 'there are new versions to potentially build'
+      end
+
+      context 'when there are no new releases' do
+        let(:new_releases_response) { { 'tags' => { '1.0' => {}, '1.1' => {} } } }
 
         it_behaves_like 'there are no new versions to potentially build'
       end

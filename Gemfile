@@ -8,6 +8,7 @@ gem 'rspec-rerun'
 gem 'webmock'
 gem 'nokogiri'
 gem 'octokit'
+gem 'git'
 gem 'bump', '= 0.5.3'
 gem 'tracker_api'
 
