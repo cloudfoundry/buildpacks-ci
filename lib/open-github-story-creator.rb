@@ -40,6 +40,7 @@ class OpenGithubStoryCreator
                        'php-buildpack',
                        'staticfile-buildpack',
                        'binary-buildpack',
+                       'dotnet-core-buildpack',
                        'buildpack-packager',
                        'machete',
                        'compile-extensions',
