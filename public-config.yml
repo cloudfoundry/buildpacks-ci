@@ -1,8 +1,8 @@
 # This file holds public configuration (like github uri, github organization) to ease creation of a new pipeline instance.
-machete-git-uri-public: https://github.com/cloudfoundry/machete.git
+machete-git-uri-public: https://github.com/cloudfoundry/machete
 machete-git-uri: git@github.com:cloudfoundry/machete.git
 
-buildpack-packager-git-uri-public: https://github.com/cloudfoundry/buildpack-packager.git
+buildpack-packager-git-uri-public: https://github.com/cloudfoundry/buildpack-packager
 buildpack-packager-git-uri: git@github.com:cloudfoundry/buildpack-packager.git
 
 binary-builder-git-uri: https://github.com/cloudfoundry/binary-builder.git
