@@ -519,15 +519,19 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: buildpack-packager
+        - get: gem
+          resource: buildpack-packager
           trigger: true
         - get: buildpack
           resource: buildpack-develop
       - task: update-buildpack-packager
-        file: buildpacks-ci/tasks/update-buildpack-packager.yml
+        file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
         privileged: true
         params:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
+          GEM_NAME: buildpack-packager
+          GEM_GIT_REPOSITORY: {{buildpack-packager-git-uri-public}}
+          GEMFILE_NAME: cf.Gemfile
       - put: buildpack-develop
         params:
           repository: buildpack-artifacts
@@ -538,16 +542,19 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: machete
+        - get: gem
+          resource: machete
           trigger: true
         - get: buildpack
           resource: buildpack-develop
       - task: update-machete
-        file: buildpacks-ci/tasks/update-machete.yml
+        file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
         privileged: true
         params:
-          MACHETE_REPOSITORY: {{machete-git-uri-public}}
           RUBYGEM_MIRROR: {{rubygem-mirror}}
+          GEM_NAME: machete
+          GEM_GIT_REPOSITORY: {{machete-git-uri-public}}
+          GEMFILE_NAME: cf.Gemfile
       - put: buildpack-develop
         params:
           repository: buildpack-artifacts
