@@ -40,27 +40,15 @@ describe BuildpackDependencyUpdater do
             version: 4.4.6
           dependencies:
           - name: node
-            version: 0.10.45
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.10.45-linux-x64.tgz
+            version: 0.12.45
+            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.12.45-linux-x64.tgz
             md5: b6607379e8cdcfa3763acc12fe40cef9
             cf_stacks:
               - cflinuxfs2
           - name: node
-            version: 0.10.46
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.10.46-linux-x64.tgz
+            version: 0.12.46
+            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.12.46-linux-x64.tgz
             md5: 2e02c3350a0b81e8b501ef3ea637a93b
-            cf_stacks:
-              - cflinuxfs2
-          - name: node
-            version: 0.12.14
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.12.14-linux-x64.tgz
-            md5: 510555de82cc985898731dc7c18a6dfb
-            cf_stacks:
-              - cflinuxfs2
-          - name: node
-            version: 0.12.15
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.12.15-linux-x64.tgz
-            md5: 317b688dde627bb85e7d575870f08eb2
             cf_stacks:
               - cflinuxfs2
           - name: node
@@ -106,14 +94,14 @@ describe BuildpackDependencyUpdater do
 
       end
 
-      context("node 0.10") do
-        let (:expected_version) { '0.10.47'}
+      context("node 0.12") do
+        let (:expected_version) { '0.12.47'}
 
         it "updates the nodejs buildpack manifest dependency with the specified version" do
           subject.run!
           manifest = YAML.load_file(manifest_file)
 
-          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '0.10.45'}
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '0.12.45'}
           expect(dependency_in_manifest).to eq(nil)
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
@@ -121,9 +109,9 @@ describe BuildpackDependencyUpdater do
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
 
-          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '0.10.46'}
-          expect(dependency_in_manifest["version"]).to eq("0.10.46")
-          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.10.46-linux-x64.tgz")
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '0.12.46'}
+          expect(dependency_in_manifest["version"]).to eq("0.12.46")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.12.46-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("2e02c3350a0b81e8b501ef3ea637a93b")
         end
 
@@ -140,7 +128,7 @@ describe BuildpackDependencyUpdater do
 
         it 'records which versions were removed' do
           subject.run!
-          expect(subject.removed_versions).to eq(['0.10.45'])
+          expect(subject.removed_versions).to eq(['0.12.45'])
         end
       end
 
@@ -245,8 +233,8 @@ describe BuildpackDependencyUpdater do
         end
       end
 
-      context("node 0.10") do
-        let (:expected_version) { '0.10.47'}
+      context("node 0.12") do
+        let (:expected_version) { '0.12.47'}
 
         it "does not update the ruby buildpack manifest dependency with the specified version" do
           subject.run!
@@ -364,8 +352,8 @@ describe BuildpackDependencyUpdater do
         end
       end
 
-      context("the new version of node is 0.10.47") do
-        let (:expected_version) { '0.10.47'}
+      context("the new version of node is 0.12.47") do
+        let (:expected_version) { '0.12.47'}
 
         it "does not add the new version to the buildpack manifest" do
           subject.run!
