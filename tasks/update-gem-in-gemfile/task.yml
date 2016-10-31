@@ -7,9 +7,9 @@ image_resource:
 inputs:
   - name: gem
   - name: buildpacks-ci
-  - name: buildpack
+  - name: repo-with-gemfile
 outputs:
-  - name: buildpack-artifacts
+  - name: repo-with-gemfile-artifacts
 run:
   path: buildpacks-ci/tasks/update-gem-in-gemfile/run.sh
 params:
@@ -17,4 +17,3 @@ params:
   GEM_NAME:
   GEM_GIT_REPOSITORY:
   GEMFILE_NAME:
-
