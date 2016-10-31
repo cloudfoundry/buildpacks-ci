@@ -6,13 +6,14 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: buildpack-packager
+  - name: gem
 outputs:
-  - name: buildpack-packager-artifacts
+  - name: gem-artifacts
 run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/scripts/release/buildpack-packager/finalize-buildpack-packager
+    - buildpacks-ci/tasks/finalize-gem/run.rb
 params:
   RUBYGEM_MIRROR:
+  GEM_NAME:

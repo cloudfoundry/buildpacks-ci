@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -ex
 
-pushd buildpack-packager
+pushd gem
   bump patch
   bump current | egrep -o '[0-9\.]+' >> VERSION
 popd
 
-rsync -a buildpack-packager/ buildpack-packager-artifacts
+rsync -a gem/ gem-artifacts
