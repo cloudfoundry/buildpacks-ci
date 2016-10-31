@@ -2,7 +2,9 @@ resources:
   - name: brats
     type: git
     source:
-      uri: https://github.com/cloudfoundry/brats.git
+      uri: git@github.com:cloudfoundry/brats.git
+      private_key: {{brats-private-key}}
+      branch: master
   - name: brats-time-resource
     type: time
     source:
@@ -13,7 +15,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch:  {{buildpacks-ci-git-uri-public-branch}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
   - name: cf-edge-environments
     type: pool
     source:
@@ -28,6 +30,20 @@ resources:
       pool: cf-lts-environments
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
+
+  - name: buildpack-packager
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: buildpack-packager
+      access_token: {{buildpacks-github-token}}
+
+  - name: machete
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: machete
+      access_token: {{buildpacks-github-token}}
 
 jobs:
 <% %w(go python nodejs php ruby jruby dotnet-core java).each do |language| %>
@@ -127,7 +143,7 @@ jobs:
         params:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           GEM_NAME: machete
-          GEM_GIT_REPOSITORY: {{buildpack-packager-git-uri-public}}
+          GEM_GIT_REPOSITORY: {{machete-git-uri-public}}
           GEMFILE_NAME: Gemfile
       - put: brats
         params:
