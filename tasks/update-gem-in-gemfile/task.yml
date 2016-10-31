@@ -5,12 +5,16 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
-  - name: buildpack-packager
+  - name: gem
   - name: buildpacks-ci
   - name: buildpack
 outputs:
   - name: buildpack-artifacts
 run:
-  path: buildpacks-ci/scripts/update-buildpack-packager
+  path: buildpacks-ci/tasks/update-gem-in-gemfile/run.sh
 params:
   RUBYGEM_MIRROR:
+  GEM_NAME:
+  GEM_GIT_REPOSITORY:
+  GEMFILE_NAME:
+
