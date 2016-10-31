@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-set -ex
-
-pushd machete
-  bump patch
-  bump current | egrep -o '[0-9\.]+' >> VERSION
-popd
-
-rsync -a machete/ machete-artifacts

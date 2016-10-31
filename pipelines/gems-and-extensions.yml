@@ -60,14 +60,15 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: buildpack-packager
+        - get: gem
+          resource: buildpack-packager
           passed: [ buildpack-packager-specs ]
       - task: bump-buildpack-packager-version
-        file: buildpacks-ci/tasks/bump-buildpack-packager-version.yml
+        file: buildpacks-ci/tasks/bump-gem-version/task.yml
       - put: buildpack-packager
         params:
-          repository: buildpack-packager-artifacts
-          tag: buildpack-packager-artifacts/VERSION
+          repository: gem-artifacts
+          tag: gem-artifacts/VERSION
           tag_prefix: v
   - name: buildpack-packager-release
     serial: true
@@ -75,21 +76,23 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: buildpack-packager
+        - get: gem
           passed: [ buildpack-packager-tag ]
+          resource: buildpack-packager
           trigger: true
       - task: create-new-buildpack-packager-release
-        file: buildpacks-ci/tasks/release-buildpack-packager.yml
+        file: buildpacks-ci/tasks/create-gem-release/task.yml
         privileged: true
         params:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
+          GEM_NAME: buildpack-packager
       - put: buildpack-packager-github-release
         params:
-          name: buildpack-packager-artifacts/tag
-          tag: buildpack-packager-artifacts/tag
+          name: gem-artifacts/tag
+          tag: gem-artifacts/tag
           globs:
-            - buildpack-packager-artifacts/buildpack-packager-v*.zip
-            - buildpack-packager-artifacts/buildpack-packager-v*.tar.gz
+            - gem-artifacts/buildpack-packager-v*.zip
+            - gem-artifacts/buildpack-packager-v*.tar.gz
   - name: machete-specs
     serial: true
     public: true
@@ -119,14 +122,15 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: machete
+        - get: gem
+          resource: machete
           passed: [ machete-specs ]
       - task: bump-machete-version
-        file: buildpacks-ci/tasks/bump-machete-version.yml
+        file: buildpacks-ci/tasks/bump-gem-version/task.yml
       - put: machete
         params:
-          repository: machete-artifacts
-          tag: machete-artifacts/VERSION
+          repository: gem-artifacts
+          tag: gem-artifacts/VERSION
           tag_prefix: v
   - name: machete-release
     serial: true
@@ -134,19 +138,22 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: machete
+        - get: gem
           passed: [ machete-tag ]
+          resource: machete
           trigger: true
       - task: create-new-machete-release
-        file: buildpacks-ci/tasks/release-machete.yml
+        file: buildpacks-ci/tasks/create-gem-release/task.yml
         privileged: true
+        params:
+          GEM_NAME: machete
       - put: machete-github-release
         params:
-          name: machete-artifacts/tag
-          tag: machete-artifacts/tag
+          name: gem-artifacts/tag
+          tag: gem-artifacts/tag
           globs:
-            - machete-artifacts/machete-v*.zip
-            - machete-artifacts/machete-v*.tar.gz
+            - gem-artifacts/machete-v*.zip
+            - gem-artifacts/machete-v*.tar.gz
   - name: compile-extensions
     serial: true
     public: true

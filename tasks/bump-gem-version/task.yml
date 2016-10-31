@@ -6,8 +6,8 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: buildpack-packager
+  - name: gem
 outputs:
-  - name: buildpack-packager-artifacts
+  - name: gem-artifacts
 run:
-  path: buildpacks-ci/scripts/release/buildpack-packager/bump-version
+  path: buildpacks-ci/tasks/bump-gem-version/run.sh
