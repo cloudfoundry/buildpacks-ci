@@ -187,6 +187,7 @@ jobs: ##########################################################################
   - name: build-<%= dependency %>
     serial: true
     public: true
+    disable_manual_trigger: true # instead, trigger jobs by pushing yaml to buildpacks-ci:binary-builds
     plan:
       - aggregate:
         - get: builds-yaml
