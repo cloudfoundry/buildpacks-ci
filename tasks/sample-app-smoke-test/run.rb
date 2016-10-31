@@ -81,15 +81,17 @@ end
 
 target_cf(cf_api, cf_username, cf_password, cf_organization, cf_login_space, cf_app_space)
 
-bind_database(database_to_bind)
+begin
+  bind_database(database_to_bind)
 
-push_app(buildpack_url, app_name)
+  push_app(buildpack_url, app_name)
 
-app_route_host = get_app_route_host(app_name)
+  app_route_host = get_app_route_host(app_name)
 
-response = get_app_response(app_route_host, cf_domain, request_path, request_type)
-
-delete_space(cf_app_space)
+  response = get_app_response(app_route_host, cf_domain, request_path, request_type)
+ensure
+  delete_space(cf_app_space)
+end
 
 if response.code == "200"
   puts 'Got HTTP response 200. App push successful'
