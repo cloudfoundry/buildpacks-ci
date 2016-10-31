@@ -4,7 +4,7 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
     version_to_delete = buildpack_manifest["dependencies"].select do |dep|
       dep_maj, dep_min, _ = dep["version"].to_s.split(".")
       if major_version == "0"
-        # node 0.10.x, 0.12.x
+        # 0.12.x
         dep_maj == major_version && dep_min == minor_version && dep["name"] == dependency
       else
         # node 4.x, 5.x, 6.x
