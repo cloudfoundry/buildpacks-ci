@@ -18,14 +18,12 @@ run:
   args:
     - -c
     - |
+      set -e
       git clone ./new-cves ./output-new-cves && \
       git clone ./new-buildpack-cves ./output-new-buildpack-cves && \
       cd buildpacks-ci/ && \
-      bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR} && \
-      bundle && \
       bundle exec ./scripts/notifications/check-cves
 params:
-  RUBYGEM_MIRROR:
   SLACK_CHANNEL:
   SLACK_WEBHOOK:
   GITHUB_USERNAME:

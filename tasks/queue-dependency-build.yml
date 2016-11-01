@@ -13,14 +13,12 @@ outputs:
 run:
   path: bash
   args:
-    - -c
+    - -cl
     - |
+      set -e
       pushd buildpacks-ci
-        bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
-        bundle
         bundle exec ./scripts/notifications/queue-dependency-build
       popd
       rsync -a binary-builds/ binary-builds-artifacts
 params:
   DEPENDENCY:
-  RUBYGEM_MIRROR:

@@ -14,14 +14,11 @@ outputs:
 run:
   path: bash
   args:
-    - -c
+    - -cl
     - |
       set -e
       pushd buildpacks-ci
-        bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
-        bundle
         bundle exec tasks/detect-and-upload/run.rb
       popd
-
 params:
   RUBYGEM_MIRROR:

@@ -79,7 +79,6 @@ jobs:
           TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
           TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: new-releases
         params:
           repository: new-releases-artifacts
@@ -105,7 +104,6 @@ jobs:
           TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
           GITHUB_USERNAME: {{github-username}}
           GITHUB_PASSWORD: {{github-password}}
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - task: create-open-issues-story
         file: buildpacks-ci/tasks/create-open-issues-story.yml
         params:
@@ -114,7 +112,6 @@ jobs:
           TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
           GITHUB_USERNAME: {{github-username}}
           GITHUB_PASSWORD: {{github-password}}
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
   - name: New CVEs
     serial: true
     public: true
@@ -137,7 +134,6 @@ jobs:
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
           TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
           EMAIL_PREPARER_DIR: ../cves-email
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: new-cves
         params:
           repository: output-new-cves

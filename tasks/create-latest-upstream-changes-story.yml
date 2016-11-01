@@ -9,11 +9,9 @@ inputs:
 run:
   path: bash
   args:
-    - -c
+    - -cl
     - |
       cd buildpacks-ci
-      bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
-      bundle
       bundle exec ./scripts/notifications/create-latest-upstream-changes-story
 params:
   TRACKER_PROJECT_ID:

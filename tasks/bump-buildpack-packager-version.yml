@@ -11,5 +11,3 @@ outputs:
   - name: buildpack-packager-artifacts
 run:
   path: buildpacks-ci/scripts/release/buildpack-packager/bump-version
-params:
-  RUBYGEM_MIRROR:

@@ -14,9 +14,8 @@ run:
   args:
     - -c
     - |
+      set -e
       pushd buildpacks-ci
-        bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
-        bundle
         bundle exec ./scripts/notifications/check-new-releases
       popd
       rsync -a new-releases/ new-releases-artifacts
@@ -28,4 +27,3 @@ params:
   TRACKER_PROJECT_ID:
   TRACKER_API_TOKEN:
   TRACKER_REQUESTER_ID:
-  RUBYGEM_MIRROR:
