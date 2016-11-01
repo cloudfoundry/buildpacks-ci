@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 set -ex
 
-pushd buildpacks-ci
-  bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
-  bundle install
-popd
-
 pushd buildpack-packager
   bump patch
   bump current | egrep -o '[0-9\.]+' >> VERSION

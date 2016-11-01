@@ -15,9 +15,8 @@ run:
   args:
     - -c
     - |
+      set -e
       pushd buildpacks-ci
-        bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
-        bundle
         bundle exec scripts/update-dependency-in-buildpack
       popd
       rsync -a buildpack/ buildpack-artifacts
@@ -28,4 +27,3 @@ params:
   TRACKER_REQUESTER_ID:
   BUILDPACK_NAME:
   BUILDPACK_DEPENDENCIES_HOST_DOMAIN:
-  RUBYGEM_MIRROR:

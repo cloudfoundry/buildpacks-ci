@@ -12,8 +12,6 @@ run:
     - -c
     - |
       cd buildpacks-ci
-      bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
-      bundle
       bundle exec ./scripts/notifications/create-new-stacks-release-story
 params:
   TRACKER_PROJECT_ID:

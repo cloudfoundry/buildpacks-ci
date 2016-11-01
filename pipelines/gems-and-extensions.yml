@@ -79,8 +79,6 @@ jobs:
           passed: [ buildpack-packager-specs ]
       - task: bump-buildpack-packager-version
         file: buildpacks-ci/tasks/bump-buildpack-packager-version.yml
-        params:
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: buildpack-packager
         params:
           repository: buildpack-packager-artifacts
@@ -140,8 +138,6 @@ jobs:
           passed: [ machete-specs ]
       - task: bump-machete-version
         file: buildpacks-ci/tasks/bump-machete-version.yml
-        params:
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: machete
         params:
           repository: machete-artifacts
@@ -159,8 +155,6 @@ jobs:
       - task: create-new-machete-release
         file: buildpacks-ci/tasks/release-machete.yml
         privileged: true
-        params:
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: machete-github-release
         params:
           name: machete-artifacts/tag

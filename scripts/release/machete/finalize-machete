@@ -2,11 +2,6 @@
 # encoding: utf-8
 require 'fileutils'
 
-Dir.chdir('buildpacks-ci') do
-  `bundle config mirror.https://rubygems.org #{ENV['RUBYGEM_MIRROR']}`
-  `bundle install`
-end
-
 artifact_path = File.join(Dir.pwd, 'machete-artifacts')
 
 current_version = Dir.chdir('machete') do

@@ -11,5 +11,3 @@ outputs:
   - name: machete-artifacts
 run:
   path: buildpacks-ci/scripts/release/machete/bump-version
-params:
-  RUBYGEM_MIRROR:
