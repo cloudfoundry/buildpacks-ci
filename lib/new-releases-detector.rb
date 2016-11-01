@@ -137,7 +137,9 @@ class NewReleasesDetector
   def massage_version(tags,dependency)
     case dependency
     when :node
-      tags.map {|tag| tag.gsub(/v/,"")}
+      tags.map { |tag| tag.gsub(/v/,"")}
+    when :nginx
+      tags.map { |tag| tag.gsub('release-', '')}
     else
       tags
     end

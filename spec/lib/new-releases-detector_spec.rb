@@ -12,6 +12,7 @@ describe NewReleasesDetector do
   let(:new_releases_dir) { Dir.mktmpdir }
   let(:github_username)  { 'github_username' }
   let(:github_password)  { 'github_password1!' }
+  let(:github_repo)      { 'default' }
 
   before do
     allow_any_instance_of(described_class).to receive(:warn) {}
@@ -31,7 +32,7 @@ describe NewReleasesDetector do
 
   subject { described_class.new(new_releases_dir) }
 
-  shared_examples_for 'there are new versions to potentially build' do
+  shared_examples_for 'there are new versions to potentially build'  do |dependency_source|
     let(:yaml_filename)     { "#{new_releases_dir}/#{dependency}.yaml"}
     let(:yaml_new_filename) { "#{new_releases_dir}/#{dependency}-new.yaml"}
     let(:all_versions)      { old_versions + new_versions }
@@ -40,9 +41,14 @@ describe NewReleasesDetector do
       allow_any_instance_of(described_class).to receive(:warn).and_call_original
       allow(File).to receive(:exist?).with(yaml_filename).and_return(true)
       allow(YAML).to receive(:load_file).with(yaml_filename).and_return(old_versions)
-      allow_any_instance_of(described_class).to receive(:open)
-        .with(new_releases_source)
-        .and_return(new_releases_response)
+
+      if dependency_source == :github
+        allow(Octokit).to receive(:tags).with(github_repo).and_return(github_response)
+      else
+        allow_any_instance_of(described_class).to receive(:open)
+          .with(new_releases_source)
+          .and_return(new_releases_response)
+      end
     end
 
     it 'sets dependency_tags to a hash of dependencies as keys and array of diffs as values' do
@@ -66,7 +72,7 @@ describe NewReleasesDetector do
     end
   end
 
-  shared_examples_for 'there are no new versions to potentially build' do
+  shared_examples_for 'there are no new versions to potentially build' do |dependency_source|
     let(:yaml_filename) { "#{new_releases_dir}/#{dependency}.yaml"}
     let(:new_versions)  { [] }
 
@@ -74,9 +80,14 @@ describe NewReleasesDetector do
       allow_any_instance_of(described_class).to receive(:warn).and_call_original
       allow(File).to receive(:exist?).with(yaml_filename).and_return(true)
       allow(YAML).to receive(:load_file).with(yaml_filename).and_return(old_versions)
-      allow_any_instance_of(described_class).to receive(:open)
-        .with(new_releases_source)
-        .and_return(new_releases_response)
+
+      if dependency_source == :github
+        allow(Octokit).to receive(:tags).with(github_repo).and_return(github_response)
+      else
+        allow_any_instance_of(described_class).to receive(:open)
+          .with(new_releases_source)
+          .and_return(new_releases_response)
+      end
     end
 
     it 'sets dependency_tags to an empty hash' do
@@ -159,6 +170,26 @@ describe NewReleasesDetector do
         it_behaves_like 'there are no new versions to potentially build'
       end
     end
+
+    context 'for nginx' do
+      let(:dependency)   { :nginx }
+      let(:old_versions) { %w(1.10.1 1.10.2) }
+      let(:github_repo)  { 'nginx/nginx' }
+
+      context 'when there are new releases' do
+        let(:new_versions)          { %w(1.10.5) }
+        let(:github_response) { [double(name: 'release-1.10.1'), double(name: 'release-1.10.2'), double(name: 'release-1.10.5')] }
+
+        it_behaves_like 'there are new versions to potentially build', :github
+      end
+
+      context 'when there are no new releases' do
+        let(:github_response) { [double(name: 'release-1.10.1'), double(name: 'release-1.10.2')] }
+
+        it_behaves_like 'there are no new versions to potentially build', :github
+      end
+    end
+
 
     context 'for bower' do
       let(:dependency)          { :bower }

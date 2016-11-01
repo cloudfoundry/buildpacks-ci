@@ -134,7 +134,7 @@ describe DependencyBuildEnqueuer do
 
     context "nginx" do
       let(:dependency)          { "nginx" }
-      let(:new_versions)        { %w(release-1.11.9 release-1.10.5) }
+      let(:new_versions)        { %w(1.11.9 1.10.5) }
       let(:expected_version_1)  { "1.10.5" }
       let(:expected_version_2)  { "1.11.9" }
 
