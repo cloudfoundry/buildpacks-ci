@@ -232,6 +232,8 @@ jobs: ##########################################################################
         - get: monday-funday
           passed: [ "notification" ]
           trigger: true
+        - get: new-cves
+          trigger: true
       - task: recreate-bosh-lite
         file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
         params:
@@ -271,8 +273,6 @@ jobs: ##########################################################################
           params: { pre: rc }
         - get: cflinuxfs2-rootfs-release-version
           params: { pre: rc }
-        - get: new-cves
-          trigger: true
       - do:
         - task: make-rootfs
           file: buildpacks-ci/tasks/make-rootfs.yml

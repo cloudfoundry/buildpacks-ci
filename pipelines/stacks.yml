@@ -248,6 +248,8 @@ jobs: ##########################################################################
           passed: [ "notification" ]
           trigger: true
         - get: buildpacks-ci
+        - get: new-cves
+          trigger: true
       - task: recreate-bosh-lite
         file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
         params:
@@ -281,8 +283,6 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: deployments-buildpacks
           passed: [ "recreate-bosh-lite" ]
-          trigger: true
-        - get: new-cves
           trigger: true
       - aggregate:
         - get: stacks
