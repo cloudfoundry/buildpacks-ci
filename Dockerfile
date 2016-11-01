@@ -56,13 +56,10 @@ RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/d
 # when docker container starts, ensure login scripts run
 COPY build/*.sh /etc/profile.d/
 
+# install buildpacks-ci Gemfile
 RUN gem install bundler
-
-COPY Gemfile /tmp/Gemfile
-
-RUN cd /tmp && bundle install
-
-RUN rm /tmp/Gemfile /tmp/Gemfile.lock
+COPY Gemfile /usr/local/Gemfile
+RUN cd /usr/local && bundle install
 
 #install fly-cli
 RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly
