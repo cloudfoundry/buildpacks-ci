@@ -163,7 +163,7 @@ describe 'finalize-buildpack task' do
 
     it 'emits a SHA256.txt file' do
       output = run("cat /tmp/build/*/buildpack-artifacts/*.SHA256SUM.txt && echo '\t'")
-      expect(output).to include '8965f5f7a2af993f1e0f66a5bf41d5edf0f957368ce7333af6af82dfc8e88c27  staticfile_buildpack-cached-v1.2.1.zip'
+      expect(output).to include '6183bfc9d4c24cb123427b3b45d3b5ffa22d218adbe86cb48f204ce0a2c711fd  staticfile_buildpack-cached-v1.2.1.zip'
     end
   end
 end
