@@ -32,7 +32,6 @@ class DependencyBuildEnqueuer
 
     new_dependency_versions.each do |ver|
       next if (prerelease_version?(ver) && dependency != 'dotnet')
-      ver = massage_version_for_manifest_format(ver)
 
       new_build = {"version" => ver}
       dependency_verification_tuples = DependencyBuildEnqueuer.build_verifications_for(dependency, ver)
@@ -54,13 +53,6 @@ class DependencyBuildEnqueuer
 
   private
 
-  def massage_version_for_manifest_format(version)
-    case dependency
-      when "nginx" then version.gsub("release-","")
-      else version
-    end
-  end
-
   def prerelease_version?(version)
     version = massage_version_for_semver(version)
     Gem::Version.new(version).prerelease?
@@ -72,7 +64,6 @@ class DependencyBuildEnqueuer
       when "dotnet" then version.gsub("v","")
       when "godep" then version.gsub("v","")
       when "glide" then version.gsub("v","")
-      when "nginx" then version.gsub("release-","")
       else version
     end
   end
