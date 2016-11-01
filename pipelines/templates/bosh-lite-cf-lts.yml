@@ -47,11 +47,6 @@ resources:
     source:
       uri: {{machete-git-uri-public}}
       branch: master
-  - name: cflinuxfs2-rootfs-bosh-release
-    type: bosh-io-release
-    tarball: true
-    source:
-      repository: cloudfoundry/cflinuxfs2-rootfs-release
   - name: cf-bosh-release
     type: bosh-io-release
     tarball: true

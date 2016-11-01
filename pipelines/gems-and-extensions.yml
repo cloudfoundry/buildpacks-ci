@@ -5,11 +5,6 @@ resources:
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch:  {{buildpacks-ci-git-uri-public-branch}}
-  - name: deployments-buildpacks
-    type: git
-    source:
-      uri: {{deployments-git-uri}}
-      private_key: {{deployments-private-key}}
   - name: buildpack-packager
     type: git
     source:
@@ -45,16 +40,6 @@ resources:
       pool: cf-edge-environments
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
-  - name: cf-release
-    type: git
-    source:
-      uri: {{cf-release-git-uri}}
-  - name: nanny-time-resource
-    type: time
-    source:
-      interval: 12h
-      start: 7:00 -0400
-      stop: 12:00 -0400
 jobs:
   - name: buildpack-packager-specs
     serial: true
