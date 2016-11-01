@@ -18,5 +18,5 @@ run:
       set -ex
       cd buildpacks-ci
       ./scripts/fly-login $CI_USERNAME $CI_PASSWORD
-      rake
+      bundle exec rake
       ./scripts/set-status-success
