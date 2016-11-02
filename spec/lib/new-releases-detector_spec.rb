@@ -54,7 +54,7 @@ describe NewReleasesDetector do
     end
 
     it 'sets dependency_tags to a hash of dependencies as keys and array of diffs as values' do
-      expect(subject.dependency_tags).to eq({dependency => new_versions})
+      expect(subject.changed_dependencies).to eq({dependency => new_versions})
     end
 
     it 'writes to a file the latest releases' do
@@ -92,7 +92,7 @@ describe NewReleasesDetector do
     end
 
     it 'sets dependency_tags to an empty hash' do
-      expect(subject.dependency_tags).to eq({})
+      expect(subject.changed_dependencies).to eq({})
     end
 
     it 'outputs to stderr that there are no new updates' do
@@ -240,11 +240,11 @@ describe NewReleasesDetector do
 
     before do
       allow(SlackClient).to receive(:new).and_return(slack_client)
-      allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return([dependency_tags, current_tags, unchanged_dependencies])
+      allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return([changed_dependencies, current_tags, unchanged_dependencies])
     end
 
     context 'with new versions for a dependency' do
-      let(:dependency_tags) { { python: %w(a b) } }
+      let(:changed_dependencies) { {python: %w(a b) } }
 
       it 'posts to slack for each new release of that dependency' do
         expect(slack_client).to receive(:post_to_slack).with("There is a new update to the *python* dependency: version *a*\n")
@@ -254,7 +254,7 @@ describe NewReleasesDetector do
     end
 
     context 'with no new versions for a dependency' do
-      let(:dependency_tags) { {} }
+      let(:changed_dependencies) { {} }
 
       it 'posts to slack for each new release of that dependency' do
         expect(slack_client).to_not receive(:post_to_slack)
@@ -269,14 +269,14 @@ describe NewReleasesDetector do
 
     before do
       allow(TrackerClient).to receive(:new).and_return(tracker_client)
-      allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return([dependency_tags, current_tags, unchanged_dependencies])
+      allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return([changed_dependencies, current_tags, unchanged_dependencies])
 
       allow(BuildpackDependency).to receive(:for).with(dependency).and_return(buildpack_dependency_tasks)
     end
 
     context 'with new versions for a dependency' do
       let(:dependency) { :python }
-      let(:dependency_tags) { { python: %w(a b) } }
+      let(:changed_dependencies) { {python: %w(a b) } }
 
       it 'posts a tracker story with the dependency and versions in the story title' do
         expect(tracker_client).to receive(:post_to_tracker).
@@ -322,7 +322,7 @@ describe NewReleasesDetector do
     context 'there are new versions of dotnet' do
       let(:dependency) { :dotnet }
       let(:buildpack_dependency_tasks) { [:microsoft] }
-      let(:dependency_tags) { { dotnet: %w(1.0.0-preview43) } }
+      let(:changed_dependencies) { {dotnet: %w(1.0.0-preview43) } }
 
       it 'adds a task to the tracker story to remove non-MS supported versions of dotnet' do
         expect(tracker_client).to receive(:post_to_tracker).
@@ -336,7 +336,7 @@ describe NewReleasesDetector do
 
     context 'with no new versions for a dependency' do
       let(:dependency) { :python }
-      let(:dependency_tags) { {} }
+      let(:changed_dependencies) { {} }
 
       it 'posts to slack for each new release of that dependency' do
         expect(tracker_client).to_not receive(:post_to_tracker)
