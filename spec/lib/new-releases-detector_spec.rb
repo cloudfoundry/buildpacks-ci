@@ -10,6 +10,7 @@ describe NewReleasesDetector do
   end
 
   let(:current_tags) { {} }
+  let(:unchanged_dependencies) { [] }
   let(:new_releases_dir) { Dir.mktmpdir }
   let(:github_username)  { 'github_username' }
   let(:github_password)  { 'github_password1!' }
@@ -67,10 +68,9 @@ describe NewReleasesDetector do
     end
 
     it 'outputs to stderr that there are new updates' do
-      expect do
-        subject
-      end.to output(/There are updates to the \*#{dependency}\* dependency:(.*)\n/).to_stderr
-    end
+      expect { subject }.
+        to output(/NEW DEPENDENCIES FOUND:\n\n^- #{dependency}:/).to_stderr
+      end
   end
 
   shared_examples_for 'there are no new versions to potentially build' do |dependency_source|
@@ -96,9 +96,7 @@ describe NewReleasesDetector do
     end
 
     it 'outputs to stderr that there are no new updates' do
-      expect do
-        subject
-      end.to output(/There are no new updates to the \*#{dependency}\* dependency\n/).to_stderr
+      expect { subject }.to output(/No Updates Needed:(.*)^- #{dependency}/m).to_stderr
     end
   end
 
@@ -242,7 +240,7 @@ describe NewReleasesDetector do
 
     before do
       allow(SlackClient).to receive(:new).and_return(slack_client)
-      allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return([dependency_tags, current_tags])
+      allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return([dependency_tags, current_tags, unchanged_dependencies])
     end
 
     context 'with new versions for a dependency' do
@@ -271,7 +269,7 @@ describe NewReleasesDetector do
 
     before do
       allow(TrackerClient).to receive(:new).and_return(tracker_client)
-      allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return([dependency_tags, current_tags])
+      allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return([dependency_tags, current_tags, unchanged_dependencies])
 
       allow(BuildpackDependency).to receive(:for).with(dependency).and_return(buildpack_dependency_tasks)
     end

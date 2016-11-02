@@ -12,11 +12,11 @@ require "#{buildpacks_ci_dir}/lib/buildpack-dependency"
 
 class NewReleasesDetector
   attr_reader :new_releases_dir
-  attr_reader :dependency_tags, :current_tags
+  attr_reader :dependency_tags, :current_tags, :unchanged_dependencies
 
   def initialize(new_releases_dir)
     @new_releases_dir = new_releases_dir
-    @dependency_tags, @current_tags = generate_dependency_tags(new_releases_dir)
+    @dependency_tags, @current_tags, @unchanged_dependencies = generate_dependency_tags(new_releases_dir)
 
     print_log
   end
@@ -76,18 +76,20 @@ class NewReleasesDetector
   end
 
   def print_log
-    dependency_tags.each do |dependency, versions|
-      output = "There are updates to the *#{dependency}* dependency:"
+    if dependency_tags.any?
+      warn "NEW DEPENDENCIES FOUND:\n\n"
 
-      versions.each do |tag|
-        output += " #{tag}"
+      dependency_tags.each do |dependency, versions|
+        warn "- #{dependency}: #{versions.join(', ')}"
       end
-
-      warn output
     end
 
-    current_tags.each_key do |dependency|
-      warn "There are no new updates to the *#{dependency}* dependency"
+    if unchanged_dependencies.any?
+      warn "\nNo Updates Needed:\n\n"
+
+      unchanged_dependencies.each do |dependency|
+        warn "- #{dependency}"
+      end
     end
   end
 
@@ -95,6 +97,7 @@ class NewReleasesDetector
     configure_octokit
     current_tags = {}
     dependency_tags = {}
+    unchanged_dependencies = []
 
     tags.each do |current_dependency, get_tags|
       current_tags[current_dependency] = massage_version(get_tags.call, current_dependency)
@@ -113,10 +116,12 @@ class NewReleasesDetector
         dependency_tags[current_dependency] = diff_tags
         File.write(filename, current_tags[current_dependency].to_yaml)
         File.write(filename_diff, diff_tags.to_yaml)
+      else
+        unchanged_dependencies << current_dependency
       end
     end
 
-    return dependency_tags, current_tags
+    return dependency_tags, current_tags, unchanged_dependencies
   end
 
   def tags
