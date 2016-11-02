@@ -9,6 +9,7 @@ describe NewReleasesDetector do
     names.collect { |n| OpenStruct.new(name: n) }
   end
 
+  let(:current_tags) { {} }
   let(:new_releases_dir) { Dir.mktmpdir }
   let(:github_username)  { 'github_username' }
   let(:github_password)  { 'github_password1!' }
@@ -241,7 +242,7 @@ describe NewReleasesDetector do
 
     before do
       allow(SlackClient).to receive(:new).and_return(slack_client)
-      allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return(dependency_tags)
+      allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return([dependency_tags, current_tags])
     end
 
     context 'with new versions for a dependency' do
@@ -270,7 +271,7 @@ describe NewReleasesDetector do
 
     before do
       allow(TrackerClient).to receive(:new).and_return(tracker_client)
-      allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return(dependency_tags)
+      allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return([dependency_tags, current_tags])
 
       allow(BuildpackDependency).to receive(:for).with(dependency).and_return(buildpack_dependency_tasks)
     end
