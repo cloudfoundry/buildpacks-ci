@@ -12,11 +12,13 @@ require "#{buildpacks_ci_dir}/lib/buildpack-dependency"
 
 class NewReleasesDetector
   attr_reader :new_releases_dir
-  attr_reader :dependency_tags
+  attr_reader :dependency_tags, :current_tags
 
   def initialize(new_releases_dir)
     @new_releases_dir = new_releases_dir
-    @dependency_tags = generate_dependency_tags(new_releases_dir)
+    @dependency_tags, @current_tags = generate_dependency_tags(new_releases_dir)
+
+    print_log
   end
 
   def post_to_slack
@@ -73,12 +75,29 @@ class NewReleasesDetector
     end
   end
 
+  def print_log
+    dependency_tags.each do |dependency, versions|
+      output = "There are updates to the *#{dependency}* dependency:"
+
+      versions.each do |tag|
+        output += " #{tag}"
+      end
+
+      warn output
+    end
+
+    current_tags.each_key do |dependency|
+      warn "There are no new updates to the *#{dependency}* dependency"
+    end
+  end
+
   def generate_dependency_tags(new_releases_dir)
     configure_octokit
+    current_tags = {}
     dependency_tags = {}
 
     tags.each do |current_dependency, get_tags|
-      current_tags = massage_version(get_tags.call, current_dependency)
+      current_tags[current_dependency] = massage_version(get_tags.call, current_dependency)
 
       filename = "#{new_releases_dir}/#{current_dependency}.yaml"
       filename_diff = "#{new_releases_dir}/#{current_dependency}-new.yaml"
@@ -88,25 +107,16 @@ class NewReleasesDetector
                         []
                       end
 
-      diff_tags = current_tags - previous_tags
+      diff_tags = current_tags[current_dependency] - previous_tags
 
       if diff_tags.any?
-        output = "There are updates to the *#{current_dependency}* dependency:"
-
-        diff_tags.each do |tag|
-          output += " #{tag}"
-        end
-
-        warn output
-
         dependency_tags[current_dependency] = diff_tags
-        File.write(filename, current_tags.to_yaml)
+        File.write(filename, current_tags[current_dependency].to_yaml)
         File.write(filename_diff, diff_tags.to_yaml)
-      else
-        warn "There are no new updates to the *#{current_dependency}* dependency"
       end
     end
-    dependency_tags
+
+    return dependency_tags, current_tags
   end
 
   def tags
