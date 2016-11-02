@@ -12,11 +12,11 @@ require "#{buildpacks_ci_dir}/lib/buildpack-dependency"
 
 class NewReleasesDetector
   attr_reader :new_releases_dir
-  attr_reader :dependency_tags, :unchanged_dependencies
+  attr_reader :changed_dependencies, :unchanged_dependencies
 
   def initialize(new_releases_dir)
     @new_releases_dir = new_releases_dir
-    @dependency_tags, @unchanged_dependencies = generate_dependency_tags(new_releases_dir)
+    @changed_dependencies, @unchanged_dependencies = generate_dependency_tags(new_releases_dir)
 
     print_log
   end
@@ -27,7 +27,7 @@ class NewReleasesDetector
       ENV['SLACK_CHANNEL'],
       'dependency-notifier'
     )
-    dependency_tags.each do |dependency, versions|
+    changed_dependencies.each do |dependency, versions|
       versions.each do |version|
         new_dependency_version_output = "There is a new update to the *#{dependency}* dependency: version *#{version}*\n"
         slack_client.post_to_slack new_dependency_version_output
@@ -41,7 +41,7 @@ class NewReleasesDetector
       ENV['TRACKER_PROJECT_ID'],
       ENV['TRACKER_REQUESTER_ID'].to_i
     )
-    dependency_tags.each do |dependency, versions|
+    changed_dependencies.each do |dependency, versions|
       tracker_story_name = "Build and/or Include new releases: #{dependency} #{versions.join(', ')}"
       tracker_story_description = "We have #{versions.count} new releases for **#{dependency}**:\n**version #{versions.join(', ')}**\n See the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file."
 
@@ -76,10 +76,10 @@ class NewReleasesDetector
   end
 
   def print_log
-    if dependency_tags.any?
+    if changed_dependencies.any?
       warn "NEW DEPENDENCIES FOUND:\n\n"
 
-      dependency_tags.each do |dependency, versions|
+      changed_dependencies.each do |dependency, versions|
         warn "- #{dependency}: #{versions.join(', ')}"
       end
     end

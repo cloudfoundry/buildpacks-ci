@@ -12,7 +12,7 @@ Dir.chdir("#{buildpacks_ci_dir}/scripts/notifications") do
   new_releases_detector.post_to_slack
 
 
-  unless new_releases_detector.dependency_tags.empty?
+  unless new_releases_detector.changed_dependencies.empty?
     Dir.chdir(new_releases_dir) do
       raise 'command failed' unless system('git add -A')
       raise 'command failed' unless system("git commit -m 'Updates for latest tags'")
