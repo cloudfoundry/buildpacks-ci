@@ -6,6 +6,10 @@ RSpec.configure do |config|
   $stdout.sync = true
   config.filter_run_excluding concourse_test: true
 
+  # Run tests in living color, even on CI
+  config.color = true
+  config.tty = true
+
   def fly(arg, env = {})
     target = 'buildpacks'
     env_var = env.collect { |k, v| "#{k}=#{v}" }.join(' ')
