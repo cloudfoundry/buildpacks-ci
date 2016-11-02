@@ -12,11 +12,11 @@ require "#{buildpacks_ci_dir}/lib/buildpack-dependency"
 
 class NewReleasesDetector
   attr_reader :new_releases_dir
-  attr_reader :dependency_tags, :current_tags, :unchanged_dependencies
+  attr_reader :dependency_tags, :unchanged_dependencies
 
   def initialize(new_releases_dir)
     @new_releases_dir = new_releases_dir
-    @dependency_tags, @current_tags, @unchanged_dependencies = generate_dependency_tags(new_releases_dir)
+    @dependency_tags, @unchanged_dependencies = generate_dependency_tags(new_releases_dir)
 
     print_log
   end
@@ -95,12 +95,11 @@ class NewReleasesDetector
 
   def generate_dependency_tags(new_releases_dir)
     configure_octokit
-    current_tags = {}
     dependency_tags = {}
     unchanged_dependencies = []
 
     tags.each do |current_dependency, get_tags|
-      current_tags[current_dependency] = massage_version(get_tags.call, current_dependency)
+      current_tags = massage_version(get_tags.call, current_dependency)
 
       filename = "#{new_releases_dir}/#{current_dependency}.yaml"
       filename_diff = "#{new_releases_dir}/#{current_dependency}-new.yaml"
@@ -110,18 +109,18 @@ class NewReleasesDetector
                         []
                       end
 
-      diff_tags = current_tags[current_dependency] - previous_tags
+      diff_tags = current_tags - previous_tags
 
       if diff_tags.any?
         dependency_tags[current_dependency] = diff_tags
-        File.write(filename, current_tags[current_dependency].to_yaml)
+        File.write(filename, current_tags.to_yaml)
         File.write(filename_diff, diff_tags.to_yaml)
       else
         unchanged_dependencies << current_dependency
       end
     end
 
-    return dependency_tags, current_tags, unchanged_dependencies
+    return dependency_tags, unchanged_dependencies
   end
 
   def tags
