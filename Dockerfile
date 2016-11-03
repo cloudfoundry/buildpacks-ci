@@ -61,6 +61,7 @@ COPY build/*.sh /etc/profile.d/
 # install buildpacks-ci Gemfile
 RUN gem install bundler
 COPY Gemfile /usr/local/Gemfile
+COPY Gemfile.lock /usr/local/Gemfile.lock
 RUN cd /usr/local && bundle install
 
 #install fly-cli
