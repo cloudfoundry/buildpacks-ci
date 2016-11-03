@@ -13,7 +13,7 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/tasks/finalize-gem/run.rb
+    - buildpacks-ci/tasks/create-gem-release/run.rb
 params:
   RUBYGEM_MIRROR:
   GEM_NAME:
