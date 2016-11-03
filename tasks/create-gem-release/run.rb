@@ -4,9 +4,9 @@ require 'fileutils'
 
 gem_name = ENV['GEM_NAME']
 
-artifact_path = File.join(Dir.pwd, "#{gem_name}-artifacts")
+artifact_path = File.join(Dir.pwd, "gem-artifacts")
 
-current_version = Dir.chdir(gem_name) do
+current_version = Dir.chdir('gem') do
   current_version = `bump current | egrep -o '[0-9\.]+'`
   tag = "v#{current_version}"
   File.write(File.join(artifact_path, 'tag'), tag)
