@@ -14,5 +14,5 @@ current_version = Dir.chdir('gem') do
 end
 
 compressed_file_target = "#{artifact_path}/#{gem_name}-v#{current_version}"
-`zip -r #{compressed_file_target}.zip #{gem_name}`
-`tar -cvzf #{compressed_file_target}.tar.gz #{gem_name}`
+`zip -r #{compressed_file_target}.zip gem`
+`tar -cvzf #{compressed_file_target}.tar.gz gem`
