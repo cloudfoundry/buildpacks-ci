@@ -44,7 +44,7 @@ The `buildpacks-ci` repository has a number of "orphan branches" used by various
 ## Updating all the Pipelines
 
 ```sh
-./bin/update-all-the-pipelines
+./bin/update-pipelines
 ```
 
 ## Configuration
