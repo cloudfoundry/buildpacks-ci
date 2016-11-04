@@ -649,6 +649,7 @@ jobs: ##########################################################################
           params:
             repository: new-stack-commit
             tag: version/number
+            rebase: true
         - put: stack-s3
           params:
             from: stack-archive/cflinuxfs2_nc-(.*).tar.gz
