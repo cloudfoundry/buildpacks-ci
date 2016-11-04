@@ -47,7 +47,9 @@ class BuildpacksCIPipelineUpdater
 
     pipeline_specific_config = ""
     pipeline_specific_config ="--load-vars-from=#{pipeline_variable_filename}" unless pipeline_variable_filename.empty?
-    fly_cmd = %{bash -c "fly -t #{target_name} set-pipeline \
+    fly_cmd = %{bash -c "fly \
+      --target=#{target_name} \
+      set-pipeline \
       --pipeline=#{pipeline_prefix}#{name} \
       --config=<(#{cmd}) \
       --load-vars-from=<(lpass show #{credential_filenames[:lpass_concourse_private]} --notes && lpass show #{credential_filenames[:lpass_deployments_buildpacks]} --notes && lpass show #{credential_filenames[:lpass_repos_private_keys]} --notes && lpass show #{credential_filenames[:lpass_bosh_release_private_keys]}) \
