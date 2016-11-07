@@ -11,7 +11,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: cf-release-gcp
+      branch: gcp-pipelines
   - name: bosh-lite
     type: git
     source:
@@ -26,12 +26,6 @@ resources:
     source:
       uri: {{cf-release-git-uri}}
       branch: develop
-  - name: cf-release-develop
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/cf-release
-      branch: develop
-      private_key: {{cf-release-private-key}}
   - name: lite-stemcell
     type: bosh-io-stemcell
     source:
@@ -62,12 +56,6 @@ resources:
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
-  - name: buildpack-releases
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry-attic/buildpack-releases.git
-      private_key: {{buildpack-releases-private-key}}
-      branch: master
   - name: diego-bosh-release
     type: bosh-io-release
     tarball: true
@@ -91,12 +79,6 @@ resources:
       user: {{buildpacks-github-org}}
       repository: <%= language.gsub('-offline', '') %>-buildpack
       access_token: {{buildpacks-github-token}}
-  - name: <%= language %>-buildpack-bosh-release
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/<%= language %>-buildpack-release.git
-      private_key: {{<%= language %>-buildpack-bosh-release-private-key}}
-      branch: master
 <% end %>
 
 groups:
@@ -106,24 +88,6 @@ groups:
       - deploy-cf-and-diego-to-cf-release
       - cats
       - destroy-bosh-lite
-      - ship-it
-<% (supported_languages - %w(java java-offline dotnet-core)).each do |language| %>
-      - deprecated-bosh-release-<%= language %>
-<% end %>
-<% (supported_languages - %w(java java-offline)).each do |language| %>
-      - update-<%= language %>-buildpack-bosh-release
-      - cf-release for <%= language %>
-<% end %>
-  - name: java
-    jobs:
-      - recreate-bosh-lite
-      - ship-it-java
-      - deprecated-bosh-release-java
-      - deprecated-bosh-release-java-offline
-      - update-java-buildpack-bosh-release
-      - update-java-offline-buildpack-bosh-release
-      - cf-release for java
-      - cf-release for java-offline
 
 jobs:
   - name: recreate-bosh-lite
@@ -213,14 +177,9 @@ jobs:
             BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
             BOSH_LITE_DISK_SIZE: 100
             BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
-<<<<<<< 1fdb18c547cfde4d5e217d018edface61443e626
-            BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
-            BOSH_LITE_NAME: cf-release.buildpacks.ci
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-=======
             BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
             BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
->>>>>>> cf-release pipeline on GCP
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             ROOTFS_RELEASE: cflinuxfs2-rootfs
           privileged: true
@@ -294,14 +253,9 @@ jobs:
             BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
             BOSH_LITE_DISK_SIZE: 100
             BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
-<<<<<<< 1fdb18c547cfde4d5e217d018edface61443e626
-            BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
-            BOSH_LITE_NAME: cf-release.buildpacks.ci
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-=======
             BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
             BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
->>>>>>> cf-release pipeline on GCP
             DIEGO_DOCKER_ON: true
           privileged: true
         on_failure:
@@ -320,7 +274,6 @@ jobs:
       - aggregate:
         - get: deployments-buildpacks
           passed: [ cats ]
-          trigger: true
         - get: buildpacks-ci
       - task: destroy-cf-release-bosh-lite
         file: buildpacks-ci/tasks/destroy-bosh-lite/task.yml
