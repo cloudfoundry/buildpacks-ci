@@ -60,15 +60,19 @@ class BuildpacksCIPipelineUpdater
     system "#{fly_cmd}"
   end
 
-  def update_standard_pipelines(target_name, options)
+  def update_standard_pipelines(target_name:, options:)
     header('For standard pipelines')
 
     full_config = get_config
+    organization = full_config['buildpacks-github-org']
+    run_php_oracle_tests = full_config['run-oracle-php-tests']
+
     Dir['pipelines/*.yml'].each do |filename|
-      name = File.basename(filename, '.yml')
+      pipeline_name = File.basename(filename, '.yml')
+
       set_pipeline(target_name: target_name,
-                   name: name,
-                   cmd: "erb organization=#{full_config["buildpacks-github-org"]} run_oracle_php_tests=#{full_config['run-oracle-php-tests']} #{filename}",
+                   name: pipeline_name,
+                   cmd: "erb organization=#{organization} run_oracle_php_tests=#{run_php_oracle_tests} #{filename}",
                    options: options
                   )
     end
@@ -150,7 +154,7 @@ class BuildpacksCIPipelineUpdater
     target_name= ENV['TARGET_NAME'] || "buildpacks"
 
     if !options.has_key?(:template)
-      update_standard_pipelines(target_name, options)
+      update_standard_pipelines(target_name: target_name, options: options)
     end
     update_bosh_lite_pipelines(target_name, options)
     update_buildpack_pipelines(target_name, options)

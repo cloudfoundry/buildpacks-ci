@@ -147,7 +147,7 @@ describe BuildpacksCIPipelineUpdater do
     let(:target_name)                    { 'concourse-target' }
     let(:options)                        { { key: 'value' } }
 
-    subject { buildpacks_ci_pipeline_updater.update_standard_pipelines(target_name, options) }
+    subject { buildpacks_ci_pipeline_updater.update_standard_pipelines(target_name: target_name, options: options) }
 
     before do
       allow(buildpacks_ci_pipeline_updater).to receive(:get_config).and_return({})
