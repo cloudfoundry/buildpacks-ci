@@ -238,8 +238,160 @@ describe BuildpacksCIPipelineUpdater do
     end
   end
   
-  # describe '#update_standard_pipelines'
-  # describe '#update_bosh_lite_pipelines'
+  describe '#update_bosh_lite_pipelines' do
+    let(:target_name)                    { 'concourse-target' }
+    let(:options)                        { { key: 'value' } }
+    let(:buildpacks_ci_pipeline_updater) { described_class.new }
+
+    subject { buildpacks_ci_pipeline_updater.update_bosh_lite_pipelines(target_name, options) }
+
+    before do
+      allow(buildpacks_ci_pipeline_updater).to receive(:get_config).and_return({})
+      allow(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).with(anything).and_return(true)
+
+      allow(YAML).to receive(:load_file).with('edge-99.yml').and_return({})
+      allow(YAML).to receive(:load_file).with('lts-11.yml').and_return({})
+
+      allow(Dir).to receive(:[]).with('config/bosh-lite/*.yml').and_return(%w(edge-99.yml))
+    end
+
+    it 'prints a header' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:header).with('For bosh-lite pipelines')
+
+      subject
+    end
+
+    it 'looks for yaml files in config/bosh-lite' do
+      expect(Dir).to receive(:[]).with('config/bosh-lite/*.yml').and_return([])
+
+      subject
+    end
+
+    it 'gets full deployment names from yaml files' do
+      expect(YAML).to receive(:load_file).with('edge-99.yml')
+
+      subject
+    end
+
+    context 'when user has supplied a template option' do
+      before do
+        allow(Dir).to receive(:[]).with('config/bosh-lite/*.yml').and_return(%w(edge-99.yml lts-11.yml))
+      end
+
+      context 'and the template name is a bosh-lite template' do
+        let(:options) { { template: 'lts' } }
+
+        it 'runs when the pipeline name matches the template name' do
+          expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).with(anything)
+
+          subject
+        end
+      end
+
+      context 'and the template name is not a bosh-lite template' do
+        let(:options) { { template: 'not-a-bosh-lite' } }
+
+        subject { buildpacks_ci_pipeline_updater.update_bosh_lite_pipelines(target_name, options) }
+
+        it 'skips when the pipeline name does not match the template name' do
+          expect(buildpacks_ci_pipeline_updater).not_to receive(:set_pipeline)
+
+          subject
+        end
+      end
+
+
+    end
+
+    it 'iterates over deployment names' do
+      allow(Dir).to receive(:[]).with('config/bosh-lite/*.yml').and_return(%w(edge-99.yml lts-11.yml))
+
+      expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).with(anything).twice
+
+      subject
+    end
+
+    it 'calls #set_pipeline with target name' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+        with(target_name: 'concourse-target',
+             name: anything, cmd: anything, options: anything, pipeline_variable_filename: anything)
+
+      subject
+    end
+
+    it 'calls #set_pipeline with deployment name' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+        with(name: 'edge-99',
+             target_name: anything, cmd: anything, options: anything, pipeline_variable_filename: anything)
+
+      subject
+    end
+
+    it 'calls #set_pipeline with pipeline_variable_file' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+        with(pipeline_variable_filename: 'edge-99.yml',
+          name: anything, target_name: anything, cmd: anything, options: anything)
+
+      subject
+    end
+
+    it 'calls #set_pipeline with options' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+        with(options: {key: 'value'},
+             name: anything, target_name: anything, cmd: anything, pipeline_variable_filename: anything)
+
+      subject
+    end
+
+    describe 'erb command passed to #set_pipeline' do
+      before do
+        allow(buildpacks_ci_pipeline_updater).to receive(:get_config).and_return({'domain-name' => 'domain.name'})
+        allow(YAML).to receive(:load_file).with('edge-99.yml').and_return({'deployment-name' => 'full-deployment-name'})
+      end
+
+      it 'includes `erb`' do
+        expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+          with(cmd: /^erb/,
+               target_name: anything, name: anything, options: anything, pipeline_variable_filename: anything)
+
+        subject
+      end
+
+      it 'sets a domain_name variable' do
+        expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+          with(cmd: /domain_name='domain\.name'/,
+               target_name: anything, name: anything, options: anything, pipeline_variable_filename: anything)
+
+        subject
+      end
+
+      it 'sets a deployment_name variable' do
+        expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+          with(cmd: /deployment_name=edge-99/,
+               target_name: anything, name: anything, options: anything, pipeline_variable_filename: anything)
+
+        subject
+      end
+
+      it 'sets a full_deployment_name variable' do
+        expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+          with(cmd: /full_deployment_name=full-deployment-name/,
+               target_name: anything, name: anything, options: anything, pipeline_variable_filename: anything)
+
+        subject
+      end
+
+      it 'passes in a pipeline filename based on the CF version' do
+        expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+          with(cmd: /pipelines\/templates\/bosh-lite-cf-edge/,
+               target_name: anything, name: anything, options: anything, pipeline_variable_filename: anything)
+
+        subject
+      end
+    end
+  end
+
+
   # describe '#update_buildpack_pipelines'
   # describe '#get_cf_version_from_deployment_name'
   # describe '#get_config'
