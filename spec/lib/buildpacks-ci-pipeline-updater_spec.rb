@@ -51,7 +51,6 @@ describe BuildpacksCIPipelineUpdater do
     subject { buildpacks_ci_pipeline_updater.update_standard_pipelines(target_name: target_name, options: options) }
 
     before do
-      allow(buildpacks_ci_pipeline_updater).to receive(:get_config).and_return({})
       allow_any_instance_of(BuildpacksCIPipelineUpdateCommand).to receive(:run!).with(anything).and_return(true)
 
       allow(Dir).to receive(:[]).with('pipelines/*.yml').and_return(%w(first.yml))
@@ -105,7 +104,6 @@ describe BuildpacksCIPipelineUpdater do
 
     describe 'erb command passed to BuildpacksCIPipelineUpdateCommand#run!' do
       before do
-        allow(buildpacks_ci_pipeline_updater).to receive(:get_config).and_return({'buildpacks-github-org' => 'buildpacks-github-org', 'run-oracle-php-tests' => 'run-oracle-php-tests'})
         allow(buildpacks_ci_configuration).to receive(:organization).and_return('buildpacks-github-org')
         allow(buildpacks_ci_configuration).to receive(:run_oracle_php_tests?).and_return(false)
       end
@@ -328,7 +326,6 @@ describe BuildpacksCIPipelineUpdater do
     subject { buildpacks_ci_pipeline_updater.update_buildpack_pipelines(target_name, options) }
 
     before do
-      allow(buildpacks_ci_pipeline_updater).to receive(:get_config).and_return({})
       allow_any_instance_of(BuildpacksCIPipelineUpdateCommand).to receive(:run!).with(anything).and_return(true)
 
       allow(Dir).to receive(:[]).with('config/buildpack/*.yml').and_return(%w(cobol.yml))
@@ -417,7 +414,7 @@ describe BuildpacksCIPipelineUpdater do
 
     describe 'erb command passed to BuildpacksCIPipelineUpdateCommand#run!' do
       before do
-        allow(buildpacks_ci_pipeline_updater).to receive(:get_config).and_return({'buildpacks-github-org' => 'are-awesome'})
+        allow(buildpacks_ci_configuration).to receive(:organization).and_return('buildpacks-github-org')
       end
 
       it 'includes `erb`' do
@@ -438,8 +435,16 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'sets an organization variable' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /organization=are-awesome/,
+          with(cmd: /organization=buildpacks-github-org/,
                target_name: anything, name: anything, options: anything, pipeline_variable_filename: anything)
+
+        subject
+      end
+    end
+
+    describe 'asking BuildpackCIConfiguration for metadata' do
+      it 'asks BuildpackCIConfiguration for the organization' do
+        expect(buildpacks_ci_configuration).to receive(:organization)
 
         subject
       end
@@ -447,6 +452,5 @@ describe BuildpacksCIPipelineUpdater do
   end
 
   # describe '#get_cf_version_from_deployment_name'
-  # describe '#get_config'
   # describe '#run!'
 end
