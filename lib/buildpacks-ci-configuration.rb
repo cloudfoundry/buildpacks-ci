@@ -14,4 +14,12 @@ class BuildpacksCIConfiguration
   def bosh_release_private_keys_filename
     ENV['LPASS_BOSH_RELEASE_PRIVATE_KEYS_FILE'] || 'Shared-Buildpacks/buildpack-bosh-release-repos-private-keys.yml'
   end
+
+  def organization
+    YAML.load_file('public-config.yml')['buildpacks-github-org']
+  end
+
+  def run_oracle_php_tests?
+    YAML.load_file('public-config.yml')['run-oracle-php-tests']
+  end
 end
