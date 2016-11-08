@@ -56,11 +56,12 @@ class BuildpacksCIPipelineUpdater
       deployment_name = File.basename(pipeline_variables_filename, '.yml')
       full_deployment_name = YAML.load_file(pipeline_variables_filename)['deployment-name']
       cf_version_type = get_cf_version_from_deployment_name(deployment_name)
+      domain_name = get_config['domain-name']
 
       set_pipeline(
         target_name: target_name,
         name: deployment_name,
-        cmd: "erb domain_name='#{get_config["domain-name"]}' deployment_name=#{deployment_name} full_deployment_name=#{full_deployment_name} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
+        cmd: "erb domain_name='#{domain_name}' deployment_name=#{deployment_name} full_deployment_name=#{full_deployment_name} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
         pipeline_variable_filename: pipeline_variables_filename,
         options: options
       )
@@ -75,11 +76,12 @@ class BuildpacksCIPipelineUpdater
 
       full_config = get_config
       language = File.basename(pipeline_variables_filename, '.yml')
+      organization = full_config['buildpacks-github-org']
 
       set_pipeline(
         target_name: target_name,
         name: "#{language}-buildpack",
-        cmd: "erb language=#{language} organization=#{full_config["buildpacks-github-org"]} pipelines/templates/buildpack.yml",
+        cmd: "erb language=#{language} organization=#{organization} pipelines/templates/buildpack.yml",
         pipeline_variable_filename: pipeline_variables_filename,
         options: options
       )
