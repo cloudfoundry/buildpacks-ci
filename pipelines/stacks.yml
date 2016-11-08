@@ -138,12 +138,6 @@ resources: #####################################################################
     source:
       repository: cloudfoundry/diego-release
 
-  - name: etcd-bosh-release
-    type: bosh-io-release
-    tarball: true
-    source:
-      repository: cloudfoundry-incubator/etcd-release
-
   - name: garden-runc-bosh-release
     type: bosh-io-release
     tarball: true
@@ -506,7 +500,6 @@ jobs: ##########################################################################
         - get: lite-stemcell
         - get: garden-runc-bosh-release
         - get: diego-bosh-release
-        - get: etcd-bosh-release
         - get: deployments-buildpacks
           passed: ['deploy-cf-to-stacks']
           trigger: true
@@ -529,7 +522,6 @@ jobs: ##########################################################################
           releases:
             - diego-bosh-release/release.tgz
             - garden-runc-bosh-release/release.tgz
-            - etcd-bosh-release/release.tgz
         on_failure:
           put: failure-alert
           params:

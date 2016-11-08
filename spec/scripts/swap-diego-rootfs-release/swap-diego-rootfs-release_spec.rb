@@ -40,8 +40,6 @@ describe 'script for filling diego manifest with correct rootfs release' do
                                                    version: latest
                                                  - name: a_rootfs_bosh_release
                                                    version: latest
-                                                 - name: etcd
-                                                   version: latest
                                                  - name: garden-linux
                                                    version: latest
                                                  - name: cf
@@ -68,8 +66,6 @@ describe 'script for filling diego manifest with correct rootfs release' do
                                                  - name: diego
                                                    version: latest
                                                  - name: cflinuxfs2-rootfs
-                                                   version: latest
-                                                 - name: etcd
                                                    version: latest
                                                  - name: garden-linux
                                                    version: latest

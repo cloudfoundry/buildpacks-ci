@@ -52,7 +52,7 @@ jobs:
 popd
 
 pushd diego-release
-  ./scripts/generate-bosh-lite-manifests
+  USE_SQL='postgres' ./scripts/generate-bosh-lite-manifests
   ../buildpacks-ci/scripts/swap-diego-rootfs-release.rb $(pwd) bosh-lite/deployments/diego.yml
 popd
 
