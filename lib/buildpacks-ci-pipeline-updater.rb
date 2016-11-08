@@ -3,13 +3,15 @@
 require 'yaml'
 require 'optparse'
 require_relative 'buildpacks-ci-pipeline-update-command'
+
 class BuildpacksCIPipelineUpdater
   def update_standard_pipelines(target_name:, options:)
     header('For standard pipelines')
 
-    full_config = get_config
-    organization = full_config['buildpacks-github-org']
-    run_php_oracle_tests = full_config['run-oracle-php-tests']
+    buildpacks_config = BuildpacksCIConfiguration.new
+
+    organization = buildpacks_config.organization
+    run_php_oracle_tests = buildpacks_config.run_oracle_php_tests?
 
     Dir['pipelines/*.yml'].each do |filename|
       pipeline_name = File.basename(filename, '.yml')

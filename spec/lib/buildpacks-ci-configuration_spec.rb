@@ -1,3 +1,4 @@
+require 'yaml'
 require_relative '../../lib/buildpacks-ci-configuration'
 
 describe BuildpacksCIConfiguration do
@@ -87,6 +88,44 @@ describe BuildpacksCIConfiguration do
 
     it 'has a default value' do
       expect(subject).to eq('Shared-Buildpacks/buildpack-bosh-release-repos-private-keys.yml')
+    end
+  end
+
+  describe '#organization' do
+    subject { BuildpacksCIConfiguration.new.organization }
+
+    before do
+      allow(YAML).to receive(:load_file).with('public-config.yml').
+        and_return({'buildpacks-github-org' => 'github-org-name'})
+    end
+
+    it 'loads the public-config.yml file' do
+      expect(YAML).to receive(:load_file).with('public-config.yml')
+
+      subject
+    end
+
+    it 'returns an organization from the yml data' do
+      expect(subject).to eq('github-org-name')
+    end
+  end
+
+  describe '#run_oracle_php_tests?' do
+    subject { BuildpacksCIConfiguration.new.run_oracle_php_tests? }
+
+    before do
+      allow(YAML).to receive(:load_file).with('public-config.yml').
+        and_return({'run-oracle-php-tests' => true})
+    end
+
+    it 'loads the public-config.yml file' do
+      expect(YAML).to receive(:load_file).with('public-config.yml')
+
+      subject
+    end
+
+    it 'returns boolean from the yml data' do
+      expect(subject).to eq(true)
     end
   end
 end

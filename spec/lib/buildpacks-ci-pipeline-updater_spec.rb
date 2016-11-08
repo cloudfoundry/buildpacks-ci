@@ -41,6 +41,7 @@ describe BuildpacksCIPipelineUpdater do
     let(:buildpacks_ci_pipeline_update_command) { BuildpacksCIPipelineUpdateCommand.new }
     let(:target_name)                    { 'concourse-target' }
     let(:options)                        { { key: 'value' } }
+    let (:buildpacks_ci_configuration) { BuildpacksCIConfiguration.new }
 
     subject { buildpacks_ci_pipeline_updater.update_standard_pipelines(target_name: target_name, options: options) }
 
@@ -50,6 +51,7 @@ describe BuildpacksCIPipelineUpdater do
 
       allow(Dir).to receive(:[]).with('pipelines/*.yml').and_return(%w(first.yml))
       allow(BuildpacksCIPipelineUpdateCommand).to receive(:new).and_return(buildpacks_ci_pipeline_update_command)
+      allow(BuildpacksCIConfiguration).to receive(:new).and_return(buildpacks_ci_configuration)
     end
 
     it 'prints a header' do
@@ -99,6 +101,8 @@ describe BuildpacksCIPipelineUpdater do
     describe 'erb command passed to BuildpacksCIPipelineUpdateCommand#run!' do
       before do
         allow(buildpacks_ci_pipeline_updater).to receive(:get_config).and_return({'buildpacks-github-org' => 'buildpacks-github-org', 'run-oracle-php-tests' => 'run-oracle-php-tests'})
+        allow(buildpacks_ci_configuration).to receive(:organization).and_return('buildpacks-github-org')
+        allow(buildpacks_ci_configuration).to receive(:run_oracle_php_tests?).and_return(false)
       end
 
       it 'includes `erb`' do
@@ -119,7 +123,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'sets a run_oracle_php_tests variable' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /run_oracle_php_tests=run-oracle-php-tests/,
+          with(cmd: /run_oracle_php_tests=false/,
                target_name: anything, name: anything, options: anything)
 
         subject
@@ -129,6 +133,20 @@ describe BuildpacksCIPipelineUpdater do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
           with(cmd: /first\.yml/,
                target_name: anything, name: anything, options: anything)
+
+        subject
+      end
+    end
+
+    describe 'asking BuildpackCIConfiguration for metadata' do
+      it 'asks BuildpackCIConfiguration for the organization' do
+        expect(buildpacks_ci_configuration).to receive(:organization)
+
+        subject
+      end
+
+      it 'asks BuildpackCIConfiguration whether PHP oracle tests should be run' do
+        expect(buildpacks_ci_configuration).to receive(:run_oracle_php_tests?)
 
         subject
       end
