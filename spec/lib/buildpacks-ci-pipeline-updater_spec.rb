@@ -6,6 +6,12 @@ require_relative '../../lib/buildpacks-ci-pipeline-updater'
 require_relative '../../lib/buildpacks-ci-pipeline-update-command'
 
 describe BuildpacksCIPipelineUpdater do
+  let (:buildpacks_ci_configuration) { BuildpacksCIConfiguration.new }
+
+  before do
+    allow(BuildpacksCIConfiguration).to receive(:new).and_return(buildpacks_ci_configuration)
+  end
+
   describe '#parse_args' do
 
     subject { described_class.new.parse_args(args) }
@@ -41,7 +47,6 @@ describe BuildpacksCIPipelineUpdater do
     let(:buildpacks_ci_pipeline_update_command) { BuildpacksCIPipelineUpdateCommand.new }
     let(:target_name)                    { 'concourse-target' }
     let(:options)                        { { key: 'value' } }
-    let (:buildpacks_ci_configuration) { BuildpacksCIConfiguration.new }
 
     subject { buildpacks_ci_pipeline_updater.update_standard_pipelines(target_name: target_name, options: options) }
 
@@ -51,7 +56,7 @@ describe BuildpacksCIPipelineUpdater do
 
       allow(Dir).to receive(:[]).with('pipelines/*.yml').and_return(%w(first.yml))
       allow(BuildpacksCIPipelineUpdateCommand).to receive(:new).and_return(buildpacks_ci_pipeline_update_command)
-      allow(BuildpacksCIConfiguration).to receive(:new).and_return(buildpacks_ci_configuration)
+
     end
 
     it 'prints a header' do
@@ -162,7 +167,7 @@ describe BuildpacksCIPipelineUpdater do
     subject { buildpacks_ci_pipeline_updater.update_bosh_lite_pipelines(target_name, options) }
 
     before do
-      allow(buildpacks_ci_pipeline_updater).to receive(:get_config).and_return({})
+      allow(buildpacks_ci_configuration).to receive(:domain_name).and_return('domain.name')
       allow_any_instance_of(BuildpacksCIPipelineUpdateCommand).to receive(:run!).with(anything).and_return(true)
 
       allow(YAML).to receive(:load_file).with('edge-99.yml').and_return({})
@@ -260,7 +265,7 @@ describe BuildpacksCIPipelineUpdater do
 
     describe 'erb command passed to BuildpacksCIPipelineUpdateCommand#run!' do
       before do
-        allow(buildpacks_ci_pipeline_updater).to receive(:get_config).and_return({'domain-name' => 'domain.name'})
+        allow(buildpacks_ci_configuration).to receive(:domain_name).and_return('domain.name')
         allow(YAML).to receive(:load_file).with('edge-99.yml').and_return({'deployment-name' => 'full-deployment-name'})
       end
 
@@ -300,6 +305,14 @@ describe BuildpacksCIPipelineUpdater do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
           with(cmd: /pipelines\/templates\/bosh-lite-cf-edge/,
                target_name: anything, name: anything, options: anything, pipeline_variable_filename: anything)
+
+        subject
+      end
+    end
+
+    describe 'asking BuildpackCIConfiguration for metadata' do
+      it 'asks BuildpacksCIConfiguration for domain name' do
+        expect(buildpacks_ci_configuration).to receive(:domain_name)
 
         subject
       end

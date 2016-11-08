@@ -128,4 +128,23 @@ describe BuildpacksCIConfiguration do
       expect(subject).to eq(true)
     end
   end
+
+  describe '#domain_name' do
+    subject { BuildpacksCIConfiguration.new.domain_name }
+
+    before do
+      allow(YAML).to receive(:load_file).with('public-config.yml').
+        and_return({'domain-name' => 'domain.name'})
+    end
+
+    it 'loads the public-config.yml file' do
+      expect(YAML).to receive(:load_file).with('public-config.yml')
+
+      subject
+    end
+
+    it 'returns boolean from the yml data' do
+      expect(subject).to eq('domain.name')
+    end
+  end
 end

@@ -33,7 +33,9 @@ class BuildpacksCIPipelineUpdater
       deployment_name = File.basename(pipeline_variables_filename, '.yml')
       full_deployment_name = YAML.load_file(pipeline_variables_filename)['deployment-name']
       cf_version_type = get_cf_version_from_deployment_name(deployment_name)
-      domain_name = get_config['domain-name']
+
+      buildpacks_configuration = BuildpacksCIConfiguration.new
+      domain_name = buildpacks_configuration.domain_name
 
       BuildpacksCIPipelineUpdateCommand.new.run!(
         target_name: target_name,

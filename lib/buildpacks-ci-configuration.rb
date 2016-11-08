@@ -22,4 +22,8 @@ class BuildpacksCIConfiguration
   def run_oracle_php_tests?
     YAML.load_file('public-config.yml')['run-oracle-php-tests']
   end
+
+  def domain_name
+    YAML.load_file('public-config.yml')['domain-name']
+  end
 end
