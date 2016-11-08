@@ -53,9 +53,10 @@ class BuildpacksCIPipelineUpdater
     Dir['config/buildpack/*.yml'].each do |pipeline_variables_filename|
       next if options.has_key?(:template) && !pipeline_variables_filename.include?(options[:template])
 
-      full_config = get_config
       language = File.basename(pipeline_variables_filename, '.yml')
-      organization = full_config['buildpacks-github-org']
+
+      buildpacks_config = BuildpacksCIConfiguration.new
+      organization = buildpacks_config.organization
 
       BuildpacksCIPipelineUpdateCommand.new.run!(
         target_name: target_name,
@@ -80,18 +81,6 @@ class BuildpacksCIPipelineUpdater
     update_buildpack_pipelines(target_name, options)
 
     puts 'Thanks, The Buildpacks Team'
-  end
-
-  def get_config
-    public_config = YAML.load_file("public-config.yml")
-    lpass_config= {}
-    lpass_yaml_data=%x{lpass show #{credential_filenames[:lpass_concourse_private]} --notes && lpass show #{credential_filenames[:lpass_deployments_buildpacks]} --notes}
-    if $?.exitstatus != 0
-      puts "WARNING: ignoring lastpass config file. An error occured while processing #{credential_filenames[:lpass_concourse_private]} and #{credential_filenames[:lpass_deployments_buildpacks]}"
-    else
-      lpass_config = YAML.load(lpass_yaml_data)
-    end
-    public_config.merge(lpass_config)
   end
 
   def parse_args(args)
