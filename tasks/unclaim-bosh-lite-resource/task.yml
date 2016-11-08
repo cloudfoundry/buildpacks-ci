@@ -10,4 +10,4 @@ inputs:
 outputs:
   - name: resource-pools-artifacts
 run:
-  path: buildpacks-ci/scripts/unclaim-bosh-lite-resource
+  path: buildpacks-ci/tasks/unclaim-bosh-lite-resource/run.sh
