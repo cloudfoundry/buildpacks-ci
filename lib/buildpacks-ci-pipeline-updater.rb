@@ -83,7 +83,7 @@ class BuildpacksCIPipelineUpdater
     lpass_config= {}
     lpass_yaml_data=%x{lpass show #{credential_filenames[:lpass_concourse_private]} --notes && lpass show #{credential_filenames[:lpass_deployments_buildpacks]} --notes}
     if $?.exitstatus != 0
-      puts "WARNING: ignoring lastpass config file. An error occured while processing #{LPASS_CONCOURSE_PRIVATE} and #{LPASS_DEPLOYMENTS_BUILDPACKS}"
+      puts "WARNING: ignoring lastpass config file. An error occured while processing #{credential_filenames[:lpass_concourse_private]} and #{credential_filenames[:lpass_deployments_buildpacks]}"
     else
       lpass_config = YAML.load(lpass_yaml_data)
     end
