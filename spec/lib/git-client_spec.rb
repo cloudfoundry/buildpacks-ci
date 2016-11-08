@@ -1,8 +1,18 @@
 # encoding: utf-8
 require 'spec_helper'
+require 'fileutils'
 require_relative '../../lib/git-client'
 
 describe GitClient do
+  let(:source_dir)    { nil }
+  let(:dir)           { nil }
+  let(:dir_to_update) { nil }
+
+  after do
+    FileUtils.rm_rf(source_dir) unless source_dir.nil?
+    FileUtils.rm_rf(dir) unless dir.nil?
+    FileUtils.rm_rf(dir_to_update) unless dir_to_update.nil?
+  end
 
   describe '#update_submodule_to_latest' do
     let(:source_dir)    { Dir.mktmpdir }
