@@ -299,8 +299,6 @@ describe BuildpacksCIPipelineUpdater do
           subject
         end
       end
-
-
     end
 
     it 'iterates over deployment names' do
@@ -391,8 +389,132 @@ describe BuildpacksCIPipelineUpdater do
     end
   end
 
+  describe '#update_buildpack_pipelines' do
+    let(:target_name)                    { 'concourse-target' }
+    let(:options)                        { { key: 'value' } }
+    let(:buildpacks_ci_pipeline_updater) { described_class.new }
 
-  # describe '#update_buildpack_pipelines'
+    subject { buildpacks_ci_pipeline_updater.update_buildpack_pipelines(target_name, options) }
+
+    before do
+      allow(buildpacks_ci_pipeline_updater).to receive(:get_config).and_return({})
+      allow(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).with(anything).and_return(true)
+
+
+      allow(Dir).to receive(:[]).with('config/buildpack/*.yml').and_return(%w(cobol.yml))
+    end
+
+    it 'prints a header' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:header).with('For buildpack pipelines')
+
+      subject
+    end
+
+    it 'looks for yaml files in config/buildpack/' do
+      expect(Dir).to receive(:[]).with('config/buildpack/*.yml').and_return([])
+
+      subject
+    end
+
+    context 'when user has supplied a template option' do
+      before do
+        allow(Dir).to receive(:[]).with('config/buildpack/*.yml').and_return(%w(template-name.yml will-not-match.yml))
+      end
+
+      context 'and the template name is a buildpack template' do
+        let(:options) { { template: 'template-name' } }
+
+        it 'runs when the pipeline name matches the template name' do
+          expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).with(anything)
+
+          subject
+        end
+      end
+
+      context 'and the template name is not a buildpack template' do
+        let(:options) { { template: 'not-a-buildpack' } }
+
+        subject { buildpacks_ci_pipeline_updater.update_buildpack_pipelines(target_name, options) }
+
+        it 'skips when the pipeline name does not match the template name' do
+          expect(buildpacks_ci_pipeline_updater).not_to receive(:set_pipeline)
+
+          subject
+        end
+      end
+    end
+
+    it 'iterates over buildpack names' do
+      allow(Dir).to receive(:[]).with('config/buildpack/*.yml').and_return(%w(intercal.yml cobol.yml))
+
+      expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).with(anything).twice
+
+      subject
+    end
+
+    it 'calls #set_pipeline with target name' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+        with(target_name: 'concourse-target',
+             name: anything, cmd: anything, options: anything, pipeline_variable_filename: anything)
+
+      subject
+    end
+
+    it 'calls #set_pipeline with buildpack name' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+        with(name: 'cobol-buildpack',
+             target_name: anything, cmd: anything, options: anything, pipeline_variable_filename: anything)
+
+      subject
+    end
+
+    it 'calls #set_pipeline with pipeline_variable_file' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+        with(pipeline_variable_filename: 'cobol.yml',
+             name: anything, target_name: anything, cmd: anything, options: anything)
+
+      subject
+    end
+
+    it 'calls #set_pipeline with options' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+        with(options: {key: 'value'},
+             name: anything, target_name: anything, cmd: anything, pipeline_variable_filename: anything)
+
+      subject
+    end
+
+    describe 'erb command passed to #set_pipeline' do
+      before do
+        allow(buildpacks_ci_pipeline_updater).to receive(:get_config).and_return({'buildpacks-github-org' => 'are-awesome'})
+      end
+
+      it 'includes `erb`' do
+        expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+          with(cmd: /^erb/,
+               target_name: anything, name: anything, options: anything, pipeline_variable_filename: anything)
+
+        subject
+      end
+
+      it 'sets a language variable' do
+        expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+          with(cmd: /language=cobol/,
+               target_name: anything, name: anything, options: anything, pipeline_variable_filename: anything)
+
+        subject
+      end
+
+      it 'sets an organization variable' do
+        expect(buildpacks_ci_pipeline_updater).to receive(:set_pipeline).
+          with(cmd: /organization=are-awesome/,
+               target_name: anything, name: anything, options: anything, pipeline_variable_filename: anything)
+
+        subject
+      end
+    end
+  end
+
   # describe '#get_cf_version_from_deployment_name'
   # describe '#get_config'
   # describe '#run!'
