@@ -3,7 +3,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: unclaim-testing
+      branch: master
   - name: resource-pools
     type: git
     source:
@@ -22,7 +22,7 @@ jobs:
         - get: resource-pools
       - do:
         - task: unclaim-bosh-lite-resource
-          file: buildpacks-ci/tasks/unclaim-bosh-lite-resource.yml
+          file: buildpacks-ci/tasks/unclaim-bosh-lite-resource/task.yml
           params:
             RESOURCE_NAME: <%= resource_name + '.buildpacks.ci' %>
             RESOURCE_TYPE: <%= resource_type %>
