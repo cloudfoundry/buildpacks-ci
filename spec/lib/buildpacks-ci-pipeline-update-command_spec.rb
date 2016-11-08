@@ -3,14 +3,14 @@ require 'yaml'
 require 'json'
 require 'spec_helper'
 require_relative '../../lib/buildpacks-ci-pipeline-update-command'
+require_relative '../../lib/buildpacks-ci-configuration'
 
 describe BuildpacksCIPipelineUpdateCommand do
-  describe '#set_pipeline' do
+  describe '#run!' do
     let(:target_name)                    { 'concourse-target' }
     let(:cmd)                            { '' }
     let(:pipeline_variable_filename)     { '' }
     let(:buildpacks_ci_pipeline_update_command) { described_class.new }
-
     subject do
       buildpacks_ci_pipeline_update_command
         .run!(target_name: target_name,
@@ -48,16 +48,11 @@ describe BuildpacksCIPipelineUpdateCommand do
       let(:cmd)  { 'erb this' }
       let(:options)       { { } }
       let(:pipeline_name) { 'our-pipeline' }
-      let(:lpass_credential_files) { {
-        lpass_concourse_private: 'private.yml',
-        lpass_deployments_buildpacks: 'deployments.yml',
-        lpass_repos_private_keys: 'keys.yml',
-        lpass_bosh_release_private_keys: 'bosh.yml'
-      } }
+      let(:buildpacks_ci_configuration) { BuildpacksCIConfiguration.new }
 
       before do
         allow(buildpacks_ci_pipeline_update_command).to receive(:puts)
-        allow(buildpacks_ci_pipeline_update_command).to receive(:credential_filenames).and_return(lpass_credential_files)
+        allow(BuildpacksCIConfiguration).to receive(:new).and_return(buildpacks_ci_configuration)
       end
 
       it 'has a pipeline name' do
@@ -76,6 +71,10 @@ describe BuildpacksCIPipelineUpdateCommand do
       end
 
       it 'loads env vars from lpass credential files' do
+        allow(buildpacks_ci_configuration).to receive(:concourse_private_filename).and_return('private.yml')
+        allow(buildpacks_ci_configuration).to receive(:deployments_buildpacks_filename).and_return('deployments.yml')
+        allow(buildpacks_ci_configuration).to receive(:repos_private_keys_filename).and_return('keys.yml')
+        allow(buildpacks_ci_configuration).to receive(:bosh_release_private_keys_filename).and_return('bosh.yml')
         expect(buildpacks_ci_pipeline_update_command).to receive(:system) do |fly_command|
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show private.yml.*\)/
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show deployments.yml.*\)/
@@ -106,6 +105,36 @@ describe BuildpacksCIPipelineUpdateCommand do
 
         it 'has a pipeline name' do
           expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(/pipeline=prefix-our-pipeline/)
+          subject
+        end
+      end
+
+      describe 'asking BuildpackCIConfiguration for credential filenames' do
+        before do
+          allow(buildpacks_ci_pipeline_update_command).to receive(:system)
+        end
+
+        it 'gets the concourse private filename' do
+          expect(buildpacks_ci_configuration).to receive(:concourse_private_filename)
+
+          subject
+        end
+
+        it 'gets the concourse buildpacks deployments filename' do
+          expect(buildpacks_ci_configuration).to receive(:deployments_buildpacks_filename)
+
+          subject
+        end
+
+        it 'gets the concourse repo private keys filename' do
+          expect(buildpacks_ci_configuration).to receive(:repos_private_keys_filename)
+
+          subject
+        end
+
+        it 'gets the concourse BOSH release private keys filename' do
+          expect(buildpacks_ci_configuration).to receive(:bosh_release_private_keys_filename)
+
           subject
         end
       end
