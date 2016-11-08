@@ -124,13 +124,4 @@ class BuildpacksCIPipelineUpdater
   def check_if_lastpass_installed
     raise '`brew install lastpass-cli` is required' if `which lpass` == ''
   end
-
-  def credential_filenames
-    {
-      lpass_concourse_private:  ENV['LPASS_CONCOURSE_PRIVATE_FILE'] || 'Shared-Buildpacks/concourse-private.yml',
-      lpass_deployments_buildpacks: ENV['LPASS_DEPLOYMENTS_BUILDPACKS_FILE'] || 'Shared-Buildpacks/deployments-buildpacks.yml',
-      lpass_repos_private_keys: ENV['LPASS_REPOS_PRIVATE_KEYS_FILE'] || 'Shared-Buildpacks/buildpack-repos-private-keys.yml',
-      lpass_bosh_release_private_keys: ENV['LPASS_BOSH_RELEASE_PRIVATE_KEYS_FILE'] || 'Shared-Buildpacks/buildpack-bosh-release-repos-private-keys.yml'
-    }
-  end
 end
