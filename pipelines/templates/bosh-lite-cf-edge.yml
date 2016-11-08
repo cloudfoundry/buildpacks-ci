@@ -62,11 +62,6 @@ resources:
     tarball: true
     source:
       repository: cloudfoundry/diego-release
-  - name: etcd-bosh-release
-    type: bosh-io-release
-    tarball: true
-    source:
-      repository: cloudfoundry-incubator/etcd-release
   - name: garden-runc-bosh-release
     type: bosh-io-release
     tarball: true
@@ -234,7 +229,6 @@ jobs:
           - get: cflinuxfs2-rootfs-bosh-release
           - get: diego-bosh-release
           - get: garden-runc-bosh-release
-          - get: etcd-bosh-release
         - put: diego-deployment
           params:
             manifest: {{diego-manifest-location}}
@@ -243,7 +237,6 @@ jobs:
               - cflinuxfs2-rootfs-bosh-release/release.tgz
               - diego-bosh-release/release.tgz
               - garden-runc-bosh-release/release.tgz
-              - etcd-bosh-release/release.tgz
         on_failure:
           put: resource-pools
           params:
