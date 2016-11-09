@@ -14,7 +14,7 @@ describe BuildpacksCIPipelineUpdateCommand do
     subject do
       buildpacks_ci_pipeline_update_command
         .run!(concourse_target_name: concourse_target_name,
-                      name: pipeline_name,
+                      pipeline_name: pipeline_name,
                       cmd: cmd,
                       options: options,
                       pipeline_variable_filename: pipeline_variable_filename
