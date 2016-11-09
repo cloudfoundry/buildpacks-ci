@@ -31,8 +31,8 @@ class BuildpacksCIPipelineUpdater
       next if options.has_key?(:template) && !pipeline_variables_filename.include?(options[:template])
 
       deployment_name = File.basename(pipeline_variables_filename, '.yml')
-      full_deployment_name = YAML.load_file(pipeline_variables_filename)['deployment-name']
       cf_version_type = get_cf_version_from_deployment_name(deployment_name)
+      full_deployment_name = YAML.load_file(pipeline_variables_filename)['deployment-name']
 
       buildpacks_configuration = BuildpacksCIConfiguration.new
       domain_name = buildpacks_configuration.domain_name
@@ -72,7 +72,7 @@ class BuildpacksCIPipelineUpdater
     check_if_lastpass_installed
     options = parse_args(args)
 
-    target_name= ENV['TARGET_NAME'] || "buildpacks"
+    target_name = ENV['TARGET_NAME'] || "buildpacks"
 
     if !options.has_key?(:template)
       update_standard_pipelines(target_name: target_name, options: options)
@@ -115,8 +115,7 @@ class BuildpacksCIPipelineUpdater
   def get_cf_version_from_deployment_name(deployment_name)
     matches = /(lts|edge)\-\d+(\-azure)?/.match(deployment_name)
     if matches.nil?
-      puts 'Your config/bosh-lite/*.yml files must be named in the following manner: edge-1.yml, edge-2.yml, lts-1.yml, lts-2.yml, etc.'
-      exit 1
+      raise 'Your config/bosh-lite/*.yml files must be named in the following manner: edge-1.yml, edge-2.yml, lts-1.yml, lts-2.yml, etc.'
     end
     matches[1]
   end
