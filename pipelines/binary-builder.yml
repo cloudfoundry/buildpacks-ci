@@ -333,7 +333,7 @@ jobs: ##########################################################################
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
             BUILDPACK_DEPENDENCIES_HOST_DOMAIN: {{buildpack-dependencies-host-domain}}
-            DOMAIN_NAME: {{domain-name}}
+            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
         - put: cf-environments
           resource: cf-edge-environments
           params:
@@ -347,7 +347,7 @@ jobs: ##########################################################################
               COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
               CF_PASSWORD: {{ci-cf-password}}
               RUBYGEM_MIRROR: {{rubygem-mirror}}
-              DOMAIN_NAME: {{domain-name}}
+              BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           - put: <%= buildpack %>-buildpack
             params:
               repository: buildpack-artifacts

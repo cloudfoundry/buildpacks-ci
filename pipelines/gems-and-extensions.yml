@@ -109,7 +109,7 @@ jobs:
         file: buildpacks-ci/tasks/run-machete-specs.yml
         params:
           CF_PASSWORD: {{ci-cf-password}}
-          DOMAIN_NAME: {{domain-name}}
+          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           RUBYGEM_MIRROR: {{rubygem-mirror}}
         privileged: true
         ensure:

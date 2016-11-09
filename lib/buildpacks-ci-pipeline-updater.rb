@@ -30,7 +30,7 @@ class BuildpacksCIPipelineUpdater
 
     buildpacks_configuration = BuildpacksCIConfiguration.new
     target_name = buildpacks_configuration.target_name
-    domain_name = buildpacks_configuration.domain_name
+    bosh_lite_domain_name = buildpacks_configuration.bosh_lite_domain_name
 
     Dir['config/bosh-lite/*.yml'].each do |pipeline_variables_filename|
       next if options.has_key?(:template) && !pipeline_variables_filename.include?(options[:template])
@@ -42,7 +42,7 @@ class BuildpacksCIPipelineUpdater
       BuildpacksCIPipelineUpdateCommand.new.run!(
         target_name: target_name,
         name: deployment_name,
-        cmd: "erb domain_name='#{domain_name}' deployment_name=#{deployment_name} full_deployment_name=#{full_deployment_name} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
+        cmd: "erb bosh_lite_domain_name='#{bosh_lite_domain_name}' deployment_name=#{deployment_name} full_deployment_name=#{full_deployment_name} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
         pipeline_variable_filename: pipeline_variables_filename,
         options: options
       )

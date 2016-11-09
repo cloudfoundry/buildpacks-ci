@@ -67,7 +67,7 @@ jobs:
           CI_CF_USERNAME: {{ci-cf-username}}
           CI_CF_PASSWORD: {{ci-cf-password}}
           RUBYGEM_MIRROR: {{rubygem-mirror}}
-          DOMAIN_NAME: {{domain-name}}
+          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           BRATS_BRANCH: master
         privileged: true
         ensure:
@@ -94,7 +94,7 @@ jobs:
           CI_CF_USERNAME: {{ci-cf-username}}
           CI_CF_PASSWORD: {{ci-cf-password}}
           RUBYGEM_MIRROR: {{rubygem-mirror}}
-          DOMAIN_NAME: {{domain-name}}
+          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           BRATS_BRANCH: master
         privileged: true
         ensure:

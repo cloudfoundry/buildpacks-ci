@@ -354,7 +354,7 @@ jobs: ##########################################################################
             BOSH_TARGET: stacks-nc.buildpacks.ci.cf-app.com
             BOSH_LITE_NAME: stacks-nc.buildpacks.ci
             RUBYGEM_MIRROR: {{rubygem-mirror}}
-            DOMAIN_NAME: {{domain-name}}
+            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             ROOTFS_RELEASE: cflinuxfs2-nc-rootfs
           privileged: true
         - put: deployments-buildpacks
@@ -579,7 +579,7 @@ jobs: ##########################################################################
             BOSH_TARGET: stacks-nc.buildpacks.ci.cf-app.com
             BOSH_LITE_NAME: stacks-nc.buildpacks.ci
             DIEGO_DOCKER_ON: true
-            DOMAIN_NAME: {{domain-name}}
+            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           privileged: true
         on_failure:
           put: failure-alert

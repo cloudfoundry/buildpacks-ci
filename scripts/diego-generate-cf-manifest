@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 set -e
-DOMAIN_NAME=${DOMAIN_NAME:-cf-app.com}
+BOSH_LITE_DOMAIN_NAME=${BOSH_LITE_DOMAIN_NAME:-cf-app.com}
 ROOTFS_RELEASE="${ROOTFS_RELEASE:-cflinuxfs2-rootfs}"
 
 pushd deployments-buildpacks

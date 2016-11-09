@@ -23,8 +23,8 @@ class BuildpacksCIConfiguration
     YAML.load_file('public-config.yml')['run-oracle-php-tests']
   end
 
-  def domain_name
-    YAML.load_file('public-config.yml')['domain-name']
+  def bosh_lite_domain_name
+    YAML.load_file('public-config.yml')['bosh-lite-domain-name']
   end
 
   def target_name
