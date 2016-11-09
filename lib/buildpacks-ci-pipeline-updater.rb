@@ -87,7 +87,7 @@ class BuildpacksCIPipelineUpdater
     # Argument parsing
     specified_options = {}
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: ./bin/update-all-the-pipelines [options]"
+      opts.banner = "Usage: ./bin/update-pipelines [options]"
 
       opts.on("--include=INCLUDE", "-iINCLUDE", "Update pipelines if their names include this string") do |include_string|
         specified_options[:include] = include_string
