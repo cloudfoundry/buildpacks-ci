@@ -9,7 +9,7 @@ class BuildpacksCIPipelineUpdater
     header('For standard pipelines')
 
     buildpacks_configuration = BuildpacksCIConfiguration.new
-    target_name = buildpacks_configuration.target_name
+    concourse_target_name = buildpacks_configuration.concourse_target_name
 
     organization = buildpacks_configuration.organization
     run_php_oracle_tests = buildpacks_configuration.run_oracle_php_tests?
@@ -17,7 +17,7 @@ class BuildpacksCIPipelineUpdater
     Dir['pipelines/*.yml'].each do |filename|
       pipeline_name = File.basename(filename, '.yml')
 
-      BuildpacksCIPipelineUpdateCommand.new.run!(target_name: target_name,
+      BuildpacksCIPipelineUpdateCommand.new.run!(concourse_target_name: concourse_target_name,
                    name: pipeline_name,
                    cmd: "erb organization=#{organization} run_oracle_php_tests=#{run_php_oracle_tests} #{filename}",
                    options: options
@@ -29,7 +29,7 @@ class BuildpacksCIPipelineUpdater
     header('For bosh-lite pipelines')
 
     buildpacks_configuration = BuildpacksCIConfiguration.new
-    target_name = buildpacks_configuration.target_name
+    concourse_target_name = buildpacks_configuration.concourse_target_name
     bosh_lite_domain_name = buildpacks_configuration.bosh_lite_domain_name
 
     Dir['config/bosh-lite/*.yml'].each do |pipeline_variables_filename|
@@ -40,7 +40,7 @@ class BuildpacksCIPipelineUpdater
       full_deployment_name = YAML.load_file(pipeline_variables_filename)['deployment-name']
 
       BuildpacksCIPipelineUpdateCommand.new.run!(
-        target_name: target_name,
+        concourse_target_name: concourse_target_name,
         name: deployment_name,
         cmd: "erb bosh_lite_domain_name='#{bosh_lite_domain_name}' deployment_name=#{deployment_name} full_deployment_name=#{full_deployment_name} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
         pipeline_variable_filename: pipeline_variables_filename,
@@ -53,7 +53,7 @@ class BuildpacksCIPipelineUpdater
     header('For buildpack pipelines')
 
     buildpacks_configuration = BuildpacksCIConfiguration.new
-    target_name = buildpacks_configuration.target_name
+    concourse_target_name = buildpacks_configuration.concourse_target_name
     organization = buildpacks_configuration.organization
 
     Dir['config/buildpack/*.yml'].each do |pipeline_variables_filename|
@@ -62,7 +62,7 @@ class BuildpacksCIPipelineUpdater
       language = File.basename(pipeline_variables_filename, '.yml')
 
       BuildpacksCIPipelineUpdateCommand.new.run!(
-        target_name: target_name,
+        concourse_target_name: concourse_target_name,
         name: "#{language}-buildpack",
         cmd: "erb language=#{language} organization=#{organization} pipelines/templates/buildpack.yml",
         pipeline_variable_filename: pipeline_variables_filename,

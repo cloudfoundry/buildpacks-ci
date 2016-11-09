@@ -27,7 +27,7 @@ class BuildpacksCIConfiguration
     YAML.load_file('public-config.yml')['bosh-lite-domain-name']
   end
 
-  def target_name
-    ENV['TARGET_NAME'] || 'buildpacks'
+  def concourse_target_name
+    ENV['CONCOURSE_TARGET_NAME'] || 'buildpacks'
   end
 end
