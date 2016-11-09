@@ -1,18 +1,18 @@
 class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
   def perform_dependency_update
     major_version, minor_version, _ = dependency_version.split(".")
-    version_to_delete = buildpack_manifest["dependencies"].select do |dep|
-      dep_maj, dep_min, _ = dep["version"].to_s.split(".")
-      if major_version == "0"
-        # 0.12.x
-        dep_maj == major_version && dep_min == minor_version && dep["name"] == dependency
-      else
-        # node 4.x, 5.x, 6.x
-        dep_maj == major_version && dep["name"] == dependency
-      end
+
+    dependencies_with_same_major_version = buildpack_manifest["dependencies"].select do |dep|
+      dep["name"] == dependency && dep["version"].split(".").first == major_version
     end.map do |dep|
       Gem::Version.new(dep['version'])
-    end.sort.first.to_s
+    end
+
+    if dependencies_with_same_major_version.count > 1 || (buildpack != 'nodejs')
+      version_to_delete = dependencies_with_same_major_version.sort.first.to_s
+    else
+      version_to_delete = nil
+    end
 
     original_dependencies = buildpack_manifest["dependencies"].clone
     new_dependencies = buildpack_manifest["dependencies"].clone

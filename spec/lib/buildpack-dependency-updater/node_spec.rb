@@ -87,6 +87,12 @@ describe BuildpackDependencyUpdater do
             md5: e54ef4e2637d8cc8125a8ccc67c47951
             cf_stacks:
               - cflinuxfs2
+          - name: node
+            version: 7.0.0
+            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-7.0.0-linux-x64.tgz
+            md5: cff1c6d374fd9dd3e8fb0ad2fbddc6da
+            cf_stacks:
+              - cflinuxfs2
         MANIFEST
         File.open(manifest_file, "w") do |file|
           file.write buildpack_manifest_contents
@@ -129,6 +135,41 @@ describe BuildpackDependencyUpdater do
         it 'records which versions were removed' do
           subject.run!
           expect(subject.removed_versions).to eq(['0.12.45'])
+        end
+      end
+
+      context("there is only 1 mainline version of node in the manifest") do
+        let (:expected_version) { '7.1.0' }
+
+        it "updates the nodejs buildpack manifest dependency with the specified version" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+          expect(dependency_in_manifest["version"]).to eq(expected_version)
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
+          expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '7.0.0'}
+          expect(dependency_in_manifest["version"]).to eq("7.0.0")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-7.0.0-linux-x64.tgz")
+          expect(dependency_in_manifest["md5"]).to eq("cff1c6d374fd9dd3e8fb0ad2fbddc6da")
+        end
+
+        it "does not update the nodejs buildpack manifest dependency default with the specified version" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+
+          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.6'}
+          expect(default_in_manifest["version"]).to eq('4.4.6')
+
+          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+          expect(default_in_manifest).to eq(nil)
+        end
+
+        it 'does not remove any dependencies' do
+          subject.run!
+          expect(subject.removed_versions).to eq([])
         end
       end
 
