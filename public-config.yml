@@ -11,7 +11,7 @@ cf-release-git-uri: https://github.com/cloudfoundry/cf-release
 
 buildpacks-github-org: cloudfoundry
 buildpacks-binaries-s3-bucket: pivotal-buildpacks
-domain-name: cf-app.com
+bosh-lite-domain-name: cf-app.com
 
 buildpacks-ci-git-uri-public: https://github.com/cloudfoundry/buildpacks-ci
 buildpacks-ci-git-uri: git@github.com:cloudfoundry/buildpacks-ci.git

@@ -2,7 +2,7 @@
 set -e
 
 DEPLOYMENT_NAME=`cat cf-environments/name`
-DOMAIN_NAME=${DOMAIN_NAME:-cf-app.com}
+BOSH_LITE_DOMAIN_NAME=${BOSH_LITE_DOMAIN_NAME:-cf-app.com}
 
 cd brats
 bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}

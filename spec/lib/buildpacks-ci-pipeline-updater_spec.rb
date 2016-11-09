@@ -173,7 +173,7 @@ describe BuildpacksCIPipelineUpdater do
 
     before do
       allow(buildpacks_ci_configuration).to receive(:target_name).and_return(target_name)
-      allow(buildpacks_ci_configuration).to receive(:domain_name).and_return('domain.name')
+      allow(buildpacks_ci_configuration).to receive(:bosh_lite_domain_name).and_return('domain.name')
       allow_any_instance_of(BuildpacksCIPipelineUpdateCommand).to receive(:run!).with(anything).and_return(true)
 
       allow(YAML).to receive(:load_file).with('edge-99.yml').and_return({})
@@ -277,7 +277,7 @@ describe BuildpacksCIPipelineUpdater do
 
     describe 'erb command passed to BuildpacksCIPipelineUpdateCommand#run!' do
       before do
-        allow(buildpacks_ci_configuration).to receive(:domain_name).and_return('domain.name')
+        allow(buildpacks_ci_configuration).to receive(:bosh_lite_domain_name).and_return('domain.name')
         allow(YAML).to receive(:load_file).with('edge-99.yml').and_return({'deployment-name' => 'full-deployment-name'})
       end
 
@@ -291,7 +291,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'sets a domain_name variable' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /domain_name='domain\.name'/,
+          with(cmd: /bosh_lite_domain_name='domain\.name'/,
                target_name: anything, name: anything, options: anything, pipeline_variable_filename: anything)
 
         subject
@@ -324,7 +324,7 @@ describe BuildpacksCIPipelineUpdater do
 
     describe 'asking BuildpackCIConfiguration for metadata' do
       it 'asks BuildpacksCIConfiguration for domain name' do
-        expect(buildpacks_ci_configuration).to receive(:domain_name)
+        expect(buildpacks_ci_configuration).to receive(:bosh_lite_domain_name)
 
         subject
       end

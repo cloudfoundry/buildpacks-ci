@@ -3,7 +3,7 @@
 set -e
 
 DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-`cat cf-environments/name`}
-DOMAIN_NAME=${DOMAIN_NAME:-cf-app.com}
+BOSH_LITE_DOMAIN_NAME=${BOSH_LITE_DOMAIN_NAME:-cf-app.com}
 
 pushd buildpacks-ci
   ./scripts/start-docker
