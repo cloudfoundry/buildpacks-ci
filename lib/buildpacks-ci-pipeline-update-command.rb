@@ -1,7 +1,7 @@
 require_relative 'buildpacks-ci-configuration'
 
 class BuildpacksCIPipelineUpdateCommand
-  def run!(target_name:, name:, cmd:, pipeline_variable_filename: "", options:)
+  def run!(concourse_target_name:, name:, cmd:, pipeline_variable_filename: "", options:)
 
     buildpacks_configuration = BuildpacksCIConfiguration.new
 
@@ -17,7 +17,7 @@ class BuildpacksCIPipelineUpdateCommand
     pipeline_specific_config = ""
     pipeline_specific_config ="--load-vars-from=#{pipeline_variable_filename}" unless pipeline_variable_filename.empty?
     fly_cmd = %{bash -c "fly \
-      --target=#{target_name} \
+      --target=#{concourse_target_name} \
       set-pipeline \
       --pipeline=#{pipeline_prefix}#{name} \
       --config=<(#{cmd}) \

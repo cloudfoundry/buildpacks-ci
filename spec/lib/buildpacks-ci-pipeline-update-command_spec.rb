@@ -7,13 +7,13 @@ require_relative '../../lib/buildpacks-ci-configuration'
 
 describe BuildpacksCIPipelineUpdateCommand do
   describe '#run!' do
-    let(:target_name)                    { 'concourse-target' }
+    let(:concourse_target_name)          { 'concourse-target' }
     let(:cmd)                            { '' }
     let(:pipeline_variable_filename)     { '' }
     let(:buildpacks_ci_pipeline_update_command) { described_class.new }
     subject do
       buildpacks_ci_pipeline_update_command
-        .run!(target_name: target_name,
+        .run!(concourse_target_name: concourse_target_name,
                       name: pipeline_name,
                       cmd: cmd,
                       options: options,
@@ -44,7 +44,7 @@ describe BuildpacksCIPipelineUpdateCommand do
     end
 
     describe 'building the fly command' do
-      let(:target_name) { 'concourse-target' }
+      let(:concourse_target_name) { 'concourse-target' }
       let(:cmd)  { 'erb this' }
       let(:options)       { { } }
       let(:pipeline_name) { 'our-pipeline' }

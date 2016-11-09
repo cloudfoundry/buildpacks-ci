@@ -148,18 +148,18 @@ describe BuildpacksCIConfiguration do
     end
   end
 
-  describe '#target_name' do
-    subject { BuildpacksCIConfiguration.new.target_name }
+  describe '#concourse_target_name' do
+    subject { BuildpacksCIConfiguration.new.concourse_target_name }
 
     context 'configured by env variable' do
       it 'returns the value of the env var' do
-        allow(ENV).to receive(:[]).with('TARGET_NAME').and_return('concourse-target')
+        allow(ENV).to receive(:[]).with('CONCOURSE_TARGET_NAME').and_return('concourse-target')
 
         expect(subject).to eq('concourse-target')
       end
 
       it 'asks ENV for the value' do
-        expect(ENV).to receive(:[]).with('TARGET_NAME')
+        expect(ENV).to receive(:[]).with('CONCOURSE_TARGET_NAME')
 
         subject
       end
