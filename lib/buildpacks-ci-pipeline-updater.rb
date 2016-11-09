@@ -5,10 +5,11 @@ require 'optparse'
 require_relative 'buildpacks-ci-pipeline-update-command'
 
 class BuildpacksCIPipelineUpdater
-  def update_standard_pipelines(target_name:, options:)
+  def update_standard_pipelines(options)
     header('For standard pipelines')
 
     buildpacks_config = BuildpacksCIConfiguration.new
+    target_name = buildpacks_config.target_name
 
     organization = buildpacks_config.organization
     run_php_oracle_tests = buildpacks_config.run_oracle_php_tests?
@@ -24,7 +25,7 @@ class BuildpacksCIPipelineUpdater
     end
   end
 
-  def update_bosh_lite_pipelines(target_name, options)
+  def update_bosh_lite_pipelines(options)
     header('For bosh-lite pipelines')
 
     Dir['config/bosh-lite/*.yml'].each do |pipeline_variables_filename|
@@ -35,6 +36,7 @@ class BuildpacksCIPipelineUpdater
       full_deployment_name = YAML.load_file(pipeline_variables_filename)['deployment-name']
 
       buildpacks_configuration = BuildpacksCIConfiguration.new
+      target_name = buildpacks_configuration.target_name
       domain_name = buildpacks_configuration.domain_name
 
       BuildpacksCIPipelineUpdateCommand.new.run!(
@@ -47,7 +49,7 @@ class BuildpacksCIPipelineUpdater
     end
   end
 
-  def update_buildpack_pipelines(target_name, options)
+  def update_buildpack_pipelines(options)
     header('For buildpack pipelines')
 
     Dir['config/buildpack/*.yml'].each do |pipeline_variables_filename|
@@ -56,6 +58,7 @@ class BuildpacksCIPipelineUpdater
       language = File.basename(pipeline_variables_filename, '.yml')
 
       buildpacks_config = BuildpacksCIConfiguration.new
+      target_name = buildpacks_config.target_name
       organization = buildpacks_config.organization
 
       BuildpacksCIPipelineUpdateCommand.new.run!(
@@ -72,13 +75,9 @@ class BuildpacksCIPipelineUpdater
     check_if_lastpass_installed
     options = parse_args(args)
 
-    target_name = ENV['TARGET_NAME'] || "buildpacks"
-
-    if !options.has_key?(:template)
-      update_standard_pipelines(target_name: target_name, options: options)
-    end
-    update_bosh_lite_pipelines(target_name, options)
-    update_buildpack_pipelines(target_name, options)
+    update_standard_pipelines(options) unless options.has_key?(:template)
+    update_bosh_lite_pipelines(options)
+    update_buildpack_pipelines(options)
 
     puts 'Thanks, The Buildpacks Team'
   end
