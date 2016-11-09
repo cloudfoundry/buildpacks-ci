@@ -181,6 +181,12 @@ describe BuildpacksCIPipelineUpdater do
       subject
     end
 
+    it 'rejects incorrectly-named yaml files' do
+      expect(Dir).to receive(:[]).with('config/bosh-lite/*.yml').and_return(%w(it-will-not-match.yml))
+
+      expect{ subject }.to raise_error(RuntimeError, /Your config\/bosh-lite\/\*\.yml files must be named in the following manner/)
+    end
+
     it 'looks for yaml files in config/bosh-lite' do
       expect(Dir).to receive(:[]).with('config/bosh-lite/*.yml').and_return([])
 
