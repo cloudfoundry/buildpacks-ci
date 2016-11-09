@@ -26,4 +26,8 @@ class BuildpacksCIConfiguration
   def domain_name
     YAML.load_file('public-config.yml')['domain-name']
   end
+
+  def target_name
+    ENV['TARGET_NAME'] || 'buildpacks'
+  end
 end

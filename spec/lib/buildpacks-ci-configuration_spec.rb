@@ -143,8 +143,30 @@ describe BuildpacksCIConfiguration do
       subject
     end
 
-    it 'returns boolean from the yml data' do
+    it 'returns string from the yml data' do
       expect(subject).to eq('domain.name')
+    end
+  end
+
+  describe '#target_name' do
+    subject { BuildpacksCIConfiguration.new.target_name }
+
+    context 'configured by env variable' do
+      it 'returns the value of the env var' do
+        allow(ENV).to receive(:[]).with('TARGET_NAME').and_return('concourse-target')
+
+        expect(subject).to eq('concourse-target')
+      end
+
+      it 'asks ENV for the value' do
+        expect(ENV).to receive(:[]).with('TARGET_NAME')
+
+        subject
+      end
+    end
+
+    it 'has a default value' do
+      expect(subject).to eq('buildpacks')
     end
   end
 end

@@ -48,9 +48,10 @@ describe BuildpacksCIPipelineUpdater do
     let(:target_name)                    { 'concourse-target' }
     let(:options)                        { { key: 'value' } }
 
-    subject { buildpacks_ci_pipeline_updater.update_standard_pipelines(target_name: target_name, options: options) }
+    subject { buildpacks_ci_pipeline_updater.update_standard_pipelines(options) }
 
     before do
+      allow(buildpacks_ci_configuration).to receive(:target_name).and_return(target_name)
       allow_any_instance_of(BuildpacksCIPipelineUpdateCommand).to receive(:run!).with(anything).and_return(true)
 
       allow(Dir).to receive(:[]).with('pipelines/*.yml').and_return(%w(first.yml))
@@ -148,6 +149,12 @@ describe BuildpacksCIPipelineUpdater do
         subject
       end
 
+      it 'asks BuildpackCIConfiguration for the Concourse target name' do
+        expect(buildpacks_ci_configuration).to receive(:target_name)
+
+        subject
+      end
+
       it 'asks BuildpackCIConfiguration whether PHP oracle tests should be run' do
         expect(buildpacks_ci_configuration).to receive(:run_oracle_php_tests?)
 
@@ -162,9 +169,10 @@ describe BuildpacksCIPipelineUpdater do
     let(:buildpacks_ci_pipeline_updater) { described_class.new }
     let(:buildpacks_ci_pipeline_update_command) { BuildpacksCIPipelineUpdateCommand.new }
 
-    subject { buildpacks_ci_pipeline_updater.update_bosh_lite_pipelines(target_name, options) }
+    subject { buildpacks_ci_pipeline_updater.update_bosh_lite_pipelines(options) }
 
     before do
+      allow(buildpacks_ci_configuration).to receive(:target_name).and_return(target_name)
       allow(buildpacks_ci_configuration).to receive(:domain_name).and_return('domain.name')
       allow_any_instance_of(BuildpacksCIPipelineUpdateCommand).to receive(:run!).with(anything).and_return(true)
 
@@ -217,7 +225,7 @@ describe BuildpacksCIPipelineUpdater do
       context 'and the template name is not a bosh-lite template' do
         let(:options) { { template: 'not-a-bosh-lite' } }
 
-        subject { buildpacks_ci_pipeline_updater.update_bosh_lite_pipelines(target_name, options) }
+        subject { buildpacks_ci_pipeline_updater.update_bosh_lite_pipelines(options) }
 
         it 'skips when the pipeline name does not match the template name' do
           expect(buildpacks_ci_pipeline_update_command).not_to receive(:run!)
@@ -320,6 +328,12 @@ describe BuildpacksCIPipelineUpdater do
 
         subject
       end
+
+      it 'asks BuildpacksCIConfiguration for Concourse target name' do
+        expect(buildpacks_ci_configuration).to receive(:target_name)
+
+        subject
+      end
     end
   end
 
@@ -329,9 +343,10 @@ describe BuildpacksCIPipelineUpdater do
     let(:buildpacks_ci_pipeline_updater) { described_class.new }
     let(:buildpacks_ci_pipeline_update_command) { BuildpacksCIPipelineUpdateCommand.new }
 
-    subject { buildpacks_ci_pipeline_updater.update_buildpack_pipelines(target_name, options) }
+    subject { buildpacks_ci_pipeline_updater.update_buildpack_pipelines(options) }
 
     before do
+      allow(buildpacks_ci_configuration).to receive(:target_name).and_return(target_name)
       allow_any_instance_of(BuildpacksCIPipelineUpdateCommand).to receive(:run!).with(anything).and_return(true)
 
       allow(Dir).to receive(:[]).with('config/buildpack/*.yml').and_return(%w(cobol.yml))
@@ -368,7 +383,7 @@ describe BuildpacksCIPipelineUpdater do
       context 'and the template name is not a buildpack template' do
         let(:options) { { template: 'not-a-buildpack' } }
 
-        subject { buildpacks_ci_pipeline_updater.update_buildpack_pipelines(target_name, options) }
+        subject { buildpacks_ci_pipeline_updater.update_buildpack_pipelines(options) }
 
         it 'skips when the pipeline name does not match the template name' do
           expect_any_instance_of(BuildpacksCIPipelineUpdateCommand).not_to receive(:run!)
@@ -454,9 +469,53 @@ describe BuildpacksCIPipelineUpdater do
 
         subject
       end
+
+      it 'asks BuildpackCIConfiguration for the Concourse target name' do
+        expect(buildpacks_ci_configuration).to receive(:target_name)
+
+        subject
+      end
     end
   end
 
-  # describe '#get_cf_version_from_deployment_name'
-  # describe '#run!'
+  describe '#run!' do
+    let(:args) { [] }
+    let(:buildpacks_ci_pipeline_updater) { described_class.new }
+
+    subject { buildpacks_ci_pipeline_updater.run!(args) }
+
+    before do
+      allow(buildpacks_ci_pipeline_updater).to receive(:update_bosh_lite_pipelines)
+      allow(buildpacks_ci_pipeline_updater).to receive(:update_buildpack_pipelines)
+      allow(buildpacks_ci_pipeline_updater).to receive(:update_standard_pipelines)
+    end
+
+    context 'there is a template argument' do
+      let(:args) { %w(--template=whatever_template) }
+
+      it 'does not try to update standard pipelines' do
+        expect(buildpacks_ci_pipeline_updater).to_not receive(:update_standard_pipelines)
+
+        subject
+      end
+    end
+
+    it 'updates bosh lite pipelines' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:update_bosh_lite_pipelines).with({})
+
+      subject
+    end
+
+    it 'updates buildpack pipelines' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:update_buildpack_pipelines).with({})
+
+      subject
+    end
+
+    it 'updates standard pipelines' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:update_standard_pipelines).with({})
+
+      subject
+    end
+  end
 end
