@@ -8,11 +8,11 @@ class BuildpacksCIPipelineUpdater
   def update_standard_pipelines(options)
     header('For standard pipelines')
 
-    buildpacks_config = BuildpacksCIConfiguration.new
-    target_name = buildpacks_config.target_name
+    buildpacks_configuration = BuildpacksCIConfiguration.new
+    target_name = buildpacks_configuration.target_name
 
-    organization = buildpacks_config.organization
-    run_php_oracle_tests = buildpacks_config.run_oracle_php_tests?
+    organization = buildpacks_configuration.organization
+    run_php_oracle_tests = buildpacks_configuration.run_oracle_php_tests?
 
     Dir['pipelines/*.yml'].each do |filename|
       pipeline_name = File.basename(filename, '.yml')
@@ -28,16 +28,16 @@ class BuildpacksCIPipelineUpdater
   def update_bosh_lite_pipelines(options)
     header('For bosh-lite pipelines')
 
+    buildpacks_configuration = BuildpacksCIConfiguration.new
+    target_name = buildpacks_configuration.target_name
+    domain_name = buildpacks_configuration.domain_name
+
     Dir['config/bosh-lite/*.yml'].each do |pipeline_variables_filename|
       next if options.has_key?(:template) && !pipeline_variables_filename.include?(options[:template])
 
       deployment_name = File.basename(pipeline_variables_filename, '.yml')
       cf_version_type = get_cf_version_from_deployment_name(deployment_name)
       full_deployment_name = YAML.load_file(pipeline_variables_filename)['deployment-name']
-
-      buildpacks_configuration = BuildpacksCIConfiguration.new
-      target_name = buildpacks_configuration.target_name
-      domain_name = buildpacks_configuration.domain_name
 
       BuildpacksCIPipelineUpdateCommand.new.run!(
         target_name: target_name,
@@ -52,14 +52,14 @@ class BuildpacksCIPipelineUpdater
   def update_buildpack_pipelines(options)
     header('For buildpack pipelines')
 
+    buildpacks_configuration = BuildpacksCIConfiguration.new
+    target_name = buildpacks_configuration.target_name
+    organization = buildpacks_configuration.organization
+
     Dir['config/buildpack/*.yml'].each do |pipeline_variables_filename|
       next if options.has_key?(:template) && !pipeline_variables_filename.include?(options[:template])
 
       language = File.basename(pipeline_variables_filename, '.yml')
-
-      buildpacks_config = BuildpacksCIConfiguration.new
-      target_name = buildpacks_config.target_name
-      organization = buildpacks_config.organization
 
       BuildpacksCIPipelineUpdateCommand.new.run!(
         target_name: target_name,
