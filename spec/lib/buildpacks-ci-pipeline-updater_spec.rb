@@ -34,7 +34,7 @@ describe BuildpacksCIPipelineUpdater do
 
     context 'with --template specified' do
       let(:args) { %w(--template template_name) }
-      let(:cmd)  { "" }
+      let(:config_generation_command)  { "" }
 
       it 'sets the template option correctly' do
         expect(subject[:template]).to eq('template_name')
@@ -82,7 +82,7 @@ describe BuildpacksCIPipelineUpdater do
     it 'calls BuildpacksCIPipelineUpdateCommand#run! with a target name' do
       expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
         with(concourse_target_name: concourse_target_name,
-             pipeline_name: anything, cmd: anything, options: anything)
+             pipeline_name: anything, config_generation_command: anything, options: anything)
 
       subject
     end
@@ -90,7 +90,7 @@ describe BuildpacksCIPipelineUpdater do
     it 'calls BuildpacksCIPipelineUpdateCommand#run! with a pipeline name' do
       expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
         with(pipeline_name: 'first',
-             concourse_target_name: anything, cmd: anything, options: anything)
+             concourse_target_name: anything, config_generation_command: anything, options: anything)
 
       subject
     end
@@ -98,7 +98,7 @@ describe BuildpacksCIPipelineUpdater do
     it 'calls BuildpacksCIPipelineUpdateCommand#run! with command line options' do
       expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
         with(options: {key: 'value'},
-             concourse_target_name: anything, pipeline_name: anything, cmd: anything)
+             concourse_target_name: anything, pipeline_name: anything, config_generation_command: anything)
 
       subject
     end
@@ -111,7 +111,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'includes `erb`' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /^erb/,
+          with(config_generation_command: /^erb/,
                concourse_target_name: anything, pipeline_name: anything, options: anything)
 
         subject
@@ -119,7 +119,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'sets an organization variable' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /organization=buildpacks-github-org/,
+          with(config_generation_command: /organization=buildpacks-github-org/,
                concourse_target_name: anything, pipeline_name: anything, options: anything)
 
         subject
@@ -127,7 +127,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'sets a run_oracle_php_tests variable' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /run_oracle_php_tests=false/,
+          with(config_generation_command: /run_oracle_php_tests=false/,
                concourse_target_name: anything, pipeline_name: anything, options: anything)
 
         subject
@@ -135,7 +135,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'passes in a pipeline filename' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /first\.yml/,
+          with(config_generation_command: /first\.yml/,
                concourse_target_name: anything, pipeline_name: anything, options: anything)
 
         subject
@@ -246,7 +246,7 @@ describe BuildpacksCIPipelineUpdater do
     it 'calls BuildpacksCIPipelineUpdateCommand#run! with target name' do
       expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
         with(concourse_target_name: 'concourse-target',
-             pipeline_name: anything, cmd: anything, options: anything, pipeline_variable_filename: anything)
+             pipeline_name: anything, config_generation_command: anything, options: anything, pipeline_variable_filename: anything)
 
       subject
     end
@@ -254,7 +254,7 @@ describe BuildpacksCIPipelineUpdater do
     it 'calls BuildpacksCIPipelineUpdateCommand#run! with deployment name' do
       expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
         with(pipeline_name: 'edge-99',
-             concourse_target_name: anything, cmd: anything, options: anything, pipeline_variable_filename: anything)
+             concourse_target_name: anything, config_generation_command: anything, options: anything, pipeline_variable_filename: anything)
 
       subject
     end
@@ -262,7 +262,7 @@ describe BuildpacksCIPipelineUpdater do
     it 'calls BuildpacksCIPipelineUpdateCommand#run! with pipeline_variable_file' do
       expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
         with(pipeline_variable_filename: 'edge-99.yml',
-          pipeline_name: anything, concourse_target_name: anything, cmd: anything, options: anything)
+          pipeline_name: anything, concourse_target_name: anything, config_generation_command: anything, options: anything)
 
       subject
     end
@@ -270,7 +270,7 @@ describe BuildpacksCIPipelineUpdater do
     it 'calls BuildpacksCIPipelineUpdateCommand#run! with options' do
       expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
         with(options: {key: 'value'},
-             pipeline_name: anything, concourse_target_name: anything, cmd: anything, pipeline_variable_filename: anything)
+             pipeline_name: anything, concourse_target_name: anything, config_generation_command: anything, pipeline_variable_filename: anything)
 
       subject
     end
@@ -283,7 +283,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'includes `erb`' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /^erb/,
+          with(config_generation_command: /^erb/,
                concourse_target_name: anything, pipeline_name: anything, options: anything, pipeline_variable_filename: anything)
 
         subject
@@ -291,7 +291,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'sets a domain_name variable' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /bosh_lite_domain_name='domain\.name'/,
+          with(config_generation_command: /bosh_lite_domain_name='domain\.name'/,
                concourse_target_name: anything, pipeline_name: anything, options: anything, pipeline_variable_filename: anything)
 
         subject
@@ -299,7 +299,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'sets a deployment_name variable' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /deployment_name=edge-99/,
+          with(config_generation_command: /deployment_name=edge-99/,
                concourse_target_name: anything, pipeline_name: anything, options: anything, pipeline_variable_filename: anything)
 
         subject
@@ -307,7 +307,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'sets a full_deployment_name variable' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /full_deployment_name=full-deployment-name/,
+          with(config_generation_command: /full_deployment_name=full-deployment-name/,
                concourse_target_name: anything, pipeline_name: anything, options: anything, pipeline_variable_filename: anything)
 
         subject
@@ -315,7 +315,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'passes in a pipeline filename based on the CF version' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /pipelines\/templates\/bosh-lite-cf-edge/,
+          with(config_generation_command: /pipelines\/templates\/bosh-lite-cf-edge/,
                concourse_target_name: anything, pipeline_name: anything, options: anything, pipeline_variable_filename: anything)
 
         subject
@@ -404,7 +404,7 @@ describe BuildpacksCIPipelineUpdater do
     it 'calls BuildpacksCIPipelineUpdateCommand#run! with target name' do
       expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
         with(concourse_target_name: 'concourse-target',
-             pipeline_name: anything, cmd: anything, options: anything, pipeline_variable_filename: anything)
+             pipeline_name: anything, config_generation_command: anything, options: anything, pipeline_variable_filename: anything)
 
       subject
     end
@@ -412,7 +412,7 @@ describe BuildpacksCIPipelineUpdater do
     it 'calls BuildpacksCIPipelineUpdateCommand#run! with buildpack name' do
       expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
         with(pipeline_name: 'cobol-buildpack',
-             concourse_target_name: anything, cmd: anything, options: anything, pipeline_variable_filename: anything)
+             concourse_target_name: anything, config_generation_command: anything, options: anything, pipeline_variable_filename: anything)
 
       subject
     end
@@ -420,7 +420,7 @@ describe BuildpacksCIPipelineUpdater do
     it 'calls BuildpacksCIPipelineUpdateCommand#run! with pipeline_variable_file' do
       expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
         with(pipeline_variable_filename: 'cobol.yml',
-             pipeline_name: anything, concourse_target_name: anything, cmd: anything, options: anything)
+             pipeline_name: anything, concourse_target_name: anything, config_generation_command: anything, options: anything)
 
       subject
     end
@@ -428,7 +428,7 @@ describe BuildpacksCIPipelineUpdater do
     it 'calls BuildpacksCIPipelineUpdateCommand#run! with options' do
       expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
         with(options: {key: 'value'},
-             pipeline_name: anything, concourse_target_name: anything, cmd: anything, pipeline_variable_filename: anything)
+             pipeline_name: anything, concourse_target_name: anything, config_generation_command: anything, pipeline_variable_filename: anything)
 
       subject
     end
@@ -440,7 +440,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'includes `erb`' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /^erb/,
+          with(config_generation_command: /^erb/,
                concourse_target_name: anything, pipeline_name: anything, options: anything, pipeline_variable_filename: anything)
 
         subject
@@ -448,7 +448,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'sets a language variable' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /language=cobol/,
+          with(config_generation_command: /language=cobol/,
                concourse_target_name: anything, pipeline_name: anything, options: anything, pipeline_variable_filename: anything)
 
         subject
@@ -456,7 +456,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'sets an organization variable' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(cmd: /organization=buildpacks-github-org/,
+          with(config_generation_command: /organization=buildpacks-github-org/,
                concourse_target_name: anything, pipeline_name: anything, options: anything, pipeline_variable_filename: anything)
 
         subject

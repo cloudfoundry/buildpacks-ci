@@ -17,11 +17,12 @@ class BuildpacksCIPipelineUpdater
     Dir['pipelines/*.yml'].each do |filename|
       pipeline_name = File.basename(filename, '.yml')
 
-      BuildpacksCIPipelineUpdateCommand.new.run!(concourse_target_name: concourse_target_name,
-                                                 pipeline_name: pipeline_name,
-                                                 cmd: "erb organization=#{organization} run_oracle_php_tests=#{run_php_oracle_tests} #{filename}",
-                                                 options: options
-                  )
+      BuildpacksCIPipelineUpdateCommand.new.run!(
+        concourse_target_name: concourse_target_name,
+        pipeline_name: pipeline_name,
+        config_generation_command: "erb organization=#{organization} run_oracle_php_tests=#{run_php_oracle_tests} #{filename}",
+        options: options
+      )
     end
   end
 
@@ -42,7 +43,7 @@ class BuildpacksCIPipelineUpdater
       BuildpacksCIPipelineUpdateCommand.new.run!(
         concourse_target_name: concourse_target_name,
         pipeline_name: deployment_name,
-        cmd: "erb bosh_lite_domain_name='#{bosh_lite_domain_name}' deployment_name=#{deployment_name} full_deployment_name=#{full_deployment_name} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
+        config_generation_command: "erb bosh_lite_domain_name='#{bosh_lite_domain_name}' deployment_name=#{deployment_name} full_deployment_name=#{full_deployment_name} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
         pipeline_variable_filename: pipeline_variables_filename,
         options: options
       )
@@ -64,7 +65,7 @@ class BuildpacksCIPipelineUpdater
       BuildpacksCIPipelineUpdateCommand.new.run!(
         concourse_target_name: concourse_target_name,
         pipeline_name: "#{language}-buildpack",
-        cmd: "erb language=#{language} organization=#{organization} pipelines/templates/buildpack.yml",
+        config_generation_command: "erb language=#{language} organization=#{organization} pipelines/templates/buildpack.yml",
         pipeline_variable_filename: pipeline_variables_filename,
         options: options
       )
