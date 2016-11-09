@@ -19,8 +19,8 @@ pushd cf-release
 ---
 name: cf-warden
 properties:
-  domain: $DEPLOYMENT_NAME.$DOMAIN_NAME
-  system_domain: $DEPLOYMENT_NAME.$DOMAIN_NAME
+  domain: $DEPLOYMENT_NAME.$BOSH_LITE_DOMAIN_NAME
+  system_domain: $DEPLOYMENT_NAME.$BOSH_LITE_DOMAIN_NAME
   acceptance_tests:
     admin_password: stub_to_be_gsubbed
     include_internet_dependent: true

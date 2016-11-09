@@ -11,7 +11,7 @@ BOSH_LITE_DOMAIN_NAME=${BOSH_LITE_DOMAIN_NAME:-cf-app.com}
 
 if [ "$DIEGO_DOCKER_ON" = "true" ]
 then
-  cf api api.$DEPLOYMENT_NAME.$DOMAIN_NAME --skip-ssl-validation
+  cf api api.$DEPLOYMENT_NAME.$BOSH_LITE_DOMAIN_NAME --skip-ssl-validation
   cf login -u $CI_CF_USERNAME -p $CI_CF_PASSWORD
   cf enable-feature-flag diego_docker
 fi
