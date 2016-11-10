@@ -11,4 +11,4 @@ cf login -u "$CI_CF_USERNAME" -p "$CI_CF_PASSWORD"
 
 cd machete/
 
-yes | ./scripts/configure_deployment
+./scripts/configure_deployment
