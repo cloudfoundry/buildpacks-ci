@@ -22,7 +22,7 @@ sed -e '1d;s/\([^\t]\)\t.*$/\1/' < /proc/cgroups | while IFS= read -r d; do
 done
 
 mkdir /tmp/build/graph
-mount -t tmpfs -o size=5g tmpfs /tmp/build/graph
+mount -t tmpfs -o size=15g tmpfs /tmp/build/graph
 # dd if=/dev/zero of=/tmp/build/graph.ext4 bs=1M count=10240
 # touch /tmp/build/graph.ext4
 # truncate -s 10GB /tmp/build/graph.ext4
