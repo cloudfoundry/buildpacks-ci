@@ -153,7 +153,7 @@ resources:
     type: new_version_resource
     source:
       url: http://www.ioncube.com/loaders.php
-      csspath: tr:contains("Linux (64 bits)") td:nth-of-type(6)
+      csspath: tr:contains("Linux (64 bits)") td:nth-of-type(5)
   - name: librdkafka
     type: new_version_resource
     source:
