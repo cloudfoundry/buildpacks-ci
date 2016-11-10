@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-set -e -x
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+set -x
 
 export IMAGE_ROOT="$PWD/image-root"
 

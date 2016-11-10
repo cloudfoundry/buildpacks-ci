@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-set -ex
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+set -x
 
 pushd gem
   bump patch

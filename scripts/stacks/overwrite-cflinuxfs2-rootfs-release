@@ -1,6 +1,8 @@
 #!/bin/bash
 
-set -e
+set -o errexit
+set -o nounset
+set -o pipefail
 
 echo "Overwriting BOSH release $ROOTFS_RELEASE"
 

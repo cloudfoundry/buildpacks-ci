@@ -1,6 +1,10 @@
 #!/bin/bash -l
 
-set -ex
+set -o errexit
+set -o nounset
+set -o pipefail
+
+set -x
 
 pushd binary-builder
   if [ -n "${RUBYGEM_MIRROR}" ]; then

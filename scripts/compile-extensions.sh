@@ -1,6 +1,8 @@
 #!/bin/bash
 
-set -e
+set -o errexit
+set -o nounset
+set -o pipefail
 
 echo "Using ruby version $(ruby -v)"
 cd compile-extensions

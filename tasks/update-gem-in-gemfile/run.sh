@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-set -ex
+set -o errexit
+set -o nounset
+set -o pipefail
+
+set -x
 
 GEM_VERSION=$(cat gem/version)
 NEW_VERSION_LINE="gem '$GEM_NAME', git: '$GEM_GIT_REPOSITORY', tag: 'v$GEM_VERSION'"
