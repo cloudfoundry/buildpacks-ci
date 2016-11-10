@@ -172,6 +172,8 @@ jobs: ##########################################################################
               AWS_ACCESS_KEY_ID: {{oracle-client-library-s3-download-access-key}}
               AWS_SECRET_ACCESS_KEY: {{oracle-client-library-s3-download-secret-key}}
               AWS_DEFAULT_REGION: us-east-1
+              ORACLE_LIBS_AWS_BUCKET: {{oracle-client-libs-s3-bucket}}
+              ORACLE_LIBS_FILENAME: {{oracle-client-libs-filename}}
             <% end %>
             privileged: true
           <% end %>
