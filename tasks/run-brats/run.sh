@@ -14,7 +14,7 @@ if [ -n "$CI_CF_PASSWORD" ]; then
   cf login -a "api.$DEPLOYMENT_NAME.$BOSH_LITE_DOMAIN_NAME" -u "$CI_CF_USERNAME" -p "$CI_CF_PASSWORD" -o pivotal -s integration --skip-ssl-validation
 fi
 
-if [ "$STACK" == "" ]; then
+if [ -z "${STACK-}" ]; then
   bundle exec rspec cf_spec/integration --tag language:"${LANGUAGE}"
 else
   bundle exec rspec -t "stack:$STACK" cf_spec/integration --tag language:"${LANGUAGE}"

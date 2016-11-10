@@ -5,6 +5,7 @@ require 'yaml'
 
 describe 'make-rootfs' do
   old_path = ENV['PATH']
+  old_rootfs_release = ENV['ROOTFS_RELEASE']
   ci_path = Dir.pwd
   test_path = File.join(ci_path, '/spec/scripts/stacks/overwrite-cflinuxfs2-rootfs-release')
   blobs_dir = File.join(test_path, 'cflinuxfs2-rootfs-release/blobs')
@@ -12,10 +13,12 @@ describe 'make-rootfs' do
 
   before(:context) do
     ENV['PATH'] = "#{test_path}:#{ENV['PATH']}"
+    ENV['ROOTFS_RELEASE'] = 'cflinuxfs2'
   end
 
   after(:context) do
     ENV['PATH'] = old_path
+    ENV['ROOTFS_RELEASE'] =  old_rootfs_release
   end
 
   RSpec.shared_examples 'creates_the_blob' do
