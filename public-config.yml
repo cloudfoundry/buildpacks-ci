@@ -26,5 +26,8 @@ deployments-git-uri: git@github.com:pivotal-cf/deployments-buildpacks
 current-timezone: America/New_York
 
 run-oracle-php-tests: true
+oracle-client-libs-s3-bucket: buildpacks-oracle-client-libs
+oracle-client-libs-filename: oracle_client_libs.tgz
+
 binary-builder-platform: x86_64
 binary-builder-os-name: GNU/Linux
