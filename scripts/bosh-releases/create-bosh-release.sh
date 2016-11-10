@@ -17,7 +17,10 @@ EOF
   fi
 
   rm -f config/blobs.yml
-  bosh -n add blob "../$BLOB_GLOB" "$BLOB_NAME"
+
+  # we actually want globbing here, so:
+  # shellcheck disable=SC2086
+  bosh -n add blob ../$BLOB_GLOB "$BLOB_NAME"
   bosh -n upload blobs
 
   git add config/blobs.yml
