@@ -1,5 +1,10 @@
 #!/bin/bash
-set -ex
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+set -x
 
 stacks_version=$(cat version/number)
 bosh_release_version=$(cat cflinuxfs2-rootfs-release-version/number)

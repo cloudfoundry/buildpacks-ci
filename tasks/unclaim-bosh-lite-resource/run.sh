@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-set -ex
+set -o errexit
+set -o nounset
+set -o pipefail
+
+set -x
 
 pushd resource-pools
   echo "Unclaiming $RESOURCE_NAME"

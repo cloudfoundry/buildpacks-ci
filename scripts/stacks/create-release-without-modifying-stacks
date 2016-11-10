@@ -1,6 +1,8 @@
 #!/bin/bash
 
-set -e
+set -o errexit
+set -o nounset
+set -o pipefail
 
 pushd cf-release
     bundle config mirror.https://rubygems.org "$RUBYGEM_MIRROR"

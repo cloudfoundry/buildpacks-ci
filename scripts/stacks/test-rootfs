@@ -1,6 +1,10 @@
 #!/bin/bash
 
-set -eux
+set -o errexit
+set -o nounset
+set -o pipefail
+
+set -x
 
 SUFFIX="${STACKS_SUFFIX-}"
 

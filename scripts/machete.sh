@@ -1,6 +1,8 @@
 #!/bin/bash -l
 
-set -e
+set -o errexit
+set -o nounset
+set -o pipefail
 
 DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$(cat cf-environments/name)}
 BOSH_LITE_DOMAIN_NAME=${BOSH_LITE_DOMAIN_NAME:-cf-app.com}

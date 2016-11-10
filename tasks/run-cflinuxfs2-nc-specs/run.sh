@@ -1,5 +1,8 @@
 #!/bin/bash -l
-set -e
+
+set -o errexit
+set -o nounset
+set -o pipefail
 
 BOSH_LITE_DOMAIN_NAME="${BOSH_LITE_DOMAIN_NAME:-cf-app.com}"
 

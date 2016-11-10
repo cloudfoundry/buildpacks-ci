@@ -1,6 +1,8 @@
 #!/bin/bash -l
 
-set -eu
+set -o errexit
+set -o nounset
+set -o pipefail
 
 SUFFIX="${ROOTFS_SUFFIX-}"
 
