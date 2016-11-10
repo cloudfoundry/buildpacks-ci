@@ -28,6 +28,7 @@ resources: #####################################################################
       ignore_paths:
         - VERSION
         - CHANGELOG
+        - "**/*.md"
 
   - name: buildpack-master
     type: git
