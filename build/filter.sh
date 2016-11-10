@@ -1,9 +1,5 @@
 #! /usr/bin/env bash
 
-set -o errexit
-set -o nounset
-set -o pipefail
-
 export CREDENTIAL_FILTER_WHITELIST="APPLICATION_NAME,\
 AZURE_BOSH_DIRECTOR_USER,\
 BASH_ENV,\
