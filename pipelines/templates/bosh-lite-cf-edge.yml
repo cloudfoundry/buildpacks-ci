@@ -83,7 +83,6 @@ jobs:
         - aggregate:
           - get: nightly-trigger
             trigger: true
-          - get: deployments-buildpacks
       - put: resource-pools
         params:
           claim: {{deployment-name}}
@@ -101,9 +100,11 @@ jobs:
         - aggregate:
           - get: buildpacks-ci
           - get: deployments-buildpacks
+          - get: resource-pools
+          - get: bosh-lite-resource
+            resource: resource-pools
             passed: [remove-environment]
             trigger: true
-          - get: resource-pools
         - task: check-if-bosh-lite-resource-exists
           file: buildpacks-ci/tasks/check-if-bosh-lite-resource-exists/task.yml
           params:
