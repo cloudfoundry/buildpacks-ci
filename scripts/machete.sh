@@ -14,7 +14,7 @@ popd
 host="$DEPLOYMENT_NAME.$BOSH_LITE_DOMAIN_NAME"
 pushd machete
   ./scripts/cf_login_and_setup "$host"
-  bundle config mirror.https://rubygems.org "$RUBYGEM_MIRROR"
+  bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
   bundle
   bundle exec rspec
 popd
