@@ -97,9 +97,13 @@ jobs:
         - aggregate:
           - get: buildpacks-ci
           - get: deployments-buildpacks
-          - get: resource-pools
             passed: [remove-environment]
             trigger: true
+          - get: resource-pools
+        - task: check-if-bosh-lite-resource-exists
+          file: buildpacks-ci/tasks/check-if-bosh-lite-resource-exists/task.yml
+          params:
+            DEPLOYMENT_NAME: {{deployment-name}}
         - task: recreate-bosh-lite
           file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
           params:
@@ -147,11 +151,16 @@ jobs:
             version: { version: {{cf-version}} }
           - get: diego-bosh-release
             version: { version: {{diego-version}} }
+          - get: resource-pools
         - aggregate:
           - task: cf-release-checkout
             file: buildpacks-ci/tasks/checkout-cf-release.yml
           - task: diego-release-checkout
             file: buildpacks-ci/tasks/checkout-diego-release.yml
+        - task: check-if-bosh-lite-resource-exists
+          file: buildpacks-ci/tasks/check-if-bosh-lite-resource-exists/task.yml
+          params:
+            DEPLOYMENT_NAME: {{deployment-name}}
         - task: generate-manifest
           file: buildpacks-ci/tasks/diego-make-manifest.yml
           params:
@@ -192,6 +201,11 @@ jobs:
           - get: bosh-stemcell
           - get: cf-bosh-release
             version: { version: {{cf-version}} }
+          - get: resource-pools
+        - task: check-if-bosh-lite-resource-exists
+          file: buildpacks-ci/tasks/check-if-bosh-lite-resource-exists/task.yml
+          params:
+            DEPLOYMENT_NAME: {{deployment-name}}
         - put: cf-deployment
           params:
             manifest: {{cf-manifest-location}}
@@ -216,6 +230,11 @@ jobs:
             version: {version: {{garden-linux-version}}}
           - get: etcd-bosh-release
             version: {version: {{etcd-version}}}
+          - get: resource-pools
+        - task: check-if-bosh-lite-resource-exists
+          file: buildpacks-ci/tasks/check-if-bosh-lite-resource-exists/task.yml
+          params:
+            DEPLOYMENT_NAME: {{deployment-name}}
         - put: diego-deployment
           params:
             manifest: {{diego-manifest-location}}
@@ -236,6 +255,11 @@ jobs:
             passed: ['deploy-diego']
             trigger: true
           - get: machete
+          - get: resource-pools
+        - task: check-if-bosh-lite-resource-exists
+          file: buildpacks-ci/tasks/check-if-bosh-lite-resource-exists/task.yml
+          params:
+            DEPLOYMENT_NAME: {{deployment-name}}
         - task: configure-deployment
           file: buildpacks-ci/tasks/machete-configure-deployment.yml
           params:
@@ -249,10 +273,17 @@ jobs:
     serial: true
     public: true
     plan:
-      - get: buildpacks-ci
-      - get: deployments-buildpacks
-        passed: ['update-machete']
-        trigger: true
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: deployments-buildpacks
+            passed: ['update-machete']
+            trigger: true
+          - get: resource-pools
+      - task: check-if-bosh-lite-resource-exists
+        file: buildpacks-ci/tasks/check-if-bosh-lite-resource-exists/task.yml
+        params:
+          DEPLOYMENT_NAME: {{deployment-name}}
       - task: write-bosh-lite-resource-metadata
         file: buildpacks-ci/tasks/write-bosh-lite-resource-metadata/task.yml
         params:

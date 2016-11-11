@@ -2,8 +2,9 @@
 require 'yaml'
 require 'json'
 require 'spec_helper'
+require 'tmpdir'
+require 'fileutils'
 require_relative '../../lib/state-of-bosh-lites'
-
 
 describe StateOfBoshLites do
   let(:environments) {%w(edge-1.buildpacks.ci edge-2.buildpacks.ci lts-1.buildpacks.ci lts-2.buildpacks.ci)}
@@ -14,33 +15,58 @@ describe StateOfBoshLites do
     allow(GitClient).to receive(:get_current_branch)
   end
 
+  subject { described_class.new }
+
   describe '#get_states!' do
-    subject { described_class.new }
+    context 'using git' do
+      before(:each) do
+        allow(GitClient).to receive(:get_current_branch).and_return('develop')
+        allow(subject).to receive(:get_environment_status).and_return( {'claimed' => true, 'job' => 'php-buildpack/specs-develop build 13'} )
+      end
 
-    before(:each) do
-      allow(GitClient).to receive(:get_current_branch).and_return('develop')
-      allow(subject).to receive(:get_environment_status).and_return( {'claimed' => true, 'job' => 'php-buildpack/specs-develop build 13'} )
+      it 'switches to the resource-pools branch and back' do
+        subject.get_states!
+
+        expect(GitClient).to have_received(:checkout_branch).with('resource-pools')
+        expect(GitClient).to have_received(:checkout_branch).with('develop')
+      end
+
+      it 'gets the status of all the environments' do
+        subject.get_states!
+
+        environments.each do |env|
+          expect(subject).to have_received(:get_environment_status).with(env)
+        end
+      end
     end
 
-    it 'switches to the resource-pools branch and back' do
-      subject.get_states!
+    context 'using a separate resource pools directory' do
+      let(:resource_pools_dir) { Dir.mktmpdir }
 
-      expect(GitClient).to have_received(:checkout_branch).with('resource-pools')
-      expect(GitClient).to have_received(:checkout_branch).with('develop')
-    end
+      before do
+        allow(Dir).to receive(:chdir).and_call_original
+        allow(subject).to receive(:get_environment_status).and_return( {'claimed' => true, 'job' => 'php-buildpack/specs-develop build 13'} )
+      end
 
-    it 'gets the status of all the environments' do
-      subject.get_states!
+      after { FileUtils.rm_rf(resource_pools_dir) }
 
-      environments.each do |env|
-        expect(subject).to have_received(:get_environment_status).with(env)
+      it 'navigates into the resource pools directory' do
+        expect(Dir).to receive(:chdir).with(resource_pools_dir)
+
+        subject.get_states!(resource_pools_dir: resource_pools_dir)
+      end
+
+      it 'gets the status of all the environments' do
+        subject.get_states!(resource_pools_dir: resource_pools_dir)
+
+        environments.each do |env|
+          expect(subject).to have_received(:get_environment_status).with(env)
+        end
       end
     end
   end
 
   describe '#get_environment_status' do
-    subject { described_class.new }
-
     let(:list_of_commits) do
       commits = <<~HEREDOC
                    011826f brats/brats-nodejs-lts build 21 unclaiming: lts-1.buildpacks.ci
@@ -94,6 +120,28 @@ describe StateOfBoshLites do
 
       it 'is failing' do
         expect(subject.get_environment_status('lts-1.buildpacks.ci')).to be_nil
+      end
+    end
+  end
+
+  describe '#bosh_lite_in_pool?' do
+    let(:deployment_id) { 'lts-1.buildpacks.ci' }
+
+    before { allow(subject).to receive(:state_of_environments).and_return(state_of_environments) }
+
+    context 'bosh lite is not in resource pool' do
+      let(:state_of_environments) { [{ 'name' => 'lts-1.buildpacks.ci', 'status' => nil }] }
+
+      it 'returns false' do
+        expect(subject.bosh_lite_in_pool?(deployment_id)).to be_falsey
+      end
+    end
+
+    context 'bosh lite is in resource pool' do
+      let(:state_of_environments) { [{ 'name' => 'lts-1.buildpacks.ci', 'status' => {'claimed' => true, 'job' => 'job'} }] }
+
+      it 'returns true' do
+        expect(subject.bosh_lite_in_pool?(deployment_id)).to be_truthy
       end
     end
   end
