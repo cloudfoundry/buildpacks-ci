@@ -29,9 +29,8 @@ class StateOfBoshLites
       return nil
     end
 
-
     #find which job claimed / unclaimed the environment
-    recent_commits = GitClient.get_list_of_one_line_commits(Dir.pwd,500)
+    recent_commits = GitClient.get_list_of_one_line_commits(Dir.pwd, 500)
 
     most_recent_commit = recent_commits.select do |commit|
       commit.match regex
@@ -72,22 +71,38 @@ class StateOfBoshLites
     end
   end
 
-  def get_states!
-    buildpacks_ci_dir = File.join(File.dirname(__FILE__), '..')
+  def get_states!(resource_pools_dir: nil)
+    if resource_pools_dir.nil?
+      buildpacks_ci_dir = File.join(File.dirname(__FILE__), '..')
 
-    Dir.chdir(buildpacks_ci_dir) do
-      current_branch = GitClient.get_current_branch(Dir.pwd)
+      Dir.chdir(buildpacks_ci_dir) do
+        current_branch = GitClient.get_current_branch(Dir.pwd)
 
-      begin
-        GitClient.checkout_branch('resource-pools')
-        GitClient.pull_current_branch
-
-        environment_names.each do |env|
-          state_of_environments.push({'name' => env, 'status' => get_environment_status(env)})
+        begin
+          GitClient.checkout_branch('resource-pools')
+          GitClient.pull_current_branch
+          get_all_environment_statuses
+        ensure
+          GitClient.checkout_branch(current_branch)
         end
-      ensure
-        GitClient.checkout_branch(current_branch)
       end
+    else
+      Dir.chdir(resource_pools_dir) do
+        get_all_environment_statuses
+      end
+    end
+  end
+
+  def bosh_lite_in_pool?(deployment_id)
+    bosh_lite_env = state_of_environments.find {|env| deployment_id == env['name'] }
+    !bosh_lite_env['status'].nil?
+  end
+
+  private
+
+  def get_all_environment_statuses
+    environment_names.each do |env|
+      state_of_environments.push({'name' => env, 'status' => get_environment_status(env)})
     end
   end
 end
