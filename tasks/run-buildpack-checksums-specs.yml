@@ -15,8 +15,8 @@ run:
       cd buildpack-checksums
       if [ -n "${RUBYGEM_MIRROR}" ]; then
         gem sources --clear-all --add "${RUBYGEM_MIRROR}"
+        bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
       fi
-      bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
       bundle
       bundle exec rspec
 params:

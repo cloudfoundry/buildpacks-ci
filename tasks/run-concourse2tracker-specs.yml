@@ -12,7 +12,9 @@ run:
     - -c
     - |
       cd concourse2tracker-source/lib/concourse2tracker-resource
-      bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
+      if [ ! -z "$RUBYGEM_MIRROR" ]; then
+        bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
+      fi
       bundle
       bundle exec rspec
 params:

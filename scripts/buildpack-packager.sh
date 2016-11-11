@@ -5,6 +5,10 @@ set -o nounset
 set -o pipefail
 
 cd buildpack-packager
-bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
+
+if [ ! -z "$RUBYGEM_MIRROR" ]; then
+  bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
+fi
+
 bundle
 bundle exec rspec spec/
