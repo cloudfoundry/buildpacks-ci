@@ -6,7 +6,7 @@ set -o pipefail
 
 pushd buildpack-master
   export BUNDLE_GEMFILE=cf.Gemfile
-  bundle config mirror.https://rubygems.org "$RUBYGEM_MIRROR"
+  bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
   bundle install
   bundle exec buildpack-packager --cached
 

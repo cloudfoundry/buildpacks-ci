@@ -12,7 +12,7 @@ run:
     - -c
     - |
       cd concourse2tracker-source/lib/concourse2tracker-resource
-      bundle config mirror.https://rubygems.org ${RUBYGEM_MIRROR}
+      bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
       bundle
       bundle exec rspec
 params:
