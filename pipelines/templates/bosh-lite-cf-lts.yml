@@ -73,7 +73,7 @@ resources:
       name: bosh-warden-boshlite-ubuntu-trusty-go_agent
 
 jobs:
-  - name: checkout-environment
+  - name: remove-environment
     serial_groups: [ deploy ]
     serial: true
     public: true
@@ -82,7 +82,7 @@ jobs:
         trigger: true
       - put: resource-pools
         params:
-          claim: {{deployment-name}}
+          remove: {{deployment-name}}
         timeout: 3h
   - name: recreate-bosh-lite
     serial_groups: [ deploy ]
@@ -94,7 +94,7 @@ jobs:
           - get: buildpacks-ci
           - get: deployments-buildpacks
           - get: resource-pools
-            passed: [checkout-environment]
+            passed: [remove-environment]
             trigger: true
         - task: recreate-bosh-lite
           file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
@@ -127,11 +127,6 @@ jobs:
             params:
               repository: deployments-buildpacks-artifacts
               rebase: true
-        on_failure:
-          put: resource-pools
-          params:
-            release: resource-pools
-        attempts: 5
   - name: generate-manifest
     serial_groups: [ deploy ]
     serial: true
@@ -140,9 +135,6 @@ jobs:
       - do:
         - aggregate:
           - get: deployments-buildpacks
-            passed: ['recreate-bosh-lite']
-            trigger: true
-          - get: resource-pools
             passed: ['recreate-bosh-lite']
             trigger: true
           - get: buildpacks-ci
@@ -181,10 +173,6 @@ jobs:
           params:
             repository: generate-manifest-artifacts
             rebase: true
-        on_failure:
-          put: resource-pools
-          params:
-            release: resource-pools
   - name: deploy-cf
     serial_groups: [ deploy ]
     serial: true
@@ -193,9 +181,6 @@ jobs:
       - do:
         - aggregate:
           - get: deployments-buildpacks
-            passed: ['generate-manifest']
-            trigger: true
-          - get: resource-pools
             passed: ['generate-manifest']
             trigger: true
           - get: bosh-lite
@@ -209,10 +194,6 @@ jobs:
             stemcells: ['bosh-stemcell/stemcell.tgz']
             releases:
               - cf-bosh-release/release.tgz
-        on_failure:
-          put: resource-pools
-          params:
-            release: resource-pools
   - name: deploy-diego
     serial_groups: [ deploy ]
     serial: true
@@ -221,9 +202,6 @@ jobs:
       - do:
         - aggregate:
           - get: deployments-buildpacks
-            passed: ['deploy-cf']
-            trigger: true
-          - get: resource-pools
             passed: ['deploy-cf']
             trigger: true
           - get: buildpacks-ci
@@ -242,10 +220,6 @@ jobs:
               - diego-bosh-release/release.tgz
               - garden-linux-bosh-release/release.tgz
               - etcd-bosh-release/release.tgz
-        on_failure:
-          put: resource-pools
-          params:
-            release: resource-pools
   - name: update-machete
     serial_groups: [ deploy ]
     serial: true
@@ -257,9 +231,6 @@ jobs:
           - get: deployments-buildpacks
             passed: ['deploy-diego']
             trigger: true
-          - get: resource-pools
-            passed: ['deploy-diego']
-            trigger: true
           - get: machete
         - task: configure-deployment
           file: buildpacks-ci/tasks/machete-configure-deployment.yml
@@ -269,19 +240,15 @@ jobs:
             CI_CF_PASSWORD: {{ci-cf-password}}
             CI_CF_USERNAME: {{ci-cf-username}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-        on_failure:
-          put: resource-pools
-          params:
-            release: resource-pools
-  - name: unclaim
+  - name: restore-environment
     serial_groups: [ deploy ]
     serial: true
     public: true
     plan:
       - get: buildpacks-ci
-      - get: resource-pools
-        passed: [ update-machete ]
+      - get: deployments-buildpacks
+        passed: ['update-machete']
         trigger: true
       - put: resource-pools
         params:
-          release: resource-pools
+          add: {{deployment-name}}
