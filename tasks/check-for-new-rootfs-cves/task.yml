@@ -22,7 +22,7 @@ run:
       git clone ./new-cves ./output-new-cves && \
       git clone ./new-buildpack-cves ./output-new-buildpack-cves && \
       cd buildpacks-ci/ && \
-      bundle exec ./scripts/notifications/check-cves
+      bundle exec ./tasks/check-for-new-rootfs-cves/run.rb
 params:
   SLACK_CHANNEL:
   SLACK_WEBHOOK:
