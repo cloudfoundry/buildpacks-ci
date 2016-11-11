@@ -14,7 +14,6 @@ if state_object.bosh_lite_in_pool?(deployment_id)
   puts "=========================================================================="
   puts "WARNING:"
   puts "You should trigger the #{bosh_lite_name} pipeline from the very beginning."
-  puts "You should not be trying to re-run intermediate deploy/setup steps on an already \
-        functional BOSH Lite with CF and Diego successfully deployed to it."
+  puts "You should not be trying to re-run intermediate deploy/setup steps on an already functional BOSH Lite with CF and Diego successfully deployed to it."
   exit 1
 end
