@@ -19,10 +19,11 @@ run:
     - -c
     - |
       set -e
-      git clone ./new-cves ./output-new-cves && \
-      git clone ./new-buildpack-cves ./output-new-buildpack-cves && \
-      cd buildpacks-ci/ && \
-      bundle exec ./tasks/check-for-new-rootfs-cves/run.rb
+      rsync -a new-cves/ output-new-cves
+      rsync -a new-buildpack-cves/ output-new-buildpack-cves
+
+      cd buildpacks-ci && bundle exec ./tasks/check-for-new-rootfs-cves/run.rb
+
 params:
   SLACK_CHANNEL:
   SLACK_WEBHOOK:
