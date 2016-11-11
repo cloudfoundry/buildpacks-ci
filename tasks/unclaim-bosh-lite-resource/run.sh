@@ -19,7 +19,7 @@ pushd resource-pools
     fi
   else
     echo "$RESOURCE_NAME does not currently exist in pool"
-    exit 1
+    git mv "$RESOURCE_TYPE/claimed/$RESOURCE_NAME" "$RESOURCE_TYPE/unclaimed/"
   fi
 popd
 
