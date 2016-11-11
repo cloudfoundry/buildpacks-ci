@@ -78,8 +78,11 @@ jobs:
     serial: true
     public: true
     plan:
-      - get: nightly-trigger
-        trigger: true
+      - do:
+        - aggregate:
+          - get: nightly-trigger
+            trigger: true
+          - get: deployments-buildpacks
       - put: resource-pools
         params:
           claim: {{deployment-name}}
