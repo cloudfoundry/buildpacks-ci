@@ -82,7 +82,11 @@ jobs:
         trigger: true
       - put: resource-pools
         params:
-          remove: {{deployment-name}}
+          claim: {{deployment-name}}
+        timeout: 3h
+      - put: resource-pools
+        params:
+          remove: resource-pools
         timeout: 3h
   - name: recreate-bosh-lite
     serial_groups: [ deploy ]
@@ -249,6 +253,10 @@ jobs:
       - get: deployments-buildpacks
         passed: ['update-machete']
         trigger: true
+      - task: write-bosh-lite-resource-metadata
+        file: buildpacks-ci/tasks/write-bosh-lite-resource-metadata/task.yml
+        params:
+          DEPLOYMENT_NAME: {{deployment-name}}
       - put: resource-pools
         params:
-          add: {{deployment-name}}
+          add: new-bosh-lite-resource
