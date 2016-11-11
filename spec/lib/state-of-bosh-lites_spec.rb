@@ -37,7 +37,7 @@ describe StateOfBoshLites do
       end
     end
   end
-  
+
   describe '#get_environment_status' do
     subject { described_class.new }
 
@@ -82,6 +82,18 @@ describe StateOfBoshLites do
         state = subject.get_environment_status('lts-1.buildpacks.ci')
         expect(state['claimed']).to eq true
         expect(state['job']).to eq 'brats/brats-nodejs-lts build 21'
+      end
+    end
+
+    context 'the environment does not currently exist' do
+      before(:each) do
+        allow(GitClient).to receive(:get_list_of_one_line_commits).and_return(list_of_commits)
+        allow(File).to receive(:exist?).with('cf-lts-environments/claimed/lts-1.buildpacks.ci').and_return(false)
+        allow(File).to receive(:exist?).with('cf-lts-environments/unclaimed/lts-1.buildpacks.ci').and_return(false)
+      end
+
+      it 'is failing' do
+        expect(subject.get_environment_status('lts-1.buildpacks.ci')).to be_nil
       end
     end
   end

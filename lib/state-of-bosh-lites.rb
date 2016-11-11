@@ -26,8 +26,9 @@ class StateOfBoshLites
       claimed = false
       regex = / (.*) unclaiming: #{environment}/
     else
-      raise "Unable to determine status of environment #{environment}"
+      return nil
     end
+
 
     #find which job claimed / unclaimed the environment
     recent_commits = GitClient.get_list_of_one_line_commits(Dir.pwd,500)
@@ -54,15 +55,19 @@ class StateOfBoshLites
       puts state_of_environments.to_yaml
     elsif output_type == 'text'
       state_of_environments.each do |env|
-        if env['status']['claimed']
-          # escape sequence colors red
-          env_status = "\e[31mclaimed\e[0m"
+        if env['status'].nil?
+          # escape sequence colors yellow
+          puts "#{env['name']}: \n  \e[33mDoes not currently exist in pool\e[0m"
         else
-          # colors green
-          env_status = "\e[32munclaimed\e[0m"
+          if env['status']['claimed']
+            # escape sequence colors red
+            env_status = "\e[31mclaimed\e[0m"
+          else
+            # colors green
+            env_status = "\e[32munclaimed\e[0m"
+          end
+          puts "#{env['name']}: \n  #{env_status} by job: #{env['status']['job']}"
         end
-
-        puts "#{env['name']}: \n  #{env_status} by job: #{env['status']['job']}"
       end
     end
   end
@@ -73,14 +78,16 @@ class StateOfBoshLites
     Dir.chdir(buildpacks_ci_dir) do
       current_branch = GitClient.get_current_branch(Dir.pwd)
 
-      GitClient.checkout_branch('resource-pools')
-      GitClient.pull_current_branch
+      begin
+        GitClient.checkout_branch('resource-pools')
+        GitClient.pull_current_branch
 
-      environment_names.each do |env|
-        state_of_environments.push({'name' => env, 'status' => get_environment_status(env)})
+        environment_names.each do |env|
+          state_of_environments.push({'name' => env, 'status' => get_environment_status(env)})
+        end
+      ensure
+        GitClient.checkout_branch(current_branch)
       end
-
-      GitClient.checkout_branch(current_branch)
     end
   end
 end
