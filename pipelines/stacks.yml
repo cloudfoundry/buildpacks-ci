@@ -238,62 +238,23 @@ jobs: ##########################################################################
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
           TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
 
-  - name: recreate-bosh-lite
-    serial: true
-    serial_groups:
-      - stacks
-    public: true
-    plan:
-      - aggregate:
-        - get: deployments-buildpacks
-        - get: monday-funday
-          passed: [ "notification" ]
-          trigger: true
-        - get: buildpacks-ci
-        - get: new-cves
-          trigger: true
-      - task: recreate-bosh-lite
-        file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
-        params:
-          DEPLOYMENT_NAME: stacks.buildpacks.ci
-          BOSH_PRIVATE_KEY: {{bosh_private_key}}
-          BOSH_USER: {{bosh_user}}
-          BOSH_PASSWORD: {{bosh_password}}
-          AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-          AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-          BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-          BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-          BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
-          BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
-          BOSH_LITE_DISK_SIZE: 100
-          BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
-          BOSH_TARGET: stacks.buildpacks.ci.cf-app.com
-          BOSH_LITE_NAME: stacks.buildpacks.ci
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-        attempts: 5
-        ensure:
-          put: deployments-buildpacks
-          params:
-            repository: deployments-buildpacks-artifacts
-            rebase: true
-
   - name: build-rootfs
     serial: true
+    serial_groups: [ stacks ]
     public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: deployments-buildpacks
-          passed: [ "recreate-bosh-lite" ]
-          trigger: true
-      - aggregate:
         - get: new-cves
-          passed: [ recreate-bosh-lite ]
+          trigger: true
         - get: stacks
         - get: version
           params: { pre: rc }
         - get: cflinuxfs2-rootfs-release-version
           params: { pre: rc }
+        - get: monday-funday
+          passed: [ "notification" ]
+          trigger: true
       - do:
         - task: make-rootfs
           file: buildpacks-ci/tasks/make-rootfs.yml
@@ -321,34 +282,80 @@ jobs: ##########################################################################
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
+  - name: recreate-bosh-lite
+    serial: true
+    serial_groups: [ stacks ]
+    public: true
+    plan:
+      - aggregate:
+        - get: deployments-buildpacks
+        - get: buildpacks-ci
+        - get: new-cves
+          passed: [ build-rootfs ]
+        - get: stack-s3
+          passed: [ build-rootfs ]
+        - get: version
+          passed: [ build-rootfs ]
+        - get: cflinuxfs2-rootfs-release-version
+          passed: [ build-rootfs ]
+        - get: receipt-s3
+          passed: [ build-rootfs ]
+          trigger: true
+        - get: stacks
+          passed: [ build-rootfs ]
+      - task: recreate-bosh-lite
+        file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
+        params:
+          DEPLOYMENT_NAME: stacks.buildpacks.ci
+          BOSH_PRIVATE_KEY: {{bosh_private_key}}
+          BOSH_USER: {{bosh_user}}
+          BOSH_PASSWORD: {{bosh_password}}
+          AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+          AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+          BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+          BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+          BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
+          BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
+          BOSH_LITE_DISK_SIZE: 100
+          BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
+          BOSH_TARGET: stacks.buildpacks.ci.cf-app.com
+          BOSH_LITE_NAME: stacks.buildpacks.ci
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
+        attempts: 5
+        ensure:
+          put: deployments-buildpacks
+          params:
+            repository: deployments-buildpacks-artifacts
+            rebase: true
+
   - name: generate-stacks-manifests
     serial: true
     serial_groups: [ stacks ]
     public: true
     plan:
       - aggregate:
-        - get: new-cves
-          passed: [ build-rootfs ]
-        - get: deployments-buildpacks
-          passed: [ build-rootfs ]
-        - get: bosh-lite
         - get: buildpacks-ci
+        - get: bosh-lite
         - get: cf-release
           resource: cf-release-rc
         - get: diego-release
         - get: cflinuxfs2-rootfs-release
         - get: lite-stemcell
+        - get: new-cves
+          passed: [ recreate-bosh-lite ]
+        - get: deployments-buildpacks
+          passed: [ recreate-bosh-lite ]
         - get: stack-s3
-          passed: [ build-rootfs ]
+          passed: [ recreate-bosh-lite ]
         - get: version
-          passed: [ build-rootfs ]
+          passed: [ recreate-bosh-lite ]
           trigger: true
         - get: cflinuxfs2-rootfs-release-version
-          passed: [ build-rootfs ]
+          passed: [ recreate-bosh-lite ]
         - get: receipt-s3
-          passed: [ build-rootfs ]
+          passed: [ recreate-bosh-lite ]
         - get: stacks
-          passed: [ build-rootfs ]
+          passed: [ recreate-bosh-lite ]
       - do:
         - task: generate-rootfs-smoke-test-manifest
           file: buildpacks-ci/tasks/make-rootfs-smoke-test-manifest.yml
@@ -604,8 +611,7 @@ jobs: ##########################################################################
 
   - name: destroy-bosh-lite
     serial: true
-    serial_groups:
-      - stacks
+    serial_groups: [ stacks ]
     public: true
     plan:
       - aggregate:
