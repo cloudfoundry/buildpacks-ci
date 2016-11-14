@@ -39,7 +39,7 @@ resources: #####################################################################
     type: git
     source:
       uri: {{buildpacks-ci-git-uri}}
-      branch: new-cve-notifications
+      branch: new-cves-stacks-nc
       private_key: {{buildpacks-ci-private-key}}
       paths: [ ubuntu14.04.yaml ]
 
@@ -158,6 +158,24 @@ resources: #####################################################################
     source:
       name: bosh-warden-boshlite-ubuntu-trusty-go_agent
 
+  ## Github Release ##
+
+  - name: stack-github-release-drafts
+    type: github-release
+    source:
+      drafts: true
+      user: pivotal-cf
+      repository: stacks-nc
+      access_token: {{buildpacks-github-token}}
+
+  - name: stack-github-release-final
+    type: github-release
+    source:
+      drafts: false
+      user: pivotal-cf
+      repository: stacks-nc
+      access_token: {{buildpacks-github-token}}
+
   ## Semver Versions ##
 
   - name: version
@@ -258,6 +276,8 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: new-cves
+          passed: [ "recreate-bosh-lite" ]
         - get: deployments-buildpacks
           passed: [ "recreate-bosh-lite" ]
           trigger: true
@@ -296,6 +316,8 @@ jobs: ##########################################################################
     serial_groups: [ stacks ]
     plan:
       - aggregate:
+        - get: new-cves
+          passed: [ "build-rootfs" ]
         - get: deployments-buildpacks
           passed: [ "build-rootfs" ]
         - get: bosh-lite
@@ -369,6 +391,8 @@ jobs: ##########################################################################
       - aggregate:
         - get: lite-stemcell
         - get: buildpacks-ci
+        - get: new-cves
+          passed: [ 'generate-stacks-manifests' ]
         - get: deployments-buildpacks
           passed: [ 'generate-stacks-manifests' ]
         - get: cf-release
@@ -430,6 +454,8 @@ jobs: ##########################################################################
       - aggregate:
         - get: lite-stemcell
         - get: buildpacks-ci
+        - get: new-cves
+          passed: [ deploy-rootfs-to-stacks-nc ]
         - get: deployments-buildpacks
           passed: [ deploy-rootfs-to-stacks-nc ]
         - get: cf-release
@@ -473,6 +499,8 @@ jobs: ##########################################################################
         - get: lite-stemcell
         - get: garden-runc-bosh-release
         - get: diego-bosh-release
+        - get: new-cves
+          passed: [ deploy-cf-to-stacks-nc ]
         - get: deployments-buildpacks
           passed: [ deploy-cf-to-stacks-nc ]
           trigger: true
@@ -509,6 +537,8 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: new-cves
+          passed: [ deploy-diego-to-stacks-nc ]
         - get: deployments-buildpacks
           passed: [ deploy-diego-to-stacks-nc ]
         - get: stack-s3
@@ -544,6 +574,8 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: new-cves
+          passed: [ cflinuxfs2-nc-specs ]
         - get: deployments-buildpacks
           passed: [ cflinuxfs2-nc-specs ]
           trigger: true
@@ -615,6 +647,8 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: new-cves
+          passed: [ cats ]
         - get: stack-s3
           passed: [ cats ]
         - get: receipt-s3
@@ -650,6 +684,47 @@ jobs: ##########################################################################
           params: { file: version/number }
         - put: cflinuxfs2-rootfs-release-version
           params: { file: cflinuxfs2-rootfs-release-version/number }
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: upload-to-github
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: previous-stacks-release
+          resource: stack-github-release-final
+        - get: stacks
+          passed: [ shipit ]
+        - get: new-cves
+          passed: [ shipit ]
+        - get: stack-s3
+          passed: [ shipit ]
+        - get: version
+          trigger: true
+          passed: [ shipit ]
+      - do:
+        - task: generate-release-notes
+          file: buildpacks-ci/tasks/generate-stacks-release-notes/task.yml
+          params:
+            STACK: stacks-nc
+        - put: stack-github-release-drafts
+          params:
+            name: version/number
+            tag: version/number
+            body: release-body/body
+            globs:
+              - stack-s3/cflinuxfs2-*.tar.gz
+        - put: new-cves
+          params:
+            repository: new-cves-artifacts
+            rebase: true
         on_failure:
           put: failure-alert
           params:
