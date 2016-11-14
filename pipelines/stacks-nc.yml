@@ -247,12 +247,6 @@ jobs: ##########################################################################
         - get: monday-funday
           passed: [ "notification" ]
           trigger: true
-      - aggregate:
-        - get: stacks
-        - get: version
-          params: { pre: rc }
-        - get: cflinuxfs2-rootfs-release-version
-          params: { pre: rc }
       - do:
         - task: make-rootfs
           file: buildpacks-ci/tasks/make-rootfs.yml
