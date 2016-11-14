@@ -1,0 +1,50 @@
+---
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
+resources:
+  - name: check-interval
+    type: cron
+    source:
+      expression: "0 * * * *"
+      location: {{current-timezone}}
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
+  - name: new-cves
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri}}
+      branch: new-cves-stacks-nc
+      private_key: {{buildpacks-ci-private-key}}
+  - name: stacks
+    type: git
+    source:
+      uri: https://github.com/pivotal-cf/stacks-nc
+      branch: master
+
+jobs:
+  - name: New CVEs
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: new-cves
+        - get: new-buildpack-cves
+        - get: stacks
+        - get: check-interval
+          trigger: true
+      - task: check-for-new-rootfs-cves
+        file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
+        params:
+          STACK: stacks-nc
+      - put: new-cves
+        params:
+          repository: output-new-cves
+          rebase: true

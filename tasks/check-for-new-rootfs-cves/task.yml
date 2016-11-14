@@ -25,6 +25,7 @@ run:
       cd buildpacks-ci && bundle exec ./tasks/check-for-new-rootfs-cves/run.rb
 
 params:
+  STACK:
   SLACK_CHANNEL:
   SLACK_WEBHOOK:
   GITHUB_USERNAME:
