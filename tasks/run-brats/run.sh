@@ -21,4 +21,4 @@ pushd brats
   else
     bundle exec rspec -t "stack:$STACK" cf_spec/integration --tag language:"${LANGUAGE}"
   fi
-popd brats
+popd
