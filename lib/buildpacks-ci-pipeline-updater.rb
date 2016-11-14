@@ -113,7 +113,7 @@ class BuildpacksCIPipelineUpdater
   end
 
   def get_cf_version_from_deployment_name(deployment_name)
-    matches = /(lts|edge)\-\d+(\-azure)?/.match(deployment_name)
+    matches = /(lts|edge)\-\d+/.match(deployment_name)
     if matches.nil?
       raise 'Your config/bosh-lite/*.yml files must be named in the following manner: edge-1.yml, edge-2.yml, lts-1.yml, lts-2.yml, etc.'
     end
