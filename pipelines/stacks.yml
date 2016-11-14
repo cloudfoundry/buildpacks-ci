@@ -171,10 +171,18 @@ resources: #####################################################################
 
   ## Github Release ##
 
-  - name: stack-github-release
+  - name: stack-github-release-drafts
     type: github-release
     source:
       drafts: true
+      user: {{buildpacks-github-org}}
+      repository: stacks
+      access_token: {{buildpacks-github-token}}
+
+  - name: stack-github-release-final
+    type: github-release
+    source:
+      drafts: false
       user: {{buildpacks-github-org}}
       repository: stacks
       access_token: {{buildpacks-github-token}}
@@ -279,6 +287,8 @@ jobs: ##########################################################################
           passed: [ "recreate-bosh-lite" ]
           trigger: true
       - aggregate:
+        - get: new-cves
+          passed: [ recreate-bosh-lite ]
         - get: stacks
         - get: version
           params: { pre: rc }
@@ -317,8 +327,10 @@ jobs: ##########################################################################
     public: true
     plan:
       - aggregate:
+        - get: new-cves
+          passed: [ build-rootfs ]
         - get: deployments-buildpacks
-          passed: [ "build-rootfs" ]
+          passed: [ build-rootfs ]
         - get: bosh-lite
         - get: buildpacks-ci
         - get: cf-release
@@ -394,6 +406,8 @@ jobs: ##########################################################################
       - aggregate:
         - get: lite-stemcell
         - get: buildpacks-ci
+        - get: new-cves
+          passed: [ 'generate-stacks-manifests' ]
         - get: deployments-buildpacks
           passed: [ 'generate-stacks-manifests' ]
         - get: cf-release
@@ -456,6 +470,8 @@ jobs: ##########################################################################
       - aggregate:
         - get: lite-stemcell
         - get: buildpacks-ci
+        - get: new-cves
+          passed: [ 'deploy-rootfs-to-stacks' ]
         - get: deployments-buildpacks
           passed: [ 'deploy-rootfs-to-stacks' ]
         - get: cf-release
@@ -500,6 +516,8 @@ jobs: ##########################################################################
         - get: lite-stemcell
         - get: garden-runc-bosh-release
         - get: diego-bosh-release
+        - get: new-cves
+          passed: ['deploy-cf-to-stacks']
         - get: deployments-buildpacks
           passed: ['deploy-cf-to-stacks']
           trigger: true
@@ -537,6 +555,8 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: new-cves
+          passed: ['deploy-diego-to-stacks']
         - get: deployments-buildpacks
           passed: ['deploy-diego-to-stacks']
           trigger: true
@@ -610,6 +630,8 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: new-cves
+          passed: [ 'cats' ]
         - get: stack-s3
           passed:
             - cats
@@ -675,18 +697,34 @@ jobs: ##########################################################################
     public: true
     plan:
       - aggregate:
+        - get: buildpacks-ci
+        - get: previous-stacks-release
+          resource: stack-github-release-final
+        - get: stacks
+          passed: [ shipit ]
+        - get: new-cves
+          passed: [ shipit ]
         - get: stack-s3
           passed: [ shipit ]
         - get: version
           trigger: true
           passed: [ shipit ]
       - do:
-        - put: stack-github-release
+        - task: generate-release-notes
+          file: buildpacks-ci/tasks/generate-stacks-release-notes/task.yml
+          params:
+            STACK: stacks
+        - put: stack-github-release-drafts
           params:
             name: version/number
             tag: version/number
+            body: release-body/body
             globs:
               - stack-s3/cflinuxfs2-*.tar.gz
+        - put: new-cves
+          params:
+            repository: new-cves-artifacts
+            rebase: true
         on_failure:
           put: failure-alert
           params:
