@@ -24,14 +24,16 @@ class ReleaseNotesCreator
   end
 
   def release_notes
-    text = "Notably, this release addresses:\n\n"
-    text += usn_release_notes_section + "\n"
+    text = ""
+    text += usn_release_notes_section + "\n" unless unreleased_usns.count == 0
     text += receipt_diff_section
     text
   end
 
   def usn_release_notes_section
     text = ""
+    text = "Notably, this release addresses:\n\n" unless unreleased_usns.count == 0
+
     unreleased_usns.each do |usn|
       text += UsnReleaseNotes.new(usn).text + "\n\n"
     end

@@ -132,6 +132,7 @@ USN-3119-1 with cve information
   describe '#usn_release_notes_section' do
     context 'there are unaddressed CVEs' do
       it 'returns the usn descriptions' do
+        expect(subject.usn_release_notes_section).to include 'Notably, this release addresses:'
         expect(subject.usn_release_notes_section).to include 'USN-3119-1 with cve information'
         expect(subject.usn_release_notes_section).to include 'USN-3123-1 with cve information'
       end
