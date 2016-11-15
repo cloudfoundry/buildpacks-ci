@@ -250,7 +250,7 @@ jobs: ##########################################################################
         - get: binary-builds
           resource: <%= dependency %>-builds
       - task: queue-binary-build
-        file: buildpacks-ci/tasks/queue-dependency-build.yml
+        file: buildpacks-ci/tasks/queue-dependency-build/task.yml
         params:
           DEPENDENCY: <%= dependency %>
       - put: <%= dependency %>-builds
