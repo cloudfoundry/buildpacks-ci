@@ -601,7 +601,7 @@ jobs: ##########################################################################
           passed: [ cflinuxfs2-nc-specs ]
       - do:
         - task: cats
-          file: buildpacks-ci/tasks/run-cats.yml
+          file: buildpacks-ci/tasks/run-cats/task.yml
           params:
             DEPLOYMENT_NAME: stacks-nc.buildpacks.ci
             CI_CF_USERNAME: {{ci-cf-username}}
