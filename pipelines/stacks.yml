@@ -36,7 +36,7 @@ resources: #####################################################################
       uri: {{buildpacks-ci-git-uri}}
       branch: new-cve-notifications
       private_key: {{buildpacks-ci-private-key}}
-      paths: [ ubuntu14.04.yaml ]
+      paths: [ ubuntu14.04.yml ]
 
   - name: deployments-buildpacks
     type: git

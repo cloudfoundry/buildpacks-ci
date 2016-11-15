@@ -20,12 +20,12 @@ class DependencyBuildEnqueuer
   end
 
   def enqueue_build
-    # We use the <dependency>-new.yaml file to get a list of the new
+    # We use the <dependency>-new.yml file to get a list of the new
     # versions to build. For each version in this file, we make a commit to
-    # <dependency>-builds.yaml with the proper build information
+    # <dependency>-builds.yml with the proper build information
     # Automated deps: bower, dotnet, node, nginx, glide, godep, composer
 
-    new_dependency_versions_file = File.join(new_releases_dir, "#{dependency}-new.yaml")
+    new_dependency_versions_file = File.join(new_releases_dir, "#{dependency}-new.yml")
     new_dependency_versions = YAML.load_file(new_dependency_versions_file)
 
     dependency_builds_file = File.join(binary_builds_dir, "#{dependency}-builds.yml")

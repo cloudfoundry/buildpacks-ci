@@ -65,7 +65,7 @@ resources: #####################################################################
       uri: {{buildpacks-ci-git-uri}}
       branch: new-release-notifications
       private_key: {{buildpacks-ci-private-key}}
-      paths: [ <%= auto_new %>-new.yaml ]
+      paths: [ <%= auto_new %>-new.yml ]
 <% end %>
 
 <% %w(go dotnet-core nodejs ruby php staticfile).each do |language| %>

@@ -101,8 +101,8 @@ class NewReleasesDetector
     tags.each do |current_dependency, get_tags|
       current_tags = massage_version(get_tags.call, current_dependency)
 
-      filename = "#{new_releases_dir}/#{current_dependency}.yaml"
-      filename_diff = "#{new_releases_dir}/#{current_dependency}-new.yaml"
+      filename = "#{new_releases_dir}/#{current_dependency}.yml"
+      filename_diff = "#{new_releases_dir}/#{current_dependency}-new.yml"
       previous_tags = if File.exist?(filename)
                         YAML.load_file(filename)
                       else
