@@ -164,7 +164,7 @@ jobs:
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
         - task: generate-manifest
-          file: buildpacks-ci/tasks/diego-make-manifest.yml
+          file: buildpacks-ci/tasks/generate-diego-and-cf-manifests/task.yml
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
             CI_CF_PASSWORD: {{ci-cf-password}}
