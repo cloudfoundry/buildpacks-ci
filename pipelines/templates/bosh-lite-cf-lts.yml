@@ -158,7 +158,7 @@ jobs:
           - task: cf-release-checkout
             file: buildpacks-ci/tasks/checkout-cf-release.yml
           - task: diego-release-checkout
-            file: buildpacks-ci/tasks/checkout-diego-release.yml
+            file: buildpacks-ci/tasks/checkout-diego-release/task.yml
         - task: check-if-bosh-lite-resource-exists
           file: buildpacks-ci/tasks/check-if-bosh-lite-resource-exists/task.yml
           params:
