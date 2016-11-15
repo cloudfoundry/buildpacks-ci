@@ -259,7 +259,7 @@ jobs:
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
         - task: configure-deployment
-          file: buildpacks-ci/tasks/machete-configure-deployment.yml
+          file: buildpacks-ci/tasks/machete-configure-deployment/task.yml
           params:
             BOSH_TARGET: <%= full_deployment_name +  '.' + bosh_lite_domain_name %>
             DEPLOYMENT_NAME: {{deployment-name}}
