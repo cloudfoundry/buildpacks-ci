@@ -211,7 +211,7 @@ jobs: ##########################################################################
             BINARY_BUILDER_OS_NAME: {{binary-builder-os-name}}
           privileged: true
         - task: push-binary
-          file: buildpacks-ci/tasks/push-binary.yml
+          file: buildpacks-ci/tasks/push-binary/task.yml
           params:
             BINARY_NAME: <%= dependency %>
             BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
@@ -283,7 +283,7 @@ jobs: ##########################################################################
             BINARY_BUILDER_OS_NAME: {{binary-builder-os-name}}
           privileged: true
         - task: push-binary
-          file: buildpacks-ci/tasks/push-binary.yml
+          file: buildpacks-ci/tasks/push-binary/task.yml
           params:
             BINARY_NAME: <%= dependency %>
             BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
