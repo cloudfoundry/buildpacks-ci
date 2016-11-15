@@ -20,7 +20,7 @@ new_receipt_file = 'stacks/cflinuxfs2/cflinuxfs2_receipt'
 old_receipt_file = open("https://raw.githubusercontent.com/#{github_repo}/#{previous_version}/cflinuxfs2/cflinuxfs2_receipt")
 
 body_file = 'release-body/body'
-notes = ReleaseNotesCreator.new(cve_yaml_file, old_receipt_file, new_receipt_file)
+notes = ReleaseNotesCreator.new(cve_yaml_file, old_receipt_file, new_receipt_file).release_notes
 puts notes
 File.write(body_file, notes)
 
