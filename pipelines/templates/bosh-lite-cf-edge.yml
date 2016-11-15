@@ -122,6 +122,7 @@ jobs:
             BOSH_PASSWORD: {{bosh_password}}
             AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
             AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            AWS_BOSH_LITE_NAME: {{deployment-name}}
             BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
             BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
             BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}

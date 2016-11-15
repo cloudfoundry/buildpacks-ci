@@ -2,9 +2,9 @@
 
 require_relative '../../lib/bosh-lite-manager.rb'
 
-iaas = ENV['IAAS'] || 'aws'
+iaas = ENV['IAAS']
 deployment_id = ENV['DEPLOYMENT_NAME']
-domain_name = ENV['BOSH_LITE_DOMAIN_NAME'] || 'cf-app.com'
+domain_name = ENV['BOSH_LITE_DOMAIN_NAME']
 bosh_lite_deployment_name = ENV["#{iaas.upcase}_BOSH_LITE_NAME"]
 bosh_private_key = ENV['BOSH_PRIVATE_KEY']
 

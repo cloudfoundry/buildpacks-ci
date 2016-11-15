@@ -12,6 +12,6 @@ Octokit.create_status(
     'success',
     context: "buildpacks-ci/merge-to-master",
     description: "Buildpacks CI build success",
-    target_url: ENV['ATC_EXTERNAL_URL'] || "https://buildpacks.ci.cf-app.com/pipelines/buildpacks-ci" 
+    target_url: ENV['PIPELINE_URI']
 )
 
