@@ -4,8 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$(cat cf-environments/name)}
-BOSH_LITE_DOMAIN_NAME=${BOSH_LITE_DOMAIN_NAME:-cf-app.com}
+DEPLOYMENT_NAME=$(cat cf-environments/name)
 
 pushd buildpacks-ci
   ./scripts/start-docker

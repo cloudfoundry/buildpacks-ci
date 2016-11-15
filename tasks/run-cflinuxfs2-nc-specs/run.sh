@@ -4,8 +4,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-BOSH_LITE_DOMAIN_NAME="${BOSH_LITE_DOMAIN_NAME:-cf-app.com}"
-
 pushd cflinuxfs2-rootfs-release
   export BUNDLE_GEMFILE=cf.Gemfile
   bundle install --jobs="$(nproc)" --no-cache

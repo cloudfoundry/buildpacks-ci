@@ -5,7 +5,6 @@ set -o nounset
 set -o pipefail
 
 DEPLOYMENT_NAME=$(cat cf-environments/name)
-BOSH_LITE_DOMAIN_NAME=${BOSH_LITE_DOMAIN_NAME:-cf-app.com}
 
 pushd brats
   if [ ! -z "$RUBYGEM_MIRROR" ]; then

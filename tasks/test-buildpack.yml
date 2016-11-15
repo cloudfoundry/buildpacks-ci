@@ -12,7 +12,7 @@ run:
   path: buildpacks-ci/scripts/test_buildpack
 params:
   COMPOSER_GITHUB_OAUTH_TOKEN:
-  DEPLOYMENT_NAME:
   STACKS:
   CF_PASSWORD:
   RUBYGEM_MIRROR:
+  BOSH_LITE_DOMAIN_NAME:
