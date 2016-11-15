@@ -10,4 +10,4 @@ inputs:
 outputs:
   - name: buildpack-artifacts
 run:
-  path: buildpacks-ci/scripts/update-compile-extensions
+  path: buildpacks-ci/tasks/update-compile-extensions/run.sh
