@@ -56,7 +56,7 @@ jobs:
           trigger: true
         - get: buildpacks-ci
       - task: run-tests
-        file: buildpacks-ci/tasks/run-buildpack-checksums-specs.yml
+        file: buildpacks-ci/tasks/run-buildpack-checksums-specs/task.yml
         params:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
       - task: build-site
