@@ -348,7 +348,7 @@ jobs: ##########################################################################
           passed: [ buildpack-release ]
         - get: buildpack-checksums
       - task: finalize-buildpack
-        file: buildpacks-ci/tasks/finalize-buildpack.yml
+        file: buildpacks-ci/tasks/finalize-buildpack/task.yml
         privileged: true
       - task: commit-shas
         file: buildpacks-ci/tasks/commit-shas.yml
