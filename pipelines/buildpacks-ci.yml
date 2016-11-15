@@ -28,7 +28,7 @@ jobs:
           resource: ci-develop
           trigger: true
       - task: rspec
-        file: buildpacks-ci/tasks/buildpacks-ci.yml
+        file: buildpacks-ci/tasks/run-buildpacks-ci-specs/task.yml
         params:
           CI_USERNAME: buildpacks
           CI_PASSWORD: {{concourse_basic_auth_password}}
