@@ -18,3 +18,7 @@ run:
   args:
     - "-cl"
     - "buildpacks-ci/tasks/generate-stacks-release-notes/run.rb"
+params:
+  STACK:
+  GITHUB_USERNAME:
+  GITHUB_PASSWORD:

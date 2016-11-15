@@ -724,6 +724,8 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/generate-stacks-release-notes/task.yml
           params:
             STACK: stacks-nc
+            GITHUB_USERNAME: {{github-username}}
+            GITHUB_PASSWORD: {{github-password}}
         - put: stack-github-release-drafts
           params:
             name: version/number
