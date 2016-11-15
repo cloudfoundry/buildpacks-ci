@@ -50,7 +50,7 @@ jobs:
         - get: buildpack-packager
           trigger: true
       - task: run-buildpack-packager-specs
-        file: buildpacks-ci/tasks/run-buildpack-packager-specs.yml
+        file: buildpacks-ci/tasks/run-buildpack-packager-specs/task.yml
         privileged: true
         params:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
