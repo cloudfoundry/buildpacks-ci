@@ -14,4 +14,4 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/scripts/release/finalize-buildpack
+    - buildpacks-ci/tasks/finalize-buildpack/run.rb

@@ -37,7 +37,7 @@ describe 'finalize-buildpack task' do
 
     before do
       File.write(changelog_path, change_log)
-      execute('-c tasks/finalize-buildpack.yml -i buildpacks-ci=. -i buildpack=./spec/finalize-buildpack -i pivotal-buildpacks-cached=./spec/finalize-buildpack')
+      execute('-c tasks/finalize-buildpack/task.yml -i buildpacks-ci=. -i buildpack=./spec/tasks/finalize-buildpack -i pivotal-buildpacks-cached=./spec/tasks/finalize-buildpack')
     end
 
     after { FileUtils.rm_rf(changelog_path) }
@@ -71,7 +71,7 @@ describe 'finalize-buildpack task' do
 
     before do
       File.write(changelog_path, change_log)
-      execute('-c tasks/finalize-buildpack.yml -i buildpacks-ci=. -i buildpack=./spec/finalize-buildpack -i pivotal-buildpacks-cached=./spec/finalize-buildpack')
+      execute('-c tasks/finalize-buildpack/task.yml -i buildpacks-ci=. -i buildpack=./spec/tasks/finalize-buildpack -i pivotal-buildpacks-cached=./spec/tasks/finalize-buildpack')
     end
 
     after { FileUtils.rm_rf(changelog_path) }
@@ -125,7 +125,7 @@ describe 'finalize-buildpack task' do
         HEREDOC
       @changelog_path = File.join(File.expand_path(File.dirname(__FILE__)), 'CHANGELOG')
       File.write(@changelog_path, change_log)
-      execute('-c tasks/finalize-buildpack.yml -i buildpacks-ci=. -i buildpack=./spec/finalize-buildpack -i pivotal-buildpacks-cached=./spec/finalize-buildpack')
+      execute('-c tasks/finalize-buildpack/task.yml -i buildpacks-ci=. -i buildpack=./spec/tasks/finalize-buildpack -i pivotal-buildpacks-cached=./spec/tasks/finalize-buildpack')
     end
 
     after(:all) { FileUtils.rm_rf(@changelog_path) }
@@ -157,7 +157,7 @@ describe 'finalize-buildpack task' do
 
     it 'emits tag based on VERSION' do
       output = run("cat /tmp/build/*/buildpack-artifacts/tag && echo '\t'")
-      version = File.read('./spec/finalize-buildpack/VERSION')
+      version = File.read('./spec/tasks/finalize-buildpack/VERSION')
       expect(output).to include("v#{version}")
     end
 
