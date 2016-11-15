@@ -10,5 +10,6 @@ inputs:
 run:
   path: buildpacks-ci/tasks/run-cflinuxfs2-nc-specs/run.sh
 params:
+  BOSH_LITE_DOMAIN_NAME:
   DEPLOYMENT_NAME:
   CF_PASSWORD:

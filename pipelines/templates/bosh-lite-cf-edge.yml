@@ -181,6 +181,7 @@ jobs:
             BOSH_LITE_NAME: {{deployment-name}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+            ROOTFS_RELEASE: cflinuxfs2-rootfs
           privileged: true
         - put: deployments-buildpacks
           params:

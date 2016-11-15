@@ -210,7 +210,9 @@ jobs:
             BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
             BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
             BOSH_LITE_NAME: cf-release.buildpacks.ci
+            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
+            ROOTFS_RELEASE: cflinuxfs2-rootfs
           privileged: true
         - put: deployments-buildpacks
           params:
@@ -291,8 +293,8 @@ jobs:
             BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
             BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
             BOSH_LITE_NAME: cf-release.buildpacks.ci
+            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             DIEGO_DOCKER_ON: true
-
           privileged: true
         on_failure:
           put: failure-alert

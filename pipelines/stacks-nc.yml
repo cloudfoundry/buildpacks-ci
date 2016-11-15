@@ -563,6 +563,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/run-cflinuxfs2-nc-specs/task.yml
           params:
             DEPLOYMENT_NAME: stacks-nc.buildpacks.ci
+            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             CF_PASSWORD: {{ci-cf-password}}
         on_failure:
           put: failure-alert

@@ -8,7 +8,9 @@ describe 'test-buildpack task' do
             '-i buildpacks-ci=. -i buildpack=./spec/test-buildpack ' \
             '-i cf-environments=./spec/test-buildpack',               'DEPLOYMENT_NAME' => 'test',
                                                                       'STACKS' => 'cflinuxfs2',
-                                                                      'RUBYGEM_MIRROR' => 'https://rubygems.org')
+                                                                      'RUBYGEM_MIRROR' => 'https://rubygems.org',
+                                                                      'BOSH_LITE_DOMAIN_NAME' => 'cf-app.com'
+           )
   end
 
   it 'targets a stack and deployment name' do
