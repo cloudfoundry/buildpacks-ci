@@ -70,7 +70,7 @@ jobs:
         - get: check-interval
           trigger: true
       - task: check-for-new-dependency-releases
-        file: buildpacks-ci/tasks/check-for-new-buildpack-dependency-releases.yml
+        file: buildpacks-ci/tasks/check-for-new-buildpack-dependency-releases/task.yml
         params:
           SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
           SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
