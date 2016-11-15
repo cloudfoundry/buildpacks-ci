@@ -448,7 +448,7 @@ jobs: ##########################################################################
             stemcells: [lite-stemcell/*.tgz]
             releases: [cflinuxfs2-rootfs-release-artifacts/dev_releases/cflinuxfs2-rootfs/*.tgz]
         - task: run-rootfs-smoke-test
-          file: buildpacks-ci/tasks/run-rootfs-smoke-test.yml
+          file: buildpacks-ci/tasks/run-rootfs-smoke-test/task.yml
           params:
             DEPLOYMENT_NAME: stacks.buildpacks.ci
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
