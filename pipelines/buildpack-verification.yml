@@ -60,7 +60,7 @@ jobs:
         params:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
       - task: build-site
-        file: buildpacks-ci/tasks/build-buildpack-checksums-site.yml
+        file: buildpacks-ci/tasks/build-buildpack-checksums-site/task.yml
         privileged: true
         params:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
