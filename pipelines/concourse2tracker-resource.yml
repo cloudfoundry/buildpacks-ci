@@ -26,7 +26,7 @@ jobs:
       - get: concourse2tracker-source
         trigger: true
       - task: run-concourse2tracker-specs
-        file: buildpacks-ci/tasks/run-concourse2tracker-specs.yml
+        file: buildpacks-ci/tasks/run-concourse2tracker-specs/task.yml
         params:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: concourse2tracker-image
