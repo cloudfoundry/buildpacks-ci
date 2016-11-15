@@ -388,7 +388,7 @@ jobs:
           passed: [ <%= language.include?('java') ? 'ship-it-java' : 'ship-it' %> ]
       - do:
         - task: convert release version to version resource
-          file: buildpacks-ci/tasks/convert-release-to-version.yml
+          file: buildpacks-ci/tasks/convert-release-to-version/task.yml
         - task: create-bosh-release
           file: buildpacks-ci/tasks/create-bosh-release.yml
           params:
@@ -434,7 +434,7 @@ jobs:
           passed: [ <%= language.include?('java') ? 'ship-it-java' : 'ship-it' %> ]
       - do:
         - task: convert release version to version resource
-          file: buildpacks-ci/tasks/convert-release-to-version.yml
+          file: buildpacks-ci/tasks/convert-release-to-version/task.yml
         - task: create-bosh-release
           file: buildpacks-ci/tasks/create-bosh-release.yml
           params:
