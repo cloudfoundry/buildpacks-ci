@@ -777,7 +777,7 @@ jobs: ##########################################################################
         - get: cflinuxfs2-rootfs-release
       - do:
         - task: create-cflinuxfs2-rootfs-release
-          file: buildpacks-ci/tasks/create-cflinuxfs2-rootfs-release.yml
+          file: buildpacks-ci/tasks/create-cflinuxfs2-rootfs-release/task.yml
           params:
             BLOB_NAME: rootfs-nc
             BLOB_GLOB: blob/cflinuxfs2_nc-*.tar.gz
