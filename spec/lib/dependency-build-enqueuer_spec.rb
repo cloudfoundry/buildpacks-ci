@@ -16,7 +16,7 @@ describe DependencyBuildEnqueuer do
   subject { described_class.new(dependency, new_releases_dir, binary_builds_dir, options) }
 
   describe '#enqueue_build' do
-    let(:dependency_new_versions_file)  { File.join(new_releases_dir, "#{dependency}-new.yaml") }
+    let(:dependency_new_versions_file)  { File.join(new_releases_dir, "#{dependency}-new.yml") }
     let(:builds_file)                   { File.join(binary_builds_dir, "#{dependency}-builds.yml") }
     let(:dependency_builds)             { {dependency.to_sym => [] } }
     let(:sha256)                        { "sha256-mocked" }
@@ -35,7 +35,7 @@ describe DependencyBuildEnqueuer do
       WebMock.enable!
     end
 
-    shared_examples_for "non pre-release builds are triggered by <dependency>-new.yaml" do |verification_type|
+    shared_examples_for "non pre-release builds are triggered by <dependency>-new.yml" do |verification_type|
       let(:commit_message_1) {"Enqueue #{dependency} - #{expected_version_1}"}
       let(:commit_message_2) {"Enqueue #{dependency} - #{expected_version_2}"}
 
@@ -107,7 +107,7 @@ describe DependencyBuildEnqueuer do
       let(:source_url_1)        { "https://github.com/tools/godep/archive/#{expected_version_1}.tar.gz" }
       let(:source_url_2)        { "https://github.com/tools/godep/archive/#{expected_version_2}.tar.gz" }
 
-      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'sha256'
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yml", 'sha256'
     end
 
     context "composer" do
@@ -118,7 +118,7 @@ describe DependencyBuildEnqueuer do
       let(:source_url_1)        { "https://getcomposer.org/download/#{expected_version_1}/composer.phar" }
       let(:source_url_2)        { "https://getcomposer.org/download/#{expected_version_2}/composer.phar" }
 
-      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'sha256'
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yml", 'sha256'
     end
 
     context "glide" do
@@ -129,7 +129,7 @@ describe DependencyBuildEnqueuer do
       let(:source_url_1)        { "https://github.com/Masterminds/glide/archive/#{expected_version_1}.tar.gz" }
       let(:source_url_2)        { "https://github.com/Masterminds/glide/archive/#{expected_version_2}.tar.gz" }
 
-      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'sha256'
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yml", 'sha256'
     end
 
     context "nginx" do
@@ -138,7 +138,7 @@ describe DependencyBuildEnqueuer do
       let(:expected_version_1)  { "1.10.5" }
       let(:expected_version_2)  { "1.11.9" }
 
-      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'gpg'
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yml", 'gpg'
     end
 
     context "node" do
@@ -149,7 +149,7 @@ describe DependencyBuildEnqueuer do
       let(:source_url_1)        { "https://nodejs.org/dist/v#{expected_version_1}/node-v#{expected_version_1}.tar.gz" }
       let(:source_url_2)        { "https://nodejs.org/dist/v#{expected_version_2}/node-v#{expected_version_2}.tar.gz" }
 
-      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'sha256'
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yml", 'sha256'
     end
 
     context "bower" do
@@ -160,7 +160,7 @@ describe DependencyBuildEnqueuer do
       let(:source_url_1)        { "https://registry.npmjs.org/bower/-/bower-#{expected_version_1}.tgz" }
       let(:source_url_2)        { "https://registry.npmjs.org/bower/-/bower-#{expected_version_2}.tgz" }
 
-      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yaml", 'sha256'
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yml", 'sha256'
     end
 
     context "dotnet" do

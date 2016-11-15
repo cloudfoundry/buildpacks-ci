@@ -7,7 +7,7 @@ require_relative '../../../lib/usn-release-notes'
 describe ReleaseNotesCreator do
 
   let(:temp_dir)         { Dir.mktmpdir }
-  let(:cves_yaml_file)   { File.join(temp_dir, 'ubuntu14.04.yaml' )}
+  let(:cves_yaml_file)   { File.join(temp_dir, 'ubuntu14.04.yml' )}
   let(:old_receipt_file) { File.join(temp_dir, 'old.txt' )}
   let(:new_receipt_file) { File.join(temp_dir, 'new.txt' )}
 

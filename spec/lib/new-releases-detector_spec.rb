@@ -35,8 +35,8 @@ describe NewReleasesDetector do
   subject { described_class.new(new_releases_dir) }
 
   shared_examples_for 'there are new versions to potentially build'  do |dependency_source|
-    let(:yaml_filename)     { "#{new_releases_dir}/#{dependency}.yaml"}
-    let(:yaml_new_filename) { "#{new_releases_dir}/#{dependency}-new.yaml"}
+    let(:yaml_filename)     { "#{new_releases_dir}/#{dependency}.yml"}
+    let(:yaml_new_filename) { "#{new_releases_dir}/#{dependency}-new.yml"}
     let(:all_versions)      { old_versions + new_versions }
 
     before do
@@ -74,7 +74,7 @@ describe NewReleasesDetector do
   end
 
   shared_examples_for 'there are no new versions to potentially build' do |dependency_source|
-    let(:yaml_filename) { "#{new_releases_dir}/#{dependency}.yaml"}
+    let(:yaml_filename) { "#{new_releases_dir}/#{dependency}.yml"}
     let(:new_versions)  { [] }
 
     before do
