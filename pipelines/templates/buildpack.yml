@@ -328,7 +328,7 @@ jobs: ##########################################################################
           resource: buildpack-master
           trigger: true
       - task: check tag not already added
-        file: buildpacks-ci/tasks/check-tag-not-already-added.yml
+        file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
       - put: buildpack-master
         params:
           repository: buildpack
