@@ -10,4 +10,4 @@ inputs:
   - name: version
   - name: stacks-artifacts
 run:
-  path: buildpacks-ci/scripts/stacks/test-rootfs
+  path: buildpacks-ci/tasks/test-rootfs/run.sh
