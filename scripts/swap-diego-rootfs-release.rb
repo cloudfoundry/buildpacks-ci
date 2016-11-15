@@ -2,7 +2,7 @@
 
 diego_release_dir = ARGV[0]
 diego_manifest_file = ARGV[1]
-rootfs_release_name = ENV['ROOTFS_RELEASE'] || 'cflinuxfs2-rootfs'
+rootfs_release_name = ENV['ROOTFS_RELEASE']
 
 Dir.chdir(diego_release_dir) do
   diego_manifest_contents = File.read(diego_manifest_file)

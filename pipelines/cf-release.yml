@@ -138,6 +138,7 @@ jobs:
         file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
         params:
           DEPLOYMENT_NAME: cf-release.buildpacks.ci
+          AWS_BOSH_LITE_NAME: cf-release.buildpacks.ci
           BOSH_PRIVATE_KEY: {{bosh_private_key}}
           BOSH_USER: {{bosh_user}}
           BOSH_PASSWORD: {{bosh_password}}
@@ -152,6 +153,8 @@ jobs:
           BOSH_TARGET: cf-release.buildpacks.ci.cf-app.com
           BOSH_LITE_NAME: cf-release.buildpacks.ci
           RUBYGEM_MIRROR: {{rubygem-mirror}}
+          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+          IAAS: {{iaas}}
         attempts: 5
         ensure:
           put: deployments-buildpacks
@@ -321,8 +324,11 @@ jobs:
           BOSH_PRIVATE_KEY: {{bosh_private_key}}
           AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
           AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+          AWS_BOSH_LITE_NAME: cf-release.buildpacks.ci
           BOSH_LITE_NAME: cf-release.buildpacks.ci
           RUBYGEM_MIRROR: {{rubygem-mirror}}
+          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+          IAAS: {{iaas}}
         attempts: 5
 
   - name: ship-it

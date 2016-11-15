@@ -35,6 +35,7 @@ jobs:
           GITHUB_USERNAME: {{github-username}}
           GITHUB_PASSWORD: {{github-password}}
           GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+          PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
         privileged: true
       - put: ci-master
         params:

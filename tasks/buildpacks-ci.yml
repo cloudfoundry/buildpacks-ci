@@ -10,6 +10,7 @@ params:
   TERM: xterm-color
   CI_USERNAME:
   CI_PASSWORD:
+  PIPELINE_URL:
 run:
   path: bash
   args:
