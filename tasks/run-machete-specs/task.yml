@@ -9,7 +9,7 @@ inputs:
   - name: machete
   - name: cf-environments
 run:
-  path: buildpacks-ci/scripts/machete.sh
+  path: buildpacks-ci/tasks/run-machete-specs/run.sh
 params:
   CF_PASSWORD:
   RUBYGEM_MIRROR:
