@@ -257,10 +257,10 @@ jobs: ##########################################################################
           trigger: true
       - do:
         - task: make-rootfs
-          file: buildpacks-ci/tasks/make-rootfs.yml
+          file: buildpacks-ci/tasks/make-rootfs/task.yml
           privileged: true
         - task: test-rootfs
-          file: buildpacks-ci/tasks/test-rootfs.yml
+          file: buildpacks-ci/tasks/test-rootfs/task.yml
           privileged: true
         - put: stack-s3
           params:
