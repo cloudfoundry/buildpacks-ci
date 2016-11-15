@@ -106,7 +106,7 @@ jobs:
         params:
           acquire: true
       - task: run-machete-specs
-        file: buildpacks-ci/tasks/run-machete-specs.yml
+        file: buildpacks-ci/tasks/run-machete-specs/task.yml
         params:
           CF_PASSWORD: {{ci-cf-password}}
           BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
