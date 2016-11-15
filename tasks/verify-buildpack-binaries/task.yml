@@ -17,4 +17,4 @@ inputs:
 outputs:
   - name: buildpack-artifacts
 run:
-  path: buildpacks-ci/scripts/verify-buildpack-binaries.rb
+  path: buildpacks-ci/verify-buildpack-binaries/run.rb
