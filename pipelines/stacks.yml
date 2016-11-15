@@ -759,7 +759,7 @@ jobs: ##########################################################################
           passed: [ shipit ]
       - do:
         - task: rename
-          file: buildpacks-ci/tasks/rename-rootfs-for-docker.yml
+          file: buildpacks-ci/tasks/rename-rootfs-for-docker/task.yml
         - aggregate:
           - put: docker latest version
             resource: docker-cflinuxfs2-rootfs
