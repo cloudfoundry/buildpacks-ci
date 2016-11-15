@@ -89,7 +89,7 @@ jobs:
           - get: binary-buildpack
           - get: php-buildpack
         - task: verify-buildpack-binaries
-          file: buildpacks-ci/tasks/verify-buildpack-binaries.yml
+          file: buildpacks-ci/tasks/verify-buildpack-binaries/task.yml
         on_failure:
           put: failure-alert
           params:
