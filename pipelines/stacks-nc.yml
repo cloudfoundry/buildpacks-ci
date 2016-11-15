@@ -484,7 +484,7 @@ jobs: ##########################################################################
           passed: [ deploy-rootfs-to-stacks-nc ]
       - do:
         - task: create-cf-release
-          file: buildpacks-ci/tasks/create-cf-release-without-modifying-stacks.yml
+          file: buildpacks-ci/tasks/create-cf-release-without-modifying-stacks/task.yml
           privileged: true
         - put: stacks-cf-deployment
           params:
