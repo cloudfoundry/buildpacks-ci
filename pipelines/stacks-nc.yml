@@ -732,7 +732,7 @@ jobs: ##########################################################################
             tag: version/number
             body: release-body/body
             globs:
-              - stack-s3/cflinuxfs2-*.tar.gz
+              - stack-s3/cflinuxfs2_nc-*.tar.gz
         - put: new-cves
           params:
             repository: new-cves-artifacts
