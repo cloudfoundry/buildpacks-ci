@@ -278,7 +278,7 @@ jobs:
           passed: [ deploy-cf-and-diego-to-cf-release ]
       - do:
         - task: cats
-          file: buildpacks-ci/tasks/run-cats.yml
+          file: buildpacks-ci/tasks/run-cats/task.yml
           params:
             DEPLOYMENT_NAME: cf-release.buildpacks.ci
             CI_CF_USERNAME: {{ci-cf-username}}
