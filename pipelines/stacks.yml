@@ -323,7 +323,7 @@ jobs: ##########################################################################
           BOSH_LITE_NAME: stacks.buildpacks.ci
           BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           RUBYGEM_MIRROR: {{rubygem-mirror}}
-          IAAS: {{iaas}}
+          IAAS: aws
         attempts: 5
         ensure:
           put: deployments-buildpacks
@@ -634,7 +634,7 @@ jobs: ##########################################################################
           BOSH_LITE_NAME: stacks.buildpacks.ci
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-          IAAS: {{iaas}}
+          IAAS: aws
         attempts: 5
 
   - name: shipit
