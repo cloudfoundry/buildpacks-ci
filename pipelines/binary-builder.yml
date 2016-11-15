@@ -202,7 +202,7 @@ jobs: ##########################################################################
           resource: <%= dependency %>-built-output
       - do:
         - task: build-binary
-          file: buildpacks-ci/tasks/build-binary.yml
+          file: buildpacks-ci/tasks/build-binary/task.yml
           params:
             BINARY_NAME: <%= dependency %>
             GIT_SSH_KEY: {{buildpacks-ci-private-key}}
@@ -274,7 +274,7 @@ jobs: ##########################################################################
         - get: buildpacks-ci
       - do:
         - task: build-binary
-          file: buildpacks-ci/tasks/build-binary.yml
+          file: buildpacks-ci/tasks/build-binary/task.yml
           params:
             GIT_SSH_KEY: {{buildpacks-ci-private-key}}
             BINARY_NAME: <%= dependency %>

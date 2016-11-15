@@ -16,6 +16,6 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/scripts/build-binary.rb
+    - buildpacks-ci/tasks/build-binary/run.rb
 params:
   RUBYGEM_MIRROR:
