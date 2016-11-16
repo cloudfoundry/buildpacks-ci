@@ -8,7 +8,7 @@ DEPLOYMENT_NAME=$(cat cf-environments/name)
 
 cd buildpack
 
-../buildpacks-ci/scripts/check-unsupported-manifest
+../buildpacks-ci/tasks/run-buildpack-specs/check-unsupported-manifest.rb
 ../buildpacks-ci/scripts/start-docker
 
 # for the PHP buildpack

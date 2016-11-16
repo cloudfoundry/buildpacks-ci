@@ -6,7 +6,7 @@ require 'yaml'
 describe 'script for filling cf manifest with correct admin password' do
   let(:cf_release_dir)       { File.join(File.dirname(__FILE__), 'cf-release') }
   let(:cf_tmp_manifest_file) { File.join(cf_release_dir, 'cf-tmp.yml') }
-  let(:swap_script_file)     { File.join(File.dirname(__FILE__), '..', '..', '..', 'scripts', 'swap-cf-release-scim-admin-password.rb') }
+  let(:swap_script_file)     { File.join(File.dirname(__FILE__), '..', '..','..', 'tasks', 'generate-diego-and-cf-manifests', 'swap-cf-release-scim-admin-password.rb') }
 
   RSpec.shared_context "shared cf-release fixture setup" do
     before do
