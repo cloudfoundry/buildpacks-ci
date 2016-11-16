@@ -11,7 +11,7 @@ inputs:
 outputs:
   - name: rootfs-smoke-test-manifest-artifacts
 run:
-  path: buildpacks-ci/scripts/make-rootfs-smoke-test-manifest
+  path: buildpacks-ci/tasks/make-rootfs-smoke-test-manifest/run.sh
 params:
   DEPLOYMENT_NAME:
   BOSH_PRIVATE_KEY:

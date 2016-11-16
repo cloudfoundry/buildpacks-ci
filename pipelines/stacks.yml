@@ -361,7 +361,7 @@ jobs: ##########################################################################
           passed: [ recreate-bosh-lite ]
       - do:
         - task: generate-rootfs-smoke-test-manifest
-          file: buildpacks-ci/tasks/make-rootfs-smoke-test-manifest.yml
+          file: buildpacks-ci/tasks/make-rootfs-smoke-test-manifest/task.yml
           params:
             DEPLOYMENT_NAME: stacks.buildpacks.ci
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
