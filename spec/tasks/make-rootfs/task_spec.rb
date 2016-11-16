@@ -4,18 +4,18 @@ require 'digest'
 require 'yaml'
 
 describe 'make-rootfs' do
-  stacks_artifacts = 'spec/scripts/stacks/make-rootfs/stacks-artifacts'
-  receipt_artifacts = 'spec/scripts/stacks/make-rootfs/receipt-artifacts'
+  stacks_artifacts = 'spec/tasks/make-rootfs/stacks-artifacts'
+  receipt_artifacts = 'spec/tasks/make-rootfs/receipt-artifacts'
 
   before(:context) do
     Dir["#{stacks_artifacts}/*"].each { |f| FileUtils.rm_rf f }
     Dir["#{receipt_artifacts}/*"].each { |f| FileUtils.rm_rf f }
 
-    execute('-c tasks/make-rootfs.yml ' \
+    execute('-c tasks/make-rootfs/task.yml ' \
       '-p ' \
       '-i buildpacks-ci=. ' \
-      '-i stacks=spec/scripts/stacks/make-rootfs/stacks ' \
-      '-i version=spec/scripts/stacks/make-rootfs/version ' \
+      '-i stacks=spec/tasks/make-rootfs/stacks ' \
+      '-i version=spec/tasks/make-rootfs/version ' \
       "-o stacks-artifacts=#{stacks_artifacts} " \
       "-o receipt-artifacts=#{receipt_artifacts} ")
   end

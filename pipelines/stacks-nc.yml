@@ -249,7 +249,7 @@ jobs: ##########################################################################
           trigger: true
       - do:
         - task: make-rootfs
-          file: buildpacks-ci/tasks/make-rootfs.yml
+          file: buildpacks-ci/tasks/make-rootfs/task.yml
           privileged: true
           params:
             STACKS_SUFFIX: _nc

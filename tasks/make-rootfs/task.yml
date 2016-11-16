@@ -12,4 +12,4 @@ outputs:
   - name: stacks-artifacts
   - name: receipt-artifacts
 run:
-  path: buildpacks-ci/scripts/stacks/make-rootfs
+  path: buildpacks-ci/tasks/make-rootfs/run.sh
