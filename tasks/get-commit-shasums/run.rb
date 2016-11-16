@@ -1,7 +1,10 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
+
 require 'fileutils'
-require_relative '../../lib/git-client'
+
+buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
+require "#{buildpacks_ci_dir}/lib/git-client"
 
 latest_shasum_file = Dir["buildpack-artifacts/*.SHA256SUM.txt"].first
 system("rsync -a buildpack-checksums/ sha-artifacts")
