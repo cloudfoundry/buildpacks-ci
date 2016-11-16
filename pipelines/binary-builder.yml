@@ -327,7 +327,7 @@ jobs: ##########################################################################
             version: every
             trigger: true
         - task: update-dependency-in-manifests
-          file: buildpacks-ci/tasks/update-dependency-in-buildpack.yml
+          file: buildpacks-ci/tasks/update-dependency-in-buildpack/task.yml
           params:
             BUILDPACK_NAME: <%= buildpack %>
             DEPENDENCY: <%= dependency %>
