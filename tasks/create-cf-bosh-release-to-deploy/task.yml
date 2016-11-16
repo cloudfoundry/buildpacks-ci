@@ -22,4 +22,4 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/scripts/release/cf/create-release
+    - buildpacks-ci/tasks/create-cf-bosh-release-to-deploy/run.sh

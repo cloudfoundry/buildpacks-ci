@@ -222,7 +222,7 @@ jobs:
             repository: generate-manifest-artifacts
             rebase: true
         - task: create-cf-release
-          file: buildpacks-ci/tasks/create-release.yml
+          file: buildpacks-ci/tasks/create-cf-bosh-release-to-deploy/task.yml
           privileged: true
         - put: cf-release-cf-deployment
           params:
