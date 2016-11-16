@@ -351,7 +351,7 @@ jobs: ##########################################################################
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
         privileged: true
       - task: commit-shas
-        file: buildpacks-ci/tasks/commit-shas.yml
+        file: buildpacks-ci/tasks/get-commit-shasums/task.yml
         privileged: true
       - put: buildpack-checksums
         params:
