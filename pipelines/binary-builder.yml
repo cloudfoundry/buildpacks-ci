@@ -163,7 +163,7 @@ jobs: ##########################################################################
         - aggregate:
           <% integration_spec_names.each do |spec_name| %>
           - task: integration-<%= spec_name %>
-            file: buildpacks-ci/tasks/binary-builder-integration.yml
+            file: buildpacks-ci/tasks/run-binary-builder-integration-specs/task.yml
             params:
               SPEC_TO_RUN: <%= spec_name %>
               RUBYGEM_MIRROR: {{rubygem-mirror}}
