@@ -91,7 +91,7 @@ jobs:
         trigger: true
       - get: buildpacks-ci
       - task: create-latest-upstream-changes-story
-        file: buildpacks-ci/tasks/create-latest-upstream-changes-story.yml
+        file: buildpacks-ci/tasks/create-latest-upstream-changes-story/task.yml
         params:
           TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
