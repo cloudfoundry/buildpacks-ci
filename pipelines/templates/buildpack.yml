@@ -251,7 +251,7 @@ jobs: ##########################################################################
           trigger: true
       - do:
         - task: rspec
-          file: buildpacks-ci/tasks/test-buildpack.yml
+          file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
           params:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
@@ -294,7 +294,7 @@ jobs: ##########################################################################
           trigger: true
       - do:
         - task: rspec
-          file: buildpacks-ci/tasks/test-buildpack.yml
+          file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
           params:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
@@ -422,7 +422,7 @@ jobs: ##########################################################################
           trigger: true
       - do:
         - task: rspec
-          file: buildpacks-ci/tasks/test-buildpack.yml
+          file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
           params:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
@@ -466,7 +466,7 @@ jobs: ##########################################################################
           trigger: true
       - do:
         - task: rspec
-          file: buildpacks-ci/tasks/test-buildpack.yml
+          file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
           params:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}

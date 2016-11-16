@@ -342,7 +342,7 @@ jobs: ##########################################################################
             acquire: true
         - do:
           - task: rspec
-            file: buildpacks-ci/tasks/test-buildpack-before-auto-update.yml
+            file: buildpacks-ci/tasks/run-buildpack-specs-before-auto-update/task.yml
             privileged: true
             params:
               STACKS: cflinuxfs2
