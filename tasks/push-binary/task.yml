@@ -11,4 +11,4 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/scripts/push-binary.rb
+    - buildpacks-ci/tasks/push-binary/run.rb
