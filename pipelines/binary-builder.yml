@@ -153,7 +153,7 @@ jobs: ##########################################################################
       - do:
         <% integration_spec_names = %w(bundler glide go godep httpd jruby nginx nodejs php5 php7 php5_with_oracle php7_with_oracle python ruby url_output yaml_flag dotnet) %>
         - task: all-expected-integration-specs-will-run
-          file: buildpacks-ci/tasks/binary-builder-integration-spec-presence.yml
+          file: buildpacks-ci/tasks/check-for-binary-builder-integration-spec-presence/task.yml
           params:
             SPEC_NAMES: <%= integration_spec_names.join(',') %>
         - task: all-unit-tests
