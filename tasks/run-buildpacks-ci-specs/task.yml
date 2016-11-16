@@ -14,10 +14,10 @@ params:
 run:
   path: bash
   args:
-    - "-c"
+    - "-cl"
     - |
       set -ex
       cd buildpacks-ci
-      ./scripts/fly-login $CI_USERNAME $CI_PASSWORD
+      ./tasks/run-buildpacks-ci-specs/fly-login.sh $CI_USERNAME $CI_PASSWORD
       bundle exec rake
-      ./scripts/set-status-success
+      bundle exec ./tasks/run-buildpacks-ci-specs/set-status-success.rb
