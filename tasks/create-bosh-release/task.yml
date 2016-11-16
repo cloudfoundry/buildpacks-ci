@@ -19,4 +19,4 @@ params:
   ACCESS_KEY_ID:
   SECRET_ACCESS_KEY:
 run:
-  path: buildpacks-ci/scripts/bosh-releases/create-bosh-release.sh
+  path: buildpacks-ci/tasks/create-bosh-release/run.sh

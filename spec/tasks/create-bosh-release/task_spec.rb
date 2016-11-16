@@ -6,13 +6,13 @@ require 'yaml'
 describe 'create bosh stacks release task' do
   context 'when uploading blobs' do
     before(:context) do
-      `git init ./spec/create-bosh-release/stacks-release`
+      `git init ./spec/tasks/create-bosh-release/stacks-release`
 
-      execute('-c tasks/create-bosh-release.yml ' \
+      execute('-c tasks/create-bosh-release/task.yml ' \
               '-i buildpacks-ci=. ' \
-              '-i blob=./spec/create-bosh-release/stack-s3 ' \
-              '-i version=./spec/create-bosh-release/version ' \
-              '-i release=./spec/create-bosh-release/stacks-release ',
+              '-i blob=./spec/tasks/create-bosh-release/stack-s3 ' \
+              '-i version=./spec/tasks/create-bosh-release/version ' \
+              '-i release=./spec/tasks/create-bosh-release/stacks-release ',
               'BLOB_NAME' => 'rootfs',
               'BLOB_GLOB' => 'blob/cflinuxfs2-*.tar.gz',
               'RELEASE_NAME' => 'stack',
@@ -49,11 +49,11 @@ describe 'create bosh stacks release task' do
       @access_key_id = 'an_access_key'
       @secret_access_key = 'a_secret_access_key'
 
-      execute('-c tasks/create-bosh-release.yml ' \
+      execute('-c tasks/create-bosh-release/task.yml ' \
               '-i buildpacks-ci=. ' \
-              '-i blob=./spec/create-bosh-release/stack-s3 ' \
-              '-i version=./spec/create-bosh-release/version ' \
-              '-i release=./spec/create-bosh-release/stacks-release ',
+              '-i blob=./spec/tasks/create-bosh-release/stack-s3 ' \
+              '-i version=./spec/tasks/create-bosh-release/version ' \
+              '-i release=./spec/tasks/create-bosh-release/stacks-release ',
               'RELEASE_DIR' => 'release',
               'ACCESS_KEY_ID' => @access_key_id,
               'SECRET_ACCESS_KEY' => @secret_access_key)
