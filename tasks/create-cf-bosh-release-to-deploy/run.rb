@@ -3,7 +3,9 @@
 
 require 'fileutils'
 require 'yaml'
-require_relative '../../../lib/cf-release-common'
+
+buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
+require "#{buildpacks_ci_dir}/lib/cf-release-common"
 
 release_names.each do |language|
   blobs = YAML.load File.read('cf-release/config/blobs.yml')
