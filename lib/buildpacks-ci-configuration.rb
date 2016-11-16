@@ -15,6 +15,10 @@ class BuildpacksCIConfiguration
     ENV['LPASS_BOSH_RELEASE_PRIVATE_KEYS_FILE'] || 'Shared-Buildpacks/buildpack-bosh-release-repos-private-keys.yml'
   end
 
+  def git_repos_private_keys_filename
+    ENV['LPASS_GIT_REPOS_PRIVATE_KEYS_FILE'] || 'Shared-Buildpacks/git-repos-private-keys.yml'
+  end
+
   def organization
     YAML.load_file('public-config.yml')['buildpacks-github-org']
   end
