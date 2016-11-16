@@ -383,7 +383,7 @@ jobs: ##########################################################################
             repository: rootfs-smoke-test-manifest-artifacts
             rebase: true
         - task: generate-cf-and-diego-manifest
-          file: buildpacks-ci/tasks/generate-diego-and-cf-manifests/task.yml
+          file: buildpacks-ci/tasks/generate-cf-and-diego-manifests/task.yml
           params:
             DEPLOYMENT_NAME: stacks.buildpacks.ci
             CI_CF_PASSWORD: {{ci-cf-password}}

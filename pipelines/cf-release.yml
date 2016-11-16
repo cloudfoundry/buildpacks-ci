@@ -196,7 +196,7 @@ jobs:
           - get: binary-buildpack-github-release
           - get: dotnet-core-buildpack-github-release
         - task: generate-manifest
-          file: buildpacks-ci/tasks/generate-diego-and-cf-manifests/task.yml
+          file: buildpacks-ci/tasks/generate-cf-and-diego-manifests/task.yml
           params:
             DEPLOYMENT_NAME: cf-release.buildpacks.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
