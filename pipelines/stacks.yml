@@ -796,7 +796,7 @@ jobs: ##########################################################################
           resource: stacks-release
       - do:
         - task: run-both-bosh-scripts
-          file: buildpacks-ci/tasks/create-bosh-release.yml
+          file: buildpacks-ci/tasks/create-bosh-release/task.yml
           params:
             BLOB_NAME: rootfs
             BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
