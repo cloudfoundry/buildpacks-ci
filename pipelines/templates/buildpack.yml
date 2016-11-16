@@ -168,7 +168,7 @@ jobs: ##########################################################################
         resource: buildpack-develop
         trigger: true
       - task: load-modules
-        file: buildpacks-ci/tasks/populate-modules-in-manifest.yml
+        file: buildpacks-ci/tasks/populate-php-modules-in-manifest/task.yml
         privileged: true
       - put: buildpack-develop
         params:
