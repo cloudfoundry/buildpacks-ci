@@ -232,7 +232,7 @@ jobs: ##########################################################################
         - get: monday-funday
           trigger: true
       - task: create-tracker-story
-        file: buildpacks-ci/tasks/create-new-stacks-release-story.yml
+        file: buildpacks-ci/tasks/create-new-stacks-release-story/task.yml
         params:
           TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
