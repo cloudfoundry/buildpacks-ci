@@ -11,4 +11,4 @@ inputs:
 outputs:
   - name: cflinuxfs2-rootfs-release-artifacts
 run:
-  path: buildpacks-ci/scripts/stacks/overwrite-cflinuxfs2-rootfs-release
+  path: buildpacks-ci/tasks/overwrite-cflinuxfs2-rootfs-release/run.sh
