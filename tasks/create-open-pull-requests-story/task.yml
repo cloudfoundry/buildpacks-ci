@@ -12,7 +12,7 @@ run:
     - -cl
     - |
       cd buildpacks-ci
-      bundle exec ./scripts/notifications/create-open-pull-requests-story
+      bundle exec ./tasks/create-open-pull-requests-story/run.rb
 params:
   TRACKER_PROJECT_ID:
   TRACKER_API_TOKEN:
