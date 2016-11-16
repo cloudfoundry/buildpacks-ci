@@ -439,7 +439,7 @@ jobs: ##########################################################################
           passed: [ 'generate-stacks-manifests' ]
       - do:
         - task: overwrite-cflinuxfs2-rootfs-release
-          file: buildpacks-ci/tasks/overwrite-cflinuxfs2-rootfs-release.yml
+          file: buildpacks-ci/tasks/overwrite-cflinuxfs2-rootfs-release/task.yml
           params:
             ROOTFS_RELEASE: cflinuxfs2-rootfs
         - put: stacks-rootfs-deployment
