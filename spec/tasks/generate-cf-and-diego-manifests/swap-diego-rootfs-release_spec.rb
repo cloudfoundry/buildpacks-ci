@@ -7,7 +7,7 @@ describe 'script for filling diego manifest with correct rootfs release' do
   let(:diego_release_dir)       { File.join(File.dirname(__FILE__), 'diego') }
   let(:diego_manifest_file) { File.join(diego_release_dir, 'diego.yml') }
   let(:diego_tmp_manifest_file) { File.join(diego_release_dir, 'diego-tmp.yml') }
-  let(:swap_script_file)     { File.join(File.dirname(__FILE__), '..', '..', '..', 'tasks', 'generate-diego-and-cf-manifests', 'swap-diego-rootfs-release.rb') }
+  let(:swap_script_file)     { File.join(File.dirname(__FILE__), '..', '..', '..', 'tasks', 'generate-cf-and-diego-manifests', 'swap-diego-rootfs-release.rb') }
 
   before do
     FileUtils.cp(diego_manifest_file, diego_tmp_manifest_file)

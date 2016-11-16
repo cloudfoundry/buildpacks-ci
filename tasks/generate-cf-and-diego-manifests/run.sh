@@ -51,14 +51,14 @@ jobs:
 
   ./scripts/generate-bosh-lite-dev-manifest bosh-lite/cf-stub-spiff-ours.yml
 
-  ../buildpacks-ci/tasks/generate-diego-and-cf-manifests/swap-cf-release-scim-admin-password.rb "$(pwd)" bosh-lite/deployments/cf.yml
+  ../buildpacks-ci/tasks/generate-cf-and-diego-manifests/swap-cf-release-scim-admin-password.rb "$(pwd)" bosh-lite/deployments/cf.yml
 
   ruby -i -pe "gsub('admin_password: stub_to_be_gsubbed', 'admin_password: ' + ENV['CI_CF_PASSWORD'])" bosh-lite/deployments/cf.yml
 popd
 
 pushd diego-release
   USE_SQL='postgres' ./scripts/generate-bosh-lite-manifests
-  ../buildpacks-ci/tasks/generate-diego-and-cf-manifests/swap-diego-rootfs-release.rb "$(pwd)" bosh-lite/deployments/diego.yml
+  ../buildpacks-ci/tasks/generate-cf-and-diego-manifests/swap-diego-rootfs-release.rb "$(pwd)" bosh-lite/deployments/diego.yml
 popd
 
 pushd deployments-buildpacks

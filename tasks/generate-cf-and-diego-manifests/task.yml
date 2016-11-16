@@ -13,7 +13,7 @@ inputs:
 outputs:
   - name: generate-manifest-artifacts
 run:
-  path: buildpacks-ci/tasks/generate-diego-and-cf-manifests/run.sh
+  path: buildpacks-ci/tasks/generate-cf-and-diego-manifests/run.sh
 params:
   DEPLOYMENT_NAME:
   CI_CF_PASSWORD:
