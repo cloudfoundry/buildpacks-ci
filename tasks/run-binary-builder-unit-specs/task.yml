@@ -9,4 +9,4 @@ inputs:
 params:
   RUBYGEM_MIRROR:
 run:
-  path: buildpacks-ci/scripts/binary-builder-unit.sh
+  path: buildpacks-ci/tasks/run-binary-builder-unit-specs/run.sh
