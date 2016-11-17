@@ -40,7 +40,8 @@ manager = BoshLiteManager.new(iaas: iaas,
                                bosh_director_user: bosh_director_user,
                                bosh_director_password: bosh_director_password,
                                bosh_director_target: bosh_director_target,
-                               bosh_private_key: bosh_private_key
+                               bosh_private_key: bosh_private_key,
+                               credentials_struct: nil
                               )
 
 manager.destroy

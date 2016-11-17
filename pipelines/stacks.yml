@@ -327,7 +327,12 @@ jobs: ##########################################################################
           BOSH_LITE_NAME: stacks.buildpacks.ci
           BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           RUBYGEM_MIRROR: {{rubygem-mirror}}
-          IAAS: aws
+          IAAS: gcp
+          BOSH_LITE_HM_DIRECTOR_PASSWORD: {{gcp_bosh_lite_hm_director_password}}
+          BOSH_LITE_NATS_PASSWORD: {{gcp_bosh_lite_nats_password}}
+          BOSH_LITE_BLOBSTORE_AGENT_PASSWORD: {{gcp_bosh_lite_blobstore_agent_password}}
+          BOSH_LITE_BLOBSTORE_DIRECTOR_PASSWORD: {{gcp_bosh_lite_blobstore_director_password}}
+          BOSH_LITE_POSTGRES_PASSWORD: {{gcp_bosh_lite_postgres_password}}
         attempts: 5
         ensure:
           put: deployments-buildpacks
@@ -638,7 +643,7 @@ jobs: ##########################################################################
           BOSH_LITE_NAME: stacks.buildpacks.ci
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-          IAAS: aws
+          IAAS: gcp
         attempts: 5
 
   - name: shipit

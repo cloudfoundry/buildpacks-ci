@@ -18,6 +18,7 @@ describe BoshLiteManager do
   let(:bosh_director_password) { 'also_a_password' }
   let(:bosh_director_target) { 'bosh.example.com' }
   let(:bosh_private_key) { 'APRIVATESSHKEY' }
+  let(:credentials_struct) { nil }
 
   subject { described_class.new(iaas: iaas,
                                 deployment_dir: deployment_dir,
@@ -29,7 +30,8 @@ describe BoshLiteManager do
                                 bosh_director_user: bosh_director_user,
                                 bosh_director_password: bosh_director_password,
                                 bosh_director_target: bosh_director_target,
-                                bosh_private_key: bosh_private_key
+                                bosh_private_key: bosh_private_key,
+                                credentials_struct: credentials_struct
                                )
           }
 
@@ -238,12 +240,14 @@ describe BoshLiteManager do
     let(:bosh_lite_dir) {File.join(deployment_dir, 'bosh-lite')}
     let(:manifest_contents) { <<~HEREDOC }
                                  ---
+                                 director_password: <%= a_password %>
                                  director_uuid: NOT_A_UUID
                                  HEREDOC
+    let(:credentials_struct) { OpenStruct.new({ 'a_password' => 'abc12345'})}
     before do
       FileUtils.mkdir_p(bosh_lite_dir)
 
-      File.write("#{bosh_lite_dir}/bosh-lite-template.yml", manifest_contents)
+      File.write("#{bosh_lite_dir}/bosh-lite-template.yml.erb", manifest_contents)
 
       allow(subject).to receive(:`).with('bosh status --uuid').and_return('aaaa-bbbb-cccc-dddd')
     end
@@ -253,6 +257,13 @@ describe BoshLiteManager do
 
       bosh_lite_manifest_contents = YAML.load_file(File.join(deployment_dir, 'bosh-lite.yml') )
       expect(bosh_lite_manifest_contents['director_uuid']).to eq 'aaaa-bbbb-cccc-dddd'
+    end
+
+    it 'creates a new bosh-lite.yml with an interpolated password' do
+      subject.send :setup_bosh_lite_manifest
+
+      bosh_lite_manifest_contents = YAML.load_file(File.join(deployment_dir, 'bosh-lite.yml') )
+      expect(bosh_lite_manifest_contents['director_password']).to eq 'abc12345'
     end
   end
 
