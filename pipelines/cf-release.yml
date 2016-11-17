@@ -148,8 +148,8 @@ jobs:
           BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
           BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
           GCP_BOSH_LITE_NAME: cf-release-gcp-bosh-lite
-          GCP_BOSH_DIRECTOR_USER: {{gcp-bosh-director-user}}
-          GCP_BOSH_DIRECTOR_PASSWORD: {{gcp-bosh-director-password}}
+          GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
+          GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           BOSH_LITE_HM_DIRECTOR_PASSWORD: {{gcp_bosh_lite_hm_director_password}}
