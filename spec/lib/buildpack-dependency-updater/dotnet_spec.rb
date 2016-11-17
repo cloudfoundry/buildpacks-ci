@@ -50,13 +50,13 @@ describe BuildpackDependencyUpdater do
               version: 1.0.0-preview2-003121
               cf_stacks:
                 - cflinuxfs2
-              uri: https://buildpacks.cloudfoundry.org/concourse-binaries/dotnet/dotnet.1.0.0-preview2-003121.linux-amd64.tar.gz
+              uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview2-003121.linux-amd64.tar.gz
               md5: 8496b07e910f3b7997196e23427f3676
             - name: dotnet
               version: 1.0.0-preview3-006666
               cf_stacks:
                 - cflinuxfs2
-              uri: https://buildpacks.cloudfoundry.org/concourse-binaries/dotnet/dotnet.1.0.0-preview3-006666.linux-amd64.tar.gz
+              uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview3-006666.linux-amd64.tar.gz
               md5: 66666666666666666666666666666666
             - name: dotnet
               version: 1.0.0-preview1-002702
@@ -68,7 +68,7 @@ describe BuildpackDependencyUpdater do
               version: 1.0.0-preview2-003131
               cf_stacks:
                 - cflinuxfs2
-              uri: https://buildpacks.cloudfoundry.org/concourse-binaries/dotnet/dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz
+              uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz
               md5: 0abbf8aaae612c02aa529ca2a80d091a
           MANIFEST
       end
@@ -93,7 +93,7 @@ describe BuildpackDependencyUpdater do
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '1.0.0'}
         expect(dependency_in_manifest["version"]).to eq("1.0.0")
-        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/dotnet/dotnet.1.0.0.linux-amd64.tar.gz")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0.linux-amd64.tar.gz")
         expect(dependency_in_manifest["md5"]).to eq("aaaabbbb22224444")
       end
 
@@ -153,13 +153,13 @@ describe BuildpackDependencyUpdater do
             version: 1.0.0-preview2-003121
             cf_stacks:
             - cflinuxfs2
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/dotnet/dotnet.1.0.0-preview2-003121.linux-amd64.tar.gz
+            uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview2-003121.linux-amd64.tar.gz
             md5: 8496b07e910f3b7997196e23427f3676
           - name: dotnet
             version: 1.0.0-preview2-003131
             cf_stacks:
             - cflinuxfs2
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/dotnet/dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz
+            uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz
             md5: 0abbf8aaae612c02aa529ca2a80d091a
           MANIFEST
       end
@@ -180,7 +180,7 @@ describe BuildpackDependencyUpdater do
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '1.0.0'}
         expect(dependency_in_manifest["version"]).to eq("1.0.0")
-        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/dotnet/dotnet.1.0.0.linux-amd64.tar.gz")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0.linux-amd64.tar.gz")
         expect(dependency_in_manifest["md5"]).to eq("aaaabbbb22224444")
       end
 
@@ -222,7 +222,7 @@ describe BuildpackDependencyUpdater do
     end
 
     it 'downloads and untars the new dotnet version' do
-      expect(subject).to receive(:system).with('curl https://buildpacks.cloudfoundry.org/concourse-binaries/dotnet/dotnet.1.0.2.linux-amd64.tar.gz -o dotnet.tar.gz')
+      expect(subject).to receive(:system).with('curl https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.2.linux-amd64.tar.gz -o dotnet.tar.gz')
       expect(subject).to receive(:system).with('tar -xf dotnet.tar.gz')
       subject.get_dependency_info
       subject.get_framework_version

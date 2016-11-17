@@ -7,7 +7,7 @@ class BuildpackDependencyUpdater::Bower < BuildpackDependencyUpdater
 
     dependency_version = git_commit_message[/filename:\s+binary-builder\/bower-([\d\.]*).tgz/, 1]
     md5 = git_commit_message[/md5:\s+(\w+)/, 1]
-    url ="https://#{buildpack_dependencies_host_domain}/concourse-binaries/bower/bower-#{dependency_version}.tgz"
+    url ="https://#{buildpack_dependencies_host_domain}/dependencies/bower/bower-#{dependency_version}.tgz"
 
     [dependency_version, url, md5]
   end

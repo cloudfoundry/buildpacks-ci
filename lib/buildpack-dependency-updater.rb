@@ -79,7 +79,7 @@ class BuildpackDependencyUpdater
     dependency_version = $2
     md5 = $3
 
-    url ="https://#{buildpack_dependencies_host_domain}/concourse-binaries/#{dependency}/#{dependency_filename}"
+    url ="https://#{buildpack_dependencies_host_domain}/dependencies/#{dependency}/#{dependency_filename}"
 
     [dependency_version, url, md5]
   end

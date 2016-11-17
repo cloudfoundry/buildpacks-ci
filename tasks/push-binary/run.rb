@@ -17,7 +17,7 @@ if binary_name == "composer" then
   aws_url =  "s3://#{bucket_name}/php/binaries/trusty/composer/#{version}"
   file_name = "composer.phar"
 else
-  aws_url =  "s3://#{bucket_name}/concourse-binaries/#{binary_name}"
+  aws_url =  "s3://#{bucket_name}/dependencies/#{binary_name}"
 end
 
 

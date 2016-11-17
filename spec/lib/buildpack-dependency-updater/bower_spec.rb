@@ -46,7 +46,7 @@ describe BuildpackDependencyUpdater do
               version: 1.77.88
               cf_stacks:
                 - cflinuxfs2
-              uri: https://buildpacks.cloudfoundry.org/concourse-binaries/bower/bower-1.7.9.tgz
+              uri: https://buildpacks.cloudfoundry.org/dependencies/bower/bower-1.7.9.tgz
               md5: doesnotmatteratall
         MANIFEST
         File.open(manifest_file, 'w') do |file|

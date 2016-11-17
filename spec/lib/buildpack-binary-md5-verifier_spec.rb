@@ -166,11 +166,11 @@ describe BuildpackBinaryMD5Verifier do
   end
 
   describe '#show_mismatches' do
-    let(:uri) { 'https://buildpacks.cloudfoundry.org/concourse-binaries/bundler/bundler-1.12.5.tgz' }
+    let(:uri) { 'https://buildpacks.cloudfoundry.org/dependencies/bundler/bundler-1.12.5.tgz' }
     let(:uri_mapping) {{
       uri => {'md5' => 'md5_stub1', 'sha' => 'sha_stub1'}
     }}
-    let(:gsubbed_file_name) { "https___buildpacks.cloudfoundry.org_concourse_binaries_bundler_bundler_1.12.5.tgz" }
+    let(:gsubbed_file_name) { "https___buildpacks.cloudfoundry.org_dependencies_bundler_bundler_1.12.5.tgz" }
     let(:md5_stub)          { double(:md5_stub) }
     let(:actual_md5_stub)   { 'md5_stub1' }
 
