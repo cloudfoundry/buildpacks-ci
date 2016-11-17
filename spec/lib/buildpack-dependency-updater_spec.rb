@@ -109,7 +109,7 @@ describe BuildpackDependencyUpdater do
           dependencies:
             - name: composer
               version: 1.0.3
-              uri: https://buildpacks.cloudfoundry.org/php/binaries/trusty/composer/1.1.0/composer.phar
+              uri: https://buildpacks.cloudfoundry.org/dependencies/php/binaries/trusty/composer/1.1.0/composer.phar
               cf_stacks:
                 - cflinuxfs2
               md5: aff20443a474112755ff0ef65c4873e5
@@ -129,7 +129,7 @@ describe BuildpackDependencyUpdater do
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(new_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/php/binaries/trusty/composer/1.1.0/composer.phar")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/php/binaries/trusty/composer/1.1.0/composer.phar")
         expect(dependency_in_manifest["md5"]).to eq("05d30d20be1c94c9edc02756420a7d10")
       end
 

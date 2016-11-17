@@ -14,7 +14,7 @@ file_name = File.basename(file_path)
 
 if binary_name == "composer" then
   version = file_name.gsub("composer-","").gsub(".phar","")
-  aws_url =  "s3://#{bucket_name}/php/binaries/trusty/composer/#{version}"
+  aws_url =  "s3://#{bucket_name}/dependencies/php/binaries/trusty/composer/#{version}"
   file_name = "composer.phar"
 else
   aws_url =  "s3://#{bucket_name}/dependencies/#{binary_name}"
