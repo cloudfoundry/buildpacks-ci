@@ -127,10 +127,6 @@ jobs:
             AWS_BOSH_LITE_NAME: {{deployment-name}}
             BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
             BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-            BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
-            BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
-            BOSH_LITE_DISK_SIZE: 100
-            BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
             BOSH_TARGET: <%= full_deployment_name +  '.' + bosh_lite_domain_name %>
             BOSH_LITE_NAME: {{deployment-name}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
@@ -183,10 +179,6 @@ jobs:
             AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
             BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
             BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-            BOSH_LITE_SECURITY_GROUP: {{buildpacks_ci_bosh_lite_security_group}}
-            BOSH_LITE_SUBNET_ID: {{buildpacks_ci_bosh_lite_subnet_id}}
-            BOSH_LITE_DISK_SIZE: 100
-            BOSH_GATEWAY_USER: {{buildpacks_ci_bosh_gateway_user}}
             BOSH_TARGET: <%= full_deployment_name +  '.' + bosh_lite_domain_name %>
             BOSH_LITE_NAME: {{deployment-name}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
