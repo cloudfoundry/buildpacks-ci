@@ -1,4 +1,9 @@
 resources:
+  - name: nightly-trigger
+    type: cron
+    source:
+      expression: <%= deployment_name.bytes.reduce(&:+) % 10 %> 0 * * *
+      location: {{current-timezone}}
   - name: cf-deployment
     type: bosh-deployment
     source:
@@ -36,7 +41,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: gcp-pipelines
+      branch: {{buildpacks-ci-git-uri-public-branch}}
   - name: machete
     type: git
     source:
