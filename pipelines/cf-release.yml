@@ -142,10 +142,6 @@ jobs:
           BOSH_PRIVATE_KEY: {{bosh_private_key}}
           BOSH_USER: {{bosh_user}}
           BOSH_PASSWORD: {{bosh_password}}
-          AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-          AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-          BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-          BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
           BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
           GCP_BOSH_LITE_NAME: cf-release-gcp-bosh-lite
           GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
@@ -205,10 +201,6 @@ jobs:
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
             BOSH_PASSWORD: {{bosh_password}}
-            AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-            AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-            BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-            BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
             BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
@@ -284,10 +276,6 @@ jobs:
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
             BOSH_PASSWORD: {{bosh_password}}
-            AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-            AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-            BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-            BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
             BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
@@ -314,12 +302,12 @@ jobs:
       - task: destroy-cf-release-bosh-lite
         file: buildpacks-ci/tasks/destroy-bosh-lite/task.yml
         params:
-          DEPLOYMENT_NAME: cf-release.buildpacks.ci
+          DEPLOYMENT_NAME: cf-release.buildpacks-gcp.ci
           BOSH_PRIVATE_KEY: {{bosh_private_key}}
-          AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-          AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-          AWS_BOSH_LITE_NAME: cf-release.buildpacks.ci
-          BOSH_LITE_NAME: cf-release.buildpacks.ci
+          GCP_BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
+          GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
+          GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
+          BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           IAAS: gcp
