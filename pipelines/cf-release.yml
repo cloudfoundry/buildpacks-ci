@@ -11,7 +11,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: gcp-pipelines
+      branch: {{buildpacks-ci-git-uri-public-branch}}
   - name: bosh-lite
     type: git
     source:
@@ -26,6 +26,12 @@ resources:
     source:
       uri: {{cf-release-git-uri}}
       branch: develop
+  - name: cf-release-develop
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cf-release
+      branch: develop
+      private_key: {{cf-release-private-key}}
   - name: lite-stemcell
     type: bosh-io-stemcell
     source:
@@ -56,6 +62,12 @@ resources:
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
+  - name: buildpack-releases
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry-attic/buildpack-releases.git
+      private_key: {{buildpack-releases-private-key}}
+      branch: master
   - name: diego-bosh-release
     type: bosh-io-release
     tarball: true
@@ -79,6 +91,12 @@ resources:
       user: {{buildpacks-github-org}}
       repository: <%= language.gsub('-offline', '') %>-buildpack
       access_token: {{buildpacks-github-token}}
+  - name: <%= language %>-buildpack-bosh-release
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/<%= language %>-buildpack-release.git
+      private_key: {{<%= language %>-buildpack-bosh-release-private-key}}
+      branch: master
 <% end %>
 
 groups:
@@ -88,6 +106,24 @@ groups:
       - deploy-cf-and-diego-to-cf-release
       - cats
       - destroy-bosh-lite
+      - ship-it
+<% (supported_languages - %w(java java-offline dotnet-core)).each do |language| %>
+      - deprecated-bosh-release-<%= language %>
+<% end %>
+<% (supported_languages - %w(java java-offline)).each do |language| %>
+      - update-<%= language %>-buildpack-bosh-release
+      - cf-release for <%= language %>
+<% end %>
+  - name: java
+    jobs:
+      - recreate-bosh-lite
+      - ship-it-java
+      - deprecated-bosh-release-java
+      - deprecated-bosh-release-java-offline
+      - update-java-buildpack-bosh-release
+      - update-java-offline-buildpack-bosh-release
+      - cf-release for java
+      - cf-release for java-offline
 
 jobs:
   - name: recreate-bosh-lite
@@ -203,6 +239,13 @@ jobs:
               - diego-bosh-release/release.tgz
               - cflinuxfs2-rootfs-bosh-release/release.tgz
               - garden-runc-bosh-release/release.tgz
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   - name: cats
     serial: true
     serial_groups: [ cf-release ]
@@ -274,6 +317,7 @@ jobs:
       - aggregate:
         - get: deployments-buildpacks
           passed: [ cats ]
+          trigger: true
         - get: buildpacks-ci
       - task: destroy-cf-release-bosh-lite
         file: buildpacks-ci/tasks/destroy-bosh-lite/task.yml

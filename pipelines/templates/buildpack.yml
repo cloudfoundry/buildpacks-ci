@@ -30,6 +30,13 @@ resources: #####################################################################
         - CHANGELOG
         - "**/*.md"
 
+  - name: buildpack-master
+    type: git
+    source:
+      uri: git@github.com:<%= git_repo_organization %>/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
+      branch: master
+
   - name: buildpacks-ci
     type: git
     source:
@@ -41,7 +48,89 @@ resources: #####################################################################
     source:
       uri: https://github.com/cloudfoundry/brats.git
 
+<% unless language == 'multi' %>
+  - name: pivnet-buildpack-metadata
+    type: git
+    source:
+      branch: master
+      private_key: {{pivotal-cf-buildpacks-ci-robots}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci-robots.git # pivotal-cf because pivnet is not foundation's
+      paths: [ pivnet-metadata/<%= language %>.yml ]
+<% end %>
+
+<% unless language == 'binary' || language == 'multi' %>
+  - name: compile-extensions
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/compile-extensions.git
+<% end %>
+
+  - name: buildpack-checksums
+    type: git
+    source:
+      uri: git@bitbucket.org:cloudfoundry-buildpacks/buildpack-checksums.git
+      private_key: {{buildpack-checksums-private-key}}
+      branch: master
+
   ## Github Releases ##
+
+    <% if language == 'multi' %>
+      <% github_release_user = 'cloudfoundry-incubator' %>
+    <% else %>
+      <% github_release_user = '{{buildpacks-github-org}}' %>
+    <% end %>
+  - name: buildpack-github-release
+    type: github-release
+    source:
+      user: <%= github_release_user %>
+      repository: <%= language %>-buildpack
+      access_token: {{buildpacks-github-token}}
+
+  - name: buildpack-packager
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: buildpack-packager
+      access_token: {{buildpacks-github-token}}
+
+  - name: machete
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: machete
+      access_token: {{buildpacks-github-token}}
+
+  ## Pivnet Release ##
+
+<% unless language == 'multi' %>
+  - name: pivnet-production
+    type: pivnet
+    source:
+      endpoint: https://network.pivotal.io
+      bucket: pivotalnetwork
+      api_token: {{pivnet-apikey}}
+      product_slug: buildpacks
+      access_key_id: {{pivnet-access-key}}
+      secret_access_key: {{pivnet-secret-key}}
+<% end %>
+
+  ## S3 Buckets ##
+
+  - name: pivotal-buildpack
+    type: s3
+    source:
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      regexp: <%= language %>_buildpack-v(.*).zip
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+
+  - name: pivotal-buildpack-cached
+    type: s3
+    source:
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      regexp: <%= language %>_buildpack-cached-v(.*).zip
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
   ## Resource Pools ##
 
