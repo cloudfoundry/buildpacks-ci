@@ -119,7 +119,7 @@ resources: #####################################################################
     source:
       target: https://stacks-nc.buildpacks-gcp.ci.cf-app.com:25555
       username: admin
-      password: {{bosh-lite-password}}
+      password: {{gcp_bosh_lite_hm_director_password}}
       deployment: cf-warden
       ignore_ssl: true
 
@@ -128,7 +128,7 @@ resources: #####################################################################
     source:
       target: https://stacks-nc.buildpacks-gcp.ci.cf-app.com:25555
       username: admin
-      password: {{bosh-lite-password}}
+      password: {{gcp_bosh_lite_hm_director_password}}
       deployment: cf-warden-diego
       ignore_ssl: true
 
@@ -137,7 +137,7 @@ resources: #####################################################################
     source:
       target: https://stacks-nc.buildpacks-gcp.ci.cf-app.com:25555
       username: admin
-      password: {{bosh-lite-password}}
+      password: {{gcp_bosh_lite_hm_director_password}}
       deployment: rootfs-smoke-test
       ignore_ssl: true
 
@@ -369,12 +369,6 @@ jobs: ##########################################################################
           params:
             DEPLOYMENT_NAME: stacks-nc.buildpacks-gcp.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
-            BOSH_PRIVATE_KEY: {{bosh_private_key}}
-            BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{bosh_password}}
-            BOSH_TARGET: stacks-nc.buildpacks-gcp.ci.cf-app.com
-            BOSH_LITE_NAME: stacks-nc.buildpacks-gcp.ci
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             ROOTFS_RELEASE: cflinuxfs2-nc-rootfs
           privileged: true
