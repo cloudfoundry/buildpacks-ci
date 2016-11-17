@@ -262,12 +262,6 @@ describe BuildpackDependencyUpdater do
               uri: https://pivotal-buildpacks.s3.amazonaws.com/dependencies/ruby/ruby-2.3.1-linux-x64.tgz
               cf_stacks:
                 - cflinuxfs2
-            - name: rails_log_stdout
-              version: 0
-              uri: https://pivotal-buildpacks.s3.amazonaws.com/ruby/binaries/lucid64/rails_log_stdout.tgz
-              md5: 9ecd9126ba4a5f12ec98bc75c433885f
-              cf_stacks:
-                - cflinuxfs2
         MANIFEST
         File.open(manifest_file, "w") do |file|
           file.write buildpack_manifest_contents
