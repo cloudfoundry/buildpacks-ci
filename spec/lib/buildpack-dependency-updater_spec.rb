@@ -42,7 +42,7 @@ describe BuildpackDependencyUpdater do
                 - cflinuxfs2
             - name: godep
               version: v64
-              uri: https://buildpacks.cloudfoundry.org/concourse-binaries/godep/godep-v64-linux-x64.tgz
+              uri: https://buildpacks.cloudfoundry.org/dependencies/godep/godep-v64-linux-x64.tgz
               md5: f75da3a0c5ec08514ec2700c2a6d1187
               cf_stacks:
                 - cflinuxfs2
@@ -65,7 +65,7 @@ describe BuildpackDependencyUpdater do
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(new_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/godep/godep-#{new_version}-linux-x64.tgz")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/godep/godep-#{new_version}-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq(new_md5)
       end
 
@@ -168,7 +168,7 @@ describe BuildpackDependencyUpdater do
           dependencies:
             - name: glide
               version: 0.9.3
-              uri: https://buildpacks.cloudfoundry.org/concourse-binaries/glide/glide-0.9.3-linux-x64.tgz
+              uri: https://buildpacks.cloudfoundry.org/dependencies/glide/glide-0.9.3-linux-x64.tgz
               cf_stacks:
                 - cflinuxfs2
               md5: aff20443a474112755ff0ef65c4873e5
@@ -190,7 +190,7 @@ describe BuildpackDependencyUpdater do
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(new_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/glide/glide-0.10.2-linux-x64.tgz")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/glide/glide-0.10.2-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
       end
 
@@ -216,7 +216,7 @@ describe BuildpackDependencyUpdater do
           dependencies:
             - name: nginx
               version: 1.11.1
-              uri: https://buildpacks.cloudfoundry.org/concourse-binaries/nginx/nginx-1.11.1-linux-x64.tgz
+              uri: https://buildpacks.cloudfoundry.org/dependencies/nginx/nginx-1.11.1-linux-x64.tgz
               cf_stacks:
                 - cflinuxfs2
               md5: 7d28497395b62221f3380e82f89cd197
@@ -241,7 +241,7 @@ describe BuildpackDependencyUpdater do
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
           expect(dependency_in_manifest["version"]).to eq(new_version)
-          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/nginx/nginx-1.11.2-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/nginx/nginx-1.11.2-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
         end
 
@@ -287,13 +287,13 @@ describe BuildpackDependencyUpdater do
           dependencies:
             - name: nginx
               version: 1.10.1
-              uri: https://buildpacks.cloudfoundry.org/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz
+              uri: https://buildpacks.cloudfoundry.org/dependencies/nginx/nginx-1.10.1-linux-x64.tgz
               cf_stacks:
                 - cflinuxfs2
               md5: 7d28497395b62221f3380e82f89cd197
             - name: nginx
               version: 1.11.1
-              uri: https://buildpacks.cloudfoundry.org/concourse-binaries/nginx/nginx-1.11.1-linux-x64.tgz
+              uri: https://buildpacks.cloudfoundry.org/dependencies/nginx/nginx-1.11.1-linux-x64.tgz
               cf_stacks:
                 - cflinuxfs2
               md5: 7d28497395b62221f3380e82f89cd197
@@ -313,12 +313,12 @@ describe BuildpackDependencyUpdater do
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
         expect(dependency_in_manifest["version"]).to eq(new_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/nginx/nginx-1.11.2-linux-x64.tgz")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/nginx/nginx-1.11.2-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] != new_version}
         expect(dependency_in_manifest["version"]).to eq("1.10.1")
-        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/nginx/nginx-1.10.1-linux-x64.tgz")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/nginx/nginx-1.10.1-linux-x64.tgz")
         expect(dependency_in_manifest["md5"]).to eq("7d28497395b62221f3380e82f89cd197")
       end
 

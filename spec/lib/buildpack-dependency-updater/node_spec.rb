@@ -41,55 +41,55 @@ describe BuildpackDependencyUpdater do
           dependencies:
           - name: node
             version: 0.12.45
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.12.45-linux-x64.tgz
+            uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-0.12.45-linux-x64.tgz
             md5: b6607379e8cdcfa3763acc12fe40cef9
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 0.12.46
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.12.46-linux-x64.tgz
+            uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-0.12.46-linux-x64.tgz
             md5: 2e02c3350a0b81e8b501ef3ea637a93b
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 4.4.5
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-4.4.5-linux-x64.tgz
+            uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-4.4.5-linux-x64.tgz
             md5: b2893ffdf42e2c3614872ced633feeea
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 4.4.6
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-4.4.6-linux-x64.tgz
+            uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-4.4.6-linux-x64.tgz
             md5: 33822ae3f92ac9586d73dee3c42a4bf2
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 5.11.1
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-5.11.1-linux-x64.tgz
+            uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-5.11.1-linux-x64.tgz
             md5: c6da910f661470d01e7920a1d3efaee2
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 5.12.0
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-5.12.0-linux-x64.tgz
+            uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-5.12.0-linux-x64.tgz
             md5: 006d5be71aa68c7cccdd5c2c9f1d0fc0
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 6.2.1
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-6.2.1-linux-x64.tgz
+            uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-6.2.1-linux-x64.tgz
             md5: 619a748a2b23f3e0189cf8c3f291b8d3
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 6.2.2
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-6.2.2-linux-x64.tgz
+            uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-6.2.2-linux-x64.tgz
             md5: e54ef4e2637d8cc8125a8ccc67c47951
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 7.0.0
-            uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-7.0.0-linux-x64.tgz
+            uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-7.0.0-linux-x64.tgz
             md5: cff1c6d374fd9dd3e8fb0ad2fbddc6da
             cf_stacks:
               - cflinuxfs2
@@ -112,12 +112,12 @@ describe BuildpackDependencyUpdater do
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
           expect(dependency_in_manifest["version"]).to eq(expected_version)
-          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-#{expected_version}-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '0.12.46'}
           expect(dependency_in_manifest["version"]).to eq("0.12.46")
-          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-0.12.46-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-0.12.46-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("2e02c3350a0b81e8b501ef3ea637a93b")
         end
 
@@ -147,12 +147,12 @@ describe BuildpackDependencyUpdater do
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
           expect(dependency_in_manifest["version"]).to eq(expected_version)
-          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-#{expected_version}-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '7.0.0'}
           expect(dependency_in_manifest["version"]).to eq("7.0.0")
-          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-7.0.0-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-7.0.0-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("cff1c6d374fd9dd3e8fb0ad2fbddc6da")
         end
 
@@ -185,12 +185,12 @@ describe BuildpackDependencyUpdater do
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
           expect(dependency_in_manifest["version"]).to eq(expected_version)
-          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-#{expected_version}-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.6'}
           expect(dependency_in_manifest["version"]).to eq("4.4.6")
-          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-4.4.6-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-4.4.6-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("33822ae3f92ac9586d73dee3c42a4bf2")
         end
 
@@ -246,20 +246,20 @@ describe BuildpackDependencyUpdater do
           dependencies:
             - name: node
               version: 4.4.4
-              uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-4.4.4-linux-x64.tgz
+              uri: https://pivotal-buildpacks.s3.amazonaws.com/dependencies/node/node-4.4.4-linux-x64.tgz
               md5: 8beeb9a17a81b9832a1ccce02e6d6897
               cf_stacks:
                 - cflinuxfs2
             - name: ruby
               version: 2.3.0
               md5: 535342030a11abeb11497824bf642bf2
-              uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/ruby/ruby-2.3.0-linux-x64.tgz
+              uri: https://pivotal-buildpacks.s3.amazonaws.com/dependencies/ruby/ruby-2.3.0-linux-x64.tgz
               cf_stacks:
                 - cflinuxfs2
             - name: ruby
               version: 2.3.1
               md5: c55c51d66a18123363e7f96635b54717
-              uri: https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/ruby/ruby-2.3.1-linux-x64.tgz
+              uri: https://pivotal-buildpacks.s3.amazonaws.com/dependencies/ruby/ruby-2.3.1-linux-x64.tgz
               cf_stacks:
                 - cflinuxfs2
             - name: rails_log_stdout
@@ -288,7 +288,7 @@ describe BuildpackDependencyUpdater do
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == "4.4.4"}
           expect(dependency_in_manifest["version"]).to eq("4.4.4")
-          expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/concourse-binaries/node/node-4.4.4-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/dependencies/node/node-4.4.4-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("8beeb9a17a81b9832a1ccce02e6d6897")
         end
 
@@ -324,7 +324,7 @@ describe BuildpackDependencyUpdater do
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
           expect(dependency_in_manifest["version"]).to eq(expected_version)
-          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-#{expected_version}-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
         end
 
@@ -373,19 +373,19 @@ describe BuildpackDependencyUpdater do
              version: 1.0.0-preview2-003121
              cf_stacks:
                - cflinuxfs2
-             uri: https://buildpacks.cloudfoundry.org/concourse-binaries/dotnet/dotnet.1.0.0-preview2-003121.linux-amd64.tar.gz
+             uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview2-003121.linux-amd64.tar.gz
              md5: 8496b07e910f3b7997196e23427f3676
            - name: dotnet
              version: 1.0.0-preview2-003131
              cf_stacks:
                - cflinuxfs2
-             uri: https://buildpacks.cloudfoundry.org/concourse-binaries/dotnet/dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz
+             uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz
              md5: 0abbf8aaae612c02aa529ca2a80d091a
            - name: node
              version: 6.9.0
              cf_stacks:
                - cflinuxfs2
-             uri: https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-6.9.0-linux-x64.tgz
+             uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-6.9.0-linux-x64.tgz
              md5: 6c1e3fcff5c9275206543d5a7fe92d57
         MANIFEST
         File.open(manifest_file, "w") do |file|
@@ -405,7 +405,7 @@ describe BuildpackDependencyUpdater do
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == "6.9.0"}
           expect(dependency_in_manifest["version"]).to eq("6.9.0")
-          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-6.9.0-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-6.9.0-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("6c1e3fcff5c9275206543d5a7fe92d57")
         end
 
@@ -438,7 +438,7 @@ describe BuildpackDependencyUpdater do
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
           expect(dependency_in_manifest["version"]).to eq(expected_version)
-          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/concourse-binaries/node/node-#{expected_version}-linux-x64.tgz")
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-#{expected_version}-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
         end
 
