@@ -3,7 +3,7 @@ require 'spec_helper.rb'
 require 'digest'
 require 'yaml'
 
-describe 'make-rootfs' do
+xdescribe 'make-rootfs' do
   stacks_artifacts = 'spec/tasks/make-rootfs/stacks-artifacts'
   receipt_artifacts = 'spec/tasks/make-rootfs/receipt-artifacts'
 
