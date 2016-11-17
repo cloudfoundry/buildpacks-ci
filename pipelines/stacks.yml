@@ -4,6 +4,10 @@ resource_types:
     type: docker-image
     source:
       repository: cfcommunity/slack-notification-resource
+  - name: cron
+    type: docker-image
+    source:
+      repository: cftoolsmiths/cron-test
 
 resources: ###########################################################################################################
 
