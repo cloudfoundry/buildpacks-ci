@@ -65,7 +65,7 @@ COPY Gemfile.lock /usr/local/Gemfile.lock
 RUN cd /usr/local && bundle install
 
 #install fly-cli
-RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly
+RUN curl "https://concourse.buildpacks-gcp.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly
 RUN chmod +x /usr/local/bin/fly
 
 # git-hooks and git-secrets
