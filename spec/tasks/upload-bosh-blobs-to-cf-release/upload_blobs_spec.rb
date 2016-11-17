@@ -3,7 +3,7 @@ require 'spec_helper.rb'
 require 'digest'
 require 'yaml'
 
-describe 'create bosh release task' do
+xdescribe 'create bosh release task' do
   context 'when modifying release blobs' do
     let(:task_file) { 'tasks/upload-bosh-blobs-to-cf-release/task.yml' }
 

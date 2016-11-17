@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'spec_helper'
 
-describe 'get-commit-shasums' do
+xdescribe 'get-commit-shasums' do
   before :context do
     `git init ./spec/tasks/get-commit-shasums`
     execute('-c tasks/get-commit-shasums/task.yml -i buildpacks-ci=. -i buildpack-checksums=./spec/tasks/get-commit-shasums -i buildpack-artifacts=./spec/tasks/get-commit-shasums/pivotal-buildpacks-cached')
