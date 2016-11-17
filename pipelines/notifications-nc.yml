@@ -1,10 +1,4 @@
 ---
-resource_types:
-- name: slack-notification
-  type: docker-image
-  source:
-    repository: cfcommunity/slack-notification-resource
-
 resources:
   - name: new-buildpack-cves
     type: git
