@@ -214,11 +214,11 @@ jobs: ##########################################################################
         - put: pivotal-buildpack
           params:
             from: buildpack-artifacts/.*_buildpack-v(.*).zip
-            to: /experimental-buildpacks/<%= language %>/
+            to: /dependencies/experimental-buildpacks/<%= language %>/
         - put: pivotal-buildpack-cached
           params:
             from: buildpack-artifacts/.*_buildpack-cached-v(.*).zip
-            to: /experimental-buildpacks/<%= language %>/
+            to: /dependencies/experimental-buildpacks/<%= language %>/
         on_failure:
           put: failure-alert
           params:
