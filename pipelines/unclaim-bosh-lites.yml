@@ -12,7 +12,7 @@ resources:
       private_key: {{buildpacks-ci-private-key}}
 
 jobs:
-<% {'cf-edge-environments': ['edge-1', 'edge-2'], 'cf-lts-environments': ['lts-1', 'lts-2'] }.each do |resource_type, resources| %>
+<% {'cf-edge-gcp-environments': ['edge-1', 'edge-2'], 'cf-lts-gcp-environments': ['lts-1', 'lts-2'] }.each do |resource_type, resources| %>
   <% resources.each do |resource_name| %>
   - name: unclaim-<%= resource_name %>
     public: true
@@ -24,7 +24,7 @@ jobs:
         - task: unclaim-bosh-lite-resource
           file: buildpacks-ci/tasks/unclaim-bosh-lite-resource/task.yml
           params:
-            RESOURCE_NAME: <%= resource_name + '.buildpacks.ci' %>
+            RESOURCE_NAME: <%= resource_name + '.buildpacks-gcp.ci' %>
             RESOURCE_TYPE: <%= resource_type %>
             PIPELINE_NAME: unclaim-bosh-lites
         - put: resource-pools
