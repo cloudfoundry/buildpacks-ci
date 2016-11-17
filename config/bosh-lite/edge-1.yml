@@ -1,7 +1,0 @@
----
-deployment-name: edge-1.buildpacks.ci
-resource-pool: cf-edge-environments
-cf-manifest-location: deployments-buildpacks/deployments/edge-1.buildpacks.ci/manifest.yml
-diego-manifest-location: deployments-buildpacks/deployments/edge-1.buildpacks.ci/diego.yml
-iaas: aws
-bosh-lite-name: N/A

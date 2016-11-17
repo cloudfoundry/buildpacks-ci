@@ -1,0 +1,7 @@
+---
+deployment-name: edge-2.buildpacks-gcp.ci
+resource-pool: cf-edge-gcp-environments
+cf-manifest-location: deployments-buildpacks/deployments/edge-2.buildpacks-gcp.ci/manifest.yml
+diego-manifest-location: deployments-buildpacks/deployments/edge-2.buildpacks-gcp.ci/diego.yml
+iaas: gcp
+bosh-lite-name: edge-2-gcp-bosh-lite
