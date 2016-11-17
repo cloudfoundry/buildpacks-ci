@@ -7,7 +7,7 @@ require 'fileutils'
 require_relative '../../lib/state-of-bosh-lites'
 
 describe StateOfBoshLites do
-  let(:environments) {%w(edge-1.buildpacks.ci edge-2.buildpacks.ci lts-1.buildpacks.ci lts-2.buildpacks.ci)}
+  let(:environments) {%w(edge-1.buildpacks-gcp.ci edge-2.buildpacks-gcp.ci lts-1.buildpacks-gcp.ci lts-2.buildpacks-gcp.ci)}
 
   before(:each) do
     allow(GitClient).to receive(:checkout_branch)
