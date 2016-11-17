@@ -3,7 +3,7 @@ require 'spec_helper.rb'
 require 'digest'
 require 'yaml'
 
-describe 'create bosh release task' do
+xdescribe 'create bosh release task' do
   context 'when modifying release blobs' do
     before(:context) do
       `git init ./spec/tasks/make-rootfs-smoke-test-manifest/deployments-buildpacks`
