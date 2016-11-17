@@ -13,7 +13,7 @@ bosh_lite_url = "https://#{deployment_id}.#{domain_name}"
 if iaas == 'azure' || iaas == 'gcp'
   bosh_director_user = ENV["#{iaas.upcase}_BOSH_DIRECTOR_USER"]
   bosh_director_password = ENV["#{iaas.upcase}_BOSH_DIRECTOR_PASSWORD"]
-  bosh_director_target = "bosh.buildpacks-#{iaas}.ci.#{domain_name}"
+  bosh_director_target = "10.0.0.6"
 elsif iaas == 'aws'
   bosh_director_user = bosh_director_password = bosh_director_target = nil
 else

@@ -117,7 +117,7 @@ resources: #####################################################################
   - name: stacks-cf-deployment
     type: bosh-deployment
     source:
-      target: https://stacks-nc.buildpacks.ci.cf-app.com:25555
+      target: https://stacks-nc.buildpacks-gcp.ci.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden
@@ -126,7 +126,7 @@ resources: #####################################################################
   - name: stacks-diego-deployment
     type: bosh-deployment
     source:
-      target: https://stacks-nc.buildpacks.ci.cf-app.com:25555
+      target: https://stacks-nc.buildpacks-gcp.ci.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: cf-warden-diego
@@ -135,7 +135,7 @@ resources: #####################################################################
   - name: stacks-rootfs-deployment
     type: bosh-deployment
     source:
-      target: https://stacks-nc.buildpacks.ci.cf-app.com:25555
+      target: https://stacks-nc.buildpacks-gcp.ci.cf-app.com:25555
       username: admin
       password: {{bosh-lite-password}}
       deployment: rootfs-smoke-test
@@ -298,17 +298,14 @@ jobs: ##########################################################################
       - task: recreate-bosh-lite
         file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
         params:
-          DEPLOYMENT_NAME: stacks-nc.buildpacks.ci
+          DEPLOYMENT_NAME: stacks-nc.buildpacks-gcp.ci
           BOSH_PRIVATE_KEY: {{bosh_private_key}}
           BOSH_USER: {{bosh_user}}
           BOSH_PASSWORD: {{bosh_password}}
-          AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-          AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-          AWS_BOSH_LITE_NAME: stacks-nc.buildpacks.ci
           BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
           BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-          BOSH_TARGET: stacks-nc.buildpacks.ci.cf-app.com
-          BOSH_LITE_NAME: stacks-nc.buildpacks.ci
+          BOSH_TARGET: stacks-nc.buildpacks-gcp.ci.cf-app.com
+          BOSH_LITE_NAME: stacks-nc.buildpacks-gcp.ci
           BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           BOSH_LITE_HM_DIRECTOR_PASSWORD: {{gcp_bosh_lite_hm_director_password}}
@@ -318,7 +315,7 @@ jobs: ##########################################################################
           BOSH_LITE_POSTGRES_PASSWORD: {{gcp_bosh_lite_postgres_password}}
           GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
           GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
-
+          GCP_BOSH_LITE_NAME: stacks-nc.buildpacks-gcp.ci
           IAAS: gcp
         attempts: 5
         ensure:
@@ -358,7 +355,7 @@ jobs: ##########################################################################
         - task: generate-rootfs-smoke-test-manifest
           file: buildpacks-ci/tasks/make-rootfs-smoke-test-manifest/task.yml
           params:
-            DEPLOYMENT_NAME: stacks-nc.buildpacks.ci
+            DEPLOYMENT_NAME: stacks-nc.buildpacks-gcp.ci
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
             BOSH_PASSWORD: {{bosh_password}}
@@ -366,8 +363,8 @@ jobs: ##########################################################################
             AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
             BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
             BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-            BOSH_TARGET: stacks-nc.buildpacks.ci.cf-app.com
-            BOSH_LITE_NAME: stacks-nc.buildpacks.ci
+            BOSH_TARGET: stacks-nc.buildpacks-gcp.ci.cf-app.com
+            BOSH_LITE_NAME: stacks-nc.buildpacks-gcp.ci
           privileged: true
         - put: deployments-buildpacks
           params:
@@ -376,13 +373,13 @@ jobs: ##########################################################################
         - task: generate-cf-and-diego-manifest
           file: buildpacks-ci/tasks/generate-cf-and-diego-manifests/task.yml
           params:
-            DEPLOYMENT_NAME: stacks-nc.buildpacks.ci
+            DEPLOYMENT_NAME: stacks-nc.buildpacks-gcp.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
             BOSH_PASSWORD: {{bosh_password}}
-            BOSH_TARGET: stacks-nc.buildpacks.ci.cf-app.com
-            BOSH_LITE_NAME: stacks-nc.buildpacks.ci
+            BOSH_TARGET: stacks-nc.buildpacks-gcp.ci.cf-app.com
+            BOSH_LITE_NAME: stacks-nc.buildpacks-gcp.ci
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             ROOTFS_RELEASE: cflinuxfs2-nc-rootfs
@@ -426,13 +423,13 @@ jobs: ##########################################################################
             ROOTFS_RELEASE: cflinuxfs2-nc-rootfs
         - put: stacks-rootfs-deployment
           params:
-            manifest: deployments-buildpacks/deployments/stacks-nc.buildpacks.ci/rootfs-smoke-test.yml
+            manifest: deployments-buildpacks/deployments/stacks-nc.buildpacks-gcp.ci/rootfs-smoke-test.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cflinuxfs2-rootfs-release-artifacts/dev_releases/cflinuxfs2-nc-rootfs/*.tgz]
         - task: run-rootfs-smoke-test
           file: buildpacks-ci/tasks/run-rootfs-smoke-test/task.yml
           params:
-            DEPLOYMENT_NAME: stacks-nc.buildpacks.ci
+            DEPLOYMENT_NAME: stacks-nc.buildpacks-gcp.ci
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
             BOSH_PASSWORD: {{bosh_password}}
@@ -440,8 +437,8 @@ jobs: ##########################################################################
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             BOSH_AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             BOSH_AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            BOSH_TARGET: stacks-nc.buildpacks.ci.cf-app.com
-            BOSH_LITE_NAME: stacks-nc.buildpacks.ci
+            BOSH_TARGET: stacks-nc.buildpacks-gcp.ci.cf-app.com
+            BOSH_LITE_NAME: stacks-nc.buildpacks-gcp.ci
             RUBYGEM_MIRROR: {{rubygem-mirror}}
         on_failure:
           put: failure-alert
@@ -484,7 +481,7 @@ jobs: ##########################################################################
           privileged: true
         - put: stacks-cf-deployment
           params:
-            manifest: deployments-buildpacks/deployments/stacks-nc.buildpacks.ci/manifest.yml
+            manifest: deployments-buildpacks/deployments/stacks-nc.buildpacks-gcp.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
         on_failure:
@@ -522,7 +519,7 @@ jobs: ##########################################################################
           passed: [ deploy-cf-to-stacks-nc ]
       - put: stacks-diego-deployment
         params:
-          manifest: deployments-buildpacks/deployments/stacks-nc.buildpacks.ci/diego.yml
+          manifest: deployments-buildpacks/deployments/stacks-nc.buildpacks-gcp.ci/diego.yml
           stemcells: ['lite-stemcell/stemcell.tgz']
           releases:
             - diego-bosh-release/release.tgz
@@ -561,7 +558,7 @@ jobs: ##########################################################################
         - task: run-cflinuxfs2-nc-specs
           file: buildpacks-ci/tasks/run-cflinuxfs2-nc-specs/task.yml
           params:
-            DEPLOYMENT_NAME: stacks-nc.buildpacks.ci
+            DEPLOYMENT_NAME: stacks-nc.buildpacks-gcp.ci
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             CF_PASSWORD: {{ci-cf-password}}
         on_failure:
@@ -599,7 +596,7 @@ jobs: ##########################################################################
         - task: cats
           file: buildpacks-ci/tasks/run-cats/task.yml
           params:
-            DEPLOYMENT_NAME: stacks-nc.buildpacks.ci
+            DEPLOYMENT_NAME: stacks-nc.buildpacks-gcp.ci
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
@@ -609,8 +606,8 @@ jobs: ##########################################################################
             AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
             BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
             BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-            BOSH_TARGET: stacks-nc.buildpacks.ci.cf-app.com
-            BOSH_LITE_NAME: stacks-nc.buildpacks.ci
+            BOSH_TARGET: stacks-nc.buildpacks-gcp.ci.cf-app.com
+            BOSH_LITE_NAME: stacks-nc.buildpacks-gcp.ci
             DIEGO_DOCKER_ON: true
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           privileged: true
@@ -634,15 +631,15 @@ jobs: ##########################################################################
       - task: destroy-stacks-nc-bosh-lite
         file: buildpacks-ci/tasks/destroy-bosh-lite/task.yml
         params:
-          DEPLOYMENT_NAME: stacks-nc.buildpacks.ci
+          DEPLOYMENT_NAME: stacks-nc.buildpacks-gcp.ci
           BOSH_PRIVATE_KEY: {{bosh_private_key}}
-          AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-          AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-          AWS_BOSH_LITE_NAME: cf-release.buildpacks.ci
-          BOSH_LITE_NAME: stacks-nc.buildpacks.ci
+          BOSH_LITE_NAME: stacks-nc.buildpacks-gcp.ci
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           IAAS: gcp
+          GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
+          GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
+          GCP_BOSH_LITE_NAME: stacks-nc.buildpacks-gcp.ci
         attempts: 5
 
   - name: shipit
