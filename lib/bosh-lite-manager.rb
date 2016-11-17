@@ -3,18 +3,21 @@
 require 'yaml'
 require 'fileutils'
 require 'net/http'
+require 'erb'
+require 'ostruct'
+
 require_relative 'git-client'
 
 class BoshLiteManager
   attr_reader :deployment_dir, :iaas, :deployment_id, :bosh_lite_user,
               :bosh_lite_password, :bosh_lite_deployment_name, :bosh_lite_url,
               :bosh_director_user, :bosh_director_password, :bosh_director_target,
-              :bosh_private_key
+              :bosh_private_key, :credentials_struct
 
   def initialize(iaas:, deployment_dir:, deployment_id:, bosh_lite_user:,
                  bosh_lite_password:, bosh_lite_deployment_name:, bosh_lite_url:,
                  bosh_director_user:, bosh_director_password:, bosh_director_target:,
-                 bosh_private_key:)
+                 bosh_private_key:, credentials_struct:)
 
     @iaas = iaas
     @deployment_dir = deployment_dir
@@ -27,6 +30,7 @@ class BoshLiteManager
     @bosh_director_password = bosh_director_password
     @bosh_director_target = bosh_director_target
     @bosh_private_key = bosh_private_key
+    @credentials_struct = credentials_struct
   end
 
   def destroy
@@ -49,7 +53,7 @@ class BoshLiteManager
       exit 1
     end
 
-    update_admin_password
+    update_admin_password if iaas == 'aws'
 
     # Remove deployment manifests generated from the previous recreation cycle
     # So this recreation cycle's manifest generation is fresh
@@ -104,9 +108,14 @@ class BoshLiteManager
 
   def setup_bosh_lite_manifest
     Dir.chdir(deployment_dir) do
+      #Evaluate erb and generate manifest with credentials interpolated in it
+      erb_template = File.join(Dir.pwd, 'bosh-lite/bosh-lite-template.yml.erb')
+
+      bosh_lite_erb = ERB.new(File.read(erb_template))
+      bosh_lite_manifest_contents = bosh_lite_erb.result(credentials_struct.instance_eval {binding})
+
       # Use correct director uuid in bosh-lite manifest
-      FileUtils.copy('bosh-lite/bosh-lite-template.yml', 'bosh-lite.yml')
-      bosh_lite_manifest = YAML.load_file('bosh-lite.yml')
+      bosh_lite_manifest = YAML.load(bosh_lite_manifest_contents)
       bosh_director_uuid = `bosh status --uuid`.strip
       bosh_lite_manifest['director_uuid'] = bosh_director_uuid
       File.write('bosh-lite.yml', bosh_lite_manifest.to_yaml)
