@@ -4,10 +4,6 @@ resource_types:
   type: docker-image
   source:
     repository: pcfseceng/email-resource
-- name: slack-notification
-  type: docker-image
-  source:
-    repository: cfcommunity/slack-notification-resource
 
 resources:
   - name: monday-funday
