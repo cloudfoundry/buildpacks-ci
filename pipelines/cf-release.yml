@@ -47,7 +47,7 @@ resources:
     source:
       target: https://cf-release.buildpacks-gcp.ci.cf-app.com:25555
       username: admin
-      password: {{gcp_bosh_lite_hm_director_password}}
+      password: {{bosh-lite-password}}
       deployment: cf-warden
       ignore_ssl: true
   - name: cf-release-diego-deployment
@@ -55,7 +55,7 @@ resources:
     source:
       target: https://cf-release.buildpacks-gcp.ci.cf-app.com:25555
       username: admin
-      password: {{gcp_bosh_lite_hm_director_password}}
+      password: {{bosh-lite-password}}
       deployment: cf-warden-diego
       ignore_ssl: true
   - name: failure-alert
@@ -198,7 +198,13 @@ jobs:
           params:
             DEPLOYMENT_NAME: cf-release.buildpacks-gcp.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
+            BOSH_PRIVATE_KEY: {{bosh_private_key}}
+            BOSH_USER: {{bosh_user}}
+            BOSH_PASSWORD: {{bosh_password}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+            BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
+            BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
             ROOTFS_RELEASE: cflinuxfs2-rootfs
           privileged: true
         - put: deployments-buildpacks
