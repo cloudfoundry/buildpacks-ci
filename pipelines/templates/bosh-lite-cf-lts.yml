@@ -115,8 +115,8 @@ jobs:
           file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
           params:
             IAAS: {{iaas}}
-            GCP_BOSH_DIRECTOR_USER: {{gcp-bosh-director-user}}
-            GCP_BOSH_DIRECTOR_PASSWORD: {{gcp-bosh-director-password}}
+            GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
+            GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
             GCP_BOSH_LITE_NAME: {{bosh-lite-name}}
             DEPLOYMENT_NAME: {{deployment-name}}
             BOSH_PRIVATE_KEY: {{bosh_private_key}}
