@@ -14,7 +14,7 @@ resources:
     source:
       target: https://<%= full_deployment_name +  '.' + bosh_lite_domain_name %>:25555
       username: admin
-      password: {{gcp_bosh_lite_hm_director_password}}
+      password: {{bosh-lite-password}}
       deployment: cf-warden
       ignore_ssl: true
   - name: diego-deployment
@@ -22,7 +22,7 @@ resources:
     source:
       target: https://<%= full_deployment_name +  '.' + bosh_lite_domain_name %>:25555
       username: admin
-      password: {{gcp_bosh_lite_hm_director_password}}
+      password: {{bosh-lite-password}}
       deployment: cf-warden-diego
       ignore_ssl: true
   - name: deployments-buildpacks
@@ -167,6 +167,12 @@ jobs:
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
             CI_CF_PASSWORD: {{ci-cf-password}}
+            BOSH_PRIVATE_KEY: {{bosh_private_key}}
+            BOSH_USER: {{bosh_user}}
+            BOSH_PASSWORD: {{bosh_password}}
+            BOSH_TARGET: <%= full_deployment_name +  '.' + bosh_lite_domain_name %>
+            BOSH_LITE_NAME: {{deployment-name}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             ROOTFS_RELEASE: cflinuxfs2-rootfs
           privileged: true
