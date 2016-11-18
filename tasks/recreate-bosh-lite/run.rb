@@ -7,7 +7,7 @@ iaas = ENV['IAAS']
 deployment_id = ENV['DEPLOYMENT_NAME']
 domain_name = ENV['BOSH_LITE_DOMAIN_NAME']
 bosh_lite_user = ENV['BOSH_USER']
-bosh_lite_password = ENV['BOSH_PASSWORD']
+bosh_lite_password = ENV['BOSH_LITE_ADMIN_PASSWORD']
 bosh_lite_deployment_name = ENV["#{iaas.upcase}_BOSH_LITE_NAME"]
 bosh_private_key = ENV['BOSH_PRIVATE_KEY']
 
@@ -36,7 +36,8 @@ end
 deployment_dir = File.join(Dir.pwd,'deployments-buildpacks-artifacts', 'deployments', deployment_id)
 
 credentials_struct = OpenStruct.new({
-  'gcp_bosh_lite_hm_director_password' => ENV['BOSH_LITE_HM_DIRECTOR_PASSWORD'],
+  'gcp_bosh_lite_admin_password' => ENV['BOSH_LITE_ADMIN_PASSWORD'],
+  'gcp_bosh_lite_hm_password' => ENV['BOSH_LITE_HM_PASSWORD'],
   'gcp_bosh_lite_nats_password' => ENV['BOSH_LITE_NATS_PASSWORD'],
   'gcp_bosh_lite_blobstore_agent_password' => ENV['BOSH_LITE_BLOBSTORE_AGENT_PASSWORD'],
   'gcp_bosh_lite_blobstore_director_password' => ENV['BOSH_LITE_BLOBSTORE_DIRECTOR_PASSWORD'],
