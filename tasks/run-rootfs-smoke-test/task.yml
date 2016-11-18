@@ -11,9 +11,7 @@ run:
   path: buildpacks-ci/tasks/run-rootfs-smoke-test/run.sh
 params:
   DEPLOYMENT_NAME:
-  BOSH_PRIVATE_KEY:
   BOSH_USER:
   BOSH_PASSWORD:
   BOSH_TARGET:
-  BOSH_LITE_NAME:
   RUBYGEM_MIRROR:
