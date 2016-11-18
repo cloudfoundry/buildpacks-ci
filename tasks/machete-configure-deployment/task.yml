@@ -11,6 +11,5 @@ run:
   path: buildpacks-ci/tasks/machete-configure-deployment/run.sh
 params:
   BOSH_TARGET:
-  DEPLOYMENT_NAME:
   CI_CF_PASSWORD:
   CI_CF_USERNAME:

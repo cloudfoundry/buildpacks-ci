@@ -14,7 +14,7 @@ resources:
     source:
       target: https://<%= full_deployment_name +  '.' + bosh_lite_domain_name %>:25555
       username: admin
-      password: {{bosh-lite-password}}
+      password: {{gcp_bosh_lite_admin_password}}
       deployment: cf-warden
       ignore_ssl: true
   - name: diego-deployment
@@ -22,7 +22,7 @@ resources:
     source:
       target: https://<%= full_deployment_name +  '.' + bosh_lite_domain_name %>:25555
       username: admin
-      password: {{bosh-lite-password}}
+      password: {{gcp_bosh_lite_admin_password}}
       deployment: cf-warden-diego
       ignore_ssl: true
   - name: deployments-buildpacks
@@ -77,7 +77,6 @@ resources:
     source:
       name: bosh-warden-boshlite-ubuntu-trusty-go_agent
 
-
 jobs:
   - name: remove-environment
     serial_groups: [ deploy ]
@@ -120,14 +119,14 @@ jobs:
             GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
             GCP_BOSH_LITE_NAME: {{bosh-lite-name}}
             DEPLOYMENT_NAME: {{deployment-name}}
-            BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{bosh_password}}
+            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
             BOSH_TARGET: <%= full_deployment_name +  '.' + bosh_lite_domain_name %>
             BOSH_LITE_NAME: {{deployment-name}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-            BOSH_LITE_HM_DIRECTOR_PASSWORD: {{gcp_bosh_lite_hm_director_password}}
+            BOSH_LITE_ADMIN_PASSWORD: {{gcp_bosh_lite_admin_password}}
+            BOSH_LITE_HM_PASSWORD: {{gcp_bosh_lite_hm_password}}
             BOSH_LITE_NATS_PASSWORD: {{gcp_bosh_lite_nats_password}}
             BOSH_LITE_BLOBSTORE_AGENT_PASSWORD: {{gcp_bosh_lite_blobstore_agent_password}}
             BOSH_LITE_BLOBSTORE_DIRECTOR_PASSWORD: {{gcp_bosh_lite_blobstore_director_password}}
@@ -166,9 +165,8 @@ jobs:
           params:
             DEPLOYMENT_NAME: {{deployment-name}}
             CI_CF_PASSWORD: {{ci-cf-password}}
-            BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{bosh_password}}
+            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
             BOSH_TARGET: <%= full_deployment_name +  '.' + bosh_lite_domain_name %>
             BOSH_LITE_NAME: {{deployment-name}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
@@ -253,7 +251,6 @@ jobs:
           file: buildpacks-ci/tasks/machete-configure-deployment/task.yml
           params:
             BOSH_TARGET: <%= full_deployment_name +  '.' + bosh_lite_domain_name %>
-            DEPLOYMENT_NAME: {{deployment-name}}
             CI_CF_PASSWORD: {{ci-cf-password}}
             CI_CF_USERNAME: {{ci-cf-username}}
   - name: restore-environment

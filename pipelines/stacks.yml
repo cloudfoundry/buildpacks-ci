@@ -112,7 +112,7 @@ resources: #####################################################################
     source:
       target: https://stacks.buildpacks-gcp.ci.cf-app.com:25555
       username: admin
-      password: {{bosh-lite-password}}
+      password: {{gcp_bosh_lite_admin_password}}
       deployment: cf-warden
       ignore_ssl: true
 
@@ -121,7 +121,7 @@ resources: #####################################################################
     source:
       target: https://stacks.buildpacks-gcp.ci.cf-app.com:25555
       username: admin
-      password: {{bosh-lite-password}}
+      password: {{gcp_bosh_lite_admin_password}}
       deployment: cf-warden-diego
       ignore_ssl: true
 
@@ -130,7 +130,7 @@ resources: #####################################################################
     source:
       target: https://stacks.buildpacks-gcp.ci.cf-app.com:25555
       username: admin
-      password: {{bosh-lite-password}}
+      password: {{gcp_bosh_lite_admin_password}}
       deployment: rootfs-smoke-test
       ignore_ssl: true
 
@@ -310,23 +310,23 @@ jobs: ##########################################################################
       - task: recreate-bosh-lite
         file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
         params:
+          IAAS: gcp
+          GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
+          GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
+          GCP_BOSH_LITE_NAME: stacks-gcp-bosh-lite
           DEPLOYMENT_NAME: stacks.buildpacks-gcp.ci
-          BOSH_PRIVATE_KEY: {{bosh_private_key}}
           BOSH_USER: {{bosh_user}}
-          BOSH_PASSWORD: {{bosh_password}}
+          BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
           BOSH_TARGET: stacks.buildpacks-gcp.ci.cf-app.com
           BOSH_LITE_NAME: stacks.buildpacks-gcp.ci
-          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           RUBYGEM_MIRROR: {{rubygem-mirror}}
-          IAAS: gcp
-          BOSH_LITE_HM_DIRECTOR_PASSWORD: {{gcp_bosh_lite_hm_director_password}}
+          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+          BOSH_LITE_ADMIN_PASSWORD: {{gcp_bosh_lite_admin_password}}
+          BOSH_LITE_HM_PASSWORD: {{gcp_bosh_lite_hm_password}}
           BOSH_LITE_NATS_PASSWORD: {{gcp_bosh_lite_nats_password}}
           BOSH_LITE_BLOBSTORE_AGENT_PASSWORD: {{gcp_bosh_lite_blobstore_agent_password}}
           BOSH_LITE_BLOBSTORE_DIRECTOR_PASSWORD: {{gcp_bosh_lite_blobstore_director_password}}
           BOSH_LITE_POSTGRES_PASSWORD: {{gcp_bosh_lite_postgres_password}}
-          GCP_BOSH_LITE_NAME: stacks.buildpacks-gcp.ci
-          GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
-          GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
         attempts: 5
         ensure:
           put: deployments-buildpacks
@@ -367,11 +367,9 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/make-rootfs-smoke-test-manifest/task.yml
           params:
             DEPLOYMENT_NAME: stacks.buildpacks-gcp.ci
-            BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{bosh_password}}
+            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
             BOSH_TARGET: stacks.buildpacks-gcp.ci.cf-app.com
-            BOSH_LITE_NAME: stacks.buildpacks-gcp.ci
           privileged: true
         - put: deployments-buildpacks
           params:
@@ -382,9 +380,8 @@ jobs: ##########################################################################
           params:
             DEPLOYMENT_NAME: stacks.buildpacks-gcp.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
-            BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{bosh_password}}
+            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
             BOSH_TARGET: stacks.buildpacks-gcp.ci.cf-app.com
             BOSH_LITE_NAME: stacks.buildpacks-gcp.ci
             RUBYGEM_MIRROR: {{rubygem-mirror}}
@@ -438,11 +435,9 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/run-rootfs-smoke-test/task.yml
           params:
             DEPLOYMENT_NAME: stacks.buildpacks-gcp.ci
-            BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{bosh_password}}
+            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
             BOSH_TARGET: stacks.buildpacks-gcp.ci.cf-app.com
-            BOSH_LITE_NAME: stacks.buildpacks-gcp.ci
             RUBYGEM_MIRROR: {{rubygem-mirror}}
         on_failure:
           put: failure-alert
@@ -568,13 +563,11 @@ jobs: ##########################################################################
             DEPLOYMENT_NAME: stacks.buildpacks-gcp.ci
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
-            BOSH_PRIVATE_KEY: {{bosh_private_key}}
             BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{bosh_password}}
+            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
             BOSH_TARGET: stacks.buildpacks-gcp.ci.cf-app.com
-            BOSH_LITE_NAME: stacks.buildpacks-gcp.ci
-            DIEGO_DOCKER_ON: true
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+            DIEGO_DOCKER_ON: true
           privileged: true
         on_failure:
           put: failure-alert
@@ -598,8 +591,7 @@ jobs: ##########################################################################
         file: buildpacks-ci/tasks/destroy-bosh-lite/task.yml
         params:
           DEPLOYMENT_NAME: stacks.buildpacks-gcp.ci
-          BOSH_PRIVATE_KEY: {{bosh_private_key}}
-          GCP_BOSH_LITE_NAME: stacks.buildpacks-gcp.ci
+          GCP_BOSH_LITE_NAME: stacks-gcp-bosh-lite
           GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
           GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
           BOSH_LITE_NAME: stacks.buildpacks-gcp.ci

@@ -14,8 +14,6 @@ run:
   path: buildpacks-ci/tasks/make-rootfs-smoke-test-manifest/run.sh
 params:
   DEPLOYMENT_NAME:
-  BOSH_PRIVATE_KEY:
   BOSH_USER:
   BOSH_PASSWORD:
   BOSH_TARGET:
-  BOSH_LITE_NAME:

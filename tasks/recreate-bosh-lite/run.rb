@@ -36,7 +36,7 @@ end
 deployment_dir = File.join(Dir.pwd,'deployments-buildpacks-artifacts', 'deployments', deployment_id)
 
 credentials_struct = OpenStruct.new({
-  'gcp_bosh_lite_admin_password' => ENV['BOSH_LITE_ADMIN_PASSWORD'],
+  'gcp_bosh_lite_admin_password' => bosh_lite_password,
   'gcp_bosh_lite_hm_password' => ENV['BOSH_LITE_HM_PASSWORD'],
   'gcp_bosh_lite_nats_password' => ENV['BOSH_LITE_NATS_PASSWORD'],
   'gcp_bosh_lite_blobstore_agent_password' => ENV['BOSH_LITE_BLOBSTORE_AGENT_PASSWORD'],
