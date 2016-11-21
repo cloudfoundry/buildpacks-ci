@@ -86,8 +86,8 @@ describe StateOfBoshLites do
     context 'the environment is unclaimed' do
       before(:each) do
         allow(GitClient).to receive(:get_list_of_one_line_commits).and_return(list_of_commits)
-        allow(File).to receive(:exist?).with('cf-edge-environments/claimed/edge-1.buildpacks.ci').and_return(false)
-        allow(File).to receive(:exist?).with('cf-edge-environments/unclaimed/edge-1.buildpacks.ci').and_return(true)
+        allow(File).to receive(:exist?).with('cf-edge-gcp-environments/claimed/edge-1.buildpacks.ci').and_return(false)
+        allow(File).to receive(:exist?).with('cf-edge-gcp-environments/unclaimed/edge-1.buildpacks.ci').and_return(true)
       end
 
       it 'returns the correct state + job' do
@@ -100,8 +100,8 @@ describe StateOfBoshLites do
     context 'the environment is claimed' do
       before(:each) do
         allow(GitClient).to receive(:get_list_of_one_line_commits).and_return(list_of_commits)
-        allow(File).to receive(:exist?).with('cf-lts-environments/claimed/lts-1.buildpacks.ci').and_return(true)
-        allow(File).to receive(:exist?).with('cf-lts-environments/unclaimed/lts-1.buildpacks.ci').and_return(false)
+        allow(File).to receive(:exist?).with('cf-lts-gcp-environments/claimed/lts-1.buildpacks.ci').and_return(true)
+        allow(File).to receive(:exist?).with('cf-lts-gcp-environments/unclaimed/lts-1.buildpacks.ci').and_return(false)
       end
 
       it 'returns the correct state + job' do
@@ -114,8 +114,8 @@ describe StateOfBoshLites do
     context 'the environment does not currently exist' do
       before(:each) do
         allow(GitClient).to receive(:get_list_of_one_line_commits).and_return(list_of_commits)
-        allow(File).to receive(:exist?).with('cf-lts-environments/claimed/lts-1.buildpacks.ci').and_return(false)
-        allow(File).to receive(:exist?).with('cf-lts-environments/unclaimed/lts-1.buildpacks.ci').and_return(false)
+        allow(File).to receive(:exist?).with('cf-lts-gcp-environments/claimed/lts-1.buildpacks.ci').and_return(false)
+        allow(File).to receive(:exist?).with('cf-lts-gcp-environments/unclaimed/lts-1.buildpacks.ci').and_return(false)
       end
 
       it 'is failing' do

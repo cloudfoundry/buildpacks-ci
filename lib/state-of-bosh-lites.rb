@@ -19,10 +19,10 @@ class StateOfBoshLites
   def get_environment_status(environment)
     type = environment.split('-').first
 
-    if File.exist?("cf-#{type}-environments/claimed/#{environment}")
+    if File.exist?("cf-#{type}-gcp-environments/claimed/#{environment}")
       claimed = true
       regex = / (.*) claiming: #{environment}/
-    elsif File.exist?("cf-#{type}-environments/unclaimed/#{environment}")
+    elsif File.exist?("cf-#{type}-gcp-environments/unclaimed/#{environment}")
       claimed = false
       regex = / (.*) unclaiming: #{environment}/
     else
