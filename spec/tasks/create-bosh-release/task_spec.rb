@@ -3,7 +3,7 @@ require 'spec_helper.rb'
 require 'digest'
 require 'yaml'
 
-xdescribe 'create bosh stacks release task' do
+describe 'create bosh stacks release task' do
   context 'when uploading blobs' do
     before(:context) do
       `git init ./spec/tasks/create-bosh-release/stacks-release`
