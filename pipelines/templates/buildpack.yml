@@ -120,7 +120,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: <%= language %>_buildpack-v(.*).zip
+      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
@@ -128,7 +128,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: <%= language %>_buildpack-cached-v(.*).zip
+      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
@@ -214,11 +214,11 @@ jobs: ##########################################################################
         - put: pivotal-buildpack
           params:
             from: buildpack-artifacts/.*_buildpack-v(.*).zip
-            to: /dependencies/experimental-buildpacks/<%= language %>/
+            to: /buildpack-release-candidates/<%= language %>/
         - put: pivotal-buildpack-cached
           params:
             from: buildpack-artifacts/.*_buildpack-cached-v(.*).zip
-            to: /dependencies/experimental-buildpacks/<%= language %>/
+            to: /buildpack-release-candidates/<%= language %>/
         on_failure:
           put: failure-alert
           params:
