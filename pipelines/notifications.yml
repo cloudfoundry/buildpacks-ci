@@ -52,7 +52,7 @@ resources:
     source:
       smtp:
         host: email-smtp.us-east-1.amazonaws.com
-        port: "25"
+        port: "2587"
         username: {{cve-amazon-ses-smtp-username}}
         password: {{cve-amazon-ses-smtp-password}}
       from: cf-buildpacks-eng@pivotal.io
