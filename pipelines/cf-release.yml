@@ -12,6 +12,11 @@ resources:
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
+  - name: runtime-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/runtime-ci
+      branch: master
   - name: bosh-lite
     type: git
     source:
@@ -241,7 +246,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: runtime-ci
         - get: cf-release
+          params:
+            submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
           passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: deployments-buildpacks
           passed: [ deploy-cf-and-diego-to-cf-release ]
@@ -267,18 +275,20 @@ jobs:
         - get: dotnet-core-buildpack-github-release
           passed: [ deploy-cf-and-diego-to-cf-release ]
       - do:
-        - task: cats
-          file: buildpacks-ci/tasks/run-cats/task.yml
+        - task: copy-cf-acceptance-tests
+          file: buildpacks-ci/tasks/copy-cf-acceptance-tests/task.yml
+        - task: write-cats-config
+          file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
-            DEPLOYMENT_NAME: cf-release.buildpacks-gcp.ci
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
-            BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-            BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
+            APPS_DOMAIN: cf-release.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
-          privileged: true
+        - task: cats
+          file: runtime-ci/scripts/ci/run-cats/task.yml
+          params:
+            NODES: 1
+            CONFIG_FILE_PATH: integration_config.json
         on_failure:
           put: failure-alert
           params:

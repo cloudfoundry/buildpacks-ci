@@ -1,0 +1,13 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: cf-release
+outputs:
+  - name: cf-acceptance-tests
+run:
+  path: buildpacks-ci/tasks/copy-cf-acceptance-tests/run.sh
