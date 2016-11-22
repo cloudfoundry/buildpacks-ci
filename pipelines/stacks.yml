@@ -81,6 +81,12 @@ resources: #####################################################################
       branch: develop
       private_key: {{cf-release-private-key}}
 
+  - name: runtime-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/runtime-ci
+      branch: master
+
   ## S3 Buckets ##
 
   - name: stack-s3
@@ -534,6 +540,10 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: runtime-ci
+        - get: cf-release
+          params:
+            submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
         - get: new-cves
           passed: ['deploy-diego-to-stacks']
         - get: deployments-buildpacks
@@ -551,18 +561,20 @@ jobs: ##########################################################################
         - get: stacks
           passed: [ deploy-diego-to-stacks ]
       - do:
-        - task: cats
-          file: buildpacks-ci/tasks/run-cats/task.yml
+        - task: copy-cf-acceptance-tests
+          file: buildpacks-ci/tasks/copy-cf-acceptance-tests/task.yml
+        - task: write-cats-config
+          file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
-            DEPLOYMENT_NAME: stacks.buildpacks-gcp.ci
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
-            BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
-            BOSH_TARGET: stacks.buildpacks-gcp.ci.cf-app.com
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+            APPS_DOMAIN: stacks.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
-          privileged: true
+        - task: cats
+          file: runtime-ci/scripts/ci/run-cats/task.yml
+          params:
+            NODES: 1
+            CONFIG_FILE_PATH: integration_config.json
         on_failure:
           put: failure-alert
           params:
