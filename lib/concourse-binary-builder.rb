@@ -149,7 +149,10 @@ class ConcourseBinaryBuilder
 
     Dir.chdir(binary_builder_dir) do
       output = `./bin/binary-builder #{flags}`
-      raise "Could not build" unless $?.success?
+      unless $?.success?
+        puts output
+        raise "Could not build"
+      end
     end
 
     output
