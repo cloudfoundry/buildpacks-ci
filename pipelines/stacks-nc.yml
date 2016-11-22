@@ -258,7 +258,7 @@ jobs: ##########################################################################
           params:
             STACKS_SUFFIX: _nc
         - task: test-rootfs
-          file: buildpacks-ci/tasks/test-rootfs.yml
+          file: buildpacks-ci/tasks/test-rootfs/task.yml
           privileged: true
           params:
             STACKS_SUFFIX: _nc
