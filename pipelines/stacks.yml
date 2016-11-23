@@ -592,6 +592,8 @@ jobs: ##########################################################################
         params:
           DEPLOYMENT_NAME: stacks.buildpacks-gcp.ci
           GCP_BOSH_LITE_NAME: stacks-gcp-bosh-lite
+          BOSH_USER: {{gcp_bosh_admin_user}}
+          BOSH_PASSWORD: {{gcp_bosh_admin_password}}
           GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
           GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
           BOSH_LITE_NAME: stacks.buildpacks-gcp.ci
