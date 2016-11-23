@@ -611,6 +611,8 @@ jobs: ##########################################################################
         file: buildpacks-ci/tasks/destroy-bosh-lite/task.yml
         params:
           DEPLOYMENT_NAME: stacks-nc.buildpacks-gcp.ci
+          BOSH_USER: {{gcp_bosh_admin_user}}
+          BOSH_PASSWORD: {{gcp_bosh_admin_password}}
           GCP_BOSH_LITE_NAME: stacks-nc-gcp-bosh-lite
           GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
           GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
