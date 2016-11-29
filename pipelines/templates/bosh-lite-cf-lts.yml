@@ -150,7 +150,11 @@ jobs:
           - get: bosh-lite
           - get: cf-bosh-release
             version: { version: {{cf-version}} }
+            params:
+              tarball: false
           - get: diego-bosh-release
+            params:
+              tarball: false
             version: { version: {{diego-version}} }
           - get: resource-pools
         - aggregate:
