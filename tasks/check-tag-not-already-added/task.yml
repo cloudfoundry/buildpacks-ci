@@ -8,4 +8,4 @@ inputs:
   - name: buildpacks-ci
   - name: buildpack
 run:
-  path: buildpacks-ci/task/check-tag-not-already-added/run.sh
+  path: buildpacks-ci/tasks/check-tag-not-already-added/run.sh
