@@ -32,6 +32,12 @@ resources: #####################################################################
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
+  - name: runtime-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/runtime-ci
+      branch: master
+
   - name: stacks
     type: git
     source:
@@ -562,6 +568,10 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: runtime-ci
+        - get: cf-release-develop
+          params:
+            submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
         - get: new-cves
           passed: [ cflinuxfs2-nc-specs ]
         - get: deployments-buildpacks
@@ -579,18 +589,20 @@ jobs: ##########################################################################
         - get: stacks
           passed: [ cflinuxfs2-nc-specs ]
       - do:
-        - task: cats
-          file: buildpacks-ci/tasks/run-cats/task.yml
+        - task: copy-cf-acceptance-tests
+          file: buildpacks-ci/tasks/copy-cf-acceptance-tests/task.yml
+        - task: write-cats-config
+          file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
-            DEPLOYMENT_NAME: stacks-nc.buildpacks-gcp.ci
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-password}}
-            BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
-            BOSH_TARGET: stacks-nc.buildpacks-gcp.ci.cf-app.com
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+            APPS_DOMAIN: stacks-nc.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
-          privileged: true
+        - task: cats
+          file: runtime-ci/scripts/ci/run-cats/task.yml
+          params:
+            NODES: 1
+            CONFIG_FILE_PATH: integration_config.json
         on_failure:
           put: failure-alert
           params:
