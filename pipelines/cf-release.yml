@@ -26,11 +26,6 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/diego-release
       branch: master
-  - name: cf-release
-    type: git
-    source:
-      uri: {{cf-release-git-uri}}
-      branch: develop
   - name: cf-release-develop
     type: git
     source:
@@ -178,6 +173,7 @@ jobs:
           - get: buildpacks-ci
           - get: bosh-lite
           - get: cf-release
+            resource: cf-release-develop
           - get: diego-release
           - get: garden-runc-bosh-release
           - get: diego-bosh-release
@@ -248,6 +244,7 @@ jobs:
         - get: buildpacks-ci
         - get: runtime-ci
         - get: cf-release
+          resource: cf-release-develop
           params:
             submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
           passed: [ deploy-cf-and-diego-to-cf-release ]
