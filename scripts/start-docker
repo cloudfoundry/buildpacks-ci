@@ -28,7 +28,7 @@ mount -t tmpfs -o size=15g tmpfs /tmp/build/graph
 # truncate -s 10GB /tmp/build/graph.ext4
 # mkfs.ext4 -F /tmp/build/graph.ext4
 # mount -t ext4 -o loop /tmp/build/graph.ext4 /tmp/build/graph
-docker daemon -g /tmp/build/graph -s aufs &
+docker daemon -g /tmp/build/graph -s aufs --mtu 1432 &
 
 until docker info >/dev/null 2>&1; do
   echo waiting for docker to come up...
