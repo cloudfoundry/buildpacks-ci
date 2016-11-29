@@ -74,12 +74,6 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/diego-release
       branch: master
 
-  - name: cf-release-rc
-    type: git
-    source:
-      uri: {{cf-release-git-uri}}
-      branch: release-candidate
-
   - name: cf-release-develop
     type: git
     source:
@@ -343,7 +337,7 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: bosh-lite
         - get: cf-release
-          resource: cf-release-rc
+          resource: cf-release-develop
         - get: diego-release
         - get: cflinuxfs2-rootfs-release
         - get: lite-stemcell
@@ -406,7 +400,7 @@ jobs: ##########################################################################
         - get: deployments-buildpacks
           passed: [ 'generate-stacks-manifests' ]
         - get: cf-release
-          resource: cf-release-rc
+          resource: cf-release-develop
           passed: [ 'generate-stacks-manifests' ]
         - get: cflinuxfs2-rootfs-release
           passed: [ 'generate-stacks-manifests' ]
@@ -460,7 +454,7 @@ jobs: ##########################################################################
         - get: deployments-buildpacks
           passed: [ 'deploy-rootfs-to-stacks' ]
         - get: cf-release
-          resource: cf-release-rc
+          resource: cf-release-develop
           passed: [ 'deploy-rootfs-to-stacks' ]
         - get: cflinuxfs2-rootfs-release
           passed: [ 'deploy-rootfs-to-stacks' ]

@@ -72,11 +72,12 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/diego-release
       branch: master
 
-  - name: cf-release-rc
+  - name: cf-release-develop
     type: git
     source:
-      uri: {{cf-release-git-uri}}
-      branch: release-candidate
+      uri: git@github.com:cloudfoundry/cf-release
+      branch: develop
+      private_key: {{cf-release-private-key}}
 
   - name: rootfs-pivnet-metadata
     type: git
@@ -330,7 +331,7 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: bosh-lite
         - get: cf-release
-          resource: cf-release-rc
+          resource: cf-release-develop
         - get: diego-release
         - get: cflinuxfs2-rootfs-release
         - get: lite-stemcell
@@ -392,7 +393,7 @@ jobs: ##########################################################################
         - get: deployments-buildpacks
           passed: [ 'generate-stacks-manifests' ]
         - get: cf-release
-          resource: cf-release-rc
+          resource: cf-release-develop
           passed: [ 'generate-stacks-manifests' ]
         - get: cflinuxfs2-rootfs-release
           passed: [ 'generate-stacks-manifests' ]
@@ -445,7 +446,7 @@ jobs: ##########################################################################
         - get: deployments-buildpacks
           passed: [ deploy-rootfs-to-stacks-nc ]
         - get: cf-release
-          resource: cf-release-rc
+          resource: cf-release-develop
           passed: [ deploy-rootfs-to-stacks-nc ]
         - get: cflinuxfs2-rootfs-release
           passed: [ deploy-rootfs-to-stacks-nc ]
