@@ -569,7 +569,8 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: runtime-ci
-        - get: cf-release-develop
+        - get: cf-release
+          resource: cf-release-develop
           params:
             submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
         - get: new-cves
