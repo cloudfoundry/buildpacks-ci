@@ -59,6 +59,7 @@ popd
 pushd diego-release
   USE_SQL='postgres' ./scripts/generate-bosh-lite-manifests
   ../buildpacks-ci/tasks/generate-cf-and-diego-manifests/swap-diego-rootfs-release.rb "$(pwd)" bosh-lite/deployments/diego.yml
+  ruby -i -pe "gsub('network_mtu: null', 'network_mtu: 1432')" bosh-lite/deployments/diego.yml
 popd
 
 pushd deployments-buildpacks
