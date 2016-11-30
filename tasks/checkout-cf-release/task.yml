@@ -14,3 +14,5 @@ run:
     - '-c'
     - |
       git clone --branch v$( cat cf-bosh-release/version ) --depth 1 https://github.com/cloudfoundry/cf-release
+      cd cf-release
+      git submodule update --init src/loggregator
