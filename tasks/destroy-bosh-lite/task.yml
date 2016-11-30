@@ -23,3 +23,7 @@ params:
   RUBYGEM_MIRROR:
   BOSH_LITE_DOMAIN_NAME:
   IAAS:
+  ######## For AWS Deploys ##################
+  BOSH_PRIVATE_KEY:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
