@@ -131,6 +131,15 @@ jobs:
             BOSH_LITE_BLOBSTORE_AGENT_PASSWORD: {{gcp_bosh_lite_blobstore_agent_password}}
             BOSH_LITE_BLOBSTORE_DIRECTOR_PASSWORD: {{gcp_bosh_lite_blobstore_director_password}}
             BOSH_LITE_POSTGRES_PASSWORD: {{gcp_bosh_lite_postgres_password}}
+            ######## For AWS Deploys ##################
+            BOSH_PRIVATE_KEY: {{bosh_private_key}}
+            AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
+            BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
+            BOSH_LITE_SUBNET_ID: {{bosh_lite_subnet_id}}
+            BOSH_LITE_SECURITY_GROUP: {{bosh_lite_security_group}}
+
           ensure:
             put: deployments-buildpacks
             params:
