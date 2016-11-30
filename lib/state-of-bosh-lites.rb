@@ -13,7 +13,11 @@ class StateOfBoshLites
     @environment_names = %w(edge-1.buildpacks-gcp.ci
                             edge-2.buildpacks-gcp.ci
                             lts-1.buildpacks-gcp.ci
-                            lts-2.buildpacks-gcp.ci)
+                            lts-2.buildpacks-gcp.ci
+                            edge-1.buildpacks.ci
+                            edge-2.buildpacks.ci
+                            lts-1.buildpacks.ci
+                            lts-2.buildpacks.ci)
   end
 
   def get_environment_status(environment)
