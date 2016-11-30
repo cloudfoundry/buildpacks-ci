@@ -1,0 +1,13 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: alpine
+
+inputs:
+- name: buildpacks-ci
+
+run:
+  path: buildpacks-ci/tasks/always-passes/run.sh
