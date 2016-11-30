@@ -7,7 +7,10 @@ require 'fileutils'
 require_relative '../../lib/state-of-bosh-lites'
 
 describe StateOfBoshLites do
-  let(:environments) {%w(edge-1.buildpacks-gcp.ci edge-2.buildpacks-gcp.ci lts-1.buildpacks-gcp.ci lts-2.buildpacks-gcp.ci)}
+  let(:gcp_environment_names) {%w(edge-1.buildpacks-gcp.ci edge-2.buildpacks-gcp.ci lts-1.buildpacks-gcp.ci lts-2.buildpacks-gcp.ci)}
+  let(:aws_environment_names) {%w(edge-1.buildpacks.ci edge-2.buildpacks.ci lts-1.buildpacks.ci lts-2.buildpacks.ci)}
+  let(:environments) { { 'aws' => aws_environment_names,
+                         'gcp' => gcp_environment_names} }
 
   before(:each) do
     allow(GitClient).to receive(:checkout_branch)
@@ -34,8 +37,10 @@ describe StateOfBoshLites do
       it 'gets the status of all the environments' do
         subject.get_states!
 
-        environments.each do |env|
-          expect(subject).to have_received(:get_environment_status).with(env)
+        environments.each do |iaas, environment_names|
+          environment_names.each do |env|
+             expect(subject).to have_received(:get_environment_status).with(env, iaas)
+          end
         end
       end
     end
@@ -59,8 +64,10 @@ describe StateOfBoshLites do
       it 'gets the status of all the environments' do
         subject.get_states!(resource_pools_dir: resource_pools_dir)
 
-        environments.each do |env|
-          expect(subject).to have_received(:get_environment_status).with(env)
+        environments.each do |iaas, environment_names|
+          environment_names.each do |env|
+             expect(subject).to have_received(:get_environment_status).with(env, iaas)
+          end
         end
       end
     end
@@ -86,12 +93,12 @@ describe StateOfBoshLites do
     context 'the environment is unclaimed' do
       before(:each) do
         allow(GitClient).to receive(:get_list_of_one_line_commits).and_return(list_of_commits)
-        allow(File).to receive(:exist?).with('cf-edge-gcp-environments/claimed/edge-1.buildpacks.ci').and_return(false)
-        allow(File).to receive(:exist?).with('cf-edge-gcp-environments/unclaimed/edge-1.buildpacks.ci').and_return(true)
+        allow(File).to receive(:exist?).with('cf-edge-environments/claimed/edge-1.buildpacks.ci').and_return(false)
+        allow(File).to receive(:exist?).with('cf-edge-environments/unclaimed/edge-1.buildpacks.ci').and_return(true)
       end
 
       it 'returns the correct state + job' do
-          state = subject.get_environment_status('edge-1.buildpacks.ci')
+          state = subject.get_environment_status('edge-1.buildpacks.ci', 'aws')
           expect(state['claimed']).to eq false
           expect(state['job']).to eq 'brats/brats-safe-edge build 21'
       end
@@ -100,12 +107,12 @@ describe StateOfBoshLites do
     context 'the environment is claimed' do
       before(:each) do
         allow(GitClient).to receive(:get_list_of_one_line_commits).and_return(list_of_commits)
-        allow(File).to receive(:exist?).with('cf-lts-gcp-environments/claimed/lts-1.buildpacks.ci').and_return(true)
-        allow(File).to receive(:exist?).with('cf-lts-gcp-environments/unclaimed/lts-1.buildpacks.ci').and_return(false)
+        allow(File).to receive(:exist?).with('cf-lts-environments/claimed/lts-1.buildpacks.ci').and_return(true)
+        allow(File).to receive(:exist?).with('cf-lts-environments/unclaimed/lts-1.buildpacks.ci').and_return(false)
       end
 
       it 'returns the correct state + job' do
-        state = subject.get_environment_status('lts-1.buildpacks.ci')
+        state = subject.get_environment_status('lts-1.buildpacks.ci', 'aws')
         expect(state['claimed']).to eq true
         expect(state['job']).to eq 'brats/brats-nodejs-lts build 21'
       end
@@ -114,12 +121,12 @@ describe StateOfBoshLites do
     context 'the environment does not currently exist' do
       before(:each) do
         allow(GitClient).to receive(:get_list_of_one_line_commits).and_return(list_of_commits)
-        allow(File).to receive(:exist?).with('cf-lts-gcp-environments/claimed/lts-1.buildpacks.ci').and_return(false)
-        allow(File).to receive(:exist?).with('cf-lts-gcp-environments/unclaimed/lts-1.buildpacks.ci').and_return(false)
+        allow(File).to receive(:exist?).with('cf-lts-gcp-environments/claimed/lts-1.buildpacks-gcp.ci').and_return(false)
+        allow(File).to receive(:exist?).with('cf-lts-gcp-environments/unclaimed/lts-1.buildpacks-gcp.ci').and_return(false)
       end
 
       it 'is failing' do
-        expect(subject.get_environment_status('lts-1.buildpacks.ci')).to be_nil
+        expect(subject.get_environment_status('lts-1.buildpacks-gcp.ci', 'gcp')).to be_nil
       end
     end
   end

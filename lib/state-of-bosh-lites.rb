@@ -6,27 +6,33 @@ require_relative './git-client'
 
 class StateOfBoshLites
 
-  attr_reader :state_of_environments, :environment_names
+  attr_reader :state_of_environments, :environments
 
   def initialize
     @state_of_environments = []
-    @environment_names = %w(edge-1.buildpacks-gcp.ci
-                            edge-2.buildpacks-gcp.ci
-                            lts-1.buildpacks-gcp.ci
-                            lts-2.buildpacks-gcp.ci
-                            edge-1.buildpacks.ci
-                            edge-2.buildpacks.ci
-                            lts-1.buildpacks.ci
-                            lts-2.buildpacks.ci)
+    @gcp_environment_names = %w(edge-1.buildpacks-gcp.ci
+                                edge-2.buildpacks-gcp.ci
+                                lts-1.buildpacks-gcp.ci
+                                lts-2.buildpacks-gcp.ci)
+
+    @aws_environment_names = %w(edge-1.buildpacks.ci
+                               edge-2.buildpacks.ci
+                               lts-1.buildpacks.ci
+                               lts-2.buildpacks.ci)
+
+    @environments = {'aws' => @aws_environment_names,
+                     'gcp' => @gcp_environment_names}
   end
 
-  def get_environment_status(environment)
+  def get_environment_status(environment, iaas)
     type = environment.split('-').first
 
-    if File.exist?("cf-#{type}-gcp-environments/claimed/#{environment}")
+    resource_type = "cf-#{type}#{iaas=='aws' ? '' : '-'+ iaas}-environments"
+
+    if File.exist?("#{resource_type}/claimed/#{environment}")
       claimed = true
       regex = / (.*) claiming: #{environment}/
-    elsif File.exist?("cf-#{type}-gcp-environments/unclaimed/#{environment}")
+    elsif File.exist?("#{resource_type}/unclaimed/#{environment}")
       claimed = false
       regex = / (.*) unclaiming: #{environment}/
     else
@@ -105,8 +111,10 @@ class StateOfBoshLites
   private
 
   def get_all_environment_statuses
-    environment_names.each do |env|
-      state_of_environments.push({'name' => env, 'status' => get_environment_status(env)})
+    environments.each do |iaas, environment_names|
+      environment_names.each do |env|
+        state_of_environments.push({'name' => env, 'status' => get_environment_status(env, iaas)})
+      end
     end
   end
 end
