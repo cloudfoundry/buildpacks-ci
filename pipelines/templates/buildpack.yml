@@ -379,7 +379,7 @@ jobs: ##########################################################################
           resource: buildpack-master
           passed: [ buildpack-release ]
       - task: finalize-buildpack
-        file: buildpacks-ci/tasks/finalize-buildpack.yml
+        file: buildpacks-ci/tasks/finalize-buildpack/task.yml
         privileged: true
       - task: write-pivnet-metadata
         file: buildpacks-ci/tasks/write-buildpack-pivnet-metadata/task.yml
