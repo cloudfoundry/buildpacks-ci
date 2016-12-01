@@ -20,14 +20,14 @@ resources:
     type: pool
     source:
       branch: resource-pools
-      pool: cf-edge-gcp-environments
+      pool: cf-edge-environments
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
   - name: cf-lts-environments
     type: pool
     source:
       branch: resource-pools
-      pool: cf-lts-gcp-environments
+      pool: cf-lts-environments
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
 
