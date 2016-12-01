@@ -1,5 +1,6 @@
 require 'nokogiri'
 require 'open-uri'
+require 'open_uri_redirections'
 
 class UsnReleaseNotes
 
@@ -30,7 +31,7 @@ class UsnReleaseNotes
     cves.each do |cve|
       cve_id  = cve.text
       cve_uri = cve['href']
-      cve_element = Nokogiri::HTML(open(cve_uri).read).css('#container > div:contains("Description") > div.value').first
+      cve_element = Nokogiri::HTML(open(cve_uri, :allow_redirections => :safe).read).css('#container > div:contains("Description") > div.value').first
 
       cve_description = cve_element.children.map do |child|
         child.text if child.text?
