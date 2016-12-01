@@ -188,6 +188,7 @@ GEM
       mini_portile2 (~> 2.1.0)
     octokit (4.4.1)
       sawyer (~> 0.7.0, >= 0.5.3)
+    open_uri_redirections (0.2.1)
     parser (2.3.1.4)
       ast (~> 2.2)
     powerpack (0.1.1)
@@ -279,6 +280,7 @@ DEPENDENCIES
   git
   nokogiri
   octokit
+  open_uri_redirections
   rake
   rspec
   rspec-rerun
