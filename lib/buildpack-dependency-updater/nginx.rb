@@ -13,12 +13,7 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
 
   def perform_dependency_specific_changes
     if mainline_version?(dependency_version)
-      buildpack_manifest["default_versions"].delete_if { |dep| dep["name"] == dependency }
-      default_dependency_hash = {
-        "name" => dependency,
-        "version" => dependency_version
-      }
-      buildpack_manifest["default_versions"] << default_dependency_hash
+      perform_default_versions_update
     end
 
     update_version_in_url_to_dependency_map

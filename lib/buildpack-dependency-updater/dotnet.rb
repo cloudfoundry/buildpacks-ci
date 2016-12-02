@@ -43,18 +43,9 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
   def perform_dependency_specific_changes
     framework_version = get_framework_version
 
-    update_default_versions unless Gem::Version.new(framework_version).prerelease?
+    perform_default_versions_update unless Gem::Version.new(framework_version).prerelease?
 
     update_dotnet_versions(framework_version)
-  end
-
-  def update_default_versions
-    buildpack_manifest["default_versions"].delete_if { |dep| dep["name"] == dependency }
-    default_dependency_hash = {
-      "name" => dependency,
-      "version" => dependency_version
-    }
-    buildpack_manifest["default_versions"] << default_dependency_hash
   end
 
   def update_dotnet_versions(framework_version)
