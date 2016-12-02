@@ -137,11 +137,12 @@ describe BuildpackDependencyUpdater do
         subject.run!
         manifest = YAML.load_file(manifest_file)
 
-        default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '1.0.3'}
-        expect(default_in_manifest).to eq(nil)
-
+        old_default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '1.0.3'}
         default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
-        expect(default_in_manifest["version"]).to eq(new_version)
+        current_default_version = default_in_manifest["version"]
+
+        expect(old_default_in_manifest).to eq(nil)
+        expect(current_default_version).to eq(new_version)
       end
 
       it 'records which versions were removed' do
@@ -340,11 +341,12 @@ describe BuildpackDependencyUpdater do
         subject.run!
         manifest = YAML.load_file(manifest_file)
 
-        default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '1.11.1'}
-        expect(default_in_manifest).to eq(nil)
-
+        old_default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '1.11.1'}
         default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
-        expect(default_in_manifest["version"]).to eq(new_version)
+        current_default_version = default_in_manifest["version"]
+
+        expect(old_default_in_manifest).to eq(nil)
+        expect(current_default_version).to eq(new_version)
       end
 
       it 'records which versions were removed' do
