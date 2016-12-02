@@ -130,13 +130,13 @@ Active development happens on `develop`. Despite our best efforts, `develop` wil
 
 Our release branch is `master`. This is stable and only updated with new buildpack releases.
 
-
 * [binary-buildpack](https://github.com/cloudfoundry/binary-buildpack)
 * [go-buildpack](https://github.com/cloudfoundry/go-buildpack)
 * [nodejs-buildpack](https://github.com/cloudfoundry/nodejs-buildpack)
 * [php-buildpack](https://github.com/cloudfoundry/php-buildpack)
 * [python-buildpack](https://github.com/cloudfoundry/python-buildpack)
 * [ruby-buildpack](https://github.com/cloudfoundry/ruby-buildpack)
+* [dotnet-core-buildpack](https://github.com/cloudfoundry/dotnet-core-buildpack)
 * [staticfile-buildpack](https://github.com/cloudfoundry/static-buildpack)
 
 ## Tooling for Development and Runtime
@@ -151,7 +151,6 @@ Our release branch is `master`. This is stable and only updated with new buildpa
 ## BOSH Releases
 
 BOSH releases are used in the assembly of [`cf-release`](https://github.com/cloudfoundry/cf-release).
-
 
 * [cflinuxfs2-rootfs-release](https://github.com/cloudfoundry/cflinuxfs2-rootfs-release)
 * [go-buildpack-release](https://github.com/cloudfoundry/go-buildpack-release)
@@ -170,7 +169,6 @@ BOSH releases are used in the assembly of [`cf-release`](https://github.com/clou
 
 These buildpacks are possible candidates for promotion, or experimental architecture explorations.
 
-* [dotnet-core-buildpack](https://github.com/cloudfoundry-community/dotnet-core-buildpack) Unlike other buildpacks, this buildpack has no `develop` branch.
 * [multi-buildpack](https://github.com/cloudfoundry-incubator/multi-buildpack)
 
 ### Tools
@@ -191,3 +189,5 @@ Some repositories are private for historical or security reasons. We list them f
 
 * [deployments-buildpacks](https://github.com/pivotal-cf/deployments-buildpacks) See repository README.
 * [buildpacks-ci-robots](https://github.com/pivotal-cf/buildpacks-ci-robots) See repository README.
+* [stacks-nc](https://github.com/pivotal-cf/stacks-nc) See repository README.
+* [cflinuxfs2-nc-rootfs-release](https://github.com/pivotal-cf/cflinuxfs2-nc-rootfs-release) See repository README.
