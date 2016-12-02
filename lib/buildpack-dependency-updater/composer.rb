@@ -20,5 +20,4 @@ class BuildpackDependencyUpdater::Composer < BuildpackDependencyUpdater
     }
     buildpack_manifest["default_versions"] << default_dependency_hash
   end
-
 end

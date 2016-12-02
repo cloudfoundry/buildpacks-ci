@@ -12,7 +12,7 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
   end
 
   def perform_dependency_specific_changes
-    if buildpack == 'php' && mainline_version?(dependency_version)
+    if mainline_version?(dependency_version)
       buildpack_manifest["default_versions"].delete_if { |dep| dep["name"] == dependency }
       default_dependency_hash = {
         "name" => dependency,
