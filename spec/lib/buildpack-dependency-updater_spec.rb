@@ -207,7 +207,9 @@ describe BuildpackDependencyUpdater do
         buildpack_manifest_contents = <<~MANIFEST
           ---
           language: staticfile
-
+          default_versions:
+            - name: nginx
+              version: 1.11.1
           url_to_dependency_map:
             - match: nginx.tgz
               name: nginx
@@ -243,6 +245,18 @@ describe BuildpackDependencyUpdater do
           expect(dependency_in_manifest["version"]).to eq(new_version)
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/nginx/nginx-1.11.2-linux-x64.tgz")
           expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+        end
+
+        it "updates the staticfile buildpack manifest default_versions section with the specified version for nginx" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+
+          old_default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '1.11.1'}
+          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
+          current_default_version = default_in_manifest["version"]
+
+          expect(old_default_in_manifest).to eq(nil)
+          expect(current_default_version).to eq(new_version)
         end
 
         it 'records which versions were removed' do
