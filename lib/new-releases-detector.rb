@@ -4,6 +4,7 @@ require 'octokit'
 require 'open-uri'
 require 'yaml'
 require 'git'
+require 'nokogiri'
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 require "#{buildpacks_ci_dir}/lib/slack-client"
@@ -141,7 +142,8 @@ class NewReleasesDetector
       php:             -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
       python:          -> { JSON.parse(open('https://hg.python.org/cpython/json-tags').read)['tags'].map { |t| t['tag'] } },
       ruby:            -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) },
-      libunwind:       -> { Git.ls_remote('http://git.savannah.gnu.org/cgit/libunwind.git')['tags'].keys }
+      libunwind:       -> { Git.ls_remote('http://git.savannah.gnu.org/cgit/libunwind.git')['tags'].keys },
+      miniconda:       -> { Nokogiri::HTML.parse(open('https://repo.continuum.io/miniconda/').read).css('table tr td a').map {|link| link['href']} }
     }
   end
 
@@ -150,6 +152,14 @@ class NewReleasesDetector
   # is consistent throughout the whole pipeline.
   def massage_version(tags,dependency)
     case dependency
+    when :miniconda
+      versions_if_found = tags.map do |link|
+        match = link.match(/-((?<ver>\d+\.\d+\.\d+))-Linux-x86_64/)
+
+        match['ver'] unless match.nil?
+      end
+
+      versions_if_found.compact.uniq.sort
     when :node
       tags.map { |tag| tag.gsub(/v/,"")}
     when :nginx

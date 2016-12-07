@@ -25,6 +25,8 @@ describe NewReleasesDetector do
     allow_any_instance_of(described_class).to receive(:open).with(/openjdk/).and_return(double(read: {}.to_yaml))
     allow_any_instance_of(described_class).to receive(:open).with(/node/).and_return(double(read: [].to_json))
     allow_any_instance_of(described_class).to receive(:open).with(/bower/).and_return(double(read: { 'versions' => {} }.to_json))
+    allow_any_instance_of(described_class).to receive(:open).with(/miniconda/).and_return(double(read: '<html></html>'))
+
     allow(File).to receive(:exist?).and_call_original
     allow(File).to receive(:write).and_call_original
 
@@ -189,7 +191,6 @@ describe NewReleasesDetector do
       end
     end
 
-
     context 'for bower' do
       let(:dependency)          { :bower }
       let(:old_versions)        { %w(1.7.6 1.7.7) }
@@ -204,6 +205,61 @@ describe NewReleasesDetector do
 
       context 'when there are no new releases' do
         let(:new_releases_response) { double(read: { 'versions' => { '1.7.6': 'data', '1.7.7': 'data' } }.to_json) }
+
+        it_behaves_like 'there are no new versions to potentially build'
+      end
+    end
+
+    context 'for miniconda' do
+      let(:dependency)   { :miniconda }
+      let(:old_versions) { %w(3.33.33 4.44.44) }
+      let(:new_releases_source) { 'https://repo.continuum.io/miniconda/' }
+
+      context 'when there are new releases' do
+        let(:new_versions)            { %w(5.55.55) }
+        let(:new_releases_response)   { double('new_releases_response', read: miniconda_releases_html ) }
+        let(:miniconda_releases_html) { <<~HTML
+                                        <table>
+                                          <tr>
+                                            <td>
+                                              <a href="http://example.com/Miniconda2-4.44.44-Linux-x86_64.sh">Miniconda2-5.55.55-Linux-x86_64.sh</a>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td>
+                                              <a href="http://example.com/Miniconda2-3.33.33-Linux-x86_64.sh">Miniconda99-4.44.44-Linux-x86_64.sh</a>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td>
+                                              <a href="http://example.com/Miniconda2-5.55.55-Linux-x86_64.sh">Miniconda2-3.33.33-Linux-x86_64.sh</a>
+                                            </td>
+                                          </tr>
+                                        </table>
+                                      HTML
+        }
+
+        it_behaves_like 'there are new versions to potentially build'
+      end
+
+      context 'when there are no new releases' do
+        let(:new_releases_response)   { double('new_releases_response', read: miniconda_releases_html ) }
+        let(:miniconda_releases_html) { <<~HTML
+                                        <table>
+                                          <tr>
+                                            <td>
+                                              <a href="http://example.com/Miniconda2-4.44.44-Linux-x86_64.sh">Miniconda2-5.55.55-Linux-x86_64.sh</a>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td>
+                                              <a href="http://example.com/Miniconda2-3.33.33-Linux-x86_64.sh">Miniconda99-4.44.44-Linux-x86_64.sh</a>
+                                            </td>
+                                          </tr>
+                                        </table>
+        HTML
+        }
+
 
         it_behaves_like 'there are no new versions to potentially build'
       end
