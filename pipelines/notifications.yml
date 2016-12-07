@@ -8,6 +8,7 @@ resource_types:
     type: docker-image
     source:
       repository: cftoolsmiths/cron-test
+
 resources:
   - name: monday-funday
     type: cron
