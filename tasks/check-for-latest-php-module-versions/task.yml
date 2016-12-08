@@ -46,7 +46,7 @@ run:
   path: bash
   args:
     - '-cl'
-    - 'buildpacks-ci/tasks/check-for-latest-php-module-versions/run.sh'
+    - 'buildpacks-ci/tasks/check-for-latest-php-module-versions/run.rb'
 params:
   TRACKER_PROJECT_ID:
   TRACKER_API_TOKEN:
