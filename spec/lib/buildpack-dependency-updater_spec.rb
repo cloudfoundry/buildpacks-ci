@@ -212,10 +212,9 @@ describe BuildpackDependencyUpdater do
             - name: nginx
               version: 1.11.1
           url_to_dependency_map:
-            - match: nginx.tgz
+            - match: nginx-(\d+\.\d+\.\d+)
               name: nginx
-              version: 1.11.1
-
+              version: $1
           dependencies:
             - name: nginx
               version: 1.11.1
@@ -239,7 +238,7 @@ describe BuildpackDependencyUpdater do
         it "updates the specified buildpack manifest dependency with the specified version" do
           subject.run!
           manifest = YAML.load_file(manifest_file)
-          version_hash = {"match"=>"nginx.tgz", "name"=>dependency, "version"=>new_version}
+          version_hash = {"match"=>"nginx-(d+.d+.d+)", "name"=>dependency, "version"=>"$1"}
           expect(manifest["url_to_dependency_map"]).to include(version_hash)
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
@@ -272,7 +271,7 @@ describe BuildpackDependencyUpdater do
         it "does not update the specified buildpack manifest dependency with the specified version" do
           subject.run!
           manifest = YAML.load_file(manifest_file)
-          version_hash = {"match"=>"nginx.tgz", "name"=>dependency, "version"=>"1.11.1"}
+          version_hash = {"match"=>"nginx-(d+.d+.d+)", "name"=>dependency, "version"=>"$1"}
           expect(manifest["url_to_dependency_map"]).to include(version_hash)
 
           new_dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
