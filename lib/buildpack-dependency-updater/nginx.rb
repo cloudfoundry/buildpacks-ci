@@ -1,22 +1,8 @@
 class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
-  def update_version_in_url_to_dependency_map
-    if mainline_version?(dependency_version) && buildpack == "staticfile"
-      buildpack_manifest["url_to_dependency_map"].delete_if { |dep| dep["name"] == dependency }
-      dependency_hash = {
-        "match" => "#{dependency}.tgz",
-        "name" => dependency,
-        "version" => dependency_version
-      }
-      buildpack_manifest["url_to_dependency_map"] << dependency_hash
-    end
-  end
-
   def perform_dependency_specific_changes
     if mainline_version?(dependency_version)
       perform_default_versions_update
     end
-
-    update_version_in_url_to_dependency_map
   end
 
   def perform_dependency_update
