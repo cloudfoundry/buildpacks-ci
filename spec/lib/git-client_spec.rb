@@ -74,12 +74,29 @@ describe GitClient do
 
     subject { described_class.last_commit_message(dir) }
 
-    before { allow(Open3).to receive(:capture3).and_return([last_commit_message, stderr_output, process_status]) }
+    before { allow(Open3).to receive(:capture3).with('git log --format=%B -n 1 HEAD~0').and_return([last_commit_message, stderr_output, process_status]) }
 
     context 'git works properly' do
       let(:last_commit_message) { 'I was last committed' }
 
       before { allow(process_status).to receive(:success?).and_return(true) }
+
+      it 'should return the last git commit message' do
+        expect(subject).to eq('I was last committed')
+      end
+    end
+
+    context 'for a specific file' do
+      let(:last_commit_message) { 'I was last committed' }
+      let(:filename)            { 'directory/info.yml' }
+
+      subject { described_class.last_commit_message(dir, 0, filename) }
+
+      before do
+        allow(Open3).to receive(:capture3).with('git log --format=%B -n 1 HEAD~0 directory/info.yml').and_return([last_commit_message, stderr_output, process_status])
+        allow(process_status).to receive(:success?).and_return(true)
+      end
+
 
       it 'should return the last git commit message' do
         expect(subject).to eq('I was last committed')
