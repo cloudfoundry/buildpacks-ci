@@ -28,8 +28,8 @@ resources:
   - name: verification-whitelist
     type: git
     source:
-      uri: {{buildpacks-ci-git-uri-public}}
-      branch: binary-verification-whitelist
+      uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
+      paths: [ binary-verification-whitelist/* ]
   - name: deploy-buildpack-verify
     type: cf
     source:
