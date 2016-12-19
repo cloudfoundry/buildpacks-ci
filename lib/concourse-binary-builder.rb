@@ -125,7 +125,7 @@ class ConcourseBinaryBuilder
     #don't change behavior for non-automated builds
     if is_automated
       #get latest version of <binary>-built.yml
-      add_ssh_key_and_update(built_dir, 'binary-built-output')
+      add_ssh_key_and_update(built_dir)
       built_file = File.join(built_dir, "#{binary_name}-built.yml")
       built = YAML.load_file(built_file)
       built_versions = built[binary_name]
@@ -158,7 +158,7 @@ class ConcourseBinaryBuilder
     output
   end
 
-  def add_ssh_key_and_update(dir, branch)
+  def add_ssh_key_and_update(dir)
     File.write("/tmp/git_ssh_key", git_ssh_key)
     system(<<-HEREDOC)
     eval "$(ssh-agent)"
@@ -171,7 +171,6 @@ class ConcourseBinaryBuilder
     ssh-add /tmp/git_ssh_key
     set -x
     cd #{dir}
-    git checkout #{branch}
     git pull -r
     HEREDOC
   end

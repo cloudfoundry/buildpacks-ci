@@ -206,7 +206,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/build-binary/task.yml
           params:
             BINARY_NAME: <%= dependency %>
-            GIT_SSH_KEY: {{buildpacks-ci-private-key}}
+            GIT_SSH_KEY: {{public-buildpacks-ci-robots-private-key}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BINARY_BUILDER_PLATFORM: {{binary-builder-platform}}
             BINARY_BUILDER_OS_NAME: {{binary-builder-os-name}}
@@ -277,7 +277,7 @@ jobs: ##########################################################################
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary/task.yml
           params:
-            GIT_SSH_KEY: {{buildpacks-ci-private-key}}
+            GIT_SSH_KEY: {{public-buildpacks-ci-robots-private-key}}
             BINARY_NAME: <%= dependency %>
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BINARY_BUILDER_PLATFORM: {{binary-builder-platform}}
