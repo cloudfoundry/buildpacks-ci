@@ -49,7 +49,7 @@ describe ConcourseBinaryBuilder do
       end
 
       allow(subject).to receive(:system).and_call_original
-      allow(subject).to receive(:add_ssh_key_and_update).with(built_dir, 'binary-built-output')
+      allow(subject).to receive(:add_ssh_key_and_update).with(built_dir)
 
       allow(subject).to receive(:run_binary_builder).with(flags) do |flags|
         Dir.chdir(binary_builder_dir) do
