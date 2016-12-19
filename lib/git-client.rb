@@ -24,9 +24,11 @@ class GitClient
     end
   end
 
-  def self.last_commit_message(dir, previous = 0)
+  def self.last_commit_message(dir, previous = 0, file = nil)
     Dir.chdir(dir) do
       command = "git log --format=%B -n 1 HEAD~#{previous}"
+      command += " #{file}" unless file.nil?
+
       stdout_str, stderr_str, status = Open3.capture3(command)
 
       raise GitError.new("Could not get commit message for HEAD~#{previous}. STDERR was: #{stderr_str}") unless status.success?
