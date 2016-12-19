@@ -4,26 +4,32 @@ require_relative '../../lib/update-dependency-in-buildpack-job'
 
 describe UpdateDependencyInBuildpackJob do
   let(:buildpacks_ci_dir) { Dir.mktmpdir }
-  let(:binary_builds_dir) { Dir.mktmpdir }
+  let(:binary_built_out_dir) { Dir.mktmpdir }
+  let(:version)                      { 'override' }
+  let(:removed_versions)             { %w(override) }
+  let(:buildpack_dependency_updater) { double(:buildpack_dependency_updater, dependency_version: version,
+                                                                             removed_versions: removed_versions,
+                                                                             run!: nil) }
 
-  subject { described_class.new(buildpacks_ci_dir, binary_builds_dir) }
+  subject { described_class.new(buildpacks_ci_dir, binary_built_out_dir) }
+
+  before do
+    allow(BuildpackDependencyUpdater).to receive(:create).and_return(buildpack_dependency_updater)
+  end
 
   after do
     FileUtils.rm_rf(buildpacks_ci_dir)
-    FileUtils.rm_rf(binary_builds_dir)
+    FileUtils.rm_rf(binary_built_out_dir)
   end
 
   describe '#update_buildpack' do
     let(:dependency)                   { 'nginx' }
     let(:buildpack_dir)                { Dir.mktmpdir }
     let(:version)                      { '1.11.3' }
-    let(:buildpack_dependency_updater) { double(:buildpack_dependency_updater) }
+    let(:removed_versions)             { %w(1.11.1) }
 
     before do
       stub_const('ENV', {'DEPENDENCY' => dependency})
-      allow(BuildpackDependencyUpdater).to receive(:create).and_return(buildpack_dependency_updater)
-      allow(buildpack_dependency_updater).to receive(:dependency_version).and_return(version)
-      allow(buildpack_dependency_updater).to receive(:run!)
     end
 
     after { FileUtils.rm_rf(buildpack_dir) }
@@ -37,9 +43,9 @@ describe UpdateDependencyInBuildpackJob do
       expect { subject.update_buildpack }.to output("Updating manifest with nginx 1.11.3...\n").to_stdout
     end
 
-    it 'returns the buildpack directory, dependency, and version' do
+    it 'returns the buildpack directory, dependency, version, and removed versions' do
       expected_buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "buildpack"))
-      expect(subject.update_buildpack).to eq([expected_buildpack_dir, 'nginx', '1.11.3'])
+      expect(subject.update_buildpack).to eq([expected_buildpack_dir, 'nginx', '1.11.3', ['1.11.1']])
     end
   end
 
@@ -111,7 +117,7 @@ describe UpdateDependencyInBuildpackJob do
     let(:removed_versions)   { ['4.4.4', '4.4.5'] }
 
     before do
-      allow(GitClient).to receive(:last_commit_message).with(binary_builds_dir).and_return(git_commit_message)
+      allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, 'binary-built-output/node-built.yml').and_return(git_commit_message)
       allow(subject).to receive(:extract_source_info).with(git_commit_message).and_return(source_info)
     end
 
@@ -125,11 +131,12 @@ describe UpdateDependencyInBuildpackJob do
   end
 
   describe '#run!' do
-    let(:tracker_client) { double(:tracker_client) }
-    let(:dependency)     { 'node' }
-    let(:story_ids)      { [123456] }
-    let(:buildpack_dir)  { Dir.mktmpdir }
-    let(:version)        { '4.4.7' }
+    let(:tracker_client)   { double(:tracker_client) }
+    let(:dependency)       { 'node' }
+    let(:story_ids)        { [123456] }
+    let(:buildpack_dir)    { Dir.mktmpdir }
+    let(:version)          { '4.4.7' }
+    let(:removed_versions) { %w(4.4.5) }
 
     before do
       allow(TrackerClient).to receive(:new).and_return(tracker_client)
@@ -139,8 +146,8 @@ describe UpdateDependencyInBuildpackJob do
     after { FileUtils.rm_rf(buildpack_dir) }
 
     it 'updates the buildpack and makes a git commit with the matching unaccepted story ids' do
-      expect(subject).to receive(:update_buildpack).and_return([buildpack_dir, dependency, version])
-      expect(subject).to receive(:write_git_commit).with(buildpack_dir, 'node', [123456], '4.4.7')
+      expect(subject).to receive(:update_buildpack).and_return([buildpack_dir, dependency, version, removed_versions])
+      expect(subject).to receive(:write_git_commit).with(buildpack_dir, 'node', [123456], '4.4.7', ['4.4.5'])
       subject.run!
     end
   end
