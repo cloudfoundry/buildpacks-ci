@@ -5,11 +5,11 @@ require_relative "git-client"
 
 class UpdateDependencyInBuildpackJob
   attr_reader :buildpacks_ci_dir
-  attr_reader :binary_builds_dir
+  attr_reader :binary_built_out_dir
 
-  def initialize(buildpacks_ci_dir, binary_builds_dir)
+  def initialize(buildpacks_ci_dir, binary_built_out_dir)
     @buildpacks_ci_dir = buildpacks_ci_dir
-    @binary_builds_dir = binary_builds_dir
+    @binary_built_out_dir = binary_built_out_dir
   end
 
   def update_buildpack
@@ -17,7 +17,7 @@ class UpdateDependencyInBuildpackJob
     buildpack_name = ENV['BUILDPACK_NAME']
     buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "buildpack"))
 
-    buildpack_updater = BuildpackDependencyUpdater.create(dependency, buildpack_name, buildpack_dir, binary_builds_dir)
+    buildpack_updater = BuildpackDependencyUpdater.create(dependency, buildpack_name, buildpack_dir, binary_built_out_dir)
 
     version = buildpack_updater.dependency_version
 
@@ -38,7 +38,8 @@ class UpdateDependencyInBuildpackJob
   end
 
   def write_git_commit(buildpack_dir, dependency, story_ids, version, removed_versions)
-    git_commit_message = GitClient.last_commit_message(binary_builds_dir)
+    binary_built_file = "binary-built-output/#{dependency}-built.yml"
+    git_commit_message = GitClient.last_commit_message(binary_built_out_dir, 0, binary_built_file)
 
     source_info = extract_source_info(git_commit_message)
 
