@@ -37,10 +37,10 @@ resources: #####################################################################
   - name: new-cves
     type: git
     source:
-      uri: {{buildpacks-ci-git-uri}}
-      branch: new-cve-notifications
-      private_key: {{buildpacks-ci-private-key}}
-      paths: [ ubuntu14.04.yml ]
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ new-cve-notifications/ubuntu14.04.yml ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
 
   - name: deployments-buildpacks
     type: git

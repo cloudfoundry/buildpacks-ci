@@ -48,10 +48,10 @@ resources: #####################################################################
   - name: new-cves
     type: git
     source:
-      uri: {{buildpacks-ci-git-uri}}
-      branch: new-cves-stacks-nc
-      private_key: {{buildpacks-ci-private-key}}
-      paths: [ ubuntu14.04.yml ]
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ new-cves-stacks-nc/ubuntu14.04.yml ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
 
   - name: deployments-buildpacks
     type: git
