@@ -17,10 +17,10 @@ describe ConcourseBinaryBuilder do
     let(:builds_yaml_artifacts_dir) { File.join(task_root_dir, 'builds-yaml-artifacts') }
     let(:binary_artifacts_dir) {File.join(task_root_dir, 'binary-builder-artifacts')}
 
-    let(:built_dir) { File.join(task_root_dir, 'built-yaml', 'binary-built-output') }
+    let(:built_dir) { File.join(task_root_dir, 'built-yaml') }
     let(:built_yaml_contents) { {dependency => []}.to_yaml }
 
-    let(:builds_dir) { File.join(task_root_dir, 'builds-yaml', 'binary-builds') }
+    let(:builds_dir) { File.join(task_root_dir, 'builds-yaml') }
     let(:builds_yaml_contents) do
       yaml_hash = {}
       yaml_hash[dependency] = [{'version' => version, verification_type => verification_value}]
@@ -32,17 +32,17 @@ describe ConcourseBinaryBuilder do
     subject { described_class.new(dependency, task_root_dir, git_ssh_key, platform, os_name) }
 
     before(:each) do
-      FileUtils.mkdir_p([built_dir, builds_dir, binary_builder_dir, binary_artifacts_dir])
+      FileUtils.mkdir_p([File.join(built_dir, 'binary-built-output'), File.join(builds_dir, 'binary-builds'), binary_builder_dir, binary_artifacts_dir])
       FileUtils.rm_rf('/tmp/src')
       FileUtils.rm_rf('/tmp/x86_64-linux-gnu')
 
-      Dir.chdir(built_dir) do
+      Dir.chdir(File.join(built_dir, 'binary-built-output')) do
         File.open("#{dependency}-built.yml", "w") do |file|
           file.write built_yaml_contents
         end
       end
 
-      Dir.chdir(builds_dir) do
+      Dir.chdir(File.join(builds_dir, 'binary-builds')) do
         File.open("#{dependency}-builds.yml", "w") do |file|
           file.write builds_yaml_contents
         end
@@ -81,9 +81,9 @@ describe ConcourseBinaryBuilder do
 
       it 'adds the correct file' do
         if automation == 'automated'
-          file_to_commit = File.join(built_dir, "#{dependency}-built.yml")
+          file_to_commit = File.join(built_dir, 'binary-built-output' ,"#{dependency}-built.yml")
         elsif automation == 'not automated'
-          file_to_commit = File.join(builds_dir, "#{dependency}-builds.yml")
+          file_to_commit = File.join(builds_dir,'binary-builds', "#{dependency}-builds.yml")
         end
 
         expect(GitClient).to have_received(:add_file).with(file_to_commit)
@@ -102,7 +102,7 @@ describe ConcourseBinaryBuilder do
       if automation == 'automated'
         it 'makes the commit with a timestamp' do
           Dir.chdir(builds_yaml_artifacts_dir) do
-            built_yaml = YAML.load_file("#{dependency}-built.yml")
+            built_yaml = YAML.load_file(File.join('binary-built-output',"#{dependency}-built.yml"))
             expect(built_yaml[dependency][0]['timestamp']).to_not eq nil
           end
         end
@@ -237,12 +237,12 @@ describe ConcourseBinaryBuilder do
         end
 
         it 'has not changed the <dep>-built.yml file' do
-          file_yaml_contents = YAML.load_file(File.join(built_dir, "#{dependency}-built.yml")).to_yaml
+          file_yaml_contents = YAML.load_file(File.join(built_dir, 'binary-built-output', "#{dependency}-built.yml")).to_yaml
           expect(built_yaml_contents).to eq(file_yaml_contents)
         end
 
         it 'syncs the -built file in builds-yaml-artifacts' do
-          built_file = File.join(builds_yaml_artifacts_dir, "#{dependency}-built.yml")
+          built_file = File.join(builds_yaml_artifacts_dir, 'binary-built-output', "#{dependency}-built.yml")
           expect(File.exist?(built_file)).to be_truthy
         end
 

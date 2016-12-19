@@ -18,8 +18,8 @@ class ConcourseBinaryBuilder
     @binary_name = binary_name
     @task_root_dir = task_root_dir
     @binary_builder_dir = File.join(task_root_dir,'binary-builder')
-    @built_dir = File.join(task_root_dir, 'built-yaml', 'binary-built-output')
-    @builds_dir = File.join(task_root_dir,'builds-yaml', 'binary-builds')
+    @built_dir = File.join(task_root_dir, 'built-yaml')
+    @builds_dir = File.join(task_root_dir,'builds-yaml')
     @builds_yaml_artifacts = File.join(task_root_dir, 'builds-yaml-artifacts')
     @binary_artifacts_dir = File.join(task_root_dir, 'binary-builder-artifacts')
   end
@@ -44,7 +44,7 @@ class ConcourseBinaryBuilder
   private
 
   def load_builds_yaml
-    builds_file = File.join(builds_dir, "#{binary_name}-builds.yml")
+    builds_file = File.join(builds_dir, 'binary-builds', "#{binary_name}-builds.yml")
     builds = YAML.load_file(builds_file)
 
     @latest_build = builds[binary_name].shift
@@ -126,7 +126,7 @@ class ConcourseBinaryBuilder
     if is_automated
       #get latest version of <binary>-built.yml
       add_ssh_key_and_update(built_dir)
-      built_file = File.join(built_dir, "#{binary_name}-built.yml")
+      built_file = File.join(built_dir, 'binary-built-output' ,"#{binary_name}-built.yml")
       built = YAML.load_file(built_file)
       built_versions = built[binary_name]
 
@@ -138,7 +138,7 @@ class ConcourseBinaryBuilder
       end
       commit_and_rsync(built_dir, builds_yaml_artifacts, git_msg, built_file)
     else
-      builds_file = File.join(builds_dir, "#{binary_name}-builds.yml")
+      builds_file = File.join(builds_dir, 'binary-builds', "#{binary_name}-builds.yml")
       File.write(builds_file, remaining_builds.to_yaml)
       commit_and_rsync(builds_dir, builds_yaml_artifacts, git_msg, builds_file)
     end
