@@ -5,20 +5,20 @@ require_relative '../../../lib/buildpack-dependency-updater'
 
 describe BuildpackDependencyUpdater do
   let(:buildpack_dir) { Dir.mktmpdir }
-  let(:binary_builds_dir) { Dir.mktmpdir }
+  let(:binary_built_out_dir) { Dir.mktmpdir }
   let(:dependencies_host_domain) { 'buildpacks.cloudfoundry.org' }
   let(:manifest_file) { File.join(buildpack_dir, 'manifest.yml') }
   let(:dep_url) { "https://#{dependencies_host_domain}/path-to-built-binary" }
   let(:dependency) { 'bower' }
 
-  subject { described_class.create(dependency, buildpack, buildpack_dir, binary_builds_dir) }
+  subject { described_class.create(dependency, buildpack, buildpack_dir, binary_built_out_dir) }
 
   before { allow(ENV).to receive(:fetch).with('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil).and_return(dependencies_host_domain) }
 
   describe '#run!' do
 
     before do
-      allow(GitClient).to receive(:last_commit_message).and_return <<~COMMIT
+      allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, 'binary-built-output/bower-built.yml').and_return <<~COMMIT
         Build bower - #{expected_version}
         filename: binary-builder/bower-#{expected_version}.tgz, md5: doesnotmatteratall, sha256: alsoignoredforthistest
       COMMIT

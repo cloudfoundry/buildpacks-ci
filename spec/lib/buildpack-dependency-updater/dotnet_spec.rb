@@ -5,10 +5,10 @@ require_relative '../../../lib/buildpack-dependency-updater'
 
 describe BuildpackDependencyUpdater do
   let(:buildpack_dir)            { Dir.mktmpdir }
-  let(:binary_builds_dir)        { Dir.mktmpdir }
+  let(:binary_built_out_dir)        { Dir.mktmpdir }
   let(:dependencies_host_domain) { 'buildpacks.cloudfoundry.org' }
 
-  subject { described_class.create('dotnet', 'dotnet-core', buildpack_dir, binary_builds_dir) }
+  subject { described_class.create('dotnet', 'dotnet-core', buildpack_dir, binary_built_out_dir) }
 
   before { allow(ENV).to receive(:fetch).with('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil).and_return(dependencies_host_domain) }
 
@@ -27,7 +27,7 @@ describe BuildpackDependencyUpdater do
         file.write versions_contents
       end
 
-      allow(GitClient).to receive(:last_commit_message).and_return <<~COMMIT
+      allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, 'binary-built-output/dotnet-built.yml').and_return <<~COMMIT
         Build dotnet - #{new_version}
         filename: binary-builder/dotnet.#{new_version}.linux-amd64.tar.gz, md5: aaaabbbb22224444, sha256: zzzzzyyyy99998888
       COMMIT

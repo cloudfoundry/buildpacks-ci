@@ -16,7 +16,7 @@ class BuildpackDependencyUpdater
   attr_reader :dependency
   attr_reader :buildpack
   attr_reader :buildpack_dir
-  attr_reader :binary_builds_dir
+  attr_reader :binary_built_dir
   attr_reader :dependency_version
   attr_reader :md5
   attr_reader :uri
@@ -28,11 +28,11 @@ class BuildpackDependencyUpdater
     const_get(dependency.capitalize).new(dependency, *args)
   end
 
-  def initialize(dependency, buildpack, buildpack_dir, binary_builds_dir)
+  def initialize(dependency, buildpack, buildpack_dir, binary_built_dir)
     @dependency = dependency
     @buildpack = buildpack
     @buildpack_dir = buildpack_dir
-    @binary_builds_dir = binary_builds_dir
+    @binary_built_dir = binary_built_dir
     @removed_versions = []
     @dependency_version, @uri, @md5 = get_dependency_info
   end
@@ -69,7 +69,8 @@ class BuildpackDependencyUpdater
   end
 
   def get_dependency_info
-    git_commit_message = GitClient.last_commit_message(binary_builds_dir)
+    binary_built_file = "binary-built-output/#{dependency}-built.yml"
+    git_commit_message = GitClient.last_commit_message(binary_built_dir, 0, binary_built_file)
 
     buildpack_dependencies_host_domain = ENV.fetch('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil)
     raise 'No host domain set via BUILDPACK_DEPENDENCIES_HOST_DOMAIN' unless buildpack_dependencies_host_domain

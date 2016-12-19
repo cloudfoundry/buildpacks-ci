@@ -5,20 +5,20 @@ require_relative '../../../lib/buildpack-dependency-updater'
 
 describe BuildpackDependencyUpdater do
   let(:buildpack_dir)            { Dir.mktmpdir }
-  let(:binary_builds_dir)        { Dir.mktmpdir }
+  let(:binary_built_out_dir)     { Dir.mktmpdir }
   let(:dependencies_host_domain) { 'buildpacks.cloudfoundry.org' }
   let(:manifest_file)            { File.join(buildpack_dir, "manifest.yml") }
   let(:dep_url)                  { "https://#{dependencies_host_domain}/path-to-built-binary" }
   let(:dependency)               { "node" }
 
-  subject { described_class.create(dependency, buildpack, buildpack_dir, binary_builds_dir) }
+  subject { described_class.create(dependency, buildpack, buildpack_dir, binary_built_out_dir) }
 
   before { allow(ENV).to receive(:fetch).with('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil).and_return(dependencies_host_domain) }
 
   describe '#run!' do
 
     before do
-      allow(GitClient).to receive(:last_commit_message).and_return <<~COMMIT
+      allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, 'binary-built-output/node-built.yml').and_return <<~COMMIT
         Build node - #{expected_version}
         filename: binary-builder/node-#{expected_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
       COMMIT

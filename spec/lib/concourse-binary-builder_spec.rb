@@ -17,10 +17,10 @@ describe ConcourseBinaryBuilder do
     let(:builds_yaml_artifacts_dir) { File.join(task_root_dir, 'builds-yaml-artifacts') }
     let(:binary_artifacts_dir) {File.join(task_root_dir, 'binary-builder-artifacts')}
 
-    let(:built_dir) { File.join(task_root_dir, 'built-yaml') }
+    let(:built_dir) { File.join(task_root_dir, 'built-yaml', 'binary-built-output') }
     let(:built_yaml_contents) { {dependency => []}.to_yaml }
 
-    let(:builds_dir) { File.join(task_root_dir, 'builds-yaml') }
+    let(:builds_dir) { File.join(task_root_dir, 'builds-yaml', 'binary-builds') }
     let(:builds_yaml_contents) do
       yaml_hash = {}
       yaml_hash[dependency] = [{'version' => version, verification_type => verification_value}]
