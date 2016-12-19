@@ -8,9 +8,9 @@ resources:
   - name: new-buildpack-cves
     type: git
     source:
-      uri: {{buildpacks-ci-git-uri}}
-      branch: new-buildpack-cve-notifications
-      private_key: {{buildpacks-ci-private-key}}
+      uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
+      paths: [ new-buildpack-cve-notifications/* ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
   - name: check-interval
     type: cron
     source:
@@ -25,8 +25,9 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri}}
-      branch: new-cves-stacks-nc
-      private_key: {{buildpacks-ci-private-key}}
+      branch:
+      paths: [ new-cves-stacks-nc/* ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
   - name: stacks
     type: git
     source:
