@@ -26,46 +26,47 @@ resources: #####################################################################
   - name: builds-out
     type: git
     source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ binary-builds/* ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
 
 <% %w(bower go bundler composer dotnet glide godep httpd jruby php php7 python node nginx ruby).each do |dep| %>
   - name: <%= dep %>-builds
     type: git
     source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ <%= dep %>-builds.yml ]
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ binary-builds/<%= dep %>-builds.yml ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
 
   - name: <%= dep %>-built-output
     type: git
     source:
-      branch: binary-built-output
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ <%= dep %>-built.yml ]
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ binary-built-output/<%= dep %>-built.yml ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
 <% end %>
 
 <% %w(bower composer dotnet glide godep nginx node).each do |auto_dep| %>
   - name: <%= auto_dep %>-builds-in
     type: git
     source:
-      branch: binary-builds
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ <%= auto_dep %>-builds.yml ]
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ binary-builds/<%= auto_dep %>-builds.yml ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
 <% end %>
 
 <% %w(bower composer dotnet glide godep nginx node).each do |auto_new| %>
   - name: <%= auto_new %>-new-releases
     type: git
     source:
-      uri: {{buildpacks-ci-git-uri}}
-      branch: new-release-notifications
-      private_key: {{buildpacks-ci-private-key}}
-      paths: [ <%= auto_new %>-new.yml ]
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ new-release-notifications/<%= auto_new %>-new.yml ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
 <% end %>
 
 <% %w(go dotnet-core nodejs ruby php staticfile).each do |language| %>
@@ -189,7 +190,7 @@ jobs: ##########################################################################
   - name: build-<%= dependency %>
     serial: true
     public: true
-    disable_manual_trigger: true # instead, trigger jobs by pushing yaml to buildpacks-ci:binary-builds
+    disable_manual_trigger: true # instead, trigger jobs by pushing yaml to public-buildpacks-ci-robots/binary-builds
     plan:
       - aggregate:
         - get: builds-yaml

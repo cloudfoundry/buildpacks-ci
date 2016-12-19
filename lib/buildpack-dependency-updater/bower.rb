@@ -1,6 +1,7 @@
 class BuildpackDependencyUpdater::Bower < BuildpackDependencyUpdater
   def get_dependency_info
-    git_commit_message = GitClient.last_commit_message(binary_builds_dir)
+    binary_built_file = "binary-built-output/#{dependency}-built.yml"
+    git_commit_message = GitClient.last_commit_message(binary_built_dir, 0, binary_built_file)
 
     buildpack_dependencies_host_domain = ENV.fetch('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil)
     raise 'No host domain set via BUILDPACK_DEPENDENCIES_HOST_DOMAIN' unless buildpack_dependencies_host_domain

@@ -18,8 +18,8 @@ class ConcourseBinaryBuilder
     @binary_name = binary_name
     @task_root_dir = task_root_dir
     @binary_builder_dir = File.join(task_root_dir,'binary-builder')
-    @built_dir = File.join(task_root_dir, 'built-yaml')
-    @builds_dir = File.join(task_root_dir ,'builds-yaml')
+    @built_dir = File.join(task_root_dir, 'built-yaml', 'binary-built-output')
+    @builds_dir = File.join(task_root_dir,'builds-yaml', 'binary-builds')
     @builds_yaml_artifacts = File.join(task_root_dir, 'builds-yaml-artifacts')
     @binary_artifacts_dir = File.join(task_root_dir, 'binary-builder-artifacts')
   end
