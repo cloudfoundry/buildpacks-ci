@@ -8,7 +8,7 @@ class BoshComponentStoryCreator
   attr_reader :components, :up_to_date, :new_versions
 
   def initialize
-    @components = %w(bosh-lite-stemcell gcp-stemcell bosh garden-runc concourse gcp-cpi)
+    @components = %w(gcp-stemcell bosh garden-runc concourse gcp-cpi)
     @up_to_date = []
     @new_versions = {}
   end
@@ -61,7 +61,6 @@ class BoshComponentStoryCreator
 
   def display_name(component)
     {
-      'bosh-lite-stemcell' => 'bosh-warden-boshlite-ubuntu-trusty-go_agent',
       'gcp-stemcell' => 'bosh-google-kvm-ubuntu-trusty-go_agent',
       'bosh' => 'BOSH',
       'garden-runc' => 'Garden-runC',

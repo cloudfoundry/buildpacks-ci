@@ -7,7 +7,6 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: public-buildpacks-ci-robots
-  - name: bosh-lite-stemcell
   - name: gcp-stemcell
   - name: bosh
   - name: garden-runc
