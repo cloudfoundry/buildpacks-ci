@@ -21,27 +21,9 @@ describe StateOfBoshLites do
   subject { described_class.new }
 
   describe '#get_states!' do
-    context 'using git' do
-      before(:each) do
-        allow(GitClient).to receive(:get_current_branch).and_return('develop')
-        allow(subject).to receive(:get_environment_status).and_return( {'claimed' => true, 'job' => 'php-buildpack/specs-develop build 13'} )
-      end
-
-      it 'switches to the resource-pools branch and back' do
-        subject.get_states!
-
-        expect(GitClient).to have_received(:checkout_branch).with('resource-pools')
-        expect(GitClient).to have_received(:checkout_branch).with('develop')
-      end
-
-      it 'gets the status of all the environments' do
-        subject.get_states!
-
-        environments.each do |iaas, environment_names|
-          environment_names.each do |env|
-             expect(subject).to have_received(:get_environment_status).with(env, iaas)
-          end
-        end
+    context 'no resource pools dir' do
+      it 'raises an exeception' do
+        expect{ subject.get_states! }.to raise_exception('resource_pools_dir is required')
       end
     end
 
@@ -57,6 +39,7 @@ describe StateOfBoshLites do
 
       it 'navigates into the resource pools directory' do
         expect(Dir).to receive(:chdir).with(resource_pools_dir)
+        expect(GitClient).to receive(:pull_current_branch)
 
         subject.get_states!(resource_pools_dir: resource_pools_dir)
       end
