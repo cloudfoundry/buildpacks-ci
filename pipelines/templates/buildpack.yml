@@ -137,32 +137,34 @@ resources: #####################################################################
   - name: cf-edge-gcp-environments
     type: pool
     source:
-      branch: resource-pools
+      branch: master
       pool: cf-edge-gcp-environments
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
   - name: cf-lts-gcp-environments
     type: pool
     source:
-      branch: resource-pools
+      branch: master
       pool: cf-lts-gcp-environments
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
   - name: cf-edge-aws-environments
     type: pool
     source:
-      branch: resource-pools
+      branch: master
       pool: cf-edge-environments
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
   - name: cf-lts-aws-environments
     type: pool
     source:
-      branch: resource-pools
+      branch: master
       pool: cf-lts-environments
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
   ## Alerts ##
 

@@ -7,9 +7,9 @@ resources:
   - name: resource-pools
     type: git
     source:
-      uri: {{buildpacks-ci-git-uri}}
-      branch: resource-pools
-      private_key: {{buildpacks-ci-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      private_key: {{public-buildpacks-ci-robots-private-key}}
 
 jobs:
 <% {'cf-edge-gcp-environments': ['edge-1', 'edge-2'], 'cf-lts-gcp-environments': ['lts-1', 'lts-2'] }.each do |resource_type, resources| %>
