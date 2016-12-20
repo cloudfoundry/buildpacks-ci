@@ -46,8 +46,11 @@ class StateOfBoshLites
       commit.match regex
     end.first
 
-    most_recent_commit.match regex
-    concourse_job = $1
+    concourse_job = nil
+    if most_recent_commit
+      most_recent_commit.match regex
+      concourse_job = $1
+    end
 
     {'claimed' => claimed, 'job' => concourse_job}
   end
@@ -82,24 +85,11 @@ class StateOfBoshLites
   end
 
   def get_states!(resource_pools_dir: nil)
-    if resource_pools_dir.nil?
-      buildpacks_ci_dir = File.join(File.dirname(__FILE__), '..')
+    raise "resource_pools_dir is required" if resource_pools_dir.nil?
 
-      Dir.chdir(buildpacks_ci_dir) do
-        current_branch = GitClient.get_current_branch(Dir.pwd)
-
-        begin
-          GitClient.checkout_branch('resource-pools')
-          GitClient.pull_current_branch
-          get_all_environment_statuses
-        ensure
-          GitClient.checkout_branch(current_branch)
-        end
-      end
-    else
-      Dir.chdir(resource_pools_dir) do
-        get_all_environment_statuses
-      end
+    Dir.chdir(resource_pools_dir) do
+      GitClient.pull_current_branch
+      get_all_environment_statuses
     end
   end
 
