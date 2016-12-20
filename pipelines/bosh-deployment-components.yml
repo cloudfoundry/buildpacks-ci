@@ -16,12 +16,6 @@ resources: #################################################
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
   ## Stemcells ##
-  - name: bosh-lite-stemcell
-    type: bosh-io-stemcell
-    source:
-      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
-      force_regular: true
-
   - name: gcp-stemcell
     type: bosh-io-stemcell
     source:
@@ -58,11 +52,6 @@ jobs: ########################################################
       - aggregate:
         - get: buildpacks-ci
         - get: public-buildpacks-ci-robots
-        - get: bosh-lite-stemcell
-          version: every
-          trigger: true
-          params:
-            tarball: false
         - get: gcp-stemcell
           trigger: true
           version: every
