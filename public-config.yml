@@ -13,7 +13,7 @@ buildpacks-github-org: cloudfoundry
 buildpacks-binaries-s3-bucket: pivotal-buildpacks
 bosh-lite-domain-name: cf-app.com
 
-buildpacks-ci-pipeline-uri: https://concourse.buildpacks-gcp.ci.cf-app.com/teams/main/pipelines/buildpacks-ci
+buildpacks-ci-pipeline-uri: https://buildpacks.ci.cf-app.com/teams/main/pipelines/buildpacks-ci
 buildpacks-ci-git-uri-public: https://github.com/cloudfoundry/buildpacks-ci
 buildpacks-ci-git-uri: git@github.com:cloudfoundry/buildpacks-ci.git
 buildpacks-ci-git-uri-public-develop-branch: develop
