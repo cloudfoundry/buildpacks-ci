@@ -447,7 +447,7 @@ describe NewReleasesDetector do
 
       it 'adds a task to the tracker story to remove non-MS supported versions of dotnet' do
         expect(buildpacks_tracker_client).to receive(:post_to_tracker).
-          with(tasks: ['Update dotnet in microsoft-buildpack', 'Remove any dotnet versions MS no longer supports'],
+          with(tasks: ['Update dotnet in microsoft-buildpack', 'Remove any dotnet versions MS no longer supports', 'Remove any dotnet-framework versions we no longer support'],
                name: anything, description: anything, point_value: anything, labels: anything
         )
 

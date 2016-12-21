@@ -113,6 +113,7 @@ class NewReleasesDetector
 
     if dependency == :dotnet
       tasks.push 'Remove any dotnet versions MS no longer supports'
+      tasks.push 'Remove any dotnet-framework versions we no longer support'
     end
 
     {
