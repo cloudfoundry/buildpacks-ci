@@ -46,7 +46,7 @@ resources:
       access_token: {{buildpacks-github-token}}
 
 jobs:
-<% %w(go python nodejs php ruby jruby dotnet-core java).each do |language| %>
+<% %w(binary staticfile go python nodejs php ruby jruby dotnet-core java).each do |language| %>
   - name: brats-<%= language %>-lts
     serial: true
     public: true
