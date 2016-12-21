@@ -9,6 +9,7 @@ require_relative 'buildpack-dependency-updater/glide.rb'
 require_relative 'buildpack-dependency-updater/bower.rb'
 require_relative 'buildpack-dependency-updater/composer.rb'
 require_relative 'buildpack-dependency-updater/dotnet.rb'
+require_relative 'buildpack-dependency-updater/dotnet-framework.rb'
 require_relative 'buildpack-dependency-updater/nginx.rb'
 require_relative 'buildpack-dependency-updater/node.rb'
 
@@ -24,8 +25,9 @@ class BuildpackDependencyUpdater
   attr_accessor :buildpack_manifest
 
   def self.create(dependency, *args)
-    raise "Unsupported dependency" unless const_defined? dependency.capitalize
-    const_get(dependency.capitalize).new(dependency, *args)
+    subclass = dependency.split('-').map { |s| s.capitalize}.join('')
+    raise "Unsupported dependency" unless const_defined? subclass
+    const_get(subclass).new(dependency, *args)
   end
 
   def initialize(dependency, buildpack, buildpack_dir, binary_built_dir)

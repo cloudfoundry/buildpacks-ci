@@ -87,6 +87,7 @@ describe ConcourseBinaryBuilder do
         git_msg += git_yaml.to_yaml
 
         git_msg += "\n\n[ci skip]" if automation == 'not automated'
+        git_msg
       end
 
       it 'adds the correct file' do

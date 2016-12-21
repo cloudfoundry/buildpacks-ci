@@ -31,7 +31,8 @@ resources: #####################################################################
       paths: [ binary-builds/* ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
-<% %w(bower go bundler composer dotnet glide godep httpd jruby php php7 python node nginx ruby).each do |dep| %>
+<% dep_build_names = %w(bower go bundler composer dotnet glide godep httpd jruby php php7 python node nginx ruby) %>
+<% dep_build_names.each do |dep| %>
   - name: <%= dep %>-builds
     type: git
     source:
@@ -39,7 +40,10 @@ resources: #####################################################################
       branch: master
       paths: [ binary-builds/<%= dep %>-builds.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
+<% end %>
 
+<% dep_built_output_names = dep_build_names + %w(dotnet-framework) %>
+<% dep_built_output_names.each do |dep| %>
   - name: <%= dep %>-built-output
     type: git
     source:
@@ -123,10 +127,11 @@ groups: ########################################################################
 <% %w(bower composer dotnet glide godep nginx node).each do |auto_dep| %>
     - build-<%= auto_dep %>
 <% end %>
-<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"], 'dotnet-core' => ['dotnet', 'node', 'bower'] }.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework'] }.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
     - update-<%= dependency %>-in-<%= buildpack %>-buildpack
   <% end %>
+    - extract-dotnet-framework
 <% end %>
 
   - name: manual-builds
@@ -309,7 +314,7 @@ jobs: ##########################################################################
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 
-<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"], 'dotnet-core' => ['dotnet', 'node', 'bower']}.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework']}.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
   - name: update-<%= dependency %>-in-<%= buildpack %>-buildpack
     serial: true
@@ -322,7 +327,11 @@ jobs: ##########################################################################
             resource: <%= buildpack %>-buildpack
           - get: built-out
             resource: <%= dependency %>-built-output
+          <% if dependency != 'dotnet-framework' %>
             passed: [ build-<%= dependency %> ]
+          <% else %>
+            passed: [ extract-dotnet-framework ]
+          <% end %>
             version: every
             trigger: true
         - task: update-dependency-in-manifests
@@ -366,3 +375,31 @@ jobs: ##########################################################################
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
   <% end %>
 <% end %>
+
+  - name: extract-dotnet-framework
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: built-yaml
+          passed: [ build-dotnet ]
+          resource: dotnet-built-output
+          trigger: true
+        - get: dotnet-framework-built
+          resource: dotnet-framework-built-output
+      - do:
+        - task: extract-dotnet-framework
+          file: buildpacks-ci/tasks/extract-dotnet-framework/task.yml
+        - task: push-binary
+          file: buildpacks-ci/tasks/push-binary/task.yml
+          params:
+            BINARY_NAME: dotnet-framework
+            BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
+        - put: dotnet-framework-built-output
+          params:
+            repository: dotnet-framework-built-output
+            rebase: true

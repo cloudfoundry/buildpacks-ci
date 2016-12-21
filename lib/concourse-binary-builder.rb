@@ -123,6 +123,7 @@ class ConcourseBinaryBuilder
     git_msg += git_yaml.to_yaml
 
     git_msg += "\n\n[ci skip]" if ci_skip
+    git_msg
   end
 
   def dependency_version_not_built(built_versions)

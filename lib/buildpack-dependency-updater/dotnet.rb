@@ -11,6 +11,25 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
     end.count > 0
   end
 
+  def get_dependency_info
+    binary_built_file = "binary-built-output/#{dependency}-built.yml"
+    git_commit_message = GitClient.last_commit_message(binary_built_dir, 0, binary_built_file)
+    git_commit_message.gsub!(/Build(.*)\n\n/,'')
+    git_commit_message.gsub!(/\n\n\[ci skip\]/,'')
+
+    build_info = YAML.load(git_commit_message)
+    dependency_filename = build_info['filename']
+    md5 = build_info['md5']
+    dependency_version = build_info['version'].gsub(/^v/,'')
+
+    buildpack_dependencies_host_domain = ENV.fetch('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil)
+    raise 'No host domain set via BUILDPACK_DEPENDENCIES_HOST_DOMAIN' unless buildpack_dependencies_host_domain
+
+    url ="https://#{buildpack_dependencies_host_domain}/dependencies/#{dependency}/#{dependency_filename}"
+
+    [dependency_version, url, md5]
+  end
+
   def perform_dependency_update
     @removed_versions = []
 
@@ -25,37 +44,25 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
   end
 
   def perform_dependency_specific_changes
-    framework_version = get_framework_version
+    perform_default_versions_update if project_json?
 
-    perform_default_versions_update unless Gem::Version.new(framework_version).prerelease?
-
-    update_dotnet_versions(framework_version)
+    update_dotnet_sdk_tools
   end
 
-  def update_dotnet_versions(framework_version)
-    versions_file = File.join(buildpack_dir,'dotnet-versions.yml')
-    versions = YAML.load_file(versions_file)
+  def update_dotnet_sdk_tools
+    tools_file = File.join(buildpack_dir,'dotnet-sdk-tools.yml')
+    tools = YAML.load_file(tools_file)
 
-    version_hash = {
-      'dotnet' => dependency_version,
-      'framework' => framework_version
-    }
-    versions << version_hash
-
-    File.write(versions_file, versions.to_yaml)
-  end
-
-  def get_framework_version
-    temp = Dir.mktmpdir
-    framework_version =""
-
-    Dir.chdir(temp) do
-      system "curl #{uri} -o dotnet.tar.gz"
-      system 'tar -xf dotnet.tar.gz'
-      framework_version = Dir['./shared/Microsoft.NETCore.App/*'].first.split('/').last
+    if project_json?
+      tools['project_json'].push dependency_version
+    else
+      tools['msbuild'].push dependency_version
     end
 
-    FileUtils.rm_rf(temp)
-    framework_version
+    File.write(tools_file, tools.to_yaml)
+  end
+
+  def project_json?
+    dependency_version.include?('preview1') || dependency_version.include?('preview2')
   end
 end
