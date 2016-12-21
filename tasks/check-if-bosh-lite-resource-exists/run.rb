@@ -7,7 +7,7 @@ deployment_id = ENV['DEPLOYMENT_NAME']
 resource_pools_dir = File.join(Dir.pwd, 'resource-pools')
 
 state_object = StateOfBoshLites.new
-state_object.get_states!(resource_pools_dir: resource_pools_dir)
+state_object.get_states!(resource_pools_dir: resource_pools_dir, git_pull: false)
 
 bosh_lite_name = deployment_id.split('.').first
 if state_object.bosh_lite_in_pool?(deployment_id)

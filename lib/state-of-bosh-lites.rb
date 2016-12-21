@@ -84,11 +84,11 @@ class StateOfBoshLites
     end
   end
 
-  def get_states!(resource_pools_dir: nil)
+  def get_states!(resource_pools_dir: nil, git_pull: true)
     raise "resource_pools_dir is required" if resource_pools_dir.nil?
 
     Dir.chdir(resource_pools_dir) do
-      GitClient.pull_current_branch
+      GitClient.pull_current_branch if git_pull
       get_all_environment_statuses
     end
   end
