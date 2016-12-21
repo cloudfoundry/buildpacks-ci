@@ -1,6 +1,6 @@
 # Introduction
 
-This contains the configuration for the Cloud Foundry Buildpacks team [Concourse deployment](https://concourse.buildpacks-gcp.ci.cf-app.com/).
+This contains the configuration for the Cloud Foundry Buildpacks team [Concourse deployment](https://buildpacks.ci.cf-app.com/).
 
 # Pipelines
 
@@ -83,7 +83,7 @@ fly intercept -c $RESOURCE_NAME rm -rf /tmp/git-resource-repo-cache
 5. `git commit -am 'Build ruby 2.2.2' && git push`
 
 Build should automatically kick off at
-https://concourse.buildpacks-gcp.ci.cf-app.com/pipelines/binary-builder and silently
+https://buildpacks.ci.cf-app.com/pipelines/binary-builder and silently
 upload a binary to the `pivotal-buildpacks` bucket under
 `dependencies/`,
 e.g. https://pivotal-buildpacks.s3.amazonaws.com/dependencies/ruby/ruby-2.2.2-linux-x64.tgz
