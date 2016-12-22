@@ -6,6 +6,7 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: deployments-buildpacks
+  - name: rootfs-smoke-test-manifest-artifacts
   - name: buildpacks-ci
 run:
   path: buildpacks-ci/tasks/run-rootfs-smoke-test/run.sh
