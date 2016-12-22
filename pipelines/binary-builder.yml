@@ -219,7 +219,6 @@ jobs: ##########################################################################
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1
-          privileged: true
         - put: builds-out
           params:
             repository: builds-yaml-artifacts
@@ -291,7 +290,6 @@ jobs: ##########################################################################
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1
-          privileged: true
         - put: builds-out
           resource: <%= dependency %>-built-output
           params:
