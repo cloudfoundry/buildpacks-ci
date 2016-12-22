@@ -5,7 +5,5 @@ cf-version: 225
 diego-version: 0.1441.0
 garden-linux-version: 0.327.0
 etcd-version: 18
-cf-manifest-location: deployments-buildpacks/deployments/lts-1.buildpacks-gcp.ci/manifest.yml
-diego-manifest-location: deployments-buildpacks/deployments/lts-1.buildpacks-gcp.ci/diego.yml
 iaas: gcp
 bosh-lite-name: lts-1-gcp-bosh-lite
