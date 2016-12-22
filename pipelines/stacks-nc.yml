@@ -30,7 +30,7 @@ resources: #####################################################################
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: {{buildpacks-ci-git-uri-public-branch}}
+      branch: no-github
 
   - name: runtime-ci
     type: git
@@ -337,99 +337,65 @@ jobs: ##########################################################################
             repository: deployments-buildpacks-artifacts
             rebase: true
 
-  - name: generate-stacks-manifests
+  - name: deploy-rootfs-and-cf-and-diego-to-stacks-nc
     serial: true
     serial_groups: [ stacks-nc ]
     plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: bosh-lite
-        - get: cf-release
-          resource: cf-release-develop
-        - get: diego-release
-        - get: cflinuxfs2-rootfs-release
-        - get: lite-stemcell
-        - get: new-cves
-          passed: [ recreate-bosh-lite ]
-        - get: deployments-buildpacks
-          passed: [ recreate-bosh-lite ]
-        - get: stack-s3
-          passed: [ recreate-bosh-lite ]
-        - get: version
-          passed: [ recreate-bosh-lite ]
-          trigger: true
-        - get: cflinuxfs2-rootfs-release-version
-          passed: [ recreate-bosh-lite ]
-        - get: receipt-s3
-          passed: [ recreate-bosh-lite ]
-        - get: stacks
-          passed: [ recreate-bosh-lite ]
       - do:
-        - task: generate-rootfs-smoke-test-manifest
-          file: buildpacks-ci/tasks/make-rootfs-smoke-test-manifest/task.yml
-          params:
-            DEPLOYMENT_NAME: stacks-nc.buildpacks.ci
-            BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
-            BOSH_TARGET: stacks-nc.buildpacks.ci.cf-app.com
-          privileged: true
-        - put: deployments-buildpacks
-          params:
-            repository: rootfs-smoke-test-manifest-artifacts
-            rebase: true
-        - task: generate-cf-and-diego-manifest
-          file: buildpacks-ci/tasks/generate-cf-and-diego-manifests/task.yml
-          params:
-            DEPLOYMENT_NAME: stacks-nc.buildpacks.ci
-            CI_CF_PASSWORD: {{ci-cf-password}}
-            BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
-            BOSH_TARGET: stacks-nc.buildpacks.ci.cf-app.com
-            BOSH_LITE_NAME: stacks-nc.buildpacks.ci
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-            ROOTFS_RELEASE: cflinuxfs2-nc-rootfs
-          privileged: true
-        - put: deployments-buildpacks
-          params:
-            repository: generate-manifest-artifacts
-            rebase: true
-
-  - name: deploy-rootfs-to-stacks-nc
-    serial: true
-    serial_groups: [ stacks-nc ]
-    plan:
-      - aggregate:
-        - get: lite-stemcell
-        - get: buildpacks-ci
-        - get: new-cves
-          passed: [ 'generate-stacks-manifests' ]
-        - get: deployments-buildpacks
-          passed: [ 'generate-stacks-manifests' ]
-        - get: cf-release
-          resource: cf-release-develop
-          passed: [ 'generate-stacks-manifests' ]
-        - get: cflinuxfs2-rootfs-release
-          passed: [ 'generate-stacks-manifests' ]
-        - get: stack-s3
-          passed: [ 'generate-stacks-manifests' ]
-        - get: version
-          passed: [ 'generate-stacks-manifests' ]
-          trigger: true
-        - get: cflinuxfs2-rootfs-release-version
-          passed: [ 'generate-stacks-manifests' ]
-        - get: receipt-s3
-          passed: [ 'generate-stacks-manifests' ]
-        - get: stacks
-          passed: [ 'generate-stacks-manifests' ]
-      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: bosh-lite
+          - get: cf-release
+            resource: cf-release-develop
+          - get: diego-release
+          - get: cflinuxfs2-rootfs-release
+          - get: lite-stemcell
+          - get: garden-runc-bosh-release
+          - get: diego-bosh-release
+          - get: new-cves
+            passed: [ recreate-bosh-lite ]
+          - get: deployments-buildpacks
+            passed: [ recreate-bosh-lite ]
+          - get: stack-s3
+            passed: [ recreate-bosh-lite ]
+          - get: version
+            passed: [ recreate-bosh-lite ]
+            trigger: true
+          - get: cflinuxfs2-rootfs-release-version
+            passed: [ recreate-bosh-lite ]
+          - get: receipt-s3
+            passed: [ recreate-bosh-lite ]
+          - get: stacks
+            passed: [ recreate-bosh-lite ]
+        - aggregate:
+          - task: generate-rootfs-smoke-test-manifest
+            file: buildpacks-ci/tasks/make-rootfs-smoke-test-manifest/task.yml
+            params:
+              DEPLOYMENT_NAME: stacks-nc.buildpacks.ci
+              BOSH_USER: {{bosh_user}}
+              BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
+              BOSH_TARGET: stacks-nc.buildpacks.ci.cf-app.com
+            privileged: true
+          - task: generate-cf-and-diego-manifest
+            file: buildpacks-ci/tasks/generate-cf-and-diego-manifests/task.yml
+            params:
+              DEPLOYMENT_NAME: stacks-nc.buildpacks.ci
+              CI_CF_PASSWORD: {{ci-cf-password}}
+              BOSH_USER: {{bosh_user}}
+              BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
+              BOSH_TARGET: stacks-nc.buildpacks.ci.cf-app.com
+              BOSH_LITE_NAME: stacks-nc.buildpacks.ci
+              RUBYGEM_MIRROR: {{rubygem-mirror}}
+              BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+              ROOTFS_RELEASE: cflinuxfs2-nc-rootfs
+            privileged: true
         - task: overwrite-cflinuxfs2-rootfs-release
           file: buildpacks-ci/tasks/overwrite-cflinuxfs2-rootfs-release/task.yml
           params:
             ROOTFS_RELEASE: cflinuxfs2-nc-rootfs
         - put: stacks-rootfs-deployment
           params:
-            manifest: deployments-buildpacks/deployments/stacks-nc.buildpacks.ci/rootfs-smoke-test.yml
+            manifest: rootfs-smoke-test-manifest-artifacts/deployments/stacks-nc.buildpacks.ci/rootfs-smoke-test.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cflinuxfs2-rootfs-release-artifacts/dev_releases/cflinuxfs2-nc-rootfs/*.tgz]
         - task: run-rootfs-smoke-test
@@ -440,90 +406,21 @@ jobs: ##########################################################################
             BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
             BOSH_TARGET: stacks-nc.buildpacks.ci.cf-app.com
             RUBYGEM_MIRROR: {{rubygem-mirror}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-
-  - name: deploy-cf-to-stacks-nc
-    serial: true
-    serial_groups: [ stacks-nc ]
-    plan:
-      - aggregate:
-        - get: lite-stemcell
-        - get: buildpacks-ci
-        - get: new-cves
-          passed: [ deploy-rootfs-to-stacks-nc ]
-        - get: deployments-buildpacks
-          passed: [ deploy-rootfs-to-stacks-nc ]
-        - get: cf-release
-          resource: cf-release-develop
-          passed: [ deploy-rootfs-to-stacks-nc ]
-        - get: cflinuxfs2-rootfs-release
-          passed: [ deploy-rootfs-to-stacks-nc ]
-        - get: stack-s3
-          passed: [ deploy-rootfs-to-stacks-nc ]
-        - get: version
-          passed: [ deploy-rootfs-to-stacks-nc ]
-          trigger: true
-        - get: cflinuxfs2-rootfs-release-version
-          passed: [ deploy-rootfs-to-stacks-nc ]
-        - get: receipt-s3
-          passed: [ deploy-rootfs-to-stacks-nc ]
-        - get: stacks
-          passed: [ deploy-rootfs-to-stacks-nc ]
-      - do:
         - task: create-cf-release
           file: buildpacks-ci/tasks/create-cf-release-without-modifying-stacks/task.yml
           privileged: true
         - put: stacks-cf-deployment
           params:
-            manifest: deployments-buildpacks/deployments/stacks-nc.buildpacks.ci/manifest.yml
+            manifest: generate-manifest-artifacts/deployments/stacks-nc.buildpacks.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
-        on_failure:
-          put: failure-alert
+        - put: stacks-diego-deployment
           params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-
-  - name: deploy-diego-to-stacks-nc
-    serial: true
-    serial_groups: [ stacks-nc ]
-    plan:
-      - aggregate:
-        - get: lite-stemcell
-        - get: garden-runc-bosh-release
-        - get: diego-bosh-release
-        - get: new-cves
-          passed: [ deploy-cf-to-stacks-nc ]
-        - get: deployments-buildpacks
-          passed: [ deploy-cf-to-stacks-nc ]
-          trigger: true
-        - get: buildpacks-ci
-        - get: stack-s3
-          passed: [ deploy-cf-to-stacks-nc ]
-        - get: version
-          passed: [ deploy-cf-to-stacks-nc ]
-          trigger: true
-        - get: cflinuxfs2-rootfs-release-version
-          passed: [ deploy-cf-to-stacks-nc ]
-        - get: receipt-s3
-          passed: [ deploy-cf-to-stacks-nc ]
-        - get: stacks
-          passed: [ deploy-cf-to-stacks-nc ]
-      - put: stacks-diego-deployment
-        params:
-          manifest: deployments-buildpacks/deployments/stacks-nc.buildpacks.ci/diego.yml
-          stemcells: ['lite-stemcell/stemcell.tgz']
-          releases:
-            - diego-bosh-release/release.tgz
-            - garden-runc-bosh-release/release.tgz
+            manifest: generate-manifest-artifacts/deployments/stacks-nc.buildpacks.ci/diego.yml
+            stemcells: ['lite-stemcell/stemcell.tgz']
+            releases:
+              - diego-bosh-release/release.tgz
+              - garden-runc-bosh-release/release.tgz
         on_failure:
           put: failure-alert
           params:
@@ -539,21 +436,21 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: new-cves
-          passed: [ deploy-diego-to-stacks-nc ]
+          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks-nc ]
         - get: deployments-buildpacks
-          passed: [ deploy-diego-to-stacks-nc ]
+          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks-nc ]
         - get: stack-s3
-          passed: [ deploy-diego-to-stacks-nc ]
+          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks-nc ]
         - get: receipt-s3
-          passed: [ deploy-diego-to-stacks-nc ]
+          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks-nc ]
         - get: cflinuxfs2-rootfs-release
         - get: stacks
-          passed: [ deploy-diego-to-stacks-nc ]
+          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks-nc ]
         - get: version
-          passed: [ deploy-diego-to-stacks-nc ]
+          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks-nc ]
           trigger: true
         - get: cflinuxfs2-rootfs-release-version
-          passed: [ deploy-diego-to-stacks-nc ]
+          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks-nc ]
       - do:
         - task: run-cflinuxfs2-nc-specs
           file: buildpacks-ci/tasks/run-cflinuxfs2-nc-specs/task.yml
