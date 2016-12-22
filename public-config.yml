@@ -15,6 +15,7 @@ bosh-lite-domain-name: cf-app.com
 
 buildpacks-ci-pipeline-uri: https://buildpacks.ci.cf-app.com/teams/main/pipelines/buildpacks-ci
 buildpacks-ci-git-uri-public: https://github.com/cloudfoundry/buildpacks-ci
+public-buildpacks-ci-robots-git-uri-public: https://github.com/cloudfoundry/public-buildpacks-ci-robots
 buildpacks-ci-git-uri: git@github.com:cloudfoundry/buildpacks-ci.git
 buildpacks-ci-git-uri-public-develop-branch: develop
 buildpacks-ci-git-uri-public-branch: master
