@@ -9,7 +9,6 @@ unless file_path
   exit
 end
 
-`apt-get update && apt-get -y install awscli`
 file_name = File.basename(file_path)
 
 if binary_name == "composer" then
