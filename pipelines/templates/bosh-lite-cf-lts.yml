@@ -145,7 +145,7 @@ jobs:
             params:
               repository: deployments-buildpacks-artifacts
               rebase: true
-  - name: generate-manifest
+  - name: deploy-cf-and-diego
     serial_groups: [ deploy ]
     serial: true
     public: true
@@ -157,14 +157,15 @@ jobs:
             trigger: true
           - get: buildpacks-ci
           - get: bosh-lite
+          - get: bosh-stemcell
           - get: cf-bosh-release
             version: { version: {{cf-version}} }
-            params:
-              tarball: false
           - get: diego-bosh-release
-            params:
-              tarball: false
             version: { version: {{diego-version}} }
+          - get: garden-linux-bosh-release
+            version: {version: {{garden-linux-version}}}
+          - get: etcd-bosh-release
+            version: {version: {{etcd-version}}}
           - get: resource-pools
         - aggregate:
           - task: cf-release-checkout
@@ -188,67 +189,21 @@ jobs:
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             ROOTFS_RELEASE: cflinuxfs2-rootfs
           privileged: true
-        - put: deployments-buildpacks
-          params:
-            repository: generate-manifest-artifacts
-            rebase: true
-  - name: deploy-cf
-    serial_groups: [ deploy ]
-    serial: true
-    public: true
-    plan:
-      - do:
-        - aggregate:
-          - get: deployments-buildpacks
-            passed: ['generate-manifest']
-            trigger: true
-          - get: bosh-lite
-          - get: buildpacks-ci
-          - get: bosh-stemcell
-          - get: cf-bosh-release
-            version: { version: {{cf-version}} }
-          - get: resource-pools
-        - task: check-if-bosh-lite-resource-exists
-          file: buildpacks-ci/tasks/check-if-bosh-lite-resource-exists/task.yml
-          params:
-            DEPLOYMENT_NAME: {{deployment-name}}
         - put: cf-deployment
           params:
-            manifest: {{cf-manifest-location}}
+            manifest: generate-manifest-artifacts/deployments/<%= full_deployment_name %>/manifest.yml
             stemcells: ['bosh-stemcell/stemcell.tgz']
             releases:
               - cf-bosh-release/release.tgz
-  - name: deploy-diego
-    serial_groups: [ deploy ]
-    serial: true
-    public: true
-    plan:
-      - do:
-        - aggregate:
-          - get: deployments-buildpacks
-            passed: ['deploy-cf']
-            trigger: true
-          - get: buildpacks-ci
-          - get: bosh-stemcell
-          - get: diego-bosh-release
-            version: {version: {{diego-version}}}
-          - get: garden-linux-bosh-release
-            version: {version: {{garden-linux-version}}}
-          - get: etcd-bosh-release
-            version: {version: {{etcd-version}}}
-          - get: resource-pools
-        - task: check-if-bosh-lite-resource-exists
-          file: buildpacks-ci/tasks/check-if-bosh-lite-resource-exists/task.yml
-          params:
-            DEPLOYMENT_NAME: {{deployment-name}}
         - put: diego-deployment
           params:
-            manifest: {{diego-manifest-location}}
+            manifest: generate-manifest-artifacts/deployments/<%= full_deployment_name %>/diego.yml
             stemcells: ['bosh-stemcell/stemcell.tgz']
             releases:
               - diego-bosh-release/release.tgz
               - garden-linux-bosh-release/release.tgz
               - etcd-bosh-release/release.tgz
+
   - name: update-machete
     serial_groups: [ deploy ]
     serial: true
@@ -258,7 +213,7 @@ jobs:
         - aggregate:
           - get: buildpacks-ci
           - get: deployments-buildpacks
-            passed: ['deploy-diego']
+            passed: [ deploy-cf-and-diego ]
             trigger: true
           - get: machete
           - get: resource-pools
