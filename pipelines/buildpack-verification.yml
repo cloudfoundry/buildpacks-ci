@@ -43,7 +43,7 @@ resources:
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
-<% %w(go nodejs ruby python php staticfile binary).each do |language| %>
+<% %w(go nodejs ruby python php staticfile binary dotnet-core).each do |language| %>
   - name: <%= language %>-buildpack
     type: git
     source:
@@ -92,6 +92,7 @@ jobs:
           - get: staticfile-buildpack
           - get: binary-buildpack
           - get: php-buildpack
+          - get: dotnet-core-buildpack
         - task: verify-buildpack-binaries
           file: buildpacks-ci/tasks/verify-buildpack-binaries/task.yml
         on_failure:
