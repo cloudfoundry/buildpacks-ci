@@ -20,7 +20,12 @@ describe BuildpackDependencyUpdater do
     before do
       allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, 'binary-built-output/bower-built.yml').and_return <<~COMMIT
         Build bower - #{expected_version}
-        filename: binary-builder/bower-#{expected_version}.tgz, md5: doesnotmatteratall, sha256: alsoignoredforthistest
+
+        ---
+        filename: binary-builder/bower-#{expected_version}.tgz
+        version: #{expected_version}
+        md5: doesnotmatteratall
+        sha256: alsoignoredforthistest
       COMMIT
     end
 

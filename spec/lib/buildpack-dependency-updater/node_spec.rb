@@ -20,7 +20,12 @@ describe BuildpackDependencyUpdater do
     before do
       allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, 'binary-built-output/node-built.yml').and_return <<~COMMIT
         Build node - #{expected_version}
-        filename: binary-builder/node-#{expected_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+
+        ---
+        filename: binary-builder/node-#{expected_version}-linux-x64.tgz
+        version: #{expected_version}
+        md5: 18bec8f65810786c846d8b21fe73064f
+        sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
       COMMIT
     end
 
