@@ -56,9 +56,7 @@ resources: #####################################################################
       private_key: {{pivotal-cf-buildpacks-ci-robots}}
       uri: git@github.com:pivotal-cf/buildpacks-ci-robots.git # pivotal-cf because pivnet is not foundation's
       paths: [ pivnet-metadata/<%= language %>.yml ]
-<% end %>
 
-<% unless language == 'binary' || language == 'multi' %>
   - name: compile-extensions
     type: git
     source:
@@ -598,7 +596,7 @@ jobs: ##########################################################################
           put: cf-lts-gcp-environments
           params:
             release: cf-environments
-<% unless language == "binary" || language == "multi" %>
+<% unless language == "multi" %>
   - name: update-compile-extensions
     serial: true
     public: true
