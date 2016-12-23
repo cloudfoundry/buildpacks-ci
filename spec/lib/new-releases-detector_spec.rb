@@ -292,19 +292,44 @@ describe NewReleasesDetector do
   end
 
   describe '#post_to_slack' do
-    let(:slack_client) { double(:slack_client) }
+    let(:buildpacks_slack_client) { double(:buildpacks_slack_client) }
+    let(:capi_slack_client)       { double(:capi_slack_client) }
 
     before do
-      allow(SlackClient).to receive(:new).and_return(slack_client)
+      @old_buildpacks_env = ENV['BUILDPACKS_SLACK_WEBHOOK']
+      @old_capi_env = ENV['CAPI_SLACK_CHANNEL']
+
+      ENV['BUILDPACKS_SLACK_CHANNEL'] = '#buildpacks'
+      ENV['CAPI_SLACK_CHANNEL'] = '#capi'
+
+      allow(SlackClient).to receive(:new).with(anything, '#buildpacks', anything).and_return(buildpacks_slack_client)
+      allow(SlackClient).to receive(:new).with(anything, '#capi', anything).and_return(capi_slack_client)
+
       allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return([changed_dependencies, current_tags, unchanged_dependencies])
+    end
+
+    after do
+      ENV['BUILDPACKS_SLACK_CHANNEL'] = @old_buildpacks_env
+      ENV['CAPI_SLACK_CHANNEL'] = @old_capi_env
     end
 
     context 'with new versions for a dependency' do
       let(:changed_dependencies) { {python: %w(a b) } }
 
-      it 'posts to slack for each new release of that dependency' do
-        expect(slack_client).to receive(:post_to_slack).with("There is a new update to the *python* dependency: version *a*\n")
-        expect(slack_client).to receive(:post_to_slack).with("There is a new update to the *python* dependency: version *b*\n")
+      it 'posts to buildpacks slack for each new release of that dependency' do
+        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *python* dependency: version *a*\n")
+        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *python* dependency: version *b*\n")
+        expect(capi_slack_client).to_not receive(:post_to_slack)
+        subject.post_to_slack
+      end
+    end
+
+    context 'with new versions of nginx' do
+      let(:changed_dependencies) { {nginx: %w(23.45.67) } }
+
+      it 'posts to buildpacks slack for each new release of that dependency' do
+        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *nginx* dependency: version *23.45.67*\n")
+        expect(capi_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: 23.45.67")
         subject.post_to_slack
       end
     end
@@ -312,19 +337,29 @@ describe NewReleasesDetector do
     context 'with no new versions for a dependency' do
       let(:changed_dependencies) { {} }
 
-      it 'posts to slack for each new release of that dependency' do
-        expect(slack_client).to_not receive(:post_to_slack)
+      it 'does not post to slack' do
+        expect(buildpacks_slack_client).to_not receive(:post_to_slack)
+        expect(capi_slack_client).to_not receive(:post_to_slack)
         subject.post_to_slack
       end
     end
   end
 
   describe '#post_to_tracker' do
-    let(:tracker_client)             { double(:tracker_client) }
+    let(:buildpacks_tracker_client) { double(:buildpacks_tracker_client) }
+    let(:capi_tracker_client)       { double(:capi_tracker_client) }
     let(:buildpack_dependency_tasks) { [:snake, :lizard] }
 
     before do
-      allow(TrackerClient).to receive(:new).and_return(tracker_client)
+      @old_buildpacks_env = ENV['BUILDPACKS_TRACKER_PROJECT_ID']
+      @old_capi_env = ENV['CAPI_TRACKER_PROJECT_ID']
+
+      ENV['BUILDPACKS_TRACKER_PROJECT_ID'] = 'buildpacks-project-id'
+      ENV['CAPI_TRACKER_PROJECT_ID'] = 'capi-project-id'
+
+      allow(TrackerClient).to receive(:new).with(anything, 'buildpacks-project-id', anything).and_return(buildpacks_tracker_client)
+      allow(TrackerClient).to receive(:new).with(anything, 'capi-project-id', anything).and_return(capi_tracker_client)
+
       allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return([changed_dependencies, current_tags, unchanged_dependencies])
 
       allow(BuildpackDependency).to receive(:for).with(dependency).and_return(buildpack_dependency_tasks)
@@ -335,41 +370,71 @@ describe NewReleasesDetector do
       let(:changed_dependencies) { {python: %w(a b) } }
 
       it 'posts a tracker story with the dependency and versions in the story title' do
-        expect(tracker_client).to receive(:post_to_tracker).
+        expect(buildpacks_tracker_client).to receive(:post_to_tracker).
           with(name: 'Build and/or Include new releases: python a, b',
                description: anything, tasks: anything, point_value: anything, labels: anything)
+
+        expect(capi_tracker_client).not_to receive(:post_to_tracker)
 
         subject.post_to_tracker
       end
 
       it 'posts a tracker story with the dependency and versions in the story description' do
-        expect(tracker_client).to receive(:post_to_tracker).
+        expect(buildpacks_tracker_client).to receive(:post_to_tracker).
           with(description: "We have 2 new releases for **python**:\n**version a, b**\n See the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file.",
                name: anything, tasks: anything, point_value: anything, labels: anything)
+
+        expect(capi_tracker_client).not_to receive(:post_to_tracker)
 
         subject.post_to_tracker
       end
 
       it 'posts a tracker story with tasks to update the dependency in buildpacks' do
-        expect(tracker_client).to receive(:post_to_tracker).
+        expect(buildpacks_tracker_client).to receive(:post_to_tracker).
           with(tasks: ['Update python in snake-buildpack', 'Update python in lizard-buildpack'],
                name: anything, description: anything, point_value: anything, labels: anything)
+
+        expect(capi_tracker_client).not_to receive(:post_to_tracker)
 
         subject.post_to_tracker
       end
 
       it 'posts a tracker story worth 1 story point' do
-        expect(tracker_client).to receive(:post_to_tracker).
+        expect(buildpacks_tracker_client).to receive(:post_to_tracker).
           with(point_value: 1,
                name: anything, description: anything, tasks: anything, labels: anything)
+
+        expect(capi_tracker_client).not_to receive(:post_to_tracker)
 
         subject.post_to_tracker
       end
 
       it 'posts a tracker story with the buildpack names as labels' do
-        expect(tracker_client).to receive(:post_to_tracker).
+        expect(buildpacks_tracker_client).to receive(:post_to_tracker).
           with(labels: %w(snake lizard),
                name: anything, description: anything, tasks: anything, point_value: anything)
+
+        expect(capi_tracker_client).not_to receive(:post_to_tracker)
+
+        subject.post_to_tracker
+      end
+    end
+
+    context 'with new versions for a dependency' do
+      let(:dependency) { :nginx }
+      let(:changed_dependencies) { {nginx: %w(11.11.11) } }
+
+      it 'posts a tracker story to the CAPI project with the correct information' do
+        expect(buildpacks_tracker_client).to receive(:post_to_tracker).
+          with(name: anything, description: anything, tasks: anything, point_value: anything, labels: anything)
+
+        expect(capi_tracker_client).to receive(:post_to_tracker).
+          with(name: 'New version(s) of nginx: 11.11.11',
+               description: 'There are 1 new version(s) of **nginx** available: 11.11.11',
+               tasks: [],
+               point_value: 1,
+               labels: []
+              )
 
         subject.post_to_tracker
       end
@@ -381,10 +446,12 @@ describe NewReleasesDetector do
       let(:changed_dependencies) { {dotnet: %w(1.0.0-preview43) } }
 
       it 'adds a task to the tracker story to remove non-MS supported versions of dotnet' do
-        expect(tracker_client).to receive(:post_to_tracker).
+        expect(buildpacks_tracker_client).to receive(:post_to_tracker).
           with(tasks: ['Update dotnet in microsoft-buildpack', 'Remove any dotnet versions MS no longer supports'],
                name: anything, description: anything, point_value: anything, labels: anything
         )
+
+        expect(capi_tracker_client).not_to receive(:post_to_tracker)
 
         subject.post_to_tracker
       end
@@ -395,7 +462,8 @@ describe NewReleasesDetector do
       let(:changed_dependencies) { {} }
 
       it 'posts to slack for each new release of that dependency' do
-        expect(tracker_client).to_not receive(:post_to_tracker)
+        expect(buildpacks_tracker_client).to_not receive(:post_to_tracker)
+        expect(capi_tracker_client).not_to receive(:post_to_tracker)
         subject.post_to_tracker
       end
     end
