@@ -109,10 +109,20 @@ class ConcourseBinaryBuilder
 
     ci_skip = remaining_builds[binary_name].empty? && !is_automated
 
-    git_msg = "Build #{binary_name} - #{version_built}\n\nfilename: #{short_filename}, md5: #{md5sum}, sha256: #{shasum}"
-    git_msg += "\n\nsource url: #{source_url}, source #{verification_type}: #{verification_value}"
+    git_msg = "Build #{binary_name} - #{version_built}\n\n"
+
+    git_yaml = {
+      "filename" => short_filename,
+      'version' => version_built,
+      'md5' => md5sum,
+      'sha256' => shasum,
+      'source url' => source_url,
+      "source #{verification_type}" => verification_value
+    }
+
+    git_msg += git_yaml.to_yaml
+
     git_msg += "\n\n[ci skip]" if ci_skip
-    git_msg
   end
 
   def dependency_version_not_built(built_versions)

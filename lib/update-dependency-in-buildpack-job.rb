@@ -1,4 +1,5 @@
 # encoding: utf-8
+require 'yaml'
 require_relative "buildpack-dependency-updater"
 require_relative "tracker-client"
 require_relative "git-client"
@@ -28,20 +29,25 @@ class UpdateDependencyInBuildpackJob
   end
 
   def extract_source_info(git_commit_message)
-    if git_commit_message.include?('gpg-signature:')
-      result = /^(?<source_info>source url: .*END PGP SIGNATURE-----)/m.match(git_commit_message)
-    else
-      result = /^(?<source_info>source url: .*)$/.match(git_commit_message)
-    end
+    git_commit_message.gsub!(/Build(.*)\n\n/,'')
+    git_commit_message.gsub!(/\n\n\[ci skip\]/,'')
 
-    result['source_info']
+    build_info = YAML.load(git_commit_message)
+
+    build_info.select do |k,v|
+      k.include?('source')
+    end
   end
 
   def write_git_commit(buildpack_dir, dependency, story_ids, version, removed_versions)
     binary_built_file = "binary-built-output/#{dependency}-built.yml"
     git_commit_message = GitClient.last_commit_message(binary_built_out_dir, 0, binary_built_file)
 
-    source_info = extract_source_info(git_commit_message)
+    source_info = ""
+
+    extract_source_info(git_commit_message).each do |k,v|
+      source_info+= "#{k}: #{v}\n"
+    end
 
     formatted_story_ids = story_ids.map {|story_id| "[##{story_id}]"}
 
@@ -49,7 +55,7 @@ class UpdateDependencyInBuildpackJob
       GitClient.add_everything
       add_remove_message = "Add #{dependency} #{version}"
       add_remove_message += ", remove #{dependency} #{removed_versions.join(', ')}" unless removed_versions.empty?
-      update_commit_message = "#{add_remove_message}\n\n#{source_info}\n\n#{formatted_story_ids.join("\n")}"
+      update_commit_message = "#{add_remove_message}\n\n#{source_info}\n#{formatted_story_ids.join("\n")}"
       GitClient.safe_commit(update_commit_message)
     end
   end

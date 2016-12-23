@@ -29,7 +29,12 @@ describe BuildpackDependencyUpdater do
 
       allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, 'binary-built-output/dotnet-built.yml').and_return <<~COMMIT
         Build dotnet - #{new_version}
-        filename: binary-builder/dotnet.#{new_version}.linux-amd64.tar.gz, md5: aaaabbbb22224444, sha256: zzzzzyyyy99998888
+
+        ---
+        filename: binary-builder/dotnet.#{new_version}.linux-amd64.tar.gz
+        version: #{new_version}
+        md5: aaaabbbb22224444
+        sha256: zzzzzyyyy99998888
       COMMIT
 
       allow(subject).to receive(:get_framework_version).and_return new_framework_version

@@ -52,7 +52,12 @@ describe BuildpackDependencyUpdater do
         end
         allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, 'binary-built-output/godep-built.yml').and_return <<~COMMIT
           Build godep - #{new_version}
-          filename: binary-builder/godep-#{new_version}-linux-x64.tgz, md5: #{new_md5}, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+
+          ---
+          filename: binary-builder/godep-#{new_version}-linux-x64.tgz
+          version: #{new_version}
+          md5: #{new_md5}
+          sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
       end
 
@@ -119,7 +124,12 @@ describe BuildpackDependencyUpdater do
         end
         allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, 'binary-built-output/composer-built.yml').and_return <<~COMMIT
           Build composer - #{new_version}
-          filename: binary-builder/composer-#{new_version}.phar, md5: 05d30d20be1c94c9edc02756420a7d10, sha256: 7f26efee06de5a1a061b6b1e330f5acc9ee69976d1551118c45b21f358cbc332
+
+          ---
+          filename: binary-builder/composer-#{new_version}.phar
+          version: #{new_version}
+          md5: 05d30d20be1c94c9edc02756420a7d10
+          sha256: 7f26efee06de5a1a061b6b1e330f5acc9ee69976d1551118c45b21f358cbc332
         COMMIT
       end
 
@@ -179,7 +189,12 @@ describe BuildpackDependencyUpdater do
         end
         allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, 'binary-built-output/glide-built.yml').and_return <<~COMMIT
           Build glide - #{new_version}
-          filename: binary-builder/glide-#{new_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+
+          ---
+          filename: binary-builder/glide-#{new_version}-linux-x64.tgz
+          version: #{new_version}
+          md5: 18bec8f65810786c846d8b21fe73064f
+          sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
       end
 
@@ -228,7 +243,12 @@ describe BuildpackDependencyUpdater do
         end
         allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, 'binary-built-output/nginx-built.yml').and_return <<~COMMIT
           Build nginx - #{new_version}
-          filename: binary-builder/nginx-#{new_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+
+          ---
+          filename: binary-builder/nginx-#{new_version}-linux-x64.tgz
+          version: #{new_version}
+          md5: 18bec8f65810786c846d8b21fe73064f
+          sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
       end
 
@@ -317,7 +337,12 @@ describe BuildpackDependencyUpdater do
         end
         allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, 'binary-built-output/nginx-built.yml').and_return <<~COMMIT
           Build nginx - #{new_version}
-          filename: binary-builder/nginx-#{new_version}-linux-x64.tgz, md5: 18bec8f65810786c846d8b21fe73064f, sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+
+          ---
+          filename: binary-builder/nginx-#{new_version}-linux-x64.tgz
+          version: #{new_version}
+          md5: 18bec8f65810786c846d8b21fe73064f
+          sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
       end
 

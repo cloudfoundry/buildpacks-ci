@@ -73,10 +73,20 @@ describe ConcourseBinaryBuilder do
       let(:shasum) { shasum = Digest::SHA256.file(File.join(binary_builder_dir, output_file)).hexdigest }
 
       let(:commit_msg) do
-        git_msg = "Build #{dependency} - #{version}\n\nfilename: binary-builder/#{output_file}, md5: #{md5sum}, sha256: #{shasum}"
-        git_msg += "\n\nsource url: #{source_url}, source #{verification_type}: #{verification_value}"
+        git_msg = "Build #{dependency} - #{version}\n\n"
+
+        git_yaml = {
+          "filename" => "binary-builder/#{output_file}",
+          'version' => version,
+          'md5' => md5sum,
+          'sha256' => shasum,
+          'source url' => source_url,
+          "source #{verification_type}" => verification_value
+        }
+
+        git_msg += git_yaml.to_yaml
+
         git_msg += "\n\n[ci skip]" if automation == 'not automated'
-        git_msg
       end
 
       it 'adds the correct file' do

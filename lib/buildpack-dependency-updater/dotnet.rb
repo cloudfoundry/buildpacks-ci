@@ -11,23 +11,6 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
     end.count > 0
   end
 
-  def get_dependency_info
-    binary_built_file = "binary-built-output/#{dependency}-built.yml"
-    git_commit_message = GitClient.last_commit_message(binary_built_dir, 0, binary_built_file)
-
-    buildpack_dependencies_host_domain = ENV.fetch('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil)
-    raise 'No host domain set via BUILDPACK_DEPENDENCIES_HOST_DOMAIN' unless buildpack_dependencies_host_domain
-
-    /.*filename:\s+binary-builder\/(#{dependency}.(.*).linux-amd64.tar.gz).*md5:\s+(\w*)\,.*/.match(git_commit_message)
-    dependency_filename = $1
-    dependency_version = $2
-    md5 = $3
-
-    url ="https://#{buildpack_dependencies_host_domain}/dependencies/#{dependency}/#{dependency_filename}"
-
-    [dependency_version, url, md5]
-  end
-
   def perform_dependency_update
     @removed_versions = []
 
