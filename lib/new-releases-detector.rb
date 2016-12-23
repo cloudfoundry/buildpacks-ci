@@ -23,50 +23,105 @@ class NewReleasesDetector
   end
 
   def post_to_slack
-    slack_client = SlackClient.new(
-      ENV['SLACK_WEBHOOK'],
-      ENV['SLACK_CHANNEL'],
+    slack_clients = {}
+
+    slack_clients['buildpacks'] = SlackClient.new(
+      ENV['BUILDPACKS_SLACK_WEBHOOK'],
+      ENV['BUILDPACKS_SLACK_CHANNEL'],
       'dependency-notifier'
     )
+
+    slack_clients['capi'] = SlackClient.new(
+      ENV['CAPI_SLACK_WEBHOOK'],
+      ENV['CAPI_SLACK_CHANNEL'],
+      'dependency-notifier'
+    )
+
     changed_dependencies.each do |dependency, versions|
       versions.each do |version|
         new_dependency_version_output = "There is a new update to the *#{dependency}* dependency: version *#{version}*\n"
-        slack_client.post_to_slack new_dependency_version_output
+        slack_clients['buildpacks'].post_to_slack new_dependency_version_output
+
+        if dependency == :nginx
+          new_nginx_version_output = "There is a new version of *nginx* available: #{version}"
+          slack_clients['capi'].post_to_slack new_nginx_version_output
+        end
       end
     end
   end
 
   def post_to_tracker
-    tracker_client = TrackerClient.new(
+    tracker_clients = {}
+
+    tracker_clients['buildpacks'] = TrackerClient.new(
       ENV['TRACKER_API_TOKEN'],
-      ENV['TRACKER_PROJECT_ID'],
+      ENV['BUILDPACKS_TRACKER_PROJECT_ID'],
       ENV['TRACKER_REQUESTER_ID'].to_i
     )
+
+    tracker_clients['capi'] = TrackerClient.new(
+      ENV['TRACKER_API_TOKEN'],
+      ENV['CAPI_TRACKER_PROJECT_ID'],
+      ENV['TRACKER_REQUESTER_ID'].to_i
+    )
+
     changed_dependencies.each do |dependency, versions|
-      tracker_story_name = "Build and/or Include new releases: #{dependency} #{versions.join(', ')}"
-      tracker_story_description = "We have #{versions.count} new releases for **#{dependency}**:\n**version #{versions.join(', ')}**\n See the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file."
+      story_info = buildpacks_tracker_story_info(dependency, versions)
 
-      buildpack_names = BuildpackDependency.for(dependency)
-      tracker_story_tasks = buildpack_names.map do |buildpack|
-        "Update #{dependency} in #{buildpack}-buildpack"
-      end
-      tracker_story_labels = buildpack_names.map do |buildpack|
-        buildpack.to_s
-      end
-
-      if dependency == :dotnet
-        tracker_story_tasks.push 'Remove any dotnet versions MS no longer supports'
-      end
-
-      tracker_client.post_to_tracker(name: tracker_story_name,
-                                     description: tracker_story_description,
-                                     tasks: tracker_story_tasks,
-                                     labels: tracker_story_labels,
+      tracker_clients['buildpacks'].post_to_tracker(name: story_info[:name],
+                                     description: story_info[:description],
+                                     tasks: story_info[:tasks],
+                                     labels: story_info[:labels],
                                      point_value: 1)
+      if dependency == :nginx
+        story_info = capi_tracker_story_info(dependency, versions)
+
+        tracker_clients['capi'].post_to_tracker(name: story_info[:name],
+                                       description: story_info[:description],
+                                       tasks: story_info[:tasks],
+                                       labels: story_info[:labels],
+                                       point_value: 1)
+      end
     end
   end
 
   private
+
+  def capi_tracker_story_info(dependency, versions)
+    name = "New version(s) of #{dependency}: #{versions.join(', ')}"
+    description =  "There are #{versions.count} new version(s) of **#{dependency}** available: #{versions.join(', ')}"
+
+    {
+      name: name,
+      description: description,
+      tasks: [],
+      labels: []
+    }
+  end
+
+  def buildpacks_tracker_story_info(dependency,versions)
+    name = "Build and/or Include new releases: #{dependency} #{versions.join(', ')}"
+    description = "We have #{versions.count} new releases for **#{dependency}**:\n**version #{versions.join(', ')}**\n See the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file."
+
+    buildpack_names = BuildpackDependency.for(dependency)
+    tasks = buildpack_names.map do |buildpack|
+      "Update #{dependency} in #{buildpack}-buildpack"
+    end
+    labels = buildpack_names.map do |buildpack|
+      buildpack.to_s
+    end
+
+    if dependency == :dotnet
+      tasks.push 'Remove any dotnet versions MS no longer supports'
+    end
+
+    {
+      name: name,
+      description: description,
+      tasks: tasks,
+      labels: labels
+    }
+  end
 
   def configure_octokit
     Octokit.auto_paginate = true
