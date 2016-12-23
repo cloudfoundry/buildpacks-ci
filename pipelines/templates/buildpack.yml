@@ -28,6 +28,10 @@ resources: #####################################################################
       ignore_paths:
         - VERSION
         - CHANGELOG
+        - LICENSE
+        - NOTICE
+        - ISSUE_TEMPLATE
+        - PULL_REQUEST_TEMPLATE
         - "**/*.md"
 
   - name: buildpack-master
