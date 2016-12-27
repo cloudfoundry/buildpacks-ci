@@ -165,8 +165,8 @@ describe DependencyBuildEnqueuer do
 
     context "dotnet" do
       let(:dependency)          { "dotnet" }
-      let(:new_versions)        { %w(1.0.0-preview2.0.1) }
-      let(:expected_version)    { "1.0.0-preview2.0.1" }
+      let(:new_versions)        { %w(v1.0.0-preview2.0.1) }
+      let(:expected_version)    { "v1.0.0-preview2.0.1" }
       let(:commit_message)      {"Enqueue #{dependency} - #{expected_version}"}
 
       context 'there is a pre-release version submitted to be built' do
