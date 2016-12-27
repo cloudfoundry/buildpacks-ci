@@ -164,8 +164,6 @@ class NewReleasesDetector
       tags.map { |tag| tag.gsub(/v/,"")}
     when :nginx
       tags.map { |tag| tag.gsub('release-', '')}
-    when :dotnet
-      tags.map { |tag| tag.gsub(/v/,"")}
     else
       tags
     end
