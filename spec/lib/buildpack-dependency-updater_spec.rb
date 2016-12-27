@@ -54,7 +54,7 @@ describe BuildpackDependencyUpdater do
           Build godep - #{new_version}
 
           ---
-          filename: binary-builder/godep-#{new_version}-linux-x64.tgz
+          filename: godep-#{new_version}-linux-x64.tgz
           version: #{new_version}
           md5: #{new_md5}
           sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
@@ -126,7 +126,7 @@ describe BuildpackDependencyUpdater do
           Build composer - #{new_version}
 
           ---
-          filename: binary-builder/composer-#{new_version}.phar
+          filename: composer-#{new_version}.phar
           version: #{new_version}
           md5: 05d30d20be1c94c9edc02756420a7d10
           sha256: 7f26efee06de5a1a061b6b1e330f5acc9ee69976d1551118c45b21f358cbc332
@@ -191,7 +191,7 @@ describe BuildpackDependencyUpdater do
           Build glide - #{new_version}
 
           ---
-          filename: binary-builder/glide-#{new_version}-linux-x64.tgz
+          filename: glide-#{new_version}-linux-x64.tgz
           version: #{new_version}
           md5: 18bec8f65810786c846d8b21fe73064f
           sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
@@ -245,7 +245,7 @@ describe BuildpackDependencyUpdater do
           Build nginx - #{new_version}
 
           ---
-          filename: binary-builder/nginx-#{new_version}-linux-x64.tgz
+          filename: nginx-#{new_version}-linux-x64.tgz
           version: #{new_version}
           md5: 18bec8f65810786c846d8b21fe73064f
           sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
@@ -339,7 +339,7 @@ describe BuildpackDependencyUpdater do
           Build nginx - #{new_version}
 
           ---
-          filename: binary-builder/nginx-#{new_version}-linux-x64.tgz
+          filename: nginx-#{new_version}-linux-x64.tgz
           version: #{new_version}
           md5: 18bec8f65810786c846d8b21fe73064f
           sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31

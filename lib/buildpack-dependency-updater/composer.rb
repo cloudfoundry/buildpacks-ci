@@ -6,7 +6,7 @@ class BuildpackDependencyUpdater::Composer < BuildpackDependencyUpdater
     git_commit_message.gsub!(/\n\n\[ci skip\]/,'')
 
     build_info = YAML.load(git_commit_message)
-    dependency_filename = build_info['filename'].gsub('binary-builder/', '')
+    dependency_filename = build_info['filename']
     md5 = build_info['md5']
     dependency_version = build_info['version']
 
