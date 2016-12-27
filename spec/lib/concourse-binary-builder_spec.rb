@@ -76,7 +76,7 @@ describe ConcourseBinaryBuilder do
         git_msg = "Build #{dependency} - #{version}\n\n"
 
         git_yaml = {
-          "filename" => "binary-builder/#{output_file}",
+          "filename" => output_file,
           'version' => version,
           'md5' => md5sum,
           'sha256' => shasum,

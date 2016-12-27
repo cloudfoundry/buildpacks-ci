@@ -22,7 +22,7 @@ describe BuildpackDependencyUpdater do
         Build node - #{expected_version}
 
         ---
-        filename: binary-builder/node-#{expected_version}-linux-x64.tgz
+        filename: node-#{expected_version}-linux-x64.tgz
         version: #{expected_version}
         md5: 18bec8f65810786c846d8b21fe73064f
         sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31

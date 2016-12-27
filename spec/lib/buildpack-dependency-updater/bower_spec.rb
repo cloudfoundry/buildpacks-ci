@@ -22,7 +22,7 @@ describe BuildpackDependencyUpdater do
         Build bower - #{expected_version}
 
         ---
-        filename: binary-builder/bower-#{expected_version}.tgz
+        filename: bower-#{expected_version}.tgz
         version: #{expected_version}
         md5: doesnotmatteratall
         sha256: alsoignoredforthistest

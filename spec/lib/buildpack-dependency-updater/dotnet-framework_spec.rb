@@ -58,7 +58,7 @@ describe BuildpackDependencyUpdater do
         Build dotnet-framework - #{new_version}
 
         ---
-        filename: binary-builder/dotnet-framework.#{new_version}.linux-amd64.tar.gz
+        filename: dotnet-framework.#{new_version}.linux-amd64.tar.gz
         version: #{new_version}
         md5: aaaabbbb22224444
         sha256: zzzzzyyyy99998888

@@ -101,8 +101,7 @@ class ConcourseBinaryBuilder
           end
 
     filename = Dir["#{binary_builder_dir}/#{binary_name + ext}"].first
-    filename.match /(binary-builder\/.*)/
-    short_filename = $1
+    short_filename = File.basename(filename)
 
     md5sum = Digest::MD5.file(filename).hexdigest
     shasum = Digest::SHA256.file(filename).hexdigest
