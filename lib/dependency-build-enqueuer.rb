@@ -92,7 +92,7 @@ class DependencyBuildEnqueuer
       verifications << ['gpg-rsa-key-id', 'A1C052F8']
       verifications << ['gpg-signature', gpg_signature]
     when "dotnet"
-      verifications << git_commit_sha_verification('dotnet/cli', version)
+      verifications << git_commit_sha_verification('dotnet/cli', 'v' + version)
     end
   end
 
