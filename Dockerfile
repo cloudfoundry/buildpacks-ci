@@ -80,4 +80,4 @@ ENV BASH_ENV /etc/profile.d/filter.sh
 RUN cd /usr/local && curl -L https://storage.googleapis.com/golang/go1.6.2.linux-amd64.tar.gz -o go.tar.gz && tar xf go.tar.gz && mv go/bin/go /usr/local/bin/go
 
 # Install poltergeist for running dotnet-core-buildpack specs
-RUN gem install phantomjs
+RUN gem install phantomjs && ruby -e 'require "phantomjs"; Phantomjs.path'
