@@ -13,7 +13,7 @@ class BuildpackDependencyUpdater::Composer < BuildpackDependencyUpdater
     buildpack_dependencies_host_domain = ENV.fetch('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil)
     raise 'No host domain set via BUILDPACK_DEPENDENCIES_HOST_DOMAIN' unless buildpack_dependencies_host_domain
 
-    url ="https://#{buildpack_dependencies_host_domain}/dependencies/php/binaries/trusty/composer/#{dependency_version}/composer.phar"
+    url ="https://#{buildpack_dependencies_host_domain}/dependencies/composer/#{dependency_version}/composer.phar"
 
     [dependency_version, url, md5]
   end
