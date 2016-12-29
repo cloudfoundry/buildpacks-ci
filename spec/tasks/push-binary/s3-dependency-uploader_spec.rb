@@ -79,12 +79,12 @@ describe S3DependencyUploader do
 
     context 'the dependency does not exist on s3' do
       before do
-        allow(subject).to receive(:`).with("aws s3 ls s3://pivotal-buildpacks/dependencies/php/binaries/trusty/composer/1.1.1/")
+        allow(subject).to receive(:`).with("aws s3 ls s3://pivotal-buildpacks/dependencies/composer/1.1.1/")
           .and_return('')
       end
 
       it 'uploads the dependency' do
-        s3_copy_command = "aws s3 cp #{File.join(artifacts_dir, 'composer-1.1.1.phar')} s3://pivotal-buildpacks/dependencies/php/binaries/trusty/composer/1.1.1/composer.phar"
+        s3_copy_command = "aws s3 cp #{File.join(artifacts_dir, 'composer-1.1.1.phar')} s3://pivotal-buildpacks/dependencies/composer/1.1.1/composer.phar"
         expect(subject).to receive(:system).with s3_copy_command
 
         subject.run
@@ -93,12 +93,12 @@ describe S3DependencyUploader do
 
     context 'the dependency already exists on s3' do
       before do
-        allow(subject).to receive(:`).with("aws s3 ls s3://pivotal-buildpacks/dependencies/php/binaries/trusty/composer/1.1.1/")
+        allow(subject).to receive(:`).with("aws s3 ls s3://pivotal-buildpacks/dependencies/composer/1.1.1/")
           .and_return('1.1.1/composer.phar')
       end
 
       it 'does not upload the dependency' do
-        s3_copy_command = "aws s3 cp #{File.join(artifacts_dir, 'composer-1.1.1.phar')} s3://pivotal-buildpacks/dependencies/php/binaries/trusty/composer/1.1.1/composer.phar"
+        s3_copy_command = "aws s3 cp #{File.join(artifacts_dir, 'composer-1.1.1.phar')} s3://pivotal-buildpacks/dependencies/composer/1.1.1/composer.phar"
         expect(subject).not_to receive(:system).with s3_copy_command
 
         subject.run
