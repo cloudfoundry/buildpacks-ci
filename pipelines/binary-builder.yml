@@ -210,7 +210,7 @@ jobs: ##########################################################################
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary/task.yml
           params:
-            BINARY_NAME: <%= dependency %>
+            DEPENDENCY: <%= dependency %>
             GIT_SSH_KEY: {{public-buildpacks-ci-robots-private-key}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BINARY_BUILDER_PLATFORM: {{binary-builder-platform}}
@@ -219,7 +219,7 @@ jobs: ##########################################################################
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary/task.yml
           params:
-            BINARY_NAME: <%= dependency %>
+            DEPENDENCY: <%= dependency %>
             BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
@@ -282,7 +282,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/build-binary/task.yml
           params:
             GIT_SSH_KEY: {{public-buildpacks-ci-robots-private-key}}
-            BINARY_NAME: <%= dependency %>
+            DEPENDENCY: <%= dependency %>
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BINARY_BUILDER_PLATFORM: {{binary-builder-platform}}
             BINARY_BUILDER_OS_NAME: {{binary-builder-os-name}}
@@ -290,7 +290,7 @@ jobs: ##########################################################################
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary/task.yml
           params:
-            BINARY_NAME: <%= dependency %>
+            DEPENDENCY: <%= dependency %>
             BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
@@ -394,7 +394,7 @@ jobs: ##########################################################################
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary/task.yml
           params:
-            BINARY_NAME: dotnet-framework
+            DEPENDENCY: dotnet-framework
             BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}

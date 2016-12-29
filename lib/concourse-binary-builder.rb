@@ -5,17 +5,17 @@ require_relative 'git-client'
 
 class ConcourseBinaryBuilder
 
-  attr_reader :binary_name, :git_ssh_key, :task_root_dir
+  attr_reader :dependency, :git_ssh_key, :task_root_dir
   attr_reader :binary_builder_dir, :built_dir, :builds_dir
   attr_reader :builds_yaml_artifacts, :binary_artifacts_dir, :source_url
   attr_reader :verification_type, :verification_value, :flags, :latest_build, :remaining_builds
   attr_reader :platform, :os_name
 
-  def initialize(binary_name, task_root_dir, git_ssh_key, platform, os_name)
+  def initialize(dependency, task_root_dir, git_ssh_key, platform, os_name)
     @platform = platform.to_sym
     @os_name = os_name.to_sym
     @git_ssh_key = git_ssh_key
-    @binary_name = binary_name
+    @dependency = dependency
     @task_root_dir = task_root_dir
     @binary_builder_dir = File.join(task_root_dir,'binary-builder')
     @built_dir = File.join(task_root_dir, 'built-yaml')
@@ -28,7 +28,7 @@ class ConcourseBinaryBuilder
     load_builds_yaml
 
     unless latest_build
-      puts "There are no new builds for #{binary_name} requested."
+      puts "There are no new builds for #{dependency} requested."
       exit
     end
 
@@ -44,15 +44,15 @@ class ConcourseBinaryBuilder
   private
 
   def load_builds_yaml
-    builds_file = File.join(builds_dir, 'binary-builds', "#{binary_name}-builds.yml")
+    builds_file = File.join(builds_dir, 'binary-builds', "#{dependency}-builds.yml")
     builds = YAML.load_file(builds_file)
 
-    @latest_build = builds[binary_name].shift
+    @latest_build = builds[dependency].shift
     @remaining_builds = builds
 
     return if @latest_build.nil?
 
-    @flags = "--name=#{binary_name}"
+    @flags = "--name=#{dependency}"
     latest_build.each_pair do |key, value|
       if key == 'md5' || key == 'sha256' || key == 'git-commit-sha'
         @verification_type = key
@@ -66,7 +66,7 @@ class ConcourseBinaryBuilder
   end
 
   def build_dependency
-    case binary_name
+    case dependency
     when 'bower'
       @source_url = "https://registry.npmjs.org/bower/-/bower-#{latest_build['version']}.tgz"
       download_non_build_dependency(source_url, 'bower', 'tgz')
@@ -91,7 +91,7 @@ class ConcourseBinaryBuilder
   def create_git_commit_msg
     version_built = latest_build['version']
 
-    ext = case binary_name
+    ext = case dependency
             when 'composer' then
               '*.phar'
             when 'go', 'dotnet' then
@@ -100,15 +100,15 @@ class ConcourseBinaryBuilder
               '-*.tgz'
           end
 
-    filename = Dir["#{binary_builder_dir}/#{binary_name + ext}"].first
+    filename = Dir["#{binary_builder_dir}/#{dependency + ext}"].first
     short_filename = File.basename(filename)
 
     md5sum = Digest::MD5.file(filename).hexdigest
     shasum = Digest::SHA256.file(filename).hexdigest
 
-    ci_skip = remaining_builds[binary_name].empty? && !is_automated
+    ci_skip = remaining_builds[dependency].empty? && !is_automated
 
-    git_msg = "Build #{binary_name} - #{version_built}\n\n"
+    git_msg = "Build #{dependency} - #{version_built}\n\n"
 
     git_yaml = {
       "filename" => short_filename,
@@ -136,19 +136,19 @@ class ConcourseBinaryBuilder
     if is_automated
       #get latest version of <binary>-built.yml
       add_ssh_key_and_update(built_dir)
-      built_file = File.join(built_dir, 'binary-built-output' ,"#{binary_name}-built.yml")
+      built_file = File.join(built_dir, 'binary-built-output' ,"#{dependency}-built.yml")
       built = YAML.load_file(built_file)
-      built_versions = built[binary_name]
+      built_versions = built[dependency]
 
       if dependency_version_not_built(built_versions)
-        built[binary_name].push latest_build
-        built[binary_name][-1]["timestamp"] = Time.now.utc.to_s
+        built[dependency].push latest_build
+        built[dependency][-1]["timestamp"] = Time.now.utc.to_s
 
         File.write(built_file, built.to_yaml)
       end
       commit_and_rsync(built_dir, builds_yaml_artifacts, git_msg, built_file)
     else
-      builds_file = File.join(builds_dir, 'binary-builds', "#{binary_name}-builds.yml")
+      builds_file = File.join(builds_dir, 'binary-builds', "#{dependency}-builds.yml")
       File.write(builds_file, remaining_builds.to_yaml)
       commit_and_rsync(builds_dir, builds_yaml_artifacts, git_msg, builds_file)
     end
@@ -187,7 +187,7 @@ class ConcourseBinaryBuilder
 
   def is_automated
     automated = %w(bower composer dotnet godep glide nginx node)
-    automated.include? binary_name
+    automated.include? dependency
   end
 
   def commit_and_rsync(in_dir, out_dir, git_msg, file)
