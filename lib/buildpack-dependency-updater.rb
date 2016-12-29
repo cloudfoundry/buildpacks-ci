@@ -18,9 +18,6 @@ class BuildpackDependencyUpdater
   attr_reader :buildpack
   attr_reader :buildpack_dir
   attr_reader :binary_built_dir
-  attr_reader :dependency_version
-  attr_reader :md5
-  attr_reader :uri
   attr_reader :removed_versions
   attr_accessor :buildpack_manifest
 
@@ -36,7 +33,6 @@ class BuildpackDependencyUpdater
     @buildpack_dir = buildpack_dir
     @binary_built_dir = binary_built_dir
     @removed_versions = []
-    @dependency_version, @uri, @md5 = get_dependency_info
   end
 
   def run!
@@ -70,24 +66,36 @@ class BuildpackDependencyUpdater
     end.count > 0
   end
 
-  def get_dependency_info
+  def dependency_version
+    @depencency_version ||= dependency_build_info['version']
+  end
+
+  def md5
+    @md5 ||= dependency_build_info['md5']
+  end
+
+  def uri
+    return @uri if @uri
+
+    dependency_filename = dependency_build_info['filename']
+
+    buildpack_dependencies_host_domain = ENV.fetch('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil)
+    raise 'No host domain set via BUILDPACK_DEPENDENCIES_HOST_DOMAIN' unless buildpack_dependencies_host_domain
+
+    @uri = "https://#{buildpack_dependencies_host_domain}/dependencies/#{dependency}/#{dependency_filename}"
+  end
+
+  def dependency_build_info
+    return @dependency_build_info if @dependency_build_info
+
     binary_built_file = "binary-built-output/#{dependency}-built.yml"
     git_commit_message = GitClient.last_commit_message(binary_built_dir, 0, binary_built_file)
     git_commit_message.gsub!(/Build(.*)\n\n/,'')
     git_commit_message.gsub!(/\n\n\[ci skip\]/,'')
 
-    build_info = YAML.load(git_commit_message)
-    dependency_filename = build_info['filename']
-    md5 = build_info['md5']
-    dependency_version = build_info['version']
-
-    buildpack_dependencies_host_domain = ENV.fetch('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil)
-    raise 'No host domain set via BUILDPACK_DEPENDENCIES_HOST_DOMAIN' unless buildpack_dependencies_host_domain
-
-    url ="https://#{buildpack_dependencies_host_domain}/dependencies/#{dependency}/#{dependency_filename}"
-
-    [dependency_version, url, md5]
+    @dependency_build_info = YAML.load(git_commit_message)
   end
+
 
   def perform_dependency_update
     original_dependencies = buildpack_manifest["dependencies"].clone
@@ -97,8 +105,8 @@ class BuildpackDependencyUpdater
     dependency_hash = {
       "name"      => dependency,
       "version"   => dependency_version,
-      "uri"       => @uri,
-      "md5"       => @md5,
+      "uri"       => uri,
+      "md5"       => md5,
       "cf_stacks" => ["cflinuxfs2"]
     }
     buildpack_manifest["dependencies"] << dependency_hash
