@@ -1,27 +1,6 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
-binary_name = ENV['BINARY_NAME']
-bucket_name= ENV['BUCKET_NAME']
-file_path   = Dir.glob("binary-builder-artifacts/#{binary_name}*.{tar.gz,tgz,phar}").first
-unless file_path
-  puts 'No binaries detected for upload.'
-  exit
-end
+require_relative 's3-dependency-uploader'
 
-file_name = File.basename(file_path)
-
-if binary_name == "composer" then
-  version = file_name.gsub("composer-","").gsub(".phar","")
-  aws_url =  "s3://#{bucket_name}/dependencies/php/binaries/trusty/composer/#{version}"
-  file_name = "composer.phar"
-else
-  aws_url =  "s3://#{bucket_name}/dependencies/#{binary_name}"
-end
-
-
-if `aws s3 ls #{aws_url}/`.include? file_name
-  puts "Binary #{file_name} has already been detected on s3. Skipping upload for this file."
-else
-  system("aws s3 cp #{file_path} #{aws_url}/#{file_name}")
-end
+S3DependencyUploader.new(ENV['DEPENDENCY'], ENV['BUCKET_NAME'], 'binary-builder-artifacts').run
