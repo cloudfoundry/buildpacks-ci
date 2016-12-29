@@ -60,7 +60,7 @@ resources:
         username: {{cve-amazon-ses-smtp-username}}
         password: {{cve-amazon-ses-smtp-password}}
       from: cf-buildpacks-eng@pivotal.io
-      to: ["cf-security@pivotal.io", "cf-buildpacks-eng@pivotal.io"]
+      to: ["cf-security@pivotal.io", "cf-buildpacks-eng@pivotal.io", "security@pivotal.io"]
 
 jobs:
   - name: New Releases
