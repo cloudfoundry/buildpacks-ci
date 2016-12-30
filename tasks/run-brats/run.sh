@@ -16,8 +16,8 @@ pushd brats
   fi
 
   if [ -z "${STACK-}" ]; then
-    bundle exec rspec cf_spec/integration --tag language:"${LANGUAGE}"
+    bundle exec rspec cf_spec/integration --tag language:"${LANGUAGE}" --tag buildpack_branch:"${BUILDPACK_BRANCH}"
   else
-    bundle exec rspec -t "stack:$STACK" cf_spec/integration --tag language:"${LANGUAGE}"
+    bundle exec rspec -t "stack:$STACK" cf_spec/integration --tag language:"${LANGUAGE}" --tag buildpack_branch:"${BUILDPACK_BRANCH}"
   fi
 popd
