@@ -125,7 +125,6 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: new-cves
-        - get: new-buildpack-cves
         - get: stacks
         - get: check-interval
           trigger: true
@@ -144,10 +143,6 @@ jobs:
       - put: new-cves
         params:
           repository: output-new-cves
-          rebase: true
-      - put: new-buildpack-cves
-        params:
-          repository: output-new-buildpack-cves
           rebase: true
       - put: stacks-related-new-cves-email
         resource: cves-email

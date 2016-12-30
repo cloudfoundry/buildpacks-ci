@@ -6,13 +6,11 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: new-cves
-  - name: new-buildpack-cves
   - name: buildpacks-ci
   - name: stacks
 outputs:
   - name: cves-email
   - name: output-new-cves
-  - name: output-new-buildpack-cves
 run:
   path: bash
   args:
@@ -20,7 +18,6 @@ run:
     - |
       set -e
       rsync -a new-cves/ output-new-cves
-      rsync -a new-buildpack-cves/ output-new-buildpack-cves
 
       cd buildpacks-ci && bundle exec ./tasks/check-for-new-rootfs-cves/run.rb
 
