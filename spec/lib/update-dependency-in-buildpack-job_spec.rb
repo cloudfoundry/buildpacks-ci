@@ -6,6 +6,7 @@ describe UpdateDependencyInBuildpackJob do
   let(:buildpacks_ci_dir) { Dir.mktmpdir }
   let(:binary_built_out_dir) { Dir.mktmpdir }
   let(:version)                      { 'override' }
+  let(:dependency)                   { 'override' }
   let(:removed_versions)             { %w(override) }
   let(:buildpack_dependency_updater) { double(:buildpack_dependency_updater, dependency_version: version,
                                                                              removed_versions: removed_versions,
@@ -14,10 +15,28 @@ describe UpdateDependencyInBuildpackJob do
   subject { described_class.new(buildpacks_ci_dir, binary_built_out_dir) }
 
   before do
+    @old_dependency = ENV.fetch('DEPENDENCY', nil)
+    @old_buildpack_name = ENV.fetch('BUILDPACK_NAME', nil)
+    @old_tracker_api_token = ENV.fetch('TRACKER_API_TOKEN', nil)
+    @old_tracker_project_id = ENV.fetch('TRACKER_PROJECT_ID', nil)
+    @old_tracker_requester_id = ENV.fetch('TRACKER_REQUESTER_ID', nil)
+
+    ENV.store('DEPENDENCY', dependency)
+    ENV.store('BUILDPACK_NAME', 'does not matter')
+    ENV.store('TRACKER_API_TOKEN', 'does not matter')
+    ENV.store('TRACKER_PROJECT_ID', 'does not matter')
+    ENV.store('TRACKER_REQUESTER_ID', 'does not matter')
+
     allow(BuildpackDependencyUpdater).to receive(:create).and_return(buildpack_dependency_updater)
   end
 
   after do
+    ENV.store('DEPENDENCY', @old_dependency)
+    ENV.store('BUILDPACK_NAME', @old_buildpack_name)
+    ENV.store('TRACKER_API_TOKEN', @old_tracker_api_token)
+    ENV.store('TRACKER_PROJECT_ID', @old_tracker_project_id)
+    ENV.store('TRACKER_REQUESTER_ID', @old_tracker_requester_id)
+
     FileUtils.rm_rf(buildpacks_ci_dir)
     FileUtils.rm_rf(binary_built_out_dir)
   end
@@ -27,10 +46,6 @@ describe UpdateDependencyInBuildpackJob do
     let(:buildpack_dir)                { Dir.mktmpdir }
     let(:version)                      { '1.11.3' }
     let(:removed_versions)             { %w(1.11.1) }
-
-    before do
-      stub_const('ENV', {'DEPENDENCY' => dependency})
-    end
 
     after { FileUtils.rm_rf(buildpack_dir) }
 

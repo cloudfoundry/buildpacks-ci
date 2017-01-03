@@ -3,7 +3,7 @@
 
 require_relative '../../lib/state-of-bosh-lites.rb'
 
-deployment_id = ENV['DEPLOYMENT_NAME']
+deployment_id = ENV.fetch('DEPLOYMENT_NAME')
 resource_pools_dir = File.join(Dir.pwd, 'resource-pools')
 
 state_object = StateOfBoshLites.new

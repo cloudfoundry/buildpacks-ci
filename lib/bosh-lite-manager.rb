@@ -96,7 +96,7 @@ class BoshLiteManager
 
   def deploy_aws_bosh_lite
     Dir.chdir(deployment_dir) do
-      ENV['VAGRANT_CWD'] = deployment_dir
+      ENV.store('VAGRANT_CWD', deployment_dir)
       run_or_exit "/usr/bin/vagrant up --provider=aws"
     end
   end
@@ -142,7 +142,7 @@ class BoshLiteManager
     run_or_exit "chmod 0600 #{ssh_key_file}"
     run_or_exit "ssh-add #{ssh_key_file}"
 
-    ENV['BOSH_LITE_PRIVATE_KEY'] = ssh_key_file
+    ENV.store('BOSH_LITE_PRIVATE_KEY', ssh_key_file)
   end
 
   def update_admin_password

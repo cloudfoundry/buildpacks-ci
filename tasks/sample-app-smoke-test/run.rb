@@ -57,27 +57,18 @@ def bind_database(database)
   end
 end
 
-cf_api = ENV['CF_API']
-cf_username = ENV['CF_USERNAME']
-cf_password = ENV['CF_PASSWORD']
-cf_organization = ENV['CF_ORGANIZATION']
-cf_domain = ENV['CF_DOMAIN']
-cf_login_space = ENV['CF_LOGIN_SPACE']
-app_name = ENV['APPLICATION_NAME']
-buildpack_url = ENV['BUILDPACK_URL']
-request_path = ENV['REQUEST_PATH']
-database_to_bind = ENV['DATABASE_TO_BIND']
-request_type = ENV['REQUEST_TYPE']
+cf_api = ENV.fetch('CF_API')
+cf_username = ENV.fetch('CF_USERNAME')
+cf_password = ENV.fetch('CF_PASSWORD')
+cf_organization = ENV.fetch('CF_ORGANIZATION')
+cf_domain = ENV.fetch('CF_DOMAIN')
+cf_login_space = ENV.fetch('CF_LOGIN_SPACE')
+app_name = ENV.fetch('APPLICATION_NAME')
+buildpack_url = ENV.fetch('BUILDPACK_URL')
+request_path = ENV.fetch('REQUEST_PATH')
+database_to_bind = ENV.fetch('DATABASE_TO_BIND')
+request_type = ENV.fetch('REQUEST_TYPE')
 cf_app_space = "sample-app-#{Random.rand(100000)}"
-
-env_vars = %w(CF_API CF_USERNAME CF_PASSWORD CF_ORGANIZATION CF_DOMAIN CF_LOGIN_SPACE APPLICATION_NAME BUILDPACK_URL REQUEST_PATH DATABASE_TO_BIND REQUEST_TYPE)
-
-env_vars.each do |var|
-  if ENV[var].nil?
-    puts "#{var} is not set. Exiting..."
-    exit 1
-  end
-end
 
 target_cf(cf_api, cf_username, cf_password, cf_organization, cf_login_space, cf_app_space)
 

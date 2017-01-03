@@ -43,8 +43,8 @@ puts ""
 puts description
 
 tracker_client = TrackerClient.new(
-  ENV['TRACKER_API_TOKEN'],
-  ENV['TRACKER_PROJECT_ID'],
-  ENV['TRACKER_REQUESTER_ID'].to_i
+  ENV.fetch('TRACKER_API_TOKEN'),
+  ENV.fetch('TRACKER_PROJECT_ID'),
+  ENV.fetch('TRACKER_REQUESTER_ID').to_i
 )
 tracker_client.post_to_tracker(name: name, description: description, tasks: tasks, labels: labels)

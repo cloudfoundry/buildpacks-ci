@@ -2,10 +2,10 @@
 
 require 'json'
 
-admin_user = ENV['CI_CF_USERNAME']
-admin_password = ENV['CI_CF_PASSWORD']
-apps_domain = ENV['APPS_DOMAIN']
-diego_docker_on = ENV['DIEGO_DOCKER_ON']
+admin_user = ENV.fetch('CI_CF_USERNAME')
+admin_password = ENV.fetch('CI_CF_PASSWORD')
+apps_domain = ENV.fetch('APPS_DOMAIN')
+diego_docker_on = ENV.fetch('DIEGO_DOCKER_ON')
 
 cats_config = {
   "admin_password" => admin_password,

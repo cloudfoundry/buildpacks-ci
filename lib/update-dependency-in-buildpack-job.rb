@@ -14,8 +14,8 @@ class UpdateDependencyInBuildpackJob
   end
 
   def update_buildpack
-    dependency = ENV['DEPENDENCY']
-    buildpack_name = ENV['BUILDPACK_NAME']
+    dependency = ENV.fetch('DEPENDENCY')
+    buildpack_name = ENV.fetch('BUILDPACK_NAME')
     buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "buildpack"))
 
     buildpack_updater = BuildpackDependencyUpdater.create(dependency, buildpack_name, buildpack_dir, binary_built_out_dir)
@@ -63,7 +63,7 @@ class UpdateDependencyInBuildpackJob
   def run!
     buildpack_dir, dependency, version, removed_versions = update_buildpack
 
-    tracker_client = TrackerClient.new(ENV['TRACKER_API_TOKEN'], ENV['TRACKER_PROJECT_ID'], ENV['TRACKER_REQUESTER_ID'].to_i)
+    tracker_client = TrackerClient.new(ENV.fetch('TRACKER_API_TOKEN'), ENV.fetch('TRACKER_PROJECT_ID'), ENV.fetch('TRACKER_REQUESTER_ID').to_i)
     story_ids = tracker_client.find_unaccepted_story_ids("include new #{dependency} #{version}")
 
     write_git_commit(buildpack_dir, dependency, story_ids, version, removed_versions)

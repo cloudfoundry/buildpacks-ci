@@ -217,7 +217,7 @@ describe BoshLiteManager do
   describe '#deploy_aws_bosh_lite' do
     it "sets VAGRANT_CWD to deployment directory" do
       subject.send :deploy_aws_bosh_lite
-      expect(ENV['VAGRANT_CWD']).to eq(deployment_dir)
+      expect(ENV.fetch('VAGRANT_CWD')).to eq(deployment_dir)
     end
 
     it "runs vagrant up with aws provider" do
@@ -308,7 +308,7 @@ describe BoshLiteManager do
 
     it 'sets the BOSH_LITE_PRIVATE_KEY env var to key file path' do
       subject.send(:install_ssh_key, install_dir)
-      expect(ENV['BOSH_LITE_PRIVATE_KEY']).to eq(key_file)
+      expect(ENV.fetch('BOSH_LITE_PRIVATE_KEY')).to eq(key_file)
     end
   end
 

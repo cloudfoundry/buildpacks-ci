@@ -11,12 +11,12 @@ describe 'script for filling diego manifest with correct rootfs release' do
 
   before do
     FileUtils.cp(diego_manifest_file, diego_tmp_manifest_file)
-    @rootfs_release = ENV['ROOTFS_RELEASE']
-    ENV['ROOTFS_RELEASE'] = 'a_rootfs_bosh_release'
+    @rootfs_release = ENV.fetch('ROOTFS_RELEASE', nil)
+    ENV.store('ROOTFS_RELEASE', 'a_rootfs_bosh_release')
   end
 
   after do
-    ENV['ROOTFS_RELEASE'] = @rootfs_release
+    ENV.store('ROOTFS_RELEASE', @rootfs_release)
     FileUtils.mv(diego_tmp_manifest_file, diego_manifest_file)
   end
 

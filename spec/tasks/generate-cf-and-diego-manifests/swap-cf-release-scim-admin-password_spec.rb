@@ -10,14 +10,14 @@ describe 'script for filling cf manifest with correct admin password' do
 
   RSpec.shared_context "shared cf-release fixture setup" do
     before do
-      @ci_cf_password = ENV['CI_CF_PASSWORD']
-      ENV['CI_CF_PASSWORD'] = 'unique_password'
+      @ci_cf_password = ENV.fetch('CI_CF_PASSWORD', nil)
+      ENV.store('CI_CF_PASSWORD', 'unique_password')
 
       FileUtils.cp(cf_manifest_file, cf_tmp_manifest_file)
     end
 
     after do
-      ENV['CI_CF_PASSWORD'] = @ci_cf_password
+      ENV.store('CI_CF_PASSWORD', @ci_cf_password)
       FileUtils.mv(cf_tmp_manifest_file, cf_manifest_file)
     end
 

@@ -3,4 +3,4 @@
 
 require_relative 's3-dependency-uploader'
 
-S3DependencyUploader.new(ENV['DEPENDENCY'], ENV['BUCKET_NAME'], 'binary-builder-artifacts').run
+S3DependencyUploader.new(ENV.fetch('DEPENDENCY'), ENV.fetch('BUCKET_NAME'), 'binary-builder-artifacts').run

@@ -26,14 +26,14 @@ class NewReleasesDetector
     slack_clients = {}
 
     slack_clients['buildpacks'] = SlackClient.new(
-      ENV['BUILDPACKS_SLACK_WEBHOOK'],
-      ENV['BUILDPACKS_SLACK_CHANNEL'],
+      ENV.fetch('BUILDPACKS_SLACK_WEBHOOK'),
+      ENV.fetch('BUILDPACKS_SLACK_CHANNEL'),
       'dependency-notifier'
     )
 
     slack_clients['capi'] = SlackClient.new(
-      ENV['CAPI_SLACK_WEBHOOK'],
-      ENV['CAPI_SLACK_CHANNEL'],
+      ENV.fetch('CAPI_SLACK_WEBHOOK'),
+      ENV.fetch('CAPI_SLACK_CHANNEL'),
       'dependency-notifier'
     )
 
@@ -54,15 +54,15 @@ class NewReleasesDetector
     tracker_clients = {}
 
     tracker_clients['buildpacks'] = TrackerClient.new(
-      ENV['TRACKER_API_TOKEN'],
-      ENV['BUILDPACKS_TRACKER_PROJECT_ID'],
-      ENV['TRACKER_REQUESTER_ID'].to_i
+      ENV.fetch('TRACKER_API_TOKEN'),
+      ENV.fetch('BUILDPACKS_TRACKER_PROJECT_ID'),
+      ENV.fetch('TRACKER_REQUESTER_ID').to_i
     )
 
     tracker_clients['capi'] = TrackerClient.new(
-      ENV['TRACKER_API_TOKEN'],
-      ENV['CAPI_TRACKER_PROJECT_ID'],
-      ENV['TRACKER_REQUESTER_ID'].to_i
+      ENV.fetch('TRACKER_API_TOKEN'),
+      ENV.fetch('CAPI_TRACKER_PROJECT_ID'),
+      ENV.fetch('TRACKER_REQUESTER_ID').to_i
     )
 
     changed_dependencies.each do |dependency, versions|

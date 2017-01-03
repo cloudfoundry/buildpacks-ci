@@ -8,13 +8,13 @@ describe BuildpacksCIConfiguration do
 
     context 'configured by env variable' do
       it 'returns the value of the env var' do
-        allow(ENV).to receive(:[]).with('LPASS_CONCOURSE_PRIVATE_FILE').and_return('private.yml')
+        allow(ENV).to receive(:fetch).with('LPASS_CONCOURSE_PRIVATE_FILE', anything).and_return('private.yml')
 
         expect(subject).to eq('private.yml')
       end
 
       it 'asks ENV for the value' do
-        expect(ENV).to receive(:[]).with('LPASS_CONCOURSE_PRIVATE_FILE')
+        expect(ENV).to receive(:fetch).with('LPASS_CONCOURSE_PRIVATE_FILE', anything)
 
         subject
       end
@@ -30,13 +30,13 @@ describe BuildpacksCIConfiguration do
 
     context 'configured by env variable' do
       it 'returns the value of the env var' do
-        allow(ENV).to receive(:[]).with('LPASS_DEPLOYMENTS_BUILDPACKS_FILE').and_return('deployment.yml')
+        allow(ENV).to receive(:fetch).with('LPASS_DEPLOYMENTS_BUILDPACKS_FILE', anything).and_return('deployment.yml')
 
         expect(subject).to eq('deployment.yml')
       end
 
       it 'asks ENV for the value' do
-        expect(ENV).to receive(:[]).with('LPASS_DEPLOYMENTS_BUILDPACKS_FILE')
+        expect(ENV).to receive(:fetch).with('LPASS_DEPLOYMENTS_BUILDPACKS_FILE', anything)
 
         subject
       end
@@ -52,13 +52,13 @@ describe BuildpacksCIConfiguration do
 
     context 'configured by env variable' do
       it 'returns the value of the env var' do
-        allow(ENV).to receive(:[]).with('LPASS_REPOS_PRIVATE_KEYS_FILE').and_return('keys.yml')
+        allow(ENV).to receive(:fetch).with('LPASS_REPOS_PRIVATE_KEYS_FILE', anything).and_return('keys.yml')
 
         expect(subject).to eq('keys.yml')
       end
 
       it 'asks ENV for the value' do
-        expect(ENV).to receive(:[]).with('LPASS_REPOS_PRIVATE_KEYS_FILE')
+        expect(ENV).to receive(:fetch).with('LPASS_REPOS_PRIVATE_KEYS_FILE', anything)
 
         subject
       end
@@ -74,13 +74,13 @@ describe BuildpacksCIConfiguration do
 
     context 'configured by env variable' do
       it 'returns the value of the env var' do
-        allow(ENV).to receive(:[]).with('LPASS_GIT_REPOS_PRIVATE_KEYS_FILE').and_return('keys.yml')
+        allow(ENV).to receive(:fetch).with('LPASS_GIT_REPOS_PRIVATE_KEYS_FILE', anything).and_return('keys.yml')
 
         expect(subject).to eq('keys.yml')
       end
 
       it 'asks ENV for the value' do
-        expect(ENV).to receive(:[]).with('LPASS_GIT_REPOS_PRIVATE_KEYS_FILE')
+        expect(ENV).to receive(:fetch).with('LPASS_GIT_REPOS_PRIVATE_KEYS_FILE', anything)
 
         subject
       end
@@ -96,13 +96,13 @@ describe BuildpacksCIConfiguration do
 
     context 'configured by env variable' do
       it 'returns the value of the env var' do
-        allow(ENV).to receive(:[]).with('LPASS_BOSH_RELEASE_PRIVATE_KEYS_FILE').and_return('private_keys.yml')
+        allow(ENV).to receive(:fetch).with('LPASS_BOSH_RELEASE_PRIVATE_KEYS_FILE', anything).and_return('private_keys.yml')
 
         expect(subject).to eq('private_keys.yml')
       end
 
       it 'asks ENV for the value' do
-        expect(ENV).to receive(:[]).with('LPASS_BOSH_RELEASE_PRIVATE_KEYS_FILE')
+        expect(ENV).to receive(:fetch).with('LPASS_BOSH_RELEASE_PRIVATE_KEYS_FILE', anything)
 
         subject
       end
@@ -175,13 +175,13 @@ describe BuildpacksCIConfiguration do
 
     context 'configured by env variable' do
       it 'returns the value of the env var' do
-        allow(ENV).to receive(:[]).with('CONCOURSE_TARGET_NAME').and_return('concourse-target')
+        allow(ENV).to receive(:fetch).with('CONCOURSE_TARGET_NAME', anything).and_return('concourse-target')
 
         expect(subject).to eq('concourse-target')
       end
 
       it 'asks ENV for the value' do
-        expect(ENV).to receive(:[]).with('CONCOURSE_TARGET_NAME')
+        expect(ENV).to receive(:fetch).with('CONCOURSE_TARGET_NAME', anything)
 
         subject
       end

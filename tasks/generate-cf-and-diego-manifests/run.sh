@@ -54,7 +54,7 @@ jobs:
   ../buildpacks-ci/tasks/generate-cf-and-diego-manifests/swap-cf-release-scim-admin-password.rb "$(pwd)" bosh-lite/deployments/cf.yml
   ../buildpacks-ci/tasks/generate-cf-and-diego-manifests/swap-jwt-keys.rb "$(pwd)" bosh-lite/deployments/cf.yml
 
-  ruby -i -pe "gsub('admin_password: stub_to_be_gsubbed', 'admin_password: ' + ENV['CI_CF_PASSWORD'])" bosh-lite/deployments/cf.yml
+  ruby -i -pe "gsub('admin_password: stub_to_be_gsubbed', 'admin_password: ' + ENV.fetch('CI_CF_PASSWORD'))" bosh-lite/deployments/cf.yml
 popd
 
 pushd diego-release

@@ -2,7 +2,7 @@
 # encoding: utf-8
 require 'fileutils'
 
-gem_name = ENV['GEM_NAME']
+gem_name = ENV.fetch('GEM_NAME')
 
 artifact_path = File.join(Dir.pwd, "gem-artifacts")
 

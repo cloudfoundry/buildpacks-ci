@@ -4,21 +4,21 @@ require 'digest'
 require 'yaml'
 
 describe 'make-rootfs' do
-  old_path = ENV['PATH']
-  old_rootfs_release = ENV['ROOTFS_RELEASE']
+  old_path = ENV.fetch('PATH', nil)
+  old_rootfs_release = ENV.fetch('ROOTFS_RELEASE', nil)
   ci_path = Dir.pwd
   test_path = File.join(ci_path, '/spec/tasks/overwrite-cflinuxfs2-rootfs-release')
   blobs_dir = File.join(test_path, 'cflinuxfs2-rootfs-release/blobs')
   blob_destination = File.join(blobs_dir, 'rootfs/cflinuxfs2-1.49.0.tar.gz')
 
   before(:context) do
-    ENV['PATH'] = "#{test_path}:#{ENV['PATH']}"
-    ENV['ROOTFS_RELEASE'] = 'cflinuxfs2'
+    ENV.store('PATH', "#{test_path}:#{old_path}")
+    ENV.store('ROOTFS_RELEASE', 'cflinuxfs2')
   end
 
   after(:context) do
-    ENV['PATH'] = old_path
-    ENV['ROOTFS_RELEASE'] =  old_rootfs_release
+    ENV.store('PATH', old_path)
+    ENV.store('ROOTFS_RELEASE',  old_rootfs_release)
   end
 
   RSpec.shared_examples 'creates_the_blob' do

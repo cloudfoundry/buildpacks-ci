@@ -11,14 +11,14 @@ require "#{buildpacks_ci_dir}/lib/notifiers/system-cve-email-preparer-and-github
 
 stacks_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'stacks'))
 
-if ENV['STACK'] == 'stacks'
+if ENV.fetch('STACK') == 'stacks'
   notifiers = [SystemCVEEmailPreparerAndGithubIssueNotifier, SystemCVETrackerNotifier, SystemCVESlackNotifier]
   cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'output-new-cves', 'new-cve-notifications'))
-elsif ENV['STACK'] == 'stacks-nc'
+elsif ENV.fetch('STACK') == 'stacks-nc'
   notifiers = []
   cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'output-new-cves', 'new-cves-stacks-nc'))
 else
-  raise "Unsupported stack: #{ENV['STACK']}"
+  raise "Unsupported stack: #{ENV.fetch('STACK')}"
 end
 
 cve_history = CVEHistory.new(cves_dir)

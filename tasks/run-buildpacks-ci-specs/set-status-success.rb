@@ -2,7 +2,7 @@
 require 'octokit'
 
 Octokit.configure do |c|
-  c.access_token = ENV['GITHUB_ACCESS_TOKEN']
+  c.access_token = ENV.fetch('GITHUB_ACCESS_TOKEN')
 end
 
 sha = `git rev-parse HEAD`.chomp
@@ -12,6 +12,6 @@ Octokit.create_status(
     'success',
     context: "buildpacks-ci/merge-to-master",
     description: "Buildpacks CI build success",
-    target_url: ENV['PIPELINE_URI']
+    target_url: ENV.fetch('PIPELINE_URI')
 )
 

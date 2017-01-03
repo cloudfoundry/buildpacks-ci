@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-if ENV['ROOTFS_TYPE'] == 'nc'
+if ENV.fetch('ROOTFS_TYPE') == 'nc'
   repo = 'pivotal-cf/stacks-nc'
 else
   repo = 'cloudfoundry/stacks'
