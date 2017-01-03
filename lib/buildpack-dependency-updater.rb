@@ -54,18 +54,6 @@ class BuildpackDependencyUpdater
     end
   end
 
-  private
-
-  def dependency_version_currently_in_manifest
-    dependencies = buildpack_manifest['dependencies']
-    dependencies.select do |dep|
-      dep['name'] == dependency &&
-      dep['version'] == dependency_version &&
-      dep['uri'] == uri &&
-      dep['md5'] == md5
-    end.count > 0
-  end
-
   def dependency_version
     @depencency_version ||= dependency_build_info['version']
   end
@@ -83,6 +71,18 @@ class BuildpackDependencyUpdater
     raise 'No host domain set via BUILDPACK_DEPENDENCIES_HOST_DOMAIN' unless buildpack_dependencies_host_domain
 
     @uri = "https://#{buildpack_dependencies_host_domain}/dependencies/#{dependency}/#{dependency_filename}"
+  end
+
+  private
+
+  def dependency_version_currently_in_manifest
+    dependencies = buildpack_manifest['dependencies']
+    dependencies.select do |dep|
+      dep['name'] == dependency &&
+      dep['version'] == dependency_version &&
+      dep['uri'] == uri &&
+      dep['md5'] == md5
+    end.count > 0
   end
 
   def dependency_build_info
