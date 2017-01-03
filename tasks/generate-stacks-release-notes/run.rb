@@ -9,11 +9,11 @@ require_relative '../../lib/git-client'
 previous_version = File.read('previous-stacks-release/version').strip
 new_version = File.read('version/number').strip
 
-if ENV['STACK'] == 'stacks'
+if ENV.fetch('STACK') == 'stacks'
   old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/stacks/#{previous_version}/cflinuxfs2/cflinuxfs2_receipt"
   cve_yaml_file = 'new-cves/new-cve-notifications/ubuntu14.04.yml'
   cves_dir = 'new-cve-notifications'
-elsif ENV['STACK'] == 'stacks-nc'
+elsif ENV.fetch('STACK') == 'stacks-nc'
   Octokit.configure do |c|
     c.login    = ENV.fetch('GITHUB_USERNAME')
     c.password = ENV.fetch('GITHUB_PASSWORD')
@@ -23,7 +23,7 @@ elsif ENV['STACK'] == 'stacks-nc'
   cve_yaml_file = 'new-cves/new-cves-stacks-nc/ubuntu14.04.yml'
   cves_dir = 'new-cves-stacks-nc'
 else
-  raise "Unsupported stack: #{ENV['STACK']}"
+  raise "Unsupported stack: #{ENV.fetch('STACK')}"
 end
 
 new_receipt_file = 'stacks/cflinuxfs2/cflinuxfs2_receipt'
@@ -49,7 +49,7 @@ File.write(cve_yaml_file, updated_cves.to_yaml)
 robots_cve_dir = File.join('new-cves', cves_dir)
 Dir.chdir(robots_cve_dir) do
   GitClient.add_file('ubuntu14.04.yml')
-  commit_message = "Updating CVEs for #{ENV['STACK']} release #{new_version}\n\n[ci skip]"
+  commit_message = "Updating CVEs for #{ENV.fetch('STACK')} release #{new_version}\n\n[ci skip]"
   GitClient.safe_commit(commit_message)
 end
 

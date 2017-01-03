@@ -5,7 +5,7 @@ class BuildpacksCIPipelineUpdateCommand
 
     buildpacks_configuration = BuildpacksCIConfiguration.new
 
-    pipeline_prefix = ENV['PIPELINE_PREFIX'] || ''
+    pipeline_prefix = ENV.fetch('PIPELINE_PREFIX', '')
 
     text_to_include = options[:include]
     text_to_exclude = options[:exclude]

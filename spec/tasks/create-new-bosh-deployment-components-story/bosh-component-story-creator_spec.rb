@@ -18,6 +18,13 @@ describe BoshComponentStoryCreator do
 
   before do
     @old_dir = Dir.pwd
+    @old_tracker_api_token = ENV.fetch('TRACKER_API_TOKEN', nil)
+    @old_tracker_project_id = ENV.fetch('TRACKER_PROJECT_ID', nil)
+    @old_tracker_requester_id = ENV.fetch('TRACKER_REQUESTER_ID', nil)
+
+    ENV.store('TRACKER_API_TOKEN', 'does not matter')
+    ENV.store('TRACKER_PROJECT_ID', 'does not matter')
+    ENV.store('TRACKER_REQUESTER_ID', 'does not matter')
 
     FileUtils.mkdir_p(File.join(root_dir, 'public-buildpacks-ci-robots', 'bosh-deployment-components'))
     File.write(concourse_known_versions_file, concourse_known_versions.to_yaml)
@@ -42,6 +49,10 @@ describe BoshComponentStoryCreator do
 
   after do
     Dir.chdir(@old_dir)
+    ENV.store('TRACKER_API_TOKEN', @old_tracker_api_token)
+    ENV.store('TRACKER_PROJECT_ID', @old_tracker_project_id)
+    ENV.store('TRACKER_REQUESTER_ID', @old_tracker_requester_id)
+
     FileUtils.rm_rf(root_dir)
   end
 

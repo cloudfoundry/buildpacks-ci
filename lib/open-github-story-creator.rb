@@ -111,9 +111,9 @@ class OpenGithubStoryCreator
 
   def self.create_tracker_story(story_name, story_description, story_tasks, point_value, labels)
     tracker_client = TrackerClient.new(
-      ENV['TRACKER_API_TOKEN'],
-      ENV['TRACKER_PROJECT_ID'],
-      ENV['TRACKER_REQUESTER_ID'].to_i
+      ENV.fetch('TRACKER_API_TOKEN'),
+      ENV.fetch('TRACKER_PROJECT_ID'),
+      ENV.fetch('TRACKER_REQUESTER_ID').to_i
     )
     tracker_client.post_to_tracker(name: story_name, description: story_description, tasks: story_tasks, point_value: point_value, labels: labels)
   end

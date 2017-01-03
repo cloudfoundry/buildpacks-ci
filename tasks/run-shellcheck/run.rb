@@ -2,7 +2,7 @@
 
 require_relative 'shell-checker'
 
-directory_to_check = ENV['DIRECTORY_TO_CHECK']
+directory_to_check = ENV.fetch('DIRECTORY_TO_CHECK')
 
 puts "Checking #{directory_to_check}"
 

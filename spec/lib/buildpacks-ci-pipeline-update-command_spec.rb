@@ -101,9 +101,9 @@ describe BuildpacksCIPipelineUpdateCommand do
       end
 
       context 'with PIPELINE_PREFIX set' do
-        before { ENV['PIPELINE_PREFIX'] = 'prefix-' }
+        before { ENV.store('PIPELINE_PREFIX', 'prefix-') }
 
-        after { ENV['PIPELINE_PREFIX'] = nil }
+        after { ENV.store('PIPELINE_PREFIX', nil) }
 
         it 'has a pipeline name' do
           expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(/pipeline=prefix-our-pipeline/)

@@ -2,11 +2,11 @@
 
 require_relative '../../lib/buildpack-release-story-creator'
 
-buildpack_name = ENV['BUILDPACK_NAME']
+buildpack_name = ENV.fetch('BUILDPACK_NAME')
 previous_buildpack_version = File.read('buildpack/VERSION')
-tracker_project_id = ENV['TRACKER_PROJECT_ID']
-tracker_requester_id = ENV['TRACKER_REQUESTER_ID'].to_i
-tracker_api_token = ENV['TRACKER_API_TOKEN']
+tracker_project_id = ENV.fetch('TRACKER_PROJECT_ID')
+tracker_requester_id = ENV.fetch('TRACKER_REQUESTER_ID').to_i
+tracker_api_token = ENV.fetch('TRACKER_API_TOKEN')
 
 buildpack_release_story_creator = BuildpackReleaseStoryCreator.new(
     buildpack_name:             buildpack_name,

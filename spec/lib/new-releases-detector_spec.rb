@@ -30,8 +30,28 @@ describe NewReleasesDetector do
     allow(File).to receive(:exist?).and_call_original
     allow(File).to receive(:write).and_call_original
 
-    allow(ENV).to receive(:fetch).with('GITHUB_USERNAME').and_return(github_username)
-    allow(ENV).to receive(:fetch).with('GITHUB_PASSWORD').and_return(github_password)
+    @old_github_username = ENV.fetch('GITHUB_USERNAME', nil)
+    @old_github_password = ENV.fetch('GITHUB_PASSWORD', nil)
+    @old_buildpacks_slack_webhook = ENV.fetch('BUILDPACKS_SLACK_WEBHOOK', nil)
+    @old_tracker_api_token = ENV.fetch('TRACKER_API_TOKEN', nil)
+    @old_tracker_requester_id = ENV.fetch('TRACKER_REQUESTER_ID', nil)
+    @old_capi_slack_webhook = ENV.fetch('CAPI_SLACK_WEBHOOK', nil)
+
+    ENV.store('GITHUB_USERNAME', github_username)
+    ENV.store('GITHUB_PASSWORD', github_password)
+    ENV.store('BUILDPACKS_SLACK_WEBHOOK', 'does not matter')
+    ENV.store('TRACKER_API_TOKEN', 'does not matter')
+    ENV.store('TRACKER_REQUESTER_ID', 'does not matter')
+    ENV.store('CAPI_SLACK_WEBHOOK', 'does not matter')
+  end
+
+  after do
+    ENV.store('GITHUB_USERNAME', @old_github_username)
+    ENV.store('GITHUB_PASSWORD', @old_github_password)
+    ENV.store('BUILDPACKS_SLACK_WEBHOOK', @old_buildpacks_slack_webhook)
+    ENV.store('TRACKER_API_TOKEN', @old_tracker_api_token)
+    ENV.store('TRACKER_REQUESTER_ID', @old_tracker_requester_id)
+    ENV.store('CAPI_SLACK_WEBHOOK', @old_capi_slack_webhook)
   end
 
   subject { described_class.new(new_releases_dir) }
@@ -296,11 +316,11 @@ describe NewReleasesDetector do
     let(:capi_slack_client)       { double(:capi_slack_client) }
 
     before do
-      @old_buildpacks_env = ENV['BUILDPACKS_SLACK_WEBHOOK']
-      @old_capi_env = ENV['CAPI_SLACK_CHANNEL']
+      @old_buildpacks_env = ENV.fetch('BUILDPACKS_SLACK_WEBHOOK', nil)
+      @old_capi_env = ENV.fetch('CAPI_SLACK_CHANNEL', nil)
 
-      ENV['BUILDPACKS_SLACK_CHANNEL'] = '#buildpacks'
-      ENV['CAPI_SLACK_CHANNEL'] = '#capi'
+      ENV.store('BUILDPACKS_SLACK_CHANNEL', '#buildpacks')
+      ENV.store('CAPI_SLACK_CHANNEL', '#capi')
 
       allow(SlackClient).to receive(:new).with(anything, '#buildpacks', anything).and_return(buildpacks_slack_client)
       allow(SlackClient).to receive(:new).with(anything, '#capi', anything).and_return(capi_slack_client)
@@ -309,8 +329,8 @@ describe NewReleasesDetector do
     end
 
     after do
-      ENV['BUILDPACKS_SLACK_CHANNEL'] = @old_buildpacks_env
-      ENV['CAPI_SLACK_CHANNEL'] = @old_capi_env
+      ENV.store('BUILDPACKS_SLACK_CHANNEL', @old_buildpacks_env)
+      ENV.store('CAPI_SLACK_CHANNEL', @old_capi_env)
     end
 
     context 'with new versions for a dependency' do
@@ -351,11 +371,11 @@ describe NewReleasesDetector do
     let(:buildpack_dependency_tasks) { [:snake, :lizard] }
 
     before do
-      @old_buildpacks_env = ENV['BUILDPACKS_TRACKER_PROJECT_ID']
-      @old_capi_env = ENV['CAPI_TRACKER_PROJECT_ID']
+      @old_buildpacks_env = ENV.fetch('BUILDPACKS_TRACKER_PROJECT_ID', nil)
+      @old_capi_env = ENV.fetch('CAPI_TRACKER_PROJECT_ID', nil)
 
-      ENV['BUILDPACKS_TRACKER_PROJECT_ID'] = 'buildpacks-project-id'
-      ENV['CAPI_TRACKER_PROJECT_ID'] = 'capi-project-id'
+      ENV.store('BUILDPACKS_TRACKER_PROJECT_ID', 'buildpacks-project-id')
+      ENV.store('CAPI_TRACKER_PROJECT_ID', 'capi-project-id')
 
       allow(TrackerClient).to receive(:new).with(anything, 'buildpacks-project-id', anything).and_return(buildpacks_tracker_client)
       allow(TrackerClient).to receive(:new).with(anything, 'capi-project-id', anything).and_return(capi_tracker_client)

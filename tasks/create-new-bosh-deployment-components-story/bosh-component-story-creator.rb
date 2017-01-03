@@ -77,10 +77,10 @@ class BoshComponentStoryCreator
                      Update the relevant BOSH deployment manifests in https://github.com/pivotal-cf/deployments-buildpacks
                      DESCRIPTION
 
-    tracker_client = TrackerApi::Client.new(token: ENV['TRACKER_API_TOKEN'])
-    buildpack_project = tracker_client.project(ENV['TRACKER_PROJECT_ID'])
+    tracker_client = TrackerApi::Client.new(token: ENV.fetch('TRACKER_API_TOKEN'))
+    buildpack_project = tracker_client.project(ENV.fetch('TRACKER_PROJECT_ID'))
 
-    requester_id = ENV['TRACKER_REQUESTER_ID']
+    requester_id = ENV.fetch('TRACKER_REQUESTER_ID')
 
     buildpack_project.create_story(name: name,
                                    description: description,

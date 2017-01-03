@@ -7,7 +7,7 @@ binary_builds_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'binary-
 
 require "#{buildpacks_ci_dir}/lib/dependency-build-enqueuer"
 
-dependency = ENV['DEPENDENCY']
+dependency = ENV.fetch('DEPENDENCY')
 
 build_enqueuer = DependencyBuildEnqueuer.new(dependency, new_releases_dir, binary_builds_dir)
 
