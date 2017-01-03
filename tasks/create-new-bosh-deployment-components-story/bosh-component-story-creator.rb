@@ -84,7 +84,8 @@ class BoshComponentStoryCreator
 
     buildpack_project.create_story(name: name,
                                    description: description,
-                                   story_type: 'chore')
+                                   story_type: 'chore',
+                                   requested_by_id: requester_id)
   end
 
   def update_versions_yml(component, version)
