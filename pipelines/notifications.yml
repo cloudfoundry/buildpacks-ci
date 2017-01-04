@@ -24,7 +24,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch:  {{buildpacks-ci-git-uri-public-branch}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
   - name: new-releases
     type: git
     source:
@@ -63,7 +63,7 @@ resources:
       to: ["cf-security@pivotal.io", "cf-buildpacks-eng@pivotal.io", "security@pivotal.io"]
 
 jobs:
-  - name: New Releases
+  - name: new-releases
     serial: true
     public: true
     plan:
@@ -89,7 +89,7 @@ jobs:
         params:
           repository: new-releases-artifacts
           rebase: true
-  - name: Monday Funday
+  - name: monday-funday
     serial: true
     public: true
     plan:
@@ -118,7 +118,37 @@ jobs:
           TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
           GITHUB_USERNAME: {{github-username}}
           GITHUB_PASSWORD: {{github-password}}
-  - name: New CVEs
+
+  - name: new-buildpack-cves
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: new-cves
+        - get: new-buildpack-cves
+        - get: check-interval
+          trigger: true
+      - task: check-for-new-buildpack-cves
+        file: buildpacks-ci/tasks/check-for-new-buildpack-cves/task.yml
+        params:
+          GITHUB_USERNAME: {{github-username}}
+          GITHUB_PASSWORD: {{github-password}}
+          SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+          SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+          EMAIL_PREPARER_DIR: ../cves-email
+      - put: new-buildpack-cves
+        params:
+          repository: output-new-buildpack-cves
+          rebase: true
+      - put: buildpack-related-new-cves-email
+        resource: cves-email
+        params:
+          subject: cves-email/subject-buildpack-ruby
+          body: cves-email/body-buildpack-ruby
+          headers: cves-email/headers-buildpack-ruby
+
+  - name: new-rootfs-cves
     serial: true
     public: true
     plan:
