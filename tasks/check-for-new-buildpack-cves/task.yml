@@ -1,0 +1,27 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: new-buildpack-cves
+  - name: buildpacks-ci
+outputs:
+  - name: cves-email
+  - name: output-new-buildpack-cves
+run:
+  path: bash
+  args:
+    - -c
+    - |
+      set -e
+      rsync -a new-buildpack-cves/ output-new-buildpack-cves
+      cd buildpacks-ci && bundle exec ./tasks/check-for-new-buildpack-cves/run.rb
+
+params:
+  SLACK_CHANNEL:
+  SLACK_WEBHOOK:
+  GITHUB_USERNAME:
+  GITHUB_PASSWORD:
+  EMAIL_PREPARER_DIR:
