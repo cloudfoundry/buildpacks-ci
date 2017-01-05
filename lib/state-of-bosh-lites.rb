@@ -2,6 +2,7 @@
 
 require 'json'
 require 'yaml'
+require 'pry'
 require_relative './git-client'
 
 class StateOfBoshLites
@@ -78,7 +79,10 @@ class StateOfBoshLites
             # colors green
             env_status = "\e[32munclaimed\e[0m"
           end
-          puts "#{env['name']}: \n  #{env_status} by job: #{env['status']['job']}"
+          pipeline = env['status']['job'].split()[0].split('/')[0]
+          job = env['status']['job'].split()[0].split('/')[1]
+          build_number = env['status']['job'].split()[2]
+          puts "#{env['name']}: \n  #{env_status} by job: #{env['status']['job']} \n https://buildpacks.ci.cf-app.com/teams/main/pipelines/#{pipeline}/jobs/#{job}/builds/#{build_number}"
         end
       end
     end

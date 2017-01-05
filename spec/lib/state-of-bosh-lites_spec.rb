@@ -22,7 +22,7 @@ describe StateOfBoshLites do
 
   describe '#get_states!' do
     context 'no resource pools dir' do
-      it 'raises an exeception' do
+      it 'raises an exception' do
         expect{ subject.get_states! }.to raise_exception('resource_pools_dir is required')
       end
     end
@@ -110,6 +110,48 @@ describe StateOfBoshLites do
 
       it 'is failing' do
         expect(subject.get_environment_status('lts-1.buildpacks-gcp.ci', 'gcp')).to be_nil
+      end
+    end
+  end
+
+  describe '#display_state' do
+    let(:state_of_environments) { [ {'name' => 'aws', 'status' => {'claimed' => 'unclaimed', 'job' => 'some-pipeline/some-job build some-build-number' } },
+        {'name' => 'gcp', 'status' => {'claimed' => 'claimed', 'job' => 'some-other-pipeline/some-other-job build some-other-build-number' } } ] }
+
+    before(:each) do
+      allow(subject).to receive(:state_of_environments).and_return(state_of_environments)
+    end
+
+    context 'output type is something-unacceptable' do
+      it 'returns the correct state + job in json' do
+        allow(STDOUT).to receive(:puts).with(anything)
+        expect{ subject.display_state('something-unacceptable') }.to raise_exception("Invalid output type: something-unacceptable")
+      end
+    end
+
+    context 'output type is json' do
+      it 'returns the correct state + job in json' do
+          allow(STDOUT).to receive(:puts).with(anything)
+          expect(STDOUT).to receive(:puts).with("[{\"name\":\"aws\",\"status\":{\"claimed\":\"unclaimed\",\"job\":\"some-pipeline/some-job build some-build-number\"}},{\"name\":\"gcp\",\"status\":{\"claimed\":\"claimed\",\"job\":\"some-other-pipeline/some-other-job build some-other-build-number\"}}]")
+          subject.display_state('json')
+      end
+    end
+
+    context 'output type is yaml' do
+      it 'returns the correct state + job in json' do
+          allow(STDOUT).to receive(:puts).with(anything)
+          expect(STDOUT).to receive(:puts).with("---\n- name: aws\n  status:\n    claimed: unclaimed\n    job: some-pipeline/some-job build some-build-number\n- name: gcp\n  status:\n    claimed: claimed\n    job: some-other-pipeline/some-other-job build some-other-build-number\n")
+          subject.display_state('yaml')
+      end
+    end
+
+    context 'output type is text' do
+      it 'returns the correct state + job in json' do
+          allow(STDOUT).to receive(:puts).with(anything)
+          expect(STDOUT).to receive(:puts).with("aws: \n  \e[31mclaimed\e[0m by job: some-pipeline/some-job build some-build-number \n https://buildpacks.ci.cf-app.com/teams/main/pipelines/some-pipeline/jobs/some-job/builds/some-build-number")
+          expect(STDOUT).to receive(:puts).with("gcp: \n  \e[31mclaimed\e[0m by job: some-other-pipeline/some-other-job build some-other-build-number \n https://buildpacks.ci.cf-app.com/teams/main/pipelines/some-other-pipeline/jobs/some-other-job/builds/some-other-build-number")
+
+          subject.display_state('text')
       end
     end
   end
