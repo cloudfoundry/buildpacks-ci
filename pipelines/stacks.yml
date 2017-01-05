@@ -93,7 +93,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: /rootfs/cflinuxfs2-(.*).tar.gz
+      regexp: cflinuxfs2-(.*).tar.gz
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
@@ -101,7 +101,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: /rootfs/cflinuxfs2_receipt-(.*)
+      regexp: cflinuxfs2_receipt-(.*)
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
@@ -268,10 +268,12 @@ jobs: ##########################################################################
           privileged: true
         - put: stack-s3
           params:
-            file: stacks-artifacts/cflinuxfs2-(.*).tar.gz
+            from: stacks-artifacts/cflinuxfs2-(.*).tar.gz
+            to: /rootfs/
         - put: receipt-s3
           params:
-            file: receipt-artifacts/cflinuxfs2_receipt-(.*)
+            from: receipt-artifacts/cflinuxfs2_receipt-(.*)
+            to: /rootfs/
         - put: version
           params: { file: version/number }
         - put: cflinuxfs2-rootfs-release-version
