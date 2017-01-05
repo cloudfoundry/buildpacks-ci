@@ -99,7 +99,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: cflinuxfs2_nc-(.*).tar.gz
+      regexp: /rootfs-nc/cflinuxfs2_nc-(.*).tar.gz
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
@@ -107,7 +107,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: cflinuxfs2_receipt_nc-(.*)
+      regexp: /rootfs-nc/cflinuxfs2_receipt_nc-(.*)
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
@@ -115,7 +115,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: cflinuxfs2-nc-rootfs-(.*).tgz
+      regexp: /cflinuxfs2-nc/cflinuxfs2-nc-rootfs-(.*).tgz
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
@@ -271,12 +271,10 @@ jobs: ##########################################################################
             STACKS_SUFFIX: _nc
         - put: stack-s3
           params:
-            from: stacks-artifacts/cflinuxfs2_nc-(.*).tar.gz
-            to: /rootfs-nc/
+            file: stacks-artifacts/cflinuxfs2_nc-(.*).tar.gz
         - put: receipt-s3
           params:
-            from: receipt-artifacts/cflinuxfs2_receipt_nc-(.*)
-            to: /rootfs-nc/
+            file: receipt-artifacts/cflinuxfs2_receipt_nc-(.*)
         - put: version
           params: { file: version/number }
         - put: cflinuxfs2-rootfs-release-version
@@ -682,8 +680,7 @@ jobs: ##########################################################################
             repository: release-artifacts
         - put: bosh-release-s3
           params:
-            from: release-artifacts/releases/cflinuxfs2-nc-rootfs/cflinuxfs2-nc-rootfs-(.*).tgz
-            to: /cflinuxfs2-nc/
+            file: release-artifacts/releases/cflinuxfs2-nc-rootfs/cflinuxfs2-nc-rootfs-(.*).tgz
         on_failure:
           put: failure-alert
           params:
