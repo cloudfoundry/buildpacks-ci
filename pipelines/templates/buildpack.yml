@@ -232,10 +232,12 @@ jobs: ##########################################################################
             RUBYGEM_MIRROR: {{rubygem-mirror}}
         - put: pivotal-buildpack
           params:
-            file: buildpack-artifacts/.*_buildpack-v(.*).zip
+            from: buildpack-artifacts/.*_buildpack-v(.*).zip
+            to: /buildpack-release-candidates/<%= language %>/
         - put: pivotal-buildpack-cached
           params:
-            file: buildpack-artifacts/.*_buildpack-cached-v(.*).zip
+            from: buildpack-artifacts/.*_buildpack-cached-v(.*).zip
+            to: /buildpack-release-candidates/<%= language %>/
         on_failure:
           put: failure-alert
           params:
