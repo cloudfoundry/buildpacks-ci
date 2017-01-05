@@ -2,7 +2,6 @@
 
 require 'json'
 require 'yaml'
-require 'pry'
 require_relative './git-client'
 
 class StateOfBoshLites
