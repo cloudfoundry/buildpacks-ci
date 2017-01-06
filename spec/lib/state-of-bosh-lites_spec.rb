@@ -148,8 +148,8 @@ describe StateOfBoshLites do
     context 'output type is text' do
       it 'returns the correct state + job in json' do
           allow(STDOUT).to receive(:puts).with(anything)
-          expect(STDOUT).to receive(:puts).with("aws: \n  \e[31mclaimed\e[0m by job: some-pipeline/some-job build some-build-number \n https://buildpacks.ci.cf-app.com/teams/main/pipelines/some-pipeline/jobs/some-job/builds/some-build-number")
-          expect(STDOUT).to receive(:puts).with("gcp: \n  \e[31mclaimed\e[0m by job: some-other-pipeline/some-other-job build some-other-build-number \n https://buildpacks.ci.cf-app.com/teams/main/pipelines/some-other-pipeline/jobs/some-other-job/builds/some-other-build-number")
+          expect(STDOUT).to receive(:puts).with("aws: \n  \e[31mclaimed\e[0m by job: some-pipeline/some-job build some-build-number \n\t https://buildpacks.ci.cf-app.com/teams/main/pipelines/some-pipeline/jobs/some-job/builds/some-build-number\n")
+          expect(STDOUT).to receive(:puts).with("gcp: \n  \e[31mclaimed\e[0m by job: some-other-pipeline/some-other-job build some-other-build-number \n\t https://buildpacks.ci.cf-app.com/teams/main/pipelines/some-other-pipeline/jobs/some-other-job/builds/some-other-build-number\n")
 
           subject.display_state('text')
       end
