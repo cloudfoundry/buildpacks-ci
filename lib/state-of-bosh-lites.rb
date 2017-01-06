@@ -81,7 +81,7 @@ class StateOfBoshLites
           pipeline = env['status']['job'].split()[0].split('/')[0]
           job = env['status']['job'].split()[0].split('/')[1]
           build_number = env['status']['job'].split()[2]
-          puts "#{env['name']}: \n  #{env_status} by job: #{env['status']['job']} \n https://buildpacks.ci.cf-app.com/teams/main/pipelines/#{pipeline}/jobs/#{job}/builds/#{build_number}"
+          puts "#{env['name']}: \n  #{env_status} by job: #{env['status']['job']} \n\t https://buildpacks.ci.cf-app.com/teams/main/pipelines/#{pipeline}/jobs/#{job}/builds/#{build_number}\n"
         end
       end
     end
