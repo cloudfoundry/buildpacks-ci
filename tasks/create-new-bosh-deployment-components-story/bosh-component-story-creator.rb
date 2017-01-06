@@ -80,7 +80,7 @@ class BoshComponentStoryCreator
     tracker_client = TrackerApi::Client.new(token: ENV.fetch('TRACKER_API_TOKEN'))
     buildpack_project = tracker_client.project(ENV.fetch('TRACKER_PROJECT_ID'))
 
-    requester_id = ENV.fetch('TRACKER_REQUESTER_ID')
+    requester_id = ENV.fetch('TRACKER_REQUESTER_ID').to_i
 
     buildpack_project.create_story(name: name,
                                    description: description,
