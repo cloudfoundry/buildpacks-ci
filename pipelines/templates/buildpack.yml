@@ -26,6 +26,7 @@ resources: #####################################################################
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
       ignore_paths:
+        - README.md
         - VERSION
         - CHANGELOG
         - LICENSE
