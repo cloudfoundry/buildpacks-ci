@@ -12,10 +12,10 @@ resources:
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
-  - name: runtime-ci
+  - name: cats-concourse-task
     type: git
     source:
-      uri: https://github.com/cloudfoundry/runtime-ci
+      uri: https://github.com/cloudfoundry/cats-concourse-task
       branch: master
   - name: bosh-lite
     type: git
@@ -250,7 +250,7 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: runtime-ci
+        - get: cats-concourse-task
         - get: cf-release
           resource: cf-release-develop
           params:
@@ -290,7 +290,7 @@ jobs:
             APPS_DOMAIN: cf-release.buildpacks.ci.cf-app.com
             DIEGO_DOCKER_ON: true
         - task: cats
-          file: runtime-ci/scripts/ci/run-cats/task.yml
+          file: cats-concourse-task/task.yml
           params:
             NODES: 4
             CONFIG_FILE_PATH: integration_config.json
