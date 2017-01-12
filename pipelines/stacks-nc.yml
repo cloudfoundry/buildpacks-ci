@@ -24,6 +24,12 @@ resources: #####################################################################
       expression: 0 5 * * 1
       location: {{current-timezone}}
 
+  - name: check-interval
+    type: cron
+    source:
+      expression: "0 * * * *"
+      location: {{current-timezone}}
+
   ## Git Repos ##
 
   - name: buildpacks-ci
@@ -242,6 +248,25 @@ jobs: ##########################################################################
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
           TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
 
+  - name: check-new-rootfs-cves
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: new-cves
+        - get: stacks
+        - get: check-interval
+          trigger: true
+      - task: check-for-new-rootfs-cves
+        file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
+        params:
+          STACK: stacks-nc
+      - put: new-cves
+        params:
+          repository: output-new-cves
+          rebase: true
+
   - name: build-rootfs
     serial: true
     serial_groups: [ stacks-nc ]
@@ -249,6 +274,7 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: new-cves
+          passed: [ check-new-rootfs-cves ]
           trigger: true
         - get: stacks
         - get: version
