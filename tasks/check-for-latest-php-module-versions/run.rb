@@ -3,7 +3,6 @@
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require "#{buildpacks_ci_dir}/lib/tracker-client"
-require 'json'
 
 name = 'Build and/or Include new releases: PHP Modules'
 description = <<-DESCRIPTION
@@ -19,12 +18,15 @@ description += "\n\n" unless description.empty?
 description += "URL | Latest Version\n"
 description += "--- | ---\n"
 
-Dir.glob('./*/input.json').each do |json_file|
+Dir.glob('./*').each do |resource_dir|
   begin
-    json = JSON.parse(File.read(json_file))
-    description += "#{json['source']['url']} | #{json['version']['version'].strip.gsub(/\s+/, ' -- ')}\n"
+    Dir.chdir(resource_dir) do
+      url = File.read('url').strip
+      version = File.read('version').strip
+      description += "#{url} | #{version}\n"
+    end
   rescue
-    description += "#{json_file} | ERROR\n"
+    puts "#{resource_dir} is not a new_version_resource"
   end
 end
 Dir.glob('./*/tag').each do |tag_file|
