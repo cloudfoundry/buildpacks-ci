@@ -104,10 +104,10 @@ resources: #####################################################################
       branch: develop
       private_key: {{cf-release-private-key}}
 
-  - name: runtime-ci
+  - name: cats-concourse-task
     type: git
     source:
-      uri: https://github.com/cloudfoundry/runtime-ci
+      uri: https://github.com/cloudfoundry/cats-concourse-task
       branch: master
 
   ## S3 Buckets ##
@@ -503,7 +503,7 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: runtime-ci
+        - get: cats-concourse-task
         - get: cf-release
           resource: cf-release-develop
           params:
@@ -534,7 +534,7 @@ jobs: ##########################################################################
             APPS_DOMAIN: stacks.buildpacks.ci.cf-app.com
             DIEGO_DOCKER_ON: true
         - task: cats
-          file: runtime-ci/scripts/ci/run-cats/task.yml
+          file: cats-concourse-task/task.yml
           params:
             NODES: 4
             CONFIG_FILE_PATH: integration_config.json
