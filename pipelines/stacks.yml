@@ -780,6 +780,8 @@ jobs: ##########################################################################
             SECRET_ACCESS_KEY: {{cloudfoundry-s3-secret-key}}
         - task: create-release-body
           file: buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes/task.yml
+          params:
+            ROOTFS_TYPE: stacks
         - task: create-release-commit
           file: buildpacks-ci/tasks/create-rootfs-bosh-release-commit/task.yml
         - put: cflinuxfs2-rootfs-release
