@@ -330,7 +330,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: buildpack-release
+  - name: ship-it
     serial: true
     public: true
     plan:
@@ -339,11 +339,9 @@ jobs: ##########################################################################
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
           passed: [ "specs-lts-master", "specs-edge-master"]
-          trigger: true
         - get: buildpack
           passed: [ "specs-lts-master", "specs-edge-master" ]
           resource: buildpack-master
-          trigger: true
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
       - put: buildpack-master
@@ -359,10 +357,12 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
-          passed: [ buildpack-release ]
+          passed: [ ship-it ]
+          trigger: true
         - get: buildpack
           resource: buildpack-master
-          passed: [ buildpack-release ]
+          passed: [ ship-it ]
+          trigger: true
         - get: buildpack-checksums
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
@@ -392,10 +392,12 @@ jobs: ##########################################################################
         - get: pivnet-buildpack-metadata
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
-          passed: [ buildpack-release ]
+          passed: [ ship-it ]
+          trigger: true
         - get: buildpack
           resource: buildpack-master
-          passed: [ buildpack-release ]
+          passed: [ ship-it ]
+          trigger: true
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
         privileged: true
@@ -414,6 +416,7 @@ jobs: ##########################################################################
     plan:
       - get: pivotal-buildpack-cached
         passed: [ write-pivnet-metadata ]
+        trigger: true
       - get: pivnet-buildpack-metadata
         passed: [ write-pivnet-metadata ]
         trigger: true
