@@ -42,6 +42,14 @@ resources: #####################################################################
       paths: [ new-cve-notifications/ubuntu14.04.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
+  - name: new-cves-out
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ new-cve-notifications/ubuntu14.04.yml ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+
   - name: deployments-buildpacks
     type: git
     source:
@@ -609,7 +617,12 @@ jobs: ##########################################################################
             body: release-body/body
             globs:
               - stack-s3/cflinuxfs2-*.tar.gz
-        - put: new-cves
+        - get: new-cves-out
+        - task: compare-cve-resources
+          file: buildpacks-ci/tasks/compare-cve-resources/task.yml
+          params:
+            FILE_PATH: "new-cve-notifications/ubuntu14.04.yml"
+        - put: new-cves-out
           params:
             repository: new-cves-artifacts
             rebase: true

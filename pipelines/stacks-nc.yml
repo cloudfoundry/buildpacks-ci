@@ -53,6 +53,14 @@ resources: #####################################################################
       paths: [ new-cves-stacks-nc/ubuntu14.04.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
+  - name: new-cves-out
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ new-cves-stacks-nc/ubuntu14.04.yml ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+
   - name: deployments-buildpacks
     type: git
     source:
@@ -623,7 +631,7 @@ jobs: ##########################################################################
             body: release-body/body
             globs:
               - stack-s3/cflinuxfs2_nc-*.tar.gz
-        - put: new-cves
+        - put: new-cves-out
           params:
             repository: new-cves-artifacts
             rebase: true
