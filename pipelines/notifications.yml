@@ -46,6 +46,11 @@ resources:
       branch: master
       paths: [ new-buildpack-cve-notifications/* ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
+  - name: stacks
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/stacks
+      branch: master
   - name: cves-email
     type: email-sender
     source:
@@ -145,3 +150,41 @@ jobs:
           body: cves-email/body-buildpack-ruby
           headers: cves-email/headers-buildpack-ruby
 
+  - name: new-rootfs-cves
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: new-cves
+        - get: stacks
+        - get: check-interval
+          trigger: true
+      - task: check-for-new-rootfs-cves
+        file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
+        params:
+          SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+          SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+          GITHUB_USERNAME: {{github-username}}
+          GITHUB_PASSWORD: {{github-password}}
+          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+          EMAIL_PREPARER_DIR: ../cves-email
+          STACK: stacks
+      - put: new-cves
+        params:
+          repository: output-new-cves
+          rebase: true
+      - put: stacks-related-new-cves-email
+        resource: cves-email
+        params:
+          subject: cves-email/subject-stacks-related
+          body: cves-email/body-stacks-related
+          headers: cves-email/headers-stacks-related
+      - put: stacks-unrelated-new-cves-email
+        resource: cves-email
+        params:
+          subject: cves-email/subject-stacks-unrelated
+          body: cves-email/body-stacks-unrelated
+          headers: cves-email/headers-stacks-unrelated
