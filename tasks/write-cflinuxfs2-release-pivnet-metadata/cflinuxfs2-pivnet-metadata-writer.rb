@@ -19,7 +19,7 @@ class Cflinuxfs2PivnetMetadataWriter
     metadata = {}
 
     metadata_release = {}
-    metadata_release['version'] = "Compilerless RootFS v#{stack_version}"
+    metadata_release['version'] = "Compilerless RootFS #{stack_version}"
     metadata_release['release_type'] = 'Beta Release'
     metadata_release['eula_slug'] = 'pivotal_beta_eula'
     metadata_release['availability'] = 'Selected User Groups Only'
