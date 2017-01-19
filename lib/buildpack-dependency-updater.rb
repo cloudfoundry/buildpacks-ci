@@ -12,6 +12,7 @@ require_relative 'buildpack-dependency-updater/dotnet.rb'
 require_relative 'buildpack-dependency-updater/dotnet-framework.rb'
 require_relative 'buildpack-dependency-updater/nginx.rb'
 require_relative 'buildpack-dependency-updater/node.rb'
+require_relative 'buildpack-dependency-updater/yarn.rb'
 
 class BuildpackDependencyUpdater
   attr_reader :dependency
