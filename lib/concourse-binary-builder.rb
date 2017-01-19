@@ -73,6 +73,9 @@ class ConcourseBinaryBuilder
     when 'composer'
       @source_url = "https://getcomposer.org/download/#{latest_build['version']}/composer.phar"
       download_non_build_dependency(source_url, 'composer', 'phar')
+    when 'yarn'
+      @source_url = "https://yarnpkg.com/downloads/#{latest_build['version']}/yarn-#{latest_build['version']}.tar.gz"
+      download_non_build_dependency(source_url, 'yarn', 'tar.gz')
     else
       binary_builder_output = run_binary_builder(flags)
       /- url:\s(.*)$/.match(binary_builder_output)
@@ -94,7 +97,7 @@ class ConcourseBinaryBuilder
     ext = case dependency
             when 'composer' then
               '*.phar'
-            when 'go', 'dotnet' then
+            when 'go', 'dotnet', 'yarn' then
               '*.tar.gz'
             else
               '-*.tgz'
@@ -186,7 +189,7 @@ class ConcourseBinaryBuilder
   end
 
   def is_automated
-    automated = %w(bower composer dotnet godep glide nginx node)
+    automated = %w(bower composer dotnet godep glide nginx node yarn)
     automated.include? dependency
   end
 
