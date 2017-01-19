@@ -202,15 +202,16 @@ class NewReleasesDetector
       godep:           -> { Octokit.tags('tools/godep').map(&:name).grep(/^v/) },
       httpd:           -> { Octokit.tags('apache/httpd').map(&:name).grep(/^2\./) },
       jruby:           -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
+      libunwind:       -> { Git.ls_remote('http://git.savannah.gnu.org/cgit/libunwind.git')['tags'].keys },
       maven:           -> { Octokit.tags('apache/maven').map(&:name).grep(/^maven/) },
+      miniconda:       -> { Nokogiri::HTML.parse(open('https://repo.continuum.io/miniconda/').read).css('table tr td a').map {|link| link['href']} },
       nginx:           -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release/) },
       node:            -> { JSON.parse(open('https://nodejs.org/dist/index.json').read).map{|d| d['version']} },
       openjdk:         -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys },
       php:             -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
       python:          -> { JSON.parse(open('https://hg.python.org/cpython/json-tags').read)['tags'].map { |t| t['tag'] } },
       ruby:            -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) },
-      libunwind:       -> { Git.ls_remote('http://git.savannah.gnu.org/cgit/libunwind.git')['tags'].keys },
-      miniconda:       -> { Nokogiri::HTML.parse(open('https://repo.continuum.io/miniconda/').read).css('table tr td a').map {|link| link['href']} }
+      yarn:            -> { Octokit.tags('yarnpkg/yarn').map(&:name).grep(/^v\d+\.\d+\.\d+$/) }
     }
   end
 
@@ -231,6 +232,8 @@ class NewReleasesDetector
       tags.map { |tag| tag.gsub(/v/,"")}
     when :nginx
       tags.map { |tag| tag.gsub('release-', '')}
+    when :yarn
+      tags.map { |tag| tag.gsub(/v/,"")}
     else
       tags
     end
