@@ -475,6 +475,8 @@ jobs:
           resource: <%= language %>-buildpack-bosh-release
         - get: cf-release
           resource: cf-release-develop
+          params:
+            submodules: none
         - get: buildpack-github-release
           resource: <%= language %>-buildpack-github-release
           <% case language; when /offline/ %>
