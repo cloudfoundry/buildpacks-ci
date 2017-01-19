@@ -219,6 +219,26 @@ describe ConcourseBinaryBuilder do
       it_behaves_like 'the resulting tar files are copied to the proper location'
     end
 
+    context 'the dependency is yarn' do
+      let(:dependency)         { 'yarn' }
+      let(:output_file)        { 'yarn-0.19.1.tar.gz' }
+      let(:verification_type)  { 'sha256' }
+      let(:verification_value) { 'aaabbbccc111222333' }
+      let(:source_url)         { 'https://yarnpkg.com/downloads/0.19.1/yarn-0.19.1.tar.gz' }
+      let(:version)            { '0.19.1' }
+
+      before do
+        expect(subject).to receive(:system).with("curl #{source_url} -o #{binary_builder_dir}/yarn-0.19.1.tar.gz") do
+          `touch #{binary_builder_dir}/yarn-#{version}.tar.gz`
+        end
+
+        subject.run
+      end
+
+      it_behaves_like 'a commit is made in builds-yaml-artifacts with the proper git message', 'automated'
+      it_behaves_like 'the resulting tar files are copied to the proper location'
+    end
+
     context 'the dependency is composer' do
       let(:dependency)    { 'composer' }
       let(:output_file)        { 'composer-1.2.0.phar' }
