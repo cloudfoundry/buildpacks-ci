@@ -163,6 +163,17 @@ describe DependencyBuildEnqueuer do
       it_behaves_like "non pre-release builds are triggered by <dependency>-new.yml", 'sha256'
     end
 
+    context "yarn" do
+      let(:dependency)          { "yarn" }
+      let(:new_versions)        { %w(0.26.7 0.28.9) }
+      let(:expected_version_1)  { "0.28.9" }
+      let(:expected_version_2)  { "0.26.7" }
+      let(:source_url_1)        { "https://yarnpkg.com/downloads/#{expected_version_1}/yarn-#{expected_version_1}.tar.gz" }
+      let(:source_url_2)        { "https://yarnpkg.com/downloads/#{expected_version_2}/yarn-#{expected_version_2}.tar.gz" }
+
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yml", 'sha256'
+    end
+
     context "dotnet" do
       let(:dependency)          { "dotnet" }
       let(:new_versions)        { %w(v1.0.0-preview2.0.1) }
