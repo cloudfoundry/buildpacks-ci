@@ -762,6 +762,8 @@ jobs: ##########################################################################
         - get: stack-s3
           passed: [ shipit ]
         - get: cf-release-develop
+          params:
+            submodules: none
         - get: buildpacks-ci
         - get: version
           trigger: true
