@@ -124,6 +124,7 @@ groups: ########################################################################
 
   - name: automated-builds
     jobs:
+    - binary-builder-specs
 <% %w(bower composer dotnet glide godep nginx node yarn).each do |auto_dep| %>
     - build-<%= auto_dep %>
 <% end %>
@@ -136,13 +137,10 @@ groups: ########################################################################
 
   - name: manual-builds
     jobs:
+    - binary-builder-specs
 <% %w(go php php7 ruby jruby bundler python httpd).each do |dependency| %>
     - build-<%= dependency %>
 <% end %>
-
-  - name: binary-builder-specs
-    jobs:
-      - binary-builder-specs
 
 jobs: #################################################################################################################
 
