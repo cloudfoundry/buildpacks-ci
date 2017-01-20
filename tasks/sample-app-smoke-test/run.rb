@@ -23,7 +23,7 @@ def push_app(buildpack_url, app_name)
       puts `./gradlew assemble`
     end
 
-    puts `cf push -b #{buildpack_url} --random-route`
+    puts `cf push -b #{buildpack_url} -t 180 --random-route`
   end
 end
 
