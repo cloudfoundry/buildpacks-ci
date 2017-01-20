@@ -168,8 +168,8 @@ describe DependencyBuildEnqueuer do
       let(:new_versions)        { %w(0.26.7 0.28.9) }
       let(:expected_version_1)  { "0.28.9" }
       let(:expected_version_2)  { "0.26.7" }
-      let(:source_url_1)        { "https://yarnpkg.com/downloads/#{expected_version_1}/yarn-#{expected_version_1}.tar.gz" }
-      let(:source_url_2)        { "https://yarnpkg.com/downloads/#{expected_version_2}/yarn-#{expected_version_2}.tar.gz" }
+      let(:source_url_1)        { "https://yarnpkg.com/downloads/#{expected_version_1}/yarn-v#{expected_version_1}.tar.gz" }
+      let(:source_url_2)        { "https://yarnpkg.com/downloads/#{expected_version_2}/yarn-v#{expected_version_2}.tar.gz" }
 
       it_behaves_like "non pre-release builds are triggered by <dependency>-new.yml", 'sha256'
     end

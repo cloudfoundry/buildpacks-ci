@@ -22,7 +22,7 @@ describe BuildpackDependencyUpdater do
         Build yarn - #{expected_version}
 
         ---
-        filename: yarn-#{expected_version}.tar.gz
+        filename: yarn-v#{expected_version}.tar.gz
         version: #{expected_version}
         md5: doesnotmatteratall
         sha256: alsoignoredforthistest
@@ -51,7 +51,7 @@ describe BuildpackDependencyUpdater do
               version: 0.1.2
               cf_stacks:
                 - cflinuxfs2
-              uri: https://buildpacks.cloudfoundry.org/dependencies/yarn/yarn-0.1.2.tgz
+              uri: https://buildpacks.cloudfoundry.org/dependencies/yarn/yarn-v0.1.2.tgz
               md5: doesnotmatteratall
         MANIFEST
         File.open(manifest_file, 'w') do |file|

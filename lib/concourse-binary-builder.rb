@@ -69,13 +69,16 @@ class ConcourseBinaryBuilder
     case dependency
     when 'bower'
       @source_url = "https://registry.npmjs.org/bower/-/bower-#{latest_build['version']}.tgz"
-      download_non_build_dependency(source_url, 'bower', 'tgz')
+      output_file = "bower-#{latest_build['version']}.tgz"
+      download_non_build_dependency(source_url, output_file)
     when 'composer'
       @source_url = "https://getcomposer.org/download/#{latest_build['version']}/composer.phar"
-      download_non_build_dependency(source_url, 'composer', 'phar')
+      output_file = "composer-#{latest_build['version']}.phar"
+      download_non_build_dependency(source_url, output_file)
     when 'yarn'
-      @source_url = "https://yarnpkg.com/downloads/#{latest_build['version']}/yarn-#{latest_build['version']}.tar.gz"
-      download_non_build_dependency(source_url, 'yarn', 'tar.gz')
+      @source_url = "https://yarnpkg.com/downloads/#{latest_build['version']}/yarn-v#{latest_build['version']}.tar.gz"
+      output_file = "yarn-v#{latest_build['version']}.tar.gz"
+      download_non_build_dependency(source_url, output_file)
     else
       binary_builder_output = run_binary_builder(flags)
       /- url:\s(.*)$/.match(binary_builder_output)
@@ -83,8 +86,8 @@ class ConcourseBinaryBuilder
     end
   end
 
-  def download_non_build_dependency(url, dependency_name, file_extension)
-      system("curl #{url} -o #{binary_builder_dir}/#{dependency_name}-#{latest_build['version']}.#{file_extension}") or raise "Could not download #{url}"
+  def download_non_build_dependency(url, output_file)
+      system("curl -L #{url} -o #{binary_builder_dir}/#{output_file}") or raise "Could not download #{url}"
   end
 
   def copy_binaries_to_output_directory

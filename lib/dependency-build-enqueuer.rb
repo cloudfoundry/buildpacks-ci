@@ -87,7 +87,7 @@ class DependencyBuildEnqueuer
       download_url = "https://github.com/Masterminds/glide/archive/#{version}.tar.gz"
       verifications << shasum_256_verification(download_url)
     when "yarn"
-      download_url = "https://yarnpkg.com/downloads/#{version}/yarn-#{version}.tar.gz"
+      download_url = "https://yarnpkg.com/downloads/#{version}/yarn-v#{version}.tar.gz"
       verifications << shasum_256_verification(download_url)
     when "nginx"
       gpg_signature_url = "http://nginx.org/download/nginx-#{version}.tar.gz.asc"
