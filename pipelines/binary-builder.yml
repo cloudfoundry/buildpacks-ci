@@ -31,7 +31,7 @@ resources: #####################################################################
       paths: [ binary-builds/* ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
-<% dep_build_names = %w(bower go bundler composer dotnet glide godep httpd jruby php php7 python node nginx ruby) %>
+<% dep_build_names = %w(bower go bundler composer dotnet glide godep httpd jruby php php7 python node nginx ruby yarn) %>
 <% dep_build_names.each do |dep| %>
   - name: <%= dep %>-builds
     type: git
@@ -53,7 +53,7 @@ resources: #####################################################################
       private_key: {{public-buildpacks-ci-robots-private-key}}
 <% end %>
 
-<% %w(bower composer dotnet glide godep nginx node).each do |auto_dep| %>
+<% %w(bower composer dotnet glide godep nginx node yarn).each do |auto_dep| %>
   - name: <%= auto_dep %>-builds-in
     type: git
     source:
@@ -63,7 +63,7 @@ resources: #####################################################################
       private_key: {{public-buildpacks-ci-robots-private-key}}
 <% end %>
 
-<% %w(bower composer dotnet glide godep nginx node).each do |auto_new| %>
+<% %w(bower composer dotnet glide godep nginx node yarn).each do |auto_new| %>
   - name: <%= auto_new %>-new-releases
     type: git
     source:
@@ -118,16 +118,16 @@ groups: ########################################################################
 
   - name: enqueue-automated-builds
     jobs:
-<% %w(bower composer dotnet glide godep nginx node).each do |auto_dep| %>
+<% %w(bower composer dotnet glide godep nginx node yarn).each do |auto_dep| %>
     - trigger-<%= auto_dep %>-build
 <% end %>
 
   - name: automated-builds
     jobs:
-<% %w(bower composer dotnet glide godep nginx node).each do |auto_dep| %>
+<% %w(bower composer dotnet glide godep nginx node yarn).each do |auto_dep| %>
     - build-<%= auto_dep %>
 <% end %>
-<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework'] }.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework'] }.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
     - update-<%= dependency %>-in-<%= buildpack %>-buildpack
   <% end %>
@@ -242,7 +242,7 @@ jobs: ##########################################################################
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 
-<% %w(bower godep dotnet composer glide nginx node).each do |dependency| %>
+<% %w(bower godep dotnet composer glide nginx node yarn).each do |dependency| %>
   - name: trigger-<%= dependency %>-build
     serial: true
     public: true
@@ -314,7 +314,7 @@ jobs: ##########################################################################
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 
-<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework']}.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework']}.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
   - name: update-<%= dependency %>-in-<%= buildpack %>-buildpack
     serial: true

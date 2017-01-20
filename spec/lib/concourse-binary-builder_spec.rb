@@ -208,7 +208,7 @@ describe ConcourseBinaryBuilder do
       let(:version)            { '1.77.90' }
 
       before do
-        expect(subject).to receive(:system).with("curl #{source_url} -o #{binary_builder_dir}/bower-1.77.90.tgz") do
+        expect(subject).to receive(:system).with("curl -L #{source_url} -o #{binary_builder_dir}/bower-1.77.90.tgz") do
           `touch #{binary_builder_dir}/bower-#{version}.tgz`
         end
 
@@ -224,11 +224,11 @@ describe ConcourseBinaryBuilder do
       let(:output_file)        { 'yarn-0.19.1.tar.gz' }
       let(:verification_type)  { 'sha256' }
       let(:verification_value) { 'aaabbbccc111222333' }
-      let(:source_url)         { 'https://yarnpkg.com/downloads/0.19.1/yarn-0.19.1.tar.gz' }
+      let(:source_url)         { 'https://yarnpkg.com/downloads/0.19.1/yarn-v0.19.1.tar.gz' }
       let(:version)            { '0.19.1' }
 
       before do
-        expect(subject).to receive(:system).with("curl #{source_url} -o #{binary_builder_dir}/yarn-0.19.1.tar.gz") do
+        expect(subject).to receive(:system).with("curl -L #{source_url} -o #{binary_builder_dir}/yarn-v0.19.1.tar.gz") do
           `touch #{binary_builder_dir}/yarn-#{version}.tar.gz`
         end
 
@@ -248,7 +248,7 @@ describe ConcourseBinaryBuilder do
       let(:version)       { '1.2.0' }
 
       before do
-        expect(subject).to receive(:system).with("curl #{source_url} -o #{binary_builder_dir}/composer-1.2.0.phar") do
+        expect(subject).to receive(:system).with("curl -L #{source_url} -o #{binary_builder_dir}/composer-1.2.0.phar") do
           `touch #{binary_builder_dir}/composer-#{version}.phar`
         end
 
