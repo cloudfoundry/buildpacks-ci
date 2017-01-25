@@ -155,6 +155,38 @@ describe ConcourseBinaryBuilder do
       it_behaves_like 'the resulting tar files are copied to the proper location'
     end
 
+    context 'the dependency is php' do
+      let(:dependency)  { 'php' }
+      let(:output_file) { 'php-5.6.30-linux-x64-1485211834.tgz' }
+      let(:verification_type) { 'sha256' }
+      let(:verification_value) { 'aaaaaabbbbbccccc' }
+      let(:source_url) { "https://php.net/distributions/php-5.6.30.tar.gz" }
+      let(:version) { '5.6.30' }
+
+      let(:flags) { "--name=#{dependency} --version=\"#{version}\" --#{verification_type}=\"#{verification_value}\" --php-extensions-file=#{File.join(builds_dir, 'binary-builds', 'php-extensions.yml')}" }
+
+      before { subject.run }
+
+      it_behaves_like 'a commit is made in builds-yaml-artifacts with the proper git message', 'not automated'
+      it_behaves_like 'the resulting tar files are copied to the proper location'
+    end
+
+    context 'the dependency is php7' do
+      let(:dependency)  { 'php7' }
+      let(:output_file) { 'php7-7.1.10-linux-x64-1485555555.tgz' }
+      let(:verification_type) { 'sha256' }
+      let(:verification_value) { 'cccccccaaaaaabbbbb' }
+      let(:source_url) { "https://php.net/distributions/php-7.1.10.tar.gz" }
+      let(:version) { '7.1.10' }
+
+      let(:flags) { "--name=#{dependency} --version=\"#{version}\" --#{verification_type}=\"#{verification_value}\" --php-extensions-file=#{File.join(builds_dir, 'binary-builds', 'php7-extensions.yml')}" }
+
+      before { subject.run }
+
+      it_behaves_like 'a commit is made in builds-yaml-artifacts with the proper git message', 'not automated'
+      it_behaves_like 'the resulting tar files are copied to the proper location'
+    end
+
     context 'the dependency is glide' do
       let(:dependency) { 'glide' }
       let(:output_file) { 'glide-v0.11.1-linux-x64.tgz' }

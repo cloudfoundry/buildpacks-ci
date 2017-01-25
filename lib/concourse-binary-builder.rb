@@ -63,6 +63,10 @@ class ConcourseBinaryBuilder
       end
       @flags << %( --#{key}="#{value}")
     end
+
+    if %w(php php7).include? dependency
+      @flags << " --php-extensions-file=#{File.join(builds_dir, 'binary-builds', "#{dependency}-extensions.yml")}"
+    end
   end
 
   def build_dependency
