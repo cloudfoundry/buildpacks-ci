@@ -20,6 +20,7 @@ describe NewReleasesDetector do
     allow_any_instance_of(described_class).to receive(:warn) {}
     allow(Octokit).to receive(:configure)
     allow(Octokit).to receive(:tags).and_return([])
+    allow(Octokit).to receive(:releases).and_return([])
     allow(Git).to receive(:ls_remote).with('http://git.savannah.gnu.org/cgit/libunwind.git').and_return({'tags' => {}})
     allow_any_instance_of(described_class).to receive(:open).with(/python/).and_return(double(read: { 'tags' => [] }.to_json))
     allow_any_instance_of(described_class).to receive(:open).with(/openjdk/).and_return(double(read: {}.to_yaml))
