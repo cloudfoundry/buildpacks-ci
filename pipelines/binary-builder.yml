@@ -180,6 +180,7 @@ jobs: ##########################################################################
               ORACLE_LIBS_FILENAME: {{oracle-client-libs-filename}}
             <% end %>
             privileged: true
+            attempts: 5
           <% end %>
         on_failure:
           put: failure-alert
