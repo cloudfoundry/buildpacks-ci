@@ -195,11 +195,11 @@ class NewReleasesDetector
     @get_tags_functions = {
       bundler:         -> { Octokit.tags('bundler/bundler').map(&:name).grep(/^v/) },
       bower:           -> { JSON.parse(open('https://registry.npmjs.org/bower').read)['versions'].keys },
-      composer:        -> { Octokit.tags('composer/composer').map(&:name) },
-      dotnet:          -> { Octokit.tags('dotnet/cli').map(&:name).grep(/^v/) },
-      glide:           -> { Octokit.tags('Masterminds/glide').map(&:name).grep(/^v/) },
+      composer:        -> { Octokit.releases('composer/composer').map(&:tag_name) },
+      dotnet:          -> { Octokit.releases('dotnet/cli').map(&:tag_name) },
+      glide:           -> { Octokit.releases('Masterminds/glide').map(&:tag_name) },
       go:              -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
-      godep:           -> { Octokit.tags('tools/godep').map(&:name).grep(/^v/) },
+      godep:           -> { Octokit.releases('tools/godep').map(&:tag_name) },
       httpd:           -> { Octokit.tags('apache/httpd').map(&:name).grep(/^2\./) },
       jruby:           -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
       libunwind:       -> { Git.ls_remote('http://git.savannah.gnu.org/cgit/libunwind.git')['tags'].keys },
@@ -211,7 +211,7 @@ class NewReleasesDetector
       php:             -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
       python:          -> { JSON.parse(open('https://hg.python.org/cpython/json-tags').read)['tags'].map { |t| t['tag'] } },
       ruby:            -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) },
-      yarn:            -> { Octokit.tags('yarnpkg/yarn').map(&:name).grep(/^v\d+\.\d+\.\d+$/) }
+      yarn:            -> { Octokit.releases('yarnpkg/yarn').map(&:tag_name) },
     }
   end
 
