@@ -112,6 +112,7 @@ jobs: ##########################################################################
       resource: cf-sample-app-nodejs
     - get: buildpacks-ci
     - task: cf-sample-app-nodejs-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/nodejs-buildpack#develop
@@ -134,6 +135,7 @@ jobs: ##########################################################################
       resource: cf-sample-app-spring
     - get: buildpacks-ci
     - task: cf-sample-app-spring-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/java-buildpack
@@ -156,6 +158,7 @@ jobs: ##########################################################################
       resource: cf-sample-app-rails
     - get: buildpacks-ci
     - task: cf-sample-app-rails-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/ruby-buildpack#develop
@@ -178,6 +181,7 @@ jobs: ##########################################################################
       resource: pong-matcher-rails
     - get: buildpacks-ci
     - task: pong-matcher-rails-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/ruby-buildpack#develop
@@ -200,6 +204,7 @@ jobs: ##########################################################################
       resource: pong-matcher-sails
     - get: buildpacks-ci
     - task: pong-matcher-sails-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/nodejs-buildpack#develop
@@ -222,6 +227,7 @@ jobs: ##########################################################################
       resource: pong-matcher-slim
     - get: buildpacks-ci
     - task: pong-matcher-slim-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
@@ -244,6 +250,7 @@ jobs: ##########################################################################
       resource: pong-matcher-django
     - get: buildpacks-ci
     - task: pong-matcher-django-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/python-buildpack#develop
@@ -266,6 +273,7 @@ jobs: ##########################################################################
       resource: pong-matcher-go
     - get: buildpacks-ci
     - task: pong-matcher-go-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/go-buildpack#develop
@@ -288,6 +296,7 @@ jobs: ##########################################################################
       resource: spring-music
     - get: buildpacks-ci
     - task: spring-music-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/java-buildpack
@@ -310,6 +319,7 @@ jobs: ##########################################################################
       resource: cf-ex-phpmyadmin
     - get: buildpacks-ci
     - task: cf-ex-phpmyadmin-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
@@ -332,6 +342,7 @@ jobs: ##########################################################################
       resource: cf-ex-drupal
     - get: buildpacks-ci
     - task: cf-ex-drupal-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
@@ -354,6 +365,7 @@ jobs: ##########################################################################
       resource: cf-ex-code-igniter
     - get: buildpacks-ci
     - task: cf-ex-code-igniter-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
@@ -376,6 +388,7 @@ jobs: ##########################################################################
       resource: cf-ex-phppgadmin
     - get: buildpacks-ci
     - task: cf-ex-phppgadmin-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
@@ -398,6 +411,7 @@ jobs: ##########################################################################
       resource: cf-ex-php-info
     - get: buildpacks-ci
     - task: cf-ex-php-info-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
@@ -420,6 +434,7 @@ jobs: ##########################################################################
       resource: cf-ex-pgbouncer
     - get: buildpacks-ci
     - task: cf-ex-pgbouncer-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
@@ -442,6 +457,7 @@ jobs: ##########################################################################
       resource: cf-ex-composer
     - get: buildpacks-ci
     - task: cf-ex-composer-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
@@ -464,6 +480,7 @@ jobs: ##########################################################################
       resource: cf-ex-phalcon
     - get: buildpacks-ci
     - task: cf-ex-phalcon-smoke-test
+      attempts: 3
       file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop

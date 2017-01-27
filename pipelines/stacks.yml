@@ -361,9 +361,12 @@ jobs: ##########################################################################
           - get: bosh-lite
           - get: cf-release
             resource: cf-release-develop
+            attempts: 3
           - get: diego-release
           - get: cflinuxfs2-rootfs-release
+            attempts: 3
           - get: lite-stemcell
+            attempts: 3
           - get: new-cves
             passed: [ recreate-bosh-lite ]
           - get: stack-s3
@@ -378,7 +381,9 @@ jobs: ##########################################################################
           - get: stacks
             passed: [ recreate-bosh-lite ]
           - get: garden-runc-bosh-release
+            attempts: 3
           - get: diego-bosh-release
+            attempts: 3
         - aggregate:
           - task: generate-rootfs-smoke-test-manifest
             file: buildpacks-ci/tasks/make-rootfs-smoke-test-manifest/task.yml
