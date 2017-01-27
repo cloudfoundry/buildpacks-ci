@@ -26,20 +26,11 @@ class S3DependencyUploader
   end
 
   def file_name
-    if @dependency == "composer" then
-      "composer.phar"
-    else
-      File.basename(file_to_upload)
-    end
+    File.basename(file_to_upload)
   end
 
   def aws_s3_dir
-    if @dependency == "composer" then
-      version = File.basename(file_to_upload).gsub('composer-','').gsub('.phar','')
-      aws_url =  "s3://#{@bucket_name}/dependencies/composer/#{version}"
-    else
-      aws_url =  "s3://#{@bucket_name}/dependencies/#{@dependency}"
-    end
+    "s3://#{@bucket_name}/dependencies/#{@dependency}"
   end
 
   def file_on_s3?

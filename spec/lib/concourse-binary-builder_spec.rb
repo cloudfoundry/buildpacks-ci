@@ -9,23 +9,27 @@ require 'fileutils'
 describe ConcourseBinaryBuilder do
   context('binary builder is run') do
 
-    let(:platform) { 'x86_64' }
-    let(:os_name)  { 'GNU/Linux' }
-    let(:git_ssh_key) { 'mock-git-ssh-key' }
-    let(:task_root_dir) { Dir.mktmpdir }
-    let(:binary_builder_dir) { File.join(task_root_dir, 'binary-builder') }
+    let(:platform)                  { 'x86_64' }
+    let(:os_name)                   { 'GNU/Linux' }
+    let(:git_ssh_key)               { 'mock-git-ssh-key' }
+    let(:task_root_dir)             { Dir.mktmpdir }
+    let(:binary_builder_dir)        { File.join(task_root_dir, 'binary-builder') }
     let(:builds_yaml_artifacts_dir) { File.join(task_root_dir, 'builds-yaml-artifacts') }
-    let(:binary_artifacts_dir) {File.join(task_root_dir, 'binary-builder-artifacts')}
+    let(:binary_artifacts_dir)      { File.join(task_root_dir, 'binary-builder-artifacts')}
 
-    let(:built_dir) { File.join(task_root_dir, 'built-yaml') }
-    let(:built_yaml_contents) { {dependency => []}.to_yaml }
+    let(:built_dir)                 { File.join(task_root_dir, 'built-yaml') }
+    let(:built_yaml_contents)       { {dependency => []}.to_yaml }
 
-    let(:builds_dir) { File.join(task_root_dir, 'builds-yaml') }
+    let(:builds_dir)                { File.join(task_root_dir, 'builds-yaml') }
     let(:builds_yaml_contents) do
       yaml_hash = {}
       yaml_hash[dependency] = [{'version' => version, verification_type => verification_value}]
       yaml_hash.to_yaml
     end
+    let(:output_file_contents)       { (0...8).map { (65 + rand(26)).chr }.join }
+    let(:output_file_md5)            { Digest::MD5.hexdigest(output_file_contents) }
+    let(:output_file_md5_short)      { output_file_md5[0..7] }
+    let(:output_file_sha256)         { Digest::SHA256.hexdigest(output_file_contents) }
 
     let(:flags) { "--name=#{dependency} --version=\"#{version}\" --#{verification_type}=\"#{verification_value}\"" }
 
@@ -53,7 +57,7 @@ describe ConcourseBinaryBuilder do
 
       allow(subject).to receive(:run_binary_builder).with(flags) do |flags|
         Dir.chdir(binary_builder_dir) do
-          `touch #{output_file}`
+          File.write(output_file, output_file_contents)
         end
 
         "- url: #{source_url}"
@@ -69,17 +73,14 @@ describe ConcourseBinaryBuilder do
     end
 
     shared_examples_for 'a commit is made in builds-yaml-artifacts with the proper git message' do |automation|
-      let(:md5sum) { md5sum = Digest::MD5.file(File.join(binary_builder_dir, output_file)).hexdigest }
-      let(:shasum) { shasum = Digest::SHA256.file(File.join(binary_builder_dir, output_file)).hexdigest }
-
       let(:commit_msg) do
         git_msg = "Build #{dependency} - #{version}\n\n"
 
         git_yaml = {
-          "filename" => output_file,
+          "filename" => output_file_with_md5,
           'version' => version,
-          'md5' => md5sum,
-          'sha256' => shasum,
+          'md5' => output_file_md5,
+          'sha256' => output_file_sha256,
           'source url' => source_url,
           "source #{verification_type}" => verification_value
         }
@@ -123,17 +124,18 @@ describe ConcourseBinaryBuilder do
 
     shared_examples_for 'the resulting tar files are copied to the proper location' do
       it 'copies the built binaries' do
-        expect(File.exist? "#{binary_artifacts_dir}/#{output_file}").to eq true
+        expect(File.exist? "#{binary_artifacts_dir}/#{output_file_with_md5}").to eq true
       end
     end
 
     context 'the dependency is go' do
-      let(:dependency) { 'go' }
-      let(:output_file) { 'go1.6.3.linux-amd64.tar.gz' }
-      let(:verification_type) { 'sha256' }
-      let(:verification_value) { '6326aeed5f86cf18f16d6dc831405614f855e2d416a91fd3fdc334f772345b00' }
-      let(:source_url) { 'https://storage.googleapis.com/golang/go1.6.3.src.tar.gz' }
-      let(:version) { '1.6.3' }
+      let(:dependency)           { 'go' }
+      let(:output_file)          { 'go1.6.3.linux-amd64.tar.gz' }
+      let(:output_file_with_md5) { "go1.6.3.linux-amd64-#{output_file_md5_short}.tar.gz" }
+      let(:verification_type)    { 'sha256' }
+      let(:verification_value)   { '6326aeed5f86cf18f16d6dc831405614f855e2d416a91fd3fdc334f772345b00' }
+      let(:source_url)           { 'https://storage.googleapis.com/golang/go1.6.3.src.tar.gz' }
+      let(:version)              { '1.6.3' }
 
       before { subject.run }
 
@@ -142,12 +144,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is python' do
-      let(:dependency) { 'python' }
-      let(:output_file) { 'python-2.7.12-linux-x64.tgz' }
-      let(:verification_type) { 'sha256' }
-      let(:verification_value) { 'f036b03f2ffd401742bb053f41c25dbe4491e52fc06e49b0dd0e9c1ae5a7baf7' }
-      let(:source_url) { 'https://www.python.org/ftp/python/2.7.12/Python-2.7.12.tgz' }
-      let(:version) { '2.7.12' }
+      let(:dependency)            { 'python' }
+      let(:output_file)           { 'python-2.7.12-linux-x64.tgz' }
+      let(:output_file_with_md5)  { "python-2.7.12-linux-x64-#{output_file_md5_short}.tgz" }
+      let(:verification_type)     { 'sha256' }
+      let(:verification_value)    { 'f036b03f2ffd401742bb053f41c25dbe4491e52fc06e49b0dd0e9c1ae5a7baf7' }
+      let(:source_url)            { 'https://www.python.org/ftp/python/2.7.12/Python-2.7.12.tgz' }
+      let(:version)               { '2.7.12' }
 
       before { subject.run }
 
@@ -156,13 +159,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is php' do
-      let(:dependency)  { 'php' }
-      let(:output_file) { 'php-5.6.30-linux-x64-1485211834.tgz' }
-      let(:verification_type) { 'sha256' }
-      let(:verification_value) { 'aaaaaabbbbbccccc' }
-      let(:source_url) { "https://php.net/distributions/php-5.6.30.tar.gz" }
-      let(:version) { '5.6.30' }
-
+      let(:dependency)            { 'php' }
+      let(:output_file)           { 'php-5.6.30-linux-x64.tgz' }
+      let(:output_file_with_md5)  { "php-5.6.30-linux-x64-#{output_file_md5_short}.tgz" }
+      let(:verification_type)     { 'sha256' }
+      let(:verification_value)    { 'aaaaaabbbbbccccc' }
+      let(:source_url)            { "https://php.net/distributions/php-5.6.30.tar.gz" }
+      let(:version)               { '5.6.30' }
       let(:flags) { "--name=#{dependency} --version=\"#{version}\" --#{verification_type}=\"#{verification_value}\" --php-extensions-file=#{File.join(builds_dir, 'binary-builds', 'php-extensions.yml')}" }
 
       before { subject.run }
@@ -172,13 +175,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is php7' do
-      let(:dependency)  { 'php7' }
-      let(:output_file) { 'php7-7.1.10-linux-x64-1485555555.tgz' }
-      let(:verification_type) { 'sha256' }
-      let(:verification_value) { 'cccccccaaaaaabbbbb' }
-      let(:source_url) { "https://php.net/distributions/php-7.1.10.tar.gz" }
-      let(:version) { '7.1.10' }
-
+      let(:dependency)            { 'php7' }
+      let(:output_file)           { 'php7-7.1.10-linux-x64.tgz' }
+      let(:output_file_with_md5)  { "php7-7.1.10-linux-x64-#{output_file_md5_short}.tgz" }
+      let(:verification_type)     { 'sha256' }
+      let(:verification_value)    { 'cccccccaaaaaabbbbb' }
+      let(:source_url)            { "https://php.net/distributions/php-7.1.10.tar.gz" }
+      let(:version)               { '7.1.10' }
       let(:flags) { "--name=#{dependency} --version=\"#{version}\" --#{verification_type}=\"#{verification_value}\" --php-extensions-file=#{File.join(builds_dir, 'binary-builds', 'php7-extensions.yml')}" }
 
       before { subject.run }
@@ -188,12 +191,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is glide' do
-      let(:dependency) { 'glide' }
-      let(:output_file) { 'glide-v0.11.1-linux-x64.tgz' }
-      let(:verification_type) { 'sha256' }
-      let(:verification_value) { '3c4958d1ab9446e3d7b2dc280cd43b84c588d50eb692487bcda950d02b9acc4c' }
-      let(:source_url) { 'https://github.com/Masterminds/glide/archive/v0.11.1.tar.gz' }
-      let(:version) { 'v0.11.1' }
+      let(:dependency)            { 'glide' }
+      let(:output_file)           { 'glide-v0.11.1-linux-x64.tgz' }
+      let(:output_file_with_md5)  { "glide-v0.11.1-linux-x64-#{output_file_md5_short}.tgz" }
+      let(:verification_type)     { 'sha256' }
+      let(:verification_value)    { '3c4958d1ab9446e3d7b2dc280cd43b84c588d50eb692487bcda950d02b9acc4c' }
+      let(:source_url)            { 'https://github.com/Masterminds/glide/archive/v0.11.1.tar.gz' }
+      let(:version)               { 'v0.11.1' }
 
       before { subject.run }
 
@@ -203,27 +207,74 @@ describe ConcourseBinaryBuilder do
 
 
     context 'the dependency is node' do
-      let(:dependency) { 'node' }
-      let(:output_file) { 'node-4.4.7-linux-x64.tgz' }
-      let(:verification_type) { 'sha256' }
-      let(:verification_value) { 'cbe1c6e421969dd5639d0fbaa6d3c1f56c0463b87efe75be8594638da4d8fc4f' }
-      let(:source_url) { 'https://nodejs.org/dist/v4.4.7/node-v4.4.7.tar.gz' }
-      let(:version) { '4.4.7' }
-
+      let(:dependency)            { 'node' }
+      let(:output_file)           { 'node-4.4.7-linux-x64.tgz' }
+      let(:output_file_with_md5)  { "node-4.4.7-linux-x64-#{output_file_md5_short}.tgz" }
+      let(:verification_type)     { 'sha256' }
+      let(:verification_value)    { 'cbe1c6e421969dd5639d0fbaa6d3c1f56c0463b87efe75be8594638da4d8fc4f' }
+      let(:source_url)            { 'https://nodejs.org/dist/v4.4.7/node-v4.4.7.tar.gz' }
+      let(:version)               { '4.4.7' }
 
       before { subject.run }
 
       it_behaves_like 'a commit is made in builds-yaml-artifacts with the proper git message', 'automated'
       it_behaves_like 'the resulting tar files are copied to the proper location'
+
+      context 'dependency has already been built' do
+        context 'with the same version and the same output file sha256' do
+          let(:built_yaml_contents) do
+            {'node' => [
+              {'version'   => '4.4.7',
+               'sha256'    => output_file_sha256,
+               'timestamp' => '2016-07-18 15:31:35 UTC'}
+            ]}.to_yaml
+          end
+
+          it 'has not changed the <dep>-built.yml file' do
+            file_yaml_contents = YAML.load_file(File.join(built_dir, 'binary-built-output', "#{dependency}-built.yml")).to_yaml
+            expect(built_yaml_contents).to eq(file_yaml_contents)
+          end
+
+          it 'syncs the -built file in builds-yaml-artifacts' do
+            built_file = File.join(builds_yaml_artifacts_dir, 'binary-built-output', "#{dependency}-built.yml")
+            expect(File.exist?(built_file)).to be_truthy
+          end
+
+          it_behaves_like 'the resulting tar files are copied to the proper location'
+        end
+
+        context 'with the same version but different output file sha256' do
+          let(:built_yaml_contents) do
+            {'node' => [
+              {'version'   => '4.4.7',
+               'sha256'    => 'aaabbbcccdddeeefff',
+               'timestamp' => '2016-07-18 15:31:35 UTC'}
+            ]}.to_yaml
+          end
+
+          it 'adds the new build to the <dep>-built.yml file' do
+            file_yaml_contents = YAML.load_file(File.join(built_dir, 'binary-built-output', "#{dependency}-built.yml"))
+            expect(file_yaml_contents['node'].count).to eq(2)
+          end
+
+          it 'syncs the -built file in builds-yaml-artifacts' do
+            built_file = File.join(builds_yaml_artifacts_dir, 'binary-built-output', "#{dependency}-built.yml")
+            expect(File.exist?(built_file)).to be_truthy
+          end
+
+          it_behaves_like 'the resulting tar files are copied to the proper location'
+        end
+      end
     end
 
     context 'the dependency is dotnet' do
-      let(:dependency) { 'dotnet' }
-      let(:output_file) { 'dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz' }
-      let(:verification_type) { 'git-commit-sha' }
-      let(:verification_value) { 'this-is-a-commit-sha' }
-      let(:source_url) { 'https://github.com/dotnet/cli' }
-      let(:version) { 'v1.0.0-preview2.0.1' }
+      let(:dependency)            { 'dotnet' }
+      let(:output_file)           { 'dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz' }
+      let(:output_file_with_md5)  { "dotnet.1.0.0-preview2-003131.linux-amd64-#{output_file_md5_short}.tar.gz" }
+      let(:verification_type)     { 'git-commit-sha' }
+      let(:verification_value)    { 'this-is-a-commit-sha' }
+      let(:source_url)            { 'https://github.com/dotnet/cli' }
+      let(:version)               { 'v1.0.0-preview2.0.1' }
 
       before { subject.run }
 
@@ -232,16 +283,19 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is bower' do
-      let(:dependency)         { 'bower' }
-      let(:output_file)        { 'bower-1.77.90.tgz' }
-      let(:verification_type)  { 'sha256' }
-      let(:verification_value) { 'aaabbbccc111222333' }
-      let(:source_url)         { 'https://registry.npmjs.org/bower/-/bower-1.77.90.tgz' }
-      let(:version)            { '1.77.90' }
+      let(:dependency)           { 'bower' }
+      let(:output_file)          { 'bower-1.77.90.tgz' }
+      let(:output_file_with_md5) { "bower-1.77.90-#{output_file_md5_short}.tgz" }
+      let(:verification_type)    { 'sha256' }
+      let(:verification_value)   { 'aaabbbccc111222333' }
+      let(:source_url)           { 'https://registry.npmjs.org/bower/-/bower-1.77.90.tgz' }
+      let(:version)              { '1.77.90' }
 
       before do
         expect(subject).to receive(:system).with("curl -L #{source_url} -o #{binary_builder_dir}/bower-1.77.90.tgz") do
-          `touch #{binary_builder_dir}/bower-#{version}.tgz`
+          Dir.chdir(binary_builder_dir) do
+            File.write(output_file, output_file_contents)
+          end
         end
 
         subject.run
@@ -252,16 +306,19 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is yarn' do
-      let(:dependency)         { 'yarn' }
-      let(:output_file)        { 'yarn-0.19.1.tar.gz' }
-      let(:verification_type)  { 'sha256' }
-      let(:verification_value) { 'aaabbbccc111222333' }
-      let(:source_url)         { 'https://yarnpkg.com/downloads/0.19.1/yarn-v0.19.1.tar.gz' }
-      let(:version)            { '0.19.1' }
+      let(:dependency)           { 'yarn' }
+      let(:output_file)          { 'yarn-0.19.1.tar.gz' }
+      let(:output_file_with_md5) { "yarn-0.19.1-#{output_file_md5_short}.tar.gz" }
+      let(:verification_type)    { 'sha256' }
+      let(:verification_value)   { 'aaabbbccc111222333' }
+      let(:source_url)           { 'https://yarnpkg.com/downloads/0.19.1/yarn-v0.19.1.tar.gz' }
+      let(:version)              { '0.19.1' }
 
       before do
         expect(subject).to receive(:system).with("curl -L #{source_url} -o #{binary_builder_dir}/yarn-v0.19.1.tar.gz") do
-          `touch #{binary_builder_dir}/yarn-#{version}.tar.gz`
+          Dir.chdir(binary_builder_dir) do
+            File.write(output_file, output_file_contents)
+          end
         end
 
         subject.run
@@ -272,16 +329,19 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is composer' do
-      let(:dependency)    { 'composer' }
-      let(:output_file)        { 'composer-1.2.0.phar' }
-      let(:verification_type)  { 'sha256' }
-      let(:verification_value) { 'dc80131545ed7f7b1369ae058824587f0718892f6a84bd86cfb0f28ab5e39095' }
-      let(:source_url)    { 'https://getcomposer.org/download/1.2.0/composer.phar' }
-      let(:version)       { '1.2.0' }
+      let(:dependency)           { 'composer' }
+      let(:output_file)          { 'composer-1.2.0.phar' }
+      let(:output_file_with_md5) { "composer-1.2.0-#{output_file_md5_short}.phar" }
+      let(:verification_type)    { 'sha256' }
+      let(:verification_value)   { 'dc80131545ed7f7b1369ae058824587f0718892f6a84bd86cfb0f28ab5e39095' }
+      let(:source_url)           { 'https://getcomposer.org/download/1.2.0/composer.phar' }
+      let(:version)              { '1.2.0' }
 
       before do
         expect(subject).to receive(:system).with("curl -L #{source_url} -o #{binary_builder_dir}/composer-1.2.0.phar") do
-          `touch #{binary_builder_dir}/composer-#{version}.phar`
+          Dir.chdir(binary_builder_dir) do
+            File.write(output_file, output_file_contents)
+          end
         end
 
         subject.run
@@ -290,27 +350,6 @@ describe ConcourseBinaryBuilder do
       it_behaves_like 'a commit is made in builds-yaml-artifacts with the proper git message', 'automated'
       it_behaves_like 'the resulting tar files are copied to the proper location'
 
-      context 'dependency has already been built' do
-        let(:built_yaml_contents) do
-          {dependency => [
-            {'version' => '1.2.0',
-           'sha256' => '4ed7a99985f8afee337cc22d5fef61b495ab4238dfff3750ac9019e87fc6aae6',
-           'timestamp' => '2016-07-18 15:31:35 UTC'}
-          ]}.to_yaml
-        end
-
-        it 'has not changed the <dep>-built.yml file' do
-          file_yaml_contents = YAML.load_file(File.join(built_dir, 'binary-built-output', "#{dependency}-built.yml")).to_yaml
-          expect(built_yaml_contents).to eq(file_yaml_contents)
-        end
-
-        it 'syncs the -built file in builds-yaml-artifacts' do
-          built_file = File.join(builds_yaml_artifacts_dir, 'binary-built-output', "#{dependency}-built.yml")
-          expect(File.exist?(built_file)).to be_truthy
-        end
-
-        it_behaves_like 'the resulting tar files are copied to the proper location'
-      end
     end
   end
 end
