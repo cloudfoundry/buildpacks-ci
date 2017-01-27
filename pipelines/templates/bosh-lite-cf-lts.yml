@@ -158,14 +158,19 @@ jobs:
           - get: buildpacks-ci
           - get: bosh-lite
           - get: bosh-stemcell
+            attempts: 3
           - get: cf-bosh-release
             version: { version: {{cf-version}} }
+            attempts: 3
           - get: diego-bosh-release
             version: { version: {{diego-version}} }
+            attempts: 3
           - get: garden-linux-bosh-release
             version: {version: {{garden-linux-version}}}
+            attempts: 3
           - get: etcd-bosh-release
             version: {version: {{etcd-version}}}
+            attempts: 3
           - get: resource-pools
         - aggregate:
           - task: cf-release-checkout

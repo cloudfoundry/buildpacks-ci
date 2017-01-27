@@ -157,11 +157,16 @@ jobs:
           - get: buildpacks-ci
           - get: bosh-lite
           - get: cf-bosh-release
+            attempts: 3
           - get: diego-bosh-release
+            attempts: 3
           - get: bosh-stemcell
+            attempts: 3
           - get: resource-pools
           - get: cflinuxfs2-rootfs-bosh-release
+            attempts: 3
           - get: garden-runc-bosh-release
+            attempts: 3
         - aggregate:
           - task: cf-release-checkout
             file: buildpacks-ci/tasks/checkout-cf-release/task.yml
