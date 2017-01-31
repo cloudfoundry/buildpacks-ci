@@ -375,13 +375,26 @@ describe NewReleasesDetector do
     end
 
     context 'with new versions of nginx' do
-      let(:changed_dependencies) { {nginx: %w(23.45.67) } }
+      context 'version is 1.11.x' do
+        let(:changed_dependencies) { {nginx: %w(1.11.99) } }
 
-      it 'posts to buildpacks and capi slack for each new release of that dependency' do
-        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *nginx* dependency: version *23.45.67*\n")
-        expect(capi_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: 23.45.67")
-        expect(pivnet_slack_client).to_not receive(:post_to_slack)
-        subject.post_to_slack
+        it 'posts to buildpacks and capi slack for each new release of that dependency' do
+          expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *nginx* dependency: version *1.11.99*\n")
+          expect(capi_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: 1.11.99")
+          expect(pivnet_slack_client).to_not receive(:post_to_slack)
+          subject.post_to_slack
+        end
+      end
+
+      context 'version is not 1.11.x' do
+        let(:changed_dependencies) { {nginx: %w(1.10.99) } }
+
+        it 'only posts to buildpacks slack for each new release of that dependency' do
+          expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *nginx* dependency: version *1.10.99*\n")
+          expect(capi_slack_client).to_not receive(:post_to_slack)
+          expect(pivnet_slack_client).to_not receive(:post_to_slack)
+          subject.post_to_slack
+        end
       end
     end
 
@@ -472,23 +485,39 @@ describe NewReleasesDetector do
       end
     end
 
-    context 'with new versions for a dependency' do
+    context 'with new versions of nginx' do
       let(:dependency) { :nginx }
-      let(:changed_dependencies) { {nginx: %w(11.11.11) } }
 
-      it 'posts a tracker story to the CAPI project with the correct information' do
-        expect(buildpacks_tracker_client).to receive(:post_to_tracker).
-          with(name: anything, description: anything, tasks: anything, point_value: anything, labels: anything)
+      context 'version is 1.11.x' do
+        let(:changed_dependencies) { {nginx: %w(1.11.99) } }
 
-        expect(capi_tracker_client).to receive(:post_to_tracker).
-          with(name: 'New version(s) of nginx: 11.11.11',
-               description: 'There are 1 new version(s) of **nginx** available: 11.11.11',
-               tasks: [],
-               point_value: 1,
-               labels: []
-              )
+        it 'posts a tracker story to the CAPI project with the correct information' do
+          expect(buildpacks_tracker_client).to receive(:post_to_tracker).
+            with(name: anything, description: anything, tasks: anything, point_value: anything, labels: anything)
 
-        subject.post_to_tracker
+          expect(capi_tracker_client).to receive(:post_to_tracker).
+            with(name: 'New version(s) of nginx: 1.11.99',
+                 description: 'There are 1 new version(s) of **nginx** available: 1.11.99',
+                 tasks: [],
+                 point_value: 1,
+                 labels: []
+                )
+
+          subject.post_to_tracker
+        end
+      end
+
+      context 'version is not 1.11.x' do
+        let(:changed_dependencies) { {nginx: %w(1.10.99) } }
+
+        it 'only posts a tracker story to the buildpacks project with the correct information' do
+          expect(buildpacks_tracker_client).to receive(:post_to_tracker).
+            with(name: anything, description: anything, tasks: anything, point_value: anything, labels: anything)
+
+          expect(capi_tracker_client).to_not receive(:post_to_tracker)
+
+          subject.post_to_tracker
+        end
       end
     end
 
