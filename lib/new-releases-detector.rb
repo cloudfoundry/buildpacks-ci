@@ -53,12 +53,23 @@ class NewReleasesDetector
           slack_clients['pivnet'].post_to_slack new_go_version_output
         end
 
-        if dependency == :nginx
+        if notify_capi?(dependency, [version])
           new_nginx_version_output = "There is a new version of *nginx* available: #{version}"
           slack_clients['capi'].post_to_slack new_nginx_version_output
         end
       end
     end
+  end
+
+  def notify_capi?(dependency, versions)
+    return false if dependency != :nginx
+
+    notify = false
+    versions.each do |ver|
+      major, minor, _ = ver.split('.')
+      notify = true if major == '1' && minor == '11'
+    end
+    notify
   end
 
   def post_to_tracker
@@ -84,7 +95,7 @@ class NewReleasesDetector
                                      tasks: story_info[:tasks],
                                      labels: story_info[:labels],
                                      point_value: 1)
-      if dependency == :nginx
+      if notify_capi?(dependency, versions)
         story_info = capi_tracker_story_info(dependency, versions)
 
         tracker_clients['capi'].post_to_tracker(name: story_info[:name],
