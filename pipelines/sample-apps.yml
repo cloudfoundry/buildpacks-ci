@@ -17,6 +17,11 @@ resources: #####################################################################
     uri: {{buildpacks-ci-git-uri-public}}
     branch: {{buildpacks-ci-git-uri-public-branch}}
 
+- name: dotnet-core-hello-world
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry-samples/dotnet-core-hello-world.git
+
 - name: cf-sample-app-nodejs
   type: git
   source:
@@ -495,6 +500,29 @@ jobs: ##########################################################################
         REQUEST_TYPE: 'GET'
         DATABASE_TO_BIND: 'mysql'
 
+- name: dotnet-core-hello-world-smoke-test
+  plan:
+    - get: nightly-trigger
+      trigger: true
+    - get: sample-app
+      resource: dotnet-core-hello-world
+    - get: buildpacks-ci
+    - task: dotnet-core-hello-world-smoke-test
+      attempts: 3
+      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+      params:
+        BUILDPACK_URL: https://github.com/cloudfoundry/dotnet-core-buildpack#develop
+        APPLICATION_NAME: dotnet_core_hello_world
+        REQUEST_PATH: "/"
+        CF_API: api.run.pivotal.io
+        CF_USERNAME: {{pws-username}}
+        CF_PASSWORD: {{pws-password}}
+        CF_ORGANIZATION: {{pws-org}}
+        CF_LOGIN_SPACE: development
+        CF_DOMAIN: cfapps.io
+        REQUEST_TYPE: 'GET'
+        DATABASE_TO_BIND: 'none'
+
 groups: ###################################################################################
 
 - name: nodejs-sample-apps
@@ -531,3 +559,8 @@ groups: ########################################################################
     - cf-ex-pgbouncer-smoke-test
     - cf-ex-composer-smoke-test
     - cf-ex-phalcon-smoke-test
+
+- name: dotnet-core-sample-apps
+  jobs:
+    - dotnet-core-hello-world-smoke-test
+
