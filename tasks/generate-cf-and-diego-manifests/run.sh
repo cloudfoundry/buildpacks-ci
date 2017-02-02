@@ -5,10 +5,6 @@ set -o nounset
 set -o pipefail
 
 pushd deployments-buildpacks
-  if [ ! -z "$RUBYGEM_MIRROR" ]; then
-    bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
-  fi
-  bundle install --jobs="$(nproc)"
   # shellcheck disable=SC1091
   source ./bin/target_bosh "$DEPLOYMENT_NAME"
 popd

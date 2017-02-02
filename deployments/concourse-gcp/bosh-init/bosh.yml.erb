@@ -1,0 +1,149 @@
+---
+name: bosh
+
+releases:
+- name: bosh
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=260.1
+  sha1: 7fb8e99e28b67df6604e97ef061c5425460518d3
+- name: bosh-google-cpi
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-google-cpi-release?v=25.6.2
+  sha1: b4865397d867655fdcc112bc5a7f9a5025cdf311
+
+resource_pools:
+- name: vms
+  network: private
+  stemcell:
+    url: https://s3.amazonaws.com/bosh-core-stemcells/google/bosh-stemcell-3312.12-google-kvm-ubuntu-trusty-go_agent.tgz
+    sha1: 8deb9fd52d4aad20b91d8473a550cebefbf2992a
+  cloud_properties:
+    zone: us-east1-c
+    machine_type: n1-standard-4
+    root_disk_size_gb: 40
+    root_disk_type: pd-standard
+    service_scopes:
+      - compute
+      - devstorage.full_control
+
+disk_pools:
+  - name: disks
+    disk_size: 32_768
+    cloud_properties:
+      type: pd-standard
+
+networks:
+  - name: vip
+    type: vip
+  - name: private
+    type: manual
+    subnets:
+    - range: 10.0.0.0/29
+      gateway: 10.0.0.1
+      static: [10.0.0.3-10.0.0.7]
+      cloud_properties:
+        network_name: concourse
+        subnetwork_name: bosh-concourse-us-east1
+        ephemeral_external_ip: true
+        tags:
+          - bosh-internal
+
+jobs:
+- name: bosh
+  instances: 1
+
+  templates:
+  - {name: nats, release: bosh}
+  - {name: postgres, release: bosh}
+  - {name: powerdns, release: bosh}
+  - {name: blobstore, release: bosh}
+  - {name: director, release: bosh}
+  - {name: health_monitor, release: bosh}
+  - {name: google_cpi, release: bosh-google-cpi}
+
+  resource_pool: vms
+  persistent_disk_pool: disks
+
+  networks:
+  - name: private
+    static_ips: [10.0.0.6]
+    default: [dns, gateway]
+
+  properties:
+    nats:
+      address: 127.0.0.1
+      user: nats
+      password: <%= gcp_bosh_nats_password %>
+
+    postgres: &db
+      listen_address: 127.0.0.1
+      host: 127.0.0.1
+      user: postgres
+      password: <%= gcp_bosh_postgres_password %>
+      database: bosh
+      adapter: postgres
+
+    dns:
+      address: 10.0.0.6
+      domain_name: microbosh
+      db: *db
+      recursor: 169.254.169.254
+
+    blobstore:
+      address: 10.0.0.6
+      port: 25250
+      provider: dav
+      director:
+        user: director
+        password: <%= gcp_bosh_blobstore_director_password %>
+      agent:
+        user: agent
+        password: <%= gcp_bosh_blobstore_agent_password %>
+
+    director:
+      address: 127.0.0.1
+      name: micro-google
+      db: *db
+      cpi_job: google_cpi
+      enable_snapshots: true
+      user_management:
+        provider: local
+        local:
+          users:
+          - {name: admin, password: <%= gcp_bosh_admin_password %>}
+          - {name: hm, password: <%= gcp_bosh_hm_password %>}
+
+    hm:
+      director_account: {user: hm, password: <%= gcp_bosh_hm_password %>}
+      resurrector_enabled: true
+
+
+    google: &google_properties
+      project: cf-buildpacks
+
+    agent:
+      mbus: nats://nats:<%= gcp_bosh_nats_password %>@10.0.0.6:4222
+      ntp: *ntp
+      blobstore:
+         options:
+           endpoint: http://10.0.0.6:25250
+           user: agent
+           password: <%= gcp_bosh_agent_password %>
+
+    ntp: &ntp
+      - 169.254.169.254
+
+cloud_provider:
+  template: {name: google_cpi, release: bosh-google-cpi}
+
+  ssh_tunnel:
+    host: 10.0.0.6
+    port: 22
+    user: bosh
+    private_key: /home/pivotal/.ssh/bosh
+
+  mbus: "https://mbus:<%= gcp_bosh_mbus_password %>@10.0.0.6:6868"
+
+  properties:
+    google: *google_properties
+    agent: {mbus: "https://mbus:<%= gcp_bosh_mbus_password %>@0.0.0.0:6868"}
+    blobstore: {provider: local, path: /var/vcap/micro_bosh/data/cache}
+    ntp: *ntp

@@ -1,0 +1,287 @@
+// Subnet for the public Concourse components
+resource "google_compute_subnetwork" "concourse-public-subnet-1" {
+  name          = "concourse-public-${var.region}-1"
+  ip_cidr_range = "10.150.0.0/16"
+  network       = "${google_compute_network.network.self_link}"
+}
+
+// Subnet for the public Concourse components
+resource "google_compute_subnetwork" "concourse-public-subnet-2" {
+  name          = "concourse-public-${var.region}-2"
+  ip_cidr_range = "10.160.0.0/16"
+  network       = "${google_compute_network.network.self_link}"
+}
+
+// Allow access to Concourse ATC
+resource "google_compute_firewall" "concourse-public" {
+  name    = "concourse-public"
+  network = "${google_compute_network.network.name}"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]
+  }
+
+  allow {
+    protocol = "icmp"
+  }
+
+  target_tags = ["concourse-public"]
+}
+
+// Allow BOSH lites to be accessible
+resource "google_compute_firewall" "bosh-lite-public" {
+  name = "bosh-lite-public"
+  network = "${google_compute_network.network.name}"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443", "2222", "4443", "25555"]
+  }
+
+  allow {
+    protocol = "icmp"
+  }
+
+  target_tags = ["bosh-lite-public"]
+}
+
+// Allow open access to between internal VMs
+resource "google_compute_firewall" "concourse-internal" {
+  name    = "concourse-internal"
+  network = "${google_compute_network.network.name}"
+
+  allow {
+    protocol = "icmp"
+  }
+
+  allow {
+    protocol = "tcp"
+  }
+
+  allow {
+    protocol = "udp"
+  }
+
+  target_tags = ["concourse-internal", "bosh-internal"]
+  source_tags = ["concourse-internal", "bosh-internal"]
+}
+
+// Static IP address for concourse ATC
+resource "google_compute_address" "concourse" {
+  name = "concourse"
+  region = "${var.region}"
+}
+
+// Static IP address for edge-1
+resource "google_compute_address" "edge-1" {
+  name = "gcp-bosh-lite-edge-1"
+  region = "${var.region}"
+}
+
+// Static IP address for lts-1
+resource "google_compute_address" "lts-1" {
+  name = "gcp-bosh-lite-lts-1"
+  region = "${var.region}"
+}
+
+// Static IP address for edge-2
+resource "google_compute_address" "edge-2" {
+  name = "gcp-bosh-lite-edge-2"
+  region = "${var.region}"
+}
+
+// Static IP address for lts-2
+resource "google_compute_address" "lts-2" {
+  name = "gcp-bosh-lite-lts-2"
+  region = "${var.region}"
+}
+
+// Static IP address for cf-release
+resource "google_compute_address" "cf-release" {
+  name = "gcp-bosh-lite-cf-release"
+  region = "${var.region}"
+}
+
+// Static IP address for stacks
+resource "google_compute_address" "stacks" {
+  name = "gcp-bosh-lite-stacks"
+  region = "${var.region}"
+}
+
+// Static IP address for stacks-nc
+resource "google_compute_address" "stacks-nc" {
+  name = "gcp-bosh-lite-stacks-nc"
+  region = "${var.region}"
+}
+
+resource "google_dns_managed_zone" "buildpacks" {
+  name        = "buildpacks"
+  dns_name    = "buildpacks-gcp.ci.cf-app.com."
+  description = "Buildpacks CI on GCP"
+}
+
+resource "google_dns_record_set" "concourse" {
+  name = "concourse.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.concourse.address}"]
+
+}
+
+resource "google_dns_record_set" "edge-1" {
+  name = "edge-1.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.edge-1.address}"]
+
+}
+
+resource "google_dns_record_set" "edge-1-star" {
+  name = "*.edge-1.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.edge-1.address}"]
+
+}
+
+resource "google_dns_record_set" "lts-1" {
+  name = "lts-1.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.lts-1.address}"]
+
+}
+
+resource "google_dns_record_set" "lts-1-star" {
+  name = "*.lts-1.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.lts-1.address}"]
+
+}
+
+resource "google_dns_record_set" "edge-2" {
+  name = "edge-2.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.edge-2.address}"]
+
+}
+
+resource "google_dns_record_set" "edge-2-star" {
+  name = "*.edge-2.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.edge-2.address}"]
+
+}
+
+resource "google_dns_record_set" "lts-2" {
+  name = "lts-2.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.lts-2.address}"]
+
+}
+
+resource "google_dns_record_set" "lts-2-star" {
+  name = "*.lts-2.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.lts-2.address}"]
+
+}
+
+resource "google_dns_record_set" "cf-release" {
+  name = "cf-release.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.cf-release.address}"]
+
+}
+
+resource "google_dns_record_set" "cf-release-star" {
+  name = "*.cf-release.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.cf-release.address}"]
+
+}
+
+resource "google_dns_record_set" "stacks" {
+  name = "stacks.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.stacks.address}"]
+
+}
+
+resource "google_dns_record_set" "stacks-star" {
+  name = "*.stacks.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.stacks.address}"]
+
+}
+
+resource "google_dns_record_set" "stacks-nc" {
+  name = "stacks-nc.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.stacks-nc.address}"]
+
+}
+
+resource "google_dns_record_set" "stacks-nc-star" {
+  name = "*.stacks-nc.buildpacks-gcp.ci.cf-app.com."
+  type = "A"
+  ttl  = 300
+
+  managed_zone = "${google_dns_managed_zone.buildpacks.name}"
+
+  rrdatas = ["${google_compute_address.stacks-nc.address}"]
+
+}

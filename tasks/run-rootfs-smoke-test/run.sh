@@ -7,10 +7,6 @@ set -o pipefail
 set -x
 
 pushd deployments-buildpacks
-  if [ ! -z "$RUBYGEM_MIRROR" ]; then
-    bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
-  fi
-  bundle install
   # shellcheck disable=SC1091
   . ./bin/target_bosh "$DEPLOYMENT_NAME"
 popd

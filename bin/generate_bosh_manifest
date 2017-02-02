@@ -1,0 +1,20 @@
+#!/bin/bash
+
+usage() {
+  echo -e "Usage: \n\t./bin/generate_bosh_manifest <concourse>"
+}
+
+BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. >/dev/null 2>&1 && pwd )
+
+deployment_name=${1-""}
+deployment_path=${BASE_DIR}/deployments/${deployment_name}
+
+if [[ ! "$deployment_name" == *concourse* ]]; then
+  usage
+elif [ ! -d $deployment_path ]; then
+  echo -e "ERROR! Deployment not found: ${deployment_path}\n"
+  usage
+else
+  # Set up BOSH Director configuration
+  echo "$( ruby -rerb -ryaml -rostruct -e "lp = YAML.load(\`lpass show 'Shared-Buildpacks/deployments-buildpacks.yml' --notes\`); puts ERB.new(\`cat $deployment_path/bosh-init/bosh.yml.erb\`).result(OpenStruct.new(lp).instance_eval {binding})" )" > $deployment_path/bosh-init/bosh.yml
+fi

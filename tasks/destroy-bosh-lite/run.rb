@@ -21,13 +21,6 @@ else
   exit 1
 end
 
-Dir.chdir ('deployments-buildpacks') do
-  rubygem_mirror = ENV.fetch('RUBYGEM_MIRROR')
-  exit 1 unless system "bundle config mirror.https://rubygems.org #{rubygem_mirror}"
-  num_cores = `nproc`.strip
-  exit 1 unless system "bundle install --jobs=#{num_cores} --retry 5"
-end
-
 deployment_dir = File.join(Dir.pwd,'deployments-buildpacks', 'deployments', deployment_id)
 
 manager = BoshLiteManager.new(iaas: iaas,

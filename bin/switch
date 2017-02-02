@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+# set -ueo pipefail
+
+BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. >/dev/null 2>&1 && pwd )
+
+deployment_name=${1-""}
+
+usage() {
+  echo -e "Usage: \n\tsource ./bin/switch <deployment name>"
+}
+
+deployment_name=${1-""}
+deployment_path=${BASE_DIR}/deployments/${deployment_name}
+
+
+if [[ "$0" == *"switch"* ]]; then
+  echo -e "ERROR! You must source this script\n"
+  usage
+elif [ "$deployment_name" == "" ] || [ "$deployment_name" == "help" ]; then
+  usage
+elif [ ! -d $deployment_path ]; then
+  echo -e "ERROR! Deployment not found: ${deployment_path}\n"
+  usage
+else
+  #generate concourse manifests if targeting a concourse deployment
+  if [[ "$deployment_name" == *concourse* ]]; then
+    echo "$( ruby -rerb -ryaml -rostruct -e "lp = YAML.load(\`lpass show 'Shared-Buildpacks/deployments-buildpacks.yml' --notes\`); puts ERB.new(\`cat $deployment_path/manifest.yml.erb\`).result(OpenStruct.new(lp).instance_eval {binding})" )" > $deployment_path/manifest.yml
+    if [ -f $deployment_path/cloud.yml.erb ]; then
+      echo "$( ruby -rerb -ryaml -rostruct -e "lp = YAML.load(\`lpass show 'Shared-Buildpacks/deployments-buildpacks.yml' --notes\`); puts ERB.new(\`cat $deployment_path/cloud.yml.erb\`).result(OpenStruct.new(lp).instance_eval {binding})" )" > $deployment_path/cloud.yml
+    fi
+  fi
+
+  source $BASE_DIR/bin/export_envs $deployment_name
+  $BASE_DIR/bin/target_bosh $deployment_name
+fi
