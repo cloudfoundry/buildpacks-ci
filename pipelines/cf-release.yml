@@ -481,7 +481,7 @@ jobs:
         - get: cf-release
           resource: cf-release-develop
           params:
-            submodules: none
+            submodules: [ src/<%= language %>-buildpack-release/ ]
         - get: buildpack-github-release
           resource: <%= language %>-buildpack-github-release
           <% case language; when /offline/ %>
