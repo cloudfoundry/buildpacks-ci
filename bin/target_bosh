@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. >/dev/null 2>&1 && pwd )
+
+target_bosh() {
+  if [ "$BOSH_TARGET" != "" ]; then
+    echo "targeting BOSH deployment"
+    BUNDLE_GEMFILE=$BASE_DIR/Gemfile bundle exec bosh target $BOSH_TARGET
+    set +x
+    BUNDLE_GEMFILE=$BASE_DIR/Gemfile bundle exec bosh login $BOSH_USER $BOSH_PASSWORD
+    set -x
+
+    deployment_manifest=${BOSH_DEPLOYMENT_MANIFEST-"$deployment_path/manifest.yml"}
+
+    if [ -f $deployment_manifest ]; then
+      echo "Using deployment manifest: $deployment_manifest"
+      BUNDLE_GEMFILE=$BASE_DIR/Gemfile bundle exec bosh deployment ${deployment_manifest}
+    else
+      echo "No manifest found at $deployment_manifest"
+      echo "If you got here and are sucessfully logged into bosh, then creating a deployment manifest is probably your next step."
+    fi
+  fi
+}
+
+deployment_name=${1-""}
+deployment_path=${BASE_DIR}/deployments/${deployment_name}
+
+if [[ ! "$*" =~ --no-target ]]; then
+  target_bosh
+fi

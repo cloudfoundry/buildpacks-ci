@@ -1,0 +1,102 @@
+---
+name: concourse
+director_uuid: REPLACE-IN-JUMPBOX-BEFORE-DEPLOY
+releases:
+- name: concourse
+  version: 2.6.0
+  url: https://bosh.io/d/github.com/concourse/concourse?v=2.6.0
+  sha1: 6e4c1321768df37a0e3947f59d28ddf8804bd4c0
+- name: garden-runc
+  version: 1.0.4
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.0.4
+  sha1: ef218cc8cc2ea5a874a59becabdf957e52976939
+
+tls_key: &tls_key |
+  <%= concourse_buildpacks_gcp_key.split("\n").join("\n  ") %>
+tls_cert: &tls_cert |
+  <%= concourse_buildpacks_gcp_crt.gsub("\n", "\n  ").chomp  %>
+  <%= concourse_buildpacks_gcp_chain.gsub("\n", "\n  ").chomp %>
+
+instance_groups:
+- name: web
+  instances: 1
+  vm_type: web
+  azs:
+  - z1
+  - z2
+  stemcell: trusty
+  networks:
+  - name: public
+    default:
+    - dns
+    - gateway
+  - name: vip
+    static_ips:
+    - 104.196.174.175
+  jobs:
+  - name: atc
+    release: concourse
+    properties:
+      external_url: https://buildpacks.ci.cf-app.com
+      publicly_viewable: true
+      basic_auth_username: buildpacks
+      basic_auth_password: "<%= concourse_basic_auth_password %>"
+      github_auth:
+        client_id: "<%= gcp_concourse_github_auth_client_id %>"
+        client_secret: "<%= gcp_concourse_github_auth_client_secret %>"
+        authorize:
+        - organization: cloudfoundry
+          teams:
+          - CF Buildpacks
+        - user: wfernandes
+        - user: roxtar
+        - user: nebhale
+        - user: slowestgirl
+        - user: ematpl
+        - user: vito
+        - user: mariash
+      postgresql:
+        database: <%= gcp_concourse_db_name %>
+        role:
+          name: <%= gcp_concourse_db_admin_user %>
+          password: <%= gcp_concourse_db_admin_password %>
+        address: <%= gcp_concourse_db_address %>
+      postgresql_database: <%= gcp_concourse_db_name %>
+      tls_cert: *tls_cert
+      tls_key: *tls_key
+      tls_bind_port: 443
+  - name: tsa
+    release: concourse
+    properties: {}
+- name: worker
+  instances: 6
+  vm_type: worker
+  azs:
+  - z1
+  stemcell: trusty
+  networks:
+  - name: public
+  jobs:
+  - name: groundcrew
+    release: concourse
+    properties: {}
+  - name: baggageclaim
+    release: concourse
+    properties: {}
+  - name: garden
+    release: garden-runc
+    properties:
+      garden:
+        listen_network: tcp
+        listen_address: 0.0.0.0:7777
+        network_mtu: 1432
+update:
+  canaries: 1
+  max_in_flight: 3
+  serial: false
+  canary_watch_time: 1000-120000
+  update_watch_time: 1000-120000
+stemcells:
+- alias: trusty
+  os: ubuntu-trusty
+  version: latest

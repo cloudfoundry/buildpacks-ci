@@ -1,0 +1,220 @@
+---
+name: lts-1-gcp-bosh-lite
+director_uuid: UUID_STUB
+releases:
+- name: bosh
+  version: 260.1
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=260.1
+  sha1: 7fb8e99e28b67df6604e97ef061c5425460518d3
+- name: bosh-warden-cpi
+  version: 29
+  url: https://bosh.io/d/github.com/cppforlife/bosh-warden-cpi-release?v=29
+  sha1: 9cc293351744f3892d4a79479cccd3c3b2cf33c7
+- name: garden-linux
+  version: 0.342.0
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-linux-release?v=0.342.0
+  sha1: 5da920b05879f66d813526793e2a73706b36b9cb
+- name: port-forwarding
+  version: 6
+  sha1: 40d0d26a217bf4f7398c1d01ffd47619349a2639
+  url: https://github.com/cloudfoundry-community/port-forwarding-boshrelease/releases/download/v6/port-forwarding-6.tgz
+stemcells:
+- alias: trusty
+  os: ubuntu-trusty
+  version: latest
+update:
+  canaries: 1
+  max_in_flight: 1
+  canary_watch_time: 5000 - 600000
+  update_watch_time: 5000 - 600000
+jobs:
+- name: bosh
+  instances: 1
+  azs:
+  - z1
+  vm_type: bosh-lite-worker
+  stemcell: trusty
+  persistent_disk_pool: bosh-ssd
+  networks:
+  - name: public
+    default:
+    - dns
+    - gateway
+  - name: vip
+    static_ips:
+    - 104.196.204.208
+  templates:
+  - name: nats
+    release: bosh
+  - name: blobstore
+    release: bosh
+  - name: postgres
+    release: bosh
+  - name: director
+    release: bosh
+  - name: health_monitor
+    release: bosh
+  - name: warden_cpi
+    release: bosh-warden-cpi
+  - name: garden
+    release: garden-linux
+  - name: port_forwarding
+    release: port-forwarding
+  properties:
+    port_forwarding:
+      rules:
+      - internal_port: 80
+        external_port: 80
+        internal_ip: 10.244.0.34
+      - internal_port: 443
+        external_port: 443
+        internal_ip: 10.244.0.34
+      - internal_port: 2222
+        external_port: 2222
+        internal_ip: 10.244.0.34
+      - internal_port: 4443
+        external_port: 4443
+        internal_ip: 10.244.0.34
+properties:
+  ntp:
+  - 0.us.pool.ntp.org
+  compiled_package_cache:
+    provider: local
+    options:
+      blobstore_path: "/vagrant/tmp/compiled_package_cache"
+  nats:
+    user: nats
+    password: "<%= gcp_bosh_lite_nats_password %>"
+    address: 127.0.0.1
+    port: 4222
+  blobstore:
+    address: 127.0.0.1
+    port: 25251
+    backend_port: 25552
+    agent:
+      user: agent
+      password: "<%= gcp_bosh_lite_blobstore_agent_password %>"
+    director:
+      user: director
+      password: "<%= gcp_bosh_lite_blobstore_director_password %>"
+  postgres: &1
+    user: bosh
+    password: "<%= gcp_bosh_lite_postgres_password %>"
+    host: 127.0.0.1
+    port: 5432
+    database: bosh
+  director:
+    name: "Bosh Lite Director lts-1-gcp"
+    address: 127.0.0.1
+    max_tasks: 100
+    cpi_job: warden_cpi
+    db: *1
+    flush_arp: true
+    enable_post_deploy: true
+    ignore_missing_gateway: true
+    user_management:
+      provider: local
+      local:
+        users:
+        - name: admin
+          password: "<%= gcp_bosh_lite_admin_password %>"
+        - name: hm
+          password: "<%= gcp_bosh_lite_hm_password %>"
+    ssl:
+      key: |
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIEpQIBAAKCAQEA6LlOQbGpTRwS1FmFcSpBKReUxeNivKMumRTJjO/Nn9IPSz4a
+        zvY9oCk3DcLMHT56T+Ofo2+WPNbq+3w9TCr4OV7W4bqsEQErkCY0C0v5cE/sFQ/v
+        gUD5XrOmeWdRhuOuxGZuaUkfrXiePqp2nnC6MbENwKpNGTpHIMr5YsSFMtVZcOXh
+        s6D6zx77CDBNtoM45DflBWGIorX5ypZ/wqe0ovbC24qKt/Dobn9ZraSA82iNFMK7
+        REfkDw77Xfbjjnc5dmllx8QhOHcA+nSEazGYXgiKBEOifglbu5IuHbqimDz54Q6h
+        Knkb8ybHFe80K2Ol2bPYMzcqw6FAlS5dUGUjgwIDAQABAoIBAQDMbeLpYEfo/W0o
+        7c6DfuuoTheY0UptjCalwBXgYNJOvvZCUTa5cKLnquy6gNBOLBDDVp9nsODXZq8Z
+        5KPv4ZsUwlOeDB2T/mQnBvgWqFFgMESgp9PqxYmIf+UPpgt+o0hlK9l3UQ2rk1Xm
+        lFUIjttwRShggvig3YmXq9TvxtN+tzAgvXD1OBQwIIOzWApjV24qiseiVB35gJnG
+        jWxmEPiXTnrKL2/7t7ix/eRGRyogdCmK9T3CLgh3TRMO0JNtU9nMNmoIIuvtWIlX
+        33512r5TnnB3u5vGAlB193ZselPNVpKpXmPVgZ6vSs3gFXxmqEvZAFXq5yhKsyRh
+        3Mu17RBhAoGBAPmcBZ5P92wIQ+zNUMDepADLICxyc8SegBHX4FF4b+jRHaM6LbMd
+        DMWWdEM5V6iR3S5kjc0CwIXwIJnAgoIIOQmYHc4R0mDwZEu0gIYKplIDNvgMA4MK
+        G9iVziWRIlnqcNF6Xax3HQ5DlcvIJo2U34Vng/UfYkUWkO6RcEyg58exAoGBAO6u
+        nOdlBwBzS+Y474GxffpWBN68eOR+Ty0aySEG+uleIvwvoj9pTSRTdCt0uaGBGjKn
+        ukQT/DW7sE5qAsI8EYSX+fuw43RIrQBcWRz/GqGUfHvof9ttRBp9bTYraQs9CZBv
+        ZwEJX2xeRqXHP1/sMLOqioAm7Q930eCkePxGmB9zAoGBAPYkwHmcW94hzHHRCegX
+        5VyO8lxCRR1IO/zch+1vOdQ5muNitLwjUnvqYR4FhwbJSHa+XAMlypqJ8GwOJeR6
+        nVxzsDiM5IwJoq3xAqisCdVoLCWxGyl2p30ORSpQk7JdeQFpjMRM9c8iIK7C4hnO
+        DBmuubbYSvzcQvGvZDF8nvQRAoGAGJ+I7lI8064RUXHkO4P9FBtVq0jUS/Y/4s5V
+        m4Ol1PdyMoQTf+k0HSBC5szG7cNs2Xb2P1m0djKjsKM9H56kzAIFtxJ7lJ5+wn/E
+        bbpfm/W+leXZcuCl2vm/j4wQ7Sjh2LW1caTu5DYhoa6ZeiLar15TpX7ei+73hu5Q
+        0O3TecMCgYEAj7LQJhRhzl3OI4HWFOZCTjxihqhQOoH5tyNoKxFmw4iBI6O3PTFu
+        U+K0cVeS3mmz5BPYFNtOhcE8Olc8MlsHexDPqfVUwLCCA4TZyYI43vYOYUgvF8Xa
+        MsiAO/c/aTeUi7bH9LZc900pFXht9zmFI776GroSBQ7fFEe6yEX91Bc=
+        -----END RSA PRIVATE KEY-----
+      cert: |
+        -----BEGIN CERTIFICATE-----
+        MIIDEDCCAfigAwIBAgIJANy2vEpugwXtMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV
+        BAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX
+        aWRnaXRzIFB0eSBMdGQwIBcNMTUwNzEyMDIzNTA4WhgPMjI4OTA0MjUwMjM1MDha
+        MDMxCzAJBgNVBAYTAlVTMQ0wCwYDVQQKEwRCT1NIMRUwEwYDVQQDEwwxOTIuMTY4
+        LjUwLjQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDouU5BsalNHBLU
+        WYVxKkEpF5TF42K8oy6ZFMmM782f0g9LPhrO9j2gKTcNwswdPnpP45+jb5Y81ur7
+        fD1MKvg5XtbhuqwRASuQJjQLS/lwT+wVD++BQPles6Z5Z1GG467EZm5pSR+teJ4+
+        qnaecLoxsQ3Aqk0ZOkcgyvlixIUy1Vlw5eGzoPrPHvsIME22gzjkN+UFYYiitfnK
+        ln/Cp7Si9sLbioq38Ohuf1mtpIDzaI0UwrtER+QPDvtd9uOOdzl2aWXHxCE4dwD6
+        dIRrMZheCIoEQ6J+CVu7ki4duqKYPPnhDqEqeRvzJscV7zQrY6XZs9gzNyrDoUCV
+        Ll1QZSODAgMBAAGjEzARMA8GA1UdEQQIMAaHBMCoMgQwDQYJKoZIhvcNAQEFBQAD
+        ggEBAEt472rlr3dDh2zRotqLAGSYn1MlQpqeY1ptvfCFUNlzIibdU+H6lUsX/ZOy
+        jzBihUkjXSdwVmbs/sq+wNdW3en10vjlfiPhBaN9j65t7xB+NmrssUGya/6MXcSW
+        G1kgleLstp/DuqmiXA51mWbqm67djVcpBLE9nC0OQLCfzRJmceO950z7Ip8zY1mp
+        fB72jCN7+fU2pxSacJfrEN+dPE5EP6ACJBUdGPivEDWgfFdy5VjlmBZyOPf87MbK
+        HhrbjIgLWhoznfjQkVlHA3tz4Xtu8zpPpalF5tJDV8QpOooJTeBktFT+O3fS9DbR
+        juw7YrkZ61ino5Rvd1lQEOQAZJs=
+        -----END CERTIFICATE-----
+      ca_cert: |
+        -----BEGIN CERTIFICATE-----
+        MIIDtzCCAp+gAwIBAgIJAL+XoGqlINOLMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV
+        BAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX
+        aWRnaXRzIFB0eSBMdGQwIBcNMTUwNzEyMDIzNTA4WhgPMjI4OTA0MjUwMjM1MDha
+        MEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJ
+        bnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw
+        ggEKAoIBAQDOGrPb3jitQZBPqJYC2/1rrpXO6cQF4hQV6CPajFnTYI2TmoKVrPpt
+        hbJVbcWC4VopmfVrq2YLkP28L25QEtNCg8QBJOa5jLPCDzffasA40YUqrMMWOh0b
+        JqzXKgtc4u0FffHBSXq3csyQXNeB/UG6qk/0YuJCFYY5zVAnOmyKdLJjngmUQovx
+        ssjfcprkgOMqpPW9BSus4m945OEWqQixk0saxT1MTL3do7oGSacT30jXZV9bowlV
+        COsZj+rR6IQkNYaZUWfYBPuHzEP3RN/J21F7T0KCi4q49CnkEwVsf6pnjFhIBuJ7
+        u+vKQ3Gq0Yro28SJs0leE8x3OA/WnLiJAgMBAAGjgacwgaQwHQYDVR0OBBYEFNL4
+        IU9fUeXBlqKwczeB3Pnup8qeMHUGA1UdIwRuMGyAFNL4IU9fUeXBlqKwczeB3Pnu
+        p8qeoUmkRzBFMQswCQYDVQQGEwJBVTETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8G
+        A1UEChMYSW50ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkggkAv5egaqUg04swDAYDVR0T
+        BAUwAwEB/zANBgkqhkiG9w0BAQUFAAOCAQEAMgANBnQbsgs9Yr0wSG1jD4w/pM90
+        y7MkLjstmOC5u9kHihWk3KDoI4Bx0fXD9wbyhP/E9AikqG7SglkuViRCrtWDprEp
+        8kTGbPG8sPjiu2cnmG19QcmL4HHHaG76r75qEggPu2wRGlEj0BR2zwOuINHCjfgz
+        Zi8Gl/4jRAazOcXmFfnNy/RXVOwswWQOG7aKbhHWCODn7jobT95wVTouEppUw7p9
+        twzPSzG7vudrmO3PSgAT+db/xrDRoHa3xk5H3fltZi7uxpRaWPqsFDezDYul4C8b
+        9JpGUkpLi0wGcVfceVLiZooxVGIQTFJj8Yu6fnTM2ZbD0xwFDyrYM92uWg==
+        -----END CERTIFICATE-----
+  hm:
+    director_account:
+      user: hm
+      password: "<%= gcp_bosh_lite_hm_password %>"
+    resurrector_enabled: true
+  warden_cpi:
+    host_ip: 10.254.50.4
+    warden:
+      connect_network: tcp
+      connect_address: 127.0.0.1:7777
+    agent:
+      mbus: nats://nats:<%= gcp_bosh_lite_nats_password %>@10.254.50.4:4222
+      blobstore:
+        provider: dav
+        options:
+          endpoint: http://10.254.50.4:25251
+          user: agent
+          password: "<%= gcp_bosh_lite_blobstore_agent_password %>"
+  garden:
+    listen_network: tcp
+    network_mtu: 1432
+    listen_address: 0.0.0.0:7777
+    disk_quota_enabled: false
+    allow_host_access: true
+    destroy_containers_on_start: true
+    default_container_grace_time: 0

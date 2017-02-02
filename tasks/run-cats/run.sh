@@ -5,7 +5,6 @@ set -o nounset
 set -o pipefail
 
 pushd deployments-buildpacks
-  bundle install --jobs="$(nproc)"
   # shellcheck disable=SC1091
   . ./bin/target_bosh "$DEPLOYMENT_NAME"
 popd

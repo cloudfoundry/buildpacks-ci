@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# set -ueo pipefail
+
+BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. >/dev/null 2>&1 && pwd )
+
+deployment_name=${1-""}
+deployment_path=${BASE_DIR}/deployments/${deployment_name}
+
+usage() {
+  echo -e "Usage: \n\texport_envs <deployment name>"
+}
+
+reset_bosh_env() {
+  unset $(env | grep BOSH_ | cut -d '=' -f 1)
+  unset $(env | grep AWS_ | cut -d '=' -f 1)
+  unset VAGRANT_CWD
+}
+
+source_deployment() {
+  echo "Switching to deployment: $deployment_name"
+  eval "$( ruby -rerb -ryaml -rostruct -e "lp = YAML.load(\`lpass show 'Shared-Buildpacks/deployments-buildpacks.yml' --notes\`); puts ERB.new(\`cat deployments/bosh_shared_environment.erb\`).result(OpenStruct.new(lp).instance_eval {binding})" )"
+  eval "$( ruby -rerb -ryaml -rostruct -e "lp = YAML.load(\`lpass show 'Shared-Buildpacks/deployments-buildpacks.yml' --notes\`); puts ERB.new(\`cat $deployment_path/bosh_environment.erb\`).result(OpenStruct.new(lp).instance_eval {binding})" )"
+}
+
+if [ "$deployment_name" == "" ] || [ "$deployment_name" == "help" ]; then
+  usage
+else
+  reset_bosh_env
+  source_deployment
+fi
