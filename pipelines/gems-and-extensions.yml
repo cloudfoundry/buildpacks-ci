@@ -33,6 +33,10 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/compile-extensions.git
+  - name: libbuildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/libbuildpack.git
   - name: cf-edge-environments
     type: pool
     source:
@@ -41,6 +45,16 @@ resources:
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 jobs:
+  - name: libbuildpack-specs
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: libbuildpack
+          trigger: true
+      - task: run-libbuildpack-specs
+        file: buildpacks-ci/tasks/run-libbuildpack-specs/task.yml
   - name: buildpack-packager-specs
     serial: true
     public: true
