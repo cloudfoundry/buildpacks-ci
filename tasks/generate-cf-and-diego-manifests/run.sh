@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-pushd deployments-buildpacks
+pushd buildpacks-ci
   # shellcheck disable=SC1091
   source ./bin/target_bosh "$DEPLOYMENT_NAME"
 popd
