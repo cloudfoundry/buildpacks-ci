@@ -4,3 +4,9 @@ private.yml
 spec/scripts/stacks/fixtures/receipt-artifacts/
 spec/scripts/stacks/fixtures/stacks-artifacts/
 rspec.failures
+
+deployments/concourse-gcp/manifest.yml
+deployments/concourse-gcp/cloud.yml
+deployments/concourse-gcp-terraform/concourse.tf
+deployments/concourse-gcp-terraform/terraform.tfstate
+deployments/concourse-gcp-terraform/terraform.tfstate.backup
