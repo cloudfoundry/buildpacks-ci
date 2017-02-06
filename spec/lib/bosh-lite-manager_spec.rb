@@ -62,7 +62,7 @@ describe BoshLiteManager do
 
     context 'iaas is aws' do
       it 'deploys bosh-lite to aws and makes the git commits' do
-        expect(subject).to receive(:install_ssh_key).with("#{deployment_dir}/../..").ordered
+        expect(subject).to receive(:install_ssh_key).ordered
         expect(subject).to receive(:delete_aws_instances).ordered
         expect(subject).to receive(:deploy_aws_bosh_lite).ordered
         expect(GitClient).to receive(:add_everything).ordered
@@ -117,7 +117,7 @@ describe BoshLiteManager do
 
     context 'iaas is aws' do
       it 'deletes the aws instance ' do
-        expect(subject).to receive(:install_ssh_key).with("#{deployment_dir}/../..").ordered
+        expect(subject).to receive(:install_ssh_key).ordered
         expect(subject).to receive(:delete_aws_instances).ordered
 
         subject.destroy
@@ -144,7 +144,7 @@ describe BoshLiteManager do
 
     context 'iaas is aws' do
       it 'installs the ssh key' do
-        expect(subject).to receive(:install_ssh_key).with("#{deployment_dir}/../..")
+        expect(subject).to receive(:install_ssh_key).ordered
         subject.send :setup_bosh_connection
       end
     end
@@ -285,29 +285,20 @@ describe BoshLiteManager do
   end
 
   describe '#install_ssh_key' do
-    let(:install_dir) { Dir.mktmpdir }
-    let(:keys_dir)    { File.join(install_dir, 'keys') }
-    let(:key_file)    { File.join(keys_dir, 'bosh.pem') }
-
-    before do
-      FileUtils.mkdir_p(keys_dir)
-    end
-
-    after { FileUtils.rm_rf(install_dir) }
-
     it 'creates a bosh.pem file with the bosh private key' do
-      subject.send(:install_ssh_key, install_dir)
+      key_file = subject.send(:install_ssh_key)
       expect(File.read(key_file)).to eq('APRIVATESSHKEY')
     end
 
     it 'chmods and adds that key to the ssh agent' do
-      expect(subject).to receive(:run_or_exit).with("chmod 0600 #{key_file}").ordered
-      expect(subject).to receive(:run_or_exit).with("ssh-add #{key_file}").ordered
-      subject.send(:install_ssh_key, install_dir)
+      key_file = subject.send(:install_ssh_key)
+
+      expect(subject).to have_received(:run_or_exit).with("chmod 0600 #{key_file}").ordered
+      expect(subject).to have_received(:run_or_exit).with("ssh-add #{key_file}").ordered
     end
 
     it 'sets the BOSH_LITE_PRIVATE_KEY env var to key file path' do
-      subject.send(:install_ssh_key, install_dir)
+      key_file = subject.send(:install_ssh_key)
       expect(ENV.fetch('BOSH_LITE_PRIVATE_KEY')).to eq(key_file)
     end
   end

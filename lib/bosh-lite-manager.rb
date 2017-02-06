@@ -5,6 +5,7 @@ require 'fileutils'
 require 'net/http'
 require 'erb'
 require 'ostruct'
+require 'tmpdir'
 
 require_relative 'git-client'
 
@@ -64,7 +65,7 @@ class BoshLiteManager
 
   def setup_bosh_connection
     if iaas == 'aws'
-      install_ssh_key(File.join(deployment_dir, '..', '..'))
+      install_ssh_key
     elsif iaas == 'azure' || iaas == 'gcp'
       target_bosh_director
     end
@@ -135,14 +136,16 @@ class BoshLiteManager
     end
   end
 
-  def install_ssh_key(install_dir)
-    ssh_key_file = File.join(install_dir, 'keys', 'bosh.pem')
+  def install_ssh_key
+    ssh_key_file = File.join(Dir.mktmpdir, 'keys', 'bosh.pem')
+    FileUtils.mkdir_p(File.dirname(ssh_key_file))
     File.write(ssh_key_file, bosh_private_key)
 
     run_or_exit "chmod 0600 #{ssh_key_file}"
     run_or_exit "ssh-add #{ssh_key_file}"
 
     ENV.store('BOSH_LITE_PRIVATE_KEY', ssh_key_file)
+    ssh_key_file
   end
 
   def update_admin_password
