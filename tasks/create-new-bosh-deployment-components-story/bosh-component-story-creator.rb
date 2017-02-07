@@ -74,7 +74,7 @@ class BoshComponentStoryCreator
     description = <<~DESCRIPTION
                      There is a new version of #{component}: #{version}
 
-                     Update the relevant BOSH deployment manifests in https://github.com/pivotal-cf/deployments-buildpacks
+                     Update the relevant BOSH deployment manifests in https://github.com/cloudfoundry/buildpacks-ci/tree/develop/deployments
                      DESCRIPTION
 
     tracker_client = TrackerApi::Client.new(token: ENV.fetch('TRACKER_API_TOKEN'))

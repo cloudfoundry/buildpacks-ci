@@ -14,14 +14,16 @@ if iaas == 'azure' || iaas == 'gcp'
   bosh_director_user = ENV.fetch("#{iaas.upcase}_BOSH_DIRECTOR_USER")
   bosh_director_password = ENV.fetch("#{iaas.upcase}_BOSH_DIRECTOR_PASSWORD")
   bosh_director_target = "10.0.0.6"
+  deployments_location = 'buildpacks-ci'
 elsif iaas == 'aws'
   bosh_lite_deployment_name = bosh_director_user = bosh_director_password = bosh_director_target = nil
+  deployments_location = 'deployments-buildpacks'
 else
   puts "Please specify IAAS=(aws|azure|gcp)"
   exit 1
 end
 
-deployment_dir = File.join(Dir.pwd,'deployments-buildpacks', 'deployments', deployment_id)
+deployment_dir = File.join(Dir.pwd, deployments_location, 'deployments', deployment_id)
 
 manager = BoshLiteManager.new(iaas: iaas,
                                deployment_dir: deployment_dir,
