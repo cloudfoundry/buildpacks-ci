@@ -527,6 +527,7 @@ jobs: ##########################################################################
 
   - name: shipit
     serial: true
+    serial_groups: [ stacks ]
     public: true
     plan:
       - aggregate:
