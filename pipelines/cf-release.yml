@@ -221,21 +221,17 @@ jobs:
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             ROOTFS_RELEASE: cflinuxfs2-rootfs
           privileged: true
-       # - put: deployments-buildpacks
-       #   params:
-       #     repository: generate-manifest-artifacts
-       #     rebase: true
         - task: create-cf-release
           file: buildpacks-ci/tasks/create-cf-bosh-release-to-deploy/task.yml
           privileged: true
         - put: cf-release-cf-deployment
           params:
-            manifest: generate-manifest-artifacts/deployments/cf-release.buildpacks.ci/manifest.yml
+            manifest: generate-manifest-artifacts/cf-release.buildpacks.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
         - put: cf-release-diego-deployment
           params:
-            manifest: generate-manifest-artifacts/deployments/cf-release.buildpacks.ci/diego.yml
+            manifest: generate-manifest-artifacts/cf-release.buildpacks.ci/diego.yml
             stemcells: ['lite-stemcell/stemcell.tgz']
             releases:
               - diego-bosh-release/release.tgz

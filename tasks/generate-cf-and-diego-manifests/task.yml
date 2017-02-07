@@ -9,7 +9,6 @@ inputs:
   - name: buildpacks-ci
   - name: cf-release
   - name: diego-release
-  - name: deployments-buildpacks
 outputs:
   - name: generate-manifest-artifacts
 run:
