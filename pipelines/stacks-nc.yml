@@ -406,7 +406,7 @@ jobs: ##########################################################################
             ROOTFS_RELEASE: cflinuxfs2-nc-rootfs
         - put: stacks-rootfs-deployment
           params:
-            manifest: rootfs-smoke-test-manifest-artifacts/deployments/stacks-nc.buildpacks.ci/rootfs-smoke-test.yml
+            manifest: rootfs-smoke-test-manifest-artifacts/stacks-nc.buildpacks.ci/rootfs-smoke-test.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cflinuxfs2-rootfs-release-artifacts/dev_releases/cflinuxfs2-nc-rootfs/*.tgz]
         - task: run-rootfs-smoke-test
@@ -422,12 +422,12 @@ jobs: ##########################################################################
           privileged: true
         - put: stacks-cf-deployment
           params:
-            manifest: generate-manifest-artifacts/deployments/stacks-nc.buildpacks.ci/manifest.yml
+            manifest: generate-manifest-artifacts/stacks-nc.buildpacks.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
         - put: stacks-diego-deployment
           params:
-            manifest: generate-manifest-artifacts/deployments/stacks-nc.buildpacks.ci/diego.yml
+            manifest: generate-manifest-artifacts/stacks-nc.buildpacks.ci/diego.yml
             stemcells: ['lite-stemcell/stemcell.tgz']
             releases:
               - diego-bosh-release/release.tgz

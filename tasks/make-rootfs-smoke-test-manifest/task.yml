@@ -7,7 +7,6 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: cflinuxfs2-rootfs-release
-  - name: deployments-buildpacks
 outputs:
   - name: rootfs-smoke-test-manifest-artifacts
 run:

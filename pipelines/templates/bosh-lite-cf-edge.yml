@@ -191,13 +191,13 @@ jobs:
           privileged: true
         - put: cf-deployment
           params:
-            manifest: generate-manifest-artifacts/deployments/<%= full_deployment_name %>/manifest.yml
+            manifest: generate-manifest-artifacts/<%= full_deployment_name %>/manifest.yml
             stemcells: ['bosh-stemcell/stemcell.tgz']
             releases:
               - cf-bosh-release/release.tgz
         - put: diego-deployment
           params:
-            manifest: generate-manifest-artifacts/deployments/<%= full_deployment_name %>/diego.yml
+            manifest: generate-manifest-artifacts/<%= full_deployment_name %>/diego.yml
             stemcells: ['bosh-stemcell/stemcell.tgz']
             releases:
               - cflinuxfs2-rootfs-bosh-release/release.tgz
