@@ -558,6 +558,7 @@ jobs: ##########################################################################
 
   - name: shipit
     serial: true
+    serial_groups: [ stacks-nc ]
     plan:
       - aggregate:
         - get: buildpacks-ci
