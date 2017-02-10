@@ -17,7 +17,7 @@ Dir.chdir('buildpack') do
 
   File.write(File.join(artifact_path, 'RECENT_CHANGES'), [
     recent_change,
-    "Packaged binaries:\n",
+    "\n\nPackaged binaries:\n",
     `BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --list`,
     "Default binary versions:\n",
     `BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --defaults`
