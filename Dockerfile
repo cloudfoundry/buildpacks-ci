@@ -59,6 +59,7 @@ RUN pip install awscli
 COPY build/*.sh /etc/profile.d/
 
 # install buildpacks-ci Gemfile
+RUN gem update --system
 RUN gem install bundler
 COPY Gemfile /usr/local/Gemfile
 COPY Gemfile.lock /usr/local/Gemfile.lock
