@@ -87,11 +87,11 @@ resources: #####################################################################
 
   ## Resource Pools ##
 
-  - name: cf-edge-environments
+  - name: edge-shared-environments
     type: pool
     source:
       branch: master
-      pool: cf-edge-environments
+      pool: edge-shared-environments
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
@@ -344,25 +344,24 @@ jobs: ##########################################################################
             BUILDPACK_DEPENDENCIES_HOST_DOMAIN: {{buildpack-dependencies-host-domain}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
         - put: cf-environments
-          resource: cf-edge-environments
+          resource: edge-shared-environments
           params:
-            acquire: true
+            claim: <%= buildpack %>
         - do:
           - task: rspec
-            file: buildpacks-ci/tasks/run-buildpack-specs-before-auto-update/task.yml
+            file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
             privileged: true
             params:
               STACKS: cflinuxfs2
               COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              CF_PASSWORD: {{ci-cf-password}}
+              CF_PASSWORD: {{ci_cf_shared_password}}
               RUBYGEM_MIRROR: {{rubygem-mirror}}
-              BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           - put: <%= buildpack %>-buildpack
             params:
               repository: buildpack-artifacts
               rebase: true
           ensure:
-            put: cf-edge-environments
+            put: edge-shared-environments
             params:
               release: cf-environments
         on_failure:
