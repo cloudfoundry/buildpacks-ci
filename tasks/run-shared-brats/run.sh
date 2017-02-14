@@ -10,13 +10,15 @@ pushd brats
   fi
   bundle install
   if [ -n "$CI_CF_PASSWORD" ]; then
-    cf login -a "api.buildpacks-shared.cf-app.com" -u "$CI_CF_USERNAME" -p "$CI_CF_PASSWORD" --skip-ssl-validation
+    space="brats-$LANGUAGE"
 
-		cf create-org pivotal
-		cf target -o pivotal
+    cf login -a "api.buildpacks-shared.cf-app.com" -u "$CI_CF_USERNAME" -p "$CI_CF_PASSWORD" -o pivotal -s "$space" --skip-ssl-validation || true
 
-		cf create-space "brats-$LANGUAGE" -o pivotal
-		cf target -s "brats-$LANGUAGE" -o pivotal
+    cf create-org pivotal
+    cf target -o pivotal
+
+    cf create-space "$space" -o pivotal
+    cf target -s "$space" -o pivotal
   fi
 
   if [ -z "${STACK-}" ]; then
