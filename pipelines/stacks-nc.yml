@@ -45,7 +45,7 @@ resources: #####################################################################
       branch: master
       private_key: {{stacks-nc-private-key}}
 
-  - name: new-cves
+  - name: new-cves-trigger
     type: git
     source:
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
@@ -53,13 +53,14 @@ resources: #####################################################################
       paths: [ new-cves-stacks-nc/ubuntu14.04.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
-  - name: new-cves-out
+  - name: new-cves
     type: git
     source:
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
       branch: master
       paths: [ new-cves-stacks-nc/ubuntu14.04.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
+      disable_ci_skip: true
 
   - name: deployments-buildpacks
     type: git
@@ -256,8 +257,9 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: new-cves
+        - get: new-cves-trigger
           trigger: true
+        - get: new-cves
         - get: stacks
         - get: version
           params: { pre: rc }
@@ -637,12 +639,7 @@ jobs: ##########################################################################
             body: release-body/body
             globs:
               - stack-s3/cflinuxfs2_nc-*.tar.gz
-        - get: new-cves-out
-        - task: compare-cve-resources
-          file: buildpacks-ci/tasks/compare-cve-resources/task.yml
-          params:
-            FILE_PATH: "new-cves-stacks-nc/ubuntu14.04.yml"
-        - put: new-cves-out
+        - put: new-cves
           params:
             repository: new-cves-artifacts
             rebase: true
