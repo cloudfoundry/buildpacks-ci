@@ -47,7 +47,7 @@ RUN wget -O- 'https://github.com/cloudfoundry-incubator/spiff/releases/download/
 RUN chmod 755 /usr/bin/spiff
 
 #download hub CLI
-RUN wget -O- https://github.com/github/hub/releases/download/v2.2.9/hub-linux-amd64-2.2.9.tgz | tar xz -C /usr/bin --strip-components=1 hub-linux-amd64-2.2.9/hub
+RUN wget -O- https://github.com/github/hub/releases/download/v2.2.1/hub-linux-amd64-2.2.1.tar.gz | tar xz -C /usr/bin --strip-components=1 hub-linux-amd64-2.2.1/hub
 
 # Ensure Concourse Filter binary is present
 RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.0.3/concourse-filter' && mv concourse-filter /usr/local/bin && chmod +x /usr/local/bin/concourse-filter
