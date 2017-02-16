@@ -8,6 +8,7 @@ inputs:
   - name: buildpacks-ci
   - name: brats
   - name: cf-environments
+  - name: cf-space
 run:
   path: buildpacks-ci/tasks/run-shared-brats/run.sh
 params:
