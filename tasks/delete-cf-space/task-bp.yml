@@ -6,13 +6,7 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: buildpack
   - name: cf-bp-space
     path: cf-space
 run:
-  path: buildpacks-ci/tasks/run-buildpack-shared-specs/run.sh
-params:
-  COMPOSER_GITHUB_OAUTH_TOKEN:
-  STACKS:
-  CF_PASSWORD:
-  RUBYGEM_MIRROR:
+  path: buildpacks-ci/tasks/delete-cf-space/run.sh
