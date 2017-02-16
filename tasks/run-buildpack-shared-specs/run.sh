@@ -28,6 +28,6 @@ fi
 bundle install --jobs="$(nproc)" --no-cache
 
 for stack in $STACKS; do
-  bundle exec buildpack-build --uncached --stack="$stack" --host=buildpacks-shared.cf-app.com --shared-host --integration-space=$SPACE
-  bundle exec buildpack-build --cached --stack="$stack" --host=buildpacks-shared.cf-app.com --shared-host --integration-space=$SPACE
+  bundle exec buildpack-build --uncached --stack="$stack" --host=buildpacks-shared.cf-app.com --shared-host --integration-space="$SPACE"
+  bundle exec buildpack-build --cached --stack="$stack" --host=buildpacks-shared.cf-app.com --shared-host --integration-space="$SPACE"
 done
