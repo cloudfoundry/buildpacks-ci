@@ -22,6 +22,23 @@ class StateOfBoshLites
 
     @environments = {'aws' => @aws_environment_names,
                      'gcp' => @gcp_environment_names}
+
+    @languages = %w(binary dotnet-core go multi nodejs php python ruby staticfile)
+  end
+
+  def get_states!(resource_pools_dir: nil, git_pull: true)
+    raise "resource_pools_dir is required" if resource_pools_dir.nil?
+
+    Dir.chdir(resource_pools_dir) do
+      GitClient.pull_current_branch if git_pull
+      get_all_environment_statuses
+
+      @languages.each do |language|
+        state_of_environments.push({'name' => language, 'status' => get_lock_status("edge-shared-environments", language)})
+      end
+    end
+
+    state_of_environments
   end
 
   def get_environment_status(environment, iaas)
@@ -29,30 +46,7 @@ class StateOfBoshLites
 
     resource_type = "cf-#{type}#{iaas=='aws' ? '' : '-'+ iaas}-environments"
 
-    if File.exist?("#{resource_type}/claimed/#{environment}")
-      claimed = true
-      regex = / (.*) claiming: #{environment}/
-    elsif File.exist?("#{resource_type}/unclaimed/#{environment}")
-      claimed = false
-      regex = / (.*) unclaiming: #{environment}/
-    else
-      return nil
-    end
-
-    #find which job claimed / unclaimed the environment
-    recent_commits = GitClient.get_list_of_one_line_commits(Dir.pwd, 500)
-
-    most_recent_commit = recent_commits.select do |commit|
-      commit.match regex
-    end.first
-
-    concourse_job = nil
-    if most_recent_commit
-      most_recent_commit.match regex
-      concourse_job = $1
-    end
-
-    {'claimed' => claimed, 'job' => concourse_job}
+    get_lock_status(resource_type, environment)
   end
 
   def display_state(output_type)
@@ -87,15 +81,6 @@ class StateOfBoshLites
     end
   end
 
-  def get_states!(resource_pools_dir: nil, git_pull: true)
-    raise "resource_pools_dir is required" if resource_pools_dir.nil?
-
-    Dir.chdir(resource_pools_dir) do
-      GitClient.pull_current_branch if git_pull
-      get_all_environment_statuses
-    end
-  end
-
   def bosh_lite_in_pool?(deployment_id)
     bosh_lite_env = state_of_environments.find {|env| deployment_id == env['name'] }
     !bosh_lite_env['status'].nil?
@@ -110,4 +95,32 @@ class StateOfBoshLites
       end
     end
   end
+
+  def get_lock_status(resource_type, lock)
+    if File.exist?("#{resource_type}/claimed/#{lock}")
+      claimed = true
+      regex = / (.*) claiming: #{lock}/
+    elsif File.exist?("#{resource_type}/unclaimed/#{lock}")
+      claimed = false
+      regex = / (.*) unclaiming: #{lock}/
+    else
+      return nil
+    end
+
+    #find which job claimed / unclaimed the environment
+    recent_commits = GitClient.get_list_of_one_line_commits(Dir.pwd, 500)
+
+    most_recent_commit = recent_commits.select do |commit|
+      commit.match regex
+    end.first
+
+    concourse_job = nil
+    if most_recent_commit
+      most_recent_commit.match regex
+      concourse_job = $1
+    end
+
+    {'claimed' => claimed, 'job' => concourse_job}
+  end
+
 end
