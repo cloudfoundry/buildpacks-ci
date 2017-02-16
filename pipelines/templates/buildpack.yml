@@ -452,50 +452,46 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - put: cf-environments
-        resource: edge-shared-environments
-        params:
-          claim: <%= language %>
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - get: buildpack
-          resource: buildpack-develop
-          trigger: true
-      - aggregate:
-        - do:
-          - put: cf-space
-          - task: rspec
-            file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
-            params:
-              STACKS: cflinuxfs2
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              CF_PASSWORD: {{ci_cf_shared_password}}
-              RUBYGEM_MIRROR: {{rubygem-mirror}}
-            privileged: true
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task.yml
-        - do:
-          - put: cf-space
-          - task: brats
-            file: buildpacks-ci/tasks/run-shared-brats/task.yml
-            params:
-              BUILDPACK_BRANCH: develop
-              CI_CF_USERNAME: {{ci-cf-username}}
-              CI_CF_PASSWORD: {{ci_cf_shared_password}}
-              LANGUAGE: <%= language %>
-              RUBYGEM_MIRROR: {{rubygem-mirror}}
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task.yml
-        on_failure:
-          put: failure-alert
+      - do:
+        - put: cf-environments
+          resource: edge-shared-environments
           params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+            claim: <%= language %>
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - get: buildpack
+            resource: buildpack-develop
+            trigger: true
+        - do:
+          - put: cf-space
+          - aggregate:
+            - task: rspec
+              file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
+              params:
+                STACKS: cflinuxfs2
+                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+                CF_PASSWORD: {{ci_cf_shared_password}}
+                RUBYGEM_MIRROR: {{rubygem-mirror}}
+              privileged: true
+            - task: brats
+              file: buildpacks-ci/tasks/run-shared-brats/task.yml
+              params:
+                BUILDPACK_BRANCH: develop
+                CI_CF_USERNAME: {{ci-cf-username}}
+                CI_CF_PASSWORD: {{ci_cf_shared_password}}
+                LANGUAGE: <%= language %>
+                RUBYGEM_MIRROR: {{rubygem-mirror}}
+          on_failure:
+            put: failure-alert
+            params:
+              text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+              channel: {{concourse-job-failure-notifications-slack-channel}}
+              username: concourse
+              icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task.yml
         ensure:
           put: edge-shared-environments
           params:
