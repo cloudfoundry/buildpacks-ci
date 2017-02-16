@@ -26,7 +26,7 @@ jobs:
           params:
             RESOURCE_NAME: <%= resource_name + '.buildpacks-gcp.ci' %>
             RESOURCE_TYPE: <%= resource_type %>
-            PIPELINE_NAME: unclaim-bosh-lites
+            PIPELINE_NAME: unclaim-locks
         - put: resource-pools
           params:
             repository: resource-pools-artifacts
@@ -48,10 +48,30 @@ jobs:
           params:
             RESOURCE_NAME: <%= resource_name + '.buildpacks.ci' %>
             RESOURCE_TYPE: <%= resource_type %>
-            PIPELINE_NAME: unclaim-bosh-lites
+            PIPELINE_NAME: unclaim-locks
         - put: resource-pools
           params:
             repository: resource-pools-artifacts
             rebase: true
   <% end %>
+<% end %>
+
+<% ['binary', 'dotnet-core', 'multi', 'nodejs', 'php', 'python', 'ruby', 'staticfile', 'go'].each do |resource_name| %>
+  - name: unclaim-<%= resource_name %>-buildpack
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: resource-pools
+      - do:
+        - task: unclaim-bosh-lite-resource
+          file: buildpacks-ci/tasks/unclaim-bosh-lite-resource/task.yml
+          params:
+            RESOURCE_NAME: <%= resource_name %>
+            RESOURCE_TYPE: edge-shared-environments
+            PIPELINE_NAME: unclaim-locks
+        - put: resource-pools
+          params:
+            repository: resource-pools-artifacts
+            rebase: true
 <% end %>
