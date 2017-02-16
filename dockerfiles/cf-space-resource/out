@@ -14,7 +14,7 @@ ORGANIZATION=$(jq -r '.source.organization' < "$payload")
 cf api "$TARGET" --skip-ssl-validation
 cf auth "$USERNAME" "$PASSWORD"
 
-SPACE=$(< /dev/urandom head -c${1:-32} | base64 | head -c 8 | awk '{print tolower($0)}')
+SPACE=$(openssl rand -base64 32 | base64 | head -c 8 | awk '{print tolower($0)}')
 cf create-space "$SPACE" -o "$ORGANIZATION"
 
 echo "{\"version\": {\"ref\":\"$SPACE\"},\"metadata\":[]}" >&3

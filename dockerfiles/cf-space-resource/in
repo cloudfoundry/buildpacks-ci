@@ -21,9 +21,6 @@ SPACE=$(jq -r '.version.ref' < "$payload")
 } > "$DESTINATION/login"
 chmod 755 "$DESTINATION/login"
 
-# shellcheck source=/dev/null
-source "$DESTINATION/login"
-
 echo "$SPACE" > "$DESTINATION/name"
 echo "export SPACE=$SPACE" > "$DESTINATION/variables"
 
