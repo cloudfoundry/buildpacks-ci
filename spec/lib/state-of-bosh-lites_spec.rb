@@ -33,6 +33,7 @@ describe StateOfBoshLites do
       before do
         allow(Dir).to receive(:chdir).and_call_original
         allow(subject).to receive(:get_environment_status).and_return( {'claimed' => true, 'job' => 'php-buildpack/specs-develop build 13'} )
+        allow(subject).to receive(:get_lock_status).and_return( {'claimed' => false, 'job' => 'ruby-buildpack/edge-shared-environments build 19'} )
       end
 
       after { FileUtils.rm_rf(resource_pools_dir) }
@@ -52,6 +53,19 @@ describe StateOfBoshLites do
              expect(subject).to have_received(:get_environment_status).with(env, iaas)
           end
         end
+      end
+
+      it 'gets the status of all the languages' do
+        data = subject.get_states!(resource_pools_dir: resource_pools_dir)
+
+        languages = %w(binary dotnet-core go multi nodejs php python ruby staticfile)
+        environment = "edge-shared-environments"
+
+        languages.each do |language|
+          expect(subject).to have_received(:get_lock_status).with(environment, language)
+        end
+
+        expect(data).to include({"name"=>"ruby", "status"=> {"claimed"=>false, "job"=>"ruby-buildpack/edge-shared-environments build 19"}})
       end
     end
   end
