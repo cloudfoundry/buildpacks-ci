@@ -448,7 +448,7 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-develop
           trigger: true
-      - do:
+      - aggregate:
         - task: rspec
           file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
           params:
