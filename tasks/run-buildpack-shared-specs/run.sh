@@ -4,6 +4,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+SPACE=$(cat cf-space/name)
+
 cd buildpack
 
 ../buildpacks-ci/tasks/run-buildpack-shared-specs/check-unsupported-manifest.rb
@@ -26,6 +28,6 @@ fi
 bundle install --jobs="$(nproc)" --no-cache
 
 for stack in $STACKS; do
-  bundle exec buildpack-build --uncached --stack="$stack" --host=buildpacks-shared.cf-app.com --shared-host --delete-space-on-exit
-  bundle exec buildpack-build --cached --stack="$stack" --host=buildpacks-shared.cf-app.com --shared-host --delete-space-on-exit
+  bundle exec buildpack-build --uncached --stack="$stack" --host=buildpacks-shared.cf-app.com --shared-host --integration-space=$SPACE
+  bundle exec buildpack-build --cached --stack="$stack" --host=buildpacks-shared.cf-app.com --shared-host --integration-space=$SPACE
 done

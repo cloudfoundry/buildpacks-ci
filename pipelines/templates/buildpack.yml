@@ -9,8 +9,23 @@ resource_types:
     source:
       repository: pivotalcf/pivnet-resource
       tag: latest-final
+  - name: cf-space-resource
+    type: docker-image
+    source:
+      repository: dgodd/cf-space-resource
 
 resources: ############################################################################################################
+
+  ## cf-space-resource ##
+
+  - name: cf-space
+    type: cf-space-resource
+    source:
+      target: api.buildpacks-shared.cf-app.com
+      username: {{ci-cf-username}}
+      password: {{ci_cf_shared_password}}
+      organization: pivotal
+      TYPE: LINUX
 
   ## Git ##
 
@@ -448,6 +463,7 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-develop
           trigger: true
+        - put: cf-space
       - aggregate:
         - task: rspec
           file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
@@ -473,9 +489,12 @@ jobs: ##########################################################################
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
         ensure:
-          put: edge-shared-environments
-          params:
-            release: cf-environments
+          aggregate:
+          - put: edge-shared-environments
+            params:
+              release: cf-environments
+          - task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task.yml
   - name: specs-edge-aws-develop
     serial: true
     public: true
