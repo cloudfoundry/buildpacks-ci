@@ -31,12 +31,6 @@ class NewReleasesDetector
       'dependency-notifier'
     )
 
-    slack_clients['pivnet'] = SlackClient.new(
-      ENV.fetch('PIVNET_SLACK_WEBHOOK'),
-      ENV.fetch('PIVNET_SLACK_CHANNEL'),
-      'dependency-notifier'
-    )
-
     slack_clients['capi'] = SlackClient.new(
       ENV.fetch('CAPI_SLACK_WEBHOOK'),
       ENV.fetch('CAPI_SLACK_CHANNEL'),
@@ -47,11 +41,6 @@ class NewReleasesDetector
       versions.each do |version|
         new_dependency_version_output = "There is a new update to the *#{dependency}* dependency: version *#{version}*\n"
         slack_clients['buildpacks'].post_to_slack new_dependency_version_output
-
-        if dependency == :go
-          new_go_version_output = "There is a new version of *go* available: #{version}"
-          slack_clients['pivnet'].post_to_slack new_go_version_output
-        end
 
         if notify_capi?(dependency, [version])
           new_nginx_version_output = "There is a new version of *nginx* available: #{version}"

@@ -77,8 +77,6 @@ jobs:
         params:
           BUILDPACKS_SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
           BUILDPACKS_SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
-          PIVNET_SLACK_CHANNEL: {{pivnet-slack-channel}}
-          PIVNET_SLACK_WEBHOOK: {{pivnet-slack-webhook}}
           CAPI_SLACK_CHANNEL: {{capi-slack-channel}}
           CAPI_SLACK_WEBHOOK: {{capi-slack-webhook}}
           GITHUB_USERNAME: {{github-username}}
