@@ -18,7 +18,15 @@ resources: #####################################################################
 
   ## cf-space-resource ##
 
-  - name: cf-space
+  - name: cf-bp-space
+    type: cf-space-resource
+    source:
+      target: api.buildpacks-shared.cf-app.com
+      username: {{ci-cf-username}}
+      password: {{ci_cf_shared_password}}
+      organization: pivotal
+
+  - name: cf-brat-space
     type: cf-space-resource
     source:
       target: api.buildpacks-shared.cf-app.com
@@ -463,9 +471,9 @@ jobs: ##########################################################################
           - get: buildpack
             resource: buildpack-develop
             trigger: true
-        - do:
-          - put: cf-space
-          - aggregate:
+        - aggregate:
+          - do:
+            - put: cf-bp-space
             - task: rspec
               file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
               params:
@@ -474,6 +482,11 @@ jobs: ##########################################################################
                 CF_PASSWORD: {{ci_cf_shared_password}}
                 RUBYGEM_MIRROR: {{rubygem-mirror}}
               privileged: true
+            ensure:
+              task: delete-cf-space
+              file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
+          - do:
+            - put: cf-brat-space
             - task: brats
               file: buildpacks-ci/tasks/run-shared-brats/task.yml
               params:
@@ -482,16 +495,16 @@ jobs: ##########################################################################
                 CI_CF_PASSWORD: {{ci_cf_shared_password}}
                 LANGUAGE: <%= language %>
                 RUBYGEM_MIRROR: {{rubygem-mirror}}
-          on_failure:
-            put: failure-alert
-            params:
-              text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-              channel: {{concourse-job-failure-notifications-slack-channel}}
-              username: concourse
-              icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task.yml
+            ensure:
+              task: delete-cf-space
+              file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
         ensure:
           put: edge-shared-environments
           params:
