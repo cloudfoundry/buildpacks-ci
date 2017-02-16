@@ -314,28 +314,22 @@ describe NewReleasesDetector do
 
   describe '#post_to_slack' do
     let(:buildpacks_slack_client)   { double(:buildpacks_slack_client) }
-    let(:pivnet_slack_client)       { double(:pivnet_slack_client) }
     let(:capi_slack_client)         { double(:capi_slack_client) }
 
     before do
       @old_buildpacks_channel = ENV.fetch('BUILDPACKS_SLACK_CHANNEL', nil)
-      @old_pivnet_channel = ENV.fetch('PIVNET_SLACK_CHANNEL', nil)
       @old_capi_channel = ENV.fetch('CAPI_SLACK_CHANNEL', nil)
 
       @old_buildpacks_webhook = ENV.fetch('BUILDPACKS_SLACK_WEBHOOK', nil)
-      @old_pivnet_webhook = ENV.fetch('PIVNET_SLACK_WEBHOOK', nil)
       @old_capi_webhook = ENV.fetch('CAPI_SLACK_WEBHOOK', nil)
 
       ENV.store('BUILDPACKS_SLACK_CHANNEL', '#buildpacks')
-      ENV.store('PIVNET_SLACK_CHANNEL', '#pivotal-network')
       ENV.store('CAPI_SLACK_CHANNEL', '#capi')
 
       ENV.store('BUILDPACKS_SLACK_WEBHOOK', 'some-webhook')
-      ENV.store('PIVNET_SLACK_WEBHOOK', 'some-webhook')
       ENV.store('CAPI_SLACK_WEBHOOK', 'some-webhook')
 
       allow(SlackClient).to receive(:new).with(anything, '#buildpacks', anything).and_return(buildpacks_slack_client)
-      allow(SlackClient).to receive(:new).with(anything, '#pivotal-network', anything).and_return(pivnet_slack_client)
       allow(SlackClient).to receive(:new).with(anything, '#capi', anything).and_return(capi_slack_client)
 
       allow_any_instance_of(described_class).to receive(:generate_dependency_tags).with(new_releases_dir).and_return([changed_dependencies, current_tags, unchanged_dependencies])
@@ -343,11 +337,9 @@ describe NewReleasesDetector do
 
     after do
       ENV.store('BUILDPACKS_SLACK_CHANNEL', @old_buildpacks_channel)
-      ENV.store('PIVNET_SLACK_CHANNEL', @old_pivnet_channel)
       ENV.store('CAPI_SLACK_CHANNEL', @old_capi_channel)
 
       ENV.store('BUILDPACKS_SLACK_WEBHOOK', @old_buildpacks_webhook)
-      ENV.store('PIVNET_SLACK_WEBHOOK', @old_pivnet_webhook)
       ENV.store('CAPI_SLACK_WEBHOOK', @old_capi_webhook)
     end
 
@@ -357,7 +349,6 @@ describe NewReleasesDetector do
       it 'posts to buildpacks slack for each new release of that dependency' do
         expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *python* dependency: version *a*\n")
         expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *python* dependency: version *b*\n")
-        expect(pivnet_slack_client).to_not receive(:post_to_slack)
         expect(capi_slack_client).to_not receive(:post_to_slack)
         subject.post_to_slack
       end
@@ -368,7 +359,6 @@ describe NewReleasesDetector do
 
       it 'posts to buildpacks and pivotal-network slack for each new release of that dependency' do
         expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *go* dependency: version *1.9.7*\n")
-        expect(pivnet_slack_client).to receive(:post_to_slack).with("There is a new version of *go* available: 1.9.7")
         expect(capi_slack_client).to_not receive(:post_to_slack)
         subject.post_to_slack
       end
@@ -381,7 +371,6 @@ describe NewReleasesDetector do
         it 'posts to buildpacks and capi slack for each new release of that dependency' do
           expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *nginx* dependency: version *1.11.99*\n")
           expect(capi_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: 1.11.99")
-          expect(pivnet_slack_client).to_not receive(:post_to_slack)
           subject.post_to_slack
         end
       end
@@ -392,7 +381,6 @@ describe NewReleasesDetector do
         it 'only posts to buildpacks slack for each new release of that dependency' do
           expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *nginx* dependency: version *1.10.99*\n")
           expect(capi_slack_client).to_not receive(:post_to_slack)
-          expect(pivnet_slack_client).to_not receive(:post_to_slack)
           subject.post_to_slack
         end
       end
@@ -403,7 +391,6 @@ describe NewReleasesDetector do
 
       it 'does not post to slack' do
         expect(buildpacks_slack_client).to_not receive(:post_to_slack)
-        expect(pivnet_slack_client).to_not receive(:post_to_slack)
         expect(capi_slack_client).to_not receive(:post_to_slack)
         subject.post_to_slack
       end
