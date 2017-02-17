@@ -7,8 +7,22 @@ resource_types: ################################################################
     type: docker-image
     source:
       repository: cfcommunity/slack-notification-resource
+  - name: cf-space-resource
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cf-space-resource
 
 resources: ############################################################################################################
+
+  ## CF Space Resources ##
+
+  - name: cf-bp-space
+    type: cf-space-resource
+    source:
+      target: api.buildpacks-shared.cf-app.com
+      username: {{ci-cf-username}}
+      password: {{ci_cf_shared_password}}
+      organization: pivotal
 
   ## Git Repos ##
 
@@ -348,6 +362,7 @@ jobs: ##########################################################################
           params:
             claim: <%= buildpack %>
         - do:
+          - put: cf-bp-space
           - task: rspec
             file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
             privileged: true
@@ -361,9 +376,12 @@ jobs: ##########################################################################
               repository: buildpack-artifacts
               rebase: true
           ensure:
-            put: edge-shared-environments
-            params:
-              release: cf-environments
+            aggregate:
+            - task: delete-cf-space
+              file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
+            - put: edge-shared-environments
+              params:
+                release: cf-environments
         on_failure:
           put: failure-alert
           params:
