@@ -37,7 +37,7 @@ class Commit
   end
 
   def self.recent(old_version)
-    commits = Open3.capture2(%Q{git log --pretty=format:'{"commit": "%H", "subject": "%s", "body": "%b"},' v#{old_version}..HEAD})
+    commits, _ = Open3.capture2(%Q{git log --pretty=format:'{"commit": "%H", "subject": "%s", "body": "%b"},' v#{old_version}..HEAD})
     commits = "[" + commits + "{}]"
     commits.gsub!(/\n/,'\n')
     commits.gsub!('"},\n{"',%Q["},\n{"])
