@@ -86,3 +86,4 @@ jobs: ########################################################
       - put: public-buildpacks-ci-robots
         params:
           repository: buildpacks-robots-artifacts
+          rebase: true
