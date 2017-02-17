@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 require 'tempfile'
+require_relative '../lib/commit'
 
 old_version = File.open('VERSION', 'r') { |f| f.readline.chomp }
 
@@ -17,9 +18,18 @@ begin
   new_changelog.write '=' * heading.length
   new_changelog.write "\n\n"
 
-  log = `git log v#{old_version}..HEAD`
-  new_changelog.write log
-  new_changelog.write "\n\n"
+  commits = Commit.recent(old_version) rescue nil
+  if commits
+    commits.each do |commit|
+      new_changelog.write commit.to_s
+      new_changelog.write "\n\n"
+    end
+  else
+    log = `git log v#{old_version}..HEAD`
+    new_changelog.write log
+  end
+
+  new_changelog.write "\n"
 
   File.open('CHANGELOG').each { |line| new_changelog.write line }
 ensure
