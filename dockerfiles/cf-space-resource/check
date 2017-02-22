@@ -11,7 +11,7 @@ USERNAME=$(jq -r '.source.username' < "$payload")
 PASSWORD=$(jq -r '.source.password' < "$payload")
 ORGANIZATION=$(jq -r '.source.organization' < "$payload")
 
-cf api "$TARGET" --skip-ssl-validation
-cf auth "$USERNAME" "$PASSWORD"
+cf api "$TARGET" --skip-ssl-validation || (sleep 4 && cf api "$TARGET" --skip-ssl-validation)
+cf auth "$USERNAME" "$PASSWORD" || (sleep 4 && cf auth "$USERNAME" "$PASSWORD")
 
 cf curl "/v2/organizations?q=name%3A${ORGANIZATION}&inline-relations-depth=1" | jq -r '.resources[0].entity.spaces|sort_by(.metadata.created_at)|reverse|map(.entity|{ref: .name})' >&3
