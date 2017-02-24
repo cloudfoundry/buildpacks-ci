@@ -60,7 +60,7 @@ describe ConcourseBinaryBuilder do
           File.write(output_file, output_file_contents)
         end
 
-        "- url: #{source_url}"
+        "Source URL: #{source_url}"
       end
 
       allow(GitClient).to receive(:add_file)
