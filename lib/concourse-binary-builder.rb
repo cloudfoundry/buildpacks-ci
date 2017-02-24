@@ -87,7 +87,7 @@ class ConcourseBinaryBuilder
       download_non_build_dependency(source_url, output_file)
     else
       binary_builder_output = run_binary_builder(flags)
-      /- url:\s(.*)$/.match(binary_builder_output)
+      /^Source URL:\s(.*)$/.match(binary_builder_output)
       @source_url = $1
     end
   end
