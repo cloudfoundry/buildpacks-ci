@@ -37,14 +37,17 @@ class Commit
   end
 
   def self.recent(old_version)
-    commits, _ = Open3.capture2(%Q{git log --pretty=format:'{"commit": "%H", "subject": "%s", "body": "%b"},' v#{old_version}..HEAD})
-    commits = "[" + commits + "{}]"
-    commits.gsub!(/\n/,'\n')
-    commits.gsub!('"},\n{"',%Q["},\n{"])
-    JSON.parse(commits).select do |c|
-      c.size>0
-    end.map do |c|
-      Commit.new(c)
+    hashes, _ = Open3.capture2(%Q{git log --pretty=format:'%H' v#{old_version}..HEAD})
+    hashes.split(/\n/).map do |hash|
+      begin
+        commit, _ = Open3.capture2(%Q{git log --pretty=format:'{"commit": "%H", "subject": "%s", "body": "%b"}' -n 1 #{hash}})
+        commit.gsub!(/\n/,'\n')
+        c = JSON.parse(commit)
+        Commit.new(c)
+      rescue => e
+        commit, _ = Open3.capture2(%Q{git log -n 1 #{hash}})
+        commit
+      end
     end
   end
 end
