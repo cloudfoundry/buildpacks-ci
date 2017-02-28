@@ -21,6 +21,7 @@ describe BuildpackDependencyUpdater do
       let(:buildpack)   { "go" }
       let(:new_version) { "v65" }
       let(:new_md5)     { "18bec8f65810786c846d8b21fe73064f" }
+      let(:existing_godep_version) { 'v64' }
 
       before do
         buildpack_manifest_contents = <<~MANIFEST
@@ -41,7 +42,13 @@ describe BuildpackDependencyUpdater do
               cf_stacks:
                 - cflinuxfs2
             - name: godep
-              version: v64
+              version: #{existing_godep_version}
+              uri: https://buildpacks.cloudfoundry.org/dependencies/godep/godep-v64-linux-x64.tgz
+              md5: f75da3a0c5ec08514ec2700c2a6d1187
+              cf_stacks:
+                - cflinuxfs2
+            - name: composer
+              version: 1.a-thing
               uri: https://buildpacks.cloudfoundry.org/dependencies/godep/godep-v64-linux-x64.tgz
               md5: f75da3a0c5ec08514ec2700c2a6d1187
               cf_stacks:
@@ -77,6 +84,30 @@ describe BuildpackDependencyUpdater do
       it 'records which versions were removed' do
         subject.run!
         expect(subject.removed_versions).to eq(['v64'])
+      end
+
+      context "dependency version to add is older than one in manifest" do
+        let(:new_version) { "v63" }
+        let(:new_md5)     { "18bec8f65810786c846d8b21fe73064f" }
+
+        it "does not try to update the manifest or buildpack" do
+          expect(subject).not_to receive(:perform_dependency_update)
+          expect(subject).not_to receive(:perform_dependency_specific_changes)
+          expect(STDOUT).to receive(:puts).with('godep v63 is older than the one in the manifest for the go buildpack.')
+          expect(STDOUT).to receive(:puts).with('No updates will be made to the manifest or buildpack.')
+          subject.run!
+        end
+      end
+
+      context "dependency version is different to manifest, but neither godep or semver" do
+        let(:existing_godep_version) { '1.a-this' }
+        let(:new_version) { "2.b-that" }
+        let(:new_md5)     { "18bec8f65810786c846d8b21fe73064f" }
+
+        it "updates the specified buildpack manifest dependency with the specified version" do
+          expect(STDOUT).to receive(:puts).with("Attempting to add godep 2.b-that to the go buildpack and manifest.")
+          subject.run!
+        end
       end
 
       context "dependency version to add is already in manifest" do

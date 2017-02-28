@@ -2,13 +2,17 @@ require 'tmpdir'
 require 'fileutils'
 
 class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
-  def dependency_version_currently_in_manifest
+  def dependency_version_currently_in_manifest?
     dependencies = buildpack_manifest['dependencies']
     dependencies.select do |dep|
       dep['name'] == dependency &&
       dep['version'] == dependency_version &&
       dep['uri'] == uri
     end.count > 0
+  end
+
+  def newer_dependency_version_currently_in_manifest?
+    false
   end
 
   def dependency_version

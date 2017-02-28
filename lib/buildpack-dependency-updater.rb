@@ -40,7 +40,13 @@ class BuildpackDependencyUpdater
     manifest_file = File.join(buildpack_dir, "manifest.yml")
     @buildpack_manifest = YAML.load_file(manifest_file)
 
-    if !dependency_version_currently_in_manifest
+    if dependency_version_currently_in_manifest?
+      puts "#{dependency} #{dependency_version} is already in the manifest for the #{buildpack} buildpack."
+      puts 'No updates will be made to the manifest or buildpack.'
+    elsif newer_dependency_version_currently_in_manifest?
+      puts "#{dependency} #{dependency_version} is older than the one in the manifest for the #{buildpack} buildpack."
+      puts 'No updates will be made to the manifest or buildpack.'
+    else
       puts "Attempting to add #{dependency} #{dependency_version} to the #{buildpack} buildpack and manifest."
 
       perform_dependency_update
@@ -49,9 +55,6 @@ class BuildpackDependencyUpdater
       File.open(manifest_file, "w") do |file|
         file.write(buildpack_manifest.to_yaml)
       end
-    else
-      puts "#{dependency} #{dependency_version} is already in the manifest for the #{buildpack} buildpack."
-      puts 'No updates will be made to the manifest or buildpack.'
     end
   end
 
@@ -76,7 +79,15 @@ class BuildpackDependencyUpdater
 
   private
 
-  def dependency_version_currently_in_manifest
+  def newer_dependency_version_currently_in_manifest?
+    dependencies = buildpack_manifest['dependencies']
+    dependencies.select do |dep|
+      newer_version = Gem::Version.new(dep['version'].gsub(/^v/,'')) > Gem::Version.new(dependency_version.gsub(/^v/,'')) rescue false
+      dep['name'] == dependency && newer_version
+    end.count > 0
+  end
+
+  def dependency_version_currently_in_manifest?
     dependencies = buildpack_manifest['dependencies']
     dependencies.select do |dep|
       dep['name'] == dependency &&

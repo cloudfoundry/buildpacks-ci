@@ -1,6 +1,19 @@
 class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
+  def dependency_version_currently_in_manifest?
+    dependencies = buildpack_manifest['dependencies']
+    dependencies.select do |dep|
+      dep['name'] == dependency &&
+      dep['version'] == dependency_version &&
+      dep['uri'] == uri
+    end.count > 0
+  end
+
+  def newer_dependency_version_currently_in_manifest?
+    false
+  end
+
   def perform_dependency_update
-    major_version, minor_version, _ = dependency_version.split(".")
+    major_version, _, _ = dependency_version.split(".")
 
     dependencies_with_same_major_version = buildpack_manifest["dependencies"].select do |dep|
       dep["name"] == dependency && dep["version"].split(".").first == major_version
@@ -55,14 +68,5 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
       "version" => dependency_version
     }
     buildpack_manifest["url_to_dependency_map"] << dependency_hash
-  end
-
-  def dependency_version_currently_in_manifest
-    dependencies = buildpack_manifest['dependencies']
-    dependencies.select do |dep|
-      dep['name'] == dependency &&
-      dep['version'] == dependency_version &&
-      dep['uri'] == uri
-    end.count > 0
   end
 end
