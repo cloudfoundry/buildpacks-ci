@@ -66,15 +66,15 @@ describe BuildpackDependencyUpdater do
     end
 
     context 'the built framework is not in the manifest' do
-      let(:new_version)           { '1.0.5' }
+      let(:new_version)           { '1.1.1' }
 
       it "updates the dotnet buildpack manifest dependency with the specified version" do
         subject.run!
         manifest = YAML.load_file(manifest_file)
 
-        dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '1.0.5'}
-        expect(dependency_in_manifest["version"]).to eq("1.0.5")
-        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/dotnet-framework/dotnet-framework.1.0.5.linux-amd64.tar.gz")
+        dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '1.1.1'}
+        expect(dependency_in_manifest["version"]).to eq("1.1.1")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/dotnet-framework/dotnet-framework.1.1.1.linux-amd64.tar.gz")
         expect(dependency_in_manifest["md5"]).to eq("aaaabbbb22224444")
       end
 
