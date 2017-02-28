@@ -26,15 +26,20 @@ describe Commit do
   end
 
   describe '.recent' do
-    it 'runs git log with json outputting arguments' do
+    it 'runs git log with json outputting arguments per commit' do
       allow(Open3).to receive(:capture2).and_return('', nil)
-      expect(Open3).to receive(:capture2).with(%q{git log --pretty=format:'{"commit": "%H", "subject": "%s", "body": "%b"},' v1.3.4..HEAD})
+      expect(Open3).to receive(:capture2).with(%q{git log --pretty=format:'%H' v1.3.4..HEAD}).and_return('123abc456')
+      expect(Open3).to receive(:capture2).with(%q{git log --pretty=format:'{"commit": "%H", "subject": "%s", "body": "%b"}' -n 1 123abc456})
 
       described_class.recent('1.3.4')
     end
 
     context 'parsable output' do
-      before { allow(Open3).to receive(:capture2).and_return('{"subject":"Hi"},{"subject":"Bye"},', nil) }
+      before do
+        expect(Open3).to receive(:capture2).with("git log --pretty=format:'%H' v1.2.3..HEAD").and_return("1234abc\n9876def")
+        allow(Open3).to receive(:capture2).with(%q{git log --pretty=format:'{"commit": "%H", "subject": "%s", "body": "%b"}' -n 1 1234abc}).and_return('{"subject":"Hi"}', nil)
+        allow(Open3).to receive(:capture2).with(%q{git log --pretty=format:'{"commit": "%H", "subject": "%s", "body": "%b"}' -n 1 9876def}).and_return('{"subject":"Bye"}', nil)
+      end
 
       it 'returns an array of commits' do
         commits = described_class.recent('1.2.3')
@@ -42,11 +47,17 @@ describe Commit do
       end
     end
 
-    context 'parse exceptions' do
-      before { allow(Open3).to receive(:capture2).and_return('{"subject":"Quote " inside text"},{"subject":"Bye"},', nil) }
+    context 'parse exceptions trigger a full commit' do
+      before do
+        expect(Open3).to receive(:capture2).with("git log --pretty=format:'%H' v1.2.3..HEAD").and_return("1234abc\n9876def")
+        allow(Open3).to receive(:capture2).with(%q{git log --pretty=format:'{"commit": "%H", "subject": "%s", "body": "%b"}' -n 1 1234abc}).and_return('{"subject":"Quote " inside text"}', nil)
+        allow(Open3).to receive(:capture2).with(%q{git log --pretty=format:'{"commit": "%H", "subject": "%s", "body": "%b"}' -n 1 9876def}).and_return('{"subject":"Bye"}', nil)
+      end
 
       it 'are bubbled up' do
-        expect { described_class.recent('1.2.3') }.to raise_error JSON::ParserError
+        expect(Open3).to receive(:capture2).with(%Q{git log -n 1 1234abc}).and_return("Regular message")
+        commits = described_class.recent('1.2.3')
+        expect(commits.map(&:to_s)).to eq ["Regular message", "* Bye"]
       end
     end
   end
