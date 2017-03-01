@@ -15,6 +15,7 @@ cf api "$TARGET" --skip-ssl-validation || (sleep 4 && cf api "$TARGET" --skip-ss
 cf auth "$USERNAME" "$PASSWORD" || (sleep 4 && cf auth "$USERNAME" "$PASSWORD")
 
 SPACE=$(openssl rand -base64 32 | base64 | head -c 8 | awk '{print tolower($0)}')
+cf create-org "$ORGANIZATION"
 cf create-space "$SPACE" -o "$ORGANIZATION" || (sleep 4 && cf create-space "$SPACE" -o "$ORGANIZATION")
 
 echo "{\"version\": {\"ref\":\"$SPACE\"},\"metadata\":[]}" >&3
