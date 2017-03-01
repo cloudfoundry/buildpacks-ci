@@ -37,6 +37,11 @@ resources: #####################################################################
   source:
     uri: https://github.com/cloudfoundry-samples/cf-sample-app-spring.git
 
+- name: cf-sample-app-go
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry-samples/test-app.git
+
 - name: pong-matcher-rails
   type: git
   source:
@@ -145,6 +150,29 @@ jobs: ##########################################################################
       params:
         BUILDPACK_URL: https://github.com/cloudfoundry/java-buildpack
         APPLICATION_NAME: cf-spring
+        REQUEST_PATH: "/"
+        CF_API: api.run.pivotal.io
+        CF_USERNAME: {{pws-username}}
+        CF_PASSWORD: {{pws-password}}
+        CF_ORGANIZATION: {{pws-org}}
+        CF_LOGIN_SPACE: development
+        CF_DOMAIN: cfapps.io
+        REQUEST_TYPE: 'GET'
+        DATABASE_TO_BIND: none
+
+- name: cf-sample-app-go-smoke-test
+  plan:
+    - get: nightly-trigger
+      trigger: true
+    - get: sample-app
+      resource: cf-sample-app-go
+    - get: buildpacks-ci
+    - task: cf-sample-app-go-smoke-test
+      attempts: 3
+      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+      params:
+        BUILDPACK_URL: https://github.com/cloudfoundry/go-buildpack#develop
+        APPLICATION_NAME: cf-go
         REQUEST_PATH: "/"
         CF_API: api.run.pivotal.io
         CF_USERNAME: {{pws-username}}
@@ -541,6 +569,7 @@ groups: ########################################################################
 
 - name: go-sample-apps
   jobs:
+    - cf-sample-app-go-smoke-test
     - pong-matcher-go-smoke-test
 
 - name: java-sample-apps
