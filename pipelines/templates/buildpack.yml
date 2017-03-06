@@ -36,7 +36,7 @@ resources: #####################################################################
 
   ## Git ##
 
-    <% if language == 'multi' %>
+    <% if language == 'multi' || language == 'hwc' %>
       <% git_repo_organization = 'cloudfoundry-incubator' %>
     <% else %>
       <% git_repo_organization = organization %>
@@ -75,7 +75,7 @@ resources: #####################################################################
     source:
       uri: https://github.com/cloudfoundry/brats.git
 
-<% unless language == 'multi' %>
+<% unless language == 'multi' || language == 'hwc' %>
   - name: pivnet-buildpack-metadata
     type: git
     source:
@@ -99,7 +99,7 @@ resources: #####################################################################
 
   ## Github Releases ##
 
-    <% if language == 'multi' %>
+    <% if language == 'multi' || language == 'hwc' %>
       <% github_release_user = 'cloudfoundry-incubator' %>
     <% else %>
       <% github_release_user = '{{buildpacks-github-org}}' %>
@@ -127,7 +127,7 @@ resources: #####################################################################
 
   ## Pivnet Release ##
 
-<% unless language == 'multi' %>
+<% unless language == 'multi' || language == 'hwc' %>
   - name: pivnet-production
     type: pivnet
     source:
@@ -167,6 +167,7 @@ resources: #####################################################################
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
+<% unless language == 'hwc' %>
   - name: cf-edge-gcp-environments
     type: pool
     source:
@@ -198,6 +199,7 @@ resources: #####################################################################
       pool: cf-lts-environments
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+<% end %>
 
   ## Alerts ##
 
@@ -278,10 +280,17 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
+      <% unless language == 'hwc' %>
       - put: cf-environments
         resource: cf-edge-aws-environments
         params:
           acquire: true
+      <% else %>
+      - put: cf-environments
+        resource: edge-shared-environments
+        params:
+          claim: <%= language %>
+      <% end %>
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
@@ -297,6 +306,7 @@ jobs: ##########################################################################
           passed: [ "detect-new-version-and-upload-artifacts" ]
           trigger: true
       - do:
+        <% unless language == 'hwc' %>
         - task: rspec
           file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
           params:
@@ -310,6 +320,24 @@ jobs: ##########################################################################
             put: cf-edge-aws-environments
             params:
               release: cf-environments
+        <% else %>
+        - put: cf-bp-space
+        - task: rspec
+          file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
+          params:
+            STACKS: cflinuxfs2
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            CF_PASSWORD: {{ci_cf_shared_password}}
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
+          privileged: true
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
+        ensure:
+          put: edge-shared-environments
+          params:
+            release: cf-environments
+        <% end %>
         on_failure:
           put: failure-alert
           params:
@@ -317,6 +345,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% unless language == 'hwc' %>
   - name: specs-lts-master
     serial: true
     public: true
@@ -360,6 +389,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
   - name: ship-it
     serial: true
     public: true
@@ -368,9 +398,17 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
-          passed: [ "specs-lts-master", "specs-edge-master"]
+          passed:
+            <% unless language == 'hwc' %>
+            - specs-lts-master
+            <% end %>
+            - specs-edge-master
         - get: buildpack
-          passed: [ "specs-lts-master", "specs-edge-master" ]
+          passed:
+            <% unless language == 'hwc' %>
+            - specs-lts-master
+            <% end %>
+            - specs-edge-master
           resource: buildpack-master
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
@@ -412,7 +450,7 @@ jobs: ##########################################################################
           globs:
             - buildpack-artifacts/*_buildpack-cached-v*.zip
             - buildpack-artifacts/*_buildpack-cached-v*.zip.SHA256SUM.txt
-<% unless language == "multi" %>
+<% unless language == "multi" || language == "hwc" %>
   - name: write-pivnet-metadata
     serial: true
     public: true
@@ -509,6 +547,7 @@ jobs: ##########################################################################
           put: edge-shared-environments
           params:
             release: cf-environments
+<% unless language == "hwc" %>
   - name: specs-edge-aws-develop
     serial: true
     public: true
@@ -685,7 +724,8 @@ jobs: ##########################################################################
           put: cf-lts-gcp-environments
           params:
             release: cf-environments
-<% unless language == "multi" %>
+<% end %>
+<% unless language == "multi" || language == "hwc"%>
   - name: update-compile-extensions
     serial: true
     public: true
