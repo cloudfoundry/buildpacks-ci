@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+set -eu +x -o pipefail
+
+DESTINATION=$1
+payload=$DESTINATION/data
+cat > "$payload" <&0
+
+## Pretty print version input
+jq '.version' < "$payload"
+
+# echo "{ \"version\": { \"ref\": \"payload\" } }" >&3
+jq -r '{version:{ref: .version.ref}}' < "$payload" >&3

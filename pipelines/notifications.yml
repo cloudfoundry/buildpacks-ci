@@ -1,5 +1,10 @@
 ---
 resource_types:
+  - name: cf-tracker-resource
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cf-tracker-resource
+      tag: latest
   - name: email-sender
     type: docker-image
     source:
@@ -10,6 +15,12 @@ resource_types:
       repository: cftoolsmiths/cron-test
 
 resources:
+  - name: tracker-filter-resource
+    type: cf-tracker-resource
+    source:
+      project_id: {{cf-buildpacks-public-tracker-id}}
+      token: {{pivotal-tracker-api-token}}
+      label: testlabel
   - name: monday-funday
     type: cron
     source:
@@ -63,6 +74,20 @@ resources:
       to: ["cf-security@pivotal.io", "cf-buildpacks-eng@pivotal.io", "security@pivotal.io"]
 
 jobs:
+  - name: tracker-filter-test
+    serial: true
+    public: true
+    plan:
+      - get: tracker-filter-resource
+        trigger: true
+      - get: buildpacks-ci
+      - get: stacks
+      - task: delete-unaffected-stories
+        file: buildpacks-ci/tasks/delete-unaffected-stories/task.yml
+      - put: tracker-filter-resource
+        params:
+          file: output/stories.json
+
   - name: new-releases
     serial: true
     public: true
