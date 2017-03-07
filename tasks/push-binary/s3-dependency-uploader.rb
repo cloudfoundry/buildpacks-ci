@@ -8,38 +8,37 @@ class S3DependencyUploader
   end
 
   def run
-    if file_to_upload
-      if file_on_s3?
-        puts "File #{file_name} has already been detected on S3. Skipping upload."
-      else
-        upload_file
-      end
-    else
+    if files_to_upload.empty?
       puts 'No files detected for upload.'
+    else
+      files_to_upload.each do |path|
+        if file_on_s3?(path)
+          puts "File #{File.basename(path)} has already been detected on S3. Skipping upload."
+        else
+          upload_file(path)
+        end
+      end
     end
   end
 
   private
 
-  def file_to_upload
-    Dir.glob("#{@artifacts_dir}/#{@dependency}*.{tar.gz,tgz,phar}").first
-  end
-
-  def file_name
-    File.basename(file_to_upload)
+  def files_to_upload
+    @files_to_upload ||= Dir.glob("#{@artifacts_dir}/#{@dependency}*.{tar.gz,tgz,phar}")
   end
 
   def aws_s3_dir
     "s3://#{@bucket_name}/dependencies/#{@dependency}"
   end
 
-  def file_on_s3?
+  def file_on_s3?(path)
+    file_name = File.basename(path)
     `aws s3 ls #{aws_s3_dir}/`.include? file_name
   end
 
-  def upload_file
-    system("aws s3 cp #{file_to_upload} #{aws_s3_dir}/#{file_name}")
+  def upload_file(path)
+    file_name = File.basename(path)
+    system("aws s3 cp #{path} #{aws_s3_dir}/#{file_name}")
   end
-
 end
 
