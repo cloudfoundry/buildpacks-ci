@@ -9,9 +9,17 @@ image_resource:
 inputs:
   - name: sample-app
   - name: buildpacks-ci
+  - name: cf-space
 
 run:
   path: bash
   args:
     - -cl
     - buildpacks-ci/tasks/sample-app-smoke-test/run.rb
+
+params:
+  BUILDPACK_URL:
+  APPLICATION_NAME:
+  REQUEST_PATH:
+  REQUEST_TYPE:
+  DATABASE_TO_BIND:
