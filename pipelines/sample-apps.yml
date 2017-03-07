@@ -3,6 +3,10 @@ resource_types:
     type: docker-image
     source:
       repository: cftoolsmiths/cron-test
+  - name: cf-space-resource
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cf-space-resource
 
 resources: ###################################################################################
 - name: nightly-trigger
@@ -112,472 +116,462 @@ resources: #####################################################################
   source:
     uri: https://github.com/cloudfoundry-samples/cf-ex-phalcon.git
 
+- name: cf-space
+  type: cf-space-resource
+  source:
+    target: api.run.pivotal.io
+    username: {{pws-username}}
+    password: {{pws-password}}
+    organization: {{pws-org}}
+
 jobs: ###################################################################################
 
 - name: cf-sample-app-nodejs-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: cf-sample-app-nodejs
-    - get: buildpacks-ci
-    - task: cf-sample-app-nodejs-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/nodejs-buildpack#develop
-        APPLICATION_NAME: cf-nodejs
-        REQUEST_PATH: "/"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: none
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: cf-sample-app-nodejs
+      - get: buildpacks-ci
+      - task: cf-sample-app-nodejs-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/nodejs-buildpack#develop
+          APPLICATION_NAME: cf-nodejs
+          REQUEST_PATH: "/"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: none
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: cf-sample-app-spring-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: cf-sample-app-spring
-    - get: buildpacks-ci
-    - task: cf-sample-app-spring-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/java-buildpack
-        APPLICATION_NAME: cf-spring
-        REQUEST_PATH: "/"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: none
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: cf-sample-app-spring
+      - get: buildpacks-ci
+      - task: cf-sample-app-spring-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/java-buildpack
+          APPLICATION_NAME: cf-spring
+          REQUEST_PATH: "/"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: none
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: cf-sample-app-go-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: cf-sample-app-go
-    - get: buildpacks-ci
-    - task: cf-sample-app-go-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/go-buildpack#develop
-        APPLICATION_NAME: cf-go
-        REQUEST_PATH: "/"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: none
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: cf-sample-app-go
+      - get: buildpacks-ci
+      - task: cf-sample-app-go-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/go-buildpack#develop
+          APPLICATION_NAME: test-app
+          REQUEST_PATH: "/"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: none
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
+
 
 - name: cf-sample-app-rails-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: cf-sample-app-rails
-    - get: buildpacks-ci
-    - task: cf-sample-app-rails-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/ruby-buildpack#develop
-        APPLICATION_NAME: cf-rails
-        REQUEST_PATH: "/"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: none
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: cf-sample-app-rails
+      - get: buildpacks-ci
+      - task: cf-sample-app-rails-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/ruby-buildpack#develop
+          APPLICATION_NAME: cf-rails
+          REQUEST_PATH: "/"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: none
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: pong-matcher-rails-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: pong-matcher-rails
-    - get: buildpacks-ci
-    - task: pong-matcher-rails-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/ruby-buildpack#develop
-        APPLICATION_NAME: railspong
-        REQUEST_PATH: "/all"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'DELETE'
-        DATABASE_TO_BIND: 'mysql'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: pong-matcher-rails
+      - get: buildpacks-ci
+      - task: pong-matcher-rails-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/ruby-buildpack#develop
+          APPLICATION_NAME: railspong
+          REQUEST_PATH: "/all"
+          REQUEST_TYPE: 'DELETE'
+          DATABASE_TO_BIND: 'mysql'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: pong-matcher-sails-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: pong-matcher-sails
-    - get: buildpacks-ci
-    - task: pong-matcher-sails-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/nodejs-buildpack#develop
-        APPLICATION_NAME: sailspong
-        REQUEST_PATH: "/all"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'DELETE'
-        DATABASE_TO_BIND: 'mysql'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: pong-matcher-sails
+      - get: buildpacks-ci
+      - task: pong-matcher-sails-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/nodejs-buildpack#develop
+          APPLICATION_NAME: sailspong
+          REQUEST_PATH: "/all"
+          REQUEST_TYPE: 'DELETE'
+          DATABASE_TO_BIND: 'mysql'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: pong-matcher-slim-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: pong-matcher-slim
-    - get: buildpacks-ci
-    - task: pong-matcher-slim-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-        APPLICATION_NAME: slimpong
-        REQUEST_PATH: "/all"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'DELETE'
-        DATABASE_TO_BIND: 'mysql'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: pong-matcher-slim
+      - get: buildpacks-ci
+      - task: pong-matcher-slim-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+          APPLICATION_NAME: slimpong
+          REQUEST_PATH: "/all"
+          REQUEST_TYPE: 'DELETE'
+          DATABASE_TO_BIND: 'mysql'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: pong-matcher-django-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: pong-matcher-django
-    - get: buildpacks-ci
-    - task: pong-matcher-django-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/python-buildpack#develop
-        APPLICATION_NAME: djangopong
-        REQUEST_PATH: "/all"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'DELETE'
-        DATABASE_TO_BIND: 'mysql'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: pong-matcher-django
+      - get: buildpacks-ci
+      - task: pong-matcher-django-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/python-buildpack#develop
+          APPLICATION_NAME: djangopong
+          REQUEST_PATH: "/all"
+          REQUEST_TYPE: 'DELETE'
+          DATABASE_TO_BIND: 'mysql'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: pong-matcher-go-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: pong-matcher-go
-    - get: buildpacks-ci
-    - task: pong-matcher-go-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/go-buildpack#develop
-        APPLICATION_NAME: gopong
-        REQUEST_PATH: "/all"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'DELETE'
-        DATABASE_TO_BIND: 'mysql'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: pong-matcher-go
+      - get: buildpacks-ci
+      - task: pong-matcher-go-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/go-buildpack#develop
+          APPLICATION_NAME: gopong
+          REQUEST_PATH: "/all"
+          REQUEST_TYPE: 'DELETE'
+          DATABASE_TO_BIND: 'mysql'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: spring-music-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: spring-music
-    - get: buildpacks-ci
-    - task: spring-music-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/java-buildpack
-        APPLICATION_NAME: spring-music
-        REQUEST_PATH: "/"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: none
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: spring-music
+      - get: buildpacks-ci
+      - task: spring-music-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/java-buildpack
+          APPLICATION_NAME: spring-music
+          REQUEST_PATH: "/"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: none
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: cf-ex-phpmyadmin-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: cf-ex-phpmyadmin
-    - get: buildpacks-ci
-    - task: cf-ex-phpmyadmin-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-        APPLICATION_NAME: cf-ex-phpmyadmin
-        REQUEST_PATH: "/"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: 'mysql'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: cf-ex-phpmyadmin
+      - get: buildpacks-ci
+      - task: cf-ex-phpmyadmin-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+          APPLICATION_NAME: cf-ex-phpmyadmin
+          REQUEST_PATH: "/"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: 'mysql'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: cf-ex-drupal-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: cf-ex-drupal
-    - get: buildpacks-ci
-    - task: cf-ex-drupal-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-        APPLICATION_NAME: cf-ex-drupal
-        REQUEST_PATH: "/install.php"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: 'mysql'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: cf-ex-drupal
+      - get: buildpacks-ci
+      - task: cf-ex-drupal-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+          APPLICATION_NAME: cf-ex-drupal
+          REQUEST_PATH: "/install.php"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: 'mysql'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: cf-ex-code-igniter-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: cf-ex-code-igniter
-    - get: buildpacks-ci
-    - task: cf-ex-code-igniter-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-        APPLICATION_NAME: cf-ex-code-igniter
-        REQUEST_PATH: "/index.php"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: 'mysql'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: cf-ex-code-igniter
+      - get: buildpacks-ci
+      - task: cf-ex-code-igniter-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+          APPLICATION_NAME: cf-ex-code-igniter
+          REQUEST_PATH: "/index.php"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: 'mysql'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: cf-ex-phppgadmin-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: cf-ex-phppgadmin
-    - get: buildpacks-ci
-    - task: cf-ex-phppgadmin-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-        APPLICATION_NAME: cf-ex-phppgadmin
-        REQUEST_PATH: "/"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: 'pgsql'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: cf-ex-phppgadmin
+      - get: buildpacks-ci
+      - task: cf-ex-phppgadmin-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+          APPLICATION_NAME: cf-ex-phppgadmin
+          REQUEST_PATH: "/"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: 'pgsql'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: cf-ex-php-info-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: cf-ex-php-info
-    - get: buildpacks-ci
-    - task: cf-ex-php-info-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-        APPLICATION_NAME: cf-ex-php-info
-        REQUEST_PATH: "/"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: 'none'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: cf-ex-php-info
+      - get: buildpacks-ci
+      - task: cf-ex-php-info-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+          APPLICATION_NAME: cf-ex-php-info
+          REQUEST_PATH: "/"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: 'none'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: cf-ex-pgbouncer-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: cf-ex-pgbouncer
-    - get: buildpacks-ci
-    - task: cf-ex-pgbouncer-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-        APPLICATION_NAME: cf-ex-pgbouncer
-        REQUEST_PATH: "/"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: 'pgsql'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: cf-ex-pgbouncer
+      - get: buildpacks-ci
+      - task: cf-ex-pgbouncer-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+          APPLICATION_NAME: cf-ex-pgbouncer
+          REQUEST_PATH: "/"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: 'pgsql'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: cf-ex-composer-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: cf-ex-composer
-    - get: buildpacks-ci
-    - task: cf-ex-composer-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-        APPLICATION_NAME: cf-ex-composer
-        REQUEST_PATH: "/"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: 'none'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: cf-ex-composer
+      - get: buildpacks-ci
+      - task: cf-ex-composer-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+          APPLICATION_NAME: cf-ex-composer
+          REQUEST_PATH: "/"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: 'none'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: cf-ex-phalcon-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: cf-ex-phalcon
-    - get: buildpacks-ci
-    - task: cf-ex-phalcon-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-        APPLICATION_NAME: cf-ex-phalcon
-        REQUEST_PATH: "/"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: 'mysql'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: cf-ex-phalcon
+      - get: buildpacks-ci
+      - task: cf-ex-phalcon-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+          APPLICATION_NAME: cf-ex-phalcon
+          REQUEST_PATH: "/"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: 'mysql'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 - name: dotnet-core-hello-world-smoke-test
   plan:
-    - get: nightly-trigger
-      trigger: true
-    - get: sample-app
-      resource: dotnet-core-hello-world
-    - get: buildpacks-ci
-    - task: dotnet-core-hello-world-smoke-test
-      attempts: 3
-      file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-      params:
-        BUILDPACK_URL: https://github.com/cloudfoundry/dotnet-core-buildpack#develop
-        APPLICATION_NAME: dotnet_core_hello_world
-        REQUEST_PATH: "/"
-        CF_API: api.run.pivotal.io
-        CF_USERNAME: {{pws-username}}
-        CF_PASSWORD: {{pws-password}}
-        CF_ORGANIZATION: {{pws-org}}
-        CF_LOGIN_SPACE: development
-        CF_DOMAIN: cfapps.io
-        REQUEST_TYPE: 'GET'
-        DATABASE_TO_BIND: 'none'
+    - do:
+      - put: cf-space
+      - get: nightly-trigger
+        trigger: true
+      - get: sample-app
+        resource: dotnet-core-hello-world
+      - get: buildpacks-ci
+      - task: dotnet-core-hello-world-smoke-test
+        attempts: 3
+        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+        params:
+          BUILDPACK_URL: https://github.com/cloudfoundry/dotnet-core-buildpack#develop
+          APPLICATION_NAME: dotnet_core_hello_world
+          REQUEST_PATH: "/"
+          REQUEST_TYPE: 'GET'
+          DATABASE_TO_BIND: 'none'
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
 
 groups: ###################################################################################
 
-- name: nodejs-sample-apps
+- name: nodejs
   jobs:
     - pong-matcher-sails-smoke-test
     - cf-sample-app-nodejs-smoke-test
 
-- name: ruby-sample-apps
+- name: ruby
   jobs:
     - cf-sample-app-rails-smoke-test
     - pong-matcher-rails-smoke-test
 
-- name: python-sample-apps
+- name: python
   jobs:
     - pong-matcher-django-smoke-test
 
-- name: go-sample-apps
+- name: go
   jobs:
     - cf-sample-app-go-smoke-test
     - pong-matcher-go-smoke-test
 
-- name: java-sample-apps
+- name: java
   jobs:
     - spring-music-smoke-test
     - cf-sample-app-spring-smoke-test
 
-- name: php-sample-apps
+- name: php
   jobs:
     - pong-matcher-slim-smoke-test
     - cf-ex-phpmyadmin-smoke-test
@@ -589,7 +583,7 @@ groups: ########################################################################
     - cf-ex-composer-smoke-test
     - cf-ex-phalcon-smoke-test
 
-- name: dotnet-core-sample-apps
+- name: dotnet-core
   jobs:
     - dotnet-core-hello-world-smoke-test
 
