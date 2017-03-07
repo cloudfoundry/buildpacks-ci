@@ -74,6 +74,29 @@ describe S3DependencyUploader do
     end
   end
 
+  context 'there is one .zip dependency to upload' do
+    let(:dependency) { 'hwc' }
+
+    before do
+      FileUtils.mkdir_p(artifacts_dir)
+      File.write(File.join(artifacts_dir, 'hwc-9.9.0-windows-amd64.zip'), 'xxx')
+    end
+
+    context 'the dependency does not exist on s3' do
+      before do
+        allow(subject).to receive(:`).with("aws s3 ls s3://a-bucket-name/dependencies/hwc/")
+          .and_return('hwc/hwc-1.1.1-windows-amd64.zip')
+      end
+
+      it 'uploads the dependency' do
+        s3_copy_command = "aws s3 cp #{File.join(artifacts_dir, 'hwc-9.9.0-windows-amd64.zip')} s3://a-bucket-name/dependencies/hwc/hwc-9.9.0-windows-amd64.zip"
+        expect(subject).to receive(:system).with s3_copy_command
+
+        subject.run
+      end
+    end
+  end
+
   context 'there are multiple dependencies to upload' do
     before do
       FileUtils.mkdir_p(artifacts_dir)
