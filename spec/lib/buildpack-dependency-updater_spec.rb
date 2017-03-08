@@ -145,7 +145,7 @@ describe BuildpackDependencyUpdater do
           dependencies:
             - name: composer
               version: 1.0.3
-              uri: https://buildpacks.cloudfoundry.org/dependencies/composer/1.0.3/composer.phar
+              uri: https://buildpacks.cloudfoundry.org/dependencies/composer/composer-1.0.3-aff20443.phar
               cf_stacks:
                 - cflinuxfs2
               md5: aff20443a474112755ff0ef65c4873e5
@@ -157,9 +157,9 @@ describe BuildpackDependencyUpdater do
           Build composer - #{new_version}
 
           ---
-          filename: composer-#{new_version}.phar
+          filename: composer-#{new_version}-abcdef12.phar
           version: #{new_version}
-          md5: 05d30d20be1c94c9edc02756420a7d10
+          md5: abcdef1205d30d20be1c9
           sha256: 7f26efee06de5a1a061b6b1e330f5acc9ee69976d1551118c45b21f358cbc332
         COMMIT
       end
@@ -170,8 +170,8 @@ describe BuildpackDependencyUpdater do
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(new_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/composer/1.1.0/composer.phar")
-        expect(dependency_in_manifest["md5"]).to eq("05d30d20be1c94c9edc02756420a7d10")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/composer/composer-1.1.0-abcdef12.phar")
+        expect(dependency_in_manifest["md5"]).to eq("abcdef1205d30d20be1c9")
       end
 
       it "updates the php buildpack manifest default_versions section with the specified version for composer" do
