@@ -80,6 +80,9 @@ class DependencyBuildEnqueuer
     when "godep"
       download_url = "https://github.com/tools/godep/archive/#{version}.tar.gz"
       verifications << shasum_256_verification(download_url)
+    when "hwc"
+      download_url = "https://github.com/cloudfoundry-incubator/hwc/archive/#{version}.tar.gz"
+      verifications << shasum_256_verification(download_url)
     when "composer"
       download_url = "https://getcomposer.org/download/#{version}/composer.phar"
       verifications << shasum_256_verification(download_url)
