@@ -45,7 +45,7 @@ describe BuildpackDependencyUpdater do
             - name: hwc
               version: 0.1.2
               cf_stacks:
-                - cflinuxfs2
+                - windows2012R2
               uri: https://buildpacks.cloudfoundry.org/dependencies/hwc/hwc-0.1.2-windows-amd64.zip
               md5: doesnotmatteratall
         MANIFEST
@@ -82,6 +82,11 @@ describe BuildpackDependencyUpdater do
         it 'drops the previous version from default_versions' do
           not_found_in_manifest = manifest['default_versions'].find { |dep| dep['name'] == dependency && dep['version'] == '0.1.2' }
           expect(not_found_in_manifest).to be_nil
+        end
+
+        it 'uses the windows stack' do
+          dependency_in_manifest = manifest['dependencies'].find { |dep| dep['name'] == dependency && dep['version'] == expected_version }
+          expect(dependency_in_manifest['cf_stacks']).to eq %w(windows2012R2)
         end
       end
     end
