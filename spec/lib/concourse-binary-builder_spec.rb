@@ -205,6 +205,20 @@ describe ConcourseBinaryBuilder do
       it_behaves_like 'the resulting tar files are copied to the proper location'
     end
 
+    context 'the dependency is hwc' do
+      let(:dependency)            { 'hwc' }
+      let(:output_file)           { 'hwc-15.11.1-windows-amd64.zip' }
+      let(:output_file_with_md5)  { "hwc-15.11.1-windows-amd64-#{output_file_md5_short}.zip" }
+      let(:verification_type)     { 'sha256' }
+      let(:verification_value)    { 'thisisasha256' }
+      let(:source_url)            { 'https://github.com/cloudfoundry-incubator/hwc/archive/15.11.1.tar.gz' }
+      let(:version)               { '15.11.1' }
+
+      before { subject.run }
+
+      it_behaves_like 'a commit is made in builds-yaml-artifacts with the proper git message', 'automated'
+      it_behaves_like 'the resulting tar files are copied to the proper location'
+    end
 
     context 'the dependency is node' do
       let(:dependency)            { 'node' }
