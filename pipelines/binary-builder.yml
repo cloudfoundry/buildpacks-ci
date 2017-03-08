@@ -336,7 +336,7 @@ jobs: ##########################################################################
       - do:
         - aggregate:
           - get: buildpacks-ci
-          - get: buildpack
+          - get: buildpack-input
             resource: <%= buildpack %>-buildpack
           - get: built-out
             resource: <%= dependency %>-built-output
@@ -373,7 +373,7 @@ jobs: ##########################################################################
               RUBYGEM_MIRROR: {{rubygem-mirror}}
           - put: <%= buildpack %>-buildpack
             params:
-              repository: buildpack-artifacts
+              repository: buildpack
               rebase: true
           ensure:
             aggregate:
