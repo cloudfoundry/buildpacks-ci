@@ -6,10 +6,10 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: buildpack
+  - name: buildpack-input
   - name: built-out
 outputs:
-  - name: buildpack-artifacts
+  - name: buildpack
 run:
   path: bash
   args:
@@ -19,7 +19,7 @@ run:
       pushd buildpacks-ci
         bundle exec tasks/update-dependency-in-buildpack/run.rb
       popd
-      rsync -a buildpack/ buildpack-artifacts
+      rsync -a buildpack-input/ buildpack
 params:
   DEPENDENCY:
   TRACKER_PROJECT_ID:

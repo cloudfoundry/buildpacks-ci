@@ -1,6 +1,6 @@
 # encoding: utf-8
 require 'spec_helper'
-require_relative '../../lib/update-dependency-in-buildpack-job'
+require_relative '../../../tasks/update-dependency-in-buildpack/update-dependency-in-buildpack-job'
 
 describe UpdateDependencyInBuildpackJob do
   let(:buildpacks_ci_dir) { Dir.mktmpdir }
@@ -59,7 +59,7 @@ describe UpdateDependencyInBuildpackJob do
     end
 
     it 'returns the buildpack directory, dependency, version, and removed versions' do
-      expected_buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "buildpack"))
+      expected_buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "buildpack-input"))
       expect(subject.update_buildpack).to eq([expected_buildpack_dir, 'nginx', '1.11.3', ['1.11.1']])
     end
   end

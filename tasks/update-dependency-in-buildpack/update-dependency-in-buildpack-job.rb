@@ -1,8 +1,8 @@
 # encoding: utf-8
 require 'yaml'
-require_relative "buildpack-dependency-updater"
-require_relative "tracker-client"
-require_relative "git-client"
+require_relative "../../lib/buildpack-dependency-updater"
+require_relative "../../lib/tracker-client"
+require_relative "../../lib/git-client"
 
 class UpdateDependencyInBuildpackJob
   attr_reader :buildpacks_ci_dir
@@ -16,7 +16,7 @@ class UpdateDependencyInBuildpackJob
   def update_buildpack
     dependency = ENV.fetch('DEPENDENCY')
     buildpack_name = ENV.fetch('BUILDPACK_NAME')
-    buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "buildpack"))
+    buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "buildpack-input"))
 
     buildpack_updater = BuildpackDependencyUpdater.create(dependency, buildpack_name, buildpack_dir, binary_built_out_dir)
 
