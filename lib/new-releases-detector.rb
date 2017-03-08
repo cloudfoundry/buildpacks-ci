@@ -201,6 +201,7 @@ class NewReleasesDetector
       go:              -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
       godep:           -> { Octokit.releases('tools/godep').map(&:tag_name) },
       httpd:           -> { Octokit.tags('apache/httpd').map(&:name).grep(/^2\./) },
+      hwc:             -> { Octokit.releases('cloudfoundry-incubator/hwc').map(&:tag_name) },
       jruby:           -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
       libunwind:       -> { Git.ls_remote('http://git.savannah.gnu.org/cgit/libunwind.git')['tags'].keys },
       maven:           -> { Octokit.tags('apache/maven').map(&:name).grep(/^maven/) },
