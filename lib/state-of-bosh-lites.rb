@@ -23,7 +23,7 @@ class StateOfBoshLites
     @environments = {'aws' => @aws_environment_names,
                      'gcp' => @gcp_environment_names}
 
-    @languages = %w(binary dotnet-core go multi nodejs php python ruby staticfile)
+    @languages = %w(binary dotnet-core hwc go multi nodejs php python ruby staticfile)
   end
 
   def get_states!(resource_pools_dir: nil, git_pull: true)
@@ -108,7 +108,7 @@ class StateOfBoshLites
     end
 
     #find which job claimed / unclaimed the environment
-    recent_commits = GitClient.get_list_of_one_line_commits(Dir.pwd, 500)
+    recent_commits = GitClient.get_list_of_one_line_commits(Dir.pwd, 1000)
 
     most_recent_commit = recent_commits.select do |commit|
       commit.match regex
