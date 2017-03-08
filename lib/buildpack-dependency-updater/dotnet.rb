@@ -33,7 +33,7 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
   end
 
   def perform_dependency_specific_changes
-    perform_default_versions_update if project_json?
+    perform_default_versions_update if !project_json?
 
     update_dotnet_sdk_tools
   end

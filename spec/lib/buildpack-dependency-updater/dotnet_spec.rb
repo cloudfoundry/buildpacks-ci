@@ -23,7 +23,7 @@ describe BuildpackDependencyUpdater do
         language: dotnet-core
         default_versions:
           - name: dotnet
-            version: 1.0.0-preview2-003131
+            version: 1.0.0-preview3-006666
         dependencies:
           - name: dotnet
             version: 1.0.0-preview2-003121
@@ -111,12 +111,12 @@ describe BuildpackDependencyUpdater do
         expect(sdk_tools['project_json'].last).to eq '1.0.0-preview2-009988'
       end
 
-      it "updates the dotnet buildpack manifest dependency default with the specified version" do
+      it "does not update the dotnet buildpack manifest dependency default with the specified version" do
         subject.run!
         manifest = YAML.load_file(manifest_file)
 
-        default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '1.0.0-preview2-009988'}
-        expect(default_in_manifest["version"]).to eq('1.0.0-preview2-009988')
+        default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '1.0.0-preview3-006666'}
+        expect(default_in_manifest["version"]).to eq('1.0.0-preview3-006666')
       end
 
       it 'records that no versions were removed' do
@@ -138,12 +138,12 @@ describe BuildpackDependencyUpdater do
         expect(dependency_in_manifest["md5"]).to eq("aaaabbbb22224444")
       end
 
-      it "does not update the dotnet buildpack manifest dependency default with the specified version" do
+      it "updates the dotnet buildpack manifest dependency default with the specified version" do
         subject.run!
         manifest = YAML.load_file(manifest_file)
 
-        default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '1.0.0-preview2-003131'}
-        expect(default_in_manifest["version"]).to eq('1.0.0-preview2-003131')
+        default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '1.0.0-preview4-001122'}
+        expect(default_in_manifest["version"]).to eq('1.0.0-preview4-001122')
       end
 
       it 'does not remove a version from the manifest' do
