@@ -97,15 +97,15 @@ class ConcourseBinaryBuilder
   end
 
   def add_md5_to_binary_name
-    Dir["#{binary_builder_dir}/*.tgz", "#{binary_builder_dir}/*.tar.gz", "#{binary_builder_dir}/*.phar"].each do |name|
-      prefix,suffix = /(.*)(\.tgz|\.tar\.gz|\.phar)$/.match(name)[1,2]
+    Dir["#{binary_builder_dir}/*.{tgz,tar.gz,phar,zip}"].each do |name|
+      prefix,suffix = /(.*)(\.tgz|\.tar\.gz|\.phar|\.zip)$/.match(name)[1,2]
       md5sum = Digest::MD5.file(name).hexdigest[0..7]
       FileUtils.mv(name, "#{prefix}-#{md5sum}#{suffix}")
     end
   end
 
   def copy_binaries_to_output_directory
-      FileUtils.cp_r(Dir["#{binary_builder_dir}/*.tgz", "#{binary_builder_dir}/*.tar.gz", "#{binary_builder_dir}/*.phar"], binary_artifacts_dir)
+      FileUtils.cp_r(Dir["#{binary_builder_dir}/*.{tgz,tar.gz,phar,zip}"], binary_artifacts_dir)
   end
 
   def create_git_commit_msg
@@ -116,6 +116,8 @@ class ConcourseBinaryBuilder
               '*.phar'
             when 'go', 'dotnet', 'yarn' then
               '*.tar.gz'
+            when 'hwc' then
+              '*.zip'
             else
               '-*.tgz'
           end
@@ -206,7 +208,7 @@ class ConcourseBinaryBuilder
   end
 
   def is_automated
-    automated = %w(bower composer dotnet godep glide nginx node yarn)
+    automated = %w(bower composer dotnet godep glide hwc nginx node yarn)
     automated.include? dependency
   end
 
