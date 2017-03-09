@@ -11,7 +11,7 @@ release_name = ENV.fetch('RELEASE_NAME')
 
 
 Dir.chdir(ENV.fetch('RELEASE_DIR')) do
-  updater = BuildpackBOSHRelaseUpdater.new(
+  updater = BuildpackBOSHReleaseUpdater.new(
     version,
     access_key_id,
     secret_access_key,
