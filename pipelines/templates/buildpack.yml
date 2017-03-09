@@ -97,6 +97,16 @@ resources: #####################################################################
       private_key: {{buildpack-checksums-private-key}}
       branch: master
 
+<% if language == 'hwc' %>
+  - name: buildpack-bosh-release
+    type: git
+    source:
+      uri: git@github.com:<%= git_repo_organization %>/<%= language %>-buildpack-release.git
+      private_key: {{<%= language %>-buildpack-bosh-release-private-key}}
+      branch: master
+<% end %>
+
+
   ## Github Releases ##
 
     <% if language == 'multi' || language == 'hwc' %>
@@ -110,6 +120,15 @@ resources: #####################################################################
       user: <%= github_release_user %>
       repository: <%= language %>-buildpack
       access_token: {{buildpacks-github-token}}
+
+<% if language == 'hwc' %>
+  - name: buildpack-bosh-release-github-release
+    type: git
+    source:
+      user: <%= github_release_user %>
+      repository: <%= language %>-buildpack-release
+      access_token: {{buildpacks-github-token}}
+<% end %>
 
   - name: buildpack-packager
     type: github-release
@@ -791,3 +810,46 @@ jobs: ##########################################################################
         params:
           repository: repo-with-gemfile-artifacts
           rebase: true
+
+<% if language == 'hwc' %>
+  - name: update-buildpack-bosh-release
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: release
+          resource: buildpack-bosh-release
+        - get: blob
+          resource: buildpack-github-release
+          trigger: true
+          passed: [ buildpack-to-github ]
+      - do:
+        - task: convert release version to version resource
+          file: buildpacks-ci/tasks/convert-release-to-version/task.yml
+        - task: create-bosh-release
+          file: buildpacks-ci/tasks/create-bosh-release/task.yml
+          params:
+            ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            BLOB_GLOB: blob/<%= language %>*.zip
+            BLOB_NAME: <%= language %>-buildpack
+            RELEASE_NAME: <%= language %>-buildpack
+            RELEASE_DIR: release
+        - put: buildpack-bosh-release
+          params:
+            repository: release-artifacts
+            rebase: true
+            tag: blob/version
+        - put: buildpack-bosh-release-github-release
+          params:
+            name: blob/version
+            tag: blob/version
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
