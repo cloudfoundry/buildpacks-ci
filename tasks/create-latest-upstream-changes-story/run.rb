@@ -4,11 +4,11 @@
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require "#{buildpacks_ci_dir}/lib/tracker-client"
 
-name = 'Pull latest changes from upstream'
+name = 'Summarize upstream changes'
 description = <<~DESCRIPTION
-                Check that there are no upstream changes that we are missing. Consult the documentation at http://docs.cloudfoundry.org/buildpacks/merging_upstream.html for more details.
+                **Summarize** changes in the Heroku buildpacks since last week (or the last time this story was completed).
 
-                Easy way to check for changes: Ex. https://github.com/cloudfoundry/ruby-buildpack/compare/develop...heroku:master
+                Easy way to check for changes: Ex. https://github.com/heroku/heroku-buildpack-ruby/compare/master@%7B7day%7D...master
               DESCRIPTION
 tasks = %w(Go Nodejs Python Ruby)
 tasks << "Tag story with all affected buildpacks"
