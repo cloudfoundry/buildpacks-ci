@@ -123,7 +123,7 @@ resources: #####################################################################
 
 <% if language == 'hwc' %>
   - name: buildpack-bosh-release-github-release
-    type: git
+    type: github-release
     source:
       user: <%= github_release_user %>
       repository: <%= language %>-buildpack-release
