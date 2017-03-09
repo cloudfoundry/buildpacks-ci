@@ -6,7 +6,7 @@ version = File.read('version/number').strip
 access_key_id = ENV.fetch('ACCESS_KEY_ID', false)
 secret_access_key = ENV.fetch('SECRET_ACCESS_KEY', false)
 blob_name = ENV.fetch('BLOB_NAME')
-blob_glob = ENV.fetch('BLOB_GLOB')
+blob_glob = File.join('..', ENV.fetch('BLOB_GLOB'))
 release_name = ENV.fetch('RELEASE_NAME')
 
 
