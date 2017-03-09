@@ -17,7 +17,7 @@ class BuildpackBOSHReleaseUpdater
   end
 
   def run!
-    write_private_yml if access_key_id
+    write_private_yml if @access_key_id
     delete_old_blob
     add_new_blob
     create_release
