@@ -91,6 +91,12 @@ resources:
       user: {{buildpacks-github-org}}
       repository: <%= language.gsub('-offline', '') %>-buildpack
       access_token: {{buildpacks-github-token}}
+  - name: <%= language %>-buildpack-bosh-release-github-release
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: <%= language.gsub('-offline', '') %>-buildpack-release
+      access_token: {{buildpacks-github-token}}
   - name: <%= language %>-buildpack-bosh-release
     type: git
     source:
@@ -458,6 +464,11 @@ jobs:
           params:
             repository: release-artifacts
             rebase: true
+            tag: blob/version
+        - put: <%= language %>-buildpack-bosh-release-github-release
+          params:
+            name: blob/version
+            tag: blob/version
         on_failure:
           put: failure-alert
           params:
