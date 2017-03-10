@@ -42,6 +42,9 @@ RUN mv /usr/bin/composer.phar /usr/bin/composer
 RUN wget -O- 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.24.0&source=github-rel'| tar xz -C /usr/bin
 RUN cf install-plugin Diego-Enabler -f -r CF-Community
 
+# download the bosh2 CLI
+RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.1-linux-amd64 -o /usr/local/bin/bosh2 && chmod +x /usr/local/bin/bosh2
+
 #download spiff for spiffy things
 RUN wget -O- 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.8/spiff_linux_amd64.zip' | funzip > /usr/bin/spiff
 RUN chmod 755 /usr/bin/spiff
