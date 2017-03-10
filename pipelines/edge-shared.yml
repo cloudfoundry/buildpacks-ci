@@ -1,0 +1,78 @@
+<% languages = %w(binary dotnet-core go hwc multi nodejs php python ruby staticfile) %>
+
+---
+resources:
+  - name: nightly-trigger
+    type: cron
+    source:
+      expression: 0 3 * * *
+      location: {{current-timezone}}
+
+  - name: language-locks
+    type: pool
+    source:
+      branch: master
+      pool: edge-shared-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
+
+  - name: cf-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-deployment
+      branch: master
+
+  - name: gcp-windows-stemcell
+    type: s3
+    source:
+      bucket: bosh-windows-stemcells
+      regexp: light-bosh-stemcell-(.*)-google-kvm-windows2012R2-go_agent.tgz
+
+  - name: gcp-linux-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-ubuntu-trusty-go_agent
+
+jobs:
+  - name: redeploy-cf-deployment
+    serial_groups: [ deploy ]
+    serial: true
+    public: true
+    plan:
+      - get: nightly-trigger
+        trigger: true
+      - aggregate:
+        <% languages.each do |language| %>
+        - put: lock-<%=language %>
+          resource: language-locks
+          params:
+            claim: <%=language %>
+          timeout: 3h
+        <% end %>
+      - aggregate:
+        - get: buildpacks-ci
+        - get: cf-deployment
+        - get: gcp-linux-stemcell
+        - get: gcp-windows-stemcell
+      - task: recreate-shared-cf-release
+        file: buildpacks-ci/tasks/recreate-shared-cf-deployment/task.yml
+        params:
+          BOSH_CLIENT: {{director-username}}
+          BOSH_CLIENT_SECRET: {{director-password}}
+          BOSH_CA_CERT: {{director-ca-cert}}
+          BOSH_ENVIRONMENT: {{director-address}}
+          CI_CF_SHARED_PASSWORD: {{ci_cf_shared_password}}
+          SYSTEM_DOMAIN: buildpacks-shared.cf-app.com
+      - aggregate:
+        <% languages.each do |language| %>
+        - put: language-locks
+          params:
+            unclaim: lock-<%=language %>
+          timeout: 3h
+        <% end %>
