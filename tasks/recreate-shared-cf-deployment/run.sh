@@ -19,7 +19,7 @@ echo "uaa_scim_users_admin_password: $CI_CF_SHARED_PASSWORD" > /tmp/deployment-v
 
 bosh2 -n -d cf deploy cf-deployment/cf-deployment.yml \
 --vars-store /tmp/deployment-vars.yml \
--v system_domain=$SYSTEM_DOMAIN \
+-v system_domain="$SYSTEM_DOMAIN" \
 -o cf-deployment/operations/windows-cell.yml \
 -o buildpacks-ci/deployments/edge-shared/scale-down.yml
 echo -e "\n\n======= Done! ======="
