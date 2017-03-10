@@ -20,7 +20,7 @@ resources:
     source:
       project_id: {{cf-buildpacks-public-tracker-id}}
       token: {{pivotal-tracker-api-token}}
-      label: testlabel
+      label: trusty-usn
   - name: monday-funday
     type: cron
     source:
@@ -74,7 +74,7 @@ resources:
       to: ["cf-security@pivotal.io", "cf-buildpacks-eng@pivotal.io", "security@pivotal.io"]
 
 jobs:
-  - name: tracker-filter-test
+  - name: tracker-sec-triage-filter
     serial: true
     public: true
     plan:
