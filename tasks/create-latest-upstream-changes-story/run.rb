@@ -6,12 +6,10 @@ require "#{buildpacks_ci_dir}/lib/tracker-client"
 
 name = 'Summarize upstream changes'
 date = (Time.now - (8 * 24 * 60 * 60)).strftime('%Y-%m-%d')
-description = <<~DESCRIPTION
-                **Summarize** changes in the Heroku buildpacks since last week (or the last time this story was completed).
-
-                Easy way to check for changes: Ex. https://github.com/heroku/heroku-buildpack-ruby/compare/master@%7B#{date}%7D...master
-              DESCRIPTION
-tasks = %w(Go Nodejs Python Ruby)
+description = "**Summarize** changes in the Heroku buildpacks since last week (or the last time this story was completed)."
+tasks = %w(Go Nodejs Python Ruby).map do |task|
+  "#{task} - https://github.com/heroku/heroku-buildpack-#{task.downcase}/compare/master@%7B#{date}%7D...master"
+end
 tasks << "Tag story with all affected buildpacks"
 labels = %w(maintenance)
 
