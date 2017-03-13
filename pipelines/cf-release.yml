@@ -299,7 +299,7 @@ jobs:
         - task: cats
           file: cats-concourse-task/task.yml
           params:
-            NODES: 4
+            NODES: 1
             CONFIG_FILE_PATH: integration_config.json
         on_failure:
           put: failure-alert
