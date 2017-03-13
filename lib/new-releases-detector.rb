@@ -203,7 +203,7 @@ class NewReleasesDetector
       httpd:           -> { Octokit.tags('apache/httpd').map(&:name).grep(/^2\./) },
       hwc:             -> { Octokit.releases('cloudfoundry-incubator/hwc').map(&:tag_name) },
       jruby:           -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
-      libunwind:       -> { Git.ls_remote('http://git.savannah.gnu.org/cgit/libunwind.git')['tags'].keys },
+      libunwind:       -> { Git.ls_remote('https://git.savannah.gnu.org/git/libunwind.git')['tags'].keys },
       maven:           -> { Octokit.tags('apache/maven').map(&:name).grep(/^maven/) },
       miniconda:       -> { Nokogiri::HTML.parse(open('https://repo.continuum.io/miniconda/').read).css('table tr td a').map {|link| link['href']} },
       nginx:           -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release/) },
