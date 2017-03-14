@@ -28,6 +28,7 @@ RUN git config --global user.name "CF Buildpacks Team CI Server"
 RUN git config --global core.pager cat
 
 RUN wget -q https://releases.hashicorp.com/vagrant/1.8.5/vagrant_1.8.5_x86_64.deb \
+  && [ 30ee435c3358c6a835ea52cf710f4e50caa0e77cb721332132a2d3386a8745d9 = $(shasum -a 256 vagrant_1.8.5_x86_64.deb | cut -d' ' -f1) ]\
   && dpkg -i vagrant_1.8.5_x86_64.deb \
   && rm vagrant_1.8.5_x86_64.deb
 RUN vagrant plugin install vagrant-aws --verbose
@@ -39,21 +40,35 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the CF-CLI
-RUN wget -O- 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.24.0&source=github-rel'| tar xz -C /usr/bin
+RUN wget -O cf-cli.tgz 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.24.0&source=github-rel' \
+  && [ adb0f75ed84a650a027fb238e4ec3123840cc1564600535c8abd420778a651b8 = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
+  && tar xzf cf-cli.tgz -C /usr/bin \
+  && rm cf-cli.tgz
 RUN cf install-plugin Diego-Enabler -f -r CF-Community
 
 # download the bosh2 CLI
-RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.1-linux-amd64 -o /usr/local/bin/bosh2 && chmod +x /usr/local/bin/bosh2
+RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.1-linux-amd64 -o /usr/local/bin/bosh2 \
+  && [ fbae71a27554be2453b103c5b149d6c182b75f5171a00d319ac9b39232e38b51 = $(shasum -a 256 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
+  && chmod +x /usr/local/bin/bosh2
 
 #download spiff for spiffy things
-RUN wget -O- 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.8/spiff_linux_amd64.zip' | funzip > /usr/bin/spiff
+RUN wget -O spiff.zip 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.8/spiff_linux_amd64.zip' \
+  && [ e5b49b7f32b2b3973536bf2a48beda2d236956bebff7677aa109cc2b71f56002 = $(shasum -a 256 spiff.zip | cut -d' ' -f1) ] \
+  && funzip spiff.zip > /usr/bin/spiff \
+  && rm spiff.zip
 RUN chmod 755 /usr/bin/spiff
 
 #download hub CLI
-RUN wget -O- https://github.com/github/hub/releases/download/v2.2.1/hub-linux-amd64-2.2.1.tar.gz | tar xz -C /usr/bin --strip-components=1 hub-linux-amd64-2.2.1/hub
+RUN wget -O hub.tgz https://github.com/github/hub/releases/download/v2.2.1/hub-linux-amd64-2.2.1.tar.gz \
+  && [ c6131dcad312c314929e800c36c925b78ade84ee91fcc67a2a41cde40e22a5c2 = $(shasum -a 256 hub.tgz | cut -d' ' -f1) ] \
+  && tar xzf hub.tgz -C /usr/bin --strip-components=1 hub-linux-amd64-2.2.1/hub \
+  && rm hub.tgz
 
 # Ensure Concourse Filter binary is present
-RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.0.3/concourse-filter' && mv concourse-filter /usr/local/bin && chmod +x /usr/local/bin/concourse-filter
+RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.0.3/concourse-filter' \
+  && [ 78dde97f155a73439834261dd7dce3f622c1aba79c487d8bc4d187ac3f4f407a = $(shasum -a 256 concourse-filter | cut -d' ' -f1) ] \
+  && mv concourse-filter /usr/local/bin \
+  && chmod +x /usr/local/bin/concourse-filter
 
 # AWS CLI
 RUN pip install awscli
@@ -69,19 +84,29 @@ COPY Gemfile.lock /usr/local/Gemfile.lock
 RUN cd /usr/local && bundle install
 
 #install fly-cli
-RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly
-RUN chmod +x /usr/local/bin/fly
+RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly \
+  && [ c080d10e9fc1ec630cb2205eece3b00673ea0f17ec769d559108ebb68ee7f9f8 = $(shasum -a 256 /usr/local/bin/fly | cut -d' ' -f1) ] \
+  && chmod +x /usr/local/bin/fly
 
 # git-hooks and git-secrets
-RUN curl -L https://github.com/git-hooks/git-hooks/releases/download/v1.1.4/git-hooks_linux_amd64.tar.gz | tar -zxf - --to-stdout > /usr/local/bin/git-hooks
-RUN chmod 755 /usr/local/bin/git-hooks
+RUN curl -L https://github.com/git-hooks/git-hooks/releases/download/v1.1.4/git-hooks_linux_amd64.tar.gz -o githooks.tgz \
+  && [ 3f21c856064f8f08f8c25494ac784882a2b8811eea3bfb721a6c595b55577c48 = $(shasum -a 256 githooks.tgz | cut -d' ' -f1) ] \
+  && tar -zxf githooks.tgz --to-stdout > /usr/local/bin/git-hooks \
+  && rm githooks.tgz \
+  && chmod 755 /usr/local/bin/git-hooks
+
 RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make install
 
 # Ensure that Concourse filtering is on for non-interactive shells
 ENV BASH_ENV /etc/profile.d/filter.sh
 
 # Install go 1.7.5
-RUN cd /usr/local && curl -L https://storage.googleapis.com/golang/go1.7.5.linux-amd64.tar.gz -o go.tar.gz && tar xf go.tar.gz && mv go/bin/go /usr/local/bin/go
+RUN cd /usr/local \
+  && curl -L https://storage.googleapis.com/golang/go1.7.5.linux-amd64.tar.gz -o go.tar.gz \
+  && [ 2e4dd6c44f0693bef4e7b46cc701513d74c3cc44f2419bf519d7868b12931ac3 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
+  && tar xf go.tar.gz \
+  && mv go/bin/go /usr/local/bin/go \
+  && rm go.tar.gz
 
 # Install poltergeist for running dotnet-core-buildpack specs
 RUN gem install phantomjs && ruby -e 'require "phantomjs"; Phantomjs.path'
