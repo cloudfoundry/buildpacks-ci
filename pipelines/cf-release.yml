@@ -30,7 +30,7 @@ resources:
     type: git
     source:
       uri: git@github.com:cloudfoundry/cf-release
-      branch: develop
+      branch: release-candidate
       private_key: {{cf-release-private-key}}
   - name: cf-release-develop
     type: git
@@ -265,7 +265,7 @@ jobs:
         - get: buildpacks-ci
         - get: cats-concourse-task
         - get: cf-release
-          resource: cf-release-develop
+          resource: cf-release-rc
           params:
             submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
           passed: [ deploy-cf-and-diego-to-cf-release ]
