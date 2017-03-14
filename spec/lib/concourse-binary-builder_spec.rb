@@ -301,7 +301,7 @@ describe ConcourseBinaryBuilder do
       let(:output_file)          { 'bower-1.77.90.tgz' }
       let(:output_file_with_md5) { "bower-1.77.90-#{output_file_md5_short}.tgz" }
       let(:verification_type)    { 'sha256' }
-      let(:verification_value)   { 'aaabbbccc111222333' }
+      let(:verification_value)   { output_file_sha256 }
       let(:source_url)           { 'https://registry.npmjs.org/bower/-/bower-1.77.90.tgz' }
       let(:version)              { '1.77.90' }
 
@@ -321,10 +321,10 @@ describe ConcourseBinaryBuilder do
 
     context 'the dependency is yarn' do
       let(:dependency)           { 'yarn' }
-      let(:output_file)          { 'yarn-0.19.1.tar.gz' }
-      let(:output_file_with_md5) { "yarn-0.19.1-#{output_file_md5_short}.tar.gz" }
+      let(:output_file)          { 'yarn-v0.19.1.tar.gz' }
+      let(:output_file_with_md5) { "yarn-v0.19.1-#{output_file_md5_short}.tar.gz" }
       let(:verification_type)    { 'sha256' }
-      let(:verification_value)   { 'aaabbbccc111222333' }
+      let(:verification_value)   { output_file_sha256 }
       let(:source_url)           { 'https://yarnpkg.com/downloads/0.19.1/yarn-v0.19.1.tar.gz' }
       let(:version)              { '0.19.1' }
 
@@ -347,7 +347,7 @@ describe ConcourseBinaryBuilder do
       let(:output_file)          { 'composer-1.2.0.phar' }
       let(:output_file_with_md5) { "composer-1.2.0-#{output_file_md5_short}.phar" }
       let(:verification_type)    { 'sha256' }
-      let(:verification_value)   { 'dc80131545ed7f7b1369ae058824587f0718892f6a84bd86cfb0f28ab5e39095' }
+      let(:verification_value)   { output_file_sha256 }
       let(:source_url)           { 'https://getcomposer.org/download/1.2.0/composer.phar' }
       let(:version)              { '1.2.0' }
 
