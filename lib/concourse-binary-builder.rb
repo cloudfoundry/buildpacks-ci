@@ -92,8 +92,24 @@ class ConcourseBinaryBuilder
     end
   end
 
-  def download_non_build_dependency(url, output_file)
-      system("curl -L #{url} -o #{binary_builder_dir}/#{output_file}") or raise "Could not download #{url}"
+  def download_non_build_dependency(url, output_filename)
+    output_file = "#{binary_builder_dir}/#{output_filename}"
+
+    system("curl -L #{url} -o #{output_file}") or raise "Could not download #{url}"
+
+    downloaded_file_hash = ""
+
+    if @verifcation_type == 'md5'
+      downloaded_file_hash = Digest::MD5.file(output_file).hexdigest
+    elsif @verification_type == 'sha256'
+      downloaded_file_hash = Digest::SHA256.file(output_file).hexdigest
+    else
+      raise "Unknown verification type: #{@verification_type}"
+    end
+
+    if @verification_value != downloaded_file_hash
+      raise "#{@verification_type} verification failed: expected #{@verification_value}, got #{downloaded_file_hash}"
+    end
   end
 
   def add_md5_to_binary_name
