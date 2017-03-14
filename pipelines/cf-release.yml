@@ -26,6 +26,12 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/diego-release
       branch: master
+  - name: cf-release-rc
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cf-release
+      branch: develop
+      private_key: {{cf-release-private-key}}
   - name: cf-release-develop
     type: git
     source:
@@ -187,7 +193,7 @@ jobs:
           - get: buildpacks-ci
           - get: bosh-lite
           - get: cf-release
-            resource: cf-release-develop
+            resource: cf-release-rc
             attempts: 3
           - get: diego-release
           - get: garden-runc-bosh-release
