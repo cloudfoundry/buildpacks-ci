@@ -79,6 +79,6 @@ jobs:
         <% languages.each do |language| %>
         - put: language-locks
           params:
-            unclaim: lock-<%=language %>
+            release: lock-<%=language %>
           timeout: 3h
         <% end %>
