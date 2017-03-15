@@ -7,10 +7,8 @@ require 'fileutils'
 require_relative '../../lib/state-of-bosh-lites'
 
 describe StateOfBoshLites do
-  let(:gcp_environment_names) {%w(edge-1.buildpacks-gcp.ci edge-2.buildpacks-gcp.ci lts-1.buildpacks-gcp.ci lts-2.buildpacks-gcp.ci)}
-  let(:aws_environment_names) {%w(edge-1.buildpacks.ci edge-2.buildpacks.ci lts-1.buildpacks.ci lts-2.buildpacks.ci)}
-  let(:environments) { { 'aws' => aws_environment_names,
-                         'gcp' => gcp_environment_names} }
+  let(:gcp_environment_names) {%w(lts-1.buildpacks-gcp.ci lts-2.buildpacks-gcp.ci)}
+  let(:environments) { { 'gcp' => gcp_environment_names} }
 
   before(:each) do
     allow(GitClient).to receive(:checkout_branch)

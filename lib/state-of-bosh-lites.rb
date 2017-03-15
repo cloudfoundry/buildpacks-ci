@@ -10,18 +10,10 @@ class StateOfBoshLites
 
   def initialize
     @state_of_environments = []
-    @gcp_environment_names = %w(edge-1.buildpacks-gcp.ci
-                                edge-2.buildpacks-gcp.ci
-                                lts-1.buildpacks-gcp.ci
+    @gcp_environment_names = %w(lts-1.buildpacks-gcp.ci
                                 lts-2.buildpacks-gcp.ci)
 
-    @aws_environment_names = %w(edge-1.buildpacks.ci
-                               edge-2.buildpacks.ci
-                               lts-1.buildpacks.ci
-                               lts-2.buildpacks.ci)
-
-    @environments = {'aws' => @aws_environment_names,
-                     'gcp' => @gcp_environment_names}
+    @environments = { 'gcp' => @gcp_environment_names }
 
     @languages = %w(binary dotnet-core hwc go multi nodejs php python ruby staticfile)
   end
