@@ -1,3 +1,5 @@
+<% go_buildpacks = %w(hwc multi staticfile) %>
+
 ---
 resource_types:
   - name: slack-notification
@@ -83,7 +85,9 @@ resources: #####################################################################
       private_key: {{pivotal-cf-buildpacks-ci-robots}}
       uri: git@github.com:pivotal-cf/buildpacks-ci-robots.git # pivotal-cf because pivnet is not foundation's
       paths: [ pivnet-metadata/<%= language %>.yml ]
+<% end %>
 
+<% unless go_buildpacks.include? language %>
   - name: compile-extensions
     type: git
     source:
@@ -565,7 +569,7 @@ jobs: ##########################################################################
           params:
             release: cf-environments
 <% end %>
-<% unless language == "multi" || language == "hwc"%>
+<% unless go_buildpacks.include? language %>
   - name: update-compile-extensions
     serial: true
     public: true
