@@ -1,5 +1,0 @@
----
-deployment-name: edge-1.buildpacks.ci
-resource-pool: cf-edge-environments
-iaas: aws
-bosh-lite-name: N/A

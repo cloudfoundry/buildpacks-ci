@@ -1,5 +1,0 @@
----
-deployment-name: edge-1.buildpacks-gcp.ci
-resource-pool: cf-edge-gcp-environments
-iaas: gcp
-bosh-lite-name: edge-1-gcp-bosh-lite
