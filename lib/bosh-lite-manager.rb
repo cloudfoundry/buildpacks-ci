@@ -98,6 +98,7 @@ class BoshLiteManager
   def deploy_aws_bosh_lite
     Dir.chdir(deployment_dir) do
       ENV.store('VAGRANT_CWD', deployment_dir)
+      ENV.store('BOSH_LITE_DISK_SIZE', '1000')
       run_or_exit "/usr/bin/vagrant up --provider=aws"
     end
   end
