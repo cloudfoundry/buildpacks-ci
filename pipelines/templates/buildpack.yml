@@ -187,35 +187,11 @@ resources: #####################################################################
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
 <% unless language == 'hwc' %>
-  - name: cf-edge-gcp-environments
-    type: pool
-    source:
-      branch: master
-      pool: cf-edge-gcp-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-
   - name: cf-lts-gcp-environments
     type: pool
     source:
       branch: master
       pool: cf-lts-gcp-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-
-  - name: cf-edge-aws-environments
-    type: pool
-    source:
-      branch: master
-      pool: cf-edge-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-
-  - name: cf-lts-aws-environments
-    type: pool
-    source:
-      branch: master
-      pool: cf-lts-environments
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 <% end %>
@@ -299,17 +275,10 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      <% unless language == 'hwc' %>
-      - put: cf-environments
-        resource: cf-edge-aws-environments
-        params:
-          acquire: true
-      <% else %>
       - put: cf-environments
         resource: edge-shared-environments
         params:
           claim: <%= language %>
-      <% end %>
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
@@ -325,21 +294,6 @@ jobs: ##########################################################################
           passed: [ "detect-new-version-and-upload-artifacts" ]
           trigger: true
       - do:
-        <% unless language == 'hwc' %>
-        - task: rspec
-          file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
-          params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci-cf-password}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-          privileged: true
-          ensure:
-            put: cf-edge-aws-environments
-            params:
-              release: cf-environments
-        <% else %>
         - put: cf-bp-space
         - task: rspec
           file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
@@ -352,11 +306,6 @@ jobs: ##########################################################################
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
-        ensure:
-          put: edge-shared-environments
-          params:
-            release: cf-environments
-        <% end %>
         on_failure:
           put: failure-alert
           params:
@@ -364,13 +313,17 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+        ensure:
+          put: edge-shared-environments
+          params:
+            release: cf-environments
 <% unless language == 'hwc' %>
   - name: specs-lts-master
     serial: true
     public: true
     plan:
       - put: cf-environments
-        resource: cf-lts-aws-environments
+        resource: cf-lts-gcp-environments
         params:
           acquire: true
       - aggregate:
@@ -398,7 +351,7 @@ jobs: ##########################################################################
             RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
           ensure:
-            put: cf-lts-aws-environments
+            put: cf-lts-gcp-environments
             params:
               release: cf-environments
         on_failure:
@@ -567,138 +520,6 @@ jobs: ##########################################################################
           params:
             release: cf-environments
 <% unless language == "hwc" %>
-  - name: specs-edge-aws-develop
-    serial: true
-    public: true
-    plan:
-      - put: cf-environments
-        resource: cf-edge-aws-environments
-        params:
-          acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - get: buildpack
-          resource: buildpack-develop
-          trigger: true
-      - do:
-        - task: rspec
-          file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
-          params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci-cf-password}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-          privileged: true
-        - task: brats
-          file: buildpacks-ci/tasks/run-brats/task.yml
-          params:
-            BUILDPACK_BRANCH: develop
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-            LANGUAGE: <%= language %>
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-        ensure:
-          put: cf-edge-aws-environments
-          params:
-            release: cf-environments
-  - name: specs-lts-aws-develop
-    serial: true
-    public: true
-    plan:
-      - put: cf-environments
-        resource: cf-lts-aws-environments
-        params:
-          acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - get: buildpack
-          resource: buildpack-develop
-          trigger: true
-      - do:
-        - task: rspec
-          file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
-          params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci-cf-password}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-          privileged: true
-        - task: brats
-          file: buildpacks-ci/tasks/run-brats/task.yml
-          params:
-            BUILDPACK_BRANCH: develop
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-            LANGUAGE: <%= language %>
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-        ensure:
-          put: cf-lts-aws-environments
-          params:
-            release: cf-environments
-  - name: specs-edge-gcp-develop
-    serial: true
-    public: true
-    plan:
-      - put: cf-environments
-        resource: cf-edge-gcp-environments
-        params:
-          acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - get: buildpack
-          resource: buildpack-develop
-          trigger: true
-      - do:
-        - task: rspec
-          file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
-          params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci-cf-password}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-          privileged: true
-        - task: brats
-          file: buildpacks-ci/tasks/run-brats/task.yml
-          params:
-            BUILDPACK_BRANCH: develop
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-            LANGUAGE: <%= language %>
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-        ensure:
-          put: cf-edge-gcp-environments
-          params:
-            release: cf-environments
   - name: specs-lts-gcp-develop
     serial: true
     public: true
