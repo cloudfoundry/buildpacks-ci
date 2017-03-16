@@ -1,4 +1,4 @@
-<% languages = %w(binary dotnet-core go hwc multi nodejs php python ruby staticfile) %>
+<% languages = %w(binary dotnet-core go hwc java multi nodejs php python ruby staticfile) %>
 
 ---
 resource_types:
