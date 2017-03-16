@@ -7,10 +7,8 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: machete
-  - name: cf-environments
+  - name: cf-space
 run:
   path: buildpacks-ci/tasks/run-machete-specs/run.sh
 params:
-  CF_PASSWORD:
   RUBYGEM_MIRROR:
-  BOSH_LITE_DOMAIN_NAME:

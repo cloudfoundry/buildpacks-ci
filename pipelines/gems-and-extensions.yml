@@ -1,10 +1,15 @@
 ---
+resource_types:
+  - name: cf-space-resource
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cf-space-resource
 resources:
   - name: buildpacks-ci
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch:  {{buildpacks-ci-git-uri-public-branch}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
   - name: buildpack-packager
     type: git
     source:
@@ -37,13 +42,20 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/libbuildpack.git
-  - name: cf-edge-environments
+  - name: language-locks
     type: pool
     source:
       branch: master
-      pool: cf-edge-gcp-environments
+      pool: edge-shared-environments
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+  - name: cf-space
+    type: cf-space-resource
+    source:
+      target: api.buildpacks-shared.cf-app.com
+      username: {{ci-cf-username}}
+      password: {{ci_cf_shared_password}}
+      organization: pivotal
 jobs:
   - name: libbuildpack-specs
     serial: true
@@ -115,21 +127,25 @@ jobs:
         - get: buildpacks-ci
         - get: machete
           trigger: true
-      - put: cf-environments
-        resource: cf-edge-environments
+      - put: lock-null
+        resource: language-locks
         params:
-          acquire: true
+          claim: "null"
+        timeout: 3h
+      - put: cf-space
       - task: run-machete-specs
         file: buildpacks-ci/tasks/run-machete-specs/task.yml
         params:
-          CF_PASSWORD: {{ci-cf-password}}
-          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
           RUBYGEM_MIRROR: {{rubygem-mirror}}
         privileged: true
         ensure:
-          put: cf-edge-environments
-          params:
-            release: cf-environments
+          aggregate:
+          - put: language-locks
+            params:
+              release: lock-null
+            timeout: 3h
+          - task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
   - name: machete-tag
     serial: true
     public: true
