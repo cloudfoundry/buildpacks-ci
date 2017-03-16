@@ -35,15 +35,16 @@ class DeleteUnaffectedStories
 
   def packages(story)
     packages = []
-    url = story['description'].match(/^\**USN:\**\s*(\S+)$/)[1]
-    url.gsub!(/^http:/, 'https:')
-    doc = Nokogiri::HTML(open(url))
-    node = doc.css('dt:contains("Ubuntu 14.04 LTS")').first&.next_sibling
-    while %w(text dd).include? node&.name
-      if node.name == 'dd'
-        packages << node.css('> a').text
+    trusty = false
+    story['description'].split(/\n/).each do |line|
+      case
+      when line =~ /^\*\*Trusty Packages:\*\*/
+        trusty = true
+      when line =~ /^\s*$/
+        trusty = false
+      when trusty == true
+        packages << line.split.first
       end
-      node = node.next_sibling
     end
     packages
   end
