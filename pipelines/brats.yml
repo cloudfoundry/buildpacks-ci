@@ -1,3 +1,16 @@
+<% languages = %w(binary dotnet-core go hwc java multi nodejs php python ruby staticfile) %>
+
+---
+resource_types:
+  - name: cron
+    type: docker-image
+    source:
+      repository: cftoolsmiths/cron-test
+  - name: cf-space-resource
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cf-space-resource
+
 resources:
   - name: brats
     type: git
@@ -5,29 +18,32 @@ resources:
       uri: git@github.com:cloudfoundry/brats.git
       private_key: {{brats-private-key}}
       branch: master
-  - name: brats-time-resource
-    type: time
+
+  - name: nightly-trigger
+    type: cron
     source:
-      interval: 12h
-      start: 19:00 -0400
-      stop: 00:00 -0400
+      expression: 0 20 * * *
+      location: {{current-timezone}}
+
   - name: buildpacks-ci
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
-  - name: cf-edge-environments
+
+  - name: edge-shared-environments
+    type: pool
+    source:
+      branch: master
+      pool: edge-shared-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
+  - name: cf-lts-gcp-environments
     type: pool
     source:
       branch: resource-pools
-      pool: cf-edge-environments
-      private_key: {{buildpacks-ci-private-key}}
-      uri: {{buildpacks-ci-git-uri}}
-  - name: cf-lts-environments
-    type: pool
-    source:
-      branch: resource-pools
-      pool: cf-lts-environments
+      pool: cf-lts-gcp-environments
       private_key: {{buildpacks-ci-private-key}}
       uri: {{buildpacks-ci-git-uri}}
 
@@ -45,21 +61,30 @@ resources:
       repository: machete
       access_token: {{buildpacks-github-token}}
 
+  - name: cf-brat-space
+    type: cf-space-resource
+    source:
+      target: api.buildpacks-shared.cf-app.com
+      username: {{ci-cf-username}}
+      password: {{ci_cf_shared_password}}
+      organization: pivotal
+
 jobs:
-<% %w(binary staticfile go python nodejs php ruby jruby dotnet-core java).each do |language| %>
+<% languages.each do |language| %>
   - name: brats-<%= language %>-lts
     serial: true
     public: true
     plan:
       - put: cf-environments
-        resource: cf-lts-environments
+        resource: cf-lts-gcp-environments
         params:
           acquire: true
         timeout: 3h
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        - {get: brats-time-resource, trigger: true}
+        - get: nightly-trigger
+          trigger: true
       - task: bin-tests
         file: buildpacks-ci/tasks/run-brats/task.yml
         params:
@@ -71,7 +96,7 @@ jobs:
           BUILDPACK_BRANCH: master
         privileged: true
         ensure:
-          put: cf-lts-environments
+          put: cf-lts-gcp-environments
           params:
             release: cf-environments
   - name: brats-<%= language %>-edge
@@ -79,26 +104,30 @@ jobs:
     public: true
     plan:
       - put: cf-environments
-        resource: cf-edge-environments
+        resource: edge-shared-environments
         params:
-          acquire: true
+          claim: <%= language %>
         timeout: 3h
       - aggregate:
         - get: buildpacks-ci
         - get: brats
-        - {get: brats-time-resource, trigger: true}
-      - task: bin-tests
-        file: buildpacks-ci/tasks/run-brats/task.yml
-        params:
-          LANGUAGE: <%= language %>
-          CI_CF_USERNAME: {{ci-cf-username}}
-          CI_CF_PASSWORD: {{ci-cf-password}}
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-          BUILDPACK_BRANCH: master
-        privileged: true
+        - get: nightly-trigger
+          trigger: true
+      - do:
+        - put: cf-brat-space
+        - task: run-brats
+          file: buildpacks-ci/tasks/run-shared-brats/task.yml
+          params:
+            BUILDPACK_BRANCH: develop
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci_cf_shared_password}}
+            LANGUAGE: <%= language %>
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
         ensure:
-          put: cf-edge-environments
+          put: edge-shared-environments
           params:
             release: cf-environments
 <% end %>
