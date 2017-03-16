@@ -15,7 +15,7 @@ class StateOfBoshLites
 
     @environments = { 'gcp' => @gcp_environment_names }
 
-    @languages = %w(binary dotnet-core hwc go multi nodejs php python ruby staticfile)
+    @languages = %w(binary dotnet-core go hwc java multi nodejs php python ruby staticfile)
   end
 
   def get_states!(resource_pools_dir: nil, git_pull: true)
