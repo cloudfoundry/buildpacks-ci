@@ -85,7 +85,7 @@ jobs:
         - get: brats
         - get: nightly-trigger
           trigger: true
-      - task: bin-tests
+      - task: run-brats
         file: buildpacks-ci/tasks/run-brats/task.yml
         params:
           LANGUAGE: <%= language %>
@@ -118,7 +118,7 @@ jobs:
         - task: run-brats
           file: buildpacks-ci/tasks/run-shared-brats/task.yml
           params:
-            BUILDPACK_BRANCH: develop
+            BUILDPACK_BRANCH: master
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci_cf_shared_password}}
             LANGUAGE: <%= language %>
