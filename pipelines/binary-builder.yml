@@ -144,7 +144,7 @@ groups: ########################################################################
 <% %w(bower composer dotnet glide godep hwc nginx node yarn).each do |auto_dep| %>
     - build-<%= auto_dep %>
 <% end %>
-<% {go: ["godep", "glide"], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework'] }.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide"], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node","yarn"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework'] }.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
     - update-<%= dependency %>-in-<%= buildpack %>-buildpack
   <% end %>
@@ -329,7 +329,7 @@ jobs: ##########################################################################
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 
-<% {go: ["godep", "glide"], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework']}.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide"], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node","yarn"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework']}.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
   - name: update-<%= dependency %>-in-<%= buildpack %>-buildpack
     serial: true
