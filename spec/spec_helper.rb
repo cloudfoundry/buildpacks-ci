@@ -10,6 +10,15 @@ RSpec.configure do |config|
   config.color = true
   config.tty = true
 
+  config.before do
+    $stdout = StringIO.new
+    $stderr = StringIO.new
+  end
+  config.after(:all) do
+    $stdout = STDOUT
+    $stderr = STDERR
+  end
+
   def fly(arg, env = {})
     target = 'buildpacks'
     env_var = env.collect { |k, v| "#{k}=#{v}" }.join(' ')
@@ -19,7 +28,6 @@ RSpec.configure do |config|
   def execute(cmd, env = {})
     @output = fly("execute #{cmd}", env)
     @id = @output.split("\n").first.split(' ').last
-    puts "latest task id=#{@id}"
   end
 
   def run(cmd, sleep_time = 5)

@@ -136,32 +136,32 @@ describe StateOfBoshLites do
 
     context 'output type is something-unacceptable' do
       it 'returns the correct state + job in json' do
-        allow(STDOUT).to receive(:puts).with(anything)
+        allow($stdout).to receive(:puts).with(anything)
         expect{ subject.display_state('something-unacceptable') }.to raise_exception("Invalid output type: something-unacceptable")
       end
     end
 
     context 'output type is json' do
       it 'returns the correct state + job in json' do
-          allow(STDOUT).to receive(:puts).with(anything)
-          expect(STDOUT).to receive(:puts).with("[{\"name\":\"aws\",\"status\":{\"claimed\":\"unclaimed\",\"job\":\"some-pipeline/some-job build some-build-number\"}},{\"name\":\"gcp\",\"status\":{\"claimed\":\"claimed\",\"job\":\"some-other-pipeline/some-other-job build some-other-build-number\"}}]")
+          allow($stdout).to receive(:puts).with(anything)
+          expect($stdout).to receive(:puts).with("[{\"name\":\"aws\",\"status\":{\"claimed\":\"unclaimed\",\"job\":\"some-pipeline/some-job build some-build-number\"}},{\"name\":\"gcp\",\"status\":{\"claimed\":\"claimed\",\"job\":\"some-other-pipeline/some-other-job build some-other-build-number\"}}]")
           subject.display_state('json')
       end
     end
 
     context 'output type is yaml' do
       it 'returns the correct state + job in json' do
-          allow(STDOUT).to receive(:puts).with(anything)
-          expect(STDOUT).to receive(:puts).with("---\n- name: aws\n  status:\n    claimed: unclaimed\n    job: some-pipeline/some-job build some-build-number\n- name: gcp\n  status:\n    claimed: claimed\n    job: some-other-pipeline/some-other-job build some-other-build-number\n")
+          allow($stdout).to receive(:puts).with(anything)
+          expect($stdout).to receive(:puts).with("---\n- name: aws\n  status:\n    claimed: unclaimed\n    job: some-pipeline/some-job build some-build-number\n- name: gcp\n  status:\n    claimed: claimed\n    job: some-other-pipeline/some-other-job build some-other-build-number\n")
           subject.display_state('yaml')
       end
     end
 
     context 'output type is text' do
       it 'returns the correct state + job in json' do
-          allow(STDOUT).to receive(:puts).with(anything)
-          expect(STDOUT).to receive(:puts).with("aws: \n  \e[31mclaimed\e[0m by job: some-pipeline/some-job build some-build-number \n\t https://buildpacks.ci.cf-app.com/teams/main/pipelines/some-pipeline/jobs/some-job/builds/some-build-number\n")
-          expect(STDOUT).to receive(:puts).with("gcp: \n  \e[31mclaimed\e[0m by job: some-other-pipeline/some-other-job build some-other-build-number \n\t https://buildpacks.ci.cf-app.com/teams/main/pipelines/some-other-pipeline/jobs/some-other-job/builds/some-other-build-number\n")
+          allow($stdout).to receive(:puts).with(anything)
+          expect($stdout).to receive(:puts).with("aws: \n  \e[31mclaimed\e[0m by job: some-pipeline/some-job build some-build-number \n\t https://buildpacks.ci.cf-app.com/teams/main/pipelines/some-pipeline/jobs/some-job/builds/some-build-number\n")
+          expect($stdout).to receive(:puts).with("gcp: \n  \e[31mclaimed\e[0m by job: some-other-pipeline/some-other-job build some-other-build-number \n\t https://buildpacks.ci.cf-app.com/teams/main/pipelines/some-other-pipeline/jobs/some-other-job/builds/some-other-build-number\n")
 
           subject.display_state('text')
       end
