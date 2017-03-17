@@ -521,9 +521,10 @@ jobs: ##########################################################################
         - task: add-flake-attempts-to-cats
           file: buildpacks-ci/tasks/add-flake-attempts-to-cats/task.yml
         - task: cats
+          attempts: 3
           file: cats-concourse-task/task.yml
           params:
-            NODES: 8
+            NODES: 12
             CONFIG_FILE_PATH: integration_config.json
         on_failure:
           put: failure-alert
