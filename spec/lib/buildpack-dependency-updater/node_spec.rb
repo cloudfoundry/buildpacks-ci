@@ -255,6 +255,12 @@ describe BuildpackDependencyUpdater do
               md5: 8beeb9a17a81b9832a1ccce02e6d6897
               cf_stacks:
                 - cflinuxfs2
+            - name: node
+              version: 6.10.0
+              uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-6.10.0-linux-x64-a53e48a2.tgz
+              md5: a53e48a27d9394949b6cd30e7ee6bdd4
+              cf_stacks:
+              - cflinuxfs2
             - name: ruby
               version: 2.3.0
               md5: 535342030a11abeb11497824bf642bf2
@@ -308,7 +314,7 @@ describe BuildpackDependencyUpdater do
         end
       end
 
-      context("node >= 4") do
+      context("node = 4.x") do
         let (:expected_version) { '4.5.0'}
 
         it "updates the ruby buildpack manifest dependency with the specified version" do
@@ -316,7 +322,6 @@ describe BuildpackDependencyUpdater do
           manifest = YAML.load_file(manifest_file)
 
           version_hash = {"match"=>"node", "name"=>dependency, "version"=>expected_version}
-          expect(manifest["url_to_dependency_map"]).to include(version_hash)
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.4'}
           expect(dependency_in_manifest).to eq(nil)
@@ -327,20 +332,33 @@ describe BuildpackDependencyUpdater do
           expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
         end
 
-        it "updates the ruby buildpack manifest dependency default with the specified version" do
+        it 'records which versions were removed' do
+          subject.run!
+          expect(subject.removed_versions).to eq(['4.4.4'])
+        end
+      end
+
+      context("node = 6.x") do
+        let (:expected_version) { '6.11.0'}
+
+        it "updates the ruby buildpack manifest dependency with the specified version" do
           subject.run!
           manifest = YAML.load_file(manifest_file)
 
-          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
-          expect(default_in_manifest["version"]).to eq(expected_version)
+          version_hash = {"match"=>"node", "name"=>dependency, "version"=>expected_version}
 
-          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.4'}
-          expect(default_in_manifest).to eq(nil)
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '6.10.0'}
+          expect(dependency_in_manifest).to eq(nil)
+
+          dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+          expect(dependency_in_manifest["version"]).to eq(expected_version)
+          expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-#{expected_version}-linux-x64.tgz")
+          expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
         end
 
         it 'records which versions were removed' do
           subject.run!
-          expect(subject.removed_versions).to eq(['4.4.4'])
+          expect(subject.removed_versions).to eq(['6.10.0'])
         end
       end
     end
