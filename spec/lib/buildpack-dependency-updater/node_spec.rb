@@ -222,8 +222,8 @@ describe BuildpackDependencyUpdater do
         it "does not try to update the manifest or buildpack" do
           expect(subject).not_to receive(:perform_dependency_update)
           expect(subject).not_to receive(:perform_dependency_specific_changes)
-          expect(STDOUT).to receive(:puts).with('node 6.2.2 is already in the manifest for the nodejs buildpack.')
-          expect(STDOUT).to receive(:puts).with('No updates will be made to the manifest or buildpack.')
+          expect($stdout).to receive(:puts).with('node 6.2.2 is already in the manifest for the nodejs buildpack.')
+          expect($stdout).to receive(:puts).with('No updates will be made to the manifest or buildpack.')
           subject.run!
         end
       end
