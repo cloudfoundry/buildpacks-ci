@@ -20,7 +20,7 @@ resources:
     source:
       project_id: {{cf-buildpacks-public-tracker-id}}
       token: {{pivotal-tracker-api-token}}
-      label: trusty-usn
+      label: usn-trusty
   - name: monday-funday
     type: cron
     source:
