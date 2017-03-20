@@ -14,7 +14,7 @@ class GCPTerraformDeployer
   end
 
   def bosh_lite_environments
-    %w(cf-release.buildpacks-gcp.ci edge-1.buildpacks-gcp.ci lts-1.buildpacks-gcp.ci edge-2.buildpacks-gcp.ci lts-2.buildpacks-gcp.ci stacks.buildpacks-gcp.ci stacks-nc.buildpacks-gcp.ci)
+    %w(cf-release.buildpacks-gcp.ci edge-1.buildpacks-gcp.ci lts-1.buildpacks-gcp.ci edge-2.buildpacks-gcp.ci lts-2.buildpacks-gcp.ci lts-3.buildpacks-gcp.ci lts-4.buildpacks-gcp.ci stacks.buildpacks-gcp.ci stacks-nc.buildpacks-gcp.ci)
   end
 
   def run!

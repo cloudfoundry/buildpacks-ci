@@ -12,7 +12,7 @@ resources:
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
 jobs:
-<% { 'cf-lts-gcp-environments': ['lts-1', 'lts-2'] }.each do |resource_type, resources| %>
+<% { 'cf-lts-gcp-environments': ['lts-1', 'lts-2', 'lts-3', 'lts-4'] }.each do |resource_type, resources| %>
   <% resources.each do |resource_name| %>
   - name: unclaim-<%= resource_name %>-gcp
     public: true
