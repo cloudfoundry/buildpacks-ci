@@ -11,7 +11,9 @@ class StateOfBoshLites
   def initialize
     @state_of_environments = []
     @gcp_environment_names = %w(lts-1.buildpacks-gcp.ci
-                                lts-2.buildpacks-gcp.ci)
+                                lts-2.buildpacks-gcp.ci
+                                lts-3.buildpacks-gcp.ci
+                                lts-4.buildpacks-gcp.ci)
 
     @environments = { 'gcp' => @gcp_environment_names }
 
