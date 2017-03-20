@@ -17,7 +17,12 @@ class BuildpackDependency
 
   def self.buildpack_manifests
     @buildpack_manifests ||= BUILDPACKS.map do |name|
-      [name, YAML.load(open("https://raw.githubusercontent.com/cloudfoundry/#{name}-buildpack/develop/manifest.yml"))]
+      if name == hwc
+        github_org = 'cloudfoundry-incubator'
+      else
+        github_org = 'cloudfoundry'
+      end
+      [name, YAML.load(open("https://raw.githubusercontent.com/#{github_org}/#{name}-buildpack/develop/manifest.yml"))]
     end
   end
 end
