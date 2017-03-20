@@ -17,7 +17,7 @@ class BuildpackDependency
 
   def self.buildpack_manifests
     @buildpack_manifests ||= BUILDPACKS.map do |name|
-      if name == 'hwc'
+      if name.to_s == 'hwc'
         github_org = 'cloudfoundry-incubator'
       else
         github_org = 'cloudfoundry'
