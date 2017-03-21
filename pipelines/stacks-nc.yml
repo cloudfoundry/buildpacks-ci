@@ -45,14 +45,6 @@ resources: #####################################################################
       branch: master
       private_key: {{stacks-nc-private-key}}
 
-  - name: new-cves-trigger
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-      branch: master
-      paths: [ new-cves-stacks-nc/ubuntu14.04.yml ]
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-
   - name: new-cves
     type: git
     source:
@@ -60,7 +52,6 @@ resources: #####################################################################
       branch: master
       paths: [ new-cves-stacks-nc/ubuntu14.04.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
-      disable_ci_skip: true
 
   - name: deployments-buildpacks
     type: git
@@ -257,9 +248,8 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: new-cves-trigger
-          trigger: true
         - get: new-cves
+          trigger: true
         - get: stacks
         - get: version
           params: { pre: rc }
