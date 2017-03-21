@@ -49,7 +49,7 @@ File.write(cve_yaml_file, updated_cves.to_yaml)
 robots_cve_dir = File.join('new-cves', cves_dir)
 Dir.chdir(robots_cve_dir) do
   GitClient.add_file('ubuntu14.04.yml')
-  commit_message = "Updating CVEs for #{ENV.fetch('STACK')} release #{new_version}\n\n[ci skip]"
+  commit_message = "Updating CVEs for #{ENV.fetch('STACK')} release #{new_version}\n\n"
   GitClient.safe_commit(commit_message)
 end
 
