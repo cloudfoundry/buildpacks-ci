@@ -127,22 +127,6 @@ jobs:
           TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
           TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-      - task: create-open-pull-requests-story
-        file: buildpacks-ci/tasks/create-open-pull-requests-story/task.yml
-        params:
-          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-          GITHUB_USERNAME: {{github-username}}
-          GITHUB_PASSWORD: {{github-password}}
-      - task: create-open-issues-story
-        file: buildpacks-ci/tasks/create-open-issues-story/task.yml
-        params:
-          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-          GITHUB_USERNAME: {{github-username}}
-          GITHUB_PASSWORD: {{github-password}}
 
   - name: new-buildpack-cves
     serial: true
