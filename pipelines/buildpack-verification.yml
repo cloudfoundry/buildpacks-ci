@@ -95,6 +95,7 @@ jobs:
           - get: dotnet-core-buildpack
         - task: verify-buildpack-binaries
           file: buildpacks-ci/tasks/verify-buildpack-binaries/task.yml
+          timeout: 1h30m
         on_failure:
           put: failure-alert
           params:
