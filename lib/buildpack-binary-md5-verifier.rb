@@ -54,10 +54,8 @@ class BuildpackBinaryMD5Verifier
           while !md5_match && attempts < max_attempts do
             desired_md5 = metadata_hash['md5']
             release_tag_sha = metadata_hash['sha']
-            file = uri.gsub(/[^a-zA-Z0-9\.]/, "_")
 
-            system "wget -q -c #{uri} -O #{file}"
-            actual_md5 = Digest::MD5.file(file).to_s
+            actual_md5 = `curl -s #{uri} | md5sum - | cut -d ' ' -f 1`.chomp
 
             if desired_md5 == actual_md5
               md5_match = true
