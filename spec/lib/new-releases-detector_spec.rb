@@ -156,19 +156,19 @@ describe NewReleasesDetector do
 
     context 'for python' do
       let(:dependency)          { :python }
-      let(:old_versions)        { %w(a b) }
-      let(:new_versions)        { %w(c) }
-      let(:new_releases_source) { 'https://hg.python.org/cpython/json-tags' }
+      let(:old_versions)        { %w(v1 v2) }
+      let(:new_versions)        { %w(v3) }
+      let(:new_releases_source) { 'https://www.python.org/downloads/' }
 
       context 'when there are new releases' do
-        let(:new_versions)          { %w(c) }
-        let(:new_releases_response) { double(read: { tags: [{ tag: 'a' }, { tag: 'b' }, { tag: 'c' }] }.to_json) }
+        let(:new_versions)          { %w(v3) }
+        let(:new_releases_response) { '<div><div><span class="release-number"><a>Python 1</a></span></div><div><span class="release-number"><a>Python 2</a></span></div><div><span class="release-number"><a>Python 3</a></span></div></div>' }
 
         it_behaves_like 'there are new versions to potentially build'
       end
 
       context 'when there are no new releases' do
-        let(:new_releases_response) { double(read: { tags: [{ tag: 'a' }, { tag: 'b' }] }.to_json) }
+        let(:new_releases_response) { '<div><div><span class="release-number"><a>Python 1</a></span></div><div><span class="release-number"><a>Python 2</a></span></div></div>' }
 
         it_behaves_like 'there are no new versions to potentially build'
       end
