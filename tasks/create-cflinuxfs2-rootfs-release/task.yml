@@ -7,7 +7,6 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: blob
-  - name: cflinuxfs2-rootfs-release-version
   - name: version
   - name: cflinuxfs2-rootfs-release
 outputs:

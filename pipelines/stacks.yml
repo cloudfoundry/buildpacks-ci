@@ -216,15 +216,6 @@ resources: #####################################################################
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
-  - name: cflinuxfs2-rootfs-release-version
-    type: semver
-    source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
-      initial_version: 0.1.0-rc.1
-      key: versions/cflinuxfs2-rootfs-release
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-
   ## Slack Alerts ##
 
   - name: failure-alert
@@ -261,8 +252,6 @@ jobs: ##########################################################################
         - get: stacks
         - get: version
           params: { pre: rc }
-        - get: cflinuxfs2-rootfs-release-version
-          params: { pre: rc }
         - get: monday-funday
           passed: [ "notification" ]
           trigger: true
@@ -281,8 +270,6 @@ jobs: ##########################################################################
             file: receipt-artifacts/cflinuxfs2_receipt-*
         - put: version
           params: { file: version/number }
-        - put: cflinuxfs2-rootfs-release-version
-          params: { file: cflinuxfs2-rootfs-release-version/number }
         on_failure:
           put: failure-alert
           params:
@@ -304,8 +291,6 @@ jobs: ##########################################################################
         - get: stack-s3
           passed: [ build-rootfs ]
         - get: version
-          passed: [ build-rootfs ]
-        - get: cflinuxfs2-rootfs-release-version
           passed: [ build-rootfs ]
         - get: receipt-s3
           passed: [ build-rootfs ]
@@ -373,8 +358,6 @@ jobs: ##########################################################################
           - get: version
             passed: [ recreate-bosh-lite ]
             trigger: true
-          - get: cflinuxfs2-rootfs-release-version
-            passed: [ recreate-bosh-lite ]
           - get: receipt-s3
             passed: [ recreate-bosh-lite ]
           - get: stacks
@@ -467,8 +450,6 @@ jobs: ##########################################################################
         - get: version
           passed: [ deploy-rootfs-and-cf-and-diego-to-stacks ]
           trigger: true
-        - get: cflinuxfs2-rootfs-release-version
-          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks ]
         - get: receipt-s3
           passed: [ deploy-rootfs-and-cf-and-diego-to-stacks ]
         - get: stacks
@@ -551,9 +532,6 @@ jobs: ##########################################################################
           passed:
             - cats
           params: { bump: final }
-        - get: cflinuxfs2-rootfs-release-version
-          passed: [ cats ]
-          params: { bump: final }
       - do:
         - task: update-receipt
           file: buildpacks-ci/tasks/update-rootfs-receipt/task.yml
@@ -570,8 +548,6 @@ jobs: ##########################################################################
             to: /rootfs/
         - put: version
           params: { file: version/number }
-        - put: cflinuxfs2-rootfs-release-version
-          params: { file: cflinuxfs2-rootfs-release-version/number }
         on_failure:
           put: failure-alert
           params:
@@ -588,14 +564,8 @@ jobs: ##########################################################################
         trigger: true
         passed: [ shipit ]
         params: {bump: minor, pre: rc}
-      - get: cflinuxfs2-rootfs-release-version
-        trigger: true
-        passed: [ shipit ]
-        params: {bump: minor, pre: rc}
       - put: version
         params: {file: version/number}
-      - put: cflinuxfs2-rootfs-release-version
-        params: {file: cflinuxfs2-rootfs-release-version/number}
 
   - name: upload-to-github
     serial: true
@@ -719,8 +689,6 @@ jobs: ##########################################################################
           trigger: true
         - get: version
           passed: [ shipit ]
-        - get: cflinuxfs2-rootfs-release-version
-          passed: [ shipit ]
         - get: cflinuxfs2-rootfs-release
       - do:
         - task: create-cflinuxfs2-rootfs-release
@@ -743,8 +711,8 @@ jobs: ##########################################################################
             repository: release-artifacts
         - put: cflinuxfs2-rootfs-github-release
           params:
-            name: cflinuxfs2-rootfs-release-version/number
-            tag: cflinuxfs2-rootfs-release-version/number
+            name: version/number
+            tag: version/number
             tag_prefix: 'v'
             commitish: release-commit/sha
             body: release-body/body

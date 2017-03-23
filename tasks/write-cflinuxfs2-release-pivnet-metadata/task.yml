@@ -7,7 +7,6 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: version
-  - name: cflinuxfs2-rootfs-release-version
   - name: rootfs-pivnet-metadata
 outputs:
   - name: pivnet-metadata-artifacts
