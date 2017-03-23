@@ -10,10 +10,7 @@ metadata_dir  = File.join(root_dir, 'rootfs-pivnet-metadata', 'pivnet-metadata')
 stack_version_file = File.join(root_dir, 'version', 'number')
 stack_version = File.read(stack_version_file)
 
-cflinux_release_version_file = File.join(root_dir, 'cflinuxfs2-rootfs-release-version', 'number')
-cflinux_release_version = File.read(cflinux_release_version_file)
-
-writer = Cflinuxfs2PivnetMetadataWriter.new(metadata_dir, stack_version, cflinux_release_version)
+writer = Cflinuxfs2PivnetMetadataWriter.new(metadata_dir, stack_version, stack_version)
 writer.run!
 
 Dir.chdir(metadata_dir) do

@@ -7,7 +7,7 @@ set -o pipefail
 set -x
 
 stacks_version=$(cat version/number)
-bosh_release_version=$(cat cflinuxfs2-rootfs-release-version/number)
+bosh_release_version=$(cat version/number)
 
 pushd "$RELEASE_DIR"
   if [ -n "${SECRET_ACCESS_KEY:+1}" ]; then
