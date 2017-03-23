@@ -170,17 +170,12 @@ describe BuildpackBinaryMD5Verifier do
     let(:uri_mapping) {{
       uri => {'md5' => 'md5_stub1', 'sha' => 'sha_stub1'}
     }}
-    let(:gsubbed_file_name) { "https___buildpacks.cloudfoundry.org_dependencies_bundler_bundler_1.12.5.tgz" }
     let(:md5_stub)          { double(:md5_stub) }
     let(:actual_md5_stub)   { 'md5_stub1' }
+    let(:curl_cmd)          { "curl -s #{uri} | md5sum - | cut -d ' ' -f 1" }
+    before { allow(described_class).to receive(:`).with(curl_cmd).and_return(actual_md5_stub) }
 
     subject { described_class.show_mismatches(uri_mapping) }
-
-    before do
-      allow(described_class).to receive(:system)
-      allow(Digest::MD5).to receive(:file).with(gsubbed_file_name).and_return(md5_stub)
-      allow(md5_stub).to receive(:to_s).and_return(actual_md5_stub)
-    end
 
     context 'md5s match' do
       it "should print a dot (.)" do
@@ -189,14 +184,9 @@ describe BuildpackBinaryMD5Verifier do
       end
 
       context 'download and md5 check flakes' do
-        before do
-          allow(described_class).to receive(:system)
-          allow(Digest::MD5).to receive(:file).with(gsubbed_file_name).and_return(md5_stub)
-          allow(md5_stub).to receive(:to_s).and_return("flake", actual_md5_stub)
-        end
-
+        before { allow(described_class).to receive(:`).with(curl_cmd).and_return("flake", actual_md5_stub) }
         it "should retry and print a dot (.)" do
-          expect(described_class).to receive(:system).exactly(2).times
+          expect(described_class).to receive(:`).exactly(2).times
           expect{ subject }.to output(/working in .*\.$/m).to_stdout
           expect(subject).to be_truthy
         end
@@ -212,7 +202,7 @@ describe BuildpackBinaryMD5Verifier do
       end
 
       it "should attempt to retry downloading and checking up to 3 times" do
-        expect(described_class).to receive(:system).exactly(3).times
+        expect(described_class).to receive(:`).exactly(3).times
         expect(subject).to be_falsey
       end
 
