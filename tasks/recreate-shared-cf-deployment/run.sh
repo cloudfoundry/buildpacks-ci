@@ -21,7 +21,8 @@ bosh2 -n -d cf deploy cf-deployment/cf-deployment.yml \
 --vars-store /tmp/deployment-vars.yml \
 -v system_domain="$SYSTEM_DOMAIN" \
 -o cf-deployment/operations/windows-cell.yml \
--o buildpacks-ci/deployments/edge-shared/scale-down.yml
+-o buildpacks-ci/deployments/edge-shared/scale-down.yml \
+-o buildpacks-ci/deployments/edge-shared/num-cells.yml
 echo -e "\n\n======= Deployed ======="
 
 echo -e "\n\n======= Cleaning BOSH director ======="
