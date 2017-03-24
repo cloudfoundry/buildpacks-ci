@@ -55,7 +55,7 @@ class BuildpackBinaryMD5Verifier
             desired_md5 = metadata_hash['md5']
             release_tag_sha = metadata_hash['sha']
 
-            actual_md5 = `curl -s #{uri} | md5sum - | cut -d ' ' -f 1`.chomp
+            actual_md5 = `curl -L -s #{uri} | md5sum - | cut -d ' ' -f 1`.chomp
 
             if desired_md5 == actual_md5
               md5_match = true
