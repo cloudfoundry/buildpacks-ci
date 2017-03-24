@@ -172,7 +172,7 @@ describe BuildpackBinaryMD5Verifier do
     }}
     let(:md5_stub)          { double(:md5_stub) }
     let(:actual_md5_stub)   { 'md5_stub1' }
-    let(:curl_cmd)          { "curl -s #{uri} | md5sum - | cut -d ' ' -f 1" }
+    let(:curl_cmd)          { "curl -L -s #{uri} | md5sum - | cut -d ' ' -f 1" }
     before { allow(described_class).to receive(:`).with(curl_cmd).and_return(actual_md5_stub) }
 
     subject { described_class.show_mismatches(uri_mapping) }
