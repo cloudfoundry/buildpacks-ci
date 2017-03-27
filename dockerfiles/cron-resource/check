@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require 'parse-cron'
+require 'json'
+require 'active_support/core_ext/time/zones'
+
+payload = JSON.parse(STDIN.read)
+
+expression = payload.dig('source', 'expression')
+location = payload.dig('source', 'location') || 'UTC'
+ENV['TZ'] = location
+
+zone = ActiveSupport::TimeZone.find_tzinfo(location)
+cron_parser = CronParser.new(expression)
+ref = cron_parser.last(zone.now)
+
+puts [ { ref: ref } ].to_json
