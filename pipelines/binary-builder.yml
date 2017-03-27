@@ -7,22 +7,8 @@ resource_types: ################################################################
     type: docker-image
     source:
       repository: cfcommunity/slack-notification-resource
-  - name: cf-space-resource
-    type: docker-image
-    source:
-      repository: cfbuildpacks/cf-space-resource
 
 resources: ############################################################################################################
-
-  ## CF Space Resources ##
-
-  - name: cf-bp-space
-    type: cf-space-resource
-    source:
-      target: api.buildpacks-shared.cf-app.com
-      username: {{ci-cf-username}}
-      password: {{ci_cf_shared_password}}
-      organization: pivotal
 
   ## Git Repos ##
 
@@ -100,16 +86,6 @@ resources: #####################################################################
         - VERSION
         - CHANGELOG
 <% end %>
-
-  ## Resource Pools ##
-
-  - name: edge-shared-environments
-    type: pool
-    source:
-      branch: master
-      pool: edge-shared-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
   ## Concourse2Tracker ##
 
@@ -359,38 +335,10 @@ jobs: ##########################################################################
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
             BUILDPACK_DEPENDENCIES_HOST_DOMAIN: {{buildpack-dependencies-host-domain}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-        - put: cf-environments
-          resource: edge-shared-environments
+        - put: <%= buildpack %>-buildpack
           params:
-            claim: <%= buildpack %>
-        - do:
-          - put: cf-bp-space
-          - task: rspec
-            file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
-            privileged: true
-            params:
-              STACKS: cflinuxfs2
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              CF_PASSWORD: {{ci_cf_shared_password}}
-              RUBYGEM_MIRROR: {{rubygem-mirror}}
-          - put: <%= buildpack %>-buildpack
-            params:
-              repository: buildpack
-              rebase: true
-          ensure:
-            aggregate:
-            - task: delete-cf-space
-              file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
-            - put: edge-shared-environments
-              params:
-                release: cf-environments
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+            repository: buildpack
+            rebase: true
   <% end %>
 <% end %>
 
