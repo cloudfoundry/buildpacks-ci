@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+require 'json'
+
+payload = JSON.parse(STDIN.read)
+
+ref = payload.dig('version', 'ref')
+puts({ version: { ref: ref} }.to_json)

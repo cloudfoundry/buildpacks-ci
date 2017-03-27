@@ -18,7 +18,7 @@ resource_types:
   - name: cron
     type: docker-image
     source:
-      repository: cftoolsmiths/cron-test
+      repository: cfbuildpacks/cron-resource
 
 resources: ############################################################################################################
 
@@ -211,7 +211,7 @@ resources: #####################################################################
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
 
-  - name: sundaynight
+  - name: sunday-night
     type: cron
     source:
       expression: 0 18 * * 0
@@ -239,7 +239,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - get: sundaynight
+      - get: sunday-night
         trigger: true
       - aggregate:
         - get: pivotal-buildpack
