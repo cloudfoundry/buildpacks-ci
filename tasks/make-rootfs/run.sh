@@ -10,10 +10,10 @@ SUFFIX="${STACKS_SUFFIX-}"
 
 buildpacks-ci/scripts/start-docker
 
-pushd stacks
+pushd cflinuxfs2
   make
 
-  versioned_stack_filename="../stacks-artifacts/cflinuxfs2$SUFFIX-$(cat ../version/number).tar.gz"
+  versioned_stack_filename="../cflinuxfs2-artifacts/cflinuxfs2$SUFFIX-$(cat ../version/number).tar.gz"
   mv cflinuxfs2.tar.gz "$versioned_stack_filename"
 
   versioned_receipt_filename="../receipt-artifacts/cflinuxfs2_receipt$SUFFIX-$(cat ../version/number)"

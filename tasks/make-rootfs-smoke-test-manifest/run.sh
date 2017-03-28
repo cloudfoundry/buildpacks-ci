@@ -12,8 +12,8 @@ popd
 MANIFEST_DIR="rootfs-smoke-test-manifest-artifacts/$DEPLOYMENT_NAME"
 mkdir -p "$MANIFEST_DIR"
 
-pushd cflinuxfs2-rootfs-release
+pushd cflinuxfs2-release
   ./scripts/generate-bosh-lite-manifest
 popd
 
-cp cflinuxfs2-rootfs-release/manifests/bosh-lite/rootfs-smoke-test.yml "$MANIFEST_DIR/"
+cp cflinuxfs2-release/manifests/bosh-lite/rootfs-smoke-test.yml "$MANIFEST_DIR/"

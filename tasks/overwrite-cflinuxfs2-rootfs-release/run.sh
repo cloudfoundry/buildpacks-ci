@@ -6,8 +6,8 @@ set -o pipefail
 
 echo "Overwriting BOSH release $ROOTFS_RELEASE"
 
-release_dir=cflinuxfs2-rootfs-release
-filename=$(< cflinuxfs2-rootfs-release/config/blobs.yml grep cflinuxfs2 | cut -d ':' -f 1)
+release_dir=cflinuxfs2-release
+filename=$(< cflinuxfs2-release/config/blobs.yml grep cflinuxfs2 | cut -d ':' -f 1)
 
 echo "Creating $release_dir directory"
 

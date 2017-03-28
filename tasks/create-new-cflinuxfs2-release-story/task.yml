@@ -12,7 +12,7 @@ run:
     - -c
     - |
       cd buildpacks-ci
-      bundle exec ./tasks/create-new-stacks-release-story/run.rb
+      bundle exec ./tasks/create-new-cflinuxfs2-release-story/run.rb
 params:
   TRACKER_PROJECT_ID:
   TRACKER_API_TOKEN:

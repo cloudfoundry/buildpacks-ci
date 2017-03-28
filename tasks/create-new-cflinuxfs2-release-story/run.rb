@@ -4,8 +4,8 @@
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require "#{buildpacks_ci_dir}/lib/tracker-client"
 
-name = 'Monday-Funday *stack* release'
-description = 'This is a reminder that a stack release was automatically started, please monitor it, and deliver story when done.'
+name = 'Monday-Funday *cflinuxfs2* release'
+description = 'This is a reminder that a cflinuxfs2 release was automatically started, please monitor it, and deliver story when done.'
 labels = %w(pm-only maintenance)
 
 tracker_client = TrackerClient.new(

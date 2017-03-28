@@ -8,7 +8,7 @@ inputs:
   - name: buildpacks-ci
   - name: blob
   - name: version
-  - name: cflinuxfs2-rootfs-release
+  - name: cflinuxfs2-release
 outputs:
   - name: release-artifacts
 params:

@@ -9,7 +9,7 @@ describe 'create bosh release task' do
       execute(
         '-c tasks/make-rootfs-smoke-test-manifest/task.yml ' \
         '-i buildpacks-ci=. ' \
-        '-i cflinuxfs2-rootfs-release=./spec/tasks/make-rootfs-smoke-test-manifest/cflinuxfs2-rootfs-release ',
+        '-i cflinuxfs2-release=./spec/tasks/make-rootfs-smoke-test-manifest/cflinuxfs2-release ',
         'DEPLOYMENT_NAME' => 'some_deployment')
     end
 

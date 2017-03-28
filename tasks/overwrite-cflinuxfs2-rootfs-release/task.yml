@@ -7,8 +7,8 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: stack-s3
-  - name: cflinuxfs2-rootfs-release
+  - name: cflinuxfs2-release
 outputs:
-  - name: cflinuxfs2-rootfs-release-artifacts
+  - name: cflinuxfs2-release-artifacts
 run:
   path: buildpacks-ci/tasks/overwrite-cflinuxfs2-rootfs-release/run.sh

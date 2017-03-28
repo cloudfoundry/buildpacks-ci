@@ -10,6 +10,6 @@ inputs:
 outputs:
   - name: cf-release-artifacts
 run:
-  path: buildpacks-ci/tasks/create-cf-release-without-modifying-stacks/run.sh
+  path: buildpacks-ci/tasks/create-cf-release-without-modifying-cflinuxfs2/run.sh
 params:
   RUBYGEM_MIRROR:

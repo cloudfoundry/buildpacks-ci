@@ -10,8 +10,8 @@ SUFFIX="${STACKS_SUFFIX-}"
 
 buildpacks-ci/scripts/start-docker
 
-pushd stacks
-  cp ../stacks-artifacts/cflinuxfs2"$SUFFIX"-*.tar.gz cflinuxfs2.tar.gz
+pushd cflinuxfs2
+  cp ../cflinuxfs2-artifacts/cflinuxfs2"$SUFFIX"-*.tar.gz cflinuxfs2.tar.gz
 
   bundle install --jobs="$(nproc)"
 

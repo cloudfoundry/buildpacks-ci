@@ -57,10 +57,10 @@ resources:
       branch: master
       paths: [ new-buildpack-cve-notifications/* ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
-  - name: stacks
+  - name: cflinuxfs2
     type: git
     source:
-      uri: https://github.com/cloudfoundry/stacks
+      uri: https://github.com/cloudfoundry/cflinuxfs2
       branch: master
   - name: cves-email
     type: email-sender
@@ -81,7 +81,7 @@ jobs:
       - get: tracker-filter-resource
         trigger: true
       - get: buildpacks-ci
-      - get: stacks
+      - get: cflinuxfs2
       - task: delete-unaffected-stories
         file: buildpacks-ci/tasks/delete-unaffected-stories/task.yml
       - put: tracker-filter-resource
@@ -164,7 +164,7 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: new-cves
-        - get: stacks
+        - get: cflinuxfs2
         - get: check-interval
           trigger: true
       - task: check-for-new-rootfs-cves
@@ -178,20 +178,20 @@ jobs:
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
           TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
           EMAIL_PREPARER_DIR: ../cves-email
-          STACK: stacks
+          STACK: cflinuxfs2
       - put: new-cves
         params:
           repository: output-new-cves
           rebase: true
-      - put: stacks-related-new-cves-email
+      - put: cflinuxfs2-related-new-cves-email
         resource: cves-email
         params:
-          subject: cves-email/subject-stacks-related
-          body: cves-email/body-stacks-related
-          headers: cves-email/headers-stacks-related
-      - put: stacks-unrelated-new-cves-email
+          subject: cves-email/subject-cflinuxfs2-related
+          body: cves-email/body-cflinuxfs2-related
+          headers: cves-email/headers-cflinuxfs2-related
+      - put: cflinuxfs2-unrelated-new-cves-email
         resource: cves-email
         params:
-          subject: cves-email/subject-stacks-unrelated
-          body: cves-email/body-stacks-unrelated
-          headers: cves-email/headers-stacks-unrelated
+          subject: cves-email/subject-cflinuxfs2-unrelated
+          body: cves-email/body-cflinuxfs2-unrelated
+          headers: cves-email/headers-cflinuxfs2-unrelated

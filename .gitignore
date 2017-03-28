@@ -2,7 +2,7 @@ private.yml
 .vagrant/
 .rspec
 spec/scripts/stacks/fixtures/receipt-artifacts/
-spec/scripts/stacks/fixtures/stacks-artifacts/
+spec/scripts/stacks/fixtures/cflinuxfs2-artifacts/
 rspec.failures
 
 deployments/concourse-gcp/manifest.yml
