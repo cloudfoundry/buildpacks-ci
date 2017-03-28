@@ -27,10 +27,10 @@ resources: #####################################################################
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
-  - name: stacks
+  - name: cflinuxfs2
     type: git
     source:
-      uri: git@github.com:cloudfoundry/stacks.git
+      uri: git@github.com:cloudfoundry/cflinuxfs2.git
       branch: master
       private_key: {{stacks-private-key}}
 
@@ -54,17 +54,17 @@ resources: #####################################################################
     source:
       uri: https://github.com/cloudfoundry/bosh-lite
 
-  - name: cflinuxfs2-rootfs-release
+  - name: cflinuxfs2-release
     type: git
     source:
-      uri: git@github.com:cloudfoundry/cflinuxfs2-rootfs-release.git
+      uri: git@github.com:cloudfoundry/cflinuxfs2-release.git
       branch: master
       private_key: {{cflinuxfs2-rootfs-private-key}}
 
-  - name: stacks-release
+  - name: cflinuxfs2-release-deprecated
     type: git
     source:
-      uri: git@github.com:pivotal-cf-experimental/stacks-release.git
+      uri: git@github.com:pivotal-cf-experimental/cflinuxfs2-release-deprecated.git
       branch: master
       private_key: {{stacks-release-private-key}}
 
@@ -114,7 +114,7 @@ resources: #####################################################################
 
   ## BOSH Deployments ##
 
-  - name: stacks-cf-deployment
+  - name: cflinuxfs2-cf-deployment
     type: bosh-deployment
     source:
       target: https://stacks.buildpacks.ci.cf-app.com:25555
@@ -123,7 +123,7 @@ resources: #####################################################################
       deployment: cf-warden
       ignore_ssl: true
 
-  - name: stacks-diego-deployment
+  - name: cflinuxfs2-diego-deployment
     type: bosh-deployment
     source:
       target: https://stacks.buildpacks.ci.cf-app.com:25555
@@ -132,7 +132,7 @@ resources: #####################################################################
       deployment: cf-warden-diego
       ignore_ssl: true
 
-  - name: stacks-rootfs-deployment
+  - name: cflinuxfs2-rootfs-deployment
     type: bosh-deployment
     source:
       target: https://stacks.buildpacks.ci.cf-app.com:25555
@@ -182,20 +182,20 @@ resources: #####################################################################
 
   ## Github Release ##
 
-  - name: stack-github-release-drafts
+  - name: cflinuxfs2-github-release-drafts
     type: github-release
     source:
       drafts: true
       user: {{buildpacks-github-org}}
-      repository: stacks
+      repository: cflinuxfs2
       access_token: {{buildpacks-github-token}}
 
-  - name: stack-github-release-final
+  - name: cflinuxfs2-github-release-final
     type: github-release
     source:
       drafts: false
       user: {{buildpacks-github-org}}
-      repository: stacks
+      repository: cflinuxfs2
       access_token: {{buildpacks-github-token}}
 
   - name: cflinuxfs2-rootfs-github-release
@@ -203,7 +203,7 @@ resources: #####################################################################
     source:
       drafts: false
       user: {{buildpacks-github-org}}
-      repository: cflinuxfs2-rootfs-release
+      repository: cflinuxfs2-release
       access_token: {{buildpacks-github-token}}
 
   ## Semver Versions ##
@@ -234,7 +234,7 @@ jobs: ##########################################################################
         - get: monday-funday
           trigger: true
       - task: create-tracker-story
-        file: buildpacks-ci/tasks/create-new-stacks-release-story/task.yml
+        file: buildpacks-ci/tasks/create-new-cflinuxfs2-release-story/task.yml
         params:
           TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
@@ -242,14 +242,14 @@ jobs: ##########################################################################
 
   - name: build-rootfs
     serial: true
-    serial_groups: [ stacks ]
+    serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: new-cves
           trigger: true
-        - get: stacks
+        - get: cflinuxfs2
         - get: version
           params: { pre: rc }
         - get: monday-funday
@@ -264,7 +264,7 @@ jobs: ##########################################################################
           privileged: true
         - put: stack-s3
           params:
-            file: stacks-artifacts/cflinuxfs2-*.tar.gz
+            file: cflinuxfs2-artifacts/cflinuxfs2-*.tar.gz
         - put: receipt-s3
           params:
             file: receipt-artifacts/cflinuxfs2_receipt-*
@@ -280,7 +280,7 @@ jobs: ##########################################################################
 
   - name: recreate-bosh-lite
     serial: true
-    serial_groups: [ stacks ]
+    serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
       - aggregate:
@@ -295,7 +295,7 @@ jobs: ##########################################################################
         - get: receipt-s3
           passed: [ build-rootfs ]
           trigger: true
-        - get: stacks
+        - get: cflinuxfs2
           passed: [ build-rootfs ]
       - task: recreate-bosh-lite
         file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
@@ -332,9 +332,9 @@ jobs: ##########################################################################
             repository: deployments-buildpacks-artifacts
             rebase: true
 
-  - name: deploy-rootfs-and-cf-and-diego-to-stacks
+  - name: deploy-rootfs-and-cf-and-diego-to-cflinuxfs2
     serial: true
-    serial_groups: [ stacks ]
+    serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
       - do:
@@ -347,7 +347,7 @@ jobs: ##########################################################################
             resource: cf-release-rc
             attempts: 3
           - get: diego-release
-          - get: cflinuxfs2-rootfs-release
+          - get: cflinuxfs2-release
             attempts: 3
           - get: lite-stemcell
             attempts: 3
@@ -360,7 +360,7 @@ jobs: ##########################################################################
             trigger: true
           - get: receipt-s3
             passed: [ recreate-bosh-lite ]
-          - get: stacks
+          - get: cflinuxfs2
             passed: [ recreate-bosh-lite ]
           - get: garden-runc-bosh-release
             attempts: 3
@@ -392,11 +392,11 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/overwrite-cflinuxfs2-rootfs-release/task.yml
           params:
             ROOTFS_RELEASE: cflinuxfs2-rootfs
-        - put: stacks-rootfs-deployment
+        - put: cflinuxfs2-rootfs-deployment
           params:
             manifest: rootfs-smoke-test-manifest-artifacts/stacks.buildpacks.ci/rootfs-smoke-test.yml
             stemcells: [lite-stemcell/*.tgz]
-            releases: [cflinuxfs2-rootfs-release-artifacts/dev_releases/cflinuxfs2-rootfs/*.tgz]
+            releases: [cflinuxfs2-release-artifacts/dev_releases/cflinuxfs2-rootfs/*.tgz]
         - task: run-rootfs-smoke-test
           file: buildpacks-ci/tasks/run-rootfs-smoke-test/task.yml
           params:
@@ -406,14 +406,14 @@ jobs: ##########################################################################
             BOSH_TARGET: stacks.buildpacks.ci.cf-app.com
             RUBYGEM_MIRROR: {{rubygem-mirror}}
         - task: create-cf-release
-          file: buildpacks-ci/tasks/create-cf-release-without-modifying-stacks/task.yml
+          file: buildpacks-ci/tasks/create-cf-release-without-modifying-cflinuxfs2/task.yml
           privileged: true
-        - put: stacks-cf-deployment
+        - put: cflinuxfs2-cf-deployment
           params:
             manifest: generate-manifest-artifacts/stacks.buildpacks.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
-        - put: stacks-diego-deployment
+        - put: cflinuxfs2-diego-deployment
           params:
             manifest: generate-manifest-artifacts/stacks.buildpacks.ci/diego.yml
             stemcells: ['lite-stemcell/stemcell.tgz']
@@ -430,7 +430,7 @@ jobs: ##########################################################################
 
   - name: cats
     serial: true
-    serial_groups: [ stacks ]
+    serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
       - aggregate:
@@ -442,18 +442,18 @@ jobs: ##########################################################################
           params:
             submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
         - get: new-cves
-          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks ]
+          passed: [ deploy-rootfs-and-cf-and-diego-to-cflinuxfs2 ]
         - get: stack-s3
-          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks ]
+          passed: [ deploy-rootfs-and-cf-and-diego-to-cflinuxfs2 ]
         - get: deployments-buildpacks
-          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks ]
+          passed: [ deploy-rootfs-and-cf-and-diego-to-cflinuxfs2 ]
         - get: version
-          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks ]
+          passed: [ deploy-rootfs-and-cf-and-diego-to-cflinuxfs2 ]
           trigger: true
         - get: receipt-s3
-          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks ]
-        - get: stacks
-          passed: [ deploy-rootfs-and-cf-and-diego-to-stacks ]
+          passed: [ deploy-rootfs-and-cf-and-diego-to-cflinuxfs2 ]
+        - get: cflinuxfs2
+          passed: [ deploy-rootfs-and-cf-and-diego-to-cflinuxfs2 ]
       - do:
         - task: copy-cf-acceptance-tests
           file: buildpacks-ci/tasks/copy-cf-acceptance-tests/task.yml
@@ -482,7 +482,7 @@ jobs: ##########################################################################
 
   - name: destroy-bosh-lite
     serial: true
-    serial_groups: [ stacks ]
+    serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
       - aggregate:
@@ -490,7 +490,7 @@ jobs: ##########################################################################
           passed: [ cats ]
           trigger: true
         - get: buildpacks-ci
-      - task: destroy-stacks-bosh-lite
+      - task: destroy-cflinuxfs2-bosh-lite
         file: buildpacks-ci/tasks/destroy-bosh-lite/task.yml
         params:
           DEPLOYMENT_NAME: stacks.buildpacks.ci
@@ -511,7 +511,7 @@ jobs: ##########################################################################
 
   - name: shipit
     serial: true
-    serial_groups: [ stacks ]
+    serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
       - aggregate:
@@ -524,8 +524,8 @@ jobs: ##########################################################################
         - get: receipt-s3
           passed:
             - cats
-        - get: stacks
-          resource: stacks
+        - get: cflinuxfs2
+          resource: cflinuxfs2
           passed:
             - cats
         - get: version
@@ -537,14 +537,14 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/update-rootfs-receipt/task.yml
         - task: update-filename
           file: buildpacks-ci/tasks/update-rootfs-filename/task.yml
-        - put: stacks
+        - put: cflinuxfs2
           params:
-            repository: new-stack-commit
+            repository: new-cflinuxfs2-commit
             tag: version/number
             rebase: true
         - put: stack-s3
           params:
-            from: stack-archive/cflinuxfs2-(.*).tar.gz
+            from: cflinuxfs2-archive/cflinuxfs2-(.*).tar.gz
             to: /rootfs/
         - put: version
           params: { file: version/number }
@@ -573,9 +573,9 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: previous-stacks-release
-          resource: stack-github-release-final
-        - get: stacks
+        - get: previous-cflinuxfs2-release
+          resource: cflinuxfs2-github-release-final
+        - get: cflinuxfs2
           passed: [ shipit ]
         - get: new-cves
           passed: [ shipit ]
@@ -586,10 +586,10 @@ jobs: ##########################################################################
           passed: [ shipit ]
       - do:
         - task: generate-release-notes
-          file: buildpacks-ci/tasks/generate-stacks-release-notes/task.yml
+          file: buildpacks-ci/tasks/generate-cflinuxfs2-release-notes/task.yml
           params:
-            STACK: stacks
-        - put: stack-github-release-drafts
+            STACK: cflinuxfs2
+        - put: cflinuxfs2-github-release-drafts
           params:
             name: version/number
             tag: version/number
@@ -655,7 +655,7 @@ jobs: ##########################################################################
         - get: version
           passed: [ shipit ]
         - get: release
-          resource: stacks-release
+          resource: cflinuxfs2-release-deprecated
       - do:
         - task: run-both-bosh-scripts
           file: buildpacks-ci/tasks/create-bosh-release/task.yml
@@ -666,7 +666,7 @@ jobs: ##########################################################################
             RELEASE_DIR: release
             ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-        - put: stacks-release
+        - put: cflinuxfs2-release-deprecated
           params:
             repository: release-artifacts
         on_failure:
@@ -689,7 +689,7 @@ jobs: ##########################################################################
           trigger: true
         - get: version
           passed: [ shipit ]
-        - get: cflinuxfs2-rootfs-release
+        - get: cflinuxfs2-release
       - do:
         - task: create-cflinuxfs2-rootfs-release
           file: buildpacks-ci/tasks/create-cflinuxfs2-rootfs-release/task.yml
@@ -697,16 +697,16 @@ jobs: ##########################################################################
             BLOB_NAME: rootfs
             BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
             RELEASE_NAME: cflinuxfs2-rootfs
-            RELEASE_DIR: cflinuxfs2-rootfs-release
+            RELEASE_DIR: cflinuxfs2-release
             ACCESS_KEY_ID: {{cloudfoundry-s3-access-key}}
             SECRET_ACCESS_KEY: {{cloudfoundry-s3-secret-key}}
         - task: create-release-body
           file: buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes/task.yml
           params:
-            ROOTFS_TYPE: stacks
+            ROOTFS_TYPE: cflinuxfs2
         - task: create-release-commit
           file: buildpacks-ci/tasks/create-rootfs-bosh-release-commit/task.yml
-        - put: cflinuxfs2-rootfs-release
+        - put: cflinuxfs2-release
           params:
             repository: release-artifacts
         - put: cflinuxfs2-rootfs-github-release
@@ -746,7 +746,7 @@ jobs: ##########################################################################
         - task: check-can-i-bump
           file: buildpacks-ci/tasks/check-can-i-bump/task.yml
         - task: upload
-          file: buildpacks-ci/tasks/upload-stacks-to-cf-release/task.yml
+          file: buildpacks-ci/tasks/upload-cflinuxfs2-to-cf-release/task.yml
           params:
             TERM: xterm-color
             ACCESS_KEY_ID: {{blobstore-access-key}}

@@ -1,7 +1,7 @@
 require 'tmpdir'
 require 'fileutils'
 require 'yaml'
-require_relative '../../../tasks/generate-stacks-release-notes/release-notes-creator'
+require_relative '../../../tasks/generate-cflinuxfs2-release-notes/release-notes-creator'
 require_relative '../../../lib/usn-release-notes'
 
 describe ReleaseNotesCreator do

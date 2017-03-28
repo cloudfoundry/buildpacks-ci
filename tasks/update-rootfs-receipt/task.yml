@@ -7,9 +7,9 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: receipt-s3
-  - name: stacks
+  - name: cflinuxfs2
   - name: version
 outputs:
-  - name: new-stack-commit
+  - name: new-cflinuxfs2-commit
 run:
   path: buildpacks-ci/tasks/update-rootfs-receipt/run.sh

@@ -9,6 +9,6 @@ inputs:
   - name: stack-s3
   - name: version
 outputs:
-  - name: stack-archive
+  - name: cflinuxfs2-archive
 run:
   path: buildpacks-ci/tasks/update-rootfs-filename/run.sh

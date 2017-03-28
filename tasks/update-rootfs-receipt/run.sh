@@ -6,9 +6,9 @@ set -o pipefail
 
 SUFFIX="${ROOTFS_SUFFIX-}"
 
-cp receipt-s3/cflinuxfs2_receipt"$SUFFIX"-* stacks/cflinuxfs2/cflinuxfs2_receipt
+cp receipt-s3/cflinuxfs2_receipt"$SUFFIX"-* cflinuxfs2/cflinuxfs2/cflinuxfs2_receipt
 
-pushd stacks
+pushd cflinuxfs2
     version=$(cat ../version/number)
     git add cflinuxfs2/cflinuxfs2_receipt
 
@@ -25,4 +25,4 @@ pushd stacks
     fi
 popd
 
-rsync -a stacks/ new-stack-commit
+rsync -a cflinuxfs2/ new-cflinuxfs2-commit

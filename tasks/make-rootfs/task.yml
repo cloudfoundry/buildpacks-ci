@@ -6,10 +6,10 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: stacks
+  - name: cflinuxfs2
   - name: version
 outputs:
-  - name: stacks-artifacts
+  - name: cflinuxfs2-artifacts
   - name: receipt-artifacts
 run:
   path: buildpacks-ci/tasks/make-rootfs/run.sh

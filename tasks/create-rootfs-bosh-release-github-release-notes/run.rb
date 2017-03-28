@@ -3,7 +3,7 @@
 if ENV.fetch('ROOTFS_TYPE') == 'nc'
   repo = 'pivotal-cf/stacks-nc'
 else
-  repo = 'cloudfoundry/stacks'
+  repo = 'cloudfoundry/cflinuxfs2'
 end
 
 body_file = 'release-body/body'
