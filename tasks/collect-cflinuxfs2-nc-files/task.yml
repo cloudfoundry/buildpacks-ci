@@ -8,7 +8,7 @@ inputs:
   - name: buildpacks-ci
   - name: bosh-release-s3
   - name: rootfs-pivnet-metadata
-  - name: cflinuxfs2-rootfs-release
+  - name: cflinuxfs2-release
 outputs:
   - name: files-to-upload
 run:
