@@ -29,10 +29,10 @@ resources:
       branch: master
       paths: [ new-cves-stacks-nc/* ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
-  - name: stacks
+  - name: cflinuxfs2
     type: git
     source:
-      uri: git@github.com:pivotal-cf/stacks-nc.git
+      uri: git@github.com:pivotal-cf/cflinuxfs2-nc.git
       branch: master
       private_key: {{stacks-nc-private-key}}
 
@@ -46,13 +46,13 @@ jobs:
         - get: buildpacks-ci
         - get: new-cves
         - get: new-buildpack-cves
-        - get: stacks
+        - get: cflinuxfs2
         - get: check-interval
           trigger: true
       - task: check-for-new-rootfs-cves
         file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
         params:
-          STACK: stacks-nc
+          STACK: cflinuxfs2-nc
       - put: new-cves
         params:
           repository: output-new-cves

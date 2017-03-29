@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-pushd cflinuxfs2-rootfs-release
+pushd cflinuxfs2-release
   export BUNDLE_GEMFILE=cf.Gemfile
   bundle install --jobs="$(nproc)" --no-cache
 
