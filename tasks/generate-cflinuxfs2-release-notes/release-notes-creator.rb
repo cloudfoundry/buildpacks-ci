@@ -15,14 +15,6 @@ class ReleaseNotesCreator
     @cves ||= YAML.load_file(@cves_yaml_file)
   end
 
-  def old_receipt
-    @old_receipt ||= File.read(@old_receipt_file).split("\n")[7..-1].join("\n")
-  end
-
-  def new_receipt
-    @new_receipt ||= File.read(@new_receipt_file).split("\n")[7..-1].join("\n")
-  end
-
   def release_notes
     text = ""
     text += usn_release_notes_section + "\n" unless unreleased_usns.count == 0
@@ -49,10 +41,19 @@ class ReleaseNotesCreator
   end
 
   def receipt_diff_section
-    receipt_diff_array = Diffy::Diff.new(old_receipt, new_receipt).select do |line|
-      line.match(/^\+/) || line.match(/^-/)
-    end.map do |line|
-      line.strip.split("  ").select { |word| word !=""}.map { |word| word.strip }
+    diffy = Diffy::Diff.new(@old_receipt_file, @new_receipt_file, source: 'files', diff: '-b') or raise 'Could not create Diffy::Diff'
+    receipt_diff_array = diffy.map do |line|
+      line.split(/\s+/, 6).map(&:strip)
+    end.select do |arr|
+      arr.length == 6
+    end.map do |arr|
+      if arr[0] == "<"
+        arr[1] = "-#{arr[1]}"
+      elsif arr[0] == ">">
+        arr[1] = "+#{arr[1]}"
+      end
+      arr.shift
+      arr
     end
 
     receipt_diff = ""

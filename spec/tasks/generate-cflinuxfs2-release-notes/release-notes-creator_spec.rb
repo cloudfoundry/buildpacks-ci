@@ -158,6 +158,20 @@ USN-3119-1 with cve information
     it 'formats the diff_correctly' do
       expect(subject.receipt_diff_section).to eq "```\n#{diff_section}```\n"
     end
+
+    context 'the receipts are abnormal widths' do
+      let(:new_receipt) { File.read('spec/fixtures/generate-cflinuxfs2-release-notes/cflinuxfs2_receipt') }
+      let(:old_receipt) { File.read('spec/fixtures/generate-cflinuxfs2-release-notes/cflinuxfs2_receipt.1') }
+      let(:diff_section) do <<~DIFF
+-ii  eject  2.1.5+deb1+cvs20081104-13.1                amd64  ejects CDs and operates CD-Changers under Linux
++ii  eject  2.1.5+deb1+cvs20081104-13.1ubuntu0.14.04.1 amd64  ejects CDs and operates CD-Changers under Linux
+        DIFF
+      end
+
+      it 'formats the diff_correctly' do
+        expect(subject.receipt_diff_section).to eq "```\n#{diff_section}```\n"
+      end
+    end
   end
 
 end
