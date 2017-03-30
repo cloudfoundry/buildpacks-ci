@@ -1,4 +1,4 @@
-<% go_buildpacks = %w(hwc multi staticfile) %>
+<% go_buildpacks = %w(go hwc multi staticfile) %>
 
 ---
 resource_types:
