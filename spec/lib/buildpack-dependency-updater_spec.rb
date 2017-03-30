@@ -27,13 +27,6 @@ describe BuildpackDependencyUpdater do
         buildpack_manifest_contents = <<~MANIFEST
           ---
           language: go
-          url_to_dependency_map:
-            - match: go(\d+\.\d+(.*))
-              name: go
-              version: $1
-            - match: godep
-              name: godep
-              version: v64
           dependencies:
             - name: go
               version: 1.6.2
@@ -72,8 +65,7 @@ describe BuildpackDependencyUpdater do
         expect($stdout).to receive(:puts).with("Attempting to add godep v65 to the go buildpack and manifest.")
         subject.run!
         manifest = YAML.load_file(manifest_file)
-        version_hash = {"match"=>dependency, "name"=>dependency, "version"=>new_version}
-        expect(manifest["url_to_dependency_map"]).to include(version_hash)
+        expect(manifest).not_to have_key("url_to_dependency_map")
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(new_version)
@@ -200,13 +192,6 @@ describe BuildpackDependencyUpdater do
         buildpack_manifest_contents = <<~MANIFEST
           ---
           language: go
-          url_to_dependency_map:
-          - match: go(\d+\.\d+(.*))
-            name: go
-            version: "$1"
-          - match: glide
-            name: glide
-            version: 0.9.3
           dependencies:
             - name: glide
               version: 0.9.3
@@ -232,8 +217,7 @@ describe BuildpackDependencyUpdater do
       it "updates the specified buildpack manifest dependency with the specified version" do
         subject.run!
         manifest = YAML.load_file(manifest_file)
-        version_hash = {"match"=>dependency, "name"=>dependency, "version"=>new_version}
-        expect(manifest["url_to_dependency_map"]).to include(version_hash)
+        expect(manifest).to_not have_key("url_to_dependency_map")
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(new_version)
