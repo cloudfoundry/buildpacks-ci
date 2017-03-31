@@ -1,4 +1,4 @@
-<% go_buildpacks = %w(go hwc multi staticfile) %>
+<% libbuildpacks = %w(go hwc multi staticfile) %>
 
 ---
 resource_types:
@@ -91,12 +91,20 @@ resources: #####################################################################
       paths: [ pivnet-metadata/<%= language %>.yml ]
 <% end %>
 
-<% unless go_buildpacks.include? language %>
+
+
+<% if libbuildpacks.include? language %>
+  - name: libbuildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/libbuildpack.git
+<% else %>
   - name: compile-extensions
     type: git
     source:
       uri: https://github.com/cloudfoundry/compile-extensions.git
 <% end %>
+
 
   - name: buildpack-checksums
     type: git
@@ -581,7 +589,24 @@ jobs: ##########################################################################
           params:
             release: cf-environments
 <% end %>
-<% unless go_buildpacks.include? language %>
+<% if libbuildpacks.include? language %>
+  - name: update-libbuildpack
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: libbuildpack
+          trigger: true
+        - get: buildpack
+          resource: buildpack-develop
+      - task: update-libbuildpack
+        file: buildpacks-ci/tasks/update-libbuildpack/task.yml
+      - put: buildpack-develop
+        params:
+          repository: buildpack-artifacts
+          rebase: true
+<% else %>
   - name: update-compile-extensions
     serial: true
     public: true
