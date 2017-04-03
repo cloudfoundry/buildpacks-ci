@@ -75,12 +75,14 @@ describe BuildpacksCIPipelineUpdateCommand do
         allow(buildpacks_ci_configuration).to receive(:deployments_buildpacks_filename).and_return('deployments.yml')
         allow(buildpacks_ci_configuration).to receive(:repos_private_keys_filename).and_return('keys.yml')
         allow(buildpacks_ci_configuration).to receive(:git_repos_private_keys_filename).and_return('git_keys.yml')
+        allow(buildpacks_ci_configuration).to receive(:git_repos_private_keys_two_filename).and_return('git_keys_two.yml')
         allow(buildpacks_ci_configuration).to receive(:bosh_release_private_keys_filename).and_return('bosh.yml')
         expect(buildpacks_ci_pipeline_update_command).to receive(:system) do |fly_command|
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show private.yml.*\)/
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show deployments.yml.*\)/
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show keys.yml.*\)/
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show git_keys.yml.*\)/
+          expect(fly_command).to match /load-vars-from=\<\(.*lpass show git_keys_two.yml.*\)/
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show bosh.yml.*\)/
         end
         subject
@@ -136,6 +138,12 @@ describe BuildpacksCIPipelineUpdateCommand do
 
         it 'gets the concourse git repo private keys filename' do
           expect(buildpacks_ci_configuration).to receive(:git_repos_private_keys_filename)
+
+          subject
+        end
+
+        it 'gets the concourse git repo private keys two filename' do
+          expect(buildpacks_ci_configuration).to receive(:git_repos_private_keys_two_filename)
 
           subject
         end
