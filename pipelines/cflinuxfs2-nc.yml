@@ -70,7 +70,7 @@ resources: #####################################################################
     source:
       uri: git@github.com:pivotal-cf/cflinuxfs2-nc-release.git
       branch: master
-      private_key: {{cflinuxfs2-nc-rootfs-private-key}}
+      private_key: {{cflinuxfs2-nc-release-private-key}}
 
   - name: diego-release
     type: git
@@ -373,17 +373,17 @@ jobs: ##########################################################################
               BOSH_LITE_NAME: cflinuxfs2-nc.buildpacks.ci
               RUBYGEM_MIRROR: {{rubygem-mirror}}
               BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-              ROOTFS_RELEASE: cflinuxfs2-nc-rootfs
+              ROOTFS_RELEASE: cflinuxfs2-nc
             privileged: true
         - task: overwrite-cflinuxfs2-release
           file: buildpacks-ci/tasks/overwrite-cflinuxfs2-release/task.yml
           params:
-            ROOTFS_RELEASE: cflinuxfs2-nc-rootfs
+            ROOTFS_RELEASE: cflinuxfs2-nc
         - put: cflinuxfs2-rootfs-deployment
           params:
             manifest: rootfs-smoke-test-manifest-artifacts/cflinuxfs2-nc.buildpacks.ci/rootfs-smoke-test.yml
             stemcells: [lite-stemcell/*.tgz]
-            releases: [cflinuxfs2-release-artifacts/dev_releases/cflinuxfs2-nc-rootfs/*.tgz]
+            releases: [cflinuxfs2-release-artifacts/dev_releases/cflinuxfs2-nc/*.tgz]
         - task: run-rootfs-smoke-test
           file: buildpacks-ci/tasks/run-rootfs-smoke-test/task.yml
           params:
@@ -629,7 +629,7 @@ jobs: ##########################################################################
       - put: version
         params: {file: version/number}
 
-  - name: create-cflinuxfs2-nc-rootfs-release
+  - name: create-cflinuxfs2-nc-release
     serial: true
     plan:
       - aggregate:
@@ -647,7 +647,7 @@ jobs: ##########################################################################
           params:
             BLOB_NAME: rootfs-nc
             BLOB_GLOB: blob/cflinuxfs2_nc-*.tar.gz
-            RELEASE_NAME: cflinuxfs2-nc-rootfs
+            RELEASE_NAME: cflinuxfs2-nc
             RELEASE_DIR: cflinuxfs2-release
             ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
@@ -656,7 +656,7 @@ jobs: ##########################################################################
             repository: release-artifacts
         - put: bosh-release-s3
           params:
-            file: release-artifacts/releases/cflinuxfs2-nc-rootfs/cflinuxfs2-nc-rootfs-*.tgz
+            file: release-artifacts/releases/cflinuxfs2-nc/cflinuxfs2-nc-*.tgz
         on_failure:
           put: failure-alert
           params:
@@ -671,14 +671,14 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: stack-s3
-          passed: [ create-cflinuxfs2-nc-rootfs-release ]
+          passed: [ create-cflinuxfs2-nc-release ]
           trigger: true
         - get: cflinuxfs2-release
-          passed: [ create-cflinuxfs2-nc-rootfs-release ]
+          passed: [ create-cflinuxfs2-nc-release ]
         - get: version
-          passed: [ create-cflinuxfs2-nc-rootfs-release ]
+          passed: [ create-cflinuxfs2-nc-release ]
         - get: bosh-release-s3
-          passed: [ create-cflinuxfs2-nc-rootfs-release ]
+          passed: [ create-cflinuxfs2-nc-release ]
         - get: rootfs-pivnet-metadata
       - do:
         - task: write-cflinuxfs2-release-pivnet-metadata

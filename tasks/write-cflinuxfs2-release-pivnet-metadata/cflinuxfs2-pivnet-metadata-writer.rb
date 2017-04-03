@@ -28,7 +28,7 @@ class Cflinuxfs2PivnetMetadataWriter
     metadata['release'] = metadata_release
 
     metadata_files = []
-    release = { 'file' => "files-to-upload/cflinuxfs2-nc-rootfs-#{release_version}.tgz",
+    release = { 'file' => "files-to-upload/cflinuxfs2-nc-#{release_version}.tgz",
               'upload_as' => "BOSH release of Compilerless RootFS",
               'description' => 'BOSH release of Compilerless RootFS for PCF'
     }
