@@ -87,6 +87,18 @@ resources: #####################################################################
         - CHANGELOG
 <% end %>
 
+  ## S3 Buckets ##
+
+<% %w(bower godep hwc dotnet composer glide nginx node yarn).each do |dependency| %>
+  - name: <%= dependency %>-binary
+    type: s3
+    source:
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      regexp: dependencies/<%= dependency %>/(.*)
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+<% end %>
+
   ## Concourse2Tracker ##
 
   - name: concourse2tracker
@@ -278,14 +290,9 @@ jobs: ##########################################################################
             BINARY_BUILDER_PLATFORM: {{binary-builder-platform}}
             BINARY_BUILDER_OS_NAME: {{binary-builder-os-name}}
           privileged: true
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary/task.yml
+        - put: <%= dependency %>-binary
           params:
-            DEPENDENCY: <%= dependency %>
-            BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
-            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            AWS_DEFAULT_REGION: us-east-1
+            file: binary-builder-artifacts/*
         - put: builds-out
           resource: <%= dependency %>-built-output
           params:
