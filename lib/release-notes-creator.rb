@@ -1,7 +1,7 @@
 require 'yaml'
 require 'diffy'
 
-require_relative '../../lib/usn-release-notes.rb'
+require_relative 'usn-release-notes'
 
 class ReleaseNotesCreator
 
@@ -57,16 +57,23 @@ class ReleaseNotesCreator
     end
 
     receipt_diff = ""
-    format = format_string(receipt_diff_array)
 
-    receipt_diff_array.each do |line|
-      receipt_diff += (format % line).strip + "\n"
+    if !receipt_diff_array.empty?
+      format = format_string(receipt_diff_array)
+
+      receipt_diff_array.each do |line|
+        receipt_diff += (format % line).strip + "\n"
+      end
     end
 
     <<~MARKDOWN
     ```
     #{receipt_diff}```
     MARKDOWN
+  end
+
+  def new_packages?
+    return receipt_diff_section != "```\n```\n"
   end
 
   private

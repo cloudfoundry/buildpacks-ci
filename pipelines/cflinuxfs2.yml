@@ -42,6 +42,22 @@ resources: #####################################################################
       paths: [ new-cve-notifications/ubuntu14.04.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
+  - name: receipt-diff
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ receipt-diffs/cflinuxfs2-diff ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      tag_filter: "newpackages_*"
+
+  - name: public-robots
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+
   - name: deployments-buildpacks
     type: git
     source:
@@ -246,6 +262,8 @@ jobs: ##########################################################################
     public: true
     plan:
       - aggregate:
+        - get: previous-cflinuxfs2-release
+          resource: cflinuxfs2-github-release-drafts
         - get: buildpacks-ci
         - get: new-cves
           trigger: true
@@ -255,6 +273,7 @@ jobs: ##########################################################################
         - get: monday-funday
           passed: [ "notification" ]
           trigger: true
+        - get: public-robots
       - do:
         - task: make-rootfs
           file: buildpacks-ci/tasks/make-rootfs/task.yml
@@ -268,6 +287,15 @@ jobs: ##########################################################################
         - put: receipt-s3
           params:
             file: receipt-artifacts/cflinuxfs2_receipt-*
+        - task: generate-receipt-diff
+          file: buildpacks-ci/tasks/generate-cflinuxfs2-receipt-diff/task.yml
+          params:
+            STACK: cflinuxfs2
+        - put: public-robots
+          params:
+            repository: public-robots-artifacts
+            rebase: true
+            tag: git-tags/TAG
         - put: version
           params: { file: version/number }
         on_failure:
@@ -294,9 +322,10 @@ jobs: ##########################################################################
           passed: [ build-rootfs ]
         - get: receipt-s3
           passed: [ build-rootfs ]
-          trigger: true
         - get: cflinuxfs2
           passed: [ build-rootfs ]
+        - get: receipt-diff
+          trigger: true
       - task: recreate-bosh-lite
         file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
         params:
@@ -509,7 +538,7 @@ jobs: ##########################################################################
           AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
         attempts: 5
 
-  - name: shipit
+  - name: release-cflinuxfs2
     serial: true
     serial_groups: [ cflinuxfs2 ]
     public: true
@@ -531,6 +560,7 @@ jobs: ##########################################################################
         - get: version
           passed:
             - cats
+          trigger: true
           params: { bump: final }
       - do:
         - task: update-receipt
@@ -562,7 +592,7 @@ jobs: ##########################################################################
     plan:
       - get: version
         trigger: true
-        passed: [ shipit ]
+        passed: [ release-cflinuxfs2 ]
         params: {bump: minor, pre: rc}
       - put: version
         params: {file: version/number}
@@ -576,14 +606,14 @@ jobs: ##########################################################################
         - get: previous-cflinuxfs2-release
           resource: cflinuxfs2-github-release-final
         - get: cflinuxfs2
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2 ]
         - get: new-cves
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2 ]
         - get: stack-s3
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2 ]
         - get: version
           trigger: true
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2 ]
       - do:
         - task: generate-release-notes
           file: buildpacks-ci/tasks/generate-cflinuxfs2-release-notes/task.yml
@@ -615,10 +645,10 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: stack-s3
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2 ]
         - get: version
           trigger: true
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2 ]
       - do:
         - task: rename
           file: buildpacks-ci/tasks/rename-rootfs-for-docker/task.yml
@@ -650,10 +680,10 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: blob
           resource: stack-s3
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2 ]
           trigger: true
         - get: version
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2 ]
         - get: release
           resource: cflinuxfs2-release-deprecated
       - do:
@@ -685,10 +715,10 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: blob
           resource: stack-s3
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2 ]
           trigger: true
         - get: version
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2 ]
         - get: cflinuxfs2-release
       - do:
         - task: create-cflinuxfs2-release
@@ -732,16 +762,16 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: stack-s3
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2 ]
         - get: cf-release-develop
           params:
             submodules: none
         - get: buildpacks-ci
         - get: version
           trigger: true
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2 ]
         - get: receipt-s3
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2 ]
       - do:
         - task: check-can-i-bump
           file: buildpacks-ci/tasks/check-can-i-bump/task.yml

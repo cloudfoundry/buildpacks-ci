@@ -1,8 +1,8 @@
 require 'tmpdir'
 require 'fileutils'
 require 'yaml'
-require_relative '../../../tasks/generate-cflinuxfs2-release-notes/release-notes-creator'
-require_relative '../../../lib/usn-release-notes'
+require_relative '../../lib/release-notes-creator'
+require_relative '../../lib/usn-release-notes'
 
 describe ReleaseNotesCreator do
 
@@ -93,7 +93,7 @@ USN-3119-1 with cve information
   DIFF
   end
 
-  before do
+  before(:each) do
     File.write(cves_yaml_file, cves_yaml)
     File.write(old_receipt_file, old_receipt)
     File.write(new_receipt_file, new_receipt)
@@ -174,5 +174,36 @@ USN-3119-1 with cve information
     end
   end
 
+  describe '#new_packages?' do
+    context 'there are new packages' do
+      it 'returns true' do
+        expect(subject.new_packages?).to be_truthy
+      end
+    end
+
+    context 'there are not new packages' do
+      let(:new_receipt) do <<~RECEIPT
+      Rootfs SHASUM: fffzzzzfffffffffffffffffff
+
+      Desired=Unknown/Install/Remove/Purge/Hold
+      | Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
+      |/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)
+      ||/ Name                               Version                             Architecture Description
+      +++-==================================-===================================-============-===============================================================================
+      ii  libcurl3:amd64                     7.35.0-1ubuntu2.9                   amd64        easy-to-use client-side URL transfer library (OpenSSL flavour)
+      ii  libcurl3-gnutls:amd64              7.35.0-1ubuntu2.9                   amd64        easy-to-use client-side URL transfer library (GnuTLS flavour)
+      ii  libcurl4-openssl-dev:amd64         7.35.0-1ubuntu2.9                   amd64        development files and documentation for libcurl (OpenSSL flavour)
+      ii  libcwidget3                        0.5.16-3.5ubuntu1                   amd64        high-level terminal interface library for C++ (runtime files)
+      ii  libdatrie1:amd64                   0.2.8-1                             amd64        Double-array trie library
+      ii  libdb5.3:amd64                     5.3.28-3ubuntu3                     amd64        Berkeley v5.3 Database Libraries [runtime]
+      ii  libdbus-1-3:amd64                  1.6.18-0ubuntu4.3                   amd64        simple interprocess messaging system (library)
+      RECEIPT
+      end
+
+      it 'returns false' do
+        expect(subject.new_packages?).to be_falsey
+      end
+    end
+  end
 end
 
