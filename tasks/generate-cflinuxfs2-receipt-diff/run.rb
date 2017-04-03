@@ -7,12 +7,10 @@ require_relative '../../lib/git-client'
 
 
 previous_version = File.read('previous-cflinuxfs2-release/version').strip
-new_version = File.read('version/number').strip
 
 if ENV.fetch('STACK') == 'cflinuxfs2'
   old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/cflinuxfs2/#{previous_version}/cflinuxfs2/cflinuxfs2_receipt"
-  cve_yaml_file = 'new-cves/new-cve-notifications/ubuntu14.04.yml'
-  cves_dir = 'new-cve-notifications'
+  receipt_diff_file = File.join('receipt-diffs', 'cflinuxfs2-diff')
 elsif ENV.fetch('STACK') == 'cflinuxfs2-nc'
   Octokit.configure do |c|
     c.login    = ENV.fetch('GITHUB_USERNAME')
@@ -20,39 +18,40 @@ elsif ENV.fetch('STACK') == 'cflinuxfs2-nc'
   end
 
   old_receipt_uri = Octokit.contents('pivotal-cf/cflinuxfs2-nc', :path => 'cflinuxfs2/cflinuxfs2_receipt', :ref => previous_version)[:download_url]
-  cve_yaml_file = 'new-cves/new-cves-stacks-nc/ubuntu14.04.yml'
-  cves_dir = 'new-cves-stacks-nc'
+  receipt_diff_file = Filepath.join('receipt-diffs', 'cflinuxfs2-nc-diff')
 else
   raise "Unsupported stack: #{ENV.fetch('STACK')}"
 end
 
-new_receipt_file = 'cflinuxfs2/cflinuxfs2/cflinuxfs2_receipt'
+new_receipt_file = Dir["receipt-artifacts/cflinuxfs2_receipt*"].first
 old_receipt = Tempfile.new('old-receipt')
 File.write(old_receipt.path, open(old_receipt_uri).read)
 
-body_file = 'release-body/body'
-notes = ReleaseNotesCreator.new(cve_yaml_file, old_receipt.path, new_receipt_file).release_notes
+creator = ReleaseNotesCreator.new(nil, old_receipt.path, new_receipt_file)
+notes = creator.receipt_diff_section
+new_packages = creator.new_packages?
+
 puts notes
-File.write(body_file, notes)
 old_receipt.unlink
 
-cves = YAML.load_file(cve_yaml_file)
+commit_message = "Updating receipt diff for #{ENV.fetch('STACK')}\n"
+tag_file = File.join('git-tags', 'TAG')
+tag_name = ""
 
-updated_cves = cves.map do |cve|
-  if cve['stack_release'] == 'unreleased'
-    cve['stack_release'] = new_version
-  end
-  cve
+if !new_packages
+  tag_name = "empty_#{Time.now.to_i}"
+  commit_message += "No new packages\n"
+else
+  tag_name = "newpackages_#{Time.now.to_i}"
+  commit_message += "New packages added\n"
 end
 
-File.write(cve_yaml_file, updated_cves.to_yaml)
+File.write(tag_file, tag_name)
 
-
-robots_cve_dir = File.join('new-cves', cves_dir)
-Dir.chdir(robots_cve_dir) do
-  GitClient.add_file('ubuntu14.04.yml')
-  commit_message = "Updating CVEs for #{ENV.fetch('STACK')} release #{new_version}\n\n"
+Dir.chdir('public-robots') do
+  File.write(receipt_diff_file, "#{tag_name}:\n\n#{notes}")
+  GitClient.add_file(receipt_diff_file)
   GitClient.safe_commit(commit_message)
 end
 
-system "rsync -a new-cves/ new-cves-artifacts"
+system "rsync -a public-robots/ public-robots-artifacts"
