@@ -375,8 +375,8 @@ jobs: ##########################################################################
               BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
               ROOTFS_RELEASE: cflinuxfs2-nc-rootfs
             privileged: true
-        - task: overwrite-cflinuxfs2-rootfs-release
-          file: buildpacks-ci/tasks/overwrite-cflinuxfs2-rootfs-release/task.yml
+        - task: overwrite-cflinuxfs2-release
+          file: buildpacks-ci/tasks/overwrite-cflinuxfs2-release/task.yml
           params:
             ROOTFS_RELEASE: cflinuxfs2-nc-rootfs
         - put: cflinuxfs2-rootfs-deployment
@@ -642,8 +642,8 @@ jobs: ##########################################################################
           passed: [ shipit ]
         - get: cflinuxfs2-release
       - do:
-        - task: create-cflinuxfs2-rootfs-release
-          file: buildpacks-ci/tasks/create-cflinuxfs2-rootfs-release/task.yml
+        - task: create-cflinuxfs2-release
+          file: buildpacks-ci/tasks/create-cflinuxfs2-release/task.yml
           params:
             BLOB_NAME: rootfs-nc
             BLOB_GLOB: blob/cflinuxfs2_nc-*.tar.gz

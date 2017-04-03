@@ -7,7 +7,7 @@ describe 'make-rootfs' do
   old_path = ENV.fetch('PATH', nil)
   old_rootfs_release = ENV.fetch('ROOTFS_RELEASE', nil)
   ci_path = Dir.pwd
-  test_path = File.join(ci_path, '/spec/tasks/overwrite-cflinuxfs2-rootfs-release')
+  test_path = File.join(ci_path, '/spec/tasks/overwrite-cflinuxfs2-release')
   blobs_dir = File.join(test_path, 'cflinuxfs2-release/blobs')
   blob_destination = File.join(blobs_dir, 'rootfs/cflinuxfs2-1.49.0.tar.gz')
 
@@ -23,8 +23,8 @@ describe 'make-rootfs' do
 
   RSpec.shared_examples 'creates_the_blob' do
     it 'moves cflinuxfs2-*.tar.gz file from stack-s3 to cflinuxfs2-release/blobs/rootfs/cflinuxfs2-[currentversion].tar.gz' do
-      Dir.chdir("#{ci_path}/spec/tasks/overwrite-cflinuxfs2-rootfs-release") do
-        system("#{ci_path}/tasks/overwrite-cflinuxfs2-rootfs-release/run.sh")
+      Dir.chdir("#{ci_path}/spec/tasks/overwrite-cflinuxfs2-release") do
+        system("#{ci_path}/tasks/overwrite-cflinuxfs2-release/run.sh")
       end
       expect(File.exist?(blob_destination)).to eq(true)
       expect(File.read(blob_destination)).to eq('new-tarball')

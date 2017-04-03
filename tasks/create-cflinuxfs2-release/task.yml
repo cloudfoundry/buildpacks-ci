@@ -19,4 +19,4 @@ params:
   ACCESS_KEY_ID:
   SECRET_ACCESS_KEY:
 run:
-  path: buildpacks-ci/tasks/create-cflinuxfs2-rootfs-release/run.sh
+  path: buildpacks-ci/tasks/create-cflinuxfs2-release/run.sh

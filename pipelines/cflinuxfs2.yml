@@ -59,7 +59,7 @@ resources: #####################################################################
     source:
       uri: git@github.com:cloudfoundry/cflinuxfs2-release.git
       branch: master
-      private_key: {{cflinuxfs2-rootfs-private-key}}
+      private_key: {{cflinuxfs2-release-private-key}}
 
   - name: cflinuxfs2-release-deprecated
     type: git
@@ -164,7 +164,7 @@ resources: #####################################################################
 
   ## Docker Image ##
 
-  - name: docker-cflinuxfs2-rootfs
+  - name: docker-cflinuxfs2
     type: docker-image
     source:
       repository: cloudfoundry/cflinuxfs2
@@ -172,7 +172,7 @@ resources: #####################################################################
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
 
-  - name: docker-cflinuxfs2-rootfs-tagged
+  - name: docker-cflinuxfs2-tagged
     type: docker-image
     source:
       repository: cloudfoundry/cflinuxfs2
@@ -198,7 +198,7 @@ resources: #####################################################################
       repository: cflinuxfs2
       access_token: {{buildpacks-github-token}}
 
-  - name: cflinuxfs2-rootfs-github-release
+  - name: cflinuxfs2-release-github-release
     type: github-release
     source:
       drafts: false
@@ -386,17 +386,17 @@ jobs: ##########################################################################
               BOSH_LITE_NAME: cflinuxfs2.buildpacks.ci
               RUBYGEM_MIRROR: {{rubygem-mirror}}
               BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-              ROOTFS_RELEASE: cflinuxfs2-rootfs
+              ROOTFS_RELEASE: cflinuxfs2
             privileged: true
-        - task: overwrite-cflinuxfs2-rootfs-release
-          file: buildpacks-ci/tasks/overwrite-cflinuxfs2-rootfs-release/task.yml
+        - task: overwrite-cflinuxfs2-release
+          file: buildpacks-ci/tasks/overwrite-cflinuxfs2-release/task.yml
           params:
-            ROOTFS_RELEASE: cflinuxfs2-rootfs
+            ROOTFS_RELEASE: cflinuxfs2
         - put: cflinuxfs2-rootfs-deployment
           params:
             manifest: rootfs-smoke-test-manifest-artifacts/cflinuxfs2.buildpacks.ci/rootfs-smoke-test.yml
             stemcells: [lite-stemcell/*.tgz]
-            releases: [cflinuxfs2-release-artifacts/dev_releases/cflinuxfs2-rootfs/*.tgz]
+            releases: [cflinuxfs2-release-artifacts/dev_releases/cflinuxfs2/*.tgz]
         - task: run-rootfs-smoke-test
           file: buildpacks-ci/tasks/run-rootfs-smoke-test/task.yml
           params:
@@ -624,12 +624,12 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/rename-rootfs-for-docker/task.yml
         - aggregate:
           - put: docker latest version
-            resource: docker-cflinuxfs2-rootfs
+            resource: docker-cflinuxfs2
             params:
               import_file: docker-s3/cflinuxfs2.tar.gz
               skip_download: true
           - put: docker tagged version
-            resource: docker-cflinuxfs2-rootfs-tagged
+            resource: docker-cflinuxfs2-tagged
             params:
               skip_download: true
               import_file: docker-s3/cflinuxfs2.tar.gz
@@ -677,7 +677,7 @@ jobs: ##########################################################################
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
-  - name: create-cflinuxfs2-rootfs-release
+  - name: create-cflinuxfs2-release
     serial: true
     public: true
     plan:
@@ -691,12 +691,12 @@ jobs: ##########################################################################
           passed: [ shipit ]
         - get: cflinuxfs2-release
       - do:
-        - task: create-cflinuxfs2-rootfs-release
-          file: buildpacks-ci/tasks/create-cflinuxfs2-rootfs-release/task.yml
+        - task: create-cflinuxfs2-release
+          file: buildpacks-ci/tasks/create-cflinuxfs2-release/task.yml
           params:
             BLOB_NAME: rootfs
             BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
-            RELEASE_NAME: cflinuxfs2-rootfs
+            RELEASE_NAME: cflinuxfs2
             RELEASE_DIR: cflinuxfs2-release
             ACCESS_KEY_ID: {{cloudfoundry-s3-access-key}}
             SECRET_ACCESS_KEY: {{cloudfoundry-s3-secret-key}}
@@ -709,7 +709,7 @@ jobs: ##########################################################################
         - put: cflinuxfs2-release
           params:
             repository: release-artifacts
-        - put: cflinuxfs2-rootfs-github-release
+        - put: cflinuxfs2-release-github-release
           params:
             name: version/number
             tag: version/number
@@ -717,7 +717,7 @@ jobs: ##########################################################################
             commitish: release-commit/sha
             body: release-body/body
             globs:
-              - release-artifacts/releases/cflinuxfs2-rootfs/*.tgz
+              - release-artifacts/releases/cflinuxfs2/*.tgz
         on_failure:
           put: failure-alert
           params:
