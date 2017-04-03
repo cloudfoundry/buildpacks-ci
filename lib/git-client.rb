@@ -61,6 +61,10 @@ class GitClient
     raise GitError.new("Could not add file: #{filename}") unless system("git add #{filename}")
   end
 
+  def self.tag_commit(tag, commit_sha)
+    raise GitError.new("Could not tag #{commit_sha} with #{tag}") unless system("git tag -a #{tag} #{commit_sha}")
+  end
+
   def self.safe_commit(message)
     changes_staged_for_commit = !system('git diff --cached --exit-code')
 

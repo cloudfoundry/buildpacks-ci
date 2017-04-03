@@ -66,6 +66,24 @@ describe GitClient do
 
   end
 
+  describe '#tag_commit' do
+    let(:tag)     { 'randomtag' }
+    let(:commit)  { '123456' }
+    subject { described_class.tag_commit(tag, commit) }
+
+    before { allow(described_class).to receive(:system).and_return(git_successful) }
+
+    context 'git works properly' do
+      let(:git_successful) { true }
+
+      it 'should git tag the specified commit' do
+        expect(described_class).to receive(:system).with('git tag -a randomtag 123456')
+
+        subject
+      end
+    end
+  end
+
   describe '#last_commit_message' do
     let(:dir)                 { Dir.mktmpdir }
     let(:last_commit_message) { 'this should not matter but is here to avoid undefined symbols' }
