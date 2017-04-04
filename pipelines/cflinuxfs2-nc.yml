@@ -53,6 +53,22 @@ resources: #####################################################################
       paths: [ new-cves-stacks-nc/ubuntu14.04.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
+  - name: receipt-diff
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ receipt-diffs/cflinuxfs2-nc-diff ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      tag_filter: "newpackages_cflinuxfs2-nc_*"
+
+  - name: public-robots
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+
   - name: deployments-buildpacks
     type: git
     source:
@@ -238,6 +254,8 @@ jobs: ##########################################################################
     serial_groups: [ cflinuxfs2-nc ]
     plan:
       - aggregate:
+        - get: previous-cflinuxfs2-release
+          resource: cflinuxfs2-github-release-drafts
         - get: buildpacks-ci
         - get: new-cves
           trigger: true
@@ -247,6 +265,7 @@ jobs: ##########################################################################
         - get: monday-funday
           passed: [ "notification" ]
           trigger: true
+        - get: public-robots
       - do:
         - task: make-rootfs
           file: buildpacks-ci/tasks/make-rootfs/task.yml
@@ -264,6 +283,17 @@ jobs: ##########################################################################
         - put: receipt-s3
           params:
             file: receipt-artifacts/cflinuxfs2_receipt_nc-*
+        - task: generate-receipt-diff
+          file: buildpacks-ci/tasks/generate-cflinuxfs2-receipt-diff/task.yml
+          params:
+            STACK: cflinuxfs2-nc
+            GITHUB_USERNAME: {{github-username}}
+            GITHUB_PASSWORD: {{github-password}}
+        - put: public-robots
+          params:
+            repository: public-robots-artifacts
+            rebase: true
+            tag: git-tags/TAG
         - put: version
           params: { file: version/number }
 
@@ -282,6 +312,7 @@ jobs: ##########################################################################
           passed: [ build-rootfs ]
         - get: receipt-s3
           passed: [ build-rootfs ]
+        - get: receipt-diff
           trigger: true
         - get: cflinuxfs2
           passed: [ build-rootfs ]
@@ -531,7 +562,7 @@ jobs: ##########################################################################
           AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
         attempts: 5
 
-  - name: shipit
+  - name: release-cflinuxfs2-nc
     serial: true
     serial_groups: [ cflinuxfs2-nc ]
     plan:
@@ -548,6 +579,7 @@ jobs: ##########################################################################
           passed: [ cats ]
         - get: version
           passed: [ cats ]
+          trigger: true
           params: { bump: final }
       - do:
         - task: update-receipt
@@ -585,14 +617,14 @@ jobs: ##########################################################################
         - get: previous-cflinuxfs2-release
           resource: cflinuxfs2-github-release-final
         - get: cflinuxfs2
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2-nc ]
         - get: new-cves
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2-nc ]
         - get: stack-s3
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2-nc ]
         - get: version
           trigger: true
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2-nc ]
       - do:
         - task: generate-release-notes
           file: buildpacks-ci/tasks/generate-cflinuxfs2-release-notes/task.yml
@@ -624,7 +656,7 @@ jobs: ##########################################################################
     plan:
       - get: version
         trigger: true
-        passed: [ shipit ]
+        passed: [ release-cflinuxfs2-nc ]
         params: {bump: minor, pre: rc}
       - put: version
         params: {file: version/number}
@@ -636,10 +668,10 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: blob
           resource: stack-s3
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2-nc ]
           trigger: true
         - get: version
-          passed: [ shipit ]
+          passed: [ release-cflinuxfs2-nc ]
         - get: cflinuxfs2-release
       - do:
         - task: create-cflinuxfs2-release

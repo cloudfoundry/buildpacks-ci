@@ -49,7 +49,7 @@ resources: #####################################################################
       branch: master
       paths: [ receipt-diffs/cflinuxfs2-diff ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
-      tag_filter: "newpackages_*"
+      tag_filter: "newpackages_cflinuxfs2_*"
 
   - name: public-robots
     type: git
