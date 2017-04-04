@@ -18,7 +18,7 @@ elsif ENV.fetch('STACK') == 'cflinuxfs2-nc'
   end
 
   old_receipt_uri = Octokit.contents('pivotal-cf/cflinuxfs2-nc', :path => 'cflinuxfs2/cflinuxfs2_receipt', :ref => previous_version)[:download_url]
-  receipt_diff_file = Filepath.join('receipt-diffs', 'cflinuxfs2-nc-diff')
+  receipt_diff_file = File.join('receipt-diffs', 'cflinuxfs2-nc-diff')
 else
   raise "Unsupported stack: #{ENV.fetch('STACK')}"
 end
