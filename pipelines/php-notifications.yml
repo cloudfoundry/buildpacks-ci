@@ -36,14 +36,6 @@ resources:
       http:
        url: https://pecl.php.net/package/cassandra
        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
-  - name: cassandra-libuv
-    type: new_version_resource
-    source:
-      type: http
-      regex: '[\d\.]+[0-9A-Za-z\-]*'
-      http:
-        url: http://downloads.datastax.com/cpp-driver/ubuntu/14.04/dependencies/libuv/
-        csspath: a[href^='v']
   - name: cassandra-cpp-driver
     type: new_version_resource
     source:
@@ -312,7 +304,6 @@ jobs:
         - get: month-start
           trigger: true
         - get: cassandra-cpp-driver
-        - get: cassandra-libuv
         - get: librdkafka
         - get: pecl-amqp
         - get: pecl-cassandra
