@@ -42,7 +42,7 @@ if !new_packages
   tag_name = "empty_#{Time.now.to_i}"
   commit_message += "No new packages\n"
 else
-  tag_name = "newpackages_#{Time.now.to_i}"
+  tag_name = "newpackages_#{ENV.fetch('STACK')}_#{Time.now.to_i}"
   commit_message += "New packages added\n"
 end
 
