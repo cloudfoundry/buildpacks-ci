@@ -6,7 +6,6 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: cassandra-cpp-driver
-  - name: cassandra-libuv
   - name: librdkafka
   - name: pecl-amqp
   - name: pecl-cassandra
