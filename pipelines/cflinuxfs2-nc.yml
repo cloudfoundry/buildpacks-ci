@@ -195,14 +195,6 @@ resources: #####################################################################
       repository: cflinuxfs2-nc
       access_token: {{buildpacks-github-token}}
 
-  - name: cflinuxfs2-github-release-final
-    type: github-release
-    source:
-      drafts: false
-      user: pivotal-cf
-      repository: cflinuxfs2-nc
-      access_token: {{buildpacks-github-token}}
-
   ## Semver Versions ##
 
   - name: version
@@ -615,7 +607,7 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: previous-cflinuxfs2-release
-          resource: cflinuxfs2-github-release-final
+          resource: cflinuxfs2-github-release-drafts
         - get: cflinuxfs2
           passed: [ release-cflinuxfs2-nc ]
         - get: new-cves
