@@ -106,6 +106,17 @@ resources: #####################################################################
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
 
+<% dep_build_names = %w(bower go bundler composer dotnet glide godep httpd hwc jruby php php7 python node nginx ruby yarn dotnet-framework) %>
+<% dep_build_names.each do |dep| %>
+  - name: buildpacks-bucket-<%= dep %>
+    type: s3
+    source:
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+      regexp: dependencies/<%= dep %>/<%= dep %>.*(\d+.\d+.\d+)(.*)
+<% end %>
+
 groups: ###############################################################################################################
 
   - name: enqueue-automated-builds
@@ -197,6 +208,7 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: built-yaml
           resource: <%= dependency %>-built-output
+        - get: buildpacks-bucket-<%= dependency %>
       - do:
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary/task.yml
@@ -207,14 +219,9 @@ jobs: ##########################################################################
             BINARY_BUILDER_PLATFORM: {{binary-builder-platform}}
             BINARY_BUILDER_OS_NAME: {{binary-builder-os-name}}
           privileged: true
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary/task.yml
+        - put: buildpacks-bucket-<%= dependency %>
           params:
-            DEPENDENCY: <%= dependency %>
-            BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
-            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            AWS_DEFAULT_REGION: us-east-1
+            file: binary-builder-artifacts/<%= dependency %>*
         - put: builds-out
           params:
             repository: builds-yaml-artifacts
@@ -268,6 +275,7 @@ jobs: ##########################################################################
         - get: binary-builder
           passed: [binary-builder-specs]
         - get: buildpacks-ci
+        - get: buildpacks-bucket-<%= dependency %>
       - do:
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary/task.yml
@@ -278,14 +286,9 @@ jobs: ##########################################################################
             BINARY_BUILDER_PLATFORM: {{binary-builder-platform}}
             BINARY_BUILDER_OS_NAME: {{binary-builder-os-name}}
           privileged: true
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary/task.yml
+        - put: buildpacks-bucket-<%= dependency %>
           params:
-            DEPENDENCY: <%= dependency %>
-            BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
-            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            AWS_DEFAULT_REGION: us-east-1
+            file: binary-builder-artifacts/<%= dependency %>*
         - put: builds-out
           resource: <%= dependency %>-built-output
           params:
@@ -354,17 +357,13 @@ jobs: ##########################################################################
           trigger: true
         - get: dotnet-framework-built
           resource: dotnet-framework-built-output
+        - get: buildpacks-bucket-dotnet-framework
       - do:
         - task: extract-dotnet-framework
           file: buildpacks-ci/tasks/extract-dotnet-framework/task.yml
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary/task.yml
+        - put: buildpacks-bucket-dotnet-framework
           params:
-            DEPENDENCY: dotnet-framework
-            BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
-            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            AWS_DEFAULT_REGION: us-east-1
+            file: binary-builder-artifacts/dotnet-framework*
         - put: dotnet-framework-built-output
           params:
             repository: dotnet-framework-built-output
