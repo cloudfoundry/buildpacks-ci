@@ -206,14 +206,6 @@ resources: #####################################################################
       repository: cflinuxfs2
       access_token: {{buildpacks-github-token}}
 
-  - name: cflinuxfs2-github-release-final
-    type: github-release
-    source:
-      drafts: false
-      user: {{buildpacks-github-org}}
-      repository: cflinuxfs2
-      access_token: {{buildpacks-github-token}}
-
   - name: cflinuxfs2-release-github-release
     type: github-release
     source:
@@ -604,7 +596,7 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: previous-cflinuxfs2-release
-          resource: cflinuxfs2-github-release-final
+          resource: cflinuxfs2-github-release-drafts
         - get: cflinuxfs2
           passed: [ release-cflinuxfs2 ]
         - get: new-cves
