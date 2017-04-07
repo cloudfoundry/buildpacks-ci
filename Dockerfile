@@ -31,8 +31,8 @@ RUN apt-get update \
 
 RUN curl -sSL https://get.docker.com/ | sh
 
-RUN git config --global user.email "cf-buildpacks-eng@pivotal.io"
-RUN git config --global user.name "CF Buildpacks Team CI Server"
+RUN git config --global user.email "cf-ci-bot@suse.de"
+RUN git config --global user.name "SUSE CF CI Bot"
 RUN git config --global core.pager cat
 
 RUN wget -q https://releases.hashicorp.com/vagrant/1.8.5/vagrant_1.8.5_x86_64.deb \

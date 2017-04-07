@@ -3,7 +3,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: cfbuildpacks/ci
+    repository: splatform/cf-ci-buildpacks
 inputs:
   - name: buildpacks-ci
   - name: buildpack-input
@@ -17,6 +17,7 @@ run:
     - |
       set -e
       pushd buildpacks-ci
+        bundle install
         bundle exec tasks/update-dependency-in-buildpack/run.rb
       popd
       rsync -a buildpack-input/ buildpack
@@ -27,3 +28,4 @@ params:
   TRACKER_REQUESTER_ID:
   BUILDPACK_NAME:
   BUILDPACK_DEPENDENCIES_HOST_DOMAIN:
+  STACK_NAME:

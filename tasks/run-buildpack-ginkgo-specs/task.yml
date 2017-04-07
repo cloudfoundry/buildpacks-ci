@@ -7,8 +7,6 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: buildpack
-  - name: cf-bp-space
-    path: cf-space
 run:
   path: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/run.sh
 params:

@@ -11,6 +11,8 @@ export GOBIN=/usr/local/bin
 
 if [ "$LANGUAGE" = "multi" ]; then
   update_dir="src/compile"
+elif [ "$LANGUAGE" = "go" ]; then
+  update_dir="src/golang"
 else
   update_dir="src/$LANGUAGE"
 fi
@@ -28,8 +30,7 @@ pushd buildpack
 
     if [ -f Gopkg.toml ]; then
       go get github.com/golang/dep/cmd/dep
-      dep ensure
-      dep ensure -update
+      dep ensure --update
     else
       go get github.com/FiloSottile/gvt
       gvt update github.com/cloudfoundry/libbuildpack
@@ -41,7 +42,7 @@ pushd buildpack
     [ -d supply ] && (cd supply && (go generate || true))
     [ -d finalize ] && (cd finalize && (go generate || true))
 
-    ginkgo -r -skipPackage=integration,brats
+    ginkgo -r -skipPackage=integration
   popd
 
   git add "$update_dir"

@@ -108,8 +108,8 @@ describe ConcourseBinaryBuilder do
 
 
       it 'makes the commit as buildpacks ci robot' do
-        expect(GitClient).to have_received(:set_global_config).with('user.email','cf-buildpacks-eng@pivotal.io')
-        expect(GitClient).to have_received(:set_global_config).with('user.name','CF Buildpacks Team CI Server')
+        expect(GitClient).to have_received(:set_global_config).with('user.email','cf-ci-bot@suse.de')
+        expect(GitClient).to have_received(:set_global_config).with('user.name','SUSE CF CI Server')
       end
 
       if automation == 'automated'

@@ -1,7 +1,7 @@
 class BuildpackDependencyUpdater::Hwc < BuildpackDependencyUpdater
   def perform_dependency_update
     original_dependencies = buildpack_manifest["dependencies"].clone
-    new_dependencies = buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency}
+    new_dependencies = buildpack_manifest["dependencies"].delete_if {|dep| dep["name"] == dependency && dep['cf_stacks'].include?(stack_name) }
     @removed_versions = (original_dependencies - new_dependencies).map{|dep| dep['version']} unless new_dependencies == original_dependencies
 
     dependency_hash = {

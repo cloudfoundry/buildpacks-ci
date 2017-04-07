@@ -1,8 +1,8 @@
+<% auto_build_names = %w(bower composer glide godep nginx node yarn) %>
+<% manual_build_names = %w(go php php7 ruby jruby bundler python httpd) %>
+<% dep_build_names = auto_build_names + manual_build_names %>
+
 resource_types: #######################################################################################################
-  - name: concourse2tracker
-    type: docker-image
-    source:
-      repository: cfbuildpacks/concourse2tracker
   - name: slack-notification
     type: docker-image
     source:
@@ -26,71 +26,56 @@ resources: #####################################################################
   - name: builds-out
     type: git
     source:
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-      branch: master
+      uri: git@github.com:SUSE/cf-public-buildpacks-ci-robots
+      branch: {{public-buildpacks-ci-robots-branch}}
       paths: [ binary-builds/* ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
-  # used to make concourse display layout match logical layout
-  - name: dummy-resource
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
-      branch: master
-
-<% dep_build_names = %w(bower go bundler composer dotnet glide godep dep httpd hwc jruby php php7 python node nginx ruby yarn) %>
+<% dep_build_names = %w(bower go bundler composer glide godep dep httpd jruby php php7 python node nginx ruby yarn) %>
 <% dep_build_names.each do |dep| %>
   - name: <%= dep %>-builds
     type: git
     source:
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-      branch: master
+      uri: git@github.com:SUSE/cf-public-buildpacks-ci-robots
+      branch: {{public-buildpacks-ci-robots-branch}}
       paths: [ binary-builds/<%= dep %>-builds.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 <% end %>
 
-<% dep_built_output_names = dep_build_names + %w(dotnet-framework) %>
+<% dep_built_output_names = dep_build_names %>
 <% dep_built_output_names.each do |dep| %>
   - name: <%= dep %>-built-output
     type: git
     source:
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-      branch: master
+      uri: git@github.com:SUSE/cf-public-buildpacks-ci-robots
+      branch: {{public-buildpacks-ci-robots-branch}}
       paths: [ binary-built-output/<%= dep %>-built.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 <% end %>
 
-  - name: dotnet-framework-built-output-trigger
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-      branch: master
-      paths: [ binary-built-output/dotnet-framework-built.yml ]
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-
-<% %w(bower bundler composer dotnet glide godep dep hwc nginx node yarn).each do |auto_dep| %>
+<% %w(bower bundler composer glide godep dep nginx node yarn).each do |auto_dep| %>
   - name: <%= auto_dep %>-builds-in
     type: git
     source:
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-      branch: master
+      uri: git@github.com:SUSE/cf-public-buildpacks-ci-robots
+      branch: {{public-buildpacks-ci-robots-branch}}
       paths: [ binary-builds/<%= auto_dep %>-builds.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
   - name: <%= auto_dep %>-new-releases
     type: git
     source:
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-      branch: master
+      uri: git@github.com:SUSE/cf-public-buildpacks-ci-robots
+      branch: {{public-buildpacks-ci-robots-branch}}
       paths: [ new-release-notifications/<%= auto_dep %>-new.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 <% end %>
 
-<% %w(go dotnet-core hwc nodejs ruby php staticfile).each do |language| %>
+<% %w(go nodejs ruby php staticfile).each do |language| %>
   - name: <%= language %>-buildpack
     type: git
     source:
-      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
+      uri: git@github.com:<%= organization %>/cf-<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
       ignore_paths:
@@ -98,55 +83,48 @@ resources: #####################################################################
         - CHANGELOG
 <% end %>
 
-  ## Concourse2Tracker ##
-
-  - name: concourse2tracker
-    type: concourse2tracker
-  - name: failure-alert
-    type: slack-notification
-    source:
-      url: {{concourse-job-failure-notifications-slack-webhook}}
-
  ## Docker Images ##
 
-  - name: docker-cflinuxfs2-rootfs
+  - name: docker-stack-rootfs
     type: docker-image
     source:
-      repository: cloudfoundry/cflinuxfs2
+      repository: {{docker-stack-repository}}
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
-      email: cf-buildpacks-eng@pivotal.io
+      email: cf-ci-bot@suse.de
+      insecure_registries:
+      - staging.registry.howdoi.website:443
 
-<% dep_build_names = %w(bower go bundler composer dotnet glide godep dep httpd hwc jruby php php7 python node nginx ruby yarn) %>
+<% dep_build_names = %w(bower go bundler composer glide godep dep httpd jruby php php7 python node nginx ruby yarn) %>
 <% dep_build_names.each do |dep| %>
   - name: buildpacks-bucket-<%= dep %>
     type: s3
     source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
+      bucket: {{binaries-s3-bucket}}
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-      regexp: dependencies/<%= dep %>/<%= dep %>.*(\d+.\d+.\d+)(.*)
+      regexp: dependencies/<%= dep %>/(.*)
+      endpoint: {{buildpacks-binaries-s3-endpoint}}
 <% end %>
 
 groups: ###############################################################################################################
 
   - name: enqueue-automated-builds
     jobs:
-<% %w(bower bundler composer dotnet glide godep dep hwc nginx node yarn).each do |auto_dep| %>
+<% %w(bower bundler composer glide godep dep nginx node yarn).each do |auto_dep| %>
     - trigger-<%= auto_dep %>-build
 <% end %>
 
   - name: automated-builds
     jobs:
     - binary-builder-specs
-<% %w(bower bundler composer dotnet glide godep dep hwc nginx node yarn).each do |auto_dep| %>
+<% %w(bower bundler composer glide godep dep nginx node yarn).each do |auto_dep| %>
     - build-<%= auto_dep %>
 <% end %>
-<% {go: ["godep", "glide", "dep" ], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node","yarn","bundler"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework'] }.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide", "dep" ], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node","yarn","bundler"]}.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
     - update-<%= dependency %>-in-<%= buildpack %>-buildpack
   <% end %>
-    - extract-dotnet-framework
 <% end %>
 
   - name: manual-builds
@@ -156,7 +134,7 @@ groups: ########################################################################
     - build-<%= dependency %>
 <% end %>
 
-  <% integration_spec_names = %w(bundler glide go godep dep httpd hwc jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
+  <% integration_spec_names = %w(bundler glide go godep dep httpd jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag) %>
   - name: binary-builder-specs
     jobs:
     - binary-builder-specs
@@ -187,27 +165,21 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: docker-cflinuxfs2-rootfs
+        - get: docker-stack-rootfs
           trigger: true
         - get: binary-builder
           trigger: true
       - do:
-        <% integration_spec_names = %w(bundler glide go godep dep httpd hwc jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
+        <% integration_spec_names = %w(bundler glide go godep dep httpd jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag) %>
         - task: all-expected-integration-specs-will-run
           file: buildpacks-ci/tasks/check-for-binary-builder-integration-spec-presence/task.yml
           params:
             SPEC_NAMES: <%= integration_spec_names.join(',') %>
         - task: all-unit-tests
           file: buildpacks-ci/tasks/run-binary-builder-unit-specs/task.yml
+          image: docker-stack-rootfs
           params:
             RUBYGEM_MIRROR: {{rubygem-mirror}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
 <% integration_spec_names.each do |spec_name| %>
   - name: binary-builder-specs-<%= spec_name %>
@@ -216,7 +188,7 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: docker-cflinuxfs2-rootfs
+        - get: docker-stack-rootfs
           trigger: true
         - get: binary-builder
           passed: [ binary-builder-specs-unit ]
@@ -237,22 +209,13 @@ jobs: ##########################################################################
               ORACLE_LIBS_FILENAME: {{oracle-client-libs-filename}}
             <% end %>
             attempts: 5
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
-
-
 
 <% %w(go php php7 ruby jruby python httpd).each do |dependency| %>
   - name: build-<%= dependency %>
     serial: true
     public: true
-    disable_manual_trigger: true # instead, trigger jobs by pushing yaml to public-buildpacks-ci-robots/binary-builds
+    # disable_manual_trigger: true # instead, trigger jobs by pushing yaml to public-buildpacks-ci-robots/binary-builds
     plan:
       - aggregate:
         - get: builds-yaml
@@ -263,9 +226,13 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: built-yaml
           resource: <%= dependency %>-built-output
+        - get: buildpacks-bucket-<%= dependency %>
+        - get: docker-stack-rootfs
+          trigger: true
       - do:
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary/task.yml
+          image: docker-stack-rootfs
           params:
             DEPENDENCY: <%= dependency %>
             GIT_SSH_KEY: {{public-buildpacks-ci-robots-private-key}}
@@ -279,21 +246,15 @@ jobs: ##########################################################################
           params:
             repository: builds-yaml-artifacts
             rebase: true
-        - put: concourse2tracker
+        - task: push-sources
+          file: buildpacks-ci/tasks/push-sources-to-obs/task.yml
           params:
-            api_token: {{pivotal-tracker-api-token}}
-            git_path: builds-yaml
-            project_id: {{cf-buildpacks-public-tracker-id}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+            OBS_USERNAME:  {{obs-username}}
+            OBS_PASSWORD:  {{obs-password}}
+            PROJECT:       Cloud:Platform:sources:buildpacks
 <% end %>
 
-<% %w(bower bundler godep dep hwc dotnet composer glide nginx node yarn).each do |dependency| %>
+<% %w(bower bundler godep dep composer glide nginx node yarn).each do |dependency| %>
   - name: trigger-<%= dependency %>-build
     serial: true
     public: true
@@ -328,9 +289,13 @@ jobs: ##########################################################################
         - get: binary-builder
           passed: [binary-builder-specs]
         - get: buildpacks-ci
+        - get: buildpacks-bucket-<%= dependency %>
+        - get: docker-stack-rootfs
+          trigger: true
       - do:
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary/task.yml
+          image: docker-stack-rootfs
           params:
             GIT_SSH_KEY: {{public-buildpacks-ci-robots-private-key}}
             DEPENDENCY: <%= dependency %>
@@ -345,21 +310,15 @@ jobs: ##########################################################################
           params:
             repository: builds-yaml-artifacts
             rebase: true
-        - put: concourse2tracker
+        - task: push-sources
+          file: buildpacks-ci/tasks/push-sources-to-obs/task.yml
           params:
-            api_token: {{pivotal-tracker-api-token}}
-            git_path: builds-yaml
-            project_id: {{cf-buildpacks-public-tracker-id}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+            OBS_USERNAME:  {{obs-username}}
+            OBS_PASSWORD:  {{obs-password}}
+            PROJECT:       Cloud:Platform:sources:buildpacks
 <% end %>
 
-<% {go: ["godep", "glide", "dep"], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node", "yarn", "bundler"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework']}.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide", "dep"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node", "yarn", "bundler"]}.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
   - name: update-<%= dependency %>-in-<%= buildpack %>-buildpack
     serial: true
@@ -371,21 +330,14 @@ jobs: ##########################################################################
           - get: buildpack-input
             resource: <%= buildpack %>-buildpack
           - get: built-out
-          <% if dependency != 'dotnet-framework' %>
             resource: <%= dependency %>-built-output
             passed: [ build-<%= dependency %> ]
-          <% else %>
-            resource: <%= dependency %>-built-output-trigger
-          <% end %>
             version: every
             trigger: true
-          <% if dependency == 'dotnet-framework' %>
-          - get: dummy-resource
-            passed: [ extract-dotnet-framework ]
-          <% end %>
         - task: update-dependency-in-manifests
           file: buildpacks-ci/tasks/update-dependency-in-buildpack/task.yml
           params:
+            STACK_NAME: {{stack-name}}
             BUILDPACK_NAME: <%= buildpack %>
             DEPENDENCY: <%= dependency %>
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
@@ -399,33 +351,3 @@ jobs: ##########################################################################
             rebase: true
   <% end %>
 <% end %>
-
-  - name: extract-dotnet-framework
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: dummy-resource
-        - get: built-yaml
-          passed: [ build-dotnet ]
-          resource: dotnet-built-output
-          trigger: true
-        - get: dotnet-framework-built
-          resource: dotnet-framework-built-output
-      - do:
-        - task: extract-dotnet-framework
-          file: buildpacks-ci/tasks/extract-dotnet-framework/task.yml
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary/task.yml
-          params:
-            DEPENDENCY: dotnet-framework
-            BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
-            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            AWS_DEFAULT_REGION: us-east-1
-            TEST_CREDENTIAL_FILTER_WHITELIST: BUCKET_NAME
-        - put: dotnet-framework-built-output
-          params:
-            repository: dotnet-framework-built-output
-            rebase: true

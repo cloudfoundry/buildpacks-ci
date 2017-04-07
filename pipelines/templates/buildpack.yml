@@ -24,53 +24,12 @@ resource_types:
 
 resources: ############################################################################################################
 
-  ## cf-space-resource ##
-
-  - name: cf-bp-space
-    type: cf-space-resource
-    source:
-      target: api.edge.buildpacks-gcp.ci.cf-app.com
-      username: {{ci-cf-username}}
-      password: {{ci_cf_edge_password}}
-      organization: pivotal
-
-<% unless no_brats.include?(language) %>
-  - name: cf-brat-space
-    type: cf-space-resource
-    source:
-      target: api.edge.buildpacks-gcp.ci.cf-app.com
-      username: {{ci-cf-username}}
-      password: {{ci_cf_edge_password}}
-      organization: pivotal
-<% end %>
-
-<% unless %w(apt hwc).include? language %>
-  - name: cf-lts-space
-    type: cf-space-resource
-    source:
-      target: {{ci-cf-lts-target}}
-      username: admin
-      password: {{ci-cf-lts-password}}
-      organization: pivotal
-
-<% unless no_brats.include?(language) %>
-  - name: cf-lts-brat-space
-    type: cf-space-resource
-    source:
-      target: {{ci-cf-lts-target}}
-      username: admin
-      password: {{ci-cf-lts-password}}
-      organization: pivotal
-<% end %>
-<% end %>
-
   ## Git ##
-
   - name: buildpack-develop
     type: git
     webhook_token: ob0aigh3
     source:
-      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
+      uri: git@github.com:<%= organization %>/cf-<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
       ignore_paths:
@@ -80,7 +39,7 @@ resources: #####################################################################
   - name: buildpack-new-version
     type: git
     source:
-      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
+      uri: git@github.com:<%= organization %>/cf-<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
       paths:
@@ -90,7 +49,7 @@ resources: #####################################################################
   - name: buildpack-master
     type: git
     source:
-      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
+      uri: git@github.com:<%= organization %>/cf-<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: master
 
@@ -113,7 +72,7 @@ resources: #####################################################################
     source:
       branch: master
       private_key: {{pivotal-cf-buildpacks-ci-robots}}
-      uri: git@github.com:pivotal-cf/buildpacks-ci-robots.git # pivotal-cf because pivnet is not foundation's
+      uri: git@github.com:SUSE/cf-buildpacks-ci-robots
       paths: [ pivnet-metadata/<%= language %>.yml ]
 <% end %>
 
@@ -140,24 +99,9 @@ resources: #####################################################################
   - name: buildpack-checksums
     type: git
     source:
-      uri: git@bitbucket.org:cloudfoundry-buildpacks/buildpack-checksums.git
+      uri: git@github.com:SUSE/cf-buildpack-checksums.git
       private_key: {{buildpack-checksums-private-key}}
       branch: master
-
-<% if language == 'hwc' %>
-  - name: buildpack-bosh-release
-    type: git
-    source:
-      uri: git@github.com:<%= organization %>/<%= language %>-buildpack-release.git
-      private_key: {{<%= language %>-buildpack-bosh-release-private-key}}
-      branch: master
-  - name: offline-buildpack-bosh-release
-    type: git
-    source:
-      uri: git@github.com:pivotal-cf/<%= language %>-offline-buildpack-release.git
-      private_key: {{<%= language %>-offline-buildpack-bosh-release-private-key}}
-      branch: master
-<% end %>
 
 
   ## Github Releases ##
@@ -166,52 +110,23 @@ resources: #####################################################################
     type: github-release
     source:
       user: {{buildpacks-github-org}}
-      repository: <%= language %>-buildpack
+      repository: cf-<%= language %>-buildpack
       access_token: {{buildpacks-github-token}}
-
-<% if language == 'hwc' %>
-  - name: buildpack-bosh-release-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: <%= language %>-buildpack-release
-      access_token: {{buildpacks-github-token}}
-  - name: offline-buildpack-bosh-release-github-release
-    type: github-release
-    source:
-      user: pivotal-cf
-      repository: <%= language %>-offline-buildpack-release
-      access_token: {{buildpacks-github-token}}
-<% end %>
 
 <% if !libbuildpacks.include?(language) %>
   - name: buildpack-packager
     type: github-release
     source:
       user: {{buildpacks-github-org}}
-      repository: buildpack-packager
+      repository: cf-buildpack-packager
       access_token: {{buildpacks-github-token}}
 
   - name: machete
     type: github-release
     source:
       user: {{buildpacks-github-org}}
-      repository: machete
+      repository: cf-machete
       access_token: {{buildpacks-github-token}}
-<% end %>
-
-  ## Pivnet Release ##
-
-<% unless %w(apt hwc multi).include? language %>
-  - name: pivnet-production
-    type: pivnet
-    source:
-      endpoint: https://network.pivotal.io
-      bucket: pivotalnetwork
-      api_token: {{pivnet-apikey}}
-      product_slug: buildpacks
-      access_key_id: {{pivnet-access-key}}
-      secret_access_key: {{pivnet-secret-key}}
 <% end %>
 
   ## S3 Buckets ##
@@ -219,7 +134,7 @@ resources: #####################################################################
   - name: pivotal-buildpack
     type: s3
     source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
+      bucket: {{buildpacks-s3-bucket}}
       regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
@@ -227,7 +142,7 @@ resources: #####################################################################
   - name: pivotal-buildpack-cached
     type: s3
     source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
+      bucket: {{buildpacks-s3-bucket}}
       regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
@@ -240,17 +155,7 @@ resources: #####################################################################
       branch: master
       pool: edge-shared-environments
       private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-
-<% unless %w(apt hwc).include? language %>
-  - name: lts-shared-environments
-    type: pool
-    source:
-      branch: master
-      pool: lts-shared-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-<% end %>
+      uri: git@github.com:SUSE/cf-public-buildpacks-ci-robots
 
   ## Alerts ##
 
@@ -258,12 +163,6 @@ resources: #####################################################################
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
-
-  - name: sunday-night
-    type: cron
-    source:
-      expression: 0 18 * * 0
-      location: {{current-timezone}}
 
 jobs: ################################################################################################################
   <% if language == "php" %>
@@ -282,26 +181,6 @@ jobs: ##########################################################################
           repository: updated-buildpack
           rebase: true
   <% end %>
-  - name: create-buildpack-release-story
-    serial: true
-    public: true
-    plan:
-      - get: sunday-night
-        trigger: true
-      - aggregate:
-        - get: pivotal-buildpack
-        - get: pivotal-buildpack-cached
-        - get: buildpacks-ci
-        - get: buildpack
-          resource: buildpack-master
-      - do:
-        - task: create-buildpack-release-story
-          file: buildpacks-ci/tasks/create-buildpack-release-tracker-story/task.yml
-          params:
-            BUILDPACK_NAME: <%= language %>
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
   - name: detect-new-version-and-upload-artifacts
     serial: true
     public: true
@@ -359,7 +238,6 @@ jobs: ##########################################################################
           passed: [ "detect-new-version-and-upload-artifacts" ]
           trigger: true
       - do:
-        - put: cf-bp-space
 <% if libbuildpacks.include?(language) %>
         - task: ginkgo
           file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
@@ -374,7 +252,7 @@ jobs: ##########################################################################
           params:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci_cf_edge_password}}
+            CF_PASSWORD: {{ci_cf_shared_password}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
 <% end %>
@@ -386,7 +264,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/set-status-success/task.yml
           params:
             GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
+            GITHUB_REPO: <%= organization %>/cf-<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-master'
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge master spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
@@ -401,78 +279,6 @@ jobs: ##########################################################################
           put: edge-shared-environments
           params:
             release: cf-environments
-<% unless %w(apt hwc).include? language %>
-  - name: specs-lts-master
-    serial: true
-    public: true
-    plan:
-      - put: cf-environments
-        resource: lts-shared-environments
-        params:
-          claim: <%= language %>
-        timeout: 3h
-      - aggregate:
-        - get: buildpacks-ci
-        - get: buildpack
-          passed: [ "detect-new-version-and-upload-artifacts" ]
-          resource: buildpack-master
-          trigger: true
-        - get: repo
-          resource: buildpack-master
-        - get: pivotal-buildpacks
-          resource: pivotal-buildpack
-          passed: [ "detect-new-version-and-upload-artifacts" ]
-          trigger: true
-        - get: pivotal-buildpacks-cached
-          resource: pivotal-buildpack-cached
-          passed: [ "detect-new-version-and-upload-artifacts" ]
-          trigger: true
-      - do:
-        - put: cf-bp-space
-          resource: cf-lts-space
-<% if libbuildpacks.include?(language) %>
-        - task: ginkgo
-          file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
-          params:
-            STACKS: cflinuxfs2
-            GINKGO_ATTEMPTS: 4
-            GINKGO_NODES: 6
-          privileged: true
-<% else %>
-        - task: rspec
-          file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
-          params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-            CF_PASSWORD: {{ci-cf-lts-password}}
-            SKIP_WINDOWS_TESTS: true
-          privileged: true
-<% end %>
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
-        on_success:
-          task: github-set-status-success
-          file: buildpacks-ci/tasks/set-status-success/task.yml
-          params:
-            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
-            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-master'
-            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI LTS master spec passed'
-            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-        ensure:
-          put: lts-shared-environments
-          params:
-            release: cf-environments
-<% end %>
   - name: ship-it
     serial: true
     public: true
@@ -482,22 +288,13 @@ jobs: ##########################################################################
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
           passed:
-            <% unless %w(apt hwc).include? language %>
-            - specs-lts-master
-            <% end %>
             - specs-edge-master
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
           passed:
-            <% unless %w(apt hwc).include? language %>
-            - specs-lts-master
-            <% end %>
             - specs-edge-master
         - get: buildpack
           passed:
-            <% unless %w(apt hwc).include? language %>
-            - specs-lts-master
-            <% end %>
             - specs-edge-master
           resource: buildpack-master
       - task: check tag not already added
@@ -543,24 +340,6 @@ jobs: ##########################################################################
             - buildpack-artifacts/*-buildpack-v*.zip.SHA256SUM.txt
 
 <% unless %w(apt hwc multi).include? language %>
-  - name: buildpack-to-pws
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: pivotal-buildpacks-cached
-          resource: pivotal-buildpack-cached
-          passed: [ ship-it ]
-          trigger: true
-      - task: update-buildpack
-        file: buildpacks-ci/tasks/pws-update-buildpack/task.yml
-        params:
-          CF_API: https://api.run.pivotal.io
-          USERNAME: {{pws_buildpacks_cf_admin_username}}
-          PASSWORD: {{pws_buildpacks_cf_admin_password}}
-          BUILDPACK_NAME: <%= language %>
-
   - name: write-pivnet-metadata
     serial: true
     public: true
@@ -589,21 +368,6 @@ jobs: ##########################################################################
         params:
           repository: pivnet-buildpack-metadata-artifacts
           rebase: true
-
-  - name: release-to-pivnet
-    public: true
-    plan:
-      - get: pivotal-buildpack-cached
-        passed: [ write-pivnet-metadata ]
-        trigger: true
-      - get: pivnet-buildpack-metadata
-        passed: [ write-pivnet-metadata ]
-        trigger: true
-      - put: pivnet-production
-        params:
-          file_glob: pivotal-buildpack-cached/<%= language %>_buildpack-cached-v*.zip
-          s3_filepath_prefix: product-files/buildpacks
-          metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
   - name: specs-edge-integration-develop
     serial: true
@@ -623,7 +387,6 @@ jobs: ##########################################################################
           - get: repo
             resource: buildpack-develop
         - do:
-          - put: cf-bp-space
 <% if libbuildpacks.include?(language) %>
           - task: ginkgo
             file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
@@ -638,13 +401,38 @@ jobs: ##########################################################################
             params:
               STACKS: cflinuxfs2
               COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              CF_PASSWORD: {{ci_cf_edge_password}}
+              CF_PASSWORD: {{ci_cf_shared_password}}
               RUBYGEM_MIRROR: {{rubygem-mirror}}
             privileged: true
 <% end %>
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
+        - aggregate:
+          - do:
+            - task: rspec
+              file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
+              params:
+                STACKS: cflinuxfs2
+                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+                CF_PASSWORD: {{ci_cf_shared_password}}
+                RUBYGEM_MIRROR: {{rubygem-mirror}}
+              privileged: true
+            ensure:
+              task: delete-cf-space
+              file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
+          - do:
+            - task: brats
+              file: buildpacks-ci/tasks/run-shared-brats/task.yml
+              params:
+                BUILDPACK_BRANCH: develop
+                CI_CF_USERNAME: {{ci-cf-username}}
+                CI_CF_PASSWORD: {{ci_cf_shared_password}}
+                LANGUAGE: <%= language %>
+                RUBYGEM_MIRROR: {{rubygem-mirror}}
+            ensure:
+              task: delete-cf-space
+              file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
         on_failure:
           put: failure-alert
           params:
@@ -729,7 +517,7 @@ jobs: ##########################################################################
             params:
               BUILDPACK_BRANCH: develop
               CI_CF_USERNAME: {{ci-cf-username}}
-              CI_CF_PASSWORD: {{ci_cf_edge_password}}
+              CI_CF_PASSWORD: {{ci_cf_shared_password}}
               LANGUAGE: <%= language %>
               RUBYGEM_MIRROR: {{rubygem-mirror}}
           ensure:
@@ -763,144 +551,11 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/set-status-success/task.yml
           params:
             GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
+            GITHUB_REPO: <%= organization %>/cf-<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-develop'
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge develop spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
-<% unless %w(apt hwc).include? language %>
-  - name: specs-lts-integration-develop
-    serial: true
-    public: true
-    plan:
-      - do:
-        - put: cf-environments
-          resource: lts-shared-environments
-          params:
-            claim: <%= language %>
-          timeout: 3h
-        - aggregate:
-          - get: buildpacks-ci
-<% unless new_brats.include?(language) || no_brats.include?(language) %>
-          - get: brats
-<% end %>
-          - get: buildpack
-            resource: buildpack-develop
-            trigger: true
-          - get: repo
-            resource: buildpack-develop
-        - do:
-          - put: cf-bp-space
-            resource: cf-lts-space
-<% if libbuildpacks.include?(language) %>
-          - task: ginkgo
-            file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
-            params:
-              STACKS: cflinuxfs2
-              GINKGO_ATTEMPTS: 4
-              GINKGO_NODES: 6
-            privileged: true
-<% else %>
-          - task: rspec
-            file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
-            params:
-              STACKS: cflinuxfs2
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              RUBYGEM_MIRROR: {{rubygem-mirror}}
-              CF_PASSWORD: {{ci-cf-lts-password}}
-              SKIP_WINDOWS_TESTS: true
-            privileged: true
-<% end %>
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-        ensure:
-          put: lts-shared-environments
-          params:
-            release: cf-environments
-<% unless no_brats.include?(language) %>
-  - name: specs-lts-brats-develop
-    serial: true
-    public: true
-    plan:
-      - do:
-<% if new_brats.include?(language) %>
-        - aggregate:
-          - get: buildpacks-ci
-          - get: buildpack
-            resource: buildpack-develop
-            trigger: true
-        - do:
-          - put: cf-brat-space
-            resource: cf-lts-brat-space
-          - task: brats
-            file: buildpacks-ci/tasks/run-bp-brats/task.yml
-            input_mapping: {cf-space: cf-brat-space}
-            params:
-              STACKS: cflinuxfs2
-              GINKGO_ATTEMPTS: 4
-              GINKGO_NODES: 6
-<% else %>
-        - aggregate:
-          - get: buildpacks-ci
-          - get: brats
-          - get: buildpack
-            resource: buildpack-develop
-            trigger: true
-          - get: repo
-            resource: buildpack-develop
-        - do:
-          - put: cf-brat-space
-            resource: cf-lts-brat-space
-          - task: brats
-            file: buildpacks-ci/tasks/run-shared-brats/task.yml
-            params:
-              BUILDPACK_BRANCH: develop
-              LANGUAGE: <%= language %>
-              RUBYGEM_MIRROR: {{rubygem-mirror}}
-<% end %>
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-<% end %>
-  - name: specs-lts-gcp-develop
-    serial: true
-    public: true
-    plan:
-      - do:
-        - get: buildpacks-ci
-        - get: repo
-          resource: buildpack-develop
-          trigger: true
-          passed:
-<% unless no_brats.include?(language) %>
-          - specs-lts-brats-develop
-<% end %>
-          - specs-lts-integration-develop
-        on_success:
-          task: github-set-status-success
-          file: buildpacks-ci/tasks/set-status-success/task.yml
-          params:
-            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
-            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-develop'
-            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI lts develop spec passed'
-            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
-<% end %>
   - name: buildpack-to-master
     serial: true
     public: true
@@ -914,7 +569,7 @@ jobs: ##########################################################################
         file: buildpacks-ci/tasks/buildpack-to-master/task.yml
         params:
           GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-          GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
+          GITHUB_REPO: <%= organization %>/cf-<%= language %>-buildpack
           GITHUB_STATUS_CONTEXT: 'buildpacks-ci/passed-dev-specs'
           GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI develop specs passed'
           PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
@@ -1021,93 +676,4 @@ jobs: ##########################################################################
         params:
           repository: repo-with-gemfile-artifacts
           rebase: true
-<% end %>
-
-<% if language == 'hwc' %>
-  - name: update-buildpack-bosh-release
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: release
-          resource: buildpack-bosh-release
-        - get: blob
-          resource: buildpack-github-release
-          trigger: true
-          passed: [ buildpack-to-github ]
-      - do:
-        - task: convert release version to version resource
-          file: buildpacks-ci/tasks/convert-release-to-version/task.yml
-        - task: create-bosh-release
-          file: buildpacks-ci/tasks/create-buildpack-bosh-release/task.yml
-          params:
-            ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-            SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            BLOB_GLOB: blob/<%= language %>*.zip
-            BLOB_NAME: <%= language %>-buildpack
-            RELEASE_NAME: <%= language %>-buildpack
-            RELEASE_DIR: release
-        - put: buildpack-bosh-release
-          params:
-            repository: release-artifacts
-            rebase: true
-            tag: blob/version
-        - put: buildpack-bosh-release-github-release
-          params:
-            name: blob/version
-            tag: blob/version
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: update-offline-buildpack-bosh-release
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: release
-          resource: offline-buildpack-bosh-release
-        - get: blob
-          resource: buildpack-github-release
-          trigger: true
-          passed: [ buildpack-to-github ]
-          params:
-            include_source_tarball: true
-      - do:
-        - task: build-offline-buildpack
-          file: buildpacks-ci/tasks/build-offline-buildpack-cutlass/task.yml
-          params:
-            LANGUAGE: hwc
-        - task: convert release version to version resource
-          file: buildpacks-ci/tasks/convert-release-to-version/task.yml
-        - task: create-bosh-release
-          file: buildpacks-ci/tasks/create-bosh-release/task.yml
-          params:
-            ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
-            SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
-            BLOB_GLOB: buildpack-zip/<%= language %>_buildpack-cached*.zip
-            BLOB_NAME: <%= language %>-buildpack
-            RELEASE_NAME: <%= language %>-offline-buildpack
-            RELEASE_DIR: release
-        - put: offline-buildpack-bosh-release
-          params:
-            repository: release-artifacts
-            rebase: true
-            tag: blob/version
-        - put: offline-buildpack-bosh-release-github-release
-          params:
-            name: blob/version
-            tag: blob/version
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>

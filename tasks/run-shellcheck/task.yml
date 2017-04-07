@@ -4,7 +4,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: cfbuildpacks/ci
+    repository: splatform/cf-ci-buildpacks
 
 inputs:
   - name: ci-develop

@@ -111,8 +111,8 @@ class GCPTerraformDeployer
 
   def commit_file(file)
     run_or_exit "git add #{file}"
-    run_or_exit 'git config --global user.email "cf-buildpacks-eng@pivotal.io"'
-    run_or_exit 'git config --global user.name "CF Buildpacks Team CI Server"'
+    run_or_exit 'git config --global user.email "cf-ci-bot@suse.de"'
+    run_or_exit 'git config --global user.name "SUSE CF CI Bot"'
     run_or_exit "git commit -m 'Update BOSH-lite manifest for new GCP deployment'"
     run_or_exit 'git pull -r'
     run_or_exit 'git push'

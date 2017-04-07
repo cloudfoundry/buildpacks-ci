@@ -120,7 +120,7 @@ resources: #####################################################################
   - name: stack-s3
     type: s3
     source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
+      bucket: {{buildpacks-s3-bucket}}
       regexp: rootfs/cflinuxfs2-(.*).tar.gz
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
@@ -128,7 +128,7 @@ resources: #####################################################################
   - name: receipt-s3
     type: s3
     source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
+      bucket: {{buildpacks-s3-bucket}}
       regexp: rootfs/cflinuxfs2_receipt-(.*)
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
@@ -177,17 +177,17 @@ resources: #####################################################################
     type: docker-image
     source:
       repository: cloudfoundry/cflinuxfs2
-      username: {{dockerhub-cflinuxfs2-username}}
-      password: {{dockerhub-cflinuxfs2-password}}
-      email: cf-buildpacks-eng@pivotal.io
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+      email: cf-ci-bot@suse.de
 
   - name: docker-cflinuxfs2-tagged
     type: docker-image
     source:
       repository: cloudfoundry/cflinuxfs2
-      username: {{dockerhub-cflinuxfs2-username}}
-      password: {{dockerhub-cflinuxfs2-password}}
-      email: cf-buildpacks-eng@pivotal.io
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+      email: cf-ci-bot@suse.de
 
   ## Github Release ##
 
@@ -212,7 +212,7 @@ resources: #####################################################################
   - name: version
     type: semver
     source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
+      bucket: {{buildpacks-s3-bucket}}
       key: versions/stack
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}

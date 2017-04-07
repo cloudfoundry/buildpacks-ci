@@ -9,9 +9,9 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
     original_dependencies = buildpack_manifest["dependencies"].clone
 
     if mainline_version?(dependency_version)
-      new_dependencies = buildpack_manifest["dependencies"].delete_if { |dep| dep["name"] == dependency && mainline_version?(dep["version"]) }
+      new_dependencies = buildpack_manifest["dependencies"].delete_if { |dep| dep["name"] == dependency && dep['cf_stacks'].include?(stack_name) && mainline_version?(dep["version"]) }
     elsif stable_version?(dependency_version) && buildpack == 'php'
-      new_dependencies = buildpack_manifest["dependencies"].delete_if { |dep| dep["name"] == dependency && stable_version?(dep["version"]) }
+      new_dependencies = buildpack_manifest["dependencies"].delete_if { |dep| dep["name"] == dependency && dep['cf_stacks'].include?(stack_name) && stable_version?(dep["version"]) }
     elsif buildpack == 'staticfile'
       return
     end
@@ -22,7 +22,8 @@ class BuildpackDependencyUpdater::Nginx < BuildpackDependencyUpdater
       "version" => dependency_version,
       "uri" => uri,
       "sha256" => sha256,
-      "cf_stacks" => ["cflinuxfs2"]
+      "md5" => md5,
+      "cf_stacks" => [stack_name]
     }
     buildpack_manifest["dependencies"] << dependency_hash
   end

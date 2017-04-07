@@ -22,7 +22,8 @@ class BuildpackDependencyUpdater::DotnetFramework < BuildpackDependencyUpdater
       "version" => dependency_version,
       "uri" => uri,
       "sha256" => sha256,
-      "cf_stacks" => ["cflinuxfs2"]
+      "md5" => md5,
+      "cf_stacks" => [stack_name]
     }
     buildpack_manifest["dependencies"] << dependency_hash
   end

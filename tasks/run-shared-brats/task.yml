@@ -3,14 +3,14 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: cfbuildpacks/ci
+    repository: splatform/cf-ci-buildpacks
 inputs:
   - name: buildpacks-ci
   - name: brats
-  - name: cf-brat-space
+  - name: cf-environments
     path: cf-space
 run:
-  path: buildpacks-ci/tasks/run-shared-brats/run.sh
+  path: /bin/true
 params:
   BUILDPACK_BRANCH:
   LANGUAGE:

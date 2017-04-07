@@ -77,8 +77,8 @@ resources:
         port: "2587"
         username: {{cve-amazon-ses-smtp-username}}
         password: {{cve-amazon-ses-smtp-password}}
-      from: cf-buildpacks-eng@pivotal.io
-      to: ["cf-security@pivotal.io", "cf-buildpacks-eng@pivotal.io"]
+      from: cf-ci-bot@suse.de
+      to: ["cf-ci-bot@suse.de"]
 
 jobs:
   - name: categorize-security-notices

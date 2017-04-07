@@ -1,0 +1,11 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: machinerytool/osc_opensuse
+inputs:
+- name: buildpacks-ci
+- name: source-artifacts
+run:
+  path: buildpacks-ci/tasks/push-sources-to-obs/run.sh

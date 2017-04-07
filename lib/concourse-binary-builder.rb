@@ -22,6 +22,7 @@ class ConcourseBinaryBuilder
     @builds_dir = File.join(task_root_dir,'builds-yaml')
     @builds_yaml_artifacts = File.join(task_root_dir, 'builds-yaml-artifacts')
     @binary_artifacts_dir = File.join(task_root_dir, 'binary-builder-artifacts')
+    @source_artifacts_dir = File.join(task_root_dir, 'source-artifacts')
   end
 
   def run
@@ -57,6 +58,8 @@ class ConcourseBinaryBuilder
     return if @latest_build.nil?
 
     @flags = "--name=#{dependency}"
+    export_dir = File.join(@source_artifacts_dir, "#{dependency}-#{latest_build['version']}")
+    @flags << " --sources-export-dir=#{export_dir}"
     latest_build.each_pair do |key, value|
       if key == 'md5' || key == 'sha256' || key == 'git-commit-sha'
         @verification_type = key
@@ -248,8 +251,8 @@ class ConcourseBinaryBuilder
 
     Dir.chdir(in_dir) do
 
-      GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
-      GitClient.set_global_config('user.name', 'CF Buildpacks Team CI Server')
+      GitClient.set_global_config('user.email', 'cf-ci-bot@suse.de')
+      GitClient.set_global_config('user.name', 'SUSE CF CI Server')
       GitClient.add_file(file)
       GitClient.safe_commit(@git_msg)
 

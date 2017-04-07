@@ -104,14 +104,6 @@ resources:
     type: bosh-io-release
     source:
       repository: cloudfoundry/garden-runc-release
-  - name: pivnet-production
-    type: pivnet
-    source:
-      api_token: {{pivnet-apikey}}
-      product_slug: buildpacks
-      product_version: "Java Buildpack 4\\."
-      access_key_id: {{pivnet-access-key}}
-      secret_access_key: {{pivnet-secret-key}}
 <% (supported_languages).each do |language| %>
   <% if language == 'java' %>
   - name: <%= language %>-buildpack-github-release
