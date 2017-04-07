@@ -243,4 +243,53 @@ describe TrackerClient do
       end
     end
   end
+
+  describe '#add_blocker_to_story' do
+    let(:story_id) { 98123 }
+    let(:blocker) { double('blocker', id: 234, name: 'something important', current_state: 'accepted') }
+    let(:tracker_uri) { "https://www.pivotaltracker.com:443/services/v5/projects/Trackergeddon/stories/#{story_id}/blockers" }
+    subject { described_class.new(api_key, project_id, requester_id) }
+
+    before do
+      stub_request(:post, tracker_uri)
+        .to_return(status: 200, body: '', headers: {})
+    end
+
+    it 'receives the 200 status code' do
+      response = subject.add_blocker_to_story(story_id: story_id, blocker: blocker)
+      expect(WebMock).to have_requested(:post, tracker_uri)
+      expect(response.code).to eq '200'
+    end
+
+    it 'has the correct payload' do
+      response = subject.add_blocker_to_story(story_id: story_id, blocker: blocker)
+
+      expected_payload = {description: "#234 - something important", person_id: 1234567, resolved: true}.to_json
+      expect(WebMock).to have_requested(:post, tracker_uri)
+        .with(body: expected_payload, headers: { 'Content-Type' => 'application/json' })
+    end
+
+    it 'has the api key that was passed to it in the header' do
+      response = subject.add_blocker_to_story(story_id: story_id, blocker: blocker)
+
+      expected_headers = {
+        'Content-Type' => 'application/json',
+        'X-TrackerToken' => 'totes_a_real_api_key'
+      }
+
+      expect(WebMock).to have_requested(:post, tracker_uri)
+        .with(headers: expected_headers)
+    end
+
+    context 'current_state is not accepted' do
+      let(:blocker) { double('blocker', id: 234, name: 'something important', current_state: 'started') }
+      it 'sets resolved to false' do
+        response = subject.add_blocker_to_story(story_id: story_id, blocker: blocker)
+
+        expected_payload = {description: "#234 - something important", person_id: 1234567, resolved: false}.to_json
+        expect(WebMock).to have_requested(:post, tracker_uri)
+          .with(body: expected_payload)
+      end
+    end
+  end
 end
