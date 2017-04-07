@@ -48,6 +48,19 @@ class TrackerClient
     response
   end
 
+  def add_blocker_to_story(story_id:, blocker:)
+    resp = http_request do |uri|
+      uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories/#{story_id}/blockers")
+      request = Net::HTTP::Post.new(uri)
+      request.body = {
+        description: "##{blocker.id} - #{blocker.name}",
+        person_id: @requester_id,
+        resolved: (blocker.current_state == 'accepted')
+      }.to_json
+      request
+    end
+  end
+
   def find_unaccepted_story_ids(text_to_search_for)
     search(name: text_to_search_for).select do |story|
       story['current_state'] != 'accepted'
