@@ -85,7 +85,7 @@ RUN cd /usr/local && bundle install
 
 #install fly-cli
 RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly \
-  && [ c080d10e9fc1ec630cb2205eece3b00673ea0f17ec769d559108ebb68ee7f9f8 = $(shasum -a 256 /usr/local/bin/fly | cut -d' ' -f1) ] \
+  && [ a61457b5fe15091f8df8013c307875831cf020163c915fb4f6408d2f8647c0aa = $(shasum -a 256 /usr/local/bin/fly | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/fly
 
 # git-hooks and git-secrets
@@ -100,10 +100,10 @@ RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make i
 # Ensure that Concourse filtering is on for non-interactive shells
 ENV BASH_ENV /etc/profile.d/filter.sh
 
-# Install go 1.7.5
+# Install go 1.8.1
 RUN cd /usr/local \
-  && curl -L https://storage.googleapis.com/golang/go1.7.5.linux-amd64.tar.gz -o go.tar.gz \
-  && [ 2e4dd6c44f0693bef4e7b46cc701513d74c3cc44f2419bf519d7868b12931ac3 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
+  && curl -L https://buildpacks.cloudfoundry.org/dependencies/go/go1.8.1.linux-amd64-b05c0cbb.tar.gz -o go.tar.gz \
+  && [ 1627a8c8acf3140fe0e474ed51d730d70159be5162aa37f6a5761a1b4c70ad8c = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && tar xf go.tar.gz \
   && mv go/bin/go /usr/local/bin/go \
   && rm go.tar.gz
