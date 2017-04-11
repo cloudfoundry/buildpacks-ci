@@ -102,8 +102,8 @@ ENV BASH_ENV /etc/profile.d/filter.sh
 
 # Install go 1.8.1
 RUN cd /usr/local \
-  && curl -L https://buildpacks.cloudfoundry.org/dependencies/go/go1.8.1.linux-amd64-b05c0cbb.tar.gz -o go.tar.gz \
-  && [ 1627a8c8acf3140fe0e474ed51d730d70159be5162aa37f6a5761a1b4c70ad8c = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
+  && curl -L https://storage.googleapis.com/golang/go1.8.1.linux-amd64.tar.gz -o go.tar.gz \
+  && [ a579ab19d5237e263254f1eac5352efcf1d70b9dacadb6d6bb12b0911ede8994 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && tar xf go.tar.gz \
   && mv go/bin/go /usr/local/bin/go \
   && rm go.tar.gz
