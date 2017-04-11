@@ -525,6 +525,9 @@ jobs:
             ACCESS_KEY_ID: {{blobstore-access-key}}
             SECRET_ACCESS_KEY: {{blobstore-secret-key}}
             BUILDPACK: <%= language %>
+            <% if %w(java java-offline).include?(language) %>
+            VERSION_ALLOWED: '~> 3.0'
+            <% end %>
           privileged: true
         - put: cf-release-develop
           params:
