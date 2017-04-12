@@ -602,6 +602,8 @@ jobs: ##########################################################################
           resource: buildpack-develop
       - task: update-libbuildpack
         file: buildpacks-ci/tasks/update-libbuildpack/task.yml
+        params:
+          LANGUAGE: <%= language %>
       - put: buildpack-develop
         params:
           repository: buildpack-artifacts
