@@ -42,6 +42,11 @@ resources:
       pool: {{resource-pool}}
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+  - name: public-robots
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
+      branch: master
   - name: buildpacks-ci
     type: git
     source:
@@ -103,6 +108,7 @@ jobs:
           - get: buildpacks-ci
           - get: deployments-buildpacks
           - get: resource-pools
+          - get: public-robots
           - get: bosh-lite-resource
             resource: resource-pools
             passed: [remove-environment]
@@ -153,6 +159,8 @@ jobs:
       - do:
         - aggregate:
           - get: deployments-buildpacks
+            passed: ['recreate-bosh-lite']
+          - get: public-robots
             passed: ['recreate-bosh-lite']
             trigger: true
           - get: buildpacks-ci
@@ -219,6 +227,8 @@ jobs:
           - get: buildpacks-ci
           - get: deployments-buildpacks
             passed: [ deploy-cf-and-diego ]
+          - get: public-robots
+            passed: [ deploy-cf-and-diego ]
             trigger: true
           - get: machete
           - get: resource-pools
@@ -241,6 +251,8 @@ jobs:
         - aggregate:
           - get: buildpacks-ci
           - get: deployments-buildpacks
+            passed: ['update-machete']
+          - get: public-robots
             passed: ['update-machete']
             trigger: true
           - get: resource-pools
