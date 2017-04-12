@@ -106,7 +106,7 @@ resources: #####################################################################
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
 
-<% dep_build_names = %w(bower go bundler composer dotnet glide godep httpd hwc jruby php php7 python node nginx ruby yarn dotnet-framework) %>
+<% dep_build_names = %w(bower go bundler composer dotnet glide godep httpd hwc jruby php php7 python node nginx ruby yarn) %>
 <% dep_build_names.each do |dep| %>
   - name: buildpacks-bucket-<%= dep %>
     type: s3
@@ -357,13 +357,17 @@ jobs: ##########################################################################
           trigger: true
         - get: dotnet-framework-built
           resource: dotnet-framework-built-output
-        - get: buildpacks-bucket-dotnet-framework
       - do:
         - task: extract-dotnet-framework
           file: buildpacks-ci/tasks/extract-dotnet-framework/task.yml
-        - put: buildpacks-bucket-dotnet-framework
+        - task: push-binary
+          file: buildpacks-ci/tasks/push-binary/task.yml
           params:
-            file: binary-builder-artifacts/dotnet-framework*
+            DEPENDENCY: dotnet-framework
+            BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
         - put: dotnet-framework-built-output
           params:
             repository: dotnet-framework-built-output
