@@ -19,11 +19,13 @@ class BuildpackReleaseStoryCreator
   end
 
   def run!
-    new_release_version = previous_buildpack_version.succ
+    new_release_version = @previous_buildpack_version.succ
     story_name = "**Release:** #{buildpack_name}-buildpack #{new_release_version}"
 
     story_description = "See blockers for relevant stories.\n\n"
     story_description += "Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).\n"
+
+    blocker_stories = stories_since_last_release
 
     story = buildpack_project.create_story(
       name: story_name,
@@ -33,7 +35,7 @@ class BuildpackReleaseStoryCreator
       requested_by_id: tracker_requester_id
     )
 
-    stories_since_last_release.each do |blocker|
+    blocker_stories.each do |blocker|
       @tracker_client.add_blocker_to_story(story_id: story.id, blocker: blocker)
     end
 
