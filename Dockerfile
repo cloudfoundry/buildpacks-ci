@@ -9,6 +9,7 @@ RUN apt-get -y install \
   expect \
   git \
   iptables \
+  jq \
   libmysqlclient-dev \
   libpq-dev \
   libsqlite3-dev \
