@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+require 'octokit'
+require 'yaml'
+require 'tmpdir'
+require 'open3'
+
+hash = YAML.load(`lpass show Shared-Buildpacks/concourse-private.yml --notes`)
+client = Octokit::Client.new(
+  login: hash['github-username'],
+  password: hash['github-password']
+)
+# p client.user
+
+hash = YAML.load(`lpass show Shared-Buildpacks/git-repos-private-keys-two.yml --notes`)
+hash.keys.each do |key|
+  next unless key =~ /-offline-buildpack-bosh-release-private-key$/
+  repo = key.gsub(/-offline-buildpack-bosh-release-private-key$/, '-offline-buildpack-release')
+  repo = "pivotal-cf/#{repo}"
+  puts [ key, repo ].join(' :: ')
+
+  Dir.mktmpdir do |dir|
+    Dir.chdir(dir) do
+      `ssh-keygen -b 4096 -q -N '' -f ./id_#{key}`
+      pubkey = File.read("./id_#{key}.pub")
+      hash[key] = File.read("./id_#{key}")
+
+      client.add_deploy_key(repo, key, pubkey)
+    end
+  end
+end
+
+out, status = Open3.capture2e('lpass edit --sync=now --non-interactive --notes Shared-Buildpacks/git-repos-private-keys-two.yml', stdin_data: hash.to_yaml.gsub(/^---\n/s,''))
+puts out unless status.success?
+p status

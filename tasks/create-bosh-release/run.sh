@@ -15,26 +15,29 @@ if [ -n "${SECRET_ACCESS_KEY:+1}" ]; then
   cat > config/private.yml <<EOF
 ---
 blobstore:
-  s3:
+  provider: s3
+  options:
     access_key_id: $ACCESS_KEY_ID
+    bucket_name: pivotal-offline-buildpacks
     secret_access_key: $SECRET_ACCESS_KEY
+    credentials_source: static
 EOF
   fi
-
-  rm -f config/blobs.yml
+  rm -rf blobs
+  echo -e "---\n{}" > config/blobs.yml
 
   # we actually want globbing here, so:
   # shellcheck disable=SC2086
-  bosh -n add blob ../$BLOB_GLOB "$BLOB_NAME"
-  bosh -n upload blobs
+  bosh2 -n add-blob ../$BLOB_GLOB "$BLOB_NAME/$(basename ../$BLOB_GLOB)"
+  bosh2 -n upload-blobs
 
   git add config/blobs.yml
   git commit -m "Updating blobs for $RELEASE_NAME $version"
 
-  bosh -n create release --final --version "$version" --name "$RELEASE_NAME" --force
+  bosh2 -n create-release --final --version "$version" --name "$RELEASE_NAME"
   git add releases/**/*-"$version".yml releases/**/index.yml
   git add .final_builds/**/index.yml .final_builds/**/**/index.yml
-  git commit -m "Final release for $BLOB_NAME at $version"
+  git commit -m "Final release for $RELEASE_NAME at $version"
 popd
 
 rsync -a release/ release-artifacts
