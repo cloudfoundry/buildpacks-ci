@@ -34,7 +34,7 @@ jobs:
   <% end %>
 <% end %>
 
-<% ['binary', 'dotnet-core', 'java', 'multi', 'nodejs', 'php', 'python', 'ruby', 'staticfile', 'go'].each do |resource_name| %>
+<% ['binary', 'dotnet-core', 'hwc', 'java', 'multi', 'nodejs', 'php', 'python', 'ruby', 'staticfile', 'go'].each do |resource_name| %>
   - name: unclaim-<%= resource_name %>-buildpack
     public: true
     plan:
