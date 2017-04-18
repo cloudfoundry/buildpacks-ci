@@ -38,7 +38,7 @@ class BuildpackBOSHReleaseUpdater
   end
 
   def delete_old_blob
-    blobs = YAML.load_file('config/blobs.yml')
+    blobs = YAML.load_file('config/blobs.yml') || {}
 
     old_buildpack_key = find_buildpack_key blobs, @buildpack_name
 

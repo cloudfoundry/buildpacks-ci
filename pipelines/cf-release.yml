@@ -110,6 +110,20 @@ resources:
       private_key: {{<%= language %>-buildpack-bosh-release-private-key}}
       branch: master
 <% end %>
+<% (supported_languages - %w(java java-offline)).each do |language| %>
+  - name: <%= language %>-offline-buildpack-bosh-release-github-release
+    type: github-release
+    source:
+      user: pivotal-cf
+      repository: <%= language %>-offline-buildpack-release
+      access_token: {{buildpacks-github-token}}
+  - name: <%= language %>-offline-buildpack-bosh-release
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/<%= language %>-offline-buildpack-release.git
+      private_key:  {{<%= language %>-offline-buildpack-bosh-release-private-key}}
+      branch: master
+<% end %>
 
 groups:
   - name: buildpacks
@@ -125,6 +139,11 @@ groups:
 <% (supported_languages - %w(java java-offline)).each do |language| %>
       - update-<%= language %>-buildpack-bosh-release
       - cf-release for <%= language %>
+<% end %>
+  - name: offline
+    jobs:
+<% (supported_languages - %w(java java-offline)).each do |language| %>
+      - update-<%= language %>-offline-buildpack-bosh-release
 <% end %>
   - name: java
     jobs:
@@ -532,6 +551,54 @@ jobs:
           params:
             repository: cf-release-artifacts
             rebase: true
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
+
+<% (supported_languages - %w(java java-offline)).each do |language| %>
+  - name: update-<%= language %>-offline-buildpack-bosh-release
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: blob
+          resource: <%= language %>-buildpack-github-release
+          trigger: true
+          passed: [ <%= language.include?('java') ? 'ship-it-java' : 'ship-it' %> ]
+          params:
+            include_source_tarball: true
+        - get: release
+          resource: <%= language %>-offline-buildpack-bosh-release
+      - do:
+        - task: build-offline-buildpack
+          file: buildpacks-ci/tasks/build-offline-buildpack/task.yml
+        - task: convert release version to version resource
+          file: buildpacks-ci/tasks/convert-release-to-version/task.yml
+        - task: create-bosh-release
+          file: buildpacks-ci/tasks/create-bosh-release/task.yml
+          input_mapping: {blob: buildpack-zip}
+          params:
+            ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
+            SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
+            BLOB_GLOB: blob/<%= language %>_buildpack*.zip
+            BLOB_NAME: <%= language %>-buildpack
+            RELEASE_NAME: <%= language %>-offline-buildpack
+            RELEASE_DIR: release
+        - put: <%= language %>-offline-buildpack-bosh-release
+          params:
+            repository: release-artifacts
+            rebase: true
+            tag: blob/version
+        - put: <%= language %>-offline-buildpack-bosh-release-github-release
+          params:
+            name: blob/version
+            tag: blob/version
         on_failure:
           put: failure-alert
           params:
