@@ -127,6 +127,10 @@ class NewReleasesDetector
       tasks.push 'Remove any dotnet-framework versions we no longer support'
     end
 
+    if dependency == :go
+      tasks.push 'Update go-version.yml in binary-builder repo'
+    end
+
     {
       name: name,
       description: description,
