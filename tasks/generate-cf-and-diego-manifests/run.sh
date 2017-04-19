@@ -56,7 +56,13 @@ popd
 pushd diego-release
   USE_SQL='postgres' ./scripts/generate-bosh-lite-manifests
   ../buildpacks-ci/tasks/generate-cf-and-diego-manifests/swap-diego-rootfs-release.rb "$(pwd)" bosh-lite/deployments/diego.yml
-  ruby -i -pe "gsub('network_mtu: null', 'network_mtu: 1432')" bosh-lite/deployments/diego.yml
+
+  if [ "$IAAS" = "gcp"  ]; then
+    echo "Setting garden network mtu to 1432"
+    ruby -i -pe "gsub('network_mtu: null', 'network_mtu: 1432')" bosh-lite/deployments/diego.yml
+  fi
+
+  ruby -i -pe "gsub('diego_privileged_containers: null', 'diego_privileged_containers: true')" bosh-lite/deployments/diego.yml
 popd
 
 MANIFEST_DIR="generate-manifest-artifacts/$DEPLOYMENT_NAME"
