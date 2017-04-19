@@ -232,6 +232,7 @@ jobs:
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             ROOTFS_RELEASE: cflinuxfs2-rootfs
+            IAAS: aws
           privileged: true
         - task: create-cf-release
           file: buildpacks-ci/tasks/create-cf-bosh-release-to-deploy/task.yml
