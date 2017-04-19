@@ -31,6 +31,8 @@ jobs:
       - put: buildpacks-ci-image
         params:
           build: buildpacks-ci
+          build_args:
+            squash: squash
         attempts: 5
         on_failure:
           put: failure-alert
