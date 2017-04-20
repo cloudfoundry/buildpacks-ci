@@ -837,8 +837,6 @@ jobs: ##########################################################################
         - get: receipt-s3
           passed: [ release-cflinuxfs2 ]
       - do:
-        - task: check-can-i-bump
-          file: buildpacks-ci/tasks/check-can-i-bump/task.yml
         - task: upload
           file: buildpacks-ci/tasks/upload-cflinuxfs2-to-cf-release/task.yml
           params:
