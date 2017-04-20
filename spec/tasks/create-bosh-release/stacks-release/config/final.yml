@@ -3,6 +3,6 @@ blobstore:
   file_name: stacks
   provider: local
   options:
-    blobstore_path: .
-final_name: .
+    blobstore_path: ./blobs/
+final_name: stacks
 
