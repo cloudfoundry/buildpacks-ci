@@ -9,7 +9,7 @@ set -x
 stacks_version=$(cat version/number)
 bosh_release_version=$(cat version/number)
 
-pushd "$RELEASE_DIR"
+pushd release
   if [ -n "${SECRET_ACCESS_KEY:+1}" ]; then
   echo "creating private.yml..."
   cat > config/private.yml <<EOF
@@ -35,4 +35,4 @@ EOF
   git commit -m "Final $RELEASE_NAME bosh release version $bosh_release_version, containing cflinuxfs2 version $stacks_version"
 popd
 
-rsync -a "$RELEASE_DIR/" release-artifacts
+rsync -a release/ release-artifacts

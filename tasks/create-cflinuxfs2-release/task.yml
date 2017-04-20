@@ -8,14 +8,13 @@ inputs:
   - name: buildpacks-ci
   - name: blob
   - name: version
-  - name: cflinuxfs2-release
+  - name: release
 outputs:
   - name: release-artifacts
 params:
   BLOB_NAME:
   BLOB_GLOB:
   RELEASE_NAME:
-  RELEASE_DIR:
   ACCESS_KEY_ID:
   SECRET_ACCESS_KEY:
 run:

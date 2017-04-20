@@ -734,7 +734,8 @@ jobs: ##########################################################################
           trigger: true
         - get: version
           passed: [ release-cflinuxfs2 ]
-        - get: cflinuxfs2-release
+        - get: release
+          resource: cflinuxfs2-release
       - do:
         - task: create-cflinuxfs2-release
           file: buildpacks-ci/tasks/create-cflinuxfs2-release/task.yml
@@ -742,7 +743,6 @@ jobs: ##########################################################################
             BLOB_NAME: rootfs
             BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
             RELEASE_NAME: cflinuxfs2
-            RELEASE_DIR: cflinuxfs2-release
             ACCESS_KEY_ID: {{cloudfoundry-s3-access-key}}
             SECRET_ACCESS_KEY: {{cloudfoundry-s3-secret-key}}
         - task: create-release-body
@@ -783,7 +783,8 @@ jobs: ##########################################################################
           trigger: true
         - get: version
           passed: [ release-cflinuxfs2 ]
-        - get: cflinuxfs2-rootfs-release
+        - get: release
+          resource: cflinuxfs2-rootfs-release
       - do:
         - task: create-cflinuxfs2-rootfs-release
           file: buildpacks-ci/tasks/create-cflinuxfs2-release/task.yml
@@ -791,7 +792,6 @@ jobs: ##########################################################################
             BLOB_NAME: rootfs
             BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
             RELEASE_NAME: cflinuxfs2-rootfs
-            RELEASE_DIR: cflinuxfs2-rootfs-release
             ACCESS_KEY_ID: {{cloudfoundry-s3-access-key}}
             SECRET_ACCESS_KEY: {{cloudfoundry-s3-secret-key}}
         - task: create-release-body
