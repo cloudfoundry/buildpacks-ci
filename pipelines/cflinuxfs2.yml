@@ -640,6 +640,7 @@ jobs: ##########################################################################
             rebase: true
         - task: comment-cve-story
           file: buildpacks-ci/tasks/comment-cve-story/task.yml
+          attempts: 20
           params:
             STACK: cflinuxfs2
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
