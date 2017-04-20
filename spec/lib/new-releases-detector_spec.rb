@@ -21,7 +21,6 @@ describe NewReleasesDetector do
     allow(Octokit).to receive(:configure)
     allow(Octokit).to receive(:tags).and_return([])
     allow(Octokit).to receive(:releases).and_return([])
-    allow(Git).to receive(:ls_remote).with('https://git.savannah.gnu.org/git/libunwind.git').and_return({'tags' => {}})
     allow_any_instance_of(described_class).to receive(:open).with(/python/).and_return(double(read: { 'tags' => [] }.to_json))
     allow_any_instance_of(described_class).to receive(:open).with(/openjdk/).and_return(double(read: {}.to_yaml))
     allow_any_instance_of(described_class).to receive(:open).with(/node/).and_return(double(read: [].to_json))
@@ -69,6 +68,8 @@ describe NewReleasesDetector do
 
       if dependency_source == :github
         allow(Octokit).to receive(:tags).with(github_repo).and_return(github_response)
+      elsif dependency_source == :github_releases
+        allow(Octokit).to receive(:releases).with(github_repo).and_return(github_response)
       else
         allow_any_instance_of(described_class).to receive(:open)
           .with(new_releases_source)
@@ -107,6 +108,8 @@ describe NewReleasesDetector do
 
       if dependency_source == :github
         allow(Octokit).to receive(:tags).with(github_repo).and_return(github_response)
+      elsif dependency_source == :github_releases
+        allow(Octokit).to receive(:releases).with(github_repo).and_return(github_response)
       else
         allow_any_instance_of(described_class).to receive(:open)
           .with(new_releases_source)
@@ -288,26 +291,20 @@ describe NewReleasesDetector do
 
     context 'for libunwind' do
       let(:dependency)          { :libunwind }
+      let(:github_repo)         { 'libunwind/libunwind' }
       let(:old_versions)        { %w(1.0 1.1) }
-      let(:new_releases_source) { 'https://git.savannah.gnu.org/git/libunwind.git' }
-
-      before do
-        allow(Git).to receive(:ls_remote).
-          with('https://git.savannah.gnu.org/git/libunwind.git').
-          and_return(new_releases_response)
-      end
 
       context 'when there are new releases' do
         let(:new_versions)          { %w(1.2 1.2-rc3) }
-        let(:new_releases_response) { { 'tags' => { '1.0' => {}, '1.1' => {}, '1.2' => {}, '1.2-rc3' => {} } } }
+        let(:github_response) { [ double(tag_name: '1.0'), double(tag_name: '1.1'), double(tag_name: '1.2'), double(tag_name: '1.2-rc3') ] }
 
-        it_behaves_like 'there are new versions to potentially build'
+        it_behaves_like 'there are new versions to potentially build', :github_releases
       end
 
       context 'when there are no new releases' do
-        let(:new_releases_response) { { 'tags' => { '1.0' => {}, '1.1' => {} } } }
+        let(:github_response) { [ double(tag_name: '1.0'), double(tag_name: '1.1') ] }
 
-        it_behaves_like 'there are no new versions to potentially build'
+        it_behaves_like 'there are no new versions to potentially build', :github_releases
       end
     end
   end
