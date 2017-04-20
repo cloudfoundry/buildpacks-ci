@@ -639,7 +639,7 @@ jobs: ##########################################################################
             repository: new-cves-artifacts
             rebase: true
         - task: comment-cve-story
-          file: buildpacks-ci/tasks/comment-cve-story/tasks.yml
+          file: buildpacks-ci/tasks/comment-cve-story/task.yml
           params:
             STACK: cflinuxfs2
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
