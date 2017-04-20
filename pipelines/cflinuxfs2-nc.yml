@@ -672,7 +672,8 @@ jobs: ##########################################################################
           trigger: true
         - get: version
           passed: [ release-cflinuxfs2-nc ]
-        - get: cflinuxfs2-release
+        - get: release
+          resource: cflinuxfs2-release
       - do:
         - task: create-cflinuxfs2-release
           file: buildpacks-ci/tasks/create-cflinuxfs2-release/task.yml
@@ -680,7 +681,6 @@ jobs: ##########################################################################
             BLOB_NAME: rootfs-nc
             BLOB_GLOB: blob/cflinuxfs2_nc-*.tar.gz
             RELEASE_NAME: cflinuxfs2-nc
-            RELEASE_DIR: cflinuxfs2-release
             ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
         - put: cflinuxfs2-release
