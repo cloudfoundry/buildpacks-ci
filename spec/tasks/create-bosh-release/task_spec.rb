@@ -2,21 +2,31 @@
 require 'spec_helper.rb'
 require 'digest'
 require 'yaml'
+require 'tmpdir'
 
 describe 'create bosh stacks release task' do
   context 'when uploading blobs' do
     before(:context) do
-      `git init ./spec/tasks/create-bosh-release/stacks-release`
+      @tmp_release = Dir.mktmpdir
+      FileUtils.cp_r "./spec/tasks/create-bosh-release/stacks-release/.", @tmp_release
+      Dir.chdir(@tmp_release) do
+        `git init .`
+        `git add .`
+        `git ci -m 'initial'`
+      end
 
       execute('-c tasks/create-bosh-release/task.yml ' \
               '-i buildpacks-ci=. ' \
               '-i blob=./spec/tasks/create-bosh-release/stack-s3 ' \
               '-i version=./spec/tasks/create-bosh-release/version ' \
-              '-i release=./spec/tasks/create-bosh-release/stacks-release ',
+              "-i release=#{@tmp_release} ",
               'BLOB_NAME' => 'rootfs',
               'BLOB_GLOB' => 'blob/cflinuxfs2-*.tar.gz',
               'RELEASE_NAME' => 'stack',
               'RELEASE_DIR' => 'release')
+    end
+    after(:context) do
+      FileUtils.rm_rf @tmp_release
     end
 
     it 'modifies config/blobs.yml correctly' do
@@ -53,7 +63,7 @@ describe 'create bosh stacks release task' do
               '-i buildpacks-ci=. ' \
               '-i blob=./spec/tasks/create-bosh-release/stack-s3 ' \
               '-i version=./spec/tasks/create-bosh-release/version ' \
-              '-i release=./spec/tasks/create-bosh-release/stacks-release ',
+              "-i release=./spec/tasks/create-bosh-release/stacks-release ",
               'RELEASE_DIR' => 'release',
               'ACCESS_KEY_ID' => @access_key_id,
               'SECRET_ACCESS_KEY' => @secret_access_key)
@@ -62,13 +72,13 @@ describe 'create bosh stacks release task' do
     it 'has the correct ACCESS_KEY_ID' do
       private_yml = YAML.load(run('cat /tmp/build/*/release/config/private.yml'))
 
-      expect(private_yml['blobstore']['s3']['access_key_id']).to be == ["redacted ACCESS_KEY_ID"]
+      expect(private_yml['blobstore']['options']['access_key_id']).to be == ["redacted ACCESS_KEY_ID"]
     end
 
     it 'has the correct SECRET_ACCESS_KEY' do
       private_yml = YAML.load(run('cat /tmp/build/*/release/config/private.yml'))
       puts private_yml
-      expect(private_yml['blobstore']['s3']['secret_access_key']).to be == ["redacted SECRET_ACCESS_KEY"]
+      expect(private_yml['blobstore']['options']['secret_access_key']).to be == ["redacted SECRET_ACCESS_KEY"]
     end
   end
 end
