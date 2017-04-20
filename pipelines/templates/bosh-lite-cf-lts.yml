@@ -201,6 +201,7 @@ jobs:
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             ROOTFS_RELEASE: cflinuxfs2-rootfs
+            IAAS: {{iaas}}
           privileged: true
         - put: cf-deployment
           params:
