@@ -13,10 +13,6 @@ class GCPTerraformDeployer
     @bosh_init_dir = bosh_init_dir
   end
 
-  def bosh_lite_environments
-    %w(cf-release.buildpacks-gcp.ci edge-1.buildpacks-gcp.ci lts-1.buildpacks-gcp.ci edge-2.buildpacks-gcp.ci lts-2.buildpacks-gcp.ci lts-3.buildpacks-gcp.ci lts-4.buildpacks-gcp.ci stacks.buildpacks-gcp.ci stacks-nc.buildpacks-gcp.ci)
-  end
-
   def run!
     begin
       puts "Generating concourse.tf..."
@@ -40,7 +36,7 @@ class GCPTerraformDeployer
       puts "Deploying BOSH director..."
       deploy_bosh_director
 
-      puts "Updating static IP addresses in BOSH-lite manifests..."
+      puts "Updating static IP address in Concourse manifest..."
       update_static_ips
 
       display_name_servers
@@ -92,15 +88,6 @@ class GCPTerraformDeployer
     update_concourse_manifest(concourse_ip)
 
     puts "Concourse deployment manifest updated"
-
-    bosh_lite_environments.each do |env|
-      env_name = env.split('.').first
-      env_ip = YAML.load(`gcloud compute addresses describe gcp-bosh-lite-#{env_name}`)['address']
-      puts "\t#{env_name}: #{env_ip}"
-      update_bosh_lite_manifest(env, env_ip)
-    end
-
-    puts "BOSH-lite deployment manifests updated"
   end
 
   def update_concourse_manifest(static_ip)
@@ -112,25 +99,6 @@ class GCPTerraformDeployer
     end.first
 
     network = web_group['networks'].select do |network|
-      network['name'] == 'vip'
-    end.first
-
-    network['static_ips'] = [static_ip]
-
-    File.write(manifest_file, manifest.to_yaml)
-
-    commit_file(manifest_file)
-  end
-
-  def update_bosh_lite_manifest(environment, static_ip)
-    manifest_file = File.expand_path(File.join(File.dirname(__FILE__), '..', 'deployments', environment, 'bosh-lite', 'bosh-lite-template.yml.erb'))
-    manifest = YAML.load_file(manifest_file)
-
-    bosh_job = manifest['jobs'].select do |job|
-      job['name'] == 'bosh'
-    end.first
-
-    network = bosh_job['networks'].select do |network|
       network['name'] == 'vip'
     end.first
 
