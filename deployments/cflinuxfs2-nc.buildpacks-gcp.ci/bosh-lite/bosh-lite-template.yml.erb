@@ -1,11 +1,11 @@
 ---
-name: stacks-gcp-bosh-lite
+name: cflinuxfs2-nc-gcp-bosh-lite
 director_uuid: UUID_STUB
 releases:
 - name: bosh
-  version: 260.6
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=260.6
-  sha1: 1506526f39f7406d97ac6edc7601e1c29fce5df5
+  version: 261.4
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=261.4
+  sha1: 4da9cedbcc8fbf11378ef439fb89de08300ad091
 - name: bosh-warden-cpi
   version: 34
   url: https://bosh.io/d/github.com/cppforlife/bosh-warden-cpi-release?v=34
@@ -21,7 +21,7 @@ releases:
 stemcells:
 - alias: trusty
   os: ubuntu-trusty
-  version: latest
+  version: 3363.15
 update:
   canaries: 1
   max_in_flight: 1
@@ -42,7 +42,7 @@ jobs:
     - gateway
   - name: vip
     static_ips:
-    - 104.196.197.70
+    - 104.196.115.103
   templates:
   - name: nats
     release: bosh
@@ -104,7 +104,7 @@ properties:
     port: 5432
     database: bosh
   director:
-    name: "Bosh Lite Director stacks-gcp"
+    name: "Bosh Lite Director cflinuxfs2-nc-gcp"
     address: 127.0.0.1
     max_tasks: 100
     cpi_job: warden_cpi
