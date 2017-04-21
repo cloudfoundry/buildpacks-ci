@@ -84,13 +84,6 @@ resources: #####################################################################
       branch: master
       private_key: {{cflinuxfs2-rootfs-private-key}}
 
-  - name: cflinuxfs2-release-deprecated
-    type: git
-    source:
-      uri: git@github.com:pivotal-cf-experimental/cflinuxfs2-release-deprecated.git
-      branch: master
-      private_key: {{stacks-release-private-key}}
-
   - name: diego-release
     type: git
     source:
@@ -680,41 +673,6 @@ jobs: ##########################################################################
               skip_download: true
               import_file: docker-s3/cflinuxfs2.tar.gz
               tag: version/number
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-
-  - name: create-bosh-release-deprecated
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: blob
-          resource: stack-s3
-          passed: [ release-cflinuxfs2 ]
-          trigger: true
-        - get: version
-          passed: [ release-cflinuxfs2 ]
-        - get: release
-          resource: cflinuxfs2-release-deprecated
-      - do:
-        - task: run-both-bosh-scripts
-          file: buildpacks-ci/tasks/create-bosh-release/task.yml
-          params:
-            BLOB_NAME: rootfs
-            BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
-            RELEASE_NAME: stack
-            RELEASE_DIR: release
-            ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-            SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-        - put: cflinuxfs2-release-deprecated
-          params:
-            repository: release-artifacts
         on_failure:
           put: failure-alert
           params:
