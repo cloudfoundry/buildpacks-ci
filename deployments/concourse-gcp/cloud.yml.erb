@@ -50,6 +50,7 @@ networks:
     - az: z1
       range: 10.150.0.0/24
       gateway: 10.150.0.1
+      static: [10.150.0.230-10.150.0.239]
       cloud_properties:
         network_name: concourse
         subnetwork_name: concourse-public-us-east1-1
