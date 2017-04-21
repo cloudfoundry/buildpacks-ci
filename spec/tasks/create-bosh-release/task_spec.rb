@@ -12,7 +12,7 @@ describe 'create bosh stacks release task' do
       Dir.chdir(@tmp_release) do
         `git init .`
         `git add .`
-        `git ci -m 'initial'`
+        `git commit -m 'initial'`
       end
 
       execute('-c tasks/create-bosh-release/task.yml ' \
