@@ -68,12 +68,6 @@ resources:
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
-  - name: buildpack-releases
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry-attic/buildpack-releases.git
-      private_key: {{buildpack-releases-private-key}}
-      branch: master
   - name: diego-bosh-release
     type: bosh-io-release
     tarball: true
@@ -133,9 +127,6 @@ groups:
       - cats
       - destroy-bosh-lite
       - ship-it
-<% (supported_languages - %w(java java-offline dotnet-core)).each do |language| %>
-      - deprecated-bosh-release-<%= language %>
-<% end %>
 <% (supported_languages - %w(java java-offline)).each do |language| %>
       - update-<%= language %>-buildpack-bosh-release
       - cf-release for <%= language %>
@@ -149,8 +140,6 @@ groups:
     jobs:
       - recreate-bosh-lite
       - ship-it-java
-      - deprecated-bosh-release-java
-      - deprecated-bosh-release-java-offline
       - update-java-buildpack-bosh-release
       - update-java-offline-buildpack-bosh-release
       - cf-release for java
@@ -409,53 +398,6 @@ jobs:
         - get: java-offline-buildpack-github-release
           passed: [ cats ]
 <% supported_languages.each do |language| %>
-  <% if language != 'dotnet-core'%>
-  - name: deprecated-bosh-release-<%= language %>
-    serial: true
-    serial_groups: [cf-release-buildpacks]
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: release
-          resource: buildpack-releases
-        - get: blob
-          resource: <%= language %>-buildpack-github-release
-          trigger: true
-          passed: [ <%= language.include?('java') ? 'ship-it-java' : 'ship-it' %> ]
-      - do:
-        - task: convert release version to version resource
-          file: buildpacks-ci/tasks/convert-release-to-version/task.yml
-        - task: create-bosh-release
-          file: buildpacks-ci/tasks/create-bosh-release/task.yml
-          params:
-            ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-            SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            <% case language
-               when /offline/ %>
-            BLOB_GLOB: ../blob/java-buildpack-offline*.zip
-            BLOB_NAME: java-buildpack
-            <% when /java/ %>
-            BLOB_GLOB: ../blob/java-buildpack-v*.zip
-            BLOB_NAME: java-buildpack
-            <% else %>
-            BLOB_GLOB: ../blob/<%= language %>*.zip
-            BLOB_NAME: <%= language %>-buildpack
-            <% end %>
-            RELEASE_NAME: <%= language %>-buildpack
-            RELEASE_DIR: release/<%= language %>-buildpack-release
-        - put: buildpack-releases
-          params:
-            repository: release-artifacts
-            rebase: true
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-    <% end %>
   - name: update-<%= language %>-buildpack-bosh-release
     serial: true
     serial_groups: [cf-release-buildpacks]
@@ -531,9 +473,6 @@ jobs:
               - java-buildpack-v*.zip
           <% end %>
           passed:
-          <% if language != 'dotnet-core'%>
-            - deprecated-bosh-release-<%= language %>
-          <% end %>
             - update-<%= language %>-buildpack-bosh-release
           trigger: true
       - do:
