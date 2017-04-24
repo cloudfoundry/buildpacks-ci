@@ -1,6 +1,5 @@
 # encoding: utf-8
 require 'tracker_api'
-require_relative './tracker-client'
 
 class BuildpackReleaseStoryCreator
   attr_reader :buildpack_name, :previous_buildpack_version,
@@ -14,8 +13,6 @@ class BuildpackReleaseStoryCreator
 
     tracker_client = TrackerApi::Client.new(token: tracker_api_token)
     @buildpack_project = tracker_client.project(tracker_project_id)
-
-    @tracker_client = TrackerClient.new(tracker_api_token, tracker_project_id, tracker_requester_id)
   end
 
   def run!
@@ -25,19 +22,18 @@ class BuildpackReleaseStoryCreator
     story_description = "See blockers for relevant stories.\n\n"
     story_description += "Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).\n"
 
-    blocker_stories = stories_since_last_release
+    blockers = stories_since_last_release.map do |story|
+      { description: story.id.to_s, resolved: false}
+    end
 
     story = buildpack_project.create_story(
       name: story_name,
       description: story_description,
       estimate: 1,
       labels: [buildpack_name, 'release'],
-      requested_by_id: tracker_requester_id
+      requested_by_id: tracker_requester_id,
+      blockers: blockers
     )
-
-    blocker_stories.each do |blocker|
-      @tracker_client.add_blocker_to_story(story_id: story.id, blocker: blocker)
-    end
 
     story
   end

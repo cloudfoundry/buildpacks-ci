@@ -1,7 +1,6 @@
 # encoding: utf-8
 require 'spec_helper'
 require_relative '../../lib/buildpack-release-story-creator'
-require_relative '../../lib/tracker-client'
 
 describe BuildpackReleaseStoryCreator do
   let(:buildpack_name) { 'elixir' }
@@ -10,7 +9,6 @@ describe BuildpackReleaseStoryCreator do
   let(:tracker_requester_id) { 555555 }
   let(:tracker_api_token) { 'tracker_api_token_stub' }
   let(:tracker_client) { double(TrackerApi::Client) }
-  let(:blocker_tracker_client) { double(TrackerClient) }
   let(:buildpack_project) { instance_double(TrackerApi::Resources::Project) }
   let(:new_story) { double('new_story', id: 987) }
 
@@ -26,9 +24,6 @@ describe BuildpackReleaseStoryCreator do
       .and_return(tracker_client)
     allow(tracker_client).to receive(:project).with(tracker_project_id)
       .and_return(buildpack_project)
-    allow(TrackerClient).to receive(:new).with(tracker_api_token, tracker_project_id, tracker_requester_id)
-      .and_return(blocker_tracker_client)
-    allow(blocker_tracker_client).to receive(:add_blocker_to_story)
   end
 
   it 'finds the previous release' do
@@ -40,8 +35,6 @@ describe BuildpackReleaseStoryCreator do
 
     expect(buildpack_project).to have_received(:stories)
                                      .with({filter: "label:release AND label:#{buildpack_name}"})
-
-    expect(blocker_tracker_client).to have_received(:add_blocker_to_story).exactly(1).times
   end
 
   context 'previous release stories exist' do
@@ -54,8 +47,6 @@ describe BuildpackReleaseStoryCreator do
 
       expect(buildpack_project).to have_received(:stories)
                                        .with({with_label: 'elixir', after_story_id: 1})
-
-      expect(blocker_tracker_client).to have_received(:add_blocker_to_story).exactly(1).times
     end
   end
 
@@ -69,8 +60,6 @@ describe BuildpackReleaseStoryCreator do
 
       expect(buildpack_project).to have_received(:stories)
                                        .with({with_label: 'elixir'})
-
-      expect(blocker_tracker_client).to have_received(:add_blocker_to_story).exactly(2).times
     end
   end
 
@@ -88,7 +77,8 @@ describe BuildpackReleaseStoryCreator do
                           DESCRIPTION
              estimate: 1,
              labels: %w(elixir release),
-             requested_by_id: 555555
+             requested_by_id: 555555,
+             blockers: [{description: '111111111', resolved: false}, {description: '222222222', resolved: false}]
             ).and_return(new_story)
 
     subject.run!
