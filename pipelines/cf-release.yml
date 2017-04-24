@@ -12,6 +12,10 @@ resources:
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
+  - name: public-robots
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
   - name: cats-concourse-task
     type: git
     source:
@@ -153,6 +157,7 @@ jobs:
     plan:
       - aggregate:
         - get: deployments-buildpacks
+        - get: public-robots
         - get: buildpacks-ci
       - task: recreate-cf-release-bosh-lite
         file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
@@ -196,6 +201,8 @@ jobs:
       - do:
         - aggregate:
           - get: deployments-buildpacks
+            passed: [ recreate-bosh-lite ]
+          - get: public-robots
             passed: [ recreate-bosh-lite ]
             trigger: true
           - get: buildpacks-ci
@@ -281,6 +288,8 @@ jobs:
           passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: deployments-buildpacks
           passed: [ deploy-cf-and-diego-to-cf-release ]
+        - get: public-robots
+          passed: [ deploy-cf-and-diego-to-cf-release ]
           trigger: true
         - get: java-buildpack-github-release
           passed: [ deploy-cf-and-diego-to-cf-release ]
@@ -335,6 +344,8 @@ jobs:
     plan:
       - aggregate:
         - get: deployments-buildpacks
+          passed: [ cats ]
+        - get: public-robots
           passed: [ cats ]
           trigger: true
         - get: buildpacks-ci
