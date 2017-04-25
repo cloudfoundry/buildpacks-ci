@@ -109,17 +109,21 @@ resources:
       branch: master
 <% end %>
 <% (supported_languages - %w(java-offline)).each do |language| %>
-  - name: <%= language %>-offline-buildpack-bosh-release-github-release
+  - name: private-<%= language %>-offline-buildpack-bosh-release-github-release
     type: github-release
     source:
       user: pivotal-cf
       repository: <%= language %>-offline-buildpack-release
       access_token: {{buildpacks-github-token}}
-  - name: <%= language %>-offline-buildpack-bosh-release
+  - name: private-<%= language %>-offline-buildpack-bosh-release
     type: git
     source:
       uri: git@github.com:pivotal-cf/<%= language %>-offline-buildpack-release.git
+      <% if language == 'java'%>
+      private_key:  {{private-<%= language %>-offline-buildpack-bosh-release-private-key}}
+      <% else %>
       private_key:  {{<%= language %>-offline-buildpack-bosh-release-private-key}}
+      <% end %>
       branch: master
 <% end %>
 
@@ -138,7 +142,7 @@ groups:
   - name: offline
     jobs:
 <% (supported_languages - %w(java java-offline)).each do |language| %>
-      - update-<%= language %>-offline-buildpack-bosh-release
+      - update-private-<%= language %>-offline-buildpack-bosh-release
 <% end %>
   - name: java
     jobs:
@@ -146,6 +150,7 @@ groups:
       - ship-it-java
       - update-java-buildpack-bosh-release
       - update-java-offline-buildpack-bosh-release
+      - update-private-java-offline-buildpack-bosh-release
       - cf-release for java
       - cf-release for java-offline
 
@@ -511,7 +516,7 @@ jobs:
 <% end %>
 
 <% (supported_languages - %w(java-offline)).each do |language| %>
-  - name: update-<%= language %>-offline-buildpack-bosh-release
+  - name: update-private-<%= language %>-offline-buildpack-bosh-release
     serial: true
     public: true
     plan:
@@ -524,7 +529,7 @@ jobs:
           params:
             include_source_tarball: true
         - get: release
-          resource: <%= language %>-offline-buildpack-bosh-release
+          resource: private-<%= language %>-offline-buildpack-bosh-release
       - do:
         <% if language != 'java' %>
         - task: build-offline-buildpack
@@ -551,12 +556,12 @@ jobs:
             BLOB_NAME: <%= language %>-buildpack
             RELEASE_NAME: <%= language %>-offline-buildpack
             RELEASE_DIR: release
-        - put: <%= language %>-offline-buildpack-bosh-release
+        - put: private-<%= language %>-offline-buildpack-bosh-release
           params:
             repository: release-artifacts
             rebase: true
             tag: blob/version
-        - put: <%= language %>-offline-buildpack-bosh-release-github-release
+        - put: private-<%= language %>-offline-buildpack-bosh-release-github-release
           params:
             name: blob/version
             tag: blob/version
