@@ -8,11 +8,12 @@ set -x
 
 version=$(cat version/number)
 
-pushd "$RELEASE_DIR"
+if [[ -z "$VERSION_ALLOWED" ]] || [[ "$version" == $VERSION_ALLOWED* ]] ; then
+	pushd "$RELEASE_DIR"
 
-if [ -n "${SECRET_ACCESS_KEY:+1}" ]; then
-  echo "creating private.yml..."
-  cat > config/private.yml <<EOF
+	if [ -n "${SECRET_ACCESS_KEY:+1}" ]; then
+		echo "creating private.yml..."
+		cat > config/private.yml <<EOF
 ---
 blobstore:
   provider: s3
@@ -22,22 +23,26 @@ blobstore:
     secret_access_key: $SECRET_ACCESS_KEY
     credentials_source: static
 EOF
-  fi
-  rm -rf blobs
-  echo -e "---\n{}" > config/blobs.yml
+		fi
+		rm -rf blobs
+		echo -e "---\n{}" > config/blobs.yml
 
-  # we actually want globbing here, so:
-  # shellcheck disable=SC2086
-  bosh2 -n add-blob ../$BLOB_GLOB "$BLOB_NAME/$(basename ../$BLOB_GLOB)"
-  bosh2 -n upload-blobs
+		# we actually want globbing here, so:
+		# shellcheck disable=SC2086
+		bosh2 -n add-blob ../$BLOB_GLOB "$BLOB_NAME/$(basename ../$BLOB_GLOB)"
+		bosh2 -n upload-blobs
 
-  git add config/blobs.yml
-  git commit -m "Updating blobs for $RELEASE_NAME $version"
+		git add config/blobs.yml
+		git commit -m "Updating blobs for $RELEASE_NAME $version"
 
-  bosh2 -n create-release --final --version "$version" --name "$RELEASE_NAME"
-  git add releases/**/*-"$version".yml releases/**/index.yml
-  git add .final_builds/**/index.yml .final_builds/**/**/index.yml
-  git commit -m "Final release for $RELEASE_NAME at $version"
-popd
+		bosh2 -n create-release --final --version "$version" --name "$RELEASE_NAME"
+		git add releases/**/*-"$version".yml releases/**/index.yml
+		git add .final_builds/**/index.yml .final_builds/**/**/index.yml
+		git commit -m "Final release for $RELEASE_NAME at $version"
+	popd
 
+else
+	echo "Skipping since not version $VERSION_ALLOWED"
+
+fi
 rsync -a release/ release-artifacts
