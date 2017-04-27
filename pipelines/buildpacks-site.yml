@@ -1,0 +1,47 @@
+resource_types:
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+resources:
+  - name: buildpacks-site
+    type: git
+    source:
+      uri: https://github.com/dgodd/buildpacks-site
+      branch: master
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
+jobs:
+  - name: build-and-publish
+    serial: true
+    public: true
+    plan:
+      - get: buildpacks-site
+        trigger: true
+      - task: build-and-publish
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: node
+          inputs:
+            - name: buildpacks-site
+          params:
+            AWS_ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
+            AWS_BUCKET: test-buildpacks
+          run:
+            path: bash
+            args:
+              - "-lc"
+              - "cd buildpacks-site && yarn && yarn run build"
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
