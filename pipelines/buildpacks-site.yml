@@ -30,14 +30,14 @@ jobs:
           inputs:
             - name: buildpacks-site
           params:
-            AWS_ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
-            AWS_SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
-            AWS_BUCKET: test-buildpacks
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_BUCKET: pivotal-buildpacks
           run:
             path: bash
             args:
               - "-lc"
-              - "cd buildpacks-site && yarn && yarn run build"
+              - "cd buildpacks-site && yarn install --no-progress && yarn run unit && yarn run build"
         on_failure:
           put: failure-alert
           params:
