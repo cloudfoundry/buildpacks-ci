@@ -23,7 +23,7 @@ class BuildpackReleaseStoryCreator
     story_description += "Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).\n"
 
     blockers = stories_since_last_release.map do |story|
-      { description: story.id.to_s, resolved: false}
+      { description: "#" + story.id.to_s, resolved: false}
     end
 
     story = buildpack_project.create_story(
