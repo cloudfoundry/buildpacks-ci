@@ -78,7 +78,7 @@ describe BuildpackReleaseStoryCreator do
              estimate: 1,
              labels: %w(elixir release),
              requested_by_id: 555555,
-             blockers: [{description: '111111111', resolved: false}, {description: '222222222', resolved: false}]
+             blockers: [{description: '#111111111', resolved: false}, {description: '#222222222', resolved: false}]
             ).and_return(new_story)
 
     subject.run!
