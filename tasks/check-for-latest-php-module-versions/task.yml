@@ -41,6 +41,7 @@ inputs:
   #   skipped: since does not yet have releases
   - name: suhosin5
   - name: buildpacks-ci
+  - name: robots-repo
 run:
   path: bash
   args:

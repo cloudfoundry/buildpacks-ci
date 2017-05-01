@@ -284,6 +284,13 @@ resources:
         access_token: {{buildpacks-github-token}}
         organization: 'stefanesser'
         repo: 'suhosin'
+  - name: robots-repo
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ binary-builds/php*-extensions.yml ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
 #  skipped: since does not yet have releases
 #  - name: suhosin7
 #    type: new_version_resource
@@ -338,6 +345,7 @@ jobs:
         #   skipped: since does not yet have releases
         - get: suhosin5
         - get: buildpacks-ci
+        - get: robots-repo
       - task: check-for-latest-php-module-versions
         file: buildpacks-ci/tasks/check-for-latest-php-module-versions/task.yml
         params:
