@@ -13,6 +13,8 @@ export GOBIN=/usr/local/bin
 
 if [ "$LANGUAGE" = "go" ]; then
   update_dir="src/golang"
+elif ["$LANGUAGE" = "staticfile"] then
+  update_dir="src/staticfile"
 else
   update_dir="src/compile"
 fi
