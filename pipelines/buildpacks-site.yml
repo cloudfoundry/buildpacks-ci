@@ -7,7 +7,7 @@ resources:
   - name: buildpacks-site
     type: git
     source:
-      uri: https://github.com/dgodd/buildpacks-site
+      uri: https://github.com/cloudfoundry-incubator/buildpacks-site
       branch: master
   - name: failure-alert
     type: slack-notification
