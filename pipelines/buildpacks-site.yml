@@ -4,6 +4,11 @@ resource_types:
     source:
       repository: cfcommunity/slack-notification-resource
 resources:
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: buildpublish # {{buildpacks-ci-git-uri-public-branch}}
   - name: buildpacks-site
     type: git
     source:
@@ -18,26 +23,15 @@ jobs:
     serial: true
     public: true
     plan:
+      - get: buildpacks-ci
       - get: buildpacks-site
         trigger: true
       - task: build-and-publish
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: node
-          inputs:
-            - name: buildpacks-site
-          params:
-            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            AWS_BUCKET: pivotal-buildpacks
-          run:
-            path: bash
-            args:
-              - "-lc"
-              - "cd buildpacks-site && yarn install --no-progress && yarn run unit && yarn run build"
+        file: buildpacks-ci/tasks/build-and-publish/task.yml
+        params:
+          AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+          AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+          AWS_BUCKET: pivotal-buildpacks
         on_failure:
           put: failure-alert
           params:
