@@ -50,7 +50,7 @@ class ExtractDotnetFramework
 
     Dir.chdir(@dotnet_sdk_dir) do
       @dotnet_framework_versions.each do |version|
-        system("tar zcf #{dotnet_framework_tar(version)} shared host *.txt") or raise "Tarring the dotnet framework failed"
+        system("tar zcf #{dotnet_framework_tar(version)} shared/Microsoft.NETCore.App/#{version} host *.txt") or raise "Tarring the dotnet framework failed"
       end
     end
   end
