@@ -3,18 +3,18 @@ name: bosh
 
 releases:
 - name: bosh
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=260.6
-  sha1: 1506526f39f7406d97ac6edc7601e1c29fce5df5
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=261.4
+  sha1: 4da9cedbcc8fbf11378ef439fb89de08300ad091
 - name: bosh-google-cpi
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-google-cpi-release?v=25.6.2
-  sha1: b4865397d867655fdcc112bc5a7f9a5025cdf311
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-google-cpi-release?v=25.7.1
+  sha1: 1412d974845b28afc0fadadceabd3ee12bd83b69
 
 resource_pools:
 - name: vms
   network: private
   stemcell:
-    url: https://s3.amazonaws.com/bosh-core-stemcells/google/bosh-stemcell-3312.18-google-kvm-ubuntu-trusty-go_agent.tgz
-    sha1: 0b04f5b56f2bf4df2470e36d0a3645ef317064f3
+    url: https://s3.amazonaws.com/bosh-core-stemcells/google/bosh-stemcell-3363.20-google-kvm-ubuntu-trusty-go_agent.tgz
+    sha1: 0b107fe9a9b29f0fb74d84d5a46d1ba04d3b7647
   cloud_properties:
     zone: us-east1-c
     machine_type: n1-standard-4
