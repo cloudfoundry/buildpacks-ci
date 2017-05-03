@@ -3,13 +3,13 @@ name: concourse
 director_uuid: REPLACE-IN-JUMPBOX-BEFORE-DEPLOY
 releases:
 - name: concourse
-  version: 2.7.3
-  url: https://bosh.io/d/github.com/concourse/concourse?v=2.7.3
-  sha1: ca38944353c893660a428cc6678941734b51b036
+  version: 2.7.4
+  url: https://bosh.io/d/github.com/concourse/concourse?v=2.7.4
+  sha1: 59f20ddea3ffd9bcab572abb3e2e1137aa3d6e7a
 - name: garden-runc
-  version: 1.4.0
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.4.0
-  sha1: 1d6020e761806d7f355ceda06c889c582b47dc32
+  version: 1.6.0
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.6.0
+  sha1: 58fbc64aff303e6d76899441241dd5dacef50cb7
 
 tls_key: &tls_key |
   <%= concourse_buildpacks_gcp_key.split("\n").join("\n  ") %>
