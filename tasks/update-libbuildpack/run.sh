@@ -28,7 +28,9 @@ pushd buildpack
 		go get github.com/onsi/gomega
 
 		gvt update github.com/cloudfoundry/libbuildpack
-		go generate
+		go generate || true
+		[ -d supply ] && (cd supply && (go generate || true))
+		[ -d finalize ] && (cd finalize && (go generate || true))
 		ginkgo -r
 	popd
 
