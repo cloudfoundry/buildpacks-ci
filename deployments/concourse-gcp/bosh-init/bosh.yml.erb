@@ -134,12 +134,6 @@ jobs:
 cloud_provider:
   template: {name: google_cpi, release: bosh-google-cpi}
 
-  ssh_tunnel:
-    host: 10.0.0.6
-    port: 22
-    user: bosh
-    private_key: /home/pivotal/.ssh/bosh
-
   mbus: "https://mbus:<%= gcp_bosh_mbus_password %>@10.0.0.6:6868"
 
   properties:
