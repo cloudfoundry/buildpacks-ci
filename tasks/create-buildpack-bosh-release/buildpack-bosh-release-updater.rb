@@ -11,7 +11,6 @@ class BuildpackBOSHReleaseUpdater
     @access_key_id = access_key_id
     @secret_access_key = secret_access_key
     @blob_name = blob_name
-    @buildpack_name = blob_name.gsub('-buildpack', '')
     @blob_glob = blob_glob
     @release_name = release_name
   end
@@ -40,7 +39,7 @@ class BuildpackBOSHReleaseUpdater
   def delete_old_blob
     blobs = YAML.load_file('config/blobs.yml') || {}
 
-    old_buildpack_key = find_buildpack_key blobs, @buildpack_name
+    old_buildpack_key = find_buildpack_key blobs, @release_name.gsub('-buildpack', '')
 
     blobs.delete(old_buildpack_key)
 
@@ -54,7 +53,7 @@ class BuildpackBOSHReleaseUpdater
     system "bosh -n upload blobs" or exit 1
 
     GitClient.add_file('config/blobs.yml')
-    GitClient.safe_commit("Updating blobs for #{@release_name}")
+    GitClient.safe_commit("Updating blobs for #{@release_name} at #{@version}")
   end
 
   def create_release
@@ -64,6 +63,6 @@ class BuildpackBOSHReleaseUpdater
     GitClient.add_file("releases/**/index.yml")
     GitClient.add_file(".final_builds/**/index.yml")
     GitClient.add_file(".final_builds/**/**/index.yml")
-    GitClient.safe_commit("Final release for #{@blob_name} at #{@version}")
+    GitClient.safe_commit("Final release for #{@release_name} at #{@version}")
   end
 end
