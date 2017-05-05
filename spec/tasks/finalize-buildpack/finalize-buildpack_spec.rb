@@ -8,6 +8,7 @@ describe BuildpackFinalizer do
   let(:artifact_dir)         { Dir.mktmpdir }
   let(:buildpack_repo_dir)   { Dir.mktmpdir }
   let(:cached_buildpack_dir) { Dir.mktmpdir }
+  let(:uncached_buildpack_dir) { Dir.mktmpdir }
   let(:version)              { '1.2.2' }
   let(:changelog_path)       { File.join(buildpack_repo_dir, 'CHANGELOG') }
   let(:new_version_changes) do
@@ -41,7 +42,11 @@ describe BuildpackFinalizer do
 
   before do
     File.write(File.join(cached_buildpack_dir, 'staticfile_buildpack-cached-v1.2.2+1231232.zip'), 'xxx')
-    @sha256 = Digest::SHA256.file(File.join(cached_buildpack_dir, 'staticfile_buildpack-cached-v1.2.2+1231232.zip')).hexdigest
+    @cached_sha256 = Digest::SHA256.file(File.join(cached_buildpack_dir, 'staticfile_buildpack-cached-v1.2.2+1231232.zip')).hexdigest
+
+    File.write(File.join(uncached_buildpack_dir, 'staticfile_buildpack-v1.2.2+99887766.zip'), 'yyy')
+    @uncached_sha256 = Digest::SHA256.file(File.join(uncached_buildpack_dir, 'staticfile_buildpack-v1.2.2+99887766.zip')).hexdigest
+
     File.write(changelog_path, change_log)
     allow(subject).to receive(:`)
     allow(subject).to receive(:system)
@@ -51,9 +56,10 @@ describe BuildpackFinalizer do
     FileUtils.rm_rf(artifact_dir)
     FileUtils.rm_rf(buildpack_repo_dir)
     FileUtils.rm_rf(cached_buildpack_dir)
+    FileUtils.rm_rf(uncached_buildpack_dir)
   end
 
-  subject { described_class.new(artifact_dir, version, buildpack_repo_dir, cached_buildpack_dir) }
+  subject { described_class.new(artifact_dir, version, buildpack_repo_dir, cached_buildpack_dir, uncached_buildpack_dir) }
 
   describe '#write_changelog' do
     it 'extracts only the latest version release notes from CHANGELOG into RECENT_CHANGES' do
@@ -155,13 +161,6 @@ describe BuildpackFinalizer do
       allow(subject).to receive(:`).with('BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --defaults').and_return(default_versions)
     end
 
-    it 'emits shasum in RECENT_CHANGES' do
-      subject.run
-      output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
-      changelog_sha = output.split("\n").last
-
-      expect(changelog_sha).to eq "  * SHA256: #{@sha256}"
-    end
 
     it 'emits a valid markdown table of dependencies' do
       subject.run
@@ -190,15 +189,40 @@ describe BuildpackFinalizer do
       expect(output).to eq("v#{version}")
     end
 
-    it 'emits a SHA256.txt file' do
+    it 'emits shasum in RECENT_CHANGES for the cached buildpack' do
+      subject.run
+      output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
+
+      expect(output).to include "  * Cached buildpack SHA256: #{@cached_sha256}"
+    end
+
+    it 'emits shasum in RECENT_CHANGES for the uncached buildpack' do
+      subject.run
+      output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
+
+      expect(output).to include "  * Uncached buildpack SHA256: #{@uncached_sha256}"
+    end
+
+    it 'emits a SHA256.txt file for the cached buildpack' do
       subject.run
       output = File.read(File.join(artifact_dir, 'staticfile_buildpack-cached-v1.2.2.zip.SHA256SUM.txt'))
-      expect(output).to eq "#{@sha256}  staticfile_buildpack-cached-v1.2.2.zip"
+      expect(output).to eq "#{@cached_sha256}  staticfile_buildpack-cached-v1.2.2.zip"
     end
 
     it 'moves the cached buildpack to the artifacts dir' do
       subject.run
       expect(File.exist? File.join(artifact_dir, 'staticfile_buildpack-cached-v1.2.2.zip')).to be_truthy
+    end
+
+    it 'emits a SHA256.txt file for the uncached buildpack' do
+      subject.run
+      output = File.read(File.join(artifact_dir, 'staticfile-buildpack-v1.2.2.zip.SHA256SUM.txt'))
+      expect(output).to eq "#{@uncached_sha256}  staticfile-buildpack-v1.2.2.zip"
+    end
+
+    it 'moves the uncached buildpack to the artifacts dir, modifying the name to match the java buildpack' do
+      subject.run
+      expect(File.exist? File.join(artifact_dir, 'staticfile-buildpack-v1.2.2.zip')).to be_truthy
     end
   end
 end
