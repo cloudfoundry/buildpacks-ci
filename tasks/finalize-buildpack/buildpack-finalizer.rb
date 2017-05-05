@@ -14,16 +14,18 @@ class BuildpackFinalizer
 
   def run
     write_tag
-    write_changelog
-    write_dependencies
+    add_changelog
+    add_dependencies
     move_cached_buildpack
   end
+
+  private
 
   def write_tag
     File.write(File.join(@artifact_dir, 'tag'), "v#{@version}")
   end
 
-  def write_changelog
+  def add_changelog
     Dir.chdir(@buildpack_repo_dir) do
       changes       = File.read('CHANGELOG')
       recent_changes = changes.split(/^v[0-9\.]+.*?=+$/m)[1].strip
@@ -32,7 +34,7 @@ class BuildpackFinalizer
     end
   end
 
-  def write_dependencies
+  def add_dependencies
     Dir.chdir(@buildpack_repo_dir) do
       num_cores = `nproc`
       system("BUNDLE_GEMFILE=cf.Gemfile bundle install --jobs=#{num_cores}")
