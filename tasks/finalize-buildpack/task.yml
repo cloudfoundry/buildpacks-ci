@@ -8,6 +8,7 @@ inputs:
   - name: buildpacks-ci
   - name: buildpack
   - name: pivotal-buildpacks-cached
+  - name: pivotal-buildpacks
 outputs:
   - name: buildpack-artifacts
 run:

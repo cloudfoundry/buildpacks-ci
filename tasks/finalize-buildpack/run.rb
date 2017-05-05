@@ -7,5 +7,6 @@ version = File.read('buildpack/VERSION').strip
 
 buildpack_repo_dir = 'buildpack'
 cached_buildpack_dir = 'pivotal-buildpacks-cached'
+uncached_buildpack_dir = 'pivotal-buildpacks'
 
-BuildpackFinalizer.new(artifact_dir, version, buildpack_repo_dir, cached_buildpack_dir).run
+BuildpackFinalizer.new(artifact_dir, version, buildpack_repo_dir, cached_buildpack_dir, uncached_buildpack_dir).run

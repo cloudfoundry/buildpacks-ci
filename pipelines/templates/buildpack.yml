@@ -411,6 +411,13 @@ jobs: ##########################################################################
             - specs-lts-master
             <% end %>
             - specs-edge-master
+        - get: pivotal-buildpacks
+          resource: pivotal-buildpack
+          passed:
+            <% unless language == 'hwc' %>
+            - specs-lts-master
+            <% end %>
+            - specs-edge-master
         - get: buildpack
           passed:
             <% unless language == 'hwc' %>
@@ -435,6 +442,9 @@ jobs: ##########################################################################
           resource: pivotal-buildpack-cached
           passed: [ ship-it ]
           trigger: true
+        - get: pivotal-buildpacks
+          resource: pivotal-buildpack
+          passed: [ ship-it ]
         - get: buildpack
           resource: buildpack-master
           passed: [ ship-it ]
@@ -458,6 +468,8 @@ jobs: ##########################################################################
           globs:
             - buildpack-artifacts/*_buildpack-cached-v*.zip
             - buildpack-artifacts/*_buildpack-cached-v*.zip.SHA256SUM.txt
+            - buildpack-artifacts/*-buildpack-v*.zip
+            - buildpack-artifacts/*-buildpack-v*.zip.SHA256SUM.txt
 <% unless language == "multi" || language == "hwc" %>
   - name: write-pivnet-metadata
     serial: true
