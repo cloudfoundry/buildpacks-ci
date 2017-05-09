@@ -193,14 +193,14 @@ describe BuildpackFinalizer do
       subject.run
       output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
 
-      expect(output).to include "  * Cached buildpack SHA256: #{@cached_sha256}"
+      expect(output).to include "  * Cached buildpack SHA256: #{@cached_sha256}\n"
     end
 
     it 'emits shasum in RECENT_CHANGES for the uncached buildpack' do
       subject.run
       output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
 
-      expect(output).to include "  * Uncached buildpack SHA256: #{@uncached_sha256}"
+      expect(output).to include "  * Uncached buildpack SHA256: #{@uncached_sha256}\n"
     end
 
     it 'emits a SHA256.txt file for the cached buildpack' do
