@@ -482,6 +482,9 @@ jobs: ##########################################################################
           resource: pivotal-buildpack-cached
           passed: [ ship-it ]
           trigger: true
+        - get: pivotal-buildpacks
+          resource: pivotal-buildpack
+          passed: [ ship-it ]
         - get: buildpack
           resource: buildpack-master
           passed: [ ship-it ]
