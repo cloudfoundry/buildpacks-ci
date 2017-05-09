@@ -63,7 +63,7 @@ class BuildpackFinalizer
           shasum = Digest::SHA256.file(new_path).hexdigest
 
           # append SHA to RELEASE NOTES
-          File.write(@recent_changes_file, "  * Cached buildpack SHA256: #{shasum}", mode: 'a')
+          File.write(@recent_changes_file, "  * Cached buildpack SHA256: #{shasum}\n", mode: 'a')
           File.write("#{new_path}.SHA256SUM.txt", "#{shasum}  #{new_filename}")
         end
       end
@@ -83,7 +83,7 @@ class BuildpackFinalizer
           shasum = Digest::SHA256.file(new_path).hexdigest
 
           # append SHA to RELEASE NOTES
-          File.write(@recent_changes_file, "  * Uncached buildpack SHA256: #{shasum}", mode: 'a')
+          File.write(@recent_changes_file, "  * Uncached buildpack SHA256: #{shasum}\n", mode: 'a')
           File.write("#{new_path}.SHA256SUM.txt", "#{shasum}  #{new_filename}")
         end
       end
