@@ -31,6 +31,13 @@ resources: #####################################################################
       paths: [ binary-builds/* ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
+  # used to make concourse display layout match logical layout
+  - name: dummy-resource
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+
 <% dep_build_names = %w(bower go bundler composer dotnet glide godep httpd hwc jruby php php7 python node nginx ruby yarn) %>
 <% dep_build_names.each do |dep| %>
   - name: <%= dep %>-builds
@@ -52,6 +59,14 @@ resources: #####################################################################
       paths: [ binary-built-output/<%= dep %>-built.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 <% end %>
+
+  - name: dotnet-framework-built-output-trigger
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ binary-built-output/dotnet-framework-built.yml ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
 
 <% %w(bower composer dotnet glide godep hwc nginx node yarn).each do |auto_dep| %>
   - name: <%= auto_dep %>-builds-in
@@ -320,14 +335,18 @@ jobs: ##########################################################################
           - get: buildpack-input
             resource: <%= buildpack %>-buildpack
           - get: built-out
-            resource: <%= dependency %>-built-output
           <% if dependency != 'dotnet-framework' %>
+            resource: <%= dependency %>-built-output
             passed: [ build-<%= dependency %> ]
           <% else %>
-            passed: [ extract-dotnet-framework ]
+            resource: <%= dependency %>-built-output-trigger
           <% end %>
             version: every
             trigger: true
+          <% if dependency == 'dotnet-framework' %>
+          - get: dummy-resource
+            passed: [ extract-dotnet-framework ]
+          <% end %>
         - task: update-dependency-in-manifests
           file: buildpacks-ci/tasks/update-dependency-in-buildpack/task.yml
           params:
@@ -351,6 +370,7 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: dummy-resource
         - get: built-yaml
           passed: [ build-dotnet ]
           resource: dotnet-built-output
