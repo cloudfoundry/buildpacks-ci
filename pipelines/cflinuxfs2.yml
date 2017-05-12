@@ -666,13 +666,15 @@ jobs: ##########################################################################
             resource: docker-cflinuxfs2
             params:
               import_file: docker-s3/cflinuxfs2.tar.gz
+            get_params:
               skip_download: true
           - put: docker tagged version
             resource: docker-cflinuxfs2-tagged
             params:
-              skip_download: true
               import_file: docker-s3/cflinuxfs2.tar.gz
               tag: version/number
+            get_params:
+              skip_download: true
         on_failure:
           put: failure-alert
           params:
