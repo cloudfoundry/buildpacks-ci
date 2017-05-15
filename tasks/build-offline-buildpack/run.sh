@@ -5,9 +5,9 @@ set -o nounset
 set -o pipefail
 
 tag=$(cat blob/tag)
-git clone https://github.com/cloudfoundry/$LANGUAGE-buildpack.git source
+git clone "https://github.com/cloudfoundry/$LANGUAGE-buildpack.git" source
 cd source
-git checkout $tag
+git checkout "$tag"
 git submodule update --init --recursive
 
 BUNDLE_GEMFILE=cf.Gemfile bundle

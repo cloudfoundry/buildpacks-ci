@@ -534,6 +534,8 @@ jobs:
         <% if language != 'java' %>
         - task: build-offline-buildpack
           file: buildpacks-ci/tasks/build-offline-buildpack/task.yml
+          params:
+            LANGUAGE: <%= language %>
         <% end %>
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
