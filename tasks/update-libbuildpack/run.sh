@@ -29,6 +29,7 @@ pushd buildpack
 
 		gvt update github.com/cloudfoundry/libbuildpack
 		go generate || true
+		[ -d hooks ] && (cd hooks && (go generate || true))
 		[ -d supply ] && (cd supply && (go generate || true))
 		[ -d finalize ] && (cd finalize && (go generate || true))
 		ginkgo -r
