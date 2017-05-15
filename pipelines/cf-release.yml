@@ -487,6 +487,10 @@ jobs:
           params:
             globs:
               - java-buildpack-v*.zip
+          <% else %>
+          params:
+            globs:
+              - <%= language%>_buildpack-cached-v*.zip
           <% end %>
           passed:
             - update-<%= language %>-buildpack-bosh-release
