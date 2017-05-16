@@ -19,20 +19,17 @@ class BuildpackReleaseStoryCreator
     new_release_version = @previous_buildpack_version.succ
     story_name = "**Release:** #{buildpack_name}-buildpack #{new_release_version}"
 
-    story_description = "See blockers for relevant stories.\n\n"
-    story_description += "Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).\n"
-
-    blockers = stories_since_last_release.map do |story|
-      { description: "#" + story.id.to_s, resolved: false}
+    story_description = stories_since_last_release.inject("Stories:\n\n") do |story_text, story|
+      story_text += "##{story.id} - #{story.name}\n"
     end
+    story_description += "\nRefer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).\n"
 
     story = buildpack_project.create_story(
       name: story_name,
       description: story_description,
       estimate: 1,
       labels: [buildpack_name, 'release'],
-      requested_by_id: tracker_requester_id,
-      blockers: blockers
+      requested_by_id: tracker_requester_id
     )
 
     story
