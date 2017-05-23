@@ -15,7 +15,7 @@ bosh2 -n -d cf delete-deployment
 echo -e "\n\n======= Destroyed ======="
 
 echo -e "\n\n======= Creating new cf deployment ======="
-echo "uaa_scim_users_admin_password: $CI_CF_SHARED_PASSWORD" > /tmp/deployment-vars.yml
+echo "cf_admin_password: $CI_CF_SHARED_PASSWORD" > /tmp/deployment-vars.yml
 
 bosh2 -n -d cf deploy cf-deployment/cf-deployment.yml \
 --vars-store /tmp/deployment-vars.yml \
