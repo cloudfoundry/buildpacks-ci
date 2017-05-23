@@ -443,7 +443,7 @@ jobs:
             BLOB_GLOB: blob/java-buildpack-v*.zip
             BLOB_NAME: java-buildpack
             <% else %>
-            BLOB_GLOB: blob/<%= language %>*.zip
+            BLOB_GLOB: blob/<%= language %>_buildpack-cached*.zip
             BLOB_NAME: <%= language %>-buildpack
             <% end %>
             RELEASE_NAME: <%= language %>-buildpack
@@ -487,6 +487,10 @@ jobs:
           params:
             globs:
               - java-buildpack-v*.zip
+          <% else %>
+          params:
+            globs:
+              - <%= language%>_buildpack-cached-v*.zip
           <% end %>
           passed:
             - update-<%= language %>-buildpack-bosh-release
@@ -534,6 +538,8 @@ jobs:
         <% if language != 'java' %>
         - task: build-offline-buildpack
           file: buildpacks-ci/tasks/build-offline-buildpack/task.yml
+          params:
+            LANGUAGE: <%= language %>
         <% end %>
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
@@ -551,7 +557,7 @@ jobs:
             BLOB_GLOB: blob/<%= language %>-buildpack-offline*.zip
             VERSION_ALLOWED: '3'
             <% else %>
-            BLOB_GLOB: blob/<%= language %>_buildpack*.zip
+            BLOB_GLOB: blob/<%= language %>_buildpack-cached*.zip
             <% end %>
             BLOB_NAME: <%= language %>-buildpack
             RELEASE_NAME: <%= language %>-offline-buildpack

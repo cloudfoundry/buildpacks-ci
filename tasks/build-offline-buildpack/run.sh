@@ -4,13 +4,16 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-cd blob
-mkdir source
-tar zxf source.tar.gz -C source --strip-components=1
+tag=$(cat blob/tag)
+git clone "https://github.com/cloudfoundry/$LANGUAGE-buildpack.git" source
 
-cd source
-BUNDLE_GEMFILE=cf.Gemfile bundle
-BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --cached
+pushd source
+  git checkout "$tag"
+  git submodule update --init --recursive
+
+  BUNDLE_GEMFILE=cf.Gemfile bundle
+  BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --cached
+popd
 
 # shellcheck disable=SC2035
-mv *_buildpack-cached*.zip ../../buildpack-zip/
+mv source/*_buildpack-cached*.zip buildpack-zip/

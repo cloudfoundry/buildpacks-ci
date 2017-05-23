@@ -71,14 +71,16 @@ describe BuildpackReleaseStoryCreator do
     expect(buildpack_project).to receive(:create_story).
         with(name: '**Release:** elixir-buildpack 2.10.4',
              description: <<~DESCRIPTION,
-                          See blockers for relevant stories.
+                          Stories:
+
+                          #111111111 - Elixir should be faster
+                          #222222222 - Buildpack should tweet on stage
 
                           Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
                           DESCRIPTION
              estimate: 1,
              labels: %w(elixir release),
-             requested_by_id: 555555,
-             blockers: [{description: '#111111111', resolved: false}, {description: '#222222222', resolved: false}]
+             requested_by_id: 555555
             ).and_return(new_story)
 
     subject.run!
