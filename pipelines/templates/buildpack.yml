@@ -104,6 +104,10 @@ resources: #####################################################################
     source:
       uri: https://github.com/cloudfoundry/compile-extensions.git
 <% end %>
+  - name: buildpackapplifecycle
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/buildpackapplifecycle.git
 
 
   - name: buildpack-checksums
@@ -650,6 +654,26 @@ jobs: ##########################################################################
         file: buildpacks-ci/tasks/update-compile-extensions/task.yml
         privileged: true
         params: { RUBYGEM_MIRROR: {{rubygem-mirror}}  }
+      - put: buildpack-develop
+        params:
+          repository: buildpack-artifacts
+          rebase: true
+<% end %>
+<% if language == 'multi' %>
+  - name: update-buildpackapplifecycle
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpackapplifecycle
+          trigger: true
+        - get: buildpack
+          resource: buildpack-develop
+      - task: update-buildpackapplifecycle
+        file: buildpacks-ci/tasks/update-buildpackapplifecycle/task.yml
+        params:
+          LANGUAGE: <%= language %>
       - put: buildpack-develop
         params:
           repository: buildpack-artifacts
