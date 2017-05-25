@@ -86,7 +86,7 @@ RUN cd /usr/local && bundle install
 
 #install fly-cli
 RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly \
-  && [ e258fc3a94b5578021dcc11d207e846adaa2f2ba9ceb60c661bde8f4bca00d74 = $(shasum -a 256 /usr/local/bin/fly | cut -d' ' -f1) ] \
+  && [ 0c439d8363e5d81e61f02f3a4cd0d8051ba276c2ed81a27e985416fc230e296d = $(shasum -a 256 /usr/local/bin/fly | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/fly
 
 # git-hooks and git-secrets
@@ -103,8 +103,8 @@ ENV BASH_ENV /etc/profile.d/filter.sh
 
 # Install go 1.8.1
 RUN cd /usr/local \
-  && curl -L https://storage.googleapis.com/golang/go1.8.1.linux-amd64.tar.gz -o go.tar.gz \
-  && [ a579ab19d5237e263254f1eac5352efcf1d70b9dacadb6d6bb12b0911ede8994 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
+  && curl -L https://buildpacks.cloudfoundry.org/dependencies/go/go1.8.3.linux-amd64-32ec5ac6.tar.gz -o go.tar.gz \
+  && [ f95e02c7c2768933d5a313640b446aeaf51d0611f358283d194faf95644656f1 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && tar xf go.tar.gz \
   && mv go/bin/go /usr/local/bin/go \
   && rm go.tar.gz
