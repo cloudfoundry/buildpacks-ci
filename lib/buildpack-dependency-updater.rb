@@ -4,6 +4,7 @@ require_relative 'git-client'
 
 class BuildpackDependencyUpdater; end
 
+require_relative 'buildpack-dependency-updater/bundler.rb'
 require_relative 'buildpack-dependency-updater/godep.rb'
 require_relative 'buildpack-dependency-updater/glide.rb'
 require_relative 'buildpack-dependency-updater/bower.rb'

@@ -71,6 +71,9 @@ class DependencyBuildEnqueuer
   def self.build_verifications_for(dependency, version)
     verifications = []
     case dependency
+    when 'bundler'
+      download_url = "https://rubygems.org/downloads/bundler-#{version}.gem"
+      verifications << shasum_256_verification(download_url)
     when 'bower'
       download_url = "https://registry.npmjs.org/bower/-/bower-#{version}.tgz"
       verifications << shasum_256_verification(download_url)

@@ -233,6 +233,8 @@ class NewReleasesDetector
       end
 
       versions_if_found.compact.uniq.sort
+    when :bundler
+      tags.map { |tag| tag.gsub(/v/,"")}
     when :node
       tags.map { |tag| tag.gsub(/v/,"")}
     when :nginx
