@@ -31,11 +31,6 @@ RSpec.configure do |config|
   end
 
   def run(cmd, sleep_time = 5)
-    # 'echo 2' is to work around problem: https://concourseci.slack.com/archives/general/p1469626158002396
-    output = `echo '2' | fly --target buildpacks i -b #{@id} -s one-off -- bash -c '#{cmd} && sleep #{sleep_time}' | tee /tmp/fly.log`
-    # regex is to strip out the choose container output that appears in every
-    # intercept (related to above problem)
-    /.*choose a container: 2\n(.*)/m.match(output)
-    $1
+    `fly --target buildpacks i -b #{@id} -s one-off -- bash -c '#{cmd} && sleep #{sleep_time}' | tee /tmp/fly.log`
   end
 end

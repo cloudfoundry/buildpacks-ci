@@ -37,9 +37,7 @@ describe BuildpackDependencyUpdater do
           ---
           language: nodejs
 
-          default_versions:
-            - name: yarn
-              version: 0.1.2
+          default_versions: []
 
           url_to_dependency_map:
             - match: yarn-v(\d+\.\d+\.\d+)\.tar\.gz
@@ -76,16 +74,6 @@ describe BuildpackDependencyUpdater do
 
         it 'drops the previous version from dependencies' do
           not_found_in_manifest = manifest['dependencies'].find { |dep| dep['name'] == dependency && dep['version'] == '0.1.2' }
-          expect(not_found_in_manifest).to be_nil
-        end
-
-        it 'adds the latest version to default_versions' do
-          default_version_in_manifest = manifest['default_versions'].find { |dep| dep['name'] == dependency && dep['version'] == expected_version }
-          expect(default_version_in_manifest['version']).to eq('99.00.11')
-        end
-
-        it 'drops the previous version from default_versions' do
-          not_found_in_manifest = manifest['default_versions'].find { |dep| dep['name'] == dependency && dep['version'] == '0.1.2' }
           expect(not_found_in_manifest).to be_nil
         end
       end
