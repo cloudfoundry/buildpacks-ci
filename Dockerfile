@@ -101,13 +101,15 @@ RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make i
 # Ensure that Concourse filtering is on for non-interactive shells
 ENV BASH_ENV /etc/profile.d/filter.sh
 
-# Install go 1.8.1
+# Install go 1.8.3
 RUN cd /usr/local \
   && curl -L https://buildpacks.cloudfoundry.org/dependencies/go/go1.8.3.linux-amd64-32ec5ac6.tar.gz -o go.tar.gz \
   && [ f95e02c7c2768933d5a313640b446aeaf51d0611f358283d194faf95644656f1 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && tar xf go.tar.gz \
-  && mv go/bin/go /usr/local/bin/go \
   && rm go.tar.gz
+
+ENV GOROOT=/usr/local/go
+ENV PATH=/usr/local/go/bin:$PATH
 
 # Install poltergeist for running dotnet-core-buildpack specs
 RUN gem install phantomjs && ruby -e 'require "phantomjs"; Phantomjs.path'
