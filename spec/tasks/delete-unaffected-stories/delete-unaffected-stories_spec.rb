@@ -1,16 +1,21 @@
-# require 'fileutils'
 # require 'tmpdir'
 # require 'yaml'
 require 'json'
+require 'fileutils'
 require 'webmock/rspec'
 
 require_relative '../../../tasks/delete-unaffected-stories/delete-unaffected-stories'
 
 describe DeleteUnaffectedStories do
-  let(:stories_file) { Tempfile.new }
-  let(:stack_receipt) { Tempfile.new }
-  let(:output_file) { Tempfile.new }
+  let(:tempdir) {Dir.mktmpdir}
+  let(:stories_file) { open(File.join(tempdir, 'stories_file'), 'w') }
+  let(:stack_receipt) { open(File.join(tempdir, 'stack_receipt'), 'w') }
+  let(:output_file) { open(File.join(tempdir, 'output_file'), 'w') }
   subject { DeleteUnaffectedStories.new(stories_file.path, stack_receipt.path, output_file.path) }
+
+  after do
+    FileUtils.rm_f(tempdir)
+  end
 
   it "marks any stories unrelated to rootfs for deletion" do
     stories_file.write(JSON.dump({version: { ref: JSON.dump([{ref:"123", description: "blah\n**Trusty Packages:**\nbison 1.2\n\n"}, {ref: "456", description: "blah\n**Trusty Packages:**\napt 2.1\n\n"}]) }}))

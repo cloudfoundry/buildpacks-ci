@@ -1,13 +1,11 @@
 # encoding: utf-8
 require 'spec_helper.rb'
 require 'digest'
-require 'tmpdir'
 require_relative '../../../tasks/finalize-buildpack/buildpack-finalizer'
 
 describe BuildpackFinalizer do
   let(:artifact_dir)         { Dir.mktmpdir }
   let(:buildpack_repo_dir)   { Dir.mktmpdir }
-  let(:cached_buildpack_dir) { Dir.mktmpdir }
   let(:uncached_buildpack_dir) { Dir.mktmpdir }
   let(:version)              { '1.2.2' }
   let(:changelog_path)       { File.join(buildpack_repo_dir, 'CHANGELOG') }
@@ -41,9 +39,6 @@ describe BuildpackFinalizer do
   end
 
   before do
-    File.write(File.join(cached_buildpack_dir, 'staticfile_buildpack-cached-v1.2.2+1231232.zip'), 'xxx')
-    @cached_sha256 = Digest::SHA256.file(File.join(cached_buildpack_dir, 'staticfile_buildpack-cached-v1.2.2+1231232.zip')).hexdigest
-
     File.write(File.join(uncached_buildpack_dir, 'staticfile_buildpack-v1.2.2+99887766.zip'), 'yyy')
     @uncached_sha256 = Digest::SHA256.file(File.join(uncached_buildpack_dir, 'staticfile_buildpack-v1.2.2+99887766.zip')).hexdigest
 
@@ -55,11 +50,10 @@ describe BuildpackFinalizer do
   after do
     FileUtils.rm_rf(artifact_dir)
     FileUtils.rm_rf(buildpack_repo_dir)
-    FileUtils.rm_rf(cached_buildpack_dir)
     FileUtils.rm_rf(uncached_buildpack_dir)
   end
 
-  subject { described_class.new(artifact_dir, version, buildpack_repo_dir, cached_buildpack_dir, uncached_buildpack_dir) }
+  subject { described_class.new(artifact_dir, version, buildpack_repo_dir, uncached_buildpack_dir) }
 
   describe '#write_changelog' do
     it 'extracts only the latest version release notes from CHANGELOG into RECENT_CHANGES' do
@@ -189,13 +183,6 @@ describe BuildpackFinalizer do
       expect(output).to eq("v#{version}")
     end
 
-    it 'emits shasum in RECENT_CHANGES for the cached buildpack' do
-      subject.run
-      output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
-
-      expect(output).to include "  * Cached buildpack SHA256: #{@cached_sha256}\n"
-    end
-
     it 'emits shasum in RECENT_CHANGES for the uncached buildpack' do
       subject.run
       output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
@@ -203,15 +190,9 @@ describe BuildpackFinalizer do
       expect(output).to include "  * Uncached buildpack SHA256: #{@uncached_sha256}\n"
     end
 
-    it 'emits a SHA256.txt file for the cached buildpack' do
+    it 'does not move the cached buildpack to the artifacts dir' do
       subject.run
-      output = File.read(File.join(artifact_dir, 'staticfile_buildpack-cached-v1.2.2.zip.SHA256SUM.txt'))
-      expect(output).to eq "#{@cached_sha256}  staticfile_buildpack-cached-v1.2.2.zip"
-    end
-
-    it 'moves the cached buildpack to the artifacts dir' do
-      subject.run
-      expect(File.exist? File.join(artifact_dir, 'staticfile_buildpack-cached-v1.2.2.zip')).to be_truthy
+      expect(File.exist? File.join(artifact_dir, 'staticfile_buildpack-cached-v1.2.2.zip')).to be_falsey
     end
 
     it 'emits a SHA256.txt file for the uncached buildpack' do
