@@ -470,8 +470,6 @@ jobs: ##########################################################################
           tag: buildpack-artifacts/tag
           body: buildpack-artifacts/RECENT_CHANGES
           globs:
-            - buildpack-artifacts/*_buildpack-cached-v*.zip
-            - buildpack-artifacts/*_buildpack-cached-v*.zip.SHA256SUM.txt
             - buildpack-artifacts/*-buildpack-v*.zip
             - buildpack-artifacts/*-buildpack-v*.zip.SHA256SUM.txt
 <% unless language == "multi" || language == "hwc" %>

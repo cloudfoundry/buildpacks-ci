@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'tmpdir'
+require 'tempfile'
 require 'json'
 
 RSpec.configure do |config|

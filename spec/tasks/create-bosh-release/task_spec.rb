@@ -2,7 +2,6 @@
 require 'spec_helper.rb'
 require 'digest'
 require 'yaml'
-require 'tmpdir'
 
 describe 'create bosh stacks release task' do
   context 'when uploading blobs' do

@@ -4,11 +4,10 @@ require 'fileutils'
 
 class BuildpackFinalizer
 
-  def initialize(artifact_dir, version, buildpack_repo_dir, cached_buildpack_dir, uncached_buildpack_dir)
+  def initialize(artifact_dir, version, buildpack_repo_dir, uncached_buildpack_dir)
     @artifact_dir = artifact_dir
     @version = version
     @buildpack_repo_dir = buildpack_repo_dir
-    @cached_buildpack_dir = cached_buildpack_dir
     @uncached_buildpack_dir = uncached_buildpack_dir
     @recent_changes_file = File.join(artifact_dir, 'RECENT_CHANGES')
   end
@@ -17,7 +16,6 @@ class BuildpackFinalizer
     write_tag
     add_changelog
     add_dependencies
-    move_cached_buildpack
     move_uncached_buildpack
   end
 
@@ -47,26 +45,6 @@ class BuildpackFinalizer
         "Default binary versions:\n",
         `BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --defaults`
       ].join("\n"), mode: 'a')
-    end
-  end
-
-  def move_cached_buildpack
-    Dir.chdir(@cached_buildpack_dir) do
-      Dir.glob('*.zip').map do |filename|
-        filename.match(/(.*)_buildpack-cached-v#{@version}\+.*.zip/) do |match|
-          _, language  = match.to_a
-          new_filename = "#{language}_buildpack-cached-v#{@version}.zip"
-          new_path     = File.join(@artifact_dir, new_filename)
-
-          FileUtils.mv(filename, new_path)
-
-          shasum = Digest::SHA256.file(new_path).hexdigest
-
-          # append SHA to RELEASE NOTES
-          File.write(@recent_changes_file, "  * Cached buildpack SHA256: #{shasum}\n", mode: 'a')
-          File.write("#{new_path}.SHA256SUM.txt", "#{shasum}  #{new_filename}")
-        end
-      end
     end
   end
 
