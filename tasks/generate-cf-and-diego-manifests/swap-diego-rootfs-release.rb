@@ -8,7 +8,7 @@ Dir.chdir(diego_release_dir) do
   diego_manifest_contents = File.read(diego_manifest_file)
 
     to_swap = <<-ROOTFS
-    release: cflinuxfs2-rootfs
+    release: cflinuxfs2
     ROOTFS
 
     swapped = <<-ROOTFS
@@ -18,7 +18,7 @@ Dir.chdir(diego_release_dir) do
     diego_manifest_contents.gsub!(to_swap, swapped)
 
     to_swap = <<-RELEASE
-- name: cflinuxfs2-rootfs
+- name: cflinuxfs2
   version: latest
     RELEASE
 
