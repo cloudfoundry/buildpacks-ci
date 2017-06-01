@@ -81,11 +81,11 @@ resources:
     tarball: true
     source:
       repository: cloudfoundry/diego-release
-  - name: cflinuxfs2-rootfs-bosh-release
+  - name: cflinuxfs2-bosh-release
     type: bosh-io-release
     tarball: true
     source:
-      repository: cloudfoundry/cflinuxfs2-rootfs-release
+      repository: cloudfoundry/cflinuxfs2-release
   - name: garden-runc-bosh-release
     type: bosh-io-release
     tarball: true
@@ -229,7 +229,7 @@ jobs:
             attempts: 3
           - get: diego-bosh-release
             attempts: 3
-          - get: cflinuxfs2-rootfs-bosh-release
+          - get: cflinuxfs2-bosh-release
             attempts: 3
           - get: lite-stemcell
             attempts: 3
@@ -256,7 +256,7 @@ jobs:
             BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-            ROOTFS_RELEASE: cflinuxfs2-rootfs
+            ROOTFS_RELEASE: cflinuxfs2
             IAAS: gcp
           privileged: true
         - task: create-cf-release
@@ -273,7 +273,7 @@ jobs:
             stemcells: ['lite-stemcell/stemcell.tgz']
             releases:
               - diego-bosh-release/release.tgz
-              - cflinuxfs2-rootfs-bosh-release/release.tgz
+              - cflinuxfs2-bosh-release/release.tgz
               - garden-runc-bosh-release/release.tgz
         on_failure:
           put: failure-alert

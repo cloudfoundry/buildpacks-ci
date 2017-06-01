@@ -2,14 +2,14 @@
   - name: nsync
     release: cf
   - name: cflinuxfs2-rootfs-setup
-    release: cflinuxfs2-rootfs
+    release: cflinuxfs2
   - name: route_emitter
     release: diego
 
 releases:
 - name: diego
   version: latest
-- name: cflinuxfs2-rootfs
+- name: cflinuxfs2
   version: latest
 - name: garden-linux
   version: latest
