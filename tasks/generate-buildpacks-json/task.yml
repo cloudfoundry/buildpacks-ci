@@ -1,0 +1,15 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: buildpacks-site
+outputs:
+  - name: buildpacks-json
+params:
+  ACCESS_TOKEN:
+run:
+  path: buildpacks-ci/tasks/generate-buildpacks-json/run.sh
