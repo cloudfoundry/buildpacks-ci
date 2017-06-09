@@ -2,6 +2,7 @@
 require 'spec_helper.rb'
 require 'digest'
 require 'yaml'
+require 'open3'
 
 describe 'make-rootfs' do
   old_path = ENV.fetch('PATH', nil)
@@ -24,7 +25,8 @@ describe 'make-rootfs' do
   RSpec.shared_examples 'creates_the_blob' do
     it 'moves cflinuxfs2-*.tar.gz file from stack-s3 to cflinuxfs2-release/blobs/rootfs/cflinuxfs2-[currentversion].tar.gz' do
       Dir.chdir("#{ci_path}/spec/tasks/overwrite-cflinuxfs2-release") do
-        system("#{ci_path}/tasks/overwrite-cflinuxfs2-release/run.sh")
+        _, _, status = Open3.capture3("#{ci_path}/tasks/overwrite-cflinuxfs2-release/run.sh")
+        expect(status).to be_success
       end
       expect(File.exist?(blob_destination)).to eq(true)
       expect(File.read(blob_destination)).to eq('new-tarball')
