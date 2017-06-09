@@ -31,7 +31,9 @@ blob_store_private_yml = {
 buildpack_bosh_dir = File.join(Dir.pwd, 'buildpack-bosh-release')
 cf_release_buildpack_submodule_dir = File.join(Dir.pwd, 'cf-release', 'src', "#{buildpack}-buildpack-release")
 
-Dir.chdir('cf-release') do
+puts `rsync -a cf-release/ cf-release-artifacts`
+
+Dir.chdir('cf-release-artifacts') do
   File.write('config/private.yml', blob_store_private_yml)
 
   buildpack_blob = Dir["../buildpack-github-release/*.zip"].first
@@ -64,6 +66,3 @@ Dir.chdir('cf-release') do
     puts "Skipping since not version #{version_allowed}"
   end
 end
-
-
-puts `rsync -a cf-release/ cf-release-artifacts`
