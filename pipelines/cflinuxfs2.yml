@@ -77,13 +77,6 @@ resources: #####################################################################
       branch: master
       private_key: {{cflinuxfs2-release-private-key}}
 
-  - name: cflinuxfs2-rootfs-release
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/cflinuxfs2-rootfs-release.git
-      branch: master
-      private_key: {{cflinuxfs2-rootfs-private-key}}
-
   - name: diego-release
     type: git
     source:
@@ -205,14 +198,6 @@ resources: #####################################################################
       drafts: false
       user: {{buildpacks-github-org}}
       repository: cflinuxfs2-release
-      access_token: {{buildpacks-github-token}}
-
-  - name: cflinuxfs2-rootfs-release-github-release
-    type: github-release
-    source:
-      drafts: false
-      user: {{buildpacks-github-org}}
-      repository: cflinuxfs2-rootfs-release
       access_token: {{buildpacks-github-token}}
 
   ## Semver Versions ##
@@ -707,55 +692,6 @@ jobs: ##########################################################################
             body: release-body/body
             globs:
               - release-artifacts/releases/cflinuxfs2/*.tgz
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-
-  - name: create-cflinuxfs2-rootfs-release
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: blob
-          resource: stack-s3
-          passed: [ release-cflinuxfs2 ]
-          trigger: true
-        - get: version
-          passed: [ release-cflinuxfs2 ]
-        - get: release
-          resource: cflinuxfs2-rootfs-release
-      - do:
-        - task: create-cflinuxfs2-rootfs-release
-          file: buildpacks-ci/tasks/create-cflinuxfs2-release/task.yml
-          params:
-            BLOB_NAME: rootfs
-            BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
-            RELEASE_NAME: cflinuxfs2-rootfs
-            ACCESS_KEY_ID: {{cloudfoundry-s3-access-key}}
-            SECRET_ACCESS_KEY: {{cloudfoundry-s3-secret-key}}
-        - task: create-release-body
-          file: buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes/task.yml
-          params:
-            ROOTFS_TYPE: cflinuxfs2
-        - task: create-release-commit
-          file: buildpacks-ci/tasks/create-rootfs-bosh-release-commit/task.yml
-        - put: cflinuxfs2-rootfs-release
-          params:
-            repository: release-artifacts
-        - put: cflinuxfs2-rootfs-release-github-release
-          params:
-            name: version/number
-            tag: version/number
-            tag_prefix: 'v'
-            commitish: release-commit/sha
-            body: release-body/body
-            globs:
-              - release-artifacts/releases/cflinuxfs2-rootfs/*.tgz
         on_failure:
           put: failure-alert
           params:
