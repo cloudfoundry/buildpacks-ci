@@ -26,7 +26,7 @@ resources:
       bucket: {{buildpacks-binaries-s3-bucket}}
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-      versioned_file: static/buildpack.json
+      versioned_file: static/buildpacks.json
 jobs:
   - name: build-and-publish
     serial: true
