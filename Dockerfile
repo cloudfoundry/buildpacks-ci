@@ -86,7 +86,7 @@ RUN cd /usr/local && bundle install
 
 #install fly-cli
 RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly \
-  && [ 80e75f9c95a2b11e92ffe9f585b62527ed076af5b104ebaccd164e7b7bf1819c = $(shasum -a 256 /usr/local/bin/fly | cut -d' ' -f1) ] \
+  && [ 22741e58dc061eae160d3afbf149523544c2fc44add0836620a979111b7e0675 = $(shasum -a 256 /usr/local/bin/fly | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/fly
 
 # git-hooks and git-secrets
