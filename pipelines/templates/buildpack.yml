@@ -472,6 +472,25 @@ jobs: ##########################################################################
           globs:
             - buildpack-artifacts/*-buildpack-v*.zip
             - buildpack-artifacts/*-buildpack-v*.zip.SHA256SUM.txt
+  - name: buildpack-to-pws
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: pivotal-buildpacks-cached
+          resource: pivotal-buildpack-cached
+          passed: [ ship-it ]
+          trigger: true
+      - task: update-buildpack
+        file: buildpacks-ci/tasks/pws-update-buildpack/task.yml
+        params:
+          CF_API: https://api.run.pivotal.io
+          USERNAME: {{pws_buildpacks_cf_admin_username}}
+          PASSWORD: {{pws_buildpacks_cf_admin_password}}
+          BUILDPACK_NAME: <%= language %>
+
+
 <% unless language == "multi" || language == "hwc" %>
   - name: write-pivnet-metadata
     serial: true
