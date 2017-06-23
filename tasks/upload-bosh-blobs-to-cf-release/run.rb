@@ -29,7 +29,7 @@ blob_store_private_yml = {
 }.to_yaml
 
 buildpack_bosh_dir = File.join(Dir.pwd, 'buildpack-bosh-release')
-cf_release_buildpack_submodule_dir = File.join(Dir.pwd, 'cf-release', 'src', "#{buildpack}-buildpack-release")
+cf_release_buildpack_submodule_dir = File.join(Dir.pwd, 'cf-release-artifacts', 'src', "#{buildpack}-buildpack-release")
 
 puts `rsync -a cf-release/ cf-release-artifacts`
 
