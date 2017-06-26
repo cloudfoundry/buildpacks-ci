@@ -19,11 +19,11 @@ filename = orig_filename.gsub(/\+\d+\.zip$/, '.zip')
 
 FileUtils.mv(orig_filename, filename)
 
-puts "\ncf update-buildpack #{ENV['BUILDPACK_NAME']}_buildpack -p #{filename}"
-
 if ENV['BUILDPACK_NAME'] != 'dotnet-core'
+  puts "\ncf update-buildpack #{ENV['BUILDPACK_NAME']}_buildpack -p #{filename}"
   out, status = Open3.capture2e('cf', 'update-buildpack', "#{ENV['BUILDPACK_NAME']}_buildpack", '-p', "#{filename}")
 else
+  puts "\ncf update-buildpack dotnet_core_buildpack -p #{filename}"
   out, status = Open3.capture2e('cf', 'update-buildpack', 'dotnet_core_buildpack', '-p', "#{filename}")
 end
 
