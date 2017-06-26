@@ -19,7 +19,7 @@ filename = orig_filename.gsub(/\+\d+\.zip$/, '.zip')
 
 FileUtils.mv(orig_filename, filename)
 
-puts filename
+puts "\ncf update-buildpack #{ENV['BUILDPACK_NAME']}_buildpack -p #{filename}"
 
 _, status = Open3.capture2e('cf', 'update-buildpack', "#{ENV['BUILDPACK_NAME']}_buildpack", '-p', "#{filename}")
 raise 'cf update-buildpack failed' unless status.success?
