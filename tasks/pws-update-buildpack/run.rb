@@ -21,5 +21,10 @@ FileUtils.mv(orig_filename, filename)
 
 puts "\ncf update-buildpack #{ENV['BUILDPACK_NAME']}_buildpack -p #{filename}"
 
-out, status = Open3.capture2e('cf', 'update-buildpack', "#{ENV['BUILDPACK_NAME']}_buildpack", '-p', "#{filename}")
+if ENV['BUILDPACK_NAME'] != 'dotnet-core'
+  out, status = Open3.capture2e('cf', 'update-buildpack', "#{ENV['BUILDPACK_NAME']}_buildpack", '-p', "#{filename}")
+else
+  out, status = Open3.capture2e('cf', 'update-buildpack', 'dotnet_core_buildpack', '-p', "#{filename}")
+end
+
 raise "cf update-buildpack failed: #{out}" unless status.success?
