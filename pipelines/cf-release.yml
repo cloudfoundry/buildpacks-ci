@@ -78,17 +78,14 @@ resources:
       url: {{concourse-job-failure-notifications-slack-webhook}}
   - name: diego-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
       repository: cloudfoundry/diego-release
   - name: cflinuxfs2-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
       repository: cloudfoundry/cflinuxfs2-release
   - name: garden-runc-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
       repository: cloudfoundry/garden-runc-release
 
