@@ -19,12 +19,12 @@ describe 'create bosh stacks release task' do
     @secret_access_key = 'a_secret_access_key'
     execute('-c tasks/create-bosh-release/task.yml ' \
             '-i buildpacks-ci=. ' \
-            '-i blob=./spec/tasks/create-bosh-release/stack-s3 ' \
+            '-i buildpack-zip=./spec/tasks/create-bosh-release/stack-s3 ' \
             '-i version=./spec/tasks/create-bosh-release/version ' \
             "-i release=#{@tmp_release} " \
             "-o release-artifacts=#{@release_artifacts} ",
             'BLOB_NAME' => 'rootfs',
-            'BLOB_GLOB' => 'blob/cflinuxfs2-*.tar.gz',
+            'BLOB_GLOB' => 'buildpack-zip/cflinuxfs2-*.tar.gz',
             'RELEASE_NAME' => 'stack',
             'RELEASE_DIR' => 'release',
             'ACCESS_KEY_ID' => @access_key_id,
