@@ -9,13 +9,18 @@ resource_types:
     type: docker-image
     source:
       repository: dgodd/github-release-resource
+  - name: pivnet
+    type: docker-image
+    source:
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final
 
 resources:
   - name: buildpacks-ci
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: {{buildpacks-ci-git-uri-public-branch}}
+      branch: fix-offline-java-job #{{buildpacks-ci-git-uri-public-branch}}
   - name: public-robots
     type: git
     source:
@@ -88,7 +93,13 @@ resources:
     type: bosh-io-release
     source:
       repository: cloudfoundry/garden-runc-release
-
+  - name: pivnet-production
+    type: pivnet
+    source:
+      api_token: {{pivnet-apikey}}
+      product_slug: buildpacks
+      access_key_id: {{pivnet-access-key}}
+      secret_access_key: {{pivnet-secret-key}}
 <% (supported_languages).each do |language| %>
   - name: <%= language %>-buildpack-github-release
     <% if language == 'java' %>
@@ -513,8 +524,17 @@ jobs:
             include_source_tarball: true
         - get: release
           resource: private-<%= language %>-offline-buildpack-bosh-release
+        <% if language == 'java' %>
+        - get: pivnet-production
+          params:
+            globs:
+            - "java-buildpack-offline-v3*.zip"
+        <% end %>
       - do:
-        <% if language != 'java' %>
+        <% if language == 'java' %>
+        - task: download-offline-buildpack
+          file: buildpacks-ci/tasks/download-offline-buildpack/task.yml
+        <% else %>
         - task: build-offline-buildpack
           file: buildpacks-ci/tasks/build-offline-buildpack/task.yml
           params:
@@ -524,19 +544,15 @@ jobs:
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
         - task: create-bosh-release
           file: buildpacks-ci/tasks/create-bosh-release/task.yml
-          <% if language == 'java' %>
-          input_mapping: {blob: blob}
-          <% else %>
-          input_mapping: {blob: buildpack-zip}
-          <% end %>
+          # input_mapping: {blob: buildpack-zip}
           params:
             ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
             <% if language == 'java' %>
-            BLOB_GLOB: blob/<%= language %>-buildpack-offline*.zip
+            BLOB_GLOB: buildpack-zip/<%= language %>-buildpack-offline*.zip
             VERSION_ALLOWED: '3'
             <% else %>
-            BLOB_GLOB: blob/<%= language %>_buildpack-cached*.zip
+            BLOB_GLOB: buildpack-zip/<%= language %>_buildpack-cached*.zip
             <% end %>
             BLOB_NAME: <%= language %>-buildpack
             RELEASE_NAME: <%= language %>-offline-buildpack
