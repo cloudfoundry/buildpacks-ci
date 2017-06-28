@@ -170,7 +170,6 @@ groups:
       - update-java-buildpack-bosh-release
       - update-private-java-offline-buildpack-bosh-release
       - cf-release for java
-      - buildpack-to-pws
 
 jobs:
   - name: recreate-bosh-lite
@@ -575,26 +574,3 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 
-<% supported_languages.each do |language| %>
-  <% if language == 'java' %>
-  - name: buildpack-to-pws
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-          passed: [ ship-it-java ]
-          trigger: true
-        - get: pivnet-production
-          params:
-            globs:
-            - "java-buildpack-offline-v3*.zip"
-      - task: update-java-buildpack
-        file: buildpacks-ci/tasks/pws-update-java-buildpack/task.yml
-        params:
-          CF_API: https://api.run.pivotal.io
-          USERNAME: {{pws_buildpacks_cf_admin_username}}
-          PASSWORD: {{pws_buildpacks_cf_admin_password}}
-          BUILDPACK_NAME: <%= language %>
-  <% end %>
-<% end %>

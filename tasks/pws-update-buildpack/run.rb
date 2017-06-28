@@ -14,10 +14,13 @@ raise 'cf auth failed' unless status.success?
 puts "Original Buildpacks\n==================="
 system('cf', 'buildpacks')
 
-orig_filename = Dir.glob("pivotal-buildpacks-cached/#{ENV['BUILDPACK_NAME']}*.zip").first
-filename = orig_filename.gsub(/\+\d+\.zip$/, '.zip')
-
-FileUtils.mv(orig_filename, filename)
+if ENV['BUILDPACK_NAME'] == 'java'
+  filename = Dir.glob("pivnet-production/#{ENV['BUILDPACK_NAME']}-buildpack-offline*.zip").first
+else
+  orig_filename = Dir.glob("pivotal-buildpacks-cached/#{ENV['BUILDPACK_NAME']}*.zip").first
+  filename = orig_filename.gsub(/\+\d+\.zip$/, '.zip')
+  FileUtils.mv(orig_filename, filename)
+end
 
 if ENV['BUILDPACK_NAME'] != 'dotnet-core'
   puts "\ncf update-buildpack #{ENV['BUILDPACK_NAME']}_buildpack -p #{filename}"
