@@ -15,12 +15,6 @@ resource_types:
       repository: cfbuildpacks/cron-resource
 
 resources:
-  - name: tracker-filter-resource
-    type: cf-tracker-resource
-    source:
-      project_id: {{cf-buildpacks-public-tracker-id}}
-      token: {{pivotal-tracker-api-token}}
-      label: usn-trusty
   - name: monday-funday
     type: cron
     source:
@@ -74,20 +68,6 @@ resources:
       to: ["cf-security@pivotal.io", "cf-buildpacks-eng@pivotal.io"]
 
 jobs:
-  - name: tracker-sec-triage-filter
-    serial: true
-    public: true
-    plan:
-      - get: tracker-filter-resource
-        trigger: true
-      - get: buildpacks-ci
-      - get: cflinuxfs2
-      - task: delete-unaffected-stories
-        file: buildpacks-ci/tasks/delete-unaffected-stories/task.yml
-      - put: tracker-filter-resource
-        params:
-          file: output/stories.json
-
   - name: new-releases
     serial: true
     public: true
