@@ -1,0 +1,282 @@
+---
+resources:
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
+  
+  - name: bal-develop
+    type: git
+    source:
+      uri: {{buildpackapplifecycle-git-uri}}
+      branch: {{buildpackapplifecycle-git-branch}}
+
+  - name: bal-master
+    type: git
+    source:
+      uri: {{buildpackapplifecycle-git-uri}}
+      branch: master
+      private_key: {{buildpackapplifecycle-private-key}}
+
+  - name: cats-concourse-task
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cats-concourse-task
+      branch: master
+
+  - name: bosh-lite
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-lite
+
+  - name: diego-release
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/diego-release
+      branch: master
+
+  - name: cf-release-rc
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cf-release
+      branch: release-candidate
+      private_key: {{cf-release-private-key}}
+
+  - name: cf-release-develop
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cf-release
+      branch: develop
+      private_key: {{cf-release-private-key}}
+
+  - name: lite-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+
+  - name: bal-cf-deployment
+    type: bosh-deployment
+    source:
+      target: https://bal.buildpacks-gcp.ci.cf-app.com:25555
+      username: admin
+      password: {{gcp_bosh_lite_admin_password}}
+      deployment: cf-warden
+      ignore_ssl: true
+
+  - name: bal-deployment
+    type: bosh-deployment
+    source:
+      target: https://bal.buildpacks-gcp.ci.cf-app.com:25555
+      username: admin
+      password: {{gcp_bosh_lite_admin_password}}
+      deployment: cf-warden-diego
+      ignore_ssl: true
+
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
+
+  - name: cf-bosh-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/cf-release
+
+  - name: cflinuxfs2-bosh-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/cflinuxfs2-release
+
+  - name: garden-runc-bosh-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/garden-runc-release
+
+  - name: deployments-buildpacks
+    type: git
+    source:
+      uri: {{deployments-git-uri}}
+      private_key: {{deployments-private-key}}
+      branch: master
+
+jobs:
+  - name: recreate-bosh-lite
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: deployments-buildpacks
+        - get: bal-develop
+          trigger: true
+      - task: recreate-cf-release-bosh-lite
+        file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
+        params:
+          IAAS: gcp
+          GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
+          GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
+          GCP_BOSH_LITE_NAME: bal-gcp-bosh-lite
+          DEPLOYMENT_NAME: bal.buildpacks-gcp.ci
+          BOSH_USER: {{bosh_user}}
+          BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
+          BOSH_TARGET: bal.buildpacks-gcp.ci.cf-app.com
+          BOSH_LITE_NAME: bal.buildpacks-gcp.ci
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
+          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+          BOSH_LITE_ADMIN_PASSWORD: {{gcp_bosh_lite_admin_password}}
+          BOSH_LITE_HM_PASSWORD: {{gcp_bosh_lite_hm_password}}
+          BOSH_LITE_NATS_PASSWORD: {{gcp_bosh_lite_nats_password}}
+          BOSH_LITE_BLOBSTORE_AGENT_PASSWORD: {{gcp_bosh_lite_blobstore_agent_password}}
+          BOSH_LITE_BLOBSTORE_DIRECTOR_PASSWORD: {{gcp_bosh_lite_blobstore_director_password}}
+          BOSH_LITE_POSTGRES_PASSWORD: {{gcp_bosh_lite_postgres_password}}
+        attempts: 5
+
+  - name: deploy-cf-and-diego-to-cf-release
+    serial: true
+    public: true
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: bal-develop
+            passed: [recreate-bosh-lite]
+            trigger: true
+          - get: bosh-lite
+          - get: cf-release
+            resource: cf-release-rc
+            attempts: 3
+          - get: diego-release
+          - get: garden-runc-bosh-release
+            attempts: 3
+          - get: cf-bosh-release
+            attempts: 3
+          - get: cflinuxfs2-bosh-release
+            attempts: 3
+          - get: lite-stemcell
+            attempts: 3
+        - task: generate-manifest
+          # write task to change manifest for BAL
+          # Upon investigation we may just need to update the sub module from develop can copy current task and tweak
+          file: buildpacks-ci/tasks/generate-cf-and-diego-manifests-with-bal-dev/task.yml
+          params:
+            BAL_DEV_BRANCH: {{buildpackapplifecycle-git-branch}}
+            DEPLOYMENT_NAME: bal.buildpacks-gcp.ci
+            CI_CF_PASSWORD: {{ci-cf-password}}
+            BOSH_USER: {{bosh_user}}
+            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
+            BOSH_TARGET: bal.buildpacks-gcp.ci.cf-app.com
+            BOSH_LITE_NAME: bal.buildpacks-gcp.ci
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
+            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+            ROOTFS_RELEASE: cflinuxfs2
+            IAAS: gcp
+          privileged: true
+        - task: create-diego-release
+          file: buildpacks-ci/tasks/create-diego-bosh-release-to-deploy/task.yml
+          privileged: true
+        - put: bal-cf-deployment
+          params:
+            manifest: generate-manifest-artifacts/bal.buildpacks-gcp.ci/manifest.yml
+            stemcells: [lite-stemcell/*.tgz]
+            releases: cf-bosh-release/release.tgz
+        - put: bal-deployment
+          params:
+            manifest: generate-manifest-artifacts/bal.buildpacks-gcp.ci/diego.yml
+            stemcells: ['lite-stemcell/stemcell.tgz']
+            releases:
+              - [diego-release-artifacts/dev_releases/cf/*.tgz]
+              - cflinuxfs2-bosh-release/release.tgz
+              - garden-runc-bosh-release/release.tgz
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: cats
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: bal-develop
+          passed: [deploy-cf-and-diego-to-cf-release]
+          trigger: true
+        - get: cats-concourse-task-inp
+          resource: cats-concourse-task
+        - get: cf-release
+          resource: cf-release-rc
+          params:
+            submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
+          passed: [ deploy-cf-and-diego-to-cf-release ]
+      - do:
+        - task: copy-cf-acceptance-tests
+          file: buildpacks-ci/tasks/copy-cf-acceptance-tests/task.yml
+        - task: write-cats-config
+          file: buildpacks-ci/tasks/write-cats-config/task.yml
+          params:
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-password}}
+            APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
+            DIEGO_DOCKER_ON: true
+        - task: add-flake-attempts-to-cats
+          file: buildpacks-ci/tasks/add-flake-attempts-to-cats/task.yml
+        - task: cats
+          attempts: 3
+          file: cats-concourse-task/task.yml
+          params:
+            NODES: 12
+            CONFIG_FILE_PATH: integration_config.json
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  # - name: merge-to-master
+  #   serial: true
+  #   public: true
+  #   plan:
+  #     - aggregate:
+  #       - get: bal-master
+  #       - get: buildpacks-ci
+  #       - get: bal-develop
+  #         passed: [cats]
+  #         trigger: true
+  #     - put: bal-master
+  #       params:
+  #         repository: bal-develop
+  #     - put: concourse2tracker
+  #       params:
+  #         git_path: bal-develop
+  #         project_id: {{cf-buildpacks-public-tracker-id}}
+  #         api_token: {{pivotal-tracker-api-token}}
+
+  # - name: destroy-bosh-lite
+  #   serial: true
+  #   public: true
+  #   plan:
+  #     - aggregate:
+  #       - get: buildpacks-ci
+  #       - get: bal-develop
+  #           passed: [merge-to-master]
+  #           trigger: true
+  #     - task: destroy-cf-release-bosh-lite
+  #       file: buildpacks-ci/tasks/destroy-bosh-lite/task.yml
+  #       params:
+  #         DEPLOYMENT_NAME: bal.buildpacks-gcp.ci
+  #         BOSH_USER: {{gcp_bosh_admin_user}}
+  #         BOSH_PASSWORD: {{gcp_bosh_admin_password}}
+  #         GCP_BOSH_LITE_NAME: bal-gcp-bosh-lite
+  #         GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
+  #         GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
+  #         BOSH_LITE_NAME: bal.buildpacks-gcp.ci
+  #         RUBYGEM_MIRROR: {{rubygem-mirror}}
+  #         BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+  #         IAAS: gcp
+  #       attempts: 5
