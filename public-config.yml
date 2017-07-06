@@ -19,6 +19,7 @@ public-buildpacks-ci-robots-git-uri-public: https://github.com/cloudfoundry/publ
 buildpacks-ci-git-uri: git@github.com:cloudfoundry/buildpacks-ci.git
 buildpacks-ci-git-uri-public-develop-branch: develop
 buildpacks-ci-git-uri-public-branch: master
+buildpackapplifecycle-git-branch: develop
 
 buildpacks-docker-ci-repo: cfbuildpacks/ci
 buildpacks-docker-user-email: cf-buildpacks-eng@pivotal.io
