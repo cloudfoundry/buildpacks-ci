@@ -23,6 +23,10 @@ class BuildpacksCIConfiguration
     ENV.fetch('LPASS_GIT_REPOS_PRIVATE_KEYS_TWO_FILE', 'Shared-Buildpacks/git-repos-private-keys-two.yml')
   end
 
+  def git_repos_private_keys_three_filename
+    ENV.fetch('LPASS_GIT_REPOS_PRIVATE_KEYS_THREE_FILE', 'Shared-Buildpacks/git-repos-private-keys-three.yml')
+  end
+
   def organization
     YAML.load_file('public-config.yml')['buildpacks-github-org']
   end
