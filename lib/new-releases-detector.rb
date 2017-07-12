@@ -210,6 +210,7 @@ class NewReleasesDetector
       libunwind:       -> { Octokit.releases('libunwind/libunwind').map(&:tag_name) },
       maven:           -> { Octokit.tags('apache/maven').map(&:name).grep(/^maven/) },
       miniconda:       -> { Nokogiri::HTML.parse(open('https://repo.continuum.io/miniconda/').read).css('table tr td a').map {|link| link['href']} },
+      newrelic:        -> { Nokogiri::HTML.parse(open('https://download.newrelic.com/php_agent/archive/')).css('table td a').map{|link| link.text.gsub('/','')}.drop(1) },
       nginx:           -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release/) },
       node:            -> { JSON.parse(open('https://nodejs.org/dist/index.json').read).map{|d| d['version']} },
       openjdk:         -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys },
