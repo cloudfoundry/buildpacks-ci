@@ -1,4 +1,4 @@
-<% libbuildpacks = %w(go hwc multi staticfile) %>
+<% libbuildpacks = %w(go hwc multi nodejs staticfile) %>
 
 ---
 resource_types:
