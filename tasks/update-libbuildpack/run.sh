@@ -9,12 +9,12 @@ set -x
 export GOPATH=$PWD/buildpack
 export GOBIN=/usr/local/bin
 
-
-
 if [ "$LANGUAGE" = "go" ]; then
   update_dir="src/golang"
 elif [ "$LANGUAGE" = "staticfile" ]; then
   update_dir="src/staticfile"
+elif [ "$LANGUAGE" = "nodejs" ]; then
+  update_dir="src/nodejs"
 else
   update_dir="src/compile"
 fi
