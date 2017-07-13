@@ -26,6 +26,7 @@ describe NewReleasesDetector do
     allow_any_instance_of(described_class).to receive(:open).with(/node/).and_return(double(read: [].to_json))
     allow_any_instance_of(described_class).to receive(:open).with(/bower/).and_return(double(read: { 'versions' => {} }.to_json))
     allow_any_instance_of(described_class).to receive(:open).with(/miniconda/).and_return(double(read: '<html></html>'))
+    allow_any_instance_of(described_class).to receive(:open).with(/newrelic/).and_return(double(read: '<html></html>'))
 
     allow(File).to receive(:exist?).and_call_original
     allow(File).to receive(:write).and_call_original
@@ -94,7 +95,7 @@ describe NewReleasesDetector do
     it 'outputs to stderr that there are new updates' do
       expect { subject }.
         to output(/NEW DEPENDENCIES FOUND:\n\n^- #{dependency}:/).to_stderr
-      end
+    end
   end
 
   shared_examples_for 'there are no new versions to potentially build' do |dependency_source|
@@ -229,6 +230,51 @@ describe NewReleasesDetector do
 
       context 'when there are no new releases' do
         let(:new_releases_response) { double(read: { 'versions' => { '1.7.6': 'data', '1.7.7': 'data' } }.to_json) }
+
+        it_behaves_like 'there are no new versions to potentially build'
+      end
+    end
+
+    context 'for newrelic' do
+      let(:dependency)   { :newrelic }
+      let(:old_versions) { %w(1.1.1.111 2.2.2.222) }
+      let(:new_releases_source) { 'https://download.newrelic.com/php_agent/archive/' }
+
+      context 'when there are new releases' do
+        let(:new_versions)            { %w(3.3.3.333) }
+        let(:new_releases_response)   { double('new_releases_response', read: newrelic_releases_html ) }
+        let(:newrelic_releases_html) { <<~HTML
+                                       <table>
+                                          <td>
+                                            <a href="/php_agent/archive/1.1.1.111">1.1.1.111</a>
+                                          </td>
+                                          <td>
+                                            <a href="/php_agent/archive/2.2.2.222">2.2.2.222</a>
+                                          </td>
+                                          <td>
+                                            <a href="/php_agent/archive/3.3.3.333">3.3.3.333</a>
+                                          </td>
+                                      </table>
+                                      HTML
+        }
+
+        it_behaves_like 'there are new versions to potentially build'
+      end
+
+      context 'when there are no new releases' do
+        let(:new_releases_response)   { double('new_releases_response', read: newrelic_releases_html ) }
+        let(:newrelic_releases_html) { <<~HTML
+                                        <table>
+                                          <td>
+                                            <a href="/php_agent/archive/1.1.1.111">1.1.1.111</a>
+                                          </td>
+                                          <td>
+                                            <a href="/php_agent/archive/2.2.2.222">2.2.2.222</a>
+                                          </td>
+                                        </table>
+        HTML
+        }
+
 
         it_behaves_like 'there are no new versions to potentially build'
       end

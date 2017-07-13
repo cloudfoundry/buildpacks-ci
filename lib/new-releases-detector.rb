@@ -210,7 +210,7 @@ class NewReleasesDetector
       libunwind:       -> { Octokit.releases('libunwind/libunwind').map(&:tag_name) },
       maven:           -> { Octokit.tags('apache/maven').map(&:name).grep(/^maven/) },
       miniconda:       -> { Nokogiri::HTML.parse(open('https://repo.continuum.io/miniconda/').read).css('table tr td a').map {|link| link['href']} },
-      newrelic:        -> { Nokogiri::HTML.parse(open('https://download.newrelic.com/php_agent/archive/')).css('table td a').map{|link| link.text.gsub('/','')}.drop(1) },
+      newrelic:        -> { Nokogiri::HTML.parse(open('https://download.newrelic.com/php_agent/archive/')).css('table td a').map{|link| link['href']} },
       nginx:           -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release/) },
       node:            -> { JSON.parse(open('https://nodejs.org/dist/index.json').read).map{|d| d['version']} },
       openjdk:         -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys },
@@ -229,6 +229,14 @@ class NewReleasesDetector
     when :miniconda
       versions_if_found = tags.map do |link|
         match = link.match(/-((?<ver>\d+\.\d+\.\d+))-Linux-x86_64/)
+
+        match['ver'] unless match.nil?
+      end
+
+      versions_if_found.compact.uniq.sort
+    when :newrelic
+      versions_if_found = tags.map do |link|
+        match = link.match(/((?<ver>\d+\.\d+\.\d+\.\d+))/)
 
         match['ver'] unless match.nil?
       end
