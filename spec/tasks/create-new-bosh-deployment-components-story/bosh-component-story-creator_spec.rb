@@ -87,10 +87,20 @@ describe BoshComponentStoryCreator do
       expect(subject).to have_received(:puts).with "- BOSH Google CPI => 2.2"
     end
 
-    it 'makes a tracker story' do
-      subject.run!
+    context 'makes a Tracker story' do
+      let(:concourse_known_versions)      { %w(1.0) }
 
-      expect(buildpack_project).to have_received(:create_story).with(hash_including(name: 'Update BOSH Google CPI in BOSH deployments'))
+      it 'adds content' do
+        subject.run!
+
+        expect(buildpack_project).to have_received(:create_story).with(hash_including(name: 'Update BOSH Google CPI in BOSH deployments'))
+      end
+
+      it 'adds extra context to the Tracker story if the component is Concourse' do
+        subject.run!
+
+        expect(buildpack_project).to have_received(:create_story).with(hash_including(description: /.*Run the \`bin\/deploy_concourse\` script from root\n1. git push when satisfied$/))
+      end
     end
 
     it 'updates the YAML files' do
