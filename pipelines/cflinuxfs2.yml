@@ -147,13 +147,11 @@ resources: #####################################################################
 
   - name: diego-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
       repository: cloudfoundry/diego-release
 
   - name: garden-runc-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
       repository: cloudfoundry/garden-runc-release
 
@@ -576,6 +574,24 @@ jobs: ##########################################################################
       - put: version
         params: {file: version/number}
 
+  - name: finalize-security-notices
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          resource: buildpacks-ci
+        - get: version
+          trigger: true
+          passed: [ upload-to-github ]
+      - do:
+        - task: finalize-security-notices
+          file: buildpacks-ci/tasks/finalize-security-notice-stories/task.yml
+          attempts: 20
+          params:
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
   - name: upload-to-github
     serial: true
     public: true
@@ -609,14 +625,6 @@ jobs: ##########################################################################
           params:
             repository: new-cves-artifacts
             rebase: true
-        - task: comment-cve-story
-          file: buildpacks-ci/tasks/comment-cve-story/task.yml
-          attempts: 20
-          params:
-            STACK: cflinuxfs2
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         on_failure:
           put: failure-alert
           params:

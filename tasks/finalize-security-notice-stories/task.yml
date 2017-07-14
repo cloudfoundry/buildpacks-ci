@@ -7,14 +7,13 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: version
-  - name: new-cves-artifacts
+  # - name: new-cves-artifacts
 run:
   path: bash
   args:
     - "-cl"
-    - "buildpacks-ci/tasks/comment-cve-story/run.rb"
+    - "buildpacks-ci/tasks/finalize-security-notice-stories/run.rb"
 params:
-  STACK:
   TRACKER_PROJECT_ID:
   TRACKER_REQUESTER_ID:
   TRACKER_API_TOKEN:
