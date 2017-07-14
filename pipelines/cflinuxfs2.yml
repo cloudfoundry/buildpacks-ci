@@ -609,6 +609,14 @@ jobs: ##########################################################################
           params:
             repository: new-cves-artifacts
             rebase: true
+        - task: comment-cve-story
+          file: buildpacks-ci/tasks/comment-cve-story/task.yml
+          attempts: 20
+          params:
+            STACK: cflinuxfs2
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         on_failure:
           put: failure-alert
           params:
