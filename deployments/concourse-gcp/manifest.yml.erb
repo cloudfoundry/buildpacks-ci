@@ -1,22 +1,20 @@
 ---
 name: concourse
-director_uuid: REPLACE-IN-JUMPBOX-BEFORE-DEPLOY
+director_uuid: <%= concourse_gcp_bosh_director_uuid %>
 releases:
 - name: concourse
-  version: 2.7.4
-  url: https://bosh.io/d/github.com/concourse/concourse?v=2.7.4
-  sha1: 59f20ddea3ffd9bcab572abb3e2e1137aa3d6e7a
+  version: 3.3.1
+  url: https://bosh.io/d/github.com/concourse/concourse?v=3.3.1
+  sha1: 60e6c5e1806eee48931091566a56bd0897090e28
 - name: garden-runc
   version: 1.6.0
   url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.6.0
   sha1: 58fbc64aff303e6d76899441241dd5dacef50cb7
-
 tls_key: &tls_key |
   <%= concourse_buildpacks_gcp_key.split("\n").join("\n  ") %>
 tls_cert: &tls_cert |
   <%= concourse_buildpacks_gcp_crt.gsub("\n", "\n  ").chomp  %>
   <%= concourse_buildpacks_gcp_chain.gsub("\n", "\n  ").chomp %>
-
 instance_groups:
 - name: web
   instances: 1
@@ -39,10 +37,10 @@ instance_groups:
       external_url: https://buildpacks.ci.cf-app.com
       publicly_viewable: true
       basic_auth_username: buildpacks
-      basic_auth_password: "<%= concourse_basic_auth_password %>"
+      basic_auth_password: <%= concourse_basic_auth_password %>
       github_auth:
-        client_id: "<%= gcp_concourse_github_auth_client_id %>"
-        client_secret: "<%= gcp_concourse_github_auth_client_secret %>"
+        client_id: <%= gcp_concourse_github_auth_client_id %>
+        client_secret: <%= gcp_concourse_github_auth_client_secret %>
         authorize:
         - organization: cloudfoundry
           teams:
@@ -59,10 +57,13 @@ instance_groups:
         role:
           name: <%= gcp_concourse_db_admin_user %>
           password: <%= gcp_concourse_db_admin_password %>
-        address: <%= gcp_concourse_db_address %>
+        host: <%= gcp_concourse_db_host %>
+        sslmode: disable
       postgresql_database: <%= gcp_concourse_db_name %>
-      tls_cert: *tls_cert
-      tls_key: *tls_key
+      tls_cert: &tls_key |
+        <%= postgres_tls_cert.split("\n").join("\n        ") %>
+      tls_key: &tls_cert |
+        <%= postgres_tls_key.split("\n").join("\n        ") %>
       tls_bind_port: 443
   - name: tsa
     release: concourse
