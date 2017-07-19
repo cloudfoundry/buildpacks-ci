@@ -54,6 +54,7 @@ jobs:
 popd
 
 pushd diego-release
+  sed -i ./scripts/generate-*-certs -e 's/#!\/bin\/sh/#!\/bin\/bash/'
   ./scripts/generate-diego-certs
   echo "
 ---
