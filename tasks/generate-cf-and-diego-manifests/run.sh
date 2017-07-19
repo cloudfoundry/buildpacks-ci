@@ -54,6 +54,39 @@ jobs:
 popd
 
 pushd diego-release
+  ./scripts/generate-diego-certs
+  echo "
+---
+property_overrides:
+  bbs:
+    ca_cert: |
+      $(<./diego-certs/diego-ca.crt)
+    client_cert: |
+      $(<./diego-certs/bbs-certs/client.crt)
+    client_key: |
+      $(<./diego-certs/bbs-certs/client.key)
+    server_cert: |
+      $(<./diego-certs/bbs-certs/server.crt)
+    server_key: |
+      $(<./diego-certs/bbs-certs/server.key)
+  etcd:
+    ca_cert: |
+      $(<./diego-certs/diego-ca.crt)
+    client_cert: |
+      $(<./diego-certs/etcd-certs/client.crt)
+    client_key: |
+      $(<./diego-certs/etcd-certs/client.key)
+    peer_ca_cert: |
+      $(<./diego-certs/etcd-peer-ca.crt)
+    peer_cert: |
+      $(<./diego-certs/etcd-certs/peer.crt)
+    peer_key: |
+      $(<./diego-certs/etcd-certs/peer.key)
+    server_cert: |
+      $(<./diego-certs/etcd-certs/server.crt)
+    server_key: |
+      $(<./diego-certs/etcd-certs/server.key)" > bosh-lite/update-certs-spiff.yml
+  spiff merge manifest-generation/bosh-lite-stubs/property-overrides.yml bosh-lite/update-certs-spiff.yml
   USE_SQL='postgres' ./scripts/generate-bosh-lite-manifests
   ../buildpacks-ci/tasks/generate-cf-and-diego-manifests/swap-diego-rootfs-release.rb "$(pwd)" bosh-lite/deployments/diego.yml
 
