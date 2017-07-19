@@ -56,7 +56,7 @@ popd
 pushd diego-release
   sed -i ./scripts/generate-*-certs -e 's/#!\/bin\/sh/#!\/bin\/bash/'
   ./scripts/generate-diego-certs
-  cat << EOF > bosh-lite/update-certs-spiff.yml
+  cat << EOF > update-certs-spiff.yml
 ---
 property_overrides:
   bbs:
@@ -88,7 +88,8 @@ $(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/server.crt)
     server_key: |
 $(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/server.key)
 EOF
-  spiff merge manifest-generation/bosh-lite-stubs/property-overrides.yml bosh-lite/update-certs-spiff.yml
+  spiff merge manifest-generation/bosh-lite-stubs/property-overrides.yml update-certs-spiff.yml > property-overrides-with-new-certs.yml
+  mv -f property-overrides-with-new-certs.yml manifest-generation/bosh-lite-stubs/property-overrides.yml
   USE_SQL='postgres' ./scripts/generate-bosh-lite-manifests
   ../buildpacks-ci/tasks/generate-cf-and-diego-manifests/swap-diego-rootfs-release.rb "$(pwd)" bosh-lite/deployments/diego.yml
 
