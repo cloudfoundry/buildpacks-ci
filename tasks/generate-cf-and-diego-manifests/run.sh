@@ -14,6 +14,47 @@ BOSH_RELEASES_DIR=$(pwd)
 export CF_RELEASE_DIR
 CF_RELEASE_DIR="$(pwd)/cf-release"
 
+function generate_new_diego_certs_for_lts_if_needed() {
+  if [ "$(cut -d- -f1 <<<"$DEPLOYMENT_NAME")" = "lts" ] ; then
+    sed -i ./scripts/generate-*-certs -e 's/#!\/bin\/sh/#!\/bin\/bash/'
+    ./scripts/generate-diego-certs
+    cat << EOF > update-certs-spiff.yml
+---
+property_overrides:
+  bbs:
+    ca_cert: |
+$(awk '{ print "      " $0 }' <./diego-certs/diego-ca.crt)
+    client_cert: |
+$(awk '{ print "      " $0 }' <./diego-certs/bbs-certs/client.crt)
+    client_key: |
+$(awk '{ print "      " $0 }' <./diego-certs/bbs-certs/client.key)
+    server_cert: |
+$(awk '{ print "      " $0 }' <./diego-certs/bbs-certs/server.crt)
+    server_key: |
+$(awk '{ print "      " $0 }' <./diego-certs/bbs-certs/server.key)
+  etcd:
+    ca_cert: |
+$(awk '{ print "      " $0 }' <./diego-certs/diego-ca.crt)
+    client_cert: |
+$(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/client.crt)
+    client_key: |
+$(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/client.key)
+    peer_ca_cert: |
+$(awk '{ print "      " $0 }' <./diego-certs/etcd-peer-ca.crt)
+    peer_cert: |
+$(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/peer.crt)
+    peer_key: |
+$(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/peer.key)
+    server_cert: |
+$(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/server.crt)
+    server_key: |
+$(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/server.key)
+EOF
+    spiff merge manifest-generation/bosh-lite-stubs/property-overrides.yml update-certs-spiff.yml > property-overrides-with-new-certs.yml
+    mv -f property-overrides-with-new-certs.yml manifest-generation/bosh-lite-stubs/property-overrides.yml
+  fi
+}
+
 pushd cf-release
   mkdir -p bosh-lite
   echo "
@@ -54,42 +95,7 @@ jobs:
 popd
 
 pushd diego-release
-  sed -i ./scripts/generate-*-certs -e 's/#!\/bin\/sh/#!\/bin\/bash/'
-  ./scripts/generate-diego-certs
-  cat << EOF > update-certs-spiff.yml
----
-property_overrides:
-  bbs:
-    ca_cert: |
-$(awk '{ print "      " $0 }' <./diego-certs/diego-ca.crt)
-    client_cert: |
-$(awk '{ print "      " $0 }' <./diego-certs/bbs-certs/client.crt)
-    client_key: |
-$(awk '{ print "      " $0 }' <./diego-certs/bbs-certs/client.key)
-    server_cert: |
-$(awk '{ print "      " $0 }' <./diego-certs/bbs-certs/server.crt)
-    server_key: |
-$(awk '{ print "      " $0 }' <./diego-certs/bbs-certs/server.key)
-  etcd:
-    ca_cert: |
-$(awk '{ print "      " $0 }' <./diego-certs/diego-ca.crt)
-    client_cert: |
-$(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/client.crt)
-    client_key: |
-$(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/client.key)
-    peer_ca_cert: |
-$(awk '{ print "      " $0 }' <./diego-certs/etcd-peer-ca.crt)
-    peer_cert: |
-$(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/peer.crt)
-    peer_key: |
-$(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/peer.key)
-    server_cert: |
-$(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/server.crt)
-    server_key: |
-$(awk '{ print "      " $0 }' <./diego-certs/etcd-certs/server.key)
-EOF
-  spiff merge manifest-generation/bosh-lite-stubs/property-overrides.yml update-certs-spiff.yml > property-overrides-with-new-certs.yml
-  mv -f property-overrides-with-new-certs.yml manifest-generation/bosh-lite-stubs/property-overrides.yml
+  generate_new_diego_certs_for_lts_if_needed
   USE_SQL='postgres' ./scripts/generate-bosh-lite-manifests
   ../buildpacks-ci/tasks/generate-cf-and-diego-manifests/swap-diego-rootfs-release.rb "$(pwd)" bosh-lite/deployments/diego.yml
 
