@@ -5,7 +5,8 @@ set -o nounset
 set -o pipefail
 
 tag=$(cat blob/tag)
-git clone "https://github.com/cloudfoundry/$LANGUAGE-buildpack.git" source
+GITHUB_ORG=${GITHUB_ORG:-cloudfoundry}
+git clone "https://github.com/$GITHUB_ORG/$LANGUAGE-buildpack.git" source
 
 pushd source
   git checkout "$tag"
