@@ -801,6 +801,9 @@ jobs: ##########################################################################
       - do:
         - task: build-offline-buildpack
           file: buildpacks-ci/tasks/build-offline-buildpack/task.yml
+          params:
+            GITHUB_ORG: cloudfoundry-incubator
+            LANGUAGE: hwc
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
         - task: create-bosh-release
