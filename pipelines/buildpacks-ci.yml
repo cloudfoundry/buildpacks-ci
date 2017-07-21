@@ -40,6 +40,7 @@ jobs:
       - task: github-set-status-success
         file: buildpacks-ci/tasks/set-status-success/task.yml
         params:
+          LOCAL_REPO_DIR: 'buildpacks-ci'
           GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
           GITHUB_REPO: 'cloudfoundry/buildpacks-ci'
           GITHUB_STATUS_CONTEXT: 'buildpacks-ci/merge-to-master'
