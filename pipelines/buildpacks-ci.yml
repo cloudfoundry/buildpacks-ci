@@ -37,6 +37,14 @@ jobs:
           GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
           PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
         privileged: true
+      - task: github-set-status-success
+        file: buildpacks-ci/tasks/set-status-success/task.yml
+        params:
+          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+          GITHUB_REPO: 'cloudfoundry/buildpacks-ci'
+          GITHUB_STATUS_CONTEXT: 'buildpacks-ci/merge-to-master'
+          GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI build success'
+          PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
       - put: ci-master
         params:
           repository: buildpacks-ci

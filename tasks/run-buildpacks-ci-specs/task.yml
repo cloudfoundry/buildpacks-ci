@@ -20,4 +20,3 @@ run:
       cd buildpacks-ci
       ./tasks/run-buildpacks-ci-specs/fly-login.sh $CI_USERNAME $CI_PASSWORD
       bundle exec rake
-      bundle exec ./tasks/run-buildpacks-ci-specs/set-status-success.rb
