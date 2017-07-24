@@ -10,5 +10,4 @@ cat > "$payload" <&0
 ## Pretty print version input
 jq '.version' < "$payload"
 
-# echo "{ \"version\": { \"ref\": \"payload\" } }" >&3
 jq -r '{version:{ref: .version.ref}}' < "$payload" >&3
