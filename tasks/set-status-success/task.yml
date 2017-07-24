@@ -6,6 +6,7 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
+  - name: repo
 
 run:
   path: bash
@@ -14,7 +15,6 @@ run:
     - buildpacks-ci/tasks/set-status-success/run.rb
 
 params:
-  LOCAL_REPO_DIR:
   GITHUB_ACCESS_TOKEN:
   GITHUB_REPO:
   GITHUB_STATUS_CONTEXT:

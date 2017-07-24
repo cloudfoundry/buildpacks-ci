@@ -5,7 +5,7 @@ resources:
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
-  
+
   - name: bal-develop
     type: git
     source:
@@ -237,6 +237,26 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: set-github-status
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: repo
+          resource: bal-develop
+          passed: [cats]
+          trigger: true
+      - task: github-set-status-success
+        file: buildpacks-ci/tasks/set-status-success/task.yml
+        params:
+          LOCAL_REPO_DIR: bal-develop
+          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+          GITHUB_REPO: 'cloudfoundry/buildpackapplifecycle'
+          GITHUB_STATUS_CONTEXT: 'buildpacks-ci/cats'
+          GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI CATs passed'
+          PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
   # - name: merge-to-master
   #   serial: true
