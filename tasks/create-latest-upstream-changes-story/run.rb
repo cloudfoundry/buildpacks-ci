@@ -18,4 +18,4 @@ tracker_client = TrackerClient.new(
   ENV.fetch('TRACKER_PROJECT_ID'),
   ENV.fetch('TRACKER_REQUESTER_ID').to_i
 )
-tracker_client.post_to_tracker(name: name, description: description, tasks: tasks, point_value: 1, labels: labels)
+tracker_client.post_to_tracker(name: name, description: description, tasks: tasks, point_value: 0, labels: labels)
