@@ -59,22 +59,18 @@ resources:
       branch: master
   - name: cf-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
       repository: cloudfoundry/cf-release
   - name: diego-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
       repository: cloudfoundry/diego-release
   - name: etcd-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
       repository: cloudfoundry-incubator/etcd-release
   - name: garden-linux-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
       repository: cloudfoundry-incubator/garden-linux-release
   - name: bosh-stemcell
