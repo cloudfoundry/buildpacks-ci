@@ -70,6 +70,19 @@ class TrackerClient
     end
   end
 
+  def overwrite_label_on_story(story:, existing_label_regex:, new_label:)
+    existing_labels_with_ids = story["labels"].map { |l| l.select { |key| ["name", "id", "project_id"].include?(key) } }
+    existing_labels_with_ids.select! { |l| !l['name'].match(existing_label_regex) }
+    http_request do |uri|
+      uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories/#{story["id"]}")
+      request = Net::HTTP::Put.new(uri)
+      request.body = {
+        labels: [ { name: new_label } ] + existing_labels_with_ids
+      }.to_json
+      request
+    end
+  end
+
   def add_label_to_story(story:, label:)
     existing_labels_with_ids = story["labels"].map { |l| l.select { |key| ["name", "id", "project_id"].include?(key) } }
 
