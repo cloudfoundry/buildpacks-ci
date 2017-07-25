@@ -12,6 +12,6 @@ def find_buildpack_key(blobs, language)
   when /java/
     blobs.keys.detect { |key| key =~ /java-buildpack-v/ }
   else
-    blobs.keys.detect { |key| key =~ /^#{language}-buildpack\// }
+    blobs.keys.detect { |key| key =~ /^#{language}[-_]buildpack\// }
   end
 end
