@@ -49,7 +49,9 @@ describe CategorizeSecurityNotices do
                                                                  "description": "**Trusty Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n\n",
                                                                  "labels": ["cflinuxfs2", "security-notice", "some-other-label"] } ]) }})}
 
-  let(:receipt_content) {"ii  libkrb5-26-heimdal:amd64           1.6~git20131207+dfsg-1ubuntu1.2            amd64        Heimdal Kerberos - libraries\nii  evince   3.10.3-0ubuntu10.3\nii  evince-common    3.10.2-0ubuntu10.3\n"}
+  let(:receipt_content) { "ii  libkrb5-26-heimdal:amd64           1.6~git20131207+dfsg-1ubuntu1.4            amd64        Heimdal Kerberos - libraries\n" +
+                          "ii  evince   3.10.3-0ubuntu10.3\n" +
+                          "ii  evince-common    3.10.2-0ubuntu10.3\n"}
 
   subject { CategorizeSecurityNotices.new(tracker_client, stories_file.path, stack_receipt.path, version) }
 
@@ -74,7 +76,7 @@ describe CategorizeSecurityNotices do
     subject.run
   end
 
-  it "labels any stories related to the rootfs with 'affected-<version of rootfs>', points them with 0, and starts them" do
+  it "labels any stories related to the rootfs (regardless of package version) with 'affected-<version of rootfs>', points them with 0, and starts them" do
     expect(tracker_client).to receive(:add_label_to_story).with(story: { "id" => "123",
                                                                          "description" => "#{story_content}",
                                                                          "labels" => ["cflinuxfs2", "security-notice", "some-label"] }, label: "affected-999.999")
