@@ -395,6 +395,54 @@ describe TrackerClient do
     end
   end
 
+  describe '#overwrite_label_on_story' do
+    let(:story_id) { 99999 }
+    let(:story) {
+      {
+        "kind"=>"story",
+        "id"=>story_id,
+        "labels"=>[
+          {"id"=>31337, "project_id"=>42, "kind"=>"label", "name"=>"existing-label-1", "created_at"=>"2017-07-19T15:15:15Z", "updated_at"=>"2017-07-19T15:15:15Z"},
+          {"id"=>31338, "project_id"=>42, "kind"=>"label", "name"=>"existing-label-2", "created_at"=>"2017-07-19T15:15:15Z", "updated_at"=>"2017-07-19T15:15:15Z"}
+        ]
+      }
+    }
+    let(:new_label) { "this-is-a-new-label" }
+    let(:existing_label_regex) { /existing-label-*/ }
+    let(:tracker_uri) { "https://www.pivotaltracker.com:443/services/v5/projects/Trackergeddon/stories/#{story_id}" }
+
+    before do
+      stub_request(:put, tracker_uri)
+        .to_return(status: 200, body: '', headers: {})
+    end
+
+    it 'receives the 200 status code' do
+      response = subject.overwrite_label_on_story(story: story, existing_label_regex: existing_label_regex, new_label: new_label)
+      expect(WebMock).to have_requested(:put, tracker_uri)
+      expect(response.code).to eq '200'
+    end
+
+    it 'has the correct payload' do
+      subject.overwrite_label_on_story(story: story, existing_label_regex: existing_label_regex, new_label: new_label)
+
+      expected_payload = { labels: [ { name: "this-is-a-new-label" } ] }.to_json
+      expect(WebMock).to have_requested(:put, tracker_uri)
+        .with(body: expected_payload, headers: { 'Content-Type' => 'application/json' })
+    end
+
+    it 'has the api key that was passed to it in the header' do
+      subject.overwrite_label_on_story(story: story, existing_label_regex: existing_label_regex, new_label: new_label)
+
+      expected_headers = {
+        'Content-Type' => 'application/json',
+        'X-TrackerToken' => 'totes_a_real_api_key'
+      }
+
+      expect(WebMock).to have_requested(:put, tracker_uri)
+        .with(headers: expected_headers)
+    end
+  end
+
   describe '#add_comment_to_story' do
     let(:story_id) { 89989 }
     let(:comment) { "this is a random comment!!!!!!!!!!!!!" }
