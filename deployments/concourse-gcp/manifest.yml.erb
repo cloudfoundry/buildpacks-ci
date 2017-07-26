@@ -73,10 +73,10 @@ instance_groups:
     release: concourse
     properties:
       authorized_keys:
-        - <%= windows_worker_public_key %>
-      host_public_key: <%= tsa_public_key %>
+        - <%= gcp_concourse_windows_worker_public_key %>
+      host_public_key: <%= gcp_concourse_tsa_public_key %>
       host_key: |
-        <%= tsa_private_key.split("\n").join("\n        ") %>
+        <%= gcp_concourse_tsa_private_key.split("\n").join("\n        ") %>
 - name: worker
   instances: 12
   vm_type: worker
@@ -117,9 +117,9 @@ instance_groups:
     properties:
       concourse_windows:
         tsa_host: 10.150.0.2
-        tsa_public_key: <%= tsa_public_key %>
+        tsa_public_key: <%= gcp_concourse_tsa_public_key %>
         tsa_worker_private_key: |
-          <%= windows_worker_private_key.split("\n").join("\n          ") %>
+          <%= gcp_concourse_windows_worker_private_key.split("\n").join("\n          ") %>
 
 update:
   canaries: 1
