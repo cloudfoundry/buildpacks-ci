@@ -10,6 +10,10 @@ releases:
   version: 1.6.0
   url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.6.0
   sha1: 58fbc64aff303e6d76899441241dd5dacef50cb7
+- name: windows-tools-release
+  version: latest
+- name: concourse-windows-worker
+  version: 3.3.2
 tls_key: &tls_key |
   <%= concourse_buildpacks_gcp_key.split("\n").join("\n  ") %>
 tls_cert: &tls_cert |
@@ -67,7 +71,38 @@ instance_groups:
       tls_bind_port: 443
   - name: tsa
     release: concourse
-    properties: {}
+    properties:
+      authorized_keys:
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDK3n7+0um943+SdHIUAfk8VkhzHObdD0KN9NifCLFyzLYGZM3upUJUrlbTjQXmsDhdHKfxlLsIziIPy3Wf43LWiIz4rP0SRmZbA3gBHDpQqiDQPI139Kqm7wp9NbKR7vRGepd+XTE8OITSYUZ+JaBw0ibyv3d8qv0QN1yKbWOkh5/hkAM6vsutlGWNDlKk6zEvohKEX4X3P5Q6UO1RKnEq8Hi7/Tx5vLqzZlPZqt8xqViTWjqEKrHGunmFAQD5aFulNMoZdOA5J5KwMlpXTVRoiR42NOeEEzferO425gxOnAiolSb4V/mzqbim8PvMOLMtViHLxLfc6RLferyS3PhH pivotal@bosh-bastion-concourse
+      host_key: |
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIEowIBAAKCAQEA4zmkJVOoJJQXWL+tdUEazXSylvVWT2mKtCKV6L/kfyB/uDCR
+        t8i/E9FIgqRkoB6pAijLlS+Qe39ST0tnUyxRrP3YRkg67cuGwbsr6viMqc4wzYYA
+        wGddsvDK77izXblnB/WYO8tj/0wuQDrj/HeWCXbRMVIC7gd29lmrQRkGBceQDm98
+        8vspYI7RNZMf1hn63Q6qrD+I1JSl9EgH8MBYJ1uFhhL5BFxuWaq+RhH7FEeq6RLG
+        UiIDA+QY8UcN6n7Q+yz2VrTvFGEaOqrp2OV4cSRwYMmpwiEfZ3lHt4ryya1BO2Gl
+        MWvEpgue3/kEgdylimmaRQVB2TB2wl61vHzHNQIDAQABAoIBAHBwX4eRBA1Fst/Z
+        yc3R759nddA5iwI06cwFqUTJYBqATHMqpZDaJ6N41na/PoP1aBCHe2ZRaR+Te3l9
+        iJ2hurDt1A3DRFXTdtV691qIr6J/Q6sP+mM7QyR+/wzsyuVAD3niz/gWx17XpbNm
+        8NZHntkEELRlLsn2q6lv6cyGw3IrxXJQ80JVS67L8/nsUN88WYGceSujlYa5Ziog
+        3ielWKelGZah4KAFD5FFwjs0irCGehLVspm26HRtnRiyAEAkjHTGZiuBwfzRPtrW
+        45dsxBrlR303nqE+imFiEm3AV6SMF/TdXXKwU1IyEApdwjUF5+t01gXoSpjpjxhQ
+        h0e1VykCgYEA+/5yDIYBegYarz4gJYg6ATxhuqKa58WT8w3uyumsuNoHegRR/11N
+        JnZZc2mZl7bjJ2+Wscyu4T+maxqUKrPF1s2jpczGSSetOpmGPPwaFdgcxw6MCwXn
+        EfhICzkYQAC2rYombYTc/pUtXBn2Yj5S6wRnQnsdqiCxQPu/iBTq4hcCgYEA5tZk
+        jY9XUpVMPxid+kKn6BZv8WkLCSU9kdwL+GzlfOBxAYPnuXXBt+Zu3fLyMTbUWZhF
+        1mqhS1NPVWiR4iuuOJOpRw0REdR9eKD8xqQ9VGxGtw2B51pBAIlJPD4jVm9SZSRk
+        rIT+wcBvGMI0/hh3xTeFk129VyONl72QAmjnLJMCgYB7X2nLA9i5Oz/ZSFtIxNdR
+        P5TBYVbh3nO+7bVZluo/Xk+Gx5K1qaJaEFtfC/ZsttejuRhYWFPOZ/E8QrkD5xwX
+        PHrAc+8oZcqEBCIavXqv8yyzsEWUKAGnZJ0xEXTz8OV/NUH3ILNp2PNqQjPEiari
+        8Tb0733oizT9EcQGBeexZQKBgD0MLgOSCRH6EfQN2pm4zxb9+BTsJtMAWkwc2b2V
+        bwubf8dazwmpLtYnxuJDwfFqAra/IpkWEhoNqkl4IjyiOK0VwAreVclVXOluCeuu
+        u9l72SfIFrbMk6xEom2gMVBGmI/PFCDb+1PaRIdTtRgN+H7btCPJAq3s5SFgLJm2
+        jIypAoGBAJrNtjw4lUYTZ6D+oqhTQ6dJ9KG8qqvF0yQuhLttPSxLoSmJ92jn07rG
+        zAOmSIgUmUt/ggwfge22i+EwDbOxCPgm3XFZk43m6PVqQjIwwSblgMvhx0nHEkEW
+        szt5MG3nsIHIggm2HL6LTtG6tOEMIKVWgzrx5R72/HV5hBwzTzgQ
+        -----END RSA PRIVATE KEY-----
+      host_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDjOaQlU6gklBdYv611QRrNdLKW9VZPaYq0IpXov+R/IH+4MJG3yL8T0UiCpGSgHqkCKMuVL5B7f1JPS2dTLFGs/dhGSDrty4bBuyvq+IypzjDNhgDAZ12y8MrvuLNduWcH9Zg7y2P/TC5AOuP8d5YJdtExUgLuB3b2WatBGQYFx5AOb3zy+ylgjtE1kx/WGfrdDqqsP4jUlKX0SAfwwFgnW4WGEvkEXG5Zqr5GEfsUR6rpEsZSIgMD5BjxRw3qftD7LPZWtO8UYRo6qunY5XhxJHBgyanCIR9neUe3ivLJrUE7YaUxa8SmC57f+QSB3KWKaZpFBUHZMHbCXrW8fMc1 pivotal@bosh-bastion-concourse
 - name: worker
   instances: 12
   vm_type: worker
@@ -90,6 +125,54 @@ instance_groups:
         listen_network: tcp
         listen_address: 0.0.0.0:7777
         network_mtu: 1432
+- name: windows2016_worker
+  instances: 1
+  vm_type: worker
+  azs:
+  - z1
+  stemcell: windows2016
+  networks:
+  - name: public
+  jobs:
+  - name: golang-windows
+    release: windows-tools-release
+  - name: git
+    release: windows-tools-release
+  - name: concourse_windows
+    release: concourse-windows-worker
+    properties:
+      concourse_windows:
+        tsa_host: 10.150.0.2
+        tsa_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDjOaQlU6gklBdYv611QRrNdLKW9VZPaYq0IpXov+R/IH+4MJG3yL8T0UiCpGSgHqkCKMuVL5B7f1JPS2dTLFGs/dhGSDrty4bBuyvq+IypzjDNhgDAZ12y8MrvuLNduWcH9Zg7y2P/TC5AOuP8d5YJdtExUgLuB3b2WatBGQYFx5AOb3zy+ylgjtE1kx/WGfrdDqqsP4jUlKX0SAfwwFgnW4WGEvkEXG5Zqr5GEfsUR6rpEsZSIgMD5BjxRw3qftD7LPZWtO8UYRo6qunY5XhxJHBgyanCIR9neUe3ivLJrUE7YaUxa8SmC57f+QSB3KWKaZpFBUHZMHbCXrW8fMc1 pivotal@bosh-bastion-concourse
+        tsa_worker_private_key: |
+          -----BEGIN RSA PRIVATE KEY-----
+          MIIEpAIBAAKCAQEAyt5+/tLpveN/knRyFAH5PFZIcxzm3Q9CjfTYnwixcsy2BmTN
+          7qVCVK5W040F5rA4XRyn8ZS7CM4iD8t1n+Ny1oiM+Kz9EkZmWwN4ARw6UKog0DyN
+          d/Sqpu8KfTWyke70RnqXfl0xPDiE0mFGfiWgcNIm8r93fKr9EDdcim1jpIef4ZAD
+          Or7LrZRljQ5SpOsxL6IShF+F9z+UOlDtUSpxKvB4u/08eby6s2ZT2arfMalYk1o6
+          hCqxxrp5hQEA+WhbpTTKGXTgOSeSsDJaV01UaIkeNjTnhBM33qzuNuYMTpwIqJUm
+          +Ff5s6m4pvD7zDizLVYhy8S33OkS33q8ktz4RwIDAQABAoIBAFDG3Qw8EOQSJKa9
+          BPtgecwDkx96v5X/0IFTn7lbLcTHLCdJlhHS7aFoNZxQh6v+OMMieOChVwO/iCJ/
+          4dsDJqOzhWYzAyV2sKTGsc7HXZTm2N/xbGb6HcUQYz3N1sdyvQMfJxkipEsVOhXG
+          s9ngw4yIsQdxI3OZZeBCGu/ndIh63nyihMHYMyu+2OoYx+rHQcfeiIsaduE3Z9cs
+          Sac3bGWQs1gzCDmjecIedoA6KquzMl+SSC3HBfS3uGwqfuF2dD9BZ35ObKjfa7Bo
+          iNkMiN5DGXpDoLRFSC9m2rc4Dxh1dB621yVYIANwcYxwlon5NjV605+EMlydttP/
+          FLEGarECgYEA8BbakuN/rsusRfTDnwISQN+rZoUSB/E8N/+ujlu0sM5uHvh9y40Z
+          pdrg3GNnZpL88D6wzKRywsokX3TF7jvqjdHxAxLMUR8rQQwE+H4y4DuvBSIRdQwH
+          5ryGxsZHvP9r3wPmqfnIWDBIBdNMjzwb0xdd2qGvI4dTqMb4zRWOhJ8CgYEA2FAy
+          k0WRm4i4lgQDERLmKFP2jNLcp36q1NxYm+K9u8KsO1LBCdnGVfX1vVL/rtU4V0/l
+          vFEJDr7D04dFFEpnRcdbxB//z+zT9q6LaVjjf01Vja4wTwt+R4rBh1C6MAdrm4KI
+          RMeNT+pTl2h2nDJADaXd+bzyRfit5Ygo2eVdA1kCgYEAn+LYVJHkageBBmVmEPJU
+          LZfGkVN1GozwSWqgWHWB82zFsSJSw8eHmQgWTy5zob+pamSVYPLy6f2sE1W0ql6E
+          aUWydxWBs1RKfdr/RGzmfKXCfGyfq48DhAlwx9cr1xVSRQZYCkIpxXEBxb9dcNXa
+          wc0B16Ns+wAYGoHHFuyQKIkCgYAMe6RPh2Y9uYgdcCHVLGgHz8Cco9aD+/VTz1t1
+          s4ILgdJ6oe3t6ZlegJEr2cxThI55y2yQj4ScSzn1zQqZfymyhyyuhsI2d45L4Aq/
+          i5elUwsq3/B9v0YMTt+YNXppJyR4lvHSNknbYMRuKmMd5HB52SaUMOkyTIWMh20E
+          Fg5mEQKBgQCG/bNPSYp8mrwoDeiQ3OYgPJ4o4f7MkP8tBwRmR8fEtbC/4T7HwnFh
+          lUd7ZtXongcgy5BUBwL82CTCbHYA1VxEFhAZq+Y2iBUYeRksfSx67HwNKYmSi4lh
+          cd16hdLnuJfWDOJuToZQY8ulrOb35PDOUwPAITG2+J9m/GripGvIAQ==
+          -----END RSA PRIVATE KEY-----
+
 update:
   canaries: 1
   max_in_flight: 3
@@ -100,3 +183,7 @@ stemcells:
 - alias: trusty
   os: ubuntu-trusty
   version: latest
+- alias: windows2016
+  os: windows2016
+  version: latest
+
