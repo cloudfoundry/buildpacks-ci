@@ -7,7 +7,7 @@ require 'fileutils'
 require 'yaml'
 
 describe BoshLiteManager do
-  let(:iaas) { 'aws' }
+  let(:iaas) { 'gcp' }
   let(:deployment_id) { "edge-17.buildpacks.ci" }
   let(:deployment_dir) { File.join(Dir.mktmpdir, deployment_id) }
   let(:bosh_lite_user) { 'admin_user' }
@@ -18,6 +18,7 @@ describe BoshLiteManager do
   let(:bosh_director_password) { 'also_a_password' }
   let(:bosh_director_target) { 'bosh.example.com' }
   let(:bosh_private_key) { 'APRIVATESSHKEY' }
+  let(:bosh_director_ca_cert_path) { '/path/to/BOSH_DIRECTOR_CA_CERT' }
   let(:credentials_struct) { nil }
 
   subject { described_class.new(iaas: iaas,
@@ -31,6 +32,7 @@ describe BoshLiteManager do
                                 bosh_director_password: bosh_director_password,
                                 bosh_director_target: bosh_director_target,
                                 bosh_private_key: bosh_private_key,
+                                bosh_director_ca_cert_path: bosh_director_ca_cert_path,
                                 credentials_struct: credentials_struct
                                )
           }
@@ -47,50 +49,25 @@ describe BoshLiteManager do
 
     before do
       allow(subject).to receive(:install_ssh_key)
-      allow(subject).to receive(:delete_aws_instances)
-      allow(subject).to receive(:deploy_aws_bosh_lite)
       allow(subject).to receive(:target_bosh_director)
       allow(subject).to receive(:delete_bosh_deployment)
       allow(subject).to receive(:deploy_bosh_lite)
       allow(subject).to receive(:bosh_lite_running?).and_return(bosh_lite_running)
-      allow(subject).to receive(:update_admin_password)
       allow(subject).to receive(:cleanup_deployment_manifests)
       allow(GitClient).to receive(:add_everything)
       allow(GitClient).to receive(:safe_commit)
       allow(subject).to receive(:puts)
     end
 
-    context 'iaas is aws' do
-      it 'deploys bosh-lite to aws and makes the git commits' do
-        expect(subject).to receive(:install_ssh_key).ordered
-        expect(subject).to receive(:delete_aws_instances).ordered
-        expect(subject).to receive(:deploy_aws_bosh_lite).ordered
-        expect(GitClient).to receive(:add_everything).ordered
-        expect(GitClient).to receive(:safe_commit).with('recreated deployment edge-17.buildpacks.ci').ordered
+    it 'deletes and re-deploys bosh-lite' do
+      expect(subject).to receive(:target_bosh_director).ordered
+      expect(subject).to receive(:delete_bosh_deployment).ordered
+      expect(subject).to receive(:deploy_bosh_lite).ordered
 
-        subject.recreate
-      end
-    end
-
-    context 'iaas is azure or gcp' do
-      let(:iaas) { 'azure' }
-
-      it 'deploys bosh-lite to azure' do
-        expect(subject).to receive(:target_bosh_director).ordered
-        expect(subject).to receive(:delete_bosh_deployment).ordered
-        expect(subject).to receive(:deploy_bosh_lite).ordered
-
-        subject.recreate
-      end
+      subject.recreate
     end
 
     context 'bosh-lite is running' do
-      it "updates bosh-lite admin password" do
-        expect(subject).to receive(:update_admin_password)
-
-        subject.recreate
-      end
-
       it "cleans up the deployment manifests" do
         expect(subject).to receive(:cleanup_deployment_manifests)
 
@@ -110,129 +87,61 @@ describe BoshLiteManager do
   describe '#destroy' do
     before do
       allow(subject).to receive(:install_ssh_key)
-      allow(subject).to receive(:delete_aws_instances)
       allow(subject).to receive(:target_bosh_director)
       allow(subject).to receive(:delete_bosh_deployment)
     end
 
-    context 'iaas is aws' do
-      it 'deletes the aws instance ' do
-        expect(subject).to receive(:install_ssh_key).ordered
-        expect(subject).to receive(:delete_aws_instances).ordered
+    it 'deletes the bosh-lite deployment' do
+      expect(subject).to receive(:target_bosh_director).ordered
+      expect(subject).to receive(:delete_bosh_deployment).ordered
 
-        subject.destroy
-      end
-    end
-
-    context 'iaas is azure or gcp' do
-      let(:iaas) { 'azure' }
-
-      it 'deletes the azure bosh-lite deployment' do
-        expect(subject).to receive(:target_bosh_director).ordered
-        expect(subject).to receive(:delete_bosh_deployment).ordered
-
-        subject.destroy
-      end
+      subject.destroy
     end
   end
 
   describe 'setup_bosh_connection' do
     before do
-      allow(subject).to receive(:install_ssh_key)
       allow(subject).to receive(:target_bosh_director)
     end
 
-    context 'iaas is aws' do
-      it 'installs the ssh key' do
-        expect(subject).to receive(:install_ssh_key).ordered
-        subject.send :setup_bosh_connection
-      end
-    end
-
-    context 'iaas is azure or gcp' do
-      let(:iaas) { 'gcp' }
-
-      it 'targets the BOSH director' do
-        expect(subject).to receive(:target_bosh_director)
-        subject.send :setup_bosh_connection
-      end
+    it 'targets the BOSH director' do
+      expect(subject).to receive(:target_bosh_director)
+      subject.send :setup_bosh_connection
     end
   end
 
   describe 'destroy_old_bosh_lite' do
     before do
-      allow(subject).to receive(:delete_aws_instances)
       allow(subject).to receive(:delete_bosh_deployment)
     end
 
-    context 'iaas is aws' do
-      it 'deletes the aws instance' do
-        expect(subject).to receive(:delete_aws_instances)
-        subject.send :destroy_old_bosh_lite
-      end
-    end
-
-    context 'iaas is azure or gcp' do
-      let(:iaas) { 'gcp' }
-
-      it 'deletes the bosh deployment' do
-        expect(subject).to receive(:delete_bosh_deployment)
-        subject.send :destroy_old_bosh_lite
-      end
+    it 'deletes the bosh deployment' do
+      expect(subject).to receive(:delete_bosh_deployment)
+      subject.send :destroy_old_bosh_lite
     end
   end
 
   describe 'deploy_new_bosh_lite' do
     before do
-      allow(subject).to receive(:deploy_aws_bosh_lite)
       allow(subject).to receive(:deploy_bosh_lite)
       allow(GitClient).to receive(:add_everything)
       allow(GitClient).to receive(:safe_commit)
     end
 
-    context 'iaas is aws' do
-      it 'deploys bosh lite' do
-        expect(subject).to receive(:deploy_aws_bosh_lite)
-        subject.send :deploy_new_bosh_lite
-      end
-
-      it 'commits the AWS artifacts' do
-        expect(GitClient).to receive(:add_everything)
-        expect(GitClient).to receive(:safe_commit).with('recreated deployment edge-17.buildpacks.ci')
-        subject.send :deploy_new_bosh_lite
-      end
-    end
-
-    context 'iaas is azure or gcp' do
-      let(:iaas) { 'gcp' }
-
-      it 'deploys bosh lite' do
-        expect(subject).to receive(:deploy_bosh_lite)
-        subject.send :deploy_new_bosh_lite
-      end
-    end
-  end
-
-
-  describe '#deploy_aws_bosh_lite' do
-    it "sets VAGRANT_CWD to deployment directory" do
-      subject.send :deploy_aws_bosh_lite
-      expect(ENV.fetch('VAGRANT_CWD')).to eq(deployment_dir)
-    end
-
-    it "runs vagrant up with aws provider" do
-      expect(subject).to receive(:run_or_exit).with("/usr/bin/vagrant up --provider=aws")
-
-      subject.send :deploy_aws_bosh_lite
+    it 'deploys bosh lite' do
+      expect(subject).to receive(:deploy_bosh_lite)
+      subject.send :deploy_new_bosh_lite
     end
   end
 
   describe '#target_bosh_director' do
-    it 'targets the director and logs in' do
-      expect(subject).to receive(:run_or_exit).with("bosh target bosh.example.com")
-      expect(subject).to receive(:run_or_exit).with("bosh login admin_director also_a_password")
-
+    it 'exports BOSH 2 CLI environment values' do
       subject.send :target_bosh_director
+
+      expect(ENV.fetch("BOSH_CA_CERT")).to eq bosh_director_ca_cert_path
+      expect(ENV.fetch("BOSH_CLIENT_SECRET")).to eq bosh_director_password
+      expect(ENV.fetch("BOSH_CLIENT")).to eq bosh_director_user
+      expect(ENV.fetch("BOSH_ENVIRONMENT")).to eq bosh_director_target
     end
   end
 
@@ -300,64 +209,6 @@ describe BoshLiteManager do
     it 'sets the BOSH_LITE_PRIVATE_KEY env var to key file path' do
       key_file = subject.send(:install_ssh_key)
       expect(ENV.fetch('BOSH_LITE_PRIVATE_KEY')).to eq(key_file)
-    end
-  end
-
-  describe '#update_admin_password' do
-    before do
-      allow(subject).to receive(:system).with("bosh -u admin_user -p admin -t" +
-                                              " https://edge-17.buildpacks.ci.example.com" +
-                                              " create user admin_user this_is_a_password").and_return(admin_update_succeeded)
-    end
-
-    context 'bosh update admin credentials worked' do
-      let(:admin_update_succeeded) { true }
-
-      it 'reports that it is working' do
-        expect { subject.send :update_admin_password }.to output("Deployment working!\n").to_stdout
-      end
-    end
-
-    context 'bosh update admin credentials did not work' do
-      let(:admin_update_succeeded) { false }
-
-      context 'iaas is aws' do
-        it "reports that deployment failed, deletes aws instances, and exits" do
-          expect(subject).to receive(:puts).with("Deployment failed: deleting instance")
-          expect(subject).to receive(:delete_aws_instances)
-          expect { subject.send :update_admin_password }.to raise_exception(SystemExit)
-        end
-      end
-
-      context 'iaas is azure or gcp' do
-        let(:iaas) { 'gcp' }
-
-        it "reports that deployment failed and exits" do
-          expect(subject).to receive(:puts).with("Deployment failed")
-          expect { subject.send :update_admin_password }.to raise_exception(SystemExit)
-        end
-      end
-    end
-  end
-
-  describe '#delete_aws_instances' do
-    let(:lib_directory) { File.expand_path(File.dirname(__FILE__)) }
-    let(:script_file)   { File.expand_path(File.join(lib_directory, '..', '..', 'scripts', 'terminate-bosh-lite')) }
-
-
-    before do
-      allow(subject).to receive(:run_or_exit)
-      allow(FileUtils).to receive(:rm_rf)
-    end
-
-    it 'runs the terminate bosh lite script' do
-      expect(subject).to receive(:run_or_exit).with(script_file)
-      subject.send :delete_aws_instances
-    end
-
-    it 'removes the .vagrant file' do
-      expect(FileUtils).to receive(:rm_rf).with('.vagrant')
-      subject.send :delete_aws_instances
     end
   end
 
