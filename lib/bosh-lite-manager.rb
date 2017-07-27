@@ -13,12 +13,12 @@ class BoshLiteManager
   attr_reader :deployment_dir, :iaas, :deployment_id, :bosh_lite_user,
               :bosh_lite_password, :bosh_lite_deployment_name, :bosh_lite_url,
               :bosh_director_user, :bosh_director_password, :bosh_director_target,
-              :bosh_private_key, :credentials_struct
+              :bosh_private_key, :bosh_director_ca_cert_path, :credentials_struct
 
   def initialize(iaas:, deployment_dir:, deployment_id:, bosh_lite_user:,
                  bosh_lite_password:, bosh_lite_deployment_name:, bosh_lite_url:,
                  bosh_director_user:, bosh_director_password:, bosh_director_target:,
-                 bosh_private_key:, credentials_struct:)
+                 bosh_private_key:, bosh_director_ca_cert_path:, credentials_struct:)
 
     @iaas = iaas
     @deployment_dir = deployment_dir
@@ -30,6 +30,7 @@ class BoshLiteManager
     @bosh_director_user = bosh_director_user
     @bosh_director_password = bosh_director_password
     @bosh_director_target = bosh_director_target
+    @bosh_director_ca_cert_path = bosh_director_ca_cert_path
     @bosh_private_key = bosh_private_key
     @credentials_struct = credentials_struct
   end
@@ -54,8 +55,6 @@ class BoshLiteManager
       exit 1
     end
 
-    update_admin_password if iaas == 'aws'
-
     # Remove deployment manifests generated from the previous recreation cycle
     # So this recreation cycle's manifest generation is fresh
     cleanup_deployment_manifests
@@ -64,48 +63,22 @@ class BoshLiteManager
   private
 
   def setup_bosh_connection
-    if iaas == 'aws'
-      install_ssh_key
-    elsif iaas == 'azure' || iaas == 'gcp'
-      target_bosh_director
-    end
+    target_bosh_director
   end
 
   def destroy_old_bosh_lite
-    if iaas == 'aws'
-      delete_aws_instances
-    elsif iaas == 'azure' || iaas == 'gcp'
-      # Clean up and destroy old bosh-lite VM
-      delete_bosh_deployment
-    end
+    delete_bosh_deployment
   end
 
   def deploy_new_bosh_lite
-    if iaas == 'aws'
-      deploy_aws_bosh_lite
-
-      # Commit AWS artifacts
-      Dir.chdir(deployment_dir) do
-        GitClient.add_everything
-        GitClient.safe_commit("recreated deployment #{deployment_id}")
-      end
-    elsif iaas == 'azure' || iaas == 'gcp'
-      # Boot up new bosh-lite VM
-      deploy_bosh_lite
-    end
-  end
-
-  def deploy_aws_bosh_lite
-    Dir.chdir(deployment_dir) do
-      ENV.store('VAGRANT_CWD', deployment_dir)
-      ENV.store('BOSH_LITE_DISK_SIZE', '1000')
-      run_or_exit "/usr/bin/vagrant up --provider=aws"
-    end
+    deploy_bosh_lite
   end
 
   def target_bosh_director
-    run_or_exit "bosh target #{bosh_director_target}"
-    run_or_exit "bosh login #{bosh_director_user} #{bosh_director_password}"
+    ENV["BOSH_CLIENT"] = bosh_director_user
+    ENV["BOSH_CLIENT_SECRET"] = bosh_director_password
+    ENV["BOSH_CA_CERT"] = bosh_director_ca_cert_path
+    ENV["BOSH_ENVIRONMENT"] = bosh_director_target
   end
 
   def setup_bosh_lite_manifest
@@ -147,30 +120,6 @@ class BoshLiteManager
 
     ENV.store('BOSH_LITE_PRIVATE_KEY', ssh_key_file)
     ssh_key_file
-  end
-
-  def update_admin_password
-    able_to_update_admin = system "bosh -u #{bosh_lite_user} -p admin -t #{bosh_lite_url} create user #{bosh_lite_user} #{bosh_lite_password}"
-    if able_to_update_admin
-      puts "Deployment working!"
-    elsif iaas == 'aws'
-      puts "Deployment failed: deleting instance"
-      delete_aws_instances
-      exit 1
-    else
-      puts 'Deployment failed'
-      exit 1
-    end
-  end
-
-  def delete_aws_instances
-    Dir.chdir(deployment_dir) do
-      lib_directory = File.expand_path(File.dirname(__FILE__))
-      terminate_bosh_lite_script = File.expand_path(File.join(lib_directory, '..', 'scripts', 'terminate-bosh-lite'))
-
-      run_or_exit terminate_bosh_lite_script
-      FileUtils.rm_rf('.vagrant')
-    end
   end
 
   def bosh_lite_running?
