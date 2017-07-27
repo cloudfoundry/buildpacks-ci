@@ -8,7 +8,6 @@ describe CategorizeSecurityNotices do
   let(:tracker_client) {double "tracker_client"}
   let(:stories_file) { Tempfile.new }
   let(:stack_receipt) { Tempfile.new }
-  let(:version) { 999.999 }
   let(:story_content) do <<-STORY
                             **Product:** cflinuxfs2-acceptance
                             **Severity:** medium
@@ -53,7 +52,7 @@ describe CategorizeSecurityNotices do
                           "ii  evince   3.10.3-0ubuntu10.3\n" +
                           "ii  evince-common    3.10.2-0ubuntu10.3\n"}
 
-  subject { CategorizeSecurityNotices.new(tracker_client, stories_file.path, stack_receipt.path, version) }
+  subject { CategorizeSecurityNotices.new(tracker_client, stories_file.path, stack_receipt.path) }
 
   before(:each) do
     allow(tracker_client).to receive(:add_label_to_story).with(anything)
@@ -79,7 +78,7 @@ describe CategorizeSecurityNotices do
   it "labels any stories related to the rootfs (regardless of package version) with 'affected-<version of rootfs>', points them with 0, and starts them" do
     expect(tracker_client).to receive(:add_label_to_story).with(story: { "id" => "123",
                                                                          "description" => "#{story_content}",
-                                                                         "labels" => ["cflinuxfs2", "security-notice", "some-label"] }, label: "affected-999.999")
+                                                                         "labels" => ["cflinuxfs2", "security-notice", "some-label"] }, label: "affected")
     expect(tracker_client).to receive(:point_story).with(story_id: "123", estimate: 0)
     expect(tracker_client).to receive(:change_story_state).with(story_id: "123", current_state: "started")
 
