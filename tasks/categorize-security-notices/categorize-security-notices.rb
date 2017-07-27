@@ -8,19 +8,18 @@ require 'yaml'
 class CategorizeSecurityNotices
   attr_reader :stories
 
-  def initialize(tracker_client, stories_file, stack_receipt, version)
+  def initialize(tracker_client, stories_file, stack_receipt)
     ref = JSON.parse(File.read(stories_file))
     @tracker_client = tracker_client
     @stories = JSON.parse(ref['version']['ref'])
     @receipt = File.read(stack_receipt)
-    @stack_version = version
   end
 
   def run
     stories.each do |story|
       packages = get_story_packages(story)
       if affected?(packages)
-        label_story(story, "affected-#{@stack_version}")
+        label_story(story, "affected")
         zero_point_story(story['id'])
         start_story(story['id'])
       else

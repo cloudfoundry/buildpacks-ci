@@ -22,14 +22,13 @@ fi
 pushd buildpack
 	pushd "$update_dir"
 		go get github.com/FiloSottile/gvt
-		go get github.com/golang/mock/gomock
 		go get github.com/golang/mock/mockgen
 		go get github.com/onsi/ginkgo/ginkgo
-		go get github.com/onsi/gomega
 
 		gvt update code.cloudfoundry.org/buildpackapplifecycle
 		go generate || true
 		[ -d hooks ] && (cd hooks && (go generate || true))
+		[ -d compile ] && (cd compile && (go generate || true))
 		[ -d supply ] && (cd supply && (go generate || true))
 		[ -d finalize ] && (cd finalize && (go generate || true))
 		ginkgo -r

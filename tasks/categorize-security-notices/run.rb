@@ -3,8 +3,6 @@
 require_relative './categorize-security-notices.rb'
 require_relative '../../lib/tracker-client.rb'
 
-version = File.read('cflinuxfs2-release/version').strip
-
 Dir.chdir('cflinuxfs2-release') do
   Dir.mkdir('source')
   `tar -xzf source.tar.gz -C source`
@@ -19,6 +17,5 @@ receipt_path = Dir.glob(File.join('cflinuxfs2-release', 'source', 'cloudfoundry-
 
 CategorizeSecurityNotices.new(tracker_client,
   'davos-cve-stories/data',
-  receipt_path,
-  version
+  receipt_path
 ).run
