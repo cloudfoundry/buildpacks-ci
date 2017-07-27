@@ -80,7 +80,7 @@ class BoshComponentStoryCreator
     if component == 'Concourse'
       description += <<~DESCRIPTION
                         1. Pull `buildpacks-ci`
-                        1. Update `deployments/concourse_gcp/manifest.yml` with your changes
+                        1. Update `deployments/concourse-gcp/manifest.yml.erb` with your changes
                         1. Run the `bin/deploy_concourse` script from root
                         1. git push when satisfied
                         DESCRIPTION
