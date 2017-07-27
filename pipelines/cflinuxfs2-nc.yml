@@ -168,13 +168,11 @@ resources: #####################################################################
 
   - name: diego-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
       repository: cloudfoundry/diego-release
 
   - name: garden-runc-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
       repository: cloudfoundry/garden-runc-release
 
