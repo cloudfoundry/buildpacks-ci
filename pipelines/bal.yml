@@ -4,7 +4,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: {{buildpacks-ci-git-uri-public-branch}}
+      branch: cats_bal_pipeline #{{buildpacks-ci-git-uri-public-branch}}
 
   - name: bal-develop
     type: git
@@ -12,12 +12,12 @@ resources:
       uri: {{buildpackapplifecycle-git-uri}}
       branch: {{buildpackapplifecycle-git-branch}}
 
-  - name: bal-master
-    type: git
-    source:
-      uri: {{buildpackapplifecycle-git-uri}}
-      branch: master
-      private_key: {{buildpackapplifecycle-private-key}}
+  # - name: bal-master
+  #   type: git
+  #   source:
+  #     uri: {{buildpackapplifecycle-git-uri}}
+  #     branch: master
+  #     private_key: {{buildpackapplifecycle-private-key}}
 
   - name: cats-concourse-task
     type: git
@@ -43,12 +43,12 @@ resources:
       branch: release-candidate
       private_key: {{cf-release-private-key}}
 
-  - name: cf-release-develop
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/cf-release
-      branch: develop
-      private_key: {{cf-release-private-key}}
+  # - name: cf-release-develop
+  #   type: git
+  #   source:
+  #     uri: git@github.com:cloudfoundry/cf-release
+  #     branch: develop
+  #     private_key: {{cf-release-private-key}}
 
   - name: lite-stemcell
     type: bosh-io-stemcell
@@ -73,10 +73,10 @@ resources:
       deployment: cf-warden-diego
       ignore_ssl: true
 
-  - name: failure-alert
-    type: slack-notification
-    source:
-      url: {{concourse-job-failure-notifications-slack-webhook}}
+  # - name: failure-alert
+  #   type: slack-notification
+  #   source:
+  #     url: {{concourse-job-failure-notifications-slack-webhook}}
 
   - name: cf-bosh-release
     type: bosh-io-release
@@ -101,6 +101,22 @@ resources:
       branch: master
 
 jobs:
+  - name: unit-specs-linux
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: bal-develop
+          trigger: true
+      - task: run-specs
+        file: buildpacks-ci/tasks/run-bal-specs/task.yml
+  - name: unit-specs-windows
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: bal-develop
+          trigger: true
+      - task: run-specs
+        file: buildpacks-ci/tasks/run-bal-specs/task-windows.yml
   - name: recreate-bosh-lite
     serial: true
     public: true
@@ -109,6 +125,7 @@ jobs:
         - get: buildpacks-ci
         - get: deployments-buildpacks
         - get: bal-develop
+          passed: [unit-specs-linux, unit-specs-windows]
           trigger: true
       - task: recreate-cf-release-bosh-lite
         file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
@@ -179,22 +196,22 @@ jobs:
           params:
             manifest: generate-manifest-artifacts/bal.buildpacks-gcp.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
-            releases: cf-bosh-release/release.tgz
+            releases: [cf-bosh-release/release.tgz]
         - put: bal-deployment
           params:
             manifest: generate-manifest-artifacts/bal.buildpacks-gcp.ci/diego.yml
             stemcells: ['lite-stemcell/stemcell.tgz']
             releases:
-              - [diego-release-artifacts/dev_releases/cf/*.tgz]
+              - [diego-release-artifacts/dev_releases/diego/*.tgz]
               - cflinuxfs2-bosh-release/release.tgz
               - garden-runc-bosh-release/release.tgz
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+        # on_failure:
+        #   put: failure-alert
+        #   params:
+        #     text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        #     channel: {{concourse-job-failure-notifications-slack-channel}}
+        #     username: concourse
+        #     icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
   - name: cats
     serial: true
@@ -230,13 +247,13 @@ jobs:
           params:
             NODES: 12
             CONFIG_FILE_PATH: integration_config.json
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+        # on_failure:
+        #   put: failure-alert
+        #   params:
+        #     text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        #     channel: {{concourse-job-failure-notifications-slack-channel}}
+        #     username: concourse
+        #     icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
   - name: set-github-status
     serial: true
@@ -251,7 +268,6 @@ jobs:
       - task: github-set-status-success
         file: buildpacks-ci/tasks/set-status-success/task.yml
         params:
-          LOCAL_REPO_DIR: bal-develop
           GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
           GITHUB_REPO: 'cloudfoundry/buildpackapplifecycle'
           GITHUB_STATUS_CONTEXT: 'buildpacks-ci/cats'
