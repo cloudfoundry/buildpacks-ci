@@ -75,7 +75,7 @@ describe CategorizeSecurityNotices do
     subject.run
   end
 
-  it "labels any stories related to the rootfs (regardless of package version) with 'affected-<version of rootfs>', points them with 0, and starts them" do
+  it "labels any stories related to the rootfs (regardless of package version) with 'affected', points them with 0, and starts them" do
     expect(tracker_client).to receive(:add_label_to_story).with(story: { "id" => "123",
                                                                          "description" => "#{story_content}",
                                                                          "labels" => ["cflinuxfs2", "security-notice", "some-label"] }, label: "affected")
