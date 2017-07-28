@@ -42,7 +42,6 @@ class CategorizeSecurityNotices
   def affected?(packages)
     packages.each do |package|
       package_name = package.split(" ").first
-      package_version = package.split(" ").last
       exp = Regexp.new(Regexp.escape(package_name) + ":?\\S*\\s+")
       return true if exp.match(@receipt)
     end
