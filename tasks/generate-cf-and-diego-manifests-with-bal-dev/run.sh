@@ -65,7 +65,7 @@ pushd diego-release
   ruby -i -pe "gsub('diego_privileged_containers: null', 'diego_privileged_containers: true')" bosh-lite/deployments/diego.yml
 
   pushd src/code.cloudfoundry.org/buildpackapplifecycle
-    git checkout $BAL_DEV_BRANCH
+    git checkout "$BAL_DEV_BRANCH"
     git pull
   popd
 popd
