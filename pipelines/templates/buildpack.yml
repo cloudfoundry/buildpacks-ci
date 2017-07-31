@@ -64,6 +64,16 @@ resources: #####################################################################
         - PULL_REQUEST_TEMPLATE
         - "**/*.md"
 
+  - name: buildpack-new-version
+    type: git
+    source:
+      uri: git@github.com:<%= git_repo_organization %>/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
+      branch: develop
+      paths:
+        - VERSION
+        - CHANGELOG
+
   - name: buildpack-master
     type: git
     source:
@@ -328,6 +338,8 @@ jobs: ##########################################################################
           passed: [ "detect-new-version-and-upload-artifacts" ]
           resource: buildpack-master
           trigger: true
+        - get: repo
+          resource: buildpack-master
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
           passed: [ "detect-new-version-and-upload-artifacts" ]
@@ -349,6 +361,15 @@ jobs: ##########################################################################
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
+        on_success:
+          task: github-set-status-success
+          file: buildpacks-ci/tasks/set-status-success/task.yml
+          params:
+            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+            GITHUB_REPO: cloudfoundry/<%= language %>-buildpack
+            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-master'
+            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge master spec passed'
+            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
         on_failure:
           put: failure-alert
           params:
@@ -375,6 +396,8 @@ jobs: ##########################################################################
           passed: [ "detect-new-version-and-upload-artifacts" ]
           resource: buildpack-master
           trigger: true
+        - get: repo
+          resource: buildpack-master
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
           passed: [ "detect-new-version-and-upload-artifacts" ]
@@ -397,6 +420,15 @@ jobs: ##########################################################################
             put: cf-lts-gcp-environments
             params:
               release: cf-environments
+        on_success:
+          task: github-set-status-success
+          file: buildpacks-ci/tasks/set-status-success/task.yml
+          params:
+            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+            GITHUB_REPO: cloudfoundry/<%= language %>-buildpack
+            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-master'
+            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI LTS master spec passed'
+            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
         on_failure:
           put: failure-alert
           params:
@@ -556,6 +588,8 @@ jobs: ##########################################################################
           - get: buildpack
             resource: buildpack-develop
             trigger: true
+          - get: repo
+            resource: buildpack-develop
         - aggregate:
           - do:
             - put: cf-bp-space
@@ -593,6 +627,15 @@ jobs: ##########################################################################
             ensure:
               task: delete-cf-space
               file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+        on_success:
+          task: github-set-status-success
+          file: buildpacks-ci/tasks/set-status-success/task.yml
+          params:
+            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+            GITHUB_REPO: cloudfoundry/<%= language %>-buildpack
+            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-develop'
+            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge develop spec passed'
+            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
         on_failure:
           put: failure-alert
           params:
@@ -619,6 +662,8 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-develop
           trigger: true
+        - get: repo
+          resource: buildpack-develop
       - do:
 <% if cutlass.include?(language) %>
         - task: ginkgo
@@ -650,6 +695,15 @@ jobs: ##########################################################################
             LANGUAGE: <%= language %>
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+        on_success:
+          task: github-set-status-success
+          file: buildpacks-ci/tasks/set-status-success/task.yml
+          params:
+            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+            GITHUB_REPO: cloudfoundry/<%= language %>-buildpack
+            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-develop'
+            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI LTS develop spec passed'
+            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
         on_failure:
           put: failure-alert
           params:
@@ -662,6 +716,23 @@ jobs: ##########################################################################
           params:
             release: cf-environments
 <% end %>
+  - name: buildpack-to-master
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: repo
+          trigger: true
+          resource: buildpack-new-version
+      - task: merge-to-master
+        file: buildpacks-ci/tasks/buildpack-to-master/task.yml
+        params:
+          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+          GITHUB_REPO: cloudfoundry/<%= language %>-buildpack
+          GITHUB_STATUS_CONTEXT: 'buildpacks-ci/passed-dev-specs'
+          GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI develop specs passed'
+          PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 <% if libbuildpacks.include? language %>
   - name: update-libbuildpack
     serial: true
