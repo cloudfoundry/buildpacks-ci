@@ -21,9 +21,11 @@ fi
 
 pushd buildpack
   pushd "$update_dir"
-    pushd vendor/github.com/golang/mock/mockgen
-      go install
-    popd
+    if [ -d vendor/github.com/golang/mock/mockgen ]; then
+      pushd vendor/github.com/golang/mock/mockgen
+        go install
+      popd
+    fi
     pushd vendor/github.com/onsi/ginkgo/ginkgo
       go install
     popd
