@@ -7,6 +7,10 @@ set -o pipefail
 
 cd buildpack
 
+export GOPATH=$PWD
+export GOBIN=$PWD/.bin
+export PATH=$GOBIN:$PATH
+
 ./scripts/unit.sh
 
 CACHED=true  ./scripts/integration.sh
