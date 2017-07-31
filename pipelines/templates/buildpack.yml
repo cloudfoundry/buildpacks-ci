@@ -556,6 +556,16 @@ jobs: ##########################################################################
         - aggregate:
           - do:
             - put: cf-bp-space
+<% if language == "staticfile" %>
+            - task: ginkgo
+              file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
+              params:
+                STACKS: cflinuxfs2
+                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+                CF_PASSWORD: {{ci_cf_shared_password}}
+                RUBYGEM_MIRROR: {{rubygem-mirror}}
+              privileged: true
+<% else %>
             - task: rspec
               file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
               params:
@@ -564,6 +574,7 @@ jobs: ##########################################################################
                 CF_PASSWORD: {{ci_cf_shared_password}}
                 RUBYGEM_MIRROR: {{rubygem-mirror}}
               privileged: true
+<% end %>
             ensure:
               task: delete-cf-space
               file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
