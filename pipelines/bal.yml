@@ -1,5 +1,13 @@
 ---
+resource_types:
+  - name: concourse2tracker
+    type: docker-image
+    source:
+      repository: cfbuildpacks/concourse2tracker
 resources:
+  - name: concourse2tracker
+    type: concourse2tracker
+
   - name: buildpacks-ci
     type: git
     source:
@@ -11,13 +19,14 @@ resources:
     source:
       uri: {{buildpackapplifecycle-git-uri}}
       branch: {{buildpackapplifecycle-git-branch}}
+      private_key: {{buildpackapplifecycle-private-key}}
 
-  # - name: bal-master
-  #   type: git
-  #   source:
-  #     uri: {{buildpackapplifecycle-git-uri}}
-  #     branch: master
-  #     private_key: {{buildpackapplifecycle-private-key}}
+  - name: bal-master
+    type: git
+    source:
+      uri: {{buildpackapplifecycle-git-uri}}
+      branch: master
+      private_key: {{buildpackapplifecycle-private-key}}
 
   - name: cats-concourse-task
     type: git
@@ -43,13 +52,6 @@ resources:
       branch: release-candidate
       private_key: {{cf-release-private-key}}
 
-  # - name: cf-release-develop
-  #   type: git
-  #   source:
-  #     uri: git@github.com:cloudfoundry/cf-release
-  #     branch: develop
-  #     private_key: {{cf-release-private-key}}
-
   - name: lite-stemcell
     type: bosh-io-stemcell
     source:
@@ -73,10 +75,10 @@ resources:
       deployment: cf-warden-diego
       ignore_ssl: true
 
-  # - name: failure-alert
-  #   type: slack-notification
-  #   source:
-  #     url: {{concourse-job-failure-notifications-slack-webhook}}
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
 
   - name: cf-bosh-release
     type: bosh-io-release
@@ -173,8 +175,6 @@ jobs:
           - get: lite-stemcell
             attempts: 3
         - task: generate-manifest
-          # write task to change manifest for BAL
-          # Upon investigation we may just need to update the sub module from develop can copy current task and tweak
           file: buildpacks-ci/tasks/generate-cf-and-diego-manifests-with-bal-dev/task.yml
           params:
             BAL_DEV_BRANCH: {{buildpackapplifecycle-git-branch}}
@@ -205,13 +205,13 @@ jobs:
               - [diego-release-artifacts/dev_releases/diego/*.tgz]
               - cflinuxfs2-bosh-release/release.tgz
               - garden-runc-bosh-release/release.tgz
-        # on_failure:
-        #   put: failure-alert
-        #   params:
-        #     text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-        #     channel: {{concourse-job-failure-notifications-slack-channel}}
-        #     username: concourse
-        #     icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
   - name: cats
     serial: true
@@ -247,13 +247,13 @@ jobs:
           params:
             NODES: 12
             CONFIG_FILE_PATH: integration_config.json
-        # on_failure:
-        #   put: failure-alert
-        #   params:
-        #     text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-        #     channel: {{concourse-job-failure-notifications-slack-channel}}
-        #     username: concourse
-        #     icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
   - name: set-github-status
     serial: true
@@ -274,45 +274,46 @@ jobs:
           GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI CATs passed'
           PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
-  # - name: merge-to-master
-  #   serial: true
-  #   public: true
-  #   plan:
-  #     - aggregate:
-  #       - get: bal-master
-  #       - get: buildpacks-ci
-  #       - get: bal-develop
-  #         passed: [cats]
-  #         trigger: true
-  #     - put: bal-master
-  #       params:
-  #         repository: bal-develop
-  #     - put: concourse2tracker
-  #       params:
-  #         git_path: bal-develop
-  #         project_id: {{cf-buildpacks-public-tracker-id}}
-  #         api_token: {{pivotal-tracker-api-token}}
+  - name: merge-to-master
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: bal-master
+        - get: buildpacks-ci
+        - get: bal-develop
+          passed: [cats]
+          trigger: true
+      - put: bal-master
+        params:
+          repository: bal-develop
+      - put: concourse2tracker
+        params:
+          git_path: bal-develop
+          project_id: {{cf-buildpacks-public-tracker-id}}
+          api_token: {{pivotal-tracker-api-token}}
 
-  # - name: destroy-bosh-lite
-  #   serial: true
-  #   public: true
-  #   plan:
-  #     - aggregate:
-  #       - get: buildpacks-ci
-  #       - get: bal-develop
-  #           passed: [merge-to-master]
-  #           trigger: true
-  #     - task: destroy-cf-release-bosh-lite
-  #       file: buildpacks-ci/tasks/destroy-bosh-lite/task.yml
-  #       params:
-  #         DEPLOYMENT_NAME: bal.buildpacks-gcp.ci
-  #         BOSH_USER: {{gcp_bosh_admin_user}}
-  #         BOSH_PASSWORD: {{gcp_bosh_admin_password}}
-  #         GCP_BOSH_LITE_NAME: bal-gcp-bosh-lite
-  #         GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
-  #         GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
-  #         BOSH_LITE_NAME: bal.buildpacks-gcp.ci
-  #         RUBYGEM_MIRROR: {{rubygem-mirror}}
-  #         BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-  #         IAAS: gcp
-  #       attempts: 5
+  - name: destroy-bosh-lite
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: deployments-buildpacks
+        - get: buildpacks-ci
+        - get: bal-develop
+          passed: [merge-to-master]
+          trigger: true
+      - task: destroy-cf-release-bosh-lite
+        file: buildpacks-ci/tasks/destroy-bosh-lite/task.yml
+        params:
+          DEPLOYMENT_NAME: bal.buildpacks-gcp.ci
+          BOSH_USER: {{gcp_bosh_admin_user}}
+          BOSH_PASSWORD: {{gcp_bosh_admin_password}}
+          GCP_BOSH_LITE_NAME: bal-gcp-bosh-lite
+          GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
+          GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
+          BOSH_LITE_NAME: bal.buildpacks-gcp.ci
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
+          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+          IAAS: gcp
+        attempts: 5
