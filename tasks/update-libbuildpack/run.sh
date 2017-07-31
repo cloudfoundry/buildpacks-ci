@@ -21,8 +21,6 @@ fi
 
 pushd buildpack
   pushd "$update_dir"
-    go get github.com/FiloSottile/gvt
-
     pushd vendor/github.com/golang/mock/mockgen
       go install
     popd
@@ -30,7 +28,13 @@ pushd buildpack
       go install
     popd
 
-    gvt update github.com/cloudfoundry/libbuildpack
+    if [ -f Gopkg.toml ]; then
+      go get github.com/golang/dep/cmd/dep
+      dep ensure --update
+    else
+      go get github.com/FiloSottile/gvt
+      gvt update github.com/cloudfoundry/libbuildpack
+    fi
 
     go generate || true
     [ -d compile ] && (cd compile && (go generate || true))
