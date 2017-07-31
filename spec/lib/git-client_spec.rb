@@ -132,6 +132,37 @@ describe GitClient do
     end
   end
 
+  describe '#last_commit_files' do
+    let(:dir)                 { Dir.mktmpdir }
+    let(:last_commit_files)   { 'this should not matter but is here to avoid undefined symbols' }
+    let(:stderr_output)       { 'this should not matter but is here to avoid undefined symbols' }
+    let(:process_status)      { double(:process_status) }
+
+    subject { described_class.last_commit_files(dir) }
+
+    before { allow(Open3).to receive(:capture3).with('git log --pretty="format:" --name-only -n 1 HEAD~0').and_return([last_commit_files, stderr_output, process_status]) }
+
+    context 'git works properly' do
+      let(:last_commit_files) { 'file1\nfile2' }
+
+      before { allow(process_status).to receive(:success?).and_return(true) }
+
+      it 'should return the last git commit message' do
+        expect(subject).to eq('file1\nfile2')
+      end
+    end
+
+    context 'git fails' do
+      let(:stderr_output) { 'stderr output' }
+
+      before { allow(process_status).to receive(:success?).and_return(false) }
+
+      it 'throws an exception about being unable to read the commit files' do
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not get commit files for HEAD~0. STDERR was: stderr output')
+      end
+    end
+  end
+
   describe '#last_commit_author' do
     let(:dir)                 { Dir.mktmpdir }
     let(:last_commit_message) { 'this should not matter but is here to avoid undefined symbols' }

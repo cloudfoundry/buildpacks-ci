@@ -49,6 +49,18 @@ class GitClient
     end
   end
 
+  def self.last_commit_files(dir)
+    Dir.chdir(dir) do
+      command = "git log --pretty=\"format:\" --name-only -n 1 HEAD~0"
+
+      stdout_str, stderr_str, status = Open3.capture3(command)
+
+      raise GitError.new("Could not get commit files for HEAD~0. STDERR was: #{stderr_str}") unless status.success?
+
+      stdout_str
+    end
+  end
+
   def self.set_global_config(option, value)
     raise GitError.new("Could not set global config #{option} to #{value}") unless system("git config --global #{option} \"#{value}\"")
   end
