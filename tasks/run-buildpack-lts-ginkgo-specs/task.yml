@@ -7,9 +7,10 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: buildpack
-  - name: cf-bp-space
-    path: cf-space
+  - name: cf-environments
 run:
-  path: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/run.sh
+  path: buildpacks-ci/tasks/run-buildpack-lts-ginkgo-specs/run.sh
 params:
   STACKS:
+  CF_PASSWORD:
+  BOSH_LITE_DOMAIN_NAME:
