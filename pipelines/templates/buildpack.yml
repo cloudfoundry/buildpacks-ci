@@ -169,12 +169,14 @@ resources: #####################################################################
       repository: buildpack-packager
       access_token: {{buildpacks-github-token}}
 
+<% if language != 'staticfile' %>
   - name: machete
     type: github-release
     source:
       user: {{buildpacks-github-org}}
       repository: machete
       access_token: {{buildpacks-github-token}}
+<% end %>
 
   ## Pivnet Release ##
 
@@ -618,6 +620,16 @@ jobs: ##########################################################################
           resource: buildpack-develop
           trigger: true
       - do:
+<% if language == "staticfile" %>
+            - task: ginkgo
+              file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
+              params:
+                STACKS: cflinuxfs2
+                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+                CF_PASSWORD: {{ci_cf_shared_password}}
+                RUBYGEM_MIRROR: {{rubygem-mirror}}
+              privileged: true
+<% else %>
         - task: rspec
           file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
           params:
@@ -627,6 +639,7 @@ jobs: ##########################################################################
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
+<% end %>
         - task: brats
           file: buildpacks-ci/tasks/run-brats/task.yml
           params:
@@ -730,6 +743,7 @@ jobs: ##########################################################################
         params:
           repository: repo-with-gemfile-artifacts
           rebase: true
+<% if language != 'staticfile' %>
   - name: update-machete
     serial: true
     public: true
@@ -753,6 +767,7 @@ jobs: ##########################################################################
         params:
           repository: repo-with-gemfile-artifacts
           rebase: true
+<% end %>
 
 <% if language == 'hwc' %>
   - name: update-buildpack-bosh-release
