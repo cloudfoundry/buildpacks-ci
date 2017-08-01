@@ -13,9 +13,6 @@ stacks_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'cflinuxfs2'))
 if ENV.fetch('STACK') == 'cflinuxfs2'
   notifiers = [CVEEmailPreparerAndGithubIssueNotifier, CVESlackNotifier, CVETrackerNotifier]
   cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'output-new-cves', 'new-cve-notifications'))
-elsif ENV.fetch('STACK') == 'cflinuxfs2-nc'
-  notifiers = []
-  cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'output-new-cves', 'new-cves-stacks-nc'))
 else
   raise "Unsupported stack: #{ENV.fetch('STACK')}"
 end
