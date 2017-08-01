@@ -1,10 +1,6 @@
 #!/usr/bin/env ruby
 
-if ENV.fetch('ROOTFS_TYPE') == 'nc'
-  repo = 'pivotal-cf/cflinusfs2-nc'
-else
-  repo = 'cloudfoundry/cflinuxfs2'
-end
+repo = 'cloudfoundry/cflinuxfs2'
 
 body_file = 'release-body/body'
 version = `cat version/number`
