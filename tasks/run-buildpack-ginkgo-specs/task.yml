@@ -13,3 +13,5 @@ run:
   path: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/run.sh
 params:
   STACKS:
+  GINKGO_ATTEMPTS:
+  GINKGO_NODES:

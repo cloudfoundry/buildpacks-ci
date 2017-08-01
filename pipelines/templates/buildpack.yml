@@ -564,6 +564,8 @@ jobs: ##########################################################################
               file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
               params:
                 STACKS: cflinuxfs2
+                GINKGO_ATTEMPTS: 4
+                GINKGO_NODES: 6
               privileged: true
 <% else %>
             - task: rspec
@@ -625,6 +627,8 @@ jobs: ##########################################################################
             STACKS: cflinuxfs2
             CF_PASSWORD: {{ci-cf-password}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 3
           privileged: true
 <% else %>
         - task: rspec
