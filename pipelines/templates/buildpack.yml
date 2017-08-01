@@ -1,4 +1,5 @@
 <% libbuildpacks = %w(go hwc multi nodejs staticfile) %>
+<% cutlass = %w(staticfile) %>
 
 ---
 resource_types:
@@ -74,7 +75,7 @@ resources: #####################################################################
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: {{buildpacks-ci-git-uri-public-branch}}
+      branch: cutlass # {{buildpacks-ci-git-uri-public-branch}}
 
   - name: brats
     type: git
@@ -169,7 +170,7 @@ resources: #####################################################################
       repository: buildpack-packager
       access_token: {{buildpacks-github-token}}
 
-<% if language != 'staticfile' %>
+<% if !cutlass.include?(language) %>
   - name: machete
     type: github-release
     source:
@@ -558,14 +559,11 @@ jobs: ##########################################################################
         - aggregate:
           - do:
             - put: cf-bp-space
-<% if language == "staticfile" %>
+<% if cutlass.include?(language) %>
             - task: ginkgo
               file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
               params:
                 STACKS: cflinuxfs2
-                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-                CF_PASSWORD: {{ci_cf_shared_password}}
-                RUBYGEM_MIRROR: {{rubygem-mirror}}
               privileged: true
 <% else %>
             - task: rspec
@@ -620,15 +618,14 @@ jobs: ##########################################################################
           resource: buildpack-develop
           trigger: true
       - do:
-<% if language == "staticfile" %>
-            - task: ginkgo
-              file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
-              params:
-                STACKS: cflinuxfs2
-                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-                CF_PASSWORD: {{ci_cf_shared_password}}
-                RUBYGEM_MIRROR: {{rubygem-mirror}}
-              privileged: true
+<% if cutlass.include?(language) %>
+        - task: ginkgo
+          file: buildpacks-ci/tasks/run-buildpack-lts-ginkgo-specs/task.yml
+          params:
+            STACKS: cflinuxfs2
+            CF_PASSWORD: {{ci-cf-password}}
+            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+          privileged: true
 <% else %>
         - task: rspec
           file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
@@ -743,7 +740,7 @@ jobs: ##########################################################################
         params:
           repository: repo-with-gemfile-artifacts
           rebase: true
-<% if language != 'staticfile' %>
+<% if !cutlass.include?(language) %>
   - name: update-machete
     serial: true
     public: true
