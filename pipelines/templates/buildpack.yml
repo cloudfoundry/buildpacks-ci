@@ -75,7 +75,7 @@ resources: #####################################################################
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: cutlass # {{buildpacks-ci-git-uri-public-branch}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
 
   - name: brats
     type: git
