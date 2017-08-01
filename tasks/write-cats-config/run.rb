@@ -20,6 +20,7 @@ cats_config = {
   "include_internet_dependent" => true,
   "include_routing" => false,
   "include_security_groups" => true,
+  "include_detect" => true,
   "include_services" => true,
   "include_ssh" => true,
   "include_sso" => false,
