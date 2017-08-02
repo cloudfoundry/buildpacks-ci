@@ -16,28 +16,31 @@ cats_config = {
   "backend" => "diego",
   "cf_push_timeout" => 600,
   "default_timeout" => 240,
-  "enable_color" => true,
+  "include_apps" => true,
   "include_app" => true,
+  "include_backend_compatibility" => true,
   "include_detect" => true,
+  "include_docker" => true,
   "include_internet_dependent" => true,
-  "include_routing" => false,
+  "include_persistent_app" => false,
+  "include_route_services" => true,
+  "include_routing" => true,
   "include_security_groups" => true,
   "include_services" => true,
   "include_ssh" => true,
-  "include_sso" => false,
-  "include_v3" => false,
-  "keep_user_at_suite_end" => false,
+  "include_sso" => true,
+  "include_tasks" => true,
+  "include_v3" => false
+  "include_zipkin" => true,
   "skip_ssl_validation" => true,
-  "use_existing_user" => false,
-  "use_http" => false,
+  "timeout_scale" => 1,
+  "use_http" => true,
   "verbose" => false
 }
 
 if diego_docker_on == 'true'
   exit 1 unless system "cf api api.#{apps_domain} --skip-ssl-validation"
   exit 1 unless system "echo \"\" | cf login -u #{admin_user} -p #{admin_password}"
-  exit 1 unless system "cf enable-feature-flag diego_docker"
-  cats_config['include_docker'] = true
 end
 
 puts "Writing CATS config to integration-config/integration_config.json"
