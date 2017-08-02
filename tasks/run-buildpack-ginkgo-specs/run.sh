@@ -4,8 +4,6 @@ set -o nounset
 set -o pipefail
 
 ./cf-space/login
-./buildpacks-ci/scripts/start-docker
-
 cd buildpack
 
 export GOPATH=$PWD
@@ -14,5 +12,7 @@ export PATH=$GOBIN:$PATH
 
 ./scripts/unit.sh
 
-CACHED=true  ./scripts/integration.sh
-CACHED=false ./scripts/integration.sh
+echo "Start Docker"
+../buildpacks-ci/scripts/start-docker >/dev/null
+
+./scripts/integration.sh
