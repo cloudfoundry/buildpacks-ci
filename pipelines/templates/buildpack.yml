@@ -1,5 +1,5 @@
 <% libbuildpacks = %w(go hwc multi nodejs staticfile) %>
-<% cutlass = %w(staticfile) %>
+<% cutlass = %w(nodejs staticfile) %>
 
 ---
 resource_types:
