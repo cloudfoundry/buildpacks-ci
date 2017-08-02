@@ -9,8 +9,6 @@ cf create-org integration || true
 cf create-space integration -o integration || true
 cf target -o integration -s integration
 
-./buildpacks-ci/scripts/start-docker
-
 cd buildpack
 
 export GOPATH=$PWD
@@ -19,5 +17,7 @@ export PATH=$GOBIN:$PATH
 
 ./scripts/unit.sh
 
-CACHED=true  ./scripts/integration.sh
-CACHED=false ./scripts/integration.sh
+echo "Start Docker"
+../buildpacks-ci/scripts/start-docker
+
+./scripts/integration.sh
