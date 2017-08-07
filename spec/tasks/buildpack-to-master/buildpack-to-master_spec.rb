@@ -21,6 +21,7 @@ describe BuildpackToMaster do
     allow(GitClient).to receive(:get_commit_sha).with('repo', 1).and_return(previous_sha)
     allow(Octokit).to receive(:list_statuses).with(git_repo, previous_sha).and_return(statuses)
     allow(GitClient).to receive(:last_commit_files).with('repo').and_return(files_changed)
+    allow(subject).to receive(:puts)
   end
 
   context 'the previous commit does not have lts and edge statuses' do
@@ -30,9 +31,11 @@ describe BuildpackToMaster do
 
     it 'does not add the buildpacks-ci/ready-to-merge tag' do
       expect(Octokit).not_to receive(:create_status)
-      expect(Octokit).not_to receive(:merge)
+      expect(Octokit).not_to receive(:update_branch)
 
-      subject.run
+      expect {
+        subject.run
+      }.to raise_error "Unsafe file changes"
     end
   end
 
@@ -42,9 +45,11 @@ describe BuildpackToMaster do
 
     it 'does not add the buildpacks-ci/ready-to-merge tag' do
       expect(Octokit).not_to receive(:create_status)
-      expect(Octokit).not_to receive(:merge)
+      expect(Octokit).not_to receive(:update_branch)
 
-      subject.run
+      expect {
+        subject.run
+      }.to raise_error "Unsafe file changes"
     end
   end
 
@@ -54,9 +59,11 @@ describe BuildpackToMaster do
 
     it 'does not add the buildpacks-ci/ready-to-merge tag' do
       expect(Octokit).not_to receive(:create_status)
-      expect(Octokit).not_to receive(:merge)
+      expect(Octokit).not_to receive(:update_branch)
 
-      subject.run
+      expect {
+        subject.run
+      }.to raise_error "Unsafe file changes"
     end
   end
 
@@ -66,7 +73,7 @@ describe BuildpackToMaster do
 
     it 'does not add the buildpacks-ci/ready-to-merge tag' do
       expect(Octokit).to receive(:create_status)
-      expect(Octokit).to receive(:merge)
+      expect(Octokit).to receive(:update_branch)
 
       subject.run
     end
