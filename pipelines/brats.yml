@@ -39,11 +39,11 @@ resources:
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
-  - name: cf-lts-gcp-environments
+  - name: lts-shared-environments
     type: pool
     source:
       branch: master
-      pool: cf-lts-gcp-environments
+      pool: lts-shared-environments
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
@@ -61,12 +61,20 @@ resources:
       repository: machete
       access_token: {{buildpacks-github-token}}
 
-  - name: cf-brat-space
+  - name: cf-edge-space
     type: cf-space-resource
     source:
       target: api.buildpacks-shared.cf-app.com
       username: {{ci-cf-username}}
       password: {{ci_cf_shared_password}}
+      organization: pivotal
+
+  - name: cf-lts-space
+    type: cf-space-resource
+    source:
+      target: {{ci-cf-lts-target}}
+      username: admin
+      password: {{ci-cf-lts-password}}
       organization: pivotal
 
 jobs:
@@ -76,27 +84,29 @@ jobs:
     public: true
     plan:
       - put: cf-environments
-        resource: cf-lts-gcp-environments
+        resource: lts-shared-environments
         params:
-          acquire: true
+          claim: <%= language %>
         timeout: 3h
       - aggregate:
         - get: buildpacks-ci
         - get: brats
         - get: nightly-trigger
           trigger: true
-      - task: run-brats
-        file: buildpacks-ci/tasks/run-brats/task.yml
-        params:
-          LANGUAGE: <%= language %>
-          CI_CF_USERNAME: {{ci-cf-username}}
-          CI_CF_PASSWORD: {{ci-cf-password}}
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-          BUILDPACK_BRANCH: master
-        privileged: true
+      - do:
+        - put: cf-brat-space
+          resource: cf-lts-space
+        - task: run-brats
+          file: buildpacks-ci/tasks/run-shared-brats/task.yml
+          params:
+            BUILDPACK_BRANCH: master
+            LANGUAGE: <%= language %>
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
         ensure:
-          put: cf-lts-gcp-environments
+          put: edge-shared-environments
           params:
             release: cf-environments
   - name: brats-<%= language %>-edge
@@ -115,12 +125,11 @@ jobs:
           trigger: true
       - do:
         - put: cf-brat-space
+          resource: cf-edge-space
         - task: run-brats
           file: buildpacks-ci/tasks/run-shared-brats/task.yml
           params:
             BUILDPACK_BRANCH: master
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci_cf_shared_password}}
             LANGUAGE: <%= language %>
             RUBYGEM_MIRROR: {{rubygem-mirror}}
           ensure:
