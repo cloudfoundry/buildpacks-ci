@@ -41,6 +41,22 @@ resources: #####################################################################
       password: {{ci_cf_shared_password}}
       organization: pivotal
 
+  - name: cf-lts-space
+    type: cf-space-resource
+    source:
+      target: {{ci-cf-lts-target}}
+      username: admin
+      password: {{ci-cf-lts-password}}
+      organization: pivotal
+
+  - name: cf-lts-brat-space
+    type: cf-space-resource
+    source:
+      target: {{ci-cf-lts-target}}
+      username: admin
+      password: {{ci-cf-lts-password}}
+      organization: pivotal
+
   ## Git ##
 
     <% if language == 'multi' || language == 'hwc' %>
@@ -232,6 +248,14 @@ resources: #####################################################################
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
 <% unless language == 'hwc' %>
+  - name: lts-shared-environments
+    type: pool
+    source:
+      branch: master
+      pool: lts-shared-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
   - name: cf-lts-gcp-environments
     type: pool
     source:
@@ -652,49 +676,55 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - put: cf-environments
-        resource: cf-lts-gcp-environments
-        params:
-          acquire: true
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - get: buildpack
-          resource: buildpack-develop
-          trigger: true
-        - get: repo
-          resource: buildpack-develop
       - do:
+        - put: cf-environments
+          resource: lts-shared-environments
+          params:
+            claim: <%= language %>
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - get: buildpack
+            resource: buildpack-develop
+            trigger: true
+          - get: repo
+            resource: buildpack-develop
+        - aggregate:
+          - do:
+            - put: cf-bp-space
+              resource: cf-lts-space
 <% if cutlass.include?(language) %>
-        - task: ginkgo
-          file: buildpacks-ci/tasks/run-buildpack-lts-ginkgo-specs/task.yml
-          params:
-            STACKS: cflinuxfs2
-            CF_PASSWORD: {{ci-cf-password}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-            GINKGO_ATTEMPTS: 4
-            GINKGO_NODES: 3
-          privileged: true
+            - task: ginkgo
+              file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
+              params:
+                STACKS: cflinuxfs2
+                GINKGO_ATTEMPTS: 4
+                GINKGO_NODES: 6
+              privileged: true
 <% else %>
-        - task: rspec
-          file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
-          params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci-cf-password}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-          privileged: true
+            - task: rspec
+              file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
+              params:
+                STACKS: cflinuxfs2
+                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+                RUBYGEM_MIRROR: {{rubygem-mirror}}
+              privileged: true
 <% end %>
-        - task: brats
-          file: buildpacks-ci/tasks/run-brats/task.yml
-          params:
-            BUILDPACK_BRANCH: develop
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
-            LANGUAGE: <%= language %>
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+            ensure:
+              task: delete-cf-space
+              file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
+          - do:
+            - put: cf-brat-space
+              resource: cf-lts-brat-space
+            - task: brats
+              file: buildpacks-ci/tasks/run-shared-brats/task.yml
+              params:
+                BUILDPACK_BRANCH: develop
+                LANGUAGE: <%= language %>
+                RUBYGEM_MIRROR: {{rubygem-mirror}}
+            ensure:
+              task: delete-cf-space
+              file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
         on_success:
           task: github-set-status-success
           file: buildpacks-ci/tasks/set-status-success/task.yml
@@ -702,7 +732,7 @@ jobs: ##########################################################################
             GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
             GITHUB_REPO: cloudfoundry/<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-develop'
-            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI LTS develop spec passed'
+            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI lts develop spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
         on_failure:
           put: failure-alert
@@ -712,7 +742,7 @@ jobs: ##########################################################################
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
         ensure:
-          put: cf-lts-gcp-environments
+          put: lts-shared-environments
           params:
             release: cf-environments
 <% end %>

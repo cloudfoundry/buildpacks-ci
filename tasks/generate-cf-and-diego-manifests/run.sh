@@ -67,6 +67,7 @@ EOF
 }
 
 pushd cf-release
+  date +%Y%m%d -s "20170801"
   ./scripts/generate-consul-certs
 
   mkdir -p bosh-lite
