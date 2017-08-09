@@ -41,6 +41,7 @@ resources: #####################################################################
       password: {{ci_cf_shared_password}}
       organization: pivotal
 
+<% unless language == "hwc" %>
   - name: cf-lts-space
     type: cf-space-resource
     source:
@@ -56,6 +57,7 @@ resources: #####################################################################
       username: admin
       password: {{ci-cf-lts-password}}
       organization: pivotal
+<% end %>
 
   ## Git ##
 
