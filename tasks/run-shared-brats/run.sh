@@ -5,7 +5,6 @@ set -o nounset
 set -o pipefail
 
 ./cf-space/login
-SPACE=$(cat cf-space/name)
 
 pushd brats
   if [ ! -z "$RUBYGEM_MIRROR" ]; then
