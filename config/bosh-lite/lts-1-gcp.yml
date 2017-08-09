@@ -1,9 +1,0 @@
----
-deployment-name: lts-1.buildpacks-gcp.ci
-resource-pool: cf-lts-gcp-environments
-cf-version: 235
-diego-version: 0.1467.0
-garden-linux-version: 0.342.0
-etcd-version: 49
-iaas: gcp
-bosh-lite-name: lts-1-gcp-bosh-lite
