@@ -392,7 +392,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/set-status-success/task.yml
           params:
             GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: cloudfoundry/<%= language %>-buildpack
+            GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-master'
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge master spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
@@ -451,7 +451,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/set-status-success/task.yml
           params:
             GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: cloudfoundry/<%= language %>-buildpack
+            GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-master'
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI LTS master spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
@@ -658,7 +658,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/set-status-success/task.yml
           params:
             GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: cloudfoundry/<%= language %>-buildpack
+            GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-develop'
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge develop spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
@@ -732,7 +732,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/set-status-success/task.yml
           params:
             GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: cloudfoundry/<%= language %>-buildpack
+            GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-develop'
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI lts develop spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
@@ -761,7 +761,7 @@ jobs: ##########################################################################
         file: buildpacks-ci/tasks/buildpack-to-master/task.yml
         params:
           GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-          GITHUB_REPO: cloudfoundry/<%= language %>-buildpack
+          GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
           GITHUB_STATUS_CONTEXT: 'buildpacks-ci/passed-dev-specs'
           GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI develop specs passed'
           PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
