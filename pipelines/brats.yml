@@ -106,7 +106,7 @@ jobs:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
         ensure:
-          put: edge-shared-environments
+          put: lts-shared-environments
           params:
             release: cf-environments
   - name: brats-<%= language %>-edge
