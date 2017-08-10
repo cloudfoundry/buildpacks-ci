@@ -358,6 +358,7 @@ jobs: ##########################################################################
         resource: edge-shared-environments
         params:
           claim: <%= language %>
+        timeout: 3h
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
@@ -416,6 +417,7 @@ jobs: ##########################################################################
         resource: cf-lts-gcp-environments
         params:
           acquire: true
+        timeout: 3h
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
@@ -608,6 +610,7 @@ jobs: ##########################################################################
           resource: edge-shared-environments
           params:
             claim: <%= language %>
+          timeout: 3h
         - aggregate:
           - get: buildpacks-ci
           - get: brats
@@ -683,6 +686,7 @@ jobs: ##########################################################################
           resource: lts-shared-environments
           params:
             claim: <%= language %>
+          timeout: 3h
         - aggregate:
           - get: buildpacks-ci
           - get: brats
