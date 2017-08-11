@@ -36,7 +36,7 @@ jobs:
         - get: pivnet-production
           params:
             globs:
-            - "java-buildpack-offline-v3*.zip"
+            - "java-buildpack-offline-v4*.zip"
       - do:
         - task: pws-update-buildpack
           file: buildpacks-ci/tasks/pws-update-java-buildpack/task.yml
