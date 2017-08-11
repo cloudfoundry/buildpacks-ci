@@ -455,6 +455,7 @@ jobs: ##########################################################################
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             CF_PASSWORD: {{ci-cf-lts-password}}
+            SKIP_WINDOWS_TESTS: true
           privileged: true
 <% end %>
           ensure:
@@ -731,6 +732,7 @@ jobs: ##########################################################################
                 COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
                 RUBYGEM_MIRROR: {{rubygem-mirror}}
                 CF_PASSWORD: {{ci-cf-lts-password}}
+                SKIP_WINDOWS_TESTS: true
               privileged: true
 <% end %>
             ensure:
@@ -959,15 +961,6 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
         - task: create-bosh-release
           file: buildpacks-ci/tasks/create-buildpack-bosh-release/task.yml
-          params:
-            ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
-            SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
-            BLOB_GLOB: blob/<%= language %>*.zip
-            BLOB_NAME: <%= language %>-buildpack
-            RELEASE_NAME: <%= language %>-offline-buildpack
-            RELEASE_DIR: release
-          input_mapping:
-            blob: buildpack-zip
         - put: offline-buildpack-bosh-release
           params:
             repository: release-artifacts
