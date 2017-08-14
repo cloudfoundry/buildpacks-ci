@@ -6,7 +6,7 @@ set -o pipefail
 
 ./cf-space/login
 SPACE=$(cat cf-space/name)
-CF_HOST=$(cf api | grep https | sed 's/.*https:\/\///')
+CF_HOST=$(cf api | grep https | sed 's/.*https:\/\/api\.//')
 
 cd buildpack
 
