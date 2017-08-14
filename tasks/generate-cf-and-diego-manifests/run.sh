@@ -32,17 +32,6 @@ $(awk '{ print "      " $0 }' <./diego-certs/bbs-certs/client.key)
 $(awk '{ print "      " $0 }' <./diego-certs/bbs-certs/server.crt)
     server_key: |
 $(awk '{ print "      " $0 }' <./diego-certs/bbs-certs/server.key)
-  consul:
-    agent_cert: |
-$(awk '{ print "      " $0 }' <../cf-release/consul-certs/agent.crt)
-    agent_key: |
-$(awk '{ print "      " $0 }' <../cf-release/consul-certs/agent.key)
-    ca_cert: |
-$(awk '{ print "      " $0 }' <../cf-release/consul-certs/server-ca.crt)
-    server_cert: |
-$(awk '{ print "      " $0 }' <../cf-release/consul-certs/server.crt)
-    server_key: |
-$(awk '{ print "      " $0 }' <../cf-release/consul-certs/server.crt)
   etcd:
     ca_cert: |
 $(awk '{ print "      " $0 }' <./diego-certs/diego-ca.crt)
@@ -67,9 +56,6 @@ EOF
 }
 
 pushd cf-release
-  date +%Y%m%d -s "20170801"
-  ./scripts/generate-consul-certs
-
   mkdir -p bosh-lite
   echo "
 ---
@@ -93,17 +79,6 @@ properties:
     backend: diego
   cc:
     default_to_diego_backend: true
-  consul:
-    agent_cert: |
-$(awk '{ print "      " $0 }' <./consul-certs/agent.crt)
-    agent_key: |
-$(awk '{ print "      " $0 }' <./consul-certs/agent.key)
-    ca_cert: |
-$(awk '{ print "      " $0 }' <./consul-certs/server-ca.crt)
-    server_cert: |
-$(awk '{ print "      " $0 }' <./consul-certs/server.crt)
-    server_key: |
-$(awk '{ print "      " $0 }' <./consul-certs/server.crt)
 
 jobs:
 - name: api_z1
