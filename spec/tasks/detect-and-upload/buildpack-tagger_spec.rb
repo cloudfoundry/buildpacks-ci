@@ -30,6 +30,7 @@ describe BuildpackTagger do
     Dir.chdir(task_dir) do
       FileUtils.mkdir_p('buildpack')
       File.write('buildpack/VERSION', new_version)
+      File.write('buildpack/cf.Gemfile', 'gem contents')
 
       FileUtils.mkdir_p('pivotal-buildpack')
       File.write("pivotal-buildpack/testlang_buildpack-v#{old_version}+#{old_timestamp}.zip",'specfile')
