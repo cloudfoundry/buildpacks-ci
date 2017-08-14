@@ -438,6 +438,7 @@ jobs: ##########################################################################
           trigger: true
       - do:
         - put: cf-bp-space
+          resource: cf-lts-space
 <% if cutlass.include?(language) %>
         - task: ginkgo
           file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
