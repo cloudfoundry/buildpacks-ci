@@ -257,14 +257,6 @@ resources: #####################################################################
       pool: lts-shared-environments
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-
-  - name: cf-lts-gcp-environments
-    type: pool
-    source:
-      branch: master
-      pool: cf-lts-gcp-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 <% end %>
 
   ## Alerts ##
@@ -377,6 +369,15 @@ jobs: ##########################################################################
           trigger: true
       - do:
         - put: cf-bp-space
+<% if cutlass.include?(language) %>
+        - task: ginkgo
+          file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
+          params:
+            STACKS: cflinuxfs2
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 6
+          privileged: true
+<% else %>
         - task: rspec
           file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
           params:
@@ -385,6 +386,7 @@ jobs: ##########################################################################
             CF_PASSWORD: {{ci_cf_shared_password}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
+<% end %>
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
@@ -414,9 +416,9 @@ jobs: ##########################################################################
     public: true
     plan:
       - put: cf-environments
-        resource: cf-lts-gcp-environments
+        resource: lts-shared-environments
         params:
-          acquire: true
+          claim: <%= language %>
         timeout: 3h
       - aggregate:
         - get: buildpacks-ci
@@ -435,6 +437,16 @@ jobs: ##########################################################################
           passed: [ "detect-new-version-and-upload-artifacts" ]
           trigger: true
       - do:
+        - put: cf-bp-space
+<% if cutlass.include?(language) %>
+        - task: ginkgo
+          file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
+          params:
+            STACKS: cflinuxfs2
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 6
+          privileged: true
+<% else %>
         - task: rspec
           file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
           params:
@@ -444,10 +456,14 @@ jobs: ##########################################################################
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
+<% end %>
           ensure:
-            put: cf-lts-gcp-environments
-            params:
-              release: cf-environments
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
+        ensure:
+          put: lts-shared-environments
+          params:
+            release: cf-environments
         on_success:
           task: github-set-status-success
           file: buildpacks-ci/tasks/set-status-success/task.yml
