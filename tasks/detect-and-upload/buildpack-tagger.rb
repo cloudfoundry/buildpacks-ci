@@ -46,7 +46,7 @@ class BuildpackTagger
                   export GOPATH=$PWD
                   export GOBIN=$GOPATH/.bin
                   export PATH=$GOBIN:$PATH
-                  (cd "src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager" && go install)
+                  (cd src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager && go install)
 
                   ./.bin/buildpack-packager --cached=false
                   ./.bin/buildpack-packager --cached=true
