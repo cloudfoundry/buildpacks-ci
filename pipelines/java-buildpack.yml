@@ -16,6 +16,7 @@ resources:
     source:
       api_token: {{pivnet-apikey}}
       product_slug: buildpacks
+      product_version: Java Buildpack 4\.
       access_key_id: {{pivnet-access-key}}
       secret_access_key: {{pivnet-secret-key}}
 jobs:
@@ -24,16 +25,16 @@ jobs:
     public: true
     plan:
       - aggregate:
-        - get: buildpacks-ci
+        - get: pivnet-production
   - name: buildpack-to-pws
     public: true
     serial: true
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: pivnet-production
           passed: [ship-it]
           trigger: true
-        - get: pivnet-production
           params:
             globs:
             - "java-buildpack-offline-v4*.zip"
