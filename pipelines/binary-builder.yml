@@ -160,9 +160,32 @@ groups: ########################################################################
     - build-<%= dependency %>
 <% end %>
 
+  <% integration_spec_names = %w(bundler glide go godep httpd hwc jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
+  - name: binary-builder-specs
+    jobs:
+    - binary-builder-specs
+    - binary-builder-specs-unit
+<% integration_spec_names.each do |spec_name| %>
+    - binary-builder-specs-<%= spec_name %>
+<% end %>
+
 jobs: #################################################################################################################
 
+
   - name: binary-builder-specs
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: binary-builder
+          trigger: true
+          passed:
+          <% integration_spec_names.each do |spec_name| %>
+          - binary-builder-specs-<%= spec_name %>
+          <% end %>
+
+  - name: binary-builder-specs-unit
     serial: true
     public: true
     plan:
@@ -182,8 +205,28 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/run-binary-builder-unit-specs/task.yml
           params:
             RUBYGEM_MIRROR: {{rubygem-mirror}}
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+<% integration_spec_names.each do |spec_name| %>
+  - name: binary-builder-specs-<%= spec_name %>
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: docker-cflinuxfs2-rootfs
+          trigger: true
+        - get: binary-builder
+          passed: [ binary-builder-specs-unit ]
+          trigger: true
+      - do:
         - aggregate:
-          <% integration_spec_names.each do |spec_name| %>
           - task: integration-<%= spec_name %>
             file: buildpacks-ci/tasks/run-binary-builder-integration-specs/task.yml
             params:
@@ -199,7 +242,6 @@ jobs: ##########################################################################
             <% end %>
             privileged: true
             attempts: 5
-          <% end %>
         on_failure:
           put: failure-alert
           params:
@@ -207,6 +249,9 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
+
+
 
 <% %w(go php php7 ruby jruby python httpd).each do |dependency| %>
   - name: build-<%= dependency %>
