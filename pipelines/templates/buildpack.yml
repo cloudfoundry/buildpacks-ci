@@ -449,22 +449,17 @@ jobs: ##########################################################################
           privileged: true
 <% else %>
         - task: rspec
-          file: buildpacks-ci/tasks/run-buildpack-specs/task.yml
+          file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
           params:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci-cf-password}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
+            CF_PASSWORD: {{ci_cf_shared_password}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
 <% end %>
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
-        ensure:
-          put: lts-shared-environments
-          params:
-            release: cf-environments
         on_success:
           task: github-set-status-success
           file: buildpacks-ci/tasks/set-status-success/task.yml
@@ -481,6 +476,10 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+        ensure:
+          put: lts-shared-environments
+          params:
+            release: cf-environments
 <% end %>
   - name: ship-it
     serial: true
