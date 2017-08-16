@@ -8,6 +8,10 @@ resource_types:
     type: docker-image
     source:
       repository: cfbuildpacks/cron-resource
+  - name: bosh-deployment
+    type: docker-image
+    source:
+      repository: cloudfoundry/bosh-deployment-resource
 
 resources: ###########################################################################################################
 
@@ -120,28 +124,30 @@ resources: #####################################################################
     type: bosh-deployment
     source:
       target: https://cflinuxfs2.buildpacks-gcp.ci.cf-app.com:25555
-      username: admin
-      password: {{gcp_bosh_lite_admin_password}}
+      client: admin
+      client_secret: {{gcp_bosh_lite_admin_password}}
       deployment: cf-warden
-      ignore_ssl: true
+      ca_cert: "-----BEGIN CERTIFICATE-----\nMIIELzCCAhegAwIBAgIRAIikKcVU73yrMvWfbdyPfOIwDQYJKoZIhvcNAQELBQAw\nGTEXMBUGA1UEAxMOY2VydC1hdXRob3JpdHkwHhcNMTYxMTA3MTg0NDM4WhcNMTgx\nMTA3MTg0NDM4WjAaMRgwFgYDVQQDEw8qLmJvc2gtbGl0ZS5jb20wggEiMA0GCSqG\nSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDDORPNTsnhs5eEzk4V3ndnN36P1SSSFMsu\nHQT8z7EGCCf29gWyYYSZKUIGtOpzleL7Kzi1ww4BIbHjTrQyybUFDoXV8CeAjO1L\numK2FR9aTicAcgTFCE5Q7JssSOTzrZT+FqqGCQeal3lOD7NMThYGfn18Vp2jgouV\njanns7OwoqRoLkJ0IYBAYuf8G/dcc4iCFG9WYOEEqHcktuiY4S+1d+P3V8yfncd7\nD9v1kbDcA0vxADa6BSoMEYjQ2Gv8tMVfcUxXKnkMIxHIev93inYd0zYHwpxZRRnn\nlq+NMZZuo1J+YLrqGDIJMZyGN4j+r4uPIOUQ1SADllS67gUa9rV5AgMBAAGjcTBv\nMA4GA1UdDwEB/wQEAwIDuDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIw\nHQYDVR0OBBYEFFZuVkoeC5PxO/eEaE098Orf30j/MB8GA1UdIwQYMBaAFDC93/5N\nuztl0kKzxsZwDq1eRIxJMA0GCSqGSIb3DQEBCwUAA4ICAQA6bY/ww1cPEk1Gk63B\nTPY/SdVFo+PuFrWXiskTbhtp5mIs4yNzqtZR6b5MpKqzJk8/YD22qQxKExU/v/fX\nxma5f3w2hWJ+uLHNjoYNHZJSvyyU8MzJ54ESBidlLJb3jOgz4eQfCu6AJfIdNMl+\n+Ze32NlBOyoCm+viLKhH3gGfkCqgoVhj5XRbrPiCpg5ruv0G4p3eLUcM2vzJ+SW0\nPykuyH+KNOwrWXBj+5t9S831npSuoBpAjF8F0hxG5WvkDvDh89MYDOjwJWr3sxiX\n/p2B7N2sHcu/RgFVEBjXyu+QOzasQayTJfmVjTyICJswe4rK5i0Y3VbNQrkaHX1k\nde1QKGUSJI/jSS1IgTFoBL+VtM+aA2DJBSzZ6rQnJ5qaGJOHdpMOZB+QUgNBSyIm\nYwLI9d8ql6PazyCIV/Q0woctQUdImzldwhHiJuTEgDAobKxkwvd1372jqzvMLzqi\nALG2NvXXpxJrrz+2hauwtTYiGU012uXaSZmwX+VSA/pnXTq0kx1QwzcMuuTbQ0mG\n2GO8lyPpPQfUA3/CyDIiHc6x7zWvW0vaSgTd4/80fWEPsM6r+0Q5whAXIvimrSXa\nRve4kMJyOlwCix+qukVaVIVrUT6Xa1K1WhFrvTcmkghR/GIRfmOf2YLrrrdahX2a\nzA/Kf+CVcoaF/x2H4r0VKcV3VQ==\n-----END CERTIFICATE-----"
+
 
   - name: cflinuxfs2-diego-deployment
     type: bosh-deployment
     source:
       target: https://cflinuxfs2.buildpacks-gcp.ci.cf-app.com:25555
-      username: admin
-      password: {{gcp_bosh_lite_admin_password}}
+      client: admin
+      client_secret: {{gcp_bosh_lite_admin_password}}
       deployment: cf-warden-diego
-      ignore_ssl: true
+      ca_cert: "-----BEGIN CERTIFICATE-----\nMIIELzCCAhegAwIBAgIRAIikKcVU73yrMvWfbdyPfOIwDQYJKoZIhvcNAQELBQAw\nGTEXMBUGA1UEAxMOY2VydC1hdXRob3JpdHkwHhcNMTYxMTA3MTg0NDM4WhcNMTgx\nMTA3MTg0NDM4WjAaMRgwFgYDVQQDEw8qLmJvc2gtbGl0ZS5jb20wggEiMA0GCSqG\nSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDDORPNTsnhs5eEzk4V3ndnN36P1SSSFMsu\nHQT8z7EGCCf29gWyYYSZKUIGtOpzleL7Kzi1ww4BIbHjTrQyybUFDoXV8CeAjO1L\numK2FR9aTicAcgTFCE5Q7JssSOTzrZT+FqqGCQeal3lOD7NMThYGfn18Vp2jgouV\njanns7OwoqRoLkJ0IYBAYuf8G/dcc4iCFG9WYOEEqHcktuiY4S+1d+P3V8yfncd7\nD9v1kbDcA0vxADa6BSoMEYjQ2Gv8tMVfcUxXKnkMIxHIev93inYd0zYHwpxZRRnn\nlq+NMZZuo1J+YLrqGDIJMZyGN4j+r4uPIOUQ1SADllS67gUa9rV5AgMBAAGjcTBv\nMA4GA1UdDwEB/wQEAwIDuDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIw\nHQYDVR0OBBYEFFZuVkoeC5PxO/eEaE098Orf30j/MB8GA1UdIwQYMBaAFDC93/5N\nuztl0kKzxsZwDq1eRIxJMA0GCSqGSIb3DQEBCwUAA4ICAQA6bY/ww1cPEk1Gk63B\nTPY/SdVFo+PuFrWXiskTbhtp5mIs4yNzqtZR6b5MpKqzJk8/YD22qQxKExU/v/fX\nxma5f3w2hWJ+uLHNjoYNHZJSvyyU8MzJ54ESBidlLJb3jOgz4eQfCu6AJfIdNMl+\n+Ze32NlBOyoCm+viLKhH3gGfkCqgoVhj5XRbrPiCpg5ruv0G4p3eLUcM2vzJ+SW0\nPykuyH+KNOwrWXBj+5t9S831npSuoBpAjF8F0hxG5WvkDvDh89MYDOjwJWr3sxiX\n/p2B7N2sHcu/RgFVEBjXyu+QOzasQayTJfmVjTyICJswe4rK5i0Y3VbNQrkaHX1k\nde1QKGUSJI/jSS1IgTFoBL+VtM+aA2DJBSzZ6rQnJ5qaGJOHdpMOZB+QUgNBSyIm\nYwLI9d8ql6PazyCIV/Q0woctQUdImzldwhHiJuTEgDAobKxkwvd1372jqzvMLzqi\nALG2NvXXpxJrrz+2hauwtTYiGU012uXaSZmwX+VSA/pnXTq0kx1QwzcMuuTbQ0mG\n2GO8lyPpPQfUA3/CyDIiHc6x7zWvW0vaSgTd4/80fWEPsM6r+0Q5whAXIvimrSXa\nRve4kMJyOlwCix+qukVaVIVrUT6Xa1K1WhFrvTcmkghR/GIRfmOf2YLrrrdahX2a\nzA/Kf+CVcoaF/x2H4r0VKcV3VQ==\n-----END CERTIFICATE-----"
+
 
   - name: cflinuxfs2-rootfs-deployment
     type: bosh-deployment
     source:
       target: https://cflinuxfs2.buildpacks-gcp.ci.cf-app.com:25555
-      username: admin
-      password: {{gcp_bosh_lite_admin_password}}
+      client: admin
+      client_secret: {{gcp_bosh_lite_admin_password}}
       deployment: rootfs-smoke-test
-      ignore_ssl: true
+      ca_cert: "-----BEGIN CERTIFICATE-----\nMIIELzCCAhegAwIBAgIRAIikKcVU73yrMvWfbdyPfOIwDQYJKoZIhvcNAQELBQAw\nGTEXMBUGA1UEAxMOY2VydC1hdXRob3JpdHkwHhcNMTYxMTA3MTg0NDM4WhcNMTgx\nMTA3MTg0NDM4WjAaMRgwFgYDVQQDEw8qLmJvc2gtbGl0ZS5jb20wggEiMA0GCSqG\nSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDDORPNTsnhs5eEzk4V3ndnN36P1SSSFMsu\nHQT8z7EGCCf29gWyYYSZKUIGtOpzleL7Kzi1ww4BIbHjTrQyybUFDoXV8CeAjO1L\numK2FR9aTicAcgTFCE5Q7JssSOTzrZT+FqqGCQeal3lOD7NMThYGfn18Vp2jgouV\njanns7OwoqRoLkJ0IYBAYuf8G/dcc4iCFG9WYOEEqHcktuiY4S+1d+P3V8yfncd7\nD9v1kbDcA0vxADa6BSoMEYjQ2Gv8tMVfcUxXKnkMIxHIev93inYd0zYHwpxZRRnn\nlq+NMZZuo1J+YLrqGDIJMZyGN4j+r4uPIOUQ1SADllS67gUa9rV5AgMBAAGjcTBv\nMA4GA1UdDwEB/wQEAwIDuDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIw\nHQYDVR0OBBYEFFZuVkoeC5PxO/eEaE098Orf30j/MB8GA1UdIwQYMBaAFDC93/5N\nuztl0kKzxsZwDq1eRIxJMA0GCSqGSIb3DQEBCwUAA4ICAQA6bY/ww1cPEk1Gk63B\nTPY/SdVFo+PuFrWXiskTbhtp5mIs4yNzqtZR6b5MpKqzJk8/YD22qQxKExU/v/fX\nxma5f3w2hWJ+uLHNjoYNHZJSvyyU8MzJ54ESBidlLJb3jOgz4eQfCu6AJfIdNMl+\n+Ze32NlBOyoCm+viLKhH3gGfkCqgoVhj5XRbrPiCpg5ruv0G4p3eLUcM2vzJ+SW0\nPykuyH+KNOwrWXBj+5t9S831npSuoBpAjF8F0hxG5WvkDvDh89MYDOjwJWr3sxiX\n/p2B7N2sHcu/RgFVEBjXyu+QOzasQayTJfmVjTyICJswe4rK5i0Y3VbNQrkaHX1k\nde1QKGUSJI/jSS1IgTFoBL+VtM+aA2DJBSzZ6rQnJ5qaGJOHdpMOZB+QUgNBSyIm\nYwLI9d8ql6PazyCIV/Q0woctQUdImzldwhHiJuTEgDAobKxkwvd1372jqzvMLzqi\nALG2NvXXpxJrrz+2hauwtTYiGU012uXaSZmwX+VSA/pnXTq0kx1QwzcMuuTbQ0mG\n2GO8lyPpPQfUA3/CyDIiHc6x7zWvW0vaSgTd4/80fWEPsM6r+0Q5whAXIvimrSXa\nRve4kMJyOlwCix+qukVaVIVrUT6Xa1K1WhFrvTcmkghR/GIRfmOf2YLrrrdahX2a\nzA/Kf+CVcoaF/x2H4r0VKcV3VQ==\n-----END CERTIFICATE-----"
 
   ## bosh.io Releases ##
 
