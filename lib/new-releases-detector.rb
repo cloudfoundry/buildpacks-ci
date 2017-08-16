@@ -200,7 +200,7 @@ class NewReleasesDetector
       bundler:         -> { Octokit.tags('bundler/bundler').map(&:name).grep(/^v/) },
       bower:           -> { JSON.parse(open('https://registry.npmjs.org/bower').read)['versions'].keys },
       composer:        -> { Octokit.releases('composer/composer').map(&:tag_name) },
-      dotnet:          -> { Octokit.releases('dotnet/cli').map(&:tag_name) },
+      dotnet:          -> { Octokit.tags('dotnet/cli').map(&:name).grep(/^v[0-9]/) },
       glide:           -> { Octokit.releases('Masterminds/glide').map(&:tag_name) },
       go:              -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
       godep:           -> { Octokit.releases('tools/godep').map(&:tag_name) },
