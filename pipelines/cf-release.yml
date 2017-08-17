@@ -275,6 +275,13 @@ jobs:
             manifest: generate-manifest-artifacts/cf-release.buildpacks-gcp.ci/manifest.yml
             stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
+        - task: upload-diego-release
+          file: buildpacks-ci/tasks/upload-diego-release/task.yml
+          params:
+            BOSH_ENVIRONMENT: https://cf-release.buildpacks-gcp.ci.cf-app.com:25555
+            BOSH_CLIENT: admin
+            BOSH_CLIENT_SECRET: {{gcp_bosh_lite_admin_password}}
+            BOSH_CA_CERT: "-----BEGIN CERTIFICATE-----\nMIIFNzCCAx+gAwIBAgIJAPSX5tIYsVR1MA0GCSqGSIb3DQEBCwUAMDIxMDAuBgNV\nBAMMJ2NmLXJlbGVhc2UuYnVpbGRwYWNrcy1nY3AuY2kuY2YtYXBwLmNvbTAeFw0x\nNzA4MTcxODU2MzNaFw0yMDA1MTMxODU2MzNaMDIxMDAuBgNVBAMMJ2NmLXJlbGVh\nc2UuYnVpbGRwYWNrcy1nY3AuY2kuY2YtYXBwLmNvbTCCAiIwDQYJKoZIhvcNAQEB\nBQADggIPADCCAgoCggIBALWuejSptqir4XZlblZUkNkgOGcpMLyz1ZjeRJyW09/h\nl9gp1qCfnv1//XlvQtokJ/pwM6pZBDbIx1p9qd+tmXQON5W6+IACOjICoBHpqHIg\nZLKvm8JcdeOIBj0Pqh5N6kCdzKVbr3dQ0XK4jgXY2otOIei9ND/012oIveiZMWP2\njkgz3RXTUfOba78cV6qWDWL+NlG8ndmRGM+XHYNmwSZVsqrKRbnKaak6qRrWJHxs\n+jNeucLapVrTQHF4qEOSG6Tocy4Lb4AFTTX4rrg97AE5jmNOZ9YsMCXoGC1T6pJT\nAdBIrhZxm059w/71YLhzTaSUedO4gP59w+jduXbtIHfd09IJXpk/oQQKbOGZHqGI\nnrtvpR4hjJFcocQV9Yx7+DgGlnwODpJq1iNrZJOVkf4kVxLs2N0ZbA26fX8DcsYy\nSJlD5P2nI21ZwAplgCs86s1BL5tc3FpkiKr8584J98/xzH+ZSYox7sglB4IhzqYt\nRKbyZDjmFcPNJkfJh2bar4Q7Xt750D+hwLfcm6OLPxCmfRq/+nZ2RT9AzrORPLjg\nbUkovgUMLkssK4lgwcbwl4AtqTCimDwKFl0m1J8VAtujGAd0ejEfb9EVxJgkAsTQ\nDZsiBWKKawqB++s18jER9YROR/ZppWwabjMVJ4EG7Y2ckDHMd5+AmkiutaEuyAsj\nAgMBAAGjUDBOMB0GA1UdDgQWBBTiAytY4ULjoVDN5nvZOVpBb6Ae8zAfBgNVHSME\nGDAWgBTiAytY4ULjoVDN5nvZOVpBb6Ae8zAMBgNVHRMEBTADAQH/MA0GCSqGSIb3\nDQEBCwUAA4ICAQCItvkVaYNGA+btgbPxmyHgh83sZa9+1jxXrTKtYEkdL1fl+HzM\nJbPPmNzKNKulZA51atYEn+9tYFZthrVlT+T/PpV8NYuiJ5FXMQ8dUvVmRQEKD7v3\nZua6mki9kFUEVDczi1sF1VSzPM9ZYIvyr6LaCH9BklHIuW7ShNs3cn1pRTkfhvHT\ncIECg2MhaKjj3veae7UKyR8jpFf0SucQpjMPA8eF0zrMOqZ5dpwLbS+ejpSGX50j\n0gOVvFj0XR85ItkUfyRgA3nO3fTPt5fXvc58s3Doqb5bPPKijH4i55uaMV+VgYUO\nYMimOEGvEnqERV/bfTET/v+wbYFY88aAp4srAg6kXfKas7RfYCR2RyAbfmzarMBM\nsRJqJMnHKfv0cb6pFeS+59lJoBt4PhTNZCgnu/xbymOhCMIFm6clk5lFIKFZ6Gy+\nXp+GHXnXMEzlY+zwR89kTqArKwQSl9jZaD0vu4/3rR94eAgwfMPIJBSJNrBPYRsT\nojwrHIDMULYZEiyLAHya2fNxJhTuFZk6HaW3FHMnmUASu8nrnPATLFr/LTYaC8qF\nFeB5JauF3PW4sBIOyywZy+5Cbt+qnbA/J2LigVo+HfGAuiq9iX1cXpwB7qpszh4y\nQxSTTvHB5tibRB/fJPR7a3DgaWzFhPvWJbx5CjdMO63i04rtfq6gM12BmQ==\n-----END CERTIFICATE-----"
         - put: cf-release-diego-deployment
           params:
             manifest: generate-manifest-artifacts/cf-release.buildpacks-gcp.ci/diego.yml
