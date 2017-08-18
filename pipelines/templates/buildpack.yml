@@ -730,6 +730,7 @@ jobs: ##########################################################################
                 STACKS: cflinuxfs2
                 COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
                 RUBYGEM_MIRROR: {{rubygem-mirror}}
+                CF_PASSWORD: {{ci-cf-lts-password}}
               privileged: true
 <% end %>
             ensure:
