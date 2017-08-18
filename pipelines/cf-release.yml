@@ -470,7 +470,11 @@ jobs:
           params:
             ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            <% if language == 'java' %>
             BLOB_GLOB: blob/<%= language %>?buildpack-v4*.zip
+            <% else %>
+            BLOB_GLOB: blob/<%= language %>?buildpack-v*.zip
+            <% end %>
             BLOB_NAME: <%= language %>-buildpack
             RELEASE_NAME: <%= language %>-buildpack
             RELEASE_DIR: release
