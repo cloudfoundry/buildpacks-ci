@@ -43,6 +43,11 @@ resources:
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
+  - name: hwc-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-incubator/hwc-buildpack
+      branch: master
 <% %w(go nodejs ruby python php staticfile binary dotnet-core).each do |language| %>
   - name: <%= language %>-buildpack
     type: git
@@ -93,6 +98,7 @@ jobs:
           - get: binary-buildpack
           - get: php-buildpack
           - get: dotnet-core-buildpack
+          - get: hwc-buildpack
         - task: verify-buildpack-binaries
           file: buildpacks-ci/tasks/verify-buildpack-binaries/task.yml
           timeout: 1h30m
