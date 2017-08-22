@@ -10,4 +10,4 @@ inputs:
 outputs:
   - name: buildpack-zip
 run:
-  path: buildpacks-ci/tasks/build-offline-buildpack/run.sh
+  path: buildpacks-ci/tasks/build-offline-buildpack-machete/run.sh
