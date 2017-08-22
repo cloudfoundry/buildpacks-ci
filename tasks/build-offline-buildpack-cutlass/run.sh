@@ -12,7 +12,7 @@ pushd source
   git checkout "$tag"
   git submodule update --init --recursive
 
-  (cd src/$LANGUAGE/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager && go install)
+  (cd "src/$LANGUAGE/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager" && go install)
 
   buildpack-packager --cached
 popd
