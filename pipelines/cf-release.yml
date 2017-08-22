@@ -577,7 +577,7 @@ jobs:
         <% if language == 'java' %>
         - task: download-offline-buildpack
           file: buildpacks-ci/tasks/download-offline-buildpack/task.yml
-        <% else if cutlass.include?(language) %>
+        <% elsif cutlass.include?(language) %>
         - task: build-offline-buildpack
           file: buildpacks-ci/tasks/build-offline-buildpack-cutlass/task.yml
           params:
