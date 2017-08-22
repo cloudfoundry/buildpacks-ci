@@ -9,6 +9,10 @@ GITHUB_ORG=${GITHUB_ORG:-cloudfoundry}
 git clone "https://github.com/$GITHUB_ORG/$LANGUAGE-buildpack.git" source
 
 pushd source
+  export GOPATH="$PWD"
+  export GOBIN=$PWD/.bin
+  export PATH=$GOBIN:$PATH
+
   git checkout "$tag"
   git submodule update --init --recursive
 
