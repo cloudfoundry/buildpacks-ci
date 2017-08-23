@@ -4,6 +4,10 @@ resource_types:
     type: docker-image
     source:
       repository: cfbuildpacks/concourse2tracker
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
 resources:
   - name: concourse2tracker
     type: concourse2tracker
@@ -282,7 +286,7 @@ jobs:
         - get: bal-master
         - get: buildpacks-ci
         - get: bal-develop
-          passed: [cats]
+          passed: [set-github-status]
           trigger: true
       - put: bal-master
         params:
