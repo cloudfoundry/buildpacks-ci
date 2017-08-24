@@ -9,6 +9,8 @@ set -x
 export GOPATH=$PWD/buildpack
 export GOBIN=/usr/local/bin
 
+update_dir="src/compile"
+
 pushd buildpack
 	pushd "$update_dir"
 	  go get github.com/golang/dep/cmd/dep
