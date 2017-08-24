@@ -78,7 +78,7 @@ instance_groups:
       host_key: |
         <%= gcp_concourse_tsa_private_key.split("\n").join("\n        ") %>
 - name: worker
-  instances: 12
+  instances: 6
   vm_type: worker
   azs:
   - z1
