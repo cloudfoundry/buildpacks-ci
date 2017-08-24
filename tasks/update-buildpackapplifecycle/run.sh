@@ -9,28 +9,14 @@ set -x
 export GOPATH=$PWD/buildpack
 export GOBIN=/usr/local/bin
 
-
-
-if [ "$LANGUAGE" = "go" ]; then
-  update_dir="src/golang"
-elif [ "$LANGUAGE" = "staticfile" ]; then
-  update_dir="src/staticfile"
-else
-  update_dir="src/compile"
-fi
-
 pushd buildpack
 	pushd "$update_dir"
-		go get github.com/FiloSottile/gvt
+	  go get github.com/golang/dep/cmd/dep
 		go get github.com/golang/mock/mockgen
 		go get github.com/onsi/ginkgo/ginkgo
 
-		gvt update code.cloudfoundry.org/buildpackapplifecycle
+    dep ensure --update
 		go generate || true
-		[ -d hooks ] && (cd hooks && (go generate || true))
-		[ -d compile ] && (cd compile && (go generate || true))
-		[ -d supply ] && (cd supply && (go generate || true))
-		[ -d finalize ] && (cd finalize && (go generate || true))
 		ginkgo -r
 	popd
 
