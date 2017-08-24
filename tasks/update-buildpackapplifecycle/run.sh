@@ -19,7 +19,7 @@ pushd buildpack
 
     dep ensure --update
 		go generate || true
-		ginkgo -r
+		ginkgo
 	popd
 
 	git add "$update_dir"
