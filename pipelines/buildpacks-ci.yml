@@ -12,6 +12,7 @@ resources:
       private_key: {{buildpacks-ci-private-key}}
   - name: ci-develop
     type: git
+    webhook_token: ob0aigh3
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-develop-branch}}
