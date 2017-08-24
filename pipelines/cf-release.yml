@@ -99,19 +99,12 @@ resources:
     source:
       api_token: {{pivnet-apikey}}
       product_slug: buildpacks
-      product_version: "Java Buildpack 3\\."
+      product_version: "Java Buildpack 4\\."
       access_key_id: {{pivnet-access-key}}
       secret_access_key: {{pivnet-secret-key}}
 <% (supported_languages).each do |language| %>
   <% if language == 'java' %>
-  - name: <%= language %>-buildpack-github-release-v3
-    type: github-release-forked
-    source:
-      user: {{buildpacks-github-org}}
-      repository: <%= language %>-buildpack
-      access_token: {{buildpacks-github-token}}
-      filter_tag_prefix: v3.
-  - name: <%= language %>-buildpack-github-release-v4
+  - name: <%= language %>-buildpack-github-release
     type: github-release-forked
     source:
       user: {{buildpacks-github-org}}
@@ -254,7 +247,7 @@ jobs:
           - get: lite-stemcell
             attempts: 3
           - get: java-buildpack-github-release
-            resource: java-buildpack-github-release-v4
+            resource: java-buildpack-github-release
             params:
               globs:
                 - java-buildpack-v*.zip
@@ -330,7 +323,7 @@ jobs:
           passed: [ deploy-cf-and-diego-to-cf-release ]
           trigger: true
         - get: java-buildpack-github-release
-          resource: java-buildpack-github-release-v4
+          resource: java-buildpack-github-release
           passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: go-buildpack-github-release
           passed: [ deploy-cf-and-diego-to-cf-release ]
@@ -443,8 +436,7 @@ jobs:
           resource: cf-release-develop
           params:
             submodules: none
-        - get: java-buildpack-github-release-v3
-        - get: java-buildpack-github-release-v4
+        - get: java-buildpack-github-release
           passed: [ cats ]
 
 <% supported_languages.each do |language| %>
@@ -458,11 +450,7 @@ jobs:
         - get: release
           resource: <%= language %>-buildpack-bosh-release
         - get: blob
-          <% if language == 'java' %>
-          resource: <%= language %>-buildpack-github-release-v4
-          <% else %>
           resource: <%= language %>-buildpack-github-release
-          <% end %>
           trigger: true
           passed: [ <%= language.include?('java') ? 'ship-it-java' : 'ship-it' %> ]
       - do:
@@ -473,11 +461,7 @@ jobs:
           params:
             ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            <% if language == 'java' %>
-            BLOB_GLOB: blob/<%= language %>?buildpack-v4*.zip
-            <% else %>
             BLOB_GLOB: blob/<%= language %>?buildpack-v*.zip
-            <% end %>
             BLOB_NAME: <%= language %>-buildpack
             RELEASE_NAME: <%= language %>-buildpack
             RELEASE_DIR: release
@@ -511,18 +495,10 @@ jobs:
           params:
             submodules: [ src/<%= language %>-buildpack-release/ ]
         - get: buildpack-github-release
-          <% if language == 'java' %>
-          resource: <%= language %>-buildpack-github-release-v4
-          <% else %>
           resource: <%= language %>-buildpack-github-release
-          <% end %>
           params:
             globs:
-              <% if language == 'java' %>
-              - <%= language%>?buildpack-v4*.zip
-              <% else %>
               - <%= language%>?buildpack-v*.zip
-              <% end %>
           passed:
             - update-<%= language %>-buildpack-bosh-release
           trigger: true
@@ -558,11 +534,7 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: blob
-          <% if language == 'java' %>
-          resource: <%= language %>-buildpack-github-release-v3
-          <% else %>
           resource: <%= language %>-buildpack-github-release
-          <% end %>
           trigger: true
           passed: [ <%= language == 'java' ? 'ship-it-java' : 'ship-it' %> ]
           params:
@@ -573,7 +545,7 @@ jobs:
         - get: pivnet-production
           params:
             globs:
-            - "java-buildpack-offline-v3*.zip"
+            - "java-buildpack-offline-v4*.zip"
         <% end %>
       - do:
         <% if language == 'java' %>
@@ -599,7 +571,7 @@ jobs:
             SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
             <% if language == 'java' %>
             BLOB_GLOB: buildpack-zip/<%= language %>-buildpack-offline*.zip
-            VERSION_ALLOWED: '3'
+            VERSION_ALLOWED: '~> 4.0'
             <% else %>
             BLOB_GLOB: buildpack-zip/<%= language %>_buildpack-cached*.zip
             <% end %>
