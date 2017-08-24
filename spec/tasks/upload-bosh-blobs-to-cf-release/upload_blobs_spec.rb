@@ -3,7 +3,7 @@ require 'spec_helper.rb'
 require 'digest'
 require 'yaml'
 
-describe 'create bosh release task' do
+describe 'create bosh release task', :fly do
   context 'when modifying release blobs' do
     def do_release(artifacts, language)
       execute("-c tasks/upload-bosh-blobs-to-cf-release/task.yml " \

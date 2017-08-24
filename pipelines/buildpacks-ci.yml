@@ -31,7 +31,7 @@ jobs:
           resource: ci-develop
           trigger: true
       - task: rspec
-        file: buildpacks-ci/tasks/run-buildpacks-ci-specs/task.yml
+        file: buildpacks-ci/tasks/run-buildpacks-ci-unit-specs/task.yml
         params:
           CI_USERNAME: buildpacks
           CI_PASSWORD: {{concourse_basic_auth_password}}
@@ -39,7 +39,6 @@ jobs:
           GITHUB_PASSWORD: {{github-password}}
           GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
           PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
-        privileged: true
       - task: github-set-status-success
         file: buildpacks-ci/tasks/set-status-success/task.yml
         params:
@@ -56,6 +55,27 @@ jobs:
           git_path: buildpacks-ci
           project_id: {{cf-buildpacks-public-tracker-id}}
           api_token: {{pivotal-tracker-api-token}}
+
+  - name: run-full-specs
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          resource: ci-master
+          trigger: true
+        - get: repo
+          resource: ci-master
+          trigger: true
+      - task: rspec
+        file: buildpacks-ci/tasks/run-buildpacks-ci-specs/task.yml
+        params:
+          CI_USERNAME: buildpacks
+          CI_PASSWORD: {{concourse_basic_auth_password}}
+          GITHUB_USERNAME: {{github-username}}
+          GITHUB_PASSWORD: {{github-password}}
+          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+          PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
   - name: shellcheck-buildpacks-ci
     public: true

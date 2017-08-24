@@ -3,7 +3,7 @@ require 'spec_helper.rb'
 require 'digest'
 require 'yaml'
 
-describe 'make-rootfs' do
+describe 'make-rootfs', :fly do
   before(:context) do
     @cflinuxfs2_artifacts = Dir.mktmpdir
     @receipt_artifacts = Dir.mktmpdir
