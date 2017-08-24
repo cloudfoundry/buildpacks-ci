@@ -7,6 +7,7 @@ set -o pipefail
 if [ ! -z "$BRANCH" ]; then
   echo Checking out branch "$BRANCH"
   pushd cf-release/src/github.com/cloudfoundry/cf-acceptance-tests
+    git fetch
     git checkout "$BRANCH"
   popd
 fi
