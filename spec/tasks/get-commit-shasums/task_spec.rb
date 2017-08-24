@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'spec_helper'
 
-describe 'get-commit-shasums' do
+describe 'get-commit-shasums', :fly do
   before :context do
     @sha_artifacts = Dir.mktmpdir
     `git init ./spec/tasks/get-commit-shasums`

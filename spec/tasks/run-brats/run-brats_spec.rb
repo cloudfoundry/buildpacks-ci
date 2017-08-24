@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'spec_helper.rb'
 
-describe 'run-brats task' do
+describe 'run-brats task', :fly do
   before(:context) do
     @output =
       execute('-c tasks/run-brats/task.yml ' \

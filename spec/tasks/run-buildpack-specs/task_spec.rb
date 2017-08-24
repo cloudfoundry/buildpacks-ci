@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'spec_helper.rb'
 
-describe 'run-buildpack-specs task' do
+describe 'run-buildpack-specs task', :fly do
   before(:context) do
     @output =
       execute('-c tasks/run-buildpack-specs/task.yml ' \

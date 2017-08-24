@@ -4,7 +4,7 @@ require 'digest'
 require 'yaml'
 require 'open3'
 
-describe 'create bosh stacks release task' do
+describe 'create bosh stacks release task', :fly do
   before(:context) do
     @tmp_release = Dir.mktmpdir
     @release_artifacts = Dir.mktmpdir
