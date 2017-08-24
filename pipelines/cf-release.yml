@@ -351,6 +351,8 @@ jobs:
       - do:
         - task: copy-cf-acceptance-tests
           file: buildpacks-ci/tasks/copy-cf-acceptance-tests/task.yml
+          params:
+            BRANCH: increase-java-app-memory
         - task: write-cats-config
           file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
