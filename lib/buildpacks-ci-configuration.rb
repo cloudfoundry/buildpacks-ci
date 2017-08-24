@@ -27,6 +27,10 @@ class BuildpacksCIConfiguration
     ENV.fetch('LPASS_GIT_REPOS_PRIVATE_KEYS_THREE_FILE', 'Shared-Buildpacks/git-repos-private-keys-three.yml')
   end
 
+  def dockerhub_cflinuxfs2_credentials_filename
+    ENV.fetch('LPASS_DOCKERHUB_CFLINUXFS2_CREDENTIALS_FILE', 'Shared-Buildpacks/dockerhub-cflinuxfs2.yml')
+  end
+
   def organization
     YAML.load_file('public-config.yml')['buildpacks-github-org']
   end
