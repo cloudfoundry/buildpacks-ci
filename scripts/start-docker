@@ -19,7 +19,7 @@ sed -e '1d;s/\([^\t]\)\t.*$/\1/' < /proc/cgroups | while IFS= read -r d; do
 done
 
 mkdir /tmp/build/graph
-mount -t tmpfs -o size=15g tmpfs /tmp/build/graph
+mount -t tmpfs -o size=42g tmpfs /tmp/build/graph
 dockerd -g /tmp/build/graph -s aufs --mtu 1432 &
 
 until docker info >/dev/null 2>&1; do
