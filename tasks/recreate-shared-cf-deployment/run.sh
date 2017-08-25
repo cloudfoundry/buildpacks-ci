@@ -20,7 +20,8 @@ echo "cf_admin_password: $CI_CF_SHARED_PASSWORD" > /tmp/deployment-vars.yml
 bosh2 -n -d cf deploy cf-deployment/cf-deployment.yml \
 --vars-store /tmp/deployment-vars.yml \
 -v system_domain="$SYSTEM_DOMAIN" \
--o cf-deployment/operations/windows-cell.yml
+-o cf-deployment/operations/windows-cell.yml \
+-o buildpacks-ci/deployments/edge-shared/use-latest-windows-stemcell.yml
 echo -e "\n\n======= Deployed ======="
 
 echo -e "\n\n======= Cleaning BOSH director ======="
