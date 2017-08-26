@@ -61,7 +61,7 @@ resources: #####################################################################
 
   ## Git ##
 
-    <% if language == 'multi' || language == 'hwc' %>
+    <% if language == 'multi' %>
       <% git_repo_organization = 'cloudfoundry-incubator' %>
     <% else %>
       <% git_repo_organization = organization %>
@@ -164,7 +164,7 @@ resources: #####################################################################
 
   ## Github Releases ##
 
-    <% if language == 'multi' || language == 'hwc' %>
+    <% if language == 'multi' %>
       <% github_release_user = 'cloudfoundry-incubator' %>
     <% else %>
       <% github_release_user = '{{buildpacks-github-org}}' %>
@@ -955,7 +955,7 @@ jobs: ##########################################################################
         - task: build-offline-buildpack
           file: buildpacks-ci/tasks/build-offline-buildpack/task.yml
           params:
-            GITHUB_ORG: cloudfoundry-incubator
+            GITHUB_ORG: cloudfoundry
             LANGUAGE: hwc
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
