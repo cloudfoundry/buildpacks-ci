@@ -122,8 +122,8 @@ instance_groups:
           <%= gcp_concourse_windows_worker_private_key.split("\n").join("\n          ") %>
 
 update:
-  canaries: 1
-  max_in_flight: 3
+  canaries: 0
+  max_in_flight: 30
   serial: false
   canary_watch_time: 1000-120000
   update_watch_time: 1000-120000
