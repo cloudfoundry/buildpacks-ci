@@ -12,6 +12,7 @@ resource_types:
 resources:
   - name: month-start
     type: cron
+    check_every: 1h
     source:
       expression: 12 5 1 * *
       location: {{current-timezone}}
@@ -22,6 +23,7 @@ resources:
       branch:  {{buildpacks-ci-git-uri-public-branch}}
   - name: pecl-rdkafka
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -30,6 +32,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('beta')) th
   - name: pecl-cassandra
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -38,6 +41,7 @@ resources:
        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: cassandra-cpp-driver
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -46,6 +50,7 @@ resources:
         csspath: a[href^='v']
   - name: pecl-amqp
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -54,6 +59,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: pecl-gearman
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -62,6 +68,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: pecl-igbinary
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -70,6 +77,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: pecl-imagick
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -78,6 +86,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: pecl-mailparse
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -86,6 +95,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: pecl-memcache
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -94,6 +104,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: pecl-mongo
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -102,6 +113,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: pecl-msgpack
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -110,6 +122,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th, table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('beta')) th
   - name: pecl-protocolbuffers
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -118,6 +131,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th, table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('beta')) th, table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('alpha')) th
   - name: pecl-redis
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -126,6 +140,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: pecl-sundown
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -134,6 +149,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th, table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('beta')) th
   - name: pecl-xdebug
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -142,6 +158,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: pecl-yaf
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -150,6 +167,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: pecl-mongodb
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -158,6 +176,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: pecl-solr
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -166,6 +185,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: pecl-lua
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -174,6 +194,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
   - name: xhprof
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -182,6 +203,7 @@ resources:
         csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th, table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('beta')) th
   - name: libmemcached
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -190,6 +212,7 @@ resources:
         csspath: table.listing tbody tr td:nth-of-type(2)
   - name: lua
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '\d\.\d\.\d'
@@ -198,6 +221,7 @@ resources:
         csspath: table:nth-of-type(1) tbody tr td.name a
   - name: hiredis
     type: new_version_resource
+    check_every: 1h
     source:
       type: git
       regex: 'v[\d\.]+[0-9A-Za-z\-]*'
@@ -207,6 +231,7 @@ resources:
         repo: 'hiredis'
   - name: twig
     type: new_version_resource
+    check_every: 1h
     source:
       type: git
       regex: 'v[\d\.]+[0-9A-Za-z\-]*'
@@ -216,6 +241,7 @@ resources:
         repo: 'twig'
   - name: xcache
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -224,6 +250,7 @@ resources:
         csspath: tr[group='1'] td a
   - name: ioncube
     type: new_version_resource
+    check_every: 1h
     source:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
@@ -232,6 +259,7 @@ resources:
         csspath: tr:contains('Linux (64 bits)') td:nth-of-type(5)
   - name: librdkafka
     type: new_version_resource
+    check_every: 1h
     source:
       type: git
       regex: 'v[\d\.]+[0-9A-Za-z\-]*'
@@ -241,6 +269,7 @@ resources:
         repo: 'librdkafka'
   - name: rabbitmq-c
     type: new_version_resource
+    check_every: 1h
     source:
       type: git
       regex: 'v[\d\.]+[0-9A-Za-z\-]*'
@@ -250,6 +279,7 @@ resources:
         repo: 'rabbitmq-c'
   - name: phpiredis
     type: new_version_resource
+    check_every: 1h
     source:
       type: git
       regex: 'v[\d\.]+[0-9A-Za-z\-]*'
@@ -259,6 +289,7 @@ resources:
         repo: 'phpiredis'
   - name: php-protobuf
     type: new_version_resource
+    check_every: 1h
     source:
       type: git
       regex: 'v[\d\.]+[0-9A-Za-z\-]*'
@@ -268,6 +299,7 @@ resources:
         repo: 'php-protobuf'
   - name: cphalcon
     type: new_version_resource
+    check_every: 1h
     source:
       type: git
       regex: 'v[\d\.]+[0-9A-Za-z\-]*'
@@ -277,6 +309,7 @@ resources:
         repo: 'cphalcon'
   - name: suhosin5
     type: new_version_resource
+    check_every: 1h
     source:
       type: git
       regex: '[\d\.]+[0-9A-Za-z\-]*'
