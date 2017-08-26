@@ -9,14 +9,10 @@ set -x
 export GOPATH=$PWD/buildpack
 export GOBIN=/usr/local/bin
 
-if [ "$LANGUAGE" = "go" ]; then
-  update_dir="src/go"
-elif [ "$LANGUAGE" = "staticfile" ]; then
-  update_dir="src/staticfile"
-elif [ "$LANGUAGE" = "nodejs" ]; then
-  update_dir="src/nodejs"
-else
+if [ "$LANGUAGE" = "hwc" -o "$LANGUAGE" = "multi" ]; then
   update_dir="src/compile"
+else
+  update_dir="src/$LANGUAGE"
 fi
 
 pushd buildpack
