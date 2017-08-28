@@ -31,7 +31,7 @@ class BuildpackTagger
         FileUtils.mv(cached_buildpack, output_cached)
       else
         puts `git tag #{tag_to_add}`
-        if File.exists?('cf.Gemfile')
+        if File.exists?('compile-extensions')
           system(<<~EOF)
                   export BUNDLE_GEMFILE=cf.Gemfile
                   if [ ! -z "$RUBYGEM_MIRROR" ]; then
