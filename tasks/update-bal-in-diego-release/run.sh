@@ -10,11 +10,13 @@ pushd bal-develop
   BAL_DEV_SHA=$(git rev-parse HEAD)
 popd
 
-rsync -a diego-release updated-diego-release
+rsync -a diego-release/ updated-diego-release
 
-pushd updated-diego-release/src/code.cloudfoundry.org/buildpacklifecycle
-  git checkout "$BAL_DEV_SHA"
-  git add .
+pushd updated-diego-release
+  pushd src/code.cloudfoundry.org/buildpackapplifecycle
+    git checkout "$BAL_DEV_SHA"
+    git add .
+  popd
+
+  git commit -m 'Update buildpacklifecycle'
 popd
-
-git commit -m 'Update buildpacklifecycle'
