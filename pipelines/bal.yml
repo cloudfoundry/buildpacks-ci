@@ -46,8 +46,9 @@ resources:
   - name: diego-release
     type: git
     source:
-      uri: https://github.com/cloudfoundry/diego-release
+      uri: git@github.com:cloudfoundry/diego-release
       branch: develop
+      private_key: {{diego-release-private-key}}
 
   - name: cf-release-rc
     type: git
