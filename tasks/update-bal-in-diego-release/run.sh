@@ -13,7 +13,7 @@ popd
 rsync -a diego-release updated-diego-release
 
 pushd updated-diego-release/src/code.cloudfoundry.org/buildpacklifecycle
-  git checkout $BAL_DEV_SHA
+  git checkout "$BAL_DEV_SHA"
   git add .
 popd
 
