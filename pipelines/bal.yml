@@ -47,7 +47,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/diego-release
-      branch: master
+      branch: develop
 
   - name: cf-release-rc
     type: git
@@ -295,6 +295,23 @@ jobs:
           git_path: bal-develop
           project_id: {{cf-buildpacks-public-tracker-id}}
           api_token: {{pivotal-tracker-api-token}}
+
+  - name: update-diego-release
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: diego-release
+        - get: bal-develop
+          passed: [merge-to-master]
+          trigger: true
+      - task: update-bal
+        file: buildpacks-ci/tasks/update-bal-in-diego-release/task.yml
+      - put: diego-release
+        params:
+          repository: updated-diego-release
+          rebase: true
 
   - name: destroy-bosh-lite
     serial: true
