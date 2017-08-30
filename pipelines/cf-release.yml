@@ -510,7 +510,7 @@ jobs:
             SECRET_ACCESS_KEY: {{blobstore-secret-key}}
             BUILDPACK: <%= language %>
             <% if language == 'java' %>
-            VERSION_ALLOWED: '~> 4.0'
+            VERSION_ALLOWED: '4.'
             <% end %>
           privileged: true
         - put: cf-release-develop
