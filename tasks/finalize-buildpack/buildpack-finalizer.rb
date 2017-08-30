@@ -36,15 +36,23 @@ class BuildpackFinalizer
 
   def add_dependencies
     Dir.chdir(@buildpack_repo_dir) do
-      num_cores = `nproc`
-      system("BUNDLE_GEMFILE=cf.Gemfile bundle install --jobs=#{num_cores}")
+      go_packager = Dir.glob("src/*/vendor/github.com/cloudfoundry/libbuildpack/packager").first
+      if go_packager
+        Dir.chdir(go_packager) do
+          `go install`
+        end
+        File.write(@recent_changes_file, `buildpack-packager --summary`, mode: 'a')
+      else
+        num_cores = `nproc`
+        system("BUNDLE_GEMFILE=cf.Gemfile bundle install --jobs=#{num_cores}")
 
-      File.write(@recent_changes_file, [
-        "\n\nPackaged binaries:\n",
-        `BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --list`,
-        "Default binary versions:\n",
-        `BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --defaults`
-      ].join("\n"), mode: 'a')
+        File.write(@recent_changes_file, [
+          "\n\nPackaged binaries:\n",
+          `BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --list`,
+          "Default binary versions:\n",
+          `BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --defaults`
+        ].join("\n"), mode: 'a')
+      end
     end
   end
 
