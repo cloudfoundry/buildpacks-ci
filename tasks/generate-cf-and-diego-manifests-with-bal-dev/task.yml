@@ -5,6 +5,7 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
+  - name: bal-develop
   - name: bosh-lite
   - name: buildpacks-ci
   - name: cf-release
@@ -14,7 +15,6 @@ outputs:
 run:
   path: buildpacks-ci/tasks/generate-cf-and-diego-manifests-with-bal-dev/run.sh
 params:
-  BAL_DEV_BRANCH:
   DEPLOYMENT_NAME:
   CI_CF_PASSWORD:
   BOSH_USER:

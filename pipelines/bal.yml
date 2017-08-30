@@ -181,7 +181,6 @@ jobs:
         - task: generate-manifest
           file: buildpacks-ci/tasks/generate-cf-and-diego-manifests-with-bal-dev/task.yml
           params:
-            BAL_DEV_BRANCH: {{buildpackapplifecycle-git-branch}}
             DEPLOYMENT_NAME: bal.buildpacks-gcp.ci
             CI_CF_PASSWORD: {{ci-cf-password}}
             BOSH_USER: {{bosh_user}}
