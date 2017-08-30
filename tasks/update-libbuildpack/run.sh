@@ -28,7 +28,8 @@ pushd buildpack
 
     if [ -f Gopkg.toml ]; then
       go get github.com/golang/dep/cmd/dep
-      dep ensure --update
+      dep ensure
+      dep ensure -update
     else
       go get github.com/FiloSottile/gvt
       gvt update github.com/cloudfoundry/libbuildpack

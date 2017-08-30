@@ -17,7 +17,9 @@ pushd buildpack
 		go get github.com/golang/mock/mockgen
 		go get github.com/onsi/ginkgo/ginkgo
 
-    dep ensure --update
+		dep ensure
+		dep ensure -update
+
 		go generate || true
 		ginkgo
 	popd
