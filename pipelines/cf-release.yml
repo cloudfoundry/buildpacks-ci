@@ -509,9 +509,6 @@ jobs:
             ACCESS_KEY_ID: {{blobstore-access-key}}
             SECRET_ACCESS_KEY: {{blobstore-secret-key}}
             BUILDPACK: <%= language %>
-            <% if language == 'java' %>
-            VERSION_ALLOWED: '4.'
-            <% end %>
           privileged: true
         - put: cf-release-develop
           params:
@@ -571,7 +568,6 @@ jobs:
             SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
             <% if language == 'java' %>
             BLOB_GLOB: buildpack-zip/<%= language %>-buildpack-offline*.zip
-            VERSION_ALLOWED: '~> 4.0'
             <% else %>
             BLOB_GLOB: buildpack-zip/<%= language %>_buildpack-cached*.zip
             <% end %>
