@@ -14,6 +14,10 @@ BOSH_RELEASES_DIR=$(pwd)
 export CF_RELEASE_DIR
 CF_RELEASE_DIR="$(pwd)/cf-release"
 
+pushd bal-develop
+  BAL_DEV_SHA=$(git rev-parse HEAD)
+popd
+
 pushd cf-release
   mkdir -p bosh-lite
   echo "
@@ -65,7 +69,7 @@ pushd diego-release
   ruby -i -pe "gsub('diego_privileged_containers: null', 'diego_privileged_containers: true')" bosh-lite/deployments/diego.yml
 
   pushd src/code.cloudfoundry.org/buildpackapplifecycle
-    git checkout "$BAL_DEV_BRANCH"
+    git checkout "$BAL_DEV_SHA"
     git pull
   popd
 popd
