@@ -9,7 +9,7 @@ set -x
 export GOPATH=$PWD/buildpack
 export GOBIN=/usr/local/bin
 
-if [ "$LANGUAGE" = "hwc" -o "$LANGUAGE" = "multi" ]; then
+if [ "$LANGUAGE" = "multi" ]; then
   update_dir="src/compile"
 else
   update_dir="src/$LANGUAGE"
