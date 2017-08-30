@@ -150,60 +150,99 @@ describe BuildpackFinalizer do
          HEREDOC
     end
 
-    before do
-      allow(subject).to receive(:`).with('BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --list').and_return(packaged_binaries)
-      allow(subject).to receive(:`).with('BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --defaults').and_return(default_versions)
+    let(:buildpack_packager_dir) do
+      File.join(buildpack_repo_dir, "src", "the-buildpack", "vendor", "github.com", "cloudfoundry", "libbuildpack", "packager")
     end
 
+    context "buildpack has libbuildpack" do
+      let(:packager_summary) do
+        <<~HEREDOC
+           Packaged binaries:
+           #{packaged_binaries}
+           Default binary versions:
+           #{default_versions}
+        HEREDOC
+      end
 
-    it 'emits a valid markdown table of dependencies' do
-      subject.run
-      output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
+      before do
+        FileUtils.mkdir_p(buildpack_packager_dir)
+        allow(subject).to receive(:`).with("go install") do
+          expect(Dir.pwd).to eql(buildpack_packager_dir)
+        end
+        allow(subject).to receive(:`).with("buildpack-packager --summary").and_return(packager_summary)
+        subject.run
+      end
 
-      expect(output).to include "Packaged binaries:"
-      expect(output).to include "| name  | version | cf_stacks  |"
-      expect(output).to include "|-------|---------|------------|"
-      expect(output).to include "| nginx | 1.8.0   | cflinuxfs2 |"
+      it 'installs the libbuildpack buildpack-packager' do
+        expect(subject).to have_received(:`).with("go install")
+      end
+
+      it 'emits a valid markdown table of dependencies and dependency default versions' do
+        output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
+
+        expect(output).to include "Packaged binaries:"
+        expect(output).to include "| name  | version | cf_stacks  |"
+        expect(output).to include "|-------|---------|------------|"
+        expect(output).to include "| nginx | 1.8.0   | cflinuxfs2 |"
+        expect(output).to include "Default binary versions:"
+        expect(output).to include "| name  | version |"
+        expect(output).to include "|-------|---------|"
+        expect(output).to include "| nginx | 1.8.0   |"
+      end
+
     end
 
-    it 'emits a valid markdown table of dependency default versions' do
-      subject.run
-      output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
+    context "buildpack does not have libbuildpack" do
+      before do
+        expect(File.exists?(buildpack_packager_dir)).to be_falsey
+        allow(subject).to receive(:`).with('BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --list').and_return(packaged_binaries)
+        allow(subject).to receive(:`).with('BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --defaults').and_return(default_versions)
+        subject.run
+      end
 
-      expect(output).to include "Default binary versions:"
-      expect(output).to include "| name  | version |"
-      expect(output).to include "|-------|---------|"
-      expect(output).to include "| nginx | 1.8.0   |"
-    end
 
-    it 'writes tag based on the VERSION' do
-      subject.run
-      output = File.read(File.join(artifact_dir, 'tag'))
+      it 'emits a valid markdown table of dependencies' do
+        output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
 
-      expect(output).to eq("v#{version}")
-    end
+        expect(output).to include "Packaged binaries:"
+        expect(output).to include "| name  | version | cf_stacks  |"
+        expect(output).to include "|-------|---------|------------|"
+        expect(output).to include "| nginx | 1.8.0   | cflinuxfs2 |"
+      end
 
-    it 'emits shasum in RECENT_CHANGES for the uncached buildpack' do
-      subject.run
-      output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
+      it 'emits a valid markdown table of dependency default versions' do
+        output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
 
-      expect(output).to include "  * Uncached buildpack SHA256: #{@uncached_sha256}\n"
-    end
+        expect(output).to include "Default binary versions:"
+        expect(output).to include "| name  | version |"
+        expect(output).to include "|-------|---------|"
+        expect(output).to include "| nginx | 1.8.0   |"
+      end
 
-    it 'does not move the cached buildpack to the artifacts dir' do
-      subject.run
-      expect(File.exist? File.join(artifact_dir, 'staticfile_buildpack-cached-v1.2.2.zip')).to be_falsey
-    end
+      it 'writes tag based on the VERSION' do
+        output = File.read(File.join(artifact_dir, 'tag'))
 
-    it 'emits a SHA256.txt file for the uncached buildpack' do
-      subject.run
-      output = File.read(File.join(artifact_dir, 'staticfile-buildpack-v1.2.2.zip.SHA256SUM.txt'))
-      expect(output).to eq "#{@uncached_sha256}  staticfile-buildpack-v1.2.2.zip"
-    end
+        expect(output).to eq("v#{version}")
+      end
 
-    it 'moves the uncached buildpack to the artifacts dir, modifying the name to match the java buildpack' do
-      subject.run
-      expect(File.exist? File.join(artifact_dir, 'staticfile-buildpack-v1.2.2.zip')).to be_truthy
+      it 'emits shasum in RECENT_CHANGES for the uncached buildpack' do
+        output = File.read(File.join(artifact_dir, 'RECENT_CHANGES'))
+
+        expect(output).to include "  * Uncached buildpack SHA256: #{@uncached_sha256}\n"
+      end
+
+      it 'does not move the cached buildpack to the artifacts dir' do
+        expect(File.exist? File.join(artifact_dir, 'staticfile_buildpack-cached-v1.2.2.zip')).to be_falsey
+      end
+
+      it 'emits a SHA256.txt file for the uncached buildpack' do
+        output = File.read(File.join(artifact_dir, 'staticfile-buildpack-v1.2.2.zip.SHA256SUM.txt'))
+        expect(output).to eq "#{@uncached_sha256}  staticfile-buildpack-v1.2.2.zip"
+      end
+
+      it 'moves the uncached buildpack to the artifacts dir, modifying the name to match the java buildpack' do
+        expect(File.exist? File.join(artifact_dir, 'staticfile-buildpack-v1.2.2.zip')).to be_truthy
+      end
     end
   end
 end
