@@ -70,7 +70,6 @@ pushd diego-release
 
   pushd src/code.cloudfoundry.org/buildpackapplifecycle
     git checkout "$BAL_DEV_SHA"
-    git pull
   popd
 popd
 
