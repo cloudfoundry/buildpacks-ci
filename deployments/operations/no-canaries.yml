@@ -1,0 +1,6 @@
+- path: /update/canaries
+  type: replace
+  value: 0
+- path: /update/max_in_flight
+  type: replace
+  value: 100
