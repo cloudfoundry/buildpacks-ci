@@ -10,9 +10,11 @@ gcp_linux_stemcell="gcp-linux-stemcell/stemcell.tgz"
 bosh2 -n upload-stemcell "$gcp_windows_stemcell"
 bosh2 -n upload-stemcell "$gcp_linux_stemcell"
 
-echo -e "\n\n======= Destroying old cf deployment ======="
-bosh2 -n -d cf delete-deployment
-echo -e "\n\n======= Destroyed ======="
+if [ -z "${SKIP_DELETION:-}" ]; then
+  echo -e "\n\n======= Destroying old cf deployment ======="
+  bosh2 -n -d cf delete-deployment
+  echo -e "\n\n======= Destroyed ======="
+fi
 
 echo -e "\n\n======= Creating new cf deployment ======="
 echo "cf_admin_password: $CI_CF_SHARED_PASSWORD" > /tmp/deployment-vars.yml
