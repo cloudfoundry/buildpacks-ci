@@ -17,7 +17,9 @@ pushd updated-diego-release
     git checkout "$BAL_DEV_SHA"
   popd
 
-  git add .
-  git config --global alias.ci commit
-  ./scripts/commit-with-submodule-log src/code.cloudfoundry.org/buildpackapplifecycle
+  if [ -n "$(git status --porcelain)" ] ; then
+    git add .
+    git config --global alias.ci commit
+    ./scripts/commit-with-submodule-log src/code.cloudfoundry.org/buildpackapplifecycle
+  fi
 popd
