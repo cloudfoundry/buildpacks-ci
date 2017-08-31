@@ -18,5 +18,5 @@ pushd updated-diego-release
   popd
 
   git add .
-  git commit -m 'Update buildpacklifecycle'
+  ./scripts/commit-with-submodule-log src/code.cloudfoundry.org/buildpackapplifecycle
 popd
