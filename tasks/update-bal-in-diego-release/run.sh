@@ -18,5 +18,6 @@ pushd updated-diego-release
   popd
 
   git add .
+  git config --global alias.ci commit
   ./scripts/commit-with-submodule-log src/code.cloudfoundry.org/buildpackapplifecycle
 popd
