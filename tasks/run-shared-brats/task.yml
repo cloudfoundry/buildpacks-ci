@@ -7,7 +7,6 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: brats
-  - name: cf-environments
   - name: cf-brat-space
     path: cf-space
 run:
