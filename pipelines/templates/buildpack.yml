@@ -612,7 +612,7 @@ jobs: ##########################################################################
           s3_filepath_prefix: product-files/buildpacks
           metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
-  - name: specs-edge-shared-develop
+  - name: specs-edge-integration-develop
     serial: true
     public: true
     plan:
@@ -624,58 +624,34 @@ jobs: ##########################################################################
           timeout: 3h
         - aggregate:
           - get: buildpacks-ci
-          - get: brats
           - get: buildpack
             resource: buildpack-develop
             trigger: true
           - get: repo
             resource: buildpack-develop
-        - aggregate:
-          - do:
-            - put: cf-bp-space
+        - do:
+          - put: cf-bp-space
 <% if cutlass.include?(language) %>
-            - task: ginkgo
-              file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
-              params:
-                STACKS: cflinuxfs2
-                GINKGO_ATTEMPTS: 4
-                GINKGO_NODES: 6
-              privileged: true
+          - task: ginkgo
+            file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
+            params:
+              STACKS: cflinuxfs2
+              GINKGO_ATTEMPTS: 4
+              GINKGO_NODES: 6
+            privileged: true
 <% else %>
-            - task: rspec
-              file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
-              params:
-                STACKS: cflinuxfs2
-                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-                CF_PASSWORD: {{ci_cf_shared_password}}
-                RUBYGEM_MIRROR: {{rubygem-mirror}}
-              privileged: true
+          - task: rspec
+            file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
+            params:
+              STACKS: cflinuxfs2
+              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+              CF_PASSWORD: {{ci_cf_shared_password}}
+              RUBYGEM_MIRROR: {{rubygem-mirror}}
+            privileged: true
 <% end %>
-            ensure:
-              task: delete-cf-space
-              file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
-          - do:
-            - put: cf-brat-space
-            - task: brats
-              file: buildpacks-ci/tasks/run-shared-brats/task.yml
-              params:
-                BUILDPACK_BRANCH: develop
-                CI_CF_USERNAME: {{ci-cf-username}}
-                CI_CF_PASSWORD: {{ci_cf_shared_password}}
-                LANGUAGE: <%= language %>
-                RUBYGEM_MIRROR: {{rubygem-mirror}}
-            ensure:
-              task: delete-cf-space
-              file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
-        on_success:
-          task: github-set-status-success
-          file: buildpacks-ci/tasks/set-status-success/task.yml
-          params:
-            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
-            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-develop'
-            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge develop spec passed'
-            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
         on_failure:
           put: failure-alert
           params:
@@ -687,8 +663,63 @@ jobs: ##########################################################################
           put: edge-shared-environments
           params:
             release: cf-environments
+  - name: specs-edge-brats-develop
+    serial: true
+    public: true
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - get: buildpack
+            resource: buildpack-develop
+            trigger: true
+          - get: repo
+            resource: buildpack-develop
+        - do:
+          - put: cf-brat-space
+          - task: brats
+            file: buildpacks-ci/tasks/run-shared-brats/task.yml
+            params:
+              BUILDPACK_BRANCH: develop
+              CI_CF_USERNAME: {{ci-cf-username}}
+              CI_CF_PASSWORD: {{ci_cf_shared_password}}
+              LANGUAGE: <%= language %>
+              RUBYGEM_MIRROR: {{rubygem-mirror}}
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: specs-edge-shared-develop
+    serial: true
+    public: true
+    plan:
+      - do:
+        - get: buildpacks-ci
+        - get: repo
+          resource: buildpack-develop
+          trigger: true
+          passed:
+          - specs-edge-brats-develop
+          - specs-edge-integration-develop
+        on_success:
+          task: github-set-status-success
+          file: buildpacks-ci/tasks/set-status-success/task.yml
+          params:
+            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+            GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
+            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-develop'
+            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge develop spec passed'
+            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
+
 <% unless language == "hwc" %>
-  - name: specs-lts-gcp-develop
+  - name: specs-lts-integration-develop
     serial: true
     public: true
     plan:
@@ -706,53 +737,31 @@ jobs: ##########################################################################
             trigger: true
           - get: repo
             resource: buildpack-develop
-        - aggregate:
-          - do:
-            - put: cf-bp-space
-              resource: cf-lts-space
+        - do:
+          - put: cf-bp-space
+            resource: cf-lts-space
 <% if cutlass.include?(language) %>
-            - task: ginkgo
-              file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
-              params:
-                STACKS: cflinuxfs2
-                GINKGO_ATTEMPTS: 4
-                GINKGO_NODES: 6
-              privileged: true
+          - task: ginkgo
+            file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
+            params:
+              STACKS: cflinuxfs2
+              GINKGO_ATTEMPTS: 4
+              GINKGO_NODES: 6
+            privileged: true
 <% else %>
-            - task: rspec
-              file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
-              params:
-                STACKS: cflinuxfs2
-                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-                RUBYGEM_MIRROR: {{rubygem-mirror}}
-                CF_PASSWORD: {{ci-cf-lts-password}}
-                SKIP_WINDOWS_TESTS: true
-              privileged: true
+          - task: rspec
+            file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
+            params:
+              STACKS: cflinuxfs2
+              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+              RUBYGEM_MIRROR: {{rubygem-mirror}}
+              CF_PASSWORD: {{ci-cf-lts-password}}
+              SKIP_WINDOWS_TESTS: true
+            privileged: true
 <% end %>
-            ensure:
-              task: delete-cf-space
-              file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
-          - do:
-            - put: cf-brat-space
-              resource: cf-lts-brat-space
-            - task: brats
-              file: buildpacks-ci/tasks/run-shared-brats/task.yml
-              params:
-                BUILDPACK_BRANCH: develop
-                LANGUAGE: <%= language %>
-                RUBYGEM_MIRROR: {{rubygem-mirror}}
-            ensure:
-              task: delete-cf-space
-              file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
-        on_success:
-          task: github-set-status-success
-          file: buildpacks-ci/tasks/set-status-success/task.yml
-          params:
-            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
-            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-develop'
-            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI lts develop spec passed'
-            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
         on_failure:
           put: failure-alert
           params:
@@ -764,6 +773,59 @@ jobs: ##########################################################################
           put: lts-shared-environments
           params:
             release: cf-environments
+  - name: specs-lts-brats-develop
+    serial: true
+    public: true
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: brats
+          - get: buildpack
+            resource: buildpack-develop
+            trigger: true
+          - get: repo
+            resource: buildpack-develop
+        - do:
+          - put: cf-brat-space
+            resource: cf-lts-brat-space
+          - task: brats
+            file: buildpacks-ci/tasks/run-shared-brats/task.yml
+            params:
+              BUILDPACK_BRANCH: develop
+              LANGUAGE: <%= language %>
+              RUBYGEM_MIRROR: {{rubygem-mirror}}
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: specs-lts-gcp-develop
+    serial: true
+    public: true
+    plan:
+      - do:
+        - get: buildpacks-ci
+        - get: repo
+          resource: buildpack-develop
+          trigger: true
+          passed:
+          - specs-lts-brats-develop
+          - specs-lts-integration-develop
+        on_success:
+          task: github-set-status-success
+          file: buildpacks-ci/tasks/set-status-success/task.yml
+          params:
+            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+            GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
+            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-develop'
+            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI lts develop spec passed'
+            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 <% end %>
   - name: buildpack-to-master
     serial: true
