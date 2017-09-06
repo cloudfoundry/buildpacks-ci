@@ -71,8 +71,31 @@ describe BuildpackToMaster do
     let(:statuses) { [{:context=>"buildpacks-ci/lts-develop"}, {:context=>"buildpacks-ci/edge-develop"}] }
     let(:files_changed) { "CHANGELOG\nVERSION" }
 
-    it 'does not add the buildpacks-ci/ready-to-merge tag' do
-      expect(Octokit).to receive(:create_status)
+    it 'adds the buildpacks-ci/ready-to-merge tag' do
+      expect(Octokit).to receive(:create_status).with(git_repo,
+                                                      current_sha,
+                                                      "success",
+                                                      context: github_status_context,
+                                                      description: github_status_description,
+                                                      target_url: pipelineuri)
+      expect(Octokit).to receive(:update_branch)
+
+      subject.run
+    end
+  end
+
+  context 'the previous commit is for hwc-buildpack and only has passed edge-develop and the current commit only change CHANGELOG and VERSION' do
+    let(:statuses) { [{:context=>"buildpacks-ci/edge-develop"}] }
+    let(:git_repo) { 'somewhere/hwc-buildpack' }
+    let(:files_changed) { "CHANGELOG\nVERSION" }
+
+    it 'adds the buildpacks-ci/ready-to-merge tag' do
+      expect(Octokit).to receive(:create_status).with(git_repo,
+                                                      current_sha,
+                                                      "success",
+                                                      context: github_status_context,
+                                                      description: github_status_description,
+                                                      target_url: pipelineuri)
       expect(Octokit).to receive(:update_branch)
 
       subject.run
