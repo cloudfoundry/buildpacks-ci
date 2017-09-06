@@ -36,7 +36,7 @@ class BuildpackFinalizer
 
   def add_dependencies
     Dir.chdir(@buildpack_repo_dir) do
-      go_packager = Dir.glob("src/*/vendor/github.com/cloudfoundry/libbuildpack/packager").first
+      go_packager = Dir.glob("src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager").first
       if go_packager
         Dir.chdir(go_packager) do
           `go install`
