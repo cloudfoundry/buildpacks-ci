@@ -151,7 +151,7 @@ describe BuildpackFinalizer do
     end
 
     let(:buildpack_packager_dir) do
-      File.join(buildpack_repo_dir, "src", "the-buildpack", "vendor", "github.com", "cloudfoundry", "libbuildpack", "packager")
+      File.join(buildpack_repo_dir, "src", "the-buildpack", "vendor", "github.com", "cloudfoundry", "libbuildpack", "packager", "buildpack-packager")
     end
 
     context "buildpack has libbuildpack" do
