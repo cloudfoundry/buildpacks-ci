@@ -284,7 +284,6 @@ jobs: ##########################################################################
         trigger: true
       - task: load-modules
         file: buildpacks-ci/tasks/populate-php-modules-in-manifest/task.yml
-        privileged: true
       - put: buildpack-develop
         params:
           repository: updated-buildpack
@@ -324,7 +323,6 @@ jobs: ##########################################################################
       - do:
         - task: detect-and-upload
           file: buildpacks-ci/tasks/detect-and-upload/task.yml
-          privileged: true
           params:
             GIT_REPO_ORG: <%= git_repo_organization %>
             BUILDPACK_NAME: <%= language %>-buildpack
@@ -536,10 +534,8 @@ jobs: ##########################################################################
         - get: buildpack-checksums
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
-        privileged: true
       - task: commit-shas
         file: buildpacks-ci/tasks/get-commit-shasums/task.yml
-        privileged: true
       - put: buildpack-checksums
         params:
           repository: sha-artifacts
@@ -592,12 +588,10 @@ jobs: ##########################################################################
           trigger: true
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
-        privileged: true
       - task: write-pivnet-metadata
         file: buildpacks-ci/tasks/write-buildpack-pivnet-metadata/task.yml
         params:
           BUILDPACK: <%= language %>
-        privileged: true
       - put: pivnet-buildpack-metadata
         params:
           repository: pivnet-buildpack-metadata-artifacts
@@ -820,7 +814,6 @@ jobs: ##########################################################################
           resource: buildpack-develop
       - task: update-compile-extensions
         file: buildpacks-ci/tasks/update-compile-extensions/task.yml
-        privileged: true
         params: { RUBYGEM_MIRROR: {{rubygem-mirror}}  }
       - put: buildpack-develop
         params:
@@ -860,7 +853,6 @@ jobs: ##########################################################################
           resource: buildpack-develop
       - task: update-buildpack-packager
         file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
-        privileged: true
         params:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           GEM_NAME: buildpack-packager
@@ -884,7 +876,6 @@ jobs: ##########################################################################
           resource: buildpack-develop
       - task: update-machete
         file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
-        privileged: true
         params:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           GEM_NAME: machete
