@@ -268,7 +268,6 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: built-yaml
           resource: <%= dependency %>-built-output
-        - get: buildpacks-bucket-<%= dependency %>
       - do:
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary/task.yml
@@ -335,7 +334,6 @@ jobs: ##########################################################################
         - get: binary-builder
           passed: [binary-builder-specs]
         - get: buildpacks-ci
-        - get: buildpacks-bucket-<%= dependency %>
       - do:
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary/task.yml
