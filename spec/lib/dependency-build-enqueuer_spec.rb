@@ -110,6 +110,17 @@ describe DependencyBuildEnqueuer do
       it_behaves_like "non pre-release builds are triggered by <dependency>-new.yml", 'sha256'
     end
 
+    context "dep" do
+      let(:dependency)          { "dep" }
+      let(:new_versions)        { %w(v0.2.1 v0.3.0) }
+      let(:expected_version_1)  { "v0.3.0" }
+      let(:expected_version_2)  { "v0.2.1" }
+      let(:source_url_1)        { "https://github.com/golang/dep/archive/#{expected_version_1}.tar.gz" }
+      let(:source_url_2)        { "https://github.com/golang/dep/archive/#{expected_version_2}.tar.gz" }
+
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yml", 'sha256'
+    end
+
     context "composer" do
       let(:dependency)          { "composer" }
       let(:new_versions)        { %w(1.1.0-RC 1.1.1-alpha1 1.1.3 1.1.2) }
