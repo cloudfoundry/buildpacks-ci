@@ -224,7 +224,7 @@ class ConcourseBinaryBuilder
   end
 
   def is_automated
-    automated = %w(bower bundler composer dotnet godep glide hwc nginx node yarn)
+    automated = %w(bower bundler composer dotnet godep dep glide hwc nginx node yarn)
     automated.include? dependency
   end
 
