@@ -63,6 +63,7 @@ class DependencyBuildEnqueuer
     case dependency
       when "dotnet" then version.gsub("v","")
       when "godep" then version.gsub("v","")
+      when "dep" then version.gsub("v","")
       when "glide" then version.gsub("v","")
       else version
     end
@@ -79,6 +80,9 @@ class DependencyBuildEnqueuer
       verifications << shasum_256_verification(download_url)
     when "node"
       download_url = "https://nodejs.org/dist/v#{version}/node-v#{version}.tar.gz"
+      verifications << shasum_256_verification(download_url)
+    when "dep"
+      download_url = "https://github.com/golang/dep/archive/#{version}.tar.gz"
       verifications << shasum_256_verification(download_url)
     when "godep"
       download_url = "https://github.com/tools/godep/archive/#{version}.tar.gz"
