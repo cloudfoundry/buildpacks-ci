@@ -6,6 +6,7 @@ class BuildpackDependencyUpdater; end
 
 require_relative 'buildpack-dependency-updater/bundler.rb'
 require_relative 'buildpack-dependency-updater/godep.rb'
+require_relative 'buildpack-dependency-updater/dep.rb'
 require_relative 'buildpack-dependency-updater/glide.rb'
 require_relative 'buildpack-dependency-updater/bower.rb'
 require_relative 'buildpack-dependency-updater/composer.rb'
