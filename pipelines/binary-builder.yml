@@ -38,7 +38,7 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
       branch: master
 
-<% dep_build_names = %w(bower go bundler composer dotnet glide godep httpd hwc jruby php php7 python node nginx ruby yarn) %>
+<% dep_build_names = %w(bower go bundler composer dotnet glide godep dep httpd hwc jruby php php7 python node nginx ruby yarn) %>
 <% dep_build_names.each do |dep| %>
   - name: <%= dep %>-builds
     type: git
@@ -68,7 +68,7 @@ resources: #####################################################################
       paths: [ binary-built-output/dotnet-framework-built.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
-<% %w(bower bundler composer dotnet glide godep hwc nginx node yarn).each do |auto_dep| %>
+<% %w(bower bundler composer dotnet glide godep dep hwc nginx node yarn).each do |auto_dep| %>
   - name: <%= auto_dep %>-builds-in
     type: git
     source:
@@ -121,7 +121,7 @@ resources: #####################################################################
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
 
-<% dep_build_names = %w(bower go bundler composer dotnet glide godep httpd hwc jruby php php7 python node nginx ruby yarn) %>
+<% dep_build_names = %w(bower go bundler composer dotnet glide godep dep httpd hwc jruby php php7 python node nginx ruby yarn) %>
 <% dep_build_names.each do |dep| %>
   - name: buildpacks-bucket-<%= dep %>
     type: s3
@@ -136,17 +136,17 @@ groups: ########################################################################
 
   - name: enqueue-automated-builds
     jobs:
-<% %w(bower bundler composer dotnet glide godep hwc nginx node yarn).each do |auto_dep| %>
+<% %w(bower bundler composer dotnet glide godep dep hwc nginx node yarn).each do |auto_dep| %>
     - trigger-<%= auto_dep %>-build
 <% end %>
 
   - name: automated-builds
     jobs:
     - binary-builder-specs
-<% %w(bower bundler composer dotnet glide godep hwc nginx node yarn).each do |auto_dep| %>
+<% %w(bower bundler composer dotnet glide godep dep hwc nginx node yarn).each do |auto_dep| %>
     - build-<%= auto_dep %>
 <% end %>
-<% {go: ["godep", "glide"], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node","yarn","bundler"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework'] }.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide", "dep" ], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node","yarn","bundler"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework'] }.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
     - update-<%= dependency %>-in-<%= buildpack %>-buildpack
   <% end %>
@@ -160,7 +160,7 @@ groups: ########################################################################
     - build-<%= dependency %>
 <% end %>
 
-  <% integration_spec_names = %w(bundler glide go godep httpd hwc jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
+  <% integration_spec_names = %w(bundler glide go godep dep httpd hwc jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
   - name: binary-builder-specs
     jobs:
     - binary-builder-specs
@@ -196,7 +196,7 @@ jobs: ##########################################################################
         - get: binary-builder
           trigger: true
       - do:
-        <% integration_spec_names = %w(bundler glide go godep httpd hwc jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
+        <% integration_spec_names = %w(bundler glide go godep dep httpd hwc jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
         - task: all-expected-integration-specs-will-run
           file: buildpacks-ci/tasks/check-for-binary-builder-integration-spec-presence/task.yml
           params:
@@ -299,7 +299,7 @@ jobs: ##########################################################################
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 
-<% %w(bower bundler godep hwc dotnet composer glide nginx node yarn).each do |dependency| %>
+<% %w(bower bundler godep dep hwc dotnet composer glide nginx node yarn).each do |dependency| %>
   - name: trigger-<%= dependency %>-build
     serial: true
     public: true
@@ -366,7 +366,7 @@ jobs: ##########################################################################
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 
-<% {go: ["godep", "glide"], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node", "yarn", "bundler"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework']}.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide", "dep"], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node", "yarn", "bundler"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework']}.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
   - name: update-<%= dependency %>-in-<%= buildpack %>-buildpack
     serial: true
