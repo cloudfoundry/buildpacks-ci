@@ -24,7 +24,10 @@ blobstore:
 EOF
   fi
   rm -rf blobs
-  bosh2 blobs | grep -- '-buildpack/.*_buildpack' | awk '{print $1}' | xargs -n1 bosh2 remove-blob
+  [ -f config/blobs.yml ] || echo -e "---\n{}" > config/blobs.yml
+  for name in $( bosh2 blobs | grep -- '-buildpack/.*_buildpack' | awk '{print $1}' ); do
+    bosh2 remove-blob $name
+  done
 
   # we actually want globbing here, so:
   # shellcheck disable=SC2086
