@@ -26,7 +26,7 @@ EOF
   rm -rf blobs
   [ -f config/blobs.yml ] || echo -e "---\n{}" > config/blobs.yml
   for name in $( bosh2 blobs | grep -- '-buildpack/.*_buildpack' | awk '{print $1}' ); do
-    bosh2 remove-blob $name
+    bosh2 remove-blob "$name"
   done
 
   # we actually want globbing here, so:
