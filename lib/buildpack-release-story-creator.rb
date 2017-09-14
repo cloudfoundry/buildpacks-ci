@@ -16,7 +16,6 @@ class BuildpackReleaseStoryCreator
   end
 
   def run!
-    new_release_version = @previous_buildpack_version.succ
     story_name = "**Release:** #{buildpack_name}-buildpack #{new_release_version}"
 
     story_description = stories_since_last_release.inject("Stories:\n\n") do |story_text, story|
@@ -47,5 +46,11 @@ class BuildpackReleaseStoryCreator
 
   def most_recent_release_story
     @latest_release_story ||= buildpack_project.stories(filter: "label:release AND label:#{buildpack_name}").last
+  end
+
+  def new_release_version
+    @previous_buildpack_version.split('.').tap do |arr|
+      arr[-1].succ!
+    end.join('.')
   end
 end
