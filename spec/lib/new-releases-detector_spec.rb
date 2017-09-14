@@ -27,6 +27,7 @@ describe NewReleasesDetector do
     allow_any_instance_of(described_class).to receive(:open).with(/bower/).and_return(double(read: { 'versions' => {} }.to_json))
     allow_any_instance_of(described_class).to receive(:open).with(/miniconda/).and_return(double(read: '<html></html>'))
     allow_any_instance_of(described_class).to receive(:open).with(/newrelic/).and_return(double(read: '<html></html>'))
+    allow_any_instance_of(described_class).to receive(:open).with('https://apr.apache.org/download.cgi').and_return(double(read: '<html></html>'))
 
     allow(File).to receive(:exist?).and_call_original
     allow(File).to receive(:write).and_call_original
@@ -153,6 +154,60 @@ describe NewReleasesDetector do
 
       context 'when there are no new releases' do
         let(:new_releases_response) { double(read: { 'v1' => 1, 'v2' => 2 }.to_yaml) }
+
+        it_behaves_like 'there are no new versions to potentially build'
+      end
+    end
+
+    context 'for apr' do
+      let(:dependency)          { :apr }
+      let(:old_versions)        { %w(1.6.0) }
+      let(:new_versions)        { %w(1.6.1) }
+      let(:new_releases_source) { 'https://apr.apache.org/download.cgi' }
+
+      context 'when there are new releases' do
+        let(:new_releases_response) { '<table>
+          <tr><td><a name="other"><strong>APR-util 2.3.5 is the best available version</strong></a></td></tr>
+          <tr><td><a name="apr1"><strong>APR 1.6.1 is the best available version</strong></a></td></tr>
+          </table>' }
+
+        it_behaves_like 'there are new versions to potentially build' do
+          let(:all_versions) { new_versions }
+        end
+      end
+
+      context 'when there are no new releases' do
+        let(:new_releases_response) { '<table>
+          <tr><td><a name="other"><strong>APR-util 2.3.4 is the best available version</strong></a></td></tr>
+          <tr><td><a name="apr1"><strong>APR 1.6.0 is the best available version</strong></a></td></tr>
+          </table>' }
+
+        it_behaves_like 'there are no new versions to potentially build'
+      end
+    end
+
+    context 'for apr-util' do
+      let(:dependency)          { :apr_util }
+      let(:old_versions)        { %w(2.3.4) }
+      let(:new_versions)        { %w(2.3.5) }
+      let(:new_releases_source) { 'https://apr.apache.org/download.cgi' }
+
+      context 'when there are new releases' do
+        let(:new_releases_response) { '<table>
+          <tr><td><a name="other"><strong>APR 1.6.1 is the best available version</strong></a></td></tr>
+          <tr><td><a name="aprutil1"><strong>APR-util 2.3.5 is the best available version</strong></a></td></tr>
+          </table>' }
+
+        it_behaves_like 'there are new versions to potentially build' do
+          let(:all_versions) { new_versions }
+        end
+      end
+
+      context 'when there are no new releases' do
+        let(:new_releases_response) { '<table>
+          <tr><td><a name="other"><strong>APR 1.6.0 is the best available version</strong></a></td></tr>
+          <tr><td><a name="aprutil1"><strong>APR-util 2.3.4 is the best available version</strong></a></td></tr>
+          </table>' }
 
         it_behaves_like 'there are no new versions to potentially build'
       end
