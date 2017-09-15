@@ -153,7 +153,6 @@ jobs:
           resource: brats
       - task: update-buildpack-packager
         file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
-        privileged: true
         params:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           GEM_NAME: buildpack-packager
@@ -177,7 +176,6 @@ jobs:
           resource: brats
       - task: update-machete
         file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
-        privileged: true
         params:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
           GEM_NAME: machete
