@@ -272,10 +272,8 @@ jobs:
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
             ROOTFS_RELEASE: cflinuxfs2
             IAAS: gcp
-          privileged: true
         - task: create-cf-release
           file: buildpacks-ci/tasks/create-cf-bosh-release-to-deploy/task.yml
-          privileged: true
         - put: cf-release-cf-deployment
           params:
             manifest: generate-manifest-artifacts/cf-release.buildpacks-gcp.ci/manifest.yml
@@ -509,7 +507,6 @@ jobs:
             ACCESS_KEY_ID: {{blobstore-access-key}}
             SECRET_ACCESS_KEY: {{blobstore-secret-key}}
             BUILDPACK: <%= language %>
-          privileged: true
         - put: cf-release-develop
           params:
             repository: cf-release-artifacts

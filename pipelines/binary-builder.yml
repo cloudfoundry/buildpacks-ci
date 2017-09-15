@@ -240,7 +240,6 @@ jobs: ##########################################################################
               ORACLE_LIBS_AWS_BUCKET: {{oracle-client-libs-s3-bucket}}
               ORACLE_LIBS_FILENAME: {{oracle-client-libs-filename}}
             <% end %>
-            privileged: true
             attempts: 5
         on_failure:
           put: failure-alert
@@ -277,7 +276,6 @@ jobs: ##########################################################################
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BINARY_BUILDER_PLATFORM: {{binary-builder-platform}}
             BINARY_BUILDER_OS_NAME: {{binary-builder-os-name}}
-          privileged: true
         - put: buildpacks-bucket-<%= dependency %>
           params:
             file: binary-builder-artifacts/<%= dependency %>*
@@ -343,7 +341,6 @@ jobs: ##########################################################################
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BINARY_BUILDER_PLATFORM: {{binary-builder-platform}}
             BINARY_BUILDER_OS_NAME: {{binary-builder-os-name}}
-          privileged: true
         - put: buildpacks-bucket-<%= dependency %>
           params:
             file: binary-builder-artifacts/<%= dependency %>*

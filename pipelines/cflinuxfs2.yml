@@ -380,7 +380,6 @@ jobs: ##########################################################################
               BOSH_USER: {{bosh_user}}
               BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
               BOSH_TARGET: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
-            privileged: true
           - task: generate-cf-and-diego-manifest
             file: buildpacks-ci/tasks/generate-cf-and-diego-manifests/task.yml
             params:
@@ -394,7 +393,6 @@ jobs: ##########################################################################
               BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
               ROOTFS_RELEASE: cflinuxfs2
               IAAS: gcp
-            privileged: true
         - task: overwrite-cflinuxfs2-release
           file: buildpacks-ci/tasks/overwrite-cflinuxfs2-release/task.yml
           params:
@@ -414,7 +412,6 @@ jobs: ##########################################################################
             RUBYGEM_MIRROR: {{rubygem-mirror}}
         - task: create-cf-release
           file: buildpacks-ci/tasks/create-cf-release-without-modifying-cflinuxfs2/task.yml
-          privileged: true
         - task: upload-diego-release
           file: buildpacks-ci/tasks/upload-diego-release/task.yml
           params:
