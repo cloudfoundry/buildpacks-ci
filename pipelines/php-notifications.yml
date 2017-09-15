@@ -28,8 +28,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/rdkafka
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('beta')) th
+        url: https://pecl.php.net/feeds/pkg_rdkafka.rss
+        csspath: item title
   - name: pecl-cassandra
     type: new_version_resource
     check_every: 1h
@@ -37,8 +37,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-       url: https://pecl.php.net/package/cassandra
-       csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+       url: https://pecl.php.net/feeds/pkg_cassandra.rss
+       csspath: item title
   - name: cassandra-cpp-driver
     type: new_version_resource
     check_every: 1h
@@ -55,8 +55,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/amqp
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+        url: https://pecl.php.net/feeds/pkg_amqp.rss
+        csspath: item title
   - name: pecl-gearman
     type: new_version_resource
     check_every: 1h
@@ -64,8 +64,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/gearman
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+        url: https://pecl.php.net/feeds/pkg_gearman.rss
+        csspath: item title
   - name: pecl-igbinary
     type: new_version_resource
     check_every: 1h
@@ -73,8 +73,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/igbinary
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+        url: https://pecl.php.net/feeds/pkg_igbinary.rss
+        csspath: item title
   - name: pecl-imagick
     type: new_version_resource
     check_every: 1h
@@ -82,8 +82,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/imagick
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+        url: https://pecl.php.net/feeds/pkg_imagick.rss
+        csspath: item title
   - name: pecl-mailparse
     type: new_version_resource
     check_every: 1h
@@ -91,8 +91,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/mailparse
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+        url: https://pecl.php.net/feeds/pkg_mailparse.rss
+        csspath: item title
   - name: pecl-memcache
     type: new_version_resource
     check_every: 1h
@@ -100,8 +100,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/memcache
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+        url: https://pecl.php.net/feeds/pkg_memcache.rss
+        csspath: item title
   - name: pecl-mongo
     type: new_version_resource
     check_every: 1h
@@ -109,8 +109,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/mongo
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+        url: https://pecl.php.net/feeds/pkg_mongo.rss
+        csspath: item title
   - name: pecl-msgpack
     type: new_version_resource
     check_every: 1h
@@ -118,8 +118,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/msgpack
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th, table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('beta')) th
+        url: https://pecl.php.net/feeds/pkg_msgpack.rss
+        csspath: item title
   - name: pecl-protocolbuffers
     type: new_version_resource
     check_every: 1h
@@ -127,8 +127,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/protocolbuffers
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th, table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('beta')) th, table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('alpha')) th
+        url: https://pecl.php.net/feeds/pkg_protocolbuffers.rss
+        csspath: item title
   - name: pecl-redis
     type: new_version_resource
     check_every: 1h
@@ -136,8 +136,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/redis
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+        url: https://pecl.php.net/feeds/pkg_redis.rss
+        csspath: item title
   - name: pecl-sundown
     type: new_version_resource
     check_every: 1h
@@ -145,8 +145,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/sundown
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th, table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('beta')) th
+        url: https://pecl.php.net/feeds/pkg_sundown.rss
+        csspath: item title
   - name: pecl-xdebug
     type: new_version_resource
     check_every: 1h
@@ -154,8 +154,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/xdebug
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+        url: https://pecl.php.net/feeds/pkg_xdebug.rss
+        csspath: item title
   - name: pecl-yaf
     type: new_version_resource
     check_every: 1h
@@ -163,8 +163,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/yaf
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+        url: https://pecl.php.net/feeds/pkg_yaf.rss
+        csspath: item title
   - name: pecl-mongodb
     type: new_version_resource
     check_every: 1h
@@ -172,8 +172,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/mongodb
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+        url: https://pecl.php.net/feeds/pkg_mongodb.rss
+        csspath: item title
   - name: pecl-solr
     type: new_version_resource
     check_every: 1h
@@ -181,8 +181,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/solr
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+        url: https://pecl.php.net/feeds/pkg_solr.rss
+        csspath: item title
   - name: pecl-lua
     type: new_version_resource
     check_every: 1h
@@ -190,8 +190,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/lua
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th
+        url: https://pecl.php.net/feeds/pkg_lua.rss
+        csspath: item title
   - name: xhprof
     type: new_version_resource
     check_every: 1h
@@ -199,8 +199,8 @@ resources:
       type: http
       regex: '[\d\.]+[0-9A-Za-z\-]*'
       http:
-        url: https://pecl.php.net/package/xhprof
-        csspath: table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('stable')) th, table[cellpadding='2'][cellspacing='1'] tr:has(td:contains('beta')) th
+        url: https://pecl.php.net/feeds/pkg_xhprof.rss
+        csspath: item title
   - name: libmemcached
     type: new_version_resource
     check_every: 1h

@@ -36,6 +36,9 @@ Dir.glob('./*').each do |resource_dir|
       if url =~ %r{https://pecl.php.net/package/(\S+)}
         php5_current = php5[$1]
         php7_current = php7[$1]
+      elsif url =~ %r{https://pecl.php.net/feeds/pkg_(\S+)\.rss}
+        php5_current = php5[$1]
+        php7_current = php7[$1]
       end
       description += "#{url} | #{version} | #{php5_current} | #{php7_current}\n"
     end
