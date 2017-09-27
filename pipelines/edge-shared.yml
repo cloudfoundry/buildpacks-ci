@@ -32,7 +32,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/cf-deployment
-      branch: master
+      branch: release-candidate
 
   - name: gcp-windows-stemcell
     type: s3
