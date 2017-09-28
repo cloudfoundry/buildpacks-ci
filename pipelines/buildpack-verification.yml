@@ -46,7 +46,7 @@ resources:
   - name: hwc-buildpack
     type: git
     source:
-      uri: https://github.com/cloudfoundry-incubator/hwc-buildpack
+      uri: https://github.com/cloudfoundry/hwc-buildpack
       branch: master
 <% %w(go nodejs ruby python php staticfile binary dotnet-core).each do |language| %>
   - name: <%= language %>-buildpack

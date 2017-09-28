@@ -60,16 +60,11 @@ resources: #####################################################################
 
   ## Git ##
 
-    <% if language == 'multi' %>
-      <% git_repo_organization = 'cloudfoundry-incubator' %>
-    <% else %>
-      <% git_repo_organization = organization %>
-    <% end %>
   - name: buildpack-develop
     type: git
     webhook_token: ob0aigh3
     source:
-      uri: git@github.com:<%= git_repo_organization %>/<%= language %>-buildpack.git
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
       ignore_paths:
@@ -85,7 +80,7 @@ resources: #####################################################################
   - name: buildpack-new-version
     type: git
     source:
-      uri: git@github.com:<%= git_repo_organization %>/<%= language %>-buildpack.git
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
       paths:
@@ -95,7 +90,7 @@ resources: #####################################################################
   - name: buildpack-master
     type: git
     source:
-      uri: git@github.com:<%= git_repo_organization %>/<%= language %>-buildpack.git
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: master
 
@@ -151,7 +146,7 @@ resources: #####################################################################
   - name: buildpack-bosh-release
     type: git
     source:
-      uri: git@github.com:<%= git_repo_organization %>/<%= language %>-buildpack-release.git
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack-release.git
       private_key: {{<%= language %>-buildpack-bosh-release-private-key}}
       branch: master
   - name: offline-buildpack-bosh-release
@@ -165,15 +160,10 @@ resources: #####################################################################
 
   ## Github Releases ##
 
-    <% if language == 'multi' %>
-      <% github_release_user = 'cloudfoundry-incubator' %>
-    <% else %>
-      <% github_release_user = '{{buildpacks-github-org}}' %>
-    <% end %>
   - name: buildpack-github-release
     type: github-release
     source:
-      user: <%= github_release_user %>
+      user: {{buildpacks-github-org}}
       repository: <%= language %>-buildpack
       access_token: {{buildpacks-github-token}}
 
@@ -181,7 +171,7 @@ resources: #####################################################################
   - name: buildpack-bosh-release-github-release
     type: github-release
     source:
-      user: <%= github_release_user %>
+      user: {{buildpacks-github-org}}
       repository: <%= language %>-buildpack-release
       access_token: {{buildpacks-github-token}}
   - name: offline-buildpack-bosh-release-github-release
@@ -325,7 +315,7 @@ jobs: ##########################################################################
         - task: detect-and-upload
           file: buildpacks-ci/tasks/detect-and-upload/task.yml
           params:
-            GIT_REPO_ORG: <%= git_repo_organization %>
+            GIT_REPO_ORG: <%= organization %>
             BUILDPACK_NAME: <%= language %>-buildpack
             RUBYGEM_MIRROR: {{rubygem-mirror}}
         - put: pivotal-buildpack
@@ -394,7 +384,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/set-status-success/task.yml
           params:
             GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
+            GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-master'
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge master spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
@@ -465,7 +455,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/set-status-success/task.yml
           params:
             GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
+            GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-master'
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI LTS master spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
@@ -714,7 +704,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/set-status-success/task.yml
           params:
             GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
+            GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-develop'
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge develop spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
@@ -823,7 +813,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/set-status-success/task.yml
           params:
             GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
+            GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-develop'
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI lts develop spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
@@ -841,7 +831,7 @@ jobs: ##########################################################################
         file: buildpacks-ci/tasks/buildpack-to-master/task.yml
         params:
           GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-          GITHUB_REPO: <%= git_repo_organization %>/<%= language %>-buildpack
+          GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
           GITHUB_STATUS_CONTEXT: 'buildpacks-ci/passed-dev-specs'
           GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI develop specs passed'
           PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}

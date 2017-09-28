@@ -148,9 +148,9 @@ BOSH releases are used in the assembly of [`cf-release`](https://github.com/clou
 
 These buildpacks are possible candidates for promotion, or experimental architecture explorations.
 
-* [multi-buildpack](https://github.com/cloudfoundry-incubator/multi-buildpack)
-* [hwc-buildpack](https://github.com/cloudfoundry-incubator/hwc-buildpack)
-* [hwc-buildpack-release](https://github.com/cloudfoundry-incubator/hwc-buildpack-release)
+* [multi-buildpack](https://github.com/cloudfoundry/multi-buildpack)
+* [hwc-buildpack](https://github.com/cloudfoundry/hwc-buildpack)
+* [hwc-buildpack-release](https://github.com/cloudfoundry/hwc-buildpack-release)
 
 ### Tools
 
