@@ -3,9 +3,9 @@ name: concourse
 director_uuid: <%= concourse_gcp_bosh_director_uuid %>
 releases:
 - name: concourse
-  version: 3.4.1
-  url: https://bosh.io/d/github.com/concourse/concourse?v=3.4.1
-  sha1: b9c3cd85caccf0dae7406f8d7dfc237b4c698ce6
+  version: 3.5.0
+  url: https://bosh.io/d/github.com/concourse/concourse?v=3.5.0
+  sha1: 65a974b3831bb9908661a5ffffbe456e10185149
 - name: garden-runc
   version: 1.6.0
   url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.6.0
@@ -13,9 +13,9 @@ releases:
 - name: windows-tools-release
   version: latest
 - name: concourse-windows-worker
-  version: 3.4.1
-  url: https://bosh.io/d/github.com/pivotal-cf-experimental/concourse-windows-worker-release?v=3.4.1
-  sha1: 5afcaa7a21be8c2837ec2b1ed9b545b6414d3722
+  version: 3.5.0
+  url: https://bosh.io/d/github.com/pivotal-cf-experimental/concourse-windows-worker-release?v=3.5.0
+  sha1: cb85924b3cacae8e2065a5535f4ec055be266017
 tls_key: &tls_key |
   <%= concourse_buildpacks_gcp_key.split("\n").join("\n  ") %>
 tls_cert: &tls_cert |
