@@ -67,6 +67,7 @@ resources: #####################################################################
     <% end %>
   - name: buildpack-develop
     type: git
+    webhook_token: ob0aigh3
     source:
       uri: git@github.com:<%= git_repo_organization %>/<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
@@ -122,6 +123,7 @@ resources: #####################################################################
 <% if libbuildpacks.include? language %>
   - name: libbuildpack
     type: git
+    webhook_token: ob0aigh3
     source:
       uri: https://github.com/cloudfoundry/libbuildpack.git
 <% else %>
