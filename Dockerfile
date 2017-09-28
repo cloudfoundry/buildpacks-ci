@@ -122,7 +122,7 @@ ENV GOROOT=/usr/local/go
 RUN git clone https://github.com/square/certstrap \
   && cd certstrap \
   && ./build \
-  && install bin/certstrap /usr/local/bin
+  && install bin/certstrap-*-linux-amd64 /usr/local/bin/certstrap
 
 # Install poltergeist for running dotnet-core-buildpack specs
 RUN gem install phantomjs && ruby -e 'require "phantomjs"; Phantomjs.path'
