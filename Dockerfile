@@ -48,8 +48,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the CF-CLI
-RUN wget -O cf-cli.tgz 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.24.0&source=github-rel' \
-  && [ adb0f75ed84a650a027fb238e4ec3123840cc1564600535c8abd420778a651b8 = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
+RUN wget -O cf-cli.tgz 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.32.0&source=github-rel' \
+  && [ 0a05521b7198dc8b92efbfb02a8fb04c84eeffeded3387aa3c9eb92ce4abef69 = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
   && tar xzf cf-cli.tgz -C /usr/bin \
   && rm cf-cli.tgz
 RUN cf install-plugin Diego-Enabler -f -r CF-Community
