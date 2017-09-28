@@ -1,5 +1,4 @@
-<% libbuildpacks = %w(go hwc multi nodejs ruby staticfile) %>
-<% cutlass = %w(go hwc multi nodejs ruby staticfile) %>
+<% libbuildpacks = %w(apt go hwc multi nodejs ruby staticfile) %>
 
 ---
 resource_types:
@@ -41,7 +40,7 @@ resources: #####################################################################
       password: {{ci_cf_shared_password}}
       organization: pivotal
 
-<% unless language == "hwc" %>
+<% unless %w(apt hwc).include? language %>
   - name: cf-lts-space
     type: cf-space-resource
     source:
@@ -110,7 +109,7 @@ resources: #####################################################################
     source:
       uri: https://github.com/cloudfoundry/brats.git
 
-<% unless language == 'multi' || language == 'hwc' %>
+<% unless %w(apt hwc multi).include? language %>
   - name: pivnet-buildpack-metadata
     type: git
     source:
@@ -191,6 +190,7 @@ resources: #####################################################################
       access_token: {{buildpacks-github-token}}
 <% end %>
 
+<% if !libbuildpacks.include?(language) %>
   - name: buildpack-packager
     type: github-release
     source:
@@ -198,7 +198,6 @@ resources: #####################################################################
       repository: buildpack-packager
       access_token: {{buildpacks-github-token}}
 
-<% if !cutlass.include?(language) %>
   - name: machete
     type: github-release
     source:
@@ -209,7 +208,7 @@ resources: #####################################################################
 
   ## Pivnet Release ##
 
-<% unless language == 'multi' || language == 'hwc' %>
+<% unless %w(apt hwc multi).include? language %>
   - name: pivnet-production
     type: pivnet
     source:
@@ -249,7 +248,7 @@ resources: #####################################################################
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
-<% unless language == 'hwc' %>
+<% unless %w(apt hwc).include? language %>
   - name: lts-shared-environments
     type: pool
     source:
@@ -367,7 +366,7 @@ jobs: ##########################################################################
           trigger: true
       - do:
         - put: cf-bp-space
-<% if cutlass.include?(language) %>
+<% if libbuildpacks.include?(language) %>
         - task: ginkgo
           file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
           params:
@@ -408,7 +407,7 @@ jobs: ##########################################################################
           put: edge-shared-environments
           params:
             release: cf-environments
-<% unless language == 'hwc' %>
+<% unless %w(apt hwc).include? language %>
   - name: specs-lts-master
     serial: true
     public: true
@@ -437,7 +436,7 @@ jobs: ##########################################################################
       - do:
         - put: cf-bp-space
           resource: cf-lts-space
-<% if cutlass.include?(language) %>
+<% if libbuildpacks.include?(language) %>
         - task: ginkgo
           file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
           params:
@@ -489,20 +488,20 @@ jobs: ##########################################################################
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
           passed:
-            <% unless language == 'hwc' %>
+            <% unless %w(apt hwc).include? language %>
             - specs-lts-master
             <% end %>
             - specs-edge-master
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
           passed:
-            <% unless language == 'hwc' %>
+            <% unless %w(apt hwc).include? language %>
             - specs-lts-master
             <% end %>
             - specs-edge-master
         - get: buildpack
           passed:
-            <% unless language == 'hwc' %>
+            <% unless %w(apt hwc).include? language %>
             - specs-lts-master
             <% end %>
             - specs-edge-master
@@ -549,7 +548,7 @@ jobs: ##########################################################################
             - buildpack-artifacts/*-buildpack-v*.zip
             - buildpack-artifacts/*-buildpack-v*.zip.SHA256SUM.txt
 
-<% unless language == "multi" || language == "hwc" %>
+<% unless %w(apt hwc multi).include? language %>
   - name: buildpack-to-pws
     serial: true
     public: true
@@ -631,7 +630,7 @@ jobs: ##########################################################################
             resource: buildpack-develop
         - do:
           - put: cf-bp-space
-<% if cutlass.include?(language) %>
+<% if libbuildpacks.include?(language) %>
           - task: ginkgo
             file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
             params:
@@ -718,7 +717,7 @@ jobs: ##########################################################################
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge develop spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
-<% unless language == "hwc" %>
+<% unless %w(apt hwc).include? language %>
   - name: specs-lts-integration-develop
     serial: true
     public: true
@@ -740,7 +739,7 @@ jobs: ##########################################################################
         - do:
           - put: cf-bp-space
             resource: cf-lts-space
-<% if cutlass.include?(language) %>
+<% if libbuildpacks.include?(language) %>
           - task: ginkgo
             file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
             params:
@@ -902,6 +901,7 @@ jobs: ##########################################################################
           repository: buildpack-artifacts
           rebase: true
 <% end %>
+<% if !libbuildpacks.include?(language) %>
   - name: update-buildpack-packager
     serial: true
     public: true
@@ -924,7 +924,6 @@ jobs: ##########################################################################
         params:
           repository: repo-with-gemfile-artifacts
           rebase: true
-<% if !cutlass.include?(language) %>
   - name: update-machete
     serial: true
     public: true
