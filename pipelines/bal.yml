@@ -128,7 +128,6 @@ jobs:
             ops_files:
             - diego-release-artifacts/use-diego-dev-release.yml
             - buildpacks-ci/deployments/operations/no-canaries.yml
-            - cf-deployment/operations/gcp.yml
             - cf-deployment/operations/scale-to-one-az.yml
             vars:
               system_domain: bal.buildpacks-gcp.ci.cf-app.com
