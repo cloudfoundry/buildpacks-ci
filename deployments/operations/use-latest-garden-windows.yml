@@ -1,0 +1,7 @@
+- type: replace
+  path: /releases/name=garden-windows
+  value:
+    name: garden-windows
+    sha1: 3ff39712bce41e34ea10cb94562121386a8c6d76
+    url: https://github.com/cloudfoundry-incubator/garden-windows-bosh-release/releases/download/v0.10.0/garden-windows-0.10.0.tgz
+    version: 0.10.0
