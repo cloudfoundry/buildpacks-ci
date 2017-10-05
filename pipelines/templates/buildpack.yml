@@ -1,4 +1,4 @@
-<% libbuildpacks = %w(apt go hwc multi nodejs ruby staticfile) %>
+<% libbuildpacks = %w(apt go hwc multi nodejs python ruby staticfile) %>
 
 ---
 resource_types:
