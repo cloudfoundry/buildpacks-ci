@@ -59,9 +59,9 @@ class BuildpackToMaster
   end
 
   def no_other_changes?
+    return true if @github_repo =~ /apt-buildpack/
     files = GitClient.last_commit_files('repo').split("\n").sort
     puts "Files changes in commit are #{files.inspect}."
-    return files == ["CHANGELOG"] if @github_repo == 'apt-buildpack'
     return files == ["CHANGELOG", "VERSION"]
   end
 end
