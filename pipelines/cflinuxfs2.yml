@@ -81,7 +81,7 @@ resources: #####################################################################
     type: git
     source:
       uri: https://github.com/cloudfoundry/diego-release
-      branch: master
+      branch: release-candidate
 
   - name: cf-release-rc
     type: git
