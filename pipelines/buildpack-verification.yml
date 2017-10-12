@@ -12,7 +12,7 @@ resources:
   - name: verification-interval
     type: cron
     source:
-      expression: "0 8 * * *"
+      expression: "0 6 * * *"
       location: {{current-timezone}}
   - name: buildpack-checksums
     type: git
