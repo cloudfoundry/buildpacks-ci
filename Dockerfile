@@ -55,8 +55,8 @@ RUN wget -O cf-cli.tgz 'https://cli.run.pivotal.io/stable?release=linux64-binary
 RUN cf install-plugin Diego-Enabler -f -r CF-Community
 
 # download the bosh2 CLI
-RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.1-linux-amd64 -o /usr/local/bin/bosh2 \
-  && [ fbae71a27554be2453b103c5b149d6c182b75f5171a00d319ac9b39232e38b51 = $(shasum -a 256 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
+RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.42-linux-amd64 -o /usr/local/bin/bosh2 \
+  && [ a97b085e45a989abfcd88de77770bb6db0c8a29e = $(shasum -a 1 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bosh2
 
 #download spiff for spiffy things
