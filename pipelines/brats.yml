@@ -1,4 +1,5 @@
 <% languages = %w(binary dotnet-core go hwc java multi nodejs php python ruby staticfile) %>
+<% new_brats = %W(apt) %>
 
 ---
 resource_types:
@@ -77,6 +78,16 @@ resources:
       password: {{ci-cf-lts-password}}
       organization: pivotal
 
+<% new_brats.each do |language| %>
+  - name: buildpack-<%= language %>
+    type: git
+    webhook_token: ob0aigh3
+    source:
+      uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
+      branch: develop
+<% end %>
+
 jobs:
 <% languages.each do |language| %>
   - name: brats-<%= language %>-lts
@@ -135,6 +146,43 @@ jobs:
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+        ensure:
+          put: edge-shared-environments
+          params:
+            release: cf-environments
+<% end %>
+<% new_brats.each do |language| %>
+  - name: brats-<%= language %>-edge
+    serial: true
+    public: true
+    plan:
+      - put: cf-environments
+        resource: edge-shared-environments
+        params:
+          claim: <%= language %>
+        timeout: 3h
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-<%= language %>
+        - get: nightly-trigger
+          trigger: true
+      - do:
+        - put: cf-brat-space
+          resource: cf-edge-space
+        - task: run-brats
+          file: buildpacks-ci/tasks/run-bp-brats/task.yml
+          input_mapping: {cf-space: cf-brat-space}
+          params:
+            STACKS: cflinuxfs2
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 6
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
         ensure:
           put: edge-shared-environments
           params:
