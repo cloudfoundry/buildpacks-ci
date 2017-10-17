@@ -1,4 +1,5 @@
 <% libbuildpacks = %w(apt go hwc multi nodejs python ruby staticfile) %>
+<% new_brats = %w(apt) %>
 
 ---
 resource_types:
@@ -654,6 +655,36 @@ jobs: ##########################################################################
           put: edge-shared-environments
           params:
             release: cf-environments
+<% if new_brats.include?(language) %>
+  - name: specs-edge-brats-develop
+    serial: true
+    public: true
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: buildpack
+            resource: buildpack-develop
+            trigger: true
+        - do:
+          - put: cf-brat-space
+          - task: brats
+            file: buildpacks-ci/tasks/run-bp-brats/task.yml
+            params:
+              STACKS: cflinuxfs2
+              GINKGO_ATTEMPTS: 4
+              GINKGO_NODES: 6
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% else %>
   - name: specs-edge-brats-develop
     serial: true
     public: true
@@ -687,6 +718,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
   - name: specs-edge-shared-develop
     serial: true
     public: true
