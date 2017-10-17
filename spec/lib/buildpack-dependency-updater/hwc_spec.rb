@@ -46,6 +46,7 @@ describe BuildpackDependencyUpdater do
               version: 0.1.2
               cf_stacks:
                 - windows2012R2
+                - windows2016
               uri: https://buildpacks.cloudfoundry.org/dependencies/hwc/hwc-0.1.2-windows-amd64.zip
               md5: doesnotmatteratall
         MANIFEST
@@ -84,9 +85,9 @@ describe BuildpackDependencyUpdater do
           expect(not_found_in_manifest).to be_nil
         end
 
-        it 'uses the windows stack' do
+        it 'uses both windows stacks' do
           dependency_in_manifest = manifest['dependencies'].find { |dep| dep['name'] == dependency && dep['version'] == expected_version }
-          expect(dependency_in_manifest['cf_stacks']).to eq %w(windows2012R2)
+          expect(dependency_in_manifest['cf_stacks']).to eq %w(windows2012R2 windows2016)
         end
       end
     end
