@@ -651,6 +651,27 @@ jobs: ##########################################################################
           put: edge-shared-environments
           params:
             release: cf-environments
+<% if language == 'php' %>
+  - name: unit-tests
+    serial: true
+    public: true
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: buildpack
+            resource: buildpack-develop
+            trigger: true
+        - task: unit-tests
+          file: buildpacks-ci/tasks/php-unit-tests/task.yml
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
 <% if new_brats.include?(language) %>
   - name: specs-edge-brats-develop
     serial: true
