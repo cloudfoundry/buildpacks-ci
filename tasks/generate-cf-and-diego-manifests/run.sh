@@ -73,7 +73,7 @@ properties:
     include_services: true
     include_sso: false
     include_v3: false
-    include_diego_ssh: false
+    include_diego_ssh: true
     include_diego_docker: true
     nodes: 4
     backend: diego
