@@ -101,10 +101,12 @@ resources: #####################################################################
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
+<% unless new_brats.include?(language) %>
   - name: brats
     type: git
     source:
       uri: https://github.com/cloudfoundry/brats.git
+<% end %>
 
 <% unless %w(apt hwc multi).include? language %>
   - name: pivnet-buildpack-metadata
