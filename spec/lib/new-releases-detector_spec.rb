@@ -28,6 +28,7 @@ describe NewReleasesDetector do
     allow_any_instance_of(described_class).to receive(:open).with(/miniconda/).and_return(double(read: '<html></html>'))
     allow_any_instance_of(described_class).to receive(:open).with(/newrelic/).and_return(double(read: '<html></html>'))
     allow_any_instance_of(described_class).to receive(:open).with('https://apr.apache.org/download.cgi').and_return(double(read: '<html></html>'))
+    allow_any_instance_of(described_class).to receive(:open).with('https://maven.apache.org/docs/history.html').and_return(double(read: '<html>3.3.6 3.3.7 3.3.8 3.3.9</html>'))
 
     allow(File).to receive(:exist?).and_call_original
     allow(File).to receive(:write).and_call_original
@@ -266,6 +267,31 @@ describe NewReleasesDetector do
 
       context 'when there are no new releases' do
         let(:github_response) { [double(name: 'release-1.10.1'), double(name: 'release-1.10.2')] }
+
+        it_behaves_like 'there are no new versions to potentially build', :github
+      end
+    end
+
+    context 'for maven' do
+      let(:dependency)   { :maven }
+      let(:old_versions) { %w(3.3.7 3.3.8) }
+      let(:github_repo)  { 'apache/maven' }
+
+      context 'when there are new releases' do
+        let(:new_versions)          { %w(3.3.9) }
+        let(:github_response) { [double(name: 'maven-3.3.7'), double(name: 'maven-3.3.8'), double(name: 'maven-3.3.9')] }
+
+        it_behaves_like 'there are new versions to potentially build', :github
+      end
+
+      context 'when there are no new releases' do
+        let(:github_response) { [double(name: 'maven-3.3.7'), double(name: 'maven-3.3.8')] }
+
+        it_behaves_like 'there are no new versions to potentially build', :github
+      end
+
+      context 'github releases NOT on maven website are ignored' do
+        let(:github_response) { [double(name: 'maven-3.3.5'), double(name: 'maven-3.3.7'), double(name: 'maven-3.3.8')] }
 
         it_behaves_like 'there are no new versions to potentially build', :github
       end

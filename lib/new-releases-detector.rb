@@ -211,7 +211,10 @@ class NewReleasesDetector
       hwc:             -> { Octokit.releases('cloudfoundry-incubator/hwc').map(&:tag_name) },
       jruby:           -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
       libunwind:       -> { Octokit.releases('libunwind/libunwind').map(&:tag_name) },
-      maven:           -> { Octokit.tags('apache/maven').map(&:name).grep(/^maven/) },
+      maven:           -> {
+        history = Nokogiri::HTML(open('https://maven.apache.org/docs/history.html')).text
+        Octokit.tags('apache/maven').map(&:name).grep(/^maven/).map{|s| s.gsub(/^maven\-/,'')}.select{|v| history.include?(v) && v !~ /alpha|beta/}
+      },
       miniconda:       -> { Nokogiri::HTML.parse(open('https://repo.continuum.io/miniconda/').read).css('table tr td a').map {|link| link['href']} },
       newrelic:        -> { Nokogiri::HTML.parse(open('https://download.newrelic.com/php_agent/archive/')).css('table td a').map{|link| link['href']} },
       nginx:           -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release/) },
