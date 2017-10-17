@@ -69,14 +69,8 @@ resources: #####################################################################
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
       ignore_paths:
-        - README.md
         - VERSION
         - CHANGELOG
-        - LICENSE
-        - NOTICE
-        - ISSUE_TEMPLATE
-        - PULL_REQUEST_TEMPLATE
-        - "**/*.md"
 
   - name: buildpack-new-version
     type: git
