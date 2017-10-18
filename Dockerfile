@@ -59,6 +59,11 @@ RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.42-linux-amd64
   && [ a97b085e45a989abfcd88de77770bb6db0c8a29e = $(shasum -a 1 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bosh2
 
+# download bbl
+RUN curl https://github.com/cloudfoundry/bosh-bootloader/releases/download/v4.10.4/bbl-v4.10.4_linux_x86-64 -o /usr/local/bin/bbl \
+  && [ c1d2c001250506bd312203839058baf11ad7f53e150c8a6a1ff617a86d39f21a = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
+  && chmod +x /usr/local/bin/bbl
+
 #download spiff for spiffy things
 RUN wget -O spiff.zip 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.8/spiff_linux_amd64.zip' \
   && [ e5b49b7f32b2b3973536bf2a48beda2d236956bebff7677aa109cc2b71f56002 = $(shasum -a 256 spiff.zip | cut -d' ' -f1) ] \
