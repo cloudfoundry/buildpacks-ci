@@ -41,7 +41,7 @@ pushd buildpack
     [ -d supply ] && (cd supply && (go generate || true))
     [ -d finalize ] && (cd finalize && (go generate || true))
 
-    ginkgo -r -skipPackage=integration
+    ginkgo -r -skipPackage=integration,brats
   popd
 
   git add "$update_dir"
