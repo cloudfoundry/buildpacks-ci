@@ -3,19 +3,19 @@ name: concourse
 director_uuid: <%= concourse_gcp_bosh_director_uuid %>
 releases:
 - name: concourse
-  version: 3.5.0
-  url: https://bosh.io/d/github.com/concourse/concourse?v=3.5.0
-  sha1: 65a974b3831bb9908661a5ffffbe456e10185149
+  version: 3.6.0
+  url: https://bosh.io/d/github.com/concourse/concourse?v=3.6.0
+  sha1: 1257bdcd3181ab0a669bc9e34cd87aff584f007b
 - name: garden-runc
-  version: 1.6.0
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.6.0
-  sha1: 58fbc64aff303e6d76899441241dd5dacef50cb7
+  version: 1.9.0
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.9.0
+  sha1: 77bfe8bdb2c3daec5b40f5116a6216badabd196c
 - name: windows-tools-release
   version: latest
 - name: concourse-windows-worker
-  version: 3.5.0
-  url: https://bosh.io/d/github.com/pivotal-cf-experimental/concourse-windows-worker-release?v=3.5.0
-  sha1: cb85924b3cacae8e2065a5535f4ec055be266017
+  version: 3.6.0
+  url: https://bosh.io/d/github.com/pivotal-cf-experimental/concourse-windows-worker-release?v=3.6.0
+  sha1: 55c86935e36e0cfcd2ad8ededce0d93d87596ba0
 tls_key: &tls_key |
   <%= concourse_buildpacks_gcp_key.split("\n").join("\n  ") %>
 tls_cert: &tls_cert |
