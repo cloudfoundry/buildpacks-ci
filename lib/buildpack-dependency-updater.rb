@@ -65,8 +65,8 @@ class BuildpackDependencyUpdater
     @depencency_version ||= dependency_build_info['version']
   end
 
-  def md5
-    @md5 ||= dependency_build_info['md5']
+  def sha256
+    @sha256 ||= dependency_build_info['sha256']
   end
 
   def uri
@@ -96,7 +96,7 @@ class BuildpackDependencyUpdater
       dep['name'] == dependency &&
       dep['version'] == dependency_version &&
       dep['uri'] == uri &&
-      dep['md5'] == md5
+      dep['sha256'] == sha256
     end.count > 0
   end
 
@@ -121,7 +121,7 @@ class BuildpackDependencyUpdater
       "name"      => dependency,
       "version"   => dependency_version,
       "uri"       => uri,
-      "md5"       => md5,
+      "sha256"    => sha256,
       "cf_stacks" => ["cflinuxfs2"]
     }
     buildpack_manifest["dependencies"] << dependency_hash

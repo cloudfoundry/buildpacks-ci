@@ -20,7 +20,7 @@ describe BuildpackDependencyUpdater do
       let(:dependency)  { "godep" }
       let(:buildpack)   { "go" }
       let(:new_version) { "v65" }
-      let(:new_md5)     { "18bec8f65810786c846d8b21fe73064f" }
+      let(:new_sha256)  { "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03" }
       let(:existing_godep_version) { 'v64' }
 
       before do
@@ -31,19 +31,19 @@ describe BuildpackDependencyUpdater do
             - name: go
               version: 1.6.2
               uri: https://storage.googleapis.com/golang/go1.6.2.linux-amd64.tar.gz
-              md5: ebfb8b38330c8779b121c43433c4b9be
+              sha256: e40c36ae71756198478624ed1bb4ce17597b3c19d243f3f0899bb5740d56212a
               cf_stacks:
                 - cflinuxfs2
             - name: godep
               version: #{existing_godep_version}
               uri: https://buildpacks.cloudfoundry.org/dependencies/godep/godep-v64-linux-x64.tgz
-              md5: f75da3a0c5ec08514ec2700c2a6d1187
+              sha256: 205b60ee79914af6a09b897170b522c5e16366214b9a0735b4eb550f4b14a3c8
               cf_stacks:
                 - cflinuxfs2
             - name: composer
               version: 1.a-thing
               uri: https://buildpacks.cloudfoundry.org/dependencies/godep/godep-v64-linux-x64.tgz
-              md5: f75da3a0c5ec08514ec2700c2a6d1187
+              sha256: 205b60ee79914af6a09b897170b522c5e16366214b9a0735b4eb550f4b14a3c8
               cf_stacks:
                 - cflinuxfs2
         MANIFEST
@@ -56,8 +56,8 @@ describe BuildpackDependencyUpdater do
           ---
           filename: godep-#{new_version}-linux-x64.tgz
           version: #{new_version}
-          md5: #{new_md5}
-          sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+          md5: whatever
+          sha256: #{new_sha256}
         COMMIT
       end
 
@@ -70,7 +70,7 @@ describe BuildpackDependencyUpdater do
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(new_version)
         expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/godep/godep-#{new_version}-linux-x64.tgz")
-        expect(dependency_in_manifest["md5"]).to eq(new_md5)
+        expect(dependency_in_manifest["sha256"]).to eq(new_sha256)
       end
 
       it 'records which versions were removed' do
@@ -80,7 +80,7 @@ describe BuildpackDependencyUpdater do
 
       context "dependency version to add is older than one in manifest" do
         let(:new_version) { "v63" }
-        let(:new_md5)     { "18bec8f65810786c846d8b21fe73064f" }
+        let(:new_sha256)  { "50b413f0c8f28298a90ee91cbebf439e30af9050d55669df129a699607893d9e" }
 
         it "does not try to update the manifest or buildpack" do
           expect(subject).not_to receive(:perform_dependency_update)
@@ -94,7 +94,7 @@ describe BuildpackDependencyUpdater do
       context "dependency version is different to manifest, but neither godep or semver" do
         let(:existing_godep_version) { '1.a-this' }
         let(:new_version) { "2.b-that" }
-        let(:new_md5)     { "18bec8f65810786c846d8b21fe73064f" }
+        let(:new_sha256)  { "50b413f0c8f28298a90ee91cbebf439e30af9050d55669df129a699607893d9e" }
 
         it "updates the specified buildpack manifest dependency with the specified version" do
           expect($stdout).to receive(:puts).with("Attempting to add godep 2.b-that to the go buildpack and manifest.")
@@ -104,7 +104,7 @@ describe BuildpackDependencyUpdater do
 
       context "dependency version to add is already in manifest" do
         let(:new_version) { "v64" }
-        let(:new_md5)     { "f75da3a0c5ec08514ec2700c2a6d1187" }
+        let(:new_sha256)  { "205b60ee79914af6a09b897170b522c5e16366214b9a0735b4eb550f4b14a3c8" }
 
         it "does not try to update the manifest or buildpack" do
           expect(subject).not_to receive(:perform_dependency_update)
@@ -140,7 +140,7 @@ describe BuildpackDependencyUpdater do
               uri: https://buildpacks.cloudfoundry.org/dependencies/composer/composer-1.0.3-aff20443.phar
               cf_stacks:
                 - cflinuxfs2
-              md5: aff20443a474112755ff0ef65c4873e5
+              sha256: 4bc453b53cb3d914b45f4b250294236adba2c0e09ff6f03793949e7e39fd4cc1
         MANIFEST
         File.open(manifest_file, "w") do |file|
           file.write buildpack_manifest_contents
@@ -151,7 +151,7 @@ describe BuildpackDependencyUpdater do
           ---
           filename: composer-#{new_version}-abcdef12.phar
           version: #{new_version}
-          md5: abcdef1205d30d20be1c9
+          md5: whatever
           sha256: 7f26efee06de5a1a061b6b1e330f5acc9ee69976d1551118c45b21f358cbc332
         COMMIT
       end
@@ -163,7 +163,7 @@ describe BuildpackDependencyUpdater do
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(new_version)
         expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/composer/composer-1.1.0-abcdef12.phar")
-        expect(dependency_in_manifest["md5"]).to eq("abcdef1205d30d20be1c9")
+        expect(dependency_in_manifest["sha256"]).to eq("7f26efee06de5a1a061b6b1e330f5acc9ee69976d1551118c45b21f358cbc332")
       end
 
       it "updates the php buildpack manifest default_versions section with the specified version for composer" do
@@ -184,32 +184,32 @@ describe BuildpackDependencyUpdater do
       end
     end
 
-    context("glide") do
-      let(:dependency)  { "glide" }
-      let(:buildpack)   { "go" }
-      let(:new_version) { "0.10.2" }
+    RSpec.shared_examples "updating dependency in buildpack" do
       before do
         buildpack_manifest_contents = <<~MANIFEST
           ---
-          language: go
+          language: #{buildpack}
+          default_versions:
+            - name: #{dependency}
+              version: #{old_version}
           dependencies:
-            - name: glide
-              version: 0.9.3
-              uri: https://buildpacks.cloudfoundry.org/dependencies/glide/glide-0.9.3-linux-x64.tgz
+            - name: #{dependency}
+              version: #{old_version}
+              uri: https://buildpacks.cloudfoundry.org/dependencies/#{dependency}/#{dependency}-#{old_version}-linux-x64.tgz
               cf_stacks:
                 - cflinuxfs2
-              md5: aff20443a474112755ff0ef65c4873e5
+              sha256: 4bc453b53cb3d914b45f4b250294236adba2c0e09ff6f03793949e7e39fd4cc1
         MANIFEST
         File.open(manifest_file, "w") do |file|
           file.write buildpack_manifest_contents
         end
-        allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, 'binary-built-output/glide-built.yml').and_return <<~COMMIT
-          Build glide - #{new_version}
+        allow(GitClient).to receive(:last_commit_message).with(binary_built_out_dir, 0, "binary-built-output/#{dependency}-built.yml").and_return <<~COMMIT
+          Build #{dependency} - #{new_version}
 
           ---
-          filename: glide-#{new_version}-linux-x64.tgz
+          filename: #{dependency}-#{new_version}-linux-x64.tgz
           version: #{new_version}
-          md5: 18bec8f65810786c846d8b21fe73064f
+          md5: whatever
           sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
       end
@@ -221,13 +221,24 @@ describe BuildpackDependencyUpdater do
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency}
         expect(dependency_in_manifest["version"]).to eq(new_version)
-        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/glide/glide-0.10.2-linux-x64.tgz")
-        expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+        expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/#{dependency}/#{dependency}-#{new_version}-linux-x64.tgz")
+        expect(dependency_in_manifest["sha256"]).to eq("7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31")
       end
 
       it 'records which versions were removed' do
         subject.run!
-        expect(subject.removed_versions).to eq(['0.9.3'])
+        expect(subject.removed_versions).to eq([old_version])
+      end
+    end
+
+    %w(glide bundler dep).each do |dependency|
+      context(dependency) do
+        let(:dependency)  { dependency }
+        let(:buildpack)   { "go" }
+        let(:new_version) { "0.10.2" }
+        let(:old_version) { "0.9.3" }
+
+        it_should_behave_like "updating dependency in buildpack"
       end
     end
 
@@ -251,7 +262,7 @@ describe BuildpackDependencyUpdater do
               uri: https://buildpacks.cloudfoundry.org/dependencies/nginx/nginx-1.11.1-linux-x64.tgz
               cf_stacks:
                 - cflinuxfs2
-              md5: 7d28497395b62221f3380e82f89cd197
+              sha256: 4bc453b53cb3d914b45f4b250294236adba2c0e09ff6f03793949e7e39fd4cc1
         MANIFEST
         File.open(manifest_file, "w") do |file|
           file.write buildpack_manifest_contents
@@ -262,7 +273,7 @@ describe BuildpackDependencyUpdater do
           ---
           filename: nginx-#{new_version}-linux-x64.tgz
           version: #{new_version}
-          md5: 18bec8f65810786c846d8b21fe73064f
+          md5: whatever
           sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
       end
@@ -279,7 +290,7 @@ describe BuildpackDependencyUpdater do
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
           expect(dependency_in_manifest["version"]).to eq(new_version)
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/nginx/nginx-1.11.2-linux-x64.tgz")
-          expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+          expect(dependency_in_manifest["sha256"]).to eq("7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31")
         end
 
         it "updates the staticfile buildpack manifest default_versions section with the specified version for nginx" do
@@ -339,13 +350,13 @@ describe BuildpackDependencyUpdater do
               uri: https://buildpacks.cloudfoundry.org/dependencies/nginx/nginx-1.10.1-linux-x64.tgz
               cf_stacks:
                 - cflinuxfs2
-              md5: 7d28497395b62221f3380e82f89cd197
+              sha256: 4bc453b53cb3d914b45f4b250294236adba2c0e09ff6f03793949e7e39fd4cc1
             - name: nginx
               version: 1.11.1
               uri: https://buildpacks.cloudfoundry.org/dependencies/nginx/nginx-1.11.1-linux-x64.tgz
               cf_stacks:
                 - cflinuxfs2
-              md5: 7d28497395b62221f3380e82f89cd197
+              sha256: 4bc453b53cb3d914b45f4b250294236adba2c0e09ff6f03793949e7e39fd4cc1
         MANIFEST
         File.open(manifest_file, "w") do |file|
           file.write buildpack_manifest_contents
@@ -356,7 +367,7 @@ describe BuildpackDependencyUpdater do
           ---
           filename: nginx-#{new_version}-linux-x64.tgz
           version: #{new_version}
-          md5: 18bec8f65810786c846d8b21fe73064f
+          md5: whatever
           sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
         COMMIT
       end
@@ -368,12 +379,12 @@ describe BuildpackDependencyUpdater do
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == new_version}
         expect(dependency_in_manifest["version"]).to eq(new_version)
         expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/nginx/nginx-1.11.2-linux-x64.tgz")
-        expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+        expect(dependency_in_manifest["sha256"]).to eq("7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31")
 
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] != new_version}
         expect(dependency_in_manifest["version"]).to eq("1.10.1")
         expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/nginx/nginx-1.10.1-linux-x64.tgz")
-        expect(dependency_in_manifest["md5"]).to eq("7d28497395b62221f3380e82f89cd197")
+        expect(dependency_in_manifest["sha256"]).to eq("4bc453b53cb3d914b45f4b250294236adba2c0e09ff6f03793949e7e39fd4cc1")
       end
 
       it "updates the php buildpack manifest default_versions section with the specified version for nginx" do
