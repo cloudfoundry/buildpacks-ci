@@ -24,8 +24,8 @@ describe BuildpackDependencyUpdater do
         ---
         filename: node-#{expected_version}-linux-x64.tgz
         version: #{expected_version}
-        md5: 18bec8f65810786c846d8b21fe73064f
-        sha256: 7f69c7b929e6fb5288e72384f8b0cd01e32ac2981a596e730e38b01eb8f2ed31
+        md5: newMD5
+        sha256: newSHA256
       COMMIT
     end
 
@@ -47,55 +47,55 @@ describe BuildpackDependencyUpdater do
           - name: node
             version: 0.12.45
             uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-0.12.45-linux-x64.tgz
-            md5: b6607379e8cdcfa3763acc12fe40cef9
+            sha256: oldSHA256_0_12_45
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 0.12.46
             uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-0.12.46-linux-x64.tgz
-            md5: 2e02c3350a0b81e8b501ef3ea637a93b
+            sha256: oldSHA256_0_12_46
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 4.4.5
             uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-4.4.5-linux-x64.tgz
-            md5: b2893ffdf42e2c3614872ced633feeea
+            sha256: oldSHA256_4_4_5
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 4.4.6
             uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-4.4.6-linux-x64.tgz
-            md5: 33822ae3f92ac9586d73dee3c42a4bf2
+            sha256: oldSHA256_4_4_6
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 5.11.1
             uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-5.11.1-linux-x64.tgz
-            md5: c6da910f661470d01e7920a1d3efaee2
+            sha256: oldSHA256_5_11_1
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 5.12.0
             uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-5.12.0-linux-x64.tgz
-            md5: 006d5be71aa68c7cccdd5c2c9f1d0fc0
+            sha256: oldSHA256_5_12_0
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 6.2.1
             uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-6.2.1-linux-x64.tgz
-            md5: 619a748a2b23f3e0189cf8c3f291b8d3
+            sha256: oldSHA256_6_2_1
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 6.2.2
             uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-6.2.2-linux-x64.tgz
-            md5: e54ef4e2637d8cc8125a8ccc67c47951
+            sha256: oldSHA256_6_2_2
             cf_stacks:
               - cflinuxfs2
           - name: node
             version: 7.0.0
             uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-7.0.0-linux-x64.tgz
-            md5: cff1c6d374fd9dd3e8fb0ad2fbddc6da
+            sha256: oldSHA256_7_0_0
             cf_stacks:
               - cflinuxfs2
         MANIFEST
@@ -118,12 +118,12 @@ describe BuildpackDependencyUpdater do
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
           expect(dependency_in_manifest["version"]).to eq(expected_version)
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-#{expected_version}-linux-x64.tgz")
-          expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+          expect(dependency_in_manifest["sha256"]).to eq("newSHA256")
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '0.12.46'}
           expect(dependency_in_manifest["version"]).to eq("0.12.46")
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-0.12.46-linux-x64.tgz")
-          expect(dependency_in_manifest["md5"]).to eq("2e02c3350a0b81e8b501ef3ea637a93b")
+          expect(dependency_in_manifest["sha256"]).to eq("oldSHA256_0_12_46")
         end
 
         it "does not update the nodejs buildpack manifest dependency default with the specified version" do
@@ -153,12 +153,12 @@ describe BuildpackDependencyUpdater do
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
           expect(dependency_in_manifest["version"]).to eq(expected_version)
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-#{expected_version}-linux-x64.tgz")
-          expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+          expect(dependency_in_manifest["sha256"]).to eq("newSHA256")
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '7.0.0'}
           expect(dependency_in_manifest["version"]).to eq("7.0.0")
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-7.0.0-linux-x64.tgz")
-          expect(dependency_in_manifest["md5"]).to eq("cff1c6d374fd9dd3e8fb0ad2fbddc6da")
+          expect(dependency_in_manifest["sha256"]).to eq("oldSHA256_7_0_0")
         end
 
         it "does not update the nodejs buildpack manifest dependency default with the specified version" do
@@ -191,12 +191,12 @@ describe BuildpackDependencyUpdater do
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
           expect(dependency_in_manifest["version"]).to eq(expected_version)
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-#{expected_version}-linux-x64.tgz")
-          expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+          expect(dependency_in_manifest["sha256"]).to eq("newSHA256")
 
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.6'}
           expect(dependency_in_manifest["version"]).to eq("4.4.6")
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-4.4.6-linux-x64.tgz")
-          expect(dependency_in_manifest["md5"]).to eq("33822ae3f92ac9586d73dee3c42a4bf2")
+          expect(dependency_in_manifest["sha256"]).to eq("oldSHA256_4_4_6")
         end
 
         it "updates the nodejs buildpack manifest dependency default with the specified version" do
@@ -252,24 +252,24 @@ describe BuildpackDependencyUpdater do
             - name: node
               version: 4.4.4
               uri: https://pivotal-buildpacks.s3.amazonaws.com/dependencies/node/node-4.4.4-linux-x64.tgz
-              md5: 8beeb9a17a81b9832a1ccce02e6d6897
+              sha256: oldSHA256_4_4_4
               cf_stacks:
                 - cflinuxfs2
             - name: node
               version: 6.10.0
               uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-6.10.0-linux-x64-a53e48a2.tgz
-              md5: a53e48a27d9394949b6cd30e7ee6bdd4
+              sha256: oldSHA256_6_10_0
               cf_stacks:
               - cflinuxfs2
             - name: ruby
               version: 2.3.0
-              md5: 535342030a11abeb11497824bf642bf2
+              sha256: oldSHA256_RUBY_2_3_0
               uri: https://pivotal-buildpacks.s3.amazonaws.com/dependencies/ruby/ruby-2.3.0-linux-x64.tgz
               cf_stacks:
                 - cflinuxfs2
             - name: ruby
               version: 2.3.1
-              md5: c55c51d66a18123363e7f96635b54717
+              sha256: oldSHA256_RUBY_2_3_1
               uri: https://pivotal-buildpacks.s3.amazonaws.com/dependencies/ruby/ruby-2.3.1-linux-x64.tgz
               cf_stacks:
                 - cflinuxfs2
@@ -294,7 +294,7 @@ describe BuildpackDependencyUpdater do
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == "4.4.4"}
           expect(dependency_in_manifest["version"]).to eq("4.4.4")
           expect(dependency_in_manifest["uri"]).to eq("https://pivotal-buildpacks.s3.amazonaws.com/dependencies/node/node-4.4.4-linux-x64.tgz")
-          expect(dependency_in_manifest["md5"]).to eq("8beeb9a17a81b9832a1ccce02e6d6897")
+          expect(dependency_in_manifest["sha256"]).to eq("oldSHA256_4_4_4")
         end
 
         it "does not update the ruby buildpack manifest dependency default with the specified version" do
@@ -329,7 +329,7 @@ describe BuildpackDependencyUpdater do
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
           expect(dependency_in_manifest["version"]).to eq(expected_version)
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-#{expected_version}-linux-x64.tgz")
-          expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+          expect(dependency_in_manifest["sha256"]).to eq("newSHA256")
         end
 
         it 'records which versions were removed' do
@@ -353,7 +353,7 @@ describe BuildpackDependencyUpdater do
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
           expect(dependency_in_manifest["version"]).to eq(expected_version)
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-#{expected_version}-linux-x64.tgz")
-          expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+          expect(dependency_in_manifest["sha256"]).to eq("newSHA256")
         end
 
         it 'records which versions were removed' do
@@ -391,19 +391,19 @@ describe BuildpackDependencyUpdater do
              cf_stacks:
                - cflinuxfs2
              uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview2-003121.linux-amd64.tar.gz
-             md5: 8496b07e910f3b7997196e23427f3676
+             sha256: oldSHA256_dotnet_preview2
            - name: dotnet
              version: 1.0.0-preview2-003131
              cf_stacks:
                - cflinuxfs2
              uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz
-             md5: 0abbf8aaae612c02aa529ca2a80d091a
+             sha256: oldSHA256_dotnet_preview1
            - name: node
              version: 6.9.0
              cf_stacks:
                - cflinuxfs2
              uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-6.9.0-linux-x64.tgz
-             md5: 6c1e3fcff5c9275206543d5a7fe92d57
+             sha256: oldSHA256_6_9_0
         MANIFEST
         File.open(manifest_file, "w") do |file|
           file.write buildpack_manifest_contents
@@ -423,7 +423,7 @@ describe BuildpackDependencyUpdater do
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == "6.9.0"}
           expect(dependency_in_manifest["version"]).to eq("6.9.0")
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-6.9.0-linux-x64.tgz")
-          expect(dependency_in_manifest["md5"]).to eq("6c1e3fcff5c9275206543d5a7fe92d57")
+          expect(dependency_in_manifest["sha256"]).to eq("oldSHA256_6_9_0")
         end
 
         it "does not change the default node version" do
@@ -456,7 +456,7 @@ describe BuildpackDependencyUpdater do
           dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
           expect(dependency_in_manifest["version"]).to eq(expected_version)
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-#{expected_version}-linux-x64.tgz")
-          expect(dependency_in_manifest["md5"]).to eq("18bec8f65810786c846d8b21fe73064f")
+          expect(dependency_in_manifest["sha256"]).to eq("newSHA256")
         end
 
         it "updates the ruby buildpack manifest dependency default with the specified version" do

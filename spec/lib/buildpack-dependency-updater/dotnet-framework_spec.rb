@@ -24,25 +24,25 @@ describe BuildpackDependencyUpdater do
           - name: dotnet-framework
             version: 1.0.0
             uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet-framework/dotnet-framework.1.0.0.linux-amd64.tar.gz
-            md5: 318aba2c18e2bbbc5d0432fd23fc7a8d
+            sha256: oldSHA256_1_0_0
             cf_stacks:
             - cflinuxfs2
           - name: dotnet-framework
             version: 1.0.1
             uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet-framework/dotnet-framework.1.0.1.linux-amd64.tar.gz
-            md5: 249445eb0d92270688d33333f7de4cd0
+            sha256: oldSHA256_1_0_1
             cf_stacks:
             - cflinuxfs2
           - name: dotnet-framework
             version: 1.0.3
             uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet-framework/dotnet-framework.1.0.3.linux-amd64.tar.gz
-            md5: cc6bc4bd77c900c3c1f2a3a5ef28e420
+            sha256: oldSHA256_1_0_3
             cf_stacks:
             - cflinuxfs2
           - name: dotnet-framework
             version: 1.1.0
             uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet-framework/dotnet-framework.1.1.0.linux-amd64.tar.gz
-            md5: a4fabc3c15c92b795836ad53634cd3dd
+            sha256: oldSHA256_1_1_0
             cf_stacks:
             - cflinuxfs2
         MANIFEST
@@ -61,7 +61,7 @@ describe BuildpackDependencyUpdater do
         filename: dotnet-framework.#{new_version}.linux-amd64.tar.gz
         version: #{new_version}
         md5: aaaabbbb22224444
-        sha256: zzzzzyyyy99998888
+        sha256: newSHA256
       COMMIT
     end
 
@@ -75,7 +75,7 @@ describe BuildpackDependencyUpdater do
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '1.1.1'}
         expect(dependency_in_manifest["version"]).to eq("1.1.1")
         expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/dotnet-framework/dotnet-framework.1.1.1.linux-amd64.tar.gz")
-        expect(dependency_in_manifest["md5"]).to eq("aaaabbbb22224444")
+        expect(dependency_in_manifest["sha256"]).to eq("newSHA256")
       end
 
       it 'does not remove a version from the manifest' do

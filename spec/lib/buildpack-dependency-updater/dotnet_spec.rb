@@ -30,25 +30,25 @@ describe BuildpackDependencyUpdater do
             cf_stacks:
               - cflinuxfs2
             uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview2-003121.linux-amd64.tar.gz
-            md5: 8496b07e910f3b7997196e23427f3676
+            sha256: oldSHA256_preview2_003121
           - name: dotnet
             version: 1.0.0-preview3-006666
             cf_stacks:
               - cflinuxfs2
             uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview3-006666.linux-amd64.tar.gz
-            md5: 66666666666666666666666666666666
+            sha256: oldSHA256_preview3_006666
           - name: dotnet
             version: 1.0.0-preview1-002702
             cf_stacks:
               - cflinuxfs2
             uri: https://go.microsoft.com/fwlink/?LinkID=798405
-            md5: 44d1dcae69a11976cfc6facc83b3aa49
+            sha256: oldSHA256_preview1_002702
           - name: dotnet
             version: 1.0.0-preview2-003131
             cf_stacks:
               - cflinuxfs2
             uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz
-            md5: 0abbf8aaae612c02aa529ca2a80d091a
+            sha256: oldSHA256_preview2_003131
         MANIFEST
     end
 
@@ -80,7 +80,7 @@ describe BuildpackDependencyUpdater do
         filename: dotnet.#{new_version.gsub(/^v/,'')}.linux-amd64.tar.gz
         version: #{new_version}
         md5: aaaabbbb22224444
-        sha256: zzzzzyyyy99998888
+        sha256: newSHA256
       COMMIT
     end
 
@@ -94,7 +94,7 @@ describe BuildpackDependencyUpdater do
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '1.0.0-preview2-009988'}
         expect(dependency_in_manifest["version"]).to eq("1.0.0-preview2-009988")
         expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview2-009988.linux-amd64.tar.gz")
-        expect(dependency_in_manifest["md5"]).to eq("aaaabbbb22224444")
+        expect(dependency_in_manifest["sha256"]).to eq("newSHA256")
       end
 
       it 'does not remove a version from the manifest' do
@@ -135,7 +135,7 @@ describe BuildpackDependencyUpdater do
         dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '1.0.0-preview4-001122'}
         expect(dependency_in_manifest["version"]).to eq('1.0.0-preview4-001122')
         expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview4-001122.linux-amd64.tar.gz")
-        expect(dependency_in_manifest["md5"]).to eq("aaaabbbb22224444")
+        expect(dependency_in_manifest["sha256"]).to eq("newSHA256")
       end
 
       it "updates the dotnet buildpack manifest dependency default with the specified version" do
