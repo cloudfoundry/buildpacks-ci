@@ -7,12 +7,12 @@ require 'digest/md5'
 class BuildpackBinaryChecksumVerifier
   def self.run!(buildpack_dir, whitelist_file)
     uris_to_ignore = YAML.load_file(whitelist_file)
-    uri_to_md5_mapping = get_uri_md5_sha_values(buildpack_dir, uris_to_ignore)
-    show_mismatches(uri_to_md5_mapping)
+    uri_to_sha256_mapping = get_checksums_by_uri(buildpack_dir, uris_to_ignore)
+    show_mismatches(uri_to_sha256_mapping)
   end
 
-  # uri -> md5
-  def self.get_uri_md5_sha_values(buildpack_dir, uris_to_ignore)
+  # uri -> sha256
+  def self.get_checksums_by_uri(buildpack_dir, uris_to_ignore)
     data = {}
 
     release_tag_shas = GitClient.git_tag_shas(buildpack_dir)
@@ -27,8 +27,8 @@ class BuildpackBinaryChecksumVerifier
           next if data[uri]
           next if uris_to_ignore.include?(uri)
 
-          if dependency.key?( "md5")
-            data[uri] = { "md5" => dependency["md5"], "sha" => release_sha }
+          if dependency.key?( "sha256")
+            data[uri] = { "sha256" => dependency["sha256"], "sha" => release_sha }
           end
         end
       rescue GitClient::GitError => e
@@ -49,26 +49,26 @@ class BuildpackBinaryChecksumVerifier
         uri_mapping.each do |uri, metadata_hash|
           attempts = 0
           max_attempts = 3
-          md5_match = false
+          sha256_match = false
 
-          while !md5_match && attempts < max_attempts do
-            desired_md5 = metadata_hash['md5']
+          while !sha256_match && attempts < max_attempts do
+            desired_sha256 = metadata_hash['sha256']
             release_tag_sha = metadata_hash['sha']
 
-            actual_md5 = `curl -L -s #{uri} | md5sum - | cut -d ' ' -f 1`.chomp
+            actual_sha256 = `curl -L -s #{uri} | shasum -a 256 - | cut -d ' ' -f 1`.chomp
 
-            if desired_md5 == actual_md5
-              md5_match = true
+            if desired_sha256 == actual_sha256
+              sha256_match = true
             else
               attempts += 1
             end
           end
 
-          if md5_match
+          if sha256_match
             print '.'
           else
             print 'F'
-            mismatches << "#{uri}: actual #{actual_md5} != desired #{desired_md5}, release sha: #{release_tag_sha}"
+            mismatches << "#{uri}: actual #{actual_sha256} != desired #{desired_sha256}, release sha: #{release_tag_sha}"
           end
         end
       end
