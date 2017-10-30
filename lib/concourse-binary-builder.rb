@@ -34,7 +34,7 @@ class ConcourseBinaryBuilder
 
     build_dependency
 
-    add_md5_to_binary_name
+    add_checksum_to_binary_name
 
     copy_binaries_to_output_directory
 
@@ -112,11 +112,11 @@ class ConcourseBinaryBuilder
     end
   end
 
-  def add_md5_to_binary_name
+  def add_checksum_to_binary_name
     Dir["#{binary_builder_dir}/*.{tgz,tar.gz,phar,zip}"].each do |name|
       prefix,suffix = /(.*)(\.tgz|\.tar\.gz|\.phar|\.zip)$/.match(name)[1,2]
-      md5sum = Digest::MD5.file(name).hexdigest[0..7]
-      FileUtils.mv(name, "#{prefix}-#{md5sum}#{suffix}")
+      sha256sum = Digest::SHA256.file(name).hexdigest[0..7]
+      FileUtils.mv(name, "#{prefix}-#{sha256sum}#{suffix}")
     end
   end
 
