@@ -323,6 +323,13 @@ jobs:
           - get: staticfile-buildpack-github-release
           - get: binary-buildpack-github-release
           - get: dotnet-core-buildpack-github-release
+        - task: upload-stemcell-to-bosh-lite
+          file: buildpacks-ci/tasks/upload-stemcell-to-bosh-lite/task.yml
+          params:
+            DEPLOYMENT_NAME: cf-release.buildpacks-gcp.ci
+            BOSH_USER: {{bosh_user}}
+            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
+            BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
         - task: generate-manifest
           file: buildpacks-ci/tasks/generate-cf-and-diego-manifests/task.yml
           params:
@@ -341,7 +348,6 @@ jobs:
         - put: cf-release-cf-deployment
           params:
             manifest: generate-manifest-artifacts/cf-release.buildpacks-gcp.ci/manifest.yml
-            stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
         - task: upload-diego-release
           file: buildpacks-ci/tasks/upload-diego-release/task.yml
@@ -353,7 +359,6 @@ jobs:
         - put: cf-release-diego-deployment
           params:
             manifest: generate-manifest-artifacts/cf-release.buildpacks-gcp.ci/diego.yml
-            stemcells: ['lite-stemcell/stemcell.tgz']
             releases:
               - diego-bosh-release/release.tgz
               - cflinuxfs2-bosh-release/release.tgz
