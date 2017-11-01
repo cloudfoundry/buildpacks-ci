@@ -15,6 +15,10 @@ resource_types:
     source:
       repository: pivotalcf/pivnet-resource
       tag: latest-final
+  - name: bosh-deployment
+    type: docker-image
+    source:
+      repository: cloudfoundry/bosh-deployment-resource
 
 resources:
   - name: buildpacks-ci
@@ -66,18 +70,78 @@ resources:
     type: bosh-deployment
     source:
       target: https://cf-release.buildpacks-gcp.ci.cf-app.com:25555
-      username: admin
-      password: {{gcp_bosh_lite_admin_password}}
+      client: admin
+      client_secret: {{gcp_bosh_lite_admin_password}}
       deployment: cf-warden
-      ignore_ssl: true
+      ca_cert: |
+        -----BEGIN CERTIFICATE-----
+        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
+        -----END CERTIFICATE-----
   - name: cf-release-diego-deployment
     type: bosh-deployment
     source:
       target: https://cf-release.buildpacks-gcp.ci.cf-app.com:25555
-      username: admin
-      password: {{gcp_bosh_lite_admin_password}}
+      client: admin
+      client_secret: {{gcp_bosh_lite_admin_password}}
       deployment: cf-warden-diego
-      ignore_ssl: true
+      ca_cert: |
+        -----BEGIN CERTIFICATE-----
+        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
+        -----END CERTIFICATE-----
   - name: failure-alert
     type: slack-notification
     source:
