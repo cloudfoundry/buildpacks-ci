@@ -238,6 +238,7 @@ jobs:
             CI_CF_PASSWORD: {{ci-cf-bal-password}}
             APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
+            CREDHUB_MODE: assisted
         - task: add-flake-attempts-to-cats
           file: buildpacks-ci/tasks/add-flake-attempts-to-cats/task.yml
         - task: cats
