@@ -38,15 +38,9 @@ class NewReleasesDetector
     )
 
     changed_dependencies.each do |dependency, versions|
-      versions.each do |version|
-        new_dependency_version_output = "There is a new update to the *#{dependency}* dependency: version *#{version}*\n"
-        slack_clients['buildpacks'].post_to_slack new_dependency_version_output
-
-        if notify_capi?(dependency, [version])
-          new_nginx_version_output = "There is a new version of *nginx* available: #{version}"
-          slack_clients['capi'].post_to_slack new_nginx_version_output
-        end
-      end
+      new_dependency_version_output = "There is a new version of *#{dependency}* available: *#{versions.join(', ')}*"
+      slack_clients['buildpacks'].post_to_slack new_dependency_version_output
+      slack_clients['capi'].post_to_slack new_dependency_version_output if notify_capi?(dependency, versions)
     end
   end
 
