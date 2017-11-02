@@ -557,7 +557,7 @@ describe NewReleasesDetector do
 
       it 'posts a tracker story with the dependency and versions in the story description' do
         expect(buildpacks_tracker_client).to receive(:post_to_tracker).
-          with(description: "We have 2 new releases for **python**:\n**version a, b**\n See the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file.",
+          with(description: "We have 2 new releases for **python**:\n**version a, b**\n\nSee the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file.",
                name: anything, tasks: anything, point_value: anything, labels: anything)
 
         expect(capi_tracker_client).not_to receive(:post_to_tracker)
