@@ -106,7 +106,7 @@ class NewReleasesDetector
 
   def buildpacks_tracker_story_info(dependency,versions)
     name = "Build and/or Include new releases: #{dependency} #{versions.join(', ')}"
-    description = "We have #{versions.count} new releases for **#{dependency}**:\n**version #{versions.join(', ')}**\n See the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file."
+    description = "We have #{versions.count} new releases for **#{dependency}**:\n**version #{versions.join(', ')}**\n\nSee the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file."
 
     buildpack_names = BuildpackDependency.for(dependency)
     tasks = buildpack_names.map do |buildpack|
@@ -123,6 +123,7 @@ class NewReleasesDetector
       tasks.push 'Update go-version.yml in binary-builder repo'
     elsif dependency == :pipenv
       description += <<~HEREDOC
+
                      ```
                      mkdir /tmp/pipenv
                      cd /tmp/pipenv
@@ -134,6 +135,7 @@ class NewReleasesDetector
                      HEREDOC
     elsif dependency == :setuptools
       description += <<~HEREDOC
+
                      ```
                      mkdir /tmp/setuptools
                      cd /tmp/setuptools
