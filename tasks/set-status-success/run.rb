@@ -19,6 +19,7 @@ sha = Dir.chdir('repo') do
 end
 
 puts "Setting status success on #{GITHUB_REPO}"
+puts "sha: #{sha}"
 puts "context: #{GITHUB_STATUS_CONTEXT}"
 puts "description: #{GITHUB_STATUS_DESCRIPTION}"
 puts "target_url: #{PIPELINE_URI}"
