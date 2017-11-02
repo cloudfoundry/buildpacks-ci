@@ -472,8 +472,7 @@ describe NewReleasesDetector do
       let(:changed_dependencies) { {python: %w(a b) } }
 
       it 'posts to buildpacks slack for each new release of that dependency' do
-        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *python* dependency: version *a*\n")
-        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *python* dependency: version *b*\n")
+        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new version of *python* available: *a, b*")
         expect(capi_slack_client).to_not receive(:post_to_slack)
         subject.post_to_slack
       end
@@ -483,7 +482,7 @@ describe NewReleasesDetector do
       let(:changed_dependencies) { {go: %w(1.9.7) } }
 
       it 'posts to buildpacks and pivotal-network slack for each new release of that dependency' do
-        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *go* dependency: version *1.9.7*\n")
+        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new version of *go* available: *1.9.7*")
         expect(capi_slack_client).to_not receive(:post_to_slack)
         subject.post_to_slack
       end
@@ -494,8 +493,8 @@ describe NewReleasesDetector do
         let(:changed_dependencies) { {nginx: %w(1.11.99) } }
 
         it 'posts to buildpacks and capi slack for each new release of that dependency' do
-          expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *nginx* dependency: version *1.11.99*\n")
-          expect(capi_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: 1.11.99")
+          expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: *1.11.99*")
+          expect(capi_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: *1.11.99*")
           subject.post_to_slack
         end
       end
@@ -504,7 +503,7 @@ describe NewReleasesDetector do
         let(:changed_dependencies) { {nginx: %w(1.10.99) } }
 
         it 'only posts to buildpacks slack for each new release of that dependency' do
-          expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *nginx* dependency: version *1.10.99*\n")
+          expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: *1.10.99*")
           expect(capi_slack_client).to_not receive(:post_to_slack)
           subject.post_to_slack
         end
