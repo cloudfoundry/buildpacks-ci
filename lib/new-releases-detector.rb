@@ -125,10 +125,28 @@ class NewReleasesDetector
     if dependency == :dotnet
       tasks.push 'Remove any dotnet versions MS no longer supports'
       tasks.push 'Remove any dotnet-framework versions we no longer support'
-    end
-
-    if dependency == :go
+    elsif dependency == :go
       tasks.push 'Update go-version.yml in binary-builder repo'
+    elsif dependency == :pipenv
+      description += <<~HEREDOC
+                     ```
+                     mkdir /tmp/pipenv
+                     cd /tmp/pipenv
+                     pip download --no-binary :all: pipenv
+                     pip download --no-binary :all: pytest-runner
+                     pip download --no-binary :all: setuptools_scm
+                     tar zcvf /tmp/pipenv-vX.X.X-SHA.tgz .
+                     ```
+                     HEREDOC
+    elsif dependency == :setuptools
+      description += <<~HEREDOC
+                     ```
+                     mkdir /tmp/setuptools
+                     cd /tmp/setuptools
+                     pip download --no-binary :all: setuptools
+                     tar zcvf /tmp/setuptools-vX.X.X-SHA.tgz .
+                     ```
+                     HEREDOC
     end
 
     {
@@ -221,8 +239,10 @@ class NewReleasesDetector
       node:            -> { JSON.parse(open('https://nodejs.org/dist/index.json').read).map{|d| d['version']} },
       openjdk:         -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys },
       php:             -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
+      pipenv:          -> { pip_versions('pipenv') },
       python:          -> { Nokogiri::HTML.parse(open('https://www.python.org/downloads/')).css('.release-number a').map{|a|a.text.gsub(/.*Python\s*/, 'v')} },
       ruby:            -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) },
+      setuptools:      -> { pip_versions('setuptools') },
       yarn:            -> { Octokit.releases('yarnpkg/yarn').select{|r| !r.prerelease}.map(&:tag_name) },
     }
   end
@@ -259,5 +279,12 @@ class NewReleasesDetector
     else
       tags
     end
+  end
+
+  private
+
+  def pip_versions(name)
+    data = JSON.parse(open("https://pypi.python.org/pypi/#{name}/json").read)
+    data['releases'].keys.sort_by{ |v| Gem::Version.new(v) }.reverse
   end
 end
