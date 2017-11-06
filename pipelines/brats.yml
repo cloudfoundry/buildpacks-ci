@@ -1,5 +1,5 @@
 <% languages = %w(binary dotnet-core go hwc java multi nodejs php python ruby staticfile) %>
-<% new_brats = %W(apt) %>
+<% new_brats = %w(apt) %>
 
 ---
 resource_types:
@@ -85,7 +85,7 @@ resources:
     source:
       uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
       private_key: {{<%= language %>-buildpack-private-key}}
-      branch: develop
+      branch: master
 <% end %>
 
 jobs:
