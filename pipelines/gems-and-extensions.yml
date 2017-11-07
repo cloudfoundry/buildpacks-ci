@@ -52,7 +52,7 @@ resources:
   - name: cf-space
     type: cf-space-resource
     source:
-      target: api.buildpacks-shared.cf-app.com
+      target: api.edge.buildpacks-gcp.ci.cf-app.com
       username: {{ci-cf-username}}
       password: {{ci_cf_shared_password}}
       organization: pivotal
