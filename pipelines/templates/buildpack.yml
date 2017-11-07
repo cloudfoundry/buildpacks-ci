@@ -1,5 +1,5 @@
 <% libbuildpacks = %w(apt go hwc multi nodejs python ruby staticfile) %>
-<% new_brats = %w(apt) %>
+<% new_brats = %w(apt nodejs ruby) %>
 
 ---
 resource_types:
@@ -772,7 +772,9 @@ jobs: ##########################################################################
           timeout: 3h
         - aggregate:
           - get: buildpacks-ci
+<% unless new_brats.include?(language) %>
           - get: brats
+<% end %>
           - get: buildpack
             resource: buildpack-develop
             trigger: true
@@ -819,6 +821,23 @@ jobs: ##########################################################################
     public: true
     plan:
       - do:
+<% if new_brats.include?(language) %>
+        - aggregate:
+          - get: buildpacks-ci
+          - get: buildpack
+            resource: buildpack-develop
+            trigger: true
+        - do:
+          - put: cf-brat-space
+            resource: cf-lts-brat-space
+          - task: brats
+            file: buildpacks-ci/tasks/run-bp-brats/task.yml
+            input_mapping: {cf-space: cf-brat-space}
+            params:
+              STACKS: cflinuxfs2
+              GINKGO_ATTEMPTS: 4
+              GINKGO_NODES: 6
+<% else %>
         - aggregate:
           - get: buildpacks-ci
           - get: brats
@@ -836,6 +855,7 @@ jobs: ##########################################################################
               BUILDPACK_BRANCH: develop
               LANGUAGE: <%= language %>
               RUBYGEM_MIRROR: {{rubygem-mirror}}
+<% end %>
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
