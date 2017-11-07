@@ -6,7 +6,7 @@ name = `hostname`.chomp
 case ARGV[0]
   when 'edge'
     cfg = YAML.load(`lpass show --notes Shared-Buildpacks/deployments-buildpacks.yml`)
-    system('cf', 'api', 'api.buildpacks-shared.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
+    system('cf', 'api', 'api.edge.buildpacks-gcp.ci.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
     system('cf', 'auth', 'admin', cfg['ci_cf_shared_password']) or raise 'Could not auth'
   when 'lts'
     cfg = YAML.load(`lpass show --notes Shared-Buildpacks/concourse-private.yml`)
