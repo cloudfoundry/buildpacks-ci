@@ -41,7 +41,7 @@ resources:
   - name: edge-cf-deployment
     type: bosh-deployment
     source:
-      target: https://35.196.189.128:25555
+      target: {{edge_bosh_target}}
       client: admin
       client_secret: {{edge_bosh_client_secret}}
       ca_cert: {{edge_bosh_ca_cert}}
