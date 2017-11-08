@@ -1,0 +1,21 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: bbl-state
+  - name: buildpacks-ci
+
+outputs:
+  - name: deployment-source-config
+
+run:
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/create-deployment-source-config/run.rb
+
+params:
+  ENV_NAME:
