@@ -56,92 +56,42 @@ resources:
       uri: git@github.com:cloudfoundry/cf-release
       branch: develop
       private_key: {{cf-release-private-key}}
+  - name: bbl-state
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: {{buildpacks-envs-private-key}}
+  - name: cf-deployment-concourse-tasks
+    type: git
+    source:
+      branch: PR-is-bosh-lite-to-bbl-up
+      uri: https://github.com/Gerg/cf-deployment-concourse-tasks.git
+      # tag_filter: v4.*
+  - name: bosh-deployment
+    type: git
+    source:
+      uri: https://github.com/TisVictress/bosh-deployment
+      branch: bosh-lite-safe
+  - name: cf-deployment-rc
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-deployment
+      branch: release-candidate
   - name: lite-stemcell
     type: bosh-io-stemcell
     source:
       name: bosh-warden-boshlite-ubuntu-trusty-go_agent
-  - name: deployments-buildpacks
-    type: git
-    source:
-      uri: {{deployments-git-uri}}
-      private_key: {{deployments-private-key}}
-      branch: master
   - name: cf-release-cf-deployment
     type: bosh-deployment
     source:
-      target: https://cf-release.buildpacks-gcp.ci.cf-app.com:25555
-      client: admin
-      client_secret: {{gcp_bosh_lite_admin_password}}
-      deployment: cf-warden
-      ca_cert: |
-        -----BEGIN CERTIFICATE-----
-        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
-        -----END CERTIFICATE-----
-  - name: cf-release-diego-deployment
-    type: bosh-deployment
-    source:
-      target: https://cf-release.buildpacks-gcp.ci.cf-app.com:25555
-      client: admin
-      client_secret: {{gcp_bosh_lite_admin_password}}
-      deployment: cf-warden-diego
-      ca_cert: |
-        -----BEGIN CERTIFICATE-----
-        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
-        -----END CERTIFICATE-----
+      deployment: cf
+      vars_store:
+        provider: gcs
+        config:
+          bucket: cf-release-cf-deployment
+          file_name: vars-store.yml
+          json_key: {{cf-release-cf-deployment-gcs-service-account-key}}
   - name: failure-alert
     type: slack-notification
     source:
@@ -218,10 +168,11 @@ resources:
 groups:
   - name: buildpacks
     jobs:
-      - recreate-bosh-lite
+      - bbl-up-bosh-lite
+      - bosh-lite-gcp-networking
       - deploy-cf-and-diego-to-cf-release
       - cats
-      - destroy-bosh-lite
+      - bbl-destroy-bosh-lite
       - ship-it
 <% (supported_languages - %w(java)).each do |language| %>
       - update-<%= language %>-buildpack-bosh-release
@@ -234,56 +185,68 @@ groups:
 <% end %>
   - name: java
     jobs:
-      - recreate-bosh-lite
       - ship-it-java
       - update-java-buildpack-bosh-release
       - update-private-java-offline-buildpack-bosh-release
       - cf-release for java
 
 jobs:
-  - name: recreate-bosh-lite
+  - name: bbl-up-bosh-lite
     serial: true
     serial_groups: [ cf-release ]
     public: true
     plan:
       - aggregate:
-        - get: deployments-buildpacks
+        - get: cf-deployment-concourse-tasks
+        - get: bbl-state
+        - get: bosh-deployment
         - get: public-robots
         - get: buildpacks-ci
-      - task: recreate-cf-release-bosh-lite
-        file: buildpacks-ci/tasks/recreate-bosh-lite/task.yml
+      - task: bbl-up
+        file: cf-deployment-concourse-tasks/bbl-up/task.yml
         params:
-          IAAS: gcp
-          GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
-          GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
-          GCP_BOSH_LITE_NAME: cf-release-gcp-bosh-lite
-          DEPLOYMENT_NAME: cf-release.buildpacks-gcp.ci
-          BOSH_USER: {{bosh_user}}
-          BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
-          BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
-          BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-          BOSH_LITE_ADMIN_PASSWORD: {{gcp_bosh_lite_admin_password}}
-          BOSH_LITE_HM_PASSWORD: {{gcp_bosh_lite_hm_password}}
-          BOSH_LITE_NATS_PASSWORD: {{gcp_bosh_lite_nats_password}}
-          BOSH_LITE_BLOBSTORE_AGENT_PASSWORD: {{gcp_bosh_lite_blobstore_agent_password}}
-          BOSH_LITE_BLOBSTORE_DIRECTOR_PASSWORD: {{gcp_bosh_lite_blobstore_director_password}}
-          BOSH_LITE_POSTGRES_PASSWORD: {{gcp_bosh_lite_postgres_password}}
-          ######## For AWS Deploys ##################
-          # BOSH_PRIVATE_KEY: {{bosh_private_key}}
-          # AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-          # AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-          # BOSH_AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-          # BOSH_AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-          # BOSH_LITE_SUBNET_ID: {{bosh_lite_subnet_id}}
-          # BOSH_LITE_SECURITY_GROUP: {{bosh_lite_security_group}}
-        attempts: 5
+          BBL_GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+          BBL_GCP_PROJECT_ID: cf-buildpacks
+          BBL_GCP_ZONE: us-east1-c
+          BBL_GCP_REGION: us-east1
+          BBL_IAAS: gcp
+          BBL_LB_CERT: {{cf-release-lb-cert}}
+          BBL_LB_KEY: {{cf-release-lb-key}}
+          LB_DOMAIN: cf-release.buildpacks-gcp.ci.cf-app.com
+          BBL_ENV_NAME: cf-release
+          BBL_STATE_DIR: cf-release
+          OPS_FILES: "bosh-lite.yml bosh-lite-runc.yml gcp/bosh-lite-vm-type.yml"
+          IS_BOSH_LITE: true
+        input_mapping:
+          ops-files: bosh-deployment
         ensure:
-          put: deployments-buildpacks
+          put: bbl-state
           params:
-            repository: deployments-buildpacks-artifacts
+            repository: updated-bbl-state
             rebase: true
+
+  - name: bosh-lite-gcp-networking
+    serial: true
+    serial_groups: [ cf-release ]
+    public: true
+    plan:
+      - aggregate:
+        - get: bbl-state
+        - get: public-robots
+          passed: [ bbl-up-bosh-lite ]
+          trigger: true
+        - get: buildpacks-ci
+      - task: add-firewall-rule
+        file: buildpacks-ci/tasks/add-bosh-lite-gcp-firewall-rule/task.yml
+        params:
+          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+          ENV_NAME: cf-release
+      - task: add-dns-zone
+        file: buildpacks-ci/tasks/add-gcp-bosh-lite-dns-zone/task.yml
+        params:
+          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+          ENV_NAME: cf-release
+
   - name: deploy-cf-and-diego-to-cf-release
     serial: true
     serial_groups: [ cf-release ]
@@ -291,15 +254,14 @@ jobs:
     plan:
       - do:
         - aggregate:
-          - get: deployments-buildpacks
-            passed: [ recreate-bosh-lite ]
           - get: public-robots
-            passed: [ recreate-bosh-lite ]
+            passed: [ bosh-lite-gcp-networking ]
             trigger: true
           - get: buildpacks-ci
+          - get: bbl-state
           - get: bosh-lite
-          - get: cf-release
-            resource: cf-release-rc
+          - get: cf-deployment
+            resource: cf-deployment-rc
             attempts: 3
           - get: diego-release
           - get: garden-runc-bosh-release
@@ -323,46 +285,41 @@ jobs:
           - get: staticfile-buildpack-github-release
           - get: binary-buildpack-github-release
           - get: dotnet-core-buildpack-github-release
-        - task: upload-stemcell-to-bosh-lite
-          file: buildpacks-ci/tasks/upload-stemcell-to-bosh-lite/task.yml
-          params:
-            DEPLOYMENT_NAME: cf-release.buildpacks-gcp.ci
-            BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
-            BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
-        - task: generate-manifest
-          file: buildpacks-ci/tasks/generate-cf-and-diego-manifests/task.yml
-          params:
-            DEPLOYMENT_NAME: cf-release.buildpacks-gcp.ci
-            CI_CF_PASSWORD: {{ci-cf-password}}
-            BOSH_USER: {{bosh_user}}
-            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
-            BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
-            BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-            BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-            ROOTFS_RELEASE: cflinuxfs2
-            IAAS: gcp
-        - task: create-cf-release
-          file: buildpacks-ci/tasks/create-cf-bosh-release-to-deploy/task.yml
+
+          - get: java-buildpack-bosh-release
+          - get: go-buildpack-bosh-release
+          - get: python-buildpack-bosh-release
+          - get: nodejs-buildpack-bosh-release
+          - get: ruby-buildpack-bosh-release
+          - get: php-buildpack-bosh-release
+          - get: staticfile-buildpack-bosh-release
+          - get: binary-buildpack-bosh-release
+          - get: dotnet-core-buildpack-bosh-release
+        - aggregate:
+          - task: create-bump-buildpacks-opsfile
+            file: buildpacks-ci/tasks/create-bump-buildpacks-opsfile/task.yml
+          - task: create-deployment-source-config
+            file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+            params:
+              ENV_NAME: cf-release
+          - task: use-bosh-lite-cloud-config
+            file: buildpacks-ci/tasks/use-bosh-lite-cloud-config/task.yml
+            params:
+              ENV_NAME: cf-release
         - put: cf-release-cf-deployment
           params:
-            manifest: generate-manifest-artifacts/cf-release.buildpacks-gcp.ci/manifest.yml
-            releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
-        - task: upload-diego-release
-          file: buildpacks-ci/tasks/upload-diego-release/task.yml
-          params:
-            BOSH_ENVIRONMENT: https://cf-release.buildpacks-gcp.ci.cf-app.com:25555
-            BOSH_CLIENT: admin
-            BOSH_CLIENT_SECRET: {{gcp_bosh_lite_admin_password}}
-            BOSH_CA_CERT: "-----BEGIN CERTIFICATE-----\nMIIFNzCCAx+gAwIBAgIJAPSX5tIYsVR1MA0GCSqGSIb3DQEBCwUAMDIxMDAuBgNV\nBAMMJ2NmLXJlbGVhc2UuYnVpbGRwYWNrcy1nY3AuY2kuY2YtYXBwLmNvbTAeFw0x\nNzA4MTcxODU2MzNaFw0yMDA1MTMxODU2MzNaMDIxMDAuBgNVBAMMJ2NmLXJlbGVh\nc2UuYnVpbGRwYWNrcy1nY3AuY2kuY2YtYXBwLmNvbTCCAiIwDQYJKoZIhvcNAQEB\nBQADggIPADCCAgoCggIBALWuejSptqir4XZlblZUkNkgOGcpMLyz1ZjeRJyW09/h\nl9gp1qCfnv1//XlvQtokJ/pwM6pZBDbIx1p9qd+tmXQON5W6+IACOjICoBHpqHIg\nZLKvm8JcdeOIBj0Pqh5N6kCdzKVbr3dQ0XK4jgXY2otOIei9ND/012oIveiZMWP2\njkgz3RXTUfOba78cV6qWDWL+NlG8ndmRGM+XHYNmwSZVsqrKRbnKaak6qRrWJHxs\n+jNeucLapVrTQHF4qEOSG6Tocy4Lb4AFTTX4rrg97AE5jmNOZ9YsMCXoGC1T6pJT\nAdBIrhZxm059w/71YLhzTaSUedO4gP59w+jduXbtIHfd09IJXpk/oQQKbOGZHqGI\nnrtvpR4hjJFcocQV9Yx7+DgGlnwODpJq1iNrZJOVkf4kVxLs2N0ZbA26fX8DcsYy\nSJlD5P2nI21ZwAplgCs86s1BL5tc3FpkiKr8584J98/xzH+ZSYox7sglB4IhzqYt\nRKbyZDjmFcPNJkfJh2bar4Q7Xt750D+hwLfcm6OLPxCmfRq/+nZ2RT9AzrORPLjg\nbUkovgUMLkssK4lgwcbwl4AtqTCimDwKFl0m1J8VAtujGAd0ejEfb9EVxJgkAsTQ\nDZsiBWKKawqB++s18jER9YROR/ZppWwabjMVJ4EG7Y2ckDHMd5+AmkiutaEuyAsj\nAgMBAAGjUDBOMB0GA1UdDgQWBBTiAytY4ULjoVDN5nvZOVpBb6Ae8zAfBgNVHSME\nGDAWgBTiAytY4ULjoVDN5nvZOVpBb6Ae8zAMBgNVHRMEBTADAQH/MA0GCSqGSIb3\nDQEBCwUAA4ICAQCItvkVaYNGA+btgbPxmyHgh83sZa9+1jxXrTKtYEkdL1fl+HzM\nJbPPmNzKNKulZA51atYEn+9tYFZthrVlT+T/PpV8NYuiJ5FXMQ8dUvVmRQEKD7v3\nZua6mki9kFUEVDczi1sF1VSzPM9ZYIvyr6LaCH9BklHIuW7ShNs3cn1pRTkfhvHT\ncIECg2MhaKjj3veae7UKyR8jpFf0SucQpjMPA8eF0zrMOqZ5dpwLbS+ejpSGX50j\n0gOVvFj0XR85ItkUfyRgA3nO3fTPt5fXvc58s3Doqb5bPPKijH4i55uaMV+VgYUO\nYMimOEGvEnqERV/bfTET/v+wbYFY88aAp4srAg6kXfKas7RfYCR2RyAbfmzarMBM\nsRJqJMnHKfv0cb6pFeS+59lJoBt4PhTNZCgnu/xbymOhCMIFm6clk5lFIKFZ6Gy+\nXp+GHXnXMEzlY+zwR89kTqArKwQSl9jZaD0vu4/3rR94eAgwfMPIJBSJNrBPYRsT\nojwrHIDMULYZEiyLAHya2fNxJhTuFZk6HaW3FHMnmUASu8nrnPATLFr/LTYaC8qF\nFeB5JauF3PW4sBIOyywZy+5Cbt+qnbA/J2LigVo+HfGAuiq9iX1cXpwB7qpszh4y\nQxSTTvHB5tibRB/fJPR7a3DgaWzFhPvWJbx5CjdMO63i04rtfq6gM12BmQ==\n-----END CERTIFICATE-----"
-        - put: cf-release-diego-deployment
-          params:
-            manifest: generate-manifest-artifacts/cf-release.buildpacks-gcp.ci/diego.yml
+            source_file: deployment-source-config/source_file.yml
+            manifest: cf-deployment/cf-deployment.yml
             releases:
-              - diego-bosh-release/release.tgz
-              - cflinuxfs2-bosh-release/release.tgz
-              - garden-runc-bosh-release/release.tgz
+              - built-buildpacks-artifacts/*.tgz
+              - cflinuxfs2-bosh-release/*.tgz
+            stemcells:
+              - lite-stemcell/*.tgz
+            ops_files:
+              - cf-deployment/operations/bosh-lite.yml
+              - bump-buildpacks-opsfile/opsfile.yml
+            vars:
+              system_domain: cf-release.buildpacks-gcp.ci.cf-app.com
         on_failure:
           put: failure-alert
           params:
@@ -383,9 +340,6 @@ jobs:
           resource: cf-release-rc
           params:
             submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
-          passed: [ deploy-cf-and-diego-to-cf-release ]
-        - get: deployments-buildpacks
-          passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: public-robots
           passed: [ deploy-cf-and-diego-to-cf-release ]
           trigger: true
@@ -416,8 +370,8 @@ jobs:
         - task: write-cats-config
           file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
+            CI_CF_USERNAME: {{cf-release-cf-username}}
+            CI_CF_PASSWORD: {{cf-release-cf-password}}
             APPS_DOMAIN: cf-release.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
         - task: add-flake-attempts-to-cats
@@ -436,36 +390,39 @@ jobs:
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
-  - name: destroy-bosh-lite
+  - name: bbl-destroy-bosh-lite
     serial: true
     serial_groups: [ cf-release ]
     public: true
     plan:
       - aggregate:
-        - get: deployments-buildpacks
-          passed: [ cats ]
+        - get: cf-deployment-concourse-tasks
+        - get: bbl-state
+        - get: buildpacks-ci
         - get: public-robots
           passed: [ cats ]
           trigger: true
-        - get: buildpacks-ci
-      - task: destroy-cf-release-bosh-lite
-        file: buildpacks-ci/tasks/destroy-bosh-lite/task.yml
+      - task: remove-firewall-rule
+        file: buildpacks-ci/tasks/remove-bosh-lite-gcp-firewall-rule/task.yml
         params:
-          DEPLOYMENT_NAME: cf-release.buildpacks-gcp.ci
-          BOSH_USER: {{gcp_bosh_admin_user}}
-          BOSH_PASSWORD: {{gcp_bosh_admin_password}}
-          GCP_BOSH_LITE_NAME: cf-release-gcp-bosh-lite
-          GCP_BOSH_DIRECTOR_USER: {{gcp_bosh_admin_user}}
-          GCP_BOSH_DIRECTOR_PASSWORD: {{gcp_bosh_admin_password}}
-          BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-          BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-          IAAS: gcp
-          ######## For AWS Deploys ##################
-          #BOSH_PRIVATE_KEY: {{bosh_private_key}}
-          #AWS_ACCESS_KEY_ID: {{buildpacks_ci_aws_access_key_id}}
-          #AWS_SECRET_ACCESS_KEY: {{buildpacks_ci_aws_secret_access_key}}
-        attempts: 5
+          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+          ENV_NAME: cf-release
+      - task: remove-gcp-bosh-lite-dns-zone
+        file: buildpacks-ci/tasks/remove-gcp-bosh-lite-dns-zone/task.yml
+        params:
+          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+          ENV_NAME: cf-release
+      - task: bbl-destroy
+        file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+        params:
+          BBL_STATE_DIR: cf-release
+          BBL_GCP_PROJECT_ID: cf-buildpacks
+          BBL_GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+        ensure:
+          put: bbl-state
+          params:
+            repository: updated-bbl-state
+            rebase: true
 
   - name: ship-it
     serial: true
