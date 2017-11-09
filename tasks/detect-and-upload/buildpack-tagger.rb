@@ -31,7 +31,8 @@ class BuildpackTagger
         FileUtils.mv(cached_buildpack, output_cached)
       else
         puts `git tag #{tag_to_add}`
-        system(<<~EOF)
+        if File.exists?('compile-extensions')
+          system(<<~EOF)
                   export BUNDLE_GEMFILE=cf.Gemfile
                   if [ ! -z "$RUBYGEM_MIRROR" ]; then
                     bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
@@ -40,6 +41,17 @@ class BuildpackTagger
                   bundle exec buildpack-packager --uncached
                   bundle exec buildpack-packager --cached
                   EOF
+        else
+          system(<<~EOF)
+                  export GOPATH=$PWD
+                  export GOBIN=$GOPATH/.bin
+                  export PATH=$GOBIN:$PATH
+                  (cd src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager && go install)
+
+                  ./.bin/buildpack-packager --cached=false
+                  ./.bin/buildpack-packager --cached=true
+                  EOF
+        end
 
         timestamp = `date +%s`.strip
 

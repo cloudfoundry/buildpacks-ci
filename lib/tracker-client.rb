@@ -3,6 +3,7 @@ require 'net/http'
 require 'net/https'
 require 'uri'
 require 'json'
+require 'pry'
 
 class TrackerClient
   def initialize(key, project, requester_id)
@@ -14,9 +15,17 @@ class TrackerClient
     raise 'invalid requester id for tracker' unless validate_number @requester_id
   end
 
-  def search(name:)
+  def search_by_name(name:)
+    search_with_filters(name: name)
+  end
+
+  def search_by_label(label:)
+    search_with_filters(label: label)
+  end
+
+  def search_with_filters(filters)
     response = http_request do |uri|
-      uri.query = "filter=name:#{name}"
+      uri.query = "filter=#{filters.map { |k,v| v.is_a?(Array) ? v.map { |vv| "#{k}:#{vv}" } : "#{k}:#{v}" }.flatten.join(" AND ")}"
       Net::HTTP::Get.new(uri)
     end
     JSON.parse(response.body)
@@ -49,7 +58,7 @@ class TrackerClient
   end
 
   def add_blocker_to_story(story_id:, blocker:)
-    resp = http_request do |uri|
+    http_request do |uri|
       uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories/#{story_id}/blockers")
       request = Net::HTTP::Post.new(uri)
       request.body = {
@@ -61,8 +70,67 @@ class TrackerClient
     end
   end
 
+  def overwrite_label_on_story(story:, existing_label_regex:, new_label:)
+    existing_labels_with_ids = story["labels"].map { |l| l.select { |key| ["name", "id", "project_id"].include?(key) } }
+    existing_labels_with_ids.select! { |l| !l['name'].match(existing_label_regex) }
+    http_request do |uri|
+      uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories/#{story["id"]}")
+      request = Net::HTTP::Put.new(uri)
+      request.body = {
+        labels: [ { name: new_label } ] + existing_labels_with_ids
+      }.to_json
+      request
+    end
+  end
+
+  def add_label_to_story(story:, label:)
+    existing_labels_with_ids = story["labels"].map { |l| l.select { |key| ["name", "id", "project_id"].include?(key) } }
+
+    http_request do |uri|
+      uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories/#{story["id"]}")
+      request = Net::HTTP::Put.new(uri)
+      request.body = {
+        labels: [ { name: label } ] + existing_labels_with_ids
+      }.to_json
+      request
+    end
+  end
+
+  def add_comment_to_story(story_id:, comment:)
+    http_request do |uri|
+      uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories/#{story_id}/comments")
+      request = Net::HTTP::Post.new(uri)
+      request.body = {
+        text: comment
+      }.to_json
+      request
+    end
+  end
+
+  def change_story_state(story_id:, current_state:)
+    http_request do |uri|
+      uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories/#{story_id}")
+      request = Net::HTTP::Put.new(uri)
+      request.body = {
+        current_state: current_state
+      }.to_json
+      request
+    end
+  end
+
+  def point_story(story_id:, estimate:)
+    http_request do |uri|
+      uri = URI.parse("https://www.pivotaltracker.com/services/v5/projects/#{@project_id}/stories/#{story_id}")
+      request = Net::HTTP::Put.new(uri)
+      request.body = {
+        estimate: estimate
+      }.to_json
+      request
+    end
+  end
+
   def find_unaccepted_story_ids(text_to_search_for)
-    search(name: text_to_search_for).select do |story|
+    search_by_name(name: text_to_search_for).select do |story|
       story['current_state'] != 'accepted'
     end.map do |story|
       story['id']

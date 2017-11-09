@@ -13,6 +13,7 @@ RUN apt-get -y install \
   libmysqlclient-dev \
   libpq-dev \
   libsqlite3-dev \
+  lsb-release \
   module-init-tools \
   npm \
   php5 \
@@ -21,6 +22,12 @@ RUN apt-get -y install \
   shellcheck \
   wget \
   zip
+
+RUN export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" \
+  && echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
+  && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
+  && apt-get update \
+  && apt-get -y install google-cloud-sdk
 
 RUN curl -sSL https://get.docker.com/ | sh
 
@@ -41,16 +48,21 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the CF-CLI
-RUN wget -O cf-cli.tgz 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.24.0&source=github-rel' \
-  && [ adb0f75ed84a650a027fb238e4ec3123840cc1564600535c8abd420778a651b8 = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
+RUN wget -O cf-cli.tgz 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.32.0&source=github-rel' \
+  && [ 0a05521b7198dc8b92efbfb02a8fb04c84eeffeded3387aa3c9eb92ce4abef69 = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
   && tar xzf cf-cli.tgz -C /usr/bin \
   && rm cf-cli.tgz
 RUN cf install-plugin Diego-Enabler -f -r CF-Community
 
 # download the bosh2 CLI
-RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.1-linux-amd64 -o /usr/local/bin/bosh2 \
-  && [ fbae71a27554be2453b103c5b149d6c182b75f5171a00d319ac9b39232e38b51 = $(shasum -a 256 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
+RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.42-linux-amd64 -o /usr/local/bin/bosh2 \
+  && [ a97b085e45a989abfcd88de77770bb6db0c8a29e = $(shasum -a 1 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bosh2
+
+# download bbl
+RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v4.10.4/bbl-v4.10.4_linux_x86-64' \
+  && [ c1d2c001250506bd312203839058baf11ad7f53e150c8a6a1ff617a86d39f21a = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
+  && chmod +x /usr/local/bin/bbl
 
 #download spiff for spiffy things
 RUN wget -O spiff.zip 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.8/spiff_linux_amd64.zip' \
@@ -86,7 +98,7 @@ RUN cd /usr/local && bundle install
 
 #install fly-cli
 RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly \
-  && [ e258fc3a94b5578021dcc11d207e846adaa2f2ba9ceb60c661bde8f4bca00d74 = $(shasum -a 256 /usr/local/bin/fly | cut -d' ' -f1) ] \
+  && [ 8638c75c3294c104da75526cab827d1b61c8ab2c05bb999340214cade37a7516 = $(shasum -a 256 /usr/local/bin/fly | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/fly
 
 # git-hooks and git-secrets
@@ -101,13 +113,21 @@ RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make i
 # Ensure that Concourse filtering is on for non-interactive shells
 ENV BASH_ENV /etc/profile.d/filter.sh
 
-# Install go 1.8.1
+# Install go 1.9
 RUN cd /usr/local \
-  && curl -L https://storage.googleapis.com/golang/go1.8.1.linux-amd64.tar.gz -o go.tar.gz \
-  && [ a579ab19d5237e263254f1eac5352efcf1d70b9dacadb6d6bb12b0911ede8994 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
+  && curl -L https://buildpacks.cloudfoundry.org/dependencies/go/go1.9.linux-amd64-4577d9ba.tar.gz -o go.tar.gz \
+  && [ d3a0193410b9b62251aa12b49780dcea3ccfd10402b05685e54051c9c0b89e72 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && tar xf go.tar.gz \
-  && mv go/bin/go /usr/local/bin/go \
-  && rm go.tar.gz
+  && rm go.tar.gz \
+  && ln -s /usr/local/go/bin/* /usr/local/bin/
+
+ENV GOROOT=/usr/local/go
+
+#download certstrap to strap certs
+RUN git clone https://github.com/square/certstrap \
+  && cd certstrap \
+  && ./build \
+  && install bin/certstrap-*-linux-amd64 /usr/local/bin/certstrap
 
 # Install poltergeist for running dotnet-core-buildpack specs
 RUN gem install phantomjs && ruby -e 'require "phantomjs"; Phantomjs.path'

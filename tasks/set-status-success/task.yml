@@ -1,0 +1,23 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: repo
+
+run:
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/set-status-success/run.rb
+
+params:
+  GITHUB_ACCESS_TOKEN:
+  GITHUB_REPO:
+  GITHUB_STATUS_CONTEXT:
+  GITHUB_STATUS_DESCRIPTION:
+  TEST_CREDENTIAL_FILTER_WHITELIST: GITHUB_REPO,GITHUB_STATUS_CONTEXT,GITHUB_STATUS_DESCRIPTION,PIPELINE_URI
+

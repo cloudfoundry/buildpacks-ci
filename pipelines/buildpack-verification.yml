@@ -7,12 +7,12 @@ resource_types:
   - name: cron
     type: docker-image
     source:
-      repository: cftoolsmiths/cron-test
+      repository: cfbuildpacks/cron-resource
 resources:
   - name: verification-interval
     type: cron
     source:
-      expression: "0 8 * * *"
+      expression: "0 6 * * *"
       location: {{current-timezone}}
   - name: buildpack-checksums
     type: git
@@ -43,6 +43,11 @@ resources:
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
+  - name: hwc-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/hwc-buildpack
+      branch: master
 <% %w(go nodejs ruby python php staticfile binary dotnet-core).each do |language| %>
   - name: <%= language %>-buildpack
     type: git
@@ -65,7 +70,6 @@ jobs:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
       - task: build-site
         file: buildpacks-ci/tasks/build-buildpack-checksums-site/task.yml
-        privileged: true
         params:
           RUBYGEM_MIRROR: {{rubygem-mirror}}
       - put: buildpack-checksums
@@ -93,6 +97,7 @@ jobs:
           - get: binary-buildpack
           - get: php-buildpack
           - get: dotnet-core-buildpack
+          - get: hwc-buildpack
         - task: verify-buildpack-binaries
           file: buildpacks-ci/tasks/verify-buildpack-binaries/task.yml
           timeout: 1h30m

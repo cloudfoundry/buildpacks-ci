@@ -1,0 +1,363 @@
+---
+resource_types:
+  - name: concourse2tracker
+    type: docker-image
+    source:
+      repository: cfbuildpacks/concourse2tracker
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+  - name: bosh-deployment
+    type: docker-image
+    source:
+      repository: cloudfoundry/bosh-deployment-resource
+resources:
+  - name: concourse2tracker
+    type: concourse2tracker
+
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
+
+  - name: bal-develop
+    type: git
+    source:
+      uri: {{buildpackapplifecycle-git-uri}}
+      branch: {{buildpackapplifecycle-git-branch}}
+      private_key: {{buildpackapplifecycle-private-key}}
+
+  - name: bal-master
+    type: git
+    source:
+      uri: {{buildpackapplifecycle-git-uri}}
+      branch: master
+      private_key: {{buildpackapplifecycle-private-key}}
+
+  - name: cf-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-deployment
+      branch: master
+
+  - name: cats-concourse-task
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cats-concourse-task
+      branch: master
+
+  - name: diego-release
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/diego-release
+      branch: develop
+      private_key: {{diego-release-private-key}}
+
+  - name: cf-deployment-concourse-tasks
+    type: git
+    source:
+      branch: master
+      uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+      tag_filter: v4.*
+
+  - name: bosh-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-deployment.git
+
+  - name: bbl-state
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: {{buildpacks-envs-private-key}}
+
+  - name: cf-acceptance-tests
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-acceptance-tests
+      branch: master
+
+  - name: wats
+    type: git
+    source:
+      uri: https://github.com/idoru/wats
+      branch: add-credhub-assist-mode-tests
+      # After https://github.com/cloudfoundry/wats/pull/17 merged change to => uri: https://github.com/cloudfoundry/wats
+
+  - name: bal-cf-deployment
+    type: bosh-deployment
+    source:
+      target: {{bal-bosh-target}}
+      client: {{bal-bosh-client}}
+      client_secret: {{bal-bosh-client-secret}}
+      ca_cert: {{bal-bosh-ca-cert}}
+      vars_store:
+        provider: gcs
+        config:
+          bucket: bal-cf-deployment
+          file_name: vars-store.yml
+          json_key: {{bal-cf-deployment-gcs-service-account-key}}
+      deployment: cf
+
+  - name: gcp-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-ubuntu-trusty-go_agent
+
+  - name: windows2012-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-windows2012R2-go_agent
+
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
+
+jobs:
+  - name: unit-specs-linux
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: bal-develop
+          trigger: true
+      - task: run-specs
+        file: buildpacks-ci/tasks/run-bal-specs/task.yml
+  - name: unit-specs-windows
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: bal-develop
+          trigger: true
+      - task: run-specs
+        file: buildpacks-ci/tasks/run-bal-specs/task-windows.yml
+
+  - name: bbl-up
+    plan:
+      - aggregate:
+        - get: cf-deployment-concourse-tasks
+        - get: bbl-state
+        - get: bosh-deployment
+      - task: bbl-up
+        file: cf-deployment-concourse-tasks/bbl-up/task.yml
+        params:
+          BBL_GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+          BBL_GCP_PROJECT_ID: cf-buildpacks
+          BBL_GCP_ZONE: us-east1-c
+          BBL_GCP_REGION: us-east1
+          BBL_IAAS: gcp
+          BBL_LB_CERT: {{bal-lb-cert}}
+          BBL_LB_KEY: {{bal-lb-key}}
+          LB_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
+          BBL_ENV_NAME: bal
+          OPS_FILES: "local-dns.yml"
+        input_mapping:
+          ops-files: bosh-deployment
+        ensure:
+          put: bbl-state
+          params:
+            repository: updated-bbl-state
+            rebase: true
+
+  - name: deploy-cf-and-diego-to-cf-release
+    serial: true
+    serial_groups: [acceptance-tests]
+    public: true
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: bal-develop
+            passed: [unit-specs-windows, unit-specs-linux]
+            trigger: true
+          - get: diego-release
+          - get: cf-deployment
+          - get: windows2012-stemcell
+          - get: bbl-state
+          - get: gcp-stemcell
+            attempts: 3
+        - task: create-diego-release-with-bal-develop
+          file: buildpacks-ci/tasks/create-diego-release-with-bal-develop/task.yml
+        - put: bal-cf-deployment
+          params:
+            manifest: cf-deployment/cf-deployment.yml
+            releases:
+              - diego-release-artifacts/dev_releases/diego/*.tgz
+            stemcells:
+              - gcp-stemcell/*.tgz
+              - windows2012-stemcell/*.tgz
+            ops_files:
+            - diego-release-artifacts/use-diego-dev-release.yml
+            - buildpacks-ci/deployments/operations/no-canaries.yml
+            - cf-deployment/operations/scale-to-one-az.yml
+            - cf-deployment/operations/windows-cell.yml
+            - cf-deployment/operations/experimental/enable-instance-identity-credentials.yml
+            - cf-deployment/operations/experimental/enable-instance-identity-credentials-windows.yml
+            - cf-deployment/operations/experimental/secure-service-credentials.yml
+            - cf-deployment/operations/experimental/use-bosh-dns.yml
+            - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
+            - buildpacks-ci/deployments/operations/use-latest-garden-windows.yml #FIXME: remove after garden-windows >=0.10.0 in cf-deployment
+            - buildpacks-ci/deployments/operations/add-credhub-ca-cert-to-windows-cells.yml
+            vars:
+              system_domain: bal.buildpacks-gcp.ci.cf-app.com
+        - task: set-up-environment-for-credhub
+          file: buildpacks-ci/tasks/set-up-environment-for-credhub/task.yml
+          params:
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-bal-password}}
+            APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: cats
+    serial: true
+    serial_groups: [acceptance-tests]
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: bal-develop
+          passed: [deploy-cf-and-diego-to-cf-release]
+          trigger: true
+        - get: cats-concourse-task-inp
+          resource: cats-concourse-task
+        - get: cf-acceptance-tests
+      - do:
+        - task: write-cats-config
+          file: buildpacks-ci/tasks/write-cats-config/task.yml
+          params:
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-bal-password}}
+            APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
+            DIEGO_DOCKER_ON: true
+            CREDHUB_MODE: assisted
+        - task: add-flake-attempts-to-cats
+          file: buildpacks-ci/tasks/add-flake-attempts-to-cats/task.yml
+        - task: cats
+          attempts: 3
+          file: cats-concourse-task/task.yml
+          params:
+            NODES: 12
+            CONFIG_FILE_PATH: integration_config.json
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: wats-2012R2
+    serial: true
+    serial_groups: [acceptance-tests]
+    public: true
+    plan:
+      - aggregate:
+        - get: bal-develop
+          trigger: true
+          passed: [cats]
+        - get: buildpacks-ci
+        - get: wats
+      - do:
+        - task: write-wats-config
+          file: buildpacks-ci/tasks/write-wats-config/task.yml
+          params:
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci-cf-bal-password}}
+            APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
+            DIEGO_DOCKER_ON: true
+        - task: wats
+          attempts: 3
+          file: buildpacks-ci/tasks/run-wats/task.yml
+          params:
+            NODES: 12
+            CONFIG_FILE_PATH: integration_config.json
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: set-github-status
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: repo
+          resource: bal-develop
+          passed: [wats-2012R2]
+          trigger: true
+      - task: github-set-status-success
+        file: buildpacks-ci/tasks/set-status-success/task.yml
+        params:
+          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+          GITHUB_REPO: 'cloudfoundry/buildpackapplifecycle'
+          GITHUB_STATUS_CONTEXT: 'buildpacks-ci/cats'
+          GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI CATs passed'
+          PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
+
+  - name: merge-to-master
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: bal-master
+        - get: buildpacks-ci
+        - get: bal-develop
+          passed: [set-github-status]
+          trigger: true
+      - put: bal-master
+        params:
+          repository: bal-develop
+      - put: concourse2tracker
+        params:
+          git_path: bal-develop
+          project_id: {{cf-buildpacks-public-tracker-id}}
+          api_token: {{pivotal-tracker-api-token}}
+
+  - name: update-diego-release
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: diego-release
+        - get: bal-develop
+          passed: [merge-to-master]
+          trigger: true
+      - task: update-bal
+        file: buildpacks-ci/tasks/update-bal-in-diego-release/task.yml
+      - put: diego-release
+        params:
+          repository: updated-diego-release
+          rebase: true
+
+  - name: destroy-cf-deployment
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: bal-develop
+          passed: [wats-2012R2]
+          trigger: true
+      - task: destroy-cf-deployment
+        file: buildpacks-ci/tasks/destroy-cf-deployment/task.yml
+        params:
+          BOSH_CLIENT: {{bal-bosh-client}}
+          BOSH_ENVIRONMENT: {{bal-bosh-target}}
+          BOSH_CLIENT_SECRET: {{bal-bosh-client-secret}}
+          BOSH_CA_CERT: {{bal-bosh-ca-cert}}
+          DEPLOYMENT_NAME: cf
+        attempts: 5

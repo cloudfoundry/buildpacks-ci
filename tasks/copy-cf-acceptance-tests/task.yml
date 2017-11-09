@@ -11,3 +11,5 @@ outputs:
   - name: cf-acceptance-tests
 run:
   path: buildpacks-ci/tasks/copy-cf-acceptance-tests/run.sh
+params:
+  BRANCH:

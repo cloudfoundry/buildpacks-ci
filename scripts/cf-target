@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+require 'yaml'
+
+name = `hostname`.chomp
+
+case ARGV[0]
+  when 'edge'
+    cfg = YAML.load(`lpass show --notes Shared-Buildpacks/deployments-buildpacks.yml`)
+    system('cf', 'api', 'api.edge.buildpacks-gcp.ci.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
+    system('cf', 'auth', 'admin', cfg['ci_cf_shared_password']) or raise 'Could not auth'
+  when 'lts'
+    cfg = YAML.load(`lpass show --notes Shared-Buildpacks/concourse-private.yml`)
+    system('cf', 'api', cfg['ci-cf-lts-target'], '--skip-ssl-validation') or raise 'Could not connect'
+    system('cf', 'auth', 'admin', cfg['ci-cf-lts-password']) or raise 'Could not auth'
+  when 'bal'
+    cfg = YAML.load(`lpass show --notes Shared-Buildpacks/concourse-private.yml`)
+    system('cf', 'api', 'api.bal.buildpacks-gcp.ci.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
+    system('cf', 'auth', 'admin', cfg['ci-cf-bal-password']) or raise 'Could not auth'
+  when 'dev'
+    system('cf', 'dev', 'target') or raise 'Could not connect'
+    system('cf', 'auth', 'admin' ,'admin') or raise 'Could not auth'
+  else
+    puts "Usage: #{$0} <edge|lts|dev>"
+    exit 1
+end
+
+system('cf', 'create-org', name)
+system('cf', 'create-space', name, '-o', name)
+system('cf', 'target', '-o', name, '-s', name) or raise "Could not target #{name}"

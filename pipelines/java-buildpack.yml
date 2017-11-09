@@ -1,0 +1,48 @@
+resource_types:
+  - name: pivnet
+    type: docker-image
+    source:
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final
+
+resources:
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
+  - name: pivnet-production
+    type: pivnet
+    source:
+      api_token: {{pivnet-apikey}}
+      product_slug: buildpacks
+      product_version: "Java Buildpack 4\\."
+      access_key_id: {{pivnet-access-key}}
+      secret_access_key: {{pivnet-secret-key}}
+jobs:
+  - name: ship-it
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: pivnet-production
+  - name: buildpack-to-pws
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: pivnet-production
+          passed: [ship-it]
+          trigger: true
+          params:
+            globs:
+            - "java-buildpack-offline-v4*.zip"
+      - do:
+        - task: pws-update-buildpack
+          file: buildpacks-ci/tasks/pws-update-java-buildpack/task.yml
+          params:
+            CF_API: https://api.run.pivotal.io
+            USERNAME: {{pws_buildpacks_cf_admin_username}}
+            PASSWORD: {{pws_buildpacks_cf_admin_password}}
+            BUILDPACK_NAME: 'java'

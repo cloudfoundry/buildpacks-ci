@@ -1,0 +1,79 @@
+azs:
+- name: z1
+  cloud_properties:
+    zone: us-east1-c
+- name: z2
+  cloud_properties:
+    zone: us-east1-d
+
+vm_types:
+- name: web
+  cloud_properties:
+    machine_type: n1-standard-2
+    root_disk_size_gb: 20
+    root_disk_type: pd-ssd
+    tags: [concourse-web]
+
+- name: database
+  cloud_properties:
+    machine_type: n1-standard-4
+    root_disk_size_gb: 100
+    root_disk_type: pd-ssd
+
+- name: worker
+  cloud_properties:
+    machine_type: n1-standard-4
+    root_disk_size_gb: 1000
+    root_disk_type: pd-ssd
+
+- name: bosh-lite-worker
+  cloud_properties:
+    machine_type: n1-standard-16
+    root_disk_size_gb: 700
+    root_disk_type: pd-ssd
+
+compilation:
+  workers: 3
+  network: public
+  reuse_compilation_vms: true
+  az: z1
+  cloud_properties:
+    machine_type: n1-standard-4
+    root_disk_size_gb: 100
+    root_disk_type: pd-ssd
+    preemptible: true
+
+networks:
+  - name: public
+    type: manual
+    subnets:
+    - az: z1
+      range: 10.150.0.0/24
+      gateway: 10.150.0.1
+      static: [10.150.0.230-10.150.0.239]
+      cloud_properties:
+        network_name: concourse
+        subnetwork_name: concourse-public-us-east1-1
+        ephemeral_external_ip: true
+        tags:
+          - concourse-internal
+    - az: z2
+      range: 10.160.0.0/24
+      gateway: 10.160.0.1
+      cloud_properties:
+        network_name: concourse
+        subnetwork_name: concourse-public-us-east1-2
+        ephemeral_external_ip: true
+        tags:
+          - concourse-internal
+
+  - name: vip
+    type: vip
+
+disk_types:
+- name: database
+  disk_size: 100000 #mb
+  cloud_properties: {type: pd-ssd}
+- name: bosh-ssd
+  disk_size: 700000
+  cloud_properties: {type: pd-ssd}

@@ -38,7 +38,7 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
       branch: master
 
-<% dep_build_names = %w(bower go bundler composer dotnet glide godep httpd hwc jruby php php7 python node nginx ruby yarn) %>
+<% dep_build_names = %w(bower go bundler composer dotnet glide godep dep httpd hwc jruby php php7 python node nginx ruby yarn) %>
 <% dep_build_names.each do |dep| %>
   - name: <%= dep %>-builds
     type: git
@@ -68,7 +68,7 @@ resources: #####################################################################
       paths: [ binary-built-output/dotnet-framework-built.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
-<% %w(bower composer dotnet glide godep hwc nginx node yarn).each do |auto_dep| %>
+<% %w(bower bundler composer dotnet glide godep dep hwc nginx node yarn).each do |auto_dep| %>
   - name: <%= auto_dep %>-builds-in
     type: git
     source:
@@ -90,11 +90,7 @@ resources: #####################################################################
   - name: <%= language %>-buildpack
     type: git
     source:
-    <% if language == 'hwc' %>
-      uri: git@github.com:cloudfoundry-incubator/<%= language %>-buildpack.git
-    <% else %>
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-    <% end %>
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
       ignore_paths:
@@ -121,7 +117,7 @@ resources: #####################################################################
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
 
-<% dep_build_names = %w(bower go bundler composer dotnet glide godep httpd hwc jruby php php7 python node nginx ruby yarn) %>
+<% dep_build_names = %w(bower go bundler composer dotnet glide godep dep httpd hwc jruby php php7 python node nginx ruby yarn) %>
 <% dep_build_names.each do |dep| %>
   - name: buildpacks-bucket-<%= dep %>
     type: s3
@@ -136,17 +132,17 @@ groups: ########################################################################
 
   - name: enqueue-automated-builds
     jobs:
-<% %w(bower composer dotnet glide godep hwc nginx node yarn).each do |auto_dep| %>
+<% %w(bower bundler composer dotnet glide godep dep hwc nginx node yarn).each do |auto_dep| %>
     - trigger-<%= auto_dep %>-build
 <% end %>
 
   - name: automated-builds
     jobs:
     - binary-builder-specs
-<% %w(bower composer dotnet glide godep hwc nginx node yarn).each do |auto_dep| %>
+<% %w(bower bundler composer dotnet glide godep dep hwc nginx node yarn).each do |auto_dep| %>
     - build-<%= auto_dep %>
 <% end %>
-<% {go: ["godep", "glide"], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node","yarn"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework'] }.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide", "dep" ], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node","yarn","bundler"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework'] }.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
     - update-<%= dependency %>-in-<%= buildpack %>-buildpack
   <% end %>
@@ -156,13 +152,36 @@ groups: ########################################################################
   - name: manual-builds
     jobs:
     - binary-builder-specs
-<% %w(go php php7 ruby jruby bundler python httpd).each do |dependency| %>
+<% %w(go php php7 ruby jruby python httpd).each do |dependency| %>
     - build-<%= dependency %>
+<% end %>
+
+  <% integration_spec_names = %w(bundler glide go godep dep httpd hwc jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
+  - name: binary-builder-specs
+    jobs:
+    - binary-builder-specs
+    - binary-builder-specs-unit
+<% integration_spec_names.each do |spec_name| %>
+    - binary-builder-specs-<%= spec_name %>
 <% end %>
 
 jobs: #################################################################################################################
 
+
   - name: binary-builder-specs
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: binary-builder
+          trigger: true
+          passed:
+          <% integration_spec_names.each do |spec_name| %>
+          - binary-builder-specs-<%= spec_name %>
+          <% end %>
+
+  - name: binary-builder-specs-unit
     serial: true
     public: true
     plan:
@@ -173,7 +192,7 @@ jobs: ##########################################################################
         - get: binary-builder
           trigger: true
       - do:
-        <% integration_spec_names = %w(bundler glide go godep httpd hwc jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
+        <% integration_spec_names = %w(bundler glide go godep dep httpd hwc jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
         - task: all-expected-integration-specs-will-run
           file: buildpacks-ci/tasks/check-for-binary-builder-integration-spec-presence/task.yml
           params:
@@ -182,8 +201,28 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/run-binary-builder-unit-specs/task.yml
           params:
             RUBYGEM_MIRROR: {{rubygem-mirror}}
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+<% integration_spec_names.each do |spec_name| %>
+  - name: binary-builder-specs-<%= spec_name %>
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: docker-cflinuxfs2-rootfs
+          trigger: true
+        - get: binary-builder
+          passed: [ binary-builder-specs-unit ]
+          trigger: true
+      - do:
         - aggregate:
-          <% integration_spec_names.each do |spec_name| %>
           - task: integration-<%= spec_name %>
             file: buildpacks-ci/tasks/run-binary-builder-integration-specs/task.yml
             params:
@@ -197,9 +236,7 @@ jobs: ##########################################################################
               ORACLE_LIBS_AWS_BUCKET: {{oracle-client-libs-s3-bucket}}
               ORACLE_LIBS_FILENAME: {{oracle-client-libs-filename}}
             <% end %>
-            privileged: true
             attempts: 5
-          <% end %>
         on_failure:
           put: failure-alert
           params:
@@ -207,8 +244,11 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
 
-<% %w(go php php7 ruby jruby bundler python httpd).each do |dependency| %>
+
+
+<% %w(go php php7 ruby jruby python httpd).each do |dependency| %>
   - name: build-<%= dependency %>
     serial: true
     public: true
@@ -223,7 +263,6 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: built-yaml
           resource: <%= dependency %>-built-output
-        - get: buildpacks-bucket-<%= dependency %>
       - do:
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary/task.yml
@@ -233,7 +272,6 @@ jobs: ##########################################################################
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BINARY_BUILDER_PLATFORM: {{binary-builder-platform}}
             BINARY_BUILDER_OS_NAME: {{binary-builder-os-name}}
-          privileged: true
         - put: buildpacks-bucket-<%= dependency %>
           params:
             file: binary-builder-artifacts/<%= dependency %>*
@@ -255,7 +293,7 @@ jobs: ##########################################################################
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 
-<% %w(bower godep hwc dotnet composer glide nginx node yarn).each do |dependency| %>
+<% %w(bower bundler godep dep hwc dotnet composer glide nginx node yarn).each do |dependency| %>
   - name: trigger-<%= dependency %>-build
     serial: true
     public: true
@@ -290,7 +328,6 @@ jobs: ##########################################################################
         - get: binary-builder
           passed: [binary-builder-specs]
         - get: buildpacks-ci
-        - get: buildpacks-bucket-<%= dependency %>
       - do:
         - task: build-binary
           file: buildpacks-ci/tasks/build-binary/task.yml
@@ -300,7 +337,6 @@ jobs: ##########################################################################
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BINARY_BUILDER_PLATFORM: {{binary-builder-platform}}
             BINARY_BUILDER_OS_NAME: {{binary-builder-os-name}}
-          privileged: true
         - put: buildpacks-bucket-<%= dependency %>
           params:
             file: binary-builder-artifacts/<%= dependency %>*
@@ -323,7 +359,7 @@ jobs: ##########################################################################
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 
-<% {go: ["godep", "glide"], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node","yarn"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework']}.each do |buildpack, dependencies| %>
+<% {go: ["godep", "glide", "dep"], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node", "yarn"], ruby: ["node", "yarn", "bundler"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework']}.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
   - name: update-<%= dependency %>-in-<%= buildpack %>-buildpack
     serial: true

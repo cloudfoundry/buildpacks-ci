@@ -12,15 +12,17 @@ resource_types:
   - name: cron
     type: docker-image
     source:
-      repository: cftoolsmiths/cron-test
+      repository: cfbuildpacks/cron-resource
 
 resources:
-  - name: tracker-filter-resource
+  - name: davos-cve-stories
     type: cf-tracker-resource
     source:
       project_id: {{cf-buildpacks-public-tracker-id}}
       token: {{pivotal-tracker-api-token}}
-      label: usn-trusty
+      labels:
+        - cflinuxfs2
+        - security-notice
   - name: monday-funday
     type: cron
     source:
@@ -62,6 +64,11 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/cflinuxfs2
       branch: master
+  - name: cflinuxfs2-release
+    type: github-release
+    source:
+      owner: cloudfoundry
+      repository: cflinuxfs2
   - name: cves-email
     type: email-sender
     source:
@@ -74,19 +81,23 @@ resources:
       to: ["cf-security@pivotal.io", "cf-buildpacks-eng@pivotal.io"]
 
 jobs:
-  - name: tracker-sec-triage-filter
+  - name: categorize-security-notices
     serial: true
     public: true
     plan:
-      - get: tracker-filter-resource
+      - get: davos-cve-stories
         trigger: true
       - get: buildpacks-ci
-      - get: cflinuxfs2
-      - task: delete-unaffected-stories
-        file: buildpacks-ci/tasks/delete-unaffected-stories/task.yml
-      - put: tracker-filter-resource
+      - get: cflinuxfs2-release
         params:
-          file: output/stories.json
+          include_source_tarball: true
+      - task: categorize-security-notices
+        file: buildpacks-ci/tasks/categorize-security-notices/task.yml
+        params:
+          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_PROJECT_REQUESTER: {{cf-buildpacks-requester-id}}
+          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+
 
   - name: new-releases
     serial: true

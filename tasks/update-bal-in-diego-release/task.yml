@@ -1,0 +1,14 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: diego-release
+  - name: bal-develop
+outputs:
+  - name: updated-diego-release
+run:
+  path: buildpacks-ci/tasks/update-bal-in-diego-release/run.sh

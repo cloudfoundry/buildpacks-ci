@@ -6,7 +6,7 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: blob
+  - name: buildpack-zip
   - name: version
   - name: release
 outputs:
@@ -14,7 +14,6 @@ outputs:
 params:
   BLOB_NAME:
   BLOB_GLOB:
-  VERSION_ALLOWED:
   RELEASE_NAME:
   RELEASE_DIR:
   ACCESS_KEY_ID:

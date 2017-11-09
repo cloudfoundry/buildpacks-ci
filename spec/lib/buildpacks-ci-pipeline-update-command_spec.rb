@@ -76,14 +76,18 @@ describe BuildpacksCIPipelineUpdateCommand do
         allow(buildpacks_ci_configuration).to receive(:repos_private_keys_filename).and_return('keys.yml')
         allow(buildpacks_ci_configuration).to receive(:git_repos_private_keys_filename).and_return('git_keys.yml')
         allow(buildpacks_ci_configuration).to receive(:git_repos_private_keys_two_filename).and_return('git_keys_two.yml')
+        allow(buildpacks_ci_configuration).to receive(:git_repos_private_keys_three_filename).and_return('git_keys_three.yml')
         allow(buildpacks_ci_configuration).to receive(:bosh_release_private_keys_filename).and_return('bosh.yml')
+        allow(buildpacks_ci_configuration).to receive(:dockerhub_cflinuxfs2_credentials_filename).and_return('dockerhub-cflinuxfs2.yml')
         expect(buildpacks_ci_pipeline_update_command).to receive(:system) do |fly_command|
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show private.yml.*\)/
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show deployments.yml.*\)/
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show keys.yml.*\)/
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show git_keys.yml.*\)/
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show git_keys_two.yml.*\)/
+          expect(fly_command).to match /load-vars-from=\<\(.*lpass show git_keys_three.yml.*\)/
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show bosh.yml.*\)/
+          expect(fly_command).to match /load-vars-from=\<\(.*lpass show dockerhub-cflinuxfs2.yml.*\)/
         end
         subject
       end

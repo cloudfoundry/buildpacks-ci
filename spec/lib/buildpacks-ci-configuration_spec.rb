@@ -113,6 +113,50 @@ describe BuildpacksCIConfiguration do
     end
   end
 
+  describe '#dockerhub_cflinuxfs2_credentials_filename' do
+    subject { BuildpacksCIConfiguration.new.dockerhub_cflinuxfs2_credentials_filename }
+
+    context 'configured by env variable' do
+      it 'returns the value of the env var' do
+        allow(ENV).to receive(:fetch).with('LPASS_DOCKERHUB_CFLINUXFS2_CREDENTIALS_FILE', anything).and_return('creds.yml')
+
+        expect(subject).to eq('creds.yml')
+      end
+
+      it 'asks ENV for the value' do
+        expect(ENV).to receive(:fetch).with('LPASS_DOCKERHUB_CFLINUXFS2_CREDENTIALS_FILE', anything)
+
+        subject
+      end
+    end
+
+    it 'has a default value' do
+      expect(subject).to eq('Shared-Buildpacks/dockerhub-cflinuxfs2.yml')
+    end
+  end
+
+  describe '#git_repos_private_keys_three_filename' do
+    subject { BuildpacksCIConfiguration.new.git_repos_private_keys_three_filename }
+
+    context 'configured by env variable' do
+      it 'returns the value of the env var' do
+        allow(ENV).to receive(:fetch).with('LPASS_GIT_REPOS_PRIVATE_KEYS_THREE_FILE', anything).and_return('keys.yml')
+
+        expect(subject).to eq('keys.yml')
+      end
+
+      it 'asks ENV for the value' do
+        expect(ENV).to receive(:fetch).with('LPASS_GIT_REPOS_PRIVATE_KEYS_THREE_FILE', anything)
+
+        subject
+      end
+    end
+
+    it 'has a default value' do
+      expect(subject).to eq('Shared-Buildpacks/git-repos-private-keys-three.yml')
+    end
+  end
+
   describe '#bosh_release_private_keys_filename' do
     subject { BuildpacksCIConfiguration.new.bosh_release_private_keys_filename }
 

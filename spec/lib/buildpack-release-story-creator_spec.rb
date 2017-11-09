@@ -85,4 +85,18 @@ describe BuildpackReleaseStoryCreator do
 
     subject.run!
   end
+
+  context 'previous release is 2.3.9' do
+    let(:previous_buildpack_version) { '2.3.9' }
+
+    it 'increases the patch correctly' do
+      allow(buildpack_project).to receive(:stories).and_return([double(id: 1)],
+                                                               [double(id:111111111, name:'Elixir should be faster'),
+                                                                double(id:222222222, name:'Buildpack should tweet on stage')])
+      expect(buildpack_project).to receive(:create_story).
+        with(hash_including(name: '**Release:** elixir-buildpack 2.3.10')).and_return(new_story)
+
+      subject.run!
+    end
+  end
 end

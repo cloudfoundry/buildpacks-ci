@@ -26,6 +26,10 @@ describe NewReleasesDetector do
     allow_any_instance_of(described_class).to receive(:open).with(/node/).and_return(double(read: [].to_json))
     allow_any_instance_of(described_class).to receive(:open).with(/bower/).and_return(double(read: { 'versions' => {} }.to_json))
     allow_any_instance_of(described_class).to receive(:open).with(/miniconda/).and_return(double(read: '<html></html>'))
+    allow_any_instance_of(described_class).to receive(:open).with(/newrelic/).and_return(double(read: '<html></html>'))
+    allow_any_instance_of(described_class).to receive(:open).with('https://apr.apache.org/download.cgi').and_return(double(read: '<html></html>'))
+    allow_any_instance_of(described_class).to receive(:open).with('https://maven.apache.org/docs/history.html').and_return(double(read: '<html>3.3.6 3.3.7 3.3.8 3.3.9</html>'))
+    allow_any_instance_of(described_class).to receive(:open).with(%r{https://pypi.python.org/pypi/[^/]+/json}).and_return(double(read: '{"releases":{}}'))
 
     allow(File).to receive(:exist?).and_call_original
     allow(File).to receive(:write).and_call_original
@@ -94,7 +98,7 @@ describe NewReleasesDetector do
     it 'outputs to stderr that there are new updates' do
       expect { subject }.
         to output(/NEW DEPENDENCIES FOUND:\n\n^- #{dependency}:/).to_stderr
-      end
+    end
   end
 
   shared_examples_for 'there are no new versions to potentially build' do |dependency_source|
@@ -152,6 +156,60 @@ describe NewReleasesDetector do
 
       context 'when there are no new releases' do
         let(:new_releases_response) { double(read: { 'v1' => 1, 'v2' => 2 }.to_yaml) }
+
+        it_behaves_like 'there are no new versions to potentially build'
+      end
+    end
+
+    context 'for apr' do
+      let(:dependency)          { :apr }
+      let(:old_versions)        { %w(1.6.0) }
+      let(:new_versions)        { %w(1.6.1) }
+      let(:new_releases_source) { 'https://apr.apache.org/download.cgi' }
+
+      context 'when there are new releases' do
+        let(:new_releases_response) { '<table>
+          <tr><td><a name="other"><strong>APR-util 2.3.5 is the best available version</strong></a></td></tr>
+          <tr><td><a name="apr1"><strong>APR 1.6.1 is the best available version</strong></a></td></tr>
+          </table>' }
+
+        it_behaves_like 'there are new versions to potentially build' do
+          let(:all_versions) { new_versions }
+        end
+      end
+
+      context 'when there are no new releases' do
+        let(:new_releases_response) { '<table>
+          <tr><td><a name="other"><strong>APR-util 2.3.4 is the best available version</strong></a></td></tr>
+          <tr><td><a name="apr1"><strong>APR 1.6.0 is the best available version</strong></a></td></tr>
+          </table>' }
+
+        it_behaves_like 'there are no new versions to potentially build'
+      end
+    end
+
+    context 'for apr-util' do
+      let(:dependency)          { :apr_util }
+      let(:old_versions)        { %w(2.3.4) }
+      let(:new_versions)        { %w(2.3.5) }
+      let(:new_releases_source) { 'https://apr.apache.org/download.cgi' }
+
+      context 'when there are new releases' do
+        let(:new_releases_response) { '<table>
+          <tr><td><a name="other"><strong>APR 1.6.1 is the best available version</strong></a></td></tr>
+          <tr><td><a name="aprutil1"><strong>APR-util 2.3.5 is the best available version</strong></a></td></tr>
+          </table>' }
+
+        it_behaves_like 'there are new versions to potentially build' do
+          let(:all_versions) { new_versions }
+        end
+      end
+
+      context 'when there are no new releases' do
+        let(:new_releases_response) { '<table>
+          <tr><td><a name="other"><strong>APR 1.6.0 is the best available version</strong></a></td></tr>
+          <tr><td><a name="aprutil1"><strong>APR-util 2.3.4 is the best available version</strong></a></td></tr>
+          </table>' }
 
         it_behaves_like 'there are no new versions to potentially build'
       end
@@ -215,6 +273,31 @@ describe NewReleasesDetector do
       end
     end
 
+    context 'for maven' do
+      let(:dependency)   { :maven }
+      let(:old_versions) { %w(3.3.7 3.3.8) }
+      let(:github_repo)  { 'apache/maven' }
+
+      context 'when there are new releases' do
+        let(:new_versions)          { %w(3.3.9) }
+        let(:github_response) { [double(name: 'maven-3.3.7'), double(name: 'maven-3.3.8'), double(name: 'maven-3.3.9')] }
+
+        it_behaves_like 'there are new versions to potentially build', :github
+      end
+
+      context 'when there are no new releases' do
+        let(:github_response) { [double(name: 'maven-3.3.7'), double(name: 'maven-3.3.8')] }
+
+        it_behaves_like 'there are no new versions to potentially build', :github
+      end
+
+      context 'github releases NOT on maven website are ignored' do
+        let(:github_response) { [double(name: 'maven-3.3.5'), double(name: 'maven-3.3.7'), double(name: 'maven-3.3.8')] }
+
+        it_behaves_like 'there are no new versions to potentially build', :github
+      end
+    end
+
     context 'for bower' do
       let(:dependency)          { :bower }
       let(:old_versions)        { %w(1.7.6 1.7.7) }
@@ -229,6 +312,51 @@ describe NewReleasesDetector do
 
       context 'when there are no new releases' do
         let(:new_releases_response) { double(read: { 'versions' => { '1.7.6': 'data', '1.7.7': 'data' } }.to_json) }
+
+        it_behaves_like 'there are no new versions to potentially build'
+      end
+    end
+
+    context 'for newrelic' do
+      let(:dependency)   { :newrelic }
+      let(:old_versions) { %w(1.1.1.111 2.2.2.222) }
+      let(:new_releases_source) { 'https://download.newrelic.com/php_agent/archive/' }
+
+      context 'when there are new releases' do
+        let(:new_versions)            { %w(3.3.3.333) }
+        let(:new_releases_response)   { double('new_releases_response', read: newrelic_releases_html ) }
+        let(:newrelic_releases_html) { <<~HTML
+                                       <table>
+                                          <td>
+                                            <a href="/php_agent/archive/1.1.1.111">1.1.1.111</a>
+                                          </td>
+                                          <td>
+                                            <a href="/php_agent/archive/2.2.2.222">2.2.2.222</a>
+                                          </td>
+                                          <td>
+                                            <a href="/php_agent/archive/3.3.3.333">3.3.3.333</a>
+                                          </td>
+                                      </table>
+                                      HTML
+        }
+
+        it_behaves_like 'there are new versions to potentially build'
+      end
+
+      context 'when there are no new releases' do
+        let(:new_releases_response)   { double('new_releases_response', read: newrelic_releases_html ) }
+        let(:newrelic_releases_html) { <<~HTML
+                                        <table>
+                                          <td>
+                                            <a href="/php_agent/archive/1.1.1.111">1.1.1.111</a>
+                                          </td>
+                                          <td>
+                                            <a href="/php_agent/archive/2.2.2.222">2.2.2.222</a>
+                                          </td>
+                                        </table>
+        HTML
+        }
+
 
         it_behaves_like 'there are no new versions to potentially build'
       end
@@ -344,8 +472,7 @@ describe NewReleasesDetector do
       let(:changed_dependencies) { {python: %w(a b) } }
 
       it 'posts to buildpacks slack for each new release of that dependency' do
-        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *python* dependency: version *a*\n")
-        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *python* dependency: version *b*\n")
+        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new version of *python* available: *a, b*")
         expect(capi_slack_client).to_not receive(:post_to_slack)
         subject.post_to_slack
       end
@@ -355,7 +482,7 @@ describe NewReleasesDetector do
       let(:changed_dependencies) { {go: %w(1.9.7) } }
 
       it 'posts to buildpacks and pivotal-network slack for each new release of that dependency' do
-        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *go* dependency: version *1.9.7*\n")
+        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new version of *go* available: *1.9.7*")
         expect(capi_slack_client).to_not receive(:post_to_slack)
         subject.post_to_slack
       end
@@ -366,8 +493,8 @@ describe NewReleasesDetector do
         let(:changed_dependencies) { {nginx: %w(1.11.99) } }
 
         it 'posts to buildpacks and capi slack for each new release of that dependency' do
-          expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *nginx* dependency: version *1.11.99*\n")
-          expect(capi_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: 1.11.99")
+          expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: *1.11.99*")
+          expect(capi_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: *1.11.99*")
           subject.post_to_slack
         end
       end
@@ -376,7 +503,7 @@ describe NewReleasesDetector do
         let(:changed_dependencies) { {nginx: %w(1.10.99) } }
 
         it 'only posts to buildpacks slack for each new release of that dependency' do
-          expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new update to the *nginx* dependency: version *1.10.99*\n")
+          expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: *1.10.99*")
           expect(capi_slack_client).to_not receive(:post_to_slack)
           subject.post_to_slack
         end
@@ -430,7 +557,7 @@ describe NewReleasesDetector do
 
       it 'posts a tracker story with the dependency and versions in the story description' do
         expect(buildpacks_tracker_client).to receive(:post_to_tracker).
-          with(description: "We have 2 new releases for **python**:\n**version a, b**\n See the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file.",
+          with(description: "We have 2 new releases for **python**:\n**version a, b**\n\nSee the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file.",
                name: anything, tasks: anything, point_value: anything, labels: anything)
 
         expect(capi_tracker_client).not_to receive(:post_to_tracker)

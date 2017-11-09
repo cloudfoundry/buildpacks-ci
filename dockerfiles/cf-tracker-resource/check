@@ -7,34 +7,11 @@ payload=$TMPDIR/cf-tracker-resource-request
 cat > "$payload" <&0
 
 PROJECT_ID=$(jq -r '.source.project_id' < "$payload")
-LABEL=$(jq -r '.source.label' < "$payload")
-PREVIOUS_LIST=$(jq -r '.version.ref' < "$payload") # list of story ids passed forward last time
+LABELS_QUERY_PART=$(jq -r '.source.labels | map("label%3A"  + .) | join ("%20AND%20")' < "$payload")
 
 # get list of all story ids in project with Security Triage label
-STORY_LIST=$(wget --quiet --no-verbose -O - "https://www.pivotaltracker.com/services/v5/projects/${PROJECT_ID}/search?query=label%3A${LABEL}%20AND%20state%3Aunscheduled" | jq -r ".stories.stories|sort_by(.created_at)|reverse|map({ ref: .id|tostring, description })")
+STORY_LIST=$(wget --quiet --no-verbose -O - "https://www.pivotaltracker.com/services/v5/projects/${PROJECT_ID}/search?query=${LABELS_QUERY_PART}%20AND%20state%3Aunscheduled" | jq -r ".stories.stories|sort_by(.created_at)|reverse|map({ id, description, labels })")
 
-if [ "$PREVIOUS_LIST" == "null" ]; then
-  echo "previous list is null"
-  # shellcheck disable=SC2086
-  echo $STORY_LIST | jq -R '.' | jq -s "map({ ref: . })" >&3
-  exit 0
-fi
-
-LATEST_STORY_ID=$(echo "$STORY_LIST" | jq -r .[0].ref)
-echo 'latest story id:'
-echo "$LATEST_STORY_ID"
-
-for id in $(echo "$PREVIOUS_LIST" | jq -r . | jq -r .[].ref); do
-  echo 'ID'
-  echo "$id"
-  if [ "$id" == "$LATEST_STORY_ID" ]; then
-    echo 'returning previous list, because most recent story is not new'
-    echo "$PREVIOUS_LIST" | jq -R '.' | jq -s "map({ ref: . })" >&3
-    exit 0
-  fi
-done
-
-echo 'returning new list, because most recent story is not in previous list'
 # shellcheck disable=SC2086
 echo $STORY_LIST | jq -R '.' | jq -s "map({ ref: . })" >&3
 

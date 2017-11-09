@@ -28,8 +28,8 @@ describe ConcourseBinaryBuilder do
     end
     let(:output_file_contents)       { (0...8).map { (65 + rand(26)).chr }.join }
     let(:output_file_md5)            { Digest::MD5.hexdigest(output_file_contents) }
-    let(:output_file_md5_short)      { output_file_md5[0..7] }
     let(:output_file_sha256)         { Digest::SHA256.hexdigest(output_file_contents) }
+    let(:output_file_sha256_short)   { output_file_sha256[0..7] }
 
     let(:flags) { "--name=#{dependency} --version=\"#{version}\" --#{verification_type}=\"#{verification_value}\"" }
 
@@ -77,7 +77,7 @@ describe ConcourseBinaryBuilder do
         git_msg = "Build #{dependency} - #{version}\n\n"
 
         git_yaml = {
-          "filename" => output_file_with_md5,
+          "filename" => output_file_with_sha256,
           'version' => version,
           'md5' => output_file_md5,
           'sha256' => output_file_sha256,
@@ -124,18 +124,18 @@ describe ConcourseBinaryBuilder do
 
     shared_examples_for 'the resulting tar files are copied to the proper location' do
       it 'copies the built binaries' do
-        expect(File.exist? "#{binary_artifacts_dir}/#{output_file_with_md5}").to eq true
+        expect(File.exist? "#{binary_artifacts_dir}/#{output_file_with_sha256}").to eq true
       end
     end
 
     context 'the dependency is go' do
-      let(:dependency)           { 'go' }
-      let(:output_file)          { 'go1.6.3.linux-amd64.tar.gz' }
-      let(:output_file_with_md5) { "go1.6.3.linux-amd64-#{output_file_md5_short}.tar.gz" }
-      let(:verification_type)    { 'sha256' }
-      let(:verification_value)   { '6326aeed5f86cf18f16d6dc831405614f855e2d416a91fd3fdc334f772345b00' }
-      let(:source_url)           { 'https://storage.googleapis.com/golang/go1.6.3.src.tar.gz' }
-      let(:version)              { '1.6.3' }
+      let(:dependency)              { 'go' }
+      let(:output_file)             { 'go1.6.3.linux-amd64.tar.gz' }
+      let(:output_file_with_sha256) { "go1.6.3.linux-amd64-#{output_file_sha256_short}.tar.gz" }
+      let(:verification_type)       { 'sha256' }
+      let(:verification_value)      { '6326aeed5f86cf18f16d6dc831405614f855e2d416a91fd3fdc334f772345b00' }
+      let(:source_url)              { 'https://storage.googleapis.com/golang/go1.6.3.src.tar.gz' }
+      let(:version)                 { '1.6.3' }
 
       before { subject.run }
 
@@ -144,13 +144,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is python' do
-      let(:dependency)            { 'python' }
-      let(:output_file)           { 'python-2.7.12-linux-x64.tgz' }
-      let(:output_file_with_md5)  { "python-2.7.12-linux-x64-#{output_file_md5_short}.tgz" }
-      let(:verification_type)     { 'sha256' }
-      let(:verification_value)    { 'f036b03f2ffd401742bb053f41c25dbe4491e52fc06e49b0dd0e9c1ae5a7baf7' }
-      let(:source_url)            { 'https://www.python.org/ftp/python/2.7.12/Python-2.7.12.tgz' }
-      let(:version)               { '2.7.12' }
+      let(:dependency)               { 'python' }
+      let(:output_file)              { 'python-2.7.12-linux-x64.tgz' }
+      let(:output_file_with_sha256)  { "python-2.7.12-linux-x64-#{output_file_sha256_short}.tgz" }
+      let(:verification_type)        { 'sha256' }
+      let(:verification_value)       { 'f036b03f2ffd401742bb053f41c25dbe4491e52fc06e49b0dd0e9c1ae5a7baf7' }
+      let(:source_url)               { 'https://www.python.org/ftp/python/2.7.12/Python-2.7.12.tgz' }
+      let(:version)                  { '2.7.12' }
 
       before { subject.run }
 
@@ -159,13 +159,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is php' do
-      let(:dependency)            { 'php' }
-      let(:output_file)           { 'php-5.6.30-linux-x64.tgz' }
-      let(:output_file_with_md5)  { "php-5.6.30-linux-x64-#{output_file_md5_short}.tgz" }
-      let(:verification_type)     { 'sha256' }
-      let(:verification_value)    { 'aaaaaabbbbbccccc' }
-      let(:source_url)            { "https://php.net/distributions/php-5.6.30.tar.gz" }
-      let(:version)               { '5.6.30' }
+      let(:dependency)               { 'php' }
+      let(:output_file)              { 'php-5.6.30-linux-x64.tgz' }
+      let(:output_file_with_sha256)  { "php-5.6.30-linux-x64-#{output_file_sha256_short}.tgz" }
+      let(:verification_type)        { 'sha256' }
+      let(:verification_value)       { 'aaaaaabbbbbccccc' }
+      let(:source_url)               { "https://php.net/distributions/php-5.6.30.tar.gz" }
+      let(:version)                  { '5.6.30' }
       let(:flags) { "--name=#{dependency} --version=\"#{version}\" --#{verification_type}=\"#{verification_value}\" --php-extensions-file=#{File.join(builds_dir, 'binary-builds', 'php-extensions.yml')}" }
 
       before { subject.run }
@@ -175,13 +175,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is php7' do
-      let(:dependency)            { 'php7' }
-      let(:output_file)           { 'php7-7.1.10-linux-x64.tgz' }
-      let(:output_file_with_md5)  { "php7-7.1.10-linux-x64-#{output_file_md5_short}.tgz" }
-      let(:verification_type)     { 'sha256' }
-      let(:verification_value)    { 'cccccccaaaaaabbbbb' }
-      let(:source_url)            { "https://php.net/distributions/php-7.1.10.tar.gz" }
-      let(:version)               { '7.1.10' }
+      let(:dependency)               { 'php7' }
+      let(:output_file)              { 'php7-7.1.10-linux-x64.tgz' }
+      let(:output_file_with_sha256)  { "php7-7.1.10-linux-x64-#{output_file_sha256_short}.tgz" }
+      let(:verification_type)        { 'sha256' }
+      let(:verification_value)       { 'cccccccaaaaaabbbbb' }
+      let(:source_url)               { "https://php.net/distributions/php-7.1.10.tar.gz" }
+      let(:version)                  { '7.1.10' }
       let(:flags) { "--name=#{dependency} --version=\"#{version}\" --#{verification_type}=\"#{verification_value}\" --php-extensions-file=#{File.join(builds_dir, 'binary-builds', 'php7-extensions.yml')}" }
 
       before { subject.run }
@@ -191,13 +191,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is glide' do
-      let(:dependency)            { 'glide' }
-      let(:output_file)           { 'glide-v0.11.1-linux-x64.tgz' }
-      let(:output_file_with_md5)  { "glide-v0.11.1-linux-x64-#{output_file_md5_short}.tgz" }
-      let(:verification_type)     { 'sha256' }
-      let(:verification_value)    { '3c4958d1ab9446e3d7b2dc280cd43b84c588d50eb692487bcda950d02b9acc4c' }
-      let(:source_url)            { 'https://github.com/Masterminds/glide/archive/v0.11.1.tar.gz' }
-      let(:version)               { 'v0.11.1' }
+      let(:dependency)               { 'glide' }
+      let(:output_file)              { 'glide-v0.11.1-linux-x64.tgz' }
+      let(:output_file_with_sha256)  { "glide-v0.11.1-linux-x64-#{output_file_sha256_short}.tgz" }
+      let(:verification_type)        { 'sha256' }
+      let(:verification_value)       { '3c4958d1ab9446e3d7b2dc280cd43b84c588d50eb692487bcda950d02b9acc4c' }
+      let(:source_url)               { 'https://github.com/Masterminds/glide/archive/v0.11.1.tar.gz' }
+      let(:version)                  { 'v0.11.1' }
 
       before { subject.run }
 
@@ -206,13 +206,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is hwc' do
-      let(:dependency)            { 'hwc' }
-      let(:output_file)           { 'hwc-15.11.1-windows-amd64.zip' }
-      let(:output_file_with_md5)  { "hwc-15.11.1-windows-amd64-#{output_file_md5_short}.zip" }
-      let(:verification_type)     { 'sha256' }
-      let(:verification_value)    { 'thisisasha256' }
-      let(:source_url)            { 'https://github.com/cloudfoundry-incubator/hwc/archive/15.11.1.tar.gz' }
-      let(:version)               { '15.11.1' }
+      let(:dependency)               { 'hwc' }
+      let(:output_file)              { 'hwc-15.11.1-windows-amd64.zip' }
+      let(:output_file_with_sha256)  { "hwc-15.11.1-windows-amd64-#{output_file_sha256_short}.zip" }
+      let(:verification_type)        { 'sha256' }
+      let(:verification_value)       { 'thisisasha256' }
+      let(:source_url)               { 'https://github.com/cloudfoundry-incubator/hwc/archive/15.11.1.tar.gz' }
+      let(:version)                  { '15.11.1' }
 
       before { subject.run }
 
@@ -221,13 +221,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is node' do
-      let(:dependency)            { 'node' }
-      let(:output_file)           { 'node-4.4.7-linux-x64.tgz' }
-      let(:output_file_with_md5)  { "node-4.4.7-linux-x64-#{output_file_md5_short}.tgz" }
-      let(:verification_type)     { 'sha256' }
-      let(:verification_value)    { 'cbe1c6e421969dd5639d0fbaa6d3c1f56c0463b87efe75be8594638da4d8fc4f' }
-      let(:source_url)            { 'https://nodejs.org/dist/v4.4.7/node-v4.4.7.tar.gz' }
-      let(:version)               { '4.4.7' }
+      let(:dependency)              { 'node' }
+      let(:output_file)             { 'node-4.4.7-linux-x64.tgz' }
+      let(:output_file_with_sha256) { "node-4.4.7-linux-x64-#{output_file_sha256_short}.tgz" }
+      let(:verification_type)       { 'sha256' }
+      let(:verification_value)      { 'cbe1c6e421969dd5639d0fbaa6d3c1f56c0463b87efe75be8594638da4d8fc4f' }
+      let(:source_url)              { 'https://nodejs.org/dist/v4.4.7/node-v4.4.7.tar.gz' }
+      let(:version)                 { '4.4.7' }
 
       before { subject.run }
 
@@ -282,13 +282,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is dotnet' do
-      let(:dependency)            { 'dotnet' }
-      let(:output_file)           { 'dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz' }
-      let(:output_file_with_md5)  { "dotnet.1.0.0-preview2-003131.linux-amd64-#{output_file_md5_short}.tar.gz" }
-      let(:verification_type)     { 'git-commit-sha' }
-      let(:verification_value)    { 'this-is-a-commit-sha' }
-      let(:source_url)            { 'https://github.com/dotnet/cli' }
-      let(:version)               { 'v1.0.0-preview2.0.1' }
+      let(:dependency)              { 'dotnet' }
+      let(:output_file)             { 'dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz' }
+      let(:output_file_with_sha256) { "dotnet.1.0.0-preview2-003131.linux-amd64-#{output_file_sha256_short}.tar.gz" }
+      let(:verification_type)       { 'git-commit-sha' }
+      let(:verification_value)      { 'this-is-a-commit-sha' }
+      let(:source_url)              { 'https://github.com/dotnet/cli' }
+      let(:version)                 { 'v1.0.0-preview2.0.1' }
 
       before { subject.run }
 
@@ -297,13 +297,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is bower' do
-      let(:dependency)           { 'bower' }
-      let(:output_file)          { 'bower-1.77.90.tgz' }
-      let(:output_file_with_md5) { "bower-1.77.90-#{output_file_md5_short}.tgz" }
-      let(:verification_type)    { 'sha256' }
-      let(:verification_value)   { output_file_sha256 }
-      let(:source_url)           { 'https://registry.npmjs.org/bower/-/bower-1.77.90.tgz' }
-      let(:version)              { '1.77.90' }
+      let(:dependency)              { 'bower' }
+      let(:output_file)             { 'bower-1.77.90.tgz' }
+      let(:output_file_with_sha256) { "bower-1.77.90-#{output_file_sha256_short}.tgz" }
+      let(:verification_type)       { 'sha256' }
+      let(:verification_value)      { output_file_sha256 }
+      let(:source_url)              { 'https://registry.npmjs.org/bower/-/bower-1.77.90.tgz' }
+      let(:version)                 { '1.77.90' }
 
       before do
         expect(subject).to receive(:system).with("curl -L #{source_url} -o #{binary_builder_dir}/bower-1.77.90.tgz") do
@@ -320,13 +320,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is yarn' do
-      let(:dependency)           { 'yarn' }
-      let(:output_file)          { 'yarn-v0.19.1.tar.gz' }
-      let(:output_file_with_md5) { "yarn-v0.19.1-#{output_file_md5_short}.tar.gz" }
-      let(:verification_type)    { 'sha256' }
-      let(:verification_value)   { output_file_sha256 }
-      let(:source_url)           { 'https://yarnpkg.com/downloads/0.19.1/yarn-v0.19.1.tar.gz' }
-      let(:version)              { '0.19.1' }
+      let(:dependency)              { 'yarn' }
+      let(:output_file)             { 'yarn-v0.19.1.tar.gz' }
+      let(:output_file_with_sha256) { "yarn-v0.19.1-#{output_file_sha256_short}.tar.gz" }
+      let(:verification_type)       { 'sha256' }
+      let(:verification_value)      { output_file_sha256 }
+      let(:source_url)              { 'https://yarnpkg.com/downloads/0.19.1/yarn-v0.19.1.tar.gz' }
+      let(:version)                 { '0.19.1' }
 
       before do
         expect(subject).to receive(:system).with("curl -L #{source_url} -o #{binary_builder_dir}/yarn-v0.19.1.tar.gz") do
@@ -343,13 +343,13 @@ describe ConcourseBinaryBuilder do
     end
 
     context 'the dependency is composer' do
-      let(:dependency)           { 'composer' }
-      let(:output_file)          { 'composer-1.2.0.phar' }
-      let(:output_file_with_md5) { "composer-1.2.0-#{output_file_md5_short}.phar" }
-      let(:verification_type)    { 'sha256' }
-      let(:verification_value)   { output_file_sha256 }
-      let(:source_url)           { 'https://getcomposer.org/download/1.2.0/composer.phar' }
-      let(:version)              { '1.2.0' }
+      let(:dependency)              { 'composer' }
+      let(:output_file)             { 'composer-1.2.0.phar' }
+      let(:output_file_with_sha256) { "composer-1.2.0-#{output_file_sha256_short}.phar" }
+      let(:verification_type)       { 'sha256' }
+      let(:verification_value)      { output_file_sha256 }
+      let(:source_url)              { 'https://getcomposer.org/download/1.2.0/composer.phar' }
+      let(:version)                 { '1.2.0' }
 
       before do
         expect(subject).to receive(:system).with("curl -L #{source_url} -o #{binary_builder_dir}/composer-1.2.0.phar") do

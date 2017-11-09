@@ -12,6 +12,7 @@ resources:
       private_key: {{buildpacks-ci-private-key}}
   - name: ci-develop
     type: git
+    webhook_token: ob0aigh3
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-develop-branch}}
@@ -27,6 +28,46 @@ jobs:
         - get: buildpacks-ci
           resource: ci-develop
           trigger: true
+        - get: repo
+          resource: ci-develop
+          trigger: true
+      - task: rspec
+        file: buildpacks-ci/tasks/run-buildpacks-ci-unit-specs/task.yml
+        params:
+          CI_USERNAME: buildpacks
+          CI_PASSWORD: {{concourse_basic_auth_password}}
+          GITHUB_USERNAME: {{github-username}}
+          GITHUB_PASSWORD: {{github-password}}
+          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+          PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
+      - task: github-set-status-success
+        file: buildpacks-ci/tasks/set-status-success/task.yml
+        params:
+          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+          GITHUB_REPO: 'cloudfoundry/buildpacks-ci'
+          GITHUB_STATUS_CONTEXT: 'buildpacks-ci/merge-to-master'
+          GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI build success'
+          PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
+      - put: ci-master
+        params:
+          repository: buildpacks-ci
+      - put: concourse2tracker
+        params:
+          git_path: buildpacks-ci
+          project_id: {{cf-buildpacks-public-tracker-id}}
+          api_token: {{pivotal-tracker-api-token}}
+
+  - name: run-full-specs
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          resource: ci-master
+          trigger: true
+        - get: repo
+          resource: ci-master
+          trigger: true
       - task: rspec
         file: buildpacks-ci/tasks/run-buildpacks-ci-specs/task.yml
         params:
@@ -36,15 +77,6 @@ jobs:
           GITHUB_PASSWORD: {{github-password}}
           GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
           PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
-        privileged: true
-      - put: ci-master
-        params:
-          repository: buildpacks-ci
-      - put: concourse2tracker
-        params:
-          git_path: buildpacks-ci
-          project_id: {{cf-buildpacks-public-tracker-id}}
-          api_token: {{pivotal-tracker-api-token}}
 
   - name: shellcheck-buildpacks-ci
     public: true

@@ -1,23 +1,32 @@
+---
 resource_types:
-  - name: slack-notification
+  - name: cron
     type: docker-image
     source:
-      repository: cfcommunity/slack-notification-resource
+      repository: cfbuildpacks/cron-resource
 resources:
+  - name: daily
+    type: cron
+    source:
+      expression: "43 7 * * *"
+      location: {{current-timezone}}
   - name: buildpacks-ci
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: buildpublish # {{buildpacks-ci-git-uri-public-branch}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
   - name: buildpacks-site
     type: git
     source:
       uri: https://github.com/cloudfoundry-incubator/buildpacks-site
       branch: master
-  - name: failure-alert
-    type: slack-notification
+  - name: buildpacks-bucket
+    type: s3
     source:
-      url: {{concourse-job-failure-notifications-slack-webhook}}
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+      versioned_file: static/buildpacks.json
 jobs:
   - name: build-and-publish
     serial: true
@@ -32,10 +41,18 @@ jobs:
           AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
           AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
           AWS_BUCKET: pivotal-buildpacks
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: generate-buildpacks-json
+    serial: true
+    public: true
+    plan:
+      - get: daily
+        trigger: true
+      - get: buildpacks-ci
+      - get: buildpacks-site
+      - task: build-and-publish
+        file: buildpacks-ci/tasks/generate-buildpacks-json/task.yml
+        params:
+          ACCESS_TOKEN: {{buildpacks-github-token}}
+      - put: buildpacks-bucket
+        params:
+          file: buildpacks-json/buildpacks.json

@@ -15,6 +15,7 @@ inputs:
   - name: binary-buildpack
   - name: php-buildpack
   - name: dotnet-core-buildpack
+  - name: hwc-buildpack
 outputs:
   - name: buildpack-artifacts
 run:

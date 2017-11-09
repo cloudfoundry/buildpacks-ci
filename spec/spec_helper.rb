@@ -1,8 +1,12 @@
 # encoding: utf-8
 require 'tmpdir'
+require 'tempfile'
 require 'json'
+require 'open3'
 
 RSpec.configure do |config|
+  config.order = :random
+
   $stdout.sync = true
   config.filter_run_excluding concourse_test: true
 
@@ -22,20 +26,12 @@ RSpec.configure do |config|
   def fly(arg, env = {})
     target = 'buildpacks'
     env_var = env.collect { |k, v| "#{k}=#{v}" }.join(' ')
-    `env #{env_var} fly --target #{target} #{arg} | tee /tmp/fly.log`
+    out, err, status = Open3.capture3("env #{env_var} fly --target #{target} #{arg} | tee /tmp/fly.log")
+    raise "Failed: env #{env_var} fly --target #{target} #{arg} | tee /tmp/fly.log" if !status.success? or err =~ /error: websocket: bad handshake/
+    out
   end
 
   def execute(cmd, env = {})
-    @output = fly("execute #{cmd}", env)
-    @id = @output.split("\n").first.split(' ').last
-  end
-
-  def run(cmd, sleep_time = 5)
-    # 'echo 2' is to work around problem: https://concourseci.slack.com/archives/general/p1469626158002396
-    output = `echo '2' | fly --target buildpacks i -b #{@id} -s one-off -- bash -c '#{cmd} && sleep #{sleep_time}' | tee /tmp/fly.log`
-    # regex is to strip out the choose container output that appears in every
-    # intercept (related to above problem)
-    /.*choose a container: 2\n(.*)/m.match(output)
-    $1
+    fly("execute #{cmd}", env)
   end
 end

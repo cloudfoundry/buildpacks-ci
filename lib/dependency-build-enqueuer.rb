@@ -1,6 +1,7 @@
 # encoding: utf-8
 require 'octokit'
 require 'yaml'
+require 'open-uri'
 require_relative 'git-client'
 
 class DependencyBuildEnqueuer
@@ -63,6 +64,7 @@ class DependencyBuildEnqueuer
     case dependency
       when "dotnet" then version.gsub("v","")
       when "godep" then version.gsub("v","")
+      when "dep" then version.gsub("v","")
       when "glide" then version.gsub("v","")
       else version
     end
@@ -71,11 +73,17 @@ class DependencyBuildEnqueuer
   def self.build_verifications_for(dependency, version)
     verifications = []
     case dependency
+    when 'bundler'
+      download_url = "https://rubygems.org/downloads/bundler-#{version}.gem"
+      verifications << shasum_256_verification(download_url)
     when 'bower'
       download_url = "https://registry.npmjs.org/bower/-/bower-#{version}.tgz"
       verifications << shasum_256_verification(download_url)
     when "node"
       download_url = "https://nodejs.org/dist/v#{version}/node-v#{version}.tar.gz"
+      verifications << shasum_256_verification(download_url)
+    when "dep"
+      download_url = "https://github.com/golang/dep/archive/#{version}.tar.gz"
       verifications << shasum_256_verification(download_url)
     when "godep"
       download_url = "https://github.com/tools/godep/archive/#{version}.tar.gz"
@@ -111,7 +119,6 @@ class DependencyBuildEnqueuer
 
   def self.shasum_256_verification(download_url)
     # only get the sha value and not the filename
-    shasum256 = `curl -sL #{download_url} | shasum -a 256 | cut -d " " -f 1`
-    ["sha256", shasum256.strip]
+    ["sha256", open(download_url) { |url| Digest::SHA256.hexdigest url.read } ]
   end
 end

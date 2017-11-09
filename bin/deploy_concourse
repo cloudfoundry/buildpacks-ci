@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -eux
+
+ruby -rerb -ryaml -rostruct -e "lp = YAML.load(\`lpass show 'Shared-Buildpacks/deployments-buildpacks.yml' --notes\`); puts ERB.new(\`cat ./deployments/concourse-gcp/manifest.yml.erb\`).result(OpenStruct.new(lp).instance_eval {binding})" > "./deployments/concourse-gcp/manifest.yml"
+
+gcloud compute scp ./deployments/concourse-gcp/manifest.yml pivotal@bosh-bastion-concourse:~/
+rm ./deployments/concourse-gcp/manifest.yml
+
+gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh deploy --tty -d concourse manifest.yml"
+
+exit 0

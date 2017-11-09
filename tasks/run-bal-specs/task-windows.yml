@@ -1,0 +1,13 @@
+---
+platform: windows
+
+inputs:
+  - name: buildpacks-ci
+  - name: bal-develop
+run:
+  path: powershell
+  args:
+  - "-ExecutionPolicy"
+  - "Bypass"
+  - "-File"
+  - buildpacks-ci/tasks/run-bal-specs/run.ps1

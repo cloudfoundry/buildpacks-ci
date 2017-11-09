@@ -4,7 +4,9 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+./cf-space/login
 SPACE=$(cat cf-space/name)
+CF_HOST=$(cf api | grep https | sed 's/.*https:\/\/api\.//')
 
 cd buildpack
 
@@ -28,6 +30,6 @@ fi
 bundle install --jobs="$(nproc)" --no-cache
 
 for stack in $STACKS; do
-  bundle exec buildpack-build --uncached --stack="$stack" --host=buildpacks-shared.cf-app.com --shared-host --integration-space="$SPACE"
-  bundle exec buildpack-build --cached --stack="$stack" --host=buildpacks-shared.cf-app.com --shared-host --integration-space="$SPACE"
+  bundle exec buildpack-build --uncached --stack="$stack" --host="$CF_HOST" --shared-host --integration-space="$SPACE"
+  bundle exec buildpack-build --cached --stack="$stack" --host="$CF_HOST" --shared-host --integration-space="$SPACE"
 done

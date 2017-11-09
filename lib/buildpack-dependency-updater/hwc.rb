@@ -8,8 +8,8 @@ class BuildpackDependencyUpdater::Hwc < BuildpackDependencyUpdater
       "name"      => dependency,
       "version"   => dependency_version,
       "uri"       => uri,
-      "md5"       => md5,
-      "cf_stacks" => ["windows2012R2"]
+      "sha256"       => sha256,
+      "cf_stacks" => ["windows2012R2", "windows2016"]
     }
     buildpack_manifest["dependencies"] << dependency_hash
   end

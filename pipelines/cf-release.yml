@@ -1,10 +1,24 @@
-<% supported_languages = %w(dotnet-core go ruby binary staticfile nodejs php python java java-offline) %>
+<% supported_languages = %w(dotnet-core go ruby binary staticfile nodejs php python java) %>
+<% cutlass = %w(go multi nodejs python ruby staticfile) %>
 ---
 resource_types:
   - name: slack-notification
     type: docker-image
     source:
       repository: cfcommunity/slack-notification-resource
+  - name: github-release-forked
+    type: docker-image
+    source:
+      repository: dgodd/github-release-resource
+  - name: pivnet
+    type: docker-image
+    source:
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final
+  - name: bosh-deployment
+    type: docker-image
+    source:
+      repository: cloudfoundry/bosh-deployment-resource
 
 resources:
   - name: buildpacks-ci
@@ -56,50 +70,124 @@ resources:
     type: bosh-deployment
     source:
       target: https://cf-release.buildpacks-gcp.ci.cf-app.com:25555
-      username: admin
-      password: {{gcp_bosh_lite_admin_password}}
+      client: admin
+      client_secret: {{gcp_bosh_lite_admin_password}}
       deployment: cf-warden
-      ignore_ssl: true
+      ca_cert: |
+        -----BEGIN CERTIFICATE-----
+        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
+        -----END CERTIFICATE-----
   - name: cf-release-diego-deployment
     type: bosh-deployment
     source:
       target: https://cf-release.buildpacks-gcp.ci.cf-app.com:25555
-      username: admin
-      password: {{gcp_bosh_lite_admin_password}}
+      client: admin
+      client_secret: {{gcp_bosh_lite_admin_password}}
       deployment: cf-warden-diego
-      ignore_ssl: true
+      ca_cert: |
+        -----BEGIN CERTIFICATE-----
+        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
+        -----END CERTIFICATE-----
   - name: failure-alert
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
   - name: diego-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
       repository: cloudfoundry/diego-release
-  - name: cflinuxfs2-rootfs-bosh-release
+  - name: cflinuxfs2-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
-      repository: cloudfoundry/cflinuxfs2-rootfs-release
+      repository: cloudfoundry/cflinuxfs2-release
   - name: garden-runc-bosh-release
     type: bosh-io-release
-    tarball: true
     source:
       repository: cloudfoundry/garden-runc-release
-
-<% supported_languages.each do |language| %>
+  - name: pivnet-production
+    type: pivnet
+    source:
+      api_token: {{pivnet-apikey}}
+      product_slug: buildpacks
+      product_version: "Java Buildpack 4\\."
+      access_key_id: {{pivnet-access-key}}
+      secret_access_key: {{pivnet-secret-key}}
+<% (supported_languages).each do |language| %>
+  <% if language == 'java' %>
+  - name: <%= language %>-buildpack-github-release
+    type: github-release-forked
+    source:
+      user: {{buildpacks-github-org}}
+      repository: <%= language %>-buildpack
+      access_token: {{buildpacks-github-token}}
+      filter_tag_prefix: v4.
+  <% else %>
   - name: <%= language %>-buildpack-github-release
     type: github-release
     source:
       user: {{buildpacks-github-org}}
-      repository: <%= language.gsub('-offline', '') %>-buildpack
+      repository: <%= language %>-buildpack
       access_token: {{buildpacks-github-token}}
+  <% end %>
   - name: <%= language %>-buildpack-bosh-release-github-release
     type: github-release
     source:
       user: {{buildpacks-github-org}}
-      repository: <%= language.gsub('-offline', '') %>-buildpack-release
+      repository: <%= language %>-buildpack-release
       access_token: {{buildpacks-github-token}}
   - name: <%= language %>-buildpack-bosh-release
     type: git
@@ -108,7 +196,7 @@ resources:
       private_key: {{<%= language %>-buildpack-bosh-release-private-key}}
       branch: master
 <% end %>
-<% (supported_languages - %w(java-offline)).each do |language| %>
+<% supported_languages.each do |language| %>
   - name: private-<%= language %>-offline-buildpack-bosh-release-github-release
     type: github-release
     source:
@@ -135,13 +223,13 @@ groups:
       - cats
       - destroy-bosh-lite
       - ship-it
-<% (supported_languages - %w(java java-offline)).each do |language| %>
+<% (supported_languages - %w(java)).each do |language| %>
       - update-<%= language %>-buildpack-bosh-release
       - cf-release for <%= language %>
 <% end %>
   - name: offline
     jobs:
-<% (supported_languages - %w(java java-offline)).each do |language| %>
+<% (supported_languages - %w(java)).each do |language| %>
       - update-private-<%= language %>-offline-buildpack-bosh-release
 <% end %>
   - name: java
@@ -149,10 +237,8 @@ groups:
       - recreate-bosh-lite
       - ship-it-java
       - update-java-buildpack-bosh-release
-      - update-java-offline-buildpack-bosh-release
       - update-private-java-offline-buildpack-bosh-release
       - cf-release for java
-      - cf-release for java-offline
 
 jobs:
   - name: recreate-bosh-lite
@@ -220,18 +306,15 @@ jobs:
             attempts: 3
           - get: diego-bosh-release
             attempts: 3
-          - get: cflinuxfs2-rootfs-bosh-release
+          - get: cflinuxfs2-bosh-release
             attempts: 3
           - get: lite-stemcell
             attempts: 3
           - get: java-buildpack-github-release
+            resource: java-buildpack-github-release
             params:
               globs:
                 - java-buildpack-v*.zip
-          - get: java-offline-buildpack-github-release
-            params:
-              globs:
-                - java-buildpack-offline-v*.zip
           - get: go-buildpack-github-release
           - get: python-buildpack-github-release
           - get: nodejs-buildpack-github-release
@@ -240,6 +323,13 @@ jobs:
           - get: staticfile-buildpack-github-release
           - get: binary-buildpack-github-release
           - get: dotnet-core-buildpack-github-release
+        - task: upload-stemcell-to-bosh-lite
+          file: buildpacks-ci/tasks/upload-stemcell-to-bosh-lite/task.yml
+          params:
+            DEPLOYMENT_NAME: cf-release.buildpacks-gcp.ci
+            BOSH_USER: {{bosh_user}}
+            BOSH_PASSWORD: {{gcp_bosh_lite_admin_password}}
+            BOSH_TARGET: cf-release.buildpacks-gcp.ci.cf-app.com
         - task: generate-manifest
           file: buildpacks-ci/tasks/generate-cf-and-diego-manifests/task.yml
           params:
@@ -251,24 +341,27 @@ jobs:
             BOSH_LITE_NAME: cf-release.buildpacks-gcp.ci
             RUBYGEM_MIRROR: {{rubygem-mirror}}
             BOSH_LITE_DOMAIN_NAME: {{bosh-lite-domain-name}}
-            ROOTFS_RELEASE: cflinuxfs2-rootfs
+            ROOTFS_RELEASE: cflinuxfs2
             IAAS: gcp
-          privileged: true
         - task: create-cf-release
           file: buildpacks-ci/tasks/create-cf-bosh-release-to-deploy/task.yml
-          privileged: true
         - put: cf-release-cf-deployment
           params:
             manifest: generate-manifest-artifacts/cf-release.buildpacks-gcp.ci/manifest.yml
-            stemcells: [lite-stemcell/*.tgz]
             releases: [cf-release-artifacts/dev_releases/cf/*.tgz]
+        - task: upload-diego-release
+          file: buildpacks-ci/tasks/upload-diego-release/task.yml
+          params:
+            BOSH_ENVIRONMENT: https://cf-release.buildpacks-gcp.ci.cf-app.com:25555
+            BOSH_CLIENT: admin
+            BOSH_CLIENT_SECRET: {{gcp_bosh_lite_admin_password}}
+            BOSH_CA_CERT: "-----BEGIN CERTIFICATE-----\nMIIFNzCCAx+gAwIBAgIJAPSX5tIYsVR1MA0GCSqGSIb3DQEBCwUAMDIxMDAuBgNV\nBAMMJ2NmLXJlbGVhc2UuYnVpbGRwYWNrcy1nY3AuY2kuY2YtYXBwLmNvbTAeFw0x\nNzA4MTcxODU2MzNaFw0yMDA1MTMxODU2MzNaMDIxMDAuBgNVBAMMJ2NmLXJlbGVh\nc2UuYnVpbGRwYWNrcy1nY3AuY2kuY2YtYXBwLmNvbTCCAiIwDQYJKoZIhvcNAQEB\nBQADggIPADCCAgoCggIBALWuejSptqir4XZlblZUkNkgOGcpMLyz1ZjeRJyW09/h\nl9gp1qCfnv1//XlvQtokJ/pwM6pZBDbIx1p9qd+tmXQON5W6+IACOjICoBHpqHIg\nZLKvm8JcdeOIBj0Pqh5N6kCdzKVbr3dQ0XK4jgXY2otOIei9ND/012oIveiZMWP2\njkgz3RXTUfOba78cV6qWDWL+NlG8ndmRGM+XHYNmwSZVsqrKRbnKaak6qRrWJHxs\n+jNeucLapVrTQHF4qEOSG6Tocy4Lb4AFTTX4rrg97AE5jmNOZ9YsMCXoGC1T6pJT\nAdBIrhZxm059w/71YLhzTaSUedO4gP59w+jduXbtIHfd09IJXpk/oQQKbOGZHqGI\nnrtvpR4hjJFcocQV9Yx7+DgGlnwODpJq1iNrZJOVkf4kVxLs2N0ZbA26fX8DcsYy\nSJlD5P2nI21ZwAplgCs86s1BL5tc3FpkiKr8584J98/xzH+ZSYox7sglB4IhzqYt\nRKbyZDjmFcPNJkfJh2bar4Q7Xt750D+hwLfcm6OLPxCmfRq/+nZ2RT9AzrORPLjg\nbUkovgUMLkssK4lgwcbwl4AtqTCimDwKFl0m1J8VAtujGAd0ejEfb9EVxJgkAsTQ\nDZsiBWKKawqB++s18jER9YROR/ZppWwabjMVJ4EG7Y2ckDHMd5+AmkiutaEuyAsj\nAgMBAAGjUDBOMB0GA1UdDgQWBBTiAytY4ULjoVDN5nvZOVpBb6Ae8zAfBgNVHSME\nGDAWgBTiAytY4ULjoVDN5nvZOVpBb6Ae8zAMBgNVHRMEBTADAQH/MA0GCSqGSIb3\nDQEBCwUAA4ICAQCItvkVaYNGA+btgbPxmyHgh83sZa9+1jxXrTKtYEkdL1fl+HzM\nJbPPmNzKNKulZA51atYEn+9tYFZthrVlT+T/PpV8NYuiJ5FXMQ8dUvVmRQEKD7v3\nZua6mki9kFUEVDczi1sF1VSzPM9ZYIvyr6LaCH9BklHIuW7ShNs3cn1pRTkfhvHT\ncIECg2MhaKjj3veae7UKyR8jpFf0SucQpjMPA8eF0zrMOqZ5dpwLbS+ejpSGX50j\n0gOVvFj0XR85ItkUfyRgA3nO3fTPt5fXvc58s3Doqb5bPPKijH4i55uaMV+VgYUO\nYMimOEGvEnqERV/bfTET/v+wbYFY88aAp4srAg6kXfKas7RfYCR2RyAbfmzarMBM\nsRJqJMnHKfv0cb6pFeS+59lJoBt4PhTNZCgnu/xbymOhCMIFm6clk5lFIKFZ6Gy+\nXp+GHXnXMEzlY+zwR89kTqArKwQSl9jZaD0vu4/3rR94eAgwfMPIJBSJNrBPYRsT\nojwrHIDMULYZEiyLAHya2fNxJhTuFZk6HaW3FHMnmUASu8nrnPATLFr/LTYaC8qF\nFeB5JauF3PW4sBIOyywZy+5Cbt+qnbA/J2LigVo+HfGAuiq9iX1cXpwB7qpszh4y\nQxSTTvHB5tibRB/fJPR7a3DgaWzFhPvWJbx5CjdMO63i04rtfq6gM12BmQ==\n-----END CERTIFICATE-----"
         - put: cf-release-diego-deployment
           params:
             manifest: generate-manifest-artifacts/cf-release.buildpacks-gcp.ci/diego.yml
-            stemcells: ['lite-stemcell/stemcell.tgz']
             releases:
               - diego-bosh-release/release.tgz
-              - cflinuxfs2-rootfs-bosh-release/release.tgz
+              - cflinuxfs2-bosh-release/release.tgz
               - garden-runc-bosh-release/release.tgz
         on_failure:
           put: failure-alert
@@ -297,8 +390,7 @@ jobs:
           passed: [ deploy-cf-and-diego-to-cf-release ]
           trigger: true
         - get: java-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-cf-release ]
-        - get: java-offline-buildpack-github-release
+          resource: java-buildpack-github-release
           passed: [ deploy-cf-and-diego-to-cf-release ]
         - get: go-buildpack-github-release
           passed: [ deploy-cf-and-diego-to-cf-release ]
@@ -319,6 +411,8 @@ jobs:
       - do:
         - task: copy-cf-acceptance-tests
           file: buildpacks-ci/tasks/copy-cf-acceptance-tests/task.yml
+          params:
+            BRANCH: master
         - task: write-cats-config
           file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
@@ -411,8 +505,7 @@ jobs:
             submodules: none
         - get: java-buildpack-github-release
           passed: [ cats ]
-        - get: java-offline-buildpack-github-release
-          passed: [ cats ]
+
 <% supported_languages.each do |language| %>
   - name: update-<%= language %>-buildpack-bosh-release
     serial: true
@@ -435,17 +528,8 @@ jobs:
           params:
             ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            <% case language
-               when /offline/ %>
-            BLOB_GLOB: blob/java-buildpack-offline*.zip
-            BLOB_NAME: java-buildpack
-            <% when /java/ %>
-            BLOB_GLOB: blob/java-buildpack-v*.zip
-            BLOB_NAME: java-buildpack
-            <% else %>
-            BLOB_GLOB: blob/<%= language %>_buildpack-cached*.zip
+            BLOB_GLOB: blob/<%= language %>?buildpack-v*.zip
             BLOB_NAME: <%= language %>-buildpack
-            <% end %>
             RELEASE_NAME: <%= language %>-buildpack
             RELEASE_DIR: release
         - put: <%= language %>-buildpack-bosh-release
@@ -479,19 +563,9 @@ jobs:
             submodules: [ src/<%= language %>-buildpack-release/ ]
         - get: buildpack-github-release
           resource: <%= language %>-buildpack-github-release
-          <% case language; when /offline/ %>
           params:
             globs:
-              - java-buildpack-offline-v*.zip
-          <% when /java/ %>
-          params:
-            globs:
-              - java-buildpack-v*.zip
-          <% else %>
-          params:
-            globs:
-              - <%= language%>_buildpack-cached-v*.zip
-          <% end %>
+              - <%= language%>?buildpack-v*.zip
           passed:
             - update-<%= language %>-buildpack-bosh-release
           trigger: true
@@ -502,10 +576,6 @@ jobs:
             ACCESS_KEY_ID: {{blobstore-access-key}}
             SECRET_ACCESS_KEY: {{blobstore-secret-key}}
             BUILDPACK: <%= language %>
-            <% if %w(java java-offline).include?(language) %>
-            VERSION_ALLOWED: '~> 3.0'
-            <% end %>
-          privileged: true
         - put: cf-release-develop
           params:
             repository: cf-release-artifacts
@@ -519,7 +589,7 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 
-<% (supported_languages - %w(java-offline)).each do |language| %>
+<% supported_languages.each do |language| %>
   - name: update-private-<%= language %>-offline-buildpack-bosh-release
     serial: true
     public: true
@@ -529,15 +599,29 @@ jobs:
         - get: blob
           resource: <%= language %>-buildpack-github-release
           trigger: true
-          passed: [ <%= language.include?('java') ? 'ship-it-java' : 'ship-it' %> ]
+          passed: [ <%= language == 'java' ? 'ship-it-java' : 'ship-it' %> ]
           params:
             include_source_tarball: true
         - get: release
           resource: private-<%= language %>-offline-buildpack-bosh-release
+        <% if language == 'java' %>
+        - get: pivnet-production
+          params:
+            globs:
+            - "java-buildpack-offline-v4*.zip"
+        <% end %>
       - do:
-        <% if language != 'java' %>
+        <% if language == 'java' %>
+        - task: download-offline-buildpack
+          file: buildpacks-ci/tasks/download-offline-buildpack/task.yml
+        <% elsif cutlass.include?(language) %>
         - task: build-offline-buildpack
-          file: buildpacks-ci/tasks/build-offline-buildpack/task.yml
+          file: buildpacks-ci/tasks/build-offline-buildpack-cutlass/task.yml
+          params:
+            LANGUAGE: <%= language %>
+        <% else %>
+        - task: build-offline-buildpack
+          file: buildpacks-ci/tasks/build-offline-buildpack-machete/task.yml
           params:
             LANGUAGE: <%= language %>
         <% end %>
@@ -545,19 +629,13 @@ jobs:
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
         - task: create-bosh-release
           file: buildpacks-ci/tasks/create-bosh-release/task.yml
-          <% if language == 'java' %>
-          input_mapping: {blob: blob}
-          <% else %>
-          input_mapping: {blob: buildpack-zip}
-          <% end %>
           params:
             ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
             <% if language == 'java' %>
-            BLOB_GLOB: blob/<%= language %>-buildpack-offline*.zip
-            VERSION_ALLOWED: '3'
+            BLOB_GLOB: buildpack-zip/<%= language %>-buildpack-offline*.zip
             <% else %>
-            BLOB_GLOB: blob/<%= language %>_buildpack-cached*.zip
+            BLOB_GLOB: buildpack-zip/<%= language %>_buildpack-cached*.zip
             <% end %>
             BLOB_NAME: <%= language %>-buildpack
             RELEASE_NAME: <%= language %>-offline-buildpack
@@ -579,3 +657,4 @@ jobs:
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
+

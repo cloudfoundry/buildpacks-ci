@@ -1,10 +1,8 @@
 private.yml
 .vagrant/
 .rspec
-spec/scripts/stacks/fixtures/receipt-artifacts/
-spec/scripts/stacks/fixtures/cflinuxfs2-artifacts/
 rspec.failures
-
+tags
 deployments/concourse-gcp/manifest.yml
 deployments/concourse-gcp/cloud.yml
 deployments/concourse-gcp/bosh-init/bosh.yml

@@ -77,6 +77,15 @@ class BoshComponentStoryCreator
                      Update the relevant BOSH deployment manifests in https://github.com/cloudfoundry/buildpacks-ci/tree/develop/deployments
                      DESCRIPTION
 
+    if component == 'Concourse'
+      description += <<~DESCRIPTION
+                        1. Pull `buildpacks-ci`
+                        1. Update `deployments/concourse-gcp/manifest.yml.erb` with your changes
+                        1. Run the `bin/deploy_concourse` script from root
+                        1. git push when satisfied
+                        DESCRIPTION
+    end
+
     tracker_client = TrackerApi::Client.new(token: ENV.fetch('TRACKER_API_TOKEN'))
     buildpack_project = tracker_client.project(ENV.fetch('TRACKER_PROJECT_ID'))
 

@@ -1,26 +1,23 @@
-<% languages = %w(binary dotnet-core go hwc java multi nodejs php python ruby staticfile) %>
-
 ---
 resource_types:
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
   - name: cron
     type: docker-image
     source:
-      repository: cftoolsmiths/cron-test
-
+      repository: cfbuildpacks/cron-resource
+  - name: bosh-deployment
+    type: docker-image
+    source:
+      repository: cloudfoundry/bosh-deployment-resource
 resources:
   - name: nightly-trigger
     type: cron
     source:
       expression: 0 3 * * *
       location: {{current-timezone}}
-
-  - name: language-locks
-    type: pool
-    source:
-      branch: master
-      pool: edge-shared-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
   - name: buildpacks-ci
     type: git
@@ -34,51 +31,90 @@ resources:
       uri: https://github.com/cloudfoundry/cf-deployment
       branch: master
 
-  - name: gcp-windows-stemcell
-    type: s3
+  - name: bbl-state
+    type: git
     source:
-      bucket: bosh-windows-stemcells
-      regexp: light-bosh-stemcell-(.*)-google-kvm-windows2012R2-go_agent.tgz
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: {{buildpacks-envs-private-key}}
 
-  - name: gcp-linux-stemcell
+  - name: edge-cf-deployment
+    type: bosh-deployment
+    source:
+      target: {{edge_bosh_target}}
+      client: admin
+      client_secret: {{edge_bosh_client_secret}}
+      ca_cert: {{edge_bosh_ca_cert}}
+      vars_store:
+        provider: gcs
+        config:
+          bucket: edge-cf-deployment
+          file_name: vars-store.yml
+          json_key: {{bal-cf-deployment-gcs-service-account-key}}
+      deployment: cf
+
+  - name: gcp-stemcell
     type: bosh-io-stemcell
     source:
       name: bosh-google-kvm-ubuntu-trusty-go_agent
 
+  - name: windows2012-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-windows2012R2-go_agent
+
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
+
 jobs:
-  - name: redeploy-cf-deployment
-    serial_groups: [ deploy ]
+  - name: deploy-edge
     serial: true
     public: true
     plan:
-      - get: nightly-trigger
-        trigger: true
-      - aggregate:
-        <% languages.each do |language| %>
-        - put: lock-<%=language %>
-          resource: language-locks
+      - do:
+        - aggregate:
+          - get: nightly-trigger
+            trigger: true
+          - get: buildpacks-ci
+          - get: cf-deployment
+          - get: bbl-state
+          - get: windows2012-stemcell
+          - get: gcp-stemcell
+            attempts: 3
+        - put: edge-cf-deployment
           params:
-            claim: <%=language %>
-          timeout: 3h
-        <% end %>
-      - aggregate:
-        - get: buildpacks-ci
-        - get: cf-deployment
-        - get: gcp-linux-stemcell
-        - get: gcp-windows-stemcell
-      - task: recreate-shared-cf-release
-        file: buildpacks-ci/tasks/recreate-shared-cf-deployment/task.yml
-        params:
-          BOSH_CLIENT: {{director-username}}
-          BOSH_CLIENT_SECRET: {{director-password}}
-          BOSH_CA_CERT: {{director-ca-cert}}
-          BOSH_ENVIRONMENT: {{director-address}}
-          CI_CF_SHARED_PASSWORD: {{ci_cf_shared_password}}
-          SYSTEM_DOMAIN: buildpacks-shared.cf-app.com
-      - aggregate:
-        <% languages.each do |language| %>
-        - put: language-locks
+            manifest: cf-deployment/cf-deployment.yml
+            stemcells:
+              - gcp-stemcell/*.tgz
+              - windows2012-stemcell/*.tgz
+            ops_files:
+            - buildpacks-ci/deployments/operations/no-canaries.yml
+            - cf-deployment/operations/scale-to-one-az.yml
+            - cf-deployment/operations/windows-cell.yml
+            - cf-deployment/operations/experimental/enable-instance-identity-credentials.yml
+            - cf-deployment/operations/experimental/enable-instance-identity-credentials-windows.yml
+            - cf-deployment/operations/experimental/secure-service-credentials.yml
+            - cf-deployment/operations/experimental/use-bosh-dns.yml
+            - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
+            - buildpacks-ci/deployments/operations/use-latest-garden-windows.yml #FIXME: remove after garden-windows >=0.10.0 in cf-deployment
+            - buildpacks-ci/deployments/operations/add-credhub-ca-cert-to-windows-cells.yml
+            - buildpacks-ci/deployments/edge-shared/use-latest-linux-stemcell.yml
+            - buildpacks-ci/deployments/edge-shared/use-latest-windows-stemcell.yml
+            - buildpacks-ci/deployments/edge-shared/num-cells.yml
+            vars:
+              system_domain: edge.buildpacks-gcp.ci.cf-app.com
+        - task: set-up-environment-for-credhub
+          file: buildpacks-ci/tasks/set-up-environment-for-credhub/task.yml
           params:
-            release: lock-<%=language %>
-          timeout: 3h
-        <% end %>
+            CI_CF_USERNAME: {{ci-cf-username}}
+            CI_CF_PASSWORD: {{ci_cf_shared_password}}
+            APPS_DOMAIN: edge.buildpacks-gcp.ci.cf-app.com
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png

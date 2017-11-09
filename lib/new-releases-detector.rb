@@ -38,15 +38,9 @@ class NewReleasesDetector
     )
 
     changed_dependencies.each do |dependency, versions|
-      versions.each do |version|
-        new_dependency_version_output = "There is a new update to the *#{dependency}* dependency: version *#{version}*\n"
-        slack_clients['buildpacks'].post_to_slack new_dependency_version_output
-
-        if notify_capi?(dependency, [version])
-          new_nginx_version_output = "There is a new version of *nginx* available: #{version}"
-          slack_clients['capi'].post_to_slack new_nginx_version_output
-        end
-      end
+      new_dependency_version_output = "There is a new version of *#{dependency}* available: *#{versions.join(', ')}*"
+      slack_clients['buildpacks'].post_to_slack new_dependency_version_output
+      slack_clients['capi'].post_to_slack new_dependency_version_output if notify_capi?(dependency, versions)
     end
   end
 
@@ -112,7 +106,7 @@ class NewReleasesDetector
 
   def buildpacks_tracker_story_info(dependency,versions)
     name = "Build and/or Include new releases: #{dependency} #{versions.join(', ')}"
-    description = "We have #{versions.count} new releases for **#{dependency}**:\n**version #{versions.join(', ')}**\n See the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file."
+    description = "We have #{versions.count} new releases for **#{dependency}**:\n**version #{versions.join(', ')}**\n\nSee the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file."
 
     buildpack_names = BuildpackDependency.for(dependency)
     tasks = buildpack_names.map do |buildpack|
@@ -125,10 +119,30 @@ class NewReleasesDetector
     if dependency == :dotnet
       tasks.push 'Remove any dotnet versions MS no longer supports'
       tasks.push 'Remove any dotnet-framework versions we no longer support'
-    end
-
-    if dependency == :go
+    elsif dependency == :go
       tasks.push 'Update go-version.yml in binary-builder repo'
+    elsif dependency == :pipenv
+      description += <<~HEREDOC
+
+                     ```
+                     mkdir /tmp/pipenv
+                     cd /tmp/pipenv
+                     pip download --no-binary :all: pipenv
+                     pip download --no-binary :all: pytest-runner
+                     pip download --no-binary :all: setuptools_scm
+                     tar zcvf /tmp/pipenv-vX.X.X-SHA.tgz .
+                     ```
+                     HEREDOC
+    elsif dependency == :setuptools
+      description += <<~HEREDOC
+
+                     ```
+                     mkdir /tmp/setuptools
+                     cd /tmp/setuptools
+                     pip download --no-binary :all: setuptools
+                     tar zcvf /tmp/setuptools-vX.X.X-SHA.tgz .
+                     ```
+                     HEREDOC
     end
 
     {
@@ -197,25 +211,34 @@ class NewReleasesDetector
 
   def tags
     @get_tags_functions = {
+      apr:             -> { Nokogiri::HTML.parse(open('https://apr.apache.org/download.cgi')).css('a[name=apr1] strong').map{|a|a.text.gsub(/APR\s+(\S+).*/, '\1')} },
+      apr_util:        -> { Nokogiri::HTML.parse(open('https://apr.apache.org/download.cgi')).css('a[name=aprutil1] strong').map{|a|a.text.gsub(/APR\-util\s+(\S+).*/, '\1')} },
       bundler:         -> { Octokit.tags('bundler/bundler').map(&:name).grep(/^v/) },
       bower:           -> { JSON.parse(open('https://registry.npmjs.org/bower').read)['versions'].keys },
       composer:        -> { Octokit.releases('composer/composer').map(&:tag_name) },
-      dotnet:          -> { Octokit.releases('dotnet/cli').map(&:tag_name) },
+      dotnet:          -> { Octokit.tags('dotnet/cli').map(&:name).grep(/^v[0-9]/) },
       glide:           -> { Octokit.releases('Masterminds/glide').map(&:tag_name) },
       go:              -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
       godep:           -> { Octokit.releases('tools/godep').map(&:tag_name) },
+      dep:             -> { Octokit.releases('golang/dep').map(&:tag_name) },
       httpd:           -> { Octokit.tags('apache/httpd').map(&:name).grep(/^2\./) },
       hwc:             -> { Octokit.releases('cloudfoundry-incubator/hwc').map(&:tag_name) },
       jruby:           -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
       libunwind:       -> { Octokit.releases('libunwind/libunwind').map(&:tag_name) },
-      maven:           -> { Octokit.tags('apache/maven').map(&:name).grep(/^maven/) },
+      maven:           -> {
+        history = Nokogiri::HTML(open('https://maven.apache.org/docs/history.html')).text
+        Octokit.tags('apache/maven').map(&:name).grep(/^maven/).map{|s| s.gsub(/^maven\-/,'')}.select{|v| history.include?(v) && v !~ /alpha|beta/}
+      },
       miniconda:       -> { Nokogiri::HTML.parse(open('https://repo.continuum.io/miniconda/').read).css('table tr td a').map {|link| link['href']} },
+      newrelic:        -> { Nokogiri::HTML.parse(open('https://download.newrelic.com/php_agent/archive/')).css('table td a').map{|link| link['href']} },
       nginx:           -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release/) },
       node:            -> { JSON.parse(open('https://nodejs.org/dist/index.json').read).map{|d| d['version']} },
       openjdk:         -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys },
       php:             -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
+      pipenv:          -> { pip_versions('pipenv') },
       python:          -> { Nokogiri::HTML.parse(open('https://www.python.org/downloads/')).css('.release-number a').map{|a|a.text.gsub(/.*Python\s*/, 'v')} },
       ruby:            -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) },
+      setuptools:      -> { pip_versions('setuptools') },
       yarn:            -> { Octokit.releases('yarnpkg/yarn').select{|r| !r.prerelease}.map(&:tag_name) },
     }
   end
@@ -233,6 +256,16 @@ class NewReleasesDetector
       end
 
       versions_if_found.compact.uniq.sort
+    when :newrelic
+      versions_if_found = tags.map do |link|
+        match = link.match(/((?<ver>\d+\.\d+\.\d+\.\d+))/)
+
+        match['ver'] unless match.nil?
+      end
+
+      versions_if_found.compact.uniq.sort
+    when :bundler
+      tags.map { |tag| tag.gsub(/v/,"")}
     when :node
       tags.map { |tag| tag.gsub(/v/,"")}
     when :nginx
@@ -242,5 +275,12 @@ class NewReleasesDetector
     else
       tags
     end
+  end
+
+  private
+
+  def pip_versions(name)
+    data = JSON.parse(open("https://pypi.python.org/pypi/#{name}/json").read)
+    data['releases'].keys.sort_by{ |v| Gem::Version.new(v) }.reverse
   end
 end

@@ -110,6 +110,17 @@ describe DependencyBuildEnqueuer do
       it_behaves_like "non pre-release builds are triggered by <dependency>-new.yml", 'sha256'
     end
 
+    context "dep" do
+      let(:dependency)          { "dep" }
+      let(:new_versions)        { %w(v0.2.1 v0.3.0) }
+      let(:expected_version_1)  { "v0.3.0" }
+      let(:expected_version_2)  { "v0.2.1" }
+      let(:source_url_1)        { "https://github.com/golang/dep/archive/#{expected_version_1}.tar.gz" }
+      let(:source_url_2)        { "https://github.com/golang/dep/archive/#{expected_version_2}.tar.gz" }
+
+      it_behaves_like "non pre-release builds are triggered by <dependency>-new.yml", 'sha256'
+    end
+
     context "composer" do
       let(:dependency)          { "composer" }
       let(:new_versions)        { %w(1.1.0-RC 1.1.1-alpha1 1.1.3 1.1.2) }
@@ -179,6 +190,7 @@ describe DependencyBuildEnqueuer do
       let(:new_versions)        { %w(v1.0.0-preview2.0.1) }
       let(:expected_version)    { "v1.0.0-preview2.0.1" }
       let(:commit_message)      {"Enqueue #{dependency} - #{expected_version}"}
+      let(:expected_sha)        {'635cf40e58ede8a53e8b9555e19a6e1ccd6f9fbe'}
 
       context 'there is a pre-release version submitted to be built' do
         before do
@@ -189,6 +201,10 @@ describe DependencyBuildEnqueuer do
           File.open(dependency_new_versions_file, "w") do |file|
             file.write new_versions.to_yaml
           end
+
+          expected_tag = double(:version, name: expected_version)
+          allow(expected_tag).to receive(:[]).with(:commit).and_return({ sha: expected_sha })
+          allow(Octokit).to receive(:tags).and_return([double(name: 'fred'), expected_tag, double(name: 'jane')])
 
           subject.enqueue_build
         end
@@ -218,7 +234,7 @@ describe DependencyBuildEnqueuer do
 
           it 'has the git-commit-sha verification in the <dependency>-builds.yml file' do
               expect(committed_dependency[dependency][0].size).to eq 2
-              expect(committed_dependency[dependency][0]['git-commit-sha']).to eq '635cf40e58ede8a53e8b9555e19a6e1ccd6f9fbe'
+              expect(committed_dependency[dependency][0]['git-commit-sha']).to eq expected_sha
           end
         end
       end

@@ -7,20 +7,8 @@ SOURCEDIR=$1
 payload=$TMPDIR/cf-tracker-resource-put
 cat > "$payload" <&0
 
-PROJECT_ID=$(jq -r '.source.project_id' < "$payload")
-TOKEN=$(jq -r '.source.token' < "$payload")
 FILE=$(jq -r '.params.file' < "$payload")
 
 cat "$SOURCEDIR/$FILE"
 
-STORIES=$(jq -r 'to_entries[]|select(.value=="delete")|.key' < "$SOURCEDIR/$FILE")
-echo "STORIES: $STORIES"
-for id in $STORIES; do
-  echo "DELETE: $id"
-  wget -O - --method=DELETE --header="X-TrackerToken: ${TOKEN}" --header="Content-Type: application/json" "https://www.pivotaltracker.com/services/v5/projects/${PROJECT_ID}/stories/${id}"
-done
-
-echo "DONE"
-
-# echo "{ \"version\": { \"ref\": \"payload\" } }" >&3
 jq -r '{version:{ref: .version.ref}}' < "$payload" >&3
