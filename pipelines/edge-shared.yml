@@ -50,7 +50,7 @@ resources:
         config:
           bucket: edge-cf-deployment
           file_name: vars-store.yml
-          json_key: {{bal-cf-deployment-gcs-service-account-key}}
+          json_key: {{edge-cf-deployment-gcs-service-account-key}}
       deployment: cf
 
   - name: gcp-stemcell
@@ -82,7 +82,6 @@ jobs:
           - get: bbl-state
           - get: windows2012-stemcell
           - get: gcp-stemcell
-            attempts: 3
         - put: edge-cf-deployment
           params:
             manifest: cf-deployment/cf-deployment.yml
@@ -93,24 +92,13 @@ jobs:
             - buildpacks-ci/deployments/operations/no-canaries.yml
             - cf-deployment/operations/scale-to-one-az.yml
             - cf-deployment/operations/windows-cell.yml
-            - cf-deployment/operations/experimental/enable-instance-identity-credentials.yml
-            - cf-deployment/operations/experimental/enable-instance-identity-credentials-windows.yml
-            - cf-deployment/operations/experimental/secure-service-credentials.yml
-            - cf-deployment/operations/experimental/use-bosh-dns.yml
-            - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
             - buildpacks-ci/deployments/operations/use-latest-garden-windows.yml #FIXME: remove after garden-windows >=0.10.0 in cf-deployment
-            - buildpacks-ci/deployments/operations/add-credhub-ca-cert-to-windows-cells.yml
             - buildpacks-ci/deployments/edge-shared/use-latest-linux-stemcell.yml
             - buildpacks-ci/deployments/edge-shared/use-latest-windows-stemcell.yml
             - buildpacks-ci/deployments/edge-shared/num-cells.yml
+            - buildpacks-ci/deployments/edge-shared/uaa-lockout.yml
             vars:
               system_domain: edge.buildpacks-gcp.ci.cf-app.com
-        - task: set-up-environment-for-credhub
-          file: buildpacks-ci/tasks/set-up-environment-for-credhub/task.yml
-          params:
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci_cf_shared_password}}
-            APPS_DOMAIN: edge.buildpacks-gcp.ci.cf-app.com
         on_failure:
           put: failure-alert
           params:

@@ -1,5 +1,5 @@
 <% libbuildpacks = %w(apt go hwc multi nodejs python ruby staticfile) %>
-<% new_brats = %w(apt nodejs ruby) %>
+<% new_brats = %w(apt nodejs python ruby) %>
 
 ---
 resource_types:
@@ -30,7 +30,7 @@ resources: #####################################################################
     source:
       target: api.edge.buildpacks-gcp.ci.cf-app.com
       username: {{ci-cf-username}}
-      password: {{ci_cf_shared_password}}
+      password: {{ci_cf_edge_password}}
       organization: pivotal
 
   - name: cf-brat-space
@@ -38,7 +38,7 @@ resources: #####################################################################
     source:
       target: api.edge.buildpacks-gcp.ci.cf-app.com
       username: {{ci-cf-username}}
-      password: {{ci_cf_shared_password}}
+      password: {{ci_cf_edge_password}}
       organization: pivotal
 
 <% unless %w(apt hwc).include? language %>
@@ -369,7 +369,7 @@ jobs: ##########################################################################
           params:
             STACKS: cflinuxfs2
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci_cf_shared_password}}
+            CF_PASSWORD: {{ci_cf_edge_password}}
             RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
 <% end %>
@@ -633,7 +633,7 @@ jobs: ##########################################################################
             params:
               STACKS: cflinuxfs2
               COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              CF_PASSWORD: {{ci_cf_shared_password}}
+              CF_PASSWORD: {{ci_cf_edge_password}}
               RUBYGEM_MIRROR: {{rubygem-mirror}}
             privileged: true
 <% end %>
@@ -723,7 +723,7 @@ jobs: ##########################################################################
             params:
               BUILDPACK_BRANCH: develop
               CI_CF_USERNAME: {{ci-cf-username}}
-              CI_CF_PASSWORD: {{ci_cf_shared_password}}
+              CI_CF_PASSWORD: {{ci_cf_edge_password}}
               LANGUAGE: <%= language %>
               RUBYGEM_MIRROR: {{rubygem-mirror}}
           ensure:
