@@ -90,7 +90,6 @@ jobs:
               - windows2012-stemcell/*.tgz
             ops_files:
             - buildpacks-ci/deployments/operations/no-canaries.yml
-            - cf-deployment/operations/scale-to-one-az.yml
             - cf-deployment/operations/windows-cell.yml
             - buildpacks-ci/deployments/operations/use-latest-garden-windows.yml #FIXME: remove after garden-windows >=0.10.0 in cf-deployment
             - buildpacks-ci/deployments/edge-shared/use-latest-linux-stemcell.yml
