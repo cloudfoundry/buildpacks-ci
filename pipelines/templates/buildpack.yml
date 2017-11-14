@@ -1,5 +1,5 @@
 <% libbuildpacks = %w(apt go hwc multi nodejs python ruby staticfile) %>
-<% new_brats = %w(apt nodejs python ruby) %>
+<% new_brats = %w(apt go nodejs python ruby) %>
 
 ---
 resource_types:
