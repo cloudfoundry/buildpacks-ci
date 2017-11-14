@@ -34,6 +34,8 @@ class ConcourseBinaryBuilder
 
     build_dependency
 
+    convert_gz_to_xz
+
     add_checksum_to_binary_name
 
     copy_binaries_to_output_directory
@@ -112,16 +114,25 @@ class ConcourseBinaryBuilder
     end
   end
 
+  def convert_gz_to_xz
+    return unless dependency == 'dotnet'
+
+    filename = Dir["#{binary_builder_dir}/#{dependency}*.tar.gz"].first
+    system('gunzip', filename) or raise "Could not gunzip #{filename}"
+    filename.gsub!(/\.gz$/, '')
+    system('xz', filename) or raise "Could not xz #{filename}"
+  end
+
   def add_checksum_to_binary_name
-    Dir["#{binary_builder_dir}/*.{tgz,tar.gz,phar,zip}"].each do |name|
-      prefix,suffix = /(.*)(\.tgz|\.tar\.gz|\.phar|\.zip)$/.match(name)[1,2]
+    Dir["#{binary_builder_dir}/*.{tgz,tar.gz,tar.xz,phar,zip}"].each do |name|
+      prefix,suffix = /(.*)(\.tgz|\.tar\.gz|\.tar\.xz|\.phar|\.zip)$/.match(name)[1,2]
       sha256sum = Digest::SHA256.file(name).hexdigest[0..7]
       FileUtils.mv(name, "#{prefix}-#{sha256sum}#{suffix}")
     end
   end
 
   def copy_binaries_to_output_directory
-      FileUtils.cp_r(Dir["#{binary_builder_dir}/*.{tgz,tar.gz,phar,zip}"], binary_artifacts_dir)
+    FileUtils.cp_r(Dir["#{binary_builder_dir}/*.{tgz,tar.gz,tar.xz,phar,zip}"], binary_artifacts_dir)
   end
 
   def create_git_commit_msg
@@ -130,8 +141,10 @@ class ConcourseBinaryBuilder
     ext = case dependency
             when 'composer' then
               '*.phar'
-            when 'go', 'dotnet', 'yarn' then
+            when 'go', 'yarn' then
               '*.tar.gz'
+            when 'dotnet' then
+              '*.tar.xz'
             when 'hwc' then
               '*.zip'
             else
@@ -140,7 +153,6 @@ class ConcourseBinaryBuilder
 
     filename = Dir["#{binary_builder_dir}/#{dependency + ext}"].first
     short_filename = File.basename(filename)
-
     md5sum = Digest::MD5.file(filename).hexdigest
     shasum = Digest::SHA256.file(filename).hexdigest
 

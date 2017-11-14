@@ -22,7 +22,7 @@ class ExtractDotnetFramework
     @dotnet_sdk_git_sha = build_info['source git-commit-sha']
     @dotnet_sdk_source_url = build_info['source url']
 
-    @dotnet_sdk_tar = File.join("/tmp", "dotnet_sdk.tgz")
+    @dotnet_sdk_tar = File.join("/tmp", "dotnet_sdk.tar.xz")
     @dotnet_sdk_dir = File.join("/tmp", "dotnet_sdk")
   end
 
@@ -42,7 +42,7 @@ class ExtractDotnetFramework
 
   def extract
     FileUtils.mkdir_p(@dotnet_sdk_dir)
-    raise "Extracting dotnet sdk failed" unless system("tar", "zxf", @dotnet_sdk_tar, "-C", @dotnet_sdk_dir)
+    raise "Extracting dotnet sdk failed" unless system("tar", "xf", @dotnet_sdk_tar, "-C", @dotnet_sdk_dir)
   end
 
   def retar
@@ -50,14 +50,14 @@ class ExtractDotnetFramework
 
     Dir.chdir(@dotnet_sdk_dir) do
       @dotnet_framework_versions.each do |version|
-        system("tar zcf #{dotnet_framework_tar(version)} shared/Microsoft.NETCore.App/#{version} host *.txt") or raise "Tarring the dotnet framework failed"
+        system("tar Jcf #{dotnet_framework_tar(version)} shared/Microsoft.NETCore.App/#{version} host *.txt") or raise "Tarring the dotnet framework failed"
       end
     end
   end
 
   def dotnet_framework_tar(version)
     dotnet_framework_artifact_dir = File.expand_path(File.join(@buildpacks_ci_dir, '..', 'binary-builder-artifacts'))
-    File.join(dotnet_framework_artifact_dir, "dotnet-framework.#{version}.linux-amd64.tar.gz")
+    File.join(dotnet_framework_artifact_dir, "dotnet-framework.#{version}.linux-amd64.tar.xz")
   end
 
   def write_yaml
@@ -85,8 +85,7 @@ class ExtractDotnetFramework
       md5sum = Digest::MD5.file(dotnet_framework_tar(version)).hexdigest
       shasum = Digest::SHA256.file(dotnet_framework_tar(version)).hexdigest
 
-      short_md5 = md5sum[0..7]
-      output_file = dotnet_framework_tar(version).gsub('.tar.gz', "-#{short_md5}.tar.gz")
+      output_file = dotnet_framework_tar(version).gsub('.tar.xz', "-#{shasum[0..7]}.tar.xz")
       FileUtils.mv(dotnet_framework_tar(version), output_file)
 
       git_msg = "Build dotnet-framework - #{version}\n\n"
