@@ -64,6 +64,13 @@ RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/
   && [ c1d2c001250506bd312203839058baf11ad7f53e150c8a6a1ff617a86d39f21a = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bbl
 
+# download terraform (used by bbl)
+RUN wget -O terraform.zip 'https://releases.hashicorp.com/terraform/0.10.8/terraform_0.10.8_linux_amd64.zip' \
+  && [ b786c0cf936e24145fad632efd0fe48c831558cc9e43c071fffd93f35e3150db = $(shasum -a 256 terraform.zip | cut -d' ' -f1) ] \
+  && funzip terraform.zip > /usr/local/bin/terraform \
+  && rm terraform.zip \
+  && chmod 755 /usr/local/bin/terraform
+
 #download spiff for spiffy things
 RUN wget -O spiff.zip 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.8/spiff_linux_amd64.zip' \
   && [ e5b49b7f32b2b3973536bf2a48beda2d236956bebff7677aa109cc2b71f56002 = $(shasum -a 256 spiff.zip | cut -d' ' -f1) ] \
