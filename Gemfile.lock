@@ -286,6 +286,7 @@ DEPENDENCIES
   bosh_cli
   bosh_cli_plugin_micro
   bump (= 0.5.3)
+  bundler (< 1.16.0)
   diffy
   git
   nokogiri
@@ -305,4 +306,4 @@ RUBY VERSION
    ruby 2.3.1p112
 
 BUNDLED WITH
-   1.14.6
+   1.15.4
