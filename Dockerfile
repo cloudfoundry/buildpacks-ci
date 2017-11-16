@@ -98,7 +98,7 @@ COPY build/*.sh /etc/profile.d/
 
 # install buildpacks-ci Gemfile
 RUN gem update --system
-RUN gem install bundler
+RUN gem install bundler -v 1.15.4
 COPY Gemfile /usr/local/Gemfile
 COPY Gemfile.lock /usr/local/Gemfile.lock
 RUN cd /usr/local && bundle install
