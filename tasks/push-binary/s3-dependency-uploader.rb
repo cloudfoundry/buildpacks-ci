@@ -24,7 +24,7 @@ class S3DependencyUploader
   private
 
   def files_to_upload
-    @files_to_upload ||= Dir.glob("#{@artifacts_dir}/#{@dependency}*.{tar.gz,tgz,phar,zip}")
+    @files_to_upload ||= Dir.glob("#{@artifacts_dir}/#{@dependency}*.{tar.gz,tar.xz,tgz,phar,zip}")
   end
 
   def aws_s3_dir
