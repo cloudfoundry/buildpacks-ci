@@ -7,6 +7,8 @@ set -o pipefail
 ./cf-space/login
 
 pushd brats
+  export BUNDLE_GEMFILE=$PWD/Gemfile
+
   if [ ! -z "$RUBYGEM_MIRROR" ]; then
     bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
   fi
