@@ -424,6 +424,7 @@ jobs: ##########################################################################
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
             AWS_DEFAULT_REGION: us-east-1
+            TEST_CREDENTIAL_FILTER_WHITELIST: BUCKET_NAME
         - put: dotnet-framework-built-output
           params:
             repository: dotnet-framework-built-output
