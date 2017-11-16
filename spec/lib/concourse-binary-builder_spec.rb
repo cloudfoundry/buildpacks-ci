@@ -5,6 +5,7 @@ require_relative '../../lib/git-client'
 require 'yaml'
 require 'tmpdir'
 require 'fileutils'
+require 'zlib'
 
 describe ConcourseBinaryBuilder do
   context('binary builder is run') do
@@ -284,13 +285,22 @@ describe ConcourseBinaryBuilder do
     context 'the dependency is dotnet' do
       let(:dependency)              { 'dotnet' }
       let(:output_file)             { 'dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz' }
-      let(:output_file_with_sha256) { "dotnet.1.0.0-preview2-003131.linux-amd64-#{output_file_sha256_short}.tar.gz" }
+      let(:output_file_with_sha256) { "dotnet.1.0.0-preview2-003131.linux-amd64-#{output_file_sha256_short}.tar.xz" }
       let(:verification_type)       { 'git-commit-sha' }
       let(:verification_value)      { 'this-is-a-commit-sha' }
       let(:source_url)              { 'https://github.com/dotnet/cli' }
       let(:version)                 { 'v1.0.0-preview2.0.1' }
 
-      before { subject.run }
+      before do
+        expect(subject).to receive(:system).with('gunzip', /\.tar\.gz$/) do |_, name|
+          File.rename name, name.gsub(/\.gz/, '')
+        end
+        expect(subject).to receive(:system).with('xz', /\.tar$/) do |_, name|
+          File.rename name, "#{name}.xz"
+        end
+
+        subject.run
+      end
 
       it_behaves_like 'a commit is made in builds-yaml-artifacts with the proper git message', 'automated'
       it_behaves_like 'the resulting tar files are copied to the proper location'
