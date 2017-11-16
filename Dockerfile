@@ -102,6 +102,7 @@ RUN gem install bundler -v 1.15.4
 COPY Gemfile /usr/local/Gemfile
 COPY Gemfile.lock /usr/local/Gemfile.lock
 RUN cd /usr/local && bundle install
+RUN bundle binstub bundler --force
 
 #install fly-cli
 RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly \
