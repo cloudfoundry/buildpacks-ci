@@ -47,6 +47,18 @@ Dir.glob('./*').each do |resource_dir|
   end
 end
 
+description += <<-DESCRIPTION
+
+If you have updated cassadra modules (including datastax/cpp-driver) please run integration tests locally with `CASSANDRA_HOST` set.
+
+```
+docker run -p 0.0.0.0:9042:9042 --detach poklet/cassandra
+export CASSANDRA_HOST=[LOCALMACHINE EXTERNAL IP]
+CF_PASSWORD=admin BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-build --host=local.pcfdev.io cf_spec/integration/deploy_a_php_app_with_cassandra_spec.rb
+```
+Then stop the above docker cassandra container
+DESCRIPTION
+
 puts name
 puts ""
 puts description
