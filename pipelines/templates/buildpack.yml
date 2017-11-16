@@ -1,5 +1,6 @@
 <% libbuildpacks = %w(apt go hwc multi nodejs python ruby staticfile) %>
 <% new_brats = %w(apt go nodejs python ruby staticfile) %>
+<% no_brats = %w(hwc multi) %>
 
 ---
 resource_types:
@@ -33,6 +34,7 @@ resources: #####################################################################
       password: {{ci_cf_edge_password}}
       organization: pivotal
 
+<% unless no_brats.include?(language) %>
   - name: cf-brat-space
     type: cf-space-resource
     source:
@@ -40,6 +42,7 @@ resources: #####################################################################
       username: {{ci-cf-username}}
       password: {{ci_cf_edge_password}}
       organization: pivotal
+<% end %>
 
 <% unless %w(apt hwc).include? language %>
   - name: cf-lts-space
@@ -50,6 +53,7 @@ resources: #####################################################################
       password: {{ci-cf-lts-password}}
       organization: pivotal
 
+<% unless no_brats.include?(language) %>
   - name: cf-lts-brat-space
     type: cf-space-resource
     source:
@@ -57,6 +61,7 @@ resources: #####################################################################
       username: admin
       password: {{ci-cf-lts-password}}
       organization: pivotal
+<% end %>
 <% end %>
 
   ## Git ##
@@ -95,7 +100,7 @@ resources: #####################################################################
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
-<% unless new_brats.include?(language) %>
+<% unless new_brats.include?(language) || no_brats.include?(language) %>
   - name: brats
     type: git
     source:
@@ -672,6 +677,7 @@ jobs: ##########################################################################
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
+<% unless no_brats.include?(language) %>
 <% if new_brats.include?(language) %>
   - name: specs-edge-brats-develop
     serial: true
@@ -737,6 +743,7 @@ jobs: ##########################################################################
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
+<% end %>
   - name: specs-edge-shared-develop
     serial: true
     public: true
@@ -747,7 +754,9 @@ jobs: ##########################################################################
           resource: buildpack-develop
           trigger: true
           passed:
+<% unless no_brats.include?(language) %>
           - specs-edge-brats-develop
+<% end %>
           - specs-edge-integration-develop
         on_success:
           task: github-set-status-success
@@ -772,7 +781,7 @@ jobs: ##########################################################################
           timeout: 3h
         - aggregate:
           - get: buildpacks-ci
-<% unless new_brats.include?(language) %>
+<% unless new_brats.include?(language) || no_brats.include?(language) %>
           - get: brats
 <% end %>
           - get: buildpack
@@ -816,6 +825,7 @@ jobs: ##########################################################################
           put: lts-shared-environments
           params:
             release: cf-environments
+<% unless no_brats.include?(language) %>
   - name: specs-lts-brats-develop
     serial: true
     public: true
@@ -866,6 +876,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
   - name: specs-lts-gcp-develop
     serial: true
     public: true
@@ -876,7 +887,9 @@ jobs: ##########################################################################
           resource: buildpack-develop
           trigger: true
           passed:
+<% unless no_brats.include?(language) %>
           - specs-lts-brats-develop
+<% end %>
           - specs-lts-integration-develop
         on_success:
           task: github-set-status-success
