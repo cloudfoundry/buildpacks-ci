@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ $1 == "-a" ]; then
-  echo rsynced from $2 to $3
+if [ "$1" == "-a" ]; then
+  echo rsynced from "$2" to "$3"
 fi
 
 exit 0
