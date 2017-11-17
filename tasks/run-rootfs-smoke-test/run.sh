@@ -6,9 +6,8 @@ set -o pipefail
 
 set -x
 
-pushd buildpacks-ci
-  # shellcheck disable=SC1091
-  . ./bin/target_bosh "$DEPLOYMENT_NAME"
+pushd "bbl-state/$ENV_NAME"
+  eval "$(bbl print-env)"
 popd
 
-bosh -d "rootfs-smoke-test-manifest-artifacts/$DEPLOYMENT_NAME/rootfs-smoke-test.yml" run errand cflinuxfs2-smoke-test
+bosh2 -d rootfs-smoke-test run-errand cflinuxfs2-smoke-test

@@ -5,16 +5,9 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
-  - name: bosh-lite
+  - name: bbl-state
   - name: buildpacks-ci
-  - name: cf-release
-  - name: diego-release
-outputs:
-  - name: upload-stemcell-to-bosh-lite
 run:
   path: buildpacks-ci/tasks/upload-stemcell-to-bosh-lite/run.sh
 params:
-  DEPLOYMENT_NAME:
-  BOSH_USER:
-  BOSH_PASSWORD:
-  BOSH_TARGET:
+  ENV_NAME:
