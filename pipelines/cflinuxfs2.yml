@@ -491,8 +491,8 @@ jobs: ##########################################################################
         - task: write-cats-config
           file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-password}}
+            CI_CF_USERNAME: {{cflinuxfs2-cf-username}}
+            CI_CF_PASSWORD: {{cflinuxfs2-cf-password}}
             APPS_DOMAIN: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
         - task: add-flake-attempts-to-cats
