@@ -1,5 +1,0 @@
-properties:
-  uaa:
-    scim:
-      users:
-      - admin|admin|scim.write,scim.read,openid,cloud_controller.admin,clients.read,clients.write,doppler.firehose,routing.router_groups.read,routing.router_groups.write

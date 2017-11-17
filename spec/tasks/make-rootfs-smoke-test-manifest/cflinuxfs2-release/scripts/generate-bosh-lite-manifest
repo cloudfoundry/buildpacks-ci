@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-RELEASE_DIR=$(dirname "$0")/..
-echo 'manifest' > "$RELEASE_DIR/manifests/bosh-lite/rootfs-smoke-test.yml"
