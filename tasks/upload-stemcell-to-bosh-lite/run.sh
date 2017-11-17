@@ -4,9 +4,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-pushd buildpacks-ci
-  # shellcheck disable=SC1091
-  source ./bin/target_bosh "$DEPLOYMENT_NAME"
+pushd "bbl-state/${ENV_NAME}"
+  eval "$(bbl print-env)"
 popd
 
-bosh upload stemcell https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent
+bosh2 upload-stemcell https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent

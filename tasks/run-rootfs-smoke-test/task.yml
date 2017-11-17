@@ -5,13 +5,9 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
-  - name: rootfs-smoke-test-manifest-artifacts
   - name: buildpacks-ci
+  - name: bbl-state
 run:
   path: buildpacks-ci/tasks/run-rootfs-smoke-test/run.sh
 params:
-  DEPLOYMENT_NAME:
-  BOSH_USER:
-  BOSH_PASSWORD:
-  BOSH_TARGET:
-  RUBYGEM_MIRROR:
+  ENV_NAME:

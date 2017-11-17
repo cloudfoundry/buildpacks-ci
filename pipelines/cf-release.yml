@@ -65,9 +65,9 @@ resources:
   - name: cf-deployment-concourse-tasks
     type: git
     source:
-      branch: PR-is-bosh-lite-to-bbl-up
-      uri: https://github.com/Gerg/cf-deployment-concourse-tasks.git
-      # tag_filter: v4.*
+      branch: master
+      uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+      tag_filter: v4.*
   - name: bosh-deployment
     type: git
     source:
