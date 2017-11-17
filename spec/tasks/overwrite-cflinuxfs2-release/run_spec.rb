@@ -20,25 +20,60 @@ describe 'make-rootfs' do
   after(:context) do
     ENV.store('PATH', old_path)
     ENV.store('ROOTFS_RELEASE',  old_rootfs_release)
+    FileUtils.rm_rf File.dirname(blob_destination)
+    FileUtils.rm_rf "#{ci_path}/spec/tasks/overwrite-cflinuxfs2-release/cflinuxfs2-release/use-dev-release-opsfile.yml"
   end
 
-  RSpec.shared_examples 'creates_the_blob' do
-    it 'moves cflinuxfs2-*.tar.gz file from stack-s3 to cflinuxfs2-release/blobs/rootfs/cflinuxfs2-[currentversion].tar.gz' do
+  RSpec.shared_examples 'creating artifacts to deploy release with updated rootfs' do
+    it 'creates a release with a cflinuxfs2 package that uses the cflinuxfs2-*.tar.gz from stack-s3' do
       Dir.chdir("#{ci_path}/spec/tasks/overwrite-cflinuxfs2-release") do
-        _, _, status = Open3.capture3("#{ci_path}/tasks/overwrite-cflinuxfs2-release/run.sh")
+        stdout, _, status = Open3.capture3("#{ci_path}/tasks/overwrite-cflinuxfs2-release/run.sh")
         expect(status).to be_success
+        expect(stdout).to include("bosh create release with cflinuxfs2 blob with SHA1: 502dd7cbee209d399844bc6914f73c41bfa068ce")
       end
-      expect(File.exist?(blob_destination)).to eq(true)
-      expect(File.read(blob_destination)).to eq('new-tarball')
+    end
+
+    it 'generates the bosh lite manifest for the smoke test' do
+      Dir.chdir("#{ci_path}/spec/tasks/overwrite-cflinuxfs2-release") do
+        stdout, _, status = Open3.capture3("#{ci_path}/tasks/overwrite-cflinuxfs2-release/run.sh")
+        expect(status).to be_success
+        expect(stdout).to include("generating bosh lite manifest for smoke test")
+      end
+    end
+
+    it 'generates an opsfile to use the version of cflinuxfs2 built' do
+      Dir.chdir("#{ci_path}/spec/tasks/overwrite-cflinuxfs2-release") do
+        stdout, _, status = Open3.capture3("#{ci_path}/tasks/overwrite-cflinuxfs2-release/run.sh")
+        expect(status).to be_success
+        expected_version = stdout.match(/version created: (.*)/)[1]
+        expect(YAML.load(File.read("cflinuxfs2-release/use-dev-release-opsfile.yml"))).to eql([{
+          "type" => "replace",
+          "path" => "/releases/name=cflinuxfs2",
+          "value" => {
+            "name" => "cflinuxfs2",
+            "version" => expected_version
+          }
+        }])
+        expect(stdout).to include("generating bosh lite manifest for smoke test")
+      end
+    end
+
+    it 'rsyncs to the artifacts dir at the very end' do
+      Dir.chdir("#{ci_path}/spec/tasks/overwrite-cflinuxfs2-release") do
+        stdout, _, status = Open3.capture3("#{ci_path}/tasks/overwrite-cflinuxfs2-release/run.sh")
+        expect(status).to be_success
+        expect(stdout.split("\n").last).to eql("rsynced from cflinuxfs2-release/ to cflinuxfs2-release-artifacts")
+      end
     end
   end
 
   context 'when the blob file exists' do
     before do
-      `printf old-tarball > #{blob_destination}`
+      FileUtils.mkdir_p(File.dirname(blob_destination))
+      File.write(blob_destination, "old-tarball")
     end
 
-    include_examples 'creates_the_blob'
+    it_should_behave_like 'creating artifacts to deploy release with updated rootfs'
   end
 
   context 'when the blob file does not exist' do
@@ -47,6 +82,6 @@ describe 'make-rootfs' do
       FileUtils.rm_rf File.dirname(blob_destination)
     end
 
-    include_examples 'creates_the_blob'
+    it_should_behave_like 'creating artifacts to deploy release with updated rootfs'
   end
 end
