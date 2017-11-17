@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo generating bosh lite manifest for smoke test
+exit 0

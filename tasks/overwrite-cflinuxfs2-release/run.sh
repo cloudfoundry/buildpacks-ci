@@ -25,11 +25,7 @@ pushd $release_dir
     ./scripts/generate-bosh-lite-manifest
 popd
 
-echo "rsyncing $release_dir to ${release_dir}-artifacts"
-
-rsync -a $release_dir/ ${release_dir}-artifacts
-
-cat <<EOF > ${release_dir}-artifacts/use-dev-release-opsfile.yml
+cat <<EOF > ${release_dir}/use-dev-release-opsfile.yml
 ---
 - type: replace
   path: /releases/name=cflinuxfs2
@@ -37,3 +33,7 @@ cat <<EOF > ${release_dir}-artifacts/use-dev-release-opsfile.yml
     name: cflinuxfs2
     version: ${version}
 EOF
+
+echo "rsyncing $release_dir to ${release_dir}-artifacts"
+
+rsync -a $release_dir/ ${release_dir}-artifacts
