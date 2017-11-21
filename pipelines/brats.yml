@@ -68,7 +68,7 @@ resources:
     source:
       target: api.edge.buildpacks-gcp.ci.cf-app.com
       username: {{ci-cf-username}}
-      password: {{ci_cf_shared_password}}
+      password: {{ci_cf_edge_password}}
       organization: pivotal
 
   - name: cf-lts-space
