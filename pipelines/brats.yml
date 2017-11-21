@@ -1,5 +1,6 @@
-<% languages = %w(binary dotnet-core go hwc java multi nodejs php python ruby staticfile) %>
-<% new_brats = %w(apt) %>
+<% languages = %w(apt binary dotnet-core go hwc java multi nodejs php python ruby staticfile) %>
+<% new_brats = %w(apt go nodejs ruby) %>
+<% not_lts = %w(apt) %>
 
 ---
 resource_types:
@@ -90,6 +91,7 @@ resources:
 
 jobs:
 <% languages.each do |language| %>
+<% unless not_lts.include?(language) %>
   - name: brats-<%= language %>-lts
     serial: true
     public: true
@@ -101,75 +103,18 @@ jobs:
         timeout: 3h
       - aggregate:
         - get: buildpacks-ci
+<% if new_brats.include?(language) %>
+        - get: buildpack
+          resource: buildpack-<%= language %>
+<% else %>
         - get: brats
+<% end %>
         - get: nightly-trigger
           trigger: true
       - do:
         - put: cf-brat-space
           resource: cf-lts-space
-        - task: run-brats
-          file: buildpacks-ci/tasks/run-shared-brats/task.yml
-          params:
-            BUILDPACK_BRANCH: master
-            LANGUAGE: <%= language %>
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
-        ensure:
-          put: lts-shared-environments
-          params:
-            release: cf-environments
-  - name: brats-<%= language %>-edge
-    serial: true
-    public: true
-    plan:
-      - put: cf-environments
-        resource: edge-shared-environments
-        params:
-          claim: <%= language %>
-        timeout: 3h
-      - aggregate:
-        - get: buildpacks-ci
-        - get: brats
-        - get: nightly-trigger
-          trigger: true
-      - do:
-        - put: cf-brat-space
-          resource: cf-edge-space
-        - task: run-brats
-          file: buildpacks-ci/tasks/run-shared-brats/task.yml
-          params:
-            BUILDPACK_BRANCH: master
-            LANGUAGE: <%= language %>
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
-        ensure:
-          put: edge-shared-environments
-          params:
-            release: cf-environments
-<% end %>
-<% new_brats.each do |language| %>
-  - name: brats-<%= language %>-edge
-    serial: true
-    public: true
-    plan:
-      - put: cf-environments
-        resource: edge-shared-environments
-        params:
-          claim: <%= language %>
-        timeout: 3h
-      - aggregate:
-        - get: buildpacks-ci
-        - get: buildpack
-          resource: buildpack-<%= language %>
-        - get: nightly-trigger
-          trigger: true
-      - do:
-        - put: cf-brat-space
-          resource: cf-edge-space
+<% if new_brats.include?(language) %>
         - task: run-brats
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
           input_mapping: {cf-space: cf-brat-space}
@@ -177,17 +122,69 @@ jobs:
             STACKS: cflinuxfs2
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 6
+<% else %>
+        - task: run-brats
+          file: buildpacks-ci/tasks/run-shared-brats/task.yml
+          params:
+            BUILDPACK_BRANCH: master
+            LANGUAGE: <%= language %>
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
+<% end %>
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
         ensure:
-          task: delete-cf-space
-          file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+          put: lts-shared-environments
+          params:
+            release: cf-environments
+<% end %>
+  - name: brats-<%= language %>-edge
+    serial: true
+    public: true
+    plan:
+      - put: cf-environments
+        resource: edge-shared-environments
+        params:
+          claim: <%= language %>
+        timeout: 3h
+      - aggregate:
+        - get: buildpacks-ci
+<% if new_brats.include?(language) %>
+        - get: buildpack
+          resource: buildpack-<%= language %>
+<% else %>
+        - get: brats
+<% end %>
+        - get: nightly-trigger
+          trigger: true
+      - do:
+        - put: cf-brat-space
+          resource: cf-edge-space
+<% if new_brats.include?(language) %>
+        - task: run-brats
+          file: buildpacks-ci/tasks/run-bp-brats/task.yml
+          input_mapping: {cf-space: cf-brat-space}
+          params:
+            STACKS: cflinuxfs2
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 6
+<% else %>
+        - task: run-brats
+          file: buildpacks-ci/tasks/run-shared-brats/task.yml
+          params:
+            BUILDPACK_BRANCH: master
+            LANGUAGE: <%= language %>
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
+<% end %>
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
         ensure:
           put: edge-shared-environments
           params:
             release: cf-environments
 <% end %>
+
   - name: update-buildpack-packager
     serial: true
     public: true
