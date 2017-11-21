@@ -15,6 +15,7 @@ run:
     - |
       set -ex
       pushd buildpack-checksums
+        export BUNDLE_GEMFILE=$PWD/Gemfile
         if [ ! -z "$RUBYGEM_MIRROR" ]; then
           gem sources --clear-all --add "${RUBYGEM_MIRROR}"
           bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
