@@ -1,0 +1,15 @@
+name: depwatcher
+version: 0.1.0
+
+authors:
+  - Dave Goddard <dave@goddard.id.au>
+
+targets:
+  check:
+    main: src/check.cr
+  in:
+    main: src/in.cr
+
+crystal: 0.23.1
+
+license: MIT
