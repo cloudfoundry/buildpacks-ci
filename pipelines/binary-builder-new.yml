@@ -1,0 +1,161 @@
+<% dependencies = {
+  pipenv: %w(python),
+  setuptools: %w(python),
+} %>
+resource_types:
+- name: depwatcher
+  type: docker-image
+  source:
+    repository: cfbuildpacks/depwatcher
+resources:
+- name: binary-builder
+  type: git
+  source:
+    uri: {{binary-builder-git-uri}}
+- name: buildpacks-ci
+  type: git
+  source:
+    uri: {{buildpacks-ci-git-uri-public}}
+    branch: {{buildpacks-ci-git-uri-public-branch}}
+
+- name: source-pipenv
+  type: depwatcher
+  source:
+    type: pypi
+    name: pipenv
+- name: source-setuptools
+  type: depwatcher
+  source:
+    type: pypi
+    name: setuptools
+
+<% dependencies.each do |dep, _| %>
+- name: buildpacks-bucket-<%= dep %>
+  type: s3
+  source:
+    bucket: {{buildpacks-binaries-s3-bucket}}
+    access_key_id: {{pivotal-buildpacks-s3-access-key}}
+    secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+    regexp: dependencies/<%= dep %>/<%= dep %>.*(\d+.\d+.\d+)(.*)
+<% end %>
+
+<% dependencies.each do |dep, _| %>
+- name: builds-<%= dep %>
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+    branch: master
+    paths: [ binary-builds-new/<%= dep %>/ ]
+    private_key: {{public-buildpacks-ci-robots-private-key}}
+<% end %>
+
+<% dependencies.values.flatten.uniq.each do |buildpack| %>
+- name: <%= buildpack %>-buildpack
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/<%= buildpack %>-buildpack.git
+    private_key: {{<%= buildpack %>-buildpack-private-key}}
+    branch: develop
+<% end %>
+
+jobs:
+<% dependencies.each do |dep, buildpacks| %>
+- name: create-<%= dep %>-story
+  serial: true
+  public: true
+  plan:
+  - aggregate:
+    - get: buildpacks-ci
+    - get: source
+      resource: source-<%= dep %>
+      trigger: true
+      version: every
+    - get: builds
+      resource: builds-<%= dep %>
+  - do:
+    - task: create-tracker-story
+      file: buildpacks-ci/tasks/build-binary-new/create.yml
+      params:
+        TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+        TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+        TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+    - put: builds-<%= dep %>
+      params:
+        repository: builds-artifacts
+        rebase: true
+
+- name: build-<%= dep %>
+  serial: true
+  public: true
+  plan:
+  - aggregate:
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: source
+      resource: source-<%= dep %>
+      trigger: true
+      version: every
+      passed: [ create-<%= dep %>-story ]
+    - get: builds
+      resource: builds-<%= dep %>
+  - do:
+    - task: build-binary
+      file: buildpacks-ci/tasks/build-binary-new/task.yml
+    - put: buildpacks-bucket-<%= dep %>
+      params:
+        file: artifacts/<%= dep %>*
+    - put: builds-<%= dep %>
+      params:
+        repository: builds-artifacts
+        rebase: true
+
+<% buildpacks.each do |buildpack| %>
+- name: update-<%= dep %>-<%= buildpack %>
+  serial: true
+  public: true
+  plan:
+  - aggregate:
+    - get: buildpack
+      resource: <%= buildpack %>-buildpack
+    - get: buildpacks-ci
+    - get: source
+      resource: source-<%= dep %>
+      passed: [build-<%= dep %>]
+      version: every
+      trigger: true
+    - get: builds
+      resource: builds-<%= dep %>
+  - do:
+    - task: update-buildpack-dependency
+      file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
+    - put: <%= buildpack %>-buildpack
+      params:
+        repository: artifacts
+        rebase: true
+<% end %>
+
+<% if buildpacks.any? %>
+- name: finish-<%= dep %>-story
+  serial: true
+  public: true
+  plan:
+  - aggregate:
+    - get: buildpacks-ci
+    - get: source
+      resource: source-<%= dep %>
+      trigger: true
+      version: every
+      passed:
+      <% buildpacks.each do |buildpack| %>
+      - update-<%= dep %>-<%= buildpack %>
+      <% end %>
+    - get: builds
+      resource: builds-<%= dep %>
+  - do:
+    - task: finish-<%= dep %>-story
+      file: buildpacks-ci/tasks/build-binary-new/finish.yml
+      params:
+        TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+        TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+<% end %>
+<% end %>
