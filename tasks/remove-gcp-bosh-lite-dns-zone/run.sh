@@ -5,6 +5,7 @@ echo "$GCP_SERVICE_ACCOUNT_KEY" > /tmp/gcp_key
 set -o errexit
 set -o nounset
 set -o pipefail
+set -o xtrace
 
 ENV_NAME=${ENV_NAME:-}
 ZONE_NAME="${ENV_NAME}"-zone
