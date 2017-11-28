@@ -35,7 +35,7 @@ fi
 gcloud dns record-sets transaction start --zone="${ZONE_NAME}"
 
   for DNS_NAME_PREFIX in '*' '*.ws' bosh doppler loggregator ssh tcp; do
-    gcloud dns record-sets transaction add "${BOSH_LITE_IP}" --name="${DNS_NAME_PREFIX}"."${DNS_NAME}" --ttl=300 --type=A --zone="${ZONE_NAME}"
+    gcloud dns record-sets transaction add "${BOSH_LITE_IP}" --name="${DNS_NAME_PREFIX}.${DNS_NAME}" --ttl=300 --type=A --zone="${ZONE_NAME}"
   done
 
 gcloud dns record-sets transaction execute --zone="${ZONE_NAME}"
