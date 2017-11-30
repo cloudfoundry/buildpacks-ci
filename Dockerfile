@@ -2,12 +2,17 @@ FROM ruby:2.3.1-slim
 
 ENV LANG="C.UTF-8"
 
-RUN apt-get update
-RUN apt-get -y install \
+COPY config/apt-key.gpg /tmp/apt-key.gpg
+RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
+  && apt-key add /tmp/apt-key.gpg
+
+RUN apt-get update \
+  && apt-get -y install \
   aufs-tools \
   curl \
   expect \
   git \
+  google-cloud-sdk \
   iptables \
   jq \
   libmysqlclient-dev \
@@ -21,13 +26,8 @@ RUN apt-get -y install \
   python-pip \
   shellcheck \
   wget \
-  zip
-
-RUN export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" \
-  && echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
-  && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
-  && apt-get update \
-  && apt-get -y install google-cloud-sdk
+  zip && \
+  apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN curl -sSL https://get.docker.com/ | sh
 
@@ -48,20 +48,19 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the CF-CLI
-RUN wget -O cf-cli.tgz 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.32.0&source=github-rel' \
-  && [ 0a05521b7198dc8b92efbfb02a8fb04c84eeffeded3387aa3c9eb92ce4abef69 = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
+RUN wget -O cf-cli.tgz 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.33.0&source=github-rel' \
+  && [ 443b61459bed73571e987f5c09ac559278da68fffa62ebe521d770d00b8f5629 = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
   && tar xzf cf-cli.tgz -C /usr/bin \
   && rm cf-cli.tgz
-RUN cf install-plugin Diego-Enabler -f -r CF-Community
 
 # download the bosh2 CLI
-RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.42-linux-amd64 -o /usr/local/bin/bosh2 \
-  && [ a97b085e45a989abfcd88de77770bb6db0c8a29e = $(shasum -a 1 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
+RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.45-linux-amd64 -o /usr/local/bin/bosh2 \
+  && [ bf04be72daa7da0c9bbeda16fda7fc7b2b8af51e = $(shasum -a 1 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bosh2
 
 # download bbl
-RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v4.10.4/bbl-v4.10.4_linux_x86-64' \
-  && [ c1d2c001250506bd312203839058baf11ad7f53e150c8a6a1ff617a86d39f21a = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
+RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v4.10.5/bbl-v4.10.5_linux_x86-64' \
+  && [ 3a782b9be10c93120f7b0d10e68704e299b79c836168a3538384ec31f69fc9d0 = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bbl
 
 # download terraform (used by bbl)
@@ -77,12 +76,6 @@ RUN wget -O spiff.zip 'https://github.com/cloudfoundry-incubator/spiff/releases/
   && funzip spiff.zip > /usr/bin/spiff \
   && rm spiff.zip
 RUN chmod 755 /usr/bin/spiff
-
-#download hub CLI
-RUN wget -O hub.tgz https://github.com/github/hub/releases/download/v2.2.1/hub-linux-amd64-2.2.1.tar.gz \
-  && [ c6131dcad312c314929e800c36c925b78ade84ee91fcc67a2a41cde40e22a5c2 = $(shasum -a 256 hub.tgz | cut -d' ' -f1) ] \
-  && tar xzf hub.tgz -C /usr/bin --strip-components=1 hub-linux-amd64-2.2.1/hub \
-  && rm hub.tgz
 
 # Ensure Concourse Filter binary is present
 RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.0.3/concourse-filter' \
@@ -106,7 +99,6 @@ RUN bundle binstub bundler --force
 
 #install fly-cli
 RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly \
-  && [ 8638c75c3294c104da75526cab827d1b61c8ab2c05bb999340214cade37a7516 = $(shasum -a 256 /usr/local/bin/fly | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/fly
 
 # git-hooks and git-secrets
@@ -123,19 +115,13 @@ ENV BASH_ENV /etc/profile.d/filter.sh
 
 # Install go 1.9
 RUN cd /usr/local \
-  && curl -L https://buildpacks.cloudfoundry.org/dependencies/go/go1.9.linux-amd64-4577d9ba.tar.gz -o go.tar.gz \
-  && [ d3a0193410b9b62251aa12b49780dcea3ccfd10402b05685e54051c9c0b89e72 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
+  && curl -L https://buildpacks.cloudfoundry.org/dependencies/go/go1.9.2.linux-amd64-f60fe671.tar.gz -o go.tar.gz \
+  && [ 6af27e6a59b4538fbf196c8019ef67c5cfeb6d21298bf9bb6bab1390a4da3448 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && tar xf go.tar.gz \
   && rm go.tar.gz \
   && ln -s /usr/local/go/bin/* /usr/local/bin/
 
 ENV GOROOT=/usr/local/go
-
-#download certstrap to strap certs
-RUN git clone https://github.com/square/certstrap \
-  && cd certstrap \
-  && ./build \
-  && install bin/certstrap-*-linux-amd64 /usr/local/bin/certstrap
 
 # Install poltergeist for running dotnet-core-buildpack specs
 RUN gem install phantomjs && ruby -e 'require "phantomjs"; Phantomjs.path'
