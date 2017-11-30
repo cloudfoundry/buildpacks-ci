@@ -7,9 +7,9 @@ require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
 manifest = YAML.load_file('buildpack/manifest.yml')
 data = JSON.parse(open('source/data.json').read)
-p data
-build = JSON.parse(open("builds/binary-builds-new/#{data.dig('source', 'name')}/#{data.dig('version', 'ref')}.json").read)
-p build
+name = data.dig('source', 'name')
+version = data.dig('version', 'ref')
+build = JSON.parse(open("builds/binary-builds-new/#{name}/#{version}.json").read)
 story_id = build['tracker_story_id']
 
 system('rsync -a buildpack/ artifacts/')
@@ -17,8 +17,8 @@ raise('Could not copy buildpack to artifacts') unless $?.success?
 
 old_version = nil
 manifest['dependencies'].each do |dep|
-  next unless dep['name'] == data.dig('source', 'name')
-  raise "Found a second entry for #{dep['name']}" if old_version
+  next unless dep['name'] == name
+  raise "Found a second entry for #{name}" if old_version
 
   old_version = dep['version']
   dep['version'] = build['version']
@@ -38,5 +38,5 @@ Dir.chdir('artifacts') do
   File.write('manifest.yml', manifest.to_yaml)
 
   GitClient.add_file('manifest.yml')
-  GitClient.safe_commit("Add #{build['name']} #{build['version']}, remove #{build['name']} #{old_version} [##{story_id}]")
+  GitClient.safe_commit("Add #{name} #{version}, remove #{name} #{old_version} [##{story_id}]")
 end
