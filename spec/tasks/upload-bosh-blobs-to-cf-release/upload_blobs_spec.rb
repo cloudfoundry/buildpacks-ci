@@ -27,9 +27,11 @@ describe 'create bosh release task', :fly do
 
       it 'removes the corresponding key from the blobs.yml' do
         parsed_blobs = YAML.load_file("#{@artifacts}/config/blobs.yml")
-        key = parsed_blobs.find { |k, _| k == 'java-buildpack/java-buildpack-v3.6.zip' }
-        expect(parsed_blobs.keys.count).to eq(2)
-        expect(key).to be_nil
+        expect(parsed_blobs.keys).to match_array([
+          "go-buildpack/go_buildpack-cached-v1.1.zip",
+          "java-buildpack/java-buildpack-offline-v1.1.zip",
+          "java-buildpack/java-buildpack-v1.2.zip"
+        ])
       end
 
       it 'adds the new blob to the right directory' do
@@ -50,9 +52,11 @@ describe 'create bosh release task', :fly do
 
       it 'removes the corresponding key from the blobs.yml' do
         parsed_blobs = YAML.load_file("#{@artifacts}/config/blobs.yml")
-        key = parsed_blobs.find { |k, _| k == 'go-buildpack/go_buildpack-cached-v1.7.2.zip' }
-        expect(parsed_blobs.keys.count).to eq(2)
-        expect(key).to be_nil
+        expect(parsed_blobs.keys).to match_array([
+          "go-buildpack/go_buildpack-cached-v1.2.zip",
+          "java-buildpack/java-buildpack-offline-v1.1.zip",
+          "java-buildpack/java-buildpack-v1.1.zip"
+        ])
       end
 
       it 'adds the new blob to the right directory' do

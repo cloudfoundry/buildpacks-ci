@@ -52,9 +52,11 @@ Dir.chdir('cf-release-artifacts') do
   next unless new_sha != blobs[old_buildpack_key]['sha']
   blobs.delete(old_buildpack_key)
   File.write('config/blobs.yml', YAML.dump(blobs))
-  exit 1 unless system "bosh add blob #{buildpack_blob} #{destination_dir}"
 
-  exit 1 unless system "bosh -n upload blobs"
+  exit 1 unless system "bosh2 reset-release"
+  exit 1 unless system "bosh2 add-blob #{buildpack_blob} #{destination_dir}/#{File.basename(buildpack_blob)}"
+
+  exit 1 unless system "bosh2 -n upload-blobs"
   exit 1 unless system "/usr/bin/env bash ./scripts/setup-git-hooks"
 
   GitClient.update_submodule_to_latest(buildpack_bosh_dir, cf_release_buildpack_submodule_dir)
