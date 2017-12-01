@@ -16,11 +16,6 @@ releases:
   version: 3.6.0
   url: https://bosh.io/d/github.com/pivotal-cf-experimental/concourse-windows-worker-release?v=3.6.0
   sha1: 55c86935e36e0cfcd2ad8ededce0d93d87596ba0
-tls_key: &tls_key |
-  <%= concourse_buildpacks_gcp_key.split("\n").join("\n  ") %>
-tls_cert: &tls_cert |
-  <%= concourse_buildpacks_gcp_crt.gsub("\n", "\n  ").chomp  %>
-  <%= concourse_buildpacks_gcp_chain.gsub("\n", "\n  ").chomp %>
 instance_groups:
 - name: web
   instances: 1
@@ -66,10 +61,11 @@ instance_groups:
         host: <%= gcp_concourse_db_host %>
         sslmode: disable
       postgresql_database: <%= gcp_concourse_db_name %>
-      tls_cert: &tls_key |
-        <%= postgres_tls_cert.split("\n").join("\n        ") %>
-      tls_key: &tls_cert |
-        <%= postgres_tls_key.split("\n").join("\n        ") %>
+      tls_key: |
+        <%= concourse_buildpacks_gcp_key.split("\n").join("\n        ") %>
+      tls_cert: |
+        <%= concourse_buildpacks_gcp_crt.gsub("\n", "\n        ").chomp  %>
+        <%= concourse_buildpacks_gcp_chain.gsub("\n", "\n        ").chomp %>
       tls_bind_port: 443
   - name: tsa
     release: concourse
