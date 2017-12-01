@@ -69,7 +69,11 @@ class ConcourseBinaryBuilder
     end
 
     if %w(php php7).include? dependency
-      @flags << " --php-extensions-file=#{File.join(builds_dir, 'binary-builds', "#{dependency}-extensions.yml")}"
+      extension_file = File.join(builds_dir, 'binary-builds', "#{dependency}-extensions.yml")
+      if latest_build['version'].start_with?('7.2.')
+        extension_file = File.join(builds_dir, 'binary-builds', "#{dependency}2-extensions.yml")
+      end
+      @flags << " --php-extensions-file=#{extension_file}"
     end
   end
 
