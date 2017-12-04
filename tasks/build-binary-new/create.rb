@@ -3,6 +3,8 @@ require 'json'
 require 'yaml'
 require 'tracker_api'
 
+BUILDPACKS = ENV['BUILDPACKS'].split(' ')
+
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
@@ -17,7 +19,7 @@ story = buildpack_project.create_story(
   name: "Build and/or Include new releases: #{name} #{version}",
   description: "```\n#{data.to_yaml}\n```\n",
   estimate: 1,
-  labels: ['binary_builder', name],
+  labels: ['binary_builder', name] + BUILDPACKS,
   requested_by_id: ENV['TRACKER_REQUESTER_ID'].to_i,
   owner_ids: [ ENV['TRACKER_REQUESTER_ID'].to_i ]
 )
