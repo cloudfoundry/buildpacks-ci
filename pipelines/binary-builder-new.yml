@@ -79,6 +79,7 @@ jobs:
         TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
         TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+        BUILDPACKS: <%= buildpacks.join(' ') %>
     - put: builds-<%= dep %>
       params:
         repository: builds-artifacts
