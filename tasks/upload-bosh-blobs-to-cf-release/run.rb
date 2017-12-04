@@ -20,7 +20,7 @@ version = ''
 
 blob_store_private_yml = {
   'blobstore' => {
-    's3' => {
+    'options' => {
       'access_key_id' => ENV.fetch('ACCESS_KEY_ID'),
       'secret_access_key' => ENV.fetch('SECRET_ACCESS_KEY')
     }

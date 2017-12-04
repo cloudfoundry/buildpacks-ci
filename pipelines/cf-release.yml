@@ -35,10 +35,6 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/cats-concourse-task
       branch: master
-  - name: bosh-lite
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/bosh-lite
   - name: diego-release
     type: git
     source:
@@ -78,10 +74,10 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/cf-deployment
       branch: release-candidate
-  - name: lite-stemcell
+  - name: gcp-stemcell
     type: bosh-io-stemcell
     source:
-      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+      name: bosh-google-kvm-ubuntu-trusty-go_agent
   - name: cf-release-cf-deployment
     type: bosh-deployment
     source:
@@ -168,11 +164,11 @@ resources:
 groups:
   - name: buildpacks
     jobs:
-      - bbl-up-bosh-lite
-      - bosh-lite-gcp-networking
-      - deploy-cf-and-diego-to-cf-release
+      - bbl-up
+      - deploy
       - cats
-      - bbl-destroy-bosh-lite
+      - delete-deployment
+      - bbl-destroy
       - ship-it
 <% (supported_languages - %w(java)).each do |language| %>
       - update-<%= language %>-buildpack-bosh-release
@@ -191,7 +187,7 @@ groups:
       - cf-release for java
 
 jobs:
-  - name: bbl-up-bosh-lite
+  - name: bbl-up
     serial: true
     serial_groups: [ cf-release ]
     public: true
@@ -215,8 +211,7 @@ jobs:
           LB_DOMAIN: cf-release.buildpacks-gcp.ci.cf-app.com
           BBL_ENV_NAME: cf-release
           BBL_STATE_DIR: cf-release
-          OPS_FILES: "bosh-lite.yml bosh-lite-runc.yml gcp/bosh-lite-vm-type.yml"
-          IS_BOSH_LITE: true
+          OPS_FILES: "local-dns.yml"
         input_mapping:
           ops-files: bosh-deployment
         ensure:
@@ -224,30 +219,13 @@ jobs:
           params:
             repository: updated-bbl-state
             rebase: true
-
-  - name: bosh-lite-gcp-networking
-    serial: true
-    serial_groups: [ cf-release ]
-    public: true
-    plan:
-      - aggregate:
-        - get: bbl-state
-        - get: public-robots
-          passed: [ bbl-up-bosh-lite ]
-          trigger: true
-        - get: buildpacks-ci
-      - task: add-firewall-rule
-        file: buildpacks-ci/tasks/add-bosh-lite-gcp-firewall-rule/task.yml
+      - task: add-gcp-parent-dns-record
+        file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
         params:
-          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
           ENV_NAME: cf-release
-      - task: add-dns-zone
-        file: buildpacks-ci/tasks/add-gcp-bosh-lite-dns-zone/task.yml
-        params:
           GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
-          ENV_NAME: cf-release
 
-  - name: deploy-cf-and-diego-to-cf-release
+  - name: deploy
     serial: true
     serial_groups: [ cf-release ]
     public: true
@@ -255,11 +233,10 @@ jobs:
       - do:
         - aggregate:
           - get: public-robots
-            passed: [ bosh-lite-gcp-networking ]
+            passed: [ bbl-up ]
             trigger: true
           - get: buildpacks-ci
           - get: bbl-state
-          - get: bosh-lite
           - get: cf-deployment
             resource: cf-deployment-rc
             attempts: 3
@@ -270,7 +247,7 @@ jobs:
             attempts: 3
           - get: cflinuxfs2-bosh-release
             attempts: 3
-          - get: lite-stemcell
+          - get: gcp-stemcell
             attempts: 3
           - get: java-buildpack-github-release
             resource: java-buildpack-github-release
@@ -302,10 +279,6 @@ jobs:
             file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
             params:
               ENV_NAME: cf-release
-          - task: use-bosh-lite-cloud-config
-            file: buildpacks-ci/tasks/use-bosh-lite-cloud-config/task.yml
-            params:
-              ENV_NAME: cf-release
         - put: cf-release-cf-deployment
           params:
             source_file: deployment-source-config/source_file.yml
@@ -314,9 +287,12 @@ jobs:
               - built-buildpacks-artifacts/*.tgz
               - cflinuxfs2-bosh-release/*.tgz
             stemcells:
-              - lite-stemcell/*.tgz
+              - gcp-stemcell/*.tgz
             ops_files:
-              - cf-deployment/operations/bosh-lite.yml
+              - cf-deployment/operations/use-compiled-releases.yml
+              - buildpacks-ci/deployments/operations/no-canaries.yml
+              - cf-deployment/operations/experimental/use-bosh-dns.yml
+              - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
               - bump-buildpacks-opsfile/opsfile.yml
             vars:
               system_domain: cf-release.buildpacks-gcp.ci.cf-app.com
@@ -341,27 +317,27 @@ jobs:
           params:
             submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
         - get: public-robots
-          passed: [ deploy-cf-and-diego-to-cf-release ]
+          passed: [ deploy ]
           trigger: true
         - get: java-buildpack-github-release
           resource: java-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-cf-release ]
+          passed: [ deploy ]
         - get: go-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-cf-release ]
+          passed: [ deploy ]
         - get: nodejs-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-cf-release ]
+          passed: [ deploy ]
         - get: python-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-cf-release ]
+          passed: [ deploy ]
         - get: ruby-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-cf-release ]
+          passed: [ deploy ]
         - get: php-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-cf-release ]
+          passed: [ deploy ]
         - get: staticfile-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-cf-release ]
+          passed: [ deploy ]
         - get: binary-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-cf-release ]
+          passed: [ deploy ]
         - get: dotnet-core-buildpack-github-release
-          passed: [ deploy-cf-and-diego-to-cf-release ]
+          passed: [ deploy ]
       - do:
         - task: copy-cf-acceptance-tests
           file: buildpacks-ci/tasks/copy-cf-acceptance-tests/task.yml
@@ -390,7 +366,24 @@ jobs:
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
-  - name: bbl-destroy-bosh-lite
+  - name: delete-deployment
+    serial: true
+    serial_groups: [ cf-release ]
+    public: true
+    plan:
+      - aggregate:
+        - get: public-robots
+          passed: [ cats ]
+          trigger: true
+        - get: bbl-state
+        - get: buildpacks-ci
+      - task: delete-deployment
+        file: buildpacks-ci/tasks/delete-deployment/task.yml
+        params:
+          DEPLOYMENT_NAME: cf
+          ENV_NAME: cf-release
+
+  - name: bbl-destroy
     serial: true
     serial_groups: [ cf-release ]
     public: true
@@ -400,15 +393,10 @@ jobs:
         - get: bbl-state
         - get: buildpacks-ci
         - get: public-robots
-          passed: [ cats ]
+          passed: [ delete-deployment ]
           trigger: true
-      - task: remove-firewall-rule
-        file: buildpacks-ci/tasks/remove-bosh-lite-gcp-firewall-rule/task.yml
-        params:
-          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
-          ENV_NAME: cf-release
-      - task: remove-gcp-bosh-lite-dns-zone
-        file: buildpacks-ci/tasks/remove-gcp-bosh-lite-dns-zone/task.yml
+      - task: remove-gcp-parent-dns-record
+        file: buildpacks-ci/tasks/remove-gcp-parent-dns-record/task.yml
         params:
           GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
           ENV_NAME: cf-release

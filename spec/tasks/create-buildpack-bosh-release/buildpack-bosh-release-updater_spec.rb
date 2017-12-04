@@ -77,8 +77,8 @@ describe BuildpackBOSHReleaseUpdater do
       subject.write_private_yml
 
       contents = YAML.load_file('config/private.yml')
-      expect(contents['blobstore']['s3']['access_key_id']).to eq 'username'
-      expect(contents['blobstore']['s3']['secret_access_key']).to eq 'password'
+      expect(contents['blobstore']['options']['access_key_id']).to eq 'username'
+      expect(contents['blobstore']['options']['secret_access_key']).to eq 'password'
     end
   end
 
@@ -102,8 +102,8 @@ describe BuildpackBOSHReleaseUpdater do
       end
 
       it 'adds the blob and commits the yml' do
-        expect(subject).to receive(:system).with("bosh -n add blob ../source/test_buildpack-cached-v3.3.3.zip test-buildpack")
-        expect(subject).to receive(:system).with("bosh -n upload blobs")
+        expect(subject).to receive(:system).with("bosh2 -n add-blob ../source/test_buildpack-cached-v3.3.3.zip test-buildpack/test_buildpack-cached-v3.3.3.zip")
+        expect(subject).to receive(:system).with("bosh2 -n upload-blobs")
 
         expect(GitClient).to receive(:add_file).with('config/blobs.yml')
         expect(GitClient).to receive(:safe_commit).with('Updating blobs for test-buildpack at 3.3.3')
@@ -114,7 +114,7 @@ describe BuildpackBOSHReleaseUpdater do
 
     describe '#create_release' do
       it 'creates the release and commits the generated files' do
-        expect(subject).to receive(:system).with "bosh -n create release --final --version 3.3.3 --name test-buildpack --force"
+        expect(subject).to receive(:system).with "bosh2 -n create-release --final --version 3.3.3 --name test-buildpack --force"
 
         expect(GitClient).to receive(:add_file).with "releases/**/*-3.3.3.yml"
         expect(GitClient).to receive(:add_file).with "releases/**/index.yml"
@@ -164,8 +164,8 @@ describe BuildpackBOSHReleaseUpdater do
       end
 
       it 'adds the blob and commits the yml' do
-        expect(subject).to receive(:system).with("bosh -n add blob ../source/java-buildpack-offline-v3.3.3.zip java-buildpack")
-        expect(subject).to receive(:system).with("bosh -n upload blobs")
+        expect(subject).to receive(:system).with("bosh2 -n add-blob ../source/java-buildpack-offline-v3.3.3.zip java-buildpack/java-buildpack-offline-v3.3.3.zip")
+        expect(subject).to receive(:system).with("bosh2 -n upload-blobs")
 
         expect(GitClient).to receive(:add_file).with('config/blobs.yml')
         expect(GitClient).to receive(:safe_commit).with('Updating blobs for java-offline-buildpack at 3.3.3')
@@ -176,7 +176,7 @@ describe BuildpackBOSHReleaseUpdater do
 
     describe '#create_release' do
       it 'creates the release and commits the generated files' do
-        expect(subject).to receive(:system).with "bosh -n create release --final --version 3.3.3 --name java-offline-buildpack --force"
+        expect(subject).to receive(:system).with "bosh2 -n create-release --final --version 3.3.3 --name java-offline-buildpack --force"
 
         expect(GitClient).to receive(:add_file).with "releases/**/*-3.3.3.yml"
         expect(GitClient).to receive(:add_file).with "releases/**/index.yml"

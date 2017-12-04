@@ -1,6 +1,0 @@
-#!/bin/bash
-if [ "$1" = "create" ] && [ "$2" = "release" ] && [ "$3" = "--force" ] && [ "$4" = "--with-tarball" ] && [ "$5" = "--name" ] && [ "$6" = "cflinuxfs2" ] && [ "$7" = "--version" ] ; then
-  echo bosh create release with cflinuxfs2 blob with SHA1: "$(shasum -a 1 blobs/rootfs/cflinuxfs2-1.49.0.tar.gz | awk '{print $1}')"
-  echo version created: "$8"
-fi
-exit 0

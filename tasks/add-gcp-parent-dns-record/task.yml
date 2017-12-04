@@ -7,11 +7,11 @@ image_resource:
     repository: cfbuildpacks/ci
 
 inputs:
-  - name: buildpacks-ci
-  - name: bbl-state
+- name: buildpacks-ci
+- name: bbl-state
 
 run:
-  path: buildpacks-ci/tasks/remove-gcp-bosh-lite-dns-zone/run.sh
+  path: buildpacks-ci/tasks/add-gcp-parent-dns-record/run.sh
 
 params:
   ENV_NAME:

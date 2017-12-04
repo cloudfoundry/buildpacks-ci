@@ -33,14 +33,6 @@ describe 'make-rootfs' do
       end
     end
 
-    it 'generates the bosh lite manifest for the smoke test' do
-      Dir.chdir("#{ci_path}/spec/tasks/overwrite-cflinuxfs2-release") do
-        stdout, _, status = Open3.capture3("#{ci_path}/tasks/overwrite-cflinuxfs2-release/run.sh")
-        expect(status).to be_success
-        expect(stdout).to include("generating bosh lite manifest for smoke test")
-      end
-    end
-
     it 'generates an opsfile to use the version of cflinuxfs2 built' do
       Dir.chdir("#{ci_path}/spec/tasks/overwrite-cflinuxfs2-release") do
         stdout, _, status = Open3.capture3("#{ci_path}/tasks/overwrite-cflinuxfs2-release/run.sh")
@@ -54,7 +46,6 @@ describe 'make-rootfs' do
             "version" => expected_version
           }
         }])
-        expect(stdout).to include("generating bosh lite manifest for smoke test")
       end
     end
 
