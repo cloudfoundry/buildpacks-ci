@@ -19,7 +19,7 @@ Dir.glob("*-buildpack-github-release").each do |github_release|
     }
   }
   Dir.chdir("#{release_name}-bosh-release") do
-    system(%(bosh --parallel 10 sync blobs && bosh create release --force --with-tarball --name #{release_name} --version #{version})) || raise("cannot create #{release_name} #{version}")
+    system(%(bosh2 --parallel 10 sync-blobs && bosh2 create-release --force --tarball dev_releases/#{release_name}/#{release_name}-#{version}.tgz --name #{release_name} --version #{version})) || raise("cannot create #{release_name} #{version}")
     system(%(cp dev_releases/*/*.tgz ../built-buildpacks-artifacts/))
   end
 

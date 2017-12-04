@@ -84,13 +84,6 @@ resources: #####################################################################
       branch: master
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
-  - name: deployments-buildpacks
-    type: git
-    source:
-      uri: {{deployments-git-uri}}
-      private_key: {{deployments-private-key}}
-      branch: master
-
   - name: bosh-lite
     type: git
     source:
@@ -153,7 +146,7 @@ resources: #####################################################################
           file_name: vars-store.yml
           json_key: {{cflinuxfs2-cf-deployment-gcs-service-account-key}}
 
-  - name: cflinuxfs2-rootfs-deployment
+  - name: cflinuxfs2-rootfs-smoke-test-deployment
     type: bosh-deployment
     source:
       deployment: rootfs-smoke-test
@@ -173,10 +166,10 @@ resources: #####################################################################
 
   ## bosh.io stemcell ##
 
-  - name: lite-stemcell
+  - name: gcp-stemcell
     type: bosh-io-stemcell
     source:
-      name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+      name: bosh-google-kvm-ubuntu-trusty-go_agent
 
   ## Docker Image ##
 
@@ -298,7 +291,7 @@ jobs: ##########################################################################
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
-  - name: bbl-up-bosh-lite
+  - name: bbl-up
     serial: true
     serial_groups: [ cflinuxfs2 ]
     public: true
@@ -307,8 +300,9 @@ jobs: ##########################################################################
         - get: cf-deployment-concourse-tasks
         - get: bbl-state
         - get: bosh-deployment
-        - get: deployments-buildpacks
         - get: buildpacks-ci
+        - get: receipt-diff
+          trigger: true
         - get: new-cves
           passed: [ build-rootfs ]
         - get: stack-s3
@@ -319,8 +313,6 @@ jobs: ##########################################################################
           passed: [ build-rootfs ]
         - get: cflinuxfs2
           passed: [ build-rootfs ]
-        - get: receipt-diff
-          trigger: true
       - task: bbl-up
         file: cf-deployment-concourse-tasks/bbl-up/task.yml
         params:
@@ -334,8 +326,7 @@ jobs: ##########################################################################
           LB_DOMAIN: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
           BBL_ENV_NAME: cflinuxfs2
           BBL_STATE_DIR: cflinuxfs2
-          OPS_FILES: "bosh-lite.yml bosh-lite-runc.yml gcp/bosh-lite-vm-type.yml"
-          IS_BOSH_LITE: true
+          OPS_FILES: "local-dns.yml"
         input_mapping:
           ops-files: bosh-deployment
         ensure:
@@ -343,59 +334,29 @@ jobs: ##########################################################################
           params:
             repository: updated-bbl-state
             rebase: true
-
-  - name: bosh-lite-gcp-networking
-    serial: true
-    serial_groups: [ cflinuxfs2 ]
-    public: true
-    plan:
-      - aggregate:
-        - get: bbl-state
-        - get: deployments-buildpacks
-          passed: [ bbl-up-bosh-lite ]
-        - get: new-cves
-          passed: [ bbl-up-bosh-lite ]
-        - get: stack-s3
-          passed: [ bbl-up-bosh-lite ]
-        - get: version
-          passed: [ bbl-up-bosh-lite ]
-          trigger: true
-        - get: receipt-s3
-          passed: [ bbl-up-bosh-lite ]
-        - get: cflinuxfs2
-          passed: [ bbl-up-bosh-lite ]
-        - get: buildpacks-ci
-      - task: add-firewall-rule
-        file: buildpacks-ci/tasks/add-bosh-lite-gcp-firewall-rule/task.yml
+      - task: add-gcp-parent-dns-record
+        file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
         params:
-          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
           ENV_NAME: cflinuxfs2
-      - task: add-dns-zone
-        file: buildpacks-ci/tasks/add-gcp-bosh-lite-dns-zone/task.yml
-        params:
           GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
-          ENV_NAME: cflinuxfs2
 
-  - name: deploy-rootfs-and-cf-and-diego-to-cflinuxfs2
+  - name: deploy
     serial: true
     serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
       - do:
         - aggregate:
-          - get: deployments-buildpacks
-            passed: [ bosh-lite-gcp-networking ]
           - get: new-cves
-            passed: [ bosh-lite-gcp-networking ]
+            passed: [ bbl-up ]
           - get: stack-s3
-            passed: [ bosh-lite-gcp-networking ]
+            passed: [ bbl-up ]
           - get: version
-            passed: [ bosh-lite-gcp-networking ]
-            trigger: true
+            passed: [ bbl-up ]
           - get: receipt-s3
-            passed: [ bosh-lite-gcp-networking ]
+            passed: [ bbl-up ]
           - get: cflinuxfs2
-            passed: [ bosh-lite-gcp-networking ]
+            passed: [ bbl-up ]
           - get: cflinuxfs2-release
             attempts: 3
           - get: buildpacks-ci
@@ -409,31 +370,25 @@ jobs: ##########################################################################
             attempts: 3
           - get: diego-bosh-release
             attempts: 3
-          - get: lite-stemcell
+          - get: gcp-stemcell
             attempts: 3
         - aggregate:
           - task: create-deployment-source-config
             file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
             params:
               ENV_NAME: cflinuxfs2
-          - task: use-bosh-lite-cloud-config
-            file: buildpacks-ci/tasks/use-bosh-lite-cloud-config/task.yml
-            params:
-              ENV_NAME: cflinuxfs2
-          - task: upload-stemcell-to-bosh-lite
-            file: buildpacks-ci/tasks/upload-stemcell-to-bosh-lite/task.yml
-            params:
-              ENV_NAME: cflinuxfs2
           - task: overwrite-cflinuxfs2-release
             file: buildpacks-ci/tasks/overwrite-cflinuxfs2-release/task.yml
             params:
               ROOTFS_RELEASE: cflinuxfs2
-        - put: cflinuxfs2-rootfs-deployment
+        - put: cflinuxfs2-rootfs-smoke-test-deployment
           params:
             source_file: deployment-source-config/source_file.yml
-            manifest: cflinuxfs2-release-artifacts/manifests/bosh-lite/rootfs-smoke-test.yml
+            manifest: cflinuxfs2-release-artifacts/manifests/manifest.yml
             releases:
               - cflinuxfs2-release-artifacts/dev_releases/cflinuxfs2/*.tgz
+            stemcells:
+              - gcp-stemcell/*.tgz
         - task: run-rootfs-smoke-test
           file: buildpacks-ci/tasks/run-rootfs-smoke-test/task.yml
           params:
@@ -445,10 +400,13 @@ jobs: ##########################################################################
             releases:
               - cflinuxfs2-release-artifacts/dev_releases/cflinuxfs2/*.tgz
             stemcells:
-              - lite-stemcell/*.tgz
+              - gcp-stemcell/*.tgz
             ops_files:
-              - cf-deployment/operations/bosh-lite.yml
+              - cf-deployment/operations/use-compiled-releases.yml
+              - buildpacks-ci/deployments/operations/no-canaries.yml
               - cflinuxfs2-release-artifacts/use-dev-release-opsfile.yml
+              - cf-deployment/operations/experimental/use-bosh-dns.yml
+              - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
             vars:
               system_domain: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
         on_failure:
@@ -473,18 +431,16 @@ jobs: ##########################################################################
           params:
             submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
         - get: new-cves
-          passed: [ deploy-rootfs-and-cf-and-diego-to-cflinuxfs2 ]
+          passed: [ deploy ]
         - get: stack-s3
-          passed: [ deploy-rootfs-and-cf-and-diego-to-cflinuxfs2 ]
-        - get: deployments-buildpacks
-          passed: [ deploy-rootfs-and-cf-and-diego-to-cflinuxfs2 ]
+          passed: [ deploy ]
         - get: version
-          passed: [ deploy-rootfs-and-cf-and-diego-to-cflinuxfs2 ]
+          passed: [ deploy ]
           trigger: true
         - get: receipt-s3
-          passed: [ deploy-rootfs-and-cf-and-diego-to-cflinuxfs2 ]
+          passed: [ deploy ]
         - get: cflinuxfs2
-          passed: [ deploy-rootfs-and-cf-and-diego-to-cflinuxfs2 ]
+          passed: [ deploy ]
       - do:
         - task: copy-cf-acceptance-tests
           file: buildpacks-ci/tasks/copy-cf-acceptance-tests/task.yml
@@ -511,25 +467,37 @@ jobs: ##########################################################################
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
-  - name: bbl-destroy-bosh-lite
+  - name: delete-deployment
     serial: true
     serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
       - aggregate:
-        - get: deployments-buildpacks
+        - get: version
           passed: [ cats ]
           trigger: true
+        - get: bbl-state
+        - get: buildpacks-ci
+      - task: delete-deployment
+        file: buildpacks-ci/tasks/delete-deployment/task.yml
+        params:
+          DEPLOYMENT_NAME: cf
+          ENV_NAME: cflinuxfs2
+
+  - name: bbl-destroy
+    serial: true
+    serial_groups: [ cf-release ]
+    public: true
+    plan:
+      - aggregate:
         - get: cf-deployment-concourse-tasks
         - get: bbl-state
         - get: buildpacks-ci
-      - task: remove-firewall-rule
-        file: buildpacks-ci/tasks/remove-bosh-lite-gcp-firewall-rule/task.yml
-        params:
-          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
-          ENV_NAME: cflinuxfs2
-      - task: remove-gcp-bosh-lite-dns-zone
-        file: buildpacks-ci/tasks/remove-gcp-bosh-lite-dns-zone/task.yml
+        - get: version
+          passed: [ delete-deployment ]
+          trigger: true
+      - task: remove-gcp-parent-dns-record
+        file: buildpacks-ci/tasks/remove-gcp-parent-dns-record/task.yml
         params:
           GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
           ENV_NAME: cflinuxfs2

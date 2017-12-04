@@ -1,0 +1,17 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: bbl-state
+run:
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/delete-deployment/run.sh
+params:
+  DEPLOYMENT_NAME:
+  ENV_NAME:

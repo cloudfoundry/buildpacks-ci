@@ -190,6 +190,7 @@ jobs:
               - gcp-stemcell/*.tgz
               - windows2012-stemcell/*.tgz
             ops_files:
+            - cf-deployment/operations/use-compiled-releases.yml
             - diego-release-artifacts/use-diego-dev-release.yml
             - buildpacks-ci/deployments/operations/no-canaries.yml
             - cf-deployment/operations/scale-to-one-az.yml
