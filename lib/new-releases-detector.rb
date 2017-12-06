@@ -143,6 +143,27 @@ class NewReleasesDetector
                      tar zcvf /tmp/setuptools-vX.X.X-SHA.tgz .
                      ```
                      HEREDOC
+    elsif dependency == :libunwind
+      description += <<~HEREDOC
+                     Dockerfile.libunwind
+                     ```
+                     FROM cloudfoundry/$CF_STACK
+
+                     RUN curl -sSL http://download.savannah.gnu.org/releases/libunwind/libunwind-${LIBUNWIND_VERSION}.tar.gz | tar zxfv - -C /usr/local/src \
+                           && cd /usr/local/src/libunwind-${LIBUNWIND_VERSION} \
+                           && ./configure \
+                           && make \
+                           && make install \
+                           && rm -rf /usr/local/src/libunwind-${LIBUNWIND_VERSION}
+                     ```
+
+                     ```
+                     export CF_STACK=cflinuxfs2
+                     export LIBUNWIND_VERSION=1.2
+                     cat Dockerfile.libunwind | envsubst | docker build -t libunwind-${CF_STACK}-${LIBUNWIND_VERSION} -
+                     docker run -v /somehostdir:/built --rm libunwind-${CF_STACK}-${LIBUNWIND_VERSION} /bin/bash -c "cd /usr/local && tar czf /built/libunwind-${CF_STACK}-${LIBUNWIND_VERSION}.tar.gz ./include/*unwind* ./lib/libunwind*"
+                     ```
+                     HEREDOC
     end
 
     {
