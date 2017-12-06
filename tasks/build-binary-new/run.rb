@@ -43,7 +43,7 @@ when 'pipenv'
       run('tar', 'zcvf', "/tmp/pipenv-v#{version}.tgz", '.')
     end
   end
-  sha = Digest::MD5.hexdigest(open("/tmp/pipenv-v#{version}.tgz").read)
+  sha = Digest::SHA256.hexdigest(open("/tmp/pipenv-v#{version}.tgz").read)
   filename = "pipenv-v#{version}-#{sha[0..7]}.tgz"
   FileUtils.mv("/tmp/pipenv-v#{version}.tgz", "artifacts/#{filename}")
 
