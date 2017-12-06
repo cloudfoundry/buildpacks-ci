@@ -19,7 +19,7 @@ story = buildpack_project.create_story(
   name: "Build and/or Include new releases: #{name} #{version}",
   description: "```\n#{data.to_yaml}\n```\n",
   estimate: 1,
-  labels: ['binary_builder', name] + BUILDPACKS,
+  labels: ['deps', name] + BUILDPACKS,
   requested_by_id: ENV['TRACKER_REQUESTER_ID'].to_i,
   owner_ids: [ ENV['TRACKER_REQUESTER_ID'].to_i ]
 )
