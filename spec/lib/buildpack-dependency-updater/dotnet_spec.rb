@@ -138,12 +138,46 @@ describe BuildpackDependencyUpdater do
         expect(dependency_in_manifest["sha256"]).to eq("newSHA256")
       end
 
-      it "updates the dotnet buildpack manifest dependency default with the specified version" do
-        subject.run!
-        manifest = YAML.load_file(manifest_file)
+      context 'the default version of the dotnet sdk is lower than the specified version' do
+        let(:buildpack_manifest_contents) do
+          <<~MANIFEST
+            ---
+            language: dotnet-core
+            default_versions:
+              - name: dotnet
+                version: 1.0.0
+            dependencies: []
+          MANIFEST
+        end
+        let(:new_version) { '1.2.3' }
+        it "updates the dotnet buildpack manifest dependency default with the specified version" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
 
-        default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '1.0.0-preview4-001122'}
-        expect(default_in_manifest["version"]).to eq('1.0.0-preview4-001122')
+          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency}
+          expect(default_in_manifest["version"]).to eq('1.2.3')
+        end
+      end
+
+      context 'the default version of the dotnet sdk is higher than the specified version' do
+        let(:buildpack_manifest_contents) do
+          <<~MANIFEST
+            ---
+            language: dotnet-core
+            default_versions:
+              - name: dotnet
+                version: 1.2.3
+            dependencies: []
+          MANIFEST
+        end
+        let(:new_version) { '1.0.0' }
+        it "does NOT update the dotnet buildpack manifest dependency default with the specified version" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+
+          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency}
+          expect(default_in_manifest["version"]).to eq('1.2.3')
+        end
       end
 
       it 'does not remove a version from the manifest' do
