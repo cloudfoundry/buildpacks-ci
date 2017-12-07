@@ -140,12 +140,13 @@ class BuildpackDependencyUpdater
   def perform_dependency_specific_changes; end
 
   def perform_default_versions_update
-    buildpack_manifest["default_versions"].delete_if { |dep| dep["name"] == dependency }
-    default_dependency_hash = {
-      "name" => dependency,
-      "version" => dependency_version
-    }
-    buildpack_manifest["default_versions"] << default_dependency_hash
+    buildpack_manifest["default_versions"].each do |dep|
+      if dep["name"] == dependency
+        if Gem::Version.new(dependency_version) > Gem::Version.new(dep['version'])
+          dep['version'] = dependency_version
+        end
+      end
+    end
   end
 end
 
