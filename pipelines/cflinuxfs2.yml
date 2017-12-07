@@ -353,6 +353,7 @@ jobs: ##########################################################################
             passed: [ bbl-up ]
           - get: version
             passed: [ bbl-up ]
+            trigger: true
           - get: receipt-s3
             passed: [ bbl-up ]
           - get: cflinuxfs2
