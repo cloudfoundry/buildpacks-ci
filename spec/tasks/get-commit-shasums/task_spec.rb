@@ -4,11 +4,14 @@ require 'spec_helper'
 describe 'get-commit-shasums', :fly do
   before :context do
     @sha_artifacts = Dir.mktmpdir
-    `git init ./spec/tasks/get-commit-shasums`
-    execute("-c tasks/get-commit-shasums/task.yml -i buildpacks-ci=. --include-ignored -i buildpack-checksums=./spec/tasks/get-commit-shasums -i buildpack-artifacts=./spec/tasks/get-commit-shasums/pivotal-buildpacks-cached -o sha-artifacts=#{@sha_artifacts}")
+    @buildpack_checksums = Dir.mktmpdir
+    `rsync -a ./spec/tasks/get-commit-shasums/ #{@buildpack_checksums}/`
+    `git init #{@buildpack_checksums}`
+    execute("-c tasks/get-commit-shasums/task.yml --include-ignored -i buildpacks-ci=. -i buildpack-checksums=#{@buildpack_checksums} -i buildpack-artifacts=#{@buildpack_checksums}/pivotal-buildpacks-cached -o sha-artifacts=#{@sha_artifacts}")
   end
   after(:context) do
     FileUtils.rm_rf @sha_artifacts
+    FileUtils.rm_rf @buildpack_checksums
   end
 
   it 'has a helpful commit message' do
