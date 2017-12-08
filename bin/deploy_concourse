@@ -7,6 +7,6 @@ ruby -rerb -ryaml -rostruct -e "lp = YAML.load(\`lpass show 'Shared-Buildpacks/d
 gcloud compute scp ./deployments/concourse-gcp/manifest.yml pivotal@bosh-bastion-concourse:~/
 rm ./deployments/concourse-gcp/manifest.yml
 
-gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh deploy --tty -d concourse manifest.yml"
+gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh deploy --tty -d concourse manifest.yml --vars-store concourse-cluster-creds.yml"
 
 exit 0

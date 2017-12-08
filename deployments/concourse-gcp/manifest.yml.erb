@@ -3,9 +3,9 @@ name: concourse
 director_uuid: <%= concourse_gcp_bosh_director_uuid %>
 releases:
 - name: concourse
-  version: 3.6.0
-  url: https://bosh.io/d/github.com/concourse/concourse?v=3.6.0
-  sha1: 1257bdcd3181ab0a669bc9e34cd87aff584f007b
+  version: 3.8.0
+  url: https://bosh.io/d/github.com/concourse/concourse?v=3.8.0
+  sha1: 99e134676df72e18c719ccfbd7977bd9449e6fd4
 - name: garden-runc
   version: 1.9.0
   url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.9.0
@@ -13,9 +13,9 @@ releases:
 - name: windows-tools-release
   version: latest
 - name: concourse-windows-worker
-  version: 3.6.0
-  url: https://bosh.io/d/github.com/pivotal-cf-experimental/concourse-windows-worker-release?v=3.6.0
-  sha1: 55c86935e36e0cfcd2ad8ededce0d93d87596ba0
+  version: 3.8.0
+  url: https://bosh.io/d/github.com/pivotal-cf-experimental/concourse-windows-worker-release?v=3.8.0
+  sha1: 34399d9be603d8eb7c0fb84cf49c9ec3052d81c8
 instance_groups:
 - name: web
   instances: 1
@@ -35,6 +35,7 @@ instance_groups:
   - name: atc
     release: concourse
     properties:
+      token_signing_key: ((token_signing_key))
       external_url: https://buildpacks.ci.cf-app.com
       publicly_viewable: true
       basic_auth_username: buildpacks
@@ -70,11 +71,9 @@ instance_groups:
   - name: tsa
     release: concourse
     properties:
-      authorized_keys:
-        - <%= gcp_concourse_windows_worker_public_key %>
-      host_public_key: <%= gcp_concourse_tsa_public_key %>
-      host_key: |
-        <%= gcp_concourse_tsa_private_key.split("\n").join("\n        ") %>
+      host_key: ((tsa_host_key))
+      token_signing_key: ((token_signing_key))
+      authorized_keys: [((worker_key.public_key))]
 - name: worker
   instances: 12
   vm_type: worker
@@ -86,7 +85,9 @@ instance_groups:
   jobs:
   - name: groundcrew
     release: concourse
-    properties: {}
+    properties:
+      drain_timeout: 10m
+      tsa: {worker_key: ((worker_key))}
   - name: baggageclaim
     release: concourse
     properties: {}
@@ -115,10 +116,16 @@ instance_groups:
     properties:
       concourse_windows:
         tsa_host: 10.150.0.2
-        tsa_public_key: <%= gcp_concourse_tsa_public_key %>
-        tsa_worker_private_key: |
-          <%= gcp_concourse_windows_worker_private_key.split("\n").join("\n          ") %>
+        drain_timeout: 10m
+        tsa: {worker_key: ((worker_key))}
 
+variables:
+- name: token_signing_key
+  type: rsa
+- name: tsa_host_key
+  type: ssh
+- name: worker_key
+  type: ssh
 update:
   canaries: 0
   max_in_flight: 30
