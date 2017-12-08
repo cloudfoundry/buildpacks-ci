@@ -5,7 +5,7 @@ describe 'get-commit-shasums', :fly do
   before :context do
     @sha_artifacts = Dir.mktmpdir
     `git init ./spec/tasks/get-commit-shasums`
-    execute("-c tasks/get-commit-shasums/task.yml -i buildpacks-ci=. -i buildpack-checksums=./spec/tasks/get-commit-shasums -i buildpack-artifacts=./spec/tasks/get-commit-shasums/pivotal-buildpacks-cached -o sha-artifacts=#{@sha_artifacts}")
+    execute("-c tasks/get-commit-shasums/task.yml -i buildpacks-ci=. --include-ignored -i buildpack-checksums=./spec/tasks/get-commit-shasums -i buildpack-artifacts=./spec/tasks/get-commit-shasums/pivotal-buildpacks-cached -o sha-artifacts=#{@sha_artifacts}")
   end
   after(:context) do
     FileUtils.rm_rf @sha_artifacts

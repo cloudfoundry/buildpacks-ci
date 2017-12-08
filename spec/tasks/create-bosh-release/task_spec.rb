@@ -18,6 +18,7 @@ describe 'create bosh stacks release task', :fly do
     @access_key_id = 'an_access_key'
     @secret_access_key = 'a_secret_access_key'
     execute('-c tasks/create-bosh-release/task.yml ' \
+            '--include-ignored ' \
             '-i buildpacks-ci=. ' \
             '-i buildpack-zip=./spec/tasks/create-bosh-release/stack-s3 ' \
             '-i version=./spec/tasks/create-bosh-release/version ' \
