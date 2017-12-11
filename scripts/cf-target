@@ -17,10 +17,9 @@ case ARGV[0]
     system('cf', 'api', 'api.bal.buildpacks-gcp.ci.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
     system('cf', 'auth', 'admin', cfg['ci-cf-bal-password']) or raise 'Could not auth'
   when 'dev'
-    system('cf', 'dev', 'target') or raise 'Could not connect'
-    system('cf', 'auth', 'admin' ,'admin') or raise 'Could not auth'
+    system('cf', 'login', '-a', 'api.local.pcfdev.io', '--skip-ssl-validation', '-u', 'admin', '-p', 'admin') or raise 'Could not connect'
   else
-    puts "Usage: #{$0} <edge|lts|dev>"
+    puts "Usage: #{$0} <edge|lts|bal|dev>"
     exit 1
 end
 
