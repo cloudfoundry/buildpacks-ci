@@ -46,12 +46,11 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
   end
 
   def perform_dependency_specific_changes
-    major_version, _minor_version, _ = dependency_version.split(".")
+    major_version, minor_version, _ = dependency_version.split(".")
+    return if minor_version == 'x'
 
-    # Make latest node 4.x.y version default node version for nodejs buildpack
     # Make latest node 6.x.y version default node version for dotnet-core buildpack
-    update_default_versions = (buildpack == "nodejs" && major_version == "4") ||
-                              (buildpack == 'dotnet-core' && major_version == '6')
+    update_default_versions = (buildpack == 'dotnet-core' && major_version == '6')
 
     if update_default_versions
       perform_default_versions_update

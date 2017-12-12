@@ -42,7 +42,7 @@ describe BuildpackDependencyUpdater do
             version: $1
           default_versions:
           - name: node
-            version: 4.4.6
+            version: 4.x
           dependencies:
           - name: node
             version: 0.12.45
@@ -130,11 +130,8 @@ describe BuildpackDependencyUpdater do
           subject.run!
           manifest = YAML.load_file(manifest_file)
 
-          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.6'}
-          expect(default_in_manifest["version"]).to eq('4.4.6')
-
-          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
-          expect(default_in_manifest).to eq(nil)
+          default_in_manifest = manifest["default_versions"].select{ |dep| dep["name"] == dependency }.map{ |dep| dep['version'] }
+          expect(default_in_manifest).to eq(['4.x'])
         end
 
         it 'records which versions were removed' do
@@ -165,11 +162,8 @@ describe BuildpackDependencyUpdater do
           subject.run!
           manifest = YAML.load_file(manifest_file)
 
-          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.6'}
-          expect(default_in_manifest["version"]).to eq('4.4.6')
-
-          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
-          expect(default_in_manifest).to eq(nil)
+          default_in_manifest = manifest["default_versions"].select{ |dep| dep["name"] == dependency }.map{ |dep| dep['version'] }
+          expect(default_in_manifest).to eq(['4.x'])
         end
 
         it 'does not remove any dependencies' do
@@ -197,17 +191,6 @@ describe BuildpackDependencyUpdater do
           expect(dependency_in_manifest["version"]).to eq("4.4.6")
           expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-4.4.6-linux-x64.tgz")
           expect(dependency_in_manifest["sha256"]).to eq("oldSHA256_4_4_6")
-        end
-
-        it "updates the nodejs buildpack manifest dependency default with the specified version" do
-          subject.run!
-          manifest = YAML.load_file(manifest_file)
-
-          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == '4.4.6'}
-          expect(default_in_manifest).to eq(nil)
-
-          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
-          expect(default_in_manifest["version"]).to eq(expected_version)
         end
 
         it 'records which versions were removed' do
