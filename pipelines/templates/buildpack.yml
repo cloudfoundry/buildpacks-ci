@@ -478,7 +478,6 @@ jobs: ##########################################################################
             resource: buildpack-develop
             trigger: true
         - do:
-          - put: cf-brat-space
           - task: brats
             file: buildpacks-ci/tasks/run-bp-brats/task.yml
             input_mapping: {cf-space: cf-brat-space}
@@ -511,7 +510,6 @@ jobs: ##########################################################################
           - get: repo
             resource: buildpack-develop
         - do:
-          - put: cf-brat-space
           - task: brats
             file: buildpacks-ci/tasks/run-shared-brats/task.yml
             params:

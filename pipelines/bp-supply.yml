@@ -17,13 +17,6 @@ resources:
       uri: git@github.com:cloudfoundry/bp-supply.git
       branch: develop
       private_key: {{bp-supply-private-key}}
-  - name: cf-bp-space
-    type: cf-space-resource
-    source:
-      target: api.edge.buildpacks-gcp.ci.cf-app.com
-      username: {{ci-cf-username}}
-      password: {{ci_cf_shared_password}}
-      organization: pivotal
 jobs:
   - name: unit-tests
     plan:
@@ -40,7 +33,6 @@ jobs:
         - get: buildpacks-ci
         - get: bp-supply
           trigger: true
-      - put: cf-bp-space
       - task: integration-tests
         file: buildpacks-ci/tasks/bp-supply/task-integration-tests.yml
         input_mapping: {cf-space: cf-bp-space}
