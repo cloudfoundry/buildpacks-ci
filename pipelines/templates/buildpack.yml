@@ -72,7 +72,7 @@ resources: #####################################################################
     source:
       branch: master
       private_key: {{pivotal-cf-buildpacks-ci-robots}}
-      uri: git@github.com:SUSE/cf-buildpacks-ci-robots
+      uri: git@github.com:SUSE/cf-public-buildpacks-ci-robots
       paths: [ pivnet-metadata/<%= language %>.yml ]
 <% end %>
 
