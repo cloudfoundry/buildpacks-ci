@@ -97,6 +97,8 @@ jobs:
             - cf-deployment/operations/experimental/secure-service-credentials.yml
             - cf-deployment/operations/experimental/use-bosh-dns.yml
             - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
+            - cf-deployment/operations/experimental/enable-traffic-to-internal-networks.yml
+            - cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml
             - buildpacks-ci/deployments/operations/use-latest-garden-windows.yml #FIXME: remove after garden-windows >=0.10.0 in cf-deployment
             - buildpacks-ci/deployments/edge-shared/use-latest-linux-stemcell.yml
             - buildpacks-ci/deployments/edge-shared/use-latest-windows-stemcell.yml
