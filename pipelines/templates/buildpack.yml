@@ -36,16 +36,6 @@ resources: #####################################################################
         - VERSION
         - CHANGELOG
 
-  - name: buildpack-new-version
-    type: git
-    source:
-      uri: git@github.com:<%= organization %>/cf-<%= language %>-buildpack.git
-      private_key: {{<%= language %>-buildpack-private-key}}
-      branch: develop
-      paths:
-        - VERSION
-        - CHANGELOG
-
   - name: buildpack-master
     type: git
     source:
@@ -59,13 +49,6 @@ resources: #####################################################################
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
-<% unless new_brats.include?(language) || no_brats.include?(language) %>
-  - name: brats
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/brats.git
-<% end %>
-
 <% unless %w(apt hwc multi).include? language %>
   - name: pivnet-buildpack-metadata
     type: git
@@ -74,19 +57,6 @@ resources: #####################################################################
       private_key: {{pivotal-cf-buildpacks-ci-robots}}
       uri: git@github.com:SUSE/cf-public-buildpacks-ci-robots
       paths: [ pivnet-metadata/<%= language %>.yml ]
-<% end %>
-
-<% if libbuildpacks.include? language %>
-  - name: libbuildpack
-    type: git
-    webhook_token: ob0aigh3
-    source:
-      uri: https://github.com/cloudfoundry/libbuildpack.git
-<% else %>
-  - name: compile-extensions
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/compile-extensions.git
 <% end %>
 
 <% if language == 'multi' %>
@@ -112,22 +82,6 @@ resources: #####################################################################
       user: {{buildpacks-github-org}}
       repository: cf-<%= language %>-buildpack
       access_token: {{buildpacks-github-token}}
-
-<% if !libbuildpacks.include?(language) %>
-  - name: buildpack-packager
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: cf-buildpack-packager
-      access_token: {{buildpacks-github-token}}
-
-  - name: machete
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: cf-machete
-      access_token: {{buildpacks-github-token}}
-<% end %>
 
   ## S3 Buckets ##
 
@@ -290,148 +244,5 @@ jobs: ##########################################################################
       - put: pivnet-buildpack-metadata
         params:
           repository: pivnet-buildpack-metadata-artifacts
-          rebase: true
-<% end %>
-<% if language == 'php' %>
-  - name: unit-tests
-    serial: true
-    public: true
-    plan:
-      - do:
-        - aggregate:
-          - get: buildpacks-ci
-          - get: buildpack
-            resource: buildpack-develop
-            trigger: true
-        - task: unit-tests
-          file: buildpacks-ci/tasks/php-unit-tests/task.yml
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-<% end %>
-
-  - name: buildpack-to-master
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: repo
-          trigger: true
-          resource: buildpack-new-version
-      - task: merge-to-master
-        file: buildpacks-ci/tasks/buildpack-to-master/task.yml
-        params:
-          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-          GITHUB_REPO: <%= organization %>/cf-<%= language %>-buildpack
-          GITHUB_STATUS_CONTEXT: 'buildpacks-ci/passed-dev-specs'
-          GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI develop specs passed'
-          PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
-<% if libbuildpacks.include? language %>
-  - name: update-libbuildpack
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: libbuildpack
-          trigger: true
-        - get: buildpack
-          resource: buildpack-develop
-      - task: update-libbuildpack
-        file: buildpacks-ci/tasks/update-libbuildpack/task.yml
-        params:
-          LANGUAGE: <%= language %>
-      - put: buildpack-develop
-        params:
-          repository: buildpack-artifacts
-          rebase: true
-<% else %>
-  - name: update-compile-extensions
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: compile-extensions
-          trigger: true
-        - get: buildpack
-          resource: buildpack-develop
-      - task: update-compile-extensions
-        file: buildpacks-ci/tasks/update-compile-extensions/task.yml
-        params: { RUBYGEM_MIRROR: {{rubygem-mirror}}  }
-      - put: buildpack-develop
-        params:
-          repository: buildpack-artifacts
-          rebase: true
-<% end %>
-<% if language == 'multi' %>
-  - name: update-buildpackapplifecycle
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: buildpackapplifecycle
-          trigger: true
-        - get: buildpack
-          resource: buildpack-develop
-      - task: update-buildpackapplifecycle
-        file: buildpacks-ci/tasks/update-buildpackapplifecycle/task.yml
-        params:
-          LANGUAGE: <%= language %>
-      - put: buildpack-develop
-        params:
-          repository: buildpack-artifacts
-          rebase: true
-<% end %>
-<% if !libbuildpacks.include?(language) %>
-  - name: update-buildpack-packager
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: gem
-          resource: buildpack-packager
-          trigger: true
-        - get: repo-with-gemfile
-          resource: buildpack-develop
-      - task: update-buildpack-packager
-        file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
-        params:
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-          GEM_NAME: buildpack-packager
-          GEM_GIT_REPOSITORY: {{buildpack-packager-git-uri-public}}
-          GEMFILE_NAME: cf.Gemfile
-      - put: buildpack-develop
-        params:
-          repository: repo-with-gemfile-artifacts
-          rebase: true
-  - name: update-machete
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: gem
-          resource: machete
-          trigger: true
-        - get: repo-with-gemfile
-          resource: buildpack-develop
-      - task: update-machete
-        file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
-        params:
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-          GEM_NAME: machete
-          GEM_GIT_REPOSITORY: {{machete-git-uri-public}}
-          GEMFILE_NAME: cf.Gemfile
-      - put: buildpack-develop
-        params:
-          repository: repo-with-gemfile-artifacts
           rebase: true
 <% end %>
