@@ -212,7 +212,7 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: specs-edge-master
+  - name: acceptance-tests-on-master
     serial: true
     public: true
     plan:
@@ -288,14 +288,14 @@ jobs: ##########################################################################
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
           passed:
-            - specs-edge-master
+            - acceptance-tests-on-master
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
           passed:
-            - specs-edge-master
+            - acceptance-tests-on-master
         - get: buildpack
           passed:
-            - specs-edge-master
+            - acceptance-tests-on-master
           resource: buildpack-master
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
