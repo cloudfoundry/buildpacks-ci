@@ -147,16 +147,6 @@ resources: #####################################################################
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
-  ## Resource Pools ##
-
-  - name: edge-shared-environments
-    type: pool
-    source:
-      branch: master
-      pool: edge-shared-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:SUSE/cf-public-buildpacks-ci-robots
-
   ## Alerts ##
 
   - name: failure-alert
@@ -212,73 +202,6 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: acceptance-tests-on-master
-    serial: true
-    public: true
-    plan:
-      - put: cf-environments
-        resource: edge-shared-environments
-        params:
-          claim: <%= language %>
-        timeout: 3h
-      - aggregate:
-        - get: buildpacks-ci
-        - get: buildpack
-          passed: [ "detect-new-version-and-upload-artifacts" ]
-          resource: buildpack-master
-          trigger: true
-        - get: repo
-          resource: buildpack-master
-        - get: pivotal-buildpacks
-          resource: pivotal-buildpack
-          passed: [ "detect-new-version-and-upload-artifacts" ]
-          trigger: true
-        - get: pivotal-buildpacks-cached
-          resource: pivotal-buildpack-cached
-          passed: [ "detect-new-version-and-upload-artifacts" ]
-          trigger: true
-      - do:
-<% if libbuildpacks.include?(language) %>
-        - task: ginkgo
-          file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
-          params:
-            STACKS: cflinuxfs2
-            GINKGO_ATTEMPTS: 4
-            GINKGO_NODES: 6
-          privileged: true
-<% else %>
-        - task: rspec
-          file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
-          params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci_cf_shared_password}}
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-          privileged: true
-<% end %>
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
-        on_success:
-          task: github-set-status-success
-          file: buildpacks-ci/tasks/set-status-success/task.yml
-          params:
-            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: <%= organization %>/cf-<%= language %>-buildpack
-            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-master'
-            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge master spec passed'
-            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-        ensure:
-          put: edge-shared-environments
-          params:
-            release: cf-environments
   - name: ship-it
     serial: true
     public: true
@@ -288,15 +211,15 @@ jobs: ##########################################################################
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
           passed:
-            - acceptance-tests-on-master
+          - detect-new-version-and-upload-artifacts
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
           passed:
-            - acceptance-tests-on-master
+          - detect-new-version-and-upload-artifacts
         - get: buildpack
-          passed:
-            - acceptance-tests-on-master
           resource: buildpack-master
+          passed:
+          - detect-new-version-and-upload-artifacts
       - task: check tag not already added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
       - put: buildpack-master
