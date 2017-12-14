@@ -25,6 +25,7 @@ resource_types:
 resources: ############################################################################################################
 
   ## Git ##
+  <% if language == "php" %>
   - name: buildpack-develop
     type: git
     webhook_token: ob0aigh3
@@ -35,6 +36,7 @@ resources: #####################################################################
       ignore_paths:
         - VERSION
         - CHANGELOG
+  <% end %>
 
   - name: buildpack-master
     type: git
