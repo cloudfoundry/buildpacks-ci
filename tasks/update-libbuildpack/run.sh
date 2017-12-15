@@ -11,6 +11,8 @@ export GOBIN=/usr/local/bin
 
 if [ "$LANGUAGE" = "multi" ]; then
   update_dir="src/compile"
+elif [ "$LANGUAGE" = "dotnet-core" ]; then
+  update_dir="src/dotnetcore"
 else
   update_dir="src/$LANGUAGE"
 fi
