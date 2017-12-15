@@ -31,27 +31,7 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
     }
     buildpack_manifest["dependencies"] << dependency_hash
   end
-
   def perform_dependency_specific_changes
-    perform_default_versions_update if !project_json?
-
-    update_dotnet_sdk_tools
+    perform_default_versions_update
   end
-
-  def update_dotnet_sdk_tools
-    tools_file = File.join(buildpack_dir,'dotnet-sdk-tools.yml')
-    tools = YAML.load_file(tools_file)
-
-    if project_json?
-      tools['project_json'].push dependency_version
-    else
-      tools['msbuild'].push dependency_version
-    end
-
-    File.write(tools_file, tools.to_yaml)
-  end
-
-  def project_json?
-    dependency_version.include?('preview1') || dependency_version.include?('preview2')
-  end
-end
+ end
