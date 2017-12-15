@@ -1,6 +1,8 @@
-<% libbuildpacks = %w(apt go hwc multi nodejs python ruby staticfile) %>
-<% new_brats = %w(apt go nodejs python ruby staticfile) %>
+<% libbuildpacks = %w(apt go hwc multi nodejs python ruby staticfile dotnet-core) %>
+<% new_brats = %w(apt go nodejs python ruby staticfile dotnet-core) %>
 <% no_brats = %w(hwc multi) %>
+<% non_published = %(apt hwc multi) %>
+<% non_lts = %(apt hwc) %>
 
 ---
 resource_types:
@@ -44,7 +46,7 @@ resources: #####################################################################
       organization: pivotal
 <% end %>
 
-<% unless %w(apt hwc).include? language %>
+<% unless non_lts.include? language %>
   - name: cf-lts-space
     type: cf-space-resource
     source:
@@ -107,7 +109,7 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/brats.git
 <% end %>
 
-<% unless %w(apt hwc multi).include? language %>
+<% unless non_published.include? language %>
   - name: pivnet-buildpack-metadata
     type: git
     source:
@@ -202,7 +204,7 @@ resources: #####################################################################
 
   ## Pivnet Release ##
 
-<% unless %w(apt hwc multi).include? language %>
+<% unless non_published.include? language %>
   - name: pivnet-production
     type: pivnet
     source:
@@ -242,7 +244,7 @@ resources: #####################################################################
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
-<% unless %w(apt hwc).include? language %>
+<% unless non_lts.include? language %>
   - name: lts-shared-environments
     type: pool
     source:
@@ -401,7 +403,7 @@ jobs: ##########################################################################
           put: edge-shared-environments
           params:
             release: cf-environments
-<% unless %w(apt hwc).include? language %>
+<% unless non_lts.include? language %>
   - name: specs-lts-master
     serial: true
     public: true
@@ -482,20 +484,20 @@ jobs: ##########################################################################
         - get: pivotal-buildpacks-cached
           resource: pivotal-buildpack-cached
           passed:
-            <% unless %w(apt hwc).include? language %>
+            <% unless non_lts.include? language %>
             - specs-lts-master
             <% end %>
             - specs-edge-master
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
           passed:
-            <% unless %w(apt hwc).include? language %>
+            <% unless non_lts.include? language %>
             - specs-lts-master
             <% end %>
             - specs-edge-master
         - get: buildpack
           passed:
-            <% unless %w(apt hwc).include? language %>
+            <% unless non_lts.include? language %>
             - specs-lts-master
             <% end %>
             - specs-edge-master
@@ -542,7 +544,7 @@ jobs: ##########################################################################
             - buildpack-artifacts/*-buildpack-v*.zip
             - buildpack-artifacts/*-buildpack-v*.zip.SHA256SUM.txt
 
-<% unless %w(apt hwc multi).include? language %>
+<% unless non_published.include? language %>
   - name: buildpack-to-pws
     serial: true
     public: true
@@ -768,7 +770,7 @@ jobs: ##########################################################################
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge develop spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
-<% unless %w(apt hwc).include? language %>
+<% unless non_lts.include? language %>
   - name: specs-lts-integration-develop
     serial: true
     public: true
