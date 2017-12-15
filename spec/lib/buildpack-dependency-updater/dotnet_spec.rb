@@ -104,13 +104,6 @@ describe BuildpackDependencyUpdater do
         expect(manifest['dependencies'].select { |d| d['name'] == dependency}.count).to eq 5
       end
 
-      it 'it is added to sdk tools file' do
-        subject.run!
-        sdk_tools = YAML.load_file(sdk_tools_file)
-
-        expect(sdk_tools['project_json'].last).to eq '1.0.0-preview2-009988'
-      end
-
       it "does not update the dotnet buildpack manifest dependency default with the specified version" do
         subject.run!
         manifest = YAML.load_file(manifest_file)
@@ -185,13 +178,6 @@ describe BuildpackDependencyUpdater do
         manifest = YAML.load_file(manifest_file)
 
         expect(manifest['dependencies'].select { |d| d['name'] == dependency}.count).to eq 5
-      end
-
-      it 'it is added to sdk tools file' do
-        subject.run!
-        sdk_tools = YAML.load_file(sdk_tools_file)
-
-        expect(sdk_tools['msbuild'].last).to eq '1.0.0-preview4-001122'
       end
 
       it 'records that no versions were removed' do
