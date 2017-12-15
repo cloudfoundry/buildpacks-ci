@@ -22,6 +22,7 @@ RUN apt-get update \
   module-init-tools \
   npm \
   php5 \
+  phantomjs \
   python-dev \
   python-pip \
   shellcheck \
