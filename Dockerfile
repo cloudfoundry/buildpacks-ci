@@ -4,6 +4,7 @@ ENV LANG="C.UTF-8"
 
 COPY config/apt-key.gpg /tmp/apt-key.gpg
 RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
+  && echo "deb http://ftp.debian.org/debian jessie-backports main" | tee -a /etc/apt/sources.list.d/jessie-backports.list \
   && apt-key add /tmp/apt-key.gpg
 
 RUN apt-get update \
