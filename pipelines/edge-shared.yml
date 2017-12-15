@@ -102,7 +102,8 @@ jobs:
             - cf-deployment/operations/experimental/secure-service-credentials-windows-cell.yml
             - cf-deployment/operations/experimental/disable-consul.yml
             - cf-deployment/operations/experimental/disable-consul-windows.yml
-            - cf-deployment-develop/operations/experimental/enable-traffic-to-internal-networks.yml
+            - cf-deployment/operations/experimental/enable-traffic-to-internal-networks.yml
+            - cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml
             - buildpacks-ci/deployments/operations/no-canaries.yml
             - buildpacks-ci/deployments/edge-shared/num-cells.yml
             vars:
