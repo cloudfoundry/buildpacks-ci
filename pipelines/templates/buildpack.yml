@@ -1,8 +1,8 @@
-<% libbuildpacks = %w(apt go hwc multi nodejs python ruby staticfile dotnet-core) %>
+<% libbuildpacks = %w(apt credhub go hwc multi nodejs python ruby staticfile dotnet-core) %>
 <% new_brats = %w(apt go nodejs python ruby staticfile dotnet-core) %>
-<% no_brats = %w(hwc multi) %>
-<% non_published = %(apt hwc multi) %>
-<% non_lts = %(apt hwc) %>
+<% no_brats = %w(credhub hwc multi) %>
+<% non_published = %(apt credhub hwc multi) %>
+<% non_lts = %(apt credhub hwc) %>
 
 ---
 resource_types:
