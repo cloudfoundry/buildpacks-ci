@@ -2,10 +2,11 @@ FROM ruby:2.3.1-slim
 
 ENV LANG="C.UTF-8"
 
-COPY config/apt-key.gpg /tmp/apt-key.gpg
+COPY config/apt-key.gpg config/google-chrome-apt-key.pub /tmp/
 RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
-  && echo "deb http://ftp.debian.org/debian jessie-backports main" | tee -a /etc/apt/sources.list.d/jessie-backports.list \
-  && apt-key add /tmp/apt-key.gpg
+  && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
+  && apt-key add /tmp/apt-key.gpg \
+  && apt-key add /tmp/google-chrome-apt-key.pub
 
 RUN apt-get update \
   && apt-get -y install \
@@ -23,12 +24,12 @@ RUN apt-get update \
   module-init-tools \
   npm \
   php5 \
-  phantomjs \
   python-dev \
   python-pip \
   shellcheck \
   wget \
-  zip && \
+  zip \
+  google-chrome-stable && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN curl -sSL https://get.docker.com/ | sh
@@ -44,6 +45,12 @@ RUN wget -q https://releases.hashicorp.com/vagrant/1.8.5/vagrant_1.8.5_x86_64.de
 RUN vagrant plugin install vagrant-aws --verbose
 ENV PATH /usr/bin:$PATH
 RUN echo $PATH && vagrant box add cloudfoundry/bosh-lite --provider aws
+
+# download and install chromedriver
+ RUN wget -O chromedriver.zip 'https://chromedriver.storage.googleapis.com/2.34/chromedriver_linux64.zip' \
+   && [ e42a55f9e28c3b545ef7c7727a2b4218c37489b4282e88903e4470e92bc1d967 = $(shasum -a 256 chromedriver.zip | cut -d' ' -f1) ] \
+   && unzip chromedriver.zip -d /usr/local/bin/ \
+   && rm chromedriver.zip
 
 # composer is a package manager for PHP apps
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
