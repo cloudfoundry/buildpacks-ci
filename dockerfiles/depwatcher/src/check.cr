@@ -10,17 +10,17 @@ when "rubygems"
   versions = Depwatcher::Rubygems.check(source["name"].to_s)
 when "pypi"
   versions = Depwatcher::Pypi.check(source["name"].to_s)
-when "github_tags"
-  versions = Depwatcher::GithubTags.check(source["name"].to_s, source["regexp"].to_s)
+when "ruby_lang"
+  versions = Depwatcher::RubyLang.check
 else
   raise "Unkown type: #{source["type"]}"
 end
 
 version = data["version"]?
 if version
-  ref = SemanticVersion.new(version["ref"].to_s)
+  ref = SemanticVersion.new(version["ref"].to_s) rescue nil
   versions.reject! do |v|
     SemanticVersion.new(v.ref) < ref
-  end
+  end if ref
 end
 puts versions.to_json

@@ -16,6 +16,6 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/tasks/build-binary-new/run.rb
+    - buildpacks-ci/tasks/build-binary-new/build.rb
 params:
   DEPENDENCY:
