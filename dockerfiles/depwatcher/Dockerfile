@@ -9,7 +9,7 @@ FROM ubuntu:xenial
 
 RUN \
   apt-get update && \
-  apt-get install -y apt-transport-https && \
+  apt-get install -y apt-transport-https libxml2-dev && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --from=0 /src/bin/check /opt/resource/check

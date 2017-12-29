@@ -19,8 +19,10 @@ tracker_story_id = build.dig('tracker_story_id')
 out_data = {
   tracker_story_id: tracker_story_id,
   version: version,
-  source: { url: url, md5: data.dig('version', 'md5_digest') }
+  source: { url: url }
 }
+out_data[:source][:md5] = data.dig('version', 'md5_digest') if data.dig('version', 'md5_digest')
+out_data[:source][:sha256] = data.dig('version', 'sha256') if data.dig('version', 'sha256')
 
 def run(*args)
   system(*args)
@@ -60,6 +62,19 @@ when 'setuptools'
 
   filename = File.basename(url).gsub(/(\.(zip|tar\.gz|tar\.xz|tgz))$/, "-#{sha[0..7]}\\1")
   File.write("artifacts/#{filename}", res)
+
+  out_data.merge!({
+    sha256: sha,
+    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+  })
+when 'ruby'
+  Dir.chdir('binary-builder') do
+    run('./bin/binary-builder', '--name=ruby', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
+  end
+  old_file = "binary-builder/ruby-#{version}-linux-x64.tgz"
+  sha = Digest::SHA256.hexdigest(open(old_file).read)
+  filename = File.basename(old_file).gsub(/(\.tgz)$/, "-#{sha[0..7]}\\1")
+  FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
     sha256: sha,

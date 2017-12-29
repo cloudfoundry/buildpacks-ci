@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+require 'yaml'
+
+class Dependency
+  attr_reader :hash
+
+  def initialize(hash)
+    @hash = hash
+  end
+
+  def name
+    @hash['name']
+  end
+
+  def version
+    Gem::Version.new(@hash['version']) rescue @hash['version']
+  end
+
+  def encode_with coder
+    coder.tag = nil
+    coder.style = Psych::Nodes::Mapping::BLOCK
+    %w(name version uri sha256 cf_stacks).each do |k|
+      coder.add k, @hash[k]
+    end
+  end
+end
+
+manifest = YAML.load_file('manifest.yml')
+manifest['dependencies'] = manifest['dependencies'].map { |d| Dependency.new(d) }.sort_by { |d| [ d.name, d.version ] }
+
+open('manifest.yml', 'w') do |f|
+  f.puts manifest.to_yaml
+end

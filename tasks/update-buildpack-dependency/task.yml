@@ -6,6 +6,7 @@ image_resource:
     repository: cloudfoundry/cflinuxfs2
 inputs:
   - name: buildpack
+  - name: buildpack-master
   - name: buildpacks-ci
   - name: source
   - name: builds
@@ -16,3 +17,6 @@ run:
   args:
     - -cl
     - buildpacks-ci/tasks/update-buildpack-dependency/run.rb
+params:
+  VERSION_LINE:
+  KEEP_MASTER:
