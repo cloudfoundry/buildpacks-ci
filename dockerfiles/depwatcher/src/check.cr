@@ -10,6 +10,8 @@ when "rubygems"
   versions = Depwatcher::Rubygems.check(source["name"].to_s)
 when "pypi"
   versions = Depwatcher::Pypi.check(source["name"].to_s)
+when "github_tags"
+  versions = Depwatcher::GithubTags.check(source["name"].to_s, source["regexp"].to_s)
 else
   raise "Unkown type: #{source["type"]}"
 end
