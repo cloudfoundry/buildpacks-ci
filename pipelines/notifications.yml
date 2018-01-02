@@ -69,6 +69,7 @@ resources:
     source:
       owner: cloudfoundry
       repository: cflinuxfs2
+      access_token: {{buildpacks-github-token}}
   - name: cves-email
     type: email-sender
     source:
