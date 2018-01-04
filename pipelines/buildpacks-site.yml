@@ -59,3 +59,4 @@ jobs:
       - put: buildpacks-bucket
         params:
           file: buildpacks-json/buildpacks.json
+          acl: public-read
