@@ -235,7 +235,6 @@ class NewReleasesDetector
       openjdk:         -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys },
       php:             -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
       python:          -> { Nokogiri::HTML.parse(open('https://www.python.org/downloads/')).css('.release-number a').map{|a|a.text.gsub(/.*Python\s*/, 'v')} },
-      ruby:            -> { Octokit.tags('ruby/ruby').map(&:name).grep(/^v/) },
       yarn:            -> { Octokit.releases('yarnpkg/yarn').select{|r| !r.prerelease}.map(&:tag_name) },
     }
   end
