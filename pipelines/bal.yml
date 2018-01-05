@@ -13,6 +13,12 @@ resource_types:
     source:
       repository: cloudfoundry/bosh-deployment-resource
 resources:
+  - name: monday-funday
+    type: cron
+    source:
+      expression: 0 5 * * 1
+      location: {{current-timezone}}
+
   - name: concourse2tracker
     type: concourse2tracker
 
