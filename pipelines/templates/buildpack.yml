@@ -1,6 +1,6 @@
 <% libbuildpacks = %w(apt credhub go hwc multi nginx nodejs python ruby staticfile dotnet-core) %>
 <% new_brats = %w(apt go nginx nodejs python ruby staticfile dotnet-core) %>
-<% no_brats = %w(credhub hwc multi) %>
+<% no_brats = %w(credhub hwc multi nginx) %>
 <% non_published = %(apt credhub hwc multi nginx) %>
 <% non_lts = %(apt credhub hwc) %>
 
