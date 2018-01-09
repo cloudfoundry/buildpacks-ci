@@ -12,6 +12,8 @@ when "pypi"
   versions = Depwatcher::Pypi.check(source["name"].to_s)
 when "ruby_lang"
   versions = Depwatcher::RubyLang.check
+when "python"
+  versions = Depwatcher::Python.check
 else
   raise "Unkown type: #{source["type"]}"
 end
