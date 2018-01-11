@@ -118,6 +118,8 @@ instance_groups:
         tsa_host: 10.150.0.2
         drain_timeout: 10m
         tsa: {worker_key: ((worker_key))}
+        tsa_public_key: ((tsa_host_key.public_key))
+        tsa_worker_private_key: ((worker_key.private_key))
 
 variables:
 - name: token_signing_key
