@@ -87,8 +87,8 @@ RUN wget -O spiff.zip 'https://github.com/cloudfoundry-incubator/spiff/releases/
 RUN chmod 755 /usr/bin/spiff
 
 # Ensure Concourse Filter binary is present
-RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.0.3/concourse-filter' \
-  && [ 78dde97f155a73439834261dd7dce3f622c1aba79c487d8bc4d187ac3f4f407a = $(shasum -a 256 concourse-filter | cut -d' ' -f1) ] \
+RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.0.4/concourse-filter' \
+  && [ 2bcad41417bf5bdc545a0912c30d9c466abd4ed0cffa6b02b678f06f71a73bb8 = $(shasum -a 256 concourse-filter | cut -d' ' -f1) ] \
   && mv concourse-filter /usr/local/bin \
   && chmod +x /usr/local/bin/concourse-filter
 
