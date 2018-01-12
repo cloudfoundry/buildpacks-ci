@@ -2,7 +2,7 @@
   pipenv: { python: {} },
   setuptools: { python: {} },
   ruby: { ruby: { line: "minor", keep_master: true } },
-  python: {},
+  python: { python: { line: "minor", keep_master: true } },
   # node: { node: { line: "major", keep_master: true }, ruby: { line: "major", keep_master: false } },
 } %>
 resource_types:
