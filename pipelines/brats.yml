@@ -96,11 +96,13 @@ jobs:
     serial: true
     public: true
     plan:
+<% unless new_brats.include?(language) %>
       - put: cf-environments
         resource: lts-shared-environments
         params:
           claim: <%= language %>
         timeout: 3h
+<% end %>
       - aggregate:
         - get: buildpacks-ci
 <% if new_brats.include?(language) %>
@@ -133,20 +135,24 @@ jobs:
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+<% unless new_brats.include?(language) %>
         ensure:
           put: lts-shared-environments
           params:
             release: cf-environments
 <% end %>
+<% end %>
   - name: brats-<%= language %>-edge
     serial: true
     public: true
     plan:
+<% unless new_brats.include?(language) %>
       - put: cf-environments
         resource: edge-shared-environments
         params:
           claim: <%= language %>
         timeout: 3h
+<% end %>
       - aggregate:
         - get: buildpacks-ci
 <% if new_brats.include?(language) %>
@@ -179,10 +185,12 @@ jobs:
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+<% unless new_brats.include?(language) %>
         ensure:
           put: edge-shared-environments
           params:
             release: cf-environments
+<% end %>
 <% end %>
 
   - name: update-buildpack-packager
