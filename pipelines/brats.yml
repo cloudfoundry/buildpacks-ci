@@ -1,5 +1,5 @@
 <% languages = %w(apt binary dotnet-core go hwc java multi nodejs php python ruby staticfile) %>
-<% new_brats = %w(apt go nodejs ruby) %>
+<% new_brats = %w(apt dotnet-core go nodejs python ruby staticfile) %>
 <% not_lts = %w(apt) %>
 
 ---
