@@ -213,6 +213,7 @@ class NewReleasesDetector
       apr:             -> { Nokogiri::HTML.parse(open('https://apr.apache.org/download.cgi')).css('a[name=apr1] strong').map{|a|a.text.gsub(/APR\s+(\S+).*/, '\1')} },
       apr_util:        -> { Nokogiri::HTML.parse(open('https://apr.apache.org/download.cgi')).css('a[name=aprutil1] strong').map{|a|a.text.gsub(/APR\-util\s+(\S+).*/, '\1')} },
       bundler:         -> { Octokit.tags('bundler/bundler').map(&:name).grep(/^v/) },
+      rubygems:        -> { Octokit.tags('rubygems/rubygems').map(&:name).grep(/^v/) },
       bower:           -> { JSON.parse(open('https://registry.npmjs.org/bower').read)['versions'].keys },
       composer:        -> { Octokit.releases('composer/composer').map(&:tag_name) },
       dotnet:          -> { Octokit.tags('dotnet/cli').map(&:name).grep(/^v[0-9]/) },
@@ -260,7 +261,7 @@ class NewReleasesDetector
       end
 
       versions_if_found.compact.uniq.sort
-    when :bundler
+    when :bundler, :rubygems
       tags.map { |tag| tag.gsub(/v/,"")}
     when :node
       tags.map { |tag| tag.gsub(/v/,"")}
