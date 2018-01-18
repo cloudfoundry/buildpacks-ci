@@ -9,7 +9,7 @@ version = data["version"]
 
 case type = source["type"].to_s
 when "rubygems"
-  ## No-op
+  version = Depwatcher::Rubygems.in(source["name"].to_s, version["ref"].to_s)
 when "pypi"
   version = Depwatcher::Pypi.in(source["name"].to_s, version["ref"].to_s)
 when "ruby_lang"
