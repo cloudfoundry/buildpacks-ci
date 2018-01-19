@@ -21,10 +21,16 @@ resources:
       private_key: {{brats-private-key}}
       branch: master
 
-  - name: nightly-trigger
+  - name: nightly-trigger-1
     type: cron
     source:
       expression: 0 20 * * *
+      location: {{current-timezone}}
+
+  - name: nightly-trigger-2
+    type: cron
+    source:
+      expression: 2 20 * * *
       location: {{current-timezone}}
 
   - name: buildpacks-ci
@@ -90,7 +96,7 @@ resources:
 <% end %>
 
 jobs:
-<% languages.each do |language| %>
+<% languages.each.with_index do |language,index| %>
 <% unless not_lts.include?(language) %>
   - name: brats-<%= language %>-lts
     serial: true
@@ -111,7 +117,7 @@ jobs:
 <% else %>
         - get: brats
 <% end %>
-        - get: nightly-trigger
+        - get: nightly-trigger-<%= (index % 2) + 1 %>
           trigger: true
       - do:
         - put: cf-brat-space
@@ -161,7 +167,7 @@ jobs:
 <% else %>
         - get: brats
 <% end %>
-        - get: nightly-trigger
+        - get: nightly-trigger-<%= (index % 2) + 1 %>
           trigger: true
       - do:
         - put: cf-brat-space
