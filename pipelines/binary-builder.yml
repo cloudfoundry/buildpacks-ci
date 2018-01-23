@@ -134,7 +134,7 @@ groups: ########################################################################
     - build-<%= dependency %>
 <% end %>
 
-  <% integration_spec_names = %w(bundler glide go godep dep httpd jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag) %>
+  <% integration_spec_names = %w(bundler glide go godep dep httpd jruby nginx nodejs php5 php7 php71 php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag) %>
   - name: binary-builder-specs
     jobs:
     - binary-builder-specs
@@ -170,9 +170,10 @@ jobs: ##########################################################################
         - get: binary-builder
           trigger: true
       - do:
-        <% integration_spec_names = %w(bundler glide go godep dep httpd jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag) %>
+        <% integration_spec_names = %w(bundler glide go godep dep httpd jruby nginx nodejs php5 php7 php71 php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag) %>
         - task: all-expected-integration-specs-will-run
           file: buildpacks-ci/tasks/check-for-binary-builder-integration-spec-presence/task.yml
+          image: docker-stack-rootfs
           params:
             SPEC_NAMES: <%= integration_spec_names.join(',') %>
         - task: all-unit-tests
@@ -197,6 +198,7 @@ jobs: ##########################################################################
         - aggregate:
           - task: integration-<%= spec_name %>
             file: buildpacks-ci/tasks/run-binary-builder-integration-specs/task.yml
+            image: docker-stack-rootfs
             params:
               SPEC_TO_RUN: <%= spec_name %>
               RUBYGEM_MIRROR: {{rubygem-mirror}}
