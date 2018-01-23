@@ -643,7 +643,11 @@ jobs: ##########################################################################
               STACKS: cflinuxfs2
               GINKGO_ATTEMPTS: 4
               GINKGO_NODES: 6
+<% if skip_docker_start.include?(language) %>
+              SKIP_DOCKER_START: true
+<% else %>
             privileged: true
+<% end %>
 <% else %>
           - task: rspec
             file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
