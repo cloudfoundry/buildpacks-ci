@@ -3,6 +3,7 @@
 <% no_brats = %w(credhub hwc multi nginx) %>
 <% non_published = %(apt credhub hwc multi nginx) %>
 <% non_lts = %(apt credhub hwc) %>
+<% skip_docker_start = %w(binary) %>
 
 ---
 resource_types:
@@ -369,7 +370,11 @@ jobs: ##########################################################################
             STACKS: cflinuxfs2
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 6
+<% if skip_docker_start.include?(language) %>
+            SKIP_DOCKER_START: true
+<% else %>
           privileged: true
+<% end %>
 <% else %>
         - task: rspec
           file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
@@ -439,7 +444,11 @@ jobs: ##########################################################################
             STACKS: cflinuxfs2
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 6
+<% if skip_docker_start.include?(language) %>
+            SKIP_DOCKER_START: true
+<% else %>
           privileged: true
+<% end %>
 <% else %>
         - task: rspec
           file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
