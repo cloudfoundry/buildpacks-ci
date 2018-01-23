@@ -12,7 +12,9 @@ export PATH=$GOBIN:$PATH
 
 ./scripts/unit.sh
 
-echo "Start Docker"
-../buildpacks-ci/scripts/start-docker >/dev/null
+if [[ ! -z ${SKIP_DOCKER_START:-} ]]; then
+  echo "Start Docker"
+  ../buildpacks-ci/scripts/start-docker >/dev/null
+fi
 
 ./scripts/integration.sh
