@@ -12,10 +12,8 @@ class DavosClient
   def change(story_id, params)
     return if story_id.to_s.empty?
 
-    Net::HTTP.post(
-      URI("https://davos.cfapps.io/product_stories/#{story_id}"),
-      URI.encode_www_form(params),
-      'Authorization' => "Bearer #{@token}"
-    )
+    client = Net::HTTP.new('davos.cfapps.io', 443)
+    client.use_ssl = true
+    client.post("/product_stories/#{story_id}", URI.encode_www_form(params), 'Authorization' => "Bearer #{@token}")
   end
 end
