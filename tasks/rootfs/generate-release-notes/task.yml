@@ -1,0 +1,24 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: previous-rootfs-release
+  - name: buildpacks-ci
+  - name: version
+  - name: new-cves
+  - name: rootfs
+outputs:
+  - name: release-body
+  - name: new-cves-artifacts
+run:
+  path: bash
+  args:
+    - "-cl"
+    - "buildpacks-ci/tasks/rootfs/generate-release-notes/run.rb"
+params:
+  STACK:
+  GITHUB_USERNAME:
+  GITHUB_PASSWORD:

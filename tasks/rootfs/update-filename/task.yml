@@ -1,0 +1,14 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: stack-s3
+  - name: version
+outputs:
+  - name: rootfs-archive
+run:
+  path: buildpacks-ci/tasks/rootfs/update-filename/run.sh
