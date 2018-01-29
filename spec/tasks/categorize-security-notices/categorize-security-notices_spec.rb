@@ -6,6 +6,7 @@ require_relative '../../../tasks/categorize-security-notices/categorize-security
 
 describe CategorizeSecurityNotices do
   let(:tracker_client) {double "tracker_client"}
+  let(:davos_client) {double "davos client"}
   let(:stories_file) { Tempfile.new }
   let(:stack_receipt) { Tempfile.new }
   let(:story_content) do <<-STORY
@@ -21,23 +22,20 @@ describe CategorizeSecurityNotices do
                             libkrb5-26-heimdal 1.7~git20150920+dfsg-4ubuntu1.16.04.1
 
                             ---
+                            #### **Resolution Instructions**
 
-                            **Instructions**
+                            ###### Step 1
 
-                            ---
+                            Please click the resolution link below to acknowledge receipt of the notice.
 
-                            **Are you affected?**
+                            ###### Step 2
 
-                            To notify security teams that you are **not affected** by this security notice, please label this story with`unaffected`and ensure that it is finished, delivered, and accepted. Please do this at your soonest possible convenience.
+                            Once you have determined whether the vulnerability affects your product, click
+                            the resolution link again to provide the appropriate resolution information.
 
-                            If you **are affected** by this security notice, please accept this story once a fix is available for consumers of your product.
+                            #### **Resolution Link**
 
-                            **What versions are affected?**
-
-                            If possible, please provide affected and fixed product version information by labelling this story. Label this story `affected-VERSION` (ex. `affected-1.2.3` or `affected-43x`) to provide us with affected version information. Label this story `fixed-VERSION` (ex. `fixed-1.2.4` or `fixed-44x`) to provide fixed version information. Any number of either type of label is acceptable, and the version information can be free-form. For example, if versions 1.2.1 and 1.2.3-1.4.5 are affected by the vulnerability, and version 1.4.6 fixes it, you might label the story:
-                            ````
-                            affected-1.2.1  affected-1.2.3-1.4.5  fixed-1.4.6
-                            ````
+                            [Click here to respond to this notice.](https://davos.cfapps.io/product_stories/4567)
                             STORY
                         end
 
@@ -45,19 +43,20 @@ describe CategorizeSecurityNotices do
                                                                  "description": "#{story_content}",
                                                                  "labels": ["cflinuxfs2", "security-notice", "some-label"] },
                                                                { "id": "456",
-                                                                 "description": "**Trusty Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n\n",
+                                                                 "description": "**Trusty Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n\n[Click here to respond to this notice.](https://davos.cfapps.io/product_stories/1289)\n",
                                                                  "labels": ["cflinuxfs2", "security-notice", "some-other-label"] } ]) }})}
 
   let(:receipt_content) { "ii  libkrb5-26-heimdal:amd64           1.6~git20131207+dfsg-1ubuntu1.4            amd64        Heimdal Kerberos - libraries\n" +
                           "ii  evince   3.10.3-0ubuntu10.3\n" +
                           "ii  evince-common    3.10.2-0ubuntu10.3\n"}
 
-  subject { CategorizeSecurityNotices.new(tracker_client, stories_file.path, stack_receipt.path) }
+  subject { CategorizeSecurityNotices.new(tracker_client, stories_file.path, stack_receipt.path, davos_client) }
 
   before(:each) do
     allow(tracker_client).to receive(:add_label_to_story).with(anything)
     allow(tracker_client).to receive(:point_story).with(anything)
     allow(tracker_client).to receive(:change_story_state).with(anything)
+    allow(davos_client).to receive(:change).with(anything, anything)
 
     stories_file.write(stories_json)
     stories_file.close
@@ -67,10 +66,12 @@ describe CategorizeSecurityNotices do
 
   it "labels any stories unrelated to the rootfs with 'unaffected', points them with 0, and delivers them" do
     expect(tracker_client).to receive(:add_label_to_story).with(story: { "id" => "456",
-                                                                         "description" => "**Trusty Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n\n",
+                                                                         "description" => "**Trusty Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n\n[Click here to respond to this notice.](https://davos.cfapps.io/product_stories/1289)\n",
                                                                          "labels" => ["cflinuxfs2", "security-notice", "some-other-label"] }, label: "unaffected")
     expect(tracker_client).to receive(:point_story).with(story_id: "456", estimate: 0)
     expect(tracker_client).to receive(:change_story_state).with(story_id: "456", current_state: "delivered")
+
+    expect(davos_client).to receive(:change).with('1289', status: 'unaffected')
 
     subject.run
   end
@@ -81,6 +82,8 @@ describe CategorizeSecurityNotices do
                                                                          "labels" => ["cflinuxfs2", "security-notice", "some-label"] }, label: "affected")
     expect(tracker_client).to receive(:point_story).with(story_id: "123", estimate: 0)
     expect(tracker_client).to receive(:change_story_state).with(story_id: "123", current_state: "started")
+
+    expect(davos_client).to receive(:change).with('4567', status: 'acknowledged')
 
     subject.run
   end

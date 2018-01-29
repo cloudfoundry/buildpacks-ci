@@ -98,7 +98,7 @@ jobs:
           TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
           TRACKER_PROJECT_REQUESTER: {{cf-buildpacks-requester-id}}
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-
+          DAVOS_TOKEN: {{davos_token}}
 
   - name: new-releases
     serial: true
