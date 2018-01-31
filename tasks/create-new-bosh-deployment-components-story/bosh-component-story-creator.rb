@@ -78,7 +78,6 @@ class BoshComponentStoryCreator
                      1. Run the `bin/deploy_concourse` script from root
                      1. git push when satisfied
                      DESCRIPTION
-    end
 
     tracker_client = TrackerApi::Client.new(token: ENV.fetch('TRACKER_API_TOKEN'))
     buildpack_project = tracker_client.project(ENV.fetch('TRACKER_PROJECT_ID'))
