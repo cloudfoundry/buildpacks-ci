@@ -63,7 +63,6 @@ class BoshComponentStoryCreator
     {
       'gcp-stemcell' => 'bosh-google-kvm-ubuntu-trusty-go_agent',
       'bosh' => 'BOSH',
-      'garden-runc' => 'Garden-runC',
       'concourse' => 'Concourse',
       'gcp-cpi' => 'BOSH Google CPI'
     }[component]
@@ -74,16 +73,11 @@ class BoshComponentStoryCreator
     description = <<~DESCRIPTION
                      There is a new version of #{component}: #{version}
 
-                     Update the relevant BOSH deployment manifests in https://github.com/cloudfoundry/buildpacks-ci/tree/develop/deployments
+                     1. Pull `buildpacks-ci`
+                     1. Update `deployments/concourse-gcp/manifest.yml.erb` with your changes
+                     1. Run the `bin/deploy_concourse` script from root
+                     1. git push when satisfied
                      DESCRIPTION
-
-    if component == 'Concourse'
-      description += <<~DESCRIPTION
-                        1. Pull `buildpacks-ci`
-                        1. Update `deployments/concourse-gcp/manifest.yml.erb` with your changes
-                        1. Run the `bin/deploy_concourse` script from root
-                        1. git push when satisfied
-                        DESCRIPTION
     end
 
     tracker_client = TrackerApi::Client.new(token: ENV.fetch('TRACKER_API_TOKEN'))
