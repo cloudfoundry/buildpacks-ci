@@ -8,7 +8,7 @@ class BoshComponentStoryCreator
   attr_reader :components, :up_to_date, :new_versions
 
   def initialize
-    @components = %w(gcp-stemcell bosh garden-runc concourse gcp-cpi)
+    @components = %w(gcp-stemcell bosh concourse gcp-cpi)
     @up_to_date = []
     @new_versions = {}
   end
