@@ -99,7 +99,7 @@ describe BoshComponentStoryCreator do
       it 'adds extra context to the Tracker story if the component is Concourse' do
         subject.run!
 
-        expect(buildpack_project).to have_received(:create_story).with(hash_including(description: /.*Run the \`bin\/deploy_concourse\` script from root\n1. git push when satisfied$/))
+        expect(buildpack_project).to have_received(:create_story).with(hash_including(name: 'Update Concourse in BOSH deployments', description: /.*Run the \`bin\/deploy_concourse\` script from root\n1. git push when satisfied$/))
       end
     end
 
