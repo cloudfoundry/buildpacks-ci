@@ -10,4 +10,4 @@ pushd "bbl-state/$ENV_NAME"
   eval "$(bbl print-env)"
 popd
 
-bosh2 -d rootfs-smoke-test run-errand ${STACK}-smoke-test
+bosh2 -d rootfs-smoke-test run-errand "${STACK}-smoke-test"
