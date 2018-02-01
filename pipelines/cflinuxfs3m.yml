@@ -51,7 +51,7 @@ resources: #####################################################################
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: cflinuxfs3m # {{buildpacks-ci-git-uri-public-branch}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
 
   - name: cflinuxfs3m
     type: git
@@ -152,10 +152,10 @@ resources: #####################################################################
           file_name: vars-store.yml
           json_key: {{cflinuxfs2-cf-deployment-gcs-service-account-key}}
 
-  # - name: cflinuxfs3m-rootfs-smoke-test-deployment
-  #   type: bosh-deployment
-  #   source:
-  #     deployment: rootfs-smoke-test
+  - name: cflinuxfs3m-rootfs-smoke-test-deployment
+    type: bosh-deployment
+    source:
+      deployment: rootfs-smoke-test
 
 
   ## bosh.io Releases ##
@@ -391,18 +391,19 @@ jobs: ##########################################################################
               ROOTFS_RELEASE: cflinuxfs3m
           - task: overwrite-capi-release
             file: buildpacks-ci/tasks/overwrite-capi-release/task.yml
-        # - put: cflinuxfs3m-rootfs-smoke-test-deployment
-        #   params:
-        #     source_file: deployment-source-config/source_file.yml
-        #     manifest: cflinuxfs3m-release-artifacts/manifests/manifest.yml
-        #     releases:
-        #       - cflinuxfs3m-release-artifacts/dev_releases/cflinuxfs3m/*.tgz
-        #     stemcells:
-        #       - gcp-stemcell/*.tgz
-        # - task: run-rootfs-smoke-test
-        #   file: buildpacks-ci/tasks/run-rootfs-smoke-test-cflinuxfs3m/task.yml
-        #   params:
-        #     ENV_NAME: cflinuxfs3m
+        - put: cflinuxfs3m-rootfs-smoke-test-deployment
+          params:
+            source_file: deployment-source-config/source_file.yml
+            manifest: cflinuxfs3m-release-artifacts/manifests/manifest.yml
+            releases:
+              - cflinuxfs3m-release-artifacts/dev_releases/cflinuxfs3m/*.tgz
+            stemcells:
+              - gcp-stemcell/*.tgz
+        - task: run-rootfs-smoke-test
+          file: buildpacks-ci/tasks/rootfs/run-rootfs-smoke-test/task.yml
+          params:
+            ENV_NAME: cflinuxfs3m
+            STACK: cflinuxfs3m
         - put: cflinuxfs3m-cf-deployment
           params:
             source_file: deployment-source-config/source_file.yml
