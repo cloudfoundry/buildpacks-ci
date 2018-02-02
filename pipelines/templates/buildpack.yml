@@ -1,4 +1,4 @@
-<% libbuildpacks = %w(apt binary credhub go hwc multi nginx nodejs python ruby staticfile dotnet-core) %>
+<% compile_extensions = %w(php) %>
 <% no_brats = %w(credhub hwc multi) %>
 <% non_published = %(apt credhub hwc multi nginx) %>
 <% non_lts = %(apt credhub hwc) %>
@@ -112,13 +112,12 @@ resources: #####################################################################
       paths: [ pivnet-metadata/<%= language %>.yml ]
 <% end %>
 
-<% if libbuildpacks.include? language %>
   - name: libbuildpack
     type: git
     webhook_token: ob0aigh3
     source:
       uri: https://github.com/cloudfoundry/libbuildpack.git
-<% else %>
+<% if compile_extensions.include? language %>
   - name: compile-extensions
     type: git
     source:
@@ -179,19 +178,12 @@ resources: #####################################################################
       access_token: {{buildpacks-github-token}}
 <% end %>
 
-<% if !libbuildpacks.include?(language) %>
+<% if compile_extensions.include? language %>
   - name: buildpack-packager
     type: github-release
     source:
       user: {{buildpacks-github-org}}
       repository: buildpack-packager
-      access_token: {{buildpacks-github-token}}
-
-  - name: machete
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: machete
       access_token: {{buildpacks-github-token}}
 <% end %>
 
@@ -355,7 +347,6 @@ jobs: ##########################################################################
           trigger: true
       - do:
         - put: cf-bp-space
-<% if libbuildpacks.include?(language) %>
         - task: ginkgo
           file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
           params:
@@ -365,16 +356,6 @@ jobs: ##########################################################################
 <% if skip_docker_start.include?(language) %>
             SKIP_DOCKER_START: true
 <% else %>
-          privileged: true
-<% end %>
-<% else %>
-        - task: rspec
-          file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
-          params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            CF_PASSWORD: {{ci_cf_edge_password}}
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
           privileged: true
 <% end %>
           ensure:
@@ -429,7 +410,6 @@ jobs: ##########################################################################
       - do:
         - put: cf-bp-space
           resource: cf-lts-space
-<% if libbuildpacks.include?(language) %>
         - task: ginkgo
           file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
           params:
@@ -440,17 +420,6 @@ jobs: ##########################################################################
 <% if skip_docker_start.include?(language) %>
             SKIP_DOCKER_START: true
 <% else %>
-          privileged: true
-<% end %>
-<% else %>
-        - task: rspec
-          file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
-          params:
-            STACKS: cflinuxfs2
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-            CF_PASSWORD: {{ci-cf-lts-password}}
-            SKIP_WINDOWS_TESTS: true
           privileged: true
 <% end %>
           ensure:
@@ -628,7 +597,6 @@ jobs: ##########################################################################
             resource: buildpack-develop
         - do:
           - put: cf-bp-space
-<% if libbuildpacks.include?(language) %>
           - task: ginkgo
             file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
             params:
@@ -638,16 +606,6 @@ jobs: ##########################################################################
 <% if skip_docker_start.include?(language) %>
               SKIP_DOCKER_START: true
 <% else %>
-            privileged: true
-<% end %>
-<% else %>
-          - task: rspec
-            file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
-            params:
-              STACKS: cflinuxfs2
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              CF_PASSWORD: {{ci_cf_edge_password}}
-              RUBYGEM_MIRROR: {{rubygem-mirror}}
             privileged: true
 <% end %>
           ensure:
@@ -761,7 +719,6 @@ jobs: ##########################################################################
         - do:
           - put: cf-bp-space
             resource: cf-lts-space
-<% if libbuildpacks.include?(language) %>
           - task: ginkgo
             file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
             params:
@@ -772,17 +729,6 @@ jobs: ##########################################################################
 <% if skip_docker_start.include?(language) %>
               SKIP_DOCKER_START: true
 <% else %>
-            privileged: true
-<% end %>
-<% else %>
-          - task: rspec
-            file: buildpacks-ci/tasks/run-buildpack-shared-specs/task.yml
-            params:
-              STACKS: cflinuxfs2
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              RUBYGEM_MIRROR: {{rubygem-mirror}}
-              CF_PASSWORD: {{ci-cf-lts-password}}
-              SKIP_WINDOWS_TESTS: true
             privileged: true
 <% end %>
           ensure:
@@ -872,7 +818,6 @@ jobs: ##########################################################################
           GITHUB_STATUS_CONTEXT: 'buildpacks-ci/passed-dev-specs'
           GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI develop specs passed'
           PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
-<% if libbuildpacks.include? language %>
   - name: update-libbuildpack
     serial: true
     public: true
@@ -891,7 +836,7 @@ jobs: ##########################################################################
         params:
           repository: buildpack-artifacts
           rebase: true
-<% else %>
+<% if compile_extensions.include? language %>
   - name: update-compile-extensions
     serial: true
     public: true
@@ -909,28 +854,6 @@ jobs: ##########################################################################
         params:
           repository: buildpack-artifacts
           rebase: true
-<% end %>
-<% if language == 'multi' %>
-  - name: update-buildpackapplifecycle
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: buildpackapplifecycle
-          trigger: true
-        - get: buildpack
-          resource: buildpack-develop
-      - task: update-buildpackapplifecycle
-        file: buildpacks-ci/tasks/update-buildpackapplifecycle/task.yml
-        params:
-          LANGUAGE: <%= language %>
-      - put: buildpack-develop
-        params:
-          repository: buildpack-artifacts
-          rebase: true
-<% end %>
-<% if !libbuildpacks.include?(language) %>
   - name: update-buildpack-packager
     serial: true
     public: true
@@ -953,27 +876,25 @@ jobs: ##########################################################################
         params:
           repository: repo-with-gemfile-artifacts
           rebase: true
-  - name: update-machete
+<% end %>
+<% if language == 'multi' %>
+  - name: update-buildpackapplifecycle
     serial: true
     public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: gem
-          resource: machete
+        - get: buildpackapplifecycle
           trigger: true
-        - get: repo-with-gemfile
+        - get: buildpack
           resource: buildpack-develop
-      - task: update-machete
-        file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
+      - task: update-buildpackapplifecycle
+        file: buildpacks-ci/tasks/update-buildpackapplifecycle/task.yml
         params:
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-          GEM_NAME: machete
-          GEM_GIT_REPOSITORY: {{machete-git-uri-public}}
-          GEMFILE_NAME: cf.Gemfile
+          LANGUAGE: <%= language %>
       - put: buildpack-develop
         params:
-          repository: repo-with-gemfile-artifacts
+          repository: buildpack-artifacts
           rebase: true
 <% end %>
 
