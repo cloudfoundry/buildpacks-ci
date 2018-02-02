@@ -1,5 +1,4 @@
 <% libbuildpacks = %w(apt binary credhub go hwc multi nginx nodejs python ruby staticfile dotnet-core) %>
-<% new_brats = %w(apt binary go nginx nodejs python ruby staticfile dotnet-core) %>
 <% no_brats = %w(credhub hwc multi) %>
 <% non_published = %(apt credhub hwc multi nginx) %>
 <% non_lts = %(apt credhub hwc) %>
@@ -102,13 +101,6 @@ resources: #####################################################################
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
-
-<% unless new_brats.include?(language) || no_brats.include?(language) %>
-  - name: brats
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/brats.git
-<% end %>
 
 <% unless non_published.include? language %>
   - name: pivnet-buildpack-metadata
@@ -694,7 +686,6 @@ jobs: ##########################################################################
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 <% unless no_brats.include?(language) %>
-<% if new_brats.include?(language) %>
   - name: specs-edge-brats-develop
     serial: true
     public: true
@@ -724,41 +715,6 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-<% else %>
-  - name: specs-edge-brats-develop
-    serial: true
-    public: true
-    plan:
-      - do:
-        - aggregate:
-          - get: buildpacks-ci
-          - get: brats
-          - get: buildpack
-            resource: buildpack-develop
-            trigger: true
-          - get: repo
-            resource: buildpack-develop
-        - do:
-          - put: cf-brat-space
-          - task: brats
-            file: buildpacks-ci/tasks/run-shared-brats/task.yml
-            params:
-              BUILDPACK_BRANCH: develop
-              CI_CF_USERNAME: {{ci-cf-username}}
-              CI_CF_PASSWORD: {{ci_cf_edge_password}}
-              LANGUAGE: <%= language %>
-              RUBYGEM_MIRROR: {{rubygem-mirror}}
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-<% end %>
 <% end %>
   - name: specs-edge-shared-develop
     serial: true
@@ -797,9 +753,6 @@ jobs: ##########################################################################
           timeout: 3h
         - aggregate:
           - get: buildpacks-ci
-<% unless new_brats.include?(language) || no_brats.include?(language) %>
-          - get: brats
-<% end %>
           - get: buildpack
             resource: buildpack-develop
             trigger: true
@@ -852,7 +805,6 @@ jobs: ##########################################################################
     public: true
     plan:
       - do:
-<% if new_brats.include?(language) %>
         - aggregate:
           - get: buildpacks-ci
           - get: buildpack
@@ -868,25 +820,6 @@ jobs: ##########################################################################
               STACKS: cflinuxfs2
               GINKGO_ATTEMPTS: 4
               GINKGO_NODES: 6
-<% else %>
-        - aggregate:
-          - get: buildpacks-ci
-          - get: brats
-          - get: buildpack
-            resource: buildpack-develop
-            trigger: true
-          - get: repo
-            resource: buildpack-develop
-        - do:
-          - put: cf-brat-space
-            resource: cf-lts-brat-space
-          - task: brats
-            file: buildpacks-ci/tasks/run-shared-brats/task.yml
-            params:
-              BUILDPACK_BRANCH: develop
-              LANGUAGE: <%= language %>
-              RUBYGEM_MIRROR: {{rubygem-mirror}}
-<% end %>
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
