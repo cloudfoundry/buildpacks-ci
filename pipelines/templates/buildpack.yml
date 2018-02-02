@@ -369,6 +369,9 @@ jobs: ##########################################################################
             STACKS: cflinuxfs2
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 6
+            <% if language == 'php' %>
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            <% end %>
 <% if skip_docker_start.include?(language) %>
             SKIP_DOCKER_START: true
 <% else %>
@@ -435,6 +438,9 @@ jobs: ##########################################################################
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 6
             SKIP_WINDOWS_TESTS: true
+            <% if language == 'php' %>
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            <% end %>
 <% if skip_docker_start.include?(language) %>
             SKIP_DOCKER_START: true
 <% else %>
@@ -623,6 +629,9 @@ jobs: ##########################################################################
               STACKS: cflinuxfs2
               GINKGO_ATTEMPTS: 4
               GINKGO_NODES: 6
+              <% if language == 'php' %>
+              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+              <% end %>
 <% if skip_docker_start.include?(language) %>
               SKIP_DOCKER_START: true
 <% else %>
@@ -729,6 +738,9 @@ jobs: ##########################################################################
               GINKGO_ATTEMPTS: 4
               GINKGO_NODES: 6
               SKIP_WINDOWS_TESTS: true
+              <% if language == 'php' %>
+              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+              <% end %>
 <% if skip_docker_start.include?(language) %>
               SKIP_DOCKER_START: true
 <% else %>
