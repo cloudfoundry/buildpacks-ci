@@ -253,6 +253,20 @@ resources: #####################################################################
       location: {{current-timezone}}
 
 jobs: ################################################################################################################
+  - name: specs-unit-develop
+    serial: true
+    public: true
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: buildpack
+            resource: buildpack-develop
+            trigger: true
+        - do:
+          - task: ginkgo
+            file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
+
   <% if language == "php" %>
   - name: ensure-manifest-has-modules
     serial: true
@@ -346,9 +360,11 @@ jobs: ##########################################################################
           passed: [ "detect-new-version-and-upload-artifacts" ]
           trigger: true
       - do:
+        - task: unit
+          file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
         - put: cf-bp-space
         - task: ginkgo
-          file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
+          file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           params:
             STACKS: cflinuxfs2
             GINKGO_ATTEMPTS: 4
@@ -408,10 +424,12 @@ jobs: ##########################################################################
           passed: [ "detect-new-version-and-upload-artifacts" ]
           trigger: true
       - do:
+        - task: unit
+          file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
         - put: cf-bp-space
           resource: cf-lts-space
         - task: ginkgo
-          file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
+          file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           params:
             STACKS: cflinuxfs2
             GINKGO_ATTEMPTS: 4
@@ -593,12 +611,14 @@ jobs: ##########################################################################
           - get: buildpack
             resource: buildpack-develop
             trigger: true
+            passed:
+            - specs-unit-develop
           - get: repo
             resource: buildpack-develop
         - do:
           - put: cf-bp-space
           - task: ginkgo
-            file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
+            file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
             params:
               STACKS: cflinuxfs2
               GINKGO_ATTEMPTS: 4
@@ -622,27 +642,6 @@ jobs: ##########################################################################
           put: edge-shared-environments
           params:
             release: cf-environments
-<% if language == 'php' %>
-  - name: unit-tests
-    serial: true
-    public: true
-    plan:
-      - do:
-        - aggregate:
-          - get: buildpacks-ci
-          - get: buildpack
-            resource: buildpack-develop
-            trigger: true
-        - task: unit-tests
-          file: buildpacks-ci/tasks/php-unit-tests/task.yml
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-<% end %>
 <% unless no_brats.include?(language) %>
   - name: specs-edge-brats-develop
     serial: true
@@ -654,6 +653,8 @@ jobs: ##########################################################################
           - get: buildpack
             resource: buildpack-develop
             trigger: true
+            passed:
+            - specs-unit-develop
         - do:
           - put: cf-brat-space
           - task: brats
@@ -714,13 +715,15 @@ jobs: ##########################################################################
           - get: buildpack
             resource: buildpack-develop
             trigger: true
+            passed:
+            - specs-unit-develop
           - get: repo
             resource: buildpack-develop
         - do:
           - put: cf-bp-space
             resource: cf-lts-space
           - task: ginkgo
-            file: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/task.yml
+            file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
             params:
               STACKS: cflinuxfs2
               GINKGO_ATTEMPTS: 4
@@ -756,6 +759,8 @@ jobs: ##########################################################################
           - get: buildpack
             resource: buildpack-develop
             trigger: true
+            passed:
+            - specs-unit-develop
         - do:
           - put: cf-brat-space
             resource: cf-lts-brat-space
