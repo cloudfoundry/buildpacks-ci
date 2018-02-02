@@ -10,7 +10,7 @@ inputs:
   - name: cf-bp-space
     path: cf-space
 run:
-  path: buildpacks-ci/tasks/run-buildpack-ginkgo-specs/run.sh
+  path: buildpacks-ci/tasks/run-buildpack-integration-specs/run.sh
 params:
   STACKS:
   GINKGO_ATTEMPTS:
