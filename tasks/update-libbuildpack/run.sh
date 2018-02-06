@@ -6,9 +6,6 @@ set -o pipefail
 
 set -x
 
-export GOPATH=$PWD/buildpack
-export GOBIN=/usr/local/bin
-
 if [ "$LANGUAGE" = "multi" ]; then
   update_dir="src/compile"
 elif [ "$LANGUAGE" = "dotnet-core" ]; then
@@ -17,7 +14,11 @@ else
   update_dir="src/$LANGUAGE"
 fi
 
+go get github.com/golang/dep/cmd/dep
+
 pushd buildpack
+  source .envrc
+
   # for the PHP buildpack
   if [ -e run_tests.sh ]; then
     export TMPDIR=$(mktemp -d)
@@ -35,12 +36,8 @@ pushd buildpack
     popd
 
     if [ -f Gopkg.toml ]; then
-      go get github.com/golang/dep/cmd/dep
       dep ensure
       dep ensure -update
-    else
-      go get github.com/FiloSottile/gvt
-      gvt update github.com/cloudfoundry/libbuildpack
     fi
 
     go generate || true
