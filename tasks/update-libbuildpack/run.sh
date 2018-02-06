@@ -17,13 +17,13 @@ else
   update_dir="src/$LANGUAGE"
 fi
 
-# for the PHP buildpack
-if [ -e run_tests.sh ]; then
-  export TMPDIR=$(mktemp -d)
-  pip install -r requirements.txt
-fi
-
 pushd buildpack
+  # for the PHP buildpack
+  if [ -e run_tests.sh ]; then
+    export TMPDIR=$(mktemp -d)
+    pip install -r requirements.txt
+  fi
+
   pushd "$update_dir"
     if [ -d vendor/github.com/golang/mock/mockgen ]; then
       pushd vendor/github.com/golang/mock/mockgen
