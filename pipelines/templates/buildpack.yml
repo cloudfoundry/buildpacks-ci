@@ -259,6 +259,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
+      - get: buildpacks-ci
       - get: buildpack
         resource: buildpack-develop
         trigger: true
