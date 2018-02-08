@@ -40,18 +40,11 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/diego-release
       branch: master
-  - name: cf-release-rc
+  - name: cf-acceptance-tests
     type: git
     source:
-      uri: git@github.com:cloudfoundry/cf-release
-      branch: release-candidate
-      private_key: {{cf-release-private-key}}
-  - name: cf-release-develop
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/cf-release
-      branch: develop
-      private_key: {{cf-release-private-key}}
+      uri: https://github.com/cloudfoundry/cf-acceptance-tests
+      branch: master
   - name: bbl-state
     type: git
     source:
@@ -67,8 +60,8 @@ resources:
   - name: bosh-deployment
     type: git
     source:
-      uri: https://github.com/TisVictress/bosh-deployment
-      branch: bosh-lite-safe
+      uri: https://github.com/cloudfoundry/bosh-deployment
+      branch: master
   - name: cf-deployment-rc
     type: git
     source:
@@ -172,7 +165,6 @@ groups:
       - ship-it
 <% (supported_languages - %w(java)).each do |language| %>
       - update-<%= language %>-buildpack-bosh-release
-      - cf-release for <%= language %>
 <% end %>
   - name: offline
     jobs:
@@ -184,7 +176,6 @@ groups:
       - ship-it-java
       - update-java-buildpack-bosh-release
       - update-private-java-offline-buildpack-bosh-release
-      - cf-release for java
 
 jobs:
   - name: bbl-up
@@ -312,10 +303,7 @@ jobs:
         - get: buildpacks-ci
         - get: cats-concourse-task-inp
           resource: cats-concourse-task
-        - get: cf-release
-          resource: cf-release-rc
-          params:
-            submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
+        - get: cf-acceptance-tests
         - get: public-robots
           passed: [ deploy ]
           trigger: true
@@ -339,10 +327,6 @@ jobs:
         - get: dotnet-core-buildpack-github-release
           passed: [ deploy ]
       - do:
-        - task: copy-cf-acceptance-tests
-          file: buildpacks-ci/tasks/copy-cf-acceptance-tests/task.yml
-          params:
-            BRANCH: master
         - task: write-cats-config
           file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
@@ -418,10 +402,6 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: cf-release
-          resource: cf-release-develop
-          params:
-            submodules: none
         - get: go-buildpack-github-release
           passed: [ cats ]
         - get: nodejs-buildpack-github-release
@@ -444,10 +424,6 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: cf-release
-          resource: cf-release-develop
-          params:
-            submodules: none
         - get: java-buildpack-github-release
           passed: [ cats ]
 
@@ -486,45 +462,6 @@ jobs:
           params:
             name: blob/version
             tag: blob/version
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-  - name: cf-release for <%= language %>
-    serial: true
-    serial_groups: [cf-release-buildpacks]
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: buildpack-bosh-release
-          resource: <%= language %>-buildpack-bosh-release
-        - get: cf-release
-          resource: cf-release-develop
-          params:
-            submodules: [ src/<%= language %>-buildpack-release/ ]
-        - get: buildpack-github-release
-          resource: <%= language %>-buildpack-github-release
-          params:
-            globs:
-              - <%= language%>?buildpack-v*.zip
-          passed:
-            - update-<%= language %>-buildpack-bosh-release
-          trigger: true
-      - do:
-        - task: upload-blobs
-          file: buildpacks-ci/tasks/upload-bosh-blobs-to-cf-release/task.yml
-          params:
-            ACCESS_KEY_ID: {{blobstore-access-key}}
-            SECRET_ACCESS_KEY: {{blobstore-secret-key}}
-            BUILDPACK: <%= language %>
-        - put: cf-release-develop
-          params:
-            repository: cf-release-artifacts
-            rebase: true
         on_failure:
           put: failure-alert
           params:
