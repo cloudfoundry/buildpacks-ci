@@ -254,6 +254,17 @@ resources: #####################################################################
       location: {{current-timezone}}
 
 jobs: ################################################################################################################
+<% if language == "php" %>
+  - name: ensure-manifest-has-modules
+    serial: true
+    public: true
+    plan:
+      - get: buildpack
+        resource: buildpack-develop
+        trigger: true
+      - task: check-modules
+        file: buildpacks-ci/tasks/check-php-modules-in-manifest/task.yml
+<% end %>
   - name: specs-unit-develop
     serial: true
     public: true
@@ -263,27 +274,13 @@ jobs: ##########################################################################
           - get: buildpacks-ci
           - get: buildpack
             resource: buildpack-develop
+<% if language == "php" %>
+            passed: [ ensure-manifest-has-modules ]
+<% end %>
             trigger: true
         - do:
           - task: ginkgo
             file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
-
-  <% if language == "php" %>
-  - name: ensure-manifest-has-modules
-    serial: true
-    public: true
-    plan:
-      - get: buildpacks-ci
-      - get: buildpack
-        resource: buildpack-develop
-        trigger: true
-      - task: load-modules
-        file: buildpacks-ci/tasks/populate-php-modules-in-manifest/task.yml
-      - put: buildpack-develop
-        params:
-          repository: updated-buildpack
-          rebase: true
-  <% end %>
   - name: create-buildpack-release-story
     serial: true
     public: true
