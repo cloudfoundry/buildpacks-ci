@@ -1,5 +1,5 @@
 <% supported_languages = %w(dotnet-core go ruby binary staticfile nodejs php python java) %>
-<% cutlass = %w(dotnet-core go multi nodejs python ruby staticfile) %>
+<% cutlass = %w(binary dotnet-core go multi nodejs python ruby staticfile) %>
 ---
 resource_types:
   - name: slack-notification
