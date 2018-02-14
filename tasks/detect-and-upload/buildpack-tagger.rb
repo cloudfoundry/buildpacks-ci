@@ -48,8 +48,8 @@ class BuildpackTagger
                   export PATH=$GOBIN:$PATH
                   (cd src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager && go install)
 
-                  ./.bin/buildpack-packager --cached=false
-                  ./.bin/buildpack-packager --cached=true
+                  ./.bin/buildpack-packager build --cached=false
+                  ./.bin/buildpack-packager build --cached=true
                   EOF
         end
 

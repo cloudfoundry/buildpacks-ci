@@ -169,7 +169,7 @@ describe BuildpackFinalizer do
         allow(subject).to receive(:`).with("go install") do
           expect(Dir.pwd).to eql(buildpack_packager_dir)
         end
-        allow(subject).to receive(:`).with("buildpack-packager --summary").and_return(packager_summary)
+        allow(subject).to receive(:`).with("buildpack-packager summary").and_return(packager_summary)
         subject.run
       end
 
