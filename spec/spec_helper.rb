@@ -14,6 +14,9 @@ RSpec.configure do |config|
   config.color = true
   config.tty = true
 
+  # Use the specified formatter
+  config.formatter = :documentation # :progress, :html, :json, CustomFormatterClass
+
   config.before do
     $stdout = StringIO.new
     $stderr = StringIO.new
