@@ -41,7 +41,7 @@ class BuildpackFinalizer
         Dir.chdir(go_packager) do
           `go install`
         end
-        File.write(@recent_changes_file, `buildpack-packager --summary`, mode: 'a')
+        File.write(@recent_changes_file, `buildpack-packager summary`, mode: 'a')
       else
         num_cores = `nproc`
         system("BUNDLE_GEMFILE=cf.Gemfile bundle install --jobs=#{num_cores}")

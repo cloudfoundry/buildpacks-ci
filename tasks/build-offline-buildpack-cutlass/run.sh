@@ -18,7 +18,7 @@ pushd source
 
   (cd src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager && go install)
 
-  buildpack-packager --cached
+  buildpack-packager build --cached
 popd
 
 # shellcheck disable=SC2035
