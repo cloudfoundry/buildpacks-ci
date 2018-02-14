@@ -38,14 +38,6 @@ RUN git config --global user.email "cf-buildpacks-eng@pivotal.io"
 RUN git config --global user.name "CF Buildpacks Team CI Server"
 RUN git config --global core.pager cat
 
-RUN wget -q https://releases.hashicorp.com/vagrant/1.8.5/vagrant_1.8.5_x86_64.deb \
-  && [ 30ee435c3358c6a835ea52cf710f4e50caa0e77cb721332132a2d3386a8745d9 = $(shasum -a 256 vagrant_1.8.5_x86_64.deb | cut -d' ' -f1) ]\
-  && dpkg -i vagrant_1.8.5_x86_64.deb \
-  && rm vagrant_1.8.5_x86_64.deb
-RUN vagrant plugin install vagrant-aws --verbose
-ENV PATH /usr/bin:$PATH
-RUN echo $PATH && vagrant box add cloudfoundry/bosh-lite --provider aws
-
 # download and install chromedriver
  RUN wget -O chromedriver.zip 'https://chromedriver.storage.googleapis.com/2.34/chromedriver_linux64.zip' \
    && [ e42a55f9e28c3b545ef7c7727a2b4218c37489b4282e88903e4470e92bc1d967 = $(shasum -a 256 chromedriver.zip | cut -d' ' -f1) ] \
