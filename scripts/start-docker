@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2034,SC2002,SC2046,SC2086,SC2162,SC2155
 ## Copied from https://github.com/concourse/docker-image-resource/blob/656e99184ed2dd78c7a615cd6d00db20e29405e2/assets/common.sh#L44
 
 set -o errexit
@@ -16,12 +15,14 @@ sanitize_cgroups() {
 
   mount -o remount,rw /sys/fs/cgroup
 
+  # shellcheck disable=SC2162,SC2034
   sed -e 1d /proc/cgroups | while read sys hierarchy num enabled; do
     if [ "$enabled" != "1" ]; then
       # subsystem disabled; skip
       continue
     fi
 
+    # shellcheck disable=SC2002
     grouping="$(cat /proc/self/cgroup | cut -d: -f2 | grep "\\<$sys\\>")"
     if [ -z "$grouping" ]; then
       # subsystem not mounted anywhere; mount it on its own
@@ -62,10 +63,13 @@ start_docker() {
     fi
   fi
 
+  # shellcheck disable=SC2046,SC2155
   local mtu=$(cat /sys/class/net/$(ip route get 8.8.8.8|awk '{ print $5 }')/mtu)
   local server_args="--mtu ${mtu}"
 
+  # shellcheck disable=SC2086
   dockerd --data-root /scratch/docker ${server_args} >$LOG_FILE 2>&1 &
+  # shellcheck disable=SC2086
   echo $! > /tmp/docker.pid
 
   sleep 1
