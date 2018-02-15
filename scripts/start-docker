@@ -48,27 +48,31 @@ sanitize_cgroups() {
   done
 }
 
-mkdir -p /var/log
-mkdir -p /var/run
+start_docker() {
+  mkdir -p /var/log
+  mkdir -p /var/run
 
-if [ "$SKIP_PRIVILEGED" = "false" ]; then
-  sanitize_cgroups
+  if [ "$SKIP_PRIVILEGED" = "false" ]; then
+    sanitize_cgroups
 
-  # check for /proc/sys being mounted readonly, as systemd does
-  if grep '/proc/sys\s\+\w\+\s\+ro,' /proc/mounts >/dev/null; then
-    mount -o remount,rw /proc/sys
+    # check for /proc/sys being mounted readonly, as systemd does
+    if grep '/proc/sys\s\+\w\+\s\+ro,' /proc/mounts >/dev/null; then
+      mount -o remount,rw /proc/sys
+    fi
   fi
-fi
 
-local mtu=$(cat /sys/class/net/$(ip route get 8.8.8.8|awk '{ print $5 }')/mtu)
-local server_args="--mtu ${mtu}"
+  local mtu=$(cat /sys/class/net/$(ip route get 8.8.8.8|awk '{ print $5 }')/mtu)
+  local server_args="--mtu ${mtu}"
 
-dockerd --data-root /scratch/docker ${server_args} >$LOG_FILE 2>&1 &
-echo $! > /tmp/docker.pid
+  dockerd --data-root /scratch/docker ${server_args} >$LOG_FILE 2>&1 &
+  echo $! > /tmp/docker.pid
 
-sleep 1
-
-until docker info >/dev/null 2>&1; do
-  echo waiting for docker to come up...
   sleep 1
-done
+
+  until docker info >/dev/null 2>&1; do
+    echo waiting for docker to come up...
+    sleep 1
+  done
+}
+
+start_docker
