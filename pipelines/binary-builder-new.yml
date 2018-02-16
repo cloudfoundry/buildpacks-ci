@@ -1,6 +1,7 @@
 <% dependencies = {
   pipenv: { python: {} },
   setuptools: { python: {} },
+  rubygems_cli: { ruby: {} },
   ruby: { ruby: { line: "minor", keep_master: true } },
   python: { python: { line: "minor", keep_master: true } },
   # node: { node: { line: "major", keep_master: true }, ruby: { line: "major", keep_master: false } },
@@ -31,6 +32,10 @@ resources:
   source:
     type: pypi
     name: setuptools
+- name: source-rubygems_cli
+  type: depwatcher
+  source:
+    type: rubygems_cli
 - name: source-ruby
   type: depwatcher
   source:
