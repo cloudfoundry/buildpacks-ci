@@ -67,6 +67,17 @@ when 'setuptools'
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
+when 'rubygems_cli'
+  res = open(url).read
+  sha = Digest::SHA256.hexdigest(res)
+
+  filename = File.basename(url).gsub(/(\.(zip|tar\.gz|tar\.xz|tgz))$/, "-#{sha[0..7]}\\1")
+  File.write("artifacts/#{filename}", res)
+
+  out_data.merge!({
+    sha256: sha,
+    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+  })
 when 'ruby'
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=ruby', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
