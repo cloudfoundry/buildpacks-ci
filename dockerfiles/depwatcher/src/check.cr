@@ -8,6 +8,8 @@ source = data["source"]
 case type = source["type"].to_s
 when "rubygems"
   versions = Depwatcher::Rubygems.check(source["name"].to_s)
+when "rubygems_cli"
+  versions = Depwatcher::RubygemsCli.check
 when "pypi"
   versions = Depwatcher::Pypi.check(source["name"].to_s)
 when "ruby_lang"
