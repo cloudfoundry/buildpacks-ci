@@ -67,7 +67,7 @@ when 'setuptools'
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
-when 'rubygems_cli'
+when 'rubygems'
   res = open(url).read
   sha = Digest::SHA256.hexdigest(res)
 
