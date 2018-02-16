@@ -29,7 +29,7 @@ resources: #####################################################################
     source:
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-      tag_filter: v4.*
+      tag_filter: v5.*
   - name: bbl-state
     type: git
     source:
@@ -39,13 +39,13 @@ resources: #####################################################################
   - name: bosh-deployment
     type: git
     source:
-      uri: https://github.com/TisVictress/bosh-deployment
-      branch: bosh-lite-safe
-  - name: cf-deployment-rc
+      uri: https://github.com/cloudfoundry/bosh-deployment.git
+      branch: master
+  - name: cf-deployment
     type: git
     source:
       uri: https://github.com/cloudfoundry/cf-deployment
-      branch: release-candidate
+      branch: master
 
   - name: buildpacks-ci
     type: git
@@ -96,12 +96,6 @@ resources: #####################################################################
       branch: master
       private_key: {{cflinuxfs2-release-private-key}}
 
-  - name: diego-release
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/diego-release
-      branch: release-candidate
-
   - name: cf-release-rc
     type: git
     source:
@@ -150,19 +144,6 @@ resources: #####################################################################
     type: bosh-deployment
     source:
       deployment: rootfs-smoke-test
-
-
-  ## bosh.io Releases ##
-
-  - name: diego-bosh-release
-    type: bosh-io-release
-    source:
-      repository: cloudfoundry/diego-release
-
-  - name: garden-runc-bosh-release
-    type: bosh-io-release
-    source:
-      repository: cloudfoundry/garden-runc-release
 
   ## bosh.io stemcell ##
 
@@ -298,7 +279,8 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: cf-deployment-concourse-tasks
-        - get: bbl-state
+        - get: env-repo
+          resource: bbl-state
         - get: bosh-deployment
         - get: buildpacks-ci
         - get: receipt-diff
@@ -332,7 +314,7 @@ jobs: ##########################################################################
         ensure:
           put: bbl-state
           params:
-            repository: updated-bbl-state
+            repository: updated-env-repo
             rebase: true
       - task: add-gcp-parent-dns-record
         file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
@@ -359,20 +341,11 @@ jobs: ##########################################################################
           - get: cflinuxfs2
             passed: [ bbl-up ]
           - get: cflinuxfs2-release
-            attempts: 3
           - get: buildpacks-ci
           - get: bbl-state
           - get: bosh-lite
           - get: cf-deployment
-            resource: cf-deployment-rc
-            attempts: 3
-          - get: diego-release
-          - get: garden-runc-bosh-release
-            attempts: 3
-          - get: diego-bosh-release
-            attempts: 3
           - get: gcp-stemcell
-            attempts: 3
         - aggregate:
           - task: create-deployment-source-config
             file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
@@ -492,7 +465,8 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: cf-deployment-concourse-tasks
-        - get: bbl-state
+        - get: env-repo
+          resource: bbl-state
         - get: buildpacks-ci
         - get: version
           passed: [ delete-deployment ]
@@ -511,7 +485,7 @@ jobs: ##########################################################################
         ensure:
           put: bbl-state
           params:
-            repository: updated-bbl-state
+            repository: updated-env-repo
             rebase: true
 
   - name: release-cflinuxfs2
