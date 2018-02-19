@@ -18,6 +18,8 @@ when "ruby_lang"
   version = Depwatcher::RubyLang.in(version["ref"].to_s)
 when "python"
   version = Depwatcher::Python.in(version["ref"].to_s)
+when "golang"
+  version = Depwatcher::Golang.in(version["ref"].to_s)
 else
   raise "Unkown type: #{type}"
 end
