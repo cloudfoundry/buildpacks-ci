@@ -2,6 +2,7 @@
   pipenv: { python: {} },
   setuptools: { python: {} },
   rubygems: { ruby: {} },
+  go: { go: { line: "minor", keep_master: true } },
   ruby: { ruby: { line: "minor", keep_master: true } },
   python: { python: { line: "minor", keep_master: true } },
   # node: { node: { line: "major", keep_master: true }, ruby: { line: "major", keep_master: false } },
@@ -47,6 +48,11 @@ resources:
   source:
     type: python
     name: python
+- name: source-go
+  type: depwatcher
+  source:
+    type: golang
+    name: go
 <% dependencies.each do |dep, _| %>
 - name: buildpacks-bucket-<%= dep %>
   type: s3
