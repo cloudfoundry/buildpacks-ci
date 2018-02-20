@@ -16,6 +16,11 @@ case ARGV[0]
     cfg = YAML.load(`lpass show --notes Shared-Buildpacks/concourse-private.yml`)
     system('cf', 'api', 'api.bal.buildpacks-gcp.ci.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
     system('cf', 'auth', 'admin', cfg['ci-cf-bal-password']) or raise 'Could not auth'
+  when 'cflinuxfs2'
+    cfg = YAML.load(`lpass show --notes Shared-Buildpacks/concourse-private.yml`)
+    system('cf', 'api', 'api.cflinuxfs2.buildpacks-gcp.ci.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
+    p('cf', 'auth', cfg['cflinuxfs2-cf-username'], cfg['cflinuxfs2-cf-password'])
+    system('cf', 'auth', cfg['cflinuxfs2-cf-username'], cfg['cflinuxfs2-cf-password']) or raise 'Could not auth'
   when 'dev'
     system('cf', 'login', '-a', 'api.local.pcfdev.io', '--skip-ssl-validation', '-u', 'admin', '-p', 'admin') or raise 'Could not connect'
   else
