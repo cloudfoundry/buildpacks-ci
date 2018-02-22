@@ -18,6 +18,8 @@ when "python"
   versions = Depwatcher::Python.check
 when "golang"
   versions = Depwatcher::Golang.check
+when "rlang"
+  versions = Depwatcher::Rlang.check
 else
   raise "Unkown type: #{source["type"]}"
 end

@@ -7,7 +7,7 @@ buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
 manifest = YAML.load_file('buildpack/manifest.yml')
-manifest_master = YAML.load_file('buildpack-master/manifest.yml')
+manifest_master = YAML.load_file('buildpack-master/manifest.yml') # rescue { 'dependencies' => [] }
 
 data = JSON.parse(open('source/data.json').read)
 name = data.dig('source', 'name')

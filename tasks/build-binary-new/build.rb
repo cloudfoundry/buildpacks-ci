@@ -25,7 +25,7 @@ out_data[:source][:md5] = data.dig('version', 'md5_digest') if data.dig('version
 out_data[:source][:sha256] = data.dig('version', 'sha256') if data.dig('version', 'sha256')
 
 def run(*args)
-  system(*args)
+  system({'DEBIAN_FRONTEND' => 'noninteractive'}, *args)
   raise "Could not run #{args}" unless $?.success?
 end
 
@@ -114,6 +114,37 @@ when 'python'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
+    sha256: sha,
+    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+  })
+when 'r'
+  artifacts = "#{Dir.pwd}/artifacts"
+  source_sha = ''
+  Dir.mktmpdir do |dir|
+    Dir.chdir(dir) do
+      run('apt', 'update')
+      run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libcurl4-openssl-dev', 'default-jre')
+      run('wget', data.dig('version', 'url'))
+      source_sha = Digest::SHA256.hexdigest(open("R-#{version}.tar.gz").read)
+      run('tar', 'xf', "R-#{version}.tar.gz")
+      Dir.chdir("R-#{version}") do
+        run('./configure','--with-readline=no','--with-x=no','--enable-R-shlib')
+        run('make')
+        run('make install')
+
+        Dir.chdir('/usr/local/lib/R') do
+          run('tar', 'zcvf', "#{artifacts}/r-v#{version}.tgz", '.')
+        end
+      end
+    end
+  end
+
+  sha = Digest::SHA256.hexdigest(open("artifacts/r-v#{version}.tgz").read)
+  filename = "r-v#{version}-#{sha[0..7]}.tgz"
+  FileUtils.mv("artifacts/r-v#{version}.tgz", "artifacts/#{filename}")
+
+  out_data.merge!({
+    source_sha256: source_sha,
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
