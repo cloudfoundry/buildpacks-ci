@@ -56,7 +56,7 @@ resources:
     source:
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-      tag_filter: v4.*
+      tag_filter: v5.*
   - name: bosh-deployment
     type: git
     source:
@@ -185,7 +185,8 @@ jobs:
     plan:
       - aggregate:
         - get: cf-deployment-concourse-tasks
-        - get: bbl-state
+        - get: env-repo
+          resource: bbl-state
         - get: bosh-deployment
         - get: public-robots
         - get: buildpacks-ci
@@ -208,7 +209,7 @@ jobs:
         ensure:
           put: bbl-state
           params:
-            repository: updated-bbl-state
+            repository: updated-env-repo
             rebase: true
       - task: add-gcp-parent-dns-record
         file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
@@ -374,7 +375,8 @@ jobs:
     plan:
       - aggregate:
         - get: cf-deployment-concourse-tasks
-        - get: bbl-state
+        - get: env-repo
+          resource: bbl-state
         - get: buildpacks-ci
         - get: public-robots
           passed: [ delete-deployment ]
@@ -393,7 +395,7 @@ jobs:
         ensure:
           put: bbl-state
           params:
-            repository: updated-bbl-state
+            repository: updated-env-repo
             rebase: true
 
   - name: ship-it
