@@ -49,7 +49,7 @@ class BuildpackToMaster
       @prev_sha
     )
     stats = statuses.map { |s| s[:context] }
-    if @github_repo =~ /(hwc|apt|credhub)-buildpack/ && stats.include?('buildpacks-ci/edge-develop')
+    if @github_repo =~ /(hwc|apt|credhub|r)-buildpack/ && stats.include?('buildpacks-ci/edge-develop')
       return true
     elsif stats.include?('buildpacks-ci/lts-develop') && stats.include?('buildpacks-ci/edge-develop')
       return true
