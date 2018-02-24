@@ -12,6 +12,7 @@ pushd buildpack/compile-extensions
   if [ ! -z "$RUBYGEM_MIRROR" ]; then
     bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
   fi
+  export BUNDLE_GEMFILE=$PWD/Gemfile
   bundle install
   bundle exec rspec
   compile_extensions_head=$(git rev-parse HEAD)
