@@ -11,5 +11,6 @@ if [ ! -z "$RUBYGEM_MIRROR" ]; then
   bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
 fi
 
+export BUNDLE_GEMFILE=$PWD/Gemfile
 bundle
 bundle exec rspec
