@@ -13,11 +13,11 @@ resource_types:
     source:
       repository: cloudfoundry/bosh-deployment-resource
 resources:
-  - name: monday-funday
-    type: cron
-    source:
-      expression: 0 5 * * 1
-      location: {{current-timezone}}
+  # - name: monday-funday
+  #   type: cron
+  #   source:
+  #     expression: 0 5 * * 1
+  #     location: {{current-timezone}}
 
   - name: concourse2tracker
     type: concourse2tracker
@@ -66,7 +66,7 @@ resources:
     source:
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-      tag_filter: v4.*
+      tag_filter: v5.*
 
   - name: bosh-deployment
     type: git
@@ -96,17 +96,13 @@ resources:
   - name: bal-cf-deployment
     type: bosh-deployment
     source:
-      target: {{bal-bosh-target}}
-      client: {{bal-bosh-client}}
-      client_secret: {{bal-bosh-client-secret}}
-      ca_cert: {{bal-bosh-ca-cert}}
+      deployment: cf
       vars_store:
         provider: gcs
         config:
           bucket: bal-cf-deployment
           file_name: vars-store.yml
           json_key: {{bal-cf-deployment-gcs-service-account-key}}
-      deployment: cf
 
   - name: gcp-stemcell
     type: bosh-io-stemcell
@@ -142,11 +138,19 @@ jobs:
         file: buildpacks-ci/tasks/run-bal-specs/task-windows.yml
 
   - name: bbl-up
+    serial: true
+    serial_groups: [ bal ]
+    public: true
     plan:
       - aggregate:
         - get: cf-deployment-concourse-tasks
-        - get: bbl-state
+        - get: bal-develop
+          passed: [unit-specs-windows, unit-specs-linux]
+          trigger: true
+        - get: env-repo
+          resource: bbl-state
         - get: bosh-deployment
+        - get: buildpacks-ci
       - task: bbl-up
         file: cf-deployment-concourse-tasks/bbl-up/task.yml
         params:
@@ -159,14 +163,20 @@ jobs:
           BBL_LB_KEY: {{bal-lb-key}}
           LB_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
           BBL_ENV_NAME: bal
+          BBL_STATE_DIR: bal
           OPS_FILES: "local-dns.yml"
         input_mapping:
           ops-files: bosh-deployment
         ensure:
           put: bbl-state
           params:
-            repository: updated-bbl-state
+            repository: updated-env-repo
             rebase: true
+      - task: add-gcp-parent-dns-record
+        file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
+        params:
+          ENV_NAME: bal
+          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
 
   - name: deploy-cf-and-diego-to-cf-release
     serial: true
@@ -177,7 +187,7 @@ jobs:
         - aggregate:
           - get: buildpacks-ci
           - get: bal-develop
-            passed: [unit-specs-windows, unit-specs-linux]
+            passed: [bbl-up]
             trigger: true
           - get: diego-release
           - get: cf-deployment
@@ -187,8 +197,13 @@ jobs:
             attempts: 3
         - task: create-diego-release-with-bal-develop
           file: buildpacks-ci/tasks/create-diego-release-with-bal-develop/task.yml
+        - task: create-deployment-source-config
+          file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+          params:
+            ENV_NAME: bal
         - put: bal-cf-deployment
           params:
+            source_file: deployment-source-config/source_file.yml
             manifest: cf-deployment/cf-deployment.yml
             releases:
               - diego-release-artifacts/dev_releases/diego/*.tgz
@@ -196,7 +211,7 @@ jobs:
               - gcp-stemcell/*.tgz
               - windows2012-stemcell/*.tgz
             ops_files:
-            - cf-deployment/operations/use-compiled-releases.yml
+            # - cf-deployment/operations/use-compiled-releases.yml
             - diego-release-artifacts/use-diego-dev-release.yml
             - buildpacks-ci/deployments/operations/no-canaries.yml
             - cf-deployment/operations/scale-to-one-az.yml
@@ -204,10 +219,9 @@ jobs:
             - cf-deployment/operations/experimental/enable-instance-identity-credentials.yml
             - cf-deployment/operations/experimental/enable-instance-identity-credentials-windows.yml
             - cf-deployment/operations/experimental/secure-service-credentials.yml
+            - cf-deployment/operations/experimental/secure-service-credentials-windows-cell.yml
             - cf-deployment/operations/experimental/use-bosh-dns.yml
             - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
-            - buildpacks-ci/deployments/operations/use-latest-garden-windows.yml #FIXME: remove after garden-windows >=0.10.0 in cf-deployment
-            - buildpacks-ci/deployments/operations/add-credhub-ca-cert-to-windows-cells.yml
             vars:
               system_domain: bal.buildpacks-gcp.ci.cf-app.com
         - task: set-up-environment-for-credhub
@@ -216,6 +230,7 @@ jobs:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-bal-password}}
             APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
+            ENV_NAME: bal
         on_failure:
           put: failure-alert
           params:
@@ -246,6 +261,7 @@ jobs:
             APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
             CREDHUB_MODE: assisted
+            CREDHUB_CLIENT_SECRET: {{ci-cf-bal-credhub-client-secret}}
         - task: add-flake-attempts-to-cats
           file: buildpacks-ci/tasks/add-flake-attempts-to-cats/task.yml
         - task: cats
@@ -355,16 +371,47 @@ jobs:
     public: true
     plan:
       - aggregate:
+        - get: bbl-state
         - get: buildpacks-ci
         - get: bal-develop
           passed: [wats-2012R2]
           trigger: true
-      - task: destroy-cf-deployment
-        file: buildpacks-ci/tasks/destroy-cf-deployment/task.yml
+      - task: create-deployment-source-config
+        file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
         params:
-          BOSH_CLIENT: {{bal-bosh-client}}
-          BOSH_ENVIRONMENT: {{bal-bosh-target}}
-          BOSH_CLIENT_SECRET: {{bal-bosh-client-secret}}
-          BOSH_CA_CERT: {{bal-bosh-ca-cert}}
-          DEPLOYMENT_NAME: cf
-        attempts: 5
+          ENV_NAME: bal
+      - put: bal-cf-deployment
+        params:
+          source_file: deployment-source-config/source_file.yml
+          delete:
+            enabled: true
+            force: true
+
+  - name: bbl-destroy
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: cf-deployment-concourse-tasks
+        - get: env-repo
+          resource: bbl-state
+        - get: buildpacks-ci
+        - get: bal-develop
+          passed: [ destroy-cf-deployment ]
+          trigger: true
+      - task: remove-gcp-parent-dns-record
+        file: buildpacks-ci/tasks/remove-gcp-parent-dns-record/task.yml
+        params:
+          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+          ENV_NAME: bal
+      - task: bbl-destroy
+        file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+        params:
+          BBL_STATE_DIR: bal
+          BBL_GCP_PROJECT_ID: cf-buildpacks
+          BBL_GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+        ensure:
+          put: bbl-state
+          params:
+            repository: updated-env-repo
+            rebase: true
