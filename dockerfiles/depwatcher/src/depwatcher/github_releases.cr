@@ -1,15 +1,8 @@
-require "json"
-require "http/client"
+require "./base"
+require "./semantic_version"
 
 module Depwatcher
-  module GithubReleases
-    class Internal
-      JSON.mapping(
-        ref: String,
-      )
-      def initialize(@ref : String)
-      end
-    end
+  class GithubReleases < Base
     class Release
       JSON.mapping(
         ref: String,
@@ -36,7 +29,7 @@ module Depwatcher
       end
     end
 
-    def self.check(repo : String) : Array(Internal)
+    def check(repo : String) : Array(Internal)
       releases(repo).reject do |r|
         r.prerelease || r.draft
       end.map do |r|
@@ -44,7 +37,7 @@ module Depwatcher
       end.compact.sort_by { |i| SemanticVersion.new(i.ref) }
     end
 
-    def self.in(repo : String, ref : String) : Release
+    def in(repo : String, ref : String) : Release
       r = releases(repo).find do |r|
         r.ref == ref
       end
@@ -56,12 +49,9 @@ module Depwatcher
       Release.new(r.ref, a[0].browser_download_url)
     end
 
-    # private
-
-    def self.releases(repo : String) : Array(External)
-      response = HTTP::Client.get "https://api.github.com/repos/#{repo}/releases"
-      raise "Could not download data from github: code #{response.status_code}" unless response.status_code == 200
-      Array(External).from_json(response.body)
+    private def releases(repo : String) : Array(External)
+      res = client.get "https://api.github.com/repos/#{repo}/releases"
+      Array(External).from_json(res)
     end
   end
 end

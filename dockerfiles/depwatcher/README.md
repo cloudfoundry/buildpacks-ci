@@ -1,9 +1,19 @@
-# Building/Pushing
+# Depwatcher
+
+A concourse resource to watch for new releases of dependencies.
+
+The Buildpacks team use this to build new dependencies for buildpacks.
+
+## Run unit tests
+
+crystal spec
+
+## Building/Pushing
 
 docker build -t cfbuildpacks/depwatcher .
 docker push cfbuildpacks/depwatcher
 
-# Example run
+## Example run
 
 ```
 $ echo '{"source":{"type":"rlang","name":"r"}}' | crystal src/check.cr
