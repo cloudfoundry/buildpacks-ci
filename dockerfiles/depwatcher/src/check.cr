@@ -7,21 +7,21 @@ source = data["source"]
 
 case type = source["type"].to_s
 when "github_releases"
-  versions = Depwatcher::GithubReleases.check(source["repo"].to_s)
+  versions = Depwatcher::GithubReleases.new.check(source["repo"].to_s)
 when "rubygems"
-  versions = Depwatcher::Rubygems.check(source["name"].to_s)
+  versions = Depwatcher::Rubygems.new.check(source["name"].to_s)
 when "rubygems_cli"
-  versions = Depwatcher::RubygemsCli.check
+  versions = Depwatcher::RubygemsCli.new.check
 when "pypi"
-  versions = Depwatcher::Pypi.check(source["name"].to_s)
+  versions = Depwatcher::Pypi.new.check(source["name"].to_s)
 when "ruby_lang"
-  versions = Depwatcher::RubyLang.check
+  versions = Depwatcher::RubyLang.new.check
 when "python"
-  versions = Depwatcher::Python.check
+  versions = Depwatcher::Python.new.check
 when "golang"
-  versions = Depwatcher::Golang.check
+  versions = Depwatcher::Golang.new.check
 when "rlang"
-  versions = Depwatcher::Rlang.check
+  versions = Depwatcher::Rlang.new.check
 else
   raise "Unkown type: #{source["type"]}"
 end

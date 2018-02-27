@@ -1,9 +1,9 @@
-require "json"
-require "http/client"
+require "./base"
+require "./github_tags"
 require "xml"
 
 module Depwatcher
-  module RubyLang
+  class RubyLang < Base
     class Release
       JSON.mapping(
         ref: String,
@@ -14,24 +14,24 @@ module Depwatcher
       end
     end
 
-    def self.check() : Array(GithubTags::Internal)
+    def check() : Array(Internal)
       name = "ruby/ruby"
       regexp = "^v\\d+_\\d+_\\d+$"
-      GithubTags.check(name, regexp).map do |r|
+      GithubTags.new(client).check(name, regexp).map do |r|
         r.ref = r.ref.gsub("_", ".").gsub(/^v/, "")
         r
       end
     end
 
-    def self.in(ref : String) : Release
+    def in(ref : String) : Release
       releases().select do |r|
         r.ref == ref
       end.first
     end
 
-    def self.releases() : Array(Release)
-      response = HTTP::Client.get "https://www.ruby-lang.org/en/downloads/"
-      doc = XML.parse_html(response.body)
+    private def releases() : Array(Release)
+      response = client.get "https://www.ruby-lang.org/en/downloads/"
+      doc = XML.parse_html(response)
       lis = doc.xpath("//li/a[starts-with(text(),'Ruby ')]")
       raise "Could not parse ruby website" unless lis.is_a?(XML::NodeSet)
 

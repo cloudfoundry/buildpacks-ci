@@ -1,22 +1,13 @@
-require "json"
-require "http/client"
+require "./base"
 
 module Depwatcher
-  module Rubygems
+  class Rubygems < Base
     class External
       JSON.mapping(
         number: String,
         sha: String,
         prerelease: Bool,
       )
-    end
-    class Internal
-      JSON.mapping(
-        ref: String,
-      )
-      def initialize(external : External)
-        @ref = external.number
-      end
     end
     class Release
       JSON.mapping(
@@ -29,30 +20,26 @@ module Depwatcher
       end
     end
 
-    def self.check(name : String) : Array(Internal)
+    def check(name : String) : Array(Internal)
       releases(name).reject do |r|
         r.prerelease
       end.map do |r|
-        Internal.new(r)
+        Internal.new(r.number)
       end.first(10).reverse
     end
 
-    def self.in(name : String, ref : String) : Release
+    def in(name : String, ref : String) : Release
       Release.new(release(name, ref))
     end
 
-    # private
-
-    def self.releases(name : String) : Array(External)
-      response = HTTP::Client.get "https://rubygems.org/api/v1/versions/#{name}.json"
-      raise "Could not download data from rubygems: code #{response.status_code}" unless response.status_code == 200
-      Array(External).from_json(response.body)
+    private def releases(name : String) : Array(External)
+      response = client.get "https://rubygems.org/api/v1/versions/#{name}.json"
+      Array(External).from_json(response)
     end
 
-    def self.release(name : String, version : String) : External
-      response = HTTP::Client.get "https://rubygems.org/api/v2/rubygems/#{name}/versions/#{version}.json"
-      raise "Could not download data from rubygems: code #{response.status_code}" unless response.status_code == 200
-      External.from_json(response.body)
+    private def release(name : String, version : String) : External
+      response = client.get "https://rubygems.org/api/v2/rubygems/#{name}/versions/#{version}.json"
+      External.from_json(response)
     end
   end
 end

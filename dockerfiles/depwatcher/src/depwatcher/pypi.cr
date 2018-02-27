@@ -1,8 +1,7 @@
-require "json"
-require "http/client"
+require "./base"
 
 module Depwatcher
-  module Pypi
+  class Pypi < Base
     class External
       JSON.mapping(
         releases: Hash(String, Array(Release)),
@@ -17,21 +16,14 @@ module Depwatcher
         size: Int64,
       )
     end
-    class Internal
-      JSON.mapping(
-        ref: String,
-      )
-      def initialize(@ref : String)
-      end
-    end
 
-    def self.check(name : String) : Array(Internal)
+    def check(name : String) : Array(Internal)
       releases(name).map do |version, _|
         Internal.new(version)
       end.sort_by { |i| SemanticVersion.new(i.ref) }.last(10)
     end
 
-    def self.in(name : String, ref : String) : Release
+    def in(name : String, ref : String) : Release
       release = releases(name)[ref].select do |r|
         r.packagetype == "sdist"
       end.sort_by do |r|
@@ -41,12 +33,9 @@ module Depwatcher
       release
     end
 
-    # private
-
-    def self.releases(name : String) : Hash(String, Array(Release))
-      response = HTTP::Client.get "https://pypi.python.org/pypi/#{name}/json"
-      raise "Could not download data from pypi: code #{response.status_code}" unless response.status_code == 200
-      External.from_json(response.body).releases
+    private def releases(name : String) : Hash(String, Array(Release))
+      response = client.get "https://pypi.python.org/pypi/#{name}/json"
+      External.from_json(response).releases
     end
   end
 end

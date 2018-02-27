@@ -1,29 +1,19 @@
-require "json"
-require "http/client"
+require "./base"
 
 module Depwatcher
-  module GithubTags
+  class GithubTags < Base
     class External
       JSON.mapping(
         name: String,
       )
     end
-    class Internal
-      JSON.mapping(
-        ref: String,
-      )
-      def initialize(external : External)
-        @ref = external.name
-      end
-    end
 
-    def self.check(name : String, regexp : String) : Array(Internal)
-      response = HTTP::Client.get "https://api.github.com/repos/#{name}/tags"
-      raise "Could not download tags data from github: code #{response.status_code}" unless response.status_code == 200
-      Array(External).from_json(response.body).select do |r|
+    def check(name : String, regexp : String) : Array(Internal)
+      response = client.get "https://api.github.com/repos/#{name}/tags"
+      Array(External).from_json(response).select do |r|
         /#{regexp}/.match(r.name)
       end.map do |r|
-        Internal.new(r)
+        Internal.new(r.name)
       end.first(10).reverse
     end
   end

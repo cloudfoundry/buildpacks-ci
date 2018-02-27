@@ -1,16 +1,8 @@
-require "json"
-require "http/client"
+require "./base"
 require "xml"
 
 module Depwatcher
-  module Golang
-    class Internal
-      JSON.mapping(
-        ref: String,
-      )
-      def initialize(@ref : String)
-      end
-    end
+  class Golang < Base
     class Release
       JSON.mapping(
         ref: String,
@@ -21,24 +13,26 @@ module Depwatcher
       end
     end
 
-    def self.check() : Array(Internal)
-      all.map do |r|
+    def initialize(@client = HTTPClientInsecure.new)
+    end
+
+    def check() : Array(Internal)
+      releases.map do |r|
         Internal.new(r.ref)
       end.reverse
     end
 
-    def self.in(ref : String) : Release
-      r = all.find do |r|
+    def in(ref : String) : Release
+      r = releases.find do |r|
         r.ref == ref
       end
       raise "Could not find data for version" unless r
       r
     end
 
-    def self.all() : Array(Release)
-      context = OpenSSL::SSL::Context::Client.insecure
-      response = HTTP::Client.get("https://golang.org/dl/", tls: context)
-      doc = XML.parse_html(response.body)
+    private def releases() : Array(Release)
+      response = client.get("https://golang.org/dl/")
+      doc = XML.parse_html(response)
       tds = doc.xpath("//td[contains(text(),'Source')]")
       raise "Could not parse golang release (td) website" unless tds.is_a?(XML::NodeSet)
       tds.map do |td|

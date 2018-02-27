@@ -1,0 +1,272 @@
+[
+  {
+    "name": "yarv_migration_base",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/yarv_migration_base",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/yarv_migration_base",
+    "commit": {
+      "sha": "20c8803697df39a086175a5eb2f8e8ee00bf1e2f",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/20c8803697df39a086175a5eb2f8e8ee00bf1e2f"
+    }
+  },
+  {
+    "name": "v2_6_0_preview1",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_6_0_preview1",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_6_0_preview1",
+    "commit": {
+      "sha": "ce0e3fc1b10d1f5c5ad6bc31ba344904345468a2",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/ce0e3fc1b10d1f5c5ad6bc31ba344904345468a2"
+    }
+  },
+  {
+    "name": "v2_5_0",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_5_0",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_5_0",
+    "commit": {
+      "sha": "4e0a512972cdcbfcd5279f1a2a81ba342ed75b6e",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/4e0a512972cdcbfcd5279f1a2a81ba342ed75b6e"
+    }
+  },
+  {
+    "name": "v2_5_0_rc1",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_5_0_rc1",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_5_0_rc1",
+    "commit": {
+      "sha": "c6f401b6b897f0f25a8ee07fc1f15a9807bdd65f",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/c6f401b6b897f0f25a8ee07fc1f15a9807bdd65f"
+    }
+  },
+  {
+    "name": "v2_5_0_preview1",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_5_0_preview1",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_5_0_preview1",
+    "commit": {
+      "sha": "f11fbd79fd7000550188cfe19d04cce9f472d26b",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/f11fbd79fd7000550188cfe19d04cce9f472d26b"
+    }
+  },
+  {
+    "name": "v2_4_3",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_4_3",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_4_3",
+    "commit": {
+      "sha": "a5ec07c73fb667378ed617da6031381ee2d832b0",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/a5ec07c73fb667378ed617da6031381ee2d832b0"
+    }
+  },
+  {
+    "name": "v2_4_2",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_4_2",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_4_2",
+    "commit": {
+      "sha": "595af866bb46db24274dc26fb9b4d3af84fd0af5",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/595af866bb46db24274dc26fb9b4d3af84fd0af5"
+    }
+  },
+  {
+    "name": "v2_4_1",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_4_1",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_4_1",
+    "commit": {
+      "sha": "820605ba3c10b9f4dafc4e5d6e09765b8b31cbea",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/820605ba3c10b9f4dafc4e5d6e09765b8b31cbea"
+    }
+  },
+  {
+    "name": "v2_4_0",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_4_0",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_4_0",
+    "commit": {
+      "sha": "d4bb726b713658f56e630b6cf817a0155b6f390e",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/d4bb726b713658f56e630b6cf817a0155b6f390e"
+    }
+  },
+  {
+    "name": "v2_4_0_rc1",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_4_0_rc1",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_4_0_rc1",
+    "commit": {
+      "sha": "55b2febff000595e6c5d8120ccb888855b7edb6f",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/55b2febff000595e6c5d8120ccb888855b7edb6f"
+    }
+  },
+  {
+    "name": "v2_4_0_preview3",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_4_0_preview3",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_4_0_preview3",
+    "commit": {
+      "sha": "81234c5ecaab58e03e346ebdbf5678e4b8a3db55",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/81234c5ecaab58e03e346ebdbf5678e4b8a3db55"
+    }
+  },
+  {
+    "name": "v2_4_0_preview2",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_4_0_preview2",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_4_0_preview2",
+    "commit": {
+      "sha": "e11c22602af69e8139ec0649bb39f5a66d1e66a1",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/e11c22602af69e8139ec0649bb39f5a66d1e66a1"
+    }
+  },
+  {
+    "name": "v2_4_0_preview1",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_4_0_preview1",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_4_0_preview1",
+    "commit": {
+      "sha": "8183c0532207ad0a9b9f99b659116218a9fa132b",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/8183c0532207ad0a9b9f99b659116218a9fa132b"
+    }
+  },
+  {
+    "name": "v2_3_6",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_3_6",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_3_6",
+    "commit": {
+      "sha": "255173462669dc90e153aa17d48e50bf19f5e76c",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/255173462669dc90e153aa17d48e50bf19f5e76c"
+    }
+  },
+  {
+    "name": "v2_3_5",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_3_5",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_3_5",
+    "commit": {
+      "sha": "e07613e27ee9445abad9c6981e8d721a0df39f1c",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/e07613e27ee9445abad9c6981e8d721a0df39f1c"
+    }
+  },
+  {
+    "name": "v2_3_4",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_3_4",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_3_4",
+    "commit": {
+      "sha": "4bd69735af901266ec21486243fc206030caa6b9",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/4bd69735af901266ec21486243fc206030caa6b9"
+    }
+  },
+  {
+    "name": "v2_3_3",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_3_3",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_3_3",
+    "commit": {
+      "sha": "c91cb76f8d84b2963f6ede2ef445ad46a6104216",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/c91cb76f8d84b2963f6ede2ef445ad46a6104216"
+    }
+  },
+  {
+    "name": "v2_3_2",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_3_2",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_3_2",
+    "commit": {
+      "sha": "9d222264d5e6a2dcac5aceafb5742a65e53dc513",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/9d222264d5e6a2dcac5aceafb5742a65e53dc513"
+    }
+  },
+  {
+    "name": "v2_3_1",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_3_1",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_3_1",
+    "commit": {
+      "sha": "5827d8e887d881eb3a6e6ea7410590261c90545f",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/5827d8e887d881eb3a6e6ea7410590261c90545f"
+    }
+  },
+  {
+    "name": "v2_3_0",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_3_0",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_3_0",
+    "commit": {
+      "sha": "a837be87fdf580ac4fd58c4cb2f1ee16bab11b99",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/a837be87fdf580ac4fd58c4cb2f1ee16bab11b99"
+    }
+  },
+  {
+    "name": "v2_3_0_preview2",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_3_0_preview2",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_3_0_preview2",
+    "commit": {
+      "sha": "e3434401aca2e331132652d4458366267e8cf378",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/e3434401aca2e331132652d4458366267e8cf378"
+    }
+  },
+  {
+    "name": "v2_3_0_preview1",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_3_0_preview1",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_3_0_preview1",
+    "commit": {
+      "sha": "9993701c7d3d83e24699177fef3238d8bf7bbbab",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/9993701c7d3d83e24699177fef3238d8bf7bbbab"
+    }
+  },
+  {
+    "name": "v2_2_9",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_2_9",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_2_9",
+    "commit": {
+      "sha": "72113d58cd2fc62b3f4ef3d2eb6cec37393532a4",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/72113d58cd2fc62b3f4ef3d2eb6cec37393532a4"
+    }
+  },
+  {
+    "name": "v2_2_8",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_2_8",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_2_8",
+    "commit": {
+      "sha": "f3c3c788aa458ec9d57035c8f3091093bfcb9fa7",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/f3c3c788aa458ec9d57035c8f3091093bfcb9fa7"
+    }
+  },
+  {
+    "name": "v2_2_7",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_2_7",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_2_7",
+    "commit": {
+      "sha": "530165c2948c3eed741db5659f7b937270caa46a",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/530165c2948c3eed741db5659f7b937270caa46a"
+    }
+  },
+  {
+    "name": "v2_2_6",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_2_6",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_2_6",
+    "commit": {
+      "sha": "1c091e34809d91cb7e9ab4518a99e07f30b7fbd1",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/1c091e34809d91cb7e9ab4518a99e07f30b7fbd1"
+    }
+  },
+  {
+    "name": "v2_2_5",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_2_5",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_2_5",
+    "commit": {
+      "sha": "449169fd8cfe4253381c40f595097ed50932bdae",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/449169fd8cfe4253381c40f595097ed50932bdae"
+    }
+  },
+  {
+    "name": "v2_2_4",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_2_4",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_2_4",
+    "commit": {
+      "sha": "9081c2c61ac9f7f9bdcbf054f33b2dc42740e85f",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/9081c2c61ac9f7f9bdcbf054f33b2dc42740e85f"
+    }
+  },
+  {
+    "name": "v2_2_3",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_2_3",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_2_3",
+    "commit": {
+      "sha": "acaf2ee762b08a4ccb23fef46cd93da1616d4d32",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/acaf2ee762b08a4ccb23fef46cd93da1616d4d32"
+    }
+  },
+  {
+    "name": "v2_2_2",
+    "zipball_url": "https://api.github.com/repos/ruby/ruby/zipball/v2_2_2",
+    "tarball_url": "https://api.github.com/repos/ruby/ruby/tarball/v2_2_2",
+    "commit": {
+      "sha": "a9721a259665149b1b9ff0beabcf5f8dc0136120",
+      "url": "https://api.github.com/repos/ruby/ruby/commits/a9721a259665149b1b9ff0beabcf5f8dc0136120"
+    }
+  }
+]
