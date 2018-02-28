@@ -123,6 +123,8 @@ when 'r'
         run('make')
         run('make install')
 
+        run('/usr/local/lib/R/bin/R','--vanilla','-e','install.packages(c("Rserve","forecast"), repos="https://cran.r-project.org", dependencies=TRUE)')
+
         Dir.chdir('/usr/local/lib/R') do
           run('tar', 'zcvf', "#{artifacts}/r-v#{version}.tgz", '.')
         end
