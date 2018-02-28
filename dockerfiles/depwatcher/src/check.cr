@@ -22,6 +22,8 @@ when "golang"
   versions = Depwatcher::Golang.new.check
 when "rlang"
   versions = Depwatcher::Rlang.new.check
+when "npm"
+  versions = Depwatcher::Npm.new.check(source["name"].to_s)
 else
   raise "Unkown type: #{source["type"]}"
 end
