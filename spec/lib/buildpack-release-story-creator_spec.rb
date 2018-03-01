@@ -40,13 +40,16 @@ describe BuildpackReleaseStoryCreator do
   context 'previous release stories exist' do
     it 'finds all the accepted buildpack_name-tagged stories since the last release' do
       allow(buildpack_project).to receive(:stories).and_return([double(id: 1, current_state: 'accepted')],
-                                                               [double(id:111111111, name:'this does not matter for this test', current_state: 'accepted')])
+                                                               [double(id:111111111, name:'this does not matter for this test', current_state: 'accepted')],
+                                                               [double(id:333333333, name:'this does not matter for this test', current_state: 'accepted')])
       allow(buildpack_project).to receive(:create_story).and_return(new_story)
 
       subject.run!
 
       expect(buildpack_project).to have_received(:stories)
                                        .with({with_label: 'elixir', after_story_id: 1})
+      expect(buildpack_project).to have_received(:stories)
+                                       .with({with_label: 'all', after_story_id: 1})
     end
   end
 
@@ -59,14 +62,17 @@ describe BuildpackReleaseStoryCreator do
       subject.run!
 
       expect(buildpack_project).to have_received(:stories)
-                                       .with({with_label: 'elixir'})
+                                       .with({with_label: 'elixir', after_story_id: nil})
+      expect(buildpack_project).to have_received(:stories)
+                                       .with({with_label: 'all', after_story_id: nil})
     end
   end
 
   it 'posts a new buildpack release story to Tracker' do
     allow(buildpack_project).to receive(:stories).and_return([double(id: 1)],
                                                              [double(id:111111111, name:'Elixir should be faster'),
-                                                              double(id:222222222, name:'Buildpack should tweet on stage')])
+                                                              double(id:222222222, name:'Buildpack should tweet on stage')],
+                                                             [double(id:333333333, name:'All buildpacks should be awesome')])
 
     expect(buildpack_project).to receive(:create_story).
         with(name: '**Release:** elixir-buildpack 2.10.4',
@@ -75,6 +81,7 @@ describe BuildpackReleaseStoryCreator do
 
                           #111111111 - Elixir should be faster
                           #222222222 - Buildpack should tweet on stage
+                          #333333333 - All buildpacks should be awesome
 
                           Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
                           DESCRIPTION
