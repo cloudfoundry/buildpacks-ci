@@ -12,7 +12,6 @@ BBL = "#{Dir.pwd}/bbl-v5.11.5_linux_x86-64"
 
 Dir.chdir("bbl-state/#{ENV['ENV_NAME']}") do
   target_config = {
-    "deployment"=> "cf",
     "target"=> `#{BBL} director-address`.strip,
     "client"=> `#{BBL} director-username`.strip,
     "client_secret"=> `#{BBL} director-password`.strip,
