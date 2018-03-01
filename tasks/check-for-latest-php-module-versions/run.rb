@@ -103,7 +103,7 @@ If you have updated cassadra modules (including datastax/cpp-driver) please run 
 ```
 docker run -p 0.0.0.0:9042:9042 --detach poklet/cassandra
 export CASSANDRA_HOST=[LOCALMACHINE EXTERNAL IP]
-CF_PASSWORD=admin BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-build --host=local.pcfdev.io cf_spec/integration/deploy_a_php_app_with_cassandra_spec.rb
+COMPOSER_GITHUB_OAUTH_TOKEN=[NNNN] ginkgo -focus 'deploying a basic PHP app using Cassandra module'
 ```
 Then stop the above docker cassandra container
 DESCRIPTION
