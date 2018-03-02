@@ -452,11 +452,22 @@ jobs: ##########################################################################
           trigger: true
         - get: bbl-state
         - get: buildpacks-ci
-      - task: delete-deployment
-        file: buildpacks-ci/tasks/delete-deployment/task.yml
+      - task: create-deployment-source-config
+        file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
         params:
-          DEPLOYMENT_NAME: cf
           ENV_NAME: cflinuxfs2
+      - put: cflinuxfs2-rootfs-smoke-test-deployment
+        params:
+          source_file: deployment-source-config/source_file.yml
+          delete:
+            enabled: true
+            force: true
+      - put: cflinuxfs2-cf-deployment
+        params:
+          source_file: deployment-source-config/source_file.yml
+          delete:
+            enabled: true
+            force: true
 
   - name: bbl-destroy
     serial: true
