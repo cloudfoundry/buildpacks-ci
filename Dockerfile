@@ -60,8 +60,8 @@ RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.45-linux-amd64
   && chmod +x /usr/local/bin/bosh2
 
 # download bbl
-RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v4.10.5/bbl-v4.10.5_linux_x86-64' \
-  && [ 3a782b9be10c93120f7b0d10e68704e299b79c836168a3538384ec31f69fc9d0 = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
+RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v5.11.6/bbl-v5.11.6_linux_x86-64' \
+  && [ 2ee595a0b8bc2546151f26e5fb986f599c1149557c9e15791b0043844f881866 = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bbl
 
 # download terraform (used by bbl)
