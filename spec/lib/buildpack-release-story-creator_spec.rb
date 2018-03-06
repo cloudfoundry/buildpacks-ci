@@ -11,6 +11,12 @@ describe BuildpackReleaseStoryCreator do
   let(:tracker_client) { double(TrackerApi::Client) }
   let(:buildpack_project) { instance_double(TrackerApi::Resources::Project) }
   let(:new_story) { double('new_story', id: 987) }
+  let(:release_stories) { [] }
+  let(:all_stories) { [double(id:888, name:'Older Release'),
+                       double(id:111, name:'Elixir should be faster'),
+                       double(id:999, name:'Latest Release'),
+                       double(id:222, name:'Buildpack should tweet on stage'),
+                       double(id:333, name:'All buildpacks should be awesome')] }
 
   subject { described_class.new(buildpack_name: buildpack_name,
                                 previous_buildpack_version: previous_buildpack_version,
@@ -24,67 +30,55 @@ describe BuildpackReleaseStoryCreator do
       .and_return(tracker_client)
     allow(tracker_client).to receive(:project).with(tracker_project_id)
       .and_return(buildpack_project)
-  end
 
-  it 'finds the previous release' do
-    allow(buildpack_project).to receive(:stories).and_return([double(id: 1, current_state: 'accepted')],
-                                                             [double(id:111111111, name:'this does not matter for this test', current_state: 'accepted')])
-    allow(buildpack_project).to receive(:create_story).and_return(new_story)
-
-    subject.run!
-
-    expect(buildpack_project).to have_received(:stories)
-                                     .with({filter: "label:release AND label:#{buildpack_name}"})
+    allow(buildpack_project).to receive(:stories).with({filter: "label:release AND label:elixir AND -state:unscheduled"}).and_return(release_stories)
+    allow(buildpack_project).to receive(:stories).with({filter: "label:elixir OR label:all", limit: 1000, auto_paginate: true}).and_return(all_stories)
   end
 
   context 'previous release stories exist' do
-    it 'finds all the accepted buildpack_name-tagged stories since the last release' do
-      allow(buildpack_project).to receive(:stories).and_return([double(id: 1, current_state: 'accepted')],
-                                                               [double(id:111111111, name:'this does not matter for this test', current_state: 'accepted')],
-                                                               [double(id:333333333, name:'this does not matter for this test', current_state: 'accepted')])
-      allow(buildpack_project).to receive(:create_story).and_return(new_story)
+    let(:release_stories) { [double(id: 888), double(id: 999)] }
+    it 'finds all the stories tagged buildpack_name or all that are lower in the backlog than the last release' do
+      expect(buildpack_project).to receive(:create_story).
+        with(hash_including(description: <<~DESCRIPTION,
+          Stories:
+
+          #222 - Buildpack should tweet on stage
+          #333 - All buildpacks should be awesome
+
+          Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
+          DESCRIPTION
+        )).and_return(new_story)
 
       subject.run!
-
-      expect(buildpack_project).to have_received(:stories)
-                                       .with({with_label: 'elixir', after_story_id: 1})
-      expect(buildpack_project).to have_received(:stories)
-                                       .with({with_label: 'all', after_story_id: 1})
     end
   end
 
   context 'no previous release stories exist' do
-    it 'finds all the accepted buildpack_name-tagged stories' do
-      allow(buildpack_project).to receive(:stories).and_return([],
-                                                               [double(id:111111111, name:'noname'), double(id:222222222, name:'noname')])
-      allow(buildpack_project).to receive(:create_story).and_return(new_story)
+    let(:release_stories) { [] }
+
+    it 'finds all the stories tagged buildpack_name or all' do
+      expect(buildpack_project).to receive(:create_story).
+        with(hash_including(description: <<~DESCRIPTION,
+          Stories:
+
+          #888 - Older Release
+          #111 - Elixir should be faster
+          #999 - Latest Release
+          #222 - Buildpack should tweet on stage
+          #333 - All buildpacks should be awesome
+
+          Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
+          DESCRIPTION
+        )).and_return(new_story)
 
       subject.run!
-
-      expect(buildpack_project).to have_received(:stories)
-                                       .with({with_label: 'elixir', after_story_id: nil})
-      expect(buildpack_project).to have_received(:stories)
-                                       .with({with_label: 'all', after_story_id: nil})
     end
   end
 
   it 'posts a new buildpack release story to Tracker' do
-    allow(buildpack_project).to receive(:stories).and_return([double(id: 1)],
-                                                             [double(id:111111111, name:'Elixir should be faster'),
-                                                              double(id:222222222, name:'Buildpack should tweet on stage')],
-                                                             [double(id:333333333, name:'All buildpacks should be awesome')])
-
     expect(buildpack_project).to receive(:create_story).
         with(name: '**Release:** elixir-buildpack 2.10.4',
-             description: <<~DESCRIPTION,
-                          Stories:
-
-                          #111111111 - Elixir should be faster
-                          #222222222 - Buildpack should tweet on stage
-                          #333333333 - All buildpacks should be awesome
-
-                          Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
-                          DESCRIPTION
+             description: anything(),
              estimate: 1,
              labels: %w(elixir release),
              requested_by_id: 555555
@@ -97,9 +91,6 @@ describe BuildpackReleaseStoryCreator do
     let(:previous_buildpack_version) { '2.3.9' }
 
     it 'increases the patch correctly' do
-      allow(buildpack_project).to receive(:stories).and_return([double(id: 1)],
-                                                               [double(id:111111111, name:'Elixir should be faster'),
-                                                                double(id:222222222, name:'Buildpack should tweet on stage')])
       expect(buildpack_project).to receive(:create_story).
         with(hash_including(name: '**Release:** elixir-buildpack 2.3.10')).and_return(new_story)
 

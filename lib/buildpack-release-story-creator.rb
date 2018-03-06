@@ -36,12 +36,13 @@ class BuildpackReleaseStoryCreator
 
   def stories_since_last_release
     story_id = most_recent_release_story_id
-    buildpack_project.stories(with_label: buildpack_name, after_story_id: story_id) +
-      buildpack_project.stories(with_label: 'all', after_story_id: story_id)
+    all = buildpack_project.stories(filter: "label:#{buildpack_name} OR label:all", limit: 1000, auto_paginate: true)
+    idx = all.find_index{ |s| s.id == story_id } if story_id
+    idx ? all[(idx+1)..-1] : all
   end
 
   def most_recent_release_story_id
-    story = buildpack_project.stories(filter: "label:release AND label:#{buildpack_name}").last
+    story = buildpack_project.stories(filter: "label:release AND label:#{buildpack_name} AND -state:unscheduled").last
     story.id if story
   end
 
