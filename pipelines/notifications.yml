@@ -119,8 +119,6 @@ jobs:
           BUILDPACKS_SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
           CAPI_SLACK_CHANNEL: {{capi-slack-channel}}
           CAPI_SLACK_WEBHOOK: {{capi-slack-webhook}}
-          GITHUB_USERNAME: {{github-username}}
-          GITHUB_PASSWORD: {{github-password}}
           BUILDPACKS_TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
           CAPI_TRACKER_PROJECT_ID: {{capi-public-tracker-id}}
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
@@ -156,11 +154,8 @@ jobs:
       - task: check-for-new-buildpack-cves
         file: buildpacks-ci/tasks/check-for-new-buildpack-cves/task.yml
         params:
-          GITHUB_USERNAME: {{github-username}}
-          GITHUB_PASSWORD: {{github-password}}
           SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
           SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
-          EMAIL_PREPARER_DIR: ../cves-email
       - put: new-buildpack-cves
         params:
           repository: output-new-buildpack-cves
@@ -181,12 +176,9 @@ jobs:
         params:
           SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
           SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
-          GITHUB_USERNAME: {{github-username}}
-          GITHUB_PASSWORD: {{github-password}}
           TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
           TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-          EMAIL_PREPARER_DIR: ../cves-email
           STACK: cflinuxfs2
       - put: new-cves
         params:

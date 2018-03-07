@@ -6,7 +6,6 @@ buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..
 require "#{buildpacks_ci_dir}/lib/buildpack-cve-feed"
 require "#{buildpacks_ci_dir}/lib/cve-history"
 require "#{buildpacks_ci_dir}/lib/notifiers/cve-slack-notifier"
-require "#{buildpacks_ci_dir}/lib/notifiers/cve-email-preparer-and-github-issue-notifier"
 
 def notify!(language, new_cves, notifiers)
   notifiers.each { |n| n.notify! new_cves, { :category => "buildpack-#{language}", :label => language } }
@@ -22,5 +21,5 @@ languages.each do |language|
 
   CVEHistory.write_yaml_cves(all_cves, buildpack_cves_dir, "#{language}.yml") unless new_cves.empty?
 
-  notify!(language, new_cves, [CVEEmailPreparerAndGithubIssueNotifier, CVESlackNotifier])
+  notify!(language, new_cves, [CVESlackNotifier])
 end

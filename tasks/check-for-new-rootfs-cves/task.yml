@@ -9,7 +9,6 @@ inputs:
   - name: buildpacks-ci
   - name: cflinuxfs2
 outputs:
-  - name: cves-email
   - name: output-new-cves
 run:
   path: bash
@@ -25,9 +24,6 @@ params:
   STACK:
   SLACK_CHANNEL:
   SLACK_WEBHOOK:
-  GITHUB_USERNAME:
-  GITHUB_PASSWORD:
   TRACKER_PROJECT_ID:
   TRACKER_API_TOKEN:
   TRACKER_REQUESTER_ID:
-  EMAIL_PREPARER_DIR:
