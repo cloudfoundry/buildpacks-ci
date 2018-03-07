@@ -14,7 +14,7 @@ module Depwatcher
         /#{regexp}/.match(r.name)
       end.map do |r|
         Internal.new(r.name)
-      end.first(10).reverse
+      end.reverse
     end
   end
 end

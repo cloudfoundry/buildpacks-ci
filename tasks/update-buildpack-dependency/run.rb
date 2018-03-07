@@ -26,15 +26,19 @@ new_versions = manifest['dependencies'].select { |d| d['name'] == name }.map { |
 
 added = (new_versions - old_versions).uniq.sort
 removed = (old_versions - new_versions).uniq.sort
+rebuilt = old_versions.include?(version)
 
-if added.length == 0
+if added.length == 0 && !rebuilt
   puts 'SKIP: Built version is not required by buildpack.'
   exit 0
 end
 
-removed_text = ''
+commit_message = "Add #{name} #{version}"
+if rebuilt
+  commit_message = "Rebuild #{name} #{version}"
+end
 if removed.length > 0
-  removed_text = ", remove #{name} #{removed.join(', ')}"
+  commit_message = "#{commit_message}, remove #{name} #{removed.join(', ')}"
 end
 
 Dir.chdir('artifacts') do
@@ -44,5 +48,5 @@ Dir.chdir('artifacts') do
   File.write('manifest.yml', manifest.to_yaml)
 
   GitClient.add_file('manifest.yml')
-  GitClient.safe_commit("Add #{name} #{version}#{removed_text} [##{story_id}]")
+  GitClient.safe_commit("#{commit_message} [##{story_id}]")
 end

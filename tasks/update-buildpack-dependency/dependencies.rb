@@ -11,9 +11,14 @@ class Dependencies
   end
 
   def switch
-    return @dependencies unless latest?
-    out = ((@dependencies - @matching_deps) + [@dep] + master_dependencies)
-p out
+    out = @dependencies
+    if @matching_deps.map{|d|d['version']}.include?(@dep['version'])
+      out = ((@dependencies.reject { |d| d['version'] == @dep['version'] }) + [@dep])
+    elsif latest?
+      out = ((@dependencies - @matching_deps) + [@dep] + master_dependencies)
+    else
+      return @dependencies
+    end
     out.sort_by do |d|
       version = Gem::Version.new(d['version']) rescue d['version']
       [ d['name'], version ]

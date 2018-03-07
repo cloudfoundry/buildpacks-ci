@@ -25,7 +25,9 @@ when "golang"
 when "rlang"
   version = Depwatcher::Rlang.new.in(version["ref"].to_s)
 when "npm"
-  versions = Depwatcher::Npm.new.in(source["name"].to_s, version["ref"].to_s)
+  version = Depwatcher::Npm.new.in(source["name"].to_s, version["ref"].to_s)
+when "nginx"
+  version = Depwatcher::Nginx.new.in(version["ref"].to_s)
 else
   raise "Unkown type: #{type}"
 end

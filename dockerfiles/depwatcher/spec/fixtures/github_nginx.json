@@ -1,0 +1,272 @@
+[
+  {
+    "name": "release-1.13.9",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.13.9",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.13.9",
+    "commit": {
+      "sha": "22adf80c4a85553f4c719c6034cac0ae57a6549a",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/22adf80c4a85553f4c719c6034cac0ae57a6549a"
+    }
+  },
+  {
+    "name": "release-1.13.8",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.13.8",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.13.8",
+    "commit": {
+      "sha": "3860a5e6c930aeafffd200de3263d0b2cccda415",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/3860a5e6c930aeafffd200de3263d0b2cccda415"
+    }
+  },
+  {
+    "name": "release-1.13.7",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.13.7",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.13.7",
+    "commit": {
+      "sha": "249208c9a55d9908b8c73c242208c16d770649f3",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/249208c9a55d9908b8c73c242208c16d770649f3"
+    }
+  },
+  {
+    "name": "release-1.13.6",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.13.6",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.13.6",
+    "commit": {
+      "sha": "66ca1d7bd8298ab9887c986781d0ee9675b0c57d",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/66ca1d7bd8298ab9887c986781d0ee9675b0c57d"
+    }
+  },
+  {
+    "name": "release-1.13.5",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.13.5",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.13.5",
+    "commit": {
+      "sha": "9963721d9a86e939246e724cacd717af63fae5cb",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/9963721d9a86e939246e724cacd717af63fae5cb"
+    }
+  },
+  {
+    "name": "release-1.13.4",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.13.4",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.13.4",
+    "commit": {
+      "sha": "c556874e174ff5b93a24976ed7032def2e8670c6",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/c556874e174ff5b93a24976ed7032def2e8670c6"
+    }
+  },
+  {
+    "name": "release-1.13.3",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.13.3",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.13.3",
+    "commit": {
+      "sha": "6454225872c058c2705fc1e207ce4bb503b2e12a",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/6454225872c058c2705fc1e207ce4bb503b2e12a"
+    }
+  },
+  {
+    "name": "release-1.13.2",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.13.2",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.13.2",
+    "commit": {
+      "sha": "2b6b360b83924ec98137990ad14f64b4cf8448f2",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/2b6b360b83924ec98137990ad14f64b4cf8448f2"
+    }
+  },
+  {
+    "name": "release-1.13.1",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.13.1",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.13.1",
+    "commit": {
+      "sha": "b84e8f713de0ae517b12c675cb47b0316d46a337",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/b84e8f713de0ae517b12c675cb47b0316d46a337"
+    }
+  },
+  {
+    "name": "release-1.13.0",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.13.0",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.13.0",
+    "commit": {
+      "sha": "0cb7be3c715fd6b85227610c654c9b8f6f7ae666",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/0cb7be3c715fd6b85227610c654c9b8f6f7ae666"
+    }
+  },
+  {
+    "name": "release-1.12.2",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.12.2",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.12.2",
+    "commit": {
+      "sha": "0ddad64d9c0ec2f0581d4145761adcbb58729f9f",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/0ddad64d9c0ec2f0581d4145761adcbb58729f9f"
+    }
+  },
+  {
+    "name": "release-1.12.1",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.12.1",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.12.1",
+    "commit": {
+      "sha": "f1f2497e7affaa56189b8fdd165afaf05d20579e",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/f1f2497e7affaa56189b8fdd165afaf05d20579e"
+    }
+  },
+  {
+    "name": "release-1.12.0",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.12.0",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.12.0",
+    "commit": {
+      "sha": "58cb5f75ef90f28a7eaa2fde01670e62c3b3c8b1",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/58cb5f75ef90f28a7eaa2fde01670e62c3b3c8b1"
+    }
+  },
+  {
+    "name": "release-1.11.13",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.13",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.13",
+    "commit": {
+      "sha": "3290884abbe84bb37d3ee7dd9327a4fe5dcde830",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/3290884abbe84bb37d3ee7dd9327a4fe5dcde830"
+    }
+  },
+  {
+    "name": "release-1.11.12",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.12",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.12",
+    "commit": {
+      "sha": "2338d1275385aa7a9255ed904592a10562fec88b",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/2338d1275385aa7a9255ed904592a10562fec88b"
+    }
+  },
+  {
+    "name": "release-1.11.11",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.11",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.11",
+    "commit": {
+      "sha": "80c2df69b02981bb58ece71a43ed1f447e5c49ba",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/80c2df69b02981bb58ece71a43ed1f447e5c49ba"
+    }
+  },
+  {
+    "name": "release-1.11.10",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.10",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.10",
+    "commit": {
+      "sha": "85f28f30bf5163749bfa545c3cbc81b98877b27c",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/85f28f30bf5163749bfa545c3cbc81b98877b27c"
+    }
+  },
+  {
+    "name": "release-1.11.9",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.9",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.9",
+    "commit": {
+      "sha": "859d62f66acaeef6c7805fbbadc5ab5c2904b8f2",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/859d62f66acaeef6c7805fbbadc5ab5c2904b8f2"
+    }
+  },
+  {
+    "name": "release-1.11.8",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.8",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.8",
+    "commit": {
+      "sha": "0bda4731830398780203e5b0dc099fdb1d4408a2",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/0bda4731830398780203e5b0dc099fdb1d4408a2"
+    }
+  },
+  {
+    "name": "release-1.11.7",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.7",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.7",
+    "commit": {
+      "sha": "e61dc2584b561c3b9f832df43380feb562d11f8d",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/e61dc2584b561c3b9f832df43380feb562d11f8d"
+    }
+  },
+  {
+    "name": "release-1.11.6",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.6",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.6",
+    "commit": {
+      "sha": "c42249a5d0ee72d21d0c71d14cb7cfd0ed9e47d5",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/c42249a5d0ee72d21d0c71d14cb7cfd0ed9e47d5"
+    }
+  },
+  {
+    "name": "release-1.11.5",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.5",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.5",
+    "commit": {
+      "sha": "06d88ca53b5a77c89271864b6fe46bfea8d4b2bf",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/06d88ca53b5a77c89271864b6fe46bfea8d4b2bf"
+    }
+  },
+  {
+    "name": "release-1.11.4",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.4",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.4",
+    "commit": {
+      "sha": "c6630fb2fdfad6cc146b99d628e2976f55939588",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/c6630fb2fdfad6cc146b99d628e2976f55939588"
+    }
+  },
+  {
+    "name": "release-1.11.3",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.3",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.3",
+    "commit": {
+      "sha": "1d2f499889a192a66c5407d634c9c697edc341cf",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/1d2f499889a192a66c5407d634c9c697edc341cf"
+    }
+  },
+  {
+    "name": "release-1.11.2",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.2",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.2",
+    "commit": {
+      "sha": "c8536d4ae7c97c5277fedd2282f2103576b4ccd2",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/c8536d4ae7c97c5277fedd2282f2103576b4ccd2"
+    }
+  },
+  {
+    "name": "release-1.11.1",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.1",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.1",
+    "commit": {
+      "sha": "757aee99b8e751b7f6abcbfa2a8da07960a986eb",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/757aee99b8e751b7f6abcbfa2a8da07960a986eb"
+    }
+  },
+  {
+    "name": "release-1.11.0",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.11.0",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.11.0",
+    "commit": {
+      "sha": "f694e2afd3bdf9d9fc159cac94276330905cff39",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/f694e2afd3bdf9d9fc159cac94276330905cff39"
+    }
+  },
+  {
+    "name": "release-1.10.3",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.10.3",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.10.3",
+    "commit": {
+      "sha": "b708f694ea93a91656ea6243a611ba86ac139e73",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/b708f694ea93a91656ea6243a611ba86ac139e73"
+    }
+  },
+  {
+    "name": "release-1.10.2",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.10.2",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.10.2",
+    "commit": {
+      "sha": "8c8c70b27b9a3d5a20c7ccb2f7e2f61dedf6fc47",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/8c8c70b27b9a3d5a20c7ccb2f7e2f61dedf6fc47"
+    }
+  },
+  {
+    "name": "release-1.10.1",
+    "zipball_url": "https://api.github.com/repos/nginx/nginx/zipball/release-1.10.1",
+    "tarball_url": "https://api.github.com/repos/nginx/nginx/tarball/release-1.10.1",
+    "commit": {
+      "sha": "e32426747fa56ab92dd6b5432ee57c912413e46a",
+      "url": "https://api.github.com/repos/nginx/nginx/commits/e32426747fa56ab92dd6b5432ee57c912413e46a"
+    }
+  }
+]
