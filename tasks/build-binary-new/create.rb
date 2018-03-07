@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+require 'fileutils'
 require 'json'
 require 'yaml'
 require 'tracker_api'
@@ -33,6 +34,7 @@ Dir.chdir('builds-artifacts') do
   GitClient.set_global_config('user.name', 'CF Buildpacks Team CI Server')
 
   version = data.dig('version', 'ref')
+  FileUtils.mkdir_p("binary-builds-new/#{data.dig('source', 'name')}")
   File.write("binary-builds-new/#{data.dig('source', 'name')}/#{version}.json", { tracker_story_id: story.id }.to_json)
 
   GitClient.add_file("binary-builds-new/#{data.dig('source', 'name')}/#{version}.json")

@@ -7,6 +7,7 @@
   ruby: { ruby: { line: "minor", keep_master: true } },
   python: { python: { line: "minor", keep_master: true } },
   r: { r: { line: "minor", keep_master: true } },
+  nginx: { nginx: { line: "minor", keep_master: true } },
   # node: { node: { line: "major", keep_master: true }, ruby: { line: "major", keep_master: false } },
 } %>
 resource_types:
@@ -66,6 +67,11 @@ resources:
     type: github_releases
     repo: yarnpkg/yarn
     name: yarn
+- name: source-nginx
+  type: depwatcher
+  source:
+    type: nginx
+    name: nginx
 <% dependencies.each do |dep, _| %>
 - name: buildpacks-bucket-<%= dep %>
   type: s3
@@ -76,15 +82,13 @@ resources:
     regexp: dependencies/<%= dep %>/<%= dep %>.*(\d+.\d+.\d+)(.*)
 <% end %>
 
-<% dependencies.each do |dep, _| %>
-- name: builds-<%= dep %>
+- name: builds
   type: git
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
     branch: master
-    paths: [ binary-builds-new/<%= dep %>/ ]
+    paths: [ binary-builds-new/ ]
     private_key: {{public-buildpacks-ci-robots-private-key}}
-<% end %>
 
 <% dependencies.values.map(&:keys).flatten.uniq.each do |buildpack| %>
 - name: <%= buildpack %>-buildpack
@@ -114,7 +118,6 @@ jobs:
       trigger: true
       version: every
     - get: builds
-      resource: builds-<%= dep %>
   - do:
     - task: create-tracker-story
       file: buildpacks-ci/tasks/build-binary-new/create.yml
@@ -123,7 +126,7 @@ jobs:
         TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         BUILDPACKS: <%= buildpacks.keys.join(' ') %>
-    - put: builds-<%= dep %>
+    - put: builds
       params:
         repository: builds-artifacts
         rebase: true
@@ -141,14 +144,13 @@ jobs:
       version: every
       passed: [ create-<%= dep %>-story ]
     - get: builds
-      resource: builds-<%= dep %>
   - do:
     - task: build-binary
       file: buildpacks-ci/tasks/build-binary-new/build.yml
     - put: buildpacks-bucket-<%= dep %>
       params:
         file: artifacts/<%= dep %>*
-    - put: builds-<%= dep %>
+    - put: builds
       params:
         repository: builds-artifacts
         rebase: true
@@ -170,7 +172,6 @@ jobs:
       version: every
       trigger: true
     - get: builds
-      resource: builds-<%= dep %>
   - do:
     - task: update-buildpack-dependency
       file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
@@ -199,7 +200,6 @@ jobs:
       - update-<%= dep %>-<%= buildpack %>
       <% end %>
     - get: builds
-      resource: builds-<%= dep %>
   - do:
     - task: finish-<%= dep %>-story
       file: buildpacks-ci/tasks/build-binary-new/finish.yml
