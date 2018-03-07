@@ -83,16 +83,6 @@ resources:
       owner: cloudfoundry
       repository: cflinuxfs2
       access_token: {{buildpacks-github-token}}
-  - name: cves-email
-    type: email-sender
-    source:
-      smtp:
-        host: email-smtp.us-east-1.amazonaws.com
-        port: "2587"
-        username: {{cve-amazon-ses-smtp-username}}
-        password: {{cve-amazon-ses-smtp-password}}
-      from: cf-buildpacks-eng@pivotal.io
-      to: ["cf-security@pivotal.io", "cf-buildpacks-eng@pivotal.io"]
 
 jobs:
   - name: categorize-security-notices
@@ -175,12 +165,6 @@ jobs:
         params:
           repository: output-new-buildpack-cves
           rebase: true
-      - put: buildpack-related-new-cves-email
-        resource: cves-email
-        params:
-          subject: cves-email/subject-buildpack-ruby
-          body: cves-email/body-buildpack-ruby
-          headers: cves-email/headers-buildpack-ruby
 
   - name: new-rootfs-cves
     serial: true
@@ -208,18 +192,6 @@ jobs:
         params:
           repository: output-new-cves
           rebase: true
-      - put: cflinuxfs2-related-new-cves-email
-        resource: cves-email
-        params:
-          subject: cves-email/subject-cflinuxfs2-related
-          body: cves-email/body-cflinuxfs2-related
-          headers: cves-email/headers-cflinuxfs2-related
-      - put: cflinuxfs2-unrelated-new-cves-email
-        resource: cves-email
-        params:
-          subject: cves-email/subject-cflinuxfs2-unrelated
-          body: cves-email/body-cflinuxfs2-unrelated
-          headers: cves-email/headers-cflinuxfs2-unrelated
 
   - name: PHP Module Checker
     serial: true
