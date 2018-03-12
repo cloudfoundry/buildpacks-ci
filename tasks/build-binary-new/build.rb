@@ -34,6 +34,7 @@ when 'pipenv'
   run('apt', 'update')
   run('apt-get', 'install', '-y', 'python-pip', 'python-dev', 'build-essential')
   run('pip', 'install', '--upgrade', 'pip')
+  run('pip', 'install', '--upgrade', 'setuptools')
   Dir.mktmpdir do |dir|
     Dir.chdir(dir) do
       run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', "pipenv==#{version}")
