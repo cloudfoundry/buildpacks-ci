@@ -28,47 +28,56 @@ resources:
 
 - name: source-pipenv
   type: depwatcher
+  check_every: 1h
   source:
     type: pypi
     name: pipenv
 - name: source-setuptools
   type: depwatcher
+  check_every: 1h
   source:
     type: pypi
     name: setuptools
 - name: source-rubygems
   type: depwatcher
+  check_every: 1h
   source:
     type: rubygems_cli
     name: rubygems
 - name: source-ruby
   type: depwatcher
+  check_every: 1h
   source:
     type: ruby_lang
     name: ruby
 - name: source-python
   type: depwatcher
+  check_every: 1h
   source:
     type: python
     name: python
 - name: source-go
   type: depwatcher
+  check_every: 1h
   source:
     type: golang
     name: go
 - name: source-r
   type: depwatcher
+  check_every: 1h
   source:
     type: rlang
     name: r
 - name: source-yarn
   type: depwatcher
+  check_every: 1h
   source:
     type: github_releases
     repo: yarnpkg/yarn
     name: yarn
 - name: source-nginx
   type: depwatcher
+  check_every: 1h
   source:
     type: nginx
     name: nginx
