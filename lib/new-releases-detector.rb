@@ -221,7 +221,7 @@ class NewReleasesDetector
       go:              -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
       godep:           -> { Octokit.releases('tools/godep').map(&:tag_name) },
       dep:             -> { Octokit.releases('golang/dep').map(&:tag_name) },
-      httpd:           -> { Octokit.tags('apache/httpd').map(&:name).grep(/^2\./) },
+      httpd:           -> { Nokogiri::HTML.parse(open('https://httpd.apache.org/download.cgi')).css('h1[id^="apache"]').map{|a| a.text.gsub(/Apache HTTP Server\s+(\S+).*/, '\1')} },
       hwc:             -> { Octokit.releases('cloudfoundry-incubator/hwc').map(&:tag_name) },
       jruby:           -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
       libunwind:       -> { Octokit.releases('libunwind/libunwind').map(&:tag_name) },
