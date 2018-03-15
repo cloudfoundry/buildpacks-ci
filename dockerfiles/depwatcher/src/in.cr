@@ -28,6 +28,8 @@ when "npm"
   version = Depwatcher::Npm.new.in(source["name"].to_s, version["ref"].to_s)
 when "nginx"
   version = Depwatcher::Nginx.new.in(version["ref"].to_s)
+when "httpd"
+  version = Depwatcher::Httpd.new.in(version["ref"].to_s)
 else
   raise "Unkown type: #{type}"
 end
