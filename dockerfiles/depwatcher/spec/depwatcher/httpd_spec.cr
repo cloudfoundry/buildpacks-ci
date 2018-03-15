@@ -22,7 +22,7 @@ Spec2.describe Depwatcher::Httpd do
     it "returns real releases sorted" do
       obj = subject.in("2.4.29")
       expect(obj.ref).to eq "2.4.29"
-      expect(obj.url).to eq "http://archive.apache.org/dist/httpd/apache_2.4.29.tar.gz"
+      expect(obj.url).to eq "http://archive.apache.org/dist/httpd/httpd-2.4.29.tar.gz"
     end
   end
 end
