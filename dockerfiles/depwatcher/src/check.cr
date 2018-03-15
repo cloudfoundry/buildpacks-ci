@@ -26,6 +26,8 @@ when "npm"
   versions = Depwatcher::Npm.new.check(source["name"].to_s)
 when "nginx"
   versions = Depwatcher::Nginx.new.check
+when "httpd"
+  versions = Depwatcher::Httpd.new.check
 else
   raise "Unkown type: #{source["type"]}"
 end
