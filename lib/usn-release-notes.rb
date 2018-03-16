@@ -10,7 +10,7 @@ class UsnReleaseNotes
     @usn_id    = usn_id.upcase
     @contents  = open(usn_url).read
     @doc       = Nokogiri::HTML(@contents)
-    @usn_title = @doc.css('#main-content > div > h2').first.text
+    @usn_title = @doc.css('#main-content h1').first.text
   end
 
   def text
@@ -20,11 +20,13 @@ class UsnReleaseNotes
   private
 
   def usn_url
-    "https://usn.ubuntu.com/#{@usn_id}/"
+    "https://usn.ubuntu.com/#{@usn_id.gsub(/^USN-/, '')}/"
   end
 
   def release_note_text
-    cves      = @doc.css('#main-content > div > h3:contains("References") + p > a[href*="cve/CVE"]')
+    cves      = @doc.css('#references + ul > li > a[href*="cve/CVE"]')
+
+    raise 'Could not find CVE references for release notes' if cves.empty?
 
     notes = "[#{usn_id}](#{usn_url}) #{usn_title}:\n"
 
