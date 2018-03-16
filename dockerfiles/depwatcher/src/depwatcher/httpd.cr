@@ -27,7 +27,7 @@ module Depwatcher
     end
 
     def in(ref : String) : Release
-      Release.new(ref, "http://archive.apache.org/dist/httpd/httpd-#{ref}.tar.gz")
+      Release.new(ref, "http://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2")
     end
   end
 end
