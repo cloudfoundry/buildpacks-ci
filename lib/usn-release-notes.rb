@@ -20,7 +20,7 @@ class UsnReleaseNotes
   private
 
   def usn_url
-    "https://www.ubuntu.com/usn/#{@usn_id}/"
+    "https://usn.ubuntu.com/#{@usn_id}/"
   end
 
   def release_note_text
