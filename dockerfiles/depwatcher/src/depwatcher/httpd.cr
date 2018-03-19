@@ -1,5 +1,6 @@
 require "./base"
 require "xml"
+require "http/request"
 
 module Depwatcher
   class Httpd < Base
@@ -7,8 +8,9 @@ module Depwatcher
       JSON.mapping(
         ref: String,
         url: String,
+        sha256: String,
       )
-      def initialize(@ref : String, @url : String)
+      def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
 
@@ -27,7 +29,9 @@ module Depwatcher
     end
 
     def in(ref : String) : Release
-      Release.new(ref, "http://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2")
+      res = HTTP::Client.get "http://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2.sha256"
+      sha256 = res.body.split(" ").first
+      Release.new(ref, "http://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2", sha256)
     end
   end
 end
