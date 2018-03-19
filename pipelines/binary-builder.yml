@@ -38,7 +38,7 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
       branch: master
 
-<% dep_build_names = %w(bower go bundler composer dotnet glide godep dep httpd hwc jruby php php7 python node nginx ruby) %>
+<% dep_build_names = %w(bower go bundler composer dotnet glide godep dep hwc jruby php php7 python node nginx ruby) %>
 <% dep_build_names.each do |dep| %>
   - name: <%= dep %>-builds
     type: git
@@ -117,7 +117,7 @@ resources: #####################################################################
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
 
-<% dep_build_names = %w(bower go bundler composer dotnet glide godep dep httpd hwc jruby php php7 python node nginx ruby) %>
+<% dep_build_names = %w(bower go bundler composer dotnet glide godep dep hwc jruby php php7 python node nginx ruby) %>
 <% dep_build_names.each do |dep| %>
   - name: buildpacks-bucket-<%= dep %>
     type: s3
@@ -152,11 +152,11 @@ groups: ########################################################################
   - name: manual-builds
     jobs:
     - binary-builder-specs
-<% %w(go php php7 ruby jruby python httpd).each do |dependency| %>
+<% %w(go php php7 ruby jruby python).each do |dependency| %>
     - build-<%= dependency %>
 <% end %>
 
-  <% integration_spec_names = %w(bundler glide go godep dep httpd hwc jruby nginx nodejs php5 php7 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
+  <% integration_spec_names = %w(bundler glide go godep dep hwc jruby nginx nodejs php5 php7 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
   - name: binary-builder-specs
     jobs:
     - binary-builder-specs
@@ -192,7 +192,7 @@ jobs: ##########################################################################
         - get: binary-builder
           trigger: true
       - do:
-        <% unit_spec_names = %w(bundler glide go godep dep httpd hwc jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
+        <% unit_spec_names = %w(bundler glide go godep dep hwc jruby nginx nodejs php5 php7 php71 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
         - task: all-expected-integration-specs-will-run
           file: buildpacks-ci/tasks/check-for-binary-builder-integration-spec-presence/task.yml
           params:
@@ -248,7 +248,7 @@ jobs: ##########################################################################
 
 
 
-<% %w(go php php7 ruby jruby python httpd).each do |dependency| %>
+<% %w(go php php7 ruby jruby python).each do |dependency| %>
   - name: build-<%= dependency %>
     serial: true
     public: true

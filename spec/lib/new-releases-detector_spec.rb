@@ -29,7 +29,6 @@ describe NewReleasesDetector do
     allow_any_instance_of(described_class).to receive(:open).with(/newrelic/).and_return(double(read: '<html></html>'))
     allow_any_instance_of(described_class).to receive(:open).with('https://apr.apache.org/download.cgi').and_return(double(read: '<html></html>'))
     allow_any_instance_of(described_class).to receive(:open).with('https://maven.apache.org/docs/history.html').and_return(double(read: '<html>3.3.6 3.3.7 3.3.8 3.3.9</html>'))
-    allow_any_instance_of(described_class).to receive(:open).with('https://httpd.apache.org/download.cgi').and_return(double(read: '<html></html>'))
     allow_any_instance_of(described_class).to receive(:open).with(%r{https://pypi.python.org/pypi/[^/]+/json}).and_return(double(read: '{"releases":{}}'))
 
     allow(File).to receive(:exist?).and_call_original
