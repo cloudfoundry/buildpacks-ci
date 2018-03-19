@@ -8,8 +8,10 @@
   python: { python: { line: "minor", keep_master: true } },
   r: { r: { line: "minor", keep_master: true } },
   nginx: { nginx: { line: "minor", keep_master: true } },
+  httpd: { php: {}, },
   # node: { node: { line: "major", keep_master: true }, ruby: { line: "major", keep_master: false } },
 } %>
+<% manual = [:httpd] %>
 resource_types:
 - name: depwatcher
   type: docker-image
@@ -81,6 +83,12 @@ resources:
   source:
     type: nginx
     name: nginx
+- name: source-httpd
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: httpd
+    name: httpd
 <% dependencies.each do |dep, _| %>
 - name: buildpacks-bucket-<%= dep %>
   type: s3
@@ -149,7 +157,7 @@ jobs:
     - get: binary-builder
     - get: source
       resource: source-<%= dep %>
-      trigger: true
+      <%= 'trigger: true' unless manual.include?(dep) %>
       version: every
       passed: [ create-<%= dep %>-story ]
     - get: builds
