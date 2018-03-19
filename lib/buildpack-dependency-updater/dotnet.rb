@@ -34,4 +34,25 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
   def perform_dependency_specific_changes
     perform_default_versions_update
   end
+
+  def perform_default_versions_update
+    buildpack_manifest["default_versions"].each do |dep|
+      if dep["name"] == dependency
+
+        if Gem::Version.new(dependency_version) >= Gem::Version.new(semver_version(dep['version']))
+          dep['version'] = dependency_version
+        end
+      end
+    end
+  end
+
+  def semver_version(version)
+     version_numbers = version.split('.')
+     index = version_numbers.index('x')
+     if index
+       version_numbers[index] = '0'
+       version_numbers[index - 1].next!
+     end
+      version_numbers.join('.')
+  end
  end

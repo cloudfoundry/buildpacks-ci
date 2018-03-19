@@ -152,6 +152,48 @@ describe BuildpackDependencyUpdater do
         end
       end
 
+      context 'the default version is a wildcard and the specified version does NOT match' do
+        let(:buildpack_manifest_contents) do
+          <<~MANIFEST
+            ---
+            language: dotnet-core
+            default_versions:
+              - name: dotnet
+                version: 1.x
+            dependencies: []
+          MANIFEST
+        end
+        let(:new_version) { '2.2.2' }
+        it "updates the dotnet buildpack manifest dependency default with the specified version" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+
+          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency}
+          expect(default_in_manifest["version"]).to eq('2.2.2')
+        end
+      end
+
+      context 'the default version is a wildcard and the specified version matches' do
+        let(:buildpack_manifest_contents) do
+          <<~MANIFEST
+            ---
+            language: dotnet-core
+            default_versions:
+              - name: dotnet
+                version: 1.x
+            dependencies: []
+          MANIFEST
+        end
+        let(:new_version) { '1.2.2' }
+        it "does NOT update the dotnet buildpack manifest dependency default with the specified version" do
+          subject.run!
+          manifest = YAML.load_file(manifest_file)
+
+          default_in_manifest = manifest["default_versions"].find{|dep| dep["name"] == dependency}
+          expect(default_in_manifest["version"]).to eq('1.x')
+        end
+      end
+
       context 'the default version of the dotnet sdk is higher than the specified version' do
         let(:buildpack_manifest_contents) do
           <<~MANIFEST
