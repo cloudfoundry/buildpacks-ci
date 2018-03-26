@@ -626,7 +626,7 @@ jobs: ##########################################################################
           - task: ginkgo
             file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
             params:
-              STACKS: cflinuxfs2
+              STACKS: <%= language == 'hwc' ? 'windows2012R2' : 'cflinuxfs2' %>
               GINKGO_ATTEMPTS: 4
               GINKGO_NODES: 6
               <% if language == 'php' %>
