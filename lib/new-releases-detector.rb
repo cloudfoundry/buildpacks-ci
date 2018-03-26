@@ -110,7 +110,7 @@ class NewReleasesDetector
 
     buildpack_names = BuildpackDependency.for(dependency)
     tasks = buildpack_names.map do |buildpack|
-      "Update #{dependency} in #{buildpack}-buildpack"
+      "Update #{dependency} in #{buildpack}-buildpack if version is supported"
     end
     labels = buildpack_names.map do |buildpack|
       buildpack.to_s
