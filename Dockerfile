@@ -20,6 +20,7 @@ RUN apt-get update \
   libmysqlclient-dev \
   libpq-dev \
   libsqlite3-dev \
+  libgconf-2-4 \
   lsb-release \
   module-init-tools \
   npm \
