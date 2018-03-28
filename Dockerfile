@@ -49,8 +49,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the CF-CLI
-RUN wget -O cf-cli.tgz 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.33.0&source=github-rel' \
-  && [ 443b61459bed73571e987f5c09ac559278da68fffa62ebe521d770d00b8f5629 = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
+RUN wget -O cf-cli.tgz 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.35.2&source=github-rel' \
+  && [ 708a7757d3b3192a40e2cd8073b4f20afc59b7cbb0cb6bd88244268dfc6eb77d = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
   && tar xzf cf-cli.tgz -C /usr/bin \
   && rm cf-cli.tgz
 
