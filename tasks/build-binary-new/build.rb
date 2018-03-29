@@ -181,9 +181,9 @@ when 'nginx'
           '--without-http_scgi_module',
           '--with-pcre',
           '--with-pcre-jit',
-          '--with-cc-opt=-fPIE -pie',
-          '--with-ld-opt=-fPIE -pie -z now',
-          # '--with-stream=dynamic',
+          '--with-cc-opt=-fPIC -pie',
+          '--with-ld-opt=-fPIC -pie -z now',
+          '--with-stream=dynamic',
         )
         run('make')
         system({'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR'=>"#{destdir}/nginx"}, 'make install')
