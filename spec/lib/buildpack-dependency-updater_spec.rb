@@ -8,7 +8,7 @@ describe BuildpackDependencyUpdater do
   let(:binary_built_out_dir)     { Dir.mktmpdir }
   let(:dependencies_host_domain) { 'buildpacks.cloudfoundry.org' }
 
-  subject { described_class.create(dependency, buildpack, buildpack_dir, binary_built_out_dir) }
+  subject { described_class.create(dependency, buildpack, buildpack_dir, nil, binary_built_out_dir) }
 
   before { allow(ENV).to receive(:fetch).with('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil).and_return(dependencies_host_domain) }
 

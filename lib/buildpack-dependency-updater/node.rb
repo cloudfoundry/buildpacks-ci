@@ -15,17 +15,9 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
   def perform_dependency_update
     major_version, _, _ = dependency_version.split(".")
 
-    dependencies_with_same_major_version = buildpack_manifest["dependencies"].select do |dep|
-      dep["name"] == dependency && dep["version"].split(".").first == major_version
-    end.map do |dep|
-      Gem::Version.new(dep['version'])
-    end
+    dependencies_with_same_major_version = get_dependencies_with_same_major_version(buildpack_manifest, dependency_version)
 
-    previous_dependencies_with_same_major_version = previous_buildpack_manifest["dependencies"].select do |dep|
-      dep["name"] == dependency && dep["version"].split(".").first == major_version
-    end.map do |dep|
-      Gem::Version.new(dep['version'])
-    end
+    previous_dependencies_with_same_major_version = get_dependencies_with_same_major_version(previous_buildpack_manifest, dependency_version)
 
     if buildpack != 'nodejs'
       version_to_delete = dependencies_with_same_major_version.sort.first.to_s
@@ -62,6 +54,17 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
 
     if update_default_versions
       perform_default_versions_update
+    end
+  end
+
+  private
+
+  def get_dependencies_with_same_major_version(manifest, version)
+    major_version, _, _ = version.split(".")
+    manifest["dependencies"].select do |dep|
+      dep["name"] == dependency && dep["version"].split(".").first == major_version
+    end.map do |dep|
+      Gem::Version.new(dep['version'])
     end
   end
 end

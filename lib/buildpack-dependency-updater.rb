@@ -47,8 +47,10 @@ class BuildpackDependencyUpdater
     manifest_file = File.join(buildpack_dir, "manifest.yml")
     @buildpack_manifest = YAML.load_file(manifest_file)
 
-    previous_manifest_file = File.join(previous_buildpack_dir, "manifest.yml")
-    @previous_buildpack_manifest = YAML.load_file(previous_manifest_file)
+    if previous_buildpack_dir != nil
+      previous_manifest_file = File.join(previous_buildpack_dir, "manifest.yml")
+      @previous_buildpack_manifest = YAML.load_file(previous_manifest_file)
+    end
 
     if dependency_version_currently_in_manifest?
       puts "#{dependency} #{dependency_version} is already in the manifest for the #{buildpack} buildpack."
@@ -101,9 +103,9 @@ class BuildpackDependencyUpdater
     dependencies = buildpack_manifest['dependencies']
     dependencies.select do |dep|
       dep['name'] == dependency &&
-      dep['version'] == dependency_version &&
-      dep['uri'] == uri &&
-      dep['sha256'] == sha256
+        dep['version'] == dependency_version &&
+        dep['uri'] == uri &&
+        dep['sha256'] == sha256
     end.count > 0
   end
 

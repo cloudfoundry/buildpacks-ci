@@ -97,7 +97,7 @@ resources: #####################################################################
         - VERSION
         - CHANGELOG
 <% end %>
-<% %w(nodejs).each do |language| %>
+<% %w(nodejs dotnet-core).each do |language| %>
   - name: previous-<%= language %>-buildpack
     type: git
     source:
@@ -105,7 +105,6 @@ resources: #####################################################################
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: master
       tag_filter: "v*[0-9].*[0-9].*[0-9]"
-
       ignore_paths:
         - VERSION
         - CHANGELOG
@@ -371,6 +370,7 @@ jobs: ##########################################################################
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 
+<% core_dependencies = { nodejs: ["node"], 'dotnet-core' => ["dotnet"] } %>
 <% {go: ["godep", "glide", "dep"], hwc: ["hwc"], staticfile: ["nginx"], php: ["nginx", "composer"], nodejs: ["node"], ruby: ["node", "bundler"], 'dotnet-core' => ['dotnet', 'node', 'bower', 'dotnet-framework']}.each do |buildpack, dependencies| %>
   <% dependencies.each do |dependency| %>
   - name: update-<%= dependency %>-in-<%= buildpack %>-buildpack
@@ -382,7 +382,7 @@ jobs: ##########################################################################
           - get: buildpacks-ci
           - get: buildpack-input
             resource: <%= buildpack %>-buildpack
-          <% if dependency == 'nodejs' %>
+          <% if core_dependencies[buildpack] && core_dependencies[buildpack].include?(dependency) %>
           - get: previous-buildpack
             resource: previous-<%= buildpack %>-buildpack
           <% end %>
