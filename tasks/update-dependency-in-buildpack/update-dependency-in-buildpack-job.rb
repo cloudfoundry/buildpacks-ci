@@ -17,6 +17,7 @@ class UpdateDependencyInBuildpackJob
     dependency = ENV.fetch('DEPENDENCY')
     buildpack_name = ENV.fetch('BUILDPACK_NAME')
     buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "buildpack-input"))
+    buildpack_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', "buildpack-input"))
 
     buildpack_updater = BuildpackDependencyUpdater.create(dependency, buildpack_name, buildpack_dir, binary_built_out_dir)
 

@@ -97,6 +97,19 @@ resources: #####################################################################
         - VERSION
         - CHANGELOG
 <% end %>
+<% %w(nodejs).each do |language| %>
+  - name: previous-<%= language %>-buildpack
+    type: git
+    source:
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
+      branch: master
+      tag_filter: "v*[0-9].*[0-9].*[0-9]"
+
+      ignore_paths:
+        - VERSION
+        - CHANGELOG
+<% end %>
 
   ## Concourse2Tracker ##
 
@@ -369,6 +382,10 @@ jobs: ##########################################################################
           - get: buildpacks-ci
           - get: buildpack-input
             resource: <%= buildpack %>-buildpack
+          <% if dependency == 'nodejs' %>
+          - get: previous-buildpack
+            resource: previous-<%= buildpack %>-buildpack
+          <% end %>
           - get: built-out
           <% if dependency != 'dotnet-framework' %>
             resource: <%= dependency %>-built-output

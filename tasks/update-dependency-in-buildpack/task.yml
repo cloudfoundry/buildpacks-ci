@@ -6,6 +6,7 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
+  - name: previous-buildpack
   - name: buildpack-input
   - name: built-out
 outputs:
