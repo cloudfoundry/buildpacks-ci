@@ -5,13 +5,15 @@ require_relative '../../../lib/buildpack-dependency-updater'
 
 describe BuildpackDependencyUpdater do
   let(:buildpack_dir)            { Dir.mktmpdir }
+  let(:previous_buildpack_dir)   { Dir.mktmpdir }
   let(:binary_built_out_dir)     { Dir.mktmpdir }
   let(:dependencies_host_domain) { 'buildpacks.cloudfoundry.org' }
   let(:manifest_file)            { File.join(buildpack_dir, "manifest.yml") }
+  let(:previous_manifest_file)   { File.join(previous_buildpack_dir, "manifest.yml") }
   let(:dep_url)                  { "https://#{dependencies_host_domain}/path-to-built-binary" }
   let(:dependency)               { "node" }
 
-  subject { described_class.create(dependency, buildpack, buildpack_dir, binary_built_out_dir) }
+  subject { described_class.create(dependency, buildpack, buildpack_dir, previous_buildpack_dir, binary_built_out_dir) }
 
   before { allow(ENV).to receive(:fetch).with('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil).and_return(dependencies_host_domain) }
 
@@ -103,6 +105,33 @@ describe BuildpackDependencyUpdater do
           file.write buildpack_manifest_contents
         end
 
+        previous_buildpack_manifest_contents = <<~MANIFEST
+          ---
+          language: nodejs
+          url_to_dependency_map:
+          - match: node\/v(\d+\.\d+\.\d+)
+            name: node
+            version: $1
+          default_versions:
+          - name: node
+            version: 4.x
+          dependencies:
+          - name: node
+            version: 0.12.45
+            uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-0.12.45-linux-x64.tgz
+            sha256: oldSHA256_0_12_45
+            cf_stacks:
+              - cflinuxfs2
+          - name: node
+            version: 0.12.46
+            uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-0.12.46-linux-x64.tgz
+            sha256: oldSHA256_0_12_46
+            cf_stacks:
+              - cflinuxfs2
+        MANIFEST
+        File.open(previous_manifest_file, "w") do |file|
+          file.write previous_buildpack_manifest_contents
+        end
       end
 
       context("node 0.12") do
@@ -137,6 +166,48 @@ describe BuildpackDependencyUpdater do
         it 'records which versions were removed' do
           subject.run!
           expect(subject.removed_versions).to eq(['0.12.45'])
+        end
+        context "when the latest release in the previous manifest is the oldest in the new manifest" do
+          before(:each) do
+            previous_buildpack_manifest_contents = <<~MANIFEST
+          ---
+          language: nodejs
+          url_to_dependency_map:
+          - match: node\/v(\d+\.\d+\.\d+)
+            name: node
+            version: $1
+          default_versions:
+          - name: node
+            version: 4.x
+          dependencies:
+          - name: node
+            version: 0.12.45
+            uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-0.12.45-linux-x64.tgz
+            sha256: oldSHA256_0_12_45
+            cf_stacks:
+              - cflinuxfs2
+            MANIFEST
+            File.open(previous_manifest_file, "w") do |file|
+              file.write previous_buildpack_manifest_contents
+            end
+          end
+          it "keeps the latest release from the previous manifest" do
+            subject.run!
+            manifest = YAML.load_file(manifest_file)
+
+            dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '0.12.45'}
+            expect(dependency_in_manifest["version"]).to eq("0.12.45")
+            expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-0.12.45-linux-x64.tgz")
+            expect(dependency_in_manifest["sha256"]).to eq("oldSHA256_0_12_45")
+
+            dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == '0.12.46'}
+            expect(dependency_in_manifest).to eq(nil)
+
+            dependency_in_manifest = manifest["dependencies"].find{|dep| dep["name"] == dependency && dep["version"] == expected_version}
+            expect(dependency_in_manifest["version"]).to eq(expected_version)
+            expect(dependency_in_manifest["uri"]).to eq("https://buildpacks.cloudfoundry.org/dependencies/node/node-#{expected_version}-linux-x64.tgz")
+            expect(dependency_in_manifest["sha256"]).to eq("newSHA256")
+          end
         end
       end
 
@@ -259,6 +330,54 @@ describe BuildpackDependencyUpdater do
         MANIFEST
         File.open(manifest_file, "w") do |file|
           file.write buildpack_manifest_contents
+        end
+
+        previous_buildpack_manifest_contents = <<~MANIFEST
+          ---
+          language: ruby
+          default_versions:
+            - name: ruby
+              version: 2.3.0
+            - name: node
+              version: 4.4.4
+          url_to_dependency_map:
+            - match: ruby-(\d+\.\d+\.\d+)
+              name: ruby
+              version: $1
+            - match: node
+              name: node
+              version: 4.4.4
+          dependencies:
+            - name: node
+              version: 4.4.4
+              uri: https://pivotal-buildpacks.s3.amazonaws.com/dependencies/node/node-4.4.4-linux-x64.tgz
+              sha256: oldSHA256_4_4_4
+              cf_stacks:
+                - cflinuxfs2
+            - name: node
+              version: 6.10.0
+              uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-6.10.0-linux-x64-a53e48a2.tgz
+              sha256: oldSHA256_6_10_0
+              cf_stacks:
+              - cflinuxfs2
+            - name: ruby
+              version: 2.3.0
+              sha256: oldSHA256_RUBY_2_3_0
+              uri: https://pivotal-buildpacks.s3.amazonaws.com/dependencies/ruby/ruby-2.3.0-linux-x64.tgz
+              cf_stacks:
+                - cflinuxfs2
+            - name: ruby
+              version: 2.3.1
+              sha256: oldSHA256_RUBY_2_3_1
+              uri: https://pivotal-buildpacks.s3.amazonaws.com/dependencies/ruby/ruby-2.3.1-linux-x64.tgz
+              cf_stacks:
+                - cflinuxfs2
+        MANIFEST
+        File.open(manifest_file, "w") do |file|
+          file.write buildpack_manifest_contents
+        end
+        File.open(previous_manifest_file, "w") do |file|
+          file.write previous_buildpack_manifest_contents
         end
       end
 
@@ -390,6 +509,48 @@ describe BuildpackDependencyUpdater do
         MANIFEST
         File.open(manifest_file, "w") do |file|
           file.write buildpack_manifest_contents
+        end
+
+        previous_buildpack_manifest_contents = <<~MANIFEST
+         ---
+         language: dotnet-core
+
+         default_versions:
+           - name: dotnet
+             version: 1.0.0-preview2-003131
+           - name: node
+             version: 6.9.0
+
+         url_to_dependency_map:
+           - match: dotnet\.(.*)\.linux-amd64\.tar\.gz
+             name: dotnet
+             version: $1
+           - match: node(.*)(\d+\.\d+\.\d+)-linux-x64.tar.gz
+             name: node
+             version: $2
+
+         dependencies:
+           - name: dotnet
+             version: 1.0.0-preview2-003121
+             cf_stacks:
+               - cflinuxfs2
+             uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview2-003121.linux-amd64.tar.gz
+             sha256: oldSHA256_dotnet_preview2
+           - name: dotnet
+             version: 1.0.0-preview2-003131
+             cf_stacks:
+               - cflinuxfs2
+             uri: https://buildpacks.cloudfoundry.org/dependencies/dotnet/dotnet.1.0.0-preview2-003131.linux-amd64.tar.gz
+             sha256: oldSHA256_dotnet_preview1
+           - name: node
+             version: 6.9.0
+             cf_stacks:
+               - cflinuxfs2
+             uri: https://buildpacks.cloudfoundry.org/dependencies/node/node-6.9.0-linux-x64.tgz
+             sha256: oldSHA256_6_9_0
+        MANIFEST
+        File.open(previous_manifest_file, "w") do |file|
+          file.write previous_buildpack_manifest_contents
         end
       end
 
