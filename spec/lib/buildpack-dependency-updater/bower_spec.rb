@@ -11,7 +11,7 @@ describe BuildpackDependencyUpdater do
   let(:dep_url) { "https://#{dependencies_host_domain}/path-to-built-binary" }
   let(:dependency) { 'bower' }
 
-  subject { described_class.create(dependency, buildpack, buildpack_dir, binary_built_out_dir) }
+  subject { described_class.create(dependency, buildpack, buildpack_dir, nil, binary_built_out_dir) }
 
   before { allow(ENV).to receive(:fetch).with('BUILDPACK_DEPENDENCIES_HOST_DOMAIN', nil).and_return(dependencies_host_domain) }
 
