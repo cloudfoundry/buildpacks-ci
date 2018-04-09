@@ -381,6 +381,7 @@ jobs: ##########################################################################
               - cflinuxfs2-release-artifacts/use-dev-release-opsfile.yml
               - cf-deployment/operations/experimental/use-bosh-dns.yml
               - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
+              - cf-deployment/operations/use-latest-stemcell.yml
             vars:
               system_domain: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
         on_failure:
