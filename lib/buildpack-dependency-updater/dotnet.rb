@@ -22,19 +22,6 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
   def perform_dependency_update
     @removed_versions = []
 
-    dependencies_with_same_major_minor_version = get_dependencies_with_same_major_minor_version(buildpack_manifest, dependency_version)
-
-    previous_dependencies_with_same_major_minor_version = get_dependencies_with_same_major_minor_version(previous_buildpack_manifest, dependency_version)
-
-    if dependencies_with_same_major_minor_version.count > 1
-      version_to_delete = dependencies_with_same_major_minor_version.sort.first.to_s == previous_dependencies_with_same_major_minor_version.sort.last.to_s ? dependencies_with_same_major_minor_version.sort[1].to_s : dependencies_with_same_major_minor_version.sort.first.to_s
-    else
-      version_to_delete = nil
-    end
-
-    original_dependencies = buildpack_manifest["dependencies"].clone
-    new_dependencies = buildpack_manifest["dependencies"].delete_if { |dep| dep["name"] == dependency && dep["version"] == version_to_delete }
-
     dependency_hash = {
       "name" => dependency,
       "version" => dependency_version,
@@ -43,8 +30,6 @@ class BuildpackDependencyUpdater::Dotnet < BuildpackDependencyUpdater
       "cf_stacks" => ["cflinuxfs2"]
     }
     buildpack_manifest["dependencies"] << dependency_hash
-
-    @removed_versions = (original_dependencies - new_dependencies).map { |dep| dep['version'] } unless new_dependencies == original_dependencies
   end
 
   def perform_dependency_specific_changes
