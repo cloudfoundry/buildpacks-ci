@@ -18,4 +18,4 @@ cd "$CF_DIR/libbuildpack"
 
 go get -t ./...
 go get github.com/onsi/ginkgo/ginkgo
-ginkgo -r -skipPackage=brats,integration
+ginkgo -r -skipPackage=LANGUAGE
