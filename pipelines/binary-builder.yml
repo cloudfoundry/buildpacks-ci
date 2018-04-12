@@ -382,9 +382,11 @@ jobs: ##########################################################################
           - get: buildpacks-ci
           - get: buildpack-input
             resource: <%= buildpack %>-buildpack
-          <% if core_dependencies[buildpack] && core_dependencies[buildpack].include?(dependency) %>
           - get: previous-buildpack
+          <% if core_dependencies[buildpack] && core_dependencies[buildpack].include?(dependency) %>
             resource: previous-<%= buildpack %>-buildpack
+          <% else %>
+            resource: dummy-resource
           <% end %>
           - get: built-out
           <% if dependency != 'dotnet-framework' %>

@@ -47,10 +47,8 @@ class BuildpackDependencyUpdater
     manifest_file = File.join(buildpack_dir, "manifest.yml")
     @buildpack_manifest = YAML.load_file(manifest_file)
 
-    if previous_buildpack_dir != nil
-      previous_manifest_file = File.join(previous_buildpack_dir, "manifest.yml")
-      @previous_buildpack_manifest = YAML.load_file(previous_manifest_file)
-    end
+    previous_manifest_file = File.join(previous_buildpack_dir, "manifest.yml")
+    @previous_buildpack_manifest = YAML.load_file(previous_manifest_file) if File.exists?(previous_manifest_file)
 
     if dependency_version_currently_in_manifest?
       puts "#{dependency} #{dependency_version} is already in the manifest for the #{buildpack} buildpack."
