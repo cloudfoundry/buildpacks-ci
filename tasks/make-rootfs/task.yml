@@ -9,7 +9,7 @@ inputs:
   - name: cflinuxfs2
   - name: version
 outputs:
-  - name: cflinuxfs2-artifacts
+  - name: rootfs-artifacts
   - name: receipt-artifacts
 run:
   path: buildpacks-ci/tasks/make-rootfs/run.sh

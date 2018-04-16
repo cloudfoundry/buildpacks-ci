@@ -1,0 +1,23 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: previous-cflinuxfs2-release
+  - name: receipt-artifacts
+  - name: public-robots
+outputs:
+  - name: public-robots-artifacts
+  - name: git-tags
+run:
+  path: bash
+  args:
+    - "-cl"
+    - "buildpacks-ci/tasks/generate-rootfs-receipt-diff/run.rb"
+params:
+  STACK:
+  GITHUB_USERNAME:
+  GITHUB_PASSWORD:

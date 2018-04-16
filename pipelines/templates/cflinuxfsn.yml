@@ -1,0 +1,712 @@
+--- # rootfs_name (cflinuxfs3)   cve_notification_file (ubuntu18.04.yml)
+resource_types:
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+  - name: cron
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cron-resource
+  - name: bosh-deployment
+    type: docker-image
+    source:
+      repository: cloudfoundry/bosh-deployment-resource
+
+resources: ###########################################################################################################
+
+  ## Cron Resource ##
+
+  - name: monday-funday
+    type: cron
+    source:
+      expression: 0 5 * * 1
+      location: {{current-timezone}}
+
+  ## Git Repos ##
+  - name: cf-deployment-concourse-tasks
+    type: git
+    source:
+      branch: master
+      uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+      tag_filter: v5.*
+  - name: bbl-state
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: {{buildpacks-envs-private-key}}
+  - name: bosh-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-deployment.git
+      branch: master
+  - name: cf-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-deployment
+      branch: master
+
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: wip-cflinuxfsn-154525028 #{{buildpacks-ci-git-uri-public-branch}}
+
+  - name: <%= rootfs_name %>
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/<%= rootfs_name %>.git
+      branch: master
+      private_key: {{stacks-private-key}}
+
+  - name: new-cves
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ new-cve-notifications/<%= cve_notification_file %> ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+
+  - name: receipt-diff
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ receipt-diffs/<%= rootfs_name %>-diff ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      tag_filter: "newpackages_<%= rootfs_name %>_*"
+
+  - name: public-robots
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+
+  - name: <%= rootfs_name %>-release
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/<%= rootfs_name %>-release.git
+      branch: master
+      private_key: {{<%= rootfs_name %>-release-private-key}}
+
+  - name: cf-release-rc
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cf-release
+      branch: release-candidate
+      private_key: {{cf-release-private-key}}
+
+  - name: cats-concourse-task
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cats-concourse-task
+      branch: master
+
+  ## S3 Buckets ##
+
+  - name: stack-s3
+    type: s3
+    source:
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      regexp: rootfs/<%= rootfs_name %>-(.*).tar.gz
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+
+  - name: receipt-s3
+    type: s3
+    source:
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      regexp: rootfs/<%= rootfs_name %>_receipt-(.*)
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+
+  ## BOSH Deployments ##
+
+  - name: <%= rootfs_name %>-cf-deployment
+    type: bosh-deployment
+    source:
+      deployment: cf
+      vars_store:
+        provider: gcs
+        config:
+          bucket: <%= rootfs_name %>-cf-deployment
+          file_name: vars-store.yml
+          json_key: {{cflinuxfs2-cf-deployment-gcs-service-account-key}}
+
+  - name: <%= rootfs_name %>-rootfs-smoke-test-deployment
+    type: bosh-deployment
+    source:
+      deployment: rootfs-smoke-test
+
+  ## bosh.io stemcell ##
+
+  - name: gcp-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-ubuntu-trusty-go_agent
+
+  ## Docker Image ##
+
+  - name: docker-<%= rootfs_name %>
+    type: docker-image
+    source:
+      repository: cloudfoundry/<%= rootfs_name %>
+      username: {{dockerhub-cflinuxfs2-username}}
+      password: {{dockerhub-cflinuxfs2-password}}
+      email: cf-buildpacks-eng@pivotal.io
+
+      ###FIXME: looks identical to the non tagged one?
+  - name: docker-<%= rootfs_name %>-tagged
+    type: docker-image
+    source:
+      repository: cloudfoundry/<%= rootfs_name %>
+      username: {{dockerhub-cflinuxfs2-username}}
+      password: {{dockerhub-cflinuxfs2-password}}
+      email: cf-buildpacks-eng@pivotal.io
+
+  ## Github Release ##
+
+  - name: <%= rootfs_name %>-github-release-drafts
+    type: github-release
+    source:
+      drafts: true
+      user: {{buildpacks-github-org}}
+      repository: <%= rootfs_name %>
+      access_token: {{buildpacks-github-token}}
+
+  - name: <%= rootfs_name %>-release-github-release
+    type: github-release
+    source:
+      drafts: false
+      user: {{buildpacks-github-org}}
+      repository: <%= rootfs_name %>-release
+      access_token: {{buildpacks-github-token}}
+
+  ## Semver Versions ##
+
+  - name: version
+    type: semver
+    source:
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      key: versions/stack
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+
+  ## Slack Alerts ##
+
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
+
+jobs: ################################################################################################################
+
+  - name: notification
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: monday-funday
+          trigger: true
+      - task: create-tracker-story
+        file: buildpacks-ci/tasks/create-new-rootfs-release-story/task.yml
+        params:
+          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+          STACK: <%= rootfs_name %>
+
+  - name: build-rootfs
+    serial: true
+    serial_groups: [ <%= rootfs_name %> ]
+    public: true
+    plan:
+      - aggregate:
+        - get: previous-rootfs-release
+          resource: <%= rootfs_name %>-github-release-drafts
+        - get: buildpacks-ci
+        - get: new-cves
+          trigger: true
+        - get: rootfs
+          resource: <%= rootfs_name %>
+        - get: version
+          params: { pre: rc }
+        - get: monday-funday
+          passed: [ "notification" ]
+          trigger: true
+        - get: public-robots
+      - do:
+        - task: make-rootfs
+          file: buildpacks-ci/tasks/make-rootfs/task.yml
+          privileged: true
+        - task: test-rootfs
+          file: buildpacks-ci/tasks/test-rootfs/task.yml
+          privileged: true
+        - put: stack-s3
+          params:
+            file: rootfs-artifacts/<%= rootfs_name %>-*.tar.gz
+        - put: receipt-s3
+          params:
+            file: receipt-artifacts/<%= rootfs_name %>_receipt-*
+        - task: generate-receipt-diff
+          file: buildpacks-ci/tasks/generate-rootfs-receipt-diff/task.yml
+          params:
+            STACK: <%= rootfs_name %>
+        - put: public-robots
+          params:
+            repository: public-robots-artifacts
+            rebase: true
+            tag: git-tags/TAG
+        - put: version
+          params: { file: version/number }
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: bbl-up
+    serial: true
+    serial_groups: [ <%= rootfs_name %> ]
+    public: true
+    plan:
+      - aggregate:
+        - get: cf-deployment-concourse-tasks
+        - get: env-repo
+          resource: bbl-state
+        - get: bosh-deployment
+        - get: buildpacks-ci
+        - get: receipt-diff
+          trigger: true
+        - get: new-cves
+          passed: [ build-rootfs ]
+        - get: stack-s3
+          passed: [ build-rootfs ]
+        - get: version
+          passed: [ build-rootfs ]
+        - get: receipt-s3
+          passed: [ build-rootfs ]
+        - get: rootfs
+          resource: <%= rootfs_name %>
+          passed: [ build-rootfs ]
+      - task: bbl-up
+        file: cf-deployment-concourse-tasks/bbl-up/task.yml
+        params:
+          BBL_GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+          BBL_GCP_PROJECT_ID: cf-buildpacks
+          BBL_GCP_ZONE: us-east1-c
+          BBL_GCP_REGION: us-east1
+          BBL_IAAS: gcp
+          BBL_LB_CERT: {{<%= rootfs_name %>-lb-cert}}
+          BBL_LB_KEY: {{<%= rootfs_name %>-lb-key}}
+          LB_DOMAIN: <%= rootfs_name %>.buildpacks-gcp.ci.cf-app.com
+          BBL_ENV_NAME: <%= rootfs_name %>
+          BBL_STATE_DIR: <%= rootfs_name %>
+          OPS_FILES: "local-dns.yml"
+        input_mapping:
+          ops-files: bosh-deployment
+        ensure:
+          put: bbl-state
+          params:
+            repository: updated-env-repo
+            rebase: true
+      - task: add-gcp-parent-dns-record
+        file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
+        params:
+          ENV_NAME: <%= rootfs_name %>
+          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+
+  - name: deploy
+    serial: true
+    serial_groups: [ <%= rootfs_name %> ]
+    public: true
+    plan:
+      - do:
+        - aggregate:
+          - get: new-cves
+            passed: [ bbl-up ]
+          - get: stack-s3
+            passed: [ bbl-up ]
+          - get: version
+            passed: [ bbl-up ]
+            trigger: true
+          - get: receipt-s3
+            passed: [ bbl-up ]
+          - get: rootfs
+            resource: <%= rootfs_name %>
+            passed: [ bbl-up ]
+          - get: rootfs-release
+            resource: <%= rootfs_name %>-release
+          - get: buildpacks-ci
+          - get: bbl-state
+          - get: bosh-lite
+          - get: cf-deployment
+          - get: gcp-stemcell
+        - aggregate:
+          - task: create-deployment-source-config
+            file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+            params:
+              ENV_NAME: <%= rootfs_name %>
+          - task: overwrite-rootfs-release
+            file: buildpacks-ci/tasks/overwrite-rootfs-release/task.yml
+            params:
+              STACK: <%= rootfs_name %>
+          - task: create-capi-release-with-rootfs
+            file: buildpacks-ci/tasks/create-capi-release-with-rootfs/task.yml
+            params:
+              STACK: <%= rootfs_name %>
+        - put: <%= rootfs_name %>-rootfs-smoke-test-deployment
+          params:
+            source_file: deployment-source-config/source_file.yml
+            manifest: rootfs-release-artifacts/manifests/manifest.yml
+            releases:
+              - rootfs-release-artifacts/dev_releases/<%= rootfs_name %>/*.tgz
+            stemcells:
+              - gcp-stemcell/*.tgz
+        - task: run-rootfs-smoke-test
+          file: buildpacks-ci/tasks/run-rootfs-smoke-test/task.yml
+          params:
+            ENV_NAME: <%= rootfs_name %>
+        - put: <%= rootfs_name %>-cf-deployment
+          params:
+            source_file: deployment-source-config/source_file.yml
+            manifest: cf-deployment/cf-deployment.yml
+            releases:
+              - rootfs-release-artifacts/dev_releases/<%= rootfs_name %>/*.tgz
+              - capi-release-artifacts/dev_releases/capi/*.tgz
+            stemcells:
+              - gcp-stemcell/*.tgz
+            ops_files:
+              - cf-deployment/operations/use-compiled-releases.yml
+              - buildpacks-ci/deployments/operations/no-canaries.yml
+              - rootfs-release-artifacts/use-dev-release-opsfile.yml
+              - cf-deployment/operations/experimental/use-bosh-dns.yml
+              - capi-release-artifacts/use-dev-release-opsfile.yml
+              - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
+              - cf-deployment/operations/use-latest-stemcell.yml
+            vars:
+              system_domain: <%= rootfs_name %>.buildpacks-gcp.ci.cf-app.com
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: cats
+    serial: true
+    serial_groups: [ <%= rootfs_name %> ]
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: cats-concourse-task-inp
+          resource: cats-concourse-task
+        - get: cf-release
+          resource: cf-release-rc
+          params:
+            submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
+        - get: new-cves
+          passed: [ deploy ]
+        - get: stack-s3
+          passed: [ deploy ]
+        - get: version
+          passed: [ deploy ]
+          trigger: true
+        - get: receipt-s3
+          passed: [ deploy ]
+        - get: rootfs
+          resource: <%= rootfs_name %>
+          passed: [ deploy ]
+      - do:
+        - task: copy-cf-acceptance-tests
+          file: buildpacks-ci/tasks/copy-cf-acceptance-tests/task.yml
+        - task: write-cats-config
+          file: buildpacks-ci/tasks/write-cats-config/task.yml
+          params:
+            CI_CF_USERNAME: {{<%= rootfs_name %>-cf-username}}
+            CI_CF_PASSWORD: {{<%= rootfs_name %>-cf-password}}
+            APPS_DOMAIN: <%= rootfs_name %>.buildpacks-gcp.ci.cf-app.com
+            DIEGO_DOCKER_ON: true
+        - task: add-flake-attempts-to-cats
+          file: buildpacks-ci/tasks/add-flake-attempts-to-cats/task.yml
+        - task: cats
+          attempts: 3
+          file: cats-concourse-task/task.yml
+          params:
+            NODES: 12
+            CONFIG_FILE_PATH: integration_config.json
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: delete-deployment
+    serial: true
+    serial_groups: [ <%= rootfs_name %> ]
+    public: true
+    plan:
+      - aggregate:
+        - get: version
+          passed: [ cats ]
+          trigger: true
+        - get: bbl-state
+        - get: buildpacks-ci
+      - task: create-deployment-source-config
+        file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+        params:
+          ENV_NAME: <%= rootfs_name %>
+      - put: <%= rootfs_name %>-rootfs-smoke-test-deployment
+        params:
+          source_file: deployment-source-config/source_file.yml
+          delete:
+            enabled: true
+            force: true
+      - put: <%= rootfs_name %>-cf-deployment
+        params:
+          source_file: deployment-source-config/source_file.yml
+          delete:
+            enabled: true
+            force: true
+
+  - name: bbl-destroy
+    serial: true
+    serial_groups: [ <%= rootfs_name %> ]
+    public: true
+    plan:
+      - aggregate:
+        - get: cf-deployment-concourse-tasks
+        - get: env-repo
+          resource: bbl-state
+        - get: buildpacks-ci
+        - get: version
+          passed: [ delete-deployment ]
+          trigger: true
+      - task: remove-gcp-parent-dns-record
+        file: buildpacks-ci/tasks/remove-gcp-parent-dns-record/task.yml
+        params:
+          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+          ENV_NAME: <%= rootfs_name %>
+      - task: bbl-destroy
+        file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+        params:
+          BBL_STATE_DIR: <%= rootfs_name %>
+          BBL_GCP_PROJECT_ID: cf-buildpacks
+          BBL_GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+        ensure:
+          put: bbl-state
+          params:
+            repository: updated-env-repo
+            rebase: true
+
+  - name: release-<%= rootfs_name %>
+    serial: true
+    serial_groups: [ <%= rootfs_name %> ]
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: new-cves
+          passed: [ 'cats' ]
+        - get: stack-s3
+          passed:
+            - cats
+        - get: receipt-s3
+          passed:
+            - cats
+        - get: rootfs
+          resource: <%= rootfs_name %>
+          passed:
+            - cats
+        - get: version
+          passed:
+            - cats
+          trigger: true
+          params: { bump: final }
+      - do:
+        - task: update-receipt
+          file: buildpacks-ci/tasks/update-rootfs-receipt/task.yml
+        - task: update-filename
+          file: buildpacks-ci/tasks/update-rootfs-filename/task.yml
+        - put: <%= rootfs_name %>
+          params:
+            repository: new-rootfs-commit
+            tag: version/number
+            rebase: true
+        - put: stack-s3
+          params:
+            from: rootfs-archive/<%= rootfs_name %>-(.*).tar.gz
+            to: /rootfs/
+        - put: version
+          params: { file: version/number }
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: reset-minor-version-to-rc
+    serial: true
+    public: true
+    plan:
+      - get: version
+        trigger: true
+        passed: [ release-<%= rootfs_name %> ]
+        params: {bump: minor, pre: rc}
+      - put: version
+        params: {file: version/number}
+
+  - name: finalize-security-notices
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          resource: buildpacks-ci
+        - get: version
+          trigger: true
+          passed: [ upload-to-github ]
+      - do:
+        - task: finalize-security-notices
+          file: buildpacks-ci/tasks/finalize-security-notice-stories/task.yml
+          attempts: 20
+          params:
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            DAVOS_TOKEN: {{davos_token}}
+  - name: upload-to-github
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: previous-rootfs-release
+          resource: <%= rootfs_name %>-github-release-drafts
+        - get: rootfs
+          resource: <%= rootfs_name %>
+          passed: [ release-<%= rootfs_name %> ]
+        - get: new-cves
+          passed: [ release-<%= rootfs_name %> ]
+        - get: stack-s3
+          passed: [ release-<%= rootfs_name %> ]
+        - get: version
+          trigger: true
+          passed: [ release-<%= rootfs_name %> ]
+      - do:
+        - task: generate-release-notes
+          file: buildpacks-ci/tasks/rootfs/generate-release-notes/task.yml
+          params:
+            STACK: <%= rootfs_name %>
+        - put: <%= rootfs_name %>-github-release-drafts
+          params:
+            name: version/number
+            tag: version/number
+            body: release-body/body
+            globs:
+              - stack-s3/<%= rootfs_name %>-*.tar.gz
+        - put: new-cves
+          params:
+            repository: new-cves-artifacts
+            rebase: true
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: upload-to-docker
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: stack-s3
+          passed: [ release-<%= rootfs_name %> ]
+        - get: version
+          trigger: true
+          passed: [ release-<%= rootfs_name %> ]
+      - do:
+        - task: rename
+          file: buildpacks-ci/tasks/rename-rootfs-for-docker/task.yml
+        - aggregate:
+          - put: docker latest version
+            resource: docker-<%= rootfs_name %>
+            params:
+              import_file: docker-s3/<%= rootfs_name %>.tar.gz
+              skip_download: true
+          - put: docker tagged version
+            resource: docker-<%= rootfs_name %>-tagged
+            params:
+              skip_download: true
+              import_file: docker-s3/<%= rootfs_name %>.tar.gz
+              tag: version/number
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: create-<%= rootfs_name %>-release
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: blob
+          resource: stack-s3
+          passed: [ release-<%= rootfs_name %> ]
+          trigger: true
+        - get: version
+          passed: [ release-<%= rootfs_name %> ]
+        - get: release
+          resource: <%= rootfs_name %>-release
+      - do:
+        - task: create-<%= rootfs_name %>-release
+          file: buildpacks-ci/tasks/rootfs/create-release/task.yml
+          params:
+            BLOB_NAME: rootfs
+            BLOB_GLOB: blob/<%= rootfs_name %>-*.tar.gz
+            RELEASE_NAME: <%= rootfs_name %>
+            ACCESS_KEY_ID: {{cloudfoundry-s3-access-key}}
+            SECRET_ACCESS_KEY: {{cloudfoundry-s3-secret-key}}
+        - task: create-release-body
+          file: buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes/task.yml
+          params:
+            ROOTFS_TYPE: <%= rootfs_name %>
+        - task: create-release-commit
+          file: buildpacks-ci/tasks/create-rootfs-bosh-release-commit/task.yml
+        - put: <%= rootfs_name %>-release
+          params:
+            repository: release-artifacts
+        - put: <%= rootfs_name %>-release-github-release
+          params:
+            name: version/number
+            tag: version/number
+            tag_prefix: 'v'
+            commitish: release-commit/sha
+            body: release-body/body
+            globs:
+              - release-artifacts/releases/<%= rootfs_name %>/*.tgz
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png

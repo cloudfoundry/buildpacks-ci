@@ -10,6 +10,7 @@ stacks_version=$(cat version/number)
 bosh_release_version=$(cat version/number)
 
 pushd release
+  set +x
   if [ -n "${SECRET_ACCESS_KEY:+1}" ]; then
   echo "creating private.yml..."
   cat > config/private.yml <<EOF
@@ -20,6 +21,7 @@ blobstore:
     secret_access_key: $SECRET_ACCESS_KEY
 EOF
   fi
+  set -x
 
   rm -f config/blobs.yml
   touch config/blobs.yml
