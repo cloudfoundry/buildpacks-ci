@@ -13,7 +13,10 @@ cf auth "$CI_CF_USERNAME" "$CI_CF_PASSWORD"
 cf set-running-environment-variable-group '{"CREDHUB_API": "https://credhub.service.cf.internal:8844/"}'
 
 pushd "bbl-state/$ENV_NAME"
+  set +o xtrace
   eval "$(bbl print-env)"
+  set -o xtrace
+  trap "pkill -f ssh" EXIT
   bosh2 instances -d cf --json | jq '.Tables[0].Rows | map(select(.instance | startswith("credhub\/") )) | map({"protocol":"tcp", "ports":"8844", "description": "Allow credhub traffic", "destination": .ips})' > credhub_security_group.json
   bosh2 instances -d cf --json | jq '.Tables[0].Rows | map(select(.instance | startswith("uaa\/") )) | map({"protocol":"tcp", "ports":"8443", "description": "Allow UAA traffic", "destination": .ips})' > uaa_security_group.json
 popd
@@ -27,5 +30,3 @@ cf bind-staging-security-group credhub
 cf create-security-group uaa "bbl-state/$ENV_NAME/uaa_security_group.json"
 cf bind-running-security-group uaa
 cf bind-staging-security-group uaa
-
-pkill -f ssh
