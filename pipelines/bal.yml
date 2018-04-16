@@ -30,7 +30,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: bal-win-2016 #{{buildpacks-ci-git-uri-public-branch}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
 
   - name: bal-develop
     type: git
