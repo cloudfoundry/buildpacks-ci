@@ -7,8 +7,10 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: stack-s3
-  - name: version
+  - name: rootfs-release
 outputs:
-  - name: rootfs-archive
+  - name: rootfs-release-artifacts
 run:
-  path: buildpacks-ci/tasks/update-rootfs-filename/run.sh
+  path: buildpacks-ci/tasks/overwrite-rootfs-release/run.sh
+params:
+  STACK:
