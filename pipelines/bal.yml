@@ -30,7 +30,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: {{buildpacks-ci-git-uri-public-branch}}
+      branch: bal-win-2016 #{{buildpacks-ci-git-uri-public-branch}}
 
   - name: bal-develop
     type: git
@@ -90,13 +90,6 @@ resources:
       uri: https://github.com/cloudfoundry/cf-acceptance-tests
       branch: master
 
-  - name: wats
-    type: git
-    source:
-      uri: https://github.com/idoru/wats
-      branch: add-credhub-assist-mode-tests
-      # After https://github.com/cloudfoundry/wats/pull/17 merged change to => uri: https://github.com/cloudfoundry/wats
-
   - name: bal-cf-deployment
     type: bosh-deployment
     source:
@@ -117,6 +110,11 @@ resources:
     type: bosh-io-stemcell
     source:
       name: bosh-google-kvm-windows2012R2-go_agent
+
+  - name: windows2016-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-windows2016-go_agent
 
   - name: failure-alert
     type: slack-notification
@@ -186,7 +184,7 @@ jobs:
 
   - name: deploy-cf-and-diego-to-cf-release
     serial: true
-    serial_groups: [acceptance-tests]
+    serial_groups: [bal]
     public: true
     plan:
       - do:
@@ -201,6 +199,7 @@ jobs:
           - get: diego-release
           - get: cf-deployment
           - get: windows2012-stemcell
+          - get: windows2016-stemcell
           - get: bbl-state
           - get: gcp-stemcell
             attempts: 3
@@ -219,21 +218,27 @@ jobs:
             stemcells:
               - gcp-stemcell/*.tgz
               - windows2012-stemcell/*.tgz
+              - windows2016-stemcell/*.tgz
             ops_files:
             # - cf-deployment/operations/use-compiled-releases.yml
             - diego-release-artifacts/use-diego-dev-release.yml
             - buildpacks-ci/deployments/operations/no-canaries.yml
             - cf-deployment/operations/scale-to-one-az.yml
             - cf-deployment/operations/windows-cell.yml
+            - cf-deployment/operations/windows2016-cell.yml
             - cf-deployment/operations/experimental/enable-instance-identity-credentials.yml
             - cf-deployment/operations/experimental/enable-instance-identity-credentials-windows.yml
+            - cf-deployment/operations/experimental/enable-instance-identity-credentials-windows2016.yml
             - cf-deployment/operations/experimental/secure-service-credentials.yml
             - cf-deployment/operations/experimental/secure-service-credentials-windows-cell.yml
+            - cf-deployment/operations/experimental/secure-service-credentials-windows2016-cell.yml
             - cf-deployment/operations/experimental/use-bosh-dns.yml
             - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
+            - cf-deployment/operations/experimental/use-bosh-dns-for-windows2016-containers.yml
             vars:
               system_domain: bal.buildpacks-gcp.ci.cf-app.com
         - task: set-up-environment-for-credhub
+          attempts: 3
           file: buildpacks-ci/tasks/set-up-environment-for-credhub/task.yml
           params:
             CI_CF_USERNAME: {{ci-cf-username}}
@@ -250,7 +255,7 @@ jobs:
 
   - name: cats
     serial: true
-    serial_groups: [acceptance-tests]
+    serial_groups: [bal]
     public: true
     plan:
       - aggregate:
@@ -265,7 +270,7 @@ jobs:
           resource: cats-concourse-task
         - get: cf-acceptance-tests
       - do:
-        - task: write-cats-config
+        - task: write-cats-config-for-windows2012R2
           file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
             CI_CF_USERNAME: {{ci-cf-username}}
@@ -274,47 +279,30 @@ jobs:
             DIEGO_DOCKER_ON: true
             CREDHUB_MODE: assisted
             CREDHUB_CLIENT_SECRET: {{ci-cf-bal-credhub-client-secret}}
-        - task: add-flake-attempts-to-cats
+            WINDOWS_STACK: windows2012R2
+        - task: add-flake-attempts-to-cats-for-windows2012R2
           file: buildpacks-ci/tasks/add-flake-attempts-to-cats/task.yml
-        - task: cats
+        - task: cats-for-windows2012R2
           attempts: 3
           file: cats-concourse-task/task.yml
           params:
             NODES: 12
             CONFIG_FILE_PATH: integration_config.json
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-
-  - name: wats-2012R2
-    serial: true
-    serial_groups: [acceptance-tests]
-    public: true
-    plan:
-      - aggregate:
-        - get: monday-funday
-          trigger: true
-          passed: [cats]
-        - get: bal-develop
-          trigger: true
-          passed: [cats]
-        - get: buildpacks-ci
-        - get: wats
-      - do:
-        - task: write-wats-config
-          file: buildpacks-ci/tasks/write-wats-config/task.yml
+        - task: write-cats-config-for-windows2016
+          file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
             CI_CF_USERNAME: {{ci-cf-username}}
             CI_CF_PASSWORD: {{ci-cf-bal-password}}
             APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
-        - task: wats
+            CREDHUB_MODE: assisted
+            CREDHUB_CLIENT_SECRET: {{ci-cf-bal-credhub-client-secret}}
+            WINDOWS_STACK: windows2016
+        - task: add-flake-attempts-to-cats-for-windows2016
+          file: buildpacks-ci/tasks/add-flake-attempts-to-cats/task.yml
+        - task: cats-for-windows2016
           attempts: 3
-          file: buildpacks-ci/tasks/run-wats/task.yml
+          file: cats-concourse-task/task.yml
           params:
             NODES: 12
             CONFIG_FILE_PATH: integration_config.json
@@ -334,7 +322,7 @@ jobs:
         - get: buildpacks-ci
         - get: repo
           resource: bal-develop
-          passed: [wats-2012R2]
+          passed: [cats]
           trigger: true
       - task: github-set-status-success
         file: buildpacks-ci/tasks/set-status-success/task.yml
@@ -383,16 +371,17 @@ jobs:
 
   - name: destroy-cf-deployment
     serial: true
+    serial_groups: [bal]
     public: true
     plan:
       - aggregate:
         - get: monday-funday
           trigger: true
-          passed: [wats-2012R2]
+          passed: [cats]
         - get: bbl-state
         - get: buildpacks-ci
         - get: bal-develop
-          passed: [wats-2012R2]
+          passed: [cats]
           trigger: true
       - task: create-deployment-source-config
         file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
@@ -407,6 +396,7 @@ jobs:
 
   - name: bbl-destroy
     serial: true
+    serial_groups: [bal]
     public: true
     plan:
       - aggregate:

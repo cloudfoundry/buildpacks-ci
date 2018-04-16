@@ -8,6 +8,7 @@ apps_domain = ENV.fetch('APPS_DOMAIN')
 diego_docker_on = ENV.fetch('DIEGO_DOCKER_ON')
 credhub_mode = ENV.fetch('CREDHUB_MODE')
 credhub_secret = ENV.fetch('CREDHUB_CLIENT_SECRET')
+windows_stack = ENV.fetch('WINDOWS_STACK')
 
 cats_config = {
   "admin_password" => admin_password,
@@ -42,6 +43,13 @@ cats_config = {
   "use_http" => true,
   "verbose" => false
 }
+
+if windows_stack
+  cats_config.merge!({ "include_windows" => true,
+    "num_windows_cells" => 1,
+    "windows_stack" => windows_stack,
+  })
+end
 
 if diego_docker_on == 'true'
   exit 1 unless system "cf api api.#{apps_domain} --skip-ssl-validation"
