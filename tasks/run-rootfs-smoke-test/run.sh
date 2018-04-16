@@ -7,8 +7,10 @@ set -o pipefail
 set -x
 
 pushd "bbl-state/$ENV_NAME"
+  set +x
   eval "$(bbl print-env)"
+  set -x
+  trap "pkill -f ssh" EXIT
 popd
 
 bosh2 -d rootfs-smoke-test run-errand cflinuxfs2-smoke-test
-pkill -f ssh
