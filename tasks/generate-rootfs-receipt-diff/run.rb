@@ -7,7 +7,7 @@ require_relative '../../lib/git-client'
 
 stack = ENV.fetch('STACK')
 
-previous_version = File.read("previous-#{stack}-release/version").strip
+previous_version = File.read("previous-rootfs-release/version").strip
 
 old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/#{stack}/#{previous_version}/#{stack}/#{stack}_receipt"
 receipt_diff_file = File.join('receipt-diffs', "#{stack}-diff")
