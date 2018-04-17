@@ -17,3 +17,5 @@ run:
     - |
       cd buildpacks-ci
       bundle exec ./tasks/create-capi-release-with-rootfs/run.rb
+params:
+  STACK:
