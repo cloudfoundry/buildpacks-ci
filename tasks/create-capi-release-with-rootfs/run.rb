@@ -6,7 +6,7 @@ stack = ENV.fetch('STACK')
 puts "Creating BOSH release capi with #{stack}"
 version = "212.0.#{Time.now.strftime('%s')}"
 
-%w[cloud_controller_clock cloud_controller_ng cloud_controller_worker nsync stager].each do |job|
+%w[cloud_controller_clock cloud_controller_ng cloud_controller_worker].each do |job|
   puts "handling #{job}"
   specfile = "../capi-release/jobs/#{job}/spec"
   spec = YAML.safe_load(File.read(specfile))
