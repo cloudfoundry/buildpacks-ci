@@ -9,7 +9,7 @@ set -x
 buildpacks-ci/scripts/start-docker
 
 pushd rootfs
-  cp "../rootfs-artifacts/$STACK-*.tar.gz" "$STACK.tar.gz"
+  cp ../rootfs-artifacts/"$STACK"-*.tar.gz "$STACK.tar.gz"
 
   bundle install --jobs="$(nproc)"
 
