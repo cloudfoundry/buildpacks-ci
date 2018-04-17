@@ -27,7 +27,7 @@ popd
 cat <<EOF > ${release_dir}/use-dev-release-opsfile.yml
 ---
 - type: replace
-  path: /releases/name=$STACK
+  path: /releases/name=$STACK?
   value:
     name: $STACK
     version: ${version}
