@@ -1,4 +1,6 @@
+puts 'whats going on'
 require 'yaml'
+puts 'i dunno'
 stack = ENV.fetch('STACK', "whats this in here?")
 
 puts "Creating BOSH release capi with #{stack}"
