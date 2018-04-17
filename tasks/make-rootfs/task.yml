@@ -13,3 +13,5 @@ outputs:
   - name: receipt-artifacts
 run:
   path: buildpacks-ci/tasks/make-rootfs/run.sh
+params:
+  STACK:
