@@ -1,5 +1,5 @@
 require 'yaml'
-stack = ENV.fetch('STACK')
+stack = ENV.fetch('STACK', "whats this in here?")
 
 puts "Creating BOSH release capi with #{stack}"
 version = "212.0.#{Time.now.strftime('%s')}"
