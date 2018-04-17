@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
 puts 'whats going on'
 require 'yaml'
 puts 'i dunno'
