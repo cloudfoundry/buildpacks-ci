@@ -13,4 +13,4 @@ pushd "bbl-state/$ENV_NAME"
   trap "pkill -f ssh" EXIT
 popd
 
-bosh2 -d rootfs-smoke-test run-errand cflinuxfs2-smoke-test
+bosh2 -d rootfs-smoke-test run-errand "$ENV_NAME-smoke-test"
