@@ -6,7 +6,7 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: cflinuxfs2
+  - name: rootfs
   - name: version
 outputs:
   - name: rootfs-artifacts
