@@ -11,3 +11,5 @@ inputs:
   - name: cflinuxfs2-artifacts
 run:
   path: buildpacks-ci/tasks/test-rootfs/run.sh
+params:
+  STACK:
