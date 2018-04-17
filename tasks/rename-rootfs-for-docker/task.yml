@@ -10,4 +10,6 @@ outputs:
   - name: docker-s3
 run:
   path: bash
-  args: ["-c", "mv stack-s3/cflinuxfs2-*.tar.gz docker-s3/cflinuxfs2.tar.gz"]
+  args: ["-c", "mv stack-s3/$STACK-*.tar.gz docker-s3/$STACK.tar.gz"]
+params:
+  STACK:
