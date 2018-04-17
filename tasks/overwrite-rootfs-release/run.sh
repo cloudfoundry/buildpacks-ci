@@ -6,7 +6,7 @@ set -o pipefail
 
 echo "Overwriting BOSH release $STACK"
 
-release_dir=$STACK-release
+release_dir=rootfs-release
 filename=$(< "$release_dir/config/blobs.yml" grep "$STACK" | cut -d ':' -f 1)
 version="212.0.$(date +"%s")"
 
