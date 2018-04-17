@@ -20,12 +20,22 @@ puts "Running 'bosh create release' in capi-release"
 Dir.chdir('capi-release-artifacts') do
   puts `bosh2 create-release --force --tarball "dev_releases/capi/capi-$version.tgz" --name capi --version "#{version}"`
 
-  ops_file = "---
-  - type: replace
-    path: /releases/name=capi
-    value:
-      name: capi
-      version: #{version}
-  "
-  File.write('use-dev-release-opsfile.yml', ops_file)
+  File.write('use-dev-release-opsfile.yml', "---
+- type: replace
+  path: /releases/name=capi
+  value:
+    name: capi
+    version: #{version}
+")
+
+  File.write('use-rootfs-as-default-stack.yml', "---
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/stacks?
+  value:
+	- name: #{stack}
+		description: Cloud Foundry Linux-based filesystem under test
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/default_stack?
+  value: #{stack}
+")
 end
