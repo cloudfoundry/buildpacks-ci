@@ -8,10 +8,10 @@ set -x
 
 buildpacks-ci/scripts/start-docker
 
-pushd "$STACK"
+pushd rootfs
   make
 
-  versioned_stack_filename="../$STACK-artifacts/$STACK-$(cat ../version/number).tar.gz"
+  versioned_stack_filename="../rootfs-artifacts/$STACK-$(cat ../version/number).tar.gz"
   mv "$STACK.tar.gz" "$versioned_stack_filename"
 
   versioned_receipt_filename="../receipt-artifacts/${STACK}_receipt-$(cat ../version/number)"
