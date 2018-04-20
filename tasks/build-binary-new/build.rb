@@ -30,8 +30,6 @@ def run(*args)
 end
 
 case name
-when 'pip'
-  puts("Pretending to build pip")
 when 'pipenv'
   run('apt', 'update')
   run('apt-get', 'install', '-y', 'python-pip', 'python-dev', 'build-essential')
@@ -56,7 +54,7 @@ when 'pipenv'
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
-when 'setuptools', 'rubygems', 'yarn'
+when 'setuptools', 'pip', 'rubygems', 'yarn'
   res = open(url).read
   sha = Digest::SHA256.hexdigest(res)
   if data.dig('version', 'md5_digest') && Digest::MD5.hexdigest(res) != data.dig('version', 'md5_digest')
