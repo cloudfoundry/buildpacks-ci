@@ -34,7 +34,7 @@ module Depwatcher
     end
 
     private def releases(name : String) : Hash(String, Array(Release))
-      response = client.get "https://pypi.python.org/pypi/#{name}/json"
+      response = client.get "https://pypi.org/pypi/#{name}/json"
       External.from_json(response).releases
     end
   end
