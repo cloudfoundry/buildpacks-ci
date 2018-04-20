@@ -30,6 +30,8 @@ def run(*args)
 end
 
 case name
+when 'pip'
+  puts("Pretending to build pip")
 when 'pipenv'
   run('apt', 'update')
   run('apt-get', 'install', '-y', 'python-pip', 'python-dev', 'build-essential')
