@@ -91,6 +91,12 @@ resources: #####################################################################
       branch: master
       private_key: {{<%= rootfs_name %>-release-private-key}}
 
+  - name: capi-release
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/capi-release
+      branch: master
+
   - name: cf-release-rc
     type: git
     source:
@@ -242,9 +248,13 @@ jobs: ##########################################################################
         - task: make-rootfs
           file: buildpacks-ci/tasks/make-rootfs/task.yml
           privileged: true
+          params:
+            STACK: <%= rootfs_name %>
         - task: test-rootfs
           file: buildpacks-ci/tasks/test-rootfs/task.yml
           privileged: true
+          params:
+            STACK: <%= rootfs_name %>
         - put: stack-s3
           params:
             file: rootfs-artifacts/<%= rootfs_name %>-*.tar.gz
@@ -343,8 +353,8 @@ jobs: ##########################################################################
           - get: rootfs-release
             resource: <%= rootfs_name %>-release
           - get: buildpacks-ci
+          - get: capi-release
           - get: bbl-state
-          - get: bosh-lite
           - get: cf-deployment
           - get: gcp-stemcell
         - aggregate:
@@ -387,6 +397,7 @@ jobs: ##########################################################################
               - rootfs-release-artifacts/use-dev-release-opsfile.yml
               - cf-deployment/operations/experimental/use-bosh-dns.yml
               - capi-release-artifacts/use-dev-release-opsfile.yml
+              - capi-release-artifacts/use-rootfs-as-default-stack.yml
               - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
               - cf-deployment/operations/use-latest-stemcell.yml
             vars:
@@ -642,6 +653,8 @@ jobs: ##########################################################################
       - do:
         - task: rename
           file: buildpacks-ci/tasks/rename-rootfs-for-docker/task.yml
+          params:
+            STACK: <%= rootfs_name %>
         - aggregate:
           - put: docker latest version
             resource: docker-<%= rootfs_name %>
