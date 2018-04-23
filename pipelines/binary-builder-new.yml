@@ -1,4 +1,5 @@
 <% dependencies = {
+  pip: { python: {} },
   pipenv: { python: {} },
   setuptools: { python: {} },
   rubygems: { ruby: {} },
@@ -34,6 +35,12 @@ resources:
   source:
     type: pypi
     name: pipenv
+- name: source-pip
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: pypi
+    name: pip
 - name: source-setuptools
   type: depwatcher
   check_every: 1h
