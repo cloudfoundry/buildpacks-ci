@@ -12,8 +12,7 @@ Spec2.describe Depwatcher::Pypi do
   describe "#check" do
     it "returns real releases sorted" do
       expect(subject.check("setuptools").map(&.ref)).to eq [
-        "38.2.0", "38.2.1", "38.2.3", "38.2.4", "38.2.5", "38.3.0", "38.4.0",
-        "38.4.1", "38.5.0", "38.5.1"
+        "38.2.5", "38.3.0", "38.4.0", "38.4.1", "38.5.0", "38.5.1", "38.5.2", "38.6.1", "39.0.0", "39.0.1"
       ]
     end
   end
@@ -22,7 +21,7 @@ Spec2.describe Depwatcher::Pypi do
     it "returns real releases sorted" do
       obj = subject.in("setuptools", "38.4.1")
       expect(obj.ref).to eq "38.4.1"
-      expect(obj.url).to eq "https://pypi.python.org/packages/d7/18/ef605d86063c11555d497a5f049709d6a90c5f8232bd6748a692794c10b7/setuptools-38.4.1.zip"
+      expect(obj.url).to eq "https://files.pythonhosted.org/packages/d7/18/ef605d86063c11555d497a5f049709d6a90c5f8232bd6748a692794c10b7/setuptools-38.4.1.zip"
       expect(obj.md5_digest).to eq "cef139c22bbc54f40dc4e93b1b48da37"
     end
   end
