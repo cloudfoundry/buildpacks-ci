@@ -2,16 +2,21 @@ FROM ruby:2.3.1-slim
 
 ENV LANG="C.UTF-8"
 
-COPY config/apt-key.gpg config/google-chrome-apt-key.pub /tmp/
-RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
-  && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
-  && apt-key add /tmp/apt-key.gpg \
+RUN apt-get update && apt-get -y curl
+
+COPY config/google-chrome-apt-key.pub /tmp/
+RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
   && apt-key add /tmp/google-chrome-apt-key.pub
+
+RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
+  && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
+RUN curl https://dist.crystal-lang.org/apt/setup.sh | sh
 
 RUN apt-get update \
   && apt-get -y install \
   aufs-tools \
-  curl \
+  crystal \
   expect \
   git \
   google-cloud-sdk \
@@ -32,10 +37,6 @@ RUN apt-get update \
   zip \
   google-chrome-stable && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Install crystal
-RUN curl https://dist.crystal-lang.org/apt/setup.sh | sh && \
-    apt-get -y install crystal
 
 RUN curl -sSL https://get.docker.com/ | sh
 
