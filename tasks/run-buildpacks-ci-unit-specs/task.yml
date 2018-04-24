@@ -14,5 +14,9 @@ run:
     - "-cl"
     - |
       set -ex
-      cd buildpacks-ci
-      bundle exec rspec --tag ~fly
+      pushd buildpacks-ci
+        bundle exec rspec --tag ~fly
+        pushd dockerfiles/depwatcher
+          crystal spec
+        popd
+      popd
