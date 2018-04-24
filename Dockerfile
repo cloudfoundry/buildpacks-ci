@@ -12,6 +12,7 @@ RUN apt-get update \
   && apt-get -y install \
   aufs-tools \
   curl \
+  crystal \
   expect \
   git \
   google-cloud-sdk \
