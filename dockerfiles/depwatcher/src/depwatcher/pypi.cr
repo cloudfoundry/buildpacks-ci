@@ -1,4 +1,5 @@
 require "./base"
+require "./semantic_version"
 
 module Depwatcher
   class Pypi < Base
