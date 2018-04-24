@@ -2,7 +2,7 @@ FROM ruby:2.3.1-slim
 
 ENV LANG="C.UTF-8"
 
-RUN apt-get update && apt-get -y curl
+RUN apt-get update && apt-get install -y curl
 
 COPY config/google-chrome-apt-key.pub /tmp/
 RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
@@ -11,7 +11,8 @@ RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >
 RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
   && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 
-RUN curl https://dist.crystal-lang.org/apt/setup.sh | sh
+RUN apt-key adv --keyserver keys.gnupg.net --recv-keys 09617FD37CC06B54 \
+    && echo "deb http://dist.crystal-lang.org/apt crystal main" > /etc/apt/sources.list.d/crystal.list
 
 RUN apt-get update \
   && apt-get -y install \
