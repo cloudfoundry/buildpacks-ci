@@ -8,6 +8,8 @@ RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee 
   && apt-key add /tmp/apt-key.gpg \
   && apt-key add /tmp/google-chrome-apt-key.pub
 
+RUN curl https://dist.crystal-lang.org/apt/setup.sh | sudo bash
+
 RUN apt-get update \
   && apt-get -y install \
   aufs-tools \
