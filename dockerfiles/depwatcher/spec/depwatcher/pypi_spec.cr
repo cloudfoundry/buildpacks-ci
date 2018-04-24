@@ -6,7 +6,7 @@ Spec2.describe Depwatcher::Pypi do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://pypi.python.org/pypi/setuptools/json", File.read(__DIR__+"/../fixtures/setuptools.json"))
+    client.stub_get("https://pypi.org/pypi/setuptools/json", File.read(__DIR__+"/../fixtures/setuptools.json"))
   end
 
   describe "#check" do
