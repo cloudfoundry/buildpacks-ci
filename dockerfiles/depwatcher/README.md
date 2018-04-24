@@ -4,9 +4,13 @@ A concourse resource to watch for new releases of dependencies.
 
 The Buildpacks team use this to build new dependencies for buildpacks.
 
+The various depwatchers in this resource (in `src`) are written in Crystal, as are the tests (in `spec`).
+
 ## Run unit tests
 
-crystal spec
+`crystal spec`
+
+(you may need to install dependencies via `crystal deps` before running tests)
 
 ## Building/Pushing
 
