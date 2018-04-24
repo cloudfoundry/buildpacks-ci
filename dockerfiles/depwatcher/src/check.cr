@@ -28,6 +28,8 @@ when "nginx"
   versions = Depwatcher::Nginx.new.check
 when "httpd"
   versions = Depwatcher::Httpd.new.check
+when "ca_apm_agent"
+  versions = Depwatcher::CaApmAgent.new.check
 else
   raise "Unkown type: #{source["type"]}"
 end

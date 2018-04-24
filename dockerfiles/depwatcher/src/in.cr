@@ -30,6 +30,8 @@ when "nginx"
   version = Depwatcher::Nginx.new.in(version["ref"].to_s)
 when "httpd"
   version = Depwatcher::Httpd.new.in(version["ref"].to_s)
+when "ca_apm_agent"
+  version = Depwatcher::CaApmAgent.new.in(version["ref"].to_s)
 else
   raise "Unkown type: #{type}"
 end
