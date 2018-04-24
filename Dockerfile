@@ -14,7 +14,6 @@ RUN apt-get update \
   && apt-get -y install \
   aufs-tools \
   curl \
-  crystal \
   expect \
   git \
   google-cloud-sdk \
@@ -35,6 +34,11 @@ RUN apt-get update \
   zip \
   google-chrome-stable && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Install crystal
+RUN curl https://dist.crystal-lang.org/apt/setup.sh | sudo bash &&
+    apt-get -y install crystal
+
 
 RUN curl -sSL https://get.docker.com/ | sh
 
