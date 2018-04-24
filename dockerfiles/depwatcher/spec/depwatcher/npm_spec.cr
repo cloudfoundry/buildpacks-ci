@@ -6,13 +6,13 @@ Spec2.describe Depwatcher::Npm do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://registry.npmjs.com/yarn/", File.read(__DIR__+"/../fixtures/yarn.json"))
+    client.stub_get("https://registry.npmjs.com/yarn/", File.read(__DIR__+"/../fixtures/npm_yarn.json"))
   end
 
   describe "#check" do
     it "returns real releases sorted" do
       expect(subject.check("yarn").map(&.ref)).to eq [
-        "1.0.1", "1.0.2", "1.1.0", "1.2.0", "1.2.1", "1.3.1", "1.3.2", "1.4.0", "1.5.0", "1.5.1"
+        "1.0.2", "1.1.0", "1.2.0", "1.2.1", "1.3.1", "1.3.2", "1.4.0", "1.5.0", "1.5.1", "1.6.0"
       ]
     end
   end

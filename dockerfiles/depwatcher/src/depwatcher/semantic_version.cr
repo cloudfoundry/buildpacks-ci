@@ -5,17 +5,15 @@ class SemanticVersion
   getter major : Int32
   getter minor : Int32
   getter patch : Int32
+  getter metadata : String | Nil
 
   def initialize(@original : String)
-    m = @original.match /^(\d+)\.(\d+)(\.(\d+))?/
+    m = @original.match /^(\d+)\.(\d+)(\.(\d+))?(.+)?/
     if m
       @major = m[1].to_i
       @minor = m[2].to_i
-      if m[4]?
-          @patch = m[4].to_i
-      else
-        @patch = 0
-      end
+      @patch = m[4]? ? m[4].to_i : 0
+      @metadata = m[5]? ? m[5] : nil
     else
       raise ArgumentError.new("Not a semantic version: #{@original.inspect}")
     end
@@ -30,5 +28,9 @@ class SemanticVersion
     return r if r != 0
 
     original <=> other.original
+  end
+
+  def is_final_release? : Bool
+    !metadata
   end
 end

@@ -37,6 +37,7 @@ module Depwatcher
     private def releases(name : String) : Hash(String, Array(Release))
       response = client.get "https://pypi.org/pypi/#{name}/json"
       External.from_json(response).releases
+        .select { |v| SemanticVersion.new(v).is_final_release? }
     end
   end
 end
