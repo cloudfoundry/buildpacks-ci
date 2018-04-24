@@ -36,7 +36,7 @@ RUN apt-get update \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install crystal
-RUN curl https://dist.crystal-lang.org/apt/setup.sh | sudo bash &&
+RUN curl https://dist.crystal-lang.org/apt/setup.sh | sudo bash && \
     apt-get -y install crystal
 
 
