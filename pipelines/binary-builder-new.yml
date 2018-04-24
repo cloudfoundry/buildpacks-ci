@@ -10,6 +10,7 @@
   r: { r: { line: "minor", keep_master: true } },
   nginx: { nginx: { line: "minor", keep_master: true } },
   httpd: { php: {}, },
+  ca_apm_php_agent: { php: {}, },
   # node: { node: { line: "major", keep_master: true }, ruby: { line: "major", keep_master: false } },
 } %>
 <% manual = [:httpd] %>
@@ -96,6 +97,12 @@ resources:
   source:
     type: httpd
     name: httpd
+- name: source-ca_apm_php_agent
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: ca_apm_agent
+    name: ca_apm_php_agent
 <% dependencies.each do |dep, _| %>
 - name: buildpacks-bucket-<%= dep %>
   type: s3
