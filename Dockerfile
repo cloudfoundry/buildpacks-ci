@@ -8,8 +8,6 @@ RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee 
   && apt-key add /tmp/apt-key.gpg \
   && apt-key add /tmp/google-chrome-apt-key.pub
 
-RUN curl https://dist.crystal-lang.org/apt/setup.sh | sudo bash
-
 RUN apt-get update \
   && apt-get -y install \
   aufs-tools \
@@ -36,9 +34,8 @@ RUN apt-get update \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install crystal
-RUN curl https://dist.crystal-lang.org/apt/setup.sh | sudo bash && \
+RUN curl https://dist.crystal-lang.org/apt/setup.sh | sh && \
     apt-get -y install crystal
-
 
 RUN curl -sSL https://get.docker.com/ | sh
 
