@@ -31,7 +31,7 @@ jobs:
         - get: repo
           resource: ci-develop
           trigger: true
-      - task: rspec
+      - task: run-ci-unit-tests
         file: buildpacks-ci/tasks/run-buildpacks-ci-unit-specs/task.yml
         params:
           CI_USERNAME: buildpacks
@@ -68,7 +68,7 @@ jobs:
         - get: repo
           resource: ci-master
           trigger: true
-      - task: rspec
+      - task: run-all-ci-specs
         file: buildpacks-ci/tasks/run-buildpacks-ci-specs/task.yml
         params:
           CI_USERNAME: buildpacks
