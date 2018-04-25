@@ -18,6 +18,7 @@ RUN apt-get update \
   && apt-get -y install \
   aufs-tools \
   crystal \
+  libxml2-dev \
   expect \
   git \
   google-cloud-sdk \
