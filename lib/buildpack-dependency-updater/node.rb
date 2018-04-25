@@ -17,11 +17,11 @@ class BuildpackDependencyUpdater::Node < BuildpackDependencyUpdater
 
     dependencies_with_same_major_version = get_dependencies_with_same_major_version(buildpack_manifest, dependency_version)
 
-    previous_dependencies_with_same_major_version = get_dependencies_with_same_major_version(previous_buildpack_manifest, dependency_version)
 
     if buildpack != 'nodejs'
       version_to_delete = dependencies_with_same_major_version.sort.first.to_s
     elsif dependencies_with_same_major_version.count > 1
+      previous_dependencies_with_same_major_version = get_dependencies_with_same_major_version(previous_buildpack_manifest, dependency_version)
       version_to_delete = dependencies_with_same_major_version.sort.first.to_s == previous_dependencies_with_same_major_version.sort.last.to_s ? dependencies_with_same_major_version.sort[1].to_s : dependencies_with_same_major_version.sort.first.to_s
     else
       version_to_delete = nil
