@@ -30,6 +30,7 @@ module Depwatcher
     end
 
     private def releases()
+      # extendable to other appdynamics agents (use 'apm' query param)
       response = client.get "https://download.appdynamics.com/download/downloadfile/?apm=php&format=json"
       Entries.from_json(response).results.map do |entry|
         if (entry.os == "linux" && entry.bit == "64" && entry.extension == "tar.bz2" && !entry.is_beta)
