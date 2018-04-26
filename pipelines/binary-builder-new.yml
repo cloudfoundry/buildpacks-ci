@@ -11,6 +11,7 @@
   nginx: { nginx: { line: "minor", keep_master: true } },
   httpd: { php: {}, },
   ca_apm_php_agent: { php: {}, },
+  appd_php_agent: { php: {}, },
   # node: { node: { line: "major", keep_master: true }, ruby: { line: "major", keep_master: false } },
 } %>
 <% manual = [:httpd] %>
@@ -103,7 +104,14 @@ resources:
   source:
     type: ca_apm_agent
     name: ca_apm_php_agent
+- name: source-appd_php_agent
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: appd_agent
+    name: appdynamics
 <% dependencies.each do |dep, _| %>
+<% if dep != :appd_php_agent %>
 - name: buildpacks-bucket-<%= dep %>
   type: s3
   source:
@@ -111,6 +119,7 @@ resources:
     access_key_id: {{pivotal-buildpacks-s3-access-key}}
     secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
     regexp: dependencies/<%= dep %>/<%= dep %>.*(\d+.\d+.\d+)(.*)
+<% end %>
 <% end %>
 
 - name: builds
@@ -178,9 +187,11 @@ jobs:
   - do:
     - task: build-binary
       file: buildpacks-ci/tasks/build-binary-new/build.yml
+    <% if dep != :appd_php_agent %>
     - put: buildpacks-bucket-<%= dep %>
       params:
         file: artifacts/<%= dep %>*
+    <% end %>
     - put: builds
       params:
         repository: builds-artifacts
