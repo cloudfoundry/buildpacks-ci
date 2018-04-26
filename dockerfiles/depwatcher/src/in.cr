@@ -32,6 +32,8 @@ when "httpd"
   version = Depwatcher::Httpd.new.in(version["ref"].to_s)
 when "ca_apm_agent"
   version = Depwatcher::CaApmAgent.new.in(version["ref"].to_s)
+when "appd_agent"
+  version = Depwatcher::AppDynamicsAgent.new.in(version["ref"].to_s)
 else
   raise "Unkown type: #{type}"
 end
