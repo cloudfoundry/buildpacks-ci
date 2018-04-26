@@ -14,8 +14,9 @@ The various depwatchers in this resource (in `src`) are written in Crystal, as a
 
 ## Building/Pushing
 
-docker build -t cfbuildpacks/depwatcher .
-docker push cfbuildpacks/depwatcher
+`docker build -t cfbuildpacks/depwatcher .`
+
+`docker push cfbuildpacks/depwatcher`
 
 ## Example run
 
