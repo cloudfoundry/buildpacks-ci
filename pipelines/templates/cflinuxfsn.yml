@@ -1,4 +1,5 @@
---- # rootfs_name (cflinuxfs3)   cve_notification_file (ubuntu18.04.yml)
+<% no_cats = %w(cflinuxfs3 cflinuxfs3m) %>
+--- #Template parameters rootfs_name (cflinuxfs3)   cve_notification_file (ubuntu18.04.yml)
 resource_types:
   - name: slack-notification
     type: docker-image
@@ -24,6 +25,7 @@ resources: #####################################################################
       location: {{current-timezone}}
 
   ## Git Repos ##
+<% unless no_cats.include?(rootfs_name) %>
   - name: cf-deployment-concourse-tasks
     type: git
     source:
@@ -46,12 +48,12 @@ resources: #####################################################################
     source:
       uri: https://github.com/cloudfoundry/cf-deployment
       branch: master
-
+<% end %>
   - name: buildpacks-ci
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: wip-cflinuxfsn-154525028 #{{buildpacks-ci-git-uri-public-branch}}
+      branch: wip-cflinuxfsn-155910839 #{{buildpacks-ci-git-uri-public-branch}}
 
   - name: <%= rootfs_name %>
     type: git
@@ -68,6 +70,7 @@ resources: #####################################################################
       paths: [ new-cve-notifications/<%= cve_notification_file %> ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
+<% unless no_cats.include?(rootfs_name) %>
   - name: receipt-diff
     type: git
     source:
@@ -76,7 +79,7 @@ resources: #####################################################################
       paths: [ receipt-diffs/<%= rootfs_name %>-diff ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
       tag_filter: "newpackages_<%= rootfs_name %>_*"
-
+<% end %>
   - name: public-robots
     type: git
     source:
@@ -91,6 +94,7 @@ resources: #####################################################################
       branch: master
       private_key: {{<%= rootfs_name %>-release-private-key}}
 
+<% unless no_cats.include?(rootfs_name) %>
   - name: capi-release
     type: git
     source:
@@ -109,6 +113,7 @@ resources: #####################################################################
     source:
       uri: https://github.com/cloudfoundry/cats-concourse-task
       branch: master
+<% end %>
 
   ## S3 Buckets ##
 
@@ -128,6 +133,7 @@ resources: #####################################################################
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
+<% unless no_cats.include?(rootfs_name) %>
   ## BOSH Deployments ##
 
   - name: <%= rootfs_name %>-cf-deployment
@@ -152,6 +158,7 @@ resources: #####################################################################
     type: bosh-io-stemcell
     source:
       name: bosh-google-kvm-ubuntu-trusty-go_agent
+<% end %>
 
   ## Docker Image ##
 
@@ -196,7 +203,7 @@ resources: #####################################################################
     type: semver
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      key: versions/stack
+      key: versions/stack-<%= rootfs_name %>
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
@@ -280,6 +287,7 @@ jobs: ##########################################################################
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
+<% unless no_cats.include?(rootfs_name) %>
   - name: bbl-up
     serial: true
     serial_groups: [ <%= rootfs_name %> ]
@@ -518,7 +526,8 @@ jobs: ##########################################################################
           params:
             repository: updated-env-repo
             rebase: true
-
+<% end %>
+<% release_gating_job = no_cats.include?(rootfs_name) ? "build-rootfs" : "cats" %>
   - name: release-<%= rootfs_name %>
     serial: true
     serial_groups: [ <%= rootfs_name %> ]
@@ -527,20 +536,21 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: new-cves
-          passed: [ 'cats' ]
+          passed:
+            - <%= release_gating_job %>
         - get: stack-s3
           passed:
-            - cats
+            - <%= release_gating_job %>
         - get: receipt-s3
           passed:
-            - cats
+            - <%= release_gating_job %>
         - get: rootfs
           resource: <%= rootfs_name %>
           passed:
-            - cats
+            - <%= release_gating_job %>
         - get: version
           passed:
-            - cats
+            - <%= release_gating_job %>
           trigger: true
           params: { bump: final }
       - do:
