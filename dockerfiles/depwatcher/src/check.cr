@@ -30,6 +30,8 @@ when "httpd"
   versions = Depwatcher::Httpd.new.check
 when "ca_apm_agent"
   versions = Depwatcher::CaApmAgent.new.check
+when "appd_agent"
+  versions = Depwatcher::AppDynamicsAgent.new.check
 else
   raise "Unkown type: #{source["type"]}"
 end
