@@ -70,6 +70,11 @@ when 'pip'
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
+when 'appdynamics'
+  out_data.merge!({
+    sha256: data.dig('version', 'sha256'),
+    url: url
+  })
 
 when 'setuptools', 'rubygems', 'yarn'
   res = open(url).read
