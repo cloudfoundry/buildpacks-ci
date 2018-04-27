@@ -12,3 +12,5 @@ outputs:
   - name: rootfs-archive
 run:
   path: buildpacks-ci/tasks/update-rootfs-filename/run.sh
+params:
+  STACK:

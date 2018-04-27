@@ -6,8 +6,8 @@ set -o pipefail
 
 SUFFIX="${ROOTFS_SUFFIX-}"
 
-source="stack-s3/cflinuxfs2$SUFFIX-*.tar.gz"
-destination=cflinuxfs2-archive/cflinuxfs2$SUFFIX-$(cat version/number).tar.gz
+source="stack-s3/${STACK}${SUFFIX}-*.tar.gz"
+destination="rootfs-archive/${STACK}${SUFFIX}-$(cat version/number).tar.gz"
 
 # here, we actually want globbing, so:
 # shellcheck disable=SC2086
