@@ -70,7 +70,6 @@ resources: #####################################################################
       paths: [ new-cve-notifications/<%= cve_notification_file %> ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
-<% unless no_cats.include?(rootfs_name) %>
   - name: receipt-diff
     type: git
     source:
@@ -79,7 +78,7 @@ resources: #####################################################################
       paths: [ receipt-diffs/<%= rootfs_name %>-diff ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
       tag_filter: "newpackages_<%= rootfs_name %>_*"
-<% end %>
+
   - name: public-robots
     type: git
     source:
@@ -551,6 +550,9 @@ jobs: ##########################################################################
         - get: version
           passed:
             - <%= release_gating_job %>
+<% if no_cats.include?(rootfs_name) %>
+        - get: receipt-diff
+<% end %>
           trigger: true
           params: { bump: final }
       - do:
