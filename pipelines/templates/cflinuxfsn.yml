@@ -60,7 +60,7 @@ resources: #####################################################################
     source:
       uri: git@github.com:cloudfoundry/<%= rootfs_name %>.git
       branch: master
-      private_key: {{stacks-private-key}}
+      private_key: {{<%= rootfs_name %>-private-key}}
 
   - name: new-cves
     type: git
