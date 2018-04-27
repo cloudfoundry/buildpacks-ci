@@ -556,8 +556,12 @@ jobs: ##########################################################################
       - do:
         - task: update-receipt
           file: buildpacks-ci/tasks/update-rootfs-receipt/task.yml
+          params:
+            STACK: <%= rootfs_name %>
         - task: update-filename
           file: buildpacks-ci/tasks/update-rootfs-filename/task.yml
+          params:
+            STACK: <%= rootfs_name %>
         - put: <%= rootfs_name %>
           params:
             repository: new-rootfs-commit

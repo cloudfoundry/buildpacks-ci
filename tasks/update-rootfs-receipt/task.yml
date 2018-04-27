@@ -13,3 +13,5 @@ outputs:
   - name: new-rootfs-commit
 run:
   path: buildpacks-ci/tasks/update-rootfs-receipt/run.sh
+params:
+  STACK:
