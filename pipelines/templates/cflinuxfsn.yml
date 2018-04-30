@@ -550,11 +550,11 @@ jobs: ##########################################################################
         - get: version
           passed:
             - <%= release_gating_job %>
+          params: { bump: final }
 <% if no_cats.include?(rootfs_name) %>
         - get: receipt-diff
 <% end %>
           trigger: true
-          params: { bump: final }
       - do:
         - task: update-receipt
           file: buildpacks-ci/tasks/update-rootfs-receipt/task.yml
