@@ -34,9 +34,9 @@ class SemanticVersionFilter
   end
 
   def match(other)
-    (major == other.major) &&
-    (minor == nil || minor == other.minor) &&
-    (patch == nil || patch == other.patch)
+    (@major == other.major) &&
+    (@minor == nil || @minor == other.minor) &&
+    (@patch == nil || @patch == other.patch)
   end
 end
 
