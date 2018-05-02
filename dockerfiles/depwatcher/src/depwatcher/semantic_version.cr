@@ -34,3 +34,27 @@ class SemanticVersion
     !metadata
   end
 end
+
+class SemanticVersionFilter
+  getter original : String
+  getter major : Int32
+  getter minor : Int32 | Nil
+  getter patch : Int32 | Nil
+
+  def initialize(@original : String)
+    m = @original.match /^(\d+)\.(\d+|X)\.(\d+|X)$/
+    if m
+      @major = m[1].to_i
+      @minor = m[2] == "X" ? nil : m[2].to_i
+      @patch = m[3] == "X" ? nil : m[3].to_i
+    else
+      raise ArgumentError.new("Not a semantic version filter: #{@original.inspect}")
+    end
+  end
+
+  def match(other : SemanticVersion) : Bool
+    (major == other.major) &&
+    (minor == nil || minor == other.minor) &&
+    (patch == nil || patch == other.patch)
+  end
+end
