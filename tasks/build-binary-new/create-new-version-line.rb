@@ -5,6 +5,10 @@ require 'yaml'
 require 'tracker_api'
 
 class SemanticVersion
+  attr_reader :major
+  attr_reader :minor
+  attr_reader :patch
+
   def initialize(original)
     @original = original
     m = @original.match /^(\d+)\.(\d+)(\.(\d+))?(.+)?/
@@ -54,6 +58,7 @@ ENV['EXISTING_VERSION_LINES'].split(' ').each do |line|
   semantic_version = SemanticVersion.new(version)
   filter = SemanticVersionFilter.new(line)
   if filter.match(semantic_version)
+    puts "#{version} is already part of #{line}"
     exit 0
   end
 end
