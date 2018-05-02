@@ -153,7 +153,6 @@ jobs:
       resource: source-<%= dep %>-latest
       trigger: true
       version: every
-    - get: builds
   - do:
     - task: create-tracker-story
       file: buildpacks-ci/tasks/build-binary-new/create-new-version-line.yml
@@ -163,10 +162,6 @@ jobs:
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         BUILDPACKS: <%= buildpacks.keys.join(' ') %>
         EXISTING_VERSION_LINES: <%= lines.join(' ') %>
-    - put: builds
-      params:
-        repository: builds-artifacts
-        rebase: true
 
   <% lines.each do | line | %>
 - name: create-<%= dep %>-v<%= line %>-story
