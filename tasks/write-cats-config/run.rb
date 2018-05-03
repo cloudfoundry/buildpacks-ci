@@ -44,7 +44,7 @@ cats_config = {
   "verbose" => false
 }
 
-if windows_stack != ''
+if windows_stack != '' && windows_stack != nil
   cats_config.merge!({ "include_windows" => true,
     "num_windows_cells" => 1,
     "windows_stack" => windows_stack,
