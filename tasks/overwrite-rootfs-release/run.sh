@@ -31,6 +31,26 @@ cat <<EOF > ${release_dir}/use-dev-release-opsfile.yml
   value:
     name: $STACK
     version: ${version}
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/stacks
+  value:
+    - name: $STACK
+      description: Cloud Foundry Linux-based filesystem under test
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=$STACK-rootfs-setup?
+  value:
+    release: $STACK
+    properties:
+      $STACK-rootfs:
+        trusted_certs: ((application_ca.certificate))
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=garden/properties/garden/persistent_image_list
+  value:
+    - "/var/vcap/packages/$STACK/rootfs.tar"
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=rep/properties/diego/rep/preloaded_rootfses
+  value:
+    - $STACK:/var/vcap/packages/$STACK/rootfs.tar
 EOF
 
 echo "rsyncing $release_dir to ${release_dir}-artifacts"
