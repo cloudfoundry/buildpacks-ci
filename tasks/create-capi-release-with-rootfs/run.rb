@@ -16,7 +16,7 @@ version = "212.0.#{Time.now.strftime('%s')}"
   File.write(specfile, YAML.dump(spec))
 end
 
-FileUtils.cp_r '../capi-release', '../capi-release-artifacts'
+FileUtils.cp_r '../capi-release/.', '../capi-release-artifacts'
 
 puts "Running 'bosh create release' in capi-release"
 
