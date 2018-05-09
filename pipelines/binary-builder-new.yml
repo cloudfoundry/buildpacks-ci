@@ -91,7 +91,7 @@ resources:
   source:
     type: httpd
     name: httpd
-- name: source-ca_apm_php_agent
+- name: source-CA-APM-PHPAgent
   type: depwatcher
   check_every: 1h
   source:
