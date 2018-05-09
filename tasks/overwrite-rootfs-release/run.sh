@@ -39,6 +39,7 @@ cat <<EOF > ${release_dir}/use-dev-release-opsfile.yml
 - type: replace
   path: /instance_groups/name=diego-cell/jobs/name=$STACK-rootfs-setup?
   value:
+    name: $STACK-rootfs-setup
     release: $STACK
     properties:
       $STACK-rootfs:
