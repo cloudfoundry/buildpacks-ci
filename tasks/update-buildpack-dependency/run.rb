@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 require 'json'
-require 'regexp'
 require 'yaml'
 require_relative './dependencies'
 
