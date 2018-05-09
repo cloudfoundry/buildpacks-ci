@@ -10,7 +10,7 @@
   r: { r: { line: "minor", lines: ["3.4.X"], keep_master: true } },
   nginx: { nginx: { line: "minor", lines: ["1.13.X", "1.14.X"], keep_master: true } },
   httpd: { php: {}, },
-  ca_apm_php_agent: { php: {}, },
+  'CA-APM-PHPAgent': { php: {}, },
   appd_php_agent: { php: {}, },
   # node: { node: { line: "major", keep_master: true }, ruby: { line: "major", keep_master: false } },
 } %>
