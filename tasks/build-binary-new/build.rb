@@ -59,7 +59,7 @@ when 'appdynamics'
     sha256: data.dig('version', 'sha256'),
     url: url
   })
-when 'setuptools', 'rubygems', 'yarn', 'ca_apm_php_agent', 'pip'
+when 'setuptools', 'rubygems', 'yarn', 'CA-APM-PHPAgent', 'pip'
   res = open(url).read
   sha = Digest::SHA256.hexdigest(res)
   if data.dig('version', 'md5_digest') && Digest::MD5.hexdigest(res) != data.dig('version', 'md5_digest')
