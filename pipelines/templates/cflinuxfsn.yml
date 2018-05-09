@@ -1,4 +1,4 @@
-<% no_cats = %w(cflinuxfs3 cflinuxfs3m) %>
+<% no_cats = %w(cflinuxfs3) %>
 --- #Template parameters rootfs_name (cflinuxfs3)   cve_notification_file (ubuntu18.04.yml)
 resource_types:
   - name: slack-notification
@@ -374,6 +374,7 @@ jobs: ##########################################################################
             params:
               STACK: <%= rootfs_name %>
           - task: create-capi-release-with-rootfs
+            ## TODO: this isn't always needed? (see cflinuxfs2.yml) maybe because we're changing the version to deploy
             file: buildpacks-ci/tasks/create-capi-release-with-rootfs/task.yml
             params:
               STACK: <%= rootfs_name %>
@@ -407,6 +408,9 @@ jobs: ##########################################################################
               - capi-release-artifacts/use-rootfs-as-default-stack.yml
               - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
               - cf-deployment/operations/use-latest-stemcell.yml
+              - cf-deployment/operations/experimental/skip-consul-cell-registrations.yml
+              - cf-deployment/operations/experimental/skip-consul-locks.yml
+              - cf-deployment/operations/experimental/disable-consul.yml
             vars:
               system_domain: <%= rootfs_name %>.buildpacks-gcp.ci.cf-app.com
         on_failure:
