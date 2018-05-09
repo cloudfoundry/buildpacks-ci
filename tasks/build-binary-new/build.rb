@@ -54,9 +54,17 @@ when 'pipenv'
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
-when 'appdynamics', 'ca_apm_php_agent'
+when 'CAAPM', 'appdynamics'
+  res = open(url).read
+  sha = Digest::SHA256.hexdigest(res)
+  if data.dig('version', 'md5_digest') && Digest::MD5.hexdigest(res) != data.dig('version', 'md5_digest')
+    raise "MD5 digest does not match version digest"
+  elsif data.dig('version', 'sha256') && sha != data.dig('version', 'sha256')
+    raise "SHA256 digest does not match version digest"
+  end
+
   out_data.merge!({
-    sha256: data.dig('version', 'sha256'),
+    sha256: sha,
     url: url
   })
 when 'setuptools', 'rubygems', 'yarn', 'pip'
