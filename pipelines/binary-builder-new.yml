@@ -14,7 +14,6 @@
   appd_php_agent: { php: {}, },
   # node: { node: { line: "major", keep_master: true }, ruby: { line: "major", keep_master: false } },
 } %>
-<% manual = [:httpd] %>
 resource_types:
 - name: depwatcher
   type: docker-image
@@ -196,7 +195,7 @@ jobs:
     - get: binary-builder
     - get: source
       resource: source-<%= dep %>-v<%= line %>
-      <%= 'trigger: true' unless manual.include?(dep) %>
+      trigger: true
       version: every
       passed: [ create-<%= dep %>-v<%= line %>-story ]
     - get: builds
@@ -300,7 +299,7 @@ jobs:
     - get: binary-builder
     - get: source
       resource: source-<%= dep %>
-      <%= 'trigger: true' unless manual.include?(dep) %>
+      trigger: true
       version: every
       passed: [ create-<%= dep %>-story ]
     - get: builds
