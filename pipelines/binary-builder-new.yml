@@ -10,7 +10,7 @@
   r: { r: { line: "minor", lines: ["3.4.X"], keep_master: true } },
   nginx: { nginx: { line: "minor", lines: ["1.13.X", "1.14.X"], keep_master: true } },
   httpd: { php: {}, },
-  'CA-APM-PHPAgent': { php: {}, },
+  ca_apm_php_agent: { php: {}, },
   appd_php_agent: { php: {}, },
   # node: { node: { line: "major", keep_master: true }, ruby: { line: "major", keep_master: false } },
 } %>
@@ -91,7 +91,7 @@ resources:
   source:
     type: httpd
     name: httpd
-- name: source-CA-APM-PHPAgent
+- name: source-ca_apm_php_agent
   type: depwatcher
   check_every: 1h
   source:
@@ -202,7 +202,7 @@ jobs:
   - do:
     - task: build-binary
       file: buildpacks-ci/tasks/build-binary-new/build.yml
-    <% if dep != :appd_php_agent %>
+    <% if dep != :appd_php_agent || dep != :ca_apm_php_agent %>
     - put: buildpacks-bucket-<%= dep %>
       params:
         file: artifacts/<%= dep %>*
@@ -306,7 +306,7 @@ jobs:
   - do:
     - task: build-binary
       file: buildpacks-ci/tasks/build-binary-new/build.yml
-    <% if dep != :appd_php_agent %>
+    <% if dep != :appd_php_agent || dep != :ca_apm_php_agent %>
     - put: buildpacks-bucket-<%= dep %>
       params:
         file: artifacts/<%= dep %>*
