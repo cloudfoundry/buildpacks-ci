@@ -15,7 +15,6 @@ gem 'tracker_api'
 gem 'rake'
 gem 'diffy'
 gem 'open_uri_redirections'
-gem 'bundler', '< 1.16.0'
 
 group :development do
   gem 'version_sorter'
