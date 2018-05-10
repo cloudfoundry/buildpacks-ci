@@ -521,7 +521,7 @@ jobs: ##########################################################################
             - cats
         - get: version
           passed:
-            - cats
+            - bbl-destroy
           trigger: true
           params: { bump: final }
       - do:
