@@ -253,10 +253,6 @@ jobs: ##########################################################################
         - put: receipt-s3
           params:
             file: receipt-artifacts/cflinuxfs2_receipt-*
-        - task: generate-receipt-diff
-          file: buildpacks-ci/tasks/generate-cflinuxfs2-receipt-diff/task.yml
-          params:
-            STACK: cflinuxfs2
         - put: public-robots
           params:
             repository: public-robots-artifacts
@@ -264,6 +260,10 @@ jobs: ##########################################################################
             tag: git-tags/TAG
         - put: version
           params: { file: version/number }
+        - task: generate-receipt-diff
+          file: buildpacks-ci/tasks/generate-cflinuxfs2-receipt-diff/task.yml
+          params:
+            STACK: cflinuxfs2
         on_failure:
           put: failure-alert
           params:
