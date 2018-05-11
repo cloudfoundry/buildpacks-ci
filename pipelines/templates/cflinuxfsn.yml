@@ -374,7 +374,6 @@ jobs: ##########################################################################
             params:
               STACK: <%= rootfs_name %>
           - task: create-capi-release-with-rootfs
-            ## TODO: this isn't always needed? (see cflinuxfs2.yml) maybe because we're changing the version to deploy
             file: buildpacks-ci/tasks/create-capi-release-with-rootfs/task.yml
             params:
               STACK: <%= rootfs_name %>
