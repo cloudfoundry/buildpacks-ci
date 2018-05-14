@@ -22,7 +22,8 @@ case ARGV[0]
     p('cf', 'auth', cfg['cflinuxfs2-cf-username'], cfg['cflinuxfs2-cf-password'])
     system('cf', 'auth', cfg['cflinuxfs2-cf-username'], cfg['cflinuxfs2-cf-password']) or raise 'Could not auth'
   when 'dev'
-    system('cf', 'login', '-a', 'api.v3.pcfdev.io', '--skip-ssl-validation', '-u', 'admin', '-p', 'admin') or raise 'Could not connect'
+    system('cf', 'api', 'api.v3.pcfdev.io', '--skip-ssl-validation') or raise 'Could not connect'
+    system('cf', 'auth', 'admin', 'admin') or raise 'Could not connect'
   else
     puts "Usage: #{$0} <edge|lts|bal|dev>"
     exit 1
