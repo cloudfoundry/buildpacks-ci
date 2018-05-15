@@ -41,17 +41,13 @@ resources:
   - name: edge-cf-deployment
     type: bosh-deployment
     source:
-      target: {{edge_bosh_target}}
-      client: admin
-      client_secret: {{edge_bosh_client_secret}}
-      ca_cert: {{edge_bosh_ca_cert}}
+      deployment: cf
       vars_store:
         provider: gcs
         config:
           bucket: edge-cf-deployment
           file_name: vars-store.yml
           json_key: {{edge-cf-deployment-gcs-service-account-key}}
-      deployment: cf
 
   - name: gcp-stemcell
     type: bosh-io-stemcell
@@ -88,8 +84,13 @@ jobs:
           - get: windows2012-stemcell
           - get: windows2016-stemcell
           - get: gcp-stemcell
+        - task: create-deployment-source-config
+          file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+          params:
+            ENV_NAME: edge
         - put: edge-cf-deployment
           params:
+            source_file: deployment-source-config/source_file.yml
             manifest: cf-deployment/cf-deployment.yml
             stemcells:
               - gcp-stemcell/*.tgz
