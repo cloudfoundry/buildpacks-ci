@@ -2,7 +2,7 @@ require "./base"
 require "xml"
 
 module Depwatcher
-  class Golang < Base
+  class Go < Base
     class Release
       JSON.mapping(
         ref: String,

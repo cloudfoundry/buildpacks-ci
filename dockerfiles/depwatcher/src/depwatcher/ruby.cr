@@ -3,7 +3,7 @@ require "./github_tags"
 require "xml"
 
 module Depwatcher
-  class RubyLang < Base
+  class Ruby < Base
     class Release
       JSON.mapping(
         ref: String,

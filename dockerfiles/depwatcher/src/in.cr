@@ -16,14 +16,14 @@ when "rubygems_cli"
   version = Depwatcher::RubygemsCli.new.in(version["ref"].to_s)
 when "pypi"
   version = Depwatcher::Pypi.new.in(source["name"].to_s, version["ref"].to_s)
-when "ruby_lang"
-  version = Depwatcher::RubyLang.new.in(version["ref"].to_s)
+when "ruby"
+  version = Depwatcher::Ruby.new.in(version["ref"].to_s)
 when "python"
   version = Depwatcher::Python.new.in(version["ref"].to_s)
-when "golang"
-  version = Depwatcher::Golang.new.in(version["ref"].to_s)
-when "rlang"
-  version = Depwatcher::Rlang.new.in(version["ref"].to_s)
+when "go"
+  version = Depwatcher::Go.new.in(version["ref"].to_s)
+when "r"
+  version = Depwatcher::R.new.in(version["ref"].to_s)
 when "npm"
   version = Depwatcher::Npm.new.in(source["name"].to_s, version["ref"].to_s)
 when "nginx"

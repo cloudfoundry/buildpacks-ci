@@ -1,8 +1,8 @@
 require "spec2"
 require "./httpclient_mock"
-require "../../src/depwatcher/rlang"
+require "../../src/depwatcher/r"
 
-Spec2.describe Depwatcher::Rlang do
+Spec2.describe Depwatcher::R do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do

@@ -3,7 +3,7 @@ require "./semantic_version"
 require "xml"
 
 module Depwatcher
-  class Rlang < Base
+  class R < Base
     class Release
       JSON.mapping(
         ref: String,
