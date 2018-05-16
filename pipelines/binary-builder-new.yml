@@ -104,6 +104,15 @@ resources:
     <% end %>
 <% end %>
 
+<% if !dep[:third_party_hosted] %>
+- name: buildpacks-bucket-<%=dep_name%>
+  type: s3
+  source:
+    bucket: {{buildpacks-binaries-s3-bucket}}
+    access_key_id: {{pivotal-buildpacks-s3-access-key}}
+    secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+    regexp: dependencies/<%=dep_name%>/<%=dep_name%>.*(\d+.\d+.\d+)(.*)
+<% end %>
 <% end %>
 
 jobs:
@@ -197,6 +206,15 @@ jobs:
   - do:
     - task: build-binary
       file: buildpacks-ci/tasks/build-binary-new/build.yml
+    <% if !dep[:third_party_hosted] %>
+    - put: buildpacks-bucket-<%=dep_name%>
+      params:
+        file: artifacts/<%=dep_name%>*
+    <% end %>
+    - put: builds
+      params:
+        repository: builds-artifacts
+        rebase: true
 <% end %>
 
 <% dep[:buildpacks].each do |bp_name, bp| %>
@@ -223,6 +241,10 @@ jobs:
       params:
         VERSION_LINE: <%= get_version_line_type(bp[:lines]) %>
         KEEP_MASTER: <%= bp[:keep_master] %>
+    - put: <%= bp_name %>-buildpack
+      params:
+        repository: artifacts
+        rebase: true
   <% end %>
 <% end %>
 <% end %>
