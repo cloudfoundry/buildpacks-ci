@@ -33,11 +33,16 @@ class UsnReleaseNotes
     cves.each do |cve|
       cve_id  = cve.text
       cve_uri = cve['href']
-      cve_element = Nokogiri::HTML(open(cve_uri, :allow_redirections => :safe).read).css('#container > div:contains("Description") > div.value').first
+      cve_description = ''
+      begin
+        cve_element = Nokogiri::HTML(open(cve_uri, :allow_redirections => :safe).read).css('#container > div:contains("Description") > div.value').first
 
-      cve_description = cve_element.children.map do |child|
-        child.text if child.text?
-      end.compact.join(" ")
+        cve_description = cve_element.children.map do |child|
+          child.text if child.text?
+        end.compact.join(" ")
+      rescue
+        cve_description = 'Could not get description'
+      end
 
       notes += "* [#{cve_id}](#{cve_uri}): #{cve_description}\n"
     end
