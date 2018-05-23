@@ -11,7 +11,8 @@
   ruby: { buildpacks: { ruby: { lines: ["2.2.X", "2.3.X", "2.4.X", "2.5.X"], keep_master: true } } },
   rubygems: { buildpacks: { ruby: {} }, source_type: 'rubygems_cli'},
   setuptools: { buildpacks: { python: {}}, source_type: 'pypi'},
-  yarn: { buildpacks: { nodejs: {}, ruby: {} }, source_type: 'github_releases', source_params: ['repo: yarnpkg/yarn']}
+  yarn: { buildpacks: { nodejs: {}, ruby: {} }, source_type: 'github_releases', source_params: ['repo: yarnpkg/yarn']},
+  godep: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: tools/godep']}
 }
 
 def validate_dependencies(deps)
