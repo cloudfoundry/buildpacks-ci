@@ -96,6 +96,19 @@ when 'ruby'
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
+when 'hwc'
+  Dir.chdir('binary-builder') do
+    run('./bin/binary-builder', '--name=hwc', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
+  end
+  old_file = "binary-builder/hwc-#{version}-windows.zip"
+  sha = Digest::SHA256.hexdigest(open(old_file).read)
+  filename = File.basename(old_file).gsub(/(\.zip)$/, "-#{sha[0..7]}\\1")
+  FileUtils.mv(old_file, "artifacts/#{filename}")
+
+  out_data.merge!({
+    sha256: sha,
+    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+  })
 when 'dep'
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=dep', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
