@@ -13,7 +13,7 @@
   setuptools: { buildpacks: { python: {}}, source_type: 'pypi'},
   yarn: { buildpacks: { nodejs: {}, ruby: {} }, source_type: 'github_releases', source_params: ['repo: yarnpkg/yarn']},
   godep: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: tools/godep']},
-  dep: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: golang/dep']}
+  dep: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: golang/dep']},
   hwc: { buildpacks: { hwc: {}}, source_type: 'github_releases', source_params: ['repo: cloudfoundry-incubator/hwc']}
 }
 
