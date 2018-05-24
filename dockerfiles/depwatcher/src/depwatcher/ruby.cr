@@ -17,10 +17,10 @@ module Depwatcher
     def check() : Array(Internal)
       name = "ruby/ruby"
       regexp = "^v\\d+_\\d+_\\d+$"
-      GithubTags.new(client).check(name, regexp).map do |r|
+      GithubTags.new(client).matched_tags(name, regexp).map do |r|
         r.ref = r.ref.gsub("_", ".").gsub(/^v/, "")
         r
-      end
+      end.sort_by { |i| SemanticVersion.new(i.ref) }
     end
 
     def in(ref : String) : Release

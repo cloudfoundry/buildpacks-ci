@@ -139,6 +139,10 @@ class GitClient
     raise GitError.new('Could not pull branch') unless system('git pull -r')
   end
 
+  def self.clone_repo(url, dir)
+    raise GitError.new('Could not clone') unless system("git clone #{url} #{dir}")
+  end
+
   def self.fetch(dir)
     Dir.chdir(dir) do
       raise GitError.new('Could not fetch') unless system('git fetch')

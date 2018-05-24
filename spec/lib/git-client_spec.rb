@@ -14,6 +14,32 @@ describe GitClient do
     FileUtils.rm_rf(dir_to_update) unless dir_to_update.nil?
   end
 
+  describe '#clone_repo' do
+    let(:url) { "https://some-url" }
+    let(:dir) {Dir.mktmpdir }
+    subject { described_class.clone_repo(url, dir) }
+
+    before { allow(described_class).to receive(:system).and_return(git_successful) }
+
+    context 'git works properly' do
+      let(:git_successful) { true }
+
+      it 'should git clone' do
+        expect(described_class).to receive(:system).with("git clone #{url} #{dir}")
+
+        subject
+      end
+    end
+
+    context 'git fails' do
+      let(:git_successful) { false }
+
+      it 'throws an exception about not cloning' do
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not clone')
+      end
+    end
+  end
+
   describe '#update_submodule_to_latest' do
     let(:source_dir)    { Dir.mktmpdir }
     let(:dir_to_update) { Dir.mktmpdir }
@@ -519,5 +545,4 @@ describe GitClient do
       end
     end
   end
-
 end
