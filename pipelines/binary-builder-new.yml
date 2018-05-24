@@ -1,6 +1,7 @@
 <% dependencies = {
   appdynamics: { buildpacks: { php: {} }, third_party_hosted: true, source_type: 'appd_agent'},
   CAAPM: { buildpacks: { php: {} }, third_party_hosted: true, source_type: 'ca_apm_agent'},
+  dotnet: { buildpacks: { dotnet-core: { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X"], source_type: 'github_tags', keep_master: true, source_params: ['repo: dotnet/cli', 'regexp: "^v[0-9]"'] } } },
   go: { buildpacks: { go: { lines: ["1.6.X", "1.7.X", "1.8.X", "1.9.X", "1.10.X"], keep_master: true } } },
   httpd: { buildpacks: { php: {} } },
   nginx: { buildpacks: { nginx: { lines: ["1.13.X", "1.14.X"], keep_master: true } } },
