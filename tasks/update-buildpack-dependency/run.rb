@@ -11,9 +11,9 @@ manifest_master = YAML.load_file('buildpack-master/manifest.yml') # rescue { 'de
 
 data = JSON.parse(open('source/data.json').read)
 name = data.dig('source', 'name')
-version = data.dig('version', 'ref')
 build = JSON.parse(open("builds/binary-builds-new/#{name}/#{version}.json").read)
 story_id = build['tracker_story_id']
+version = build['version']
 
 system('rsync -a buildpack/ artifacts/')
 raise('Could not copy buildpack to artifacts') unless $?.success?
@@ -21,7 +21,7 @@ raise('Could not copy buildpack to artifacts') unless $?.success?
 dep = { "name" => name, "version" => version, "uri" => build['url'], "sha256" => build['sha256'], "cf_stacks" => ['cflinuxfs2']}
 
 old_versions = manifest['dependencies'].select { |d| d['name'] == name }.map { |d| d['version'] }
-manifest['dependencies'] = Dependencies.new(dep, ENV['VERSION_LINE'], ENV['KEEP_MASTER'], manifest['dependencies'], manifest_master['dependencies']).switch
+manifest['dependencies'] = Dependencies.new(dep, ENV['VERSION_LINE'], ENV['REMOVAL_STRATEGY'], manifest['dependencies'], manifest_master['dependencies']).switch
 new_versions = manifest['dependencies'].select { |d| d['name'] == name }.map { |d| d['version'] }
 
 added = (new_versions - old_versions).uniq.sort
