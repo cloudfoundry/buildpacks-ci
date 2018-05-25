@@ -7,8 +7,9 @@ module Depwatcher
       JSON.mapping(
         ref: String,
         url: String,
+        git_commit_sha: String,
       )
-      def initialize(@ref : String, @url : String)
+      def initialize(@ref : String, @url : String, @git_commit_sha : String)
       end
     end
 
@@ -16,6 +17,13 @@ module Depwatcher
       JSON.mapping(
         name: String,
         tarball_url: String,
+        commit: Commit,
+      )
+    end
+
+    class Commit
+      JSON.mapping(
+            sha: String,
       )
     end
 
@@ -28,7 +36,7 @@ module Depwatcher
         t.name == ref
       end
       raise "Could not find data for version #{ref}" unless t
-      Tag.new(t.name, t.tarball_url)
+      Tag.new(t.name, t.tarball_url, t.commit.sha)
     end
 
     def matched_tags(repo : String, regexp : String) : Array(Internal)

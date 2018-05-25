@@ -39,9 +39,10 @@ when 'dotnet'
     run('apt-get', '-y', 'upgrade')
     run('apt-get', '-y', 'install', 'clang', 'devscripts', 'debhelper', 'libunwind8', 'liburcu1', 'libpython2.7', 'liblttng-ust0', 'libllvm3.6', 'liblldb-3.6')
 
+    major, minor, patch = version.split('.')
+
     ENV['DropSuffix'] = 'true'
     ENV['TERM'] = 'linux'
-    major, minor, patch = version.split('.')
     if major == 'v2' && minor == '1' && patch.to_i >= 4 && patch.to_i <= 200
       runbuildsh = File.open('run-build.sh', 'r') {|f| f.read}
       runbuildsh.gsub!('WriteDynamicPropsToStaticPropsFiles "${args[@]}"', 'WriteDynamicPropsToStaticPropsFiles')
@@ -49,22 +50,22 @@ when 'dotnet'
     end
     run('./build.sh', '/t:Compile')
   end
-
   # The path to the built files changes in dotnet-v2.1.300
   has_artifacts_dir = major[1..-1].to_i <= 2 && minor.to_i <= 1 && patch.to_i < 300
-  old_filename = "#{name}.#{version}.linux-amd64.tar.gz"
-  run('tar', 'Jcf', old_filename, if has_artifacts_dir
-     'cli/artifacts/*-x64/stage2/*'
-  else
-     'cli/bin/2/linux-x64/dotnet/*'
-  end)
-  sha = Digest::SHA256.hexdigest(open(old_filename).read)
+  old_filename = "#{name}.#{version}.linux-amd64.tar.xz"
+   system('tar', 'Jcf', "/tmp/#{old_filename}", if has_artifacts_dir
+                                                  'cli/artifacts/linux-x64/stage2/.'
+                                                else
+                                                  'cli/bin/2/linux-x64/dotnet/.'
+                                                end)
+  sha = Digest::SHA256.hexdigest(open("/tmp/#{old_filename}").read)
   filename = old_filename.gsub(/(\.(zip|tar\.gz|tar\.xz|tgz))$/, "-#{sha[0..7]}\\1")
-  FileUtils.mv(old_filename, "artifacts/#{filename}")
+  FileUtils.mv("/tmp/#{old_filename}", "artifacts/#{filename}")
 
   out_data.merge!({
     sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}",
+    git_commit_sha: data.dig('version', 'git_commit_sha')
   })
 when 'pipenv'
   run('apt', 'update')
