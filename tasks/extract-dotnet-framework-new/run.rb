@@ -11,14 +11,15 @@ buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
 source_file = JSON.parse(open('source/data.json').read)
-version = source_file.dig('version', 'ref')
+sdk_version = source_file.dig('version', 'ref')
 build_file = JSON.parse(open("builds/binary-builder-new/dotnet/#{version}.json").read)
 dotnet_sdk_dependency_url = build_file.dig('url')
 git_commit_sha = build_file.dig('git_commit_sha')
 sdk_source_url = build_file.dig('source', 'url')
 
 class ExtractDotnetFramework
-  def initialize(dotnet_sdk_dependency_url, git_commit_sha, sdk_source_url)
+  def initialize(sdk_version, dotnet_sdk_dependency_url, git_commit_sha, sdk_source_url)
+    @sdk_version = sdk_version
     @dotnet_sdk_dependency_url = dotnet_sdk_dependency_url
     @dotnet_sdk_git_sha = git_commit_sha
     @dotnet_sdk_source_url = sdk_source_url
@@ -61,12 +62,12 @@ class ExtractDotnetFramework
   end
 
   def write_yaml
-    input_dir = File.expand_path('dotnet-framework-built')
-    output_dir = File.expand_path('dotnet-framework-built-output')
+    input_dir = File.expand_path('builds')
+    output_dir = File.expand_path('builds-artifacts')
     system "rsync", "-a", "#{input_dir}/", output_dir
 
-    framework_built_file = File.join(output_dir , 'binary-built-output', 'dotnet-framework-built.yml')
-    framework_built = YAML.load_file(framework_built_file)
+    framework_build_file = File.join(output_dir , 'binary-builds-new', 'dotnet-framework', "#{@sdk_version}.json")
+    framework_built = YAML.load_file(framework_build_file)
 
     Dir.chdir(output_dir) do
       GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
@@ -80,7 +81,7 @@ class ExtractDotnetFramework
         'timestamp' => Time.now.utc.to_s
       })
 
-      File.write(framework_built_file, framework_built.to_yaml)
+      File.write(framework_build_file, framework_built.to_yaml)
 
       md5sum = Digest::MD5.file(dotnet_framework_tar(version)).hexdigest
       shasum = Digest::SHA256.file(dotnet_framework_tar(version)).hexdigest
@@ -102,11 +103,11 @@ class ExtractDotnetFramework
       git_msg += git_yaml.to_yaml
 
       Dir.chdir(output_dir) do
-        GitClient.add_file(framework_built_file)
+        GitClient.add_file(framework_build_file)
         GitClient.safe_commit(git_msg)
       end
     end
   end
 end
 
-ExtractDotnetFramework.new(dotnet_sdk_dependency_url, sdk_source_url, git_commit_sha).run
+ExtractDotnetFramework.new(sdk_version, dotnet_sdk_dependency_url, sdk_source_url, git_commit_sha).run
