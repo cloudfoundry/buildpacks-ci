@@ -12,7 +12,7 @@ inputs:
 run:
   path: buildpacks-ci/tasks/run-buildpack-integration-specs/run.sh
 params:
-  STACKS:
+  CF_STACK:
   GINKGO_ATTEMPTS:
   GINKGO_NODES:
   SKIP_DOCKER_START:
