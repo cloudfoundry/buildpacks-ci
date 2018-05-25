@@ -16,7 +16,6 @@ module Depwatcher
     class External
       JSON.mapping(
         name: String,
-        tarball_url: String,
         commit: Commit,
       )
     end
@@ -36,7 +35,7 @@ module Depwatcher
         t.name == ref
       end
       raise "Could not find data for version #{ref}" unless t
-      Tag.new(t.name, t.tarball_url, t.commit.sha)
+      Tag.new(t.name, "https://github.com/#{repo}", t.commit.sha)
     end
 
     def matched_tags(repo : String, regexp : String) : Array(Internal)

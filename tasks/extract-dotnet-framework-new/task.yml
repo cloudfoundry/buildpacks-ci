@@ -1,0 +1,18 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cloudfoundry/cflinuxfs2
+inputs:
+  - name: buildpacks-ci
+  - name: source
+  - name: builds
+outputs:
+  - name: binary-builder-artifacts
+  - name: dotnet-framework-built-output
+run:
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/extract-dotnet-framework/run.rb
