@@ -15,4 +15,4 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/tasks/extract-dotnet-framework/run.rb
+    - buildpacks-ci/tasks/extract-dotnet-framework-new/run.rb
