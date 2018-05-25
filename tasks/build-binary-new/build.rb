@@ -33,10 +33,10 @@ case name
 when 'dotnet'
   GitClient.clone_repo('https://github.com/dotnet/cli.git', 'cli')
 
+  stripped_version = version[1..-1]
+  major, minor, patch = stripped_version.split('.')
   Dir.chdir('cli') do
     GitClient.checkout_branch(version)
-    version = version[1..-1]
-    major, minor, patch = version.split('.')
     run('apt-get', 'update')
     run('apt-get', '-y', 'upgrade')
     run('apt-get', '-y', 'install', 'clang', 'devscripts', 'debhelper', 'libunwind8', 'liburcu1', 'libpython2.7', 'liblttng-ust0', 'libllvm3.6', 'liblldb-3.6')
@@ -49,26 +49,26 @@ when 'dotnet'
       File.open('run-build.sh ', 'w') {|f| f.write runbuildsh}
     end
     run('./build.sh', '/t:Compile')
-
-    # The path to the built files changes in dotnet-v2.1.300
-    has_artifacts_dir = major.to_i <= 2 && minor.to_i <= 1 && patch.to_i < 300
-    old_filename = "#{name}.#{version}.linux-amd64.tar.xz"
-    system('tar', 'Jcf', "/tmp/#{old_filename}", if has_artifacts_dir
-                                                   'artifacts/linux-x64/stage2/.'
-                                                 else
-                                                   'bin/2/linux-x64/dotnet/.'
-                                                 end)
-    sha = Digest::SHA256.hexdigest(open("/tmp/#{old_filename}").read)
-    filename = old_filename.gsub(/(\.(zip|tar\.gz|tar\.xz|tgz))$/, "-#{sha[0..7]}\\1")
-    FileUtils.mv("/tmp/#{old_filename}", "artifacts/#{filename}")
-
-    out_data.merge!({
-      version: version,
-      sha256: sha,
-      url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}",
-      git_commit_sha: data.dig('version', 'git_commit_sha')
-    })
   end
+
+  # The path to the built files changes in dotnet-v2.1.300
+  has_artifacts_dir = major.to_i <= 2 && minor.to_i <= 1 && patch.to_i < 300
+  old_filename = "#{name}.#{stripped_version}.linux-amd64.tar.xz"
+  system('tar', 'Jcf', "/tmp/#{old_filename}", if has_artifacts_dir
+                                                 'cli/artifacts/linux-x64/stage2/.'
+                                               else
+                                                 'cli/bin/2/linux-x64/dotnet/.'
+                                               end)
+  sha = Digest::SHA256.hexdigest(open("/tmp/#{old_filename}").read)
+  filename = old_filename.gsub(/(\.(zip|tar\.gz|tar\.xz|tgz))$/, "-#{sha[0..7]}\\1")
+  FileUtils.mv("/tmp/#{old_filename}", "artifacts/#{filename}")
+
+  out_data.merge!({
+    version: stripped_version,
+    sha256: sha,
+    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}",
+    git_commit_sha: data.dig('version', 'git_commit_sha')
+  })
 when 'pipenv'
   run('apt', 'update')
   run('apt-get', 'install', '-y', 'python-pip', 'python-dev', 'build-essential')
