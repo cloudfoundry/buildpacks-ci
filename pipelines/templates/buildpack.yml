@@ -4,6 +4,21 @@
 <% push_to_pws = %(hwc) %>
 <% non_lts = %(apt credhub hwc) %>
 <% skip_docker_start = %w(binary r) %>
+<% stacks = { "hwc" => %w(windows2012R2 windows2016),
+  "apt" => %w(cflinuxfs2),
+  "binary" => %w(cflinuxfs2),
+  "credhub" => %w(cflinuxfs2),
+  "dotnet-core" => %w(cflinuxfs2),
+  "go" => %w(cflinuxfs2),
+  "multi" => %w(cflinuxfs2),
+  "nginx" => %w(cflinuxfs2),
+  "nodejs" => %w(cflinuxfs2),
+  "php" => %w(cflinuxfs2),
+  "python" => %w(cflinuxfs2),
+  "r" => %w(cflinuxfs2),
+  "ruby" => %w(cflinuxfs2),
+  "staticfile" => %w(cflinuxfs2)
+} %>
 
 ---
 resource_types:
@@ -362,10 +377,11 @@ jobs: ##########################################################################
         - task: unit
           file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
         - put: cf-bp-space
-        - task: ginkgo
+<% stacks[language].each do |stack| %>
+        - task: ginkgo-<%= stack %>
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           params:
-            STACKS: <%= language == 'hwc' ? 'all' : 'cflinuxfs2' %>
+            CF_STACK: <%= stack %>
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 6
             <% if language == 'php' %>
@@ -375,6 +391,7 @@ jobs: ##########################################################################
             SKIP_DOCKER_START: true
 <% else %>
           privileged: true
+<% end %>
 <% end %>
           ensure:
             task: delete-cf-space
@@ -430,10 +447,11 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
         - put: cf-bp-space
           resource: cf-lts-space
-        - task: ginkgo
+<% stacks[language].each do |stack| %>
+        - task: ginkgo-<%= stack %>
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           params:
-            STACKS: cflinuxfs2
+            CF_STACK: <%= stack %>
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 6
             SKIP_WINDOWS_TESTS: true
@@ -444,6 +462,7 @@ jobs: ##########################################################################
             SKIP_DOCKER_START: true
 <% else %>
           privileged: true
+<% end %>
 <% end %>
           ensure:
             task: delete-cf-space
@@ -623,10 +642,11 @@ jobs: ##########################################################################
             resource: buildpack-develop
         - do:
           - put: cf-bp-space
-          - task: ginkgo
+<% stacks[language].each do |stack| %>
+          - task: ginkgo-<%= stack %>
             file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
             params:
-              STACKS: <%= language == 'hwc' ? 'all' : 'cflinuxfs2' %>
+              CF_STACK: <%= stack %>
               GINKGO_ATTEMPTS: 4
               GINKGO_NODES: 6
               <% if language == 'php' %>
@@ -636,6 +656,7 @@ jobs: ##########################################################################
               SKIP_DOCKER_START: true
 <% else %>
             privileged: true
+<% end %>
 <% end %>
           ensure:
             task: delete-cf-space
@@ -731,10 +752,11 @@ jobs: ##########################################################################
         - do:
           - put: cf-bp-space
             resource: cf-lts-space
-          - task: ginkgo
+<% stacks[language].each do |stack| %>
+          - task: ginkgo-<%= stack %>
             file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
             params:
-              STACKS: cflinuxfs2
+              CF_STACK: <%= stack %>
               GINKGO_ATTEMPTS: 4
               GINKGO_NODES: 6
               SKIP_WINDOWS_TESTS: true
@@ -745,6 +767,7 @@ jobs: ##########################################################################
               SKIP_DOCKER_START: true
 <% else %>
             privileged: true
+<% end %>
 <% end %>
           ensure:
             task: delete-cf-space
