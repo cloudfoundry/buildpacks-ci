@@ -33,13 +33,13 @@ case name
 when 'dotnet'
   GitClient.clone_repo('https://github.com/dotnet/cli.git', 'cli')
 
+  major, minor, patch = version.split('.')
   Dir.chdir('cli') do
     GitClient.checkout_branch(version)
     run('apt-get', 'update')
     run('apt-get', '-y', 'upgrade')
     run('apt-get', '-y', 'install', 'clang', 'devscripts', 'debhelper', 'libunwind8', 'liburcu1', 'libpython2.7', 'liblttng-ust0', 'libllvm3.6', 'liblldb-3.6')
 
-    major, minor, patch = version.split('.')
 
     ENV['DropSuffix'] = 'true'
     ENV['TERM'] = 'linux'
