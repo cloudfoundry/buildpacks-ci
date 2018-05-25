@@ -40,6 +40,7 @@ when 'dotnet'
     run('apt-get', '-y', 'install', 'clang', 'devscripts', 'debhelper', 'libunwind8', 'liburcu1', 'libpython2.7', 'liblttng-ust0', 'libllvm3.6', 'liblldb-3.6')
 
     ENV['DropSuffix'] = 'true'
+    ENV['TERM'] = 'linux'
     major, minor, patch = version.split('.')
     if major == 'v2' && minor == '1' && patch.to_i >= 4 && patch.to_i <= 200
       runbuildsh = File.open('run-build.sh', 'r') {|f| f.read}
