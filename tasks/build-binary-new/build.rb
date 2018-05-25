@@ -54,11 +54,11 @@ when 'dotnet'
   # The path to the built files changes in dotnet-v2.1.300
   has_artifacts_dir = major.to_i <= 2 && minor.to_i <= 1 && patch.to_i < 300
   old_filename = "#{name}.#{stripped_version}.linux-amd64.tar.xz"
-  system('tar', 'Jcf', "/tmp/#{old_filename}", if has_artifacts_dir
-                                                 'cli/artifacts/linux-x64/stage2/.'
-                                               else
-                                                 'cli/bin/2/linux-x64/dotnet/.'
-                                               end)
+  system('tar', 'Jcf', "/tmp/#{old_filename}", '.', '-C', if has_artifacts_dir
+                                                            'cli/artifacts/linux-x64/stage2'
+                                                          else
+                                                            'cli/bin/2/linux-x64/dotnet'
+                                                          end)
   sha = Digest::SHA256.hexdigest(open("/tmp/#{old_filename}").read)
   filename = old_filename.gsub(/(\.(zip|tar\.gz|tar\.xz|tgz))$/, "-#{sha[0..7]}\\1")
   FileUtils.mv("/tmp/#{old_filename}", "artifacts/#{filename}")
