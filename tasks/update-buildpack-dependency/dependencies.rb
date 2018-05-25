@@ -1,8 +1,8 @@
 class Dependencies
-  def initialize(dep, line, keep_master, dependencies, master_dependencies)
+  def initialize(dep, line, removal_strategy, dependencies, master_dependencies)
     @dep = dep
     @line = line
-    @keep_master = keep_master
+    @removal_strategy = removal_strategy
     @dependencies = dependencies
     @matching_deps = dependencies.select do |d|
       d['name'] == @dep['name'] && same_line?(d['version'])
@@ -14,6 +14,8 @@ class Dependencies
     out = @dependencies
     if @matching_deps.map{|d|d['version']}.include?(@dep['version'])
       out = ((@dependencies.reject { |d| d['version'] == @dep['version'] }) + [@dep])
+    elsif @removal_strategy == 'keep_all'
+      out = @dependencies + [@dep]
     elsif latest?
       out = ((@dependencies - @matching_deps) + [@dep] + master_dependencies)
     else
@@ -53,26 +55,10 @@ class Dependencies
   end
 
   def master_dependencies
-    return [] unless @keep_master == 'true'
+    return [] unless @removal_strategy == 'keep_master'
     dep = @master_dependencies.select do |d|
       d['name'] == @dep['name'] && same_line?(d['version'])
     end.sort_by { |d| Gem::Version.new(d['version']) rescue d['version'] }.last
     dep ? [dep] : []
   end
 end
-
-# old_version = nil
-# manifest['dependencies'].each do |dep|
-#   next unless dep['name'] == name
-#   raise "Found a second entry for #{name}" if old_version
-
-#   old_version = dep['version']
-#   dep['version'] = build['version']
-#   dep['uri'] = build['url']
-#   dep['sha256'] = build['sha256']
-# end
-
-# if Gem::Version.new(build['version']) < Gem::Version.new(old_version)
-#   puts 'SKIP: Built version is older than current version in buildpack.'
-#   exit 0
-# end
