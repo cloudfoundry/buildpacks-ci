@@ -11,11 +11,12 @@ buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
 source_file = JSON.parse(open('source/data.json').read)
-sdk_version = source_file.dig('version', 'ref')
-build_file = JSON.parse(open("builds/binary-builder-new/dotnet/#{version}.json").read)
+source_version = source_file.dig('version', 'ref')
+build_file = JSON.parse(open("builds/binary-builder-new/dotnet/#{source_version}.json").read)
 dotnet_sdk_dependency_url = build_file.dig('url')
 git_commit_sha = build_file.dig('git_commit_sha')
 sdk_source_url = build_file.dig('source', 'url')
+sdk_version = build_file.dig('version')
 
 class ExtractDotnetFramework
   def initialize(sdk_version, dotnet_sdk_dependency_url, git_commit_sha, sdk_source_url)
