@@ -31,7 +31,7 @@ end
 
 case name
 when 'dotnet'
-  GitClient.clone_repo(url, 'cli')
+  GitClient.clone_repo('https://github.com/dotnet/cli.git', 'cli')
 
   Dir.chdir('cli') do
     GitClient.checkout_branch(version)

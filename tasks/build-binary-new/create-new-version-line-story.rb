@@ -11,7 +11,7 @@ class SemanticVersion
 
   def initialize(original)
     @original = original
-    m = @original.match /^(\d+)\.(\d+)(\.(\d+))?(.+)?/
+    m = @original.match /^v?(\d+)\.(\d+)(\.(\d+))?(.+)?/
     if m
       @major = m[1].to_i
       @minor = m[2].to_i

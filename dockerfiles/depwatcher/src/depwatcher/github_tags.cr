@@ -20,7 +20,7 @@ module Depwatcher
     end
 
     def check(repo : String, regexp : String) : Array(Internal)
-      matched_tags(repo, regexp).sort_by { |i| SemanticVersion.new(i.ref) }.last(10)
+      matched_tags(repo, regexp).sort_by { |i| SemanticVersion.new(i.ref) }
     end
 
     def in(repo : String, ref : String) : Tag
