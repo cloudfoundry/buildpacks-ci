@@ -75,7 +75,7 @@ class ExtractDotnetFramework
     end
 
     @dotnet_framework_versions.each do |version|
-      framework_build_file = File.join(output_dir , 'binary-builds-new', 'dotnet-framework', "#{version}.json")
+      framework_build_file = File.join(output_dir, 'binary-builds-new', 'dotnet-framework', "#{version}.json")
 
       md5sum = Digest::MD5.file(dotnet_framework_tar(version)).hexdigest
       shasum = Digest::SHA256.file(dotnet_framework_tar(version)).hexdigest
@@ -86,7 +86,7 @@ class ExtractDotnetFramework
       framework_build_data = {
         'version' => version,
         'sha256' => shasum,
-        'url' => "https://buildpacks.cloudfoundry.org/dependencies/dotnet-framework/#{output_file}"
+        'url' => "https://buildpacks.cloudfoundry.org/dependencies/dotnet-framework/#{File.basename(output_file)}"
       }
 
       File.write(framework_build_file, framework_build_data.to_json)
@@ -112,4 +112,4 @@ class ExtractDotnetFramework
   end
 end
 
-ExtractDotnetFramework.new(sdk_version, dotnet_sdk_dependency_url, sdk_source_url, git_commit_sha).run
+ExtractDotnetFramework.new(buildpacks_ci_dir, sdk_version, dotnet_sdk_dependency_url, sdk_source_url, git_commit_sha).run
