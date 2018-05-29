@@ -14,13 +14,14 @@ require_relative "#{buildpacks_ci_dir}/lib/git-client"
 source_file = JSON.parse(open('source/data.json').read)
 source_version = source_file.dig('version', 'ref')
 build_file = JSON.parse(open("builds/binary-builds-new/dotnet/#{source_version}.json").read)
-dotnet_sdk_dependency_url = build_file.dig('url')
+dotnet_sdk_dependency_url = build_file['url']
 git_commit_sha = build_file.dig('git_commit_sha')
 sdk_source_url = build_file.dig('source', 'url')
-sdk_version = build_file.dig('version')
+sdk_version = build_file['version']
+tracker_story_id = build_file['tracker_story_id']
 
 class ExtractDotnetFramework
-  def initialize(buildpacks_ci_dir, sdk_version, dotnet_sdk_dependency_url, git_commit_sha, sdk_source_url)
+  def initialize(buildpacks_ci_dir, sdk_version, dotnet_sdk_dependency_url, git_commit_sha, sdk_source_url, tracker_story_id)
     @buildpacks_ci_dir = buildpacks_ci_dir
     @sdk_version = sdk_version
     @dotnet_sdk_dependency_url = dotnet_sdk_dependency_url
@@ -29,6 +30,7 @@ class ExtractDotnetFramework
 
     @dotnet_sdk_tar = File.join("/tmp", "dotnet_sdk.tar.xz")
     @dotnet_sdk_dir = File.join("/tmp", "dotnet_sdk")
+    @tracker_story_id = tracker_story_id
   end
 
   def run
@@ -84,6 +86,7 @@ class ExtractDotnetFramework
       FileUtils.mv(dotnet_framework_tar(version), output_file)
 
       framework_build_data = {
+        'tracker_story_id' => @tracker_story_id,
         'version' => version,
         'sha256' => shasum,
         'url' => "https://buildpacks.cloudfoundry.org/dependencies/dotnet-framework/#{File.basename(output_file)}"
@@ -112,4 +115,4 @@ class ExtractDotnetFramework
   end
 end
 
-ExtractDotnetFramework.new(buildpacks_ci_dir, sdk_version, dotnet_sdk_dependency_url, sdk_source_url, git_commit_sha).run
+ExtractDotnetFramework.new(buildpacks_ci_dir, sdk_version, dotnet_sdk_dependency_url, sdk_source_url, git_commit_sha, tracker_story_id).run
