@@ -46,6 +46,7 @@ pushd buildpack
     [ -d supply ] && (cd supply && (go generate || true))
     [ -d finalize ] && (cd finalize && (go generate || true))
 
+    export CF_STACK=${CF_STACK:-cflinuxfs2}
     ginkgo -r -skipPackage=integration,brats
   popd
 
