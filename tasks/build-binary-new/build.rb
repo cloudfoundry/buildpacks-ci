@@ -55,7 +55,7 @@ when 'dotnet'
   has_artifacts_dir = major.to_i <= 2 && minor.to_i <= 1 && patch.to_i < 300
   old_filename = "#{name}.#{stripped_version}.linux-amd64.tar.xz"
   Dir.chdir(if has_artifacts_dir
-              'cli/artifacts/linux-x64/stage2'
+              Dir['cli/artifacts/*-x64/stage2'][0]
             else
               'cli/bin/2/linux-x64/dotnet'
             end) do

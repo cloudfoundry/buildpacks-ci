@@ -10,7 +10,7 @@ inputs:
   - name: builds
 outputs:
   - name: binary-builder-artifacts
-  - name: dotnet-framework-built-output
+  - name: builds-artifacts
 run:
   path: bash
   args:
