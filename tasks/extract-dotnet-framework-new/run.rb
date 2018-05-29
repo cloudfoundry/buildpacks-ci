@@ -60,8 +60,7 @@ class ExtractDotnetFramework
   end
 
   def dotnet_framework_tar(version)
-    dotnet_framework_artifact_dir = File.expand_path('binary-builder-artifacts')
-    File.join(@buildpacks_ci_dir, '..', dotnet_framework_artifact_dir, "dotnet-framework.#{version}.linux-amd64.tar.xz")
+    File.join(@buildpacks_ci_dir, '..', 'binary-builder-artifacts', "dotnet-framework.#{version}.linux-amd64.tar.xz")
   end
 
   def write_yaml
