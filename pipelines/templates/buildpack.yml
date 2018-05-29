@@ -688,13 +688,15 @@ jobs: ##########################################################################
             - specs-unit-develop
         - do:
           - put: cf-brat-space
-          - task: brats
+<% stacks[language].each do |stack| %>
+          - task: brats-<%= stack %>
             file: buildpacks-ci/tasks/run-bp-brats/task.yml
             input_mapping: {cf-space: cf-brat-space}
             params:
-              STACKS: cflinuxfs2
+              CF_STACK: <%= stack %>
               GINKGO_ATTEMPTS: 4
               GINKGO_NODES: 6
+<% end %>
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
@@ -800,13 +802,15 @@ jobs: ##########################################################################
         - do:
           - put: cf-brat-space
             resource: cf-lts-brat-space
-          - task: brats
+<% stacks[language].each do |stack| %>
+          - task: brats-<%= stack %>
             file: buildpacks-ci/tasks/run-bp-brats/task.yml
             input_mapping: {cf-space: cf-brat-space}
             params:
-              STACKS: cflinuxfs2
+              CF_STACK: <%= stack %>
               GINKGO_ATTEMPTS: 4
               GINKGO_NODES: 6
+<% end %>
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
