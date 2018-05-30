@@ -7,7 +7,7 @@
 <% stacks = {
   "hwc" => %w(windows2012R2 windows2016),
   "apt" => %w(cflinuxfs2),
-  "binary" => %w(cflinuxfs2) # TODO: add windows2012R2 (definitely), windows2016 (maybe),
+  "binary" => %w(cflinuxfs2), # TODO: add windows2012R2 (definitely), windows2016 (maybe)
   "credhub" => %w(cflinuxfs2),
   "dotnet-core" => %w(cflinuxfs2),
   "go" => %w(cflinuxfs2),
