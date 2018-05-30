@@ -632,23 +632,6 @@ describe NewReleasesDetector do
       end
     end
 
-    context 'there are new versions of dotnet' do
-      let(:dependency) { :dotnet }
-      let(:buildpack_dependency_tasks) { [:microsoft] }
-      let(:changed_dependencies) { {dotnet: %w(1.0.0-preview43) } }
-
-      it 'adds a task to the tracker story to remove non-MS supported versions of dotnet' do
-        expect(buildpacks_tracker_client).to receive(:post_to_tracker).
-          with(tasks: ['Verify dotnet is updated in microsoft-buildpack if version is supported', 'Remove any dotnet versions MS no longer supports', 'Remove any dotnet-framework versions we no longer support'],
-               name: anything, description: anything, point_value: anything, labels: anything
-        )
-
-        expect(capi_tracker_client).not_to receive(:post_to_tracker)
-
-        subject.post_to_tracker
-      end
-    end
-
     context 'with no new versions for a dependency' do
       let(:dependency) { :python }
       let(:changed_dependencies) { {} }
