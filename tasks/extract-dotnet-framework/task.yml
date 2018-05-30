@@ -6,11 +6,11 @@ image_resource:
     repository: cloudfoundry/cflinuxfs2
 inputs:
   - name: buildpacks-ci
-  - name: built-yaml
-  - name: dotnet-framework-built
+  - name: source
+  - name: builds
 outputs:
   - name: binary-builder-artifacts
-  - name: dotnet-framework-built-output
+  - name: builds-artifacts
 run:
   path: bash
   args:

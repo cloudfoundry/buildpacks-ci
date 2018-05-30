@@ -2,28 +2,35 @@
 # encoding: utf-8
 
 require 'yaml'
+require 'json'
 require 'pathname'
 require 'fileutils'
 require 'digest'
 
+
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
-class ExtractDotnetFramework
-  def initialize(buildpacks_ci_dir)
-    @buildpacks_ci_dir = buildpacks_ci_dir
-    binary_built_dir = File.expand_path(File.join(@buildpacks_ci_dir, '..', 'built-yaml'))
-    git_commit_message = GitClient.last_commit_message(binary_built_dir, 0, "binary-built-output/dotnet-built.yml")
-    git_commit_message.gsub!(/Build(.*)\n\n/,'')
-    git_commit_message.gsub!(/\n\n\[ci skip\]/,'')
+source_file = JSON.parse(open('source/data.json').read)
+source_version = source_file.dig('version', 'ref')
+build_file = JSON.parse(open("builds/binary-builds-new/dotnet/#{source_version}.json").read)
+dotnet_sdk_dependency_url = build_file['url']
+git_commit_sha = build_file.dig('git_commit_sha')
+sdk_source_url = build_file.dig('source', 'url')
+sdk_version = build_file['version']
+tracker_story_id = build_file['tracker_story_id']
 
-    build_info = YAML.load(git_commit_message)
-    @dotnet_sdk_filename = build_info['filename'].gsub('binary-builder/', '')
-    @dotnet_sdk_git_sha = build_info['source git-commit-sha']
-    @dotnet_sdk_source_url = build_info['source url']
+class ExtractDotnetFramework
+  def initialize(buildpacks_ci_dir, sdk_version, dotnet_sdk_dependency_url, git_commit_sha, sdk_source_url, tracker_story_id)
+    @buildpacks_ci_dir = buildpacks_ci_dir
+    @sdk_version = sdk_version
+    @dotnet_sdk_dependency_url = dotnet_sdk_dependency_url
+    @dotnet_sdk_git_sha = git_commit_sha
+    @dotnet_sdk_source_url = sdk_source_url
 
     @dotnet_sdk_tar = File.join("/tmp", "dotnet_sdk.tar.xz")
     @dotnet_sdk_dir = File.join("/tmp", "dotnet_sdk")
+    @tracker_story_id = tracker_story_id
   end
 
   def run
@@ -36,8 +43,7 @@ class ExtractDotnetFramework
   private
 
   def download
-    dotnet_sdk_url = "https://buildpacks.cloudfoundry.org/dependencies/dotnet/#{@dotnet_sdk_filename}"
-    raise "Downloading dotnet sdk tar failed" unless system("curl", "-o", @dotnet_sdk_tar, dotnet_sdk_url)
+    raise "Downloading dotnet sdk tar failed" unless system("curl", "-o", @dotnet_sdk_tar, @dotnet_sdk_dependency_url)
   end
 
   def extract
@@ -56,17 +62,14 @@ class ExtractDotnetFramework
   end
 
   def dotnet_framework_tar(version)
-    dotnet_framework_artifact_dir = File.expand_path(File.join(@buildpacks_ci_dir, '..', 'binary-builder-artifacts'))
-    File.join(dotnet_framework_artifact_dir, "dotnet-framework.#{version}.linux-amd64.tar.xz")
+    File.join(@buildpacks_ci_dir, '..', 'binary-builder-artifacts', "dotnet-framework.#{version}.linux-amd64.tar.xz")
   end
 
   def write_yaml
-    input_dir = File.expand_path(File.join(@buildpacks_ci_dir, '..', 'dotnet-framework-built'))
-    output_dir = File.expand_path(File.join(@buildpacks_ci_dir, '..', 'dotnet-framework-built-output'))
+    input_dir = File.expand_path('builds')
+    output_dir = File.expand_path('builds-artifacts')
     system "rsync", "-a", "#{input_dir}/", output_dir
 
-    framework_built_file = File.join(output_dir , 'binary-built-output', 'dotnet-framework-built.yml')
-    framework_built = YAML.load_file(framework_built_file)
 
     Dir.chdir(output_dir) do
       GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
@@ -74,19 +77,22 @@ class ExtractDotnetFramework
     end
 
     @dotnet_framework_versions.each do |version|
-      framework_built['dotnet-framework'].push({
-        'version' => version,
-        'git-commit-sha' => @dotnet_sdk_git_sha,
-        'timestamp' => Time.now.utc.to_s
-      })
-
-      File.write(framework_built_file, framework_built.to_yaml)
+      framework_build_file = File.join(output_dir, 'binary-builds-new', 'dotnet-framework', "#{version}.json")
 
       md5sum = Digest::MD5.file(dotnet_framework_tar(version)).hexdigest
       shasum = Digest::SHA256.file(dotnet_framework_tar(version)).hexdigest
 
       output_file = dotnet_framework_tar(version).gsub('.tar.xz', "-#{shasum[0..7]}.tar.xz")
       FileUtils.mv(dotnet_framework_tar(version), output_file)
+
+      framework_build_data = {
+        'tracker_story_id' => @tracker_story_id,
+        'version' => version,
+        'sha256' => shasum,
+        'url' => "https://buildpacks.cloudfoundry.org/dependencies/dotnet-framework/#{File.basename(output_file)}"
+      }
+
+      File.write(framework_build_file, framework_build_data.to_json)
 
       git_msg = "Build dotnet-framework - #{version}\n\n"
 
@@ -102,11 +108,11 @@ class ExtractDotnetFramework
       git_msg += git_yaml.to_yaml
 
       Dir.chdir(output_dir) do
-        GitClient.add_file(framework_built_file)
+        GitClient.add_file(framework_build_file)
         GitClient.safe_commit(git_msg)
       end
     end
   end
 end
 
-ExtractDotnetFramework.new(buildpacks_ci_dir).run
+ExtractDotnetFramework.new(buildpacks_ci_dir, sdk_version, dotnet_sdk_dependency_url, sdk_source_url, git_commit_sha, tracker_story_id).run
