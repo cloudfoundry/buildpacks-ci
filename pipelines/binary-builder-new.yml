@@ -2,6 +2,7 @@
   appdynamics: { buildpacks: { php: {} }, third_party_hosted: true, source_type: 'appd_agent'},
   CAAPM: { buildpacks: { php: {} }, third_party_hosted: true, source_type: 'ca_apm_agent'},
   dotnet: { buildpacks: { 'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X"], removal_strategy: 'keep_master' } }, source_type: 'github_tags', source_params: ['repo: dotnet/cli', 'regexp: "^v[0-9]"'] },
+  'dotnet-framework': { buildpacks: { 'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X"], removal_strategy: 'keep_all' } } },
   go: { buildpacks: { go: { lines: ["1.6.X", "1.7.X", "1.8.X", "1.9.X", "1.10.X"], removal_strategy: 'keep_master' } } },
   httpd: { buildpacks: { php: {} } },
   nginx: { buildpacks: { nginx: { lines: ["1.13.X", "1.14.X"], removal_strategy: 'keep_master' } } },
@@ -72,13 +73,6 @@ resources:
     branch: master
     paths: [ binary-builds-new/ ]
     private_key: {{public-buildpacks-ci-robots-private-key}}
-- name: dotnet-framework-builds
-  type: git
-  source:
-    uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-    branch: master
-    paths: [ binary-builds-new/dotnet-framework/ ]
-    private_key: {{public-buildpacks-ci-robots-private-key}}
 
 <% dependencies.values.map{|dep| dep[:buildpacks].keys}.flatten.uniq.each do |buildpack| %>
 - name: <%= buildpack %>-buildpack
@@ -115,7 +109,7 @@ resources:
     <% end %>
 <% end %>
 
-<% if !dep[:third_party_hosted] %>
+<% if !dep[:third_party_hosted] && dep_name.to_s != 'dotnet-framework' %>
 - name: buildpacks-bucket-<%=dep_name%>
   type: s3
   source:
@@ -155,6 +149,7 @@ jobs:
 <% end %>
 
 <% version_lines.each do |line| %>
+<% if dep_name.to_s != 'dotnet-framework' %>
 - name: create-<%=dep_name%>-<%= line %>-story
   serial: true
   public: true
@@ -226,6 +221,7 @@ jobs:
       params:
         repository: builds-artifacts
         rebase: true
+<% end %>
 
 <% if dep_name == :dotnet %>
 - name: extract-dotnet-framework-from-sdk-<%= line %>
@@ -240,10 +236,9 @@ jobs:
         version: every
         passed: [ build-<%=dep_name%>-<%= line %> ]
       - get: builds
-        passed: [ build-<%=dep_name%>-<%= line %> ]
     - do:
-      - task: extract-dotnet-framework-new
-        file: buildpacks-ci/tasks/extract-dotnet-framework-new/task.yml
+      - task: extract-dotnet-framework
+        file: buildpacks-ci/tasks/extract-dotnet-framework/task.yml
       - task: push-binary
         file: buildpacks-ci/tasks/push-binary/task.yml
         params:
@@ -258,10 +253,39 @@ jobs:
           repository: builds-artifacts
           rebase: true
 <% end %>
+
+<% if dep_name.to_s == 'dotnet-framework' %>
+- name: update-dotnet-framework-<%= line %>-dotnet-core
+  serial: true
+  public: true
+  plan:
+  - aggregate:
+    - get: buildpack
+      resource: dotnet-core-buildpack
+    - get: buildpack-master
+      resource: dotnet-core-buildpack-master
+    - get: buildpacks-ci
+    - get: builds
+    - get: source
+      resource: source-dotnet-framework-<%= line %>
+      version: every
+      trigger: true
+  - do:
+    - task: update-buildpack-dependency
+      file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
+      params:
+        VERSION_LINE: 'minor'
+        REMOVAL_STRATEGY: 'keep_all'
+    - put: dotnet-core-buildpack
+      params:
+        repository: artifacts
+        rebase: true
+<% end %>
 <% end %>
 
 <% dep[:buildpacks].each do |bp_name, bp| %>
   <% (bp[:lines] || ['latest']).each do |line| %>
+  <% if dep_name.to_s != 'dotnet-framework' %>
 - name: update-<%=dep_name%>-<%= line %>-<%= bp_name %>
   serial: true
   public: true
@@ -284,56 +308,32 @@ jobs:
       params:
         VERSION_LINE: <%= get_version_line_type(bp[:lines]) %>
         REMOVAL_STRATEGY: <%= bp[:removal_strategy] || 'remove_all' %>
-    <% if dep_name != :dotnet %>
     - put: <%= bp_name %>-buildpack
       params:
         repository: artifacts
         rebase: true
-    <% end %>
+  <% end %>
   <% end %>
 <% end %>
 <% end %>
 
-- name: update-dotnet-framework-dotnet-core
-  serial: true
-  public: true
-  plan:
-  - aggregate:
-    - get: buildpack
-      resource: dotnet-core-buildpack
-    - get: buildpack-master
-      resource: dotnet-core-buildpack-master
-    - get: buildpacks-ci
-    - get: builds
-      version: every
-      resource: dotnet-framework-builds
-      trigger: true
-  - do:
-    - task: update-buildpack-dependency
-      file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
-      params:
-        VERSION_LINE: 'minor'
-        REMOVAL_STRATEGY: 'keep_all'
-#    - put: dotnet-core-buildpack
-#      params:
-#        repository: artifacts
-#        rebase: true
-
 groups:
   - name: all
     jobs:
-    <% dependencies.each do |dep_name, dep| %>
-    <%
-      version_lines = dep[:buildpacks].values.reduce([]) {|sum, bp| sum | (bp[:lines] || [])}
-      version_lines = ['latest'] if version_lines.empty?
-    %>
+<% dependencies.each do |dep_name, dep| %>
+<%
+  version_lines = dep[:buildpacks].values.reduce([]) {|sum, bp| sum | (bp[:lines] || [])}
+  version_lines = ['latest'] if version_lines.empty?
+%>
     <% if is_multiline?(dep) %>
     - create-<%= dep_name %>-new-line-story
     <% end %>
     <% version_lines.each do |line| %>
+    <% if dep_name.to_s != 'dotnet-framework' %>
     - create-<%=dep_name%>-<%= line %>-story
     - finish-<%=dep_name%>-<%= line %>-story
     - build-<%=dep_name%>-<%= line %>
+    <% end %>
     <% if dep_name == :dotnet %>
     - extract-dotnet-framework-from-sdk-<%= line %>
     <% end %>
@@ -342,9 +342,8 @@ groups:
     <% (bp[:lines] || ['latest']).each do |line| %>
     - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
     <% end %>
-    <% end %>
-    <% end %>
-    - update-dotnet-framework-dotnet-core
+<% end %>
+<% end %>
 
 <% dependencies.each do |dep_name, dep| %>
 <%
@@ -357,15 +356,14 @@ groups:
     - create-<%= dep_name %>-new-line-story
     <% end %>
     <% version_lines.each do |line| %>
+    <% if dep_name.to_s != 'dotnet-framework' %>
     - create-<%=dep_name%>-<%= line %>-story
     - finish-<%=dep_name%>-<%= line %>-story
     - build-<%=dep_name%>-<%= line %>
+    <% end %>
     <% if dep_name == :dotnet %>
     - extract-dotnet-framework-from-sdk-<%= line %>
     <% end %>
-    <% end %>
-    <% if dep_name == :dotnet %>
-    - update-dotnet-framework-dotnet-core
     <% end %>
     <% dep[:buildpacks].each do |bp_name, bp| %>
     <% (bp[:lines] || ['latest']).each do |line| %>
