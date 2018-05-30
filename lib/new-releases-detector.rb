@@ -116,10 +116,7 @@ class NewReleasesDetector
       buildpack.to_s
     end
 
-    if dependency == :dotnet
-      tasks.push 'Remove any dotnet versions MS no longer supports'
-      tasks.push 'Remove any dotnet-framework versions we no longer support'
-    elsif dependency == :go
+    if dependency == :go
       tasks.push 'Update go-version.yml in binary-builder repo'
     elsif dependency == :libunwind
       description += <<~HEREDOC
@@ -216,7 +213,6 @@ class NewReleasesDetector
       rubygems:        -> { Octokit.tags('rubygems/rubygems').map(&:name).grep(/^v/) },
       bower:           -> { JSON.parse(open('https://registry.npmjs.org/bower').read)['versions'].keys },
       composer:        -> { Octokit.releases('composer/composer').map(&:tag_name) },
-      dotnet:          -> { Octokit.tags('dotnet/cli').map(&:name).grep(/^v[0-9]/) },
       glide:           -> { Octokit.releases('Masterminds/glide').map(&:tag_name) },
       go:              -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
       godep:           -> { Octokit.releases('tools/godep').map(&:tag_name) },
