@@ -8,12 +8,12 @@ class SemanticVersion
   getter metadata : String | Nil
 
   def initialize(@original : String)
-    m = @original.match /^v?(\d+)\.(\d+)(\.(\d+))?(.+)?/
+    m = @original.match /^v?(\d+)(\.(\d+))?(\.(\d+))?(.+)?/
     if m
       @major = m[1].to_i
-      @minor = m[2].to_i
-      @patch = m[4]? ? m[4].to_i : 0
-      @metadata = m[5]? ? m[5] : nil
+      @minor = m[3]? ? m[3].to_i : 0
+      @patch = m[5]? ? m[5].to_i : 0
+      @metadata = m[6]? ? m[6] : nil
     else
       raise ArgumentError.new("Not a semantic version: #{@original.inspect}")
     end
