@@ -19,13 +19,13 @@ module Depwatcher
     end
     class External
       JSON.mapping(
-        name: String,
+        tag_name: String,
         draft: Bool,
         prerelease: Bool,
         assets: Array(Asset),
       )
       def ref
-        name.gsub(/^v/,"")
+        tag_name.gsub(/^v/,"")
       end
     end
 
