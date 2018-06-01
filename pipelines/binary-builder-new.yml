@@ -1,10 +1,13 @@
 <% dependencies = {
   appdynamics: { buildpacks: { php: {} }, third_party_hosted: true, source_type: 'appd_agent'},
   CAAPM: { buildpacks: { php: {} }, third_party_hosted: true, source_type: 'ca_apm_agent'},
+  dep: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: golang/dep']},
   dotnet: { buildpacks: { 'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X"], removal_strategy: 'keep_master' } }, source_type: 'github_tags', source_params: ['repo: dotnet/cli', 'regexp: "^v[0-9]"'] },
   'dotnet-framework': { buildpacks: { 'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X"], removal_strategy: 'keep_all' } } },
   go: { buildpacks: { go: { lines: ["1.6.X", "1.7.X", "1.8.X", "1.9.X", "1.10.X"], removal_strategy: 'keep_master' } } },
+  godep: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: tools/godep']},
   httpd: { buildpacks: { php: {} } },
+  hwc: { buildpacks: { hwc: {}}, source_type: 'github_releases', source_params: ['repo: cloudfoundry/hwc', 'extension: exe']},
   nginx: { buildpacks: { nginx: { lines: ["1.13.X", "1.14.X"], removal_strategy: 'keep_master' } } },
   pip: { buildpacks: { python: {} }, source_type: 'pypi'},
   pipenv: { buildpacks: { python: {} }, source_type: 'pypi'},
@@ -13,10 +16,7 @@
   ruby: { buildpacks: { ruby: { lines: ["2.2.X", "2.3.X", "2.4.X", "2.5.X"], removal_strategy: 'keep_master' } } },
   rubygems: { buildpacks: { ruby: {} }, source_type: 'rubygems_cli'},
   setuptools: { buildpacks: { python: {}}, source_type: 'pypi'},
-  yarn: { buildpacks: { nodejs: {}, ruby: {} }, source_type: 'github_releases', source_params: ['repo: yarnpkg/yarn']},
-  godep: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: tools/godep']},
-  dep: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: golang/dep']},
-  hwc: { buildpacks: { hwc: {}}, source_type: 'github_releases', source_params: ['repo: cloudfoundry/hwc']}
+  yarn: { buildpacks: { nodejs: {}, ruby: {} }, source_type: 'github_releases', source_params: ['repo: yarnpkg/yarn', 'extension: gz']}
 }
 
 def validate_dependencies(deps)

@@ -6,19 +6,29 @@ module Depwatcher
     abstract def get(url : String) : HTTP::Client::Response
   end
   class HTTPClientImpl < HTTPClient
-    def get(url : String) : String
+    def get(url : String) : HTTP::Client::Response
       response = HTTP::Client.get(url)
-      raise "Could not download data from #{url}: code #{response.status_code}" unless response.status_code == 200
-      response.body
+      if response.status_code == 301
+        get(response.headers["location"])
+      elsif response.status_code == 200
+        response
+      else
+        raise "Could not download data from #{url}: code #{response.status_code}"
+      end
     end
   end
 
   class HTTPClientInsecure < HTTPClient
-    def get(url : String) : String
+    def get(url : String) : HTTP::Client::Response
       context = OpenSSL::SSL::Context::Client.insecure
       response = HTTP::Client.get(url, tls: context)
-      raise "Could not download data from #{url}: code #{response.status_code}" unless response.status_code == 200
-      response.body
+      if response.status_code == 301
+        get(response.headers["location"])
+      elsif response.status_code == 200
+        response
+      else
+        raise "Could not download data from #{url}: code #{response.status_code}"
+      end
     end
   end
 

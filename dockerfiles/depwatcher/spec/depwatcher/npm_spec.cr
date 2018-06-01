@@ -6,7 +6,7 @@ Spec2.describe Depwatcher::Npm do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://registry.npmjs.com/yarn/", File.read(__DIR__+"/../fixtures/npm_yarn.json"))
+    client.stub_get("https://registry.npmjs.com/yarn/", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/npm_yarn.json")))
   end
 
   describe "#check" do

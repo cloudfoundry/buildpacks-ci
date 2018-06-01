@@ -48,7 +48,7 @@ module Depwatcher
 
 
     private def tags(repo : String) : Array(External)
-      res = client.get "https://api.github.com/repos/#{repo}/tags"
+      res = client.get("https://api.github.com/repos/#{repo}/tags").body
       Array(External).from_json(res)
     end
   end

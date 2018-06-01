@@ -9,7 +9,7 @@ version = data["version"]
 
 case type = source["type"].to_s
 when "github_releases"
-  version = Depwatcher::GithubReleases.new.in(source["repo"].to_s, version["ref"].to_s)
+  version = Depwatcher::GithubReleases.new.in(source["repo"].to_s, source["extension"].to_s, version["ref"].to_s)
 when "github_tags"
   version = Depwatcher::GithubTags.new.in(source["repo"].to_s, version["ref"].to_s)
 when "rubygems"

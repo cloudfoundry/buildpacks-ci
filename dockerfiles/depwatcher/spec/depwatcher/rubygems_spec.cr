@@ -6,7 +6,7 @@ Spec2.describe Depwatcher::RubygemsCli do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://rubygems.org/pages/download", File.read(__DIR__+"/../fixtures/rubygems.html"))
+    client.stub_get("https://rubygems.org/pages/download", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/rubygems.html")))
   end
 
   describe "#check" do

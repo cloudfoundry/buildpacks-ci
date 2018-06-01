@@ -6,7 +6,7 @@ Spec2.describe Depwatcher::DotnetFramework do
   let(client) {HTTPClientMock.new}
   subject {described_class.new.tap {|s| s.client = client}}
   before do
-    client.stub_get("https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/contents/binary-builds-new/dotnet-framework", File.read(__DIR__ + "/../fixtures/dotnet_framework.json"))
+    client.stub_get("https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/contents/binary-builds-new/dotnet-framework", HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet_framework.json")))
   end
 
   describe "#check" do

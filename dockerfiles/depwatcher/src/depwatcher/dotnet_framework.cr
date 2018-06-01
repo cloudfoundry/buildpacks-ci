@@ -24,7 +24,7 @@ module Depwatcher
     end
 
     private def builds() : Array(External)
-      res = client.get "https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/contents/binary-builds-new/dotnet-framework"
+      res = client.get("https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/contents/binary-builds-new/dotnet-framework").body
       Array(External).from_json(res).map{ |b| External.new(b.name.gsub(/\.json$/, ""))}
     end
   end

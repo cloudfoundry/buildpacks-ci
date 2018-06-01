@@ -31,7 +31,7 @@ module Depwatcher
     end
 
     private def releases() : Array(Release)
-      response = client.get("https://golang.org/dl/")
+      response = client.get("https://golang.org/dl/").body
       doc = XML.parse_html(response)
       tds = doc.xpath("//td[contains(text(),'Source')]")
       raise "Could not parse golang release (td) website" unless tds.is_a?(XML::NodeSet)
