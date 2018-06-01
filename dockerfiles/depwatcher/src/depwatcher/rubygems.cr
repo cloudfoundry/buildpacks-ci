@@ -33,12 +33,12 @@ module Depwatcher
     end
 
     private def releases(name : String) : Array(External)
-      response = client.get "https://rubygems.org/api/v1/versions/#{name}.json"
+      response = client.get("https://rubygems.org/api/v1/versions/#{name}.json").body
       Array(External).from_json(response)
     end
 
     private def release(name : String, version : String) : External
-      response = client.get "https://rubygems.org/api/v2/rubygems/#{name}/versions/#{version}.json"
+      response = client.get("https://rubygems.org/api/v2/rubygems/#{name}/versions/#{version}.json").body
       External.from_json(response)
     end
   end

@@ -15,7 +15,7 @@ module Depwatcher
     end
 
     def check() : Array(Internal)
-      response = client.get "https://ca.bintray.com/apm-agents/"
+      response = client.get("https://ca.bintray.com/apm-agents/").body
       doc = XML.parse_html(response)
       links = doc.xpath("//a[@href]")
       raise "Could not parse apache httpd website" unless links.is_a?(XML::NodeSet)

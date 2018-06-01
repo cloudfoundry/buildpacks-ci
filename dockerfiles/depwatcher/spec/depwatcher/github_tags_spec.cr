@@ -6,7 +6,7 @@ Spec2.describe Depwatcher::GithubTags do
   let(client) {HTTPClientMock.new}
   subject {described_class.new.tap {|s| s.client = client}}
   before do
-    client.stub_get("https://api.github.com/repos/dotnet/cli/tags", File.read(__DIR__ + "/../fixtures/dotnet.json"))
+    client.stub_get("https://api.github.com/repos/dotnet/cli/tags", HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet.json")))
   end
 
   describe "#check" do

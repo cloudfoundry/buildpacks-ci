@@ -43,7 +43,7 @@ module Depwatcher
     end
 
     private def releases(name : String) : Hash(String,Version)
-      response = client.get "https://registry.npmjs.com/#{name}/"
+      response = client.get("https://registry.npmjs.com/#{name}/").body
       External.from_json(response).versions
     end
   end

@@ -16,7 +16,7 @@ module Depwatcher
     end
 
     def check() : Array(Internal)
-      response = client.get "http://archive.apache.org/dist/httpd/"
+      response = client.get("http://archive.apache.org/dist/httpd/").body
       doc = XML.parse_html(response)
       links = doc.xpath("//a[starts-with(@href, 'CURRENT')]")
       raise "Could not parse apache httpd website" unless links.is_a?(XML::NodeSet)
@@ -30,8 +30,8 @@ module Depwatcher
     end
 
     def in(ref : String) : Release
-      res = HTTP::Client.get "http://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2.sha256"
-      sha256 = res.body.split(" ").first
+      res = HTTP::Client.get("http://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2.sha256").body
+      sha256 = res.split(" ").first
       Release.new(ref, "http://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2", sha256)
     end
   end

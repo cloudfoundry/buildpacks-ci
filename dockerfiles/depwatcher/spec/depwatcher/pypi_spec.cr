@@ -6,7 +6,7 @@ Spec2.describe Depwatcher::Pypi do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://pypi.org/pypi/setuptools/json", File.read(__DIR__+"/../fixtures/setuptools.json"))
+    client.stub_get("https://pypi.org/pypi/setuptools/json", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/setuptools.json")))
   end
 
   describe "#check" do
@@ -17,7 +17,7 @@ Spec2.describe Depwatcher::Pypi do
     end
 
     it "returns final releases < 10.x sorted for pip" do
-      client.stub_get("https://pypi.org/pypi/pip/json", File.read(__DIR__+"/../fixtures/pip.json"))
+      client.stub_get("https://pypi.org/pypi/pip/json", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/pip.json")))
       expect(subject.check("pip").map(&.ref)).to eq [
         "8.0.1", "8.0.2", "8.0.3", "8.1.0", "8.1.1", "8.1.2", "9.0.0", "9.0.1", "9.0.2", "9.0.3"
       ]

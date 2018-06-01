@@ -1,7 +1,7 @@
 require "http/client"
 require "xml"
 
-response = HTTP::Client.get "https://www.ruby-lang.org/en/downloads/"
+response = HTTP::Client.get("https://www.ruby-lang.org/en/downloads/").body
 doc = XML.parse_html(response.body)
 lis = doc.xpath("//li/a[starts-with(text(),'Ruby ')]")
 raise "Could not parse ruby website" unless lis.is_a?(XML::NodeSet)
