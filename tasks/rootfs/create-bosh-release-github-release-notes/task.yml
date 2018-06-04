@@ -13,6 +13,6 @@ run:
   path: bash
   args:
     - "-cl"
-    - "buildpacks-ci/tasks/rootfs/create-bosh-release-github-release-notes/run.rb"
+    - "buildpacks-ci/tasks/rootfs/create-offline-bosh-release-github-release-notes/run.rb"
 params:
   STACK:

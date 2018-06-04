@@ -12,3 +12,5 @@ outputs:
   - name: buildpack-zip
 run:
   path: buildpacks-ci/tasks/download-offline-buildpack/run.sh
+params:
+  CF_STACK:

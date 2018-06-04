@@ -1,0 +1,5 @@
+# abort script on any command that exits with a non zero value
+set -e -x
+
+echo "Copying buildpack"
+cp hwc-buildpack/hwc_buildpack-*.zip ${BOSH_INSTALL_TARGET}/hwc_buildpack.zip

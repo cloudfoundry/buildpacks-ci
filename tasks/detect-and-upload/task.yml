@@ -22,3 +22,6 @@ run:
       popd
 params:
   RUBYGEM_MIRROR:
+  CF_STACK:
+  BUILDPACK_NAME:
+  GIT_REPO_ORG:

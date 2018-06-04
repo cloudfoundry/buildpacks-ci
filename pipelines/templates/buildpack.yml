@@ -7,7 +7,7 @@
 <% stacks = {
   "hwc" => %w(windows2012R2 windows2016),
   "apt" => %w(cflinuxfs2),
-  "binary" => %w(cflinuxfs2), # TODO: add windows2012R2 (definitely), windows2016 (maybe)
+  "binary" => %w(cflinuxfs2),
   "credhub" => %w(cflinuxfs2),
   "dotnet-core" => %w(cflinuxfs2),
   "go" => %w(cflinuxfs2),
@@ -181,6 +181,13 @@ resources: #####################################################################
       access_token: {{buildpacks-github-token}}
 
 <% if language == 'hwc' %>
+  - name: binary-buildpack-github-release
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: binary-buildpack
+      access_token: {{buildpacks-github-token}}
+
   - name: buildpack-bosh-release-github-release
     type: github-release
     source:
@@ -330,18 +337,23 @@ jobs: ##########################################################################
         - get: pivotal-buildpack-cached
         - get: pivotal-buildpack
       - do:
-        - task: detect-and-upload
-          file: buildpacks-ci/tasks/detect-and-upload/task.yml
-          params:
-            GIT_REPO_ORG: <%= organization %>
-            BUILDPACK_NAME: <%= language %>-buildpack
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-        - put: pivotal-buildpack
-          params:
-            file: buildpack-artifacts/*_buildpack-v*.zip
-        - put: pivotal-buildpack-cached
-          params:
-            file: buildpack-artifacts/*_buildpack-cached-v*.zip
+        - aggregate:
+<% stacks[language].each do |stack| %>
+          - do:
+            - task: detect-and-upload-<%= stack %>
+              file: buildpacks-ci/tasks/detect-and-upload/task.yml
+              params:
+                GIT_REPO_ORG: <%= organization %>
+                BUILDPACK_NAME: <%= language %>-buildpack
+                RUBYGEM_MIRROR: {{rubygem-mirror}}
+                CF_STACK: <%= stack %>
+            - put: pivotal-buildpack
+              params:
+                file: buildpack-artifacts/*_buildpack-v*.zip
+            - put: pivotal-buildpack-cached
+              params:
+                file: buildpack-artifacts/*_buildpack-cached-<%= stack %>-v*.zip
+<% end %>
         on_failure:
           put: failure-alert
           params:
@@ -956,17 +968,22 @@ jobs: ##########################################################################
           resource: buildpack-github-release
           trigger: true
           passed: [ buildpack-to-github ]
+        - get: extra-blob
+          resource: binary-buildpack-github-release
       - do:
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
-        - task: create-bosh-release
-          file: buildpacks-ci/tasks/create-buildpack-bosh-release/task.yml
+        - task: add-extra-blob-for-bosh-release
+          file: buildpacks-ci/tasks/add-extra-blob-for-bosh-release/task.yml
+          params:
+            LANGUAGE: binary
+        - task: create-online-bosh-release
+          file: buildpacks-ci/tasks/create-online-bosh-release/task.yml
           params:
             ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            BLOB_GLOB: blob/<%= language %>*.zip
-            BLOB_NAME: <%= language %>-buildpack
-            RELEASE_NAME: <%= language %>-buildpack
+            LANGUAGES: "hwc binary"
+            RELEASE_NAME: hwc-buildpack
             RELEASE_DIR: release
         - put: buildpack-bosh-release
           params:
@@ -999,20 +1016,25 @@ jobs: ##########################################################################
           params:
             include_source_tarball: true
       - do:
-        - task: build-offline-buildpack
-          file: buildpacks-ci/tasks/build-offline-buildpack-cutlass/task.yml
+        - task: build-offline-buildpacks
+          file: buildpacks-ci/tasks/build-offline-buildpacks-cutlass/task.yml
           params:
             LANGUAGE: hwc
+            CF_STACKS: <%= stacks['hwc'].join(' ') %>
+        - task: build-offline-buildpacks
+          file: buildpacks-ci/tasks/build-offline-buildpacks-cutlass/task.yml
+          params:
+            LANGUAGE: binary
+            CF_STACKS: "windows2012R windows2016"
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
-        - task: create-bosh-release
-          file: buildpacks-ci/tasks/create-bosh-release/task.yml
+        - task: create-offline-bosh-release
+          file: buildpacks-ci/tasks/create-offline-bosh-release/task.yml
           params:
             ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
-            BLOB_GLOB: buildpack-zip/<%= language %>_buildpack-cached*.zip
-            BLOB_NAME: <%= language %>-buildpack
-            RELEASE_NAME: <%= language %>-offline-buildpack
+            LANGUAGES: "hwc binary"
+            RELEASE_NAME: hwc-offline-buildpack
             RELEASE_DIR: release
         - put: offline-buildpack-bosh-release
           params:

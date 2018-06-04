@@ -1,5 +1,16 @@
 <% supported_languages = %w(dotnet-core go ruby binary staticfile nodejs php python java) %>
-<% cutlass = %w(binary dotnet-core go multi nodejs python ruby staticfile) %>
+<% cutlass = %w(binary dotnet-core go nodejs python ruby staticfile) %>
+<% stacks = {
+  "binary" => %w(cflinuxfs2),
+  "java" => %w(cflinuxfs2),
+  "dotnet-core" => %w(cflinuxfs2),
+  "go" => %w(cflinuxfs2),
+  "nodejs" => %w(cflinuxfs2),
+  "php" => %w(cflinuxfs2),
+  "python" => %w(cflinuxfs2),
+  "ruby" => %w(cflinuxfs2),
+  "staticfile" => %w(cflinuxfs2)
+} %>
 ---
 resource_types:
   - name: slack-notification
@@ -451,13 +462,12 @@ jobs:
       - do:
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
-        - task: create-bosh-release
-          file: buildpacks-ci/tasks/create-buildpack-bosh-release/task.yml
+        - task: create-online-bosh-release
+          file: buildpacks-ci/tasks/create-online-bosh-release/task.yml
           params:
             ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            BLOB_GLOB: blob/<%= language %>?buildpack-v*.zip
-            BLOB_NAME: <%= language %>-buildpack
+            LANGUAGES: <%= language %>
             RELEASE_NAME: <%= language %>-buildpack
             RELEASE_DIR: release
         - put: <%= language %>-buildpack-bosh-release
@@ -503,30 +513,29 @@ jobs:
         <% if language == 'java' %>
         - task: download-offline-buildpack
           file: buildpacks-ci/tasks/download-offline-buildpack/task.yml
+          params:
+            CF_STACK: <%= stacks['java'].first %> #we currently only support one stack for java buildpack
         <% elsif cutlass.include?(language) %>
         - task: build-offline-buildpack
-          file: buildpacks-ci/tasks/build-offline-buildpack-cutlass/task.yml
+          file: buildpacks-ci/tasks/build-offline-buildpacks-cutlass/task.yml
           params:
             LANGUAGE: <%= language %>
+            CF_STACKS: <%= stacks[language].join(' ') %>
         <% else %>
         - task: build-offline-buildpack
-          file: buildpacks-ci/tasks/build-offline-buildpack-machete/task.yml
+          file: buildpacks-ci/tasks/build-offline-buildpacks-machete/task.yml
           params:
             LANGUAGE: <%= language %>
+            CF_STACKS: <%= stacks[language].join(' ') %>
         <% end %>
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
-        - task: create-bosh-release
-          file: buildpacks-ci/tasks/create-bosh-release/task.yml
+        - task: create-offline-bosh-release
+          file: buildpacks-ci/tasks/create-offline-bosh-release/task.yml
           params:
             ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
-            <% if language == 'java' %>
-            BLOB_GLOB: buildpack-zip/<%= language %>-buildpack-offline*.zip
-            <% else %>
-            BLOB_GLOB: buildpack-zip/<%= language %>_buildpack-cached*.zip
-            <% end %>
-            BLOB_NAME: <%= language %>-buildpack
+            LANGUAGES: <%= language %>
             RELEASE_NAME: <%= language %>-offline-buildpack
             RELEASE_DIR: release
         - put: private-<%= language %>-offline-buildpack-bosh-release
@@ -546,4 +555,3 @@ jobs:
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
-
