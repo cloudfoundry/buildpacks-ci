@@ -1,0 +1,8 @@
+---
+blobstore:
+  file_name: hwc
+  provider: local
+  options:
+    blobstore_path: ./blobs/
+final_name: hwc
+

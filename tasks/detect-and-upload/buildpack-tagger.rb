@@ -40,6 +40,8 @@ class BuildpackTagger
                   bundle install
                   bundle exec buildpack-packager --uncached
                   bundle exec buildpack-packager --cached
+                  echo "stack: $CF_STACK" >> manifest.yml
+                  zip *-cached*.zip manifest.yml
                   EOF
         else
           system(<<~EOF)
@@ -49,19 +51,20 @@ class BuildpackTagger
                   (cd src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager && go install)
 
                   ./.bin/buildpack-packager build --cached=false --any-stack
-                  ./.bin/buildpack-packager build --cached=true --any-stack
+                  ./.bin/buildpack-packager build --cached=true --stack="$CF_STACK"
                   EOF
         end
 
         timestamp = `date +%s`.strip
 
         Dir["*.zip"].map do |filename|
-          filename.match(/(.*)_buildpack(-cached)?-v(.*).zip/) do |match|
+          filename.match(/(.*)_buildpack(-cached)?.*-v(.*).zip/) do |match|
             language = match[1]
             cached = match[2]
             version = match[3]
+            stack = cached ? "-#{ENV.fetch('CF_STACK')}" : ''
 
-            output_file = "../buildpack-artifacts/#{language}_buildpack#{cached}-v#{version}+#{timestamp}.zip"
+            output_file = "../buildpack-artifacts/#{language}_buildpack#{cached}#{stack}-v#{version}+#{timestamp}.zip"
 
             FileUtils.mv(filename, output_file)
           end

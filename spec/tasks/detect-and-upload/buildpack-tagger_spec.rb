@@ -20,6 +20,8 @@ describe BuildpackTagger do
        bundle install
        bundle exec buildpack-packager --uncached
        bundle exec buildpack-packager --cached
+       echo "stack: $CF_STACK" >> manifest.yml
+       zip *-cached*.zip manifest.yml
        EOF
   end
 
@@ -58,6 +60,8 @@ describe BuildpackTagger do
         File.write("testlang_buildpack-v#{@new_version}.zip",'specfile')
         File.write("testlang_buildpack-cached-v#{@new_version}.zip",'specfile')
       end
+
+      allow(ENV).to receive(:fetch).with('CF_STACK').and_return('some-stack')
     end
     allow(Octokit).to receive(:tags).with("#{git_repo_org}/#{buildpack_name}").and_return(git_tags)
   end
@@ -105,16 +109,16 @@ describe BuildpackTagger do
       Dir.chdir(File.join(task_dir, 'buildpack-artifacts')) do
         output_buildpacks = Dir["*.zip"]
         expect(output_buildpacks).to include('testlang_buildpack-v4.4.4+09876.zip')
-        expect(output_buildpacks).to include('testlang_buildpack-cached-v4.4.4+09876.zip')
+        expect(output_buildpacks).to include('testlang_buildpack-cached-some-stack-v4.4.4+09876.zip')
       end
     end
 
     it 'calculates the md5 and sha256 hashes of the new buildpacks' do
       expect(subject).to receive(:`).with('sha256sum testlang_buildpack-v4.4.4+09876.zip')
-      expect(subject).to receive(:`).with('sha256sum testlang_buildpack-cached-v4.4.4+09876.zip')
+      expect(subject).to receive(:`).with('sha256sum testlang_buildpack-cached-some-stack-v4.4.4+09876.zip')
 
       expect(subject).to receive(:`).with('md5sum testlang_buildpack-v4.4.4+09876.zip')
-      expect(subject).to receive(:`).with('md5sum testlang_buildpack-cached-v4.4.4+09876.zip')
+      expect(subject).to receive(:`).with('md5sum testlang_buildpack-cached-some-stack-v4.4.4+09876.zip')
       subject.run!
     end
   end
