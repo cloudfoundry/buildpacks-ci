@@ -15,13 +15,12 @@ pushd source
 popd
 
 for stack in $CF_STACKS; do
-  cp -r source source-$stack
-  pushd source-$stack
+  cp -r source "source-$stack"
+  pushd "source-$stack"
     BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --cached
     echo "stack: $stack" >> manifest.yml
-    zip *buildpack-cached*.zip manifest.yml
-    mv *buildpack-cached*.zip $(echo *buildpack-cached*.zip | sed "s/-cached/-cached-${stack}/")
+    zip ./*buildpack-cached*.zip manifest.yml
+    mv ./*buildpack-cached*.zip $(echo *buildpack-cached*.zip | sed "s/-cached/-cached-${stack}/")
   popd
-  # shellcheck disable=SC2035
   mv source-$stack/*_buildpack-cached*.zip buildpack-zip/
 done

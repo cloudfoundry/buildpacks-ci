@@ -23,7 +23,7 @@ blobstore:
     credentials_source: static
 EOF
   fi
-  echo "$(bosh2 blobs)"
+
   rm -rf blobs
   [ -f config/blobs.yml ] || echo -e "---\n{}" > config/blobs.yml
   for name in $( bosh2 blobs | grep -- '-buildpack/.*buildpack' | awk '{print $1}' ); do

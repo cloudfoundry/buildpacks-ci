@@ -20,7 +20,7 @@ describe BuildpackTagger do
        bundle install
        bundle exec buildpack-packager --uncached
        bundle exec buildpack-packager --cached
-       echo "stack: $CF_STACK" >> manifest.yml
+       echo 'stack: "$CF_STACK"' >> manifest.yml
        zip *-cached*.zip manifest.yml
        EOF
   end

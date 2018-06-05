@@ -6,4 +6,4 @@ set -o pipefail
 
 set -x
 
-cp extra-blob/$LANGUAGE-buildpack*.zip blob/
+cp extra-blob/"${LANGUAGE}"-buildpack*.zip blob/

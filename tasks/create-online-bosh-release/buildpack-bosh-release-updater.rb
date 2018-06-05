@@ -46,12 +46,9 @@ class BuildpackBOSHReleaseUpdater
   end
 
   def add_new_blobs
-    puts "in the function"
     @languages.each do |language|
-      puts "here"
       blob_name = "#{language}-buildpack"
       Dir["../blob/#{language}*.zip"].each do |buildpack|
-      puts "HERE!!!!!!!!!!!!! bosh2 -n add-blob #{buildpack} #{blob_name}/#{File.basename(buildpack)}"
         system "bosh2 -n add-blob #{buildpack} #{blob_name}/#{File.basename(buildpack)}" or exit 1
       end
 
