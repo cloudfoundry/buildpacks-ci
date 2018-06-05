@@ -19,7 +19,7 @@ pushd source
   (cd src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager && go install)
 
   for stack in $CF_STACKS; do
-    buildpack-packager build --cached --stack=$stack
+    buildpack-packager build --cached "--stack=$stack"
   done
 popd
 

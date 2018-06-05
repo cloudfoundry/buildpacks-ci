@@ -239,7 +239,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached-v(.*).zip
+      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached-.*-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
@@ -630,7 +630,7 @@ jobs: ##########################################################################
         trigger: true
       - put: pivnet-production
         params:
-          file_glob: pivotal-buildpack-cached/<%= language %>_buildpack-cached-v*.zip
+          file_glob: pivotal-buildpack-cached/<%= language %>_buildpack-cached-*-v*.zip
           s3_filepath_prefix: product-files/buildpacks
           metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
