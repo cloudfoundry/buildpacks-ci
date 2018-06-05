@@ -38,7 +38,7 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
       branch: master
 
-<% dep_build_names = %w(bower go bundler composer glide godep dep hwc jruby php php7 python node nginx ruby) %>
+<% dep_build_names = %w(bower go bundler composer dotnet glide godep dep hwc jruby php php7 python node nginx ruby) %>
 <% dep_build_names.each do |dep| %>
   - name: <%= dep %>-builds
     type: git
@@ -420,3 +420,33 @@ jobs: ##########################################################################
             rebase: true
   <% end %>
 <% end %>
+
+  - name: extract-dotnet-framework
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: dummy-resource
+        - get: built-yaml
+          passed: [ build-dotnet ]
+          resource: dotnet-built-output
+          trigger: true
+        - get: dotnet-framework-built
+          resource: dotnet-framework-built-output
+      - do:
+        - task: extract-dotnet-framework
+          file: buildpacks-ci/tasks/extract-dotnet-framework/task.yml
+        - task: push-binary
+          file: buildpacks-ci/tasks/push-binary/task.yml
+          params:
+            DEPENDENCY: dotnet-framework
+            BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
+            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            AWS_DEFAULT_REGION: us-east-1
+            TEST_CREDENTIAL_FILTER_WHITELIST: BUCKET_NAME
+        - put: dotnet-framework-built-output
+          params:
+            repository: dotnet-framework-built-output
+            rebase: true
