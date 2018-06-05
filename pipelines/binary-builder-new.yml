@@ -8,7 +8,7 @@
   godep: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: tools/godep']},
   httpd: { buildpacks: { php: {} } },
   hwc: { buildpacks: { hwc: {}}, source_type: 'github_releases', source_params: ['repo: cloudfoundry/hwc', 'extension: exe']},
-  nginx: { buildpacks: { nginx: { lines: ["1.13.X", "1.14.X"], removal_strategy: 'keep_master' } } },
+  nginx: { buildpacks: { nginx: { lines: ["1.13.X", "1.14.X", "1.15.X"], removal_strategy: 'keep_master' } } },
   pip: { buildpacks: { python: {} }, source_type: 'pypi'},
   pipenv: { buildpacks: { python: {} }, source_type: 'pypi'},
   python: { buildpacks: { python: { lines: ["2.7.X", "3.3.X", "3.4.X", "3.5.X", "3.6.X"], removal_strategy: 'keep_master' } } },
