@@ -346,13 +346,21 @@ jobs: ##########################################################################
                 GIT_REPO_ORG: <%= organization %>
                 BUILDPACK_NAME: <%= language %>-buildpack
                 RUBYGEM_MIRROR: {{rubygem-mirror}}
+                <% if language.to_s == 'hwc' || if language.to_s == 'binary' %>
+                CF_STACK: "any"
+                <% else %>
                 CF_STACK: <%= stack %>
+                <% end %>
             - put: pivotal-buildpack
               params:
                 file: buildpack-artifacts/*_buildpack-v*.zip
             - put: pivotal-buildpack-cached
               params:
+              <% if language.to_s == 'hwc' || if language.to_s == 'binary' %>
+                file: buildpack-artifacts/*_buildpack-cached-v*.zip
+              <% else %>
                 file: buildpack-artifacts/*_buildpack-cached-<%= stack %>-v*.zip
+              <% end %>
 <% end %>
         on_failure:
           put: failure-alert
@@ -1020,12 +1028,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/build-offline-buildpacks-cutlass/task.yml
           params:
             LANGUAGE: hwc
-            CF_STACKS: <%= stacks['hwc'].join(' ') %>
-        - task: build-offline-buildpacks
-          file: buildpacks-ci/tasks/build-offline-buildpacks-cutlass/task.yml
-          params:
-            LANGUAGE: binary
-            CF_STACKS: "windows2012R windows2016"
+            CF_STACKS: "any"
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
         - task: create-offline-bosh-release
@@ -1033,7 +1036,7 @@ jobs: ##########################################################################
           params:
             ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
-            LANGUAGES: "hwc binary"
+            LANGUAGES: "hwc"
             RELEASE_NAME: hwc-offline-buildpack
             RELEASE_DIR: release
         - put: offline-buildpack-bosh-release
