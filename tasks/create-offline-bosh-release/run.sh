@@ -41,7 +41,7 @@ EOF
     else
       blob_list=("../buildpack-zip/${language}_buildpack-cached*.zip")
     fi
-    for blob in $blob_list; do
+    for blob in "${blob_list[@]}"; do
       bosh2 -n add-blob $blob "$blob_name/$(basename $blob)"
     done
   done
