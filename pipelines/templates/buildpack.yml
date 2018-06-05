@@ -346,7 +346,7 @@ jobs: ##########################################################################
                 GIT_REPO_ORG: <%= organization %>
                 BUILDPACK_NAME: <%= language %>-buildpack
                 RUBYGEM_MIRROR: {{rubygem-mirror}}
-                <% if language.to_s == 'hwc' || if language.to_s == 'binary' %>
+                <% if language.to_s == 'hwc' || language.to_s == 'binary' %>
                 CF_STACK: "any"
                 <% else %>
                 CF_STACK: <%= stack %>
@@ -356,7 +356,7 @@ jobs: ##########################################################################
                 file: buildpack-artifacts/*_buildpack-v*.zip
             - put: pivotal-buildpack-cached
               params:
-              <% if language.to_s == 'hwc' || if language.to_s == 'binary' %>
+              <% if language.to_s == 'hwc' || language.to_s == 'binary' %>
                 file: buildpack-artifacts/*_buildpack-cached-v*.zip
               <% else %>
                 file: buildpack-artifacts/*_buildpack-cached-<%= stack %>-v*.zip
