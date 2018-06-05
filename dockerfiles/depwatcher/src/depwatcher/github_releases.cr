@@ -1,3 +1,4 @@
+require "openssl"
 require "./base"
 require "./semantic_version"
 
@@ -7,8 +8,9 @@ module Depwatcher
       JSON.mapping(
         ref: String,
         url: String,
+        sha256: String,
       )
-      def initialize(@ref : String, @url : String)
+      def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
     class Asset
@@ -46,7 +48,12 @@ module Depwatcher
         a.name.match(/#{ext}$/)
       end
       raise "Could not determine a single url for version" unless a.size == 1
-      Release.new(r.ref, a[0].browser_download_url)
+
+      download_url = a[0].browser_download_url
+      hash = OpenSSL::Digest.new("SHA256")
+      hash.update(client.get(download_url).body_io)
+
+      Release.new(r.ref, download_url, hash.hexdigest)
     end
 
     private def releases(repo : String) : Array(External)
