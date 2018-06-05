@@ -30,6 +30,7 @@ class BuildpackTagger
         FileUtils.mv(uncached_buildpack, output_uncached)
         FileUtils.mv(cached_buildpack, output_cached)
       else
+        stack = ENV.fetch('CF_STACK')
         puts `git tag #{tag_to_add}`
         if File.exists?('compile-extensions')
           system(<<~EOF)
@@ -40,22 +41,18 @@ class BuildpackTagger
                   bundle install
                   bundle exec buildpack-packager --uncached
                   bundle exec buildpack-packager --cached
-                  echo "stack: $CF_STACK" >> manifest.yml
+                  echo "stack: #{stack}" >> manifest.yml
                   zip *-cached*.zip manifest.yml
                   EOF
         else
+          stack_flag = stack == 'any' ? '--any-stack' : "--stack=#{stack}"
           system(<<~EOF)
                   export GOPATH=$PWD
                   export GOBIN=$GOPATH/.bin
                   export PATH=$GOBIN:$PATH
                   (cd src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager && go install)
-
-                    ./.bin/buildpack-packager build --cached=false --any-stack
-                  if [[ "$CF_STACK" == "any" ]]; then
-                    ./.bin/buildpack-packager build --cached=true --any-stack
-                  else
-                    ./.bin/buildpack-packager build --cached=true --stack="$CF_STACK"
-                  fi
+                  ./.bin/buildpack-packager build --cached=false --any-stack
+                  ./.bin/buildpack-packager build --cached=true #{stack_flag}
                   EOF
         end
 
@@ -66,10 +63,9 @@ class BuildpackTagger
             language = match[1]
             cached = match[2]
             version = match[3]
-            cfstack = ENV.fetch('CF_STACK')
-            stack = cached && cfstack != 'any' ? "-#{cfstack}" : ''
+            stack_string = cached && stack != 'any' ? "-#{stack}" : ''
 
-            output_file = "../buildpack-artifacts/#{language}_buildpack#{cached}#{stack}-v#{version}+#{timestamp}.zip"
+            output_file = "../buildpack-artifacts/#{language}_buildpack#{cached}#{stack_string}-v#{version}+#{timestamp}.zip"
 
             FileUtils.mv(filename, output_file)
           end
