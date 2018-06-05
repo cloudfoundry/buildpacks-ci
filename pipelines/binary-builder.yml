@@ -341,6 +341,9 @@ jobs: ##########################################################################
         - get: buildpacks-ci
       - do:
         - task: build-binary
+          <% if dependency.to_s == 'nginx' %> #nginx flakes on build-binary
+          attempts: 3
+          <% end %>
           file: buildpacks-ci/tasks/build-binary/task.yml
           params:
             GIT_SSH_KEY: {{public-buildpacks-ci-robots-private-key}}
