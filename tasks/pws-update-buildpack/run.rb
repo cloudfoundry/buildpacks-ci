@@ -15,7 +15,13 @@ puts "Original Buildpacks\n==================="
 system('cf', 'buildpacks')
 
 if ENV['BUILDPACK_NAME'] == 'java'
-  filename = Dir.glob("pivnet-production/#{ENV['BUILDPACK_NAME']}-buildpack-offline*.zip").first
+  orig_filename = Dir.glob("pivnet-production/#{ENV['BUILDPACK_NAME']}-buildpack-offline*.zip").first
+  File.write('manifest.yml','stack: cflinuxfs2')
+  system(<<~EOF)
+          zip #{orig_filename} manifest.yml
+          EOF
+  filename = orig_filename.gsub(/-offline/,'-offline-cflinuxfs2') #TODO: Do not hard code stack
+  FileUtils.mv(orig_filename, filename)
 else
   orig_filename = Dir.glob("pivotal-buildpacks-cached/#{ENV['BUILDPACK_NAME']}*.zip").first
   filename = orig_filename.gsub(/\+\d+\.zip$/, '.zip')

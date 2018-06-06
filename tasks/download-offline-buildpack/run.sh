@@ -10,7 +10,7 @@ pushd pivnet-production
     echo "stack: cflinuxfs2" > manifest.yml
     old_name="$(echo ./*buildpack-cached*.zip)"
     zip "$old_name" manifest.yml
-    new_name="${old_name//-cached/-cached-$CF_STACK}"
+    new_name="${old_name//-offline/-offline-$CF_STACK}"
     mv "$old_name" "$new_name"
 popd
 
