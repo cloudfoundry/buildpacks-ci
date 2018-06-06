@@ -19,7 +19,7 @@ def main
 
   push_app(buildpack_url, app_name)
 
-  host = get_app_host(app_name)
+  host = get_app_host(app_name, File.read("./cf-space/name"))
 
   response = get_app_response(host, request_path, request_type)
 
@@ -61,8 +61,11 @@ def push_app(buildpack_url, app_name)
   end
 end
 
-def get_app_host(app_name)
-  apps = JSON.parse(`cf curl '/v2/apps' -X GET -H 'Content-Type: application/x-www-form-urlencoded' -d 'q=name:#{app_name}'`)
+def get_app_host(app_name, space_name)
+  spaces = JSON.parse(`cf curl '/v2/spaces' -X GET -H 'Content-Type: application/x-www-form-urlencoded' -d 'q=name:#{space_name}'`)
+  space_guid = spaces['resources'].first['metadata']['guid']
+
+  apps = JSON.parse(`cf curl '/v2/apps' -X GET -H 'Content-Type: application/x-www-form-urlencoded' -d 'q=name:#{app_name}&q=space_guid:#{space_guid}'`)
   routes_url = apps['resources'].first['entity']['routes_url']
 
   routes = JSON.parse(`cf curl #{routes_url}`)
