@@ -19,7 +19,7 @@ def main
 
   push_app(buildpack_url, app_name)
 
-  host = get_app_host(app_name, File.read("./cf-space/name"))
+  host = get_app_host(app_name, File.read("./cf-space/name").strip)
 
   response = get_app_response(host, request_path, request_type)
 
