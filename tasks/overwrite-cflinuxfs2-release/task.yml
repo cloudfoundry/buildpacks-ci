@@ -12,3 +12,5 @@ outputs:
   - name: cflinuxfs2-release-artifacts
 run:
   path: buildpacks-ci/tasks/overwrite-cflinuxfs2-release/run.sh
+params:
+  ROOTFS_RELEASE:

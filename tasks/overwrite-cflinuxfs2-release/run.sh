@@ -10,18 +10,20 @@ release_dir=cflinuxfs2-release
 filename=$(< cflinuxfs2-release/config/blobs.yml grep cflinuxfs2 | cut -d ':' -f 1)
 version="212.0.$(date +"%s")"
 
-echo "Creating $release_dir directory"
-
-mkdir -p "$release_dir/blobs/$(dirname "$filename")"
-
-echo "Moving stack-s3/*.tar.gz to $release_dir/blobs/$filename"
-
-cp stack-s3/*.tar.gz "$release_dir/blobs/$filename"
-
 pushd $release_dir
-    echo "Running 'bosh create release' in $release_dir"
+  for name in $( bosh2 blobs | grep -- 'rootfs/cflinuxfs2-*' | awk '{print $1}' ); do
+    bosh2 remove-blob "$name"
+  done
 
-    bosh2 create-release --force --tarball "dev_releases/$ROOTFS_RELEASE/$ROOTFS_RELEASE-$version.tgz" --name "$ROOTFS_RELEASE" --version "${version}"
+  # we actually want globbing here, so:
+  # shellcheck disable=SC2086
+
+  blob=../stack-s3/*.tar.gz
+  bosh2 -n add-blob $blob "rootfs/$(basename $blob)"
+
+  echo "Running 'bosh create release' in $release_dir"
+
+  bosh2 create-release --force --tarball "dev_releases/$ROOTFS_RELEASE/$ROOTFS_RELEASE-$version.tgz" --name "$ROOTFS_RELEASE" --version "${version}"
 popd
 
 cat <<EOF > ${release_dir}/use-dev-release-opsfile.yml
