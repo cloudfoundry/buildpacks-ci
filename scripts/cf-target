@@ -24,11 +24,16 @@ case ARGV[0]
   when 'dev'
     system('cf', 'api', 'api.v3.pcfdev.io', '--skip-ssl-validation') or raise 'Could not connect'
     system('cf', 'auth', 'admin', 'admin') or raise 'Could not connect'
+  when 'pws'
+    cfg = YAML.load(`lpass show --notes Shared-Buildpacks/concourse-private.yml`)
+    system('cf', 'login', '-a', 'api.run.pivotal.io', '-u', cfg['pws-username'], '-p', cfg['pws-password'], '-o', 'cf-buildpacks', '-s', 'development') or raise 'Could not connect'
   else
-    puts "Usage: #{$0} <edge|lts|bal|dev>"
+    puts "Usage: #{$0} <edge|lts|bal|dev|pws>"
     exit 1
 end
 
-system('cf', 'create-org', name)
-system('cf', 'create-space', name, '-o', name)
-system('cf', 'target', '-o', name, '-s', name) or raise "Could not target #{name}"
+if ARGV[0] != 'pws'
+  system('cf', 'create-org', name)
+  system('cf', 'create-space', name, '-o', name)
+  system('cf', 'target', '-o', name, '-s', name) or raise "Could not target #{name}"
+end
