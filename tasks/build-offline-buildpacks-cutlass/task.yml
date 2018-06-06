@@ -7,8 +7,6 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: blob
-  - name: buildpack-zip
-    optional: true
 outputs:
   - name: buildpack-zip
 run:
