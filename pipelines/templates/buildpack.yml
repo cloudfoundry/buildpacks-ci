@@ -181,13 +181,6 @@ resources: #####################################################################
       access_token: {{buildpacks-github-token}}
 
 <% if language == 'hwc' %>
-  - name: binary-buildpack-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: binary-buildpack
-      access_token: {{buildpacks-github-token}}
-
   - name: buildpack-bosh-release-github-release
     type: github-release
     source:
@@ -338,7 +331,8 @@ jobs: ##########################################################################
         - get: pivotal-buildpack
       - do:
         - aggregate:
-<% stacks[language].each do |stack| %>
+<% stack_languages = language.to_s == 'hwc' || language.to_s == 'binary' ? ['any'] : stacks[language] %>
+<% stack_languages.each do |stack| %>
           - do:
             - task: detect-and-upload-<%= stack %>
               file: buildpacks-ci/tasks/detect-and-upload/task.yml
@@ -346,21 +340,13 @@ jobs: ##########################################################################
                 GIT_REPO_ORG: <%= organization %>
                 BUILDPACK_NAME: <%= language %>-buildpack
                 RUBYGEM_MIRROR: {{rubygem-mirror}}
-                <% if language.to_s == 'hwc' || language.to_s == 'binary' %>
-                CF_STACK: "any"
-                <% else %>
                 CF_STACK: <%= stack %>
-                <% end %>
             - put: pivotal-buildpack
               params:
                 file: buildpack-artifacts/*_buildpack-v*.zip
             - put: pivotal-buildpack-cached
               params:
-              <% if language.to_s == 'hwc' || language.to_s == 'binary' %>
-                file: buildpack-artifacts/*_buildpack-cached-v*.zip
-              <% else %>
-                file: buildpack-artifacts/*_buildpack-cached-<%= stack %>-v*.zip
-              <% end %>
+                file: buildpack-artifacts/*_buildpack-cached*-v*.zip
 <% end %>
         on_failure:
           put: failure-alert
@@ -638,7 +624,7 @@ jobs: ##########################################################################
         trigger: true
       - put: pivnet-production
         params:
-          file_glob: pivotal-buildpack-cached/<%= language %>_buildpack-cached-*-v*.zip
+          file_glob: pivotal-buildpack-cached/<%= language %>_buildpack-cached*-v*.zip
           s3_filepath_prefix: product-files/buildpacks
           metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
@@ -976,21 +962,15 @@ jobs: ##########################################################################
           resource: buildpack-github-release
           trigger: true
           passed: [ buildpack-to-github ]
-        - get: extra-blob
-          resource: binary-buildpack-github-release
       - do:
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
-        - task: add-extra-blob-for-bosh-release
-          file: buildpacks-ci/tasks/add-extra-blob-for-bosh-release/task.yml
-          params:
-            LANGUAGE: binary
         - task: create-online-bosh-release
           file: buildpacks-ci/tasks/create-online-bosh-release/task.yml
           params:
             ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            LANGUAGES: "hwc binary"
+            LANGUAGES: "hwc"
             RELEASE_NAME: hwc-buildpack
             RELEASE_DIR: release
         - put: buildpack-bosh-release
