@@ -17,7 +17,7 @@ pushd $release_dir
   blob="../stack-s3/*.tar.gz"
 
   # shellcheck disable=SC2086
-  bosh2 -n add-blob "$blob" "rootfs/$(basename $blob)"
+  bosh2 -n add-blob $blob "rootfs/$(basename $blob)"
 
   echo "Running 'bosh create release' in $release_dir"
 
