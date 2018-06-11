@@ -36,7 +36,11 @@ when 'dotnet'
   stripped_version = version[1..-1]
   major, minor, patch = stripped_version.split('.')
   Dir.chdir('cli') do
-    GitClient.checkout_branch(version)
+    if version == 'v2.1.300' # See: https://github.com/dotnet/cli/issues/9388
+      GitClient.checkout_branch('aeae506fa8d3571d8b5f75f81389003e0fb0273e')
+    else
+      GitClient.checkout_branch(version)
+    end
     run('apt-get', 'update')
     run('apt-get', '-y', 'upgrade')
     run('apt-get', '-y', 'install', 'clang', 'devscripts', 'debhelper', 'libunwind8', 'liburcu1', 'libpython2.7', 'liblttng-ust0', 'libllvm3.6', 'liblldb-3.6')
