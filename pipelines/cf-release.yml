@@ -46,11 +46,6 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/cats-concourse-task
       branch: master
-  - name: diego-release
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/diego-release
-      branch: master
   - name: cf-acceptance-tests
     type: git
     source:
@@ -96,18 +91,10 @@ resources:
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
-  - name: diego-bosh-release
-    type: bosh-io-release
-    source:
-      repository: cloudfoundry/diego-release
   - name: cflinuxfs2-bosh-release
     type: bosh-io-release
     source:
       repository: cloudfoundry/cflinuxfs2-release
-  - name: garden-runc-bosh-release
-    type: bosh-io-release
-    source:
-      repository: cloudfoundry/garden-runc-release
   - name: pivnet-production
     type: pivnet
     source:
@@ -242,11 +229,6 @@ jobs:
           - get: bbl-state
           - get: cf-deployment
             resource: cf-deployment-rc
-            attempts: 3
-          - get: diego-release
-          - get: garden-runc-bosh-release
-            attempts: 3
-          - get: diego-bosh-release
             attempts: 3
           - get: cflinuxfs2-bosh-release
             attempts: 3
