@@ -24,7 +24,7 @@ The various depwatchers in this resource (in `src`) are written in Crystal, as a
 $ echo '{"source":{"type":"github_releases","name":"hwc","repo":"cloudfoundry/hwc","extension":"exe"}}' | crystal src/check.cr
   {"source":{"type":"github_releases","name":"hwc","repo":"cloudfoundry/hwc","extension":"exe"}}
   [{"ref":"1.0.0"},{"ref":"1.0.1"},{"ref":"2.0.0"}]
-  
+
 $ echo '{"source":{"type":"github_releases","name":"hwc","repo":"cloudfoundry/hwc","extension":"exe"},"version":{"ref":"2.0.0"}}' | crystal src/in.cr -- /tmp
 {"source":{"type":"github_releases","name":"hwc","repo":"cloudfoundry/hwc","extension":"exe"},"version":{"ref":"2.0.0"}}
 {"ref":"2.0.0","url":"https://github.com/cloudfoundry/hwc/releases/download/2.0.0/hwc.exe","sha256":"1bad9c61262702404653f4d043d79082e8a181ee33e2c1e11db3eb346e7fcd33"}

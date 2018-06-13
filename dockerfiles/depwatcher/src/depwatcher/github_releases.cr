@@ -19,7 +19,6 @@ module Depwatcher
     class Asset
       JSON.mapping(
         name: String,
-        url: String,
         browser_download_url: String
       )
     end
@@ -55,11 +54,11 @@ module Depwatcher
       end
       raise "Could not determine a single url for version" unless a.size == 1
 
-      download_url = a[0].url
+      download_url = a[0].browser_download_url
       hash = OpenSSL::Digest.new("SHA256")
       resp = client.get(download_url, HTTP::Headers{"Accept" => "application/octet-stream"})
       hash.update(IO::Memory.new(resp.body))
-      Release.new(r.ref, a[0].browser_download_url, hash.hexdigest)
+      Release.new(r.ref, download_url, hash.hexdigest)
     end
 
     private def releases(repo : String) : Array(External)
