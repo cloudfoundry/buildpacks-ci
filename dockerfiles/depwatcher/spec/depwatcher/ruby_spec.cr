@@ -6,8 +6,8 @@ Spec2.describe Depwatcher::Ruby do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://api.github.com/repos/ruby/ruby/tags", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/github_ruby.json")))
-    client.stub_get("https://www.ruby-lang.org/en/downloads/", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/ruby.html")))
+    client.stub_get("https://api.github.com/repos/ruby/ruby/tags", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/github_ruby.json")))
+    client.stub_get("https://www.ruby-lang.org/en/downloads/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/ruby.html")))
   end
 
   describe "#check" do

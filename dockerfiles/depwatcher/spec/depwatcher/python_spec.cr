@@ -6,8 +6,8 @@ Spec2.describe Depwatcher::Python do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://www.python.org/downloads/", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/python.html")))
-    client.stub_get("https://www.python.org/downloads/release/python-355/", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/python-355.html")))
+    client.stub_get("https://www.python.org/downloads/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/python.html")))
+    client.stub_get("https://www.python.org/downloads/release/python-355/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/python-355.html")))
   end
 
   describe "#check" do

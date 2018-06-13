@@ -6,8 +6,8 @@ Spec2.describe Depwatcher::Rubygems do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://rubygems.org/api/v1/versions/abn_search.json", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/abn_search.json")))
-    client.stub_get("https://rubygems.org/api/v2/rubygems/abn_search/versions/0.0.5.json", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/abn_search_0.0.5.json")))
+    client.stub_get("https://rubygems.org/api/v1/versions/abn_search.json", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/abn_search.json")))
+    client.stub_get("https://rubygems.org/api/v2/rubygems/abn_search/versions/0.0.5.json", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/abn_search_0.0.5.json")))
   end
 
   describe "#check" do
