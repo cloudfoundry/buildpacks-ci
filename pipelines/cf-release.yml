@@ -1,7 +1,7 @@
 <% supported_languages = %w(dotnet-core go ruby binary staticfile nodejs php python java) %>
 <% cutlass = %w(binary dotnet-core go nodejs python ruby staticfile) %>
 <% stacks = {
-  "binary" => %w(cflinuxfs2),
+  "binary" => %w(any),
   "java" => %w(cflinuxfs2),
   "dotnet-core" => %w(cflinuxfs2),
   "go" => %w(cflinuxfs2),
