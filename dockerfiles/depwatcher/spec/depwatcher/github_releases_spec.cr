@@ -6,8 +6,9 @@ Spec2.describe Depwatcher::GithubReleases do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://api.github.com/repos/yarnpkg/yarn/releases", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/gh_yarn.json")))
+    client.stub_get("https://api.github.com/repos/yarnpkg/yarn/releases", nil, HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/gh_yarn.json")))
     client.stub_get("https://github.com/yarnpkg/yarn/releases/download/v1.5.1/yarn-v1.5.1.tar.gz", HTTP::Headers{"Accept" => "application/octet-stream"}, HTTP::Client::Response.new(200, body: "dummy data"))
+    client.stub_get("https://github.com/yarnpkg/yarn/archive/v1.5.1.tar.gz", HTTP::Headers{"Accept" => "application/octet-stream"}, HTTP::Client::Response.new(200, body: "different dummy data"))
   end
 
   describe "#check" do
@@ -17,11 +18,22 @@ Spec2.describe Depwatcher::GithubReleases do
   end
 
   describe "#in" do
-    it "returns real releases sorted" do
-      obj = subject.in("yarnpkg/yarn", "tar.gz", "1.5.1")
-      expect(obj.ref).to eq "1.5.1"
-      expect(obj.url).to eq "https://github.com/yarnpkg/yarn/releases/download/v1.5.1/yarn-v1.5.1.tar.gz"
-      expect(obj.sha256).to eq "797bb0abff798d7200af7685dca7901edffc52bf26500d5bd97282658ee24152"
+    context "when fetching a binary" do
+      it "returns a release object for the version" do
+        obj = subject.in("yarnpkg/yarn", "tar.gz", "1.5.1")
+        expect(obj.ref).to eq "1.5.1"
+        expect(obj.url).to eq "https://github.com/yarnpkg/yarn/releases/download/v1.5.1/yarn-v1.5.1.tar.gz"
+        expect(obj.sha256).to eq "797bb0abff798d7200af7685dca7901edffc52bf26500d5bd97282658ee24152"
+      end
+    end
+
+    context "when fetching raw source code" do
+      it "returns a release object for the version" do
+        obj = subject.in("yarnpkg/yarn", "1.5.1")
+        expect(obj.ref).to eq "1.5.1"
+        expect(obj.url).to eq "https://github.com/yarnpkg/yarn/archive/v1.5.1.tar.gz"
+        expect(obj.sha256).to eq "04d4ca87acce59d80d59e00e850e4bbc3a996aa8761fec218bcba0beab2412bd"
+      end
     end
   end
 end
