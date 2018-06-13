@@ -9,7 +9,7 @@ version = data["version"]
 
 case type = source["type"].to_s
 when "github_releases"
-  if source["fetch_source"]? == JSON.parse("true")
+  version = if source["fetch_source"]? == JSON.parse("true")
     Depwatcher::GithubReleases.new.in(source["repo"].to_s, version["ref"].to_s)
   else
     Depwatcher::GithubReleases.new.in(source["repo"].to_s, source["extension"].to_s, version["ref"].to_s)
