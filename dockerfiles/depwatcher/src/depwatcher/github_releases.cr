@@ -16,19 +16,19 @@ module Depwatcher
       end
     end
 
-    class Asset
+    class GithubAsset
       JSON.mapping(
         name: String,
         browser_download_url: String
       )
     end
 
-    class External
+    class GithubRelease
       JSON.mapping(
         tag_name: String,
         draft: Bool,
         prerelease: Bool,
-        assets: Array(Asset),
+        assets: Array(GithubAsset),
       )
 
       def ref
@@ -45,25 +45,37 @@ module Depwatcher
     end
 
     def in(repo : String, ext : String, ref : String) : Release
-      r = releases(repo).find do |r|
+      github_release = find_github_release(repo, ref)
+      asset = github_release.assets.select do |a|
+        a.name.ends_with?(ext)
+      end
+      raise "Could not determine a single url for version" unless asset.size == 1
+      make_release(github_release, asset.first.browser_download_url)
+    end
+
+    def in(repo : String, ref : String) : Release
+      github_release = find_github_release(repo, ref)
+      make_release(github_release, "https://github.com/#{repo}/archive/#{github_release.tag_name}.tar.gz")
+    end
+
+    private def releases(repo : String) : Array(GithubRelease)
+      res = client.get("https://api.github.com/repos/#{repo}/releases").body
+      Array(GithubRelease).from_json(res)
+    end
+
+    private def find_github_release(repo : String, ref : String)
+      github_release = releases(repo).find do |r|
         r.ref == ref
       end
-      raise "Could not find data for version" unless r
-      a = r.assets.select do |a|
-        a.name.match(/#{ext}$/)
-      end
-      raise "Could not determine a single url for version" unless a.size == 1
+      raise "Could not find data for version" unless github_release
+      github_release
+    end
 
-      download_url = a[0].browser_download_url
+    private def make_release(github_release : GithubRelease, download_url : String) : Release
       hash = OpenSSL::Digest.new("SHA256")
       resp = client.get(download_url, HTTP::Headers{"Accept" => "application/octet-stream"})
       hash.update(IO::Memory.new(resp.body))
-      Release.new(r.ref, download_url, hash.hexdigest)
-    end
-
-    private def releases(repo : String) : Array(External)
-      res = client.get("https://api.github.com/repos/#{repo}/releases").body
-      Array(External).from_json(res)
+      Release.new(github_release.ref, download_url, hash.hexdigest)
     end
   end
 end
