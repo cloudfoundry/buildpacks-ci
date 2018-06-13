@@ -6,8 +6,8 @@ Spec2.describe Depwatcher::Httpd do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("http://archive.apache.org/dist/httpd/", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/httpd.html")))
-    client.stub_get("http://archive.apache.org/dist/httpd/.*tar/.bz2.*tar\.bz2\.sha256", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/httpd.sha256")))
+    client.stub_get("http://archive.apache.org/dist/httpd/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/httpd.html")))
+    client.stub_get("http://archive.apache.org/dist/httpd/.*tar/.bz2.*tar\.bz2\.sha256", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/httpd.sha256")))
   end
 
   describe "#check" do

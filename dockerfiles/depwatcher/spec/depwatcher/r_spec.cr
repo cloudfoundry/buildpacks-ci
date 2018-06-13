@@ -6,7 +6,7 @@ Spec2.describe Depwatcher::R do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://svn.r-project.org/R/tags/", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/rlang.html")))
+    client.stub_get("https://svn.r-project.org/R/tags/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/rlang.html")))
   end
 
   describe "#check" do

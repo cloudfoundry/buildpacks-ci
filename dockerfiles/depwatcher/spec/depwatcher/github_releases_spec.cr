@@ -6,8 +6,8 @@ Spec2.describe Depwatcher::GithubReleases do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://api.github.com/repos/yarnpkg/yarn/releases", HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/gh_yarn.json")))
-    client.stub_get("https://github.com/yarnpkg/yarn/releases/download/v1.5.1/yarn-v1.5.1.tar.gz", HTTP::Client::Response.new(200, body_io: IO::Memory.new("dummy data")))
+    client.stub_get("https://api.github.com/repos/yarnpkg/yarn/releases", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/gh_yarn.json")))
+    client.stub_get("https://api.github.com/repos/yarnpkg/yarn/releases/assets/6332912", HTTP::Headers{"Accept" => "application/octet-stream"}, HTTP::Client::Response.new(200, body: "dummy data"))
   end
 
   describe "#check" do

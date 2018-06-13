@@ -7,10 +7,10 @@ module Depwatcher
   end
 
   class HTTPClientImpl < HTTPClient
-    def get(url : String) : HTTP::Client::Response
-      response = HTTP::Client.get(url)
+    def get(url : String, headers : HTTP::Headers? = nil) : HTTP::Client::Response
+      response = HTTP::Client.get(url, headers)
       if response.status_code == 301 || response.status_code == 302
-        get(response.headers["location"])
+        get(response.headers["location"], headers)
       elsif response.status_code == 200
         response
       else
@@ -20,11 +20,11 @@ module Depwatcher
   end
 
   class HTTPClientInsecure < HTTPClient
-    def get(url : String) : HTTP::Client::Response
+    def get(url : String, headers : HTTP::Headers? = nil) : HTTP::Client::Response
       context = OpenSSL::SSL::Context::Client.insecure
-      response = HTTP::Client.get(url, tls: context)
+      response = HTTP::Client.get(url, headers: headers, tls: context)
       if response.status_code == 301 || response.status_code == 302
-        get(response.headers["location"])
+        get(response.headers["location"], headers)
       elsif response.status_code == 200
         response
       else
