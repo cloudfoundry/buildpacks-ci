@@ -19,11 +19,11 @@ version = build['version']
 system('rsync -a buildpack/ artifacts/')
 raise('Could not copy buildpack to artifacts') unless $?.success?
 
-dep = { "name" => name, "version" => version, "uri" => build['url'], "sha256" => build['sha256'], "cf_stacks" => ['cflinuxfs2']}
+dep = {"name" => name, "version" => version, "uri" => build['url'], "sha256" => build['sha256'], "cf_stacks" => ENV['CF_STACKS'].split}
 
-old_versions = manifest['dependencies'].select { |d| d['name'] == name }.map { |d| d['version'] }
+old_versions = manifest['dependencies'].select {|d| d['name'] == name}.map {|d| d['version']}
 manifest['dependencies'] = Dependencies.new(dep, ENV['VERSION_LINE'], ENV['REMOVAL_STRATEGY'], manifest['dependencies'], manifest_master['dependencies']).switch
-new_versions = manifest['dependencies'].select { |d| d['name'] == name }.map { |d| d['version'] }
+new_versions = manifest['dependencies'].select {|d| d['name'] == name}.map {|d| d['version']}
 
 added = (new_versions - old_versions).uniq.sort
 removed = (old_versions - new_versions).uniq.sort

@@ -20,3 +20,4 @@ run:
 params:
   VERSION_LINE:
   KEEP_MASTER:
+  CF_STACKS:
