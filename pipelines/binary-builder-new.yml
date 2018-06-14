@@ -7,7 +7,7 @@
   go: { buildpacks: { go: { lines: ["1.6.X", "1.7.X", "1.8.X", "1.9.X", "1.10.X"], removal_strategy: 'keep_master' } } },
   godep: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: tools/godep']},
   httpd: { buildpacks: { php: {} } },
-  hwc: { buildpacks: { hwc: {}}, source_type: 'github_releases', source_params: ['repo: cloudfoundry/hwc', 'fetch_source: true']},
+  hwc: { buildpacks: { hwc: { cf_stacks: ['windows2012R2', 'windows2016'] } }, source_type: 'github_releases', source_params: ['repo: cloudfoundry/hwc', 'fetch_source: true']},
   nginx: { buildpacks: { nginx: { lines: ["1.13.X", "1.14.X", "1.15.X"], removal_strategy: 'keep_master' } } },
   pip: { buildpacks: { python: {} }, source_type: 'pypi'},
   pipenv: { buildpacks: { python: {} }, source_type: 'pypi'},
@@ -276,6 +276,7 @@ jobs:
       params:
         VERSION_LINE: 'minor'
         REMOVAL_STRATEGY: 'keep_all'
+        CF_STACKS: 'cflinuxfs2'
     - put: dotnet-core-buildpack
       params:
         repository: artifacts
@@ -307,7 +308,8 @@ jobs:
       file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
       params:
         VERSION_LINE: <%= get_version_line_type(bp[:lines]) %>
-        REMOVAL_STRATEGY: <%= bp[:removal_strategy] || 'remove_all' %>
+        REMOVAL_STRATEGY: <%= bp.fetch(:removal_strategy, 'remove_all') %>
+        CF_STACKS: <%= bp.fetch(:cf_stacks, ['cflinuxfs2']).join(' ') %>
     - put: <%= bp_name %>-buildpack
       params:
         repository: artifacts
