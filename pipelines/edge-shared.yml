@@ -97,7 +97,6 @@ jobs:
               - windows2012-stemcell/*.tgz
               - windows2016-stemcell/*.tgz
             ops_files:
-            - cf-deployment/operations/use-compiled-releases.yml
             - cf-deployment/operations/windows-cell.yml
             - cf-deployment/operations/windows2016-cell.yml
             - cf-deployment/operations/use-latest-windows-stemcell.yml
