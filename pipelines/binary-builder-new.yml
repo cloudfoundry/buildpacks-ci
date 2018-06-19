@@ -116,7 +116,8 @@ resources:
     bucket: {{buildpacks-binaries-s3-bucket}}
     access_key_id: {{pivotal-buildpacks-s3-access-key}}
     secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-    regexp: dependencies/<%=dep_name%>/<%=dep_name%>.*(\d+.\d+.\d+)(.*)
+    # godep has versions of the form 'v80'; everyone else uses 'v1.2.3'
+    regexp: dependencies/<%=dep_name%>/<%=dep_name%>.*<%= dep_name.to_s == 'godep' ? '(\d+)' : '(\d+.\d+.\d+)' %>(.*)
 <% end %>
 <% end %>
 

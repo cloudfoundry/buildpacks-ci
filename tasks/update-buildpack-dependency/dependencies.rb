@@ -22,7 +22,9 @@ class Dependencies
       return @dependencies
     end
     out.sort_by do |d|
-      version = Gem::Version.new(d['version']) rescue d['version']
+      version = d['version']
+      version = version[1..-1] if !version.nil? && version.start_with?('v')
+      version = Gem::Version.new(version) rescue version
       [ d['name'], version ]
     end
   end

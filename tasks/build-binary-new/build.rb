@@ -155,9 +155,9 @@ when 'hwc'
   })
 when 'dep'
   Dir.chdir('binary-builder') do
-    run('./bin/binary-builder', '--name=dep', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
+    run('./bin/binary-builder', '--name=dep', "--version=v#{version}", "--sha256=#{data.dig('version', 'sha256')}")
   end
-  old_file = "binary-builder/dep#{version}.linux-amd64.tar.gz"
+  old_file = "binary-builder/dep-v#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
   filename = File.basename(old_file).gsub(/(\.tar.gz)$/, "-#{sha[0..7]}\\1")
   FileUtils.mv(old_file, "artifacts/#{filename}")
@@ -168,9 +168,9 @@ when 'dep'
   })
 when 'godep'
   Dir.chdir('binary-builder') do
-    run('./bin/binary-builder', '--name=godep', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
+    run('./bin/binary-builder', '--name=godep', "--version=v#{version}", "--sha256=#{data.dig('version', 'sha256')}")
   end
-  old_file = "binary-builder/godep#{version}.linux-amd64.tar.gz"
+  old_file = "binary-builder/godep-v#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
   filename = File.basename(old_file).gsub(/(\.tar.gz)$/, "-#{sha[0..7]}\\1")
   FileUtils.mv(old_file, "artifacts/#{filename}")
