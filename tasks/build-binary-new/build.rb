@@ -30,6 +30,19 @@ def run(*args)
 end
 
 case name
+when 'bundler'
+  Dir.chdir('binary-builder') do
+    run('./bin/binary-builder', '--name=bundler', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
+  end
+  old_file = "binary-builder/bundler-#{version}.tgz"
+  sha = Digest::SHA256.hexdigest(open(old_file).read)
+  filename = File.basename(old_file).gsub(/(\.tar.gz)$/, "-#{sha[0..7]}\\1")
+  FileUtils.mv(old_file, "artifacts/#{filename}")
+
+  out_data.merge!({
+    sha256: sha,
+    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+  })
 when 'dotnet'
   GitClient.clone_repo('https://github.com/dotnet/cli.git', 'cli')
 
