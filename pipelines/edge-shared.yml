@@ -100,7 +100,6 @@ jobs:
             - cf-deployment/operations/windows-cell.yml
             - cf-deployment/operations/windows2016-cell.yml
             - cf-deployment/operations/use-latest-windows-stemcell.yml
-            - cf-deployment/operations/experimental/enable-prefer-declarative-healthchecks-windows.yml
             - cf-deployment/operations/experimental/enable-instance-identity-credentials.yml
             - cf-deployment/operations/experimental/enable-instance-identity-credentials-windows.yml
             - cf-deployment/operations/experimental/enable-instance-identity-credentials-windows2016.yml
