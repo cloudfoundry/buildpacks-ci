@@ -63,11 +63,11 @@ module Depwatcher
       Array(GithubRelease).from_json(res)
     end
 
-    private def find_github_release(repo : String, ref : String)
+    def find_github_release(repo : String, ref : String)
       github_release = releases(repo).find do |r|
         r.ref == ref
       end
-      raise "Could not find data for version" unless github_release
+      raise "Could not find release data for version" unless github_release
       github_release
     end
 
