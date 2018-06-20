@@ -13,10 +13,16 @@ resource_types:
     source:
       repository: cloudfoundry/bosh-deployment-resource
 resources:
-  - name: nightly-trigger
+  - name: daily-3am-trigger
     type: cron
     source:
       expression: 0 3 * * *
+      location: {{current-timezone}}
+
+  - name: sunday-9pm-trigger
+    type: cron
+    source:
+      expression: 0 21 * * 7
       location: {{current-timezone}}
 
   - name: buildpacks-ci
@@ -71,13 +77,19 @@ resources:
 
 jobs:
   - name: deploy-edge
+    serial_groups:
+      - edge
     serial: true
     public: true
     plan:
       - do:
         - aggregate:
-          - get: nightly-trigger
+          - get: daily-3am-trigger
             trigger: true
+          - get: sunday-9pm-trigger
+            trigger: true
+            passed:
+            - clean-up-edge
           - get: buildpacks-ci
           - get: cf-deployment
           - get: bbl-state
@@ -113,6 +125,62 @@ jobs:
             - buildpacks-ci/deployments/edge-shared/num-cells.yml
             vars:
               system_domain: edge.buildpacks-gcp.ci.cf-app.com
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: clean-up-edge
+    serial_groups:
+      - edge
+    serial: true
+    public: true
+    plan:
+      - do:
+        - aggregate:
+          - get: daily-3am-trigger
+            trigger: true
+            passed:
+              - deploy-edge
+          - get: sunday-9pm-trigger
+            trigger: true
+            passed:
+              - tear-down-edge
+          - get: buildpacks-ci
+          - get: bbl-state
+        - task: bosh-clean-up
+          file: buildpacks-ci/tasks/bosh-clean-up/task.yml
+          params:
+            ENV_NAME: edge
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: tear-down-edge
+    serial_groups:
+      - edge
+    serial: true
+    public: true
+    plan:
+      - do:
+        - aggregate:
+          - get: sunday-9pm-trigger
+            trigger: true
+          - get: buildpacks-ci
+          - get: bbl-state
+        - put: edge-cf-deployment
+          params:
+            source_file: deployment-source-config/source_file.yml
+            delete:
+              enabled: true
+              force: true
         on_failure:
           put: failure-alert
           params:
