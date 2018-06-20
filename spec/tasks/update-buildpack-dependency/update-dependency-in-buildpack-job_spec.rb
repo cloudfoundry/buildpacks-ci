@@ -138,4 +138,45 @@ describe Dependencies do
       end
     end
   end
+
+  context 'when dotnet 2.1.201 already exists' do
+    let(:dependencies) { [
+      { 'name' => 'dotnet', 'version' =>  '2.1.201' },
+      { 'name' => 'dotnet', 'version' =>  '2.1.300' },
+      { 'name' => 'dotnet', 'version' =>  '2.1.301' },
+    ].freeze }
+    let(:master_dependencies) { [
+      { 'name' => 'dotnet', 'version' =>  '2.1.201' },
+      { 'name' => 'dotnet', 'version' =>  '2.1.300' },
+    ] }
+
+    let(:line) { nil }
+    let(:removal_strategy) { 'keep_master' }
+
+    let(:dep) { { 'name' => 'dotnet', 'version' => '2.1.302' } }
+    it 'keeps dotnet 2.1.201 when there is a new version of dotnet in the same line' do
+      expect(subject).to eq([
+        { 'name' => 'dotnet', 'version' =>  '2.1.201' },
+        { 'name' => 'dotnet', 'version' =>  '2.1.300' },
+        { 'name' => 'dotnet', 'version' =>  '2.1.302' },
+      ])
+    end
+
+    context 'when dotnet 2.1.201 gets rebuilt' do
+      let(:dependencies) { [
+        { 'name' => 'dotnet', 'version' =>  '2.1.201', 'foo' => 'bar' },
+        { 'name' => 'dotnet', 'version' =>  '2.1.300' },
+        { 'name' => 'dotnet', 'version' =>  '2.1.301' },
+      ].freeze }
+
+      let(:dep) { { 'name' => 'dotnet', 'version' => '2.1.201', 'foo' => 'baz' } }
+      it 'replaces dotnet 2.1.201 with dotnet 2.1.201' do
+        expect(subject).to eq([
+          { 'name' => 'dotnet', 'version' =>  '2.1.201', 'foo' => 'baz' },
+          { 'name' => 'dotnet', 'version' =>  '2.1.300' },
+          { 'name' => 'dotnet', 'version' =>  '2.1.301' },
+        ])
+      end
+    end
+  end
 end

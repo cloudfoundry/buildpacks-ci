@@ -5,7 +5,7 @@ class Dependencies
     @removal_strategy = removal_strategy
     @dependencies = dependencies
     @matching_deps = dependencies.select do |d|
-      d['name'] == @dep['name'] && same_line?(d['version'])
+      same_dependency_line?(d['version'], d['name'])
     end
     @master_dependencies = master_dependencies
   end
@@ -35,7 +35,10 @@ class Dependencies
     end
   end
 
-  def same_line?(version)
+  def same_dependency_line?(version, dep_name)
+    return false if dep_name != @dep['name']
+    return false if @dep['name'] == 'dotnet' && version == '2.1.201' && @dep['version'] != '2.1.201'
+
     version = begin
       Gem::Version.new(version)
     rescue
@@ -57,7 +60,7 @@ class Dependencies
   def master_dependencies
     return [] unless @removal_strategy == 'keep_master'
     dep = @master_dependencies.select do |d|
-      d['name'] == @dep['name'] && same_line?(d['version'])
+      same_dependency_line?(d['version'], d['name'])
     end.sort_by { |d| Gem::Version.new(d['version']) rescue d['version'] }.last
     dep ? [dep] : []
   end
