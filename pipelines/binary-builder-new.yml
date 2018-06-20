@@ -11,6 +11,10 @@
   httpd: { buildpacks: { php: {} } },
   hwc: { buildpacks: { hwc: { cf_stacks: ['windows2012R2', 'windows2016'] } }, source_type: 'github_releases', source_params: ['repo: cloudfoundry/hwc', 'fetch_source: true']},
   nginx: { buildpacks: { nginx: { lines: ["1.13.X", "1.14.X", "1.15.X"], removal_strategy: 'keep_master' } } },
+  node: { buildpacks: { nodejs: { lines: ["4.X.X", "6.X.X", "8.X.X", "9.X.X", "10.X.X"], removal_strategy: 'keep_master'},
+                        ruby: { lines: ["4.X.X", "6.X.X"], removal_strategy: 'keep_master'},
+                        'dotnet-core' => { lines: ["6.X.X"], removal_strategy: 'keep_master'} },
+                      source_type: 'node'},
   pip: { buildpacks: { python: {} }, source_type: 'pypi'},
   pipenv: { buildpacks: { python: {} }, source_type: 'pypi'},
   python: { buildpacks: { python: { lines: ["2.7.X", "3.3.X", "3.4.X", "3.5.X", "3.6.X"], removal_strategy: 'keep_master' } } },
@@ -188,8 +192,10 @@ jobs:
       trigger: true
       version: every
       passed:
-      <% dep[:buildpacks].each do |bp_name, _| %>
+      <% dep[:buildpacks].each do |bp_name, bp_data| %>
+      <% if bp_data.dig(:lines).nil? || bp_data[:lines].include?(line) %>
       - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
+      <% end %>
       <% end %>
     - get: builds
   - do:

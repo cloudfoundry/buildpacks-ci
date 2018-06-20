@@ -30,6 +30,8 @@ when "go"
   version = Depwatcher::Go.new.in(version["ref"].to_s)
 when "r"
   version = Depwatcher::R.new.in(version["ref"].to_s)
+when "node"
+  version = Depwatcher::Node.new.in(version["ref"].to_s)
 when "npm"
   version = Depwatcher::Npm.new.in(source["name"].to_s, version["ref"].to_s)
 when "nginx"

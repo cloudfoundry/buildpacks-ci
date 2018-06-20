@@ -218,6 +218,20 @@ when 'go'
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
+when 'node'
+  Dir.chdir('binary-builder') do
+    run('./bin/binary-builder', '--name=node', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
+  end
+  old_file = "binary-builder/node-#{version}-linux-x64.tgz"
+  sha = Digest::SHA256.hexdigest(open(old_file).read)
+  filename = File.basename(old_file).gsub(/(\.tar.gz)$/, "-#{sha[0..7]}\\1")
+  FileUtils.mv(old_file, "artifacts/#{filename}")
+
+  out_data.merge!({
+    sha256: sha,
+    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+  })
+
 when 'python'
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=python', "--version=#{version}", "--md5=#{data.dig('version', 'md5')}")
