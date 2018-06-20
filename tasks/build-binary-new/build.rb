@@ -33,13 +33,12 @@ case name
 when 'dotnet'
   GitClient.clone_repo('https://github.com/dotnet/cli.git', 'cli')
 
-  stripped_version = version[1..-1]
-  major, minor, patch = stripped_version.split('.')
+  major, minor, patch = version.split('.')
   Dir.chdir('cli') do
-    if version == 'v2.1.300' # See: https://github.com/dotnet/cli/issues/9388
+    if version == '2.1.300' # See: https://github.com/dotnet/cli/issues/9388
       GitClient.checkout_branch('aeae506fa8d3571d8b5f75f81389003e0fb0273e')
     else
-      GitClient.checkout_branch(version)
+      GitClient.checkout_branch("v#{version}")
     end
     run('apt-get', 'update')
     run('apt-get', '-y', 'upgrade')
@@ -57,7 +56,7 @@ when 'dotnet'
 
   # The path to the built files changes in dotnet-v2.1.300
   has_artifacts_dir = major.to_i <= 2 && minor.to_i <= 1 && patch.to_i < 300
-  old_filename = "#{name}.#{stripped_version}.linux-amd64.tar.xz"
+  old_filename = "#{name}.#{version}.linux-amd64.tar.xz"
   Dir.chdir(if has_artifacts_dir
               Dir['cli/artifacts/*-x64/stage2'][0]
             else
@@ -70,7 +69,7 @@ when 'dotnet'
   FileUtils.mv("/tmp/#{old_filename}", "artifacts/#{filename}")
 
   out_data.merge!({
-    version: stripped_version,
+    version: version,
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}",
     git_commit_sha: data.dig('version', 'git_commit_sha')
