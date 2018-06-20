@@ -17,7 +17,7 @@ run:
       pushd buildpacks-ci
         bundle exec rspec --tag ~fly
         pushd dockerfiles/depwatcher
-          crystal deps
+          crystal shards
           crystal spec
         popd
       popd
