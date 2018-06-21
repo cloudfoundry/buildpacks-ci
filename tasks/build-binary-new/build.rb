@@ -352,7 +352,7 @@ when 'nginx'
   out_data.merge!({
     source_pgp: source_pgp,
     sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+    url: "https://buildpacks.cloudfoundry.org/dependencies/nginx/#{filename}"
   })
 when 'nginx-static'
   artifacts = "#{Dir.pwd}/artifacts"
