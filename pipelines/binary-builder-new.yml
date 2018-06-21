@@ -13,6 +13,7 @@
   httpd: { buildpacks: { php: {} } },
   hwc: { buildpacks: { hwc: { cf_stacks: ['windows2012R2', 'windows2016'] } }, source_type: 'github_releases', source_params: ['repo: cloudfoundry/hwc', 'fetch_source: true']},
   nginx: { buildpacks: { nginx: { lines: ["1.13.X", "1.14.X", "1.15.X"], removal_strategy: 'keep_master' } } },
+  'nginx-static': { buildpacks: { php: { lines: ["1.14.X", "1.15.X"] }, staticfile: { lines: ["1.15.X"] } }, source_type: 'nginx' },
   node: { buildpacks: { nodejs: { lines: ["4.X.X", "6.X.X", "8.X.X", "9.X.X", "10.X.X"], removal_strategy: 'keep_master'},
                         ruby: { lines: ["4.X.X", "6.X.X"], removal_strategy: 'keep_master'},
                         'dotnet-core' => { lines: ["6.X.X"], removal_strategy: 'keep_master'} },

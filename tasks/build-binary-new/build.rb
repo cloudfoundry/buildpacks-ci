@@ -354,6 +354,57 @@ when 'nginx'
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
+when 'nginx-static'
+  artifacts = "#{Dir.pwd}/artifacts"
+  source_pgp = 'not yet implemented'
+  destdir = Dir.mktmpdir
+  Dir.mktmpdir do |dir|
+    Dir.chdir(dir) do
+      run('wget', data.dig('version', 'url'))
+      # TODO validate pgp
+      run('tar', 'xf', "nginx-#{version}.tar.gz")
+      Dir.chdir("nginx-#{version}") do
+        run(
+          './configure',
+          '--prefix=/',
+          '--error-log-path=stderr',
+          '--with-http_ssl_module',
+          '--with-http_realip_module',
+          '--with-http_gunzip_module',
+          '--with-http_gzip_static_module',
+          '--with-http_auth_request_module',
+          '--with-http_random_index_module',
+          '--with-http_secure_link_module',
+          '--with-http_stub_status_module',
+          '--without-http_uwsgi_module',
+          '--without-http_scgi_module',
+          '--with-pcre',
+          '--with-pcre-jit',
+          '--with-cc-opt=-fPIE -pie',
+          '--with-ld-opt=-fPIE -pie -z now',
+        )
+        run('make')
+        system({'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR'=>"#{destdir}/nginx"}, 'make install')
+        raise "Could not run make install" unless $?.success?
+
+        Dir.chdir(destdir) do
+          run('rm', '-Rf', './nginx/html', './nginx/conf')
+          run('mkdir', 'nginx/conf')
+          run('tar', 'zcvf', "#{artifacts}/nginx-#{version}.tgz", '.')
+        end
+      end
+    end
+  end
+
+  sha = Digest::SHA256.hexdigest(open("artifacts/nginx-#{version}.tgz").read)
+  filename = "nginx-#{version}-linux-x64-#{sha[0..7]}.tgz"
+  FileUtils.mv("artifacts/nginx-#{version}.tgz", "artifacts/#{filename}")
+
+  out_data.merge!({
+    source_pgp: source_pgp,
+    sha256: sha,
+    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+  })
 else
   raise("Dependency: #{name} is not currently supported")
 end

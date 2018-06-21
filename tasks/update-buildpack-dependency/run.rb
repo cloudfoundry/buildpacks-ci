@@ -11,6 +11,7 @@ manifest_master = YAML.load_file('buildpack-master/manifest.yml') # rescue { 'de
 
 data = JSON.parse(open('source/data.json').read)
 name = data.dig('source', 'name')
+name = 'nginx' if name == 'nginx-static'
 resource_version = data.dig('version', 'ref')
 build = JSON.parse(open("builds/binary-builds-new/#{name}/#{resource_version}.json").read)
 story_id = build['tracker_story_id']
