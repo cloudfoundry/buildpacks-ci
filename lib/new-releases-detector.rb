@@ -209,15 +209,6 @@ class NewReleasesDetector
     @get_tags_functions = {
       apr:             -> { Nokogiri::HTML.parse(open('https://apr.apache.org/download.cgi')).css('a[name=apr1] strong').map{|a|a.text.gsub(/APR\s+(\S+).*/, '\1')} },
       apr_util:        -> { Nokogiri::HTML.parse(open('https://apr.apache.org/download.cgi')).css('a[name=aprutil1] strong').map{|a|a.text.gsub(/APR\-util\s+(\S+).*/, '\1')} },
-      bundler:         -> { Octokit.tags('bundler/bundler').map(&:name).grep(/^v/) },
-      rubygems:        -> { Octokit.tags('rubygems/rubygems').map(&:name).grep(/^v/) },
-      bower:           -> { JSON.parse(open('https://registry.npmjs.org/bower').read)['versions'].keys },
-      composer:        -> { Octokit.releases('composer/composer').map(&:tag_name) },
-      glide:           -> { Octokit.releases('Masterminds/glide').map(&:tag_name) },
-      go:              -> { Octokit.tags('golang/go').map(&:name).grep(/^go/) },
-      godep:           -> { Octokit.releases('tools/godep').map(&:tag_name) },
-      dep:             -> { Octokit.releases('golang/dep').map(&:tag_name) },
-      hwc:             -> { Octokit.releases('cloudfoundry-incubator/hwc').map(&:tag_name) },
       jruby:           -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
       libunwind:       -> { Octokit.releases('libunwind/libunwind').map(&:tag_name) },
       maven:           -> {
@@ -227,10 +218,8 @@ class NewReleasesDetector
       miniconda:       -> { Nokogiri::HTML.parse(open('https://repo.continuum.io/miniconda/').read).css('table tr td a').map {|link| link['href']} },
       newrelic:        -> { Nokogiri::HTML.parse(open('https://download.newrelic.com/php_agent/archive/')).css('table td a').map{|link| link['href']} },
       nginx:           -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release/) },
-      node:            -> { JSON.parse(open('https://nodejs.org/dist/index.json').read).map{|d| d['version']} },
       openjdk:         -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys },
       php:             -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
-      python:          -> { Nokogiri::HTML.parse(open('https://www.python.org/downloads/')).css('.release-number a').map{|a|a.text.gsub(/.*Python\s*/, 'v')} },
     }
   end
 
