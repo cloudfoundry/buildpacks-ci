@@ -1,6 +1,7 @@
 <% dependencies = {
   appdynamics: { buildpacks: { php: {} }, third_party_hosted: true, source_type: 'appd_agent'},
-  bundler: { buildpacks: { ruby: {} }, source_type: 'rubygems', source_params: ['name: bundler'] },
+  bower: { buildpacks: { 'dotnet-core' => {} }, source_type: 'npm' },
+  bundler: { buildpacks: { ruby: {} }, source_type: 'rubygems' },
   CAAPM: { buildpacks: { php: {} }, third_party_hosted: true, source_type: 'ca_apm_agent'},
   composer: { buildpacks: { php: {} }, source_type: 'github_releases', source_params: ['repo: composer/composer', 'extension: .phar']},
   dep: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: golang/dep', 'fetch_source: true']},

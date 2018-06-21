@@ -135,7 +135,7 @@ when 'composer'
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
-when 'setuptools', 'rubygems', 'yarn', 'pip'
+when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower'
   res = open(url).read
   sha = Digest::SHA256.hexdigest(res)
   if data.dig('version', 'md5_digest') && Digest::MD5.hexdigest(res) != data.dig('version', 'md5_digest')
