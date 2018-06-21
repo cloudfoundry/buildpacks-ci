@@ -2,7 +2,7 @@
 
 set -xeuo pipefail
 
-pushd bbl-state/${ENV_NAME}
+pushd "bbl-state/${ENV_NAME}"
   set +x
   eval "$(bbl print-env)"
   set -x
