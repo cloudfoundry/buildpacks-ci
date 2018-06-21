@@ -55,6 +55,10 @@ def get_version_line_type(lines)
     nil
   end
 end
+
+def bp_uses_line?(bp_data, line)
+  bp_data.dig(:lines).nil? || bp_data[:lines].include?(line)
+end
 %>
 
 resource_types:
@@ -175,7 +179,7 @@ jobs:
         TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
         TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-        BUILDPACKS: <%= dep[:buildpacks].keys.join(' ') %>
+        BUILDPACKS: <%= dep[:buildpacks].select{ |_, bp_data| bp_uses_line?(bp_data,line) }.keys.join(' ') %>
     - put: builds
       params:
         repository: builds-artifacts
@@ -193,7 +197,7 @@ jobs:
       version: every
       passed:
       <% dep[:buildpacks].each do |bp_name, bp_data| %>
-      <% if bp_data.dig(:lines).nil? || bp_data[:lines].include?(line) %>
+      <% if bp_uses_line?(bp_data, line) %>
       - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
       <% end %>
       <% end %>
