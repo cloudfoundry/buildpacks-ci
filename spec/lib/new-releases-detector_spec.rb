@@ -21,10 +21,7 @@ describe NewReleasesDetector do
     allow(Octokit).to receive(:configure)
     allow(Octokit).to receive(:tags).and_return([])
     allow(Octokit).to receive(:releases).and_return([])
-    allow_any_instance_of(described_class).to receive(:open).with(/python/).and_return(double(read: { 'tags' => [] }.to_json))
     allow_any_instance_of(described_class).to receive(:open).with(/openjdk/).and_return(double(read: {}.to_yaml))
-    allow_any_instance_of(described_class).to receive(:open).with(/node/).and_return(double(read: [].to_json))
-    allow_any_instance_of(described_class).to receive(:open).with(/bower/).and_return(double(read: { 'versions' => {} }.to_json))
     allow_any_instance_of(described_class).to receive(:open).with(/miniconda/).and_return(double(read: '<html></html>'))
     allow_any_instance_of(described_class).to receive(:open).with(/newrelic/).and_return(double(read: '<html></html>'))
     allow_any_instance_of(described_class).to receive(:open).with('https://apr.apache.org/download.cgi').and_return(double(read: '<html></html>'))
@@ -215,45 +212,6 @@ describe NewReleasesDetector do
       end
     end
 
-    context 'for python' do
-      let(:dependency)          { :python }
-      let(:old_versions)        { %w(v1 v2) }
-      let(:new_versions)        { %w(v3) }
-      let(:new_releases_source) { 'https://www.python.org/downloads/' }
-
-      context 'when there are new releases' do
-        let(:new_versions)          { %w(v3) }
-        let(:new_releases_response) { '<div><div><span class="release-number"><a>Python 1</a></span></div><div><span class="release-number"><a>Python 2</a></span></div><div><span class="release-number"><a>Python 3</a></span></div></div>' }
-
-        it_behaves_like 'there are new versions to potentially build'
-      end
-
-      context 'when there are no new releases' do
-        let(:new_releases_response) { '<div><div><span class="release-number"><a>Python 1</a></span></div><div><span class="release-number"><a>Python 2</a></span></div></div>' }
-
-        it_behaves_like 'there are no new versions to potentially build'
-      end
-    end
-
-    context 'for node' do
-      let(:dependency)          { :node }
-      let(:old_versions)        { %w(1.2.3 1.2.4) }
-      let(:new_releases_source) { 'https://nodejs.org/dist/index.json' }
-
-      context 'when there are new releases' do
-        let(:new_versions)          { %w(1.2.5) }
-        let(:new_releases_response) { double(read: [{ 'version' => 'v1.2.3'}, { 'version' => 'v1.2.4'}, { 'version' => 'v1.2.5'}].to_json) }
-
-        it_behaves_like 'there are new versions to potentially build'
-      end
-
-      context 'when there are no new releases' do
-        let(:new_releases_response) { double(read: [{ 'version' => 'v1.2.3'}, { 'version' => 'v1.2.4'}].to_json) }
-
-        it_behaves_like 'there are no new versions to potentially build'
-      end
-    end
-
     context 'for nginx' do
       let(:dependency)   { :nginx }
       let(:old_versions) { %w(1.10.1 1.10.2) }
@@ -295,25 +253,6 @@ describe NewReleasesDetector do
         let(:github_response) { [double(name: 'maven-3.3.5'), double(name: 'maven-3.3.7'), double(name: 'maven-3.3.8')] }
 
         it_behaves_like 'there are no new versions to potentially build', :github
-      end
-    end
-
-    context 'for bower' do
-      let(:dependency)          { :bower }
-      let(:old_versions)        { %w(1.7.6 1.7.7) }
-      let(:new_releases_source) { 'https://registry.npmjs.org/bower' }
-
-      context 'when there are new releases' do
-        let(:new_versions)          { %w(1.7.9) }
-        let(:new_releases_response) { double(read: { 'versions' => { '1.7.6': 'data', '1.7.7': 'data', '1.7.9': 'data' } }.to_json) }
-
-        it_behaves_like 'there are new versions to potentially build'
-      end
-
-      context 'when there are no new releases' do
-        let(:new_releases_response) { double(read: { 'versions' => { '1.7.6': 'data', '1.7.7': 'data' } }.to_json) }
-
-        it_behaves_like 'there are no new versions to potentially build'
       end
     end
 
