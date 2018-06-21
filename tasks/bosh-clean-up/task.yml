@@ -11,6 +11,6 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/tasks/detect-and-upload/run.rb
+    - buildpacks-ci/tasks/bosh-clean-up/run.rb
 params:
   ENV_NAME:
