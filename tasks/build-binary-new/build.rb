@@ -124,6 +124,17 @@ when 'CAAPM', 'appdynamics'
     sha256: sha,
     url: url
   })
+when 'composer'
+  sha = data.dig('version', 'sha256')
+  input_path = "source/composer.phar"
+  filename = "composer-#{version}-#{sha[0..7]}.phar"
+  output_path = "artifacts/#{filename}"
+  FileUtils.mv(input_path, output_path)
+
+  out_data.merge!({
+    sha256: sha,
+    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+  })
 when 'setuptools', 'rubygems', 'yarn', 'pip'
   res = open(url).read
   sha = Digest::SHA256.hexdigest(res)
