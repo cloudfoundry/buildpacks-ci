@@ -1,4 +1,4 @@
-FROM crystallang/crystal:0.23.1
+FROM crystallang/crystal:0.24.2
 
 ADD . /src
 WORKDIR /src
@@ -9,7 +9,7 @@ FROM ubuntu:xenial
 
 RUN \
   apt-get update && \
-  apt-get install -y apt-transport-https libxml2-dev && \
+  apt-get install -y apt-transport-https libxml2-dev libevent-2.0-5 && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --from=0 /src/bin/check /opt/resource/check
