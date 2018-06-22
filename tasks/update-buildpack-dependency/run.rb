@@ -10,21 +10,21 @@ manifest = YAML.load_file('buildpack/manifest.yml')
 manifest_master = YAML.load_file('buildpack-master/manifest.yml') # rescue { 'dependencies' => [] }
 
 data = JSON.parse(open('source/data.json').read)
-name = data.dig('source', 'name')
-name = 'nginx' if name == 'nginx-static'
+source_name = data.dig('source', 'name')
 resource_version = data.dig('version', 'ref')
-build = JSON.parse(open("builds/binary-builds-new/#{name}/#{resource_version}.json").read)
+build = JSON.parse(open("builds/binary-builds-new/#{source_name}/#{resource_version}.json").read)
+manifest_name = source_name == 'nginx-static' ? 'nginx' : source_name
 story_id = build['tracker_story_id']
 version = build['version']
 
 system('rsync -a buildpack/ artifacts/')
 raise('Could not copy buildpack to artifacts') unless $?.success?
 
-dep = {"name" => name, "version" => version, "uri" => build['url'], "sha256" => build['sha256'], "cf_stacks" => ENV['CF_STACKS'].split}
+dep = {"name" => manifest_name, "version" => version, "uri" => build['url'], "sha256" => build['sha256'], "cf_stacks" => ENV['CF_STACKS'].split}
 
-old_versions = manifest['dependencies'].select {|d| d['name'] == name}.map {|d| d['version']}
+old_versions = manifest['dependencies'].select {|d| d['name'] == manifest_name}.map {|d| d['version']}
 manifest['dependencies'] = Dependencies.new(dep, ENV['VERSION_LINE'], ENV['REMOVAL_STRATEGY'], manifest['dependencies'], manifest_master['dependencies']).switch
-new_versions = manifest['dependencies'].select {|d| d['name'] == name}.map {|d| d['version']}
+new_versions = manifest['dependencies'].select {|d| d['name'] == manifest_name}.map {|d| d['version']}
 
 added = (new_versions - old_versions).uniq.sort
 removed = (old_versions - new_versions).uniq.sort
@@ -37,7 +37,7 @@ end
 
 path_to_extensions = 'extensions/appdynamics/extension.py'
 write_extensions = ''
-if !rebuilt && name == 'appdynamics' && manifest['language'] == 'php'
+if !rebuilt && manifest_name == 'appdynamics' && manifest['language'] == 'php'
   if removed.length == 1 && added.length == 1
     text = File.read('buildpack/' + path_to_extensions)
     write_extensions = text.gsub(/#{Regexp.quote(removed.first)}/, added.first)
@@ -48,12 +48,12 @@ if !rebuilt && name == 'appdynamics' && manifest['language'] == 'php'
   end
 end
 
-commit_message = "Add #{name} #{version}"
+commit_message = "Add #{manifest_name} #{version}"
 if rebuilt
-  commit_message = "Rebuild #{name} #{version}"
+  commit_message = "Rebuild #{manifest_name} #{version}"
 end
 if removed.length > 0
-  commit_message = "#{commit_message}, remove #{name} #{removed.join(', ')}"
+  commit_message = "#{commit_message}, remove #{manifest_name} #{removed.join(', ')}"
 end
 
 Dir.chdir('artifacts') do
