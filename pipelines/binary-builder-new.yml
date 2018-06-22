@@ -129,10 +129,8 @@ resources:
     bucket: {{buildpacks-binaries-s3-bucket}}
     access_key_id: {{pivotal-buildpacks-s3-access-key}}
     secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-    # nginx-static will be in nginx/nginx-vA.B.C-hash.tgz, not nginx-static.
-    <% correct_dep_name = dep_name.to_s == 'nginx-static' ? 'nginx' : dep_name %>
     # godep has versions of the form 'v80'; everyone else uses 'v1.2.3'
-    regexp: dependencies/<%=correct_dep_name%>/<%=correct_dep_name%>.*<%= correct_dep_name.to_s == 'godep' ? '(\d+)' : '(\d+.\d+.\d+)' %>(.*)
+    regexp: dependencies/<%=dep_name%>/<%=dep_name%>.*<%= dep_name.to_s == 'godep' ? '(\d+)' : '(\d+.\d+.\d+)' %>(.*)
 <% end %>
 <% end %>
 
