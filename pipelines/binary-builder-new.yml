@@ -5,7 +5,7 @@
   CAAPM: { buildpacks: { php: {} }, third_party_hosted: true, source_type: 'ca_apm_agent'},
   composer: { buildpacks: { php: {} }, source_type: 'github_releases', source_params: ['repo: composer/composer', 'extension: .phar']},
   dep: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: golang/dep', 'fetch_source: true']},
-  dotnet: { buildpacks: { 'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X"], removal_strategy: 'keep_master' } }, source_type: 'github_tags', source_params: ['repo: dotnet/cli', 'regexp: "^v[0-9]"'] },
+  dotnet: { buildpacks: { 'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X"], removal_strategy: 'keep_master' } } },
   'dotnet-framework': { buildpacks: { 'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X"], removal_strategy: 'keep_all' } } },
   glide: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: Masterminds/glide', 'fetch_source: true'] },
   go: { buildpacks: { go: { lines: ["1.6.X", "1.7.X", "1.8.X", "1.9.X", "1.10.X"], removal_strategy: 'keep_master' } } },
