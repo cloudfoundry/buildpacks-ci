@@ -27,7 +27,7 @@ when "r"
 when "npm"
   versions = Depwatcher::Npm.new.check(source["name"].to_s)
 when "node"
-  versions = Depwatcher::Node.new.check()
+  versions = Depwatcher::Node.new.check
 when "nginx"
   versions = Depwatcher::Nginx.new.check
 when "httpd"
@@ -36,6 +36,8 @@ when "ca_apm_agent"
   versions = Depwatcher::CaApmAgent.new.check
 when "appd_agent"
   versions = Depwatcher::AppDynamicsAgent.new.check
+when "dotnet"
+  versions = Depwatcher::Dotnet.new.check
 when "dotnet-framework"
   versions = Depwatcher::DotnetFramework.new.check
 else
