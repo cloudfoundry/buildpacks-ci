@@ -357,7 +357,7 @@ when 'nginx'
 when 'nginx-static'
   source_pgp = 'unimplemented'
   Dir.chdir('binary-builder') do
-    run('./bin/binary-builder', '--name=binary-builder', "--version=#{version}", '--gpg-signature=unimplemented', '--gpg-rsa-key-id=unimplemented')
+    run('./bin/binary-builder', '--name=nginx', "--version=#{version}", '--gpg-signature=unimplemented', '--gpg-rsa-key-id=unimplemented')
   end
   old_file = "binary-builder/nginx-#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
