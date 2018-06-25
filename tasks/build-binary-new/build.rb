@@ -357,9 +357,7 @@ when 'nginx'
 when 'nginx-static'
   artifacts = "#{Dir.pwd}/artifacts"
   source_pgp = 'not yet implemented'
-  tmpdir = Dir.mktmpdir
-  destdir = File.join(tmpdir, 'nginx')
-  Dir.mkdir(destdir)
+  destdir = Dir.mktmpdir
 
   Dir.mktmpdir do |dir|
     Dir.chdir(dir) do
@@ -390,10 +388,9 @@ when 'nginx-static'
         system({'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR'=>"#{destdir}/nginx"}, 'make install')
         raise "Could not run make install" unless $?.success?
 
-        Dir.chdir(tmpdir) do
-          run('rm', '-Rf', './nginx/nginx/html', './nginx/nginx/conf')
-          run('mkdir', 'nginx/nginx/conf')
-          run('tar', 'zcvf', "#{artifacts}/nginx-#{version}.tgz", 'nginx')
+        Dir.chdir(destdir) do
+          run('rm', '-Rf', './nginx/html/', './nginx/conf/*')
+          run('tar', 'zcvf', "#{artifacts}/nginx-#{version}.tgz", '*')
         end
       end
     end
