@@ -355,50 +355,14 @@ when 'nginx'
     url: "https://buildpacks.cloudfoundry.org/dependencies/nginx/#{filename}"
   })
 when 'nginx-static'
-  artifacts = "#{Dir.pwd}/artifacts"
-  source_pgp = 'not yet implemented'
-  destdir = Dir.mktmpdir
-
-  Dir.mktmpdir do |dir|
-    Dir.chdir(dir) do
-      run('wget', data.dig('version', 'url'))
-      # TODO validate pgp
-      run('tar', 'xf', "nginx-#{version}.tar.gz")
-      Dir.chdir("nginx-#{version}") do
-        run(
-          './configure',
-          '--prefix=/',
-          '--error-log-path=stderr',
-          '--with-http_ssl_module',
-          '--with-http_realip_module',
-          '--with-http_gunzip_module',
-          '--with-http_gzip_static_module',
-          '--with-http_auth_request_module',
-          '--with-http_random_index_module',
-          '--with-http_secure_link_module',
-          '--with-http_stub_status_module',
-          '--without-http_uwsgi_module',
-          '--without-http_scgi_module',
-          '--with-pcre',
-          '--with-pcre-jit',
-          '--with-cc-opt=-fPIE -pie',
-          '--with-ld-opt=-fPIE -pie -z now',
-        )
-        run('make')
-        system({'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR'=>"#{destdir}/nginx"}, 'make install')
-        raise "Could not run make install" unless $?.success?
-
-        Dir.chdir(destdir) do
-          run('rm', '-Rf', './nginx/html/', './nginx/conf/*')
-          run('tar', 'zcvf', "#{artifacts}/nginx-#{version}.tgz", '*')
-        end
-      end
-    end
+  source_pgp = 'unimplemented'
+  Dir.chdir('binary-builder') do
+    run('./bin/binary-builder', '--name=binary-builder', "--version=#{version}", '--gpg-signature=unimplemented', '--gpg-rsa-key-id=unimplemented')
   end
-
-  sha = Digest::SHA256.hexdigest(open("artifacts/nginx-#{version}.tgz").read)
-  filename = "nginx-#{version}-linux-x64-#{sha[0..7]}.tgz"
-  FileUtils.mv("artifacts/nginx-#{version}.tgz", "artifacts/#{filename}")
+  old_file = "binary-builder/nginx-#{version}-linux-x64.tgz"
+  sha = Digest::SHA256.hexdigest(open(old_file).read)
+  filename = File.basename(old_file).gsub(/(\.tgz)$/, "-#{sha[0..7]}\\1")
+  FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
     source_pgp: source_pgp,
