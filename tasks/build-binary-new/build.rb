@@ -111,7 +111,7 @@ when 'pipenv'
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
-when 'CAAPM', 'appdynamics'
+when 'CAAPM', 'appdynamics', 'miniconda2', 'miniconda3'
   res = open(url).read
   sha = Digest::SHA256.hexdigest(res)
   if data.dig('version', 'md5_digest') && Digest::MD5.hexdigest(res) != data.dig('version', 'md5_digest')
