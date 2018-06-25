@@ -355,9 +355,9 @@ when 'nginx'
     url: "https://buildpacks.cloudfoundry.org/dependencies/nginx/#{filename}"
   })
 when 'nginx-static'
-  source_pgp = data.dig('version', 'pgp')
+  old_sha = Digest::SHA256.hexdigest(open(data.dig('version', 'url')).read)
   Dir.chdir('binary-builder') do
-    run('./bin/binary-builder', '--name=nginx', "--version=#{version}", "--gpg-signature=#{source_pgp}", '--gpg-rsa-key-id=unimplemented')
+    run('./bin/binary-builder', '--name=nginx', "--version=#{version}", "--sha256=#{old_sha}")
   end
   old_file = "binary-builder/nginx-#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
@@ -365,7 +365,6 @@ when 'nginx-static'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    source_pgp: source_pgp,
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
