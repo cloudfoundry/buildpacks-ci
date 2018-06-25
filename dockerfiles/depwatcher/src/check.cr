@@ -10,6 +10,8 @@ when "github_releases"
   versions = Depwatcher::GithubReleases.new.check(source["repo"].to_s)
 when "github_tags"
   versions = Depwatcher::GithubTags.new.check(source["repo"].to_s, source["regexp"].to_s)
+when "miniconda"
+  versions = Depwatcher::Miniconda.new.check(source["generation"].to_s)
 when "rubygems"
   versions = Depwatcher::Rubygems.new.check(source["name"].to_s)
 when "rubygems_cli"
