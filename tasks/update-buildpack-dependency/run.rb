@@ -55,6 +55,26 @@ if !rebuilt && manifest_name = 'php' && manifest['language'] == 'php'
   php_defaults[varname] = version
 end
 
+if manifest_name = 'php' && manifest['language'] == 'php'
+  # set the modules for this php version
+  dependencies = manifest['dependencies'].map do |dependency|
+    if dependency.fetch('name') == 'php' && dependency.fetch('version') == version
+      modules = Dir.mktmpdir do |dir|
+                  Dir.chdir(dir) do
+                    `wget --no-verbose #{build['url']} && tar xzf #{File.basename(build['url'])}`
+                    Dir['php/lib/php/extensions/no-debug-non-zts-*/*.so'].collect do |file|
+                      File.basename(file, '.so')
+                    end.sort.reject do |m|
+                      %w(odbc gnupg).include?(m)
+                    end
+                  end
+                end
+      dependency["modules"] = modules
+    end
+    dependency
+  end
+end
+
 path_to_extensions = 'extensions/appdynamics/extension.py'
 write_extensions = ''
 if !rebuilt && manifest_name == 'appdynamics' && manifest['language'] == 'php'
