@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'json'
 require 'yaml'
+require 'tmpdir'
 require_relative './dependencies'
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
