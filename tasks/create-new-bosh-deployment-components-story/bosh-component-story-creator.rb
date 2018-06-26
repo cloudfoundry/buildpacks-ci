@@ -69,7 +69,7 @@ class BoshComponentStoryCreator
   end
 
   def create_tracker_story(component, version)
-    name = "Update #{component} in BOSH deployments"
+    name = "Update #{component} for Concourse deployment"
     description = <<~DESCRIPTION
                      There is a new version of #{component}: #{version}
 
