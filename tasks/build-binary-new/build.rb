@@ -285,7 +285,7 @@ when 'php'
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', "--name=php#{phpV}", "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}", "--php-extensions-file=#{extension_file}")
   end
-  old_file = "binary-builder/php-#{version}-linux-x64.tgz"
+  old_file = "binary-builder/php#{phpV}-#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
   filename = File.basename(old_file).gsub(/(\.tgz)$/, "-#{sha[0..7]}\\1")
   FileUtils.mv(old_file, "artifacts/#{filename}")
