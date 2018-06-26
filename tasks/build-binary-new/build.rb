@@ -235,7 +235,7 @@ when 'libunwind'
 
   Dir.chdir('source') do
     # github-releases depwatcher has already downloaded .tar.gz
-    run('tar', 'zxf', 'libunwind-#{version}.tar.gz')
+    run('tar', 'zxf', "libunwind-#{version}.tar.gz")
     Dir.chdir("libunwind-#{version}") do
       run('./configure', "--prefix=#{built_path}")
       run('make')
@@ -244,7 +244,7 @@ when 'libunwind'
   end
   old_filename = "libunwind-#{version}.tgz"
   Dir.chdir(built_path) do
-    run('tar','czf', old_filename, '*')
+    run('tar', 'czf', old_filename, '*')
   end
   old_filename = File.join(built_path,old_filename)
   sha = Digest::SHA256.hexdigest(open(old_filename).read)
