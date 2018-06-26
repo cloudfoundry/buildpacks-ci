@@ -12,6 +12,7 @@
   godep: { buildpacks: { go: {}}, source_type: 'github_releases', source_params: ['repo: tools/godep', 'fetch_source: true']},
   httpd: { buildpacks: { php: {} } },
   hwc: { buildpacks: { hwc: { cf_stacks: ['windows2012R2', 'windows2016'] } }, source_type: 'github_releases', source_params: ['repo: cloudfoundry/hwc', 'fetch_source: true']},
+  libunwind: { buildpacks: { 'dotnet-core' => {} }, source_type: 'github_releases', source_params: ['repo: libunwind/libunwind', 'extension: .tar.gz']},
   miniconda2: { buildpacks: { python: {} }, third_party_hosted: true, source_type: 'miniconda', source_params: ['generation: 2'] },
   miniconda3: { buildpacks: { python: {} }, third_party_hosted: true, source_type: 'miniconda', source_params: ['generation: 3'] },
   nginx: { buildpacks: { nginx: { lines: ["1.13.X", "1.14.X", "1.15.X"], removal_strategy: 'keep_master' } } },

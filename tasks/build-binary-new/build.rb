@@ -229,6 +229,31 @@ when 'go'
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
+when 'libunwind'
+  built_path = File.join(Dir.pwd, 'built')
+  Dir.mkdir(built_path)
+
+  Dir.chdir('source') do
+    # github-releases depwatcher has already downloaded .tar.gz
+    run('tar', 'zxf', 'libunwind*.tar.gz')
+    Dir.chdir("libunwind-#{version}") do
+      run('./configure', "--prefix=#{built_path}")
+      run('make')
+      run('make install')
+    end
+  end
+  old_filename = "libunwind-#{version}.tgz"
+  Dir.chdir(built_path) do
+    run('tar','czf', old_filename, '*')
+  end
+  old_filename = File.join(built_path,old_filename)
+  sha = Digest::SHA256.hexdigest(open(old_filename).read)
+  filename = "libunwind-#{version}-#{sha[0..7]}.tar.gz"
+  FileUtils.mv(old_filename, "artifacts/#{filename}")
+  out_data.merge!({
+    sha256: sha,
+    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+  })
 when 'node'
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=node', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
