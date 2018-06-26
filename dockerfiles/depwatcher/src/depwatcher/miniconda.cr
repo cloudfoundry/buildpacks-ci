@@ -16,11 +16,11 @@ module Depwatcher
     end
 
     def check(generation : String) : Array(Internal)
-      releases(generation) { |m, _| Internal.new(m[1]) }
+      releases(generation) { |m, _| Internal.new(m[1]) }.sort_by { |i| SemanticVersion.new(i.ref) }
     end
 
     def in(generation : String, ref : String) : Release
-      url = "https://repo.continuum.io/miniconda/Miniconda#{generation}-#{ref}-Linux_x86_64.sh"
+      url = "https://repo.continuum.io/miniconda/Miniconda#{generation}-#{ref}-Linux-x86_64.sh"
       (releases(generation) { |m, e|
         if m[1] == ref
           Release.new(ref, url, e.children[7].text)
@@ -39,6 +39,5 @@ module Depwatcher
         end
       end.compact
     end
-
   end
 end
