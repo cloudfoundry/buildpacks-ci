@@ -35,6 +35,26 @@ if added.length == 0 && !rebuilt
   exit 0
 end
 
+php_defaults = nil
+if !rebuilt && manifest_name = 'php' && manifest['language'] == 'php'
+  case version
+  when /^5.6/
+    varname = 'PHP_56_LATEST'
+  when /^7.0/
+    varname = 'PHP_70_LATEST'
+  when /^7.1/
+    varname = 'PHP_71_LATEST'
+  when /^7.2/
+    varname = 'PHP_72_LATEST'
+  else
+   puts "Unexpected version #{version} is not in known version lines."
+   exit 1
+  end
+
+  php_defaults = JSON.load_file('buildpack/defaults/options.json')
+  php_defaults[varname] = version
+end
+
 path_to_extensions = 'extensions/appdynamics/extension.py'
 write_extensions = ''
 if !rebuilt && manifest_name == 'appdynamics' && manifest['language'] == 'php'
@@ -62,6 +82,10 @@ Dir.chdir('artifacts') do
 
   File.write('manifest.yml', manifest.to_yaml)
   GitClient.add_file('manifest.yml')
+  unless php_defaults.nil?
+    File.write('defaults/options.json', php_defaults.to_json)
+    GitClient.add_file('defaults/options.json')
+  end
 
   if write_extensions != ''
     File.write(path_to_extensions, write_extensions)
