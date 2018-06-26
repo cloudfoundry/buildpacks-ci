@@ -21,7 +21,8 @@ module Depwatcher
     end
 
     def in(ref : String) : DotnetRelease
-      release = GithubReleases.new(client).find_github_release("dotnet/cli", ref)
+      new_ref = ref.gsub(/^v/, "")
+      release = GithubReleases.new(client).find_github_release("dotnet/cli", new_ref)
       DotnetRelease.new(release.ref, "https://github.com/dotnet/cli", get_dotnet_release_commit(release.tag_name))
     end
 
