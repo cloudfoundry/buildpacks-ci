@@ -268,9 +268,9 @@ when 'node'
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
 when 'php'
-  if version.starts_with?("7")
+  if version.start_with?("7")
     phpV = "7"
-  elsif version.starts_with?("5")
+  elsif version.start_with?("5")
     phpV = ""  # binary-builder expects 'php' to mean php 5.X.
   else
     raise "Unexpected PHP version #{version}. Expected 5.X or 7.X"
