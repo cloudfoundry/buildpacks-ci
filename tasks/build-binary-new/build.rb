@@ -244,7 +244,7 @@ when 'libunwind'
   end
   old_filename = "libunwind-#{version}.tgz"
   Dir.chdir(built_path) do
-    run('tar', 'czf', old_filename, '*')
+    run('tar', 'czf', old_filename, 'include', 'lib')
   end
   old_filename = File.join(built_path,old_filename)
   sha = Digest::SHA256.hexdigest(open(old_filename).read)
