@@ -276,8 +276,14 @@ when 'php'
     raise "Unexpected PHP version #{version}. Expected 5.X or 7.X"
   end
 
+  # add the right extensions
+  extension_file = File.join(buildpacks_ci_dir, 'tasks', 'build-binary-new', "php#{phpV}-extensions.yml")
+  if version.start_with?('7.2.')
+    extension_file = File.join(buildpacks_ci_dir, 'tasks', 'build-binary-new', "php72-extensions.yml")
+  end
+
   Dir.chdir('binary-builder') do
-    run('./bin/binary-builder', "--name=php#{phpV}", "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
+    run('./bin/binary-builder', "--name=php#{phpV}", "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}", "--php-extensions-file=#{extension_file}")
   end
   old_file = "binary-builder/php-#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
