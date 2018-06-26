@@ -26,6 +26,8 @@ when "pypi"
   version = Depwatcher::Pypi.new.in(source["name"].to_s, version["ref"].to_s)
 when "ruby"
   version = Depwatcher::Ruby.new.in(version["ref"].to_s)
+when "php"
+  versions = Depwatcher::Php.new.in(version["ref"].to_s)
 when "python"
   version = Depwatcher::Python.new.in(version["ref"].to_s)
 when "go"

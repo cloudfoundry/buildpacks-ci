@@ -20,6 +20,8 @@ when "pypi"
   versions = Depwatcher::Pypi.new.check(source["name"].to_s)
 when "ruby"
   versions = Depwatcher::Ruby.new.check
+when "php"
+  versions = Depwatcher::Php.new.check
 when "python"
   versions = Depwatcher::Python.new.check
 when "go"
