@@ -1,4 +1,6 @@
 .idea/
+.bundle/
+vendor/
 private.yml
 .vagrant/
 .rspec
