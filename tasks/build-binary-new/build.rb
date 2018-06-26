@@ -267,7 +267,27 @@ when 'node'
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
+when 'php'
+  if version.starts_with?("7")
+    phpV = "7"
+  elsif version.starts_with?("5")
+    phpV = ""  # binary-builder expects 'php' to mean php 5.X.
+  else
+    raise "Unexpected PHP version #{version}. Expected 5.X or 7.X"
+  end
 
+  Dir.chdir('binary-builder') do
+    run('./bin/binary-builder', "--name=php#{phpV}", "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
+  end
+  old_file = "binary-builder/php-#{version}-linux-x64.tgz"
+  sha = Digest::SHA256.hexdigest(open(old_file).read)
+  filename = File.basename(old_file).gsub(/(\.tgz)$/, "-#{sha[0..7]}\\1")
+  FileUtils.mv(old_file, "artifacts/#{filename}")
+
+  out_data.merge!({
+    sha256: sha,
+    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+  })
 when 'python'
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=python', "--version=#{version}", "--md5=#{data.dig('version', 'md5')}")
