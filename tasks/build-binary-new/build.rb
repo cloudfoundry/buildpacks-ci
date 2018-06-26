@@ -235,7 +235,7 @@ when 'libunwind'
 
   Dir.chdir('source') do
     # github-releases depwatcher has already downloaded .tar.gz
-    run('tar', 'zxf', 'libunwind*.tar.gz')
+    run('tar', 'zxf', 'libunwind-#{version}.tar.gz')
     Dir.chdir("libunwind-#{version}") do
       run('./configure', "--prefix=#{built_path}")
       run('make')
