@@ -32,7 +32,7 @@ class BoshComponentStoryCreator
     display_new_versions if new_versions.any?
 
     new_versions.each do |component, version|
-      create_tracker_story(display_name(component), version)
+      create_tracker_story(component, version)
       update_versions_yml(component, version)
     end
   end
@@ -69,9 +69,23 @@ class BoshComponentStoryCreator
   end
 
   def create_tracker_story(component, version)
-    name = "Update #{component} for Concourse deployment"
-    description = <<~DESCRIPTION
-                     There is a new version of #{component}: #{version}
+    name = "Update #{display_name(component)} for Concourse deployment"
+    tracker_client = TrackerApi::Client.new(token: ENV.fetch('TRACKER_API_TOKEN'))
+    buildpack_project = tracker_client.project(ENV.fetch('TRACKER_PROJECT_ID'))
+
+    requester_id = ENV.fetch('TRACKER_REQUESTER_ID').to_i
+
+    buildpack_project.create_story(name: name,
+                                   description: get_story_description(component, version),
+                                   story_type: 'chore',
+                                   requested_by_id: requester_id,
+                                   labels: ['concourse']
+    )
+  end
+
+  def get_story_description(component, version)
+    release_description = <<~DESCRIPTION
+                     There is a new version of #{display_name(component)}: #{version}
 
                      1. Pull `buildpacks-ci`
                      1. Update `deployments/concourse-gcp/manifest.yml.erb` with your changes
@@ -79,17 +93,18 @@ class BoshComponentStoryCreator
                      1. git push when satisfied
                      DESCRIPTION
 
-    tracker_client = TrackerApi::Client.new(token: ENV.fetch('TRACKER_API_TOKEN'))
-    buildpack_project = tracker_client.project(ENV.fetch('TRACKER_PROJECT_ID'))
+    non_release_description = <<~DESCRIPTION
+                     There is a new version of #{display_name(component)}: #{version}
 
-    requester_id = ENV.fetch('TRACKER_REQUESTER_ID').to_i
-
-    buildpack_project.create_story(name: name,
-                                   description: description,
-                                   story_type: 'chore',
-                                   requested_by_id: requester_id,
-                                   labels: ['concourse']
-    )
+                     1. Pull `buildpacks-ci`
+                     1. Run the `bin/deploy_concourse` script from root
+                     DESCRIPTION
+    case component
+    when 'concourse'
+      release_description
+    else
+      non_release_description
+    end
   end
 
   def update_versions_yml(component, version)

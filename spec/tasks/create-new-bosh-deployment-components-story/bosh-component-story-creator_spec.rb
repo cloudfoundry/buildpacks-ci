@@ -71,6 +71,7 @@ describe BoshComponentStoryCreator do
       expect(buildpack_project).to have_received(:create_story).with(hash_including(name: 'Update BOSH Google CPI for Concourse deployment'))
     end
 
+    # TODO: avoid false positives
     it 'does not update the YAML files' do
       subject.run!
 
@@ -91,16 +92,36 @@ describe BoshComponentStoryCreator do
     context 'makes a Tracker story' do
       let(:concourse_known_versions)      { %w(1.0) }
 
-      it 'adds content' do
+      it 'creates a non-release-related story' do
         subject.run!
 
-        expect(buildpack_project).to have_received(:create_story).with(hash_including(name: 'Update BOSH Google CPI for Concourse deployment', labels: ['concourse']))
+        expected_description = <<~DESCRIPTION
+                     There is a new version of BOSH Google CPI: 2.2
+
+                     1. Pull `buildpacks-ci`
+                     1. Run the `bin/deploy_concourse` script from root
+        DESCRIPTION
+        expect(buildpack_project).to have_received(:create_story).with(hash_including(
+                                                                           name: 'Update BOSH Google CPI for Concourse deployment',
+                                                                           description: expected_description,
+                                                                           labels: ['concourse']))
       end
 
-      it 'adds extra context to the Tracker story if the component is Concourse' do
+      it 'creates a release-related story' do
         subject.run!
 
-        expect(buildpack_project).to have_received(:create_story).with(hash_including(name: 'Update Concourse for Concourse deployment', labels: ['concourse'], description: /.*Run the \`bin\/deploy_concourse\` script from root\n1. git push when satisfied$/))
+        expected_description = <<~DESCRIPTION
+                     There is a new version of Concourse: 1.1
+
+                     1. Pull `buildpacks-ci`
+                     1. Update `deployments/concourse-gcp/manifest.yml.erb` with your changes
+                     1. Run the `bin/deploy_concourse` script from root
+                     1. git push when satisfied
+        DESCRIPTION
+        expect(buildpack_project).to have_received(:create_story).with(hash_including(
+                                                                           name: 'Update Concourse for Concourse deployment',
+                                                                           description: expected_description,
+                                                                           labels: ['concourse']))
       end
     end
 
