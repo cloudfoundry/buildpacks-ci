@@ -25,6 +25,9 @@ story = buildpack_project.create_story(
   owner_ids: [ ENV['TRACKER_REQUESTER_ID'].to_i ]
 )
 
+commit_msg = "git ci -m \"Bump version to $(cat VERSION) [#{story.id}]\""
+story.description = story.description + "```\n#{commit_msg}\n```"
+story.save
 puts "Created tracker story #{story.id}"
 
 system('rsync -a builds/ builds-artifacts/')
