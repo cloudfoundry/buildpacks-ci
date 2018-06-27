@@ -48,8 +48,8 @@ when 'dotnet'
 
   major, minor, patch = version.split('.')
   Dir.chdir('cli') do
-    if version == '2.1.300' # See: https://github.com/dotnet/cli/issues/9388
-      GitClient.checkout_branch('aeae506fa8d3571d8b5f75f81389003e0fb0273e')
+    if version == '2.1.301' # See: https://github.com/dotnet/cli/issues/9388
+      GitClient.checkout_branch('2fed1c07ba8669c87da60be5fd77f380d4b3fc95')
     else
       GitClient.checkout_branch("v#{version}")
     end
