@@ -84,7 +84,7 @@ class BoshComponentStoryCreator
   end
 
   def get_story_description(component, version)
-    release_description = <<~DESCRIPTION
+    manual_update_description = <<~DESCRIPTION
                      There is a new version of #{display_name(component)}: #{version}
 
                      1. Pull `buildpacks-ci`
@@ -93,7 +93,7 @@ class BoshComponentStoryCreator
                      1. git push when satisfied
                      DESCRIPTION
 
-    non_release_description = <<~DESCRIPTION
+    auto_update_description = <<~DESCRIPTION
                      There is a new version of #{display_name(component)}: #{version}
 
                      1. Pull `buildpacks-ci`
@@ -101,9 +101,9 @@ class BoshComponentStoryCreator
                      DESCRIPTION
     case component
     when 'concourse'
-      release_description
+      manual_update_description
     else
-      non_release_description
+      auto_update_description
     end
   end
 

@@ -71,13 +71,15 @@ describe BoshComponentStoryCreator do
       expect(buildpack_project).to have_received(:create_story).with(hash_including(name: 'Update BOSH Google CPI for Concourse deployment'))
     end
 
-    # TODO: avoid false positives
-    it 'does not update the YAML files' do
+    it 'updates YAML files for out-of-date components' do
       subject.run!
 
       expect(YAML.load_file(concourse_known_versions_file)).to eq %w(1.1)
-      expect(GitClient).not_to have_received(:add_file).with(File.join('bosh-deployment-components', 'concourse-versions.yml'))
-      expect(GitClient).not_to have_received(:safe_commit).with('Detected new version of Concourse: 1.1')
+      expect(GitClient).to have_received(:add_file).once
+      expect(GitClient).to have_received(:add_file).with(File.join('bosh-deployment-components', 'gcp-cpi-versions.yml'))
+
+      expect(GitClient).to have_received(:safe_commit).once
+      expect(GitClient).to have_received(:safe_commit).with('Detected new version of BOSH Google CPI: 2.2')
     end
   end
 
