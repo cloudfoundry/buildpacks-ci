@@ -6,7 +6,7 @@ Spec2.describe Depwatcher::JRuby do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://s3.amazonaws.com/jruby.org/downloads/9.2.0.0/jruby-src-9.2.0.0.tar.gz.sha256", nil, HTTP::Client::Response.new(200, "3d59bde1639c69965664ee46a07be230141ee8e99d2e7f43b574a6a8298c887c"))
+    client.stub_get("https://s3.amazonaws.com/jruby.org/downloads/9.2.0.0/jruby-src-9.2.0.0.tar.gz.sha256", nil, HTTP::Client::Response.new(200, "3d59bde1639c69965664ee46a07be230141ee8e99d2e7f43b574a6a8298c887c\n"))
     client.stub_get("http://jruby.org/download", nil, HTTP::Client::Response.new(200, File.read(File.join(__DIR__,"..", "fixtures", "jruby.html"))))
   end
 

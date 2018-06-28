@@ -34,7 +34,7 @@ module Depwatcher
     end
 
     def in(ref : String) : Release
-      sha = client.get("https://s3.amazonaws.com/jruby.org/downloads/#{ref}/jruby-src-#{ref}.tar.gz.sha256").body
+      sha = client.get("https://s3.amazonaws.com/jruby.org/downloads/#{ref}/jruby-src-#{ref}.tar.gz.sha256").body.strip
       Release.new(ref, "https://s3.amazonaws.com/jruby.org/downloads/#{ref}/jruby-src-#{ref}.tar.gz", sha)
     end
   end
