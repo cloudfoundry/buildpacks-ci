@@ -44,15 +44,13 @@ when 'bundler'
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
 when 'dotnet'
+  commit_sha = data.dig('version', 'git_commit_sha')
+
   GitClient.clone_repo('https://github.com/dotnet/cli.git', 'cli')
 
   major, minor, patch = version.split('.')
   Dir.chdir('cli') do
-    if version == '2.1.301' # See: https://github.com/dotnet/cli/issues/9388
-      GitClient.checkout_branch('2fed1c07ba8669c87da60be5fd77f380d4b3fc95')
-    else
-      GitClient.checkout_branch("v#{version}")
-    end
+    GitClient.checkout_branch(commit_sha)
     run('apt-get', 'update')
     run('apt-get', '-y', 'upgrade')
     run('apt-get', '-y', 'install', 'clang', 'devscripts', 'debhelper', 'libunwind8', 'liburcu1', 'libpython2.7', 'liblttng-ust0', 'libllvm3.6', 'liblldb-3.6')
@@ -85,7 +83,7 @@ when 'dotnet'
     version: version,
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}",
-    git_commit_sha: data.dig('version', 'git_commit_sha')
+    git_commit_sha: commit_sha
   })
 when 'pipenv'
   run('apt', 'update')
