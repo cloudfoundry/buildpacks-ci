@@ -18,8 +18,7 @@ module Depwatcher
       name = "nginx/nginx"
       regexp = "^release\-\\d+\.\\d+\.\\d+$"
       GithubTags.new(client).matched_tags(name, regexp).map do |r|
-        r.ref = r.ref.gsub(/^release\-/, "")
-        r
+        Internal.new(r.name.gsub(/^release\-/, ""))
       end.sort_by { |i| SemanticVersion.new(i.ref) }
     end
 
