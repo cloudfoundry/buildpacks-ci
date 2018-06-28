@@ -16,6 +16,8 @@ when "github_releases"
   end
 when "github_tags"
   version = Depwatcher::GithubTags.new.in(source["repo"].to_s, version["ref"].to_s)
+when "jruby"
+  version = Depwatcher::JRuby.new.in(version["ref"].to_s)
 when "miniconda"
   version = Depwatcher::Miniconda.new.in(source["generation"].to_s, version["ref"].to_s)
 when "rubygems"
