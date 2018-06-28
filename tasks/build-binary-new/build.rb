@@ -227,6 +227,28 @@ when 'go'
     sha256: sha,
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
+when 'jruby'
+  if /9.1.*/ =~ version
+    # jruby 9.1.X.X will implement ruby 2.3.X
+    ruby_version = '2.3'
+  elsif /9.2.*/ =~ version
+    # jruby 9.2.X.X will implement ruby 2.5.X
+    ruby_version = '2.5'
+  else
+    raise "Unsupported jruby version line #{version}"
+  end
+  Dir.chdir('binary-builder') do
+    run('./bin/binary-builder', '--name=jruby', "--version=#{version}_ruby-#{ruby_version}", "--sha256=#{data.dig('version', 'sha256')}")
+  end
+  old_file = "binary-builder/jruby-#{version}_ruby-#{ruby_version}-linux-x64.tgz"
+  sha = Digest::SHA256.hexdigest(open(old_file).read)
+  filename = "jruby-#{version}_ruby-#{ruby_version}-linux-x64-#{sha[0..7]}.tgz"
+  FileUtils.mv(old_file, "artifacts/#{filename}")
+
+  out_data.merge!({
+    sha256: sha,
+    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+  })
 when 'libunwind'
   built_path = File.join(Dir.pwd, 'built')
   Dir.mkdir(built_path)
