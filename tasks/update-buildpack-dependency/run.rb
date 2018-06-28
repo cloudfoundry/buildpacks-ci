@@ -37,7 +37,7 @@ if added.length == 0 && !rebuilt
 end
 
 php_defaults = nil
-if !rebuilt && manifest_name = 'php' && manifest['language'] == 'php'
+if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
   case version
   when /^5.6/
     varname = 'PHP_56_LATEST'
@@ -56,7 +56,7 @@ if !rebuilt && manifest_name = 'php' && manifest['language'] == 'php'
   php_defaults[varname] = version
 end
 
-if manifest_name = 'php' && manifest['language'] == 'php'
+if manifest_name == 'php' && manifest['language'] == 'php'
   # set the modules for this php version
   dependencies = manifest['dependencies'].map do |dependency|
     if dependency.fetch('name') == 'php' && dependency.fetch('version') == version
