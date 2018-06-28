@@ -1,26 +1,33 @@
 [
   {
-    "name": "v2.1.301",
-    "zipball_url": "https://api.github.com/repos/dotnet/cli/zipball/v2.1.301",
-    "tarball_url": "https://api.github.com/repos/dotnet/cli/tarball/v2.1.301",
+    "name": "v2.1.300-rc1-008673",
+    "zipball_url": "https://api.github.com/repos/dotnet/cli/zipball/v2.1.300-rc1-008673",
+    "tarball_url": "https://api.github.com/repos/dotnet/cli/tarball/v2.1.300-rc1-008673",
     "commit": {
-      "sha": "59524873d628a6b0156fd84b2e8a632418fe83f1",
-      "url": "https://api.github.com/repos/dotnet/cli/commits/59524873d628a6b0156fd84b2e8a632418fe83f1"
-    },
-    "node_id": "MDM6UmVmNDM1NjgxMDc6djIuMS4zMDE="
+      "sha": "f5e3ddbe739af749cd85ec392de8c0980987fa36",
+      "url": "https://api.github.com/repos/dotnet/cli/commits/f5e3ddbe739af749cd85ec392de8c0980987fa36"
+    }
   },
   {
-    "name": "v2.1.301+dependencies",
-    "zipball_url": "https://api.github.com/repos/dotnet/cli/zipball/v2.1.301+dependencies",
-    "tarball_url": "https://api.github.com/repos/dotnet/cli/tarball/v2.1.301+dependencies",
+    "name": "v2.1.300-preview2-008530",
+    "zipball_url": "https://api.github.com/repos/dotnet/cli/zipball/v2.1.300-preview2-008530",
+    "tarball_url": "https://api.github.com/repos/dotnet/cli/tarball/v2.1.300-preview2-008530",
     "commit": {
-      "sha": "2a1f1c6d30c73c1bce0b557ebbdfba1008e9ae63",
-      "url": "https://api.github.com/repos/dotnet/cli/commits/2a1f1c6d30c73c1bce0b557ebbdfba1008e9ae63"
-    },
-    "node_id": "MDM6UmVmNDM1NjgxMDc6djIuMS4zMDErZGVwZW5kZW5jaWVz"
+      "sha": "822ae6d43ace168540b24dd70a2425c9a852fa9b",
+      "url": "https://api.github.com/repos/dotnet/cli/commits/822ae6d43ace168540b24dd70a2425c9a852fa9b"
+    }
   },
   {
-    "name": "v2.1.200+dependencies",
+    "name": "v2.1.300-preview1-008174",
+    "zipball_url": "https://api.github.com/repos/dotnet/cli/zipball/v2.1.300-preview1-008174",
+    "tarball_url": "https://api.github.com/repos/dotnet/cli/tarball/v2.1.300-preview1-008174",
+    "commit": {
+      "sha": "b8df89a54fdb3854b7f4fd13cfb9c69efde7ff49",
+      "url": "https://api.github.com/repos/dotnet/cli/commits/b8df89a54fdb3854b7f4fd13cfb9c69efde7ff49"
+    }
+  },
+  {
+    "name": "v2.1.200",
     "zipball_url": "https://api.github.com/repos/dotnet/cli/zipball/v2.1.200",
     "tarball_url": "https://api.github.com/repos/dotnet/cli/tarball/v2.1.200",
     "commit": {
@@ -29,7 +36,7 @@
     }
   },
   {
-    "name": "v2.1.105+dependencies",
+    "name": "v2.1.105",
     "zipball_url": "https://api.github.com/repos/dotnet/cli/zipball/v2.1.105",
     "tarball_url": "https://api.github.com/repos/dotnet/cli/tarball/v2.1.105",
     "commit": {
@@ -38,7 +45,7 @@
     }
   },
   {
-    "name": "v2.1.104+dependencies",
+    "name": "v2.1.104",
     "zipball_url": "https://api.github.com/repos/dotnet/cli/zipball/v2.1.104",
     "tarball_url": "https://api.github.com/repos/dotnet/cli/tarball/v2.1.104",
     "commit": {
@@ -47,7 +54,7 @@
     }
   },
   {
-    "name": "v2.1.103+dependencies",
+    "name": "v2.1.103",
     "zipball_url": "https://api.github.com/repos/dotnet/cli/zipball/v2.1.103",
     "tarball_url": "https://api.github.com/repos/dotnet/cli/tarball/v2.1.103",
     "commit": {
@@ -74,7 +81,7 @@
     }
   },
   {
-    "name": "non-semver",
+    "name": "v2.1.100",
     "zipball_url": "https://api.github.com/repos/dotnet/cli/zipball/v2.1.100",
     "tarball_url": "https://api.github.com/repos/dotnet/cli/tarball/v2.1.100",
     "commit": {

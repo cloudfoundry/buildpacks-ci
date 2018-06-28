@@ -18,8 +18,7 @@ module Depwatcher
       name = "ruby/ruby"
       regexp = "^v\\d+_\\d+_\\d+$"
       GithubTags.new(client).matched_tags(name, regexp).map do |r|
-        r.ref = r.ref.gsub("_", ".").gsub(/^v/, "")
-        r
+        Internal.new(r.name.gsub("_", ".").gsub(/^v/, ""))
       end.sort_by { |i| SemanticVersion.new(i.ref) }
     end
 

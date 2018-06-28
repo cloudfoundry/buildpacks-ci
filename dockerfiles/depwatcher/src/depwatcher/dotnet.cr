@@ -3,7 +3,6 @@ require "./semantic_version"
 require "./github_releases"
 require "./github_tags"
 
-
 module Depwatcher
   class Dotnet < Base
     class DotnetRelease
@@ -12,22 +11,45 @@ module Depwatcher
         url: String,
         git_commit_sha: String,
       )
-      def initialize(@ref : String, @url : String, @git_commit_sha : String)
+
+      def initialize(
+        @ref : String,
+        @url : String,
+        @git_commit_sha : String
+      )
       end
     end
 
-    def check() : Array(Internal)
-      GithubReleases.new(client).check("dotnet/cli")
+    class External
+      JSON.mapping(
+        name: String,
+        commit: String
+      )
+
+      def initialize(
+        @name : String,
+        @commit : String
+      )
+      end
+    end
+
+    def check : Array(Internal)
+      dotnet_tags.map{|t| Internal.new(t.name) }.sort_by { |i| SemanticVersion.new(i.ref) }
     end
 
     def in(ref : String) : DotnetRelease
-      new_ref = ref.gsub(/^v/, "")
-      release = GithubReleases.new(client).find_github_release("dotnet/cli", new_ref)
-      DotnetRelease.new(release.ref, "https://github.com/dotnet/cli", get_dotnet_release_commit(release.tag_name))
+      tag = dotnet_tags.select{|t| t.name == ref}.first
+      DotnetRelease.new(tag.name, "https://github.com/dotnet/cli", tag.commit)
     end
 
-    private def get_dotnet_release_commit(tag : String)
-      GithubTags.new(client).in("dotnet/cli", tag).git_commit_sha
+    private def dotnet_tags() : Array(External)
+      GithubTags.new(client).matched_tags("dotnet/cli", ".*\\+dependencies")
+        .map do |t|
+          m = t.name.match(/\d+\.\d+\.\d+/)
+          if !m.nil?
+            External.new(m[0], t.commit.sha)
+          end
+        end.compact
     end
   end
 end
