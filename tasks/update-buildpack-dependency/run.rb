@@ -29,10 +29,16 @@ dep = {
     'cf_stacks': ENV['CF_STACKS'].split
 }
 
+puts "dep is #{dep}"
+
 old_versions = manifest['dependencies']
                    .select {|d| d['name'] == manifest_name}
                    .map {|d| d['version']}
 
+puts "old versions is #{old_versions}"
+
+puts "manifest[dependencies] is #{manifest['dependencies']}"
+puts "manifest_master[dependencies] is #{manifest_master['dependencies']}"
 manifest['dependencies'] = Dependencies.new(
     dep,
     ENV['VERSION_LINE'],
