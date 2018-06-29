@@ -11,10 +11,9 @@ class Dependencies
   end
 
   def switch
-    out = @dependencies
     puts "version is #{@dep['version']}"
     puts "matching_deps are #{@matching_deps.map { |d| d['version'] }}"
-    if @matching_deps.map{|d|d['version']}.include?(@dep['version'])
+    if @matching_deps.map { |d| d['version'] }.include?(@dep['version'])
       out = ((@dependencies.reject { |d| d['version'] == @dep['version'] }) + [@dep])
     elsif @removal_strategy == 'keep_all'
       out = @dependencies + [@dep]
@@ -27,7 +26,7 @@ class Dependencies
       version = d['version']
       version = version[1..-1] if !version.nil? && version.start_with?('v')
       version = Gem::Version.new(version) rescue version
-      [ d['name'], version ]
+      [d['name'], version]
     end
   end
 
@@ -53,7 +52,7 @@ class Dependencies
     when 'major'
       version.segments[0] == Gem::Version.new(@dep['version']).segments[0]
     when 'minor'
-      version.segments[0,2] == Gem::Version.new(@dep['version']).segments[0,2]
+      version.segments[0, 2] == Gem::Version.new(@dep['version']).segments[0, 2]
     when nil, '', 'null'
       true
     else
@@ -65,7 +64,7 @@ class Dependencies
     return [] unless @removal_strategy == 'keep_master'
     dep = @master_dependencies.select do |d|
       same_dependency_line?(d['version'], d['name'])
-    end.sort_by { |d| Gem::Version.new(d['version']) rescue d['version'] }.last
+    end.sort_by {|d| Gem::Version.new(d['version']) rescue d['version']}.last
     dep ? [dep] : []
   end
 end
