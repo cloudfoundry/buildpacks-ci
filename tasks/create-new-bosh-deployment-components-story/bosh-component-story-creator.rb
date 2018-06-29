@@ -8,7 +8,7 @@ class BoshComponentStoryCreator
   attr_reader :components, :up_to_date, :new_versions
 
   def initialize
-    @components = %w(gcp-stemcell bosh concourse gcp-cpi)
+    @components = %w(gcp-stemcell gcp-windows-stemcell bosh concourse gcp-cpi garden-runc windows-worker)
     @up_to_date = []
     @new_versions = {}
   end
@@ -16,6 +16,7 @@ class BoshComponentStoryCreator
   def run!
     components.each do |component|
       known_versions_file = File.join('public-buildpacks-ci-robots', 'bosh-deployment-components', "#{component}-versions.yml")
+      ensure_file(known_versions_file)
       known_versions = YAML.load_file(known_versions_file)
 
       newest_version = File.read(File.join(component,'version')).strip
@@ -62,9 +63,12 @@ class BoshComponentStoryCreator
   def display_name(component)
     {
       'gcp-stemcell' => 'bosh-google-kvm-ubuntu-trusty-go_agent',
+      'gcp-windows-stemcell' => 'bosh-google-kvm-windows2016-go_agent',
       'bosh' => 'BOSH',
       'concourse' => 'Concourse',
-      'gcp-cpi' => 'BOSH Google CPI'
+      'gcp-cpi' => 'BOSH Google CPI',
+      'garden-runc' => 'Garden-runC',
+      'windows-worker' => 'Windows Worker'
     }[component]
   end
 
@@ -100,7 +104,7 @@ class BoshComponentStoryCreator
                      1. Run the `bin/deploy_concourse` script from root
                      DESCRIPTION
     case component
-    when 'concourse'
+    when 'concourse', 'garden-runc', 'windows-worker'
       manual_update_description
     else
       auto_update_description
@@ -119,5 +123,9 @@ class BoshComponentStoryCreator
       GitClient.add_file(known_versions_file)
       GitClient.safe_commit("Detected new version of #{display_name(component)}: #{version}")
     end
+  end
+
+  def ensure_file(path)
+    File.write(path, [].to_yaml) unless File.exists?(path)
   end
 end
