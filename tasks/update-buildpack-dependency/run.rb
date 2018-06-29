@@ -22,11 +22,11 @@ system('rsync -a buildpack/ artifacts/')
 raise 'Could not copy buildpack to artifacts' unless $?.success?
 
 dep = {
-    'name': manifest_name,
-    'version': version,
-    'uri': build['url'],
-    'sha256': build['sha256'],
-    'cf_stacks': ENV['CF_STACKS'].split
+  'name' => manifest_name,
+  'version' => version,
+  'uri' => build['url'],
+  'sha256' => build['sha256'],
+  'cf_stacks' => ENV['CF_STACKS'].split
 }
 
 
@@ -34,8 +34,6 @@ old_versions = manifest['dependencies']
                    .select {|d| d['name'] == manifest_name}
                    .map {|d| d['version']}
 
-puts "old versions is #{old_versions}"
-puts "dep is #{dep}"
 manifest['dependencies'] = Dependencies.new(
     dep,
     ENV['VERSION_LINE'],
