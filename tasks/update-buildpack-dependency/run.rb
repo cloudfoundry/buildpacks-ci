@@ -36,6 +36,10 @@ if added.length == 0 && !rebuilt
   exit 0
 end
 
+#
+# Special PHP stuff
+# * The defaults/options.json file contains default version numbers to use for each PHP line.
+#   Update the default version for the relevant line to this version of PHP (if !rebuilt)
 php_defaults = nil
 if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
   case version
@@ -56,8 +60,11 @@ if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
   php_defaults[varname] = version
 end
 
+#
+# Special PHP stuff
+# * Each php version in the manifest lists the modules it was built with.
+#   Get that list for this version of php.
 if manifest_name == 'php' && manifest['language'] == 'php'
-  # set the modules for this php version
   dependencies = manifest['dependencies'].map do |dependency|
     if dependency.fetch('name') == 'php' && dependency.fetch('version') == version
       modules = Dir.mktmpdir do |dir|
@@ -76,6 +83,10 @@ if manifest_name == 'php' && manifest['language'] == 'php'
   end
 end
 
+#
+# Special PHP stuff
+# * The appdynamics extension for PHP has a python file with its version number in it.
+#   Replace the old version number with the new version we're adding. (if !rebuilt)
 path_to_extensions = 'extensions/appdynamics/extension.py'
 write_extensions = ''
 if !rebuilt && manifest_name == 'appdynamics' && manifest['language'] == 'php'
@@ -83,9 +94,25 @@ if !rebuilt && manifest_name == 'appdynamics' && manifest['language'] == 'php'
     text = File.read('buildpack/' + path_to_extensions)
     write_extensions = text.gsub(/#{Regexp.quote(removed.first)}/, added.first)
   else
-   puts 'Expected to have one added version and one removed version for appdynamics in the PHP buildpack.'
-   puts 'Got added (#{added}) and removed (#{removed}).'
-   exit 1
+    puts 'Expected to have one added version and one removed version for appdynamics in the PHP buildpack.'
+    puts "Got added (#{added}) and removed (#{removed})."
+    exit 1
+  end
+end
+
+#
+# Special JRuby Stuff
+# * There are two Gemfiles in fixtures which depend on the latest JRuby in the 9.2.X.X line.
+#   Replace their jruby engine version with the one in the manifest.
+ruby_files_to_edit = { 'fixtures/sinatra_jruby/Gemfile' => nil, 'fixtures/jruby_start_command/Gemfile' => nil }
+if !rebuilt && manifest_name == 'jruby' && manifest['language'] == 'ruby'
+  version_number = /(9.2.\d+.\d+)_ruby-2.5/.match(version)
+  if version_number
+    jruby_version = version_numbers[1]
+    ruby_files_to_edit.each_key do |path|
+      text = File.read(File.join('buildpack', path))
+      ruby_files_to_edit[path] = text.gsub(/=> '(9.2.\d+.\d+)'/, "=> '#{jruby_version}'")
+    end
   end
 end
 
@@ -103,9 +130,17 @@ Dir.chdir('artifacts') do
 
   File.write('manifest.yml', manifest.to_yaml)
   GitClient.add_file('manifest.yml')
+
   unless php_defaults.nil?
     File.write('defaults/options.json', php_defaults.to_json)
     GitClient.add_file('defaults/options.json')
+  end
+
+  ruby_files_to_edit.each do |path, content|
+    if content
+      File.write(path, content)
+      GitClient.add_file(path)
+    end
   end
 
   if write_extensions != ''
