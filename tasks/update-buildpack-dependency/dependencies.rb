@@ -12,6 +12,8 @@ class Dependencies
 
   def switch
     out = @dependencies
+    puts "version is #{@dep['version']}"
+    puts "matching_deps are #{@matching_deps.map { |d| d['version'] }}"
     if @matching_deps.map{|d|d['version']}.include?(@dep['version'])
       out = ((@dependencies.reject { |d| d['version'] == @dep['version'] }) + [@dep])
     elsif @removal_strategy == 'keep_all'
