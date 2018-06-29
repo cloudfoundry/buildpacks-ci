@@ -118,7 +118,7 @@ instance_groups:
     release: concourse-windows-worker
     properties:
       concourse_windows:
-        tsa_host: 10.150.0.2
+        tsa_host: 10.150.0.2:2222
         drain_timeout: 10m
         tsa: {worker_key: ((worker_key))}
         tsa_public_key: ((tsa_host_key.public_key))
