@@ -8,8 +8,10 @@ inputs:
   - name: buildpacks-ci
   - name: public-buildpacks-ci-robots
   - name: gcp-stemcell
+  - name: gcp-windows-stemcell
   - name: bosh
   - name: garden-runc
+  - name: windows-worker
   - name: concourse
   - name: gcp-cpi
 outputs:

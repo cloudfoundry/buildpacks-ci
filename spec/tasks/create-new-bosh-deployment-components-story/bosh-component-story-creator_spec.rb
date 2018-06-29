@@ -135,4 +135,45 @@ describe BoshComponentStoryCreator do
       expect(GitClient).to have_received(:safe_commit).with('Detected new version of BOSH Google CPI: 2.2')
     end
   end
+
+  context 'the component is new' do
+    let(:components) { %w(gcp-windows-stemcell)}
+    let(:gcp_windows_stemcell_known_versions_file) { File.join(root_dir, 'public-buildpacks-ci-robots', 'bosh-deployment-components', 'gcp-windows-stemcell-versions.yml') }
+
+    before do
+      FileUtils.mkdir_p(File.join(root_dir, 'gcp-windows-stemcell'))
+      File.write(File.join(root_dir, 'gcp-windows-stemcell', 'version'), '1.0')
+    end
+
+    it 'writes the the new version to stdout' do
+      subject.run!
+
+      expect(subject).to have_received(:puts).with "*** New versions detected ***"
+      expect(subject).to have_received(:puts).with "- bosh-google-kvm-windows2016-go_agent => 1.0"
+    end
+
+    it 'creates a tracker story' do
+      subject.run!
+
+      expected_description = <<~DESCRIPTION
+                   There is a new version of bosh-google-kvm-windows2016-go_agent: 1.0
+
+                   1. Pull `buildpacks-ci`
+                   1. Run the `bin/deploy_concourse` script from root
+      DESCRIPTION
+      expect(buildpack_project).to have_received(:create_story).with(hash_including(
+        name: 'Update bosh-google-kvm-windows2016-go_agent for Concourse deployment',
+        description: expected_description,
+        labels: ['concourse']))
+    end
+
+    it 'updates the YAML files' do
+      subject.run!
+
+      expect(YAML.load_file(gcp_windows_stemcell_known_versions_file)).to eq %w(1.0)
+      expect(GitClient).to have_received(:add_file).with(File.join('bosh-deployment-components', 'gcp-windows-stemcell-versions.yml'))
+      expect(GitClient).to have_received(:safe_commit).with('Detected new version of bosh-google-kvm-windows2016-go_agent: 1.0')
+    end
+  end
+
 end

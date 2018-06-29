@@ -22,11 +22,22 @@ resources: #################################################
       name: bosh-google-kvm-ubuntu-trusty-go_agent
       force_regular: true
 
+  - name: gcp-windows-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-windows2016-go_agent
+      force_regular: true
+
   ## BOSH releases ##
   - name: bosh
     type: bosh-io-release
     source:
       repository: cloudfoundry/bosh
+
+  - name: garden-runc
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/garden-runc-release
 
   - name: concourse
     type: bosh-io-release
@@ -38,8 +49,12 @@ resources: #################################################
     source:
       repository: cloudfoundry-incubator/bosh-google-cpi-release
 
-jobs: ########################################################
+  - name: windows-worker
+    type: bosh-io-release
+    source:
+      repository: pivotal-cf-experimental/concourse-windows-worker-release
 
+jobs: ########################################################
   - name: new-bosh-deployment-components
     serial: true
     public: true
@@ -49,22 +64,30 @@ jobs: ########################################################
         - get: public-buildpacks-ci-robots
         - get: gcp-stemcell
           trigger: true
-          version: every
+          params:
+            tarball: false
+        - get: gcp-windows-stemcell
+          trigger: true
           params:
             tarball: false
         - get: bosh
           trigger: true
-          version: every
           params:
             tarball: false
         - get: concourse
           trigger: true
-          version: every
           params:
             tarball: false
         - get: gcp-cpi
           trigger: true
-          version: every
+          params:
+            tarball: false
+        - get: garden-runc
+          trigger: true
+          params:
+            tarball: false
+        - get: windows-worker
+          trigger: true
           params:
             tarball: false
       - task: create-new-bosh-deployment-components-story
