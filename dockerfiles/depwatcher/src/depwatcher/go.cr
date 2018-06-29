@@ -19,7 +19,7 @@ module Depwatcher
     def check() : Array(Internal)
       releases.map do |r|
         Internal.new(r.ref)
-      end.reverse
+      end.sort_by { |i| SemanticVersion.new(i.ref) }
     end
 
     def in(ref : String) : Release
@@ -45,9 +45,15 @@ module Depwatcher
         raise "Could not parse golang release (a) website" unless a.is_a?(XML::NodeSet)
         url = a.first["href"].to_s
         v = url.match(/\/go([\d\.]*)\.src/)
-        raise "Could not match version in url #{url}" unless v
-        Release.new(v[1], url, sha.first.text.to_s)
-      end
+        beta = url.match(/\/go[\d\.]+(beta|alpha)[\d\.]*\.src/)
+        if v.nil? && beta.nil?
+          raise "Could not match version in url #{url}"
+        elsif v.nil?
+          nil
+        else
+          Release.new(v[1], url, sha.first.text.to_s)
+        end
+      end.compact
     end
   end
 end
