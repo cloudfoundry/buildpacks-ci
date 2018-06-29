@@ -19,13 +19,31 @@ story_id = build['tracker_story_id']
 version = build['version']
 
 system('rsync -a buildpack/ artifacts/')
-raise('Could not copy buildpack to artifacts') unless $?.success?
+raise 'Could not copy buildpack to artifacts' unless $?.success?
 
-dep = {"name" => manifest_name, "version" => version, "uri" => build['url'], "sha256" => build['sha256'], "cf_stacks" => ENV['CF_STACKS'].split}
+dep = {
+    'name': manifest_name,
+    'version': version,
+    'uri': build['url'],
+    'sha256': build['sha256'],
+    'cf_stacks': ENV['CF_STACKS'].split
+}
 
-old_versions = manifest['dependencies'].select {|d| d['name'] == manifest_name}.map {|d| d['version']}
-manifest['dependencies'] = Dependencies.new(dep, ENV['VERSION_LINE'], ENV['REMOVAL_STRATEGY'], manifest['dependencies'], manifest_master['dependencies']).switch
-new_versions = manifest['dependencies'].select {|d| d['name'] == manifest_name}.map {|d| d['version']}
+old_versions = manifest['dependencies']
+                   .select {|d| d['name'] == manifest_name}
+                   .map {|d| d['version']}
+
+manifest['dependencies'] = Dependencies.new(
+    dep,
+    ENV['VERSION_LINE'],
+    ENV['REMOVAL_STRATEGY'],
+    manifest['dependencies'],
+    manifest_master['dependencies']
+).switch
+
+new_versions = manifest['dependencies']
+                   .select {|d| d['name'] == manifest_name}
+                   .map {|d| d['version']}
 
 added = (new_versions - old_versions).uniq.sort
 removed = (old_versions - new_versions).uniq.sort
@@ -52,8 +70,8 @@ if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
   when /^7.2/
     varname = 'PHP_72_LATEST'
   else
-   puts "Unexpected version #{version} is not in known version lines."
-   exit 1
+    puts "Unexpected version #{version} is not in known version lines."
+    exit 1
   end
 
   php_defaults = JSON.load_file('buildpack/defaults/options.json')
@@ -68,15 +86,15 @@ if manifest_name == 'php' && manifest['language'] == 'php'
   dependencies = manifest['dependencies'].map do |dependency|
     if dependency.fetch('name') == 'php' && dependency.fetch('version') == version
       modules = Dir.mktmpdir do |dir|
-                  Dir.chdir(dir) do
-                    `wget --no-verbose #{build['url']} && tar xzf #{File.basename(build['url'])}`
-                    Dir['php/lib/php/extensions/no-debug-non-zts-*/*.so'].collect do |file|
-                      File.basename(file, '.so')
-                    end.sort.reject do |m|
-                      %w(odbc gnupg).include?(m)
-                    end
-                  end
-                end
+        Dir.chdir(dir) do
+          `wget --no-verbose #{build['url']} && tar xzf #{File.basename(build['url'])}`
+          Dir['php/lib/php/extensions/no-debug-non-zts-*/*.so'].collect do |file|
+            File.basename(file, '.so')
+          end.sort.reject do |m|
+            %w(odbc gnupg).include?(m)
+          end
+        end
+      end
       dependency["modules"] = modules
     end
     dependency
@@ -104,7 +122,7 @@ end
 # Special JRuby Stuff
 # * There are two Gemfiles in fixtures which depend on the latest JRuby in the 9.2.X.X line.
 #   Replace their jruby engine version with the one in the manifest.
-ruby_files_to_edit = { 'fixtures/sinatra_jruby/Gemfile' => nil, 'fixtures/jruby_start_command/Gemfile' => nil }
+ruby_files_to_edit = {'fixtures/sinatra_jruby/Gemfile' => nil, 'fixtures/jruby_start_command/Gemfile' => nil}
 if !rebuilt && manifest_name == 'jruby' && manifest['language'] == 'ruby'
   version_number = /(9.2.\d+.\d+)_ruby-2.5/.match(version)
   if version_number
