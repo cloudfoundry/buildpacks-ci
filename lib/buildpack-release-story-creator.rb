@@ -30,6 +30,9 @@ class BuildpackReleaseStoryCreator
       labels: [buildpack_name, 'release'],
       requested_by_id: tracker_requester_id
     )
+    commit_msg = "git ci -m \"Bump version to $(cat VERSION) [#{story.id}]\""
+    story.description = story_description + "\n**Commit Message**\n```\n\##{commit_msg}\n```"
+    story.save
 
     story
   end
