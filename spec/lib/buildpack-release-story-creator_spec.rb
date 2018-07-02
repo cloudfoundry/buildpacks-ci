@@ -48,6 +48,9 @@ describe BuildpackReleaseStoryCreator do
           Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
           DESCRIPTION
         )).and_return(new_story)
+      expect(new_story).to receive(:description=).
+          with(anything())
+      expect(new_story).to receive(:save)
 
       subject.run!
     end
@@ -70,6 +73,9 @@ describe BuildpackReleaseStoryCreator do
           Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
           DESCRIPTION
         )).and_return(new_story)
+      expect(new_story).to receive(:description=).
+         with(anything())
+      expect(new_story).to receive(:save)
 
       subject.run!
     end
@@ -83,6 +89,9 @@ describe BuildpackReleaseStoryCreator do
              labels: %w(elixir release),
              requested_by_id: 555555
             ).and_return(new_story)
+    expect(new_story).to receive(:description=).
+      with(anything())
+    expect(new_story).to receive(:save)
 
     subject.run!
   end
@@ -93,6 +102,9 @@ describe BuildpackReleaseStoryCreator do
     it 'increases the patch correctly' do
       expect(buildpack_project).to receive(:create_story).
         with(hash_including(name: '**Release:** elixir-buildpack 2.3.10')).and_return(new_story)
+      expect(new_story).to receive(:description=).
+        with(anything())
+      expect(new_story).to receive(:save)
 
       subject.run!
     end
