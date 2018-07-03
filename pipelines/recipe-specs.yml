@@ -1,0 +1,99 @@
+resources: ############################################################################################################
+
+  ## Git Repos ##
+  - name: binary-builder
+    type: git
+    source:
+      uri: {{binary-builder-git-uri}}
+
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
+
+ ## Docker Images ##
+  - name: docker-cflinuxfs2-rootfs
+    type: docker-image
+    source:
+      repository: cloudfoundry/cflinuxfs2
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+      email: cf-buildpacks-eng@pivotal.io
+
+groups: ###############################################################################################################
+
+<% integration_spec_names = %w(bundler glide go godep dep httpd hwc jruby nginx nodejs php5 php7 php5_with_oracle php7_with_oracle php5_with_geolitedb php7_with_geolitedb python ruby url_output yaml_flag dotnet) %>
+  - name: binary-builder-specs
+    jobs:
+    - binary-builder-specs
+    - binary-builder-specs-unit
+<% integration_spec_names.each do |spec_name| %>
+    - binary-builder-specs-<%= spec_name %>
+<% end %>
+
+jobs: #################################################################################################################
+
+  - name: binary-builder-specs
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: binary-builder
+          trigger: true
+          passed:
+          <% integration_spec_names.each do |spec_name| %>
+          - binary-builder-specs-<%= spec_name %>
+          <% end %>
+
+  - name: binary-builder-specs-unit
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: docker-cflinuxfs2-rootfs
+          trigger: true
+        - get: binary-builder
+          trigger: true
+      - do:
+        - task: all-expected-integration-specs-will-run
+          file: buildpacks-ci/tasks/check-for-binary-builder-integration-spec-presence/task.yml
+          params:
+            SPEC_NAMES: <%= integration_spec_names.join(',') %>
+        - task: all-unit-tests
+          file: buildpacks-ci/tasks/run-binary-builder-unit-specs/task.yml
+          params:
+            RUBYGEM_MIRROR: {{rubygem-mirror}}
+
+<% integration_spec_names.each do |spec_name| %>
+  - name: binary-builder-specs-<%= spec_name %>
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: docker-cflinuxfs2-rootfs
+          trigger: true
+        - get: binary-builder
+          passed: [ binary-builder-specs-unit ]
+          trigger: true
+      - do:
+        - aggregate:
+          - task: integration-<%= spec_name %>
+            file: buildpacks-ci/tasks/run-binary-builder-integration-specs/task.yml
+            params:
+              SPEC_TO_RUN: <%= spec_name %>
+              RUBYGEM_MIRROR: {{rubygem-mirror}}
+              RUN_ORACLE_PHP_TESTS: <%= run_oracle_php_tests %>
+            <% if run_oracle_php_tests == 'true' %>
+              AWS_ACCESS_KEY_ID: {{oracle-client-library-s3-download-access-key}}
+              AWS_SECRET_ACCESS_KEY: {{oracle-client-library-s3-download-secret-key}}
+              AWS_DEFAULT_REGION: us-east-1
+              ORACLE_LIBS_AWS_BUCKET: {{oracle-client-libs-s3-bucket}}
+              ORACLE_LIBS_FILENAME: {{oracle-client-libs-filename}}
+            <% end %>
+            attempts: 5
+<% end %>
+
