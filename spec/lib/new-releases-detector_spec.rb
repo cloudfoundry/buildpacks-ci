@@ -22,11 +22,8 @@ describe NewReleasesDetector do
     allow(Octokit).to receive(:tags).and_return([])
     allow(Octokit).to receive(:releases).and_return([])
     allow_any_instance_of(described_class).to receive(:open).with(/openjdk/).and_return(double(read: {}.to_yaml))
-    allow_any_instance_of(described_class).to receive(:open).with(/miniconda/).and_return(double(read: '<html></html>'))
-    allow_any_instance_of(described_class).to receive(:open).with(/newrelic/).and_return(double(read: '<html></html>'))
     allow_any_instance_of(described_class).to receive(:open).with('https://apr.apache.org/download.cgi').and_return(double(read: '<html></html>'))
     allow_any_instance_of(described_class).to receive(:open).with('https://maven.apache.org/docs/history.html').and_return(double(read: '<html>3.3.6 3.3.7 3.3.8 3.3.9</html>'))
-    allow_any_instance_of(described_class).to receive(:open).with(%r{https://pypi.python.org/pypi/[^/]+/json}).and_return(double(read: '{"releases":{}}'))
 
     allow(File).to receive(:exist?).and_call_original
     allow(File).to receive(:write).and_call_original
@@ -212,25 +209,6 @@ describe NewReleasesDetector do
       end
     end
 
-    context 'for nginx' do
-      let(:dependency)   { :nginx }
-      let(:old_versions) { %w(1.10.1 1.10.2) }
-      let(:github_repo)  { 'nginx/nginx' }
-
-      context 'when there are new releases' do
-        let(:new_versions)          { %w(1.10.5) }
-        let(:github_response) { [double(name: 'release-1.10.1'), double(name: 'release-1.10.2'), double(name: 'release-1.10.5')] }
-
-        it_behaves_like 'there are new versions to potentially build', :github
-      end
-
-      context 'when there are no new releases' do
-        let(:github_response) { [double(name: 'release-1.10.1'), double(name: 'release-1.10.2')] }
-
-        it_behaves_like 'there are no new versions to potentially build', :github
-      end
-    end
-
     context 'for maven' do
       let(:dependency)   { :maven }
       let(:old_versions) { %w(3.3.7 3.3.8) }
@@ -253,125 +231,6 @@ describe NewReleasesDetector do
         let(:github_response) { [double(name: 'maven-3.3.5'), double(name: 'maven-3.3.7'), double(name: 'maven-3.3.8')] }
 
         it_behaves_like 'there are no new versions to potentially build', :github
-      end
-    end
-
-    context 'for newrelic' do
-      let(:dependency)   { :newrelic }
-      let(:old_versions) { %w(1.1.1.111 2.2.2.222) }
-      let(:new_releases_source) { 'https://download.newrelic.com/php_agent/archive/' }
-
-      context 'when there are new releases' do
-        let(:new_versions)            { %w(3.3.3.333) }
-        let(:new_releases_response)   { double('new_releases_response', read: newrelic_releases_html ) }
-        let(:newrelic_releases_html) { <<~HTML
-                                       <table>
-                                          <td>
-                                            <a href="/php_agent/archive/1.1.1.111">1.1.1.111</a>
-                                          </td>
-                                          <td>
-                                            <a href="/php_agent/archive/2.2.2.222">2.2.2.222</a>
-                                          </td>
-                                          <td>
-                                            <a href="/php_agent/archive/3.3.3.333">3.3.3.333</a>
-                                          </td>
-                                      </table>
-                                      HTML
-        }
-
-        it_behaves_like 'there are new versions to potentially build'
-      end
-
-      context 'when there are no new releases' do
-        let(:new_releases_response)   { double('new_releases_response', read: newrelic_releases_html ) }
-        let(:newrelic_releases_html) { <<~HTML
-                                        <table>
-                                          <td>
-                                            <a href="/php_agent/archive/1.1.1.111">1.1.1.111</a>
-                                          </td>
-                                          <td>
-                                            <a href="/php_agent/archive/2.2.2.222">2.2.2.222</a>
-                                          </td>
-                                        </table>
-        HTML
-        }
-
-
-        it_behaves_like 'there are no new versions to potentially build'
-      end
-    end
-
-    context 'for miniconda' do
-      let(:dependency)   { :miniconda }
-      let(:old_versions) { %w(3.33.33 4.44.44) }
-      let(:new_releases_source) { 'https://repo.continuum.io/miniconda/' }
-
-      context 'when there are new releases' do
-        let(:new_versions)            { %w(5.55.55) }
-        let(:new_releases_response)   { double('new_releases_response', read: miniconda_releases_html ) }
-        let(:miniconda_releases_html) { <<~HTML
-                                        <table>
-                                          <tr>
-                                            <td>
-                                              <a href="http://example.com/Miniconda2-4.44.44-Linux-x86_64.sh">Miniconda2-5.55.55-Linux-x86_64.sh</a>
-                                            </td>
-                                          </tr>
-                                          <tr>
-                                            <td>
-                                              <a href="http://example.com/Miniconda2-3.33.33-Linux-x86_64.sh">Miniconda99-4.44.44-Linux-x86_64.sh</a>
-                                            </td>
-                                          </tr>
-                                          <tr>
-                                            <td>
-                                              <a href="http://example.com/Miniconda2-5.55.55-Linux-x86_64.sh">Miniconda2-3.33.33-Linux-x86_64.sh</a>
-                                            </td>
-                                          </tr>
-                                        </table>
-                                      HTML
-        }
-
-        it_behaves_like 'there are new versions to potentially build'
-      end
-
-      context 'when there are no new releases' do
-        let(:new_releases_response)   { double('new_releases_response', read: miniconda_releases_html ) }
-        let(:miniconda_releases_html) { <<~HTML
-                                        <table>
-                                          <tr>
-                                            <td>
-                                              <a href="http://example.com/Miniconda2-4.44.44-Linux-x86_64.sh">Miniconda2-5.55.55-Linux-x86_64.sh</a>
-                                            </td>
-                                          </tr>
-                                          <tr>
-                                            <td>
-                                              <a href="http://example.com/Miniconda2-3.33.33-Linux-x86_64.sh">Miniconda99-4.44.44-Linux-x86_64.sh</a>
-                                            </td>
-                                          </tr>
-                                        </table>
-        HTML
-        }
-
-
-        it_behaves_like 'there are no new versions to potentially build'
-      end
-    end
-
-    context 'for libunwind' do
-      let(:dependency)          { :libunwind }
-      let(:github_repo)         { 'libunwind/libunwind' }
-      let(:old_versions)        { %w(1.0 1.1) }
-
-      context 'when there are new releases' do
-        let(:new_versions)          { %w(1.2 1.2-rc3) }
-        let(:github_response) { [ double(tag_name: '1.0'), double(tag_name: '1.1'), double(tag_name: '1.2'), double(tag_name: '1.2-rc3') ] }
-
-        it_behaves_like 'there are new versions to potentially build', :github_releases
-      end
-
-      context 'when there are no new releases' do
-        let(:github_response) { [ double(tag_name: '1.0'), double(tag_name: '1.1') ] }
-
-        it_behaves_like 'there are no new versions to potentially build', :github_releases
       end
     end
   end
@@ -408,44 +267,12 @@ describe NewReleasesDetector do
     end
 
     context 'with new versions for a dependency' do
-      let(:changed_dependencies) { {python: %w(a b) } }
+      let(:changed_dependencies) { {apr: %w(a b) } }
 
       it 'posts to buildpacks slack for each new release of that dependency' do
-        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new version of *python* available: *a, b*")
+        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new version of *apr* available: *a, b*")
         expect(capi_slack_client).to_not receive(:post_to_slack)
         subject.post_to_slack
-      end
-    end
-
-    context 'with new versions of golang' do
-      let(:changed_dependencies) { {go: %w(1.9.7) } }
-
-      it 'posts to buildpacks and pivotal-network slack for each new release of that dependency' do
-        expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new version of *go* available: *1.9.7*")
-        expect(capi_slack_client).to_not receive(:post_to_slack)
-        subject.post_to_slack
-      end
-    end
-
-    context 'with new versions of nginx' do
-      context 'version is 1.11.x' do
-        let(:changed_dependencies) { {nginx: %w(1.11.99) } }
-
-        it 'posts to buildpacks and capi slack for each new release of that dependency' do
-          expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: *1.11.99*")
-          expect(capi_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: *1.11.99*")
-          subject.post_to_slack
-        end
-      end
-
-      context 'version is not 1.11.x' do
-        let(:changed_dependencies) { {nginx: %w(1.10.99) } }
-
-        it 'only posts to buildpacks slack for each new release of that dependency' do
-          expect(buildpacks_slack_client).to receive(:post_to_slack).with("There is a new version of *nginx* available: *1.10.99*")
-          expect(capi_slack_client).to_not receive(:post_to_slack)
-          subject.post_to_slack
-        end
       end
     end
 
@@ -481,12 +308,12 @@ describe NewReleasesDetector do
     end
 
     context 'with new versions for a dependency' do
-      let(:dependency) { :python }
-      let(:changed_dependencies) { {python: %w(a b) } }
+      let(:dependency) { :apr }
+      let(:changed_dependencies) { {apr: %w(a b) } }
 
       it 'posts a tracker story with the dependency and versions in the story title' do
         expect(buildpacks_tracker_client).to receive(:post_to_tracker).
-          with(name: 'Build and/or Include new releases: python a, b',
+          with(name: 'Build and/or Include new releases: apr a, b',
                description: anything, tasks: anything, point_value: anything, labels: anything)
 
         expect(capi_tracker_client).not_to receive(:post_to_tracker)
@@ -496,7 +323,7 @@ describe NewReleasesDetector do
 
       it 'posts a tracker story with the dependency and versions in the story description' do
         expect(buildpacks_tracker_client).to receive(:post_to_tracker).
-          with(description: "We have 2 new releases for **python**:\n**version a, b**\n\nSee the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file.",
+          with(description: "We have 2 new releases for **apr**:\n**version a, b**\n\nThis dependency is NOT handled by the binary-builder-new pipeline.\nUpdate the httpd recipe in the binary-builder repo.",
                name: anything, tasks: anything, point_value: anything, labels: anything)
 
         expect(capi_tracker_client).not_to receive(:post_to_tracker)
@@ -506,7 +333,7 @@ describe NewReleasesDetector do
 
       it 'posts a tracker story with tasks to update the dependency in buildpacks' do
         expect(buildpacks_tracker_client).to receive(:post_to_tracker).
-          with(tasks: ['Verify python is updated in snake-buildpack if version is supported', 'Verify python is updated in lizard-buildpack if version is supported'],
+          with(tasks: ['Verify apr is updated in snake-buildpack if version is supported', 'Verify apr is updated in lizard-buildpack if version is supported'],
                name: anything, description: anything, point_value: anything, labels: anything)
 
         expect(capi_tracker_client).not_to receive(:post_to_tracker)
@@ -535,44 +362,8 @@ describe NewReleasesDetector do
       end
     end
 
-    context 'with new versions of nginx' do
-      let(:dependency) { :nginx }
-
-      context 'version is 1.11.x' do
-        let(:changed_dependencies) { {nginx: %w(1.11.99) } }
-
-        it 'posts a tracker story to the CAPI project with the correct information' do
-          expect(buildpacks_tracker_client).to receive(:post_to_tracker).
-            with(name: anything, description: anything, tasks: anything, point_value: anything, labels: anything)
-
-          expect(capi_tracker_client).to receive(:post_to_tracker).
-            with(name: 'New version(s) of nginx: 1.11.99',
-                 description: 'There are 1 new version(s) of **nginx** available: 1.11.99',
-                 tasks: [],
-                 point_value: 1,
-                 labels: []
-                )
-
-          subject.post_to_tracker
-        end
-      end
-
-      context 'version is not 1.11.x' do
-        let(:changed_dependencies) { {nginx: %w(1.10.99) } }
-
-        it 'only posts a tracker story to the buildpacks project with the correct information' do
-          expect(buildpacks_tracker_client).to receive(:post_to_tracker).
-            with(name: anything, description: anything, tasks: anything, point_value: anything, labels: anything)
-
-          expect(capi_tracker_client).to_not receive(:post_to_tracker)
-
-          subject.post_to_tracker
-        end
-      end
-    end
-
     context 'with no new versions for a dependency' do
-      let(:dependency) { :python }
+      let(:dependency) { :apr }
       let(:changed_dependencies) { {} }
 
       it 'posts to slack for each new release of that dependency' do
