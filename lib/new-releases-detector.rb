@@ -106,7 +106,7 @@ class NewReleasesDetector
 
   def buildpacks_tracker_story_info(dependency,versions)
     name = "Build and/or Include new releases: #{dependency} #{versions.join(', ')}"
-    description = "We have #{versions.count} new releases for **#{dependency}**:\n**version #{versions.join(', ')}**\n\nSee the documentation at http://docs.cloudfoundry.org/buildpacks/upgrading_dependency_versions.html for info on building a new release binary and adding it to the buildpack manifest file."
+    description = "We have #{versions.count} new releases for **#{dependency}**:\n**version #{versions.join(', ')}**\n\nThis dependency is NOT handled by the binary-builder-new pipeline.\n"
 
     buildpack_names = BuildpackDependency.for(dependency)
     tasks = buildpack_names.map do |buildpack|
@@ -116,29 +116,15 @@ class NewReleasesDetector
       buildpack.to_s
     end
 
-    if dependency == :go
-      tasks.push 'Update go-version.yml in binary-builder repo'
-    elsif dependency == :libunwind
-      description += <<~HEREDOC
-                     Dockerfile.libunwind
-                     ```
-                     FROM cloudfoundry/$CF_STACK
-
-                     RUN curl -sSL http://download.savannah.gnu.org/releases/libunwind/libunwind-${LIBUNWIND_VERSION}.tar.gz | tar zxfv - -C /usr/local/src \
-                           && cd /usr/local/src/libunwind-${LIBUNWIND_VERSION} \
-                           && ./configure \
-                           && make \
-                           && make install \
-                           && rm -rf /usr/local/src/libunwind-${LIBUNWIND_VERSION}
-                     ```
-
-                     ```
-                     export CF_STACK=cflinuxfs2
-                     export LIBUNWIND_VERSION=1.2
-                     cat Dockerfile.libunwind | envsubst | docker build -t libunwind-${CF_STACK}-${LIBUNWIND_VERSION} -
-                     docker run -v /somehostdir:/built --rm libunwind-${CF_STACK}-${LIBUNWIND_VERSION} /bin/bash -c "cd /usr/local && tar czf /built/libunwind-${CF_STACK}-${LIBUNWIND_VERSION}.tar.gz ./include/*unwind* ./lib/libunwind*"
-                     ```
-                     HEREDOC
+    case dependency
+    when :maven
+      description += 'Update the jruby recipe in the binary-builder repo.'
+    when :openjdk
+      description += 'Update the jruby recipe in the binary-builder repo.'
+    when :apr
+      description += 'Update the httpd recipe in the binary-builder repo.'
+    when :apr_util
+      description += 'Update the httpd recipe in the binary-builder repo.'
     end
 
     {
@@ -181,7 +167,7 @@ class NewReleasesDetector
     unchanged_dependencies = []
 
     tags.each do |current_dependency, get_tags|
-      current_tags = massage_version(get_tags.call, current_dependency)
+      current_tags = get_tags.call
 
       filename = "#{new_releases_dir}/#{current_dependency}.yml"
       filename_diff = "#{new_releases_dir}/#{current_dependency}-new.yml"
@@ -209,56 +195,11 @@ class NewReleasesDetector
     @get_tags_functions = {
       apr:             -> { Nokogiri::HTML.parse(open('https://apr.apache.org/download.cgi')).css('a[name=apr1] strong').map{|a|a.text.gsub(/APR\s+(\S+).*/, '\1')} },
       apr_util:        -> { Nokogiri::HTML.parse(open('https://apr.apache.org/download.cgi')).css('a[name=aprutil1] strong').map{|a|a.text.gsub(/APR\-util\s+(\S+).*/, '\1')} },
-      jruby:           -> { Octokit.tags('jruby/jruby').map(&:name).grep(/^(1|9)\./) },
-      libunwind:       -> { Octokit.releases('libunwind/libunwind').map(&:tag_name) },
       maven:           -> {
         history = Nokogiri::HTML(open('https://maven.apache.org/docs/history.html')).text
         Octokit.tags('apache/maven').map(&:name).grep(/^maven/).map{|s| s.gsub(/^maven\-/,'')}.select{|v| history.include?(v) && v !~ /alpha|beta/}
       },
-      miniconda:       -> { Nokogiri::HTML.parse(open('https://repo.continuum.io/miniconda/').read).css('table tr td a').map {|link| link['href']} },
-      newrelic:        -> { Nokogiri::HTML.parse(open('https://download.newrelic.com/php_agent/archive/')).css('table td a').map{|link| link['href']} },
-      nginx:           -> { Octokit.tags('nginx/nginx').map(&:name).grep(/^release/) },
       openjdk:         -> { YAML.load(open('https://download.run.pivotal.io/openjdk/trusty/x86_64/index.yml').read).keys },
-      php:             -> { Octokit.tags('php/php-src').map(&:name).grep(/^php/) },
     }
-  end
-
-  # take the list of tags and format the version so it matches
-  # the version in the buildpack manifest.yml. This way, the version format
-  # is consistent throughout the whole pipeline.
-  def massage_version(tags,dependency)
-    case dependency
-    when :miniconda
-      versions_if_found = tags.map do |link|
-        match = link.match(/-((?<ver>\d+\.\d+\.\d+))-Linux-x86_64/)
-
-        match['ver'] unless match.nil?
-      end
-
-      versions_if_found.compact.uniq.sort
-    when :newrelic
-      versions_if_found = tags.map do |link|
-        match = link.match(/((?<ver>\d+\.\d+\.\d+\.\d+))/)
-
-        match['ver'] unless match.nil?
-      end
-
-      versions_if_found.compact.uniq.sort
-    when :bundler, :rubygems
-      tags.map { |tag| tag.gsub(/v/,"")}
-    when :node
-      tags.map { |tag| tag.gsub(/v/,"")}
-    when :nginx
-      tags.map { |tag| tag.gsub('release-', '')}
-    else
-      tags
-    end
-  end
-
-  private
-
-  def pip_versions(name)
-    data = JSON.parse(open("https://pypi.python.org/pypi/#{name}/json").read)
-    data['releases'].keys.sort_by{ |v| Gem::Version.new(v) }.reverse
   end
 end
