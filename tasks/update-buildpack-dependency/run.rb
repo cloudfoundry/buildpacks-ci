@@ -17,6 +17,7 @@ build = JSON.parse(open("builds/binary-builds-new/#{source_name}/#{resource_vers
 manifest_name = source_name == 'nginx-static' ? 'nginx' : source_name
 story_id = build['tracker_story_id']
 version = build['version']
+removal_strategy = ENV['REMOVAL_STRATEGY']
 
 system('rsync -a buildpack/ artifacts/')
 raise 'Could not copy buildpack to artifacts' unless $?.success?
@@ -29,7 +30,6 @@ dep = {
   'cf_stacks' => ENV['CF_STACKS'].split
 }
 
-
 old_versions = manifest['dependencies']
                    .select {|d| d['name'] == manifest_name}
                    .map {|d| d['version']}
@@ -37,7 +37,7 @@ old_versions = manifest['dependencies']
 manifest['dependencies'] = Dependencies.new(
     dep,
     ENV['VERSION_LINE'],
-    ENV['REMOVAL_STRATEGY'],
+    removal_strategy,
     manifest['dependencies'],
     manifest_master['dependencies']
 ).switch
@@ -53,6 +53,13 @@ rebuilt = old_versions.include?(version)
 if added.length == 0 && !rebuilt
   puts 'SKIP: Built version is not required by buildpack.'
   exit 0
+end
+
+if removal_strategy == 'remove_all'
+  manifest['default_versions'] = manifest['default_versions'].map do |v|
+    v['version'] = version if v['name'] == manifest_name
+    v
+  end
 end
 
 #
