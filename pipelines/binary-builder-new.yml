@@ -26,7 +26,7 @@
   pip: { buildpacks: { python: {} }, source_type: 'pypi'},
   pipenv: { buildpacks: { python: {} }, source_type: 'pypi'},
   python: { buildpacks: { python: { lines: ["2.7.X", "3.4.X", "3.5.X", "3.6.X"], removal_strategy: 'keep_master' } } },
-  r: { buildpacks: { r: { lines: ["3.4.X"], removal_strategy: 'keep_master' } } },
+  r: { buildpacks: { r: { lines: ["3.4.X", "3.5.X"], removal_strategy: 'keep_master' } } },
   ruby: { buildpacks: { ruby: { lines: ["2.2.X", "2.3.X", "2.4.X", "2.5.X"], removal_strategy: 'keep_master' } } },
   rubygems: { buildpacks: { ruby: {} }, source_type: 'rubygems_cli'},
   setuptools: { buildpacks: { python: {}}, source_type: 'pypi'},
