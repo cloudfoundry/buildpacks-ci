@@ -33,8 +33,14 @@ end
 
 def url_for_type(name, type)
   case type.gsub(/Recipe$/,'')
-  when /PECL/i
-    "https://pecl.php.net/package/#{name}"
+  when 'PHPProtobufPecl'
+    'https://github.com/allegro/php-protobuf/releases'
+  when 'SuhosinPecl'
+    'https://github.com/sektioneins/suhosin/releases'
+  when 'TwigPecl'
+    'https://github.com/twigphp/Twig/releases'
+  when 'XcachePecl'
+    'https://xcache.lighttpd.net/wiki/ReleaseArchive'
   when 'CassandraCppDriver'
     'http://downloads.datastax.com/cpp-driver/ubuntu/14.04/cassandra/'
   when 'Hiredis'
@@ -50,9 +56,15 @@ def url_for_type(name, type)
   when 'Phalcon'
     'https://github.com/phalcon/cphalcon/releases'
   when 'PHPIRedis'
-    'https://github.com/redis/hiredis/releases'
+    'https://github.com/nrk/phpiredis/releases'
   when 'RabbitMQ'
     'https://github.com/alanxz/rabbitmq-c/releases'
+  when 'TidewaysXhprof'
+    'https://github.com/tideways/php-xhprof-extension/releases'
+  when 'UnixOdbc'
+    'http://www.unixodbc.org/'
+  when /PECL/i
+    "https://pecl.php.net/package/#{name}"
   end
 end
 
