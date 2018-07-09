@@ -98,14 +98,8 @@ end
 
 description += <<-DESCRIPTION
 
-If you have updated cassadra modules (including datastax/cpp-driver) please run integration tests locally with `CASSANDRA_HOST` set.
-
-```
-docker run -p 0.0.0.0:9042:9042 --detach poklet/cassandra
-export CASSANDRA_HOST=[LOCALMACHINE EXTERNAL IP]
-COMPOSER_GITHUB_OAUTH_TOKEN=[NNNN] ginkgo -focus 'deploying a basic PHP app using Cassandra module'
-```
-Then stop the above docker cassandra container
+If you're updating cassandra modules (including datastax/cpp-driver) please do so in individual commits, then rebuild appropriate php versions, so integration tests can run in CI with only cassandra changes.
+This will help isolate the php cassandra module change(s) if the changes cause problems.
 DESCRIPTION
 
 puts description
