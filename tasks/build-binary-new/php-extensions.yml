@@ -1,7 +1,7 @@
 native_modules:
 - name: rabbitmq
-  version: 0.8.0
-  md5: 51d5827651328236ecb7c60517c701c2
+  version: 0.9.0
+  md5: 3d7a3894e6b191127be7987fbae0e157
   klass: RabbitMQRecipe
 - name: lua
   version: 5.3.4
@@ -43,8 +43,8 @@ extensions:
   md5: ebeeffa834e8428c9105a45fe89344aa
   klass: PeclRecipe
 - name: igbinary
-  version: 2.0.5
-  md5: d27c0020f491bb8c7f4724364a5ce35e
+  version: 2.0.7
+  md5: 3e1cd2cbf261a1ed5caeaf476ab45ed9
   klass: PeclRecipe
 - name: imagick
   version: 3.4.3
@@ -83,8 +83,8 @@ extensions:
   md5: cde37cae4fafbb66903ce81d44f7f492
   klass: PeclRecipe
 - name: mongodb
-  version: 1.4.2
-  md5: 28084c896be33df1ca268898646b7e32
+  version: 1.5.1
+  md5: 1ba9c01d39e6e4091876e71125fb948d
   klass: PeclRecipe
 - name: msgpack
   version: 0.5.7
@@ -99,8 +99,8 @@ extensions:
   md5: a304ca632b0d7c5710d5590ac06248a9
   klass: PeclRecipe
 - name: redis
-  version: 4.0.0
-  md5: e7a8735690e0c8ea9e83f8682c31e22c
+  version: 4.0.2
+  md5: 28f0876eff1b83b4503de80da7dc2637
   klass: PeclRecipe
 - name: solr
   version: 2.4.0
@@ -133,8 +133,8 @@ extensions:
   md5: c8538be13c90fba9dc7abef1c2cfbdc5
   klass: AmqpPeclRecipe
 - name: ioncube
-  version: 10.2.0
-  md5: 61a8591003b81dccf5b0d8045acaded5
+  version: 10.2.2
+  md5: e5cd0c672aee7fa13aa483dd6951a085
   klass: IonCubeRecipe
 - name: lua
   version: 1.1.0
@@ -153,8 +153,8 @@ extensions:
   md5: nil
   klass: OdbcRecipe
 - name: phalcon
-  version: 3.3.2
-  md5: 358838bb9b978417c4f1c884ac1d0215
+  version: 3.4.0
+  md5: 821068fe1907bf29e12d0476200117e3
   klass: PhalconRecipe
 - name: phpiredis
   version: 1.0.0
