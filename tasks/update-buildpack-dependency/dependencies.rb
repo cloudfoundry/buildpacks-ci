@@ -11,13 +11,18 @@ class Dependencies
   end
 
   def switch
+    # if we're rebuilding, replace matching version
     if @matching_deps.map { |d| d['version'] }.include?(@dep['version'])
       out = ((@dependencies.reject { |d| d['version'] == @dep['version'] }) + [@dep])
+    # adding a new one, but keep everything
     elsif @removal_strategy == 'keep_all'
       out = @dependencies + [@dep]
+    # adding one newer than all existing versions
     elsif latest?
+      # keep deps (on master) and add this new one
       out = ((@dependencies - @matching_deps) + [@dep] + master_dependencies)
     else
+      # if not newer, don't do anything
       return @dependencies
     end
     out.sort_by do |d|
@@ -51,6 +56,12 @@ class Dependencies
       version.segments[0] == Gem::Version.new(@dep['version']).segments[0]
     when 'minor'
       version.segments[0, 2] == Gem::Version.new(@dep['version']).segments[0, 2]
+    when 'nginx'
+      # 1.13.X and 1.15.X are the same version line
+      # 1.12.X and 1.14.X are the same version line
+      dep_version = Gem::Version.new(@dep['version'])
+      version.segments[0] == dep_version.segments[0] &&
+        version.segments[1].even? == dep_version.segments[1].even?
     when nil, '', 'null'
       true
     else
