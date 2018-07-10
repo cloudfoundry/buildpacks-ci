@@ -71,9 +71,9 @@ if !rebuilt && manifest_name == 'nginx' && manifest['language'] == 'nginx'
   v = Gem::Version.new(version)
   if data.dig('source', 'version_filter')
     if v.segments[1].even? # 1.12.X is stable
-      manifest['version_lines']['stable'] = data['source']['version_filter']
+      manifest['version_lines']['stable'] = data['source']['version_filter'].downcase
     else # 1.13.X is mainline
-      manifest['version_lines']['mainline'] = data['source']['version_filter']
+      manifest['version_lines']['mainline'] = data['source']['version_filter'].downcase
     end
   else
     raise "When setting nginx's version_line, expected to find data['source']['version_filter'], but did not"
