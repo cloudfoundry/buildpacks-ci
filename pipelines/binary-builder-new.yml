@@ -328,7 +328,7 @@ jobs:
     - task: update-buildpack-dependency
       file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
       params:
-        VERSION_LINE: <%= get_version_line_type(bp[:lines]) %>
+        VERSION_LINE: <%= if dep_name == :nginx && bp_name == :nginx then 'nginx' else get_version_line_type(bp[:lines]) end %>
         REMOVAL_STRATEGY: <%= bp.fetch(:removal_strategy, 'remove_all') %>
         CF_STACKS: <%= bp.fetch(:cf_stacks, ['cflinuxfs2']).join(' ') %>
     - put: <%= bp_name %>-buildpack
