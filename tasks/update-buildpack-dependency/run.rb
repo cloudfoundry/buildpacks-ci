@@ -63,6 +63,25 @@ if removal_strategy == 'remove_all'
 end
 
 #
+# Special Nginx stuff (for Nginx buildpack)
+# * There are two version lines, stable & mainline
+#   when we add a new minor line, we should update the version line regex
+if !rebuilt && manifest_name == 'nginx' && manifest['language'] == 'nginx'
+  version_lines = manifest['version_lines']
+  v = Gem::Version.new(version)
+  if data.dig('source', 'version_filter')
+    if v.segments.even? # 1.12.X is stable
+      manifest['version_lines']['stable'] = data['source']['version_filter']
+    else # 1.13.X is mainline
+      manifest['version_lines']['mainline'] = data['source']['version_filter']
+    end
+  else
+    raise "When setting nginx's version_line, expected to find data['source']['version_filter'], but did not"
+  end
+end
+
+
+#
 # Special PHP stuff
 # * The defaults/options.json file contains default version numbers to use for each PHP line.
 #   Update the default version for the relevant line to this version of PHP (if !rebuilt)

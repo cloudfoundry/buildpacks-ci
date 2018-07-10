@@ -16,7 +16,7 @@
   libunwind: { buildpacks: { 'dotnet-core' => {} }, source_type: 'github_releases', source_params: ['repo: libunwind/libunwind', 'extension: .tar.gz']},
   miniconda2: { buildpacks: { python: {} }, third_party_hosted: true, source_type: 'miniconda', source_params: ['generation: 2'] },
   miniconda3: { buildpacks: { python: {} }, third_party_hosted: true, source_type: 'miniconda', source_params: ['generation: 3'] },
-  nginx: { buildpacks: { nginx: { lines: ["1.13.X", "1.14.X", "1.15.X"], removal_strategy: 'keep_master' } } },
+  nginx: { buildpacks: { nginx: { lines: ["1.14.X", "1.15.X"] }}},
   'nginx-static': { buildpacks: { php: { lines: ["1.14.X", "1.15.X"] }, staticfile: { lines: ["1.15.X"] } }, source_type: 'nginx' },
   node: { buildpacks: { nodejs: { lines: ["6.X.X", "8.X.X", "9.X.X", "10.X.X"], removal_strategy: 'keep_master'},
                         ruby: { lines: ["6.X.X"], removal_strategy: 'keep_master'},
