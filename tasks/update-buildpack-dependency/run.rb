@@ -70,7 +70,7 @@ if !rebuilt && manifest_name == 'nginx' && manifest['language'] == 'nginx'
   version_lines = manifest['version_lines']
   v = Gem::Version.new(version)
   if data.dig('source', 'version_filter')
-    if v.segments.even? # 1.12.X is stable
+    if v.segments[1].even? # 1.12.X is stable
       manifest['version_lines']['stable'] = data['source']['version_filter']
     else # 1.13.X is mainline
       manifest['version_lines']['mainline'] = data['source']['version_filter']
