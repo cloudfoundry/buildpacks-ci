@@ -516,7 +516,6 @@ jobs: ##########################################################################
           passed:
             - cats
         - get: cflinuxfs2
-          resource: cflinuxfs2
           passed:
             - cats
         - get: version
@@ -526,7 +525,7 @@ jobs: ##########################################################################
           params: { bump: final }
       - do:
         - task: update-receipt
-          file: buildpacks-ci/tasks/update-rootfs-receipt/task.yml
+          file: buildpacks-ci/tasks/update-cflinuxfs2-receipt/task.yml
         - task: update-filename
           file: buildpacks-ci/tasks/update-rootfs-filename/task.yml
         - put: cflinuxfs2
@@ -679,7 +678,7 @@ jobs: ##########################################################################
         - task: create-release-body
           file: buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes/task.yml
           params:
-            ROOTFS_TYPE: cflinuxfs2
+            STACK: cflinuxfs2
         - task: create-release-commit
           file: buildpacks-ci/tasks/create-rootfs-bosh-release-commit/task.yml
         - put: cflinuxfs2-release
