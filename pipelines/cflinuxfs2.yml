@@ -515,7 +515,8 @@ jobs: ##########################################################################
         - get: receipt-s3
           passed:
             - cats
-        - get: cflinuxfs2
+        - get: rootfs
+          resource: cflinuxfs2
           passed:
             - cats
         - get: version

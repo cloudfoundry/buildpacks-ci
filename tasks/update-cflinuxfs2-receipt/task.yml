@@ -7,7 +7,7 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: receipt-s3
-  - name: cflinuxfs2
+  - name: rootfs
   - name: version
 outputs:
   - name: new-rootfs-commit
