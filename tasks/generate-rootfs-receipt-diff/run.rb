@@ -7,12 +7,12 @@ require_relative '../../lib/git-client'
 
 stack = ENV.fetch('STACK')
 
-previous_version = File.read("previous-rootfs-release/version").strip
+previous_version = "master" #TODO: Revert this: File.read("previous-rootfs-release/version").strip
 
-old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/#{stack}/#{previous_version}/#{stack}/#{stack}_receipt"
+old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/cflinuxfs3/#{previous_version}/receipt.#{stack}.x86_64"
 receipt_diff_file = File.join('receipt-diffs', "#{stack}-diff")
 
-new_receipt_file = Dir["receipt-artifacts/#{stack}_receipt*"].first
+new_receipt_file = Dir["receipt-artifacts/receipt.#{stack}.x86_64*"].first
 old_receipt = Tempfile.new('old-receipt')
 File.write(old_receipt.path, open(old_receipt_uri).read)
 

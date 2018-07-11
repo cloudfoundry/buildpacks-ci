@@ -58,9 +58,9 @@ resources: #####################################################################
   - name: <%= rootfs_name %>
     type: git
     source:
-      uri: git@github.com:cloudfoundry/<%= rootfs_name %>.git
+      uri: git@github.com:cloudfoundry/cflinuxfs3.git
       branch: master
-      private_key: {{<%= rootfs_name %>-private-key}}
+      private_key: {{cflinuxfs3-private-key}}
 
   - name: new-cves
     type: git
@@ -75,7 +75,7 @@ resources: #####################################################################
     source:
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
       branch: master
-      paths: [ receipt-diffs/<%= rootfs_name %>-diff ]
+      paths: [ receipt.<%= rootfs_name %>.x86_64 ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
       tag_filter: "newpackages_<%= rootfs_name %>_*"
 
@@ -128,7 +128,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: rootfs/<%= rootfs_name %>_receipt-(.*)
+      regexp: rootfs/receipt.<%= rootfs_name %>.x86_64-(.*)
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
@@ -185,7 +185,7 @@ resources: #####################################################################
     source:
       drafts: true
       user: {{buildpacks-github-org}}
-      repository: <%= rootfs_name %>
+      repository: cflinuxfs3
       access_token: {{buildpacks-github-token}}
 
   - name: <%= rootfs_name %>-release-github-release
@@ -256,17 +256,12 @@ jobs: ##########################################################################
           privileged: true
           params:
             STACK: <%= rootfs_name %>
-        - task: test-rootfs
-          file: buildpacks-ci/tasks/test-rootfs/task.yml
-          privileged: true
-          params:
-            STACK: <%= rootfs_name %>
         - put: stack-s3
           params:
             file: rootfs-artifacts/<%= rootfs_name %>-*.tar.gz
         - put: receipt-s3
           params:
-            file: receipt-artifacts/<%= rootfs_name %>_receipt-*
+            file: receipt-artifacts/receipt.<%= rootfs_name %>.x86_64-*
         - task: generate-receipt-diff
           file: buildpacks-ci/tasks/generate-rootfs-receipt-diff/task.yml
           params:

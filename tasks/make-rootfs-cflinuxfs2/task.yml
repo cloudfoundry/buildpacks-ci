@@ -6,8 +6,10 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: cflinuxfs3
+  - name: cflinuxfs2
   - name: version
-  - name: cflinuxfs3-artifacts
+outputs:
+  - name: cflinuxfs2-artifacts
+  - name: receipt-artifacts
 run:
-  path: buildpacks-ci/tasks/test-rootfs-cflinuxfs3/run.sh
+  path: buildpacks-ci/tasks/make-rootfs-cflinuxfs2/run.sh
