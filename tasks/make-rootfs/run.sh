@@ -9,7 +9,7 @@ set -x
 buildpacks-ci/scripts/start-docker
 
 pushd rootfs
-  make --always-make NAME=$STACK
+  make --always-make NAME="$STACK"
 
   versioned_stack_filename="../rootfs-artifacts/$STACK-$(cat ../version/number).tar.gz"
   mv "$STACK.x86_64.tar.gz" "$versioned_stack_filename"
