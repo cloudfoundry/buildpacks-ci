@@ -6,7 +6,7 @@ set -o pipefail
 
 SUFFIX="${ROOTFS_SUFFIX-}"
 
-cp "receipt-s3/${STACK}_receipt${SUFFIX}"-* "rootfs/${STACK}/${STACK}_receipt"
+cp "receipt-s3/${STACK}_receipt${SUFFIX}"-* "${STACK}/${STACK}/${STACK}_receipt"
 
 pushd rootfs
     version=$(cat ../version/number)

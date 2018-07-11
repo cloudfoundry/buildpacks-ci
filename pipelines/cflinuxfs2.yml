@@ -526,6 +526,8 @@ jobs: ##########################################################################
       - do:
         - task: update-receipt
           file: buildpacks-ci/tasks/update-cflinuxfs2-receipt/task.yml
+          params:
+            STACK: cflinuxfs2
         - task: update-filename
           file: buildpacks-ci/tasks/update-rootfs-filename/task.yml
         - put: cflinuxfs2
