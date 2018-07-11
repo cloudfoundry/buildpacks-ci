@@ -19,5 +19,3 @@ run:
     - "buildpacks-ci/tasks/generate-rootfs-receipt-diff/run.rb"
 params:
   STACK:
-  GITHUB_USERNAME:
-  GITHUB_PASSWORD:

@@ -8,11 +8,11 @@ describe 'make-rootfs', :fly do
     @cflinuxfs2_artifacts = Dir.mktmpdir
     @receipt_artifacts = Dir.mktmpdir
 
-    execute('-c tasks/make-rootfs/task.yml ' \
+    execute('-c tasks/make-rootfs-cflinuxfs2/task.yml ' \
       '-p ' \
       '-i buildpacks-ci=. ' \
-      '-i cflinuxfs2=spec/tasks/make-rootfs/cflinuxfs2 ' \
-      '-i version=spec/tasks/make-rootfs/version ' \
+      '-i cflinuxfs2=spec/tasks/make-rootfs-cflinuxfs2/cflinuxfs2 ' \
+      '-i version=spec/tasks/make-rootfs-cflinuxfs2/version ' \
       "-o cflinuxfs2-artifacts=#{@cflinuxfs2_artifacts} " \
       "-o receipt-artifacts=#{@receipt_artifacts} ")
   end

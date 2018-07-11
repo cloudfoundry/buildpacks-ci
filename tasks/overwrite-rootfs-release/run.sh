@@ -7,21 +7,21 @@ set -o pipefail
 echo "Overwriting BOSH release $STACK"
 
 release_dir=rootfs-release
-filename=$(< "$release_dir/config/blobs.yml" grep "$STACK" | cut -d ':' -f 1)
 version="212.0.$(date +"%s")"
 
-echo "Creating $release_dir directory"
+pushd $release_dir
+  for name in $( bosh2 blobs | grep -- "rootfs/$STACK-*" | awk '{print $1}' ); do
+    bosh2 remove-blob "$name"
+  done
 
-mkdir -p "$release_dir/blobs/$(dirname "$filename")"
+  blob="../stack-s3/*.tar.gz"
 
-echo "Moving stack-s3/*.tar.gz to $release_dir/blobs/$filename"
+  # shellcheck disable=SC2086
+  bosh2 -n add-blob $blob "rootfs/$(basename $blob)"
 
-cp stack-s3/*.tar.gz "$release_dir/blobs/$filename"
+  echo "Running 'bosh create release' in $release_dir"
 
-pushd "$release_dir"
-    echo "Running 'bosh create release' in $release_dir"
-
-    bosh2 create-release --force --tarball "dev_releases/$STACK/$STACK-$version.tgz" --name "$STACK" --version "${version}"
+  bosh2 create-release --force --tarball "dev_releases/$STACK/$STACK-$version.tgz" --name "$STACK" --version "${version}"
 popd
 
 cat <<EOF > ${release_dir}/use-dev-release-opsfile.yml
