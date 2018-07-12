@@ -33,17 +33,21 @@ module Depwatcher
       end
     end
 
-    def check : Array(Internal)
-      dotnet_tags.map{|t| Internal.new(t.name) }.sort_by { |i| SemanticVersion.new(i.ref) }
+    def check(tag_regex : String) : Array(Internal)
+      dotnet_tags(tag_regex)
+        .map { |t| Internal.new(t.name) }
+        .sort_by { |i| SemanticVersion.new(i.ref) }
     end
 
-    def in(ref : String) : DotnetRelease
-      tag = dotnet_tags.select{|t| t.name == ref}.first
+    def in(ref : String, tag_regex : String) : DotnetRelease
+      tag = dotnet_tags(tag_regex)
+        .select { |t| t.name == ref }
+        .first
       DotnetRelease.new(tag.name, "https://github.com/dotnet/cli", tag.commit)
     end
 
-    private def dotnet_tags() : Array(External)
-      GithubTags.new(client).matched_tags("dotnet/cli", ".*\\+dependencies")
+    private def dotnet_tags(tag_regex : String) : Array(External)
+      GithubTags.new(client).matched_tags("dotnet/cli", tag_regex)
         .map do |t|
           m = t.name.match(/\d+\.\d+\.\d+/)
           if !m.nil?

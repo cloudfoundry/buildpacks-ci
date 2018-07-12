@@ -70,44 +70,6 @@ Spec2.describe SemanticVersion do
 end
 
 Spec2.describe SemanticVersionFilter do
-    it "returns successfully with major only" do
-      version = SemanticVersionFilter.new("1.X.X")
-      expect(version.major).to eq 1
-      expect(version.minor).to be_nil
-      expect(version.patch).to be_nil
-    end
-
-    it "returns successfully with major and minor only" do
-      version = SemanticVersionFilter.new("1.2.X")
-      expect(version.major).to eq 1
-      expect(version.minor).to eq 2
-      expect(version.patch).to be_nil
-    end
-
-    it "returns successfully with major, minor, and patch" do
-      version = SemanticVersionFilter.new("1.2.3")
-      expect(version.major).to eq 1
-      expect(version.minor).to eq 2
-      expect(version.patch).to eq 3
-    end
-
-  describe "invalid filters" do
-    it "returns error with a non-semantic version" do
-      expect{ SemanticVersionFilter.new("VERSION1") }.to raise_error ArgumentError, "Not a semantic version filter: \"VERSION1\""
-    end
-    it "returns error with a non-literal major version" do
-      expect{ SemanticVersionFilter.new("X.2.2") }.to raise_error ArgumentError, "Not a semantic version filter: \"X.2.2\""
-    end
-    it "returns error without all three fields" do
-      expect{ SemanticVersionFilter.new("1.X") }.to raise_error ArgumentError, "Not a semantic version filter: \"1.X\""
-      expect{ SemanticVersionFilter.new("1.1") }.to raise_error ArgumentError, "Not a semantic version filter: \"1.1\""
-    end
-    it "returns error when filter includes any metadata" do
-      expect{ SemanticVersionFilter.new("1.1.1-dev") }.to raise_error ArgumentError, "Not a semantic version filter: \"1.1.1-dev\""
-      expect{ SemanticVersionFilter.new("1.X.X-dev") }.to raise_error ArgumentError, "Not a semantic version filter: \"1.X.X-dev\""
-    end
-  end
-
   describe "match" do
     it "returns true when only major is specified and major version matches" do
       versionfilter = SemanticVersionFilter.new("1.X.X")
@@ -143,6 +105,15 @@ Spec2.describe SemanticVersionFilter do
       expect(versionfilter.match(SemanticVersion.new("1.3"))).to be_false
       expect(versionfilter.match(SemanticVersion.new("1.32.3-dev"))).to be_false
       expect(versionfilter.match(SemanticVersion.new("1.32.3-dev.3333"))).to be_false
+    end
+
+    it "matches appropriately minor and major are specified and patch contains number and one or more wildcards" do
+      versionfilter = SemanticVersionFilter.new("1.2.3XX")
+      expect(versionfilter.match(SemanticVersion.new("1.2.3"))).to be_false
+      expect(versionfilter.match(SemanticVersion.new("1.2.34"))).to be_false
+      expect(versionfilter.match(SemanticVersion.new("1.2.425"))).to be_false
+      expect(versionfilter.match(SemanticVersion.new("1.2.345"))).to be_true
+      expect(versionfilter.match(SemanticVersion.new("1.2.3456"))).to be_true
     end
 
     it "returns true when major, minor, and patch are specified and all match" do

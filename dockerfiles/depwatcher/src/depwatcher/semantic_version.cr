@@ -35,26 +35,19 @@ class SemanticVersion
   end
 end
 
+# NOTE: Keep in sync with 'tasks/build-binary-new/create-new-version-line-story.rb'!
 class SemanticVersionFilter
-  getter original : String
-  getter major : Int32
-  getter minor : Int32 | Nil
-  getter patch : Int32 | Nil
-
-  def initialize(@original : String)
-    m = @original.match /^(\d+)\.(\d+|X)\.(\d+|X)$/
-    if m
-      @major = m[1].to_i
-      @minor = m[2] == "X" ? nil : m[2].to_i
-      @patch = m[3] == "X" ? nil : m[3].to_i
-    else
-      raise ArgumentError.new("Not a semantic version filter: #{@original.inspect}")
-    end
+  def initialize(@filter_string : String)
   end
 
-  def match(other : SemanticVersion) : Bool
-    (major == other.major) &&
-    (minor == nil || minor == other.minor) &&
-    (patch == nil || patch == other.patch)
+  def match(semver : SemanticVersion) : Bool
+    semver_string : String = "#{semver.major}.#{semver.minor}.#{semver.patch}"
+    first_x_idx = @filter_string.index("X")
+    if first_x_idx.nil?
+      semver_string == @filter_string
+    else
+      prefix = @filter_string[0, first_x_idx]
+      semver_string.starts_with?(prefix) && @filter_string.size <= semver_string.size
+    end
   end
 end

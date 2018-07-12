@@ -19,7 +19,7 @@ Spec2.describe Depwatcher::Dotnet do
 
   describe "#check" do
     it "returns dotnet release versions sorted" do
-      expect(subject.check.map(&.ref)).to eq [
+      expect(subject.check(".*\\+dependencies").map(&.ref)).to eq [
         "2.1.103", "2.1.104", "2.1.105", "2.1.200", "2.1.301",
       ]
     end
@@ -27,7 +27,7 @@ Spec2.describe Depwatcher::Dotnet do
 
   describe "#in" do
     it "returns a dotnet release" do
-      obj = subject.in("2.1.301")
+      obj = subject.in("2.1.301", ".*\\+dependencies")
       expect(obj.ref).to eq "2.1.301"
       expect(obj.url).to eq "https://github.com/dotnet/cli"
       expect(obj.git_commit_sha).to eq "2a1f1c6d30c73c1bce0b557ebbdfba1008e9ae63"
