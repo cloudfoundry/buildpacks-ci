@@ -43,7 +43,6 @@ class Dependencies
 
   def same_dependency_line?(version, dep_name)
     return false if dep_name != @dep['name']
-    return false if @dep['name'] == 'dotnet' && version == '2.1.201' && @dep['version'] != '2.1.201'
 
     version = begin
       Gem::Version.new(version)
