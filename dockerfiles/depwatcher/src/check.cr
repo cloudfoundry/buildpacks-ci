@@ -9,7 +9,7 @@ case type = source["type"].to_s
 when "github_releases"
   versions = Depwatcher::GithubReleases.new.check(source["repo"].to_s)
 when "github_tags"
-  versions = Depwatcher::GithubTags.new.check(source["repo"].to_s, source["regexp"].to_s)
+  versions = Depwatcher::GithubTags.new.check(source["repo"].to_s, source["tag_regex"].to_s)
 when "jruby"
   versions = Depwatcher::JRuby.new.check()
 when "miniconda"
@@ -43,7 +43,7 @@ when "ca_apm_agent"
 when "appd_agent"
   versions = Depwatcher::AppDynamicsAgent.new.check
 when "dotnet"
-  versions = Depwatcher::Dotnet.new.check
+  versions = Depwatcher::Dotnet.new.check(source["tag_regex"].to_s)
 when "dotnet-framework"
   versions = Depwatcher::DotnetFramework.new.check
 else

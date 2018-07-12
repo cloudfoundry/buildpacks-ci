@@ -21,29 +21,25 @@ class SemanticVersion
       raise ArgumentError.new("Not a semantic version: #{@original.inspect}")
     end
   end
-
 end
 
+# NOTE: Keep in sync with 'dockerfiles/depwatcher/src/depwatcher/semantic_version.cr'!
 class SemanticVersionFilter
-  def initialize(original)
-    @original = original
-    m = @original.match /^(\d+)\.(\d+|X)\.(\d+|X)$/
-    if m
-      @major = m[1].to_i
-      @minor = m[2] == 'X' ? nil : m[2].to_i
-      @patch = m[3] == 'X' ? nil : m[3].to_i
+  def initialize(filter_string)
+    @filter_string = filter_string
+  end
+
+  def match(semver)
+    other_string = "#{semver.major}.#{semver.minor}.#{semver.patch}"
+    first_x_idx = @filter_string.index('X')
+    if first_x_idx.nil?
+      other_string == @filter_string
     else
-      raise ArgumentError.new("Not a semantic version filter: #{@original.inspect}")
+      prefix = @filter_string[0, first_x_idx]
+      other_string.start_with?(prefix) && @filter_string.size <= other_string.size
     end
   end
-
-  def match(other)
-    (@major == other.major) &&
-    (@minor == nil || @minor == other.minor) &&
-    (@patch == nil || @patch == other.patch)
-  end
 end
-
 
 BUILDPACKS = ENV['BUILDPACKS'].split(' ').compact
 

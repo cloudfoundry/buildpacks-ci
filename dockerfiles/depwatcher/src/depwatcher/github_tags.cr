@@ -31,8 +31,8 @@ module Depwatcher
       )
     end
 
-    def check(repo : String, regexp : String) : Array(Internal)
-      matched_tags(repo, regexp)
+    def check(repo : String, tag_regex : String) : Array(Internal)
+      matched_tags(repo, tag_regex)
       .map { |t| Internal.new(t.name) }
       .sort_by { |i| SemanticVersion.new(i.ref) }
     end
@@ -43,9 +43,9 @@ module Depwatcher
       Tag.new(t.name, "https://github.com/#{repo}", t.commit.sha)
     end
 
-    def matched_tags(repo : String, regexp : String) : Array(External)
+    def matched_tags(repo : String, tag_regex : String) : Array(External)
       tags(repo)
-        .select { |t| /#{regexp}/.match(t.name) }
+        .select { |t| /#{tag_regex}/.match(t.name) }
     end
 
     private def tags(repo : String) : Array(External)
