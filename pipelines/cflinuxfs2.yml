@@ -245,8 +245,10 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/make-rootfs-cflinuxfs2/task.yml
           privileged: true
         - task: test-rootfs
-          file: buildpacks-ci/tasks/test-rootfs/task.yml
+          file: buildpacks-ci/tasks/test-cflinuxfs2/task.yml
           privileged: true
+          params:
+            STACK: cflinuxfs2
         - put: stack-s3
           params:
             file: cflinuxfs2-artifacts/cflinuxfs2-*.tar.gz
@@ -531,15 +533,16 @@ jobs: ##########################################################################
             STACK: cflinuxfs2
         - task: update-filename
           file: buildpacks-ci/tasks/update-rootfs-filename/task.yml
+          params:
+            STACK: cflinuxfs2
         - put: cflinuxfs2
           params:
-            repository: new-cflinuxfs2-commit
+            repository: new-rootfs-commit
             tag: version/number
             rebase: true
         - put: stack-s3
           params:
-            from: cflinuxfs2-archive/cflinuxfs2-(.*).tar.gz
-            to: /rootfs/
+            file: rootfs-archive/cflinuxfs2-(.*).tar.gz
         - put: version
           params: { file: version/number }
         on_failure:
@@ -635,6 +638,8 @@ jobs: ##########################################################################
       - do:
         - task: rename
           file: buildpacks-ci/tasks/rename-rootfs-for-docker/task.yml
+          params:
+            STACK: cflinuxfs2
         - aggregate:
           - put: docker latest version
             resource: docker-cflinuxfs2
