@@ -181,7 +181,7 @@ when 'dep'
   end
   old_file = "binary-builder/dep-v#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
-  filename = "binary-builder/dep-v#{version}-linux-x64-#{sha[0..7]}.tgz"
+  filename = "dep-v#{version}-linux-x64-#{sha[0..7]}.tgz"
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
