@@ -36,7 +36,7 @@ when 'bundler'
   end
   old_file = "binary-builder/bundler-#{version}.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
-  filename = File.basename(old_file).gsub(/(\.tar.gz)$/, "-#{sha[0..7]}\\1")
+  filename = "bundler-#{version}-#{sha[0..7]}.tgz"
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
@@ -76,7 +76,7 @@ when 'dotnet'
     system('tar', 'Jcf', "/tmp/#{old_filename}", '.')
   end
   sha = Digest::SHA256.hexdigest(open("/tmp/#{old_filename}").read)
-  filename = old_filename.gsub(/(\.(zip|tar\.gz|tar\.xz|tgz))$/, "-#{sha[0..7]}\\1")
+  filename = "#{name}.#{version}.linux-amd64-#{sha[0..7]}.tar.xz"
   FileUtils.mv("/tmp/#{old_filename}", "artifacts/#{filename}")
 
   out_data.merge!({
@@ -155,7 +155,7 @@ when 'ruby'
   end
   old_file = "binary-builder/ruby-#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
-  filename = File.basename(old_file).gsub(/(\.tgz)$/, "-#{sha[0..7]}\\1")
+  filename = "ruby-#{version}-linux-x64-#{sha[0..7]}.tgz"
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
@@ -168,7 +168,7 @@ when 'hwc'
   end
   old_file = "binary-builder/hwc-#{version}-windows-amd64.zip"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
-  filename = File.basename(old_file).gsub(/(\.zip)$/, "-#{sha[0..7]}\\1")
+  filename = "hwc-#{version}-windows-amd64-#{sha[0..7]}.zip"
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
@@ -194,7 +194,7 @@ when 'glide'
   end
   old_file = "binary-builder/glide-v#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
-  filename = File.basename(old_file).gsub(/(\.tar.gz)$/, "-#{sha[0..7]}\\1")
+  filename = "glide-v#{version}-linux-x64-#{sha[0..7]}.tgz"
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
@@ -207,7 +207,7 @@ when 'godep'
   end
   old_file = "binary-builder/godep-v#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
-  filename = File.basename(old_file).gsub(/(\.tar.gz)$/, "-#{sha[0..7]}\\1")
+  filename = "godep-v#{version}-linux-x64-#{sha[0..7]}.tgz"
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
@@ -220,7 +220,7 @@ when 'go'
   end
   old_file = "binary-builder/go#{version}.linux-amd64.tar.gz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
-  filename = File.basename(old_file).gsub(/(\.tar.gz)$/, "-#{sha[0..7]}\\1")
+  filename = "go#{version}.linux-amd64-#{sha[0..7]}.tar.gz"
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
@@ -280,7 +280,7 @@ when 'node'
   end
   old_file = "binary-builder/node-#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
-  filename = File.basename(old_file).gsub(/(\.tgz)$/, "-#{sha[0..7]}\\1")
+  filename = "node-#{version}-linux-x64-#{sha[0..7]}.tgz"
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
@@ -307,7 +307,7 @@ when 'php'
   end
   old_file = "binary-builder/php#{phpV}-#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
-  filename = File.basename(old_file).gsub(/(\.tgz)$/, "-#{sha[0..7]}\\1")
+  filename = "php#{phpV}-#{version}-linux-x64-#{sha[0..7]}.tgz"
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
@@ -320,7 +320,7 @@ when 'python'
   end
   old_file = "binary-builder/python-#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
-  filename = File.basename(old_file).gsub(/(\.tgz)$/, "-#{sha[0..7]}\\1")
+  filename = "python-#{version}-linux-x64-#{sha[0..7]}.tgz"
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
@@ -333,7 +333,7 @@ when 'httpd'
   end
   old_file = "binary-builder/httpd-#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
-  filename = File.basename(old_file).gsub(/(\.tgz)$/, "-#{sha[0..7]}\\1")
+  filename = "httpd-#{version}-linux-x64-#{sha[0..7]}.tgz"
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
@@ -432,7 +432,7 @@ when 'nginx-static'
   end
   old_file = "binary-builder/nginx-#{version}-linux-x64.tgz"
   sha = Digest::SHA256.hexdigest(open(old_file).read)
-  filename = File.basename(old_file).gsub(/(\.tgz)$/, "-#{sha[0..7]}\\1")
+  filename = "nginx-#{version}-linux-x64-#{sha[0..7]}.tgz"
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
