@@ -274,6 +274,7 @@ jobs:
             stemcells:
               - gcp-stemcell/*.tgz
             ops_files:
+              - cf-deployment/operations/use-latest-stemcell.yml
               - cf-deployment/operations/use-compiled-releases.yml
               - buildpacks-ci/deployments/operations/no-canaries.yml
               - cf-deployment/operations/experimental/use-bosh-dns.yml
