@@ -8,7 +8,7 @@ set -x
 
 buildpacks-ci/scripts/start-docker
 
-pushd rootfs
+pushd cflinuxfs2
   cp ../cflinuxfs2-artifacts/"$STACK"-*.tar.gz "$STACK.tar.gz"
 
   bundle install --jobs="$(nproc)"
