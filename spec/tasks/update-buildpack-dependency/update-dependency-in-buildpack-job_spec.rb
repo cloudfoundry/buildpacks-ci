@@ -148,7 +148,8 @@ describe Dependencies do
     end
   end
 
-  context 'when dotnet 2.1.201 already exists' do
+  # Ignore for now, until we decide how we want to handle dotnet's strange version lines
+  xcontext 'when dotnet 2.1.201 already exists' do
     let(:dependencies) {[
         {'name' => 'dotnet', 'version' => '2.1.201'},
         {'name' => 'dotnet', 'version' => '2.1.300'},
