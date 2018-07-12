@@ -57,11 +57,14 @@ when 'dotnet'
 
     ENV['DropSuffix'] = 'true'
     ENV['TERM'] = 'linux'
-    if major == '2' && minor == '1' && patch.to_i >= 4 && patch.to_i <= 200
+
+    # We must fix the build script for dotnet versions 2.1.4 to 2.1.2XX (see https://github.com/dotnet/cli/issues/8358)
+    if major == '2' && minor == '1' && patch.to_i >= 4 && patch.to_i < 300
       runbuildsh = File.open('run-build.sh', 'r') {|f| f.read}
       runbuildsh.gsub!('WriteDynamicPropsToStaticPropsFiles "${args[@]}"', 'WriteDynamicPropsToStaticPropsFiles')
       File.open('run-build.sh ', 'w') {|f| f.write runbuildsh}
     end
+
     run('./build.sh', '/t:Compile')
   end
 
