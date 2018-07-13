@@ -542,7 +542,7 @@ jobs: ##########################################################################
             rebase: true
         - put: stack-s3
           params:
-            file: rootfs-archive/cflinuxfs2-(.*).tar.gz
+            file: rootfs-archive/cflinuxfs2-*.tar.gz
         - put: version
           params: { file: version/number }
         on_failure:
