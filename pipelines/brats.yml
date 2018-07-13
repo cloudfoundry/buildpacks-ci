@@ -126,6 +126,7 @@ jobs:
         - task: run-brats
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
           input_mapping: {cf-space: cf-brat-space}
+          attempts: <%= if language == "ruby" then 3 else 1 end %>
           params:
             STACKS: cflinuxfs2
             GINKGO_ATTEMPTS: 4
