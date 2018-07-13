@@ -2,14 +2,14 @@
 <% cutlass = %w(binary dotnet-core go nodejs python ruby staticfile) %>
 <% stacks = {
   "binary" => %w(any),
-  "java" => %w(cflinuxfs2),
-  "dotnet-core" => %w(cflinuxfs2),
-  "go" => %w(cflinuxfs2),
-  "nodejs" => %w(cflinuxfs2),
-  "php" => %w(cflinuxfs2),
-  "python" => %w(cflinuxfs2),
-  "ruby" => %w(cflinuxfs2),
-  "staticfile" => %w(cflinuxfs2)
+  "java" => %w(cflinuxfs2 cflinuxfs3),
+  "dotnet-core" => %w(cflinuxfs2 cflinuxfs3),
+  "go" => %w(cflinuxfs2 cflinuxfs3),
+  "nodejs" => %w(cflinuxfs2 cflinuxfs3),
+  "php" => %w(cflinuxfs2 cflinuxfs3),
+  "python" => %w(cflinuxfs2 cflinuxfs3),
+  "ruby" => %w(cflinuxfs2 cflinuxfs3),
+  "staticfile" => %w(cflinuxfs2 cflinuxfs3)
 } %>
 ---
 resource_types:
@@ -85,8 +85,8 @@ resources:
       vars_store:
         provider: gcs
         config:
-          bucket: cf-release-multiple-stacks-cf-deployment
-          file_name: vars-store.yml
+          bucket: cf-release-cf-deployment
+          file_name: vars-store-multiple-stacks.yml
           json_key: {{cf-release-cf-deployment-gcs-service-account-key}}
   - name: failure-alert
     type: slack-notification
@@ -286,6 +286,7 @@ jobs:
             ops_files:
               - cf-deployment/operations/use-latest-stemcell.yml
               - cf-deployment/operations/use-compiled-releases.yml
+              - buildpacks-ci/deployments/operations/cflinuxfs3.yml
               - buildpacks-ci/deployments/operations/no-canaries.yml
               - cf-deployment/operations/experimental/use-bosh-dns.yml
               - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
