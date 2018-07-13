@@ -50,7 +50,7 @@ resources: #####################################################################
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: wip-cflinuxfsn-155910839 #{{buildpacks-ci-git-uri-public-branch}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
 
   - name: <%= rootfs_name %>
     type: git
