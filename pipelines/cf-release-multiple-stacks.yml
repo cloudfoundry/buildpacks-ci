@@ -1,0 +1,550 @@
+<% supported_languages = %w(dotnet-core go ruby binary staticfile nodejs php python java) %>
+<% cutlass = %w(binary dotnet-core go nodejs python ruby staticfile) %>
+<% stacks = {
+  "binary" => %w(any),
+  "java" => %w(cflinuxfs2),
+  "dotnet-core" => %w(cflinuxfs2),
+  "go" => %w(cflinuxfs2),
+  "nodejs" => %w(cflinuxfs2),
+  "php" => %w(cflinuxfs2),
+  "python" => %w(cflinuxfs2),
+  "ruby" => %w(cflinuxfs2),
+  "staticfile" => %w(cflinuxfs2)
+} %>
+---
+resource_types:
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+  - name: github-release-forked
+    type: docker-image
+    source:
+      repository: dgodd/github-release-resource
+  - name: pivnet
+    type: docker-image
+    source:
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final
+  - name: bosh-deployment
+    type: docker-image
+    source:
+      repository: cloudfoundry/bosh-deployment-resource
+
+resources:
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: cf-release-multiple-stacks
+  - name: public-robots
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
+      branch: cf-release-multiple-stacks
+  - name: cats-concourse-task
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cats-concourse-task
+      branch: master
+  - name: cf-acceptance-tests
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-acceptance-tests
+      branch: master
+  - name: bbl-state
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: {{buildpacks-envs-private-key}}
+  - name: cf-deployment-concourse-tasks
+    type: git
+    source:
+      branch: master
+      uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+      tag_filter: v5.*
+  - name: bosh-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-deployment
+      branch: master
+  - name: cf-deployment-rc
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-deployment
+      branch: release-candidate
+  - name: gcp-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-ubuntu-trusty-go_agent
+  - name: cf-release-multiple-stacks-cf-deployment
+    type: bosh-deployment
+    source:
+      deployment: cf
+      vars_store:
+        provider: gcs
+        config:
+          bucket: cf-release-multiple-stacks-cf-deployment
+          file_name: vars-store.yml
+          json_key: {{cf-release-cf-deployment-gcs-service-account-key}}
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
+  - name: cflinuxfs2-bosh-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/cflinuxfs2-release
+  - name: cflinuxfs3-bosh-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: cflinuxfs3-release
+      access_token: {{buildpacks-github-token}}
+  - name: pivnet-production
+    type: pivnet
+    source:
+      api_token: {{pivnet-apikey}}
+      product_slug: buildpacks
+      product_version: "Java Buildpack 4\\."
+      access_key_id: {{pivnet-access-key}}
+      secret_access_key: {{pivnet-secret-key}}
+<% (supported_languages).each do |language| %>
+  <% if language == 'java' %>
+  - name: <%= language %>-buildpack-github-release
+    type: github-release-forked
+    source:
+      user: {{buildpacks-github-org}}
+      repository: <%= language %>-buildpack
+      access_token: {{buildpacks-github-token}}
+      filter_tag_prefix: v4.
+  <% else %>
+  - name: <%= language %>-buildpack-github-release
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: <%= language %>-buildpack
+      access_token: {{buildpacks-github-token}}
+  <% end %>
+#  - name: <%= language %>-buildpack-bosh-release-github-release
+#    type: github-release
+#    source:
+#      user: {{buildpacks-github-org}}
+#      repository: <%= language %>-buildpack-release
+#      access_token: {{buildpacks-github-token}}
+  - name: <%= language %>-buildpack-bosh-release
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/<%= language %>-buildpack-release.git
+      private_key: {{<%= language %>-buildpack-bosh-release-private-key}}
+      branch: cf-release-multiple-stacks
+<% end %>
+<% supported_languages.each do |language| %>
+#  - name: private-<%= language %>-offline-buildpack-bosh-release-github-release
+#    type: github-release
+#    source:
+#      user: pivotal-cf
+#      repository: <%= language %>-offline-buildpack-release
+#      access_token: {{buildpacks-github-token}}
+  - name: private-<%= language %>-offline-buildpack-bosh-release
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/<%= language %>-offline-buildpack-release.git
+      <% if language == 'java'%>
+      private_key:  {{private-<%= language %>-offline-buildpack-bosh-release-private-key}}
+      <% else %>
+      private_key:  {{<%= language %>-offline-buildpack-bosh-release-private-key}}
+      <% end %>
+      branch: cf-release-multiple-stacks
+<% end %>
+
+groups:
+  - name: buildpacks
+    jobs:
+      - bbl-up
+      - deploy
+      - cats
+      - delete-deployment
+      - bbl-destroy
+      - ship-it
+<% (supported_languages - %w(java)).each do |language| %>
+      - update-<%= language %>-buildpack-bosh-release
+<% end %>
+  - name: offline
+    jobs:
+<% (supported_languages - %w(java)).each do |language| %>
+      - update-private-<%= language %>-offline-buildpack-bosh-release
+<% end %>
+  - name: java
+    jobs:
+      - ship-it-java
+      - update-java-buildpack-bosh-release
+      - update-private-java-offline-buildpack-bosh-release
+
+jobs:
+  - name: bbl-up
+    serial: true
+    serial_groups: [ cf-release ]
+    public: true
+    plan:
+      - aggregate:
+        - get: cf-deployment-concourse-tasks
+        - get: env-repo
+          resource: bbl-state
+        - get: bosh-deployment
+        - get: public-robots
+        - get: buildpacks-ci
+      - task: bbl-up
+        file: cf-deployment-concourse-tasks/bbl-up/task.yml
+        params:
+          BBL_GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+          BBL_GCP_PROJECT_ID: cf-buildpacks
+          BBL_GCP_ZONE: us-east1-c
+          BBL_GCP_REGION: us-east1
+          BBL_IAAS: gcp
+          BBL_LB_CERT: {{cf-release-lb-cert}}
+          BBL_LB_KEY: {{cf-release-lb-key}}
+          LB_DOMAIN: cf-release-multiple-stacks.buildpacks-gcp.ci.cf-app.com
+          BBL_ENV_NAME: cf-release-multiple-stacks
+          BBL_STATE_DIR: cf-release-multiple-stacks
+          OPS_FILES: "local-dns.yml"
+        input_mapping:
+          ops-files: bosh-deployment
+        ensure:
+          put: bbl-state
+          params:
+            repository: updated-env-repo
+            rebase: true
+      - task: add-gcp-parent-dns-record
+        file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
+        params:
+          ENV_NAME: cf-release-multiple-stacks
+          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+
+  - name: deploy
+    serial: true
+    serial_groups: [ cf-release ]
+    public: true
+    plan:
+      - do:
+        - aggregate:
+          - get: public-robots
+            passed: [ bbl-up ]
+            trigger: true
+          - get: buildpacks-ci
+          - get: bbl-state
+          - get: cf-deployment
+            resource: cf-deployment-rc
+            attempts: 3
+          - get: cflinuxfs2-bosh-release
+            attempts: 3
+          - get: cflinuxfs3-bosh-release
+            attempts: 3
+          - get: gcp-stemcell
+            attempts: 3
+          - get: java-buildpack-github-release
+            resource: java-buildpack-github-release
+            params:
+              globs:
+                - java-buildpack-v*.zip
+          - get: go-buildpack-github-release
+          - get: python-buildpack-github-release
+          - get: nodejs-buildpack-github-release
+          - get: ruby-buildpack-github-release
+          - get: php-buildpack-github-release
+          - get: staticfile-buildpack-github-release
+          - get: binary-buildpack-github-release
+          - get: dotnet-core-buildpack-github-release
+
+          - get: java-buildpack-bosh-release
+          - get: go-buildpack-bosh-release
+          - get: python-buildpack-bosh-release
+          - get: nodejs-buildpack-bosh-release
+          - get: ruby-buildpack-bosh-release
+          - get: php-buildpack-bosh-release
+          - get: staticfile-buildpack-bosh-release
+          - get: binary-buildpack-bosh-release
+          - get: dotnet-core-buildpack-bosh-release
+        - aggregate:
+          - task: create-bump-buildpacks-opsfile
+            file: buildpacks-ci/tasks/create-bump-buildpacks-opsfile/task.yml
+          - task: create-deployment-source-config
+            file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+            params:
+              ENV_NAME: cf-release-multiple-stacks
+        - put: cf-release-multiple-stacks-cf-deployment
+          params:
+            source_file: deployment-source-config/source_file.yml
+            manifest: cf-deployment/cf-deployment.yml
+            releases:
+              - built-buildpacks-artifacts/*.tgz
+              - cflinuxfs2-bosh-release/*.tgz
+              - cflinuxfs3-bosh-release/*.tgz
+            stemcells:
+              - gcp-stemcell/*.tgz
+            ops_files:
+              - cf-deployment/operations/use-latest-stemcell.yml
+              - cf-deployment/operations/use-compiled-releases.yml
+              - buildpacks-ci/deployments/operations/no-canaries.yml
+              - cf-deployment/operations/experimental/use-bosh-dns.yml
+              - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
+              - bump-buildpacks-opsfile/opsfile.yml
+            vars:
+              system_domain: cf-release-multiple-stacks.buildpacks-gcp.ci.cf-app.com
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+  - name: cats
+    serial: true
+    serial_groups: [ cf-release ]
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: cats-concourse-task-inp
+          resource: cats-concourse-task
+        - get: cf-acceptance-tests
+        - get: public-robots
+          passed: [ deploy ]
+          trigger: true
+        - get: java-buildpack-github-release
+          resource: java-buildpack-github-release
+          passed: [ deploy ]
+        - get: go-buildpack-github-release
+          passed: [ deploy ]
+        - get: nodejs-buildpack-github-release
+          passed: [ deploy ]
+        - get: python-buildpack-github-release
+          passed: [ deploy ]
+        - get: ruby-buildpack-github-release
+          passed: [ deploy ]
+        - get: php-buildpack-github-release
+          passed: [ deploy ]
+        - get: staticfile-buildpack-github-release
+          passed: [ deploy ]
+        - get: binary-buildpack-github-release
+          passed: [ deploy ]
+        - get: dotnet-core-buildpack-github-release
+          passed: [ deploy ]
+      - do:
+        - task: write-cats-config
+          file: buildpacks-ci/tasks/write-cats-config/task.yml
+          params:
+            CI_CF_USERNAME: {{cf-release-cf-username}}
+            CI_CF_PASSWORD: {{cf-release-cf-password}}
+            APPS_DOMAIN: cf-release-multiple-stacks.buildpacks-gcp.ci.cf-app.com
+            DIEGO_DOCKER_ON: true
+        - task: add-flake-attempts-to-cats
+          file: buildpacks-ci/tasks/add-flake-attempts-to-cats/task.yml
+        - task: cats
+          attempts: 3
+          file: cats-concourse-task/task.yml
+          params:
+            NODES: 12
+            CONFIG_FILE_PATH: integration_config.json
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: delete-deployment
+    serial: true
+    serial_groups: [ cf-release ]
+    public: true
+    plan:
+      - aggregate:
+        - get: public-robots
+          passed: [ cats ]
+          trigger: true
+        - get: bbl-state
+        - get: buildpacks-ci
+      - task: create-deployment-source-config
+        file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+        params:
+          ENV_NAME: cf-release-multiple-stacks
+      - put: cf-release-multiple-stacks-cf-deployment
+        params:
+          source_file: deployment-source-config/source_file.yml
+          delete:
+            enabled: true
+            force: true
+
+  - name: bbl-destroy
+    serial: true
+    serial_groups: [ cf-release ]
+    public: true
+    plan:
+      - aggregate:
+        - get: cf-deployment-concourse-tasks
+        - get: env-repo
+          resource: bbl-state
+        - get: buildpacks-ci
+        - get: public-robots
+          passed: [ delete-deployment ]
+          trigger: true
+      - task: remove-gcp-parent-dns-record
+        file: buildpacks-ci/tasks/remove-gcp-parent-dns-record/task.yml
+        params:
+          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+          ENV_NAME: cf-release-multiple-stacks
+      - task: bbl-destroy
+        file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+        params:
+          BBL_STATE_DIR: cf-release-multiple-stacks
+          BBL_GCP_PROJECT_ID: cf-buildpacks
+          BBL_GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+        ensure:
+          put: bbl-state
+          params:
+            repository: updated-env-repo
+            rebase: true
+
+  - name: ship-it
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: go-buildpack-github-release
+          passed: [ cats ]
+        - get: nodejs-buildpack-github-release
+          passed: [ cats ]
+        - get: python-buildpack-github-release
+          passed: [ cats ]
+        - get: ruby-buildpack-github-release
+          passed: [ cats ]
+        - get: php-buildpack-github-release
+          passed: [ cats ]
+        - get: staticfile-buildpack-github-release
+          passed: [ cats ]
+        - get: binary-buildpack-github-release
+          passed: [ cats ]
+        - get: dotnet-core-buildpack-github-release
+          passed: [ cats ]
+  - name: ship-it-java
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: java-buildpack-github-release
+          passed: [ cats ]
+
+<% supported_languages.each do |language| %>
+  - name: update-<%= language %>-buildpack-bosh-release
+    serial: true
+    serial_groups: [cf-release-buildpacks]
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: release
+          resource: <%= language %>-buildpack-bosh-release
+        - get: blob
+          resource: <%= language %>-buildpack-github-release
+          trigger: true
+          passed: [ <%= language.include?('java') ? 'ship-it-java' : 'ship-it' %> ]
+      - do:
+        - task: convert release version to version resource
+          file: buildpacks-ci/tasks/convert-release-to-version/task.yml
+        - task: create-online-bosh-release
+          file: buildpacks-ci/tasks/create-online-bosh-release/task.yml
+          params:
+            ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
+            SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            LANGUAGES: <%= language %>
+            RELEASE_NAME: <%= language %>-buildpack
+            RELEASE_DIR: release
+#        - put: <%= language %>-buildpack-bosh-release
+#          params:
+#            repository: release-artifacts
+#            rebase: true
+#            tag: blob/version
+#        - put: <%= language %>-buildpack-bosh-release-github-release
+#          params:
+#            name: blob/version
+#            tag: blob/version
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
+
+<% supported_languages.each do |language| %>
+  - name: update-private-<%= language %>-offline-buildpack-bosh-release
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: blob
+          resource: <%= language %>-buildpack-github-release
+          trigger: true
+          passed: [ <%= language == 'java' ? 'ship-it-java' : 'ship-it' %> ]
+          params:
+            include_source_tarball: true
+        - get: release
+          resource: private-<%= language %>-offline-buildpack-bosh-release
+        <% if language == 'java' %>
+        - get: pivnet-production
+          params:
+            globs:
+            - "java-buildpack-offline-v4*.zip"
+        <% end %>
+      - do:
+        <% if language == 'java' %>
+        - task: download-offline-buildpack
+          file: buildpacks-ci/tasks/download-offline-buildpack/task.yml
+          params:
+            CF_STACK: <%= stacks['java'].first %> #we currently only support one stack for java buildpack
+        <% elsif cutlass.include?(language) %>
+        - task: build-offline-buildpack
+          file: buildpacks-ci/tasks/build-offline-buildpacks-cutlass/task.yml
+          params:
+            LANGUAGE: <%= language %>
+            CF_STACKS: <%= stacks[language].join(' ') %>
+        <% else %>
+        - task: build-offline-buildpack
+          file: buildpacks-ci/tasks/build-offline-buildpacks-machete/task.yml
+          params:
+            LANGUAGE: <%= language %>
+            CF_STACKS: <%= stacks[language].join(' ') %>
+        <% end %>
+        - task: convert release version to version resource
+          file: buildpacks-ci/tasks/convert-release-to-version/task.yml
+        - task: create-offline-bosh-release
+          file: buildpacks-ci/tasks/create-offline-bosh-release/task.yml
+          params:
+            ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
+            SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
+            LANGUAGES: <%= language %>
+            RELEASE_NAME: <%= language %>-offline-buildpack
+            RELEASE_DIR: release
+#        - put: private-<%= language %>-offline-buildpack-bosh-release
+#          params:
+#            repository: release-artifacts
+#            rebase: true
+#            tag: blob/version
+#        - put: private-<%= language %>-offline-buildpack-bosh-release-github-release
+#          params:
+#            name: blob/version
+#            tag: blob/version
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
