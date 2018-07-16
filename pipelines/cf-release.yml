@@ -1,10 +1,10 @@
-<% supported_languages = %w(dotnet-core go ruby binary staticfile nodejs php python java) %>
+<% supported_languages = %w(binary dotnet-core go java nodejs php python ruby staticfile) %>
 <% cutlass = %w(binary dotnet-core go nodejs python ruby staticfile) %>
 <% stacks = {
   "binary" => %w(any),
-  "java" => %w(cflinuxfs2),
   "dotnet-core" => %w(cflinuxfs2),
   "go" => %w(cflinuxfs2),
+  "java" => %w(cflinuxfs2),
   "nodejs" => %w(cflinuxfs2),
   "php" => %w(cflinuxfs2),
   "python" => %w(cflinuxfs2),
@@ -302,25 +302,13 @@ jobs:
         - get: public-robots
           passed: [ deploy ]
           trigger: true
-        - get: java-buildpack-github-release
+        <% (supported_languages).each do |language| %>
+        - get: <%= language %>-buildpack-github-release
+          <% if language == 'java' %>
           resource: java-buildpack-github-release
+          <% end %>
           passed: [ deploy ]
-        - get: go-buildpack-github-release
-          passed: [ deploy ]
-        - get: nodejs-buildpack-github-release
-          passed: [ deploy ]
-        - get: python-buildpack-github-release
-          passed: [ deploy ]
-        - get: ruby-buildpack-github-release
-          passed: [ deploy ]
-        - get: php-buildpack-github-release
-          passed: [ deploy ]
-        - get: staticfile-buildpack-github-release
-          passed: [ deploy ]
-        - get: binary-buildpack-github-release
-          passed: [ deploy ]
-        - get: dotnet-core-buildpack-github-release
-          passed: [ deploy ]
+        <% end %>
       - do:
         - task: write-cats-config
           file: buildpacks-ci/tasks/write-cats-config/task.yml
@@ -403,22 +391,10 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: go-buildpack-github-release
+        <% (supported_languages - %w(java)).each do |language| %>
+        - get: <%= language %>-buildpack-github-release
           passed: [ cats ]
-        - get: nodejs-buildpack-github-release
-          passed: [ cats ]
-        - get: python-buildpack-github-release
-          passed: [ cats ]
-        - get: ruby-buildpack-github-release
-          passed: [ cats ]
-        - get: php-buildpack-github-release
-          passed: [ cats ]
-        - get: staticfile-buildpack-github-release
-          passed: [ cats ]
-        - get: binary-buildpack-github-release
-          passed: [ cats ]
-        - get: dotnet-core-buildpack-github-release
-          passed: [ cats ]
+        <% end %>
   - name: ship-it-java
     serial: true
     public: true
