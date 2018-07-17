@@ -2,7 +2,7 @@ FROM crystallang/crystal:0.24.2
 
 ADD . /src
 WORKDIR /src
-RUN crystal spec
+RUN crystal deps && crystal spec
 RUN shards build --production
 
 FROM ubuntu:xenial

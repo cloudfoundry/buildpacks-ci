@@ -3,6 +3,7 @@ resource_types:
     type: docker-image
     source:
       repository: cfbuildpacks/concourse2tracker
+
 resources:
   - name: ci-master
     type: git
@@ -10,14 +11,33 @@ resources:
       uri: {{buildpacks-ci-git-uri}}
       branch: master
       private_key: {{buildpacks-ci-private-key}}
+
   - name: ci-develop
     type: git
     webhook_token: ob0aigh3
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-develop-branch}}
+
   - name: concourse2tracker
     type: concourse2tracker
+
+  - name: depwatcher-master
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri}}
+      branch: master
+      paths: [ dockerfiles/depwatcher/ ]
+      private_key: {{buildpacks-ci-private-key}}
+
+  - name: depwatcher-image
+    type: docker-image
+    source:
+      repository: cfbuildpacks/depwatcher
+      email: {{buildpacks-docker-user-email}}
+      username: {{buildpacks-docker-user-username}}
+      password: {{buildpacks-docker-user-password}}
+
 jobs:
   - name: merge-to-master
     serial: true
@@ -56,6 +76,19 @@ jobs:
           git_path: buildpacks-ci
           project_id: {{cf-buildpacks-public-tracker-id}}
           api_token: {{pivotal-tracker-api-token}}
+
+  - name: update-depwatcher-image
+    serial: true
+    public: true
+    plan:
+      - get: depwatcher-master
+        trigger: true
+        passed:
+          - merge-to-master
+      - put: depwatcher-image
+        params:
+          build: depwatcher-master/dockerfiles/depwatcher
+        attempts: 3
 
   - name: run-full-specs
     serial: true
