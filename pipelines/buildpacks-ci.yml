@@ -83,8 +83,6 @@ jobs:
     plan:
       - get: depwatcher-master
         trigger: true
-        passed:
-          - merge-to-master
       - put: depwatcher-image
         params:
           build: depwatcher-master/dockerfiles/depwatcher
