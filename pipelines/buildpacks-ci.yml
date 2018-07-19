@@ -24,6 +24,7 @@ resources:
 
   - name: depwatcher-master
     type: git
+    check_every: 15s
     source:
       uri: {{buildpacks-ci-git-uri}}
       branch: master
