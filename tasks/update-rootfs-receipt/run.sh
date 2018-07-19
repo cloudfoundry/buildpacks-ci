@@ -4,8 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-SUFFIX="${ROOTFS_SUFFIX-}"
-
+# shellcheck disable=SC2086
 if [ $STACK == 'cflinuxfs2' ]; then
     receipt_file="${STACK}_receipt"
     receipt_dest="${STACK}/${STACK}_receipt"
