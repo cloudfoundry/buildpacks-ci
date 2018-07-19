@@ -14,3 +14,5 @@ run:
   args:
     - "-cl"
     - "buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes/run.rb"
+params:
+  STACK:
