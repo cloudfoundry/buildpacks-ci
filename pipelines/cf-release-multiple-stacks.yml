@@ -36,7 +36,7 @@ resources:
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: cf-release-multiple-stacks
+      branch: master
   - name: public-robots
     type: git
     source:
