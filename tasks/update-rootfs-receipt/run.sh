@@ -6,11 +6,19 @@ set -o pipefail
 
 SUFFIX="${ROOTFS_SUFFIX-}"
 
-cp "receipt-s3/${STACK}_receipt${SUFFIX}"-* "rootfs/${STACK}/${STACK}_receipt"
+if [ $STACK == 'cflinuxfs2' ]; then
+    receipt_file="${STACK}_receipt"
+    receipt_dest="${STACK}/${STACK}_receipt"
+else
+    receipt_file="receipt.${STACK}.x86_64"
+    receipt_dest="receipt.${STACK}.x86_64"
+fi
+
+cp "receipt-s3/${receipt_file}"-* "rootfs/${receipt_dest}"
 
 pushd rootfs
     version=$(cat ../version/number)
-    git add "${STACK}/${STACK}_receipt"
+    git add "${receipt_dest}"
 
     set +e
       git diff --cached --exit-code
