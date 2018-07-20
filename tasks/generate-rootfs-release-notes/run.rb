@@ -2,8 +2,8 @@
 
 require 'octokit'
 require 'open-uri'
-require_relative '../../../lib/release-notes-creator'
-require_relative '../../../lib/git-client'
+require_relative '../../lib/release-notes-creator'
+require_relative '../../lib/git-client'
 
 
 previous_version = File.read('previous-rootfs-release/version').strip
