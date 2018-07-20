@@ -600,6 +600,7 @@ jobs: ##########################################################################
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             DAVOS_TOKEN: {{davos_token}}
+
   - name: upload-to-github
     serial: true
     public: true
@@ -620,7 +621,7 @@ jobs: ##########################################################################
           passed: [ release-<%= rootfs_name %> ]
       - do:
         - task: generate-release-notes
-          file: buildpacks-ci/tasks/rootfs/generate-release-notes/task.yml
+          file: buildpacks-ci/tasks/generate-rootfs-release-notes/task.yml
           params:
             STACK: <%= rootfs_name %>
         - put: <%= rootfs_name %>-github-release-drafts
@@ -704,7 +705,7 @@ jobs: ##########################################################################
         - task: create-release-body
           file: buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes/task.yml
           params:
-            ROOTFS_TYPE: <%= rootfs_name %>
+            STACK: <%= rootfs_name %>
         - task: create-release-commit
           file: buildpacks-ci/tasks/create-rootfs-bosh-release-commit/task.yml
         - put: <%= rootfs_name %>-release
