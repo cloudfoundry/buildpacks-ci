@@ -18,7 +18,7 @@ ubuntu_version = {
 receipt_file_name = stack == 'cflinuxfs2' ? "#{stack}_receipt" : "receipt.#{stack}.x86_64"
 receipt_file_dest = stack == 'cflinuxfs2' ? "#{stack}/#{receipt_file_name}" : receipt_file_name
 
-old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/#{stack}/5a855a901d98c6cc8f559cece3acea2ddddb1696/#{receipt_file_dest}"
+old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/#{stack}/#{previous_version}/#{receipt_file_dest}"
 cve_yaml_file = "new-cves/new-cve-notifications/ubuntu#{ubuntu_version}.yml"
 cves_dir = 'new-cve-notifications'
 
