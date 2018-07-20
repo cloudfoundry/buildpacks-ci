@@ -101,7 +101,7 @@ if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
     exit 1
   end
 
-  php_defaults = JSON.load_file('buildpack/defaults/options.json')
+  php_defaults = JSON.parse(open('buildpack/defaults/options.json').read)
   php_defaults[varname] = version
 end
 
