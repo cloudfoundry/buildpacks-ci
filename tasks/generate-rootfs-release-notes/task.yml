@@ -17,7 +17,7 @@ run:
   path: bash
   args:
     - "-cl"
-    - "buildpacks-ci/tasks/rootfs/generate-release-notes/run.rb"
+    - "buildpacks-ci/tasks/generate-rootfs-release-notes/run.rb"
 params:
   STACK:
   GITHUB_USERNAME:

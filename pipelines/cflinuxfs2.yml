@@ -601,7 +601,7 @@ jobs: ##########################################################################
           trigger: true
           passed: [ release-cflinuxfs2 ]
       - do:
-        - task: generate-release-notes
+        - task: generate-rootfs-release-notes
           file: buildpacks-ci/tasks/generate-cflinuxfs2-release-notes/task.yml
           params:
             STACK: cflinuxfs2
