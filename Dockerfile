@@ -57,8 +57,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the CF-CLI
-RUN wget -O cf-cli.tgz 'https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.35.2&source=github-rel' \
-  && [ 708a7757d3b3192a40e2cd8073b4f20afc59b7cbb0cb6bd88244268dfc6eb77d = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
+RUN wget -O cf-cli.tgz 'https://packages.cloudfoundry.org/edge?arch=linux64&source=github' \
+  && [ 0c94e787e49f99af19d528948a3695eda2430167f04b4533c68b35f3fe73765a = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
   && tar xzf cf-cli.tgz -C /usr/bin \
   && rm cf-cli.tgz
 
