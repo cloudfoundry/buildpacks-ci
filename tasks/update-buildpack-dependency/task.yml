@@ -19,5 +19,4 @@ run:
     - buildpacks-ci/tasks/update-buildpack-dependency/run.rb
 params:
   VERSION_LINE:
-  KEEP_MASTER:
-  CF_STACKS:
+  REMOVAL_STRATEGY:
