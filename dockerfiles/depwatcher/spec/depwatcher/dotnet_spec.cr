@@ -8,7 +8,7 @@ Spec2.describe Depwatcher::Dotnet do
 
   before do
     client.stub_get(
-      "https://api.github.com/repos/dotnet/cli/tags",
+      "https://api.github.com/repos/dotnet/cli/tags?per_page=1000",
       nil,
       HTTP::Client::Response.new(
         200,

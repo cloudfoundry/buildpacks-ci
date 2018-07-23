@@ -18,4 +18,4 @@ run:
     - -cl
     - buildpacks-ci/tasks/build-binary-new/build.rb
 params:
-  DEPENDENCY:
+  STACK:

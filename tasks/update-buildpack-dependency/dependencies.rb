@@ -5,7 +5,7 @@ class Dependencies
     @removal_strategy = removal_strategy
     @dependencies = dependencies
     @matching_deps = dependencies.select do |d|
-      same_dependency_line?(d['version'], d['name'])
+      same_dependency_line?(d['cf_stacks'], d['version'], d['name'])
     end
     @master_dependencies = master_dependencies
   end
@@ -13,7 +13,7 @@ class Dependencies
   def switch
     # if we're rebuilding, replace matching version
     if @matching_deps.map { |d| d['version'] }.include?(@dep['version'])
-      out = ((@dependencies.reject { |d| d['version'] == @dep['version'] }) + [@dep])
+      out = ((@dependencies.reject { |d| same_dependency_line?(d['cf_stacks'], d['version'], d['name']) && d['version'] == @dep['version'] }) + [@dep])
     # adding a new one, but keep everything
     elsif @removal_strategy == 'keep_all'
       out = @dependencies + [@dep]
@@ -29,7 +29,7 @@ class Dependencies
       version = d['version']
       version = version[1..-1] if !version.nil? && version.start_with?('v')
       version = Gem::Version.new(version) rescue version
-      [d['name'], version]
+      [d['name'], version, d['cf_stacks']]
     end
   end
 
@@ -41,8 +41,9 @@ class Dependencies
     end
   end
 
-  def same_dependency_line?(version, dep_name)
+  def same_dependency_line?(stacks, version, dep_name)
     return false if dep_name != @dep['name']
+    return false unless (stacks - @dep['cf_stacks']).empty?
 
     version = begin
       Gem::Version.new(version)
@@ -71,7 +72,7 @@ class Dependencies
   def master_dependencies
     return [] unless @removal_strategy == 'keep_master'
     dep = @master_dependencies.select do |d|
-      same_dependency_line?(d['version'], d['name'])
+      same_dependency_line?(d['cf_stacks'], d['version'], d['name'])
     end.sort_by {|d| Gem::Version.new(d['version']) rescue d['version']}.last
     dep ? [dep] : []
   end
