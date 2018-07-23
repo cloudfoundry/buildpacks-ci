@@ -44,6 +44,13 @@ resources:
       branch: master
       private_key: {{buildpacks-envs-private-key}}
 
+  - name: cflinuxfs3-bosh-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: cflinuxfs3-release
+      access_token: {{buildpacks-github-token}}
+
   - name: edge-cf-deployment
     type: bosh-deployment
     source:
@@ -92,6 +99,7 @@ jobs:
           - get: windows2012-stemcell
           - get: windows2016-stemcell
           - get: gcp-stemcell
+          - get: cflinuxfs3-bosh-release
         - task: create-deployment-source-config
           file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
           params:
@@ -100,6 +108,8 @@ jobs:
           params:
             source_file: deployment-source-config/source_file.yml
             manifest: cf-deployment/cf-deployment.yml
+            releases:
+              - cflinuxfs3-bosh-release/*.tgz
             stemcells:
               - gcp-stemcell/*.tgz
               - windows2012-stemcell/*.tgz
@@ -119,6 +129,7 @@ jobs:
             - cf-deployment/operations/experimental/use-bosh-dns-for-windows2016-containers.yml
             - buildpacks-ci/deployments/operations/no-canaries.yml
             - buildpacks-ci/deployments/edge-shared/num-cells.yml
+            - buildpacks-ci/deployments/operations/cflinuxfs3.yml
             vars:
               system_domain: edge.buildpacks-gcp.ci.cf-app.com
         on_failure:
