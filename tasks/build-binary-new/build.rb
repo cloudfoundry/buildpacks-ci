@@ -322,8 +322,6 @@ when 'php'
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
 when 'python'
-  run('apt', 'update')
-  run('apt-get', 'install', '-y', 'libssl-dev', 'libcurl4-openssl-dev')
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=python', "--version=#{version}", "--md5=#{data.dig('version', 'md5')}")
   end
