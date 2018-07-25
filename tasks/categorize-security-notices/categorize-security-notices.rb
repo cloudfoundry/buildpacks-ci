@@ -8,16 +8,18 @@ require 'yaml'
 class CategorizeSecurityNotices
   attr_reader :stories
 
-  def initialize(tracker_client, stories_file, stack_receipt, davos_client)
+  def initialize(tracker_client, stories_file, stack_receipt, davos_client, stack)
     ref = JSON.parse(File.read(stories_file))
     @tracker_client = tracker_client
     @stories = JSON.parse(ref['version']['ref'])
     @receipt = File.read(stack_receipt)
-		@davos_client = davos_client
+    @davos_client = davos_client
+    @stack = stack
   end
 
   def run
     stories.each do |story|
+      next unless story['labels'].include? @stack
       packages = get_story_packages(story)
       if affected?(packages)
         label_story(story, "affected")
@@ -36,7 +38,15 @@ class CategorizeSecurityNotices
   private
 
   def get_story_packages(story)
-    exp = Regexp.new('\*\*Trusty Packages:\*\*\n(.*?)\n\n', Regexp::MULTILINE)
+    exp =
+        case @stack
+        when 'cflinuxfs2'
+          Regexp.new('\*\*Trusty Packages:\*\*\n(.*?)\n\n', Regexp::MULTILINE)
+        when 'cflinuxfs3'
+          Regexp.new('\*\*Bionic Packages:\*\*\n(.*?)\n\n', Regexp::MULTILINE)
+        else
+          raise "Unsupported stack: #{stack}"
+        end
 
     package_list = exp.match(story['description'])[1].split("\n")
     package_list.map { |package| package.lstrip }
