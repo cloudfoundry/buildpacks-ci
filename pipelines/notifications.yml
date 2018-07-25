@@ -83,6 +83,11 @@ resources:
       owner: cloudfoundry
       repository: cflinuxfs2
       access_token: {{buildpacks-github-token}}
+  - name: cflinuxfs3
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cflinuxfs3
+      branch: master
 
 jobs:
   - name: categorize-security-notices
@@ -127,6 +132,7 @@ jobs:
         params:
           repository: new-releases-artifacts
           rebase: true
+
   - name: monday-funday
     serial: true
     public: true
@@ -169,17 +175,28 @@ jobs:
         - get: buildpacks-ci
         - get: new-cves
         - get: cflinuxfs2
+        - get: cflinuxfs3
         - get: check-interval
           trigger: true
-      - task: check-for-new-rootfs-cves
-        file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
-        params:
-          SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
-          SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
-          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-          STACK: cflinuxfs2
+      - aggregate:
+        - task: check-for-new-rootfs-cves
+          file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
+          params:
+            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+            STACK: cflinuxfs2
+        - task: check-for-new-rootfs-cves
+          file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
+          params:
+            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+            STACK: cflinuxfs3
       - put: new-cves
         params:
           repository: output-new-cves
