@@ -600,6 +600,7 @@ jobs: ##########################################################################
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             DAVOS_TOKEN: {{davos_token}}
+            STACK: <%= rootfs_name %>
 
   - name: upload-to-github
     serial: true

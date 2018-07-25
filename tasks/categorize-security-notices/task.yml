@@ -8,6 +8,7 @@ inputs:
   - name: davos-cve-stories
   - name: buildpacks-ci
   - name: cflinuxfs2-release
+  - name: cflinuxfs3-release
 run:
   path: bash
   args:
@@ -18,4 +19,5 @@ params:
   TRACKER_REQUESTER_ID:
   TRACKER_API_TOKEN:
   DAVOS_TOKEN:
+  STACK:
 

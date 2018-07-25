@@ -9,8 +9,9 @@ token = ENV.fetch('TRACKER_API_TOKEN')
 project_id = ENV.fetch('TRACKER_PROJECT_ID')
 requester_id = ENV.fetch('TRACKER_REQUESTER_ID')
 davos_token = ENV.fetch('DAVOS_TOKEN')
+stack = ENV.fecth('STACK')
 
 tracker_client = TrackerClient.new(token, project_id, requester_id.to_i)
 davos_client = DavosClient.new(davos_token)
 
-FinalizeSecurityNoticeStories.new(tracker_client, new_stack_version, davos_client).run
+FinalizeSecurityNoticeStories.new(tracker_client, new_stack_version, davos_client, stack).run

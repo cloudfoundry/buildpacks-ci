@@ -88,25 +88,44 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/cflinuxfs3
       branch: master
+  - name: cflinuxfs3-release
+    type: github-release
+    source:
+      owner: cloudfoundry
+      repository: cflinuxfs3
+      access_token: {{buildpacks-github-token}}
 
 jobs:
   - name: categorize-security-notices
     serial: true
     public: true
     plan:
-      - get: davos-cve-stories
-        trigger: true
-      - get: buildpacks-ci
-      - get: cflinuxfs2-release
-        params:
-          include_source_tarball: true
-      - task: categorize-security-notices
-        file: buildpacks-ci/tasks/categorize-security-notices/task.yml
-        params:
-          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-          TRACKER_PROJECT_REQUESTER: {{cf-buildpacks-requester-id}}
-          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-          DAVOS_TOKEN: {{davos_token}}
+      - aggregate:
+        - get: davos-cve-stories
+          trigger: true
+        - get: buildpacks-ci
+        - get: cflinuxfs2-release
+          params:
+            include_source_tarball: true
+        - get: cflinuxfs3-release
+            include_source_tarball: true
+      - aggregate:
+        - task: categorize-security-notices-cflinuxfs2
+          file: buildpacks-ci/tasks/categorize-security-notices/task.yml
+          params:
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_PROJECT_REQUESTER: {{cf-buildpacks-requester-id}}
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            DAVOS_TOKEN: {{davos_token}}
+            STACK: cflinuxfs2
+        - task: categorize-security-notices-cflinuxfs3
+          file: buildpacks-ci/tasks/categorize-security-notices/task.yml
+          params:
+            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_PROJECT_REQUESTER: {{cf-buildpacks-requester-id}}
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            DAVOS_TOKEN: {{davos_token}}
+            STACK: cflinuxfs3
 
   - name: new-releases
     serial: true
@@ -179,7 +198,7 @@ jobs:
         - get: check-interval
           trigger: true
       - aggregate:
-        - task: check-for-new-rootfs-cves
+        - task: check-for-new-cflinuxfs2-cves
           file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
           params:
             SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
@@ -188,7 +207,7 @@ jobs:
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
             STACK: cflinuxfs2
-        - task: check-for-new-rootfs-cves
+        - task: check-for-new-cflinuxfs3-cves
           file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
           params:
             SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
