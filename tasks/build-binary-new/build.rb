@@ -158,7 +158,7 @@ when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower'
   })
 when 'ruby'
   run('apt', 'update')
-  run('apt-get', 'install', '-y', 'libssl-dev')
+  run('apt-get', 'install', '-y', 'libssl-dev', 'libffi-dev')
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=ruby', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
   end
