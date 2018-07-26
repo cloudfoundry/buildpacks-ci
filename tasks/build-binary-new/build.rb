@@ -65,11 +65,9 @@ when 'dotnet'
       runbuildsh = File.open('run-build.sh', 'r') {|f| f.read}
       runbuildsh.gsub!('WriteDynamicPropsToStaticPropsFiles "${args[@]}"', 'WriteDynamicPropsToStaticPropsFiles')
       File.open('run-build.sh ', 'w') {|f| f.write runbuildsh}
-
-      run('./build.sh')
-    else
-      run('./build.sh', '/t:Compile')
     end
+
+    run('./build.sh', '/t:Compile')
   end
 
   # The path to the built files changes in dotnet-v2.1.300
