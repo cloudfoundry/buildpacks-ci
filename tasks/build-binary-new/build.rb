@@ -158,7 +158,13 @@ when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower'
   })
 when 'ruby'
   run('apt', 'update')
-  run('apt-get', 'install', '-y', 'libssl-dev', 'libffi-dev')
+  run('apt-get', 'install', '-y', 'libffi-dev')
+
+  major, minor, _ = version.split('.')
+  if major == '2' && minor == '3' && stack == 'cflinuxfs3'
+    run('apt-get', 'install', '-y', 'libssl1.0-dev')
+  end
+
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=ruby', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
   end
@@ -324,8 +330,6 @@ when 'php'
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
 when 'python'
-  run('apt', 'update')
-  run('apt-get', 'install', '-y', 'libssl-dev')
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=python', "--version=#{version}", "--md5=#{data.dig('version', 'md5')}")
   end
@@ -341,7 +345,7 @@ when 'python'
 when 'httpd'
   Dir.chdir('binary-builder') do
     run('apt', 'update')
-    run('apt-get', 'install', '-y', 'libssl-dev', 'libldap2-dev')
+    run('apt-get', 'install', '-y', 'libldap2-dev')
     run('./bin/binary-builder', '--name=httpd', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
   end
   old_file = "binary-builder/httpd-#{version}-linux-x64.tgz"
@@ -360,7 +364,7 @@ when 'r'
     Dir.chdir(dir) do
       run('mkdir', '-p', '/usr/share/man/man1')
       run('apt', 'update')
-      run('apt-get', 'install', '-y', 'gfortran', 'libssl-dev', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libcurl4-openssl-dev', 'default-jre')
+      run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libcurl4-openssl-dev', 'default-jre')
       run('wget', url)
       source_sha = Digest::SHA256.hexdigest(open("R-#{version}.tar.gz").read)
       run('tar', 'xf', "R-#{version}.tar.gz")
@@ -393,8 +397,6 @@ when 'nginx'
   destdir = Dir.mktmpdir
   Dir.mktmpdir do |dir|
     Dir.chdir(dir) do
-      run('apt', 'update')
-      run('apt-get', 'install', '-y', 'libssl-dev')
       run('wget', data.dig('version', 'url'))
       # TODO validate pgp
       run('tar', 'xf', "nginx-#{version}.tar.gz")
@@ -444,8 +446,6 @@ when 'nginx'
 when 'nginx-static'
   old_sha = Digest::SHA256.hexdigest(open(data.dig('version', 'url')).read)
   Dir.chdir('binary-builder') do
-    run('apt', 'update')
-    run('apt-get', 'install', '-y', 'libssl-dev')
     run('./bin/binary-builder', '--name=nginx', "--version=#{version}", "--sha256=#{old_sha}")
   end
   old_file = "binary-builder/nginx-#{version}-linux-x64.tgz"
