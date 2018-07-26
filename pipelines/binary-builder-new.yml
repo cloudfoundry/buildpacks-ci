@@ -9,7 +9,8 @@
                         any_stack: true },
 
   bundler:            { buildpacks: { ruby: {} },
-                        source_type: 'rubygems' },
+                        source_type: 'rubygems',
+                        any_stack: true},
 
   CAAPM:              { buildpacks: { php: {} },
                         third_party_hosted: true,
@@ -344,7 +345,7 @@ jobs:
     <% unless skip_build.include?({ dep: dep_name.to_s, line: line, stack: stack}) %>
     - do:
       - task: build-binary-<%= stack %>
-        image: <%= (stack == 'any-stack') ? stacks.last : stack %>-image
+        image: <%= if dep_name.to_s == 'bundler' then 'cflinuxfs2' elsif stack == 'any-stack' then stacks.last else stack end%>-image
         file: buildpacks-ci/tasks/build-binary-new/build.yml
         output_mapping: {artifacts: <%= stack %>-artifacts, builds-artifacts: <%= stack %>-builds-metadata}
         params:
