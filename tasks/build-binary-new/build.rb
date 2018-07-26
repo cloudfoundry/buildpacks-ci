@@ -159,7 +159,7 @@ when 'ruby'
   run('apt-get', 'install', '-y', 'libffi-dev')
 
   major, minor, _ = version.split('.')
-  if major == '2' && minor == '3' && stack == 'cflinuxfs3'
+  if major == '2' && stack == 'cflinuxfs3' && (minor == '3' || minor == '2')
     run('apt-get', 'install', '-y', 'libssl1.0-dev')
   end
 
