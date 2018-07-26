@@ -12,6 +12,16 @@ md -Force $buildDir
 echo "Moving buildpackapplifecycle onto the gopath..."
 cp bal-develop/* $buildDir -recurse
 
+# install git
+echo "#### Attempting to install git"
+$urlPath = "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
+$urlSplit = $urlPath.split('/')
+$filename = (Resolve-Path .\).ToString() + '\' + $urlSplit[$urlSplit.length - 1]
+$webclient = New-Object "System.Net.WebClient"
+$webclient.DownloadFile($urlPath, $filename)
+invoke-item $filename
+echo "#### Maybe installed git"
+
 push-location $buildDir
 
   go get -t ./...
