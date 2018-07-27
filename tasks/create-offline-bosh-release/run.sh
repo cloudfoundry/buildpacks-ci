@@ -47,7 +47,7 @@ EOF
     done
   done
 
-#  bosh2 -n upload-blobs
+  bosh2 -n upload-blobs
 
   git add config/blobs.yml
   git commit -m "Updating blobs for $RELEASE_NAME $version"
