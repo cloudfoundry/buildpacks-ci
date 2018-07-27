@@ -51,7 +51,7 @@ class BuildpackTagger
                   export GOBIN=$GOPATH/.bin
                   export PATH=$GOBIN:$PATH
                   (cd src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager && go install)
-                  ./.bin/buildpack-packager build --cached=false --any-stack
+                  ./.bin/buildpack-packager build --cached=false #{stack_flag}
                   ./.bin/buildpack-packager build --cached=true #{stack_flag}
                   EOF
         end
@@ -63,7 +63,7 @@ class BuildpackTagger
             language = match[1]
             cached = match[2]
             version = match[3]
-            stack_string = cached && stack != 'any' ? "-#{stack}" : ''
+            stack_string = stack != 'any' ? "-#{stack}" : ''
 
             output_file = "../buildpack-artifacts/#{language}_buildpack#{cached}#{stack_string}-v#{version}+#{timestamp}.zip"
 
