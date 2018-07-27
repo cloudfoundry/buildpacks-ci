@@ -10,6 +10,10 @@ inputs:
   - name: pivotal-buildpacks-stack0
   - name: pivotal-buildpacks-stack1
     optional: true
+  - name: pivotal-buildpacks-stack2
+    optional: true
+  - name: pivotal-buildpacks-stack3
+    optional: true
 outputs:
   - name: buildpack-artifacts
 run:
