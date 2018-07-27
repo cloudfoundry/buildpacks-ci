@@ -8,7 +8,7 @@ class BuildpackFinalizer
     @artifact_dir = artifact_dir
     @version = version
     @buildpack_repo_dir = buildpack_repo_dir
-    @uncached_buildpack_dir = uncached_buildpack_dirs
+    @uncached_buildpack_dirs = uncached_buildpack_dirs
     @recent_changes_file = File.join(artifact_dir, 'RECENT_CHANGES')
   end
 
