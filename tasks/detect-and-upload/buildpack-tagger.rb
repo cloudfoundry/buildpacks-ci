@@ -58,14 +58,17 @@ class BuildpackTagger
 
         timestamp = `date +%s`.strip
 
+        Dir.mkdir("../buildpack-artifacts/uncached")
+        Dir.mkdir("../buildpack-artifacts/cached")
         Dir["*.zip"].map do |filename|
           filename.match(/(.*)_buildpack(-cached)?.*-v(.*).zip/) do |match|
             language = match[1]
             cached = match[2]
             version = match[3]
             stack_string = stack != 'any' ? "-#{stack}" : ''
+            dir = cached ? 'cached' : 'uncached'
 
-            output_file = "../buildpack-artifacts/#{language}_buildpack#{cached}#{stack_string}-v#{version}+#{timestamp}.zip"
+            output_file = "../buildpack-artifacts/#{dir}/#{language}_buildpack#{cached}#{stack_string}-v#{version}+#{timestamp}.zip"
 
             FileUtils.mv(filename, output_file)
           end
