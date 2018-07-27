@@ -108,16 +108,16 @@ describe BuildpackTagger do
 
       Dir.chdir(File.join(task_dir, 'buildpack-artifacts')) do
         output_buildpacks = Dir["*.zip"]
-        expect(output_buildpacks).to include('testlang_buildpack-v4.4.4+09876.zip')
+        expect(output_buildpacks).to include('testlang_buildpack-some-stack-v4.4.4+09876.zip')
         expect(output_buildpacks).to include('testlang_buildpack-cached-some-stack-v4.4.4+09876.zip')
       end
     end
 
     it 'calculates the md5 and sha256 hashes of the new buildpacks' do
-      expect(subject).to receive(:`).with('sha256sum testlang_buildpack-v4.4.4+09876.zip')
+      expect(subject).to receive(:`).with('sha256sum testlang_buildpack-some-stack-v4.4.4+09876.zip')
       expect(subject).to receive(:`).with('sha256sum testlang_buildpack-cached-some-stack-v4.4.4+09876.zip')
 
-      expect(subject).to receive(:`).with('md5sum testlang_buildpack-v4.4.4+09876.zip')
+      expect(subject).to receive(:`).with('md5sum testlang_buildpack-some-stack-v4.4.4+09876.zip')
       expect(subject).to receive(:`).with('md5sum testlang_buildpack-cached-some-stack-v4.4.4+09876.zip')
       subject.run!
     end
