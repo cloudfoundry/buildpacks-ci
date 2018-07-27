@@ -4,11 +4,11 @@ require 'fileutils'
 
 class BuildpackFinalizer
 
-  def initialize(artifact_dir, version, buildpack_repo_dir, uncached_buildpack_dir)
+  def initialize(artifact_dir, version, buildpack_repo_dir, uncached_buildpack_dirs)
     @artifact_dir = artifact_dir
     @version = version
     @buildpack_repo_dir = buildpack_repo_dir
-    @uncached_buildpack_dir = uncached_buildpack_dir
+    @uncached_buildpack_dir = uncached_buildpack_dirs
     @recent_changes_file = File.join(artifact_dir, 'RECENT_CHANGES')
   end
 
@@ -57,20 +57,22 @@ class BuildpackFinalizer
   end
 
   def move_uncached_buildpack
-    Dir.chdir(@uncached_buildpack_dir) do
-      Dir.glob('*.zip').map do |filename|
-        filename.match(/(.*)_buildpack-v#{@version}\+.*.zip/) do |match|
-          _, language  = match.to_a
-          new_filename = "#{language}-buildpack-v#{@version}.zip"
-          new_path     = File.join(@artifact_dir, new_filename)
+    @uncached_buildpack_dirs.each do |uncached_buildpack_dir|
+      Dir.chdir(uncached_buildpack_dir) do
+        Dir.glob('*.zip').map do |filename|
+          filename.match(/(.*)_buildpack(-.*)?-v#{@version}\+.*.zip/) do |match|
+            _, language, stack_string  = match.to_a
+            new_filename = "#{language}-buildpack#{stack_string}-v#{@version}.zip"
+            new_path     = File.join(@artifact_dir, new_filename)
 
-          FileUtils.mv(filename, new_path)
+            FileUtils.mv(filename, new_path)
 
-          shasum = Digest::SHA256.file(new_path).hexdigest
+            shasum = Digest::SHA256.file(new_path).hexdigest
 
-          # append SHA to RELEASE NOTES
-          File.write(@recent_changes_file, "  * Uncached buildpack SHA256: #{shasum}\n", mode: 'a')
-          File.write("#{new_path}.SHA256SUM.txt", "#{shasum}  #{new_filename}")
+            # append SHA to RELEASE NOTES
+            File.write(@recent_changes_file, "  * Uncached buildpack SHA256: #{shasum}\n", mode: 'a')
+            File.write("#{new_path}.SHA256SUM.txt", "#{shasum}  #{new_filename}")
+          end
         end
       end
     end
