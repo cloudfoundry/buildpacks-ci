@@ -329,7 +329,8 @@ when 'php'
   })
 when 'python'
   major, minor, _ = version.split('.')
-  if major == '3' && stack == 'cflinuxfs3' && (minor == '3' || minor == '4')
+  if major == '3' && minor == '4' && stack == 'cflinuxfs3'
+    run('apt', 'update')
     run('apt-get', 'install', '-y', 'libssl1.0-dev')
   end
   Dir.chdir('binary-builder') do
