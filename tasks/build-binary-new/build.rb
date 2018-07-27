@@ -328,6 +328,10 @@ when 'php'
     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
   })
 when 'python'
+  major, minor, _ = version.split('.')
+  if major == '3' && stack == 'cflinuxfs3' && (minor == '3' || minor == '4')
+    run('apt-get', 'install', '-y', 'libssl1.0-dev')
+  end
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=python', "--version=#{version}", "--md5=#{data.dig('version', 'md5')}")
   end
