@@ -1,15 +1,15 @@
-<% supported_languages = %w(binary dotnet-core go java nodejs php python ruby staticfile) %>
+<% supported_languages = %w(dotnet-core go ruby binary staticfile nodejs php python java) %>
 <% cutlass = %w(binary dotnet-core go nodejs python ruby staticfile) %>
 <% stacks = {
-  "binary" => %w(any),
-  "dotnet-core" => %w(cflinuxfs2),
-  "go" => %w(cflinuxfs2),
-  "java" => %w(cflinuxfs2),
-  "nodejs" => %w(cflinuxfs2),
-  "php" => %w(cflinuxfs2),
-  "python" => %w(cflinuxfs2),
-  "ruby" => %w(cflinuxfs2),
-  "staticfile" => %w(cflinuxfs2)
+  "binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016),
+  "java" => %w(cflinuxfs2 cflinuxfs3),
+  "dotnet-core" => %w(cflinuxfs2 cflinuxfs3),
+  "go" => %w(cflinuxfs2 cflinuxfs3),
+  "nodejs" => %w(cflinuxfs2 cflinuxfs3),
+  "php" => %w(cflinuxfs2 cflinuxfs3),
+  "python" => %w(cflinuxfs2 cflinuxfs3),
+  "ruby" => %w(cflinuxfs2 cflinuxfs3),
+  "staticfile" => %w(cflinuxfs2 cflinuxfs3)
 } %>
 ---
 resource_types:
@@ -95,6 +95,12 @@ resources:
     type: bosh-io-release
     source:
       repository: cloudfoundry/cflinuxfs2-release
+  - name: cflinuxfs3-bosh-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: cflinuxfs3-release
+      access_token: {{buildpacks-github-token}}
   - name: pivnet-production
     type: pivnet
     source:
@@ -232,6 +238,8 @@ jobs:
             attempts: 3
           - get: cflinuxfs2-bosh-release
             attempts: 3
+          - get: cflinuxfs3-bosh-release
+            attempts: 3
           - get: gcp-stemcell
             attempts: 3
           - get: java-buildpack-github-release
@@ -271,11 +279,13 @@ jobs:
             releases:
               - built-buildpacks-artifacts/*.tgz
               - cflinuxfs2-bosh-release/*.tgz
+              - cflinuxfs3-bosh-release/*.tgz
             stemcells:
               - gcp-stemcell/*.tgz
             ops_files:
               - cf-deployment/operations/use-latest-stemcell.yml
               - cf-deployment/operations/use-compiled-releases.yml
+              - buildpacks-ci/deployments/operations/cflinuxfs3.yml
               - buildpacks-ci/deployments/operations/no-canaries.yml
               - cf-deployment/operations/experimental/use-bosh-dns.yml
               - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
