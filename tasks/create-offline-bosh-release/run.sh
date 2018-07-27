@@ -41,6 +41,7 @@ EOF
     else
       blob_list=("../buildpack-zip/${language}_buildpack-cached*.zip")
     fi
+    # shellcheck disable=SC2128
     for blob in $blob_list; do
       bosh2 -n add-blob $blob "$blob_name/$(basename $blob)"
     done
