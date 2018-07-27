@@ -236,6 +236,24 @@ resources: #####################################################################
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
+<% stacks[language].each do |stack| %>
+  - name: pivotal-buildpack-<%= stack %>
+    type: s3
+    source:
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-<%= stack %>-v(.*).zip
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+
+  - name: pivotal-buildpack-cached-<%= stack %>
+    type: s3
+    source:
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached-<%= stack %>-v(.*).zip
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+<% end %>
+
   ## Resource Pools ##
 
   - name: edge-shared-environments
@@ -541,6 +559,12 @@ jobs: ##########################################################################
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
           passed: [ ship-it ]
+        <% stacks[language].each_with_index do |stack, ndx| %>
+        - get: pivotal-buildpacks-cached-stack<%= ndx.to_s %>
+          resource: pivotal-buildpack-cached-<%= stack %>
+        - get: pivotal-buildpacks-stack<%= ndx.to_s %>
+          resource: pivotal-buildpack-<%= stack %>
+        <% end %>
         - get: buildpack
           resource: buildpack-master
           passed: [ ship-it ]
@@ -560,8 +584,8 @@ jobs: ##########################################################################
           tag: buildpack-artifacts/tag
           body: buildpack-artifacts/RECENT_CHANGES
           globs:
-            - buildpack-artifacts/*-buildpack-v*.zip
-            - buildpack-artifacts/*-buildpack-v*.zip.SHA256SUM.txt
+            - buildpack-artifacts/*-buildpack*-v*.zip
+            - buildpack-artifacts/*-buildpack*-v*.zip.SHA256SUM.txt
 
 <% if !non_published.include?(language) || push_to_pws.include?(language) %>
   - name: buildpack-to-pws
