@@ -75,7 +75,7 @@ class BuildpackTagger
         end
 
         Dir.chdir('../buildpack-artifacts') do
-          Dir["*.zip"].each do |buildpack|
+          Dir["*/*.zip"].each do |buildpack|
             md5sum = `md5sum #{buildpack}`
             sha256sum = `sha256sum #{buildpack}`
             puts "md5: #{md5sum}"
