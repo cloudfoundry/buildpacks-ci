@@ -224,7 +224,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-v(.*).zip
+      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack.*-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
@@ -343,10 +343,10 @@ jobs: ##########################################################################
                 CF_STACK: <%= stack %>
             - put: pivotal-buildpack
               params:
-                file: buildpack-artifacts/*_buildpack-v*.zip
+                file: buildpack-artifacts/uncached/*_buildpack*-v*.zip
             - put: pivotal-buildpack-cached
               params:
-                file: buildpack-artifacts/*_buildpack-cached*-v*.zip
+                file: buildpack-artifacts/cached/*_buildpack-cached*-v*.zip
 <% end %>
         on_failure:
           put: failure-alert
