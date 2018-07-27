@@ -7,7 +7,9 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: buildpack
-  - name: pivotal-buildpacks
+  - name: pivotal-buildpacks-stack0
+  - name: pivotal-buildpacks-stack1
+    optional: true
 outputs:
   - name: buildpack-artifacts
 run:
