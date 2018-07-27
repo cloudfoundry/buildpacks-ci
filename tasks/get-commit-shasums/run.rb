@@ -6,13 +6,18 @@ require 'fileutils'
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require "#{buildpacks_ci_dir}/lib/git-client"
 
-latest_shasum_file = Dir["buildpack-artifacts/*.SHA256SUM.txt"].first
+latest_shasum_files = Dir["buildpack-artifacts/*.SHA256SUM.txt"]
 system("rsync -a buildpack-checksums/ sha-artifacts")
-FileUtils.copy(latest_shasum_file, './sha-artifacts')
 
-shasum_basename = File.basename(latest_shasum_file, ".SHA256SUM.txt")
+latest_shasum_files.each do |latest_shasum_file|
+  FileUtils.copy(latest_shasum_file, './sha-artifacts')
+end
+
+shasum_basenames = latest_shasum_files.map do |latest_shasum_file|
+  File.basename(latest_shasum_file, ".SHA256SUM.txt")
+end
 
 Dir.chdir('sha-artifacts') do
   GitClient.add_everything
-  GitClient.safe_commit("SHA256SUM for #{shasum_basename}")
+  GitClient.safe_commit("SHA256SUM for #{shasum_basenames.join(' ')}")
 end
