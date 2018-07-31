@@ -12,15 +12,11 @@ pushd source
   git checkout "$tag"
   git submodule update --init --recursive
   BUNDLE_GEMFILE=cf.Gemfile bundle
+
+  for stack in $CF_STACKS; do
+    BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --cached --stack="$stack"
+  done
+
+  mv ./*buildpack-cached*.zip buildpack-zip/
 popd
 
-for stack in $CF_STACKS; do
-  cp -r source "source-$stack"
-  pushd "source-$stack"
-    BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --cached
-    echo "stack: $stack" >> manifest.yml
-    zip ./*buildpack-cached*.zip manifest.yml
-    mv ./*buildpack-cached*.zip "$(echo ./*buildpack-cached*.zip | sed "s/-cached/-cached-${stack}/")"
-  popd
-  mv source-"$stack"/*_buildpack-cached*.zip buildpack-zip/
-done
