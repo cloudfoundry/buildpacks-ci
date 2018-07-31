@@ -17,7 +17,7 @@ Dir.glob('*-buildpack-github-release').each do |github_release|
 
   ## Build new buildpack from master for each stack
   stacks.each do |stack|
-    system(%(buildpack-packager build --uncached --stack=#{stack}`)) || raise("cannot package buildpack #{release_name} #{stack}")
+    system(%(buildpack-packager build --uncached --stack=#{stack})) || raise("cannot package buildpack #{release_name} #{stack}")
   end
 
   ## Bump blobs in bosh release
