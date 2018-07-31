@@ -24,7 +24,7 @@ Dir.glob('*-buildpack-github-release').each do |github_release|
       stdin.close
       _, status = Process.waitpid2 pid
       status || raise("cannot list-blobs for #{release_name}-bosh-release:\n\n#{stdout}\n\n#{stderr}")
-      stdout.lines.each do |line|
+      stdout.each_line do |line|
         system(%(bosh2 remove-blob #{line}))
       end
 
