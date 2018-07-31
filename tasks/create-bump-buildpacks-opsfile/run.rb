@@ -12,31 +12,36 @@ Dir.glob('*-buildpack-github-release').each do |github_release|
   release_name = github_release.gsub('-github-release', '')
   language = release_name.gsub('-buildpack', '')
 
-  stacks = %w[cflinuxfs2 cflinuxfs3]
-  stacks << %w[windows2012R2 windows2016] if release_name == 'binary-buildpack'
+  if language != 'java'
+    stacks = %w[cflinuxfs2 cflinuxfs3]
+    stacks << %w[windows2012R2 windows2016] if release_name == 'binary-buildpack'
 
-  ## Build new buildpack from master for each stack
-  stacks.each do |stack|
-    system(%(buildpack-packager build --uncached --stack=#{stack})) || raise("cannot package buildpack #{release_name} #{stack}")
+    ## Build new buildpack from master for each stack
+    stacks.each do |stack|
+      system(%(buildpack-packager build --uncached --stack=#{stack})) || raise("cannot package buildpack #{release_name} #{stack}")
+    end
   end
-
   ## Bump blobs in bosh release
   Dir.chdir("#{release_name}-bosh-release") do
-    ## Clean out existing blobs
-    system(%(rm -rf blobs) || raise("can't remove blobs"))
-    if File.exists('config/blobs.yml')
-      File.open('config/blobs.yml', 'w') { |file| file.write("---\n{}") }
-    end
-    cmd = "bosh2 blobs | grep -- '-buildpack/.*buildpack' | awk '{print $1}'"
-    Open3.popen3(cmd) do |_, stdout, _, _|
-      stdout.lines.each do |line|
-        system(%(bosh2 remove-blob #{line}))
+    if language != 'java'
+      ## Clean out existing blobs
+      system(%(rm -rf blobs) || raise("can't remove blobs"))
+      if File.exists('config/blobs.yml')
+        File.open('config/blobs.yml', 'w') { |file| file.write("---\n{}") }
       end
-    end
+      cmd = "bosh2 blobs | grep -- '-buildpack/.*buildpack' | awk '{print $1}'"
+      Open3.popen3(cmd) do |_, stdout, _, _|
+        stdout.lines.each do |line|
+          system(%(bosh2 remove-blob #{line}))
+        end
+      end
 
-    ## Add new blobs for new buildpacks
-    Dir.glob("../#{github_release}/#{language}_buildpack-*.zip") do |blob|
-      system(%(bosh2 -n add-blob #{blob} #{release_name}/#{File.basename(blob)})) || raise("cannot add blob #{blob} to #{release_name}")
+      ## Add new blobs for new buildpacks
+      Dir.glob("../#{github_release}/#{language}_buildpack-*.zip") do |blob|
+        system(%(bosh2 -n add-blob #{blob} #{release_name}/#{File.basename(blob)})) || raise("cannot add blob #{blob} to #{release_name}")
+      end
+    else
+      system(%(bosh2 --parallel 10 sync-blobs)) || raise("cannot sync blobs #{release_name} #{version}")
     end
 
     # Create release and copy to built-buildpacks-artifacts
