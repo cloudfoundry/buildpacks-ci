@@ -17,7 +17,7 @@ Dir.glob('*-buildpack-github-release').each do |github_release|
     if language != 'java'
       ## Clean out existing blobs
       system(%(rm -rf blobs) || raise("can't remove blobs"))
-      if File.exists('config/blobs.yml')
+      if File.exist?('config/blobs.yml')
         File.open('config/blobs.yml', 'w') { |file| file.write("---\n{}") }
       end
 
