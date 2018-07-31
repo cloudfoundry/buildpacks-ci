@@ -10,11 +10,10 @@ version = "0.#{Time.now.to_i}"
 replacements = []
 Dir.glob('*-buildpack-github-release').each do |github_release|
   release_name = github_release.gsub('-github-release', '')
-  language = release_name.gsub('-buildpack', '')
 
   ## Bump blobs in bosh release
   Dir.chdir("#{release_name}-bosh-release") do
-    if language != 'java'
+    if release_name != 'java-buildpack'
       ## Clean out existing blobs
       system(%(rm -rf blobs) || raise("can't remove blobs"))
       if File.exist?('config/blobs.yml')
@@ -30,7 +29,7 @@ Dir.glob('*-buildpack-github-release').each do |github_release|
       end
 
       ## Add new blobs for new buildpacks
-      Dir.glob("../#{github_release}/#{language}_buildpack-*.zip") do |blob|
+      Dir.glob("../#{github_release}/#{release_name}-*.zip") do |blob|
         system(%(bosh2 -n add-blob #{blob} #{release_name}/#{File.basename(blob)})) || raise("cannot add blob #{blob} to #{release_name}")
       end
     else
