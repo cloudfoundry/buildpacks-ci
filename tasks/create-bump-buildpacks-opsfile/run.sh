@@ -6,4 +6,4 @@ set -o pipefail
 
 cd buildpacks-ci/
 bundle install
-bundle exec buildpacks-ci/tasks/create-bump-buildpacks-opsfile/run.rb
+bundle exec tasks/create-bump-buildpacks-opsfile/run.rb
