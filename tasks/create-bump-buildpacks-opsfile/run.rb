@@ -12,18 +12,6 @@ Dir.glob('*-buildpack-github-release').each do |github_release|
   release_name = github_release.gsub('-github-release', '')
   language = release_name.gsub('-buildpack', '')
 
-  if language != 'java'
-    stacks = %w[cflinuxfs2 cflinuxfs3]
-    stacks << %w[windows2012R2 windows2016] if release_name == 'binary-buildpack'
-
-    ## Build new buildpack from master for each stack
-    stacks.each do |stack|
-      pid, stdin, stdout, stderr = Open4.popen4 "buildpack-packager build --uncached --stack=#{stack}"
-      stdin.close
-      _, status = Process.waitpid2 pid
-      status || raise("cannot package buildpack #{release_name} #{stack}:\n\n#{stdout}\n\n#{stderr}")
-    end
-  end
   ## Bump blobs in bosh release
   Dir.chdir("#{release_name}-bosh-release") do
     if language != 'java'
