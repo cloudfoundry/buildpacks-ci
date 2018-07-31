@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 require 'fileutils'
-require 'open3'
+require 'open4'
 require 'yaml'
 
 version = "0.#{Time.now.to_i}"
@@ -18,7 +18,10 @@ Dir.glob('*-buildpack-github-release').each do |github_release|
 
     ## Build new buildpack from master for each stack
     stacks.each do |stack|
-      system(%(buildpack-packager build --uncached --stack=#{stack})) || raise("cannot package buildpack #{release_name} #{stack}")
+      pid, stdin, stdout, stderr = Open4.popen4 "buildpack-packager build --uncached --stack=#{stack}"
+      stdin.close
+      _, status = Process.waitpid2 pid
+      status || raise("cannot package buildpack #{release_name} #{stack}:\n\n#{stdout}\n\n#{stderr}")
     end
   end
   ## Bump blobs in bosh release
@@ -29,11 +32,13 @@ Dir.glob('*-buildpack-github-release').each do |github_release|
       if File.exists('config/blobs.yml')
         File.open('config/blobs.yml', 'w') { |file| file.write("---\n{}") }
       end
-      cmd = "bosh2 blobs | grep -- '-buildpack/.*buildpack' | awk '{print $1}'"
-      Open3.popen3(cmd) do |_, stdout, _, _|
-        stdout.lines.each do |line|
-          system(%(bosh2 remove-blob #{line}))
-        end
+
+      pid, stdin, stdout, stderr = Open4.popen4 "bosh2 blobs | grep -- '-buildpack/.*buildpack' | awk '{print $1}'"
+      stdin.close
+      _, status = Process.waitpid2 pid
+      status || raise("cannot list-blobs for #{release_name}-bosh-release:\n\n#{stdout}\n\n#{stderr}")
+      stdout.lines.each do |line|
+        system(%(bosh2 remove-blob #{line}))
       end
 
       ## Add new blobs for new buildpacks
