@@ -6,5 +6,6 @@ set -o pipefail
 
 cd buildpacks-ci/
 bundle install
+cd ..
 gem install open4
-tasks/create-bump-buildpacks-opsfile/run.rb
+buildpacks-ci/tasks/create-bump-buildpacks-opsfile/run.rb
