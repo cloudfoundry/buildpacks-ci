@@ -6,7 +6,9 @@
     - name: staticfile_buildpack
       package: staticfile-buildpack-cflinuxfs3
     - name: java_buildpack
-      package: java-buildpack
+      package: java-buildpack-cflinuxfs2
+    - name: java_buildpack
+      package: java-buildpack-cflinuxfs3
     - name: ruby_buildpack
       package: ruby-buildpack-cflinuxfs2
     - name: ruby_buildpack
