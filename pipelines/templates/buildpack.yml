@@ -359,12 +359,14 @@ jobs: ##########################################################################
                 BUILDPACK_NAME: <%= language %>-buildpack
                 RUBYGEM_MIRROR: {{rubygem-mirror}}
                 CF_STACK: <%= stack %>
+              output_mapping:
+                buildpack-artifacts: buildpack-artifacts-<%= stack %>
             - put: pivotal-buildpack
               params:
-                file: buildpack-artifacts/uncached/*_buildpack*-v*.zip
+                file: buildpack-artifacts-<%= stack %>/uncached/*_buildpack*-v*.zip
             - put: pivotal-buildpack-cached
               params:
-                file: buildpack-artifacts/cached/*_buildpack-cached*-v*.zip
+                file: buildpack-artifacts-<%= stack %>/cached/*_buildpack-cached*-v*.zip
 <% end %>
         on_failure:
           put: failure-alert
