@@ -349,7 +349,7 @@ jobs: ##########################################################################
         - get: pivotal-buildpack
       - do:
         - aggregate:
-<% stack_languages = language.to_s == 'hwc' || language.to_s == 'binary' ? ['any'] : stacks[language] %>
+<% stack_languages = language.to_s == 'hwc' ? ['any'] : stacks[language] %>
 <% stack_languages.each do |stack| %>
           - do:
             - task: detect-and-upload-<%= stack %>
