@@ -28,9 +28,7 @@
     - name: python_buildpack
       package: python-buildpack-cflinuxf3
     - name: php_buildpack
-      package: php-buildpack-cflinuxf2
-    - name: php_buildpack
-      package: php-buildpack-cflinuxf3
+      package: php-buildpack
     - name: binary_buildpack
       package: binary-buildpack-cflinuxf2
     - name: binary_buildpack
