@@ -16,7 +16,7 @@ pushd pivnet-production
       zip "$new_name" manifest.yml
       rm manifest.yml
     done
-    rm $old_name
+    rm "$old_name"
 popd
 
 # shellcheck disable=SC2035
