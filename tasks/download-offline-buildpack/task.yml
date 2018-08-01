@@ -13,4 +13,4 @@ outputs:
 run:
   path: buildpacks-ci/tasks/download-offline-buildpack/run.sh
 params:
-  CF_STACK:
+  CF_STACKS:
