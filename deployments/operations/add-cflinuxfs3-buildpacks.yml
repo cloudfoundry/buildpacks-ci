@@ -22,16 +22,16 @@
     - name: nodejs_buildpack
       package: nodejs-buildpack-cflinuxfs3
     - name: go_buildpack
-      package: go-buildpack-cflinuxf2
+      package: go-buildpack-cflinuxfs2
     - name: go_buildpack
-      package: go-buildpack-cflinuxf3
+      package: go-buildpack-cflinuxfs3
     - name: python_buildpack
-      package: python-buildpack-cflinuxf2
+      package: python-buildpack-cflinuxfs2
     - name: python_buildpack
-      package: python-buildpack-cflinuxf3
+      package: python-buildpack-cflinuxfs3
     - name: php_buildpack
       package: php-buildpack
     - name: binary_buildpack
-      package: binary-buildpack-cflinuxf2
+      package: binary-buildpack-cflinuxfs2
     - name: binary_buildpack
-      package: binary-buildpack-cflinuxf3
+      package: binary-buildpack-cflinuxfs3
