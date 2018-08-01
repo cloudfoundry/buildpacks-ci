@@ -286,6 +286,7 @@ jobs:
               - cf-deployment/operations/use-latest-stemcell.yml
               - cf-deployment/operations/use-compiled-releases.yml
               - buildpacks-ci/deployments/operations/cflinuxfs3.yml
+              - buildpacks-ci/deployments/operations/add-cflinuxfs3-buildpacks.yml
               - buildpacks-ci/deployments/operations/no-canaries.yml
               - bump-buildpacks-opsfile/opsfile.yml
             vars:
