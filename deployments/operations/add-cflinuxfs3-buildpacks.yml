@@ -1,0 +1,37 @@
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks
+  type: replace
+  value:
+    - name: staticfile_buildpack
+      package: staticfile-buildpack-cflinuxfs2
+    - name: staticfile_buildpack
+      package: staticfile-buildpack-cflinuxfs3
+    - name: java_buildpack
+      package: java-buildpack
+    - name: ruby_buildpack
+      package: ruby-buildpack-cflinuxfs2
+    - name: ruby_buildpack
+      package: ruby-buildpack-cflinuxfs3
+    - name: dotnet_core_buildpack
+      package: dotnet-core-buildpack-cflinuxfs2
+    - name: dotnet_core_buildpack
+      package: dotnet-core-buildpack-cflinuxfs3
+    - name: nodejs_buildpack
+      package: nodejs-buildpack-cflinuxfs2
+    - name: nodejs_buildpack
+      package: nodejs-buildpack-cflinuxfs3
+    - name: go_buildpack
+      package: go-buildpack-cflinuxf2
+    - name: go_buildpack
+      package: go-buildpack-cflinuxf3
+    - name: python_buildpack
+      package: python-buildpack-cflinuxf2
+    - name: python_buildpack
+      package: python-buildpack-cflinuxf3
+    - name: php_buildpack
+      package: php-buildpack-cflinuxf2
+    - name: php_buildpack
+      package: php-buildpack-cflinuxf3
+    - name: binary_buildpack
+      package: binary-buildpack-cflinuxf2
+    - name: binary_buildpack
+      package: binary-buildpack-cflinuxf3
