@@ -13,27 +13,37 @@ Dir.glob('*-buildpack-github-release').each do |github_release|
 
   ## Bump blobs in bosh release
   Dir.chdir("#{release_name}-bosh-release") do
-    if release_name != 'java-buildpack'
       ## Clean out existing blobs
-      system(%(rm -rf blobs) || raise("can't remove blobs"))
-      if File.exist?('config/blobs.yml')
-        File.open('config/blobs.yml', 'w') { |file| file.write("---\n{}") }
-      end
+    system(%(rm -rf blobs) || raise("can't remove blobs"))
+    if File.exist?('config/blobs.yml')
+      File.open('config/blobs.yml', 'w') { |file| file.write("---\n{}") }
+    end
 
-      pid, stdin, stdout, stderr = Open4.popen4 "bosh2 blobs | grep -- '-buildpack/.*buildpack' | awk '{print $1}'"
-      stdin.close
-      _, status = Process.waitpid2 pid
-      status || raise("cannot list-blobs for #{release_name}-bosh-release:\n\n#{stdout}\n\n#{stderr}")
-      stdout.each_line do |line|
-        system(%(bosh2 remove-blob #{line}))
-      end
+    pid, stdin, stdout, stderr = Open4.popen4 "bosh2 blobs | grep -- '-buildpack/.*buildpack' | awk '{print $1}'"
+    stdin.close
+    _, status = Process.waitpid2 pid
+    status || raise("cannot list-blobs for #{release_name}-bosh-release:\n\n#{stdout}\n\n#{stderr}")
+    stdout.each_line do |line|
+      system(%(bosh2 remove-blob #{line}))
+    end
 
-      ## Add new blobs for new buildpacks
-      Dir.glob("../#{github_release}/#{release_name}-*.zip") do |blob|
-        system(%(bosh2 -n add-blob #{blob} #{release_name}/#{File.basename(blob)})) || raise("cannot add blob #{blob} to #{release_name}")
+    # Java buildpack needs to be stack-associated
+    if release_name == 'java-buildpack'
+      github_version=File.read("../#{github_release}/version")
+      java_zip_file = Dir.glob("../#{github_release}/#{release_name}-*.zip").first
+      ['cflinuxfs2', 'cflinuxfs3'].each do |stack|
+        new_zip_file = "../#{github_release}/#{release_name}-#{stack}-v#{github_version}.zip"
+        File.write('manifest.yml', "stack: #{stack}")
+        FileUtils.cp(java_zip_file, new_zip_file)
+        system(%(zip #{new_zip_file} 'manifest.yml')) || raise("cannot zip java buildpack file")
+        FileUtils.rm('manifest.yml')
       end
-    else
-      system(%(bosh2 --parallel 10 sync-blobs)) || raise("cannot sync blobs #{release_name} #{version}")
+      FileUtils.rm(java_zip_file)
+    end
+
+    ## Add new blobs for new buildpacks
+    Dir.glob("../#{github_release}/#{release_name}-*.zip") do |blob|
+      system(%(bosh2 -n add-blob #{blob} #{release_name}/#{File.basename(blob)})) || raise("cannot add blob #{blob} to #{release_name}")
     end
 
     # Create release and copy to built-buildpacks-artifacts
