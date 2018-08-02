@@ -18,8 +18,8 @@ describe BuildpackTagger do
          bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
        fi
        bundle install
-       bundle exec buildpack-packager --uncached
-       bundle exec buildpack-packager --cached
+       bundle exec buildpack-packager --uncached --stack=some-stack
+       bundle exec buildpack-packager --cached --stack=some-stack
        echo "stack: some-stack" >> manifest.yml
        zip *-cached*.zip manifest.yml
        EOF
