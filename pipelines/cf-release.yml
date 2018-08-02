@@ -484,7 +484,7 @@ jobs:
         - task: download-offline-buildpack
           file: buildpacks-ci/tasks/download-offline-buildpack/task.yml
           params:
-            CF_STACK: <%= stacks['java'].first %> #we currently only support one stack for java buildpack
+            CF_STACKS: <%= stacks[language].join(' ') %>
         <% elsif cutlass.include?(language) %>
         - task: build-offline-buildpack
           file: buildpacks-ci/tasks/build-offline-buildpacks-cutlass/task.yml
