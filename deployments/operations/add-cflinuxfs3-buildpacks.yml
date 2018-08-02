@@ -30,7 +30,9 @@
     - name: python_buildpack
       package: python-buildpack-cflinuxfs3
     - name: php_buildpack
-      package: php-buildpack
+      package: php-buildpack-cflinuxfs2
+    - name: php_buildpack
+      package: php-buildpack-cflinuxfs3
     - name: binary_buildpack
       package: binary-buildpack-cflinuxfs2
     - name: binary_buildpack
