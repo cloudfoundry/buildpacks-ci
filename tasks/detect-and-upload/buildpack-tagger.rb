@@ -31,6 +31,7 @@ class BuildpackTagger
         FileUtils.mv(cached_buildpack, output_cached)
       else
         stack = ENV.fetch('CF_STACK')
+        stack_flag = stack == 'any' ? '--any-stack' : "--stack=#{stack}"
         puts `git tag #{tag_to_add}`
         if File.exists?('compile-extensions')
           system(<<~EOF)
@@ -39,13 +40,12 @@ class BuildpackTagger
                     bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
                   fi
                   bundle install
-                  bundle exec buildpack-packager --uncached
-                  bundle exec buildpack-packager --cached
+                  bundle exec buildpack-packager --uncached #{stack_flag}
+                  bundle exec buildpack-packager --cached #{stack_flag}
                   echo "stack: #{stack}" >> manifest.yml
                   zip *-cached*.zip manifest.yml
                   EOF
         else
-          stack_flag = stack == 'any' ? '--any-stack' : "--stack=#{stack}"
           system(<<~EOF)
                   export GOPATH=$PWD
                   export GOBIN=$GOPATH/.bin
