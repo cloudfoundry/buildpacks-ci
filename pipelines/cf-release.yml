@@ -288,6 +288,8 @@ jobs:
               - buildpacks-ci/deployments/operations/cflinuxfs3.yml
               - buildpacks-ci/deployments/operations/add-cflinuxfs3-buildpacks.yml
               - buildpacks-ci/deployments/operations/no-canaries.yml
+              - cf-deployment/operations/experimental/use-bosh-dns.yml
+              - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
               - bump-buildpacks-opsfile/opsfile.yml
             vars:
               system_domain: cf-release.buildpacks-gcp.ci.cf-app.com
