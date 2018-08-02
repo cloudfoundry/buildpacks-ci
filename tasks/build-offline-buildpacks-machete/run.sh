@@ -17,6 +17,5 @@ pushd source
     BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --cached --stack="$stack"
   done
 
-  mv ./*buildpack-cached*.zip buildpack-zip/
+  mv ./*buildpack-cached*.zip ../buildpack-zip/
 popd
-
