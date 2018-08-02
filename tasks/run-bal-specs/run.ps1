@@ -14,6 +14,7 @@ cp bal-develop/* $buildDir -recurse
 
 # install git
 echo "#### Attempting to install git"
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12;
 $urlPath = "https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/Git-2.18.0-64-bit.exe"
 $urlSplit = $urlPath.split('/')
 $filename = (Resolve-Path .\).ToString() + '\' + $urlSplit[$urlSplit.length - 1]
