@@ -7,6 +7,8 @@ set -o xtrace
 
 CF_API_URL=api."$APPS_DOMAIN"
 
+sleep $((2 * 60))
+
 cf api --skip-ssl-validation "$CF_API_URL"
 cf auth "$CI_CF_USERNAME" "$CI_CF_PASSWORD"
 
