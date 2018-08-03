@@ -41,9 +41,17 @@ class Dependencies
     end
   end
 
+  # When rebuilding, we don't want to lose supported stacks
+  # [1,2,3], [1,2] => false
+  # [1,2,3], [1,2,3] => true
+  # [1], [1,2] => true
+  def dep_includes_at_least_these_stacks?(manifest_stacks)
+    (manifest_stacks - @dep['cf_stacks']).empty?
+  end
+
   def same_dependency_line?(stacks, version, dep_name)
     return false if dep_name != @dep['name']
-    return false unless (stacks - @dep['cf_stacks']).empty?
+    return false unless dep_includes_at_least_these_stacks?(stacks)
 
     version = begin
       Gem::Version.new(version)
