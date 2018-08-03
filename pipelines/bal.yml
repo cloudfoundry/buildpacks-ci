@@ -70,7 +70,7 @@ resources:
     source:
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-      tag_filter: v5.*
+      tag_filter: v*
 
   - name: bosh-deployment
     type: git
