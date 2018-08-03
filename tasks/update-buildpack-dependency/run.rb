@@ -88,7 +88,6 @@ end
 # * There are two version lines, stable & mainline
 #   when we add a new minor line, we should update the version line regex
 if !rebuilt && manifest_name == 'nginx' && manifest['language'] == 'nginx'
-  version_lines = manifest['version_lines']
   v = Gem::Version.new(resource_version)
   if data.dig('source', 'version_filter')
     if v.segments[1].even? # 1.12.X is stable
@@ -130,8 +129,7 @@ end
 # * Each php version in the manifest lists the modules it was built with.
 #   Get that list for this version of php.
 if manifest_name == 'php' && manifest['language'] == 'php'
-  # TODO: different stacks could end up with different modules?
-  dependencies = manifest['dependencies'].map do |dependency|
+  manifest['dependencies'].each do |dependency|
     if dependency.fetch('name') == 'php' && dependency.fetch('version') == resource_version
       modules = Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
@@ -141,13 +139,12 @@ if manifest_name == 'php' && manifest['language'] == 'php'
           Dir['php/lib/php/extensions/no-debug-non-zts-*/*.so'].collect do |file|
             File.basename(file, '.so')
           end.sort.reject do |m|
-            %w(odbc gnupg).include?(m)
+            %w[odbc gnupg].include?(m)
           end
         end
       end
-      dependency["modules"] = modules
+      dependency['modules'] = modules
     end
-    dependency
   end
 end
 
