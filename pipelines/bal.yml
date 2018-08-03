@@ -168,7 +168,6 @@ jobs:
           LB_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
           BBL_ENV_NAME: bal
           BBL_STATE_DIR: bal
-          OPS_FILES: "local-dns.yml"
         input_mapping:
           ops-files: bosh-deployment
         ensure:
