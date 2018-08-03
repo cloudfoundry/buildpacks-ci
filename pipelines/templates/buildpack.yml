@@ -236,6 +236,7 @@ resources: #####################################################################
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
+<% unless language.to_s == 'hwc' %>
 <% stacks[language].each do |stack| %>
   - name: pivotal-buildpack-<%= stack %>
     type: s3
@@ -252,6 +253,7 @@ resources: #####################################################################
       regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached-<%= stack %>-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+<% end %>
 <% end %>
 
   ## Resource Pools ##
@@ -561,11 +563,18 @@ jobs: ##########################################################################
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
           passed: [ ship-it ]
+        <% if language.to_s == 'hwc' %>
+        - get: pivotal-buildpacks-cached-stack0
+          resource: pivotal-buildpack-cached
+        - get: pivotal-buildpacks-stack0
+          resource: pivotal-buildpack
+        <% else %>
         <% stacks[language].each_with_index do |stack, ndx| %>
         - get: pivotal-buildpacks-cached-stack<%= ndx.to_s %>
           resource: pivotal-buildpack-cached-<%= stack %>
         - get: pivotal-buildpacks-stack<%= ndx.to_s %>
           resource: pivotal-buildpack-<%= stack %>
+        <% end %>
         <% end %>
         - get: buildpack
           resource: buildpack-master
