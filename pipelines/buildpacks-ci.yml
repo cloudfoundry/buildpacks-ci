@@ -113,7 +113,7 @@ jobs:
         trigger: true
       - put: buildpacks-ci-image
         params:
-          build: buildpacks-ci
+          build: buildpacks-ci-dockerfile-master
           build_args:
             squash: squash
         attempts: 2
@@ -133,7 +133,7 @@ jobs:
         trigger: true
       - put: depwatcher-image
         params:
-          build: depwatcher-master/dockerfiles/depwatcher
+          build: depwatcher-dockerfile-master/dockerfiles/depwatcher
           build_args:
             squash: squash
         attempts: 2
