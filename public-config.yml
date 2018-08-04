@@ -22,6 +22,7 @@ buildpacks-ci-git-uri-public-branch: master
 buildpackapplifecycle-git-branch: develop
 
 buildpacks-docker-ci-repo: cfbuildpacks/ci
+buildpacks-docker-depwatcher-repo: cfbuildpacks/depwatcher
 buildpacks-docker-user-email: cf-buildpacks-eng@pivotal.io
 buildpacks-concourse2tracker-docker-repo: cfbuildpacks/concourse2tracker
 
