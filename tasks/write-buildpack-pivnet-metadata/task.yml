@@ -9,7 +9,7 @@ image_resource:
 inputs:
   - name: buildpack
   - name: buildpacks-ci
-  - name: pivotal-buildpacks-cached
+  - name: pivotal-buildpacks-stack0
   - name: pivnet-buildpack-metadata
   - name: buildpack-artifacts
 
