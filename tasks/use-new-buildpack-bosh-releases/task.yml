@@ -5,15 +5,15 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
-  - name: java-buildpack-bosh-release
-  - name: go-buildpack-bosh-release
-  - name: python-buildpack-bosh-release
-  - name: nodejs-buildpack-bosh-release
-  - name: ruby-buildpack-bosh-release
-  - name: php-buildpack-bosh-release
-  - name: staticfile-buildpack-bosh-release
-  - name: binary-buildpack-bosh-release
-  - name: dotnet-core-buildpack-bosh-release
+  - name: java-buildpack-release
+  - name: go-buildpack-release
+  - name: python-buildpack-release
+  - name: nodejs-buildpack-release
+  - name: ruby-buildpack-release
+  - name: php-buildpack-release
+  - name: staticfile-buildpack-release
+  - name: binary-buildpack-release
+  - name: dotnet-core-buildpack-release
   - name: buildpacks-ci
 outputs:
   - name: buildpacks-opsfile
