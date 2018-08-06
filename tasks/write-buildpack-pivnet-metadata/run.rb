@@ -12,7 +12,7 @@ recent_changes_filename = File.join(root_dir, 'buildpack-artifacts', 'RECENT_CHA
 
 buildpack_files = ''
 
-Dir.chdir('pivotal-buildpacks-cached') do
+Dir.chdir('pivotal-buildpacks-stack0') do
   buildpack_files = Dir["#{buildpack}_buildpack-cached*-v*.zip"]
 end
 
