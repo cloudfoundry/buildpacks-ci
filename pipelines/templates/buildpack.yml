@@ -7,7 +7,7 @@
 <% stacks = {
   "hwc" => %w(windows2012R2 windows2016),
   "apt" => %w(cflinuxfs2 cflinuxfs3),
-  "binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016),
+  "binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016 any), # binary needs unassociated release for pivnet
   "credhub" => %w(cflinuxfs2 cflinuxfs3),
   "dotnet-core" => %w(cflinuxfs2 cflinuxfs3),
   "go" => %w(cflinuxfs2 cflinuxfs3),
@@ -625,10 +625,12 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: pivnet-buildpack-metadata
-        - get: pivotal-buildpacks-cached
+        - get: pivotal-buildpacks-cached-passed
           resource: pivotal-buildpack-cached
           passed: [ ship-it ]
           trigger: true
+        - get: pivotal-buildpacks-stack0
+          resource: pivotal-buildpack-cached-<%= if language.to_s == 'binary' then 'any' else 'cflinuxfs2' end %>
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
           passed: [ ship-it ]
@@ -658,7 +660,7 @@ jobs: ##########################################################################
         trigger: true
       - put: pivnet-production
         params:
-          file_glob: pivotal-buildpack-cached/<%= language %>_buildpack-cached*-v*.zip
+          file_glob: pivotal-buildpack-cached/<%= language %>_buildpack-cached<%= if language.to_s == 'binary' then '' else '-cflinuxfs2' end %>-v*.zip
           s3_filepath_prefix: product-files/buildpacks
           metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
