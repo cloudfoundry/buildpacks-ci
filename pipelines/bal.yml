@@ -212,6 +212,8 @@ jobs:
             ENV_NAME: bal
         - task: turn-on-bosh-dns
           file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
+          params:
+            BBL_STATE_DIR: bal
         - put: bal-cf-deployment
           params:
             source_file: deployment-source-config/source_file.yml
