@@ -24,12 +24,20 @@ resources: #####################################################################
       location: {{current-timezone}}
 
   ## Git Repos ##
+  <% languages = %w(binary dotnet-core go java nodejs php python ruby staticfile) %>
+  <% languages.each do |language| %>
+  - name: <%= language %>-buildpack-release
+    type: git
+    source:
+      branch: master
+      uri: https://github.com/cloudfoundry/<%= language %>-buildpack-release.git
+  <% end %>
   - name: cf-deployment-concourse-tasks
     type: git
     source:
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-      tag_filter: v5.*
+      tag_filter: v*
   - name: bbl-state
     type: git
     source:
@@ -351,6 +359,10 @@ jobs: ##########################################################################
           - get: bbl-state
           - get: cf-deployment
           - get: gcp-stemcell
+          - get: cf-deployment-concourse-tasks
+          <% languages.each do |language| %>
+          - get: <%= language %>-buildpack-release
+          <% end %>
         - aggregate:
           - task: create-deployment-source-config
             file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
@@ -364,12 +376,19 @@ jobs: ##########################################################################
             file: buildpacks-ci/tasks/create-capi-release-with-rootfs/task.yml
             params:
               STACK: <%= rootfs_name %>
+          - task: turn-on-bosh-dns
+            file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
+            params:
+              BBL_STATE_DIR: <%= rootfs_name %>
+          - task: use-new-buildpack-bosh-releases
+            file: buildpacks-ci/tasks/use-new-buildpack-bosh-releases.yml
         - put: <%= rootfs_name %>-rootfs-smoke-test-deployment
           params:
             source_file: deployment-source-config/source_file.yml
             manifest: rootfs-release-artifacts/manifests/manifest.yml
             releases:
               - rootfs-release-artifacts/dev_releases/<%= rootfs_name %>/*.tgz
+              - built-buildpacks-artifacts/*.tgz
             stemcells:
               - gcp-stemcell/*.tgz
         - task: run-rootfs-smoke-test
@@ -387,12 +406,12 @@ jobs: ##########################################################################
               - gcp-stemcell/*.tgz
             ops_files:
               - cf-deployment/operations/use-compiled-releases.yml
+              - buildpacks-opsfile/use-latest-buildpack-releases.yml
               - buildpacks-ci/deployments/operations/no-canaries.yml
+              - buildpacks-ci/deployments/operations/add-cflinuxfs3-buildpacks.yml
               - rootfs-release-artifacts/use-dev-release-opsfile.yml
-              - cf-deployment/operations/experimental/use-bosh-dns.yml
               - capi-release-artifacts/use-dev-release-opsfile.yml
               - capi-release-artifacts/use-rootfs-as-default-stack.yml
-              - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
               - cf-deployment/operations/use-latest-stemcell.yml
               - cf-deployment/operations/experimental/skip-consul-cell-registrations.yml
               - cf-deployment/operations/experimental/skip-consul-locks.yml
