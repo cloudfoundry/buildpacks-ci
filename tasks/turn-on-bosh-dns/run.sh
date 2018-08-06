@@ -7,4 +7,4 @@ source cf-deployment-concourse-tasks/shared-functions
 setup_bosh_env_vars
 trap "pkill -f ssh" EXIT
 
-bosh_update_dns_runtime_config
+bosh -n update-runtime-config bosh-deployment/runtime-configs/dns.yml --name dns

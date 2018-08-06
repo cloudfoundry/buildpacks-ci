@@ -10,9 +10,7 @@ inputs:
 - name: buildpacks-ci
 - name: bbl-state
 - name: cf-deployment-concourse-tasks
+- name: bosh-deployment
 
 run:
   path: buildpacks-ci/tasks/turn-on-bosh-dns/run.sh
-
-params:
-  BBL_STATE_DIR:

@@ -203,6 +203,7 @@ jobs:
           - get: gcp-stemcell
             attempts: 3
           - get: cf-deployment-concourse-tasks
+          - get: bosh-deployment
         - task: create-diego-release-with-bal-develop
           file: buildpacks-ci/tasks/create-diego-release-with-bal-develop/task.yml
         - task: create-deployment-source-config
@@ -211,8 +212,6 @@ jobs:
             ENV_NAME: bal
         - task: turn-on-bosh-dns
           file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
-          params:
-            BBL_STATE_DIR: bal
         - put: bal-cf-deployment
           params:
             source_file: deployment-source-config/source_file.yml
