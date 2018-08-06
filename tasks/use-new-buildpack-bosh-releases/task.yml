@@ -19,5 +19,7 @@ outputs:
   - name: buildpacks-opsfile
   - name: built-buildpacks-artifacts
 params:
+  ACCESS_KEY_ID:
+  SECRET_ACCESS_KEY:
 run:
   path: buildpacks-ci/tasks/use-new-buildpack-bosh-releases/run.sh
