@@ -72,7 +72,8 @@ RUN wget -O cf-cli.tgz 'https://s3.amazonaws.com/cf-cli-multi-stack/cf-6.38.0%2B
 # download the bosh2 CLI
 RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.45-linux-amd64 -o /usr/local/bin/bosh2 \
   && [ bf04be72daa7da0c9bbeda16fda7fc7b2b8af51e = $(shasum -a 1 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
-  && chmod +x /usr/local/bin/bosh2
+  && chmod +x /usr/local/bin/bosh2 \
+  && ln -s /usr/local/bin/bosh2 /usr/local/bin/bosh
 
 # download bbl
 RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v5.11.6/bbl-v5.11.6_linux_x86-64' \
