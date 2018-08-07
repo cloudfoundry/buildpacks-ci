@@ -607,10 +607,12 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: pivotal-buildpacks-cached
+        - get: pivotal-buildpacks-cached-passed
           resource: pivotal-buildpack-cached
           passed: [ ship-it ]
           trigger: true
+        - get: pivotal-buildpacks-cached
+          resource: pivotal-buildpack-cached-<%= if language.to_s == 'binary' then 'any' else 'cflinuxfs2' end %>
       - task: update-buildpack
         file: buildpacks-ci/tasks/pws-update-buildpack/task.yml
         params:
@@ -654,12 +656,15 @@ jobs: ##########################################################################
   - name: release-to-pivnet
     public: true
     plan:
-      - get: pivotal-buildpack-cached
+      - get: pivotal-buildpack-cached-passed
+        resource: pivotal-buildpack-cached
         passed: [ write-pivnet-metadata ]
         trigger: true
       - get: pivnet-buildpack-metadata
         passed: [ write-pivnet-metadata ]
         trigger: true
+      - get: pivotal-buildpack-cached
+        resource: pivotal-buildpack-cached-<%= if language.to_s == 'binary' then 'any' else 'cflinuxfs2' end %>
       - put: pivnet-production
         params:
           file_glob: pivotal-buildpack-cached/<%= language %>_buildpack-cached<%= if language.to_s == 'binary' then '' else '-cflinuxfs2' end %>-v*.zip
