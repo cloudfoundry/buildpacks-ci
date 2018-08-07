@@ -349,6 +349,10 @@ jobs: ##########################################################################
           - get: cf-deployment
           - get: gcp-stemcell
         - aggregate:
+          - task: turn-on-bosh-dns
+            file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
+            params:
+              BBL_STATE_DIR: cflinuxfs2
           - task: create-deployment-source-config
             file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
             params:
@@ -381,8 +385,6 @@ jobs: ##########################################################################
               - cf-deployment/operations/use-compiled-releases.yml
               - buildpacks-ci/deployments/operations/no-canaries.yml
               - cflinuxfs2-release-artifacts/use-dev-release-opsfile.yml
-              - cf-deployment/operations/experimental/use-bosh-dns.yml
-              - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
               - cf-deployment/operations/use-latest-stemcell.yml
             vars:
               system_domain: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
