@@ -19,7 +19,6 @@ class CategorizeSecurityNotices
 
   def run
     stories.each do |story|
-      next unless story['labels'].include? @stack
       packages = get_story_packages(story)
       if affected?(packages)
         label_story(story, "affected")
