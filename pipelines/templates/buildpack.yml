@@ -242,7 +242,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-<%= stack %>-v(.*).zip
+      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack<%= if stack == 'any' then '' else "-#{stack}" end %>-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
@@ -250,7 +250,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached-<%= stack %>-v(.*).zip
+      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached<%= if stack == 'any' then '' else "-#{stack}" end %>-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 <% end %>
@@ -408,6 +408,7 @@ jobs: ##########################################################################
         - put: cf-bp-space
         - aggregate:
 <% stacks[language].each do |stack| %>
+<% unless language == "binary" and stack == "any" %>
           - task: ginkgo-<%= stack %>
             file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
             params:
@@ -422,6 +423,7 @@ jobs: ##########################################################################
   <% else %>
             privileged: true
   <% end %>
+<% end %>
 <% end %>
           ensure:
             task: delete-cf-space
@@ -687,6 +689,7 @@ jobs: ##########################################################################
           - put: cf-bp-space
           - aggregate:
 <% stacks[language].each do |stack| %>
+<% unless language == "binary" and stack == "any" %>
             - task: ginkgo-<%= stack %>
               file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
               params:
@@ -701,6 +704,7 @@ jobs: ##########################################################################
   <% else %>
               privileged: true
   <% end %>
+<% end %>
 <% end %>
           ensure:
             task: delete-cf-space
@@ -733,6 +737,7 @@ jobs: ##########################################################################
           - put: cf-brat-space
           - aggregate:
 <% stacks[language].each do |stack| %>
+<% unless language == "binary" and stack == "any" %>
             - task: brats-<%= stack %>
               file: buildpacks-ci/tasks/run-bp-brats/task.yml
               input_mapping: {cf-space: cf-brat-space}
@@ -740,6 +745,7 @@ jobs: ##########################################################################
                 CF_STACK: <%= stack %>
                 GINKGO_ATTEMPTS: 4
                 GINKGO_NODES: 6
+<% end %>
 <% end %>
           ensure:
             task: delete-cf-space
