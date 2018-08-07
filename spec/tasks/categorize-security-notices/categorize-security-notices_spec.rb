@@ -41,37 +41,27 @@ describe CategorizeSecurityNotices do
     STORY
   end
 
-  let(:stories_json) {
-    stories = [
-        {
-            "id": '123',
-            "description": "#{story_content('cflinuxfs2')}",
-            "labels": %w(cflinuxfs2 security-notice some-label)
-        },
-        {
-            "id": '456',
-            "description": "**Trusty Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n\n[Click here to respond to this notice.](https://davos.cfapps.io/product_stories/1289)\n",
-            "labels": %w(cflinuxfs2 security-notice some-other-label)
-        },
-        {
-            "id": '789',
-            "description": "**Bionic Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n\n[Click here to respond to this notice.](https://davos.cfapps.io/product_stories/1289)\n",
-            "labels": %w(cflinuxfs3 security-notice some-other-label)
-        },
-        {
-            "id": '101',
-            "description": "#{story_content('cflinuxfs3')}",
-            "labels": %w(cflinuxfs3 security-notice some-label)
-        }
-    ]
-    JSON.dump({ version: { ref: JSON.dump(stories) } })
-  }
-
   let(:receipt_content) { "ii  libkrb5-26-heimdal:amd64           1.6~git20131207+dfsg-1ubuntu1.4            amd64        Heimdal Kerberos - libraries\n" +
       "ii  evince   3.10.3-0ubuntu10.3\n" +
       "ii  evince-common    3.10.2-0ubuntu10.3\n" }
 
   context "when the stack is cflinuxfs2" do
+    let(:stories_json) {
+      stories = [
+        {
+          "id": '123',
+          "description": "#{story_content('cflinuxfs2')}",
+          "labels": %w(cflinuxfs2 security-notice some-label)
+        },
+        {
+          "id": '456',
+          "description": "**Trusty Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n\n[Click here to respond to this notice.](https://davos.cfapps.io/product_stories/1289)\n",
+          "labels": %w(cflinuxfs2 security-notice some-other-label)
+        }
+      ]
+      JSON.dump({ version: { ref: JSON.dump(stories) } })
+    }
+
     subject { CategorizeSecurityNotices.new(tracker_client, stories_file.path, stack_receipt.path, davos_client, 'cflinuxfs2') }
 
     before(:each) do
@@ -112,6 +102,22 @@ describe CategorizeSecurityNotices do
   end
 
   context "when the stack is cflinuxfs3" do
+    let(:stories_json) {
+      stories = [
+        {
+          "id": '789',
+          "description": "**Bionic Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n\n[Click here to respond to this notice.](https://davos.cfapps.io/product_stories/1289)\n",
+          "labels": %w(cflinuxfs3 security-notice some-other-label)
+        },
+        {
+          "id": '101',
+          "description": "#{story_content('cflinuxfs3')}",
+          "labels": %w(cflinuxfs3 security-notice some-label)
+        }
+      ]
+      JSON.dump({ version: { ref: JSON.dump(stories) } })
+    }
+
     subject { CategorizeSecurityNotices.new(tracker_client, stories_file.path, stack_receipt.path, davos_client, 'cflinuxfs3') }
 
     before(:each) do
