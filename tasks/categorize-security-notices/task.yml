@@ -8,7 +8,9 @@ inputs:
   - name: davos-cve-stories
   - name: buildpacks-ci
   - name: cflinuxfs2-release
+    optional: true
   - name: cflinuxfs3-release
+    optional: true
 run:
   path: bash
   args:
