@@ -19,7 +19,7 @@ blobstore:
     secret_access_key: $SECRET_ACCESS_KEY
     credentials_source: static
 EOF
-    bosh2 create-release --tarball "../built-buildpacks-artifacts/$language-$version.tgz" --name "$language" --version "$version"
+    bosh2 create-release --tarball "../built-buildpacks-artifacts/$language-buildpack-$version.tgz" --name "$language-buildpack" --version "$version"
   popd
 
   cat <<EOF >> buildpacks-opsfile/use-latest-buildpack-releases.yml
@@ -29,4 +29,3 @@ EOF
 
 EOF
 done
-
