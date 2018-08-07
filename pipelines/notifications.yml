@@ -15,13 +15,21 @@ resource_types:
       repository: cfbuildpacks/cron-resource
 
 resources:
-  - name: davos-cve-stories
+  - name: davos-cve-stories-cflinuxfs2
     type: cf-tracker-resource
     source:
       project_id: {{cf-buildpacks-public-tracker-id}}
       token: {{pivotal-tracker-api-token}}
       labels:
         - cflinuxfs2
+        - security-notice
+  - name: davos-cve-stories-cflinuxfs3
+    type: cf-tracker-resource
+    source:
+      project_id: {{cf-buildpacks-public-tracker-id}}
+      token: {{pivotal-tracker-api-token}}
+      labels:
+        - cflinuxfs3
         - security-notice
   - name: monday-funday
     type: cron
@@ -96,18 +104,17 @@ resources:
       access_token: {{buildpacks-github-token}}
 
 jobs:
-  - name: categorize-security-notices
+  - name: categorize-security-notices-cflinuxfs2
     serial: true
     public: true
     plan:
       - aggregate:
         - get: davos-cve-stories
+          resource: davos-cve-stories-cflinuxfs2
           trigger: true
         - get: buildpacks-ci
         - get: cflinuxfs2-release
           params:
-            include_source_tarball: true
-        - get: cflinuxfs3-release
             include_source_tarball: true
       - aggregate:
         - task: categorize-security-notices-cflinuxfs2
@@ -118,6 +125,19 @@ jobs:
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             DAVOS_TOKEN: {{davos_token}}
             STACK: cflinuxfs2
+  - name: categorize-security-notices-cflinuxfs3
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: davos-cve-stories
+          resource: davos-cve-stories-cflinuxfs3
+          trigger: true
+        - get: buildpacks-ci
+        - get: cflinuxfs3-release
+          params:
+            include_source_tarball: true
+      - aggregate:
         - task: categorize-security-notices-cflinuxfs3
           file: buildpacks-ci/tasks/categorize-security-notices/task.yml
           params:
@@ -126,7 +146,6 @@ jobs:
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             DAVOS_TOKEN: {{davos_token}}
             STACK: cflinuxfs3
-
   - name: new-releases
     serial: true
     public: true
@@ -198,28 +217,40 @@ jobs:
         - get: check-interval
           trigger: true
       - aggregate:
-        - task: check-for-new-cflinuxfs2-cves
-          file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
-          params:
-            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
-            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-            STACK: cflinuxfs2
-        - task: check-for-new-cflinuxfs3-cves
-          file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
-          params:
-            SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
-            SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
-            STACK: cflinuxfs3
-      - put: new-cves
-        params:
-          repository: output-new-cves
-          rebase: true
+        - do:
+          - task: check-for-new-cflinuxfs2-cves
+            file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
+            params:
+              SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+              SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+              TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+              TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+              TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+              STACK: cflinuxfs2
+            output_mapping:
+              output-new-cves: output-new-cves-cflinuxfs2
+          - put: new-cves-cflinuxfs2
+            resource: new-cves
+            params:
+              repository: output-new-cves-cflinuxfs2
+              rebase: true
+        - do:
+          - task: check-for-new-cflinuxfs3-cves
+            file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
+            params:
+              SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+              SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+              TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+              TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+              TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+              STACK: cflinuxfs3
+            output_mapping:
+              output-new-cves: output-new-cves-cflinuxfs3
+          - put: new-cves-cflinuxfs3
+            resource: new-cves
+            params:
+              repository: output-new-cves-cflinuxfs3
+              rebase: true
 
   - name: PHP Module Checker
     serial: true
