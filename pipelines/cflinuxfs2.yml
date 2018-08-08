@@ -348,6 +348,7 @@ jobs: ##########################################################################
           - get: bosh-lite
           - get: cf-deployment
           - get: gcp-stemcell
+          - get: bosh-deployment
         - aggregate:
           - task: turn-on-bosh-dns
             file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
