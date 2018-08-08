@@ -26,12 +26,24 @@ resources: #####################################################################
   ## Git Repos ##
   <% languages = %w(binary dotnet-core go java nodejs php python ruby staticfile) %>
   <% languages.each do |language| %>
-  - name: <%= language %>-buildpack-release
+  - name: <%= language %>-buildpack-release #TODO: Remove this resource and use online releases when they contain cflinuxfs3!!!
     type: git
     source:
+      uri: git@github.com:pivotal-cf/<%= language %>-offline-buildpack-release.git
+      <% if language == 'java'%>
+      private_key:  {{private-<%= language %>-offline-buildpack-bosh-release-private-key}}
+      <% else %>
+      private_key:  {{<%= language %>-offline-buildpack-bosh-release-private-key}}
+      <% end %>
       branch: master
-      uri: https://github.com/cloudfoundry/<%= language %>-buildpack-release.git
+
+#  - name: <%= language %>-buildpack-release #TODO: Use this resource when online buildpacks have cflinuxfs3!!!
+#    type: git
+#    source:
+#      branch: master
+#      uri: https://github.com/pivotal/<%= language %>-buildpack-release.git
   <% end %>
+
   - name: cf-deployment-concourse-tasks
     type: git
     source:
@@ -360,6 +372,7 @@ jobs: ##########################################################################
           - get: cf-deployment
           - get: gcp-stemcell
           - get: cf-deployment-concourse-tasks
+          - get: bosh-deployment
           <% languages.each do |language| %>
           - get: <%= language %>-buildpack-release
           <% end %>
@@ -381,14 +394,16 @@ jobs: ##########################################################################
             params:
               BBL_STATE_DIR: <%= rootfs_name %>
           - task: use-new-buildpack-bosh-releases
-            file: buildpacks-ci/tasks/use-new-buildpack-bosh-releases.yml
+            file: buildpacks-ci/tasks/use-new-buildpack-bosh-releases/task.yml
+            params:
+              ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}} #TODO: Remove when using online releases!!
+              SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
         - put: <%= rootfs_name %>-rootfs-smoke-test-deployment
           params:
             source_file: deployment-source-config/source_file.yml
             manifest: rootfs-release-artifacts/manifests/manifest.yml
             releases:
               - rootfs-release-artifacts/dev_releases/<%= rootfs_name %>/*.tgz
-              - built-buildpacks-artifacts/*.tgz
             stemcells:
               - gcp-stemcell/*.tgz
         - task: run-rootfs-smoke-test
@@ -402,13 +417,14 @@ jobs: ##########################################################################
             releases:
               - rootfs-release-artifacts/dev_releases/<%= rootfs_name %>/*.tgz
               - capi-release-artifacts/dev_releases/capi/*.tgz
+              - built-buildpacks-artifacts/*.tgz
             stemcells:
               - gcp-stemcell/*.tgz
             ops_files:
               - cf-deployment/operations/use-compiled-releases.yml
               - buildpacks-opsfile/use-latest-buildpack-releases.yml
               - buildpacks-ci/deployments/operations/no-canaries.yml
-              - buildpacks-ci/deployments/operations/add-cflinuxfs3-buildpacks.yml
+              - buildpacks-ci/deployments/operations/add-cflinuxfs3-only-buildpacks.yml
               - rootfs-release-artifacts/use-dev-release-opsfile.yml
               - capi-release-artifacts/use-dev-release-opsfile.yml
               - capi-release-artifacts/use-rootfs-as-default-stack.yml
@@ -469,6 +485,7 @@ jobs: ##########################################################################
           params:
             NODES: 12
             CONFIG_FILE_PATH: integration_config.json
+            SKIP_REGEXP: "Specifying a specific Stack"
         on_failure:
           put: failure-alert
           params:
