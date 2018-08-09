@@ -24,7 +24,7 @@ ENV['STACKS'].each do |stack|
     filename = orig_filename.gsub(/-offline/,"-offline-#{stack}") #TODO: Do not hard code stack
     FileUtils.cp(orig_filename, filename)
   else
-    orig_filename = Dir.glob("pivotal-buildpacks-cached-#{stack}/#{ENV['BUILDPACK_NAME']}*.zip").first
+    orig_filename = Dir.glob("pivotal-buildpack-cached-#{stack}/#{ENV['BUILDPACK_NAME']}*.zip").first
     filename = orig_filename.gsub(/\+\d+\.zip$/, '.zip')
     FileUtils.mv(orig_filename, filename)
   end
