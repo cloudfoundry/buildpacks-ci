@@ -265,6 +265,7 @@ jobs:
           - get: staticfile-buildpack-bosh-release
           - get: binary-buildpack-bosh-release
           - get: dotnet-core-buildpack-bosh-release
+          - get: bosh-deployment
         - aggregate:
           - task: create-bump-buildpacks-opsfile
             file: buildpacks-ci/tasks/create-bump-buildpacks-opsfile/task.yml
@@ -272,6 +273,10 @@ jobs:
             file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
             params:
               ENV_NAME: cf-release
+          - task: turn-on-bosh-dns
+            file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
+            params:
+              BBL_STATE_DIR: cf-release
         - put: cf-release-cf-deployment
           params:
             source_file: deployment-source-config/source_file.yml
@@ -288,8 +293,6 @@ jobs:
               - buildpacks-ci/deployments/operations/cflinuxfs3.yml
               - buildpacks-ci/deployments/operations/add-cflinuxfs3-buildpacks.yml
               - buildpacks-ci/deployments/operations/no-canaries.yml
-              - cf-deployment/operations/experimental/use-bosh-dns.yml
-              - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
               - bump-buildpacks-opsfile/opsfile.yml
             vars:
               system_domain: cf-release.buildpacks-gcp.ci.cf-app.com
