@@ -14,7 +14,8 @@ raise 'cf auth failed' unless status.success?
 puts "Original Buildpacks\n==================="
 system('cf', 'buildpacks')
 
-ENV['STACKS'].each do |stack|
+stacks = ENV['STACKS'].split(' ')
+stacks.each do |stack|
   if ENV['BUILDPACK_NAME'] == 'java'
     orig_filename = Dir.glob("pivnet-production/#{ENV['BUILDPACK_NAME']}-buildpack-offline*.zip").first
     File.write('manifest.yml',"stack: #{stack}")
