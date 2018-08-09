@@ -6,13 +6,13 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: pivotal-buildpacks-cached-cflinuxfs2
+  - name: pivotal-buildpack-cached-cflinuxfs2
     optional: true
-  - name: pivotal-buildpacks-cached-cflinuxfs3
+  - name: pivotal-buildpack-cached-cflinuxfs3
     optional: true
-  - name: pivotal-buildpacks-cached-windows2012R2
+  - name: pivotal-buildpack-cached-windows2012R2
     optional: true
-  - name: pivotal-buildpacks-cached-windows2016
+  - name: pivotal-buildpack-cached-windows2016
     optional: true
 run:
   path: bash
