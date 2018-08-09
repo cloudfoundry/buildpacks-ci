@@ -14,26 +14,28 @@ raise 'cf auth failed' unless status.success?
 puts "Original Buildpacks\n==================="
 system('cf', 'buildpacks')
 
-if ENV['BUILDPACK_NAME'] == 'java'
-  orig_filename = Dir.glob("pivnet-production/#{ENV['BUILDPACK_NAME']}-buildpack-offline*.zip").first
-  File.write('manifest.yml','stack: cflinuxfs2')
-  system(<<~EOF)
-          zip #{orig_filename} manifest.yml
-          EOF
-  filename = orig_filename.gsub(/-offline/,'-offline-cflinuxfs2') #TODO: Do not hard code stack
-  FileUtils.mv(orig_filename, filename)
-else
-  orig_filename = Dir.glob("pivotal-buildpacks-cached/#{ENV['BUILDPACK_NAME']}*.zip").first
-  filename = orig_filename.gsub(/\+\d+\.zip$/, '.zip')
-  FileUtils.mv(orig_filename, filename)
-end
+ENV['STACKS'].each do |stack|
+  if ENV['BUILDPACK_NAME'] == 'java'
+    orig_filename = Dir.glob("pivnet-production/#{ENV['BUILDPACK_NAME']}-buildpack-offline*.zip").first
+    File.write('manifest.yml',"stack: #{stack}")
+    system(<<~EOF)
+            zip #{orig_filename} manifest.yml
+            EOF
+    filename = orig_filename.gsub(/-offline/,"-offline-#{stack}") #TODO: Do not hard code stack
+    FileUtils.cp(orig_filename, filename)
+  else
+    orig_filename = Dir.glob("pivotal-buildpacks-cached-#{stack}/#{ENV['BUILDPACK_NAME']}*.zip").first
+    filename = orig_filename.gsub(/\+\d+\.zip$/, '.zip')
+    FileUtils.mv(orig_filename, filename)
+  end
 
-if ENV['BUILDPACK_NAME'] != 'dotnet-core'
-  puts "\ncf update-buildpack #{ENV['BUILDPACK_NAME']}_buildpack -p #{filename}"
-  out, status = Open3.capture2e('cf', 'update-buildpack', "#{ENV['BUILDPACK_NAME']}_buildpack", '-p', "#{filename}")
-else
-  puts "\ncf update-buildpack dotnet_core_buildpack -p #{filename}"
-  out, status = Open3.capture2e('cf', 'update-buildpack', 'dotnet_core_buildpack', '-p', "#{filename}")
+  stack_flag = stack == 'any' ? '--any-stack' : "--stack=#{stack}"
+  if ENV['BUILDPACK_NAME'] != 'dotnet-core'
+    puts "\ncf update-buildpack #{ENV['BUILDPACK_NAME']}_buildpack -p #{filename} #{stack_flag}"
+    # out, status = Open3.capture2e('cf', 'update-buildpack', "#{ENV['BUILDPACK_NAME']}_buildpack", '-p', "#{filename}", "#{stack}")
+  else
+    puts "\ncf update-buildpack dotnet_core_buildpack -p #{filename} #{stack_flag}"
+    # out, status = Open3.capture2e('cf', 'update-buildpack', 'dotnet_core_buildpack', '-p', "#{filename}, #{stack_flag}")
+  end
+  # raise "cf update-buildpack failed: #{out}" unless status.success?
 end
-
-raise "cf update-buildpack failed: #{out}" unless status.success?
