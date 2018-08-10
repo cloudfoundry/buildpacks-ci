@@ -7,7 +7,7 @@
 <% stacks = {
   "hwc" => %w(windows2012R2 windows2016),
   "apt" => %w(cflinuxfs2 cflinuxfs3),
-  "binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016 any), # binary needs unassociated release for pivnet
+  "binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016), # binary needs unassociated release for pivnet
   "credhub" => %w(cflinuxfs2 cflinuxfs3),
   "dotnet-core" => %w(cflinuxfs2 cflinuxfs3),
   "go" => %w(cflinuxfs2 cflinuxfs3),
@@ -20,6 +20,7 @@
   "ruby" => %w(cflinuxfs2 cflinuxfs3),
   "staticfile" => %w(cflinuxfs2 cflinuxfs3)
 } %>
+<% any_stack = %w(hwc binary) %>
 
 ---
 resource_types:
@@ -255,6 +256,15 @@ resources: #####################################################################
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 <% end %>
 <% end %>
+<% if any_stack.include?(language) %>
+  - name: pivotal-buildpack-cached-any
+    type: s3
+    source:
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached-v(.*).zip
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+<% end %>
 
   ## Resource Pools ##
 
@@ -351,8 +361,8 @@ jobs: ##########################################################################
         - get: pivotal-buildpack
       - do:
         - aggregate:
-<% stack_languages = language.to_s == 'hwc' ? ['any'] : stacks[language] %>
-<% stack_languages.each do |stack| %>
+<% bucket_stacks = language.to_s == 'hwc' ? ['any'] : stacks[language]
+   bucket_stacks.each do |stack| %> #change bucket_stacks to stacks[language] when removing any_stack
           - do:
             - task: detect-and-upload-<%= stack %>
               file: buildpacks-ci/tasks/detect-and-upload/task.yml
@@ -408,7 +418,6 @@ jobs: ##########################################################################
         - put: cf-bp-space
         - aggregate:
 <% stacks[language].each do |stack| %>
-<% unless language == "binary" and stack == "any" %>
           - task: ginkgo-<%= stack %>
             file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
             params:
@@ -423,7 +432,6 @@ jobs: ##########################################################################
   <% else %>
             privileged: true
   <% end %>
-<% end %>
 <% end %>
           ensure:
             task: delete-cf-space
@@ -611,8 +619,10 @@ jobs: ##########################################################################
           resource: pivotal-buildpack-cached
           passed: [ ship-it ]
           trigger: true
-        - get: pivotal-buildpacks-cached
-          resource: pivotal-buildpack-cached-<%= if language.to_s == 'binary' then 'any' else 'cflinuxfs2' end %>
+        <% pws_stacks = any_stack.include?(language) ? ['any'] : ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to stacks[language] when PWS has cflinuxfs3
+           pws_stacks.each do |stack| %>
+        - get: pivotal-buildpack-cached-<%= stack %>
+        <% end %>
       - task: update-buildpack
         file: buildpacks-ci/tasks/pws-update-buildpack/task.yml
         params:
@@ -620,6 +630,7 @@ jobs: ##########################################################################
           USERNAME: {{pws_buildpacks_cf_admin_username}}
           PASSWORD: {{pws_buildpacks_cf_admin_password}}
           BUILDPACK_NAME: <%= language %>
+          STACKS: <%= pws_stacks.join(' ') %>
 <% end %>
 <% unless non_published.include? language %>
   - name: write-pivnet-metadata
@@ -634,7 +645,7 @@ jobs: ##########################################################################
           passed: [ ship-it ]
           trigger: true
         - get: pivotal-buildpacks-stack0
-          resource: pivotal-buildpack-cached-<%= if language.to_s == 'binary' then 'any' else 'cflinuxfs2' end %>
+          resource: pivotal-buildpack-cached-<%= if any_stack.include?(language) then 'any' else 'cflinuxfs2' end %>
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
           passed: [ ship-it ]
@@ -664,10 +675,10 @@ jobs: ##########################################################################
         passed: [ write-pivnet-metadata ]
         trigger: true
       - get: pivotal-buildpack-cached
-        resource: pivotal-buildpack-cached-<%= if language.to_s == 'binary' then 'any' else 'cflinuxfs2' end %>
+        resource: pivotal-buildpack-cached-<%= if any_stack.include?(language) then 'any' else 'cflinuxfs2' end %>
       - put: pivnet-production
         params:
-          file_glob: pivotal-buildpack-cached/<%= language %>_buildpack-cached<%= if language.to_s == 'binary' then '' else '-cflinuxfs2' end %>-v*.zip
+          file_glob: pivotal-buildpack-cached/<%= language %>_buildpack-cached<%= if any_stack.include?(language) then '' else '-cflinuxfs2' end %>-v*.zip
           s3_filepath_prefix: product-files/buildpacks
           metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
@@ -694,7 +705,6 @@ jobs: ##########################################################################
           - put: cf-bp-space
           - aggregate:
 <% stacks[language].each do |stack| %>
-<% unless language == "binary" and stack == "any" %>
             - task: ginkgo-<%= stack %>
               file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
               params:
@@ -709,7 +719,6 @@ jobs: ##########################################################################
   <% else %>
               privileged: true
   <% end %>
-<% end %>
 <% end %>
           ensure:
             task: delete-cf-space
@@ -742,7 +751,6 @@ jobs: ##########################################################################
           - put: cf-brat-space
           - aggregate:
 <% stacks[language].each do |stack| %>
-<% unless language == "binary" and stack == "any" %>
             - task: brats-<%= stack %>
               file: buildpacks-ci/tasks/run-bp-brats/task.yml
               input_mapping: {cf-space: cf-brat-space}
@@ -750,7 +758,6 @@ jobs: ##########################################################################
                 CF_STACK: <%= stack %>
                 GINKGO_ATTEMPTS: 4
                 GINKGO_NODES: 6
-<% end %>
 <% end %>
           ensure:
             task: delete-cf-space

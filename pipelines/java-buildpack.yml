@@ -46,3 +46,4 @@ jobs:
             USERNAME: {{pws_buildpacks_cf_admin_username}}
             PASSWORD: {{pws_buildpacks_cf_admin_password}}
             BUILDPACK_NAME: 'java'
+            STACKS: 'cflinuxfs2'
