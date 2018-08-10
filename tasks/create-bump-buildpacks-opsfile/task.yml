@@ -30,4 +30,7 @@ outputs:
   - name: built-buildpacks-artifacts
 params:
 run:
-  path: buildpacks-ci/tasks/create-bump-buildpacks-opsfile/run.sh
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/create-bump-buildpacks-opsfile/run.rb
