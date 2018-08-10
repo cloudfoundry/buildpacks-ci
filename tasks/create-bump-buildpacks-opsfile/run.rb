@@ -27,20 +27,6 @@ Dir.glob('*-buildpack-github-release').each do |github_release|
       system(%(bosh2 remove-blob #{line}))
     end
 
-    # Java buildpack needs to be stack-associated
-    if release_name == 'java-buildpack'
-      github_version=File.read("../#{github_release}/version")
-      java_zip_file = Dir.glob("../#{github_release}/#{release_name}-*.zip").first
-      ['cflinuxfs2', 'cflinuxfs3'].each do |stack|
-        new_zip_file = "../#{github_release}/#{release_name}-#{stack}-v#{github_version}.zip"
-        File.write('manifest.yml', "stack: #{stack}")
-        FileUtils.cp(java_zip_file, new_zip_file)
-        system(%(zip #{new_zip_file} 'manifest.yml')) || raise("cannot zip java buildpack file")
-        FileUtils.rm('manifest.yml')
-      end
-      FileUtils.rm(java_zip_file)
-    end
-
     ## Add new blobs for new buildpacks
     Dir.glob("../#{github_release}/#{release_name}-*.zip") do |blob|
       system(%(bosh2 -n add-blob #{blob} #{release_name}/#{File.basename(blob)})) || raise("cannot add blob #{blob} to #{release_name}")
