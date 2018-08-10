@@ -107,8 +107,8 @@ RUN pip install awscli
 COPY build/*.sh /etc/profile.d/
 
 # install buildpacks-ci Gemfile
-RUN gem update --system
-RUN gem install bundler -v 1.15.4
+RUN gem update --system \
+  && gem install bundler -v 1.15.4
 COPY Gemfile /usr/local/Gemfile
 COPY Gemfile.lock /usr/local/Gemfile.lock
 RUN cd /usr/local && bundle install
@@ -140,8 +140,10 @@ RUN cd /usr/local \
 
 ENV GOROOT=/usr/local/go
 
-# Install poltergeist for running dotnet-core-buildpack specs
-RUN gem install phantomjs && ruby -e 'require "phantomjs"; Phantomjs.path'
+# Install gems
+# poltergeist for running dotnet-core-buildpack specs
+RUN gem install phantomjs open4 \
+  && ruby -e 'require "phantomjs"; Phantomjs.path'
 
 # Add git known host
 RUN mkdir -p /root/.ssh/ && echo github.com,192.30.252.131 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ== > /root/.ssh/known_hosts
