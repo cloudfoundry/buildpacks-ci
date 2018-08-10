@@ -30,13 +30,13 @@ stacks.each do |stack|
     FileUtils.mv(orig_filename, filename)
   end
 
-  stack_flag = stack == 'any' ? '--any-stack' : "--stack=#{stack}"
+  stack = '' if stack == 'any'
   if ENV['BUILDPACK_NAME'] != 'dotnet-core'
-    puts "\ncf update-buildpack #{ENV['BUILDPACK_NAME']}_buildpack -p #{filename} #{stack_flag}"
-    out, status = Open3.capture2e('cf', 'update-buildpack', "#{ENV['BUILDPACK_NAME']}_buildpack", '-p', "#{filename}", "#{stack_flag}")
+    puts "\ncf update-buildpack #{ENV['BUILDPACK_NAME']}_buildpack -p #{filename} -s #{stack}"
+    out, status = Open3.capture2e('cf', 'update-buildpack', "#{ENV['BUILDPACK_NAME']}_buildpack", '-p', "#{filename}", '-s', "#{stack}")
   else
-    puts "\ncf update-buildpack dotnet_core_buildpack -p #{filename} #{stack_flag}"
-    out, status = Open3.capture2e('cf', 'update-buildpack', 'dotnet_core_buildpack', '-p', "#{filename}, #{stack_flag}")
+    puts "\ncf update-buildpack dotnet_core_buildpack -p #{filename} -s #{stack}"
+    out, status = Open3.capture2e('cf', 'update-buildpack', 'dotnet_core_buildpack', '-p', "#{filename}", '-s', "#{stack}")
   end
   raise "cf update-buildpack failed: #{out}" unless status.success?
 end
