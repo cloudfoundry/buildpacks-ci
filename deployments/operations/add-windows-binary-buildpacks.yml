@@ -1,0 +1,7 @@
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks/-
+  type: replace
+  value:
+    - name: binary_buildpack
+      package: binary-buildpack-windows2012R2
+    - name: binary_buildpack
+      package: binary-buildpack-windows2016
