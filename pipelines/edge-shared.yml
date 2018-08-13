@@ -13,6 +13,22 @@ resource_types:
     source:
       repository: cloudfoundry/bosh-deployment-resource
 resources:
+  - name: bosh-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-deployment
+      branch: master
+  #TODO: Delete these resources when cf-deployment has cflinuxfs3
+<% %w(dotnet-core go ruby binary staticfile nodejs php python java).each do |language| %>
+  - name: <%= language %>-buildpack-bosh-release
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/<%= language %>-buildpack-release.git
+      private_key: {{<%= language %>-buildpack-bosh-release-private-key}}
+      branch: master
+<% end %>
+  # TODO: Delete to here
+
   - name: daily-3am-trigger
     type: cron
     source:
@@ -99,17 +115,36 @@ jobs:
           - get: windows2012-stemcell
           - get: windows2016-stemcell
           - get: gcp-stemcell
+          # TODO: Remove these releases when cf-deployment has cflinuxfs3
           - get: cflinuxfs3-bosh-release
-        - task: create-deployment-source-config
-          file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
-          params:
-            ENV_NAME: edge
+          - get: java-buildpack-bosh-release
+          - get: go-buildpack-bosh-release
+          - get: python-buildpack-bosh-release
+          - get: nodejs-buildpack-bosh-release
+          - get: ruby-buildpack-bosh-release
+          - get: php-buildpack-bosh-release
+          - get: staticfile-buildpack-bosh-release
+          - get: binary-buildpack-bosh-release
+          - get: dotnet-core-buildpack-bosh-release
+          - get: bosh-deployment
+        - aggregate:
+          - task: create-deployment-source-config
+            file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+            params:
+              ENV_NAME: edge
+          - task: turn-on-bosh-dns
+            file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
+            params:
+              BBL_STATE_DIR: edge
+          - task: create-all-cflinuxfs3-bosh-releases-temporary
+            file: buildpacks-ci/tasks/create-all-cflinuxfs3-bosh-releases-temporary/task.yml
         - put: edge-cf-deployment
           params:
             source_file: deployment-source-config/source_file.yml
             manifest: cf-deployment/cf-deployment.yml
             releases:
               - cflinuxfs3-bosh-release/*.tgz
+              - built-buildpacks-artifacts/*.tgz
             stemcells:
               - gcp-stemcell/*.tgz
               - windows2012-stemcell/*.tgz
@@ -124,12 +159,12 @@ jobs:
             - cf-deployment/operations/experimental/secure-service-credentials-windows2016-cell.yml
             - cf-deployment/operations/experimental/enable-traffic-to-internal-networks.yml
             - cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml
-            - cf-deployment/operations/experimental/use-bosh-dns.yml
-            - cf-deployment/operations/experimental/use-bosh-dns-for-containers.yml
-            - cf-deployment/operations/experimental/use-bosh-dns-for-windows2016-containers.yml
             - buildpacks-ci/deployments/operations/no-canaries.yml
             - buildpacks-ci/deployments/edge-shared/num-cells.yml
             - buildpacks-ci/deployments/operations/cflinuxfs3.yml
+            - buildpacks-ci/deployments/operations/add-cflinuxfs3-buildpacks.yml
+            - buildpacks-ci/deployments/operations/add-windows-binary-buildpacks.yml
+            - buildpacks-opsfile/opsfile.yml
             vars:
               system_domain: edge.buildpacks-gcp.ci.cf-app.com
         on_failure:
