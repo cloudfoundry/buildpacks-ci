@@ -22,6 +22,7 @@ class BuildpacksCIPipelineUpdateCommand
       buildpacks_configuration.git_repos_private_keys_two_filename,
       buildpacks_configuration.git_repos_private_keys_three_filename,
       buildpacks_configuration.bosh_release_private_keys_filename,
+      buildpacks_configuration.bosh_release_private_keys_filename_lts,
       buildpacks_configuration.dockerhub_cflinuxfs2_credentials_filename
     ].map { |name| "lpass show #{name} --notes"}.join(' && ')
 
