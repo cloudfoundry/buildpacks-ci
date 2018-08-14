@@ -16,7 +16,7 @@ class BuildpackBOSHReleaseUpdater
 
   def run!
     write_private_yml if @access_key_id
-    delete_old_blob
+    delete_old_blobs
     add_new_blobs
     create_release
   end
@@ -35,12 +35,13 @@ class BuildpackBOSHReleaseUpdater
     File.write('config/private.yml', private_yml)
   end
 
-  def delete_old_blob
+  def delete_old_blobs
     blobs = YAML.load_file('config/blobs.yml') || {}
 
-    old_buildpack_key = find_buildpack_key blobs, @release_name.gsub('-buildpack', '')
-
-    blobs.delete(old_buildpack_key)
+    while find_buildpack_key blobs, @release_name.gsub('-buildpack', '')
+      old_buildpack_key = find_buildpack_key blobs, @release_name.gsub('-buildpack', '')
+      blobs.delete(old_buildpack_key)
+    end
 
     File.write('config/blobs.yml', YAML.dump(blobs))
   end

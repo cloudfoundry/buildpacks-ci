@@ -20,10 +20,14 @@ describe BuildpackBOSHReleaseUpdater do
          size: 123
          object_id: 123-456
          sha: abcdef
-       test-buildpack/test_buildpack-cached-v2.1.2.zip:
+       test-buildpack/test_buildpack-cached-stack1-v2.1.2.zip:
          size: 789
          object_id: abc-def
          sha: 987654
+       test-buildpack/test_buildpack-cached-stack2-v2.1.2.zip:
+         size: 789
+         object_id: abc-deh
+         sha: 887653
        BLOBS
   end
   let(:new_blobs) do
@@ -80,14 +84,14 @@ describe BuildpackBOSHReleaseUpdater do
     end
   end
 
-  context 'the release is a regular buildpack' do
-    describe '#delete_old_blob' do
+  context 'the release is a buildpack' do
+    describe '#delete_old_blobs' do
       before do
         File.write('config/blobs.yml', old_blobs)
       end
 
-      it 'removes the old blob from blobs.yml' do
-        subject.delete_old_blob
+      it 'removes all of the old buildpack blobs from blobs.yml' do
+        subject.delete_old_blobs
 
         blobs_contents = File.read('config/blobs.yml')
         expect(blobs_contents).to eq(new_blobs)
@@ -119,67 +123,6 @@ describe BuildpackBOSHReleaseUpdater do
         expect(GitClient).to receive(:add_file).with ".final_builds/**/index.yml"
         expect(GitClient).to receive(:add_file).with ".final_builds/**/**/index.yml"
         expect(GitClient).to receive(:safe_commit).with "Final release for test-buildpack at 3.3.3"
-
-        subject.create_release
-      end
-    end
-  end
-
-  context 'the release is java-offline buildpack' do
-    let(:languages)         { ['java'] }
-    let(:release_name)      { 'java-offline-buildpack' }
-    let(:old_blobs) do
-      <<~BLOBS
-         ---
-         thing-one/thing-one_1.1.1.zip:
-           size: 123
-           object_id: 123-456
-           sha: abcdef
-         java-buildpack/java-buildpack-offline-v4.5.6.zip:
-           size: 78910
-           object_id: def-bac
-           sha: really-a-sha
-         BLOBS
-    end
-
-    describe '#delete_old_blob' do
-      before do
-        File.write('config/blobs.yml', old_blobs)
-      end
-
-      it 'removes the old blob from blobs.yml' do
-        subject.delete_old_blob
-
-        blobs_contents = File.read('config/blobs.yml')
-        expect(blobs_contents).to eq(new_blobs)
-      end
-    end
-
-    describe '#add_new_blobs' do
-      before do
-        File.write(File.join(buildpack_dir, 'java-buildpack-offline-v3.3.3.zip'), 'xxx')
-      end
-
-      it 'adds the blob and commits the yml' do
-        expect(subject).to receive(:system).with("bosh2 -n add-blob ../blob/java-buildpack-offline-v3.3.3.zip java-buildpack/java-buildpack-offline-v3.3.3.zip")
-        expect(subject).to receive(:system).with("bosh2 -n upload-blobs")
-
-        expect(GitClient).to receive(:add_file).with('config/blobs.yml')
-        expect(GitClient).to receive(:safe_commit).with('Updating blobs for java-offline-buildpack at 3.3.3')
-
-        subject.add_new_blobs
-      end
-    end
-
-    describe '#create_release' do
-      it 'creates the release and commits the generated files' do
-        expect(subject).to receive(:system).with "bosh2 -n create-release --final --version 3.3.3 --name java-offline-buildpack --force"
-
-        expect(GitClient).to receive(:add_file).with "releases/**/*-3.3.3.yml"
-        expect(GitClient).to receive(:add_file).with "releases/**/index.yml"
-        expect(GitClient).to receive(:add_file).with ".final_builds/**/index.yml"
-        expect(GitClient).to receive(:add_file).with ".final_builds/**/**/index.yml"
-        expect(GitClient).to receive(:safe_commit).with "Final release for java-offline-buildpack at 3.3.3"
 
         subject.create_release
       end
