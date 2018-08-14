@@ -49,7 +49,7 @@ resources: #####################################################################
     source:
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-      tag_filter: v*
+      tag_filter: v5.*
   - name: bbl-state
     type: git
     source:
@@ -574,7 +574,7 @@ jobs: ##########################################################################
             - cats
         - get: version
           passed:
-            - cats
+            - bbl-destroy
           params: { bump: final }
         - get: receipt-diff
           trigger: true
