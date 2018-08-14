@@ -156,6 +156,23 @@ resources:
       private_key:  {{<%= language %>-offline-buildpack-bosh-release-private-key}}
       <% end %>
       branch: master
+
+  - name: private-<%= language %>-offline-buildpack-bosh-release-github-release-lts
+    type: github-release
+    source:
+      user: pivotal-cf
+      repository: <%= language %>-offline-buildpack-release-lts
+      access_token: {{buildpacks-github-token}}
+  - name: private-<%= language %>-offline-buildpack-bosh-release-lts
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/<%= language %>-offline-buildpack-release-lts.git
+      <% if language == 'java'%>
+      private_key:  {{private-<%= language %>-offline-buildpack-bosh-release-private-key-lts}}
+      <% else %>
+      private_key:  {{<%= language %>-offline-buildpack-bosh-release-private-key-lts}}
+      <% end %>
+      branch: master
 <% end %>
 
 groups:
@@ -174,12 +191,14 @@ groups:
     jobs:
 <% (supported_languages - %w(java)).each do |language| %>
       - update-private-<%= language %>-offline-buildpack-bosh-release
+      - update-private-<%= language %>-offline-buildpack-bosh-release-lts
 <% end %>
   - name: java
     jobs:
       - ship-it-java
       - update-java-buildpack-bosh-release
       - update-private-java-offline-buildpack-bosh-release
+      - update-private-java-offline-buildpack-bosh-release-lts
 
 jobs:
   - name: bbl-up
@@ -461,8 +480,9 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 
+<% %w(latest lts).each do |release_type| %>
 <% supported_languages.each do |language| %>
-  - name: update-private-<%= language %>-offline-buildpack-bosh-release
+  - name: update-private-<%= language %>-offline-buildpack-bosh-release<%= release_type == 'lts' ? '-lts' : '' %>
     serial: true
     public: true
     plan:
@@ -475,7 +495,7 @@ jobs:
           params:
             include_source_tarball: true
         - get: release
-          resource: private-<%= language %>-offline-buildpack-bosh-release
+          resource: private-<%= language %>-offline-buildpack-bosh-release<%= release_type == 'lts' ? '-lts' : '' %>
         <% if language == 'java' %>
         - get: pivnet-production
           params:
@@ -487,19 +507,25 @@ jobs:
         - task: download-offline-buildpack
           file: buildpacks-ci/tasks/download-offline-buildpack/task.yml
           params:
-            CF_STACKS: <%= stacks[language].join(' ') %>
+            CF_STACKS: <%= release_type == 'lts' ? 'cflinuxfs2' : stacks[language].join(' ') %>
+        <% elsif language == 'binary' %>
+        - task: build-offline-buildpack
+          file: buildpacks-ci/tasks/build-offline-buildpacks-cutlass/task.yml
+          params:
+            LANGUAGE: "binary"
+            CF_STACKS: <%= release_type == 'lts' ? 'any' : stacks[language].join(' ') %>
         <% elsif cutlass.include?(language) %>
         - task: build-offline-buildpack
           file: buildpacks-ci/tasks/build-offline-buildpacks-cutlass/task.yml
           params:
             LANGUAGE: <%= language %>
-            CF_STACKS: <%= stacks[language].join(' ') %>
+            CF_STACKS: <%= release_type == 'lts' ? 'cflinuxfs2' : stacks[language].join(' ') %>
         <% else %>
         - task: build-offline-buildpack
           file: buildpacks-ci/tasks/build-offline-buildpacks-machete/task.yml
           params:
             LANGUAGE: <%= language %>
-            CF_STACKS: <%= stacks[language].join(' ') %>
+            CF_STACKS: <%= release_type == 'lts' ? 'cflinuxfs2' : stacks[language].join(' ') %>
         <% end %>
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
@@ -511,12 +537,12 @@ jobs:
             LANGUAGES: <%= language %>
             RELEASE_NAME: <%= language %>-offline-buildpack
             RELEASE_DIR: release
-        - put: private-<%= language %>-offline-buildpack-bosh-release
+        - put: private-<%= language %>-offline-buildpack-bosh-release<%= release_type == 'lts' ? '-lts' : '' %>
           params:
             repository: release-artifacts
             rebase: true
             tag: blob/version
-        - put: private-<%= language %>-offline-buildpack-bosh-release-github-release
+        - put: private-<%= language %>-offline-buildpack-bosh-release-github-release<%= release_type == 'lts' ? '-lts' : '' %>
           params:
             name: blob/version
             tag: blob/version
@@ -527,4 +553,5 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+<% end %>
 <% end %>
