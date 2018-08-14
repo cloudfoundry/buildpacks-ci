@@ -573,11 +573,10 @@ jobs: ##########################################################################
           passed:
             - cats
         - get: version
+          trigger: true
           passed:
             - bbl-destroy
           params: { bump: final }
-        - get: receipt-diff
-          trigger: true
       - do:
         - task: update-receipt
           file: buildpacks-ci/tasks/update-rootfs-receipt/task.yml
