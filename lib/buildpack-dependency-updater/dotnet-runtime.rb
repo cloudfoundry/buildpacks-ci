@@ -1,7 +1,7 @@
 require 'tmpdir'
 require 'fileutils'
 
-class BuildpackDependencyUpdater::DotnetFramework < BuildpackDependencyUpdater
+class BuildpackDependencyUpdater::DotnetRuntime < BuildpackDependencyUpdater
   def dependency_version_currently_in_manifest?
     dependencies = buildpack_manifest['dependencies']
     dependencies.select do |dep|

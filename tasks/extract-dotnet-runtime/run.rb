@@ -14,14 +14,14 @@ require_relative "#{buildpacks_ci_dir}/lib/git-client"
 source_file = JSON.parse(open('source/data.json').read)
 source_version = source_file.dig('version', 'ref')
 stack = ENV['STACK']
-build_file = JSON.parse(open("builds/binary-builds-new/dotnet/#{source_version}-#{stack}.json").read)
+build_file = JSON.parse(open("builds/binary-builds-new/dotnet-sdk/#{source_version}-#{stack}.json").read)
 dotnet_sdk_dependency_url = build_file['url']
 git_commit_sha = build_file.dig('git_commit_sha')
 sdk_source_url = build_file.dig('source', 'url')
 sdk_version = build_file['version']
 tracker_story_id = build_file['tracker_story_id']
 
-class ExtractDotnetFramework
+class ExtractDotnetRuntime
   def initialize(
       buildpacks_ci_dir,
       sdk_version,
@@ -63,17 +63,17 @@ class ExtractDotnetFramework
   end
 
   def retar
-    @dotnet_framework_versions = Dir["#{@dotnet_sdk_dir}/shared/Microsoft.NETCore.App/*"].map{ |f| Pathname.new(f).basename.to_s }
+    @dotnet_runtime_versions = Dir["#{@dotnet_sdk_dir}/shared/Microsoft.NETCore.App/*"].map{ |f| Pathname.new(f).basename.to_s }
 
     Dir.chdir(@dotnet_sdk_dir) do
-      @dotnet_framework_versions.each do |version|
-        system("tar Jcf #{dotnet_framework_tar(version)} shared/Microsoft.NETCore.App/#{version} host *.txt") or raise "Tarring the dotnet framework failed"
+      @dotnet_runtime_versions.each do |version|
+        system("tar Jcf #{dotnet_runtime_tar(version)} shared/Microsoft.NETCore.App/#{version} host *.txt") or raise "Tarring the dotnet runtime failed"
       end
     end
   end
 
-  def dotnet_framework_tar(version)
-    File.join(@buildpacks_ci_dir, '..', 'binary-builder-artifacts', "dotnet-framework.#{version}.linux-amd64.tar.xz")
+  def dotnet_runtime_tar(version)
+    File.join(@buildpacks_ci_dir, '..', 'binary-builder-artifacts', "dotnet-runtime.#{version}.linux-amd64.tar.xz")
   end
 
   def write_yaml
@@ -87,25 +87,25 @@ class ExtractDotnetFramework
       GitClient.set_global_config('user.name', 'CF Buildpacks Team CI Server')
     end
 
-    @dotnet_framework_versions.each do |version|
-      framework_build_file = File.join(output_dir, 'binary-builds-new', 'dotnet-framework', "#{version}-#{@stack}.json")
+    @dotnet_runtime_versions.each do |version|
+      runtime_build_file = File.join(output_dir, 'binary-builds-new', 'dotnet-runtime', "#{version}-#{@stack}.json")
 
-      md5sum = Digest::MD5.file(dotnet_framework_tar(version)).hexdigest
-      shasum = Digest::SHA256.file(dotnet_framework_tar(version)).hexdigest
+      md5sum = Digest::MD5.file(dotnet_runtime_tar(version)).hexdigest
+      shasum = Digest::SHA256.file(dotnet_runtime_tar(version)).hexdigest
 
-      output_file = dotnet_framework_tar(version).gsub('.tar.xz', "-#{@stack}-#{shasum[0..7]}.tar.xz")
-      FileUtils.mv(dotnet_framework_tar(version), output_file)
+      output_file = dotnet_runtime_tar(version).gsub('.tar.xz', "-#{@stack}-#{shasum[0..7]}.tar.xz")
+      FileUtils.mv(dotnet_runtime_tar(version), output_file)
 
-      framework_build_data = {
+      runtime_build_data = {
         'tracker_story_id' => @tracker_story_id,
         'version' => version,
         'sha256' => shasum,
-        'url' => "https://buildpacks.cloudfoundry.org/dependencies/dotnet-framework/#{File.basename(output_file)}"
+        'url' => "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/#{File.basename(output_file)}"
       }
 
-      File.write(framework_build_file, framework_build_data.to_json)
+      File.write(runtime_build_file, runtime_build_data.to_json)
 
-      git_msg = "Build dotnet-framework - #{version}\n\n"
+      git_msg = "Build dotnet-runtime - #{version}\n\n"
 
       git_yaml = {
         'filename' => File.basename(output_file),
@@ -119,14 +119,14 @@ class ExtractDotnetFramework
       git_msg += git_yaml.to_yaml
 
       Dir.chdir(output_dir) do
-        GitClient.add_file(framework_build_file)
+        GitClient.add_file(runtime_build_file)
         GitClient.safe_commit(git_msg)
       end
     end
   end
 end
 
-ExtractDotnetFramework.new(
+ExtractDotnetRuntime.new(
     buildpacks_ci_dir,
     sdk_version,
     dotnet_sdk_dependency_url,

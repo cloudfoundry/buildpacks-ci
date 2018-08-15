@@ -30,7 +30,7 @@
                           'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.2X", "2.1.3X", "2.1.X"], removal_strategy: 'keep_all' } },
                         source_params: ['tag_regex: .*'] },
 
-  'dotnet-framework': { buildpacks: {
+  'dotnet-runtime': { buildpacks: {
                           'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X"], removal_strategy: 'keep_all' } } },
 
   glide:              { buildpacks: { go: {}},
@@ -233,7 +233,7 @@ resources:
     <% end %>
 <% end %>
 
-<% if !dep[:third_party_hosted] && dep_name.to_s != 'dotnet-framework' %>
+<% if !dep[:third_party_hosted] && dep_name.to_s != 'dotnet-runtime' %>
 - name: buildpacks-bucket-<%=dep_name%>
   type: s3
   source:
@@ -274,7 +274,7 @@ jobs:
 <% end %>
 
 <% version_lines.each do |line| %>
-<% if dep_name.to_s != 'dotnet-framework' %>
+<% if dep_name.to_s != 'dotnet-runtime' %>
 - name: create-<%=dep_name%>-<%= line %>-story
   serial: true
   public: true
@@ -367,7 +367,7 @@ jobs:
 <% end %>
 
 <% if dep_name == :dotnet %>
-- name: extract-dotnet-framework-from-sdk-<%= line %>
+- name: extract-dotnet-runtime-from-sdk-<%= line %>
   serial: true
   public: true
   plan:
@@ -383,14 +383,14 @@ jobs:
       - do:
         <% stacks.each do |stack| %>
         <% unless skip_build.include?({ dep: dep_name.to_s, line: line, stack: stack}) %>
-        - task: extract-dotnet-framework-<%= stack %>
-          file: buildpacks-ci/tasks/extract-dotnet-framework/task.yml
+        - task: extract-dotnet-runtime-<%= stack %>
+          file: buildpacks-ci/tasks/extract-dotnet-runtime/task.yml
           params:
             STACK: <%= stack %>
         - task: push-binary
           file: buildpacks-ci/tasks/push-binary/task.yml
           params:
-            DEPENDENCY: dotnet-framework
+            DEPENDENCY: dotnet-runtime
             BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
             AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
@@ -405,8 +405,8 @@ jobs:
         <% end %>
 <% end %>
 
-<% if dep_name.to_s == 'dotnet-framework' %>
-- name: update-dotnet-framework-<%= line %>-dotnet-core
+<% if dep_name.to_s == 'dotnet-runtime' %>
+- name: update-dotnet-runtime<%= line %>-dotnet-core
   serial: true
   public: true
   plan:
@@ -418,7 +418,7 @@ jobs:
     - get: buildpacks-ci
     - get: builds
     - get: source
-      resource: source-dotnet-framework-<%= line %>
+      resource: source-dotnet-runtime-<%= line %>
       version: every
       trigger: true
   - do:
@@ -437,7 +437,7 @@ jobs:
 
 <% dep[:buildpacks].each do |bp_name, bp| %>
   <% (bp[:lines] || ['latest']).each do |line| %>
-  <% if dep_name.to_s != 'dotnet-framework' %>
+  <% if dep_name.to_s != 'dotnet-runtime' %>
 - name: update-<%=dep_name%>-<%= line %>-<%= bp_name %>
   serial: true
   public: true
@@ -481,13 +481,13 @@ groups:
     - create-<%= dep_name %>-new-line-story
     <% end %>
     <% version_lines.each do |line| %>
-    <% if dep_name.to_s != 'dotnet-framework' %>
+    <% if dep_name.to_s != 'dotnet-runtime' %>
     - create-<%=dep_name%>-<%= line %>-story
     - finish-<%=dep_name%>-<%= line %>-story
     - build-<%=dep_name%>-<%= line %>
     <% end %>
     <% if dep_name == :dotnet %>
-    - extract-dotnet-framework-from-sdk-<%= line %>
+    - extract-dotnet-runtime-from-sdk-<%= line %>
     <% end %>
     <% end %>
     <% dep[:buildpacks].each do |bp_name, bp| %>
@@ -508,13 +508,13 @@ groups:
     - create-<%= dep_name %>-new-line-story
     <% end %>
     <% version_lines.each do |line| %>
-    <% if dep_name.to_s != 'dotnet-framework' %>
+    <% if dep_name.to_s != 'dotnet-runtime' %>
     - create-<%=dep_name%>-<%= line %>-story
     - finish-<%=dep_name%>-<%= line %>-story
     - build-<%=dep_name%>-<%= line %>
     <% end %>
     <% if dep_name == :dotnet %>
-    - extract-dotnet-framework-from-sdk-<%= line %>
+    - extract-dotnet-runtime-from-sdk-<%= line %>
     <% end %>
     <% end %>
     <% dep[:buildpacks].each do |bp_name, bp| %>

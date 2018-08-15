@@ -1,12 +1,12 @@
 require "spec2"
 require "./httpclient_mock"
-require "../../src/depwatcher/dotnet_framework.cr"
+require "../../src/depwatcher/dotnet_runtime.cr"
 
-Spec2.describe Depwatcher::DotnetFramework do
+Spec2.describe Depwatcher::DotnetRuntime do
   let(client) {HTTPClientMock.new}
   subject {described_class.new.tap {|s| s.client = client}}
   before do
-    client.stub_get("https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/contents/binary-builds-new/dotnet-framework", nil, HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet_framework.json")))
+    client.stub_get("https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/contents/binary-builds-new/dotnet-runtime", nil, HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet_runtime.json")))
   end
 
   describe "#check" do

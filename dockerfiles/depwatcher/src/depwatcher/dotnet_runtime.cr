@@ -2,7 +2,7 @@ require "./base"
 require "./semantic_version"
 
 module Depwatcher
-  class DotnetFramework < Base
+  class DotnetRuntime < Base
     class External
       JSON.mapping(
         name: String,
@@ -24,7 +24,7 @@ module Depwatcher
     end
 
     private def builds() : Array(External)
-      res = client.get("https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/contents/binary-builds-new/dotnet-framework").body
+      res = client.get("https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/contents/binary-builds-new/dotnet-runtime").body
       Array(External).from_json(res).map{ |b| External.new(b.name.gsub(/\.json$/, ""))}
     end
   end

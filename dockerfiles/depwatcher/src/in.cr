@@ -50,8 +50,8 @@ when "appd_agent"
   version = Depwatcher::AppDynamicsAgent.new.in(version["ref"].to_s)
 when "dotnet"
   version = Depwatcher::Dotnet.new.in(version["ref"].to_s, source["tag_regex"].to_s)
-when "dotnet-framework"
-  version = Depwatcher::DotnetFramework.new.in(version["ref"].to_s)
+when "dotnet-runtime"
+  version = Depwatcher::DotnetRuntime.new.in(version["ref"].to_s)
 else
   raise "Unkown type: #{type}"
 end
