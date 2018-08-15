@@ -26,7 +26,7 @@ out_data[:source][:md5] = data.dig('version', 'md5_digest') if data.dig('version
 out_data[:source][:sha256] = data.dig('version', 'sha256') if data.dig('version', 'sha256')
 
 def run(*args)
-  system({'DEBIAN_FRONTEND' => 'noninteractive'}, *args)
+  system({ 'DEBIAN_FRONTEND' => 'noninteractive' }, *args)
   raise "Could not run #{args}" unless $?.success?
 end
 
@@ -41,9 +41,9 @@ when 'bundler'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'dotnet'
   commit_sha = data.dig('version', 'git_commit_sha')
 
@@ -62,9 +62,9 @@ when 'dotnet'
 
     # We must fix the build script for dotnet versions 2.1.4 to 2.1.2XX (see https://github.com/dotnet/cli/issues/8358)
     if major == '2' && minor == '1' && patch.to_i >= 4 && patch.to_i < 300
-      runbuildsh = File.open('run-build.sh', 'r') {|f| f.read}
+      runbuildsh = File.open('run-build.sh', 'r') { |f| f.read }
       runbuildsh.gsub!('WriteDynamicPropsToStaticPropsFiles "${args[@]}"', 'WriteDynamicPropsToStaticPropsFiles')
-      File.open('run-build.sh ', 'w') {|f| f.write runbuildsh}
+      File.open('run-build.sh ', 'w') { |f| f.write runbuildsh }
     end
 
     run('./build.sh', '/t:Compile')
@@ -85,11 +85,11 @@ when 'dotnet'
   FileUtils.mv("/tmp/#{old_filename}", "artifacts/#{filename}")
 
   out_data.merge!({
-    version: version,
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}",
-    git_commit_sha: commit_sha
-  })
+                    version: version,
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}",
+                    git_commit_sha: commit_sha
+                  })
 when 'pipenv'
   run('apt', 'update')
   run('apt-get', 'install', '-y', 'python-pip', 'python-dev', 'build-essential')
@@ -111,9 +111,9 @@ when 'pipenv'
   FileUtils.mv("/tmp/pipenv-v#{version}.tgz", "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'CAAPM', 'appdynamics', 'miniconda2', 'miniconda3'
   res = open(url).read
   sha = Digest::SHA256.hexdigest(res)
@@ -124,9 +124,9 @@ when 'CAAPM', 'appdynamics', 'miniconda2', 'miniconda3'
   end
 
   out_data.merge!({
-    sha256: sha,
-    url: url
-  })
+                    sha256: sha,
+                    url: url
+                  })
 when 'composer'
   sha = data.dig('version', 'sha256')
   input_path = "source/composer.phar"
@@ -135,9 +135,9 @@ when 'composer'
   FileUtils.mv(input_path, output_path)
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower'
   res = open(url).read
   sha = Digest::SHA256.hexdigest(res)
@@ -151,9 +151,9 @@ when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower'
   File.write("artifacts/#{filename}", res)
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'ruby'
   run('apt', 'update')
   run('apt-get', 'install', '-y', 'libffi-dev')
@@ -172,9 +172,9 @@ when 'ruby'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'hwc'
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=hwc', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
@@ -185,9 +185,9 @@ when 'hwc'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'dep'
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=dep', "--version=v#{version}", "--sha256=#{data.dig('version', 'sha256')}")
@@ -198,9 +198,9 @@ when 'dep'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'glide'
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=glide', "--version=v#{version}", "--sha256=#{data.dig('version', 'sha256')}")
@@ -211,9 +211,9 @@ when 'glide'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'godep'
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=godep', "--version=v#{version}", "--sha256=#{data.dig('version', 'sha256')}")
@@ -224,9 +224,9 @@ when 'godep'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'go'
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=go', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
@@ -237,9 +237,9 @@ when 'go'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'jruby'
   if /9.1.*/ =~ version
     # jruby 9.1.X.X will implement ruby 2.3.X
@@ -259,9 +259,9 @@ when 'jruby'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'libunwind'
   built_path = File.join(Dir.pwd, 'built')
   Dir.mkdir(built_path)
@@ -279,14 +279,14 @@ when 'libunwind'
   Dir.chdir(built_path) do
     run('tar', 'czf', old_filename, 'include', 'lib')
   end
-  old_filename = File.join(built_path,old_filename)
+  old_filename = File.join(built_path, old_filename)
   sha = Digest::SHA256.hexdigest(open(old_filename).read)
   filename = "libunwind-#{version}-#{stack}-#{sha[0..7]}.tar.gz"
   FileUtils.mv(old_filename, "artifacts/#{filename}")
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'node'
   Dir.chdir('binary-builder') do
     run('./bin/binary-builder', '--name=node', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
@@ -297,14 +297,14 @@ when 'node'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'php'
   if version.start_with?("7")
     phpV = "7"
   elsif version.start_with?("5")
-    phpV = ""  # binary-builder expects 'php' to mean php 5.X.
+    phpV = "" # binary-builder expects 'php' to mean php 5.X.
   else
     raise "Unexpected PHP version #{version}. Expected 5.X or 7.X"
   end
@@ -324,9 +324,9 @@ when 'php'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'python'
   major, minor, _ = version.split('.')
   if major == '3' && minor == '4' && stack == 'cflinuxfs3'
@@ -342,9 +342,9 @@ when 'python'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'httpd'
   Dir.chdir('binary-builder') do
     run('apt', 'update')
@@ -357,28 +357,46 @@ when 'httpd'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'r'
   artifacts = "#{Dir.pwd}/artifacts"
   source_sha = ''
   Dir.mktmpdir do |dir|
     Dir.chdir(dir) do
       run('mkdir', '-p', '/usr/share/man/man1')
+
       run('apt', 'update')
-      run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libcurl4-openssl-dev', 'default-jre')
+
+      fs_specific_packages = stack == 'cflinuxfs2' ? ['libgfortran-4.8-dev'] : ['libgfortran-7-dev']
+      run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libcurl4-openssl-dev', 'default-jre', *fs_specific_packages)
+
       run('wget', url)
       source_sha = Digest::SHA256.hexdigest(open("R-#{version}.tar.gz").read)
       run('tar', 'xf', "R-#{version}.tar.gz")
+
       Dir.chdir("R-#{version}") do
-        run('./configure','--with-readline=no','--with-x=no','--enable-R-shlib')
+        run('./configure', '--with-readline=no', '--with-x=no', '--enable-R-shlib')
         run('make')
         run('make install')
 
-        run('/usr/local/lib/R/bin/R','--vanilla','-e','install.packages(c("Rserve","forecast"), repos="https://cran.r-project.org", dependencies=TRUE)')
+        run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'install.packages(c("Rserve","forecast"), repos="https://cran.r-project.org", dependencies=TRUE)')
 
         Dir.chdir('/usr/local/lib/R') do
+          case stack
+          when 'cflinuxfs2'
+            run('cp', '-L', '/usr/bin/gfortran-4.8', './bin/gfortran')
+            run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libcaf_single.a', './lib')
+            run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.a', './lib')
+            run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.so', './lib')
+            run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortranbegin.a', './lib')
+          when 'cflinuxfs3'
+            run('cp', '-L', '/usr/bin/x86_64-linux-gnu-gfortran-7', './bin/gfortran')
+            run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libcaf_single.a', './lib')
+            run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libgfortran.a', './lib')
+            run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libgfortran.so', './lib')
+          end
           run('tar', 'zcvf', "#{artifacts}/r-v#{version}.tgz", '.')
         end
       end
@@ -390,10 +408,10 @@ when 'r'
   FileUtils.mv("artifacts/r-v#{version}.tgz", "artifacts/#{filename}")
 
   out_data.merge!({
-    source_sha256: source_sha,
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    source_sha256: source_sha,
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 when 'nginx'
   artifacts = "#{Dir.pwd}/artifacts"
   source_pgp = 'not yet implemented'
@@ -425,7 +443,7 @@ when 'nginx'
           '--with-stream=dynamic',
         )
         run('make')
-        system({'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR'=>"#{destdir}/nginx"}, 'make install')
+        system({ 'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR' => "#{destdir}/nginx" }, 'make install')
         raise "Could not run make install" unless $?.success?
 
         Dir.chdir(destdir) do
@@ -442,10 +460,10 @@ when 'nginx'
   FileUtils.mv("artifacts/nginx-#{version}.tgz", "artifacts/#{filename}")
 
   out_data.merge!({
-    source_pgp: source_pgp,
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/nginx/#{filename}"
-  })
+                    source_pgp: source_pgp,
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/nginx/#{filename}"
+                  })
 when 'nginx-static'
   old_sha = Digest::SHA256.hexdigest(open(data.dig('version', 'url')).read)
   Dir.chdir('binary-builder') do
@@ -457,9 +475,9 @@ when 'nginx-static'
   FileUtils.mv(old_file, "artifacts/#{filename}")
 
   out_data.merge!({
-    sha256: sha,
-    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
-  })
+                    sha256: sha,
+                    url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+                  })
 else
   raise("Dependency: #{name} is not currently supported")
 end
