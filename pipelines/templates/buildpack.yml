@@ -6,8 +6,8 @@
 <% skip_docker_start = %w(binary r) %>
 <% stacks = {
   "hwc" => %w(windows2012R2 windows2016),
-  "apt" => %w(cflinuxfs2 cflinuxfs3),
-  "binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016), # binary needs unassociated release for pivnet
+  "apt" => %w(cflinuxfs2),
+  "binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016),
   "credhub" => %w(cflinuxfs2 cflinuxfs3),
   "dotnet-core" => %w(cflinuxfs2 cflinuxfs3),
   "go" => %w(cflinuxfs2 cflinuxfs3),
