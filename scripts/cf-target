@@ -21,6 +21,11 @@ case ARGV[0]
     system('cf', 'api', 'api.cflinuxfs2.buildpacks-gcp.ci.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
     p('cf', 'auth', cfg['cflinuxfs2-cf-username'], cfg['cflinuxfs2-cf-password'])
     system('cf', 'auth', cfg['cflinuxfs2-cf-username'], cfg['cflinuxfs2-cf-password']) or raise 'Could not auth'
+  when 'cf-release'
+    cfg = YAML.load(`lpass show --notes Shared-Buildpacks/concourse-private.yml`)
+    system('cf', 'api', 'api.cf-release.buildpacks-gcp.ci.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
+    p('cf', 'auth', cfg['cf-release-cf-username'], cfg['cf-release-cf-password'])
+    system('cf', 'auth', cfg['cf-release-cf-username'], cfg['cf-release-cf-password']) or raise 'Could not auth'
   when 'dev'
     system('cf', 'api', 'api.v3.pcfdev.io', '--skip-ssl-validation') or raise 'Could not connect'
     system('cf', 'auth', 'admin', 'admin') or raise 'Could not connect'
