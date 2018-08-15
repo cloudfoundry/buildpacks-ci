@@ -35,7 +35,7 @@ cat <<EOF > ${release_dir}/use-dev-release-opsfile.yml
   path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/stacks
   value:
     - name: $STACK
-      description: Cloud Foundry Linux-based filesystem under test
+      description: Cloud Foundry Linux-based filesystem (Ubuntu 18.04)
 - type: replace
   path: /instance_groups/name=diego-cell/jobs/name=$STACK-rootfs-setup?
   value:

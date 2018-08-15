@@ -39,7 +39,7 @@ Dir.chdir('../capi-release-artifacts') do
   path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/stacks?
   value:
   - name: #{stack}
-    description: Cloud Foundry Linux-based filesystem under test
+    description: Cloud Foundry Linux-based filesystem (Ubuntu 18.04)
 - type: replace
   path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/default_stack?
   value: #{stack}
