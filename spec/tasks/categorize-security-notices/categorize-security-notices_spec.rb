@@ -6,39 +6,22 @@ require_relative '../../../tasks/categorize-security-notices/categorize-security
 
 describe CategorizeSecurityNotices do
   let(:tracker_client) { double "tracker_client" }
-  let(:davos_client) { double "davos client" }
   let(:stories_file) { Tempfile.new }
   let(:stack_receipt) { Tempfile.new }
 
   def story_content(stack)
     <<-STORY
-                            **Product:** #{stack}
-                            **Severity:** medium
-                            **USN:** http://www.ubuntu.com/usn/usn-3353-1/
-
-                            **Trusty Packages:**
-                            libkrb5-26-heimdal 1.6~git20131207+dfsg-1ubuntu1.2
-                            libkrb5-26-heimdal 1.6~git20131207+dfsg-1ubuntu1.3
-
-                            **Bionic Packages:**
-                            libkrb5-26-heimdal 1.7~git20150920+dfsg-4ubuntu1.18.04.1
-
-                            ---
-                            #### **Resolution Instructions**
-
-                            ###### Step 1
-
-                            Please click the resolution link below to acknowledge receipt of the notice.
-
-                            ###### Step 2
-
-                            Once you have determined whether the vulnerability affects your product, click
-                            the resolution link again to provide the appropriate resolution information.
-
-                            #### **Resolution Link**
-
-                            [Click here to respond to this notice.](https://davos.cfapps.io/product_stories/4567)
-    STORY
+**Product:** #{stack}
+**Severity:** medium
+**USN:** http://www.ubuntu.com/usn/usn-3353-1/
+**14.04 Packages:**
+libkrb5-26-heimdal 1.6~git20131207+dfsg-1ubuntu1.2
+libkrb5-26-heimdal 1.6~git20131207+dfsg-1ubuntu1.3
+**16.04 Packages:**
+libkrb5-26-heimdal 1.7~git20150920+dfsg-4ubuntu1.16.04.1
+**18.04 Packages:**
+libkrb5-26-heimdal 1.7~git20150920+dfsg-4ubuntu1.18.04.1
+STORY
   end
 
   let(:receipt_content) { "ii  libkrb5-26-heimdal:amd64           1.6~git20131207+dfsg-1ubuntu1.4            amd64        Heimdal Kerberos - libraries\n" +
@@ -55,20 +38,19 @@ describe CategorizeSecurityNotices do
         },
         {
           "id": '456',
-          "description": "**Trusty Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n\n[Click here to respond to this notice.](https://davos.cfapps.io/product_stories/1289)\n",
+          "description": "**14.04 Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n",
           "labels": %w(cflinuxfs2 security-notice some-other-label)
         }
       ]
       JSON.dump({ version: { ref: JSON.dump(stories) } })
     }
 
-    subject { CategorizeSecurityNotices.new(tracker_client, stories_file.path, stack_receipt.path, davos_client, 'cflinuxfs2') }
+    subject { CategorizeSecurityNotices.new(tracker_client, stories_file.path, stack_receipt.path, 'cflinuxfs2') }
 
     before(:each) do
       allow(tracker_client).to receive(:add_label_to_story).with(anything)
       allow(tracker_client).to receive(:point_story).with(anything)
       allow(tracker_client).to receive(:change_story_state).with(anything)
-      allow(davos_client).to receive(:change).with(anything, anything)
 
       stories_file.write(stories_json)
       stories_file.close
@@ -78,12 +60,10 @@ describe CategorizeSecurityNotices do
 
     it "labels any stories unrelated to the rootfs with 'unaffected', points them with 0, and delivers them" do
       expect(tracker_client).to receive(:add_label_to_story).with(story: { "id" => "456",
-                                                                           "description" => "**Trusty Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n\n[Click here to respond to this notice.](https://davos.cfapps.io/product_stories/1289)\n",
+                                                                           "description" => "**14.04 Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n",
                                                                            "labels" => ["cflinuxfs2", "security-notice", "some-other-label"] }, label: "unaffected")
       expect(tracker_client).to receive(:point_story).with(story_id: "456", estimate: 0)
       expect(tracker_client).to receive(:change_story_state).with(story_id: "456", current_state: "delivered")
-
-      expect(davos_client).to receive(:change).with('1289', status: 'unaffected')
 
       subject.run
     end
@@ -95,8 +75,6 @@ describe CategorizeSecurityNotices do
       expect(tracker_client).to receive(:point_story).with(story_id: "123", estimate: 0)
       expect(tracker_client).to receive(:change_story_state).with(story_id: "123", current_state: "started")
 
-      expect(davos_client).to receive(:change).with('4567', status: 'acknowledged')
-
       subject.run
     end
   end
@@ -106,7 +84,7 @@ describe CategorizeSecurityNotices do
       stories = [
         {
           "id": '789',
-          "description": "**Bionic Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n\n[Click here to respond to this notice.](https://davos.cfapps.io/product_stories/1289)\n",
+          "description": "**18.04 Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\nnginx-extras 1.4.6-1ubuntu3.9",
           "labels": %w(cflinuxfs3 security-notice some-other-label)
         },
         {
@@ -118,13 +96,12 @@ describe CategorizeSecurityNotices do
       JSON.dump({ version: { ref: JSON.dump(stories) } })
     }
 
-    subject { CategorizeSecurityNotices.new(tracker_client, stories_file.path, stack_receipt.path, davos_client, 'cflinuxfs3') }
+    subject { CategorizeSecurityNotices.new(tracker_client, stories_file.path, stack_receipt.path, 'cflinuxfs3') }
 
     before(:each) do
       allow(tracker_client).to receive(:add_label_to_story).with(anything)
       allow(tracker_client).to receive(:point_story).with(anything)
       allow(tracker_client).to receive(:change_story_state).with(anything)
-      allow(davos_client).to receive(:change).with(anything, anything)
 
       stories_file.write(stories_json)
       stories_file.close
@@ -134,12 +111,10 @@ describe CategorizeSecurityNotices do
 
     it "labels any stories unrelated to the rootfs with 'unaffected', points them with 0, and delivers them" do
       expect(tracker_client).to receive(:add_label_to_story).with(story: { 'id' => '789',
-                                                                           'description' => "**Bionic Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\n\n[Click here to respond to this notice.](https://davos.cfapps.io/product_stories/1289)\n",
+                                                                           'description' => "**18.04 Packages:**\nnginx-extras 1.4.6-1ubuntu3.8\nnginx-extras 1.4.6-1ubuntu3.9",
                                                                            'labels' => %w(cflinuxfs3 security-notice some-other-label) }, label: 'unaffected')
       expect(tracker_client).to receive(:point_story).with(story_id: '789', estimate: 0)
       expect(tracker_client).to receive(:change_story_state).with(story_id: '789', current_state: 'delivered')
-
-      expect(davos_client).to receive(:change).with('1289', status: 'unaffected')
 
       subject.run
     end
@@ -150,8 +125,6 @@ describe CategorizeSecurityNotices do
                                                                            'labels' => %w(cflinuxfs3 security-notice some-label) }, label: "affected")
       expect(tracker_client).to receive(:point_story).with(story_id: '101', estimate: 0)
       expect(tracker_client).to receive(:change_story_state).with(story_id: '101', current_state: 'started')
-
-      expect(davos_client).to receive(:change).with('4567', status: 'acknowledged')
 
       subject.run
     end

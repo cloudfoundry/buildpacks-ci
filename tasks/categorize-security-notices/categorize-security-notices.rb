@@ -8,12 +8,11 @@ require 'yaml'
 class CategorizeSecurityNotices
   attr_reader :stories
 
-  def initialize(tracker_client, stories_file, stack_receipt, davos_client, stack)
+  def initialize(tracker_client, stories_file, stack_receipt, stack)
     ref = JSON.parse(File.read(stories_file))
     @tracker_client = tracker_client
     @stories = JSON.parse(ref['version']['ref'])
     @receipt = File.read(stack_receipt)
-    @davos_client = davos_client
     @stack = stack
   end
 
@@ -24,12 +23,10 @@ class CategorizeSecurityNotices
         label_story(story, "affected")
         zero_point_story(story['id'])
         start_story(story['id'])
-        davos_change(story, status: 'acknowledged')
       else
         label_story(story, "unaffected")
         zero_point_story(story['id'])
         deliver_story(story['id'])
-        davos_change(story, status: 'unaffected')
       end
     end
   end
@@ -40,9 +37,9 @@ class CategorizeSecurityNotices
     exp =
         case @stack
         when 'cflinuxfs2'
-          Regexp.new('\*\*Trusty Packages:\*\*\n(.*?)\n\n', Regexp::MULTILINE)
+          Regexp.new('\*\*14.04 Packages:\*\*\n(.*?)\n((\*.*Packages)|\Z)', Regexp::MULTILINE)
         when 'cflinuxfs3'
-          Regexp.new('\*\*Bionic Packages:\*\*\n(.*?)\n\n', Regexp::MULTILINE)
+          Regexp.new('\*\*18.04 Packages:\*\*\n(.*?)\Z', Regexp::MULTILINE)
         else
           raise "Unsupported stack: #{stack}"
         end
@@ -75,11 +72,5 @@ class CategorizeSecurityNotices
 
   def start_story(story_id)
     @tracker_client.change_story_state(story_id: story_id, current_state: "started")
-  end
-
-  def davos_change(story, params)
-    m = story['description'].match(%r{\(https://davos.cfapps.io/product_stories/(\d+)\)})
-    return unless m&.length == 2
-    @davos_client.change(m[1], params)
   end
 end
