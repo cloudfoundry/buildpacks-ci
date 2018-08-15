@@ -14,12 +14,6 @@ resources:
     source:
       expression: "0 6 * * *"
       location: {{current-timezone}}
-  - name: buildpack-checksums
-    type: git
-    source:
-      uri: git@bitbucket.org:cloudfoundry-buildpacks/buildpack-checksums.git
-      private_key: {{buildpack-checksums-private-key}}
-      branch: master
   - name: buildpacks-ci
     type: git
     source:
@@ -30,15 +24,6 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
       paths: [ binary-verification-whitelist/* ]
-  - name: deploy-buildpack-verify
-    type: cf
-    source:
-      api: https://api.run.pivotal.io
-      username: {{pws-username}}
-      password: {{pws-password}}
-      organization: {{pws-org}}
-      space: {{pws-space}}
-      skip_cert_check: false
   - name: failure-alert
     type: slack-notification
     source:
@@ -57,29 +42,6 @@ resources:
 <% end %>
 
 jobs:
-  - name: build-site
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpack-checksums
-          trigger: true
-        - get: buildpacks-ci
-      - task: run-tests
-        file: buildpacks-ci/tasks/run-buildpack-checksums-specs/task.yml
-        params:
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-      - task: build-site
-        file: buildpacks-ci/tasks/build-buildpack-checksums-site/task.yml
-        params:
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-      - put: buildpack-checksums
-        params:
-          repository: buildpack-checksums-artifacts
-          rebase: true
-      - put: deploy-buildpack-verify
-        params:
-          path: buildpack-checksums-artifacts/final_site/
-          manifest: buildpack-checksums-artifacts/final_site/manifest.yml
   - name: verify-buildpack-binaries
     public: true
     plan:
