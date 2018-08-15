@@ -15,6 +15,6 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/tasks/extract-dotnet-framework/run.rb
+    - buildpacks-ci/tasks/extract-dotnet-runtime/run.rb
 params:
   STACK:
