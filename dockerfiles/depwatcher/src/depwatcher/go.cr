@@ -36,22 +36,39 @@ module Depwatcher
       tds = doc.xpath("//td[contains(text(),'Source')]")
       raise "Could not parse golang release (td) website" unless tds.is_a?(XML::NodeSet)
       tds.map do |td|
+        # Get last preceding h3 category header (Stable versions, Unstable verions, Archived versions)
+        div = td.xpath("./ancestor::div")
+        raise "Could not parse golang release (div) website" unless div.is_a?(XML::NodeSet)
+        div = div.skip(div.size - 1).first
+        h3 = div.xpath("../preceding-sibling::h3")
+        raise "Could not parse golang release (h3) website" unless h3.is_a?(XML::NodeSet)
+        h3 = h3.skip(h3.size - 1).first
+
+        # Get entire row, in order to get sha and url
         tr = td.xpath("./ancestor::tr")
         raise "Could not parse golang release (tr) website" unless tr.is_a?(XML::NodeSet)
         tr = tr.first
         sha = tr.xpath("./td[position()=6]")
         raise "Could not parse golang release (sha256) website" unless sha.is_a?(XML::NodeSet)
+
         a = tr.xpath(".//a")
         raise "Could not parse golang release (a) website" unless a.is_a?(XML::NodeSet)
         url = a.first["href"].to_s
-        v = url.match(/\/go([\d\.]*)\.src/)
-        beta = url.match(/\/go[\d\.]+(beta|alpha)[\d\.]*\.src/)
-        if v.nil? && beta.nil?
-          raise "Could not match version in url #{url}"
-        elsif v.nil?
-          nil
-        else
+
+        # Extract versions from Stable and Archived versions; ignore Unstable
+        if h3.text().starts_with?("Stable versions")
+          v = url.match(/\/go([\d\.]*)\.src/)
+          raise "Could not match version in url #{url}" if v.nil?
           Release.new(v[1], url, sha.first.text.to_s)
+        elsif h3.text().starts_with?("Archived versions")
+          v = url.match(/\/go([\d\.]*)\.src/)
+          if v.nil? # Ignore unmatched archived versions (e.g. alpha, beta, rc)
+            nil
+          else
+            Release.new(v[1], url, sha.first.text.to_s)
+          end
+        else
+          nil
         end
       end.compact
     end
