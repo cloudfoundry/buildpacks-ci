@@ -26,7 +26,7 @@
                         source_type: 'github_releases',
                         source_params: ['repo: golang/dep', 'fetch_source: true']},
 
-  dotnet:             { buildpacks: {
+  'dotnet-sdk':             { buildpacks: {
                           'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.2X", "2.1.3X", "2.1.X"], removal_strategy: 'keep_all' } },
                         source_params: ['tag_regex: .*'] },
 
@@ -128,7 +128,7 @@ windows_stacks = ['windows2012R2', 'windows2016']
 skip_build = [
   { dep: 'python', line: '3.7.X', stack: 'cflinuxfs2' },
   { dep: 'php', line: '5.6.X', stack: 'cflinuxfs3'},
-  { dep: 'dotnet', line: '1.0.X', stack: 'cflinuxfs3' },
+  { dep: 'dotnet-sdk', line: '1.0.X', stack: 'cflinuxfs3' },
 ]
 
 def validate_dependencies(deps)
@@ -366,7 +366,7 @@ jobs:
     <% end %>
 <% end %>
 
-<% if dep_name == :dotnet %>
+<% if dep_name == 'dotnet-sdk' %>
 - name: extract-dotnet-runtime-from-sdk-<%= line %>
   serial: true
   public: true
@@ -406,7 +406,7 @@ jobs:
 <% end %>
 
 <% if dep_name.to_s == 'dotnet-runtime' %>
-- name: update-dotnet-runtime<%= line %>-dotnet-core
+- name: update-dotnet-runtime-<%= line %>-dotnet-core
   serial: true
   public: true
   plan:
@@ -486,7 +486,7 @@ groups:
     - finish-<%=dep_name%>-<%= line %>-story
     - build-<%=dep_name%>-<%= line %>
     <% end %>
-    <% if dep_name == :dotnet %>
+    <% if dep_name == 'dotnet-sdk' %>
     - extract-dotnet-runtime-from-sdk-<%= line %>
     <% end %>
     <% end %>
@@ -513,7 +513,7 @@ groups:
     - finish-<%=dep_name%>-<%= line %>-story
     - build-<%=dep_name%>-<%= line %>
     <% end %>
-    <% if dep_name == :dotnet %>
+    <% if dep_name == 'dotnet-sdk' %>
     - extract-dotnet-runtime-from-sdk-<%= line %>
     <% end %>
     <% end %>
