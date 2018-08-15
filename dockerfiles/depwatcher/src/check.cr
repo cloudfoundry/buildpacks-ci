@@ -42,8 +42,8 @@ when "ca_apm_agent"
   versions = Depwatcher::CaApmAgent.new.check
 when "appd_agent"
   versions = Depwatcher::AppDynamicsAgent.new.check
-when "dotnet"
-  versions = Depwatcher::Dotnet.new.check(source["tag_regex"].to_s)
+when "dotnet-sdk"
+  versions = Depwatcher::DotnetSdk.new.check(source["tag_regex"].to_s)
 when "dotnet-runtime"
   versions = Depwatcher::DotnetRuntime.new.check
 else

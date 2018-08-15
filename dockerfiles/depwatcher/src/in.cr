@@ -48,8 +48,8 @@ when "ca_apm_agent"
   version = Depwatcher::CaApmAgent.new.in(version["ref"].to_s)
 when "appd_agent"
   version = Depwatcher::AppDynamicsAgent.new.in(version["ref"].to_s)
-when "dotnet"
-  version = Depwatcher::Dotnet.new.in(version["ref"].to_s, source["tag_regex"].to_s)
+when "dotnet-sdk"
+  version = Depwatcher::DotnetSdk.new.in(version["ref"].to_s, source["tag_regex"].to_s)
 when "dotnet-runtime"
   version = Depwatcher::DotnetRuntime.new.in(version["ref"].to_s)
 else
