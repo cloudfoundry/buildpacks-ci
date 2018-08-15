@@ -7,7 +7,6 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: version
-  # - name: new-cves-artifacts
 run:
   path: bash
   args:
@@ -17,5 +16,4 @@ params:
   TRACKER_PROJECT_ID:
   TRACKER_REQUESTER_ID:
   TRACKER_API_TOKEN:
-  DAVOS_TOKEN:
   STACK:
