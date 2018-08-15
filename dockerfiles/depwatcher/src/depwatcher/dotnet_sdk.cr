@@ -4,7 +4,7 @@ require "./github_releases"
 require "./github_tags"
 
 module Depwatcher
-  class Dotnet < Base
+  class DotnetSdk < Base
     class DotnetRelease
       JSON.mapping(
         ref: String,

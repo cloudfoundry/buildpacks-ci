@@ -1,8 +1,8 @@
 require "spec2"
 require "./httpclient_mock"
-require "../../src/depwatcher/dotnet"
+require "../../src/depwatcher/dotnet_sdk"
 
-Spec2.describe Depwatcher::Dotnet do
+Spec2.describe Depwatcher::DotnetSdk do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
 
@@ -18,7 +18,7 @@ Spec2.describe Depwatcher::Dotnet do
   end
 
   describe "#check" do
-    it "returns dotnet release versions sorted" do
+    it "returns dotnet sdk release versions sorted" do
       expect(subject.check(".*\\+dependencies").map(&.ref)).to eq [
         "2.1.103", "2.1.104", "2.1.105", "2.1.200", "2.1.301",
       ]
@@ -26,7 +26,7 @@ Spec2.describe Depwatcher::Dotnet do
   end
 
   describe "#in" do
-    it "returns a dotnet release" do
+    it "returns a dotnet sdk release" do
       obj = subject.in("2.1.301", ".*\\+dependencies")
       expect(obj.ref).to eq "2.1.301"
       expect(obj.url).to eq "https://github.com/dotnet/cli"
