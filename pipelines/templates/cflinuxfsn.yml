@@ -494,6 +494,21 @@ jobs: ##########################################################################
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
+  - name: check-for-race-condition
+    serial: true
+    serial_groups: [ <%= rootfs_name %> ]
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: version
+          passed: [ cats ]
+          trigger: true
+        - get: latest-version
+          resource: version
+      - task: check-for-rootfs-race-condition
+        file: buildpacks-ci/tasks/check-for-rootfs-race-condition/task.yml
+
   - name: delete-deployment
     serial: true
     serial_groups: [ <%= rootfs_name %> ]
@@ -501,7 +516,7 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: version
-          passed: [ cats ]
+          passed: [ check-for-race-condition ]
           trigger: true
         - get: bbl-state
         - get: buildpacks-ci
