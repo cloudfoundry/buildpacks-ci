@@ -2,7 +2,6 @@
 
 require_relative './categorize-security-notices.rb'
 require_relative '../../lib/tracker-client.rb'
-require_relative '../../lib/davos_client.rb'
 
 tracker_api_token = ENV.fetch('TRACKER_API_TOKEN')
 tracker_project_id = ENV.fetch('TRACKER_PROJECT_ID')

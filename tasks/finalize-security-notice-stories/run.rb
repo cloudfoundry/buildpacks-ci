@@ -2,7 +2,6 @@
 
 require_relative './finalize-security-notice-stories'
 require_relative '../../lib/tracker-client.rb'
-require_relative '../../lib/davos_client.rb'
 
 new_stack_version = File.read('version/number').strip.gsub(/-rc.*/, '')
 token = ENV.fetch('TRACKER_API_TOKEN')
