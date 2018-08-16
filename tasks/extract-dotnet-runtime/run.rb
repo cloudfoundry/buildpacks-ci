@@ -88,7 +88,10 @@ class ExtractDotnetRuntime
     end
 
     @dotnet_runtime_versions.each do |version|
-      runtime_build_file = File.join(output_dir, 'binary-builds-new', 'dotnet-runtime', "#{version}-#{@stack}.json")
+      dotnet_runtime_dir = File.join(output_dir, 'binary-builds-new', 'dotnet-runtime')
+      Dir.mkdir(dotnet_runtime_dir) unless File.exists?(dotnet_runtime_dir)
+
+      runtime_build_file = File.join(dotnet_runtime_dir, "#{version}-#{@stack}.json")
 
       md5sum = Digest::MD5.file(dotnet_runtime_tar(version)).hexdigest
       shasum = Digest::SHA256.file(dotnet_runtime_tar(version)).hexdigest
