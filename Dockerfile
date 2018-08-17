@@ -35,10 +35,10 @@ RUN apt-get update \
   python-dev \
   python-pip \
   shellcheck \
+  vim \
   wget \
   zip \
   google-chrome-stable && \
-  vim && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN curl -sSL https://get.docker.com/ | sh
