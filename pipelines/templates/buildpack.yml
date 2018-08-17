@@ -306,12 +306,14 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - get: buildpacks-ci
-      - get: buildpack
-        resource: buildpack-develop
-        trigger: true
-      - task: check-modules
-        file: buildpacks-ci/tasks/check-php-modules-in-manifest/task.yml
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-develop
+          trigger: true
+      - do:
+        - task: check-modules
+          file: buildpacks-ci/tasks/check-php-modules-in-manifest/task.yml
 <% end %>
   - name: specs-unit-develop
     serial: true
