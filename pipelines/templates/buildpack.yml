@@ -1,6 +1,6 @@
 <% compile_extensions = %w(php) %>
 <% no_brats = %w(credhub hwc multi r) %>
-<% non_published = %(apt credhub hwc multi r) %>
+<% non_published = %(apt credhub hwc multi r nginx) %>
 <% push_to_pws = %(hwc) %>
 <% non_lts = %(apt credhub hwc) %>
 <% skip_docker_start = %w(binary r) %>
