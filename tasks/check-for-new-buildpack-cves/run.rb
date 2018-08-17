@@ -8,7 +8,7 @@ require "#{buildpacks_ci_dir}/lib/cve-history"
 require "#{buildpacks_ci_dir}/lib/notifiers/cve-slack-notifier"
 
 def notify!(language, new_cves, notifiers)
-  notifiers.each { |n| n.notify! new_cves, { :category => "buildpack-#{language}", :label => language } }
+  notifiers.each { |n| n.notify! new_cves, { :category => "buildpack-#{language}", :label => language }, ''}
 end
 
 buildpack_cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'output-new-buildpack-cves', 'new-buildpack-cve-notifications'))
