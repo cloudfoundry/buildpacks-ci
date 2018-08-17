@@ -38,6 +38,7 @@ RUN apt-get update \
   wget \
   zip \
   google-chrome-stable && \
+  vim && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN curl -sSL https://get.docker.com/ | sh
