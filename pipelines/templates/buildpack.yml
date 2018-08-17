@@ -45,8 +45,8 @@ resource_types:
 resources: ############################################################################################################
 
   ## cf-space-resource ##
-
-  - name: cf-bp-space
+<% stacks[language].each do |stack| %>
+  - name: cf-bp-space-<%= stack %>
     type: cf-space-resource
     source:
       target: api.edge.buildpacks-gcp.ci.cf-app.com
@@ -55,7 +55,7 @@ resources: #####################################################################
       organization: pivotal
 
 <% unless no_brats.include?(language) %>
-  - name: cf-brat-space
+  - name: cf-brat-space-<%= stack %>
     type: cf-space-resource
     source:
       target: api.edge.buildpacks-gcp.ci.cf-app.com
@@ -63,9 +63,10 @@ resources: #####################################################################
       password: {{ci_cf_edge_password}}
       organization: pivotal
 <% end %>
+<% end %>
 
 <% unless non_lts.include? language %>
-  - name: cf-lts-space
+  - name: cf-lts-space-cflinuxfs2
     type: cf-space-resource
     source:
       target: {{ci-cf-lts-target}}
@@ -74,7 +75,7 @@ resources: #####################################################################
       organization: pivotal
 
 <% unless no_brats.include?(language) %>
-  - name: cf-lts-brat-space
+  - name: cf-lts-brat-space-cflinuxfs2
     type: cf-space-resource
     source:
       target: {{ci-cf-lts-target}}
@@ -415,27 +416,30 @@ jobs: ##########################################################################
       - do:
         - task: unit
           file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
-        - put: cf-bp-space
         - aggregate:
 <% stacks[language].each do |stack| %>
-          - task: ginkgo-<%= stack %>
-            file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
-            params:
-              CF_STACK: <%= stack %>
-              GINKGO_ATTEMPTS: 4
-              GINKGO_NODES: 6
-              <% if language == 'php' %>
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              <% end %>
-  <% if skip_docker_start.include?(language) %>
-              SKIP_DOCKER_START: true
-  <% else %>
-            privileged: true
-  <% end %>
+          - do:
+            - put: cf-bp-space-<%= stack %>
+            - task: ginkgo-<%= stack %>
+              file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+              params:
+                CF_STACK: <%= stack %>
+                GINKGO_ATTEMPTS: 4
+                GINKGO_NODES: 6
+                <% if language == 'php' %>
+                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+                <% end %>
+    <% if skip_docker_start.include?(language) %>
+                SKIP_DOCKER_START: true
+    <% else %>
+              privileged: true
+    <% end %>
+            ensure:
+              task: delete-cf-space-<%= stack %>
+              file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
+              params:
+                CF_STACK: <%= stack %>
 <% end %>
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
         on_success:
           task: github-set-status-success
           file: buildpacks-ci/tasks/set-status-success/task.yml
@@ -485,8 +489,8 @@ jobs: ##########################################################################
       - do:
         - task: unit
           file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
-        - put: cf-bp-space
-          resource: cf-lts-space
+        - put: cf-bp-space-cflinuxfs2
+          resource: cf-lts-space-cflinuxfs2
         - task: ginkgo-cflinuxfs2
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           params:
@@ -503,8 +507,10 @@ jobs: ##########################################################################
           privileged: true
 <% end %>
           ensure:
-            task: delete-cf-space
+            task: delete-cf-space-cflinuxfs2
             file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
+            params:
+              CF_STACK: cflinuxfs2
         on_success:
           task: github-set-status-success
           file: buildpacks-ci/tasks/set-status-success/task.yml
@@ -702,27 +708,30 @@ jobs: ##########################################################################
           - get: repo
             resource: buildpack-develop
         - do:
-          - put: cf-bp-space
           - aggregate:
 <% stacks[language].each do |stack| %>
-            - task: ginkgo-<%= stack %>
-              file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
-              params:
-                CF_STACK: <%= stack %>
-                GINKGO_ATTEMPTS: 4
-                GINKGO_NODES: 6
-                <% if language == 'php' %>
-                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-                <% end %>
-  <% if skip_docker_start.include?(language) %>
-                SKIP_DOCKER_START: true
-  <% else %>
-              privileged: true
-  <% end %>
+            - do:
+              - put: cf-bp-space-<%= stack %>
+              - task: ginkgo-<%= stack %>
+                file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+                params:
+                  CF_STACK: <%= stack %>
+                  GINKGO_ATTEMPTS: 4
+                  GINKGO_NODES: 6
+                  <% if language == 'php' %>
+                  COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+                  <% end %>
+    <% if skip_docker_start.include?(language) %>
+                  SKIP_DOCKER_START: true
+    <% else %>
+                privileged: true
+    <% end %>
+              ensure:
+                task: delete-cf-space-<%= stack %>
+                file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
+                params:
+                  CF_STACK: <%= stack %>
 <% end %>
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
         on_failure:
           put: failure-alert
           params:
@@ -748,20 +757,23 @@ jobs: ##########################################################################
             passed:
             - specs-unit-develop
         - do:
-          - put: cf-brat-space
           - aggregate:
 <% stacks[language].each do |stack| %>
-            - task: brats-<%= stack %>
-              file: buildpacks-ci/tasks/run-bp-brats/task.yml
-              input_mapping: {cf-space: cf-brat-space}
-              params:
-                CF_STACK: <%= stack %>
-                GINKGO_ATTEMPTS: 4
-                GINKGO_NODES: 6
+            - do:
+              - put: cf-brat-space-<%= stack %>
+              - task: brats-<%= stack %>
+                file: buildpacks-ci/tasks/run-bp-brats/task.yml
+                input_mapping: {cf-space-<%= stack %>: cf-brat-space-<%= stack %>}
+                params:
+                  CF_STACK: <%= stack %>
+                  GINKGO_ATTEMPTS: 4
+                  GINKGO_NODES: 6
+              ensure:
+                task: delete-cf-space-<%= stack %>
+                file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+                params:
+                  CF_STACK: <%= stack %>
 <% end %>
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
         on_failure:
           put: failure-alert
           params:
@@ -815,8 +827,8 @@ jobs: ##########################################################################
           - get: repo
             resource: buildpack-develop
         - do:
-          - put: cf-bp-space
-            resource: cf-lts-space
+          - put: cf-bp-space-cflinuxfs2
+            resource: cf-lts-space-cflinuxfs2
           - task: ginkgo-cflinuxfs2
             file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
             params:
@@ -833,8 +845,10 @@ jobs: ##########################################################################
             privileged: true
 <% end %>
           ensure:
-            task: delete-cf-space
+            task: delete-cf-space-cflinuxfs2
             file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
+            params:
+              CF_STACK: cflinuxfs2
         on_failure:
           put: failure-alert
           params:
@@ -860,18 +874,20 @@ jobs: ##########################################################################
             passed:
             - specs-unit-develop
         - do:
-          - put: cf-brat-space
-            resource: cf-lts-brat-space
+          - put: cf-brat-space-cflinuxfs2
+            resource: cf-lts-brat-space-cflinuxfs2
           - task: brats-cflinuxfs2
             file: buildpacks-ci/tasks/run-bp-brats/task.yml
-            input_mapping: {cf-space: cf-brat-space}
+            input_mapping: {cf-space-cflinuxfs2: cf-brat-space-cflinuxfs2}
             params:
               CF_STACK: cflinuxfs2
               GINKGO_ATTEMPTS: 4
               GINKGO_NODES: 6
           ensure:
-            task: delete-cf-space
+            task: delete-cf-space-cflinuxfs2
             file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+            params:
+              CF_STACK: cflinuxfs2
         on_failure:
           put: failure-alert
           params:
