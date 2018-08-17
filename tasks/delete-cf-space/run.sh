@@ -5,5 +5,5 @@ set -o nounset
 set -o pipefail
 
 "./cf-space-$CF_STACK/login"
-SPACE="$(cat cf-space-$CF_STACK/name)"
+SPACE="$(cat cf-space-"$CF_STACK"/name)"
 cf delete-space -f "$SPACE" || true
