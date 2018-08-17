@@ -155,11 +155,9 @@ when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower'
                     url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
                   })
 when 'ruby'
-  run('apt', 'update')
-  run('apt-get', 'install', '-y', 'libffi-dev')
-
   major, minor, _ = version.split('.')
   if major == '2' && stack == 'cflinuxfs3' && (minor == '3' || minor == '2')
+    run('apt', 'update')
     run('apt-get', 'install', '-y', 'libssl1.0-dev')
   end
 
@@ -347,8 +345,6 @@ when 'python'
                   })
 when 'httpd'
   Dir.chdir('binary-builder') do
-    run('apt', 'update')
-    run('apt-get', 'install', '-y', 'libldap2-dev')
     run('./bin/binary-builder', '--name=httpd', "--version=#{version}", "--sha256=#{data.dig('version', 'sha256')}")
   end
   old_file = "binary-builder/httpd-#{version}-linux-x64.tgz"
