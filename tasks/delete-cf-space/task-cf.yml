@@ -6,6 +6,15 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: cf-space
+  - name: cf-space-cflinuxfs2
+    optional: true
+  - name: cf-space-cflinuxfs3
+    optional: true
+  - name: cf-space-windows2012R2
+    optional: true
+  - name: cf-space-windows2016
+    optional: true
 run:
   path: buildpacks-ci/tasks/delete-cf-space/run.sh
+params:
+  CF_STACK:
