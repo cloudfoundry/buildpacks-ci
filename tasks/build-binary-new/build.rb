@@ -15,7 +15,7 @@ def run(*args)
   raise "Could not run #{args}" unless $?.success?
 end
 
-def binary_builder(name, extra_arg, old_filename, presha, ext)
+def binary_builder(name, extension_file, old_filename, filename_prefix, ext)
   if $data.dig('version', 'md5_digest') 
     digest_arg = "--md5=#{$data.dig('version', 'md5_digest')}"
   elsif $data.dig('version', 'sha256')
@@ -25,19 +25,19 @@ def binary_builder(name, extra_arg, old_filename, presha, ext)
   end
 
   Dir.chdir('binary-builder') do
-    if extra_arg && extra_arg != ""
+    if extension_file && extension_file != ""
       run('./bin/binary-builder', "--name=#{name}", "--version=#{$version}", digest_arg, extra_arg)
     else
       run('./bin/binary-builder', "--name=#{name}", "--version=#{$version}", digest_arg)
     end
   end
 
-  finalize_outputs("binary-builder/#{old_filename}", presha, ext)
+  finalize_outputs("binary-builder/#{old_filename}", filename_prefix, ext)
 end
 
-def finalize_outputs(old_filepath, presha, ext)
+def finalize_outputs(old_filepath, filename_prefix, ext)
   sha = Digest::SHA256.hexdigest(open(old_filepath).read)
-  filename = "#{presha}-#{sha[0..7]}#{ext}"
+  filename = "#{filename_prefix}-#{sha[0..7]}#{ext}"
   FileUtils.mv(old_filepath, "artifacts/#{filename}")
 
   {
@@ -76,24 +76,39 @@ def main()
 
   case $name
   when 'bundler'
-    out_data.merge!(binary_builder('bundler', "", "bundler-#{$version}.tgz", "bundler-#{$version}-#{stack}", '.tgz'))
+    out_data.merge!(binary_builder("#{$name}", "", "#{$name}-#{$version}.tgz", "#{$name}-#{$version}-#{stack}", '.tgz'))
   when 'hwc'
     out_data.merge!(binary_builder('hwc', "", "hwc-#{$version}-windows-amd64.zip", "hwc-#{$version}-windows-amd64", '.zip'))
-  when 'dep'
-    out_data.merge!(binary_builder('dep', "", "dep-v#{$version}-linux-x64.tgz", "dep-v#{$version}-linux-x64-#{stack}", '.tgz'))
-  when 'glide'
-    out_data.merge!(binary_builder('glide', "", "glide-linux-x64.tgz", "glide-v#{$version}-linux-x64-#{stack}", '.tgz'))
-  when 'godep'
-    out_data.merge!(binary_builder('godep', "", "godep-linux-x64.tgz", "godep-v#{$version}-linux-x64-#{stack}", '.tgz'))
+  when 'dep', 'glide', 'godep'
+    out_data.merge!(binary_builder("#{$name}", "", "#{$name}-v#{$version}-linux-x64.tgz", "#{$name}-v#{$version}-linux-x64-#{stack}", '.tgz'))
   when 'go'
     out_data.merge!(binary_builder('go', "", "go#{$version}.linux-amd64.tar.gz", "go#{$version}.linux-amd64-#{stack}", '.tar.gz'))
-  when 'node'
-    out_data.merge!(binary_builder('node', "", "node-#{$version}-linux-x64.tgz", "node-#{$version}-linux-x64-#{stack}", '.tgz'))
-  when 'httpd'
-    out_data.merge!(binary_builder('httpd', '', "httpd-#{$version}-linux-x64.tgz", "httpd-#{$version}-linux-x64-#{stack}", '.tgz'))
+  when 'node', 'httpd'
+    out_data.merge!(binary_builder("#{$name}", "", "#{$name}-#{$version}-linux-x64.tgz", "#{$name}-#{$version}-linux-x64-#{stack}", '.tgz'))
   when 'nginx-static'
     $data['version']['sha256'] = Digest::SHA256.hexdigest(open($data.dig('version', 'url')).read)
-    out_data.merge!(binary_builder('nginx', '', "nginx-#{$version}-linux-x64.tgz", "nginx-#{$version}-linux-x64-#{stack}", '.tgz'))
+    out_data.merge!(binary_builder('nginx', "", "nginx-#{$version}-linux-x64.tgz", "nginx-#{$version}-linux-x64-#{stack}", '.tgz'))
+
+  when 'CAAPM', 'appdynamics', 'miniconda2', 'miniconda3'
+    results = check_sha()
+    out_data.merge!({
+                      sha256: results[1],
+                      url: $url
+                    })
+
+  when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower'
+    results = check_sha()
+    sha = results[1]
+    filename = File.basename($url).gsub(/(\.(zip|tar\.gz|tar\.xz|tgz))$/, "-#{sha[0..7]}\\1")
+    File.write("artifacts/#{filename}", results[0])
+
+    out_data.merge!({
+                      sha256: sha,
+                      url: "https://buildpacks.cloudfoundry.org/dependencies/#{$name}/#{filename}"
+                    })
+
+  when 'composer'
+    out_data.merge!(finalize_outputs("source/composer.phar", "composer-#{$version}", '.phar'))
 
   when 'ruby'
     major, minor, _ = $version.split('.')
@@ -139,48 +154,6 @@ def main()
     end
     out_data.merge!(binary_builder('python', '', "python-#{$version}-linux-x64.tgz", "python-#{$version}-linux-x64-#{stack}", '.tgz'))
 
-  when 'dotnet-sdk'
-    commit_sha = $data.dig('version', 'git_commit_sha')
-
-    GitClient.clone_repo('https://github.com/dotnet/cli.git', 'cli')
-
-    major, minor, patch = $version.split('.')
-    Dir.chdir('cli') do
-      GitClient.checkout_branch(commit_sha)
-      run('apt-get', 'update')
-      run('apt-get', '-y', 'upgrade')
-      fs_specific_packages = stack == 'cflinuxfs2' ? ['liburcu1', 'libllvm3.6', 'liblldb-3.6'] : ['liburcu6', 'libllvm3.9', 'liblldb-3.9']
-      run('apt-get', '-y', 'install', 'clang', 'devscripts', 'debhelper', 'libunwind8', 'libpython2.7', 'liblttng-ust0', *fs_specific_packages)
-
-      ENV['DropSuffix'] = 'true'
-      ENV['TERM'] = 'linux'
-
-      # We must fix the build script for dotnet-sdk versions 2.1.4 to 2.1.2XX (see https://github.com/dotnet/cli/issues/8358)
-      if major == '2' && minor == '1' && patch.to_i >= 4 && patch.to_i < 300
-        runbuildsh = File.open('run-build.sh', 'r') { |f| f.read }
-        runbuildsh.gsub!('WriteDynamicPropsToStaticPropsFiles "${args[@]}"', 'WriteDynamicPropsToStaticPropsFiles')
-        File.open('run-build.sh ', 'w') { |f| f.write runbuildsh }
-      end
-
-      run('./build.sh', '/t:Compile')
-    end
-
-    # The path to the built files changes in dotnet-v2.1.300
-    has_artifacts_dir = major.to_i <= 2 && minor.to_i <= 1 && patch.to_i < 300
-    old_filepath = "/tmp/#{$name}.#{$version}.linux-amd64.tar.xz"
-    Dir.chdir(if has_artifacts_dir
-                Dir['cli/artifacts/*-x64/stage2'][0]
-              else
-                'cli/bin/2/linux-x64/dotnet'
-              end) do
-      system('tar', 'Jcf', old_filepath, '.')
-    end
-
-    out_data.merge!(finalize_outputs(old_filepath, "#{$name}.#{$version}.linux-amd64-#{stack}", '.tar.xz'))
-    out_data.merge!({
-                      version: $version,
-                      git_commit_sha: commit_sha
-                    })
   when 'pipenv'
     old_filepath = "/tmp/pipenv-v#{$version}.tgz"
     run('apt', 'update')
@@ -199,25 +172,6 @@ def main()
       end
     end
     out_data.merge!(finalize_outputs(old_filepath, "pipenv-v#{$version}-#{stack}" , '.tgz'))
-  when 'CAAPM', 'appdynamics', 'miniconda2', 'miniconda3'
-    results = check_sha()
-    out_data.merge!({
-                      sha256: results[1],
-                      url: $url
-                    })
-  when 'composer'
-    out_data.merge!(finalize_outputs("source/composer.phar", "composer-#{$version}", '.phar'))
-
-  when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower'
-    results = check_sha()
-    sha = results[1]
-    filename = File.basename($url).gsub(/(\.(zip|tar\.gz|tar\.xz|tgz))$/, "-#{sha[0..7]}\\1")
-    File.write("artifacts/#{filename}", results[0])
-
-    out_data.merge!({
-                      sha256: sha,
-                      url: "https://buildpacks.cloudfoundry.org/dependencies/#{$name}/#{filename}"
-                    })
 
   when 'libunwind'
     built_path = File.join(Dir.pwd, 'built')
@@ -330,6 +284,49 @@ def main()
 
     out_data.merge!(finalize_outputs("artifacts/nginx-#{$version}.tgz", "nginx-#{$version}-linux-x64-#{stack}", '.tgz'))
     out_data[:source_pgp] = source_pgp
+
+  when 'dotnet-sdk'
+    commit_sha = $data.dig('version', 'git_commit_sha')
+
+    GitClient.clone_repo('https://github.com/dotnet/cli.git', 'cli')
+
+    major, minor, patch = $version.split('.')
+    Dir.chdir('cli') do
+      GitClient.checkout_branch(commit_sha)
+      run('apt-get', 'update')
+      run('apt-get', '-y', 'upgrade')
+      fs_specific_packages = stack == 'cflinuxfs2' ? ['liburcu1', 'libllvm3.6', 'liblldb-3.6'] : ['liburcu6', 'libllvm3.9', 'liblldb-3.9']
+      run('apt-get', '-y', 'install', 'clang', 'devscripts', 'debhelper', 'libunwind8', 'libpython2.7', 'liblttng-ust0', *fs_specific_packages)
+
+      ENV['DropSuffix'] = 'true'
+      ENV['TERM'] = 'linux'
+
+      # We must fix the build script for dotnet-sdk versions 2.1.4 to 2.1.2XX (see https://github.com/dotnet/cli/issues/8358)
+      if major == '2' && minor == '1' && patch.to_i >= 4 && patch.to_i < 300
+        runbuildsh = File.open('run-build.sh', 'r') { |f| f.read }
+        runbuildsh.gsub!('WriteDynamicPropsToStaticPropsFiles "${args[@]}"', 'WriteDynamicPropsToStaticPropsFiles')
+        File.open('run-build.sh ', 'w') { |f| f.write runbuildsh }
+      end
+
+      run('./build.sh', '/t:Compile')
+    end
+
+    # The path to the built files changes in dotnet-v2.1.300
+    has_artifacts_dir = major.to_i <= 2 && minor.to_i <= 1 && patch.to_i < 300
+    old_filepath = "/tmp/#{$name}.#{$version}.linux-amd64.tar.xz"
+    Dir.chdir(if has_artifacts_dir
+                Dir['cli/artifacts/*-x64/stage2'][0]
+              else
+                'cli/bin/2/linux-x64/dotnet'
+              end) do
+      system('tar', 'Jcf', old_filepath, '.')
+    end
+
+    out_data.merge!(finalize_outputs(old_filepath, "#{$name}.#{$version}.linux-amd64-#{stack}", '.tar.xz'))
+    out_data.merge!({
+                      version: $version,
+                      git_commit_sha: commit_sha
+                    })
 
   else
     raise("Dependency: #{$name} is not currently supported")
