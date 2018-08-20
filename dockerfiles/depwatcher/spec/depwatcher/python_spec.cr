@@ -24,7 +24,7 @@ Spec2.describe Depwatcher::Python do
       obj = subject.in("3.5.5")
       expect(obj.ref).to eq "3.5.5"
       expect(obj.url).to eq "https://www.python.org/ftp/python/3.5.5/Python-3.5.5.tgz"
-      expect(obj.md5).to eq "7c825b747d25c11e669e99b912398585"
+      expect(obj.md5_digest).to eq "7c825b747d25c11e669e99b912398585"
     end
   end
 end
