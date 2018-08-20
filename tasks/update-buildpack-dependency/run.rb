@@ -66,7 +66,12 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   added += (new_versions - old_versions).uniq.sort
   removed += (old_versions - new_versions).uniq.sort
-  rebuilt = old_versions.include?(resource_version)
+  rebuilt += old_versions.include?(resource_version)
+end
+
+rebuilt = rebuilt.all?()
+if rebuilt
+  puts 'REBUILD: skipping most version updating logic'
 end
 
 if added.empty? && !rebuilt
@@ -106,6 +111,7 @@ end
 #   Update the default version for the relevant line to this version of PHP (if !rebuilt)
 php_defaults = nil
 if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
+  update_default = false
   case resource_version
   when /^5.6/
     varname = 'PHP_56_LATEST'
@@ -115,6 +121,7 @@ if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
     varname = 'PHP_71_LATEST'
   when /^7.2/
     varname = 'PHP_72_LATEST'
+    update_default = true
   else
     puts "Unexpected version #{resource_version} is not in known version lines."
     exit 1
@@ -122,6 +129,9 @@ if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
 
   php_defaults = JSON.parse(open('buildpack/defaults/options.json').read)
   php_defaults[varname] = resource_version
+  if update_default
+    php_defaults['PHP_DEFAULT'] = resource_version
+  end
 end
 
 #
