@@ -7,9 +7,9 @@ module Depwatcher
       JSON.mapping(
         ref: String,
         url: String,
-        md5: String,
+        md5_digest: String,
       )
-      def initialize(@ref : String, @url : String, @md5 : String)
+      def initialize(@ref : String, @url : String, @md5_digest : String)
       end
     end
 
@@ -33,10 +33,10 @@ module Depwatcher
       tr = a.xpath("./ancestor::tr")
       raise "Could not parse python release (tr) website" unless tr.is_a?(XML::NodeSet)
       tr = tr.first
-      md5 = tr.xpath("./td[position()=4]")
-      raise "Could not parse python release (md5) website" unless md5.is_a?(XML::NodeSet)
+      md5_digest = tr.xpath("./td[position()=4]")
+      raise "Could not parse python release (md5_digest) website" unless md5_digest.is_a?(XML::NodeSet)
 
-      Release.new(ref, a["href"], md5.first.text)
+      Release.new(ref, a["href"], md5_digest.first.text)
     end
   end
 end
