@@ -66,7 +66,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   added += (new_versions - old_versions).uniq.sort
   removed += (old_versions - new_versions).uniq.sort
-  rebuilt += old_versions.include?(resource_version)
+  rebuilt += [old_versions.include?(resource_version)]
 end
 
 rebuilt = rebuilt.all?()
