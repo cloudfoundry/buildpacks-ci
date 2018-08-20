@@ -37,7 +37,7 @@ end
 
 def finalize_outputs(old_filepath, filename_prefix, ext)
   sha = Digest::SHA256.hexdigest(open(old_filepath).read)
-  filename = "#{filename_prefix}-#{sha[0..7]}#{ext}"
+  filename = "#{filename_prefix}-#{sha[0..7]}.#{ext}"
   FileUtils.mv(old_filepath, "artifacts/#{filename}")
 
   {
