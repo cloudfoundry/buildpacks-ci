@@ -21,7 +21,7 @@ def binary_builder(name, extension_file, old_filename, filename_prefix, ext)
   elsif $data.dig('version', 'sha256')
     digest_arg = "--sha256=#{$data.dig('version', 'sha256')}"
   else
-    digest_arg = "--sha256" # because php5 doesn't have a sha
+    digest_arg = "--sha256=" # because php5 doesn't have a sha
   end
 
   Dir.chdir('binary-builder') do
@@ -76,18 +76,18 @@ def main()
 
   case $name
   when 'bundler'
-    out_data.merge!(binary_builder("#{$name}", "", "#{$name}-#{$version}.tgz", "#{$name}-#{$version}-#{stack}", '.tgz'))
+    out_data.merge!(binary_builder("#{$name}", "", "#{$name}-#{$version}.tgz", "#{$name}-#{$version}-#{stack}", 'tgz'))
   when 'hwc'
-    out_data.merge!(binary_builder('hwc', "", "hwc-#{$version}-windows-amd64.zip", "hwc-#{$version}-windows-amd64", '.zip'))
+    out_data.merge!(binary_builder('hwc', "", "hwc-#{$version}-windows-amd64.zip", "hwc-#{$version}-windows-amd64", 'zip'))
   when 'dep', 'glide', 'godep'
-    out_data.merge!(binary_builder("#{$name}", "", "#{$name}-v#{$version}-linux-x64.tgz", "#{$name}-v#{$version}-linux-x64-#{stack}", '.tgz'))
+    out_data.merge!(binary_builder("#{$name}", "", "#{$name}-v#{$version}-linux-x64.tgz", "#{$name}-v#{$version}-linux-x64-#{stack}", 'tgz'))
   when 'go'
-    out_data.merge!(binary_builder('go', "", "go#{$version}.linux-amd64.tar.gz", "go#{$version}.linux-amd64-#{stack}", '.tar.gz'))
+    out_data.merge!(binary_builder('go', "", "go#{$version}.linux-amd64.tar.gz", "go#{$version}.linux-amd64-#{stack}", 'tar.gz'))
   when 'node', 'httpd'
-    out_data.merge!(binary_builder("#{$name}", "", "#{$name}-#{$version}-linux-x64.tgz", "#{$name}-#{$version}-linux-x64-#{stack}", '.tgz'))
+    out_data.merge!(binary_builder("#{$name}", "", "#{$name}-#{$version}-linux-x64.tgz", "#{$name}-#{$version}-linux-x64-#{stack}", 'tgz'))
   when 'nginx-static'
     $data['version']['sha256'] = Digest::SHA256.hexdigest(open($data.dig('version', 'url')).read)
-    out_data.merge!(binary_builder('nginx', "", "nginx-#{$version}-linux-x64.tgz", "nginx-#{$version}-linux-x64-#{stack}", '.tgz'))
+    out_data.merge!(binary_builder('nginx', "", "nginx-#{$version}-linux-x64.tgz", "nginx-#{$version}-linux-x64-#{stack}", 'tgz'))
 
   when 'CAAPM', 'appdynamics', 'miniconda2', 'miniconda3'
     results = check_sha()
@@ -108,7 +108,7 @@ def main()
                     })
 
   when 'composer'
-    out_data.merge!(finalize_outputs("source/composer.phar", "composer-#{$version}", '.phar'))
+    out_data.merge!(finalize_outputs("source/composer.phar", "composer-#{$version}", 'phar'))
 
   when 'ruby'
     major, minor, _ = $version.split('.')
@@ -116,7 +116,7 @@ def main()
       run('apt', 'update')
       run('apt-get', 'install', '-y', 'libssl1.0-dev')
     end
-    out_data.merge!(binary_builder('ruby', "", "ruby-#{$version}-linux-x64.tgz", "ruby-#{$version}-linux-x64-#{stack}", '.tgz'))
+    out_data.merge!(binary_builder('ruby', "", "ruby-#{$version}-linux-x64.tgz", "ruby-#{$version}-linux-x64-#{stack}", 'tgz'))
 
   when 'jruby'
     if /9.1.*/ =~ $version
@@ -128,7 +128,7 @@ def main()
     else
       raise "Unsupported jruby version line #{$version}"
     end
-    out_data.merge!(binary_builder('jruby', "", "jruby-#{$version}_ruby-#{ruby_version}-linux-x64.tgz", "jruby-#{$version}_ruby-#{ruby_version}-linux-x64-#{stack}", '.tgz'))
+    out_data.merge!(binary_builder('jruby', "", "jruby-#{$version}_ruby-#{ruby_version}-linux-x64.tgz", "jruby-#{$version}_ruby-#{ruby_version}-linux-x64-#{stack}", 'tgz'))
 
   when 'php'
     if $version.start_with?("7")
@@ -144,7 +144,7 @@ def main()
     if $version.start_with?('7.2.')
       extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php72-extensions.yml")
     end
-    out_data.merge!(binary_builder('php', "--php-extensions-file=#{extension_file}", "php#{phpV}-#{$version}-linux-x64.tgz", "php#{phpV}-#{$version}-linux-x64-#{stack}", '.tgz'))
+    out_data.merge!(binary_builder("php#{phpV}", "--php-extensions-file=#{extension_file}", "php#{phpV}-#{$version}-linux-x64.tgz", "php#{phpV}-#{$version}-linux-x64-#{stack}", 'tgz'))
 
   when 'python'
     major, minor, _ = $version.split('.')
@@ -152,7 +152,7 @@ def main()
       run('apt', 'update')
       run('apt-get', 'install', '-y', 'libssl1.0-dev')
     end
-    out_data.merge!(binary_builder('python', '', "python-#{$version}-linux-x64.tgz", "python-#{$version}-linux-x64-#{stack}", '.tgz'))
+    out_data.merge!(binary_builder('python', '', "python-#{$version}-linux-x64.tgz", "python-#{$version}-linux-x64-#{stack}", 'tgz'))
 
   when 'pipenv'
     old_filepath = "/tmp/pipenv-v#{$version}.tgz"
@@ -171,7 +171,7 @@ def main()
         run('tar', 'zcvf', old_filepath, '.')
       end
     end
-    out_data.merge!(finalize_outputs(old_filepath, "pipenv-v#{$version}-#{stack}" , '.tgz'))
+    out_data.merge!(finalize_outputs(old_filepath, "pipenv-v#{$version}-#{stack}" , 'tgz'))
 
   when 'libunwind'
     built_path = File.join(Dir.pwd, 'built')
@@ -191,7 +191,7 @@ def main()
       run('tar', 'czf', old_filename, 'include', 'lib')
     end
 
-    out_data.merge!(finalize_outputs(File.join(built_path, old_filename), "libunwind-#{$version}-#{stack}", '.tar.gz'))
+    out_data.merge!(finalize_outputs(File.join(built_path, old_filename), "libunwind-#{$version}-#{stack}", 'tar.gz'))
 
   when 'r'
     artifacts = "#{Dir.pwd}/artifacts"
@@ -236,7 +236,7 @@ def main()
       end
     end
 
-    out_data.merge!(finalize_outputs("artifacts/r-v#{$version}.tgz", "r-v#{$version}-#{stack}", '.tgz'))
+    out_data.merge!(finalize_outputs("artifacts/r-v#{$version}.tgz", "r-v#{$version}-#{stack}", 'tgz'))
     out_data[:source_sha256] = source_sha
 
   when 'nginx'
@@ -282,7 +282,7 @@ def main()
       end
     end
 
-    out_data.merge!(finalize_outputs("artifacts/nginx-#{$version}.tgz", "nginx-#{$version}-linux-x64-#{stack}", '.tgz'))
+    out_data.merge!(finalize_outputs("artifacts/nginx-#{$version}.tgz", "nginx-#{$version}-linux-x64-#{stack}", 'tgz'))
     out_data[:source_pgp] = source_pgp
 
   when 'dotnet-sdk'
@@ -322,7 +322,7 @@ def main()
       system('tar', 'Jcf', old_filepath, '.')
     end
 
-    out_data.merge!(finalize_outputs(old_filepath, "#{$name}.#{$version}.linux-amd64-#{stack}", '.tar.xz'))
+    out_data.merge!(finalize_outputs(old_filepath, "#{$name}.#{$version}.linux-amd64-#{stack}", 'tar.xz'))
     out_data.merge!({
                       version: $version,
                       git_commit_sha: commit_sha
