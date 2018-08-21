@@ -26,7 +26,7 @@ def binary_builder(name, extension_file, old_filename, filename_prefix, ext)
 
   Dir.chdir('binary-builder') do
     if extension_file && extension_file != ""
-      run('./bin/binary-builder', "--name=#{name}", "--version=#{$version}", digest_arg, extra_arg)
+      run('./bin/binary-builder', "--name=#{name}", "--version=#{$version}", digest_arg, extension_file)
     else
       run('./bin/binary-builder', "--name=#{name}", "--version=#{$version}", digest_arg)
     end
