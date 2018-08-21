@@ -152,6 +152,7 @@ jobs:
             ops_files:
             - cf-deployment/operations/windows-cell.yml
             - cf-deployment/operations/windows2016-cell.yml
+            - cf-deployment/operations/use-latest-stemcell.yml
             - cf-deployment/operations/use-latest-windows-stemcell.yml
             - cf-deployment/operations/use-latest-windows2016-stemcell.yml
             - cf-deployment/operations/experimental/secure-service-credentials.yml
