@@ -366,7 +366,7 @@ jobs:
     <% end %>
 <% end %>
 
-<% if dep_name == 'dotnet-sdk' %>
+<% if dep_name.to_s == 'dotnet-sdk' %>
 - name: extract-dotnet-runtime-from-sdk-<%= line %>
   serial: true
   public: true
@@ -486,7 +486,7 @@ groups:
     - finish-<%=dep_name%>-<%= line %>-story
     - build-<%=dep_name%>-<%= line %>
     <% end %>
-    <% if dep_name == 'dotnet-sdk' %>
+    <% if dep_name.to_s == 'dotnet-sdk' %>
     - extract-dotnet-runtime-from-sdk-<%= line %>
     <% end %>
     <% end %>
@@ -513,7 +513,7 @@ groups:
     - finish-<%=dep_name%>-<%= line %>-story
     - build-<%=dep_name%>-<%= line %>
     <% end %>
-    <% if dep_name == 'dotnet-sdk' %>
+    <% if dep_name.to_s == 'dotnet-sdk' %>
     - extract-dotnet-runtime-from-sdk-<%= line %>
     <% end %>
     <% end %>
