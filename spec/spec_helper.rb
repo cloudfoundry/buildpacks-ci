@@ -21,6 +21,7 @@ RSpec.configure do |config|
     $stdout = StringIO.new
     $stderr = StringIO.new
   end
+
   config.after(:all) do
     $stdout = STDOUT
     $stderr = STDERR
