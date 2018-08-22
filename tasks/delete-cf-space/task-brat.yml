@@ -6,6 +6,9 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
+  - name: cf-brat-space
+    path: cf-space
+    optional: true
   - name: cf-brat-space-cflinuxfs2
     path: cf-space-cflinuxfs2
     optional: true
