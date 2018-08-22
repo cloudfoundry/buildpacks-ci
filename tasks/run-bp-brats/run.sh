@@ -3,7 +3,13 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-"./cf-space-$CF_STACK/login"
+cf_flag=""
+
+if [ -n "$CF_STACK" ]; then
+    cf_flag="-$CF_STACK"
+fi
+
+"./cf-space$cf_flag/login"
 cd buildpack
 
 export GOPATH=$PWD
