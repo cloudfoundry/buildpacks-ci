@@ -4,7 +4,7 @@ set -ex -o pipefail
 
 
 echo "Targeting bosh director..."
-pushd env-repo/$BOSH_ENV
+pushd "env-repo/$BOSH_ENV"
   eval "$(bbl print-env)"
 popd
 
