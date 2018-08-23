@@ -2,8 +2,8 @@ class BinaryBuilderWrapper
   attr_reader :base_dir
 
   def initialize(runner, base_dir = 'binary-builder')
-    @base_dir = base_dir
     @runner = runner
+    @base_dir = base_dir
   end
 
   def build(source_input, extension_file = nil)
@@ -15,11 +15,13 @@ class BinaryBuilderWrapper
       '--sha256=' # because php5 doesn't have a sha
     end
 
+    version_prefix = (%w[dep glide godep].include? source_input.name) ? 'v' : ''
+
     Dir.chdir(@base_dir) do
       if extension_file && extension_file != ''
-        @runner.run('./bin/binary-builder', "--name=#{source_input.name}", "--version=#{source_input.version}", digest_arg, extension_file)
+        @runner.run('./bin/binary-builder', "--name=#{source_input.name}", "--version=#{version_prefix}#{source_input.version}", digest_arg, extension_file)
       else
-        @runner.run('./bin/binary-builder', "--name=#{source_input.name}", "--version=#{source_input.version}", digest_arg)
+        @runner.run('./bin/binary-builder', "--name=#{source_input.name}", "--version=#{version_prefix}#{source_input.version}", digest_arg)
       end
     end
   end

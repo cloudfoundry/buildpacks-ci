@@ -1,6 +1,6 @@
 class SourceInput
-  attr_reader :name, :url, :version, :md5, :git_commit_sha
-  attr_accessor :sha256
+  attr_reader :url, :md5, :git_commit_sha
+  attr_accessor :name, :version, :sha256
 
   def initialize(name, url, version, md5, sha256, git_commit_sha = nil)
     @name    = name
