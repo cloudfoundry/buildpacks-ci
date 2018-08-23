@@ -10,10 +10,7 @@ inputs:
   - name: env-repo
 
 run:
-  path: bash
-  args:
-    - -cl
-    - buildpacks-ci/tasks/upload-bosh-release/run.sh
+  path: buildpacks-ci/tasks/upload-bosh-release/run.sh
 params:
   BOSH_ENV:
   # ^ relative to env-repo
