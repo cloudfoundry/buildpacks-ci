@@ -93,6 +93,31 @@ After these are set up, you will be able to run the test suite via:
 rspec
 ```
 
+## Making Changes to Build Scripts
+
+When you want to change how a binary gets built, there are two places you may need to make changes. All binaries are built by the `binary-builder-new` pipeline, and you may need to change the task that builds them. For many binaries, the `binary-builder-new` pipeline runs recipes from the `binary-builder` repo; for those binaries, you will usually need to change the recipe rather than the concourse task.
+
+For the list of currently supported binaries, check out our `binary-builder-new` [pipeline](https://buildpacks.ci.cf-app.com/teams/main/pipelines/binary-builder-new).
+
+The concourse task that orchestrates the building is `buildpacks-ci/tasks/build-binary-new/builder.rb`; many of the recipes are in [binary-builder](https://github.com/cloudfoundry/binary-builder). 
+
+To test these changes locally, you can execute the concourse task for it, but point to local changes. For instance:
+
+```
+$ cd buildpacks-ci
+$ STACK=cflinuxfs2 fly -t buildpacks e -c tasks/build-binary-new/build.yml -j binary-builder-new/build-r-3.4.X -i buildpacks-ci=.
+```
+
+For binaries that use recipes in `binary-builder`, you can also test in Docker. For instance:
+
+```
+$ docker run -w /binary-builder -v `pwd`:/binary-builder -it cloudfoundry/cflinuxfs2:ruby-2.2.4 ./bin/binary-builder --name=ruby --version=2.2.3 --md5=150a5efc5f5d8a8011f30aa2594a7654
+$ ls
+ruby-2.2.3-linux-x64.tgz
+```
+
+
+
 # Buildpack Repositories Guide
 
 `buildpacks-ci` pipelines and tasks refer to many other repositories. These repos are where the buildpack team and others develop buildpacks and related artifacts.

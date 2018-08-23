@@ -6,6 +6,10 @@ require_relative 'build_input'
 require_relative 'build_output'
 require_relative 'artifact_output'
 
+include Runner
+include Sha
+include Dependencies
+
 def main
   binary_builder  = BinaryBuilderWrapper.new(Runner)
   source_input    = SourceInput.from_file('source/data.json')
