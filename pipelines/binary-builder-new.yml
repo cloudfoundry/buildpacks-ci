@@ -368,7 +368,7 @@ jobs:
             rebase: true
     <% end %>
     <% end %>
-# <% end %>
+ <% end %>
 
 <% if dep_name.to_s == 'dotnet-sdk' %>
 - name: extract-dotnet-runtime-from-sdk-<%= line %>
@@ -407,6 +407,7 @@ jobs:
             rebase: true
         <% end %>
         <% end %>
+<% if ['2.1.3X', '2.1.4X'].include? line %> # TODO : hack to only extract aspnetcore for these versions
 - name: extract-dotnet-aspnetcore-from-sdk-<%= line %>
   serial: true
   public: true
@@ -443,6 +444,7 @@ jobs:
             rebase: true
         <% end %>
         <% end %>
+<% end %>
 <% end %>
 
 <% if dep_name.to_s == 'dotnet-runtime' || dep_name.to_s == 'dotnet-aspnetcore' %>
@@ -530,7 +532,9 @@ groups:
     <% end %>
     <% if dep_name.to_s == 'dotnet-sdk' %>
     - extract-dotnet-runtime-from-sdk-<%= line %>
+    <% if ['2.1.3X', '2.1.4X'].include? line %> # TODO : hack to only extract aspnetcore for these versions
     - extract-dotnet-aspnetcore-from-sdk-<%= line %>
+    <% end %>
     <% end %>
     <% end %>
     <% dep[:buildpacks].each do |bp_name, bp| %>
@@ -558,7 +562,9 @@ groups:
     <% end %>
     <% if dep_name.to_s == 'dotnet-sdk' %>
     - extract-dotnet-runtime-from-sdk-<%= line %>
+    <% if ['2.1.3X', '2.1.4X'].include? line %> # TODO : hack to only extract aspnetcore for these versions
     - extract-dotnet-aspnetcore-from-sdk-<%= line %>
+    <% end %>
     <% end %>
     <% end %>
     <% dep[:buildpacks].each do |bp_name, bp| %>
