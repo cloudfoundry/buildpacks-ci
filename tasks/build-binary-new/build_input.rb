@@ -1,13 +1,17 @@
 class BuildInput
-  attr_reader :tracker_story_id
+  attr_reader :tracker_story_id, :url
 
-  def initialize(tracker_story_id)
+  def initialize(tracker_story_id, url=nil)
     @tracker_story_id = tracker_story_id
+    @url = url
   end
 
   def self.from_file(build_file)
     data = JSON.parse(open(build_file).read)
-    BuildInput.new(data.dig('tracker_story_id') || '')
+    BuildInput.new(
+      data.dig('tracker_story_id') || '',
+      data.dig('url')
+    )
   end
 
   def copy_to_build_output
