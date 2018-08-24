@@ -9,7 +9,7 @@ inputs:
   - name: source
   - name: builds
 outputs:
-  - name: artifacts
+  - name: binary-builder-artifacts
   - name: builds-artifacts
 run:
   path: bash
