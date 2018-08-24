@@ -52,6 +52,8 @@ when "dotnet-sdk"
   version = Depwatcher::DotnetSdk.new.in(version["ref"].to_s, source["tag_regex"].to_s)
 when "dotnet-runtime"
   version = Depwatcher::DotnetRuntime.new.in(version["ref"].to_s)
+when "dotnet-aspnetcore"
+  version = Depwatcher::DotnetAspNetCore.new.in(version["ref"].to_s)
 else
   raise "Unkown type: #{type}"
 end
