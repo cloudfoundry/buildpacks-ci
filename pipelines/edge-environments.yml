@@ -36,6 +36,7 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/buildpacks-envs
+    branch: master
     private_key: {{buildpacks-envs-private-key}}
 
 - name: buildpacks-ci
