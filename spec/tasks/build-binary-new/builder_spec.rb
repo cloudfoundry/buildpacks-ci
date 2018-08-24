@@ -122,7 +122,7 @@ describe 'Builder' do
         let(:source_input) { SourceInput.new('nginx', 'https://fake.com', '1.0.2', nil, 'fake-sha256') }
 
         it 'should build correctly' do
-          expect(Dependencies).to receive(:build_nginx)
+          expect(DependencyBuild).to receive(:build_nginx)
             .with(source_input)
             .and_return 'fake-source-sha-123'
 
@@ -163,7 +163,7 @@ describe 'Builder' do
         let(:source_input) { SourceInput.new('pipenv', 'https://fake.com', '1.0.2', nil, 'fake-sha256') }
 
         it 'should build correctly' do
-          expect(Dependencies).to receive(:build_pipenv)
+          expect(DependencyBuild).to receive(:build_pipenv)
             .with(source_input)
             .and_return '/build-dir/fake-pipenv-1234.tar.gz'
 
@@ -179,7 +179,7 @@ describe 'Builder' do
         let(:source_input) { SourceInput.new('libunwind', 'https://fake.com', '1.0.2', nil, 'fake-sha256') }
 
         it 'should build correctly' do
-          expect(Dependencies).to receive(:build_libunwind)
+          expect(DependencyBuild).to receive(:build_libunwind)
             .with(source_input)
             .and_return '/build-dir/fake-libunwind-1234.tar.gz'
 
@@ -209,7 +209,7 @@ describe 'Builder' do
         let(:source_input) { SourceInput.new('r', 'https://fake.com', '1.0.2', nil, 'fake-sha256') }
 
         it 'should build correctly' do
-          expect(Dependencies).to receive(:build_r)
+          expect(DependencyBuild).to receive(:build_r)
             .with(source_input)
             .and_return 'fake-source-sha-123'
 
@@ -225,7 +225,7 @@ describe 'Builder' do
         let(:source_input) { SourceInput.new('dotnet-sdk', 'https://fake.com', '1.0.2', nil, 'fake-sha256', 'fake-source-sha-123') }
 
         it 'should build correctly' do
-          expect(Dependencies).to receive(:build_dotnet_sdk)
+          expect(DependencyBuild).to receive(:build_dotnet_sdk)
             .with(source_input)
             .and_return 'fake-source-sha-123'
 

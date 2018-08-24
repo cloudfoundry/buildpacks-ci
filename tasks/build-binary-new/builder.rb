@@ -11,7 +11,7 @@ module Runner
   end
 end
 
-module Dependencies
+module DependencyBuild
   def build_pipenv(source_input)
     old_file_path = "/tmp/pipenv-v#{source_input.version}.tgz"
     Runner.run('apt', 'update')
@@ -382,7 +382,7 @@ class Builder
       )
 
     when 'pipenv'
-      old_file_path = Dependencies.build_pipenv source_input
+      old_file_path = DependencyBuild.build_pipenv source_input
       out_data.merge!(
         artifact_output.move_dependency(
           source_input.name,
@@ -393,7 +393,7 @@ class Builder
       )
 
     when 'libunwind'
-      old_file_path = Dependencies.build_libunwind source_input
+      old_file_path = DependencyBuild.build_libunwind source_input
       out_data.merge!(
         artifact_output.move_dependency(
           source_input.name,
@@ -404,7 +404,7 @@ class Builder
       )
 
     when 'r'
-      source_sha = Dependencies.build_r source_input
+      source_sha = DependencyBuild.build_r source_input
       out_data.merge!(
         artifact_output.move_dependency(
           source_input.name,
@@ -417,7 +417,7 @@ class Builder
 
     when 'nginx'
       source_pgp = 'not yet implemented'
-      Dependencies.build_nginx source_input
+      DependencyBuild.build_nginx source_input
       out_data.merge!(
         artifact_output.move_dependency(
           source_input.name,
@@ -429,7 +429,7 @@ class Builder
       out_data[:source_pgp] = source_pgp
 
     when 'dotnet-sdk'
-      Dependencies.build_dotnet_sdk source_input
+      DependencyBuild.build_dotnet_sdk source_input
       out_data.merge!(
         artifact_output.move_dependency(
           source_input.name,
