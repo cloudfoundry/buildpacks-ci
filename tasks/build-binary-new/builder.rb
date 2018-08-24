@@ -355,7 +355,7 @@ class Builder
       if source_input.version.start_with?('7.2.')
         extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php72-extensions.yml")
       end
-      binary_builder.build(source_input, "--php-extensions-file=#{extension_file}")
+      binary_builder.build("php#{phpV}", "--php-extensions-file=#{extension_file}")
       out_data.merge!(
         artifact_output.move_dependency(
           "php#{phpV}",
