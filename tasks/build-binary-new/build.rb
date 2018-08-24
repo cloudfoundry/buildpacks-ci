@@ -8,7 +8,7 @@ require_relative 'artifact_output'
 
 include Runner
 include Sha
-include Dependencies
+include DependencyBuild
 
 def main
   binary_builder  = BinaryBuilderWrapper.new(Runner)
