@@ -342,25 +342,23 @@ class Builder
       )
 
     when 'php'
-      if source_input.version.start_with?("7")
-        phpV = "7"
-      elsif source_input.version.start_with?("5")
-        phpV = "" # binary-builder expects 'php' to mean php 5.X.
-      else
+      if source_input.version.start_with?('7')
+        source_input.name = 'php7'
+      elsif !source_input.version.start_with?('5')
         raise "Unexpected PHP version #{source_input.version}. Expected 5.X or 7.X"
       end
 
       # add the right extensions
-      extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php#{phpV}-extensions.yml")
+      extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "#{source_input.name}-extensions.yml")
       if source_input.version.start_with?('7.2.')
         extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php72-extensions.yml")
       end
-      binary_builder.build("php#{phpV}", "--php-extensions-file=#{extension_file}")
+      binary_builder.build(source_input, "--php-extensions-file=#{extension_file}")
       out_data.merge!(
         artifact_output.move_dependency(
-          "php#{phpV}",
-          "#{binary_builder.base_dir}/php#{phpV}-#{source_input.version}-linux-x64.tgz",
-          "php#{phpV}-#{source_input.version}-linux-x64-#{stack}",
+          source_input.name,
+          "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}-linux-x64.tgz",
+          "#{source_input.name}-#{source_input.version}-linux-x64-#{stack}",
           'tgz'
         )
       )
