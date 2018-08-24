@@ -11,7 +11,8 @@ popd
 
 echo "Uploading any matching releases..."
 pushd bosh-release
-  bosh upload-release "$RELEASE"
+  # shellcheck disable=SC2086
+  bosh upload-release $RELEASE
 popd
 
 echo "All done."
