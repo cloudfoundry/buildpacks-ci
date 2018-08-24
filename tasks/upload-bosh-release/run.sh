@@ -11,7 +11,7 @@ popd
 
 echo "Uploading any matching releases..."
 pushd bosh-release
-  bosh upload-release "$RELEASES_GLOB"
+  bosh upload-release "$RELEASE"
 popd
 
 echo "All done."
