@@ -5,6 +5,7 @@ require_relative "#{$buildpacks_ci_dir}/lib/git-client"
 
 class BuildOutput
   attr_reader :git_client, :base_dir
+  attr_accessor :version
 
   def initialize(name, version, stack, tracker_story_id, git_client = GitClient, base_dir = 'builds-artifacts')
     @name             = name
