@@ -15,6 +15,6 @@ params:
   BOSH_ENV:
   # ^ relative to env-repo
   # path to bbl-state dir (to run eval "$(bbl print-env)")
-  RELEASES_GLOB:
+  RELEASE:
   # ^ relative to bosh-release input
-  # glob to match all the release files to upload
+  # glob to match the release file to upload
