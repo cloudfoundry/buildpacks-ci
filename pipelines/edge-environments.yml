@@ -1,0 +1,212 @@
+<% environments = ['brink', 'fringe', 'rim']
+   opsfiles = [
+     '../cf-deployment/operations/windows-cell.yml',
+     '../cf-deployment/operations/windows2016-cell.yml',
+     '../cf-deployment/operations/use-latest-stemcell.yml',
+     '../cf-deployment/operations/use-latest-windows-stemcell.yml',
+     '../cf-deployment/operations/use-latest-windows2016-stemcell.yml',
+     '../cf-deployment/operations/experimental/secure-service-credentials.yml',
+     '../cf-deployment/operations/experimental/secure-service-credentials-windows-cell.yml',
+     '../cf-deployment/operations/experimental/secure-service-credentials-windows2016-cell.yml',
+     '../cf-deployment/operations/experimental/enable-traffic-to-internal-networks.yml',
+     '../cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml',
+     'deployments/operations/no-canaries.yml',
+     'deployments/edge-shared/num-cells.yml',
+     'deployments/edge-shared/scale-instance-groups.yml',
+     'deployments/operations/cflinuxfs3.yml',
+     'deployments/operations/add-cflinuxfs3-buildpacks.yml',
+     'deployments/operations/add-windows-binary-buildpacks.yml'
+   #  '../buildpacks-opsfile/opsfile.yml'
+   ]
+%>
+
+resource_types:
+- name: cron
+  type: docker-image
+  source:
+    repository: cfbuildpacks/cron-resource
+
+- name: google-cloud-storage
+  type: docker-image
+  source:
+    repository: frodenas/gcs-resource
+
+resources:
+- name: env-repo
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/buildpacks-envs
+    private_key: {{buildpacks-envs-private-key}}
+
+- name: buildpacks-ci
+  type: git
+  source:
+    uri: {{buildpacks-ci-git-uri-public}}
+    branch: {{buildpacks-ci-git-uri-public-branch}}
+
+- name: cf-deployment
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/cf-deployment
+
+- name: cf-deployment-concourse-tasks
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+    tag_filter: v5.*
+
+- name: 3am-daily-timer
+  type: cron
+  source:
+    expression: 0 3 * * *
+    location: {{current-timezone}}
+
+- name: edge-environments-locks
+  type: pool
+  source:
+    branch: master
+    pool: edge-environments
+    private_key: {{public-buildpacks-ci-robots-private-key}}
+    uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
+- name: cflinuxfs3-bosh-release
+  type: github-release
+  source:
+    user: cloudfoundry
+    repository: cflinuxfs3-release
+    access_token: {{buildpacks-github-token}}
+
+<% environments.each_with_index do |env, i| %>
+- name: once-a-week-timer-<%= env %>
+  type: cron
+  source:
+    expression: 0 18 * * <%= i % 7 %>
+    location: {{current-timezone}}
+<% end %>
+
+jobs:
+<% environments.each do |env| %>
+- name: deploy-<%= env %>
+  plan:
+  - aggregate:
+    - get: env-repo
+    - get: cf-deployment
+    - get: buildpacks-ci
+    - get: cf-deployment-concourse-tasks
+    - get: cflinuxfs3-bosh-release
+    - get: 3am-daily-timer
+      trigger: true
+    - put: edge-environments-locks
+      params:
+        claim: <%= env %>
+  - aggregate:
+    - task: bosh-upload-windows2012R2-stemcell
+      file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
+      params:
+        BBL_STATE_DIR: <%= env %>
+        MANIFEST_FILE: ../env-repo/manifests/manifest-windows2012R2.yml
+    - task: bosh-upload-windows2016-stemcell
+      file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
+      params:
+        BBL_STATE_DIR: <%= env %>
+        MANIFEST_FILE: ../env-repo/manifests/manifest-windows2016.yml
+    - task: bosh-upload-stemcells
+      file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
+      params:
+        BBL_STATE_DIR: <%= env %>
+    - task: upload-bosh-release
+      file: buildpacks-ci/tasks/upload-bosh-release/task.yml
+      input_mapping:
+        bosh-release: cflinuxfs3-bosh-release
+      params:
+        BOSH_ENV: <%= env %>
+        RELEASE: "*.tgz"
+    on_failure:
+      put: edge-environments-locks
+      params:
+        release: edge-environments-locks
+  - do:
+    - task: bosh-deploy
+      file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+      input_mapping:
+        vars-store: env-repo
+        vars-files: env-repo # not actually used
+        ops-files: buildpacks-ci
+      params:
+        BBL_STATE_DIR: <%= env %>
+        VARS_STORE_FILE: <%= env %>/vars-store.json
+        SYSTEM_DOMAIN: <%= env %>.buildpacks-gcp.ci.cf-app.com
+        OPS_FILES: "<%= opsfiles.join(' ') %>"
+        GIT_COMMIT_EMAIL: {{github-email}}
+        GIT_COMMIT_USERNAME: {{github-username}}
+      ensure:
+        put: edge-environments-locks
+        params:
+          release: edge-environments-locks
+    - put: env-repo
+      params:
+        repository: updated-vars-store
+
+
+- name: delete-cf-<%= env %>
+  plan:
+  - aggregate:
+    - get: env-repo
+    - get: cf-deployment-concourse-tasks
+    - get: once-a-week-timer-<%= env %>
+    - put: edge-environments-locks
+      params:
+        claim: <%= env %>
+  - do:
+    - task: delete-deployment
+      file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+      params:
+        BBL_STATE_DIR: <%= env %>
+        DEPLOYMENT_NAME: cf
+      ensure:
+        put: edge-environments-locks
+        params:
+          release: edge-environments-locks
+
+- name: bosh-cleanup-<%=env%>
+  plan:
+  - aggregate:
+    - get: env-repo
+    - get: cf-deployment-concourse-tasks
+    - get: 3am-daily-timer
+      passed: [deploy-<%= env %>]
+      trigger: true
+    - get: once-a-week-timer-<%= env %>
+      passed: [delete-cf-<%= env %>]
+      trigger: true
+    - put: edge-environments-locks
+      params:
+        claim: <%= env %>
+  - do:
+    - task: bosh-cleanup
+      file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+      params:
+        BBL_STATE_DIR: <%= env %>
+      ensure:
+        put: edge-environments-locks
+        params:
+          release: edge-environments-locks
+<% end %>
+
+
+groups:
+  - name: all
+    jobs:
+<% environments.each do |env| %>
+      - deploy-<%= env %>
+      - delete-cf-<%= env %>
+      - bosh-cleanup-<%= env %>
+<% end %>
+<% environments.each do |env| %>
+  - name: <%= env %>
+    jobs:
+      - deploy-<%= env %>
+      - delete-cf-<%= env %>
+      - bosh-cleanup-<%= env %>
+<% end %>
+
