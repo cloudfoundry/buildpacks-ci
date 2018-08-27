@@ -147,7 +147,7 @@ jobs:
     - put: env-repo
       params:
         repository: updated-vars-store
-
+        rebase: true
 
 - name: delete-cf-<%= env %>
   plan:
