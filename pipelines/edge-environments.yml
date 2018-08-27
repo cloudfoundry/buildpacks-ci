@@ -135,7 +135,7 @@ jobs:
         ops-files: buildpacks-ci
       params:
         BBL_STATE_DIR: <%= env %>
-        VARS_STORE_FILE: <%= env %>/vars-store.json
+        VARS_STORE_FILE: <%= env %>/vars-store.yml
         SYSTEM_DOMAIN: <%= env %>.buildpacks-gcp.ci.cf-app.com
         OPS_FILES: "<%= opsfiles.join(' ') %>"
         GIT_COMMIT_EMAIL: {{github-email}}
