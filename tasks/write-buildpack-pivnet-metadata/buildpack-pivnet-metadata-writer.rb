@@ -4,13 +4,13 @@ require 'yaml'
 
 class BuildpackPivnetMetadataWriter
 
-  attr_reader :buildpack, :output_dir, :buildpack_dir, :cached_buildpack_filename, :recent_changes_filename
+  attr_reader :buildpack, :output_dir, :buildpack_dir, :cached_buildpack_filenames, :recent_changes_filename
 
-  def initialize(buildpack, output_dir, buildpack_dir, cached_buildpack_filename, recent_changes_filename)
+  def initialize(buildpack, output_dir, buildpack_dir, cached_buildpack_filenames, recent_changes_filename)
     @buildpack = buildpack
     @output_dir = output_dir
     @buildpack_dir = buildpack_dir
-    @cached_buildpack_filename = cached_buildpack_filename
+    @cached_buildpack_filenames = cached_buildpack_filenames
     @recent_changes_filename = recent_changes_filename
   end
 
@@ -25,11 +25,11 @@ class BuildpackPivnetMetadataWriter
 
     metadata = {}
     metadata['release'] = {
-      'version' => product_version,
-      'release_type' => release_type,
-      'eula_slug' => eula_slug,
-      'release_notes_url' => release_notes_url,
-      'availability' => availability
+        'version' => product_version,
+        'release_type' => release_type,
+        'eula_slug' => eula_slug,
+        'release_notes_url' => release_notes_url,
+        'availability' => availability
     }
 
     if buildpack != 'dotnet-core'
@@ -37,11 +37,15 @@ class BuildpackPivnetMetadataWriter
       metadata['release']['license_exception'] = license_exception
     end
 
-    metadata['product_files'] = [ {
-      'file' => File.join('pivotal-buildpack-cached', cached_buildpack_filename),
-      'upload_as' => display_name,
-      'description' => description
-    } ]
+    metadata['product_files'] = []
+    cached_buildpack_filenames.each do |filename|
+      stack = filename.match(/.*_buildpack-cached-?(.*)?-v.*.zip/)[1]
+      metadata['product_files'].push({
+                                         'file' => filename,
+                                         'upload_as' => display_name(stack),
+                                         'description' => description
+                                     })
+    end
 
     puts "Writing metadata to #{metadata_yml}"
     puts metadata.to_yaml
@@ -81,8 +85,12 @@ def license_exception
   'TSU'
 end
 
-def display_name
-  "#{formatted_name} Buildpack (offline)"
+def display_name(stack = '')
+  if !stack.empty?
+    "#{formatted_name} Buildpack #{stack} (offline)"
+  else
+    "#{formatted_name} Buildpack (offline)"
+  end
 end
 
 def description

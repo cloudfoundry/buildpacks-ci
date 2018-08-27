@@ -652,8 +652,18 @@ jobs: ##########################################################################
           resource: pivotal-buildpack-cached
           passed: [ ship-it ]
           trigger: true
-        - get: pivotal-buildpacks-stack0
-          resource: pivotal-buildpack-cached-<%= if any_stack.include?(language) then 'any' else 'cflinuxfs2' end %>
+        <% pivnet_stacks = ''
+          if language.to_s == 'hwc'
+            pivnet_stacks = ['any']
+          elsif language.to_s == 'binary'
+            pivnet_stacks = ['cflinuxfs2', 'windows2012R2', 'windows2016']
+          else
+            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to stacks[language] when PWS has cflinuxfs3
+          end
+          pivnet_stacks.each_with_index do |stack, ndx| %>
+        - get: pivotal-buildpacks-stack<%= ndx %>
+          resource: pivotal-buildpack-cached-<%= stack %>
+        <% end %>
         - get: pivotal-buildpacks
           resource: pivotal-buildpack
           passed: [ ship-it ]
@@ -675,18 +685,29 @@ jobs: ##########################################################################
   - name: release-to-pivnet
     public: true
     plan:
-      - get: pivotal-buildpack-cached-passed
-        resource: pivotal-buildpack-cached
-        passed: [ write-pivnet-metadata ]
-        trigger: true
-      - get: pivnet-buildpack-metadata
-        passed: [ write-pivnet-metadata ]
-        trigger: true
-      - get: pivotal-buildpack-cached
-        resource: pivotal-buildpack-cached-<%= if any_stack.include?(language) then 'any' else 'cflinuxfs2' end %>
+      - aggregate:
+        - get: pivotal-buildpack-cached-passed
+          resource: pivotal-buildpack-cached
+          passed: [ write-pivnet-metadata ]
+          trigger: true
+        - get: pivnet-buildpack-metadata
+          passed: [ write-pivnet-metadata ]
+          trigger: true
+        <% pivnet_stacks = ''
+          if language.to_s == 'hwc'
+            pivnet_stacks = ['any']
+          elsif language.to_s == 'binary'
+            pivnet_stacks = ['cflinuxfs2', 'windows2012R2', 'windows2016']
+          else
+            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to stacks[language] when PWS has cflinuxfs3
+          end
+          pivnet_stacks.each_with_index do |stack, ndx| %>
+        - get: pivotal-buildpacks-stack<%= ndx %>
+          resource: pivotal-buildpack-cached-<%= stack %>
+        <% end %>
       - put: pivnet-production
         params:
-          file_glob: pivotal-buildpack-cached/<%= language %>_buildpack-cached<%= if any_stack.include?(language) then '' else '-cflinuxfs2' end %>-v*.zip
+          file_glob: pivotal-buildpacks-stack*/<%= language %>_buildpack-cached*.zip
           s3_filepath_prefix: product-files/buildpacks
           metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
