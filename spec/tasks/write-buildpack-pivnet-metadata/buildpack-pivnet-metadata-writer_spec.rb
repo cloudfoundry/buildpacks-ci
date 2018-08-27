@@ -11,7 +11,11 @@ describe BuildpackPivnetMetadataWriter do
   let(:root_dir)                  { Dir.mktmpdir }
   let(:buildpack_dir)             { File.join(root_dir, 'buildpack-master') }
   let(:metadata_dir)              { File.join(root_dir, 'pivnet-buildpack-metadata', 'pivnet-metadata') }
-  let(:cached_buildpack_filename) { "#{buildpack}_buildpack-cached-v#{version}+#{timestamp}.zip" }
+  let(:cached_buildpack_filenames) {
+    ["pivotal-buildpacks-stack0/#{buildpack}_buildpack-cached-v#{version}+#{timestamp}.zip",
+     "pivotal-buildpacks-stack1/#{buildpack}_buildpack-cached-cflinuxfs2-v#{version}+#{timestamp}.zip",
+     "pivotal-buildpacks-stack2/#{buildpack}_buildpack-cached-some-stack-v#{version}+#{timestamp}.zip"]
+  }
   let(:yaml_path)                 { File.join(metadata_dir, "#{buildpack}.yml") }
   let(:yaml_contents)             { YAML.load_file(yaml_path) }
   let(:timestamp)                 { '1111111111' }
@@ -29,7 +33,7 @@ describe BuildpackPivnetMetadataWriter do
     FileUtils.rm_rf(root_dir)
   end
 
-  subject { described_class.new(buildpack, metadata_dir, buildpack_dir, cached_buildpack_filename, recent_changes_filename) }
+  subject { described_class.new(buildpack, metadata_dir, buildpack_dir, cached_buildpack_filenames, recent_changes_filename) }
 
   describe '#get_version' do
     let(:version)                   { "1.6.0" }
@@ -71,11 +75,19 @@ describe BuildpackPivnetMetadataWriter do
       it 'writes the product files metadata to the file' do
         subject.run!
         product_files = yaml_contents['product_files']
-        expect(product_files.count).to eq 1
+        expect(product_files.count).to eq 3
 
-        product_file = product_files.first
-        expect(product_file['file']).to eq File.join('pivotal-buildpack-cached', cached_buildpack_filename)
+        product_file = product_files[0]
+        expect(product_file['file']).to eq File.join('pivotal-buildpacks-stack0', 'dotnet-core_buildpack-cached-v1.0.0+1111111111.zip')
         expect(product_file['upload_as']).to eq '.NET Core Buildpack (offline)'
+        expect(product_file['description']).to eq '.NET Core Buildpack for PCF'
+        product_file = product_files[1]
+        expect(product_file['file']).to eq File.join('pivotal-buildpacks-stack1', 'dotnet-core_buildpack-cached-cflinuxfs2-v1.0.0+1111111111.zip')
+        expect(product_file['upload_as']).to eq '.NET Core Buildpack cflinuxfs2 (offline)'
+        expect(product_file['description']).to eq '.NET Core Buildpack for PCF'
+        product_file = product_files[2]
+        expect(product_file['file']).to eq File.join('pivotal-buildpacks-stack2', 'dotnet-core_buildpack-cached-some-stack-v1.0.0+1111111111.zip')
+        expect(product_file['upload_as']).to eq '.NET Core Buildpack some-stack (offline)'
         expect(product_file['description']).to eq '.NET Core Buildpack for PCF'
       end
     end
@@ -163,10 +175,10 @@ describe BuildpackPivnetMetadataWriter do
       it 'writes the product files metadata to the file' do
         subject.run!
         product_files = yaml_contents['product_files']
-        expect(product_files.count).to eq 1
+        expect(product_files.count).to eq 3
 
         product_file = product_files.first
-        expect(product_file['file']).to eq File.join('pivotal-buildpack-cached', cached_buildpack_filename)
+        expect(product_file['file']).to eq File.join('pivotal-buildpacks-stack0', 'ruby_buildpack-cached-v1.7.45+1111111111.zip')
         expect(product_file['upload_as']).to eq 'Ruby Buildpack (offline)'
         expect(product_file['description']).to match /Added a feature/
         expect(product_file['description']).to match /Updated a dependency/
