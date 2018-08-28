@@ -122,32 +122,27 @@ jobs:
       params:
         BOSH_ENV: <%= env %>
         RELEASE: "*.tgz"
-    on_failure:
-      put: edge-environments-locks
-      params:
-        release: edge-environments-locks
-  - do:
-    - task: bosh-deploy
-      file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
-      input_mapping:
-        vars-store: env-repo
-        vars-files: env-repo # not actually used
-        ops-files: buildpacks-ci
-      params:
-        BBL_STATE_DIR: <%= env %>
-        VARS_STORE_FILE: <%= env %>/vars-store.yml
-        SYSTEM_DOMAIN: <%= env %>.buildpacks-gcp.ci.cf-app.com
-        OPS_FILES: "<%= opsfiles.join(' ') %>"
-        GIT_COMMIT_EMAIL: {{github-email}}
-        GIT_COMMIT_USERNAME: {{github-username}}
-      ensure:
-        put: edge-environments-locks
-        params:
-          release: edge-environments-locks
-    - put: env-repo
-      params:
-        repository: updated-vars-store
-        rebase: true
+  - task: bosh-deploy
+    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    input_mapping:
+      vars-store: env-repo
+      vars-files: env-repo # not actually used
+      ops-files: buildpacks-ci
+    params:
+      BBL_STATE_DIR: <%= env %>
+      VARS_STORE_FILE: <%= env %>/vars-store.yml
+      SYSTEM_DOMAIN: <%= env %>.buildpacks-gcp.ci.cf-app.com
+      OPS_FILES: "<%= opsfiles.join(' ') %>"
+      GIT_COMMIT_EMAIL: {{github-email}}
+      GIT_COMMIT_USERNAME: {{github-username}}
+  - put: env-repo
+    params:
+      repository: updated-vars-store
+      rebase: true
+  ensure:
+    put: edge-environments-locks
+    params:
+      release: edge-environments-locks
 
 - name: delete-cf-<%= env %>
   plan:
@@ -158,16 +153,15 @@ jobs:
     - put: edge-environments-locks
       params:
         claim: <%= env %>
-  - do:
-    - task: delete-deployment
-      file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
-      params:
-        BBL_STATE_DIR: <%= env %>
-        DEPLOYMENT_NAME: cf
-      ensure:
-        put: edge-environments-locks
-        params:
-          release: edge-environments-locks
+  - task: delete-deployment
+    file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+    params:
+      BBL_STATE_DIR: <%= env %>
+      DEPLOYMENT_NAME: cf
+  ensure:
+    put: edge-environments-locks
+    params:
+      release: edge-environments-locks
 
 - name: bosh-cleanup-<%=env%>
   plan:
@@ -183,18 +177,15 @@ jobs:
     - put: edge-environments-locks
       params:
         claim: <%= env %>
-  - do:
-    - task: bosh-cleanup
-      file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
-      params:
-        BBL_STATE_DIR: <%= env %>
-      ensure:
-        put: edge-environments-locks
-        params:
-          release: edge-environments-locks
+  - task: bosh-cleanup
+    file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+    params:
+      BBL_STATE_DIR: <%= env %>
+  ensure:
+    put: edge-environments-locks
+    params:
+      release: edge-environments-locks
 <% end %>
-
-
 groups:
   - name: all
     jobs:
