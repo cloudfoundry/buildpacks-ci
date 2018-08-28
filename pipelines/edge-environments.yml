@@ -62,7 +62,7 @@ resources:
     expression: 0 3 * * *
     location: {{current-timezone}}
 
-- name: edge-environments-locks
+- name: edge-environments
   type: pool
   source:
     branch: master
@@ -97,7 +97,7 @@ jobs:
     - get: cflinuxfs3-bosh-release
     - get: 3am-daily-timer
       trigger: true
-    - put: edge-environments-locks
+    - put: edge-environments
       params:
         claim: <%= env %>
   - aggregate:
@@ -140,9 +140,9 @@ jobs:
       repository: updated-vars-store
       rebase: true
   ensure:
-    put: edge-environments-locks
+    put: edge-environments
     params:
-      release: edge-environments-locks
+      release: edge-environments
 
 - name: delete-cf-<%= env %>
   plan:
@@ -150,7 +150,7 @@ jobs:
     - get: env-repo
     - get: cf-deployment-concourse-tasks
     - get: once-a-week-timer-<%= env %>
-    - put: edge-environments-locks
+    - put: edge-environments
       params:
         claim: <%= env %>
   - task: delete-deployment
@@ -159,9 +159,9 @@ jobs:
       BBL_STATE_DIR: <%= env %>
       DEPLOYMENT_NAME: cf
   ensure:
-    put: edge-environments-locks
+    put: edge-environments
     params:
-      release: edge-environments-locks
+      release: edge-environments
 
 - name: bosh-cleanup-<%=env%>
   plan:
@@ -174,7 +174,7 @@ jobs:
     - get: once-a-week-timer-<%= env %>
       passed: [delete-cf-<%= env %>]
       trigger: true
-    - put: edge-environments-locks
+    - put: edge-environments
       params:
         claim: <%= env %>
   - task: bosh-cleanup
@@ -182,9 +182,9 @@ jobs:
     params:
       BBL_STATE_DIR: <%= env %>
   ensure:
-    put: edge-environments-locks
+    put: edge-environments
     params:
-      release: edge-environments-locks
+      release: edge-environments
 <% end %>
 groups:
   - name: all
