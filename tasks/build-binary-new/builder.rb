@@ -125,6 +125,7 @@ module DependencyBuild
             '--with-pcre-jit',
             '--with-cc-opt=-fPIC -pie',
             '--with-ld-opt=-fPIC -pie -z now',
+            '--with-compat',
             '--with-stream=dynamic',
           )
           Runner.run('make')
