@@ -13,5 +13,3 @@ outputs:
 
 run:
   path: buildpacks-ci/tasks/create-cf-space/run.sh
-params:
-  CF_STACK:
