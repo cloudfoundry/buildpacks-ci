@@ -8,7 +8,7 @@ set -x
 OUTPUT=cf-space
 ENV_NAME=$(cat "$ENV_POOL_RESOURCE/name")
 TARGET="api.$ENV_NAME.$SYSTEM_DOMAIN"
-PASSWORD=$(cat "$ENVS_DIR/$ENV_NAME/vars-store.yml" | grep cf_admin_password: | awk '{print $2}')
+PASSWORD=$(grep "cf_admin_password:" "$ENVS_DIR/$ENV_NAME/vars-store.yml" | awk '{print $2}')
 cf api "$TARGET" --skip-ssl-validation || (sleep 4 && cf api "$TARGET" --skip-ssl-validation)
 cf auth "$USERNAME" "$PASSWORD" || (sleep 4 && cf auth "$USERNAME" "$PASSWORD")
 
