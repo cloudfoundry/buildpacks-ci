@@ -35,7 +35,7 @@ describe 'Builder' do
       TableTestInput.new('ruby', '2.7.14')        => TableTestOutput.new('/fake-binary-builder/ruby-2.7.14-linux-x64.tgz', 'ruby-2.7.14-linux-x64-cflinuxfs2', 'tgz'),
       TableTestInput.new('jruby', '9.2.0')        => TableTestOutput.new('/fake-binary-builder/jruby-9.2.0_ruby-2.5-linux-x64.tgz', 'jruby-9.2.0_ruby-2.5-linux-x64-cflinuxfs2', 'tgz'),
       TableTestInput.new('php', '7.0.0')          => TableTestOutput.new('/fake-binary-builder/php7-7.0.0-linux-x64.tgz', 'php7-7.0.0-linux-x64-cflinuxfs2', 'tgz'),
-      TableTestInput.new('nginx-static', '7.0.0') => TableTestOutput.new('/fake-binary-builder/nginx-7.0.0-linux-x64.tgz', 'nginx-7.0.0-linux-x64-cflinuxfs2', 'tgz'),
+      TableTestInput.new('nginx-static', '7.0.0') => TableTestOutput.new('/fake-binary-builder/nginx-static-7.0.0-linux-x64.tgz', 'nginx-7.0.0-linux-x64-cflinuxfs2', 'tgz'),
     }.each do |input, output|
       describe "to build #{input.dep}" do
         let(:source_input) { SourceInput.new(input.dep, 'https://fake.com', input.version, 'fake-md5', nil) }
@@ -64,9 +64,8 @@ describe 'Builder' do
 
         it 'should build correctly' do
           dep_name      = input.dep == 'php' ? 'php7' : input.dep
-          expected_name = dep_name == 'nginx-static' ? 'nginx' : dep_name
           expect(artifact_output).to receive(:move_dependency)
-            .with(expected_name, output.old_file_path, output.prefix, output.extension)
+            .with(dep_name, output.old_file_path, output.prefix, output.extension)
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
