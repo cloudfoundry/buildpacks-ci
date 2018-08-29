@@ -12,7 +12,6 @@
      '../cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml',
      'deployments/operations/no-canaries.yml',
      'deployments/edge-shared/num-cells.yml',
-     'deployments/edge-shared/scale-instance-groups.yml',
      'deployments/operations/cflinuxfs3.yml',
      'deployments/operations/add-cflinuxfs3-buildpacks.yml',
      'deployments/operations/add-windows-binary-buildpacks.yml'
