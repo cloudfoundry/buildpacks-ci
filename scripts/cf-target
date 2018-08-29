@@ -6,7 +6,7 @@ name = `hostname`.chomp
 edge_envs = ['rim', 'brink', 'fringe']
 
 def env_login(env)
-  cfg = YAML.load_file("../buildpacks-envs/#{env}/vars-store.yml")
+  cfg = YAML.load_file("#{ENV['HOME']}/workspace/buildpacks-envs/#{env}/vars-store.yml")
   system('cf', 'api', "api.#{env}.buildpacks-gcp.ci.cf-app.com", '--skip-ssl-validation') or raise 'Could not connect'
   system('cf', 'auth', 'admin', cfg['cf_admin_password']) or raise 'Could not auth'
 end
