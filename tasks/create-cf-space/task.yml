@@ -1,0 +1,17 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: edge-environments
+  - name: env-repo
+outputs:
+  - name: cf-space
+
+run:
+  path: buildpacks-ci/tasks/create-cf-space/run.sh
+params:
+  CF_STACK:
