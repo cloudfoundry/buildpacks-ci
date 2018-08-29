@@ -162,7 +162,6 @@ jobs:
             - cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml
             - buildpacks-ci/deployments/operations/no-canaries.yml
             - buildpacks-ci/deployments/edge-shared/num-cells.yml
-            - buildpacks-ci/deployments/edge-shared/scale-instance-groups.yml
             - buildpacks-ci/deployments/operations/cflinuxfs3.yml
             - buildpacks-ci/deployments/operations/add-cflinuxfs3-buildpacks.yml
             - buildpacks-ci/deployments/operations/add-windows-binary-buildpacks.yml
