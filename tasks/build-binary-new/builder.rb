@@ -265,13 +265,12 @@ class Builder
 
     when 'nginx-static'
       source_input.sha256 = Sha.get_sha(source_input.url)
-      source_input.name = 'nginx'
       binary_builder.build(source_input)
       out_data.merge!(
         artifact_output.move_dependency(
-          'nginx',
-          "#{binary_builder.base_dir}/nginx-#{source_input.version}-linux-x64.tgz",
-          "nginx-#{source_input.version}-linux-x64-#{stack}",
+          source_input.name,
+          "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}-linux-x64.tgz",
+          "nginx-#{source_input.version}-linux-x64-#{stack}",  # want filename in manifest to read 'nginx-...', not 'nginx-static-...'
           'tgz'
         )
       )
