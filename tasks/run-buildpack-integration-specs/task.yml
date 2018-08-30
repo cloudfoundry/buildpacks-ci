@@ -7,7 +7,18 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: buildpack
-  - name: cf-space
+  - name: cf-bp-space-cflinuxfs2
+    path: cf-space-cflinuxfs2
+    optional: true
+  - name: cf-bp-space-cflinuxfs3
+    path: cf-space-cflinuxfs3
+    optional: true
+  - name: cf-bp-space-windows2012R2
+    path: cf-space-windows2012R2
+    optional: true
+  - name: cf-bp-space-windows2016
+    path: cf-space-windows2016
+    optional: true
 run:
   path: buildpacks-ci/tasks/run-buildpack-integration-specs/run.sh
 params:
