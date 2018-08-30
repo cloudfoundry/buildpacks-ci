@@ -13,3 +13,9 @@ outputs:
 
 run:
   path: buildpacks-ci/tasks/create-cf-space/run.sh
+params:
+  ENV_POOL_RESOURCE:
+  ENVS_DIR:
+  ORGANIZATION:
+  SYSTEM_DOMAIN:
+  USERNAME:
