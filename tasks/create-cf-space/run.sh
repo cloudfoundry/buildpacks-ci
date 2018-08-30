@@ -6,13 +6,13 @@ set -x
 
 OUTPUT=cf-space
 
-if [ -n "$TARGET" ]; then
+if [ -z "$TARGET" ]; then
   ENV_NAME=$(cat "$ENV_POOL_RESOURCE/name")
   TARGET="api.$ENV_NAME.$SYSTEM_DOMAIN"
 fi
 
 set +x
-if [ -n "$PASSWORD" ]; then
+if [ -z "$PASSWORD" ]; then
   PASSWORD=$(grep "cf_admin_password:" "$ENVS_DIR/$ENV_NAME/vars-store.yml" | awk '{print $2}')
 fi
 
