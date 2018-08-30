@@ -1,13 +1,14 @@
 #!/bin/bash -l
 set -o errexit
-set -o nounset
 set -o pipefail
 
 cf_flag=""
 
-if [ -n "$CF_STACK" ]; then
+if [[ -n "$CF_STACK" && -z "$NEW_ENVS" ]]; then
     cf_flag="-$CF_STACK"
 fi
+
+set -o nounset
 
 "./cf-space$cf_flag/login"
 
