@@ -12,6 +12,7 @@ run:
   path: buildpacks-ci/tasks/run-buildpack-integration-specs/run.sh
 params:
   CF_STACK:
+  NEW_ENVS: true
   GINKGO_ATTEMPTS:
   GINKGO_NODES:
   SKIP_DOCKER_START:
