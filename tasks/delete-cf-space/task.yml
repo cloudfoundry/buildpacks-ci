@@ -9,3 +9,5 @@ inputs:
   - name: cf-space
 run:
   path: buildpacks-ci/tasks/delete-cf-space/run.sh
+params:
+  CF_STACK:
