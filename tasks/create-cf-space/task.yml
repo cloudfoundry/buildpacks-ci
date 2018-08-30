@@ -7,7 +7,9 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: edge-environments
+    optional: true
   - name: env-repo
+    optional: true
 outputs:
   - name: cf-space
 
@@ -19,3 +21,5 @@ params:
   ORGANIZATION:
   SYSTEM_DOMAIN:
   USERNAME:
+  PASSWORD:
+  TARGET:
