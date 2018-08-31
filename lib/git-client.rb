@@ -9,7 +9,7 @@ class GitClient
     GitClient.fetch(dir_to_update)
 
     Dir.chdir(dir_to_update) do
-      GitClient.checkout_branch(latest_ref)
+      GitClient.checkout(latest_ref)
     end
   end
 
@@ -131,8 +131,12 @@ class GitClient
     end
   end
 
-  def self.checkout_branch(branch)
+  def self.checkout(branch)
     raise GitError.new("Could not checkout branch: #{branch}") unless system("git checkout #{branch}")
+  end
+
+  def self.cherry_pick(commit)
+    raise GitError.new("Could not cherry_pick commit: #{commit}") unless system("git cherry-pick #{commit}")
   end
 
   def self.pull_current_branch

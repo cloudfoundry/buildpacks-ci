@@ -26,14 +26,14 @@
                         source_type: 'github_releases',
                         source_params: ['repo: golang/dep', 'fetch_source: true']},
 
-  'dotnet-sdk':             { buildpacks: {
+  'dotnet-sdk':       { buildpacks: {
                           'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.3X", "2.1.4X"], removal_strategy: 'keep_all' } },
                         source_params: ['tag_regex: .*'] },
 
-  'dotnet-runtime': { buildpacks: {
+  'dotnet-runtime':   { buildpacks: {
                           'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X"], removal_strategy: 'keep_all' } } },
 
-  'dotnet-aspnetcore': { buildpacks: {
+  'dotnet-aspnetcore':  { buildpacks: {
                           'dotnet-core' => { lines: ["2.1.X"], removal_strategy: 'keep_all' } } },
 
   glide:              { buildpacks: { go: {}},

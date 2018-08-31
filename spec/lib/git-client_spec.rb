@@ -50,7 +50,7 @@ describe GitClient do
     it "should update target repo's submodule to latest submodule sha" do
       expect(GitClient).to receive(:get_commit_sha).with(source_dir, 0).and_return(latest_sha)
       expect(GitClient).to receive(:fetch).with(dir_to_update)
-      expect(GitClient).to receive(:checkout_branch).with(latest_sha)
+      expect(GitClient).to receive(:checkout).with(latest_sha)
 
       subject
     end
@@ -290,10 +290,10 @@ describe GitClient do
     end
   end
 
-  describe '#checkout_branch' do
+  describe '#checkout' do
     let(:git_branch) {'a-different-git-branch'}
 
-    subject { described_class.checkout_branch(git_branch) }
+    subject { described_class.checkout(git_branch) }
 
     before { allow(described_class).to receive(:system).and_return(git_successful) }
 
@@ -312,6 +312,32 @@ describe GitClient do
 
       it 'throws an exception about not checking out the branch' do
         expect{ subject }.to raise_error(GitClient::GitError, 'Could not checkout branch: a-different-git-branch')
+      end
+    end
+  end
+
+  describe '#cherry_pick' do
+    let(:git_cherrypick_commit) {'abc123'}
+
+    subject { described_class.cherry_pick(git_cherrypick_commit) }
+
+    before { allow(described_class).to receive(:system).and_return(git_successful) }
+
+    context 'git works properly' do
+      let(:git_successful) { true }
+
+      it 'cherry_pick the specified commit' do
+        expect(described_class).to receive(:system).with('git cherry-pick abc123')
+
+        subject
+      end
+    end
+
+    context 'git fails' do
+      let(:git_successful) { false }
+
+      it 'throws an exception about not cherrypicking the commit' do
+        expect{ subject }.to raise_error(GitClient::GitError, 'Could not cherry_pick commit: abc123')
       end
     end
   end
