@@ -16,6 +16,38 @@
     }
   },
   {
+    "name": "1.0.11-cflinuxfs2.json",
+    "path": "binary-builds-new/dotnet-framework/1.0.11.json",
+    "sha": "eba16def3c5861966387f409f983a84795c54452",
+    "size": 222,
+    "url": "https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/contents/binary-builds-new/dotnet-framework/1.0.11.json?ref=master",
+    "html_url": "https://github.com/cloudfoundry/public-buildpacks-ci-robots/blob/master/binary-builds-new/dotnet-framework/1.0.11.json",
+    "git_url": "https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/git/blobs/eba16def3c5861966387f409f983a84795c54452",
+    "download_url": "https://raw.githubusercontent.com/cloudfoundry/public-buildpacks-ci-robots/master/binary-builds-new/dotnet-framework/1.0.11.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/contents/binary-builds-new/dotnet-framework/1.0.11.json?ref=master",
+      "git": "https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/git/blobs/eba16def3c5861966387f409f983a84795c54452",
+      "html": "https://github.com/cloudfoundry/public-buildpacks-ci-robots/blob/master/binary-builds-new/dotnet-framework/1.0.11.json"
+    }
+  },
+  {
+    "name": "1.0.11-cflinuxfs3.json",
+    "path": "binary-builds-new/dotnet-framework/1.0.11.json",
+    "sha": "eba16def3c5861966387f409f983a84795c54452",
+    "size": 222,
+    "url": "https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/contents/binary-builds-new/dotnet-framework/1.0.11.json?ref=master",
+    "html_url": "https://github.com/cloudfoundry/public-buildpacks-ci-robots/blob/master/binary-builds-new/dotnet-framework/1.0.11.json",
+    "git_url": "https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/git/blobs/eba16def3c5861966387f409f983a84795c54452",
+    "download_url": "https://raw.githubusercontent.com/cloudfoundry/public-buildpacks-ci-robots/master/binary-builds-new/dotnet-framework/1.0.11.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/contents/binary-builds-new/dotnet-framework/1.0.11.json?ref=master",
+      "git": "https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/git/blobs/eba16def3c5861966387f409f983a84795c54452",
+      "html": "https://github.com/cloudfoundry/public-buildpacks-ci-robots/blob/master/binary-builds-new/dotnet-framework/1.0.11.json"
+    }
+  },
+  {
     "name": "1.1.8.json",
     "path": "binary-builds-new/dotnet-framework/1.1.8.json",
     "sha": "2621602ff1043b3f3eadf8ffac44e10ad59fb633",
