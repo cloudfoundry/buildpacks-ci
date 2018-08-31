@@ -5,9 +5,6 @@
      '../cf-deployment/operations/use-latest-stemcell.yml',
      '../cf-deployment/operations/use-latest-windows-stemcell.yml',
      '../cf-deployment/operations/use-latest-windows2016-stemcell.yml',
-     '../cf-deployment/operations/experimental/secure-service-credentials.yml',
-     '../cf-deployment/operations/experimental/secure-service-credentials-windows-cell.yml',
-     '../cf-deployment/operations/experimental/secure-service-credentials-windows2016-cell.yml',
      '../cf-deployment/operations/experimental/enable-traffic-to-internal-networks.yml',
      '../cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml',
      'deployments/operations/no-canaries.yml',
@@ -48,6 +45,12 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/cf-deployment
+
+- name: bosh-deployment
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/bosh-deployment
+    branch: master
 
 - name: cf-deployment-concourse-tasks
   type: git
@@ -94,6 +97,7 @@ jobs:
     - get: buildpacks-ci
     - get: cf-deployment-concourse-tasks
     - get: cflinuxfs3-bosh-release
+    - get: bosh-deployment
     - get: 3am-daily-timer
       trigger: true
     - put: edge-environments
@@ -121,6 +125,12 @@ jobs:
       params:
         BOSH_ENV: <%= env %>
         RELEASE: "*.tgz"
+  - task: turn-on-bosh-dns
+    file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
+    input_mapping:
+      bbl-state: env-repo
+    params:
+      BBL_STATE_DIR: <%= env %>
   - task: bosh-deploy
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
