@@ -2,13 +2,7 @@
 set -o errexit
 set -o pipefail
 
-cf_flag=""
-
-if [[ -n "$CF_STACK" && "$NEW_ENVS" == "false" ]]; then
-    cf_flag="-$CF_STACK"
-fi
-
-"./cf-space$cf_flag/login"
+"./cf-space/login"
 cd buildpack
 
 export GOPATH=$PWD

@@ -1,14 +1,9 @@
 #!/bin/bash -l
 set -o errexit
+set -o nounset
 set -o pipefail
 
-cf_flag=""
-
-if [[ -n "$CF_STACK" && "$NEW_ENVS" == "false" ]]; then
-    cf_flag="-$CF_STACK"
-fi
-
-"./cf-space$cf_flag/login"
+"./cf-space/login"
 
 cd buildpack
 
