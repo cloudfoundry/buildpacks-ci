@@ -146,7 +146,15 @@ module DependencyBuild
 
     major, minor, patch = source_input.version.split('.')
     Dir.chdir('cli') do
-      GitClient.checkout_branch(source_input.git_commit_sha)
+      GitClient.checkout(source_input.git_commit_sha)
+
+      # TODO: This is a temporary workaround to get 2.1.401 to build properly.
+      # Remove this block after 2.1.402 is released and builds properly.
+      # See: https://github.com/dotnet/cli/issues/9897#issuecomment-416361988
+      if [major, minor, patch] == %w(2 1 401)
+        GitClient.cherry_pick('257cf7a4784cc925742ef4e2706e752ab1f578b0')
+      end
+
       Runner.run('apt-get', 'update')
       Runner.run('apt-get', '-y', 'upgrade')
       stack = ENV.fetch('STACK')
