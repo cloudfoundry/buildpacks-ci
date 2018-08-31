@@ -91,7 +91,8 @@ class ExtractDotnetRuntime
       dotnet_runtime_dir = File.join(output_dir, 'binary-builds-new', 'dotnet-runtime')
       Dir.mkdir(dotnet_runtime_dir) unless File.exists?(dotnet_runtime_dir)
 
-      File.write(File.join(dotnet_runtime_dir, "#{version}.json"), { 'tracker_story_id' => @tracker_story_id }.to_json)
+      version_ref_file = File.join(dotnet_runtime_dir, "#{version}.json")
+      File.write(version_ref_file, { 'tracker_story_id' => @tracker_story_id }.to_json)
 
       md5sum = Digest::MD5.file(dotnet_runtime_tar(version)).hexdigest
       shasum = Digest::SHA256.file(dotnet_runtime_tar(version)).hexdigest
@@ -123,6 +124,7 @@ class ExtractDotnetRuntime
       git_msg += git_yaml.to_yaml
 
       Dir.chdir(output_dir) do
+        GitClient.add_file(version_ref_file)
         GitClient.add_file(runtime_build_file)
         GitClient.safe_commit(git_msg)
       end
