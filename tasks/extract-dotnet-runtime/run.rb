@@ -87,13 +87,11 @@ class ExtractDotnetRuntime
       GitClient.set_global_config('user.name', 'CF Buildpacks Team CI Server')
     end
 
-    dotnet_runtime_dir = File.join(output_dir, 'binary-builds-new', 'dotnet-runtime')
-    Dir.mkdir(dotnet_runtime_dir) unless File.exists?(dotnet_runtime_dir)
-
-    File.write(File.join(dotnet_runtime_dir, "#{version}.json"), { 'tracker_story_id' => @tracker_story_id }.to_json)
-
     @dotnet_runtime_versions.each do |version|
-      runtime_build_file = File.join(dotnet_runtime_dir, "#{version}-#{@stack}.json")
+      dotnet_runtime_dir = File.join(output_dir, 'binary-builds-new', 'dotnet-runtime')
+      Dir.mkdir(dotnet_runtime_dir) unless File.exists?(dotnet_runtime_dir)
+
+      File.write(File.join(dotnet_runtime_dir, "#{version}.json"), { 'tracker_story_id' => @tracker_story_id }.to_json)
 
       md5sum = Digest::MD5.file(dotnet_runtime_tar(version)).hexdigest
       shasum = Digest::SHA256.file(dotnet_runtime_tar(version)).hexdigest
@@ -108,6 +106,7 @@ class ExtractDotnetRuntime
         'url' => "https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/#{File.basename(output_file)}"
       }
 
+      runtime_build_file = File.join(dotnet_runtime_dir, "#{version}-#{@stack}.json")
       File.write(runtime_build_file, runtime_build_data.to_json)
 
       git_msg = "Build dotnet-runtime - #{version}\n\n"
