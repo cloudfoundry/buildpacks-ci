@@ -8,8 +8,6 @@ if [[ -n "$CF_STACK" && -z "$NEW_ENVS" ]]; then
     cf_flag="-$CF_STACK"
 fi
 
-set -o nounset
-
 "./cf-space$cf_flag/login"
 
 cd buildpack
