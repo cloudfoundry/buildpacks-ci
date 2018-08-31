@@ -20,6 +20,7 @@ inputs:
 run:
   path: buildpacks-ci/tasks/run-bp-brats/run.sh
 params:
+  NEW_ENVS: false
   CF_STACK:
   GINKGO_ATTEMPTS:
   GINKGO_NODES:

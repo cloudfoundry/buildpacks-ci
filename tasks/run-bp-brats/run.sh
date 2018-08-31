@@ -4,7 +4,7 @@ set -o pipefail
 
 cf_flag=""
 
-if [[ -n "$CF_STACK" && -z "$NEW_ENVS" ]]; then
+if [[ -n "$CF_STACK" && "$NEW_ENVS" == "false" ]]; then
     cf_flag="-$CF_STACK"
 fi
 
