@@ -327,7 +327,7 @@ describe GitClient do
       let(:git_successful) { true }
 
       it 'cherry_pick the specified commit' do
-        expect(described_class).to receive(:system).with('git cherry-pick abc123')
+        expect(described_class).to receive(:system).with('git cherry-pick --no-commit abc123')
 
         subject
       end
