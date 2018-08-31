@@ -136,7 +136,7 @@ class GitClient
   end
 
   def self.cherry_pick(commit)
-    raise GitError.new("Could not cherry_pick commit: #{commit}") unless system("git cherry-pick #{commit}")
+    raise GitError.new("Could not cherry_pick commit: #{commit}") unless system("git cherry-pick --no-commit #{commit}")
   end
 
   def self.pull_current_branch
