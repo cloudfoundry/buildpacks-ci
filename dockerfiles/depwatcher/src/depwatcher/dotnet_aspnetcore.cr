@@ -28,7 +28,7 @@ module Depwatcher
       Array(External)
         .from_json(res)
         .reject { |b| b.name.includes?("-cflinuxfs") }
-        .map { |b| External.new(b.name.gsub(/\.json$/, ""))
+        .map { |b| External.new(b.name.gsub(/\.json$/, "")) }
     end
   end
 end
