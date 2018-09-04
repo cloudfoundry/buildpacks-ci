@@ -7,8 +7,7 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: brats
-  - name: cf-brat-space
-    path: cf-space
+  - name: cf-space
 run:
   path: buildpacks-ci/tasks/run-shared-brats/run.sh
 params:
