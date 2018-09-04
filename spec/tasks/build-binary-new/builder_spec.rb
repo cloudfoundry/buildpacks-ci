@@ -49,21 +49,26 @@ describe 'Builder' do
             expect(binary_builder).to receive(:build).with(source_input, anything)
           end
 
-          expect(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
+          allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
           expect(build_input).to receive(:copy_to_build_output)
           expect(Sha).to receive(:get_sha).and_return('some bogus').at_most(1).times
-          expect(build_output).to receive(:git_add_and_commit)
-            .with(
-              tracker_story_id: 'fake-story-id',
-              version:          input.version,
-              source:           { url: 'https://fake.com', md5: 'fake-md5', sha256: nil },
-              sha256:           'fake-sha256',
-              url:              'fake-url',
+
+          expect(build_output).to receive(:add_output)
+            .with("#{input.version}-cflinuxfs2.json",
+              {
+                tracker_story_id: 'fake-story-id',
+                version:          input.version,
+                source:           { url: 'https://fake.com', md5: 'fake-md5', sha256: nil },
+                sha256:           'fake-sha256',
+                url:              'fake-url'
+              }
             )
+          expect(build_output).to receive(:commit_outputs)
+            .with("Build #{input.dep} - #{input.version} - cflinuxfs2 [#fake-story-id]")
         end
 
         it 'should build correctly' do
-          dep_name      = input.dep == 'php' ? 'php7' : input.dep
+          dep_name = input.dep == 'php' ? 'php7' : input.dep
           expect(artifact_output).to receive(:move_dependency)
             .with(dep_name, output.old_file_path, output.prefix, output.extension)
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
@@ -78,21 +83,26 @@ describe 'Builder' do
     before do
       allow(binary_builder).to receive(:base_dir).and_return '/fake-binary-builder'
 
-      expect(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
+      allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
       expect(build_input).to receive(:copy_to_build_output)
     end
 
     context 'third party-hosted deps' do
       before do
-        expect(build_output).to receive(:git_add_and_commit)
-          .with(
-            tracker_story_id: 'fake-story-id',
-            version:          '1.0.2',
-            source:           { url: 'fake-url', md5: nil, sha256: 'fake-sha256' },
-            sha256:           'fake-sha256',
-            url:              'fake-url'
+        expect(build_output).to receive(:add_output)
+          .with("1.0.2-cflinuxfs2.json",
+            {
+              tracker_story_id: 'fake-story-id',
+              version:          '1.0.2',
+              source:           { url: 'fake-url', md5: nil, sha256: 'fake-sha256' },
+              sha256:           'fake-sha256',
+              url:              'fake-url'
+            }
           )
+        expect(build_output).to receive(:commit_outputs)
+          .with("Build #{source_input.name} - 1.0.2 - cflinuxfs2 [#fake-story-id]")
       end
+
       describe 'CAAPM, appdynamics, minconda2&3' do
         let(:source_input) { SourceInput.new('CAAPM', 'fake-url', '1.0.2', nil, 'fake-sha256') }
 
@@ -105,18 +115,24 @@ describe 'Builder' do
         end
       end
     end
+
     context 'Nginx' do
       before do
-        expect(build_output).to receive(:git_add_and_commit)
-          .with(
-            tracker_story_id: 'fake-story-id',
-            version:          '1.0.2',
-            source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
-            sha256:           'fake-sha256',
-            url:              'fake-url',
-            source_pgp:       'not yet implemented'
+        expect(build_output).to receive(:add_output)
+          .with("1.0.2-cflinuxfs2.json",
+            {
+              tracker_story_id: 'fake-story-id',
+              version:          '1.0.2',
+              source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
+              sha256:           'fake-sha256',
+              url:              'fake-url',
+              source_pgp:       'not yet implemented'
+            }
           )
+        expect(build_output).to receive(:commit_outputs)
+          .with("Build #{source_input.name} - 1.0.2 - cflinuxfs2 [#fake-story-id]")
       end
+
       describe 'nginx' do
         let(:source_input) { SourceInput.new('nginx', 'https://fake.com', '1.0.2', nil, 'fake-sha256') }
 
@@ -136,14 +152,19 @@ describe 'Builder' do
 
     context 'and no git commit sha' do
       before do
-        expect(build_output).to receive(:git_add_and_commit)
-          .with(
-            tracker_story_id: 'fake-story-id',
-            version:          '1.0.2',
-            source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
-            sha256:           'fake-sha256',
-            url:              'fake-url'
+
+        expect(build_output).to receive(:add_output)
+          .with("1.0.2-cflinuxfs2.json",
+            {
+              tracker_story_id: 'fake-story-id',
+              version:          '1.0.2',
+              source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
+              sha256:           'fake-sha256',
+              url:              'fake-url'
+            }
           )
+        expect(build_output).to receive(:commit_outputs)
+          .with("Build #{source_input.name} - 1.0.2 - cflinuxfs2 [#fake-story-id]")
       end
 
       describe 'to build composer' do
@@ -193,15 +214,19 @@ describe 'Builder' do
 
     context 'and a git commit sha' do
       before do
-        expect(build_output).to receive(:git_add_and_commit)
-          .with(
-            tracker_story_id: 'fake-story-id',
-            version:          '1.0.2',
-            source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
-            sha256:           'fake-sha256',
-            url:              'fake-url',
-            git_commit_sha:   'fake-source-sha-123'
+        expect(build_output).to receive(:add_output)
+          .with("1.0.2-cflinuxfs2.json",
+            {
+              tracker_story_id: 'fake-story-id',
+              version:          '1.0.2',
+              source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
+              sha256:           'fake-sha256',
+              url:              'fake-url',
+              git_commit_sha:   'fake-source-sha-123'
+            }
           )
+        expect(build_output).to receive(:commit_outputs)
+          .with("Build #{source_input.name} - 1.0.2 - cflinuxfs2 [#fake-story-id]")
       end
 
       describe 'to build r' do

@@ -5,28 +5,27 @@ require_relative "#{$buildpacks_ci_dir}/lib/git-client"
 
 class BuildOutput
   attr_reader :git_client, :base_dir
-  attr_accessor :version
 
-  def initialize(name, version, stack, tracker_story_id, git_client = GitClient, base_dir = 'builds-artifacts')
+  def initialize(name, git_client = GitClient, base_dir = 'builds-artifacts')
     @name             = name
-    @version          = version
-    @stack            = stack
-    @tracker_story_id = tracker_story_id
-    @git_client = git_client
-    @base_dir = base_dir
+    @git_client       = git_client
+    @base_dir         = File.join(base_dir, 'binary-builds-new', name)
+    FileUtils.mkdir_p(@base_dir)
   end
 
-  def git_add_and_commit(out_data)
+  def add_output(file, data)
+    Dir.chdir(@base_dir) do
+      out_file = File.join(@base_dir, file)
+      File.write(out_file, data.to_json)
+      @git_client.add_file(out_file)
+    end
+  end
+
+  def commit_outputs(msg)
     Dir.chdir(@base_dir) do
       @git_client.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
       @git_client.set_global_config('user.name', 'CF Buildpacks Team CI Server')
-
-      FileUtils.mkdir_p(File.join('binary-builds-new', @name))
-      out_file = File.join('binary-builds-new', @name, "#{@version}-#{@stack}.json")
-      File.write(out_file, out_data.to_json)
-
-      @git_client.add_file(out_file)
-      @git_client.safe_commit("Build #{@name} - #{@version} - #{@stack} [##{@tracker_story_id}]")
+      @git_client.safe_commit(msg)
     end
   end
 end
