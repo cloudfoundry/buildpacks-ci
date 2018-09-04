@@ -14,12 +14,7 @@ def main
   binary_builder  = BinaryBuilderWrapper.new(Runner)
   source_input    = SourceInput.from_file('source/data.json')
   build_input     = BuildInput.from_file("builds/binary-builds-new/#{source_input.name}/#{source_input.version}.json")
-  build_output    = BuildOutput.new(
-    source_input.name,
-    source_input.version,
-    ENV['STACK'],
-    build_input.tracker_story_id
-  )
+  build_output    = BuildOutput.new(source_input.name)
   artifact_output = ArtifactOutput.new
   out_data = Builder.new.execute(
     binary_builder,

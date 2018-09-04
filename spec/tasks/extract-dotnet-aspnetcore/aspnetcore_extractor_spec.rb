@@ -27,8 +27,6 @@ describe 'AspnetcoreExtractor' do
     end
 
     expect(build_input).to receive(:copy_to_build_output)
-
-    expect(build_output).to receive(:version=).with '2.1.2'
   end
 
   it 'should extract the Microsoft.AspNetCore.All and Microsoft.AspNetCore.App metapackages' do
@@ -41,13 +39,20 @@ describe 'AspnetcoreExtractor' do
       )
       .and_return(url: 'fake-url', sha256: 'fake-sha256')
 
-    expect(build_output).to receive(:git_add_and_commit)
-      .with(
-        tracker_story_id: 'fake-story-id',
-        version: '2.1.2',
-        url: 'fake-url',
-        sha256: 'fake-sha256'
-      )
+    expect(build_output).to receive(:add_output)
+      .with('2.1.2.json', { tracker_story_id: 'fake-story-id' })
+
+    expect(build_output).to receive(:add_output)
+      .with('2.1.2-cflinuxfs2.json',
+        {
+          tracker_story_id: 'fake-story-id',
+          version:          '2.1.2',
+          url:              'fake-url',
+          sha256:           'fake-sha256'
+        })
+
+    expect(build_output).to receive(:commit_outputs)
+      .with('Build dotnet-aspnetcore - 2.1.2 - cflinuxfs2 [#fake-story-id]')
 
     subject.run
   end

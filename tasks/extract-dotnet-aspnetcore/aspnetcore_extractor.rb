@@ -15,25 +15,25 @@ class AspnetcoreExtractor
   attr_reader :base_dir
 
   def initialize(
-      stack,
+    stack,
       build_input,
       build_output,
       artifact_output,
       downloader = Downloader.new
   )
-    @base_dir = Dir.tmpdir
-    @stack = stack
-    @build_input = build_input
-    @build_output = build_output
+    @base_dir        = Dir.tmpdir
+    @stack           = stack
+    @build_input     = build_input
+    @build_output    = build_output
     @artifact_output = artifact_output
-    @downloader = downloader
+    @downloader      = downloader
   end
 
   def run
-    sdk_tar = File.join(@base_dir, 'dotnet-sdk.tar.xz')
-    sdk_dir = File.join(@base_dir, 'dotnet-sdk')
+    sdk_tar        = File.join(@base_dir, 'dotnet-sdk.tar.xz')
+    sdk_dir        = File.join(@base_dir, 'dotnet-sdk')
     aspcorenet_tar = File.join(@base_dir, "dotnet-aspnetcore.tar.xz")
-    sdk_url = @build_input.url
+    sdk_url        = @build_input.url
 
     @downloader.download(sdk_url, sdk_tar)
 
@@ -71,7 +71,7 @@ class AspnetcoreExtractor
 
     out_data = {
       tracker_story_id: @build_input.tracker_story_id,
-      version: version,
+      version:          version,
     }
 
     out_data.merge!(@artifact_output.move_dependency(
@@ -81,8 +81,9 @@ class AspnetcoreExtractor
       'tar.xz'
     ))
 
-    @build_output.version = version
-    @build_output.git_add_and_commit(out_data)
+    @build_output.add_output("#{version}.json", { tracker_story_id: @build_input.tracker_story_id })
+    @build_output.add_output("#{version}-#{@stack}.json", out_data)
+    @build_output.commit_outputs("Build dotnet-aspnetcore - #{version} - #{@stack} [##{@build_input.tracker_story_id}]")
 
     out_data
   end

@@ -25,7 +25,10 @@ module Depwatcher
 
     private def builds() : Array(External)
       res = client.get("https://api.github.com/repos/cloudfoundry/public-buildpacks-ci-robots/contents/binary-builds-new/dotnet-aspnetcore").body
-      Array(External).from_json(res).map{ |b| External.new(b.name.gsub(/\.json$/, ""))}
+      Array(External)
+        .from_json(res)
+        .reject { |b| b.name.includes?("-cflinuxfs") }
+        .map { |b| External.new(b.name.gsub(/\.json$/, ""))
     end
   end
 end

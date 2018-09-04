@@ -338,35 +338,36 @@ class Builder
       else
         raise "Unsupported jruby version line #{source_input.version}"
       end
-      source_input.version = "#{source_input.version}_ruby-#{ruby_version}"
+      full_version = "#{source_input.version}_ruby-#{ruby_version}"
       binary_builder.build(source_input)
       out_data.merge!(
         artifact_output.move_dependency(
           source_input.name,
-          "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}-linux-x64.tgz",
-          "#{source_input.name}-#{source_input.version}-linux-x64-#{stack}",
+          "#{binary_builder.base_dir}/#{source_input.name}-#{full_version}-linux-x64.tgz",
+          "#{source_input.name}-#{full_version}-linux-x64-#{stack}",
           'tgz'
         )
       )
 
     when 'php'
+      full_name = source_input.name
       if source_input.version.start_with?('7')
-        source_input.name = 'php7'
+        full_name = 'php7'
       elsif !source_input.version.start_with?('5')
         raise "Unexpected PHP version #{source_input.version}. Expected 5.X or 7.X"
       end
 
       # add the right extensions
-      extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "#{source_input.name}-extensions.yml")
+      extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "#{full_name}-extensions.yml")
       if source_input.version.start_with?('7.2.')
         extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php72-extensions.yml")
       end
       binary_builder.build(source_input, "--php-extensions-file=#{extension_file}")
       out_data.merge!(
         artifact_output.move_dependency(
-          source_input.name,
-          "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}-linux-x64.tgz",
-          "#{source_input.name}-#{source_input.version}-linux-x64-#{stack}",
+          full_name,
+          "#{binary_builder.base_dir}/#{full_name}-#{source_input.version}-linux-x64.tgz",
+          "#{full_name}-#{source_input.version}-linux-x64-#{stack}",
           'tgz'
         )
       )
@@ -453,7 +454,8 @@ class Builder
       raise("Dependency: #{source_input.name} is not currently supported")
     end
 
-    build_output.git_add_and_commit(out_data)
+    build_output.add_output("#{source_input.version}-#{stack}.json", out_data)
+    build_output.commit_outputs("Build #{source_input.name} - #{source_input.version} - #{stack} [##{build_input.tracker_story_id}]")
 
     out_data
   end
