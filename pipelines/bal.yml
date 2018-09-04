@@ -234,9 +234,6 @@ jobs:
             - cf-deployment/operations/use-latest-windows2016-stemcell.yml
             - cf-deployment/operations/use-latest-windows-stemcell.yml
             - cf-deployment/operations/use-latest-stemcell.yml
-            - cf-deployment/operations/experimental/secure-service-credentials.yml
-            - cf-deployment/operations/experimental/secure-service-credentials-windows-cell.yml
-            - cf-deployment/operations/experimental/secure-service-credentials-windows2016-cell.yml
             vars:
               system_domain: bal.buildpacks-gcp.ci.cf-app.com
         - task: set-up-environment-for-credhub
