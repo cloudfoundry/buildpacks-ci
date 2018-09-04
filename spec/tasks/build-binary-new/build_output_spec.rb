@@ -7,7 +7,7 @@ describe 'BuildOutput' do
 
   it 'should add an output' do
     expect(git_client).to receive(:add_file)
-      .with(File.join(subject.base_dir, 'test_file'))
+      .with('test_file')
 
     subject.add_output('test_file', { A: '1', B: '2', C: '3' })
 

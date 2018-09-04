@@ -15,9 +15,8 @@ class BuildOutput
 
   def add_output(file, data)
     Dir.chdir(@base_dir) do
-      out_file = File.join(@base_dir, file)
-      File.write(out_file, data.to_json)
-      @git_client.add_file(out_file)
+      File.write(file, data.to_json)
+      @git_client.add_file(file)
     end
   end
 
