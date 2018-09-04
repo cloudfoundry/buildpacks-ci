@@ -7,7 +7,8 @@ set -x
 OUTPUT=cf-space
 
 if [ -z "$TARGET" ]; then
-  ENV_NAME=$(cat "$ENV_POOL_RESOURCE/name")
+  lock_name=$(cat "$ENV_POOL_RESOURCE/name")
+  ENV_NAME="${lock_name//[[:digit:]]/}"
   TARGET="api.$ENV_NAME.$SYSTEM_DOMAIN"
 fi
 
