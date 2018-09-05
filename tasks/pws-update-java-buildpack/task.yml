@@ -11,7 +11,7 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/tasks/pws-update-buildpack/run.rb
+    - buildpacks-ci/tasks/pws-create-or-update-buildpack/run.rb
 params:
   CF_API:
   USERNAME:
