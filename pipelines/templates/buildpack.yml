@@ -33,58 +33,12 @@ resource_types:
     source:
       repository: pivotalcf/pivnet-resource
       tag: latest-final
-  - name: cf-space-resource
-    type: docker-image
-    source:
-      repository: cfbuildpacks/cf-space-resource
   - name: cron
     type: docker-image
     source:
       repository: cfbuildpacks/cron-resource
 
 resources: ############################################################################################################
-
-  ## cf-space-resource ##
-<% stacks[language].each do |stack| %>
-  - name: cf-bp-space-<%= stack %>
-    type: cf-space-resource
-    source:
-      target: api.edge.buildpacks-gcp.ci.cf-app.com
-      username: {{ci-cf-username}}
-      password: {{ci_cf_edge_password}}
-      organization: pivotal
-
-<% unless no_brats.include?(language) %>
-  - name: cf-brat-space-<%= stack %>
-    type: cf-space-resource
-    source:
-      target: api.edge.buildpacks-gcp.ci.cf-app.com
-      username: {{ci-cf-username}}
-      password: {{ci_cf_edge_password}}
-      organization: pivotal
-<% end %>
-<% end %>
-
-<% unless non_lts.include? language %>
-  - name: cf-lts-space-cflinuxfs2
-    type: cf-space-resource
-    source:
-      target: {{ci-cf-lts-target}}
-      username: admin
-      password: {{ci-cf-lts-password}}
-      organization: pivotal
-
-<% unless no_brats.include?(language) %>
-  - name: cf-lts-brat-space-cflinuxfs2
-    type: cf-space-resource
-    source:
-      target: {{ci-cf-lts-target}}
-      username: admin
-      password: {{ci-cf-lts-password}}
-      organization: pivotal
-<% end %>
-<% end %>
-
   ## Git ##
 
   - name: buildpack-develop
@@ -171,6 +125,13 @@ resources: #####################################################################
       private_key: {{<%= language %>-offline-buildpack-bosh-release-private-key}}
       branch: master
 <% end %>
+
+  - name: env-repo
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: {{buildpacks-envs-private-key}}
 
 
   ## Github Releases ##
@@ -269,7 +230,15 @@ resources: #####################################################################
 
   ## Resource Pools ##
 
-  - name: edge-shared-environments
+  - name: edge-environments
+    type: pool
+    source:
+      branch: master
+      pool: edge-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
+  - name: edge-buildpack-specs-pool
     type: pool
     source:
       branch: master
@@ -278,7 +247,7 @@ resources: #####################################################################
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
 <% unless non_lts.include? language %>
-  - name: lts-shared-environments
+  - name: lts-buildpack-specs-pool
     type: pool
     source:
       branch: master
@@ -395,13 +364,16 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - put: cf-environments
-        resource: edge-shared-environments
-        params:
-          claim: <%= language %>
-        timeout: 3h
       - aggregate:
+        - put: edge-environments
+          params:
+            acquire: true
+        - put: edge-buildpack-specs-pool
+          params:
+            claim: <%= language %>
+          timeout: 3h
         - get: buildpacks-ci
+        - get: env-repo
         - get: buildpack
           passed: [ "detect-new-version-and-upload-artifacts" ]
           resource: buildpack-master
@@ -416,64 +388,74 @@ jobs: ##########################################################################
           resource: pivotal-buildpack-cached
           passed: [ "detect-new-version-and-upload-artifacts" ]
           trigger: true
-      - do:
-        - task: unit
-          file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
-        - aggregate:
+      - task: unit
+        file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
+      - aggregate:
 <% stacks[language].each do |stack| %>
-          - do:
-            - put: cf-bp-space-<%= stack %>
-            - task: ginkgo-<%= stack %>
-              file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
-              params:
-                CF_STACK: <%= stack %>
-                GINKGO_ATTEMPTS: 4
-                GINKGO_NODES: 6
-                <% if language == 'php' %>
-                COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-                <% end %>
-    <% if skip_docker_start.include?(language) %>
-                SKIP_DOCKER_START: true
-    <% else %>
-              privileged: true
-    <% end %>
-            ensure:
-              task: delete-cf-space-<%= stack %>
-              file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
-              params:
-                CF_STACK: <%= stack %>
+        - do:
+          - task: create-cf-space
+            file: buildpacks-ci/tasks/create-cf-space/task.yml
+            output_mapping: {cf-space: cf-space-<%= stack %>}
+            params:
+              ENV_POOL_RESOURCE: edge-environments
+              ENVS_DIR: env-repo
+              ORG: pivotal
+              SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+              USERNAME: admin
+          - task: ginkgo-<%= stack %>
+            file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+            input_mapping: {cf-space: cf-space-<%= stack %>}
+            params:
+              CF_STACK: <%= stack %>
+              GINKGO_ATTEMPTS: 4
+              GINKGO_NODES: 6
+              <% if language == 'php' %>
+              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+              <% end %>
+<% if skip_docker_start.include?(language) %>
+              SKIP_DOCKER_START: true
+<% else %>
+            privileged: true
 <% end %>
-        on_success:
-          task: github-set-status-success
-          file: buildpacks-ci/tasks/set-status-success/task.yml
-          params:
-            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
-            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-master'
-            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge master spec passed'
-            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-        ensure:
-          put: edge-shared-environments
-          params:
-            release: cf-environments
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task.yml
+            input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
+    on_success:
+      task: github-set-status-success
+      file: buildpacks-ci/tasks/set-status-success/task.yml
+      params:
+        GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+        GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
+        GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-master'
+        GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge master spec passed'
+        PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
+    on_failure:
+      put: failure-alert
+      params:
+        text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        channel: {{concourse-job-failure-notifications-slack-channel}}
+        username: concourse
+        icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+    ensure:
+      aggregate:
+      - put: edge-buildpack-specs-pool
+        params:
+          release: edge-buildpack-specs-pool
+      - put: edge-environments
+        params:
+          release: edge-environments
 <% unless non_lts.include? language %>
   - name: specs-lts-master
     serial: true
     public: true
     plan:
-      - put: cf-environments
-        resource: lts-shared-environments
-        params:
-          claim: <%= language %>
-        timeout: 3h
       - aggregate:
+        - put: lts-buildpack-specs-pool
+          params:
+            claim: <%= language %>
+          timeout: 3h
         - get: buildpacks-ci
         - get: buildpack
           passed: [ "detect-new-version-and-upload-artifacts" ]
@@ -492,8 +474,13 @@ jobs: ##########################################################################
       - do:
         - task: unit
           file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
-        - put: cf-bp-space-cflinuxfs2
-          resource: cf-lts-space-cflinuxfs2
+        - task: create-cf-space
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          params:
+            ORG: pivotal
+            TARGET: {{ci-cf-lts-target}}
+            USERNAME: admin
+            PASSWORD: {{ci-cf-lts-password}}
         - task: ginkgo-cflinuxfs2
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           params:
@@ -509,31 +496,30 @@ jobs: ##########################################################################
 <% else %>
           privileged: true
 <% end %>
-          ensure:
-            task: delete-cf-space-cflinuxfs2
-            file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
-            params:
-              CF_STACK: cflinuxfs2
-        on_success:
-          task: github-set-status-success
-          file: buildpacks-ci/tasks/set-status-success/task.yml
-          params:
-            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
-            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-master'
-            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI LTS master spec passed'
-            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
         ensure:
-          put: lts-shared-environments
-          params:
-            release: cf-environments
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    on_success:
+      task: github-set-status-success
+      file: buildpacks-ci/tasks/set-status-success/task.yml
+      params:
+        GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+        GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
+        GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-master'
+        GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI LTS master spec passed'
+        PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
+    on_failure:
+      put: failure-alert
+      params:
+        text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        channel: {{concourse-job-failure-notifications-slack-channel}}
+        username: concourse
+        icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+    ensure:
+      put: lts-buildpack-specs-pool
+      params:
+        release: lts-buildpack-specs-pool
+
 <% end %>
   - name: ship-it
     serial: true
@@ -712,95 +698,121 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - do:
-        - put: cf-environments
-          resource: edge-shared-environments
+      - aggregate:
+        - put: edge-environments
+          params:
+            acquire: true
+        - put: edge-buildpack-specs-pool
           params:
             claim: <%= language %>
           timeout: 3h
-        - aggregate:
-          - get: buildpacks-ci
-          - get: buildpack
-            resource: buildpack-develop
-            trigger: true
-            passed:
-            - specs-unit-develop
-          - get: repo
-            resource: buildpack-develop
-        - do:
-          - aggregate:
+        - get: buildpacks-ci
+        - get: env-repo
+        - get: buildpack
+          resource: buildpack-develop
+          trigger: true
+          passed:
+          - specs-unit-develop
+        - get: repo
+          resource: buildpack-develop
+      - aggregate:
 <% stacks[language].each do |stack| %>
-            - do:
-              - put: cf-bp-space-<%= stack %>
-              - task: ginkgo-<%= stack %>
-                file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
-                params:
-                  CF_STACK: <%= stack %>
-                  GINKGO_ATTEMPTS: 4
-                  GINKGO_NODES: 6
-                  <% if language == 'php' %>
-                  COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-                  <% end %>
-    <% if skip_docker_start.include?(language) %>
-                  SKIP_DOCKER_START: true
-    <% else %>
-                privileged: true
-    <% end %>
-              ensure:
-                task: delete-cf-space-<%= stack %>
-                file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
-                params:
-                  CF_STACK: <%= stack %>
+        - do:
+          - task: create-cf-space
+            file: buildpacks-ci/tasks/create-cf-space/task.yml
+            output_mapping: {cf-space: cf-space-<%= stack %>}
+            params:
+              ENV_POOL_RESOURCE: edge-environments
+              ENVS_DIR: env-repo
+              ORG: pivotal
+              SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+              USERNAME: admin
+          - task: ginkgo-<%= stack %>
+            file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+            input_mapping: {cf-space: cf-space-<%= stack %>}
+            params:
+              CF_STACK: <%= stack %>
+              GINKGO_ATTEMPTS: 4
+              GINKGO_NODES: 6
+              <% if language == 'php' %>
+              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+              <% end %>
+<% if skip_docker_start.include?(language) %>
+              SKIP_DOCKER_START: true
+<% else %>
+            privileged: true
 <% end %>
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-        ensure:
-          put: edge-shared-environments
-          params:
-            release: cf-environments
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task.yml
+            input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
+    on_failure:
+      put: failure-alert
+      params:
+        text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        channel: {{concourse-job-failure-notifications-slack-channel}}
+        username: concourse
+        icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+    ensure:
+      aggregate:
+      - put: edge-buildpack-specs-pool
+        params:
+          release: edge-buildpack-specs-pool
+      - put: edge-environments
+        params:
+          release: edge-environments
 <% unless no_brats.include?(language) %>
   - name: specs-edge-brats-develop
     serial: true
     public: true
     plan:
-      - do:
-        - aggregate:
-          - get: buildpacks-ci
-          - get: buildpack
-            resource: buildpack-develop
-            trigger: true
-            passed:
-            - specs-unit-develop
-        - do:
-          - aggregate:
-<% stacks[language].each do |stack| %>
-            - do:
-              - put: cf-brat-space-<%= stack %>
-              - task: brats-<%= stack %>
-                file: buildpacks-ci/tasks/run-bp-brats/task.yml
-                input_mapping: {cf-space-<%= stack %>: cf-brat-space-<%= stack %>}
-                params:
-                  CF_STACK: <%= stack %>
-                  GINKGO_ATTEMPTS: 4
-                  GINKGO_NODES: 6
-              ensure:
-                task: delete-cf-space-<%= stack %>
-                file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
-                params:
-                  CF_STACK: <%= stack %>
-<% end %>
-        on_failure:
-          put: failure-alert
+      - aggregate:
+        - put: edge-environments
           params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+            acquire: true
+        - get: buildpacks-ci
+        - get: env-repo
+        - get: buildpack
+          resource: buildpack-develop
+          trigger: true
+          passed:
+          - specs-unit-develop
+      - aggregate:
+<% stacks[language].each do |stack| %>
+        - do:
+          - task: create-cf-space
+            file: buildpacks-ci/tasks/create-cf-space/task.yml
+            output_mapping: {cf-space: cf-space-<%= stack %>}
+            params:
+              ENV_POOL_RESOURCE: edge-environments
+              ENVS_DIR: env-repo
+              ORG: pivotal
+              SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+              USERNAME: admin
+          - task: brats-<%= stack %>
+            file: buildpacks-ci/tasks/run-bp-brats/task.yml
+            input_mapping: {cf-space: cf-space-<%= stack %>}
+            params:
+              CF_STACK: <%= stack %>
+              GINKGO_ATTEMPTS: 4
+              GINKGO_NODES: 6
+          ensure:
+            task: delete-cf-space-<%= stack %>
+            file: buildpacks-ci/tasks/delete-cf-space/task.yml
+            input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
+    on_failure:
+      put: failure-alert
+      params:
+        text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        channel: {{concourse-job-failure-notifications-slack-channel}}
+        username: concourse
+        icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+    ensure:
+      put: edge-environments
+      params:
+        release: edge-environments
 <% end %>
   - name: specs-edge-shared-develop
     serial: true
@@ -831,90 +843,92 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - do:
-        - put: cf-environments
-          resource: lts-shared-environments
+      - aggregate:
+        - put: lts-buildpack-specs-pool
           params:
             claim: <%= language %>
           timeout: 3h
-        - aggregate:
-          - get: buildpacks-ci
-          - get: buildpack
-            resource: buildpack-develop
-            trigger: true
-            passed:
-            - specs-unit-develop
-          - get: repo
-            resource: buildpack-develop
-        - do:
-          - put: cf-bp-space-cflinuxfs2
-            resource: cf-lts-space-cflinuxfs2
-          - task: ginkgo-cflinuxfs2
-            file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
-            params:
-              CF_STACK: cflinuxfs2
-              GINKGO_ATTEMPTS: 4
-              GINKGO_NODES: 6
-              SKIP_WINDOWS_TESTS: true
-              <% if language == 'php' %>
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              <% end %>
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-develop
+          trigger: true
+          passed:
+          - specs-unit-develop
+        - get: repo
+          resource: buildpack-develop
+      - do:
+        - task: create-cf-space
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          params:
+            ORG: pivotal
+            TARGET: {{ci-cf-lts-target}}
+            USERNAME: admin
+            PASSWORD: {{ci-cf-lts-password}}
+        - task: ginkgo-cflinuxfs2
+          file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+          params:
+            CF_STACK: cflinuxfs2
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 6
+            SKIP_WINDOWS_TESTS: true
+            <% if language == 'php' %>
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            <% end %>
 <% if skip_docker_start.include?(language) %>
-              SKIP_DOCKER_START: true
+            SKIP_DOCKER_START: true
 <% else %>
-            privileged: true
+          privileged: true
 <% end %>
-          ensure:
-            task: delete-cf-space-cflinuxfs2
-            file: buildpacks-ci/tasks/delete-cf-space/task-bp.yml
-            params:
-              CF_STACK: cflinuxfs2
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
         ensure:
-          put: lts-shared-environments
-          params:
-            release: cf-environments
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    on_failure:
+      put: failure-alert
+      params:
+        text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        channel: {{concourse-job-failure-notifications-slack-channel}}
+        username: concourse
+        icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+    ensure:
+      put: lts-buildpack-specs-pool
+      params:
+        release: lts-buildpack-specs-pool
 <% unless no_brats.include?(language) %>
   - name: specs-lts-brats-develop
     serial: true
     public: true
     plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-develop
+          trigger: true
+          passed:
+          - specs-unit-develop
       - do:
-        - aggregate:
-          - get: buildpacks-ci
-          - get: buildpack
-            resource: buildpack-develop
-            trigger: true
-            passed:
-            - specs-unit-develop
-        - do:
-          - put: cf-brat-space-cflinuxfs2
-            resource: cf-lts-brat-space-cflinuxfs2
-          - task: brats-cflinuxfs2
-            file: buildpacks-ci/tasks/run-bp-brats/task.yml
-            input_mapping: {cf-space-cflinuxfs2: cf-brat-space-cflinuxfs2}
-            params:
-              CF_STACK: cflinuxfs2
-              GINKGO_ATTEMPTS: 4
-              GINKGO_NODES: 6
-          ensure:
-            task: delete-cf-space-cflinuxfs2
-            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
-            params:
-              CF_STACK: cflinuxfs2
-        on_failure:
-          put: failure-alert
+        - task: create-cf-space
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
           params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+            ORG: pivotal
+            TARGET: {{ci-cf-lts-target}}
+            USERNAME: admin
+            PASSWORD: {{ci-cf-lts-password}}
+        - task: brats-cflinuxfs2
+          file: buildpacks-ci/tasks/run-bp-brats/task.yml
+          params:
+            CF_STACK: cflinuxfs2
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 6
+        ensure:
+          task: delete-cf-space-cflinuxfs2
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    on_failure:
+      put: failure-alert
+      params:
+        text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        channel: {{concourse-job-failure-notifications-slack-channel}}
+        username: concourse
+        icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
   - name: specs-lts-gcp-develop
     serial: true
