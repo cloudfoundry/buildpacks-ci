@@ -60,7 +60,7 @@ class AspnetcoreExtractor
 
     version = versions.first
     Dir.chdir(sdk_dir) do
-      system("tar Jcf #{aspcorenet_tar} shared/Microsoft.AspNetCore.All/#{version} shared/Microsoft.AspNetCore.App/#{version} host *.txt") or raise "Tarring the dotnet aspnetcore assemblies failed"
+      system("tar Jcf #{aspcorenet_tar} shared/Microsoft.AspNetCore.All/#{version} shared/Microsoft.AspNetCore.App/#{version} *.txt") or raise "Tarring the dotnet aspnetcore assemblies failed"
     end
 
     version
