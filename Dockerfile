@@ -68,7 +68,8 @@ RUN mv /usr/bin/composer.phar /usr/bin/composer
 RUN wget -O cf-cli.tgz 'https://s3.amazonaws.com/cf-cli-multi-stack/cf-6.38.0%2B28c97c6bd.2018-07-23.tgz' \
   && [ 022305ee3ccd010e692a6aa671a68da8abde89e1fe22c3c76c179752dae1ac35 = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
   && tar xzf cf-cli.tgz -C /usr/bin \
-  && rm cf-cli.tgz
+  && rm cf-cli.tgz \
+  && cf install-plugin -r CF-Community "log-cache" -f
 
 # download the bosh2 CLI
 RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.45-linux-amd64 -o /usr/local/bin/bosh2 \
