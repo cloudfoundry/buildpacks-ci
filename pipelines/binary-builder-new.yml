@@ -463,19 +463,16 @@ jobs:
       resource: source-<%= dep_name %>-<%= line %>
       version: every
       trigger: true
-    <% if dep_name.to_s != 'dotnet-aspnetcore' %>
   - do:
     - task: update-buildpack-dependency
       file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
       params:
         VERSION_LINE: 'minor'
         REMOVAL_STRATEGY: 'keep_all'
-        CF_STACKS: 'cflinuxfs2'
     - put: dotnet-core-buildpack
       params:
         repository: artifacts
         rebase: true
-    <% end %>
 <% end %>
 <% end %>
 
