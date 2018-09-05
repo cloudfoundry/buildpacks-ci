@@ -614,7 +614,7 @@ jobs: ##########################################################################
           resource: pivotal-buildpack-cached
           passed: [ ship-it ]
           trigger: true
-        <% pws_stacks = any_stack.include?(language) ? ['any'] : ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to stacks[language] when PWS has cflinuxfs3
+        <% pws_stacks = any_stack.include?(language) ? ['any'] : stacks[language]
            pws_stacks.each do |stack| %>
         - get: pivotal-buildpack-cached-<%= stack %>
         <% end %>
