@@ -2,6 +2,7 @@
 # encoding: utf-8
 require 'open3'
 require 'fileutils'
+require 'json'
 
 puts "Buildpack name: #{ENV['BUILDPACK_NAME']}\n"
 
@@ -33,15 +34,31 @@ stacks.each do |stack|
   stack = '' if stack == 'any'
   buildpack_name = ENV['BUILDPACK_NAME'] != 'dotnet-core' ? ENV['BUILDPACK_NAME'] + '_buildpack' : 'dotnet_core_buildpack'
 
-  puts "\ncf create-buildpack #{buildpack_name} #{filename} 0"
-  out, status = Open3.capture2e('cf', 'create-buildpack', "#{buildpack_name}", "#{filename}", '0')
-  raise "cf create-buildpack failed: #{out}" unless status.success?
-  if out.include?('already exists')
-    puts "\n#{buildpack_name} already exists with stack #{stack}; updating buildpack instead."
+  if buildpack_exists(buildpack_name, stack)
+    puts "\n#{buildpack_name} already exists with stack #{stack}; updating buildpack."
     puts "\ncf update-buildpack #{buildpack_name} -p #{filename} -s #{stack}"
     out, status = Open3.capture2e('cf', 'update-buildpack', "#{buildpack_name}", '-p', "#{filename}", '-s', "#{stack}")
     raise "cf update-buildpack failed: #{out}" unless status.success?
   else
-    puts "\nSkipping update because #{buildpack_name} with #{stack} was newly created."
+    puts "\n#{buildpack_name} with #{stack} does not exist; creating buildpack."
+    puts "\ncf create-buildpack #{buildpack_name} #{filename} 0"
+    out, status = Open3.capture2e('cf', 'create-buildpack', "#{buildpack_name}", "#{filename}", '0')
+    raise "cf create-buildpack failed: #{out}" unless status.success?
   end
+end
+
+def buildpack_exists(name, stack)
+  out, status = Open3.capture2e('cf', 'curl', "/v2/buildpacks")
+  raise "curling cf v2 buildpack failed: #{out}" unless status.success?
+  response = JSON.parse(out)
+  response["resources"].each do |resource|
+    if resource["entity"]["name"] == name && resource["entity"]["stack"] == stack_mapping(stack)
+      return true
+    end
+  end
+  false
+end
+
+def stack_mapping(stack)
+  return stack == '' ? nil : stack
 end
