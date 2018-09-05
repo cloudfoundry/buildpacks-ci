@@ -632,8 +632,8 @@ jobs: ##########################################################################
            pws_stacks.each do |stack| %>
         - get: pivotal-buildpack-cached-<%= stack %>
         <% end %>
-      - task: update-buildpack
-        file: buildpacks-ci/tasks/pws-update-buildpack/task.yml
+      - task: create-or-update-buildpack
+        file: buildpacks-ci/tasks/pws-create-or-update-buildpack/task.yml
         params:
           CF_API: https://api.run.pivotal.io
           USERNAME: {{pws_buildpacks_cf_admin_username}}

@@ -31,12 +31,17 @@ stacks.each do |stack|
   end
 
   stack = '' if stack == 'any'
-  if ENV['BUILDPACK_NAME'] != 'dotnet-core'
-    puts "\ncf update-buildpack #{ENV['BUILDPACK_NAME']}_buildpack -p #{filename} -s #{stack}"
-    out, status = Open3.capture2e('cf', 'update-buildpack', "#{ENV['BUILDPACK_NAME']}_buildpack", '-p', "#{filename}", '-s', "#{stack}")
+  buildpack_name = ENV['BUILDPACK_NAME'] != 'dotnet-core' ? ENV['BUILDPACK_NAME'] + '_buildpack' : 'dotnet_core_buildpack'
+
+  puts "\ncf create-buildpack #{buildpack_name} #{filename} 0"
+  out, status = Open3.capture2e('cf', 'create-buildpack', "#{buildpack_name}", "#{filename}", '0')
+  raise "cf create-buildpack failed: #{out}" unless status.success?
+  if out.include?('already exists')
+    puts "\n#{buildpack_name} already exists with stack #{stack}; updating buildpack instead."
+    puts "\ncf update-buildpack #{buildpack_name} -p #{filename} -s #{stack}"
+    out, status = Open3.capture2e('cf', 'update-buildpack', "#{buildpack_name}", '-p', "#{filename}", '-s', "#{stack}")
+    raise "cf update-buildpack failed: #{out}" unless status.success?
   else
-    puts "\ncf update-buildpack dotnet_core_buildpack -p #{filename} -s #{stack}"
-    out, status = Open3.capture2e('cf', 'update-buildpack', 'dotnet_core_buildpack', '-p', "#{filename}", '-s', "#{stack}")
+    puts "\nSkipping update because #{buildpack_name} with #{stack} was newly created."
   end
-  raise "cf update-buildpack failed: #{out}" unless status.success?
 end
