@@ -4,6 +4,22 @@ require 'open3'
 require 'fileutils'
 require 'json'
 
+def buildpack_exists(name, stack)
+  out, status = Open3.capture2e('cf', 'curl', "/v2/buildpacks")
+  raise "curling cf v2 buildpack failed: #{out}" unless status.success?
+  response = JSON.parse(out)
+  response["resources"].each do |resource|
+    if resource["entity"]["name"] == name && resource["entity"]["stack"] == stack_mapping(stack)
+      return true
+    end
+  end
+  false
+end
+
+def stack_mapping(stack)
+  return stack == '' ? nil : stack
+end
+
 puts "Buildpack name: #{ENV['BUILDPACK_NAME']}\n"
 
 _, status = Open3.capture2e('cf', 'api', ENV['CF_API'])
@@ -47,18 +63,3 @@ stacks.each do |stack|
   end
 end
 
-def buildpack_exists(name, stack)
-  out, status = Open3.capture2e('cf', 'curl', "/v2/buildpacks")
-  raise "curling cf v2 buildpack failed: #{out}" unless status.success?
-  response = JSON.parse(out)
-  response["resources"].each do |resource|
-    if resource["entity"]["name"] == name && resource["entity"]["stack"] == stack_mapping(stack)
-      return true
-    end
-  end
-  false
-end
-
-def stack_mapping(stack)
-  return stack == '' ? nil : stack
-end
