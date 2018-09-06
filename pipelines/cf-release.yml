@@ -529,7 +529,7 @@ jobs:
             ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
             LANGUAGES: <%= language %>
-            RELEASE_NAME: <%= language %>-offline-buildpack
+            RELEASE_NAME: <%= language %>-offline-buildpack<%= release_type == 'lts' ? '-lts' : '' %>
             RELEASE_DIR: release
         - put: private-<%= language %>-offline-buildpack-bosh-release<%= release_type == 'lts' ? '-lts' : '' %>
           params:
