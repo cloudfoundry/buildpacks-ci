@@ -1,4 +1,5 @@
 <% environments = ['brink', 'fringe', 'rim']
+   locks_per_environment = 4
    opsfiles = [
      '../cf-deployment/operations/windows-cell.yml',
      '../cf-deployment/operations/windows2016-cell.yml',
@@ -100,21 +101,12 @@ jobs:
     - get: bosh-deployment
     - get: 3am-daily-timer
       trigger: true
-    - put: edge-environments
-      params:
-        claim: <%= env %>
-    - put: edge-environments1
+<% locks_per_environment.times do |lock_num| %>
+    - put: edge-environments<%= lock_num %>
       resource: edge-environments
       params:
-        claim: <%= env %>1
-    - put: edge-environments2
-      resource: edge-environments
-      params:
-        claim: <%= env %>2
-    - put: edge-environments3
-      resource: edge-environments
-      params:
-        claim: <%= env %>3
+        claim: <%= env %><%= lock_num %>
+<% end %>
   - aggregate:
     - task: bosh-upload-windows2012R2-stemcell
       file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
@@ -163,18 +155,11 @@ jobs:
       rebase: true
   ensure:
     aggregate:
+<% locks_per_environment.times do |lock_num| %>
     - put: edge-environments
       params:
-        release: edge-environments
-    - put: edge-environments
-      params:
-        release: edge-environments1
-    - put: edge-environments
-      params:
-        release: edge-environments2
-    - put: edge-environments
-      params:
-        release: edge-environments3
+        release: edge-environments<%= lock_num %>
+<% end %>
 
 - name: delete-cf-<%= env %>
   serial: true
@@ -183,21 +168,12 @@ jobs:
     - get: env-repo
     - get: cf-deployment-concourse-tasks
     - get: once-a-week-timer-<%= env %>
-    - put: edge-environments
-      params:
-        claim: <%= env %>
-    - put: edge-environments1
+<% locks_per_environment.times do |lock_num| %>
+    - put: edge-environments<%= lock_num %>
       resource: edge-environments
       params:
-        claim: <%= env %>1
-    - put: edge-environments2
-      resource: edge-environments
-      params:
-        claim: <%= env %>2
-    - put: edge-environments3
-      resource: edge-environments
-      params:
-        claim: <%= env %>3
+        claim: <%= env %><%= lock_num %>
+<% end %>
   - task: delete-deployment
     file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
     params:
@@ -205,19 +181,11 @@ jobs:
       DEPLOYMENT_NAME: cf
   ensure:
     aggregate:
+<% locks_per_environment.times do |lock_num| %>
     - put: edge-environments
       params:
-        release: edge-environments
-    - put: edge-environments
-      params:
-        release: edge-environments1
-    - put: edge-environments
-      params:
-        release: edge-environments2
-    - put: edge-environments
-      params:
-        release: edge-environments3
-
+        release: edge-environments<%= lock_num %>
+<% end %>
 - name: bosh-cleanup-<%=env%>
   serial: true
   plan:
@@ -230,39 +198,23 @@ jobs:
     - get: once-a-week-timer-<%= env %>
       passed: [delete-cf-<%= env %>]
       trigger: true
-    - put: edge-environments
-      params:
-        claim: <%= env %>
-    - put: edge-environments1
+<% locks_per_environment.times do |lock_num| %>
+    - put: edge-environments<%= lock_num %>
       resource: edge-environments
       params:
-        claim: <%= env %>1
-    - put: edge-environments2
-      resource: edge-environments
-      params:
-        claim: <%= env %>2
-    - put: edge-environments3
-      resource: edge-environments
-      params:
-        claim: <%= env %>3
+        claim: <%= env %><%= lock_num %>
+<% end %>
   - task: bosh-cleanup
     file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
     params:
       BBL_STATE_DIR: <%= env %>
   ensure:
     aggregate:
+<% locks_per_environment.times do |lock_num| %>
     - put: edge-environments
       params:
-        release: edge-environments
-    - put: edge-environments
-      params:
-        release: edge-environments1
-    - put: edge-environments
-      params:
-        release: edge-environments2
-    - put: edge-environments
-      params:
-        release: edge-environments3
+        release: edge-environments<%= lock_num %>
+<% end %>
 <% end %>
 groups:
   - name: all
