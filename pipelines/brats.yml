@@ -39,6 +39,14 @@ resources:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
+  - name: edge-environments
+    type: pool
+    source:
+      branch: master
+      pool: edge-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
   - name: edge-shared-environments
     type: pool
     source:
@@ -55,6 +63,13 @@ resources:
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
+  - name: env-repo
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: {{buildpacks-envs-private-key}}
+
   - name: buildpack-packager
     type: github-release
     source:
@@ -68,22 +83,6 @@ resources:
       user: {{buildpacks-github-org}}
       repository: machete
       access_token: {{buildpacks-github-token}}
-
-  - name: cf-edge-space
-    type: cf-space-resource
-    source:
-      target: api.edge.buildpacks-gcp.ci.cf-app.com
-      username: {{ci-cf-username}}
-      password: {{ci_cf_edge_password}}
-      organization: pivotal
-
-  - name: cf-lts-space
-    type: cf-space-resource
-    source:
-      target: {{ci-cf-lts-target}}
-      username: admin
-      password: {{ci-cf-lts-password}}
-      organization: pivotal
 
 <% new_brats.each do |language| %>
   - name: buildpack-<%= language %>
@@ -102,14 +101,14 @@ jobs:
     serial: true
     public: true
     plan:
-<% unless new_brats.include?(language) %>
-      - put: cf-environments
-        resource: lts-shared-environments
-        params:
-          claim: <%= language %>
-        timeout: 3h
-<% end %>
       - aggregate:
+<% unless new_brats.include?(language) %>
+        - put: cf-environments
+          resource: lts-shared-environments
+          params:
+            claim: <%= language %>
+          timeout: 3h
+<% end %>
         - get: buildpacks-ci
 <% if new_brats.include?(language) %>
         - get: buildpack
@@ -120,12 +119,16 @@ jobs:
         - get: nightly-trigger-<%= (index % 2) + 1 %>
           trigger: true
       - do:
-        - put: cf-brat-space
-          resource: cf-lts-space
+        - task: create-cf-space
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          params:
+            ORG: pivotal
+            TARGET: {{ci-cf-lts-target}}
+            USERNAME: admin
+            PASSWORD: {{ci-cf-lts-password}}
 <% if new_brats.include?(language) %>
         - task: run-brats
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
-          input_mapping: {cf-space: cf-brat-space}
           attempts: <%= if language == "ruby" then 3 else 1 end %>
           params:
             STACKS: cflinuxfs2
@@ -141,7 +144,7 @@ jobs:
 <% end %>
           ensure:
             task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+            file: buildpacks-ci/tasks/delete-cf-space/task.yml
 <% unless new_brats.include?(language) %>
         ensure:
           put: lts-shared-environments
@@ -153,15 +156,19 @@ jobs:
     serial: true
     public: true
     plan:
-<% unless new_brats.include?(language) %>
-      - put: cf-environments
-        resource: edge-shared-environments
-        params:
-          claim: <%= language %>
-        timeout: 3h
-<% end %>
       - aggregate:
+        - put: edge-environments
+          params:
+            acquire: true
+<% unless new_brats.include?(language) %>
+        - put: cf-environments
+          resource: edge-shared-environments
+          params:
+            claim: <%= language %>
+          timeout: 3h
+<% end %>
         - get: buildpacks-ci
+        - get: env-repo
 <% if new_brats.include?(language) %>
         - get: buildpack
           resource: buildpack-<%= language %>
@@ -171,12 +178,17 @@ jobs:
         - get: nightly-trigger-<%= (index % 2) + 1 %>
           trigger: true
       - do:
-        - put: cf-brat-space
-          resource: cf-edge-space
+        - task: create-cf-space
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          params:
+            ENV_POOL_RESOURCE: edge-environments
+            ENVS_DIR: env-repo
+            ORG: pivotal
+            SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+            USERNAME: admin
 <% if new_brats.include?(language) %>
         - task: run-brats
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
-          input_mapping: {cf-space: cf-brat-space}
           params:
             STACKS: cflinuxfs2
             GINKGO_ATTEMPTS: 4
@@ -191,13 +203,17 @@ jobs:
 <% end %>
           ensure:
             task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task-brat.yml
+            file: buildpacks-ci/tasks/delete-cf-space/task.yml
 <% unless new_brats.include?(language) %>
         ensure:
           put: edge-shared-environments
           params:
             release: cf-environments
 <% end %>
+    ensure:
+      put: edge-environments
+      params:
+        release: edge-environments
 <% end %>
 
   - name: update-buildpack-packager

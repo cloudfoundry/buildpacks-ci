@@ -12,7 +12,6 @@
      'deployments/operations/cflinuxfs3.yml',
      'deployments/operations/add-cflinuxfs3-buildpacks.yml',
      'deployments/operations/add-windows-binary-buildpacks.yml'
-   #  '../buildpacks-opsfile/opsfile.yml'
    ]
 %>
 
@@ -90,6 +89,7 @@ resources:
 jobs:
 <% environments.each do |env| %>
 - name: deploy-<%= env %>
+  serial: true
   plan:
   - aggregate:
     - get: env-repo
@@ -103,6 +103,18 @@ jobs:
     - put: edge-environments
       params:
         claim: <%= env %>
+    - put: edge-environments1
+      resource: edge-environments
+      params:
+        claim: <%= env %>1
+    - put: edge-environments2
+      resource: edge-environments
+      params:
+        claim: <%= env %>2
+    - put: edge-environments3
+      resource: edge-environments
+      params:
+        claim: <%= env %>3
   - aggregate:
     - task: bosh-upload-windows2012R2-stemcell
       file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
@@ -133,6 +145,7 @@ jobs:
       BBL_STATE_DIR: <%= env %>
   - task: bosh-deploy
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    attempts: 3
     input_mapping:
       vars-store: env-repo
       vars-files: env-repo # not actually used
@@ -149,11 +162,22 @@ jobs:
       repository: updated-vars-store
       rebase: true
   ensure:
-    put: edge-environments
-    params:
-      release: edge-environments
+    aggregate:
+    - put: edge-environments
+      params:
+        release: edge-environments
+    - put: edge-environments
+      params:
+        release: edge-environments1
+    - put: edge-environments
+      params:
+        release: edge-environments2
+    - put: edge-environments
+      params:
+        release: edge-environments3
 
 - name: delete-cf-<%= env %>
+  serial: true
   plan:
   - aggregate:
     - get: env-repo
@@ -162,17 +186,40 @@ jobs:
     - put: edge-environments
       params:
         claim: <%= env %>
+    - put: edge-environments1
+      resource: edge-environments
+      params:
+        claim: <%= env %>1
+    - put: edge-environments2
+      resource: edge-environments
+      params:
+        claim: <%= env %>2
+    - put: edge-environments3
+      resource: edge-environments
+      params:
+        claim: <%= env %>3
   - task: delete-deployment
     file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
     params:
       BBL_STATE_DIR: <%= env %>
       DEPLOYMENT_NAME: cf
   ensure:
-    put: edge-environments
-    params:
-      release: edge-environments
+    aggregate:
+    - put: edge-environments
+      params:
+        release: edge-environments
+    - put: edge-environments
+      params:
+        release: edge-environments1
+    - put: edge-environments
+      params:
+        release: edge-environments2
+    - put: edge-environments
+      params:
+        release: edge-environments3
 
 - name: bosh-cleanup-<%=env%>
+  serial: true
   plan:
   - aggregate:
     - get: env-repo
@@ -186,14 +233,36 @@ jobs:
     - put: edge-environments
       params:
         claim: <%= env %>
+    - put: edge-environments1
+      resource: edge-environments
+      params:
+        claim: <%= env %>1
+    - put: edge-environments2
+      resource: edge-environments
+      params:
+        claim: <%= env %>2
+    - put: edge-environments3
+      resource: edge-environments
+      params:
+        claim: <%= env %>3
   - task: bosh-cleanup
     file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
     params:
       BBL_STATE_DIR: <%= env %>
   ensure:
-    put: edge-environments
-    params:
-      release: edge-environments
+    aggregate:
+    - put: edge-environments
+      params:
+        release: edge-environments
+    - put: edge-environments
+      params:
+        release: edge-environments1
+    - put: edge-environments
+      params:
+        release: edge-environments2
+    - put: edge-environments
+      params:
+        release: edge-environments3
 <% end %>
 groups:
   - name: all
