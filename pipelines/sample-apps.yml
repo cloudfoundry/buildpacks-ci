@@ -164,26 +164,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: cf-sample-app-spring
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: cf-sample-app-spring-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/java-buildpack
-          APPLICATION_NAME: cf-spring
-          REQUEST_PATH: "/"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: none
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: cf-sample-app-spring-smoke-test
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/java-buildpack
+            APPLICATION_NAME: cf-spring
+            REQUEST_PATH: "/"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: none
+        ensure:
+          task: delete-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: cf-sample-app-go-smoke-test
   plan:
@@ -193,26 +200,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: cf-sample-app-go
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: cf-sample-app-go-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/go-buildpack#develop
-          APPLICATION_NAME: test-app
-          REQUEST_PATH: "/"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: none
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: cf-sample-app-go-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/go-buildpack#develop
+            APPLICATION_NAME: test-app
+            REQUEST_PATH: "/"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: none
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 
 - name: cf-sample-app-rails-smoke-test
@@ -223,26 +237,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: cf-sample-app-rails
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: cf-sample-app-rails-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/ruby-buildpack#develop
-          APPLICATION_NAME: cf-rails
-          REQUEST_PATH: "/"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: none
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: cf-sample-app-rails-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/ruby-buildpack#develop
+            APPLICATION_NAME: cf-rails
+            REQUEST_PATH: "/"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: none
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: pong-matcher-rails-smoke-test
   plan:
@@ -252,26 +273,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: pong-matcher-rails
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: pong-matcher-rails-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/ruby-buildpack#develop
-          APPLICATION_NAME: railspong
-          REQUEST_PATH: "/all"
-          REQUEST_TYPE: 'DELETE'
-          DATABASE_TO_BIND: 'mysql'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: pong-matcher-rails-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/ruby-buildpack#develop
+            APPLICATION_NAME: railspong
+            REQUEST_PATH: "/all"
+            REQUEST_TYPE: 'DELETE'
+            DATABASE_TO_BIND: 'mysql'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: pong-matcher-sails-smoke-test
   plan:
@@ -281,26 +309,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: pong-matcher-sails
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: pong-matcher-sails-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/nodejs-buildpack#develop
-          APPLICATION_NAME: sailspong
-          REQUEST_PATH: "/all"
-          REQUEST_TYPE: 'DELETE'
-          DATABASE_TO_BIND: 'mysql'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: pong-matcher-sails-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/nodejs-buildpack#develop
+            APPLICATION_NAME: sailspong
+            REQUEST_PATH: "/all"
+            REQUEST_TYPE: 'DELETE'
+            DATABASE_TO_BIND: 'mysql'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: pong-matcher-slim-smoke-test
   plan:
@@ -310,26 +345,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: pong-matcher-slim
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: pong-matcher-slim-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-          APPLICATION_NAME: slimpong
-          REQUEST_PATH: "/all"
-          REQUEST_TYPE: 'DELETE'
-          DATABASE_TO_BIND: 'mysql'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: pong-matcher-slim-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+            APPLICATION_NAME: slimpong
+            REQUEST_PATH: "/all"
+            REQUEST_TYPE: 'DELETE'
+            DATABASE_TO_BIND: 'mysql'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: pong-matcher-django-smoke-test
   plan:
@@ -339,26 +381,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: pong-matcher-django
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: pong-matcher-django-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/python-buildpack#develop
-          APPLICATION_NAME: djangopong
-          REQUEST_PATH: "/all"
-          REQUEST_TYPE: 'DELETE'
-          DATABASE_TO_BIND: 'mysql'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: pong-matcher-django-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/python-buildpack#develop
+            APPLICATION_NAME: djangopong
+            REQUEST_PATH: "/all"
+            REQUEST_TYPE: 'DELETE'
+            DATABASE_TO_BIND: 'mysql'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: pong-matcher-go-smoke-test
   plan:
@@ -368,26 +417,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: pong-matcher-go
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: pong-matcher-go-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/go-buildpack#develop
-          APPLICATION_NAME: gopong
-          REQUEST_PATH: "/all"
-          REQUEST_TYPE: 'DELETE'
-          DATABASE_TO_BIND: 'mysql'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: pong-matcher-go-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/go-buildpack#develop
+            APPLICATION_NAME: gopong
+            REQUEST_PATH: "/all"
+            REQUEST_TYPE: 'DELETE'
+            DATABASE_TO_BIND: 'mysql'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: spring-music-smoke-test
   plan:
@@ -397,26 +453,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: spring-music
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: spring-music-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/java-buildpack
-          APPLICATION_NAME: spring-music
-          REQUEST_PATH: "/"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: none
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: spring-music-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/java-buildpack
+            APPLICATION_NAME: spring-music
+            REQUEST_PATH: "/"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: none
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: cf-ex-phpmyadmin-smoke-test
   plan:
@@ -426,26 +489,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: cf-ex-phpmyadmin
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: cf-ex-phpmyadmin-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-          APPLICATION_NAME: cf-ex-phpmyadmin
-          REQUEST_PATH: "/"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: 'mysql'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: cf-ex-phpmyadmin-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+            APPLICATION_NAME: cf-ex-phpmyadmin
+            REQUEST_PATH: "/"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: 'mysql'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: cf-ex-drupal-smoke-test
   plan:
@@ -455,26 +525,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: cf-ex-drupal
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: cf-ex-drupal-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-          APPLICATION_NAME: cf-ex-drupal
-          REQUEST_PATH: "/install.php"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: 'mysql'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: cf-ex-drupal-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+            APPLICATION_NAME: cf-ex-drupal
+            REQUEST_PATH: "/install.php"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: 'mysql'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: cf-ex-code-igniter-smoke-test
   plan:
@@ -484,26 +561,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: cf-ex-code-igniter
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: cf-ex-code-igniter-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-          APPLICATION_NAME: cf-ex-code-igniter
-          REQUEST_PATH: "/index.php"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: 'mysql'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: cf-ex-code-igniter-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+            APPLICATION_NAME: cf-ex-code-igniter
+            REQUEST_PATH: "/index.php"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: 'mysql'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: cf-ex-phppgadmin-smoke-test
   plan:
@@ -513,26 +597,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: cf-ex-phppgadmin
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: cf-ex-phppgadmin-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-          APPLICATION_NAME: cf-ex-phppgadmin
-          REQUEST_PATH: "/"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: 'pgsql'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: cf-ex-phppgadmin-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+            APPLICATION_NAME: cf-ex-phppgadmin
+            REQUEST_PATH: "/"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: 'pgsql'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: cf-ex-php-info-smoke-test
   plan:
@@ -542,26 +633,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: cf-ex-php-info
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: cf-ex-php-info-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-          APPLICATION_NAME: cf-ex-php-info
-          REQUEST_PATH: "/"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: 'none'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: cf-ex-php-info-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+            APPLICATION_NAME: cf-ex-php-info
+            REQUEST_PATH: "/"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: 'none'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: cf-ex-pgbouncer-smoke-test
   plan:
@@ -571,26 +669,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: cf-ex-pgbouncer
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: cf-ex-pgbouncer-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-          APPLICATION_NAME: cf-ex-pgbouncer
-          REQUEST_PATH: "/"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: 'pgsql'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: cf-ex-pgbouncer-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+            APPLICATION_NAME: cf-ex-pgbouncer
+            REQUEST_PATH: "/"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: 'pgsql'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: cf-ex-composer-smoke-test
   plan:
@@ -600,26 +705,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: cf-ex-composer
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: cf-ex-composer-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-          APPLICATION_NAME: cf-ex-composer
-          REQUEST_PATH: "/"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: 'none'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: cf-ex-composer-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+            APPLICATION_NAME: cf-ex-composer
+            REQUEST_PATH: "/"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: 'none'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: cf-ex-phalcon-smoke-test
   plan:
@@ -629,26 +741,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: cf-ex-phalcon
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: cf-ex-phalcon-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
-          APPLICATION_NAME: cf-ex-phalcon
-          REQUEST_PATH: "/"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: 'mysql'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: cf-ex-phalcon-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/php-buildpack#develop
+            APPLICATION_NAME: cf-ex-phalcon
+            REQUEST_PATH: "/"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: 'mysql'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: dotnet-core-hello-world-smoke-test
   plan:
@@ -658,26 +777,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: dotnet-core-hello-world
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: dotnet-core-hello-world-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/dotnet-core-buildpack#develop
-          APPLICATION_NAME: dotnet_core_hello_world
-          REQUEST_PATH: "/"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: 'none'
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: dotnet-core-hello-world-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/dotnet-core-buildpack#develop
+            APPLICATION_NAME: dotnet_core_hello_world
+            REQUEST_PATH: "/"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: 'none'
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 groups: ###################################################################################
 
