@@ -1,4 +1,4 @@
-<% new_brats = %w(apt binary dotnet-core go hwc nodejs python ruby staticfile php nginx r) %>
+<% new_brats = %w(apt binary dotnet-core go hwc nodejs python ruby staticfile php nginx) %>
 <% languages = %w(java) + new_brats %>
 <% not_lts = %w(apt) %>
 <% stacks = {
@@ -13,7 +13,6 @@
 "nodejs" => %w(cflinuxfs2 cflinuxfs3),
 "php" => %w(cflinuxfs2 cflinuxfs3),
 "python" => %w(cflinuxfs2 cflinuxfs3),
-"r" => %w(cflinuxfs2 cflinuxfs3),
 "ruby" => %w(cflinuxfs2 cflinuxfs3),
 "staticfile" => %w(cflinuxfs2 cflinuxfs3),
 "java" => %w(cflinuxfs2, cflinuxfs3)
