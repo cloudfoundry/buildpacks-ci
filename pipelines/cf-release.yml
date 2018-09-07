@@ -41,11 +41,6 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
-  - name: cats-concourse-task
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/cats-concourse-task
-      branch: master
   - name: cf-acceptance-tests
     type: git
     source:
@@ -63,6 +58,11 @@ resources:
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
       tag_filter: v5.*
+  - name: cf-deployment-concourse-tasks-latest
+    type: git
+    source:
+      branch: master
+      uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
   - name: bosh-deployment
     type: git
     source:
@@ -329,8 +329,8 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: cats-concourse-task-inp
-          resource: cats-concourse-task
+        - get: cf-deployment-concourse-tasks
+          resource: cf-deployment-concourse-tasks-latest
         - get: cf-acceptance-tests
         - get: public-robots
           passed: [ deploy ]
@@ -350,14 +350,13 @@ jobs:
             CI_CF_PASSWORD: {{cf-release-cf-password}}
             APPS_DOMAIN: cf-release.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
-        - task: add-flake-attempts-to-cats
-          file: buildpacks-ci/tasks/add-flake-attempts-to-cats/task.yml
         - task: cats
           attempts: 3
-          file: cats-concourse-task/task.yml
+          file: cf-deployment-concourse-tasks/run-cats/task.yml
           params:
             NODES: 12
             CONFIG_FILE_PATH: integration_config.json
+            FLAKE_ATTEMPTS: 3
         on_failure:
           put: failure-alert
           params:
