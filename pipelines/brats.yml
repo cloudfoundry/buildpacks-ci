@@ -1,6 +1,23 @@
-<% languages = %w(apt binary dotnet-core go hwc java multi nodejs php python ruby staticfile) %>
-<% new_brats = %w(apt binary dotnet-core go nodejs python ruby staticfile php) %>
+<% new_brats = %w(apt binary dotnet-core go hwc nodejs python ruby staticfile php nginx r) %>
+<% languages = %w(java) + new_brats %>
 <% not_lts = %w(apt) %>
+<% stacks = {
+"hwc" => %w(windows2012R2 windows2016),
+"apt" => %w(cflinuxfs2),
+"binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016),
+"credhub" => %w(cflinuxfs2 cflinuxfs3),
+"dotnet-core" => %w(cflinuxfs2 cflinuxfs3),
+"go" => %w(cflinuxfs2 cflinuxfs3),
+"multi" => %w(cflinuxfs2 cflinuxfs3),
+"nginx" => %w(cflinuxfs2 cflinuxfs3),
+"nodejs" => %w(cflinuxfs2 cflinuxfs3),
+"php" => %w(cflinuxfs2 cflinuxfs3),
+"python" => %w(cflinuxfs2 cflinuxfs3),
+"r" => %w(cflinuxfs2 cflinuxfs3),
+"ruby" => %w(cflinuxfs2 cflinuxfs3),
+"staticfile" => %w(cflinuxfs2 cflinuxfs3),
+"java" => %w(cflinuxfs2, cflinuxfs3)
+} %>
 
 ---
 resource_types:
@@ -177,33 +194,41 @@ jobs:
 <% end %>
         - get: nightly-trigger-<%= (index % 2) + 1 %>
           trigger: true
-      - do:
-        - task: create-cf-space
-          file: buildpacks-ci/tasks/create-cf-space/task.yml
-          params:
-            ENV_POOL_RESOURCE: edge-environments
-            ENVS_DIR: env-repo
-            ORG: pivotal
-            SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
-            USERNAME: admin
+      - aggregate:
+<% stacks[language].each do |stack| %>
+        - do:
+          - task: create-cf-space
+            file: buildpacks-ci/tasks/create-cf-space/task.yml
+            output_mapping: {cf-space: cf-space-<%= stack %>}
+            params:
+              ENV_POOL_RESOURCE: edge-environments
+              ENVS_DIR: env-repo
+              ORG: pivotal
+              SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+              USERNAME: admin
 <% if new_brats.include?(language) %>
-        - task: run-brats
-          file: buildpacks-ci/tasks/run-bp-brats/task.yml
-          params:
-            STACKS: cflinuxfs2
-            GINKGO_ATTEMPTS: 4
-            GINKGO_NODES: 6
+          - task: run-brats-<%= stack %>
+            file: buildpacks-ci/tasks/run-bp-brats/task.yml
+            input_mapping: {cf-space: cf-space-<%= stack %>}
+            params:
+              CF_STACK: <%= stack %>
+              GINKGO_ATTEMPTS: 4
+              GINKGO_NODES: 6
 <% else %>
-        - task: run-brats
-          file: buildpacks-ci/tasks/run-shared-brats/task.yml
-          params:
-            BUILDPACK_BRANCH: master
-            LANGUAGE: <%= language %>
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
+          - task: run-brats-<%= stack %>
+            file: buildpacks-ci/tasks/run-shared-brats/task.yml
+            input_mapping: {cf-space: cf-space-<%= stack %>}
+            params:
+              STACK: <%= stack %>
+              BUILDPACK_BRANCH: master
+              LANGUAGE: <%= language %>
+              RUBYGEM_MIRROR: {{rubygem-mirror}}
 <% end %>
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task.yml
+            ensure:
+              task: delete-cf-space
+              file: buildpacks-ci/tasks/delete-cf-space/task.yml
+              input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 <% unless new_brats.include?(language) %>
         ensure:
           put: edge-shared-environments
