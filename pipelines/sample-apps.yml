@@ -1,3 +1,5 @@
+<% stacks = %w(cflinuxfs2 cflinuxfs3) %>
+---
 resource_types:
   - name: cron
     type: docker-image
@@ -126,26 +128,33 @@ jobs: ##########################################################################
       - get: sample-app
         resource: cf-sample-app-nodejs
       - get: buildpacks-ci
-    - do:
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ORG: {{pws-org}}
-          TARGET: api.run.pivotal.io
-          USERNAME: {{pws-username}}
-          PASSWORD: {{pws-password}}
-      - task: cf-sample-app-nodejs-smoke-test
-        attempts: 3
-        file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-        params:
-          BUILDPACK_URL: https://github.com/cloudfoundry/nodejs-buildpack#develop
-          APPLICATION_NAME: cf-nodejs
-          REQUEST_PATH: "/"
-          REQUEST_TYPE: 'GET'
-          DATABASE_TO_BIND: none
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    - aggregate:
+<% stacks.each do |stack| %>
+      - do:
+        - task: create-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ORG: {{pws-org}}
+            TARGET: api.run.pivotal.io
+            USERNAME: {{pws-username}}
+            PASSWORD: {{pws-password}}
+        - task: cf-sample-app-nodejs-smoke-test-<%= stack %>
+          attempts: 3
+          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            STACK: <%= stack %>
+            BUILDPACK_URL: https://github.com/cloudfoundry/nodejs-buildpack#develop
+            APPLICATION_NAME: cf-nodejs
+            REQUEST_PATH: "/"
+            REQUEST_TYPE: 'GET'
+            DATABASE_TO_BIND: none
+        ensure:
+          task: delete-cf-space-<%= stack %>
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+<% end %>
 
 - name: cf-sample-app-spring-smoke-test
   plan:
