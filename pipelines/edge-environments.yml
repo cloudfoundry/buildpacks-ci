@@ -79,6 +79,12 @@ resources:
     repository: cflinuxfs3-release
     access_token: {{buildpacks-github-token}}
 
+- name: hwc-buildpack
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/hwc-buildpack
+    branch: master
+
 <% environments.each_with_index do |env, i| %>
 - name: once-a-week-timer-<%= env %>
   type: cron
@@ -99,6 +105,7 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: cflinuxfs3-bosh-release
     - get: bosh-deployment
+    - get: hwc-buildpack
     - get: 3am-daily-timer
       trigger: true
 <% locks_per_environment.times do |lock_num| %>
@@ -149,6 +156,10 @@ jobs:
       OPS_FILES: "<%= opsfiles.join(' ') %>"
       GIT_COMMIT_EMAIL: {{github-email}}
       GIT_COMMIT_USERNAME: {{github-username}}
+  - task: clean-up-env-buildpacks
+    file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
+    params:
+      ENV_NAME: <%= env %>
   - put: env-repo
     params:
       repository: updated-vars-store

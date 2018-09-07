@@ -1,0 +1,14 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: hwc-buildpack
+  - name: updated-vars-store
+run:
+  path: buildpacks-ci/tasks/clean-up-env-buildpacks/run.sh
+params:
+  ENV_NAME:
