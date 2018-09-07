@@ -12,10 +12,6 @@ def env_login(env)
 end
 
 case ARGV[0]
-  when 'edge'
-    cfg = YAML.load(`lpass show --notes Shared-Buildpacks/deployments-buildpacks.yml`)
-    system('cf', 'api', 'api.edge.buildpacks-gcp.ci.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
-    system('cf', 'auth', 'admin', cfg['ci_cf_edge_password']) or raise 'Could not auth'
   when *edge_envs
     env_login(ARGV[0])
   when 'lts'
@@ -42,7 +38,7 @@ case ARGV[0]
     cfg = YAML.load(`lpass show --notes Shared-Buildpacks/concourse-private.yml`)
     system('cf', 'login', '-a', 'api.run.pivotal.io', '-u', cfg['pws-username'], '-p', cfg['pws-password'], '-o', 'cf-buildpacks', '-s', 'development') or raise 'Could not connect'
   else
-    puts "Usage: #{$0} <edge|#{edge_envs.join('|')}|lts|bal|dev|pws>"
+    puts "Usage: #{$0} <#{edge_envs.join('|')}|lts|bal|dev|pws>"
     exit 1
 end
 
