@@ -1,11 +1,9 @@
-<% new_brats = %w(apt binary dotnet-core go hwc nodejs python ruby staticfile php nginx) %>
+<% new_brats = %w(apt binary dotnet-core go nodejs python ruby staticfile php nginx) %>
 <% languages = %w(java) + new_brats %>
 <% not_lts = %w(apt) %>
 <% stacks = {
-"hwc" => %w(windows2012R2 windows2016),
 "apt" => %w(cflinuxfs2),
 "binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016),
-"credhub" => %w(cflinuxfs2 cflinuxfs3),
 "dotnet-core" => %w(cflinuxfs2 cflinuxfs3),
 "go" => %w(cflinuxfs2 cflinuxfs3),
 "multi" => %w(cflinuxfs2 cflinuxfs3),
