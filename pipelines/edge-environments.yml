@@ -153,7 +153,7 @@ jobs:
     params:
       repository: updated-vars-store
       rebase: true
-  ensure:
+  on_success:
     aggregate:
 <% locks_per_environment.times do |lock_num| %>
     - put: edge-environments
@@ -168,6 +168,7 @@ jobs:
     - get: env-repo
     - get: cf-deployment-concourse-tasks
     - get: once-a-week-timer-<%= env %>
+      trigger: true
 <% locks_per_environment.times do |lock_num| %>
     - put: edge-environments<%= lock_num %>
       resource: edge-environments
@@ -179,7 +180,7 @@ jobs:
     params:
       BBL_STATE_DIR: <%= env %>
       DEPLOYMENT_NAME: cf
-  ensure:
+  on_success:
     aggregate:
 <% locks_per_environment.times do |lock_num| %>
     - put: edge-environments
