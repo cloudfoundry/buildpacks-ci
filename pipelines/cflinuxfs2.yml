@@ -30,6 +30,11 @@ resources: #####################################################################
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
       tag_filter: v5.*
+  - name: cf-deployment-concourse-tasks-latest
+    type: git
+    source:
+      branch: master
+      uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
   - name: bbl-state
     type: git
     source:
@@ -102,12 +107,6 @@ resources: #####################################################################
       uri: git@github.com:cloudfoundry/cf-release
       branch: release-candidate
       private_key: {{cf-release-private-key}}
-
-  - name: cats-concourse-task
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/cats-concourse-task
-      branch: master
 
   ## S3 Buckets ##
 
@@ -404,8 +403,8 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: cats-concourse-task-inp
-          resource: cats-concourse-task
+        - get: cf-deployment-concourse-tasks
+          resource: cf-deployment-concourse-tasks-latest
         - get: cf-release
           resource: cf-release-rc
           params:
@@ -422,8 +421,6 @@ jobs: ##########################################################################
         - get: cflinuxfs2
           passed: [ deploy ]
       - do:
-        - task: copy-cf-acceptance-tests
-          file: buildpacks-ci/tasks/copy-cf-acceptance-tests/task.yml
         - task: write-cats-config
           file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
@@ -431,14 +428,13 @@ jobs: ##########################################################################
             CI_CF_PASSWORD: {{cflinuxfs2-cf-password}}
             APPS_DOMAIN: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
-        - task: add-flake-attempts-to-cats
-          file: buildpacks-ci/tasks/add-flake-attempts-to-cats/task.yml
         - task: cats
           attempts: 3
-          file: cats-concourse-task/task.yml
+          file: cf-deployment-concourse-tasks/run-cats/task.yml
           params:
             NODES: 12
             CONFIG_FILE_PATH: integration_config.json
+            FLAKE_ATTEMPTS: 3
         on_failure:
           put: failure-alert
           params:
