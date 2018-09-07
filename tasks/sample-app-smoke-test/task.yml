@@ -18,6 +18,7 @@ run:
     - buildpacks-ci/tasks/sample-app-smoke-test/run.rb
 
 params:
+  STACK:
   BUILDPACK_URL:
   APPLICATION_NAME:
   REQUEST_PATH:
