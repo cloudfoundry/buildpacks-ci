@@ -410,7 +410,7 @@ jobs: ##########################################################################
               - cf-deployment/operations/use-compiled-releases.yml
               - buildpacks-opsfile/use-latest-buildpack-releases.yml
               - buildpacks-ci/deployments/operations/no-canaries.yml
-              - buildpacks-ci/deployments/operations/add-cflinuxfs3-only-buildpacks.yml
+              - buildpacks-ci/deployments/operations/add-<%= rootfs_name %>-only-buildpacks.yml
               - rootfs-release-artifacts/use-dev-release-opsfile.yml
               - capi-release-artifacts/use-dev-release-opsfile.yml
               - capi-release-artifacts/use-rootfs-as-default-stack.yml
