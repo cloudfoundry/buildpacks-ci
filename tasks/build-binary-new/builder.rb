@@ -74,7 +74,7 @@ module DependencyBuild
           Runner.run('make')
           Runner.run('make install')
 
-          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'install.packages(c("Rserve","forecast","shiny"), repos="https://cran.r-project.org", dependencies=TRUE)')
+          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'install.packages(c("Rserve","forecast","shiny", "plumber"), repos="https://cran.r-project.org", dependencies=TRUE)')
 
           Dir.chdir('/usr/local/lib/R') do
             case stack
