@@ -26,22 +26,11 @@ resources: #####################################################################
   ## Git Repos ##
   <% languages = %w(binary dotnet-core go java nodejs php python ruby staticfile) %>
   <% languages.each do |language| %>
-  - name: <%= language %>-buildpack-release #TODO: Remove this resource and use online releases when they contain cflinuxfs3!!!
+  - name: <%= language %>-buildpack-release
     type: git
     source:
-      uri: git@github.com:pivotal-cf/<%= language %>-offline-buildpack-release.git
-      <% if language == 'java'%>
-      private_key:  {{private-<%= language %>-offline-buildpack-bosh-release-private-key}}
-      <% else %>
-      private_key:  {{<%= language %>-offline-buildpack-bosh-release-private-key}}
-      <% end %>
       branch: master
-
-#  - name: <%= language %>-buildpack-release #TODO: Use this resource when online buildpacks have cflinuxfs3!!!
-#    type: git
-#    source:
-#      branch: master
-#      uri: https://github.com/pivotal/<%= language %>-buildpack-release.git
+      uri: https://github.com/cloudfoundry/<%= language %>-buildpack-release.git
   <% end %>
 
   - name: cf-deployment-concourse-tasks
@@ -50,6 +39,11 @@ resources: #####################################################################
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
       tag_filter: v5.*
+  - name: cf-acceptance-tests
+    type: git
+    source:
+      branch: master
+      uri: https://github.com/cloudfoundry/cf-acceptance-tests.git
   - name: cf-deployment-concourse-tasks-latest
     type: git
     source:
@@ -120,13 +114,6 @@ resources: #####################################################################
     source:
       uri: https://github.com/cloudfoundry/capi-release
       branch: master
-
-  - name: cf-release-rc
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/cf-release
-      branch: release-candidate
-      private_key: {{cf-release-private-key}}
 
   ## S3 Buckets ##
 
@@ -448,10 +435,7 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: cf-deployment-concourse-tasks
           resource: cf-deployment-concourse-tasks-latest
-        - get: cf-release
-          resource: cf-release-rc
-          params:
-            submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
+        - get: cf-acceptance-tests
         - get: new-cves
           passed: [ deploy ]
         - get: stack-s3
