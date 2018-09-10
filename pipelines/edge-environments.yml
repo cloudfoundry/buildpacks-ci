@@ -89,7 +89,7 @@ resources:
 - name: once-a-week-timer-<%= env %>
   type: cron
   source:
-    expression: 0 18 * * <%= i % 7 %>
+    expression: 0 19 * * <%= i % 7 %>
     location: {{current-timezone}}
 <% end %>
 
