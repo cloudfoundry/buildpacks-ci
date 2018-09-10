@@ -3,6 +3,7 @@
 require 'uri'
 require 'net/http'
 require 'json'
+require 'yaml'
 require 'fileutils'
 require 'digest'
 
@@ -56,6 +57,10 @@ def push_app(buildpack_url, app_name)
 
       system "./gradlew assemble"
       FileUtils.mv("./build/libs/sample-app-1.0.jar", "./build/libs/spring-music-1.0.jar")
+    elsif app_name == 'cf-ex-phpmyadmin'
+      manifest = YAML.load(File.read('manifest.yml'))
+      manifest['applications'][0].delete 'routes'
+      File.write('manifest.yml', manifest.to_yaml)
     end
 
     system "cf push #{app_name} -b #{buildpack_url} -t 180 --random-route -s #{ENV.fetch('STACK', 'cflinuxfs2')}"
