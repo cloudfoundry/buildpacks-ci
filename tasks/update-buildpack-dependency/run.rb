@@ -29,13 +29,14 @@ raise 'Could not copy buildpack to artifacts' unless $?.success?
 added = []
 removed = []
 rebuilt = []
-stacks = []
+total_stacks = []
 builds = {}
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
   stack = %r{#{resource_version}-(.*)\.json$}.match(stack_dependency_build)[1]
   stacks = (stack == 'any-stack') ? ALL_STACKS : [stack]
   stacks = WINDOWS_STACKS if source_name == 'hwc'
+  total_stacks = total_stacks | stacks
 
   build = JSON.parse(open(stack_dependency_build).read)
   builds[stack] = build
@@ -199,7 +200,7 @@ end
 if removed.length > 0
   commit_message = "#{commit_message}, remove #{manifest_name} #{removed.join(', ')}"
 end
-commit_message = commit_message + "\n\nfor stacks #{stacks.join(', ')}"
+commit_message = commit_message + "\n\nfor stack(s) #{total_stacks.join(', ')}"
 
 Dir.chdir('artifacts') do
   GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
