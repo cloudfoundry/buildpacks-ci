@@ -1,7 +1,7 @@
 <% compile_extensions = %w(php) %>
 <% no_brats = %w(credhub hwc multi r) %>
-<% non_published = %(apt credhub hwc multi r nginx) %>
-<% push_to_pws = %(hwc) %>
+<% non_published_pivnet = %(apt credhub hwc multi r nginx) %>
+<% non_published_pws = %(apt credhub multi r nginx) %>
 <% non_lts = %(apt credhub hwc) %>
 <% skip_docker_start = %w(binary r) %>
 <% stacks = {
@@ -75,7 +75,7 @@ resources: #####################################################################
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
-<% unless non_published.include? language %>
+<% unless non_published_pivnet.include? language %>
   - name: pivnet-buildpack-metadata
     type: git
     source:
@@ -169,7 +169,7 @@ resources: #####################################################################
 
   ## Pivnet Release ##
 
-<% unless non_published.include? language %>
+<% unless non_published_pivnet.include? language %>
   - name: pivnet-production
     type: pivnet
     source:
@@ -603,7 +603,7 @@ jobs: ##########################################################################
             - buildpack-artifacts/*-buildpack*-v*.zip
             - buildpack-artifacts/*-buildpack*-v*.zip.SHA256SUM.txt
 
-<% if !non_published.include?(language) || push_to_pws.include?(language) %>
+<% if !non_published_pws.include?(language)%>
   - name: buildpack-to-pws
     serial: true
     public: true
@@ -627,7 +627,7 @@ jobs: ##########################################################################
           BUILDPACK_NAME: <%= language %>
           STACKS: <%= pws_stacks.join(' ') %>
 <% end %>
-<% unless non_published.include? language %>
+<% unless non_published_pivnet.include? language %>
   - name: write-pivnet-metadata
     serial: true
     public: true
