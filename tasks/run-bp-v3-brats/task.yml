@@ -3,7 +3,8 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: cfbuildpacks/bpv3:build
+    repository: cfbuildpacks/bpv3
+    tag: build
 inputs:
   - name: buildpacks-ci
   - name: buildpack
