@@ -21,7 +21,7 @@
   "staticfile" => %w(cflinuxfs2 cflinuxfs3)
 } %>
 <% any_stack = %w(hwc binary) %>
-
+<% v3_buildpacks = %w(nodejs) %>
 ---
 resource_types:
   - name: slack-notification
@@ -40,6 +40,19 @@ resource_types:
 
 resources: ############################################################################################################
   ## Git ##
+
+<% if v3_buildpacks.include?(language) %>
+  - name: buildpack-v3
+    type: git
+    webhook_token: ob0aigh3
+    source:
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
+      branch: "wip-v3-detect-#160290732"
+      ignore_paths:
+      - VERSION
+      - CHANGELOG
+<% end %>
 
   - name: buildpack-develop
     type: git
@@ -814,6 +827,26 @@ jobs: ##########################################################################
       params:
         release: edge-environments
 <% end %>
+
+<% if v3_buildpacks.include?(language) %>
+  - name: specs-v3-brats-develop
+    serial: true
+    public: false
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-v3
+          trigger: true
+#          passed:
+#          - specs-unit-develop
+      - task: v3-brats
+        file: buildpacks-ci/tasks/run-bp-v3-brats/task.yml
+        params:
+          GINKGO_ATTEMPTS: 1
+          GINKGO_NODES: 1
+<% end %>
+
   - name: specs-edge-shared-develop
     serial: true
     public: true
