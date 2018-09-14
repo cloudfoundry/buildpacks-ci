@@ -11,7 +11,4 @@ export PATH=$GOBIN:$PATH
 echo "Start Docker"
 ../buildpacks-ci/scripts/start-docker > /dev/null
 
-echo "Pulling build image"
-docker pull cfbuildpacks/bpv3:build
-
 ./scripts/v3-brats.sh
