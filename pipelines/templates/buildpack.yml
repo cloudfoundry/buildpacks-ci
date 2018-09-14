@@ -832,6 +832,7 @@ jobs: ##########################################################################
         params:
           GINKGO_ATTEMPTS: 1
           GINKGO_NODES: 1
+        privileged: true
 <% end %>
 
   - name: specs-edge-shared-develop
