@@ -41,19 +41,6 @@ resource_types:
 resources: ############################################################################################################
   ## Git ##
 
-<% if v3_buildpacks.include?(language) %>
-  - name: buildpack-v3
-    type: git
-    webhook_token: ob0aigh3
-    source:
-      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: {{<%= language %>-buildpack-private-key}}
-      branch: "wip-v3-detect-#160290732"
-      ignore_paths:
-      - VERSION
-      - CHANGELOG
-<% end %>
-
   - name: buildpack-develop
     type: git
     webhook_token: ob0aigh3
@@ -836,10 +823,10 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-v3
+          resource: buildpack-develop
           trigger: true
-#          passed:
-#          - specs-unit-develop
+          passed:
+          - specs-unit-develop
       - task: v3-brats
         file: buildpacks-ci/tasks/run-bp-v3-brats/task.yml
         params:
