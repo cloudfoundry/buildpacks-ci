@@ -365,7 +365,7 @@ class Builder
       binary_builder.build(source_input, "--php-extensions-file=#{extension_file}")
       out_data.merge!(
         artifact_output.move_dependency(
-          full_name,
+          source_input.name,
           "#{binary_builder.base_dir}/#{full_name}-#{source_input.version}-linux-x64.tgz",
           "#{full_name}-#{source_input.version}-linux-x64-#{stack}",
           'tgz'
