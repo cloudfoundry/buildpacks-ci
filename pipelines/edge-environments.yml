@@ -142,6 +142,12 @@ jobs:
       bbl-state: env-repo
     params:
       BBL_STATE_DIR: <%= env %>
+  - task: clean-up-env-buildpacks
+    file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
+    input_mapping:
+      bbl-state: env-repo
+    params:
+      ENV_NAME: <%= env %>
   - task: bosh-deploy
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     attempts: 3
@@ -158,6 +164,8 @@ jobs:
       GIT_COMMIT_USERNAME: {{github-username}}
   - task: clean-up-env-buildpacks
     file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
+    input_mapping:
+      bbl-state: updated-vars-store
     params:
       ENV_NAME: <%= env %>
   - put: env-repo

@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
-set -o errexit
 set -o pipefail
 set -o nounset
 
 set +x
-cf_password=$(grep "cf_admin_password:" "updated-vars-store/$ENV_NAME/vars-store.yml" | awk '{print $2}')
+cf_password=$(grep "cf_admin_password:" "bbl-state/$ENV_NAME/vars-store.yml" | awk '{print $2}')
 target="api.$ENV_NAME.buildpacks-gcp.ci.cf-app.com"
 cf api "$target" --skip-ssl-validation || (sleep 4 && cf api "$target" --skip-ssl-validation)
+
+if [ "$?" == "1" ]; then #This is run before deploying the environment so this can fail
+  exit 0
+fi
+
 cf auth admin "$cf_password" || (sleep 4 && cf auth admin "$cf_password")
 set -x
 

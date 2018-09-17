@@ -7,7 +7,7 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: hwc-buildpack
-  - name: updated-vars-store
+  - name: bbl-state
 run:
   path: buildpacks-ci/tasks/clean-up-env-buildpacks/run.sh
 params:
