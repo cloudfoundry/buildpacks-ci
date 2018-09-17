@@ -128,6 +128,12 @@ resources: #####################################################################
       branch: master
       paths: [ "cnb/<%= image_type %>/**" ]
 <% end %>
+
+  - name: cnb-lifecycle-master
+    type: git
+    source:
+      uri: https://github.com/buildpack/lifecycle
+      branch: master
 <% end %>
 
   ## S3 Buckets ##
@@ -196,6 +202,7 @@ resources: #####################################################################
 <% cnb_images.each do |image_type| %>
   - name: docker-<%= rootfs_name %>-cnb-experimental-<%= image_type %>
     type: docker-image
+    check_every: 15s
     source:
       repository: cfbuildpacks/<%= rootfs_name %>-cnb-experimental
       tag: <%= image_type %>
@@ -743,12 +750,14 @@ jobs: ##########################################################################
     plan:
       - get: <%= rootfs_name %>-cnb-experimental-<%= image_type %>-dockerfile-master
         trigger: true
-<% if image_type != 'base' %>
-      # Changes in base image should also trigger an update for children
-      - get: <%= rootfs_name %>-cnb-experimental-base-dockerfile-master
+<% if image_type == 'base' %>
+      # Changes in lifecycle repo should trigger an update for base
+      - get: cnb-lifecycle-master
         trigger: true
-        passed:
-          - update-<%= rootfs_name %>-cnb-experimental-base-image
+<% else %>
+      # Changes in base image should also trigger an update for children
+      - get: docker-<%= rootfs_name %>-cnb-experimental-base
+        trigger: true
 <% end %>
       - put: docker-<%= rootfs_name %>-cnb-experimental-<%= image_type %>
         params:
