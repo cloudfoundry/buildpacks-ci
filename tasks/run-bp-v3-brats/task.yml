@@ -12,3 +12,4 @@ run:
 params:
   GINKGO_ATTEMPTS:
   GINKGO_NODES:
+  CNB_BUILD_IMAGE:
