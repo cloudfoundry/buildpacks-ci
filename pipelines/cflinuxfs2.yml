@@ -35,6 +35,11 @@ resources: #####################################################################
     source:
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+  - name: cf-acceptance-tests
+    type: git
+    source:
+      branch: master
+      uri: https://github.com/cloudfoundry/cf-acceptance-tests.git
   - name: bbl-state
     type: git
     source:
@@ -100,13 +105,6 @@ resources: #####################################################################
       uri: git@github.com:cloudfoundry/cflinuxfs2-release.git
       branch: master
       private_key: {{cflinuxfs2-release-private-key}}
-
-  - name: cf-release-rc
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/cf-release
-      branch: release-candidate
-      private_key: {{cf-release-private-key}}
 
   ## S3 Buckets ##
 
@@ -405,10 +403,7 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: cf-deployment-concourse-tasks
           resource: cf-deployment-concourse-tasks-latest
-        - get: cf-release
-          resource: cf-release-rc
-          params:
-            submodules: [ src/github.com/cloudfoundry/cf-acceptance-tests/ ]
+        - get: cf-acceptance-tests
         - get: new-cves
           passed: [ deploy ]
         - get: stack-s3
