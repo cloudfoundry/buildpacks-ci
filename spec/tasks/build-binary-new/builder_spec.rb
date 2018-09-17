@@ -68,9 +68,8 @@ describe 'Builder' do
         end
 
         it 'should build correctly' do
-          dep_name = input.dep == 'php' ? 'php7' : input.dep
           expect(artifact_output).to receive(:move_dependency)
-            .with(dep_name, output.old_file_path, output.prefix, output.extension)
+            .with(input.dep, output.old_file_path, output.prefix, output.extension)
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
