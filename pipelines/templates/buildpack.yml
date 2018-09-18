@@ -273,7 +273,7 @@ resources: #####################################################################
   ## Docker Images ##
 <% if v3_buildpacks.include?(language) %>
 <% cnb_images.each do |image_type| %>
-  - name: docker-cnb-<%= image_type %>
+  - name: cnb-<%= image_type %>-image
     type: docker-image
     source:
       repository: cfbuildpacks/cflinuxfs3-cnb-experimental
@@ -843,7 +843,7 @@ jobs: ##########################################################################
           passed:
           - specs-unit-develop
 <% cnb_images.each do |image_type| %>
-        - get: docker-cnb-<%= image_type %>
+        - get: cnb-<%= image_type %>-image
           trigger: true
           params:
             skip_download: true
