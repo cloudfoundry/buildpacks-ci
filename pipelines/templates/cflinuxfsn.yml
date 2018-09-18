@@ -120,7 +120,7 @@ resources: #####################################################################
 
 <% if rootfs_name == 'cflinuxfs3' %>
 <% cnb_images.each do |image_type| %>
-  - name: <%= rootfs_name %>-cnb-experimental-<%= image_type %>-dockerfile-master
+  - name: <%= rootfs_name %>-cnb-<%= image_type %>-master
     type: git
     check_every: 15s
     source:
@@ -200,7 +200,7 @@ resources: #####################################################################
 
 <% if rootfs_name == 'cflinuxfs3' %>
 <% cnb_images.each do |image_type| %>
-  - name: docker-<%= rootfs_name %>-cnb-experimental-<%= image_type %>
+  - name: <%= rootfs_name %>-cnb-<%= image_type %>-image
     type: docker-image
     check_every: 15s
     source:
@@ -744,11 +744,11 @@ jobs: ##########################################################################
 
 <% if rootfs_name == 'cflinuxfs3' %>
 <% cnb_images.each do |image_type| %>
-  - name: update-<%= rootfs_name %>-cnb-experimental-<%= image_type %>-image
+  - name: update-<%= rootfs_name %>-cnb-<%= image_type %>-image
     serial: true
     public: true
     plan:
-      - get: <%= rootfs_name %>-cnb-experimental-<%= image_type %>-dockerfile-master
+      - get: <%= rootfs_name %>-cnb-<%= image_type %>-master
         trigger: true
 <% if image_type == 'base' %>
       # Changes in lifecycle repo should trigger an update for base
@@ -756,12 +756,12 @@ jobs: ##########################################################################
         trigger: true
 <% else %>
       # Changes in base image should also trigger an update for children
-      - get: docker-<%= rootfs_name %>-cnb-experimental-base
+      - get: <%= rootfs_name %>-cnb-base-image
         trigger: true
 <% end %>
-      - put: docker-<%= rootfs_name %>-cnb-experimental-<%= image_type %>
+      - put: <%= rootfs_name %>-cnb-<%= image_type %>-image
         params:
-          build: <%= rootfs_name %>-cnb-experimental-<%= image_type %>-dockerfile-master/cnb/<%= image_type %>
+          build: <%= rootfs_name %>-cnb-<%= image_type %>-master/cnb/<%= image_type %>
           build_args:
             squash: squash
         attempts: 2
