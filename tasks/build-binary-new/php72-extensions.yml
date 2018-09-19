@@ -31,6 +31,10 @@ native_modules:
   version: 2.3.6
   md5: a8629fd2953b04b4639d0a9d8a5cf9d1
   klass: UnixOdbcRecipe
+- name: libsodium
+  version: 1.0.16
+  md5: 37b18839e57e7a62834231395c8e962b
+  klass: LibSodiumRecipe
 
 extensions:
 #standard pecl
@@ -97,7 +101,7 @@ extensions:
 - name: redis
   version: 4.0.2
   md5: 28f0876eff1b83b4503de80da7dc2637
-  klass: PeclRecipe
+  klass: RedisPeclRecipe
 - name: stomp
   version: 2.0.2
   md5: 507c30184fde736e924cee20c56df061
@@ -114,6 +118,10 @@ extensions:
   version: 3.0.4
   md5: 7e37aae409be7fc25ac31f918f5fa2eb
   klass: MemcachedPeclRecipe
+- name: sodium
+  version: nil
+  md5: nil
+  klass: SodiumRecipe
 
 #non-standard
 - name: amqp
