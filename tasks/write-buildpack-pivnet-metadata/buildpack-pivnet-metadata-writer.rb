@@ -104,6 +104,8 @@ def formatted_name
     "PHP"
   elsif buildpack == 'nodejs'
     "NodeJS"
+  elsif buildpack == 'nginx'
+    "NGINX"
   else
     "#{buildpack.capitalize}"
   end
