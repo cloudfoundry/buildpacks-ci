@@ -29,7 +29,7 @@ when "pypi"
 when "ruby"
   version = Depwatcher::Ruby.new.in(version["ref"].to_s)
 when "php"
-  versions = Depwatcher::Php.new.in(version["ref"].to_s)
+  version = Depwatcher::Php.new.in(version["ref"].to_s)
 when "python"
   version = Depwatcher::Python.new.in(version["ref"].to_s)
 when "go"
