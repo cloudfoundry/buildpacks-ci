@@ -58,15 +58,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the CF-CLI
-# TODO: UNCOMMENT THIS ONCE OFFICIAL CLI SUPPORTS STACK ASSOCIATION
-#RUN wget -O cf-cli.tgz 'https://packages.cloudfoundry.org/edge?arch=linux64&source=github' \
-#  && [ 0c94e787e49f99af19d528948a3695eda2430167f04b4533c68b35f3fe73765a = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
-#  && tar xzf cf-cli.tgz -C /usr/bin \
-#  && rm cf-cli.tgz
-
-# TODO: DELETE THIS AND 'cf-cli-multi-stack' S3 BUCKET ONCE OFFICIAL CLI SUPPORTS STACK ASSOCIATION
-RUN wget -O cf-cli.tgz 'https://packages.cloudfoundry.org/edge?arch=linux64&source=github' \
-  && [ 89fb1071cbd36d80c8f0f885ef435783e449e8e614d5fa1aa1e891265568e718 = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
+RUN wget -O cf-cli.tgz 'https://packages.cloudfoundry.org/stable?release=linux64-binary&version=6.39.1&source=github-rel' \
+  && [ 62c3930b139c71334ad6b69fddc7fa469558873995877ed8bbfdf07e170d1d3e = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
   && tar xzf cf-cli.tgz -C /usr/bin \
   && rm cf-cli.tgz \
   && cf install-plugin -r CF-Community "log-cache" -f
