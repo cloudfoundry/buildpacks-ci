@@ -126,6 +126,24 @@ describe BuildpackPivnetMetadataWriter do
       end
     end
 
+    context 'the buildpack is nginx' do
+      let(:version)                   { "6.78.99" }
+      let(:buildpack)                 { 'nginx' }
+      let(:recent_changes)            { 'nginx security fixes' }
+      let(:cached_buildpack_filenames){ ["pivotal-buildpacks-stack0/#{buildpack}_buildpack-cached-cflinuxfs2-v#{version}+#{timestamp}.zip"] }
+
+      before { allow(subject).to receive(:get_version).and_return(version) }
+
+      it "capitalizes filenames correctly" do
+        subject.run!
+        release = yaml_contents['release']
+        product_file = yaml_contents['product_files'].first
+
+        expect(release['version']).to eq 'NGINX 6.78.99'
+        expect(product_file['upload_as']).to eq 'NGINX Buildpack cflinuxfs2 (offline)'
+      end
+    end
+
     context 'the buildpack is ruby' do
       let(:version)                   { "1.7.45" }
       let(:buildpack)                 { 'ruby' }
