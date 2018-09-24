@@ -168,6 +168,14 @@ resources: #####################################################################
       access_token: {{buildpacks-github-token}}
 <% end %>
 
+<% if v3_buildpacks.include?(language) %>
+  - name: pack
+    type: github-release
+    source:
+      user: buildpack
+      repository: pack
+<% end %>
+
   ## Pivnet Release ##
 
 <% unless non_published_pivnet.include? language %>
@@ -835,7 +843,37 @@ jobs: ##########################################################################
 <% end %>
 
 <% if v3_buildpacks.include?(language) %>
-  - name: specs-v3-brats-develop
+  - name: specs-v3-acceptance-develop
+    serial: true
+    public: false
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-develop
+          trigger: true
+          passed:
+          - specs-unit-develop
+        - get: pack
+          resource: pack
+          trigger: true
+<% cnb_images.each do |image_type| %>
+        - get: cnb-<%= image_type %>-image
+          trigger: true
+          params:
+            skip_download: true
+<% end %>
+      - task: v3-brats
+        file: buildpacks-ci/tasks/run-bp-v3-acceptance/task.yml
+        params:
+          GINKGO_ATTEMPTS: 1
+          GINKGO_NODES: 1
+          CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
+        privileged: true
+<% end %>
+
+<% if v3_buildpacks.include?(language) %>
+  - name: specs-v3-integration-develop
     serial: true
     public: false
     plan:
@@ -853,7 +891,7 @@ jobs: ##########################################################################
             skip_download: true
 <% end %>
       - task: v3-brats
-        file: buildpacks-ci/tasks/run-bp-v3-brats/task.yml
+        file: buildpacks-ci/tasks/run-bp-v3-integration/task.yml
         params:
           GINKGO_ATTEMPTS: 1
           GINKGO_NODES: 1
