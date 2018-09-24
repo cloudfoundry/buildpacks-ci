@@ -7,6 +7,7 @@ admin_password = ENV.fetch('CI_CF_PASSWORD')
 apps_domain = ENV.fetch('APPS_DOMAIN')
 diego_docker_on = ENV.fetch('DIEGO_DOCKER_ON')
 credhub_mode = ENV.fetch('CREDHUB_MODE')
+credhub_client = ENV.fetch('CREDHUB_CLIENT')
 credhub_secret = ENV.fetch('CREDHUB_CLIENT_SECRET')
 windows_stack = ENV.fetch('WINDOWS_STACK')
 
@@ -16,6 +17,7 @@ cats_config = {
   "api" => "api.#{apps_domain}",
   "apps_domain" => apps_domain,
   "credhub_mode" => credhub_mode,
+  "credhub_client" => credhub_client,
   "credhub_secret" => credhub_secret,
   "async_service_operation_timeout" => 1200,
   "backend" => "diego",

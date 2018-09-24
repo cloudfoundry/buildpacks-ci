@@ -277,6 +277,7 @@ jobs:
             APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
             CREDHUB_MODE: assisted
+            CREDHUB_CLIENT: cc_service_key_client
             CREDHUB_CLIENT_SECRET: {{ci-cf-bal-credhub-client-secret}}
             WINDOWS_STACK: windows2012R2
         - task: cats-for-windows2012R2
@@ -294,6 +295,7 @@ jobs:
             APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
             CREDHUB_MODE: assisted
+            CREDHUB_CLIENT: cc_service_key_client
             CREDHUB_CLIENT_SECRET: {{ci-cf-bal-credhub-client-secret}}
             WINDOWS_STACK: windows2016
         - task: cats-for-windows2016
