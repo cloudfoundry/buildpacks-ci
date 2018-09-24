@@ -863,7 +863,7 @@ jobs: ##########################################################################
           params:
             skip_download: true
 <% end %>
-      - task: v3-brats
+      - task: v3-acceptance
         file: buildpacks-ci/tasks/run-bp-v3-acceptance/task.yml
         params:
           GINKGO_ATTEMPTS: 1
@@ -890,7 +890,7 @@ jobs: ##########################################################################
           params:
             skip_download: true
 <% end %>
-      - task: v3-brats
+      - task: v3-integration
         file: buildpacks-ci/tasks/run-bp-v3-integration/task.yml
         params:
           GINKGO_ATTEMPTS: 1
