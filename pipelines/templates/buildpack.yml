@@ -964,7 +964,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
           params:
             CF_STACK: cflinuxfs2
-            GINKGO_ATTEMPTS: 4
+            GINKGO_ATTEMPTS: <%= language.to_s == 'php' ? 10 : 4 %>
             GINKGO_NODES: 6
         ensure:
           task: delete-cf-space-cflinuxfs2
