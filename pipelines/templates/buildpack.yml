@@ -869,6 +869,7 @@ jobs: ##########################################################################
           GINKGO_ATTEMPTS: 1
           GINKGO_NODES: 1
           CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
+          CNB_RUN_IMAGE: packs/run # TODO: change to `cfbuildpacks/cflinuxfs3-cnb-experimental:run` when pack cli can use it
         privileged: true
 <% end %>
 
@@ -896,6 +897,7 @@ jobs: ##########################################################################
           GINKGO_ATTEMPTS: 1
           GINKGO_NODES: 1
           CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
+          CNB_RUN_IMAGE: packs/run # TODO: change to `cfbuildpacks/cflinuxfs3-cnb-experimental:run` when pack cli can use it
         privileged: true
 <% end %>
 
