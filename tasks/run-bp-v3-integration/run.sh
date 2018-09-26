@@ -4,7 +4,6 @@ set -o pipefail
 
 cd buildpack
 
-export GOPATH=$PWD
 export GOBIN=$PWD/.bin
 export PATH=$GOBIN:$PATH
 
