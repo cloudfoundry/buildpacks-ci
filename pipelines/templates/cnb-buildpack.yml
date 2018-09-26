@@ -47,6 +47,20 @@ resources: #####################################################################
 <% end %>
 
 jobs: ################################################################################################################
+  - name: specs-unit-develop
+    serial: true
+    public: true
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: buildpack
+            resource: buildpack-develop
+            trigger: true
+        - do:
+          - task: ginkgo
+            file: buildpacks-ci/tasks/run-bp-unit/task.yml
+
   - name: specs-v3-acceptance-develop
     serial: true
     public: false
@@ -56,6 +70,8 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-develop
           trigger: true
+          passed:
+          - specs-unit-develop
         - get: pack
           resource: pack
           trigger: true
@@ -83,6 +99,8 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-develop
           trigger: true
+          passed:
+          - specs-unit-develop
 <% cnb_images.each do |image_type| %>
         - get: cnb-<%= image_type %>-image
           trigger: true
