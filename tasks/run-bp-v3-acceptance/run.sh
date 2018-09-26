@@ -11,4 +11,4 @@ export PATH=$GOBIN:$PATH
 echo "Start Docker"
 ../buildpacks-ci/scripts/start-docker > /dev/null
 
-./scripts/v3-acceptance.sh
+./scripts/acceptance.sh
