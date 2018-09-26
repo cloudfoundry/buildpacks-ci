@@ -1,0 +1,123 @@
+<% v3_buildpacks = %w(nodejs) %>
+<% cnb_images = %w(run build) %>
+---
+resource_types:
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+
+resources: ############################################################################################################
+  ## Git ##
+
+<% if v3_buildpacks.include? language %>
+  - name: buildpack-develop
+    type: git
+    webhook_token: ob0aigh3
+    source:
+      uri: git@github.com:<%= organization %>/<%= language %>-cnb-buildpack.git
+      private_key: {{<%= language %>-cnb-buildpack-private-key}}
+      branch: develop
+      ignore_paths:
+        - VERSION
+        - CHANGELOG
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
+
+  ## Github Releases ##
+  - name: pack
+    type: github-release
+    source:
+      user: buildpack
+      repository: pack
+
+  ## Docker Images ##
+<% cnb_images.each do |image_type| %>
+  - name: cnb-<%= image_type %>-image
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cflinuxfs3-cnb-experimental
+      tag: <%= image_type %>
+      email: {{buildpacks-docker-user-email}}
+      username: {{buildpacks-docker-user-username}}
+      password: {{buildpacks-docker-user-password}}
+<% end %>
+
+jobs: ################################################################################################################
+  - name: specs-v3-acceptance-develop
+    serial: true
+    public: false
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-develop
+          trigger: true
+        - get: pack
+          resource: pack
+          trigger: true
+<% cnb_images.each do |image_type| %>
+        - get: cnb-<%= image_type %>-image
+          trigger: true
+          params:
+            skip_download: true
+<% end %>
+      - task: v3-acceptance
+        file: buildpacks-ci/tasks/run-bp-v3-acceptance/taskuyml
+        params:
+          GINKGO_ATTEMPTS: 1
+          GINKGO_NODES: 1
+          CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
+          CNB_RUN_IMAGE: packs/run # TODO: change to `cfbuildpacks/cflinuxfs3-cnb-experimental:run` when pack cli can use it
+        privileged: true
+
+  - name: specs-v3-integration-develop
+    serial: true
+    public: false
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-develop
+          trigger: true
+<% cnb_images.each do |image_type| %>
+        - get: cnb-<%= image_type %>-image
+          trigger: true
+          params:
+            skip_download: true
+<% end %>
+      - task: v3-integration
+        file: buildpacks-ci/tasks/run-bp-v3-integration/task.yml
+        params:
+          GINKGO_ATTEMPTS: 1
+          GINKGO_NODES: 1
+          CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
+          CNB_RUN_IMAGE: packs/run # TODO: change to `cfbuildpacks/cflinuxfs3-cnb-experimental:run` when pack cli can use it
+        privileged: true
+
+  - name: specs-v3-brats-develop
+    serial: true
+    public: false
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-develop
+          trigger: true
+<% cnb_images.each do |image_type| %>
+        - get: cnb-<%= image_type %>-image
+          trigger: true
+          params:
+            skip_download: true
+<% end %>
+      - task: v3-brats
+        file: buildpacks-ci/tasks/run-bp-v3-brats/task.yml
+        params:
+          GINKGO_ATTEMPTS: 1
+          GINKGO_NODES: 1
+          CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
+        privileged: true
+<% end %>
