@@ -8,4 +8,4 @@ inputs:
   - name: buildpacks-ci
   - name: buildpack
 run:
-  path: buildpacks-ci/tasks/run-bp-v3-units/run.sh
+  path: buildpacks-ci/tasks/run-bp-v3-unit/run.sh
