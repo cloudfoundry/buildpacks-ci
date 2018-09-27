@@ -15,7 +15,7 @@ def main
   source_input    = SourceInput.from_file('source/data.json')
   build_input     = BuildInput.from_file("builds/binary-builds-new/#{source_input.name}/#{source_input.version}.json")
   build_output    = BuildOutput.new(source_input.name)
-  artifact_output = ArtifactOutput.new
+  artifact_output = ArtifactOutput.new(File.join(Dir.pwd, 'artifacts'))
   out_data = Builder.new.execute(
     binary_builder,
     ENV['STACK'],

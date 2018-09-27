@@ -3,10 +3,11 @@ require 'open-uri'
 require 'digest'
 require 'net/http'
 require 'tmpdir'
+require_relative 'dotnet_framework_extractor'
 
 module Runner
   def run(*args)
-    system({ 'DEBIAN_FRONTEND' => 'noninteractive' }, *args)
+    system({'DEBIAN_FRONTEND' => 'noninteractive'}, *args)
     raise "Could not run #{args}" unless $?.success?
   end
 end
@@ -53,7 +54,7 @@ module DependencyBuild
   end
 
   def build_r(source_input)
-    artifacts  = "#{Dir.pwd}/artifacts"
+    artifacts = "#{Dir.pwd}/artifacts"
     source_sha = ''
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
@@ -97,10 +98,11 @@ module DependencyBuild
     end
     source_sha
   end
+
   def build_nginx(source_input)
-    artifacts  = "#{Dir.pwd}/artifacts"
+    artifacts = "#{Dir.pwd}/artifacts"
     source_pgp = 'not yet implemented'
-    destdir    = Dir.mktmpdir
+    destdir = Dir.mktmpdir
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         Runner.run('wget', source_input.url)
@@ -129,7 +131,7 @@ module DependencyBuild
             '--with-stream=dynamic',
           )
           Runner.run('make')
-          system({ 'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR' => "#{destdir}/nginx" }, 'make install')
+          system({'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR' => "#{destdir}/nginx"}, 'make install')
           raise 'Could not run make install' unless $?.success?
 
           Dir.chdir(destdir) do
@@ -141,9 +143,11 @@ module DependencyBuild
       end
     end
   end
-  def build_dotnet_sdk(source_input)
+
+  def build_dotnet_sdk(source_input, build_input, build_output, artifact_output)
     GitClient.clone_repo('https://github.com/dotnet/cli.git', 'cli')
 
+    stack = ENV.fetch('STACK')
     major, minor, patch = source_input.version.split('.')
     Dir.chdir('cli') do
       GitClient.checkout(source_input.git_commit_sha)
@@ -157,18 +161,17 @@ module DependencyBuild
 
       Runner.run('apt-get', 'update')
       Runner.run('apt-get', '-y', 'upgrade')
-      stack = ENV.fetch('STACK')
       fs_specific_packages = stack == 'cflinuxfs2' ? ['liburcu1', 'libllvm3.6', 'liblldb-3.6'] : ['liburcu6', 'libllvm3.9', 'liblldb-3.9']
       Runner.run('apt-get', '-y', 'install', 'clang', 'devscripts', 'debhelper', 'libunwind8', 'libpython2.7', 'liblttng-ust0', *fs_specific_packages)
 
       ENV['DropSuffix'] = 'true'
-      ENV['TERM']       = 'linux'
+      ENV['TERM'] = 'linux'
 
       # We must fix the build script for dotnet-sdk versions 2.1.4 to 2.1.2XX (see https://github.com/dotnet/cli/issues/8358)
       if major == '2' && minor == '1' && patch.to_i >= 4 && patch.to_i < 300
-        runbuildsh = File.open('run-build.sh', 'r') { |f| f.read }
+        runbuildsh = File.open('run-build.sh', 'r') {|f| f.read}
         runbuildsh.gsub!('WriteDynamicPropsToStaticPropsFiles "${args[@]}"', 'WriteDynamicPropsToStaticPropsFiles')
-        File.open('run-build.sh ', 'w') { |f| f.write runbuildsh }
+        File.open('run-build.sh ', 'w') {|f| f.write runbuildsh}
       end
 
       Runner.run('./build.sh', '/t:Compile')
@@ -176,12 +179,15 @@ module DependencyBuild
 
     # The path to the built files changes in dotnet-v2.1.300
     has_artifacts_dir = major.to_i <= 2 && minor.to_i <= 1 && patch.to_i < 300
-    old_filepath      = "/tmp/#{source_input.name}.#{source_input.version}.linux-amd64.tar.xz"
-    Dir.chdir(if has_artifacts_dir
-      Dir['cli/artifacts/*-x64/stage2'][0]
-    else
-      'cli/bin/2/linux-x64/dotnet'
-    end) do
+    old_filepath = "/tmp/#{source_input.name}.#{source_input.version}.linux-amd64.tar.xz"
+    dotnet_dir = has_artifacts_dir ? Dir['cli/artifacts/*-x64/stage2'][0] : 'cli/bin/2/linux-x64/dotnet'
+
+    remove_frameworks = major.to_i >= 2 && minor.to_i >= 1
+    framework_extractor = DotnetFrameworkExtractor.new(dotnet_dir, stack, source_input, build_input, artifact_output)
+    framework_extractor.extract_runtime(remove_frameworks)
+    framework_extractor.extract_aspnetcore(remove_frameworks)
+
+    Dir.chdir(dotnet_dir) do
       system('tar', 'Jcf', old_filepath, '.')
     end
   end
@@ -191,6 +197,7 @@ module Sha
   def get_sha(url)
     Digest::SHA256.hexdigest(open(url).read)
   end
+
   def check_sha(source_input)
     res = open(source_input.url).read
     sha = get_sha(source_input.url)
@@ -207,12 +214,12 @@ class Builder
   def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output)
     build_input.copy_to_build_output
 
-    out_data                   = {
+    out_data = {
       tracker_story_id: build_input.tracker_story_id,
-      version:          source_input.version,
-      source:           { url: source_input.url }
+      version: source_input.version,
+      source: {url: source_input.url}
     }
-    out_data[:source][:md5]    = source_input.md5
+    out_data[:source][:md5] = source_input.md5
     out_data[:source][:sha256] = source_input.sha256
 
     case source_input.name
@@ -278,15 +285,15 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}-linux-x64.tgz",
-          "nginx-#{source_input.version}-linux-x64-#{stack}",  # want filename in manifest to read 'nginx-...', not 'nginx-static-...'
+          "nginx-#{source_input.version}-linux-x64-#{stack}", # want filename in manifest to read 'nginx-...', not 'nginx-static-...'
           'tgz'
         )
       )
 
     when 'CAAPM', 'appdynamics', 'miniconda2', 'miniconda3'
-      results           = Sha.check_sha(source_input)
+      results = Sha.check_sha(source_input)
       out_data[:sha256] = results[1]
-      out_data[:url]    = source_input.url
+      out_data[:url] = source_input.url
 
     when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower' # TODO : fix me to use artifact_output
       results = Sha.check_sha(source_input)
@@ -436,7 +443,7 @@ class Builder
       out_data[:source_pgp] = source_pgp
 
     when 'dotnet-sdk'
-      DependencyBuild.build_dotnet_sdk source_input
+      DependencyBuild.build_dotnet_sdk source_input, build_input, build_output, artifact_output
       out_data.merge!(
         artifact_output.move_dependency(
           source_input.name,
@@ -446,7 +453,7 @@ class Builder
         )
       )
       out_data.merge!({
-        version:        source_input.version,
+        version: source_input.version,
         git_commit_sha: source_input.git_commit_sha
       })
 

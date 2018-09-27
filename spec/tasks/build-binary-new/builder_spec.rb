@@ -249,7 +249,7 @@ describe 'Builder' do
 
         it 'should build correctly' do
           expect(DependencyBuild).to receive(:build_dotnet_sdk)
-            .with(source_input)
+            .with(source_input, build_input, build_output, artifact_output)
             .and_return 'fake-source-sha-123'
 
           expect(artifact_output).to receive(:move_dependency)
