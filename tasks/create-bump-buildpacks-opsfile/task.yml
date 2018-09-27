@@ -24,6 +24,7 @@ inputs:
   - name: binary-buildpack-bosh-release
   - name: dotnet-core-buildpack-bosh-release
   - name: cflinuxfs2-bosh-release
+  - name: cflinuxfs3-bosh-release
   - name: buildpacks-ci
 outputs:
   - name: bump-buildpacks-opsfile
