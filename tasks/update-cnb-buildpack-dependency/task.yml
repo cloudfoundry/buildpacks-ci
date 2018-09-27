@@ -1,0 +1,22 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpack
+  - name: buildpack-master
+  - name: buildpacks-ci
+  - name: source
+  - name: builds
+outputs:
+  - name: artifacts
+run:
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/update-cnb-buildpack-dependency/run.rb
+params:
+  VERSION_LINE:
+  REMOVAL_STRATEGY:

@@ -17,6 +17,7 @@ gem 'rspec'
 gem 'rspec-rerun'
 gem 'tracker_api'
 gem 'webmock'
+gem 'toml'
 
 group :development do
   gem 'rubocop'
