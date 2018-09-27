@@ -31,8 +31,9 @@ resources: #####################################################################
   - name: pack
     type: github-release
     source:
-      user: buildpack
       repository: pack
+      user: buildpack
+      access_token: {{buildpacks-github-token}}
 
   ## Docker Images ##
 <% cnb_images.each do |image_type| %>
