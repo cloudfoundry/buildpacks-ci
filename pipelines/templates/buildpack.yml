@@ -21,7 +21,6 @@
   "staticfile" => %w(cflinuxfs2 cflinuxfs3)
 } %>
 <% any_stack = %w(hwc binary) %>
-<% v3_buildpacks = %w(nodejs) %>
 <% cnb_images = %w(run build) %>
 ---
 resource_types:
@@ -168,14 +167,6 @@ resources: #####################################################################
       access_token: {{buildpacks-github-token}}
 <% end %>
 
-<% if v3_buildpacks.include?(language) %>
-  - name: pack
-    type: github-release
-    source:
-      user: buildpack
-      repository: pack
-<% end %>
-
   ## Pivnet Release ##
 
 <% unless non_published_pivnet.include? language %>
@@ -278,19 +269,6 @@ resources: #####################################################################
       expression: 0 18 * * 0
       location: {{current-timezone}}
 
-  ## Docker Images ##
-<% if v3_buildpacks.include?(language) %>
-<% cnb_images.each do |image_type| %>
-  - name: cnb-<%= image_type %>-image
-    type: docker-image
-    source:
-      repository: cfbuildpacks/cflinuxfs3-cnb-experimental
-      tag: <%= image_type %>
-      email: {{buildpacks-docker-user-email}}
-      username: {{buildpacks-docker-user-username}}
-      password: {{buildpacks-docker-user-password}}
-<% end %>
-<% end %>
 
 jobs: ################################################################################################################
 <% if language == "php" %>
@@ -840,65 +818,6 @@ jobs: ##########################################################################
       put: edge-environments
       params:
         release: edge-environments
-<% end %>
-
-<% if v3_buildpacks.include?(language) %>
-  - name: specs-v3-acceptance-develop
-    serial: true
-    public: false
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: buildpack
-          resource: buildpack-develop
-          trigger: true
-          passed:
-          - specs-unit-develop
-        - get: pack
-          resource: pack
-          trigger: true
-<% cnb_images.each do |image_type| %>
-        - get: cnb-<%= image_type %>-image
-          trigger: true
-          params:
-            skip_download: true
-<% end %>
-      - task: v3-acceptance
-        file: buildpacks-ci/tasks/run-bp-v3-acceptance/task.yml
-        params:
-          GINKGO_ATTEMPTS: 1
-          GINKGO_NODES: 1
-          CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
-          CNB_RUN_IMAGE: packs/run # TODO: change to `cfbuildpacks/cflinuxfs3-cnb-experimental:run` when pack cli can use it
-        privileged: true
-<% end %>
-
-<% if v3_buildpacks.include?(language) %>
-  - name: specs-v3-integration-develop
-    serial: true
-    public: false
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: buildpack
-          resource: buildpack-develop
-          trigger: true
-          passed:
-          - specs-unit-develop
-<% cnb_images.each do |image_type| %>
-        - get: cnb-<%= image_type %>-image
-          trigger: true
-          params:
-            skip_download: true
-<% end %>
-      - task: v3-integration
-        file: buildpacks-ci/tasks/run-bp-v3-integration/task.yml
-        params:
-          GINKGO_ATTEMPTS: 1
-          GINKGO_NODES: 1
-          CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
-          CNB_RUN_IMAGE: packs/run # TODO: change to `cfbuildpacks/cflinuxfs3-cnb-experimental:run` when pack cli can use it
-        privileged: true
 <% end %>
 
   - name: specs-edge-shared-develop
