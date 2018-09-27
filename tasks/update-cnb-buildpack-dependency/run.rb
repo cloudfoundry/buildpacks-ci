@@ -98,22 +98,5 @@ Dir.chdir('artifacts') do
   File.write('buildpack.toml', TOML::Generator.new(buildpack_toml).body)
   GitClient.add_file('buildpack.toml')
 
-  unless php_defaults.nil?
-    File.write('defaults/options.json', php_defaults.to_json)
-    GitClient.add_file('defaults/options.json')
-  end
-
-  ruby_files_to_edit.each do |path, content|
-    if content
-      File.write(path, content)
-      GitClient.add_file(path)
-    end
-  end
-
-  if write_extensions != ''
-    File.write(path_to_extensions, write_extensions)
-    GitClient.add_file(path_to_extensions)
-  end
-
   GitClient.safe_commit("#{commit_message} [##{story_id}]")
 end
