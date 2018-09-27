@@ -86,8 +86,8 @@
   node:               { buildpacks: {
                           nodejs: { lines: ["6.X.X", "8.X.X", "9.X.X", "10.X.X"], removal_strategy: 'keep_master'},
                           ruby: { lines: ["6.X.X"], removal_strategy: 'keep_master'},
-                          'dotnet-core' => { lines: ["6.X.X"], removal_strategy: 'keep_master'}},
-                          'nodejs-cnb' => {lines: ["6.X.X", "8.X.X", "9.X.X", "10.X.X"], removal_strategy: 'keep_master'}
+                          'dotnet-core' => { lines: ["6.X.X"], removal_strategy: 'keep_master'},
+                          'nodejs-cnb' => {lines: ["6.X.X", "8.X.X", "9.X.X", "10.X.X"], removal_strategy: 'keep_master'}},
                         source_type: 'node'},
 
   php:                { buildpacks: {
@@ -498,7 +498,7 @@ jobs:
     - get: builds
   - do:
     - task: update-buildpack-dependency
-      <% if bp_name.include? '-cnb' %>
+      <% if bp_name.to_s.include? '-cnb' %>
       file: buildpacks-ci/tasks/update-cnb-buildpack-dependency/task.yml
       <% else %>
       file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
