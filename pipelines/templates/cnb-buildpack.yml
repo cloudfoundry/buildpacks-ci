@@ -1,5 +1,6 @@
 <% v3_buildpacks = %w(nodejs) %>
 <% cnb_images = %w(run build) %>
+<% launchable_buildpacks = %w() %>
 ---
 resource_types:
   - name: slack-notification
@@ -28,12 +29,14 @@ resources: #####################################################################
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
   ## Github Releases ##
+<% if launchable_buildpacks.include?(language) %>
   - name: pack
     type: github-release
     source:
       repository: pack
       user: buildpack
       access_token: {{buildpacks-github-token}}
+<% end %>
 
   ## Docker Images ##
 <% cnb_images.each do |image_type| %>
@@ -68,6 +71,8 @@ jobs: ##########################################################################
           - task: ginkgo
             file: buildpacks-ci/tasks/run-bp-v3-unit/task.yml
 
+
+<% if launchable_buildpacks.include?(language) %>
   - name: specs-v3-acceptance-develop
     serial: true
     public: false
@@ -95,6 +100,7 @@ jobs: ##########################################################################
           CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
           CNB_RUN_IMAGE: packs/run # TODO: change to `cfbuildpacks/cflinuxfs3-cnb-experimental:run` when pack cli can use it
         privileged: true
+<% end %>
 
   - name: specs-v3-integration-develop
     serial: true
