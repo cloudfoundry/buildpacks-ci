@@ -181,16 +181,7 @@ resources: #####################################################################
 
   ## Docker Image ##
 
-  - name: docker-<%= rootfs_name %>
-    type: docker-image
-    source:
-      repository: cloudfoundry/<%= rootfs_name %>
-      username: {{dockerhub-cflinuxfs2-username}}
-      password: {{dockerhub-cflinuxfs2-password}}
-      email: cf-buildpacks-eng@pivotal.io
-
-      ###FIXME: looks identical to the non tagged one?
-  - name: docker-<%= rootfs_name %>-tagged
+  - name: <%= rootfs_name %>-image
     type: docker-image
     source:
       repository: cloudfoundry/<%= rootfs_name %>
@@ -723,17 +714,12 @@ jobs: ##########################################################################
           params:
             STACK: <%= rootfs_name %>
         - aggregate:
-          - put: docker latest version
-            resource: docker-<%= rootfs_name %>
-            params:
-              import_file: docker-s3/<%= rootfs_name %>.tar.gz
-              skip_download: true
-          - put: docker tagged version
-            resource: docker-<%= rootfs_name %>-tagged
+          - put: <%= rootfs_name %>-image
             params:
               skip_download: true
               import_file: docker-s3/<%= rootfs_name %>.tar.gz
-              tag: version/number
+              tag_file: version/number
+              tag_as_latest: true
         on_failure:
           put: failure-alert
           params:
@@ -753,6 +739,9 @@ jobs: ##########################################################################
 <% if image_type == 'base' %>
       # Changes in lifecycle repo should trigger an update for base
       - get: cnb-lifecycle-master
+        trigger: true
+      # Changes in cflinuxfs3 image should trigger an update for base
+      - get: cflinuxfs3-image
         trigger: true
 <% else %>
       # Changes in base image should also trigger an update for children
