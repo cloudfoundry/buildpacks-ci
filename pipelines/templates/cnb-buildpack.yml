@@ -115,6 +115,9 @@ jobs: ##########################################################################
           - specs-unit-develop
 <% cnb_images.each do |image_type| %>
         - get: cnb-<%= image_type %>-image
+          trigger: true
+          passed:
+          - specs-unit-develop
           params:
             skip_download: true
 <% end %>
