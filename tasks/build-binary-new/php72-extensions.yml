@@ -94,10 +94,6 @@ extensions:
   version: 3.0.5
   md5: 844bd1528161518a47415f709214bae9
   klass: PeclRecipe
-- name: readline
-  version: nil
-  md5: nil
-  klass: ReadlineRecipe
 - name: redis
   version: 4.1.1
   md5: 32488f1d214e60afc5e027ae2d1e895f
@@ -126,6 +122,40 @@ extensions:
   version: nil
   md5: nil
   klass: SodiumRecipe
+
+#bundled w/PHP
+- name: tidy
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+- name: enchant
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+- name: interbase
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+- name: pdo_firebird
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+- name: readline
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+- name: wddx
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+- name: xmlrpc
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+- name: recode
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
 
 #non-standard
 - name: amqp
