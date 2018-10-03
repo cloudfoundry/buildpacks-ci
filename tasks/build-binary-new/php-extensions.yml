@@ -127,6 +127,36 @@ extensions:
   md5: f07a87ae08f79fdca448fad3f1d359f4
   klass: PeclRecipe
 
+  #bundled w/PHP
+- name: tidy
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+- name: enchant
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+- name: interbase
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+- name: pdo_firebird
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+- name: wddx
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+- name: xmlrpc
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+- name: recode
+  version: nil
+  md5: nil
+  klass: FakePeclRecipe
+
   #non-standard
 - name: amqp
   version: 1.9.3
