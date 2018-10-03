@@ -1,4 +1,4 @@
-<% v3_buildpacks = %w(nodejs) %>
+<% v3_buildpacks = %w(nodejs npm) %>
 <% cnb_images = %w(run build) %>
 <% launchable_buildpacks = %w() %>
 ---
@@ -16,8 +16,8 @@ resources: #####################################################################
     type: git
     webhook_token: ob0aigh3
     source:
-      uri: git@github.com:<%= organization %>/<%= language %>-cnb-buildpack.git
-      private_key: {{<%= language %>-cnb-buildpack-private-key}}
+      uri: git@github.com:<%= organization %>/<%= language %>-cnb.git
+      private_key: {{<%= language %>-cnb-private-key}}
       branch: develop
       ignore_paths:
         - VERSION

@@ -86,8 +86,8 @@ class BuildpacksCIPipelineUpdater
 
       BuildpacksCIPipelineUpdateCommand.new.run!(
         concourse_target_name: concourse_target_name,
-        pipeline_name: "#{language}-cnb-buildpack",
-        config_generation_command: "erb language=#{language} organization=#{organization} pipelines/templates/cnb-buildpack.yml",
+        pipeline_name: "#{language}-cnb",
+        config_generation_command: "erb language=#{language} organization=#{organization} pipelines/templates/cnb.yml",
         pipeline_variable_filename: pipeline_variables_filename,
         options: options
       )

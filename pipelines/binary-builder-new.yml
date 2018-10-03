@@ -409,7 +409,7 @@ jobs:
   - do:
     - task: update-buildpack-dependency
       <% if bp_name.to_s.include? '-cnb' %>
-      file: buildpacks-ci/tasks/update-cnb-buildpack-dependency/task.yml
+      file: buildpacks-ci/tasks/update-cnb-dependency/task.yml
       <% else %>
       file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
       <% end %>

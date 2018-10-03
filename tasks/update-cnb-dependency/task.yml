@@ -16,7 +16,7 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/tasks/update-cnb-buildpack-dependency/run.rb
+    - buildpacks-ci/tasks/update-cnb-dependency/run.rb
 params:
   VERSION_LINE:
   REMOVAL_STRATEGY:
