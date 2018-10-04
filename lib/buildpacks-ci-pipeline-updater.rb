@@ -79,7 +79,7 @@ class BuildpacksCIPipelineUpdater
     concourse_target_name = buildpacks_configuration.concourse_target_name
     organization = buildpacks_configuration.organization
 
-    Dir['config/buildpack/*.yml'].each do |pipeline_variables_filename|
+    Dir['config/buildpack/v3/*.yml'].each do |pipeline_variables_filename|
       next if options.has_key?(:template) && !pipeline_variables_filename.include?(options[:template])
 
       language = File.basename(pipeline_variables_filename, '.yml')
