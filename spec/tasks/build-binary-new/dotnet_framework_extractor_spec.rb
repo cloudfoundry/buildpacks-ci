@@ -110,5 +110,17 @@ describe 'DotnetFrameworkExtractor' do
       expect(FileUtils).not_to receive(:rm_rf).with(%w(shared/Microsoft.NETCore.App))
       subject.extract_runtime(false)
     end
+
+    it 'should call write runtime file with the sdk path as its argument' do
+      expect(subject).to receive(:write_runtime_file).with(sdk_dir)
+      subject.extract_runtime(true)
+    end
+
+    it 'should write a file RuntimeVersion.txt that contains the Microsoft.NETCore.App version', focus: true do
+      expected_write_location = File.join(sdk_dir, 'RuntimeVersion.txt')
+      subject.extract_runtime(true)
+      expect(File.file?(expected_write_location)).to be true
+      expect(File.read(expected_write_location)).to eq '3.1.3'
+    end
   end
 end
