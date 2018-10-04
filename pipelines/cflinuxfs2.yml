@@ -147,7 +147,7 @@ resources: #####################################################################
   - name: gcp-stemcell
     type: bosh-io-stemcell
     source:
-      name: bosh-google-kvm-ubuntu-trusty-go_agent
+      name: bosh-google-kvm-ubuntu-xenial-go_agent
 
   ## Docker Image ##
 
