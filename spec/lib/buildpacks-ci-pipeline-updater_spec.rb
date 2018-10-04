@@ -489,6 +489,8 @@ describe BuildpacksCIPipelineUpdater do
       allow(buildpacks_ci_pipeline_updater).to receive(:update_bosh_lite_pipelines)
       allow(buildpacks_ci_pipeline_updater).to receive(:update_buildpack_pipelines)
       allow(buildpacks_ci_pipeline_updater).to receive(:update_standard_pipelines)
+      allow(buildpacks_ci_pipeline_updater).to receive(:update_cnb_buildpack_pipelines)
+      allow(buildpacks_ci_pipeline_updater).to receive(:update_rootfs_pipelines)
     end
 
     context 'there is a template argument' do
@@ -515,6 +517,18 @@ describe BuildpacksCIPipelineUpdater do
 
     it 'updates standard pipelines' do
       expect(buildpacks_ci_pipeline_updater).to receive(:update_standard_pipelines).with({})
+
+      subject
+    end
+
+    it 'updates the cnb buildpacks pipelines' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:update_cnb_buildpack_pipelines).with({})
+
+      subject
+    end
+
+    it 'updates the rootfs pipelines' do
+      expect(buildpacks_ci_pipeline_updater).to receive(:update_rootfs_pipelines).with({})
 
       subject
     end
