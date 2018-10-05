@@ -27,7 +27,9 @@ class DotnetFrameworkExtractor
     build_output = BuildOutput.new('dotnet-runtime')
     runtime_tar = File.join(@base_dir, "dotnet-runtime.tar.xz")
 
-    write_runtime_file(@sdk_dir)
+    if remove_frameworks
+      write_runtime_file(@sdk_dir)
+    end
 
     version = extract_framework_dep(@sdk_dir, runtime_tar, %w(Microsoft.NETCore.App), remove_frameworks)
 
@@ -46,19 +48,14 @@ class DotnetFrameworkExtractor
   private
 
   def write_runtime_file(sdk_dir)
-    runtime_file_path = ''
     Dir.chdir(sdk_dir) do
-      path = File.join("shared", "Microsoft.NETCore.App")
-      version = Dir[File.join(path, "*")].map{ |version_path| Pathname.new(version_path).basename.to_s }
-      raise " multiple Microsoft.NETCore.App versions in SDK" if version.size > 1
-      raise " no Microsoft.NETCore.App versions in SDK" unless version.any?
+      runtime_glob = File.join("shared", "Microsoft.NETCore.App", "*")
+      version = Pathname.new(Dir[runtime_glob].first()).basename.to_s
 
       File.open("RuntimeVersion.txt", "w") do |f|
-        f.write(version.first)
-        runtime_file_path = f.path
+        f.write(version)
       end
     end
-    runtime_file_path
   end
 
   def extract_framework_dep(sdk_dir, tar, package_names, remove_frameworks)

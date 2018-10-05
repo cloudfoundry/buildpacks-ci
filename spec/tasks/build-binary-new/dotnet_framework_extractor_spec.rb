@@ -63,11 +63,15 @@ describe 'DotnetFrameworkExtractor' do
 
     it 'should extract and remove the Microsoft.AspNetCore.All and Microsoft.AspNetCore.App metapackages when told to remove frameworks' do
       expect(FileUtils).to receive(:rm_rf).with(%w(shared/Microsoft.AspNetCore.App shared/Microsoft.AspNetCore.All))
+      expect(subject).not_to receive(:write_runtime_file)  # No file written for aspnetcore
+
       subject.extract_aspnetcore(true)
     end
 
     it 'should extract and keep the Microsoft.AspNetCore.All and Microsoft.AspNetCore.App metapackages when told to keep frameworks' do
-      expect(FileUtils).to_not receive(:rm_rf)
+      expect(FileUtils).not_to receive(:rm_rf)
+      expect(subject).not_to receive(:write_runtime_file)
+
       subject.extract_aspnetcore(false)
     end
   end
@@ -103,24 +107,16 @@ describe 'DotnetFrameworkExtractor' do
 
     it 'should extract and remove the Microsoft.NETCore.App when told to remove frameworks' do
       expect(FileUtils).to receive(:rm_rf).with(%w(shared/Microsoft.NETCore.App)).and_return(true)
+      expect(subject).to receive(:write_runtime_file).with(sdk_dir)
+
       subject.extract_runtime(true)
     end
 
     it 'should extract and keep the Microsoft.NETCore.App when told to keep frameworks' do
       expect(FileUtils).not_to receive(:rm_rf).with(%w(shared/Microsoft.NETCore.App))
+      expect(subject).not_to receive(:write_runtime_file)
+
       subject.extract_runtime(false)
-    end
-
-    it 'should call write runtime file with the sdk path as its argument' do
-      expect(subject).to receive(:write_runtime_file).with(sdk_dir)
-      subject.extract_runtime(true)
-    end
-
-    it 'should write a file RuntimeVersion.txt that contains the Microsoft.NETCore.App version', focus: true do
-      expected_write_location = File.join(sdk_dir, 'RuntimeVersion.txt')
-      subject.extract_runtime(true)
-      expect(File.file?(expected_write_location)).to be true
-      expect(File.read(expected_write_location)).to eq '3.1.3'
     end
   end
 end
