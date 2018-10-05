@@ -24,15 +24,16 @@ class UsnReleaseNotes
   end
 
   def release_note_text
-    cves      = @doc.css('#references + ul > li > a[href*="cve/CVE"]')
+    cves = @doc.css('#references + ul > li > a[href*="cve/CVE"]')
+    lps  = @doc.css('#references + ul > li > a[href*="launchpad"]')
 
-    raise 'Could not find CVE references for release notes' if cves.empty?
+    raise 'Could not find CVE or LP references for release notes' if (cves.empty? && lps.empty?)
 
     notes = "[#{usn_id}](#{usn_url}) #{usn_title}:\n"
 
     cves.each do |cve|
-      cve_id  = cve.text
-      cve_uri = cve['href']
+      cve_id          = cve.text
+      cve_uri         = cve['href']
       cve_description = ''
       begin
         cve_element = Nokogiri::HTML(open(cve_uri, :allow_redirections => :safe).read).css('#container > div:contains("Description") > div.value').first
@@ -45,6 +46,24 @@ class UsnReleaseNotes
       end
 
       notes += "* [#{cve_id}](#{cve_uri}): #{cve_description}\n"
+    end
+
+    lps.each do |lp|
+      lp_id          = lp.text
+      lp_uri         = lp['href']
+      lp_description = ''
+
+      begin
+        lp_element = Nokogiri::HTML(open(lp_uri, :allow_redirections => :safe).read).css('#edit-title > span').first
+
+        lp_description = lp_element.children.map do |child|
+          child.text.strip if child.text?
+        end.compact.join(" ")
+      rescue
+        lp_description = 'Could not get description'
+      end
+
+      notes += "* [#{lp_id}](#{lp_uri}): #{lp_description}\n"
     end
 
     notes
