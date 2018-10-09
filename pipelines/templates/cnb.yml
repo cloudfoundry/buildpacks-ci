@@ -1,4 +1,3 @@
-<% v3_buildpacks = %w(nodejs npm) %>
 <% cnb_images = %w(run build) %>
 <% launchable_buildpacks = %w() %>
 ---
@@ -11,16 +10,14 @@ resource_types:
 resources: ############################################################################################################
   ## Git ##
 
-<% if v3_buildpacks.include? language %>
-  - name: buildpack-develop
+  - name: buildpack-master
     type: git
     webhook_token: ob0aigh3
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-cnb.git
       private_key: {{<%= language %>-cnb-private-key}}
-      branch: develop
+      branch: master
       ignore_paths:
-        - VERSION
         - CHANGELOG
   - name: buildpacks-ci
     type: git
@@ -51,7 +48,7 @@ resources: #####################################################################
 <% end %>
 
 jobs: ################################################################################################################
-  - name: specs-unit-develop
+  - name: specs-unit
     serial: true
     public: false
     plan:
@@ -59,7 +56,7 @@ jobs: ##########################################################################
         - aggregate:
           - get: buildpacks-ci
           - get: buildpack
-            resource: buildpack-develop
+            resource: buildpack-master
             trigger: true
   <% cnb_images.each do |image_type| %>
           - get: cnb-<%= image_type %>-image
@@ -73,17 +70,17 @@ jobs: ##########################################################################
 
 
 <% if launchable_buildpacks.include?(language) %>
-  - name: specs-v3-acceptance-develop
+  - name: specs-v3-acceptance
     serial: true
     public: false
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-develop
+          resource: buildpack-master
           trigger: true
           passed:
-          - specs-unit-develop
+          - specs-unit
         - get: pack
           resource: pack
           trigger: true
@@ -102,22 +99,22 @@ jobs: ##########################################################################
         privileged: true
 <% end %>
 
-  - name: specs-v3-integration-develop
+  - name: specs-v3-integration
     serial: true
     public: false
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-develop
+          resource: buildpack-master
           trigger: true
           passed:
-          - specs-unit-develop
+          - specs-unit
 <% cnb_images.each do |image_type| %>
         - get: cnb-<%= image_type %>-image
           trigger: true
           passed:
-          - specs-unit-develop
+          - specs-unit
           params:
             skip_download: true
 <% end %>
@@ -129,4 +126,3 @@ jobs: ##########################################################################
           CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
           CNB_RUN_IMAGE: packs/run # TODO: change to `cfbuildpacks/cflinuxfs3-cnb-experimental:run` when pack cli can use it
         privileged: true
-<% end %>
