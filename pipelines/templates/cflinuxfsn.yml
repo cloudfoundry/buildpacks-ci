@@ -718,7 +718,7 @@ jobs: ##########################################################################
             params:
               skip_download: true
               import_file: docker-s3/<%= rootfs_name %>.tar.gz
-              tag_file: version/number
+              tag: version/number
               tag_as_latest: true
         on_failure:
           put: failure-alert
