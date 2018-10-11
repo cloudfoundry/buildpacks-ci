@@ -218,7 +218,8 @@ resources:
     uri: git@github.com:cloudfoundry/<%= buildpack %>-buildpack.git
     private_key: {{<%= buildpack %>-private-key}}
     branch: master
-    tag_filter: v*
+    # TODO: UNCOMMENT LINE BELOW ONCE WE HAVE A RELEASE
+    # tag_filter: v*
 <% else %>
 - name: <%= buildpack %>-buildpack
   type: git
