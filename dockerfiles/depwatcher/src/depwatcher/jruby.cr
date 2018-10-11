@@ -16,7 +16,7 @@ module Depwatcher
     end
 
     private def get_versions() : Array(String)
-      response = client.get("http://jruby.org/download").body
+      response = client.get("https://www.jruby.org/download").body
       doc = XML.parse_html(response)
       elements = doc.xpath_nodes("//a[starts-with(@href,'https://repo1.maven.org/maven2/org/jruby/jruby-dist/')]")
       elements.map { |e|
