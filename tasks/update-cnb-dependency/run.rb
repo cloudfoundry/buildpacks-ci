@@ -16,8 +16,8 @@ buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
 buildpack_toml = TOML.load_file('buildpack/buildpack.toml')
-buildpack_toml_master = begin
-                          TOML.load_file('buildpack-master/buildpack.toml')
+buildpack_toml_latest_released = begin
+                          TOML.load_file('buildpack-latest-released/buildpack.toml')
                         rescue
                           { 'metadata' => {'dependencies' => []} }
                         end
@@ -64,7 +64,7 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
       ENV['VERSION_LINE'],
       removal_strategy,
       buildpack_toml['metadata']['dependencies'],
-      buildpack_toml_master['metadata']['dependencies']
+      buildpack_toml_latest_released['metadata']['dependencies']
   ).switch
 
   new_versions = buildpack_toml['metadata']['dependencies']

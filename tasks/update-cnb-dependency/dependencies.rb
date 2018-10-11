@@ -1,5 +1,5 @@
 class Dependencies
-  def initialize(dep, line, removal_strategy, dependencies, master_dependencies)
+  def initialize(dep, line, removal_strategy, dependencies, dependencies_latest_released)
     @dep = dep
     @line = line
     @removal_strategy = removal_strategy
@@ -7,7 +7,7 @@ class Dependencies
     @matching_deps = dependencies.select do |d|
       same_dependency_line?(d['stacks'], d['version'], d['id'])
     end
-    @master_dependencies = master_dependencies
+    @dependencies_latest_released = dependencies_latest_released
   end
 
   def switch
@@ -19,8 +19,8 @@ class Dependencies
       out = @dependencies + [@dep]
     # adding one newer than all existing versions
     elsif latest?
-      # keep deps (on master) and add this new one
-      out = ((@dependencies - @matching_deps) + [@dep] + master_dependencies)
+      # keep deps (from latest released buildpack) and add this new one
+      out = ((@dependencies - @matching_deps) + [@dep] + dependencies_latest_released)
     else
       # if not newer, don't do anything
       return @dependencies
@@ -77,9 +77,9 @@ class Dependencies
     end
   end
 
-  def master_dependencies
-    return [] unless @removal_strategy == 'keep_master'
-    dep = @master_dependencies.select do |d|
+  def dependencies_latest_released
+    return [] unless @removal_strategy == 'keep_latest_released'
+    dep = @dependencies_latest_released.select do |d|
       same_dependency_line?(d['stacks'], d['version'], d['id'])
     end.sort_by {|d| Gem::Version.new(d['version']) rescue d['version']}.last
     dep ? [dep] : []
