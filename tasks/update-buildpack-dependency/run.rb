@@ -13,7 +13,7 @@ buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
 manifest = YAML.load_file('buildpack/manifest.yml')
-manifest_master = YAML.load_file('buildpack-master/manifest.yml') # rescue { 'dependencies' => [] }
+manifest_latest_released = YAML.load_file('buildpack-latest-released/manifest.yml') # rescue { 'dependencies' => [] }
 
 data = JSON.parse(open('source/data.json').read)
 source_name = data.dig('source', 'name')
@@ -58,7 +58,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
       ENV['VERSION_LINE'],
       removal_strategy,
       manifest['dependencies'],
-      manifest_master['dependencies']
+      manifest_latest_released['dependencies']
   ).switch
 
   new_versions = manifest['dependencies']
