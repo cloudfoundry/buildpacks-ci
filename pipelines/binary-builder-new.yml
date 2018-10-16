@@ -26,14 +26,9 @@
                         source_type: 'github_releases',
                         source_params: ['repo: golang/dep', 'fetch_source: true']},
 
-  'dotnet-sdk1':      { buildpacks: {
-                          'dotnet-core' => { lines: ["1.0.X", "1.1.X" ], removal_strategy: 'keep_all' } },
-                        source_type: 'dotnet-sdk',
-                        source_params: ['tag_regex: ^v1\.\d+\.\d+$'] },
-
   'dotnet-sdk':       { buildpacks: {
-                          'dotnet-core' => { lines: ["2.0.X", "2.1.3X", "2.1.4X"], removal_strategy: 'keep_all' } },
-                        source_params: ['tag_regex: ^v2\.\d+\.\d+\+dependencies$'] },
+                          'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.3X", "2.1.4X"], removal_strategy: 'keep_all' } },
+                        source_params: ['tag_regex: ^v\d+\.\d+\.\d+\+dependencies$'] },
 
   'dotnet-runtime':   { buildpacks: {
                           'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X"], removal_strategy: 'keep_all' } } },
@@ -139,7 +134,7 @@ deps_extracted_from_dotnet_sdk = ['dotnet-runtime', 'dotnet-aspnetcore']
 skip_build = [
   { dep: 'python', line: '3.7.X', stack: 'cflinuxfs2' },
   { dep: 'php', line: '5.6.X', stack: 'cflinuxfs3'},
-  { dep: 'dotnet-sdk1', line: '1.0.X', stack: 'cflinuxfs3' },
+  { dep: 'dotnet-sdk', line: '1.0.X', stack: 'cflinuxfs3' },
 ]
 
 def validate_dependencies(deps)
@@ -385,7 +380,7 @@ jobs:
           resource: buildpacks-bucket-<%= dep_name %>
           params:
             file: <%= stack %>-artifacts/<%= dep_name.to_s == "nginx-static" ? "nginx" : dep_name %>*
-        <% if dep_name.to_s.start_with?('dotnet-sdk') %>
+        <% if dep_name.to_s == 'dotnet-sdk' %>
         - put: buildpacks-bucket-dotnet-runtime-<%= stack %>
           resource: buildpacks-bucket-dotnet-runtime
           params:
