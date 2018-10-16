@@ -3,6 +3,7 @@ require 'json'
 require 'yaml'
 require 'tmpdir'
 require_relative './dependencies'
+require_relative './php_manifest'
 
 CFLINUXFS2 = 'cflinuxfs2'
 CFLINUXFS3 = 'cflinuxfs3'
@@ -132,6 +133,7 @@ if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
   php_defaults[varname] = resource_version
   if update_default
     php_defaults['PHP_DEFAULT'] = resource_version
+    manifest['default_versions'] = PHPManifest.update_defaults(manifest, resource_version)
   end
 end
 
