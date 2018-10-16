@@ -185,7 +185,11 @@ module DependencyBuild
     remove_frameworks = major.to_i >= 2 && minor.to_i >= 1
     framework_extractor = DotnetFrameworkExtractor.new(dotnet_dir, stack, source_input, build_input, artifact_output)
     framework_extractor.extract_runtime(remove_frameworks)
-    framework_extractor.extract_aspnetcore(remove_frameworks)
+
+    # There are only separate ASP.net packages for dotnet core 2+
+    if major.to_i >= 2
+      framework_extractor.extract_aspnetcore(remove_frameworks)
+    end
 
     Dir.chdir(dotnet_dir) do
       system('tar', 'Jcf', old_filepath, '.')
