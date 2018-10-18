@@ -52,13 +52,6 @@ resources:
     source:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
-  - name: robots-repo
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-      branch: master
-      paths: [ binary-builds/php*-extensions.yml ]
-      private_key: {{public-buildpacks-ci-robots-private-key}}
   - name: new-releases
     type: git
     source:
@@ -258,7 +251,6 @@ jobs:
         - get: month-start
           trigger: true
         - get: buildpacks-ci
-        - get: robots-repo
       - task: check-for-latest-php-module-versions
         file: buildpacks-ci/tasks/check-for-latest-php-module-versions/task.yml
         params:

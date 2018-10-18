@@ -69,9 +69,9 @@ def url_for_type(name, type)
 end
 
 data = {
-  'PHP5' => YAML.load(open('robots-repo/binary-builds/php-extensions.yml').read),
-  'PHP7' => YAML.load(open('robots-repo/binary-builds/php7-extensions.yml').read),
-  'PHP72' => YAML.load(open('robots-repo/binary-builds/php72-extensions.yml').read)
+  'PHP5' => YAML.load(open('buildpacks-ci/tasks/build-binary-new/php-extensions.yml').read),
+  'PHP7' => YAML.load(open('buildpacks-ci/tasks/build-binary-new/php7-extensions.yml').read),
+  'PHP72' => YAML.load(open('buildpacks-ci/tasks/build-binary-new/php72-extensions.yml').read)
 }
 
 Tuple = Struct.new(:name, :klass)
