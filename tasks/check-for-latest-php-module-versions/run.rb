@@ -33,6 +33,8 @@ end
 
 def url_for_type(name, type)
   case type.gsub(/Recipe$/,'')
+  when 'LibSodium'
+    'https://github.com/jedisct1/libsodium/releases/'
   when 'PHPProtobufPecl'
     'https://github.com/allegro/php-protobuf/releases'
   when 'SuhosinPecl'
