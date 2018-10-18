@@ -1,5 +1,5 @@
 <% cnb_images = %w(run build) %>
-<% launchable_buildpacks = %w() %>
+<% launchable_buildpacks = %w(npm) %>
 ---
 resource_types:
   - name: slack-notification
