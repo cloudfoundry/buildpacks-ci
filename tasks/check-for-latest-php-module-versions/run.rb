@@ -14,7 +14,7 @@ def current_pecl_version(name)
   end.reject do |v|
     Gem::Version.new(v).prerelease? rescue false
   end.sort_by do |v|
-    Gem::Version.new(v) rescue v
+    Gem::Version.new(v)
   end
   versions.last
 end
@@ -22,19 +22,20 @@ end
 def current_github_version(url)
   repo = url.match(%r{^https://github.com/(.*)/releases$})[1]
   data = JSON.parse(open("https://api.github.com/repos/#{repo}/releases").read)
+  # puts data
   data.reject do |d|
     d['prerelease'] || d['draft']
   end.map do |d|
-    d['name'].gsub(/^\D*v/,'').gsub(/^version\s*/i,'').gsub(/\s*stable$/i,'')
+    d['tag_name'].gsub(/^\D*[v\-]/,'').gsub(/^version\s*/i,'').gsub(/\s*stable$/i,'')
   end.sort_by do |v|
-    Gem::Version.new(v) rescue v
+    Gem::Version.new(v)
   end.last
 end
 
 def url_for_type(name, type)
   case type.gsub(/Recipe$/,'')
   when 'LibSodium'
-    'https://github.com/jedisct1/libsodium/releases/'
+    'https://github.com/jedisct1/libsodium/releases'
   when 'PHPProtobufPecl'
     'https://github.com/allegro/php-protobuf/releases'
   when 'SuhosinPecl'
