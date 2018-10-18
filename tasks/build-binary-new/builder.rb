@@ -27,6 +27,9 @@ module DependencyBuild
         end
         Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'pytest-runner')
         Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'setuptools_scm')
+        Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'parver')
+        Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'wheel')
+        Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'invoke')
         Runner.run('tar', 'zcvf', old_file_path, '.')
       end
     end
