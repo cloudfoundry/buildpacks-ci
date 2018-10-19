@@ -51,8 +51,11 @@ describe 'Builder' do
 
           allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
           expect(build_input).to receive(:copy_to_build_output)
+          allow(Sha).to receive(:get_sha_from_text_file)
           expect(Sha).to receive(:get_sha).and_return('some bogus').at_most(1).times
 
+          allow(build_output).to receive(:add_output)
+            .with("#{input.version}-bionic.json", any_args)
           expect(build_output).to receive(:add_output)
             .with("#{input.version}-cflinuxfs2.json",
               {
