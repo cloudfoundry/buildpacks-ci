@@ -10,6 +10,9 @@ CFLINUXFS3 = 'cflinuxfs3'
 ALL_STACKS = [CFLINUXFS2, CFLINUXFS3]
 WINDOWS_STACKS = ['windows2012R2', 'windows2016']
 
+# Stacks we dont want to process (most likely V3 stacks)
+IGNORED_STACKS = ['bionic']
+
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
@@ -35,6 +38,8 @@ builds = {}
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
   stack = %r{#{resource_version}-(.*)\.json$}.match(stack_dependency_build)[1]
+  next if IGNORED_STACKS.include?(stack)
+
   stacks = (stack == 'any-stack') ? ALL_STACKS : [stack]
   stacks = WINDOWS_STACKS if source_name == 'hwc'
   total_stacks = total_stacks | stacks

@@ -5,7 +5,8 @@ require 'tmpdir'
 require_relative './dependencies'
 
 ALL_STACKS = {
-  'cflinuxfs3' => 'org.cloudfoundry.stacks.cflinuxfs3'
+  'cflinuxfs3' => 'org.cloudfoundry.stacks.cflinuxfs3',
+  'bionic' => 'io.buildpacks.stacks.bionic'
 }
 
 V3_DEP_NAMES = {
@@ -34,7 +35,7 @@ raise 'Could not copy buildpack to artifacts' unless $?.success?
 added = []
 removed = []
 rebuilt = []
-total_stacks = ['io.buildpacks.stacks.bionic']
+total_stacks = []
 builds = {}
 
 Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
@@ -52,7 +53,7 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
     'version' => resource_version,
     'uri' => build['url'],
     'sha256' => build['sha256'],
-    'stacks' => [ALL_STACKS[stack], 'io.buildpacks.stacks.bionic']
+    'stacks' => [ALL_STACKS[stack]]
   }
 
   old_versions = buildpack_toml['metadata']['dependencies']
