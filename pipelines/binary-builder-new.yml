@@ -347,6 +347,26 @@ jobs:
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
 
+<% if dep_name.to_s == 'node' %>
+- name: copy-<%=dep_name%>-<%= line %>-bionic
+  plan:
+  - aggregate:
+    - get: buildpacks-ci
+    - get: source
+      resource: source-<%=dep_name%>-<%= line %>
+      trigger: true
+      version: every
+    - get: builds
+  - do:
+    - task: write-bionic-metadata
+      file: buildpacks-ci/tasks/write-bionic-metadata/task.yml
+    - put: bionic-builds-metadata
+      resource: builds
+      params:
+        repository: builds-artifacts
+        rebase: true
+<% end %>
+
 - name: build-<%=dep_name%>-<%= line %>
   serial: true
   public: true
@@ -418,7 +438,9 @@ jobs:
     - get: source
       resource: source-<%=dep_name%>-<%= line %>
       <% unless deps_extracted_from_dotnet_sdk.include?(dep_name.to_s) %>
-      passed: [build-<%=dep_name%>-<%= line %>]
+      <% must_pass = ["build-#{dep_name}-#{line}"] %>
+      <% must_pass.push("copy-#{dep_name}-#{line}-bionic") if bp_name.to_s.include? '-cnb' %>
+      passed: <%= must_pass %>
       <% end %>
       version: every
       trigger: true
