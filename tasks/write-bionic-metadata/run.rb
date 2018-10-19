@@ -16,7 +16,7 @@ build_input.copy_to_build_output
 
 build_output.add_output("#{source_input.version}-bionic.json",
   {
-    sha: get_sha_from_text_file("https://nodejs.org/dist/v#{source_input.version}/SHASUMS256.txt"),
+    sha256: get_sha_from_text_file("https://nodejs.org/dist/v#{source_input.version}/SHASUMS256.txt"),
     url: "https://nodejs.org/dist/v#{source_input.version}/node-v#{source_input.version}-linux-x64.tar.gz"
   }
 )
