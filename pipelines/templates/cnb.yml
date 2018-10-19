@@ -1,5 +1,13 @@
 <% cnb_images = %w(run build) %>
-<% launchable_buildpacks = %w(npm) %>
+<% buildpacks = {
+  'npm' => {
+    'launchable' => true
+  },
+  'nodejs' => {
+
+  }
+}
+%>
 ---
 resource_types:
   - name: slack-notification
@@ -26,7 +34,7 @@ resources: #####################################################################
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
   ## Github Releases ##
-<% if launchable_buildpacks.include?(language) %>
+<% if buildpacks[language]['launchable'] %>
   - name: pack
     type: github-release
     source:
@@ -69,7 +77,7 @@ jobs: ##########################################################################
             file: buildpacks-ci/tasks/run-bp-v3-unit/task.yml
 
 
-<% if launchable_buildpacks.include?(language) %>
+<% if buildpacks[language]['launchable'] %>
   - name: specs-v3-acceptance
     serial: true
     public: false
