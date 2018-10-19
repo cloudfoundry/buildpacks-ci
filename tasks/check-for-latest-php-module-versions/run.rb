@@ -127,6 +127,11 @@ tracker_client = TrackerClient.new(
 tracker_client.post_to_tracker(
   name: 'Build and/or Include new releases: PHP Modules',
   description: description,
-  tasks: ['Check each PHP module for updates', 'Rebuild PHP versions if any module updates', 'Update PHP Buildpack with new PHP versions', 'Copy 7.0 Extensions to 7.2 and remove solr and xdebug'],
+  tasks: [
+    'Check each PHP module for updates and update extension configs (in `buildpacks-ci`)',
+    'Copy 7.0 extension config to 7.2 and remove `solr`, but **keep** `sodium` entries in 7.2 (IDE diff tool might help)',
+    'Rebuild PHP versions if any module updates',
+    'Update PHP Buildpack with new PHP versions',
+  ],
   labels: %w(maintenance php)
 )
