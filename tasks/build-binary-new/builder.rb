@@ -215,10 +215,6 @@ module Sha
     end
     [res, sha]
   end
-
-  def get_sha_from_text_file(url)
-    open(url).read.match(/^(.*) .*linux-x64.tar.gz$/).captures.first.strip
-  end
 end
 
 
@@ -280,27 +276,7 @@ class Builder
         )
       )
 
-    when 'node'
-      binary_builder.build(source_input)
-
-      # We want to add output for the V3 bionic stack so we'll create that here
-      build_output.add_output("#{source_input.version}-bionic.json",
-        {
-          sha: Sha.get_sha_from_text_file("https://nodejs.org/dist/v#{source_input.version}/SHASUMS256.txt"),
-          url: "https://nodejs.org/dist/v#{source_input.version}/node-v#{source_input.version}-linux-x64.tar.gz"
-        }
-      )
-
-      out_data.merge!(
-        artifact_output.move_dependency(
-          source_input.name,
-          "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}-linux-x64.tgz",
-          "#{source_input.name}-#{source_input.version}-linux-x64-#{stack}",
-          'tgz'
-        )
-      )
-
-    when 'httpd'
+    when 'node', 'httpd'
       binary_builder.build(source_input)
       out_data.merge!(
         artifact_output.move_dependency(
