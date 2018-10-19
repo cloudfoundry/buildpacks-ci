@@ -106,6 +106,10 @@ extensions:
   version: 2.0.2
   md5: 507c30184fde736e924cee20c56df061
   klass: PeclRecipe
+- name: xdebug
+  version: 2.6.1
+  md5: 35cc0f2e8b7d40556a9ad9afd9c49aee
+  klass: PeclRecipe
 - name: yaf
   version: 3.0.7
   md5: d09cdd5b04a25a3fd5a44d3507653e88
