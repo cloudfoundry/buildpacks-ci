@@ -478,6 +478,9 @@ groups:
     <% unless deps_extracted_from_dotnet_sdk.include?(dep_name.to_s) %>
     - create-<%=dep_name%>-<%= line %>-story
     - finish-<%=dep_name%>-<%= line %>-story
+    <% if dep_name.to_s == 'node' %>
+    - copy-<%=dep_name%>-<%= line %>-bionic
+    <% end %>
     - build-<%=dep_name%>-<%= line %>
     <% end %>
     <% end %>
@@ -502,6 +505,9 @@ groups:
     <% unless deps_extracted_from_dotnet_sdk.include?(dep_name.to_s) %>
     - create-<%=dep_name%>-<%= line %>-story
     - finish-<%=dep_name%>-<%= line %>-story
+    <% if dep_name.to_s == 'node' %>
+    - copy-<%=dep_name%>-<%= line %>-bionic
+    <% end %>
     - build-<%=dep_name%>-<%= line %>
     <% end %>
     <% end %>
