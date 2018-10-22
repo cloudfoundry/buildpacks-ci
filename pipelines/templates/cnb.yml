@@ -34,7 +34,7 @@ resources: #####################################################################
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: {{buildpacks-ci-git-uri-public-branch}}
+      branch: WIP-#160852974-separate-products
 
   ## Github Releases ##
 <% if buildpacks[language]['launchable'] %>

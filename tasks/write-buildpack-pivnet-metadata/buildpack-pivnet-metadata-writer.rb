@@ -6,12 +6,13 @@ class BuildpackPivnetMetadataWriter
 
   attr_reader :buildpack, :output_dir, :buildpack_dir, :cached_buildpack_filenames, :recent_changes_filename
 
-  def initialize(buildpack, output_dir, buildpack_dir, cached_buildpack_filenames, recent_changes_filename)
+  def initialize(buildpack, output_dir, buildpack_dir, cached_buildpack_filenames, recent_changes_filename, lts_product)
     @buildpack = buildpack
     @output_dir = output_dir
     @buildpack_dir = buildpack_dir
     @cached_buildpack_filenames = cached_buildpack_filenames
     @recent_changes_filename = recent_changes_filename
+    @lts_product = lts_product
   end
 
   def get_version
@@ -21,11 +22,13 @@ class BuildpackPivnetMetadataWriter
   end
 
   def run!
-    metadata_yml = File.join(output_dir, "#{buildpack}.yml")
+    metadata_file_name = @lts_product == "true" ? "#{buildpack}-lts.yml" : "#{buildpack}.yml"
+    metadata_yml = File.join(output_dir, metadata_file_name)
+    version = @lts_product == "true" ? product_version : get_version
 
     metadata = {}
     metadata['release'] = {
-        'version' => product_version,
+        'version' => version,
         'release_type' => release_type,
         'eula_slug' => eula_slug,
         'release_notes_url' => release_notes_url,
@@ -74,7 +77,7 @@ def release_notes_url
 end
 
 def availability
-  "All Users"
+  @lts_product == "true" ? "All Users" : "Admins Only"
 end
 
 def eccn
