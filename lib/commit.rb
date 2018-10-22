@@ -1,6 +1,8 @@
 require 'json'
 require 'open3'
 
+STORY_ID_ANYWHERE = /\s*\[#(\d+)\]\s*/
+
 class Commit
   attr_reader :commit, :subject, :body, :stories
   def initialize(hash)
@@ -17,8 +19,9 @@ class Commit
 
     hash['body'].to_s.split(/\n/).each do |line|
       case line
-      when /^Signed-off-by:/
-      when /^\s*\[#(\d+)\]\s*$/
+      when /^Signed-off-by:|^Co-authored-by:/
+      when STORY_ID_ANYWHERE
+        @body << line.gsub!(STORY_ID_ANYWHERE, '')
         @stories << "(https://www.pivotaltracker.com/story/show/#{$1})"
       else
         @body << line
