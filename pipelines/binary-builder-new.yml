@@ -356,6 +356,7 @@ jobs:
       resource: source-<%=dep_name%>-<%= line %>
       trigger: true
       version: every
+      passed: [ create-<%=dep_name%>-<%= line %>-story ]
     - get: builds
   - do:
     - task: write-bionic-metadata
