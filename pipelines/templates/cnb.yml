@@ -3,6 +3,9 @@
   'npm' => {
     'launchable' => true
   },
+  'yarn' => {
+    'launchable' => true
+  },
   'nodejs' => {
 
   }

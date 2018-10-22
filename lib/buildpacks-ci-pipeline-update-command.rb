@@ -18,6 +18,7 @@ class BuildpacksCIPipelineUpdateCommand
       buildpacks_configuration.concourse_private_filename,
       buildpacks_configuration.deployments_buildpacks_filename,
       buildpacks_configuration.repos_private_keys_filename,
+      buildpacks_configuration.cnb_repos_private_keys_filename,
       buildpacks_configuration.git_repos_private_keys_filename,
       buildpacks_configuration.git_repos_private_keys_two_filename,
       buildpacks_configuration.git_repos_private_keys_three_filename,
