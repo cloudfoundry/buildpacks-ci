@@ -77,7 +77,7 @@ def release_notes_url
 end
 
 def availability
-  "All Users"
+  @lts_product == 'true' ? "All Users" : "Admins Only"
 end
 
 def eccn

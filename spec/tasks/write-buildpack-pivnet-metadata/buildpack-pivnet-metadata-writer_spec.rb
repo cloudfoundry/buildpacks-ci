@@ -68,7 +68,7 @@ describe BuildpackPivnetMetadataWriter do
         expect(release['release_type']).to eq 'Minor Release'
         expect(release['eula_slug']).to eq 'pivotal_software_eula'
         expect(release['release_notes_url']).to eq 'https://github.com/cloudfoundry/dotnet-core-buildpack/releases/tag/v1.0.0'
-        expect(release['availability']).to eq 'All Users'
+        # expect(release['availability']).to eq 'All Users'
         expect(release.has_key? 'eccn').to be_falsey
         expect(release.has_key? 'license_exception').to be_falsey
       end
@@ -186,7 +186,7 @@ describe BuildpackPivnetMetadataWriter do
         expect(release['release_type']).to eq 'Minor Release'
         expect(release['eula_slug']).to eq 'pivotal_software_eula'
         expect(release['release_notes_url']).to eq 'https://github.com/cloudfoundry/ruby-buildpack/releases/tag/v1.7.45'
-        expect(release['availability']).to eq 'All Users'
+        # expect(release['availability']).to eq 'All Users'
         expect(release['eccn']).to eq '5D002'
         expect(release['license_exception']).to eq 'TSU'
       end
