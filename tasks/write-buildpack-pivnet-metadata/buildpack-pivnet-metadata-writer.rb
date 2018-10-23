@@ -77,7 +77,8 @@ def release_notes_url
 end
 
 def availability
-  @lts_product == 'true' ? "All Users" : "Admins Only"
+  (@lts_product != 'true' || buildpack == 'hwc') ? "Admins Only" : "All Users"
+  # "All Users"
 end
 
 def eccn
