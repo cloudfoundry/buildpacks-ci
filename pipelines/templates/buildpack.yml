@@ -22,9 +22,9 @@
   'hwc' => {
     'stacks' => %w(windows2012R2 windows2016),
     'skip_brats' => true,
-    'skip_pivnet_publish' => true,
     'non_lts' => true,
-    'any_stack' => true
+    'any_stack' => true,
+    'product_slug' => 'hwc-buildpack'
   },
   'multi' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
@@ -257,8 +257,8 @@ resources: #####################################################################
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
-<% unless language.to_s == 'hwc' %>
 <% buildpacks[language]['stacks'].each do |stack| %>
+  <% unless language.to_s == 'hwc' %>
   - name: pivotal-buildpack-<%= stack %>
     type: s3
     source:
@@ -266,6 +266,7 @@ resources: #####################################################################
       regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack<%= if stack == 'any' then '' else "-#{stack}" end %>-v(.*).zip
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+  <% end %>
 
   - name: pivotal-buildpack-cached-<%= stack %>
     type: s3
@@ -275,7 +276,7 @@ resources: #####################################################################
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 <% end %>
-<% end %>
+
 <% if buildpacks[language]['any_stack'] %>
   - name: pivotal-buildpack-cached-any
     type: s3
@@ -392,8 +393,8 @@ jobs: ##########################################################################
         - get: pivotal-buildpack
       - do:
         - aggregate:
-<% bucket_stacks = language.to_s == 'hwc' ? ['any'] : buildpacks[language]['stacks']
-   bucket_stacks = bucket_stacks + ['any'] if language.to_s == 'binary'
+<% bucket_stacks = buildpacks[language]['stacks']
+   bucket_stacks = bucket_stacks + ['any'] if (language.to_s == 'binary' || language.to_s == 'hwc')
    bucket_stacks.each do |stack| %> #change bucket_stacks to buildpacks[language]['stacks'] when removing any_stack
           - do:
             - task: detect-and-upload-<%= stack %>
@@ -711,11 +712,11 @@ jobs: ##########################################################################
           resource: pivotal-buildpack-cached
           passed: [ ship-it ]
           trigger: true
-        <% pivnet_stacks = ''
+        <% pivnet_stacks = []
           if language.to_s == 'binary' || language.to_s == 'hwc'
             pivnet_stacks = ['any']
           else
-            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to buildpacks[language]['stacks'] when PWS has cflinuxfs3
+            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to buildpacks[language]['stacks'] when removing any_stack
           end
           pivnet_stacks.each_with_index do |stack, ndx| %>
         - get: pivotal-buildpacks-stack<%= ndx %>
@@ -751,11 +752,11 @@ jobs: ##########################################################################
         - get: pivnet-buildpack-metadata-lts
           passed: [ write-pivnet-metadata-for-lts-product ]
           trigger: true
-        <% pivnet_stacks = ''
+        <% pivnet_stacks = []
           if language.to_s == 'binary' || language.to_s == 'hwc'
             pivnet_stacks = ['any']
           else
-            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to buildpacks[language]['stacks'] when PWS has cflinuxfs3
+            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to buildpacks[language]['stacks'] when removing any_stack
           end
           pivnet_stacks.each_with_index do |stack, ndx| %>
         - get: pivotal-buildpacks-stack<%= ndx %>
