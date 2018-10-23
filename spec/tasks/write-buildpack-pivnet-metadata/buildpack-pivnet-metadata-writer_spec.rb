@@ -101,12 +101,7 @@ describe BuildpackPivnetMetadataWriter do
       before {allow(subject).to receive(:get_version).and_return(version)}
 
       it 'capitalizes filenames correctly' do
-        subject.run!
-        release = yaml_contents['release']
-        product_file = yaml_contents['product_files'].first
-
-        expect(release['version']).to eq '1.23.45'
-        expect(product_file['upload_as']).to eq 'PHP Buildpack (offline)'
+        expect(formatted_name).to eq('PHP')
       end
     end
 
@@ -118,12 +113,7 @@ describe BuildpackPivnetMetadataWriter do
       before {allow(subject).to receive(:get_version).and_return(version)}
 
       it 'capitalizes filenames correctly' do
-        subject.run!
-        release = yaml_contents['release']
-        product_file = yaml_contents['product_files'].first
-
-        expect(release['version']).to eq '6.78.99'
-        expect(product_file['upload_as']).to eq 'NodeJS Buildpack (offline)'
+        expect(formatted_name).to eq('NodeJS')
       end
     end
 
@@ -136,12 +126,20 @@ describe BuildpackPivnetMetadataWriter do
       before {allow(subject).to receive(:get_version).and_return(version)}
 
       it 'capitalizes filenames correctly' do
-        subject.run!
-        release = yaml_contents['release']
-        product_file = yaml_contents['product_files'].first
+        expect(formatted_name).to eq('NGINX')
+      end
+    end
 
-        expect(release['version']).to eq '6.78.99'
-        expect(product_file['upload_as']).to eq 'NGINX Buildpack cflinuxfs2 (offline)'
+    context 'the buildpack is hwc' do
+      let(:version) {'6.78.99'}
+      let(:buildpack) {'hwc'}
+      let(:recent_changes) {'gwc security fixes'}
+      let(:cached_buildpack_filenames) {["pivotal-buildpacks-stack0/#{buildpack}_buildpack-cached-cflinuxfs2-v#{version}+#{timestamp}.zip"]}
+
+      before {allow(subject).to receive(:get_version).and_return(version)}
+
+      it 'capitalizes filenames correctly' do
+        expect(formatted_name).to eq('HWC')
       end
     end
 
