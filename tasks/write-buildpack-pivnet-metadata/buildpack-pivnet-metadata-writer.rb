@@ -28,11 +28,11 @@ class BuildpackPivnetMetadataWriter
 
     metadata = {}
     metadata['release'] = {
-        'version' => version,
-        'release_type' => release_type,
-        'eula_slug' => eula_slug,
-        'release_notes_url' => release_notes_url,
-        'availability' => availability
+      'version' => version,
+      'release_type' => release_type,
+      'eula_slug' => eula_slug,
+      'release_notes_url' => release_notes_url,
+      'availability' => availability
     }
 
     if buildpack != 'dotnet-core'
@@ -44,10 +44,10 @@ class BuildpackPivnetMetadataWriter
     cached_buildpack_filenames.each do |filename|
       stack = filename.match(/.*_buildpack-cached-?(.*)?-v.*.zip/)[1]
       metadata['product_files'].push({
-                                         'file' => filename,
-                                         'upload_as' => display_name(stack),
-                                         'description' => description
-                                     })
+        'file' => filename,
+        'upload_as' => display_name(stack),
+        'description' => description
+      })
     end
 
     puts "Writing metadata to #{metadata_yml}"
@@ -55,6 +55,22 @@ class BuildpackPivnetMetadataWriter
     puts "\n\n"
 
     File.write(metadata_yml, metadata.to_yaml)
+  end
+end
+
+def formatted_name
+  if buildpack == "dotnet-core"
+    ".NET Core"
+  elsif buildpack == 'php'
+    "PHP"
+  elsif buildpack == 'nodejs'
+    "NodeJS"
+  elsif buildpack == 'nginx'
+    "NGINX"
+  elsif buildpack == 'hwc'
+    "HWC"
+  else
+    "#{buildpack.capitalize}"
   end
 end
 
@@ -99,18 +115,4 @@ end
 
 def description
   File.read(recent_changes_filename)
-end
-
-def formatted_name
-  if buildpack == "dotnet-core"
-    ".NET Core"
-  elsif buildpack == 'php'
-    "PHP"
-  elsif buildpack == 'nodejs'
-    "NodeJS"
-  elsif buildpack == 'nginx'
-    "NGINX"
-  else
-    "#{buildpack.capitalize}"
-  end
 end
