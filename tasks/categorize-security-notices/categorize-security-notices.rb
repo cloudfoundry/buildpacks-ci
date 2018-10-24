@@ -37,7 +37,7 @@ class CategorizeSecurityNotices
     exp =
         case @stack
         when 'cflinuxfs2'
-          Regexp.new('\*\*14.04 Packages:\*\*\n(.*?)\n((\*.*Packages)|\Z)', Regexp::MULTILINE)
+          Regexp.new('\*\*14.04 Packages:\*\*\n(.*?)((\n\*\*.*Packages)|\Z)', Regexp::MULTILINE)
         when 'cflinuxfs3'
           Regexp.new('\*\*18.04 Packages:\*\*\n(.*?)\Z', Regexp::MULTILINE)
         else
