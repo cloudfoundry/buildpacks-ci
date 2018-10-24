@@ -4,7 +4,7 @@ require 'yaml'
 
 class BuildpackPivnetMetadataWriter
 
-  attr_reader :buildpack, :output_dir, :buildpack_dir, :cached_buildpack_filenames, :recent_changes_filename
+  attr_reader :buildpack, :output_dir, :buildpack_dir, :cached_buildpack_filenames, :recent_changes_filename, :lts_product
 
   def initialize(buildpack, output_dir, buildpack_dir, cached_buildpack_filenames, recent_changes_filename, lts_product)
     @buildpack = buildpack
@@ -22,9 +22,9 @@ class BuildpackPivnetMetadataWriter
   end
 
   def run!
-    metadata_file_name = @lts_product == "true" ? "#{buildpack}-lts.yml" : "#{buildpack}.yml"
+    metadata_file_name = lts_product == "true" ? "#{buildpack}-lts.yml" : "#{buildpack}.yml"
     metadata_yml = File.join(output_dir, metadata_file_name)
-    version = @lts_product == "true" ? product_version : get_version
+    version = lts_product == "true" ? product_version : get_version
 
     metadata = {}
     metadata['release'] = {
@@ -93,7 +93,7 @@ def release_notes_url
 end
 
 def availability
-  (@lts_product != 'true' || buildpack == 'hwc') ? "Admins Only" : "All Users"
+  (lts_product != 'true' || buildpack == 'hwc') ? "Admins Only" : "All Users"
   # "All Users"
 end
 
@@ -108,6 +108,8 @@ end
 def display_name(stack = '')
   if !stack.empty?
     "#{formatted_name} Buildpack #{stack} (offline)"
+  elsif lts_product != 'true' && (buildpack == 'hwc' || buildpack == 'binary')
+    "#{formatted_name} Buildpack for PAS 2.2 (offline)"
   else
     "#{formatted_name} Buildpack (offline)"
   end

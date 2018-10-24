@@ -779,7 +779,13 @@ jobs: ##########################################################################
         resource: pivotal-buildpack-cached
         passed: [ ship-it ]
         trigger: true
-      <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
+      <%
+      all_pivnet_stacks = buildpacks[language]['stacks']
+      if language.to_s == 'hwc' || language.to_s == 'binary'
+        all_pivnet_stacks = all_pivnet_stacks + ['any']
+      end
+      all_pivnet_stacks.each_with_index do |stack, ndx|
+      %>
       - get: pivotal-buildpacks-stack<%= ndx %>
         resource: pivotal-buildpack-cached-<%= stack %>
       <% end %>
@@ -813,7 +819,13 @@ jobs: ##########################################################################
       - get: pivnet-buildpack-metadata
         passed: [ write-pivnet-metadata ]
         trigger: true
-      <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
+      <%
+      pivnet_stacks = buildpacks[language]['stacks']
+      if language.to_s == 'hwc' || language.to_s == 'binary'
+        pivnet_stacks = pivnet_stacks + ['any']
+      end
+      pivnet_stacks.each_with_index do |stack, ndx|
+      %>
       - get: pivotal-buildpacks-stack<%= ndx %>
         resource: pivotal-buildpack-cached-<%= stack %>
       <% end %>
