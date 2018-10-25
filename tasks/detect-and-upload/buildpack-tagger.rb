@@ -19,13 +19,16 @@ class BuildpackTagger
       existing_tags = Octokit.tags("#{git_repo_org}/#{buildpack_name}").map(&:name)
       puts "Existing tags: #{existing_tags}"
 
+      Dir.mkdir("../buildpack-artifacts/uncached")
+      Dir.mkdir("../buildpack-artifacts/cached")
+
       if existing_tags.include? tag_to_add
         puts "Tag #{tag_to_add} already exists"
         uncached_buildpack = Dir["../pivotal-buildpack/*.zip"].first
         cached_buildpack = Dir["../pivotal-buildpack-cached/*.zip"].first
 
-        output_uncached = File.join('..', 'buildpack-artifacts', File.basename(uncached_buildpack))
-        output_cached = File.join('..', 'buildpack-artifacts', File.basename(cached_buildpack))
+        output_uncached = File.join('..', 'buildpack-artifacts', 'uncached', File.basename(uncached_buildpack))
+        output_cached = File.join('..', 'buildpack-artifacts', 'cached', File.basename(cached_buildpack))
 
         FileUtils.mv(uncached_buildpack, output_uncached)
         FileUtils.mv(cached_buildpack, output_cached)
@@ -58,8 +61,6 @@ class BuildpackTagger
 
         timestamp = `date +%s`.strip
 
-        Dir.mkdir("../buildpack-artifacts/uncached")
-        Dir.mkdir("../buildpack-artifacts/cached")
         Dir["*.zip"].map do |filename|
           filename.match(/(.*)_buildpack(-cached)?.*-v(.*).zip/) do |match|
             language = match[1]

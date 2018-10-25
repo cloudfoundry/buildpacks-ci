@@ -5,11 +5,11 @@ require 'fileutils'
 require_relative '../../../tasks/detect-and-upload/buildpack-tagger'
 
 describe BuildpackTagger do
-  let(:task_dir) { Dir.mktmpdir }
-  let(:old_version)    { '3.3.3' }
-  let(:old_timestamp)  {'12345'}
-  let(:git_tags)       { [double(name: 'v1.1.1'), double(name: 'v2.2.2'), double(name: 'v3.3.3')] }
-  let(:git_repo_org)   {'some-sort-of-org'}
+  let(:task_dir) {Dir.mktmpdir}
+  let(:old_version) {'3.3.3'}
+  let(:old_timestamp) {'12345'}
+  let(:git_tags) {[double(name: 'v1.1.1'), double(name: 'v2.2.2'), double(name: 'v3.3.3')]}
+  let(:git_repo_org) {'some-sort-of-org'}
   let(:buildpack_name) {'testlang'}
   let(:buildpack_package_command) do
     <<~EOF
@@ -22,7 +22,7 @@ describe BuildpackTagger do
        bundle exec buildpack-packager --cached --stack=some-stack
        echo "stack: some-stack" >> manifest.yml
        zip *-cached*.zip manifest.yml
-       EOF
+    EOF
   end
 
   before(:each) do
@@ -36,10 +36,10 @@ describe BuildpackTagger do
       File.write('buildpack/compile-extensions', 'gem contents')
 
       FileUtils.mkdir_p('pivotal-buildpack')
-      File.write("pivotal-buildpack/testlang_buildpack-v#{old_version}+#{old_timestamp}.zip",'specfile')
+      File.write("pivotal-buildpack/testlang_buildpack-v#{old_version}+#{old_timestamp}.zip", 'specfile')
 
       FileUtils.mkdir_p('pivotal-buildpack-cached')
-      File.write("pivotal-buildpack-cached/testlang_buildpack-cached-v#{old_version}+#{old_timestamp}.zip",'specfile')
+      File.write("pivotal-buildpack-cached/testlang_buildpack-cached-v#{old_version}+#{old_timestamp}.zip", 'specfile')
 
       FileUtils.mkdir_p('buildpack-artifacts')
 
@@ -57,8 +57,8 @@ describe BuildpackTagger do
       end
 
       allow(subject).to receive(:system).with(buildpack_package_command) do
-        File.write("testlang_buildpack-v#{@new_version}.zip",'specfile')
-        File.write("testlang_buildpack-cached-v#{@new_version}.zip",'specfile')
+        File.write("testlang_buildpack-v#{@new_version}.zip", 'specfile')
+        File.write("testlang_buildpack-cached-v#{@new_version}.zip", 'specfile')
       end
 
       allow(ENV).to receive(:fetch).with('CF_STACK').and_return('some-stack')
@@ -70,11 +70,11 @@ describe BuildpackTagger do
     FileUtils.rm_rf(task_dir)
   end
 
-  subject { described_class.new(File.join(task_dir, 'buildpack'), buildpack_name, git_repo_org) }
+  subject {described_class.new(File.join(task_dir, 'buildpack'), buildpack_name, git_repo_org)}
 
   context 'the tag already exists' do
-    let(:new_version)  { '3.3.3' }
-    let(:new_timestamp) { '09876'}
+    let(:new_version) {'3.3.3'}
+    let(:new_timestamp) {'09876'}
 
     it 'does not try to add a git tag' do
       expect(subject).not_to receive(:`).with('git tag v3.3.3')
@@ -86,16 +86,16 @@ describe BuildpackTagger do
       subject.run!
 
       Dir.chdir(File.join(task_dir, 'buildpack-artifacts')) do
-        output_buildpacks = Dir["*.zip"]
-        expect(output_buildpacks).to include('testlang_buildpack-v3.3.3+12345.zip')
-        expect(output_buildpacks).to include('testlang_buildpack-cached-v3.3.3+12345.zip')
+        output_buildpacks = Dir[File.join('*', '*.zip')]
+        expect(output_buildpacks).to include('uncached/testlang_buildpack-v3.3.3+12345.zip')
+        expect(output_buildpacks).to include('cached/testlang_buildpack-cached-v3.3.3+12345.zip')
       end
     end
   end
 
   context 'the tag does not exist' do
-    let(:new_version)   { '4.4.4' }
-    let(:new_timestamp) { '09876'}
+    let(:new_version) {'4.4.4'}
+    let(:new_timestamp) {'09876'}
 
     it 'adds a tag with the new version' do
       expect(subject).to receive(:`).with('git tag v4.4.4')
