@@ -354,8 +354,20 @@ class Builder
       else
         raise "Unsupported jruby version line #{source_input.version}"
       end
+
+      # Create a copy of the source_input to prevent mutating version for later use
       full_version = "#{source_input.version}_ruby-#{ruby_version}"
-      binary_builder.build(source_input)
+      binary_builder.build(
+          SourceInput.new(
+              source_input.name,
+              source_input.url,
+              full_version,
+              source_input.md5,
+              source_input.sha256,
+              source_input.git_commit_sha
+          )
+      )
+
       out_data.merge!(
         artifact_output.move_dependency(
           source_input.name,

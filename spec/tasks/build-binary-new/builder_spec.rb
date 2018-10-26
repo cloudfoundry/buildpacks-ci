@@ -43,10 +43,13 @@ describe 'Builder' do
         before do
           allow(binary_builder).to receive(:base_dir).and_return '/fake-binary-builder'
 
-          if input.dep != 'php'
+          if input.dep != 'php' && input.dep != 'jruby'
             expect(binary_builder).to receive(:build).with source_input
-          else
+          elsif input.dep == 'php'
             expect(binary_builder).to receive(:build).with(source_input, anything)
+          else
+            full_version = "#{source_input.version}_ruby-2.5"
+            expect(binary_builder).to receive(:build) {|src| expect(src.version).to eq(full_version)}
           end
 
           allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
