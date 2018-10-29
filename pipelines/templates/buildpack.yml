@@ -670,8 +670,11 @@ jobs: ##########################################################################
            pws_stacks.each do |stack| %>
         - get: pivotal-buildpack-cached-<%= stack %>
           passed: [ ship-it ]
-          trigger: true
         <% end %>
+        - get: buildpack
+          resource: buildpack-master
+          passed: [ ship-it ]
+          trigger: true
       - task: create-or-update-buildpack
         file: buildpacks-ci/tasks/pws-create-or-update-buildpack/task.yml
         params:
