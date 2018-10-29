@@ -44,7 +44,7 @@ stacks.each do |stack|
   else
     orig_filename = Dir.glob("pivotal-buildpack-cached-#{stack}/#{ENV['BUILDPACK_NAME']}*.zip").first
     filename = orig_filename.gsub(/\+\d+\.zip$/, '.zip')
-    FileUtils.mv(orig_filename, filename)
+    system('mv', "#{orig_filename}", "#{filename}") or raise 'Failed to remove timestamp from buildpack file'
   end
 
   stack = '' if stack == 'any'
