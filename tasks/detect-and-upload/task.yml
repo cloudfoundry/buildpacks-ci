@@ -6,7 +6,9 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: pivotal-buildpack
+    option: true
   - name: pivotal-buildpack-cached
+    option: true
   - name: buildpacks-ci
   - name: buildpack
 outputs:
