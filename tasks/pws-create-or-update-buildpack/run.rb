@@ -25,7 +25,7 @@ puts "Buildpack name: #{ENV['BUILDPACK_NAME']}\n"
 _, status = Open3.capture2e('cf', 'api', ENV['CF_API'])
 raise 'cf target failed' unless status.success?
 
-_, status = Open3.capture2e('cf','auth', ENV['USERNAME'], ENV['PASSWORD'])
+_, status = Open3.capture2e('cf','auth', ENV['USERNAME'], ENV['PASSWORD'], '--client-credentials')
 raise 'cf auth failed' unless status.success?
 
 puts "Original Buildpacks\n==================="

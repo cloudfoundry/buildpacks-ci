@@ -679,8 +679,8 @@ jobs: ##########################################################################
         file: buildpacks-ci/tasks/pws-create-or-update-buildpack/task.yml
         params:
           CF_API: https://api.run.pivotal.io
-          USERNAME: {{pws_buildpacks_cf_admin_username}}
-          PASSWORD: {{pws_buildpacks_cf_admin_password}}
+          USERNAME: {{pws_buildpacks_cf_admin_client}}
+          PASSWORD: {{pws_buildpacks_cf_admin_secret}}
           BUILDPACK_NAME: <%= language %>
           STACKS: <%= pws_stacks.join(' ') %>
 <% end %>
