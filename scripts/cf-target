@@ -11,6 +11,8 @@ def env_login(env)
   system('cf', 'auth', 'admin', cfg['cf_admin_password']) or raise 'Could not auth'
 end
 
+system('cf', 'logout') or raise 'Could not logout'
+
 case ARGV[0]
   when *edge_envs
     env_login(ARGV[0])
@@ -36,7 +38,9 @@ case ARGV[0]
     system('cf', 'auth', 'admin', 'admin') or raise 'Could not connect'
   when 'pws'
     cfg = YAML.load(`lpass show --notes Shared-Buildpacks/concourse-private.yml`)
-    system('cf', 'login', '-a', 'api.run.pivotal.io', '-u', cfg['pws-username'], '-p', cfg['pws-password'], '-o', 'cf-buildpacks', '-s', 'development') or raise 'Could not connect'
+    system('cf', 'api', 'api.run.pivotal.io') or raise 'Could not connect'
+    system('cf', 'auth', cfg['pws_buildpacks_cf_client'], cfg['pws_buildpacks_cf_secret'], '--client-credentials') or raise 'Could not connect'
+    system('cf', 'target', '-o', 'cf-buildpacks', '-s', 'development') or raise 'Could not connect'
   else
     puts "Usage: #{$0} <#{edge_envs.join('|')}|lts|bal|dev|pws>"
     exit 1

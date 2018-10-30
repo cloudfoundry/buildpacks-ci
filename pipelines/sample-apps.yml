@@ -137,8 +137,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: cf-sample-app-nodejs-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -173,8 +174,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: cf-sample-app-spring-smoke-test
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml

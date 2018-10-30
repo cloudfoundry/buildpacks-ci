@@ -18,7 +18,7 @@ if [ -z "$PASSWORD" ]; then
 fi
 
 cf api "$TARGET" --skip-ssl-validation || (sleep 4 && cf api "$TARGET" --skip-ssl-validation)
-cf auth "$USERNAME" "$PASSWORD" || (sleep 4 && cf auth "$USERNAME" "$PASSWORD")
+cf auth "$USERNAME" "$PASSWORD" "$CREDS_FLAG" || (sleep 4 && cf auth "$USERNAME" "$PASSWORD" "$CREDS_FLAG")
 set -x
 
 SPACE=$(openssl rand -base64 32 | base64 | head -c 8 | awk '{print tolower($0)}')
@@ -26,12 +26,30 @@ cf create-org "$ORG"
 cf create-space "$SPACE" -o "$ORG" || (sleep 4 && cf create-space "$SPACE" -o "$ORG")
 
 set +x
-cat > "$OUTPUT/login" << EOF
-#!/usr/bin/env sh
-set +x
-echo "Logging in to $SPACE on $ORG on $TARGET"
-cf login -a "$TARGET" -u "$USERNAME" -p "$PASSWORD" --skip-ssl-validation -o "$ORG" -s "$SPACE"
-EOF
+
+if [ -z "$CREDS_FLAG" ]; then
+login=$(cat <<- EOM
+  #!/usr/bin/env sh
+  set +x
+  echo "Logging in to $SPACE on $ORG on $TARGET"
+  cf login -a "$TARGET" -u "$USERNAME" -p "$PASSWORD" --skip-ssl-validation -o "$ORG" -s "$SPACE"
+EOM
+)
+else
+login=$(cat <<- EOM
+  #!/usr/bin/env sh
+  set +x
+  echo "Logging in to $SPACE on $ORG on $TARGET"
+  cf api "$TARGET"
+  cf auth "$USERNAME" "$PASSWORD" --client-credentials
+  cf target -o "$ORG" -s "$SPACE"
+EOM
+)
+fi
+
+
+echo "${login}" > "$OUTPUT/login"
+
 set -x
 chmod 755 "$OUTPUT/login"
 

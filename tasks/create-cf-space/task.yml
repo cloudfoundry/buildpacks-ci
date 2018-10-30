@@ -16,8 +16,8 @@ outputs:
 run:
   path: buildpacks-ci/tasks/create-cf-space/run.sh
 params:
+  ORG:
   CF_STACK:
-params:
   ENV_POOL_RESOURCE:
   ENVS_DIR:
   ORGANIZATION:
@@ -25,3 +25,4 @@ params:
   USERNAME:
   PASSWORD:
   TARGET:
+  CREDS_FLAG:
