@@ -58,8 +58,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the CF-CLI
-RUN wget -O cf-cli.tgz 'https://packages.cloudfoundry.org/stable?release=linux64-binary&version=6.39.1&source=github-rel' \
-  && [ 62c3930b139c71334ad6b69fddc7fa469558873995877ed8bbfdf07e170d1d3e = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
+RUN wget -O cf-cli.tgz 'https://packages.cloudfoundry.org/stable?release=linux64-binary&version=6.40.0&source=github-rel' \
+  && [ de34bb9755ec9f9ca9605b14c690a9013157cc3c83fc647beb2c842a03c8b5b2 = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
   && tar xzf cf-cli.tgz -C /usr/bin \
   && rm cf-cli.tgz \
   && cf install-plugin -r CF-Community "log-cache" -f
