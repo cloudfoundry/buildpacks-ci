@@ -32,3 +32,4 @@ run:
 
 params:
   BUILDPACK:
+  LTS_PRODUCT:

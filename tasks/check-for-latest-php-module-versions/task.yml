@@ -6,7 +6,6 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: robots-repo
 run:
   path: bash
   args:

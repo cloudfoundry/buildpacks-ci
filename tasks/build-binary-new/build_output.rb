@@ -1,4 +1,5 @@
 require 'json'
+require 'fileutils'
 
 $buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{$buildpacks_ci_dir}/lib/git-client"

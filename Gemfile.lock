@@ -43,6 +43,7 @@ GEM
     parallel (1.12.1)
     parser (2.4.0.2)
       ast (~> 2.3)
+    parslet (1.8.2)
     powerpack (0.1.1)
     pry (0.11.3)
       coderay (~> 1.1.0)
@@ -84,6 +85,8 @@ GEM
       addressable (>= 2.3.5, < 2.6)
       faraday (~> 0.8, < 1.0)
     thread_safe (0.3.6)
+    toml (0.2.0)
+      parslet (~> 1.8.0)
     tracker_api (1.8.0)
       addressable
       equalizer
@@ -124,6 +127,7 @@ DEPENDENCIES
   rspec-rerun
   rubocop
   rubocop-rspec
+  toml
   tracker_api
   version_sorter
   webmock
@@ -132,4 +136,4 @@ RUBY VERSION
    ruby 2.3.1p112
 
 BUNDLED WITH
-   1.16.2
+   1.16.5

@@ -1,0 +1,19 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cloudfoundry/cflinuxfs3
+inputs:
+- name: buildpacks-ci
+- name: source
+- name: builds
+outputs:
+- name: builds-artifacts
+run:
+  path: bash
+  args:
+  - -cl
+  - buildpacks-ci/tasks/write-bionic-metadata/run.rb
+params:
+  STACK:

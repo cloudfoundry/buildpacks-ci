@@ -9,7 +9,7 @@ describe Dependencies do
         line,
         removal_strategy,
         dependencies,
-        master_dependencies
+        dependencies_latest_released
     ).switch
   }
   let(:dependencies) do
@@ -24,7 +24,7 @@ describe Dependencies do
       ]
     end.flatten.sort_by { |d| [d['name'], d['version'], d['cf_stacks']] }.freeze
   end
-  let(:master_dependencies) do
+  let(:dependencies_latest_released) do
     [['stack1'], ['stack2']].map do |stack|
       [
         { 'name' => 'bundler', 'version' => '1.2.1', 'cf_stacks' => stack },
@@ -140,13 +140,13 @@ describe Dependencies do
     end
   end
 
-  context 'removal_strategy is keep_master' do
+  context 'removal_strategy is keep_latest_released' do
     let(:line) {'major'}
-    let(:removal_strategy) {'keep_master'}
+    let(:removal_strategy) {'keep_latest_released'}
 
     context 'new version is newer than all existing on its line' do
       let(:dep) {{'name' => 'ruby', 'version' => '1.4.0', 'cf_stacks' => ['stack1'] }}
-      it 'replaces all of the named dependencies on its line keeping the latest from master' do
+      it 'replaces all of the named dependencies on its line keeping the latest from last released buildpack' do
         expect(subject).to eq([
           { 'name' => 'bundler', 'version' => '1.2.3', 'cf_stacks' => ['stack1'] },
           { 'name' => 'bundler', 'version' => '1.2.3', 'cf_stacks' => ['stack2'] },
@@ -169,7 +169,7 @@ describe Dependencies do
     let(:removal_strategy) {'keep_all'}
     context 'new version is newer than all existing on its line' do
       let(:dep) {{'name' => 'ruby', 'version' => '1.4.0', 'cf_stacks' => ['stack1'] }}
-      it 'replaces all of the named dependencies on its line keeping the latest from master' do
+      it 'replaces all of the named dependencies on its line keeping the latest from last released buildpack' do
         expect(subject).to eq([
                                   {'name' => 'bundler', 'version' => '1.2.3', 'cf_stacks' => ['stack1']},
                                   {'name' => 'bundler', 'version' => '1.2.3', 'cf_stacks' => ['stack2']},
@@ -199,7 +199,7 @@ describe Dependencies do
         {'name' => 'dotnet', 'version' => '2.1.301', 'cf_stacks' => ['stack1'] },
         {'name' => 'dotnet', 'version' => '2.1.301', 'cf_stacks' => ['stack2'] },
     ].freeze}
-    let(:master_dependencies) {[
+    let(:dependencies_latest_released) {[
         {'name' => 'dotnet', 'version' => '2.1.201', 'cf_stacks' => ['stack1'] },
         {'name' => 'dotnet', 'version' => '2.1.201', 'cf_stacks' => ['stack2'] },
         {'name' => 'dotnet', 'version' => '2.1.300', 'cf_stacks' => ['stack1'] },
@@ -207,7 +207,7 @@ describe Dependencies do
     ]}
 
     let(:line) {nil}
-    let(:removal_strategy) {'keep_master'}
+    let(:removal_strategy) {'keep_latest_released'}
 
     let(:dep) {{'name' => 'dotnet', 'version' => '2.1.302', 'cf_stacks' => ['stack1'] }}
     it 'keeps dotnet 2.1.201 when there is a new version of dotnet in the same line' do
@@ -246,7 +246,7 @@ describe Dependencies do
   end
 
   context 'nginx' do
-    let(:master_dependencies) {[
+    let(:dependencies_latest_released) {[
         {'name' => 'nginx', 'version' => '1.12.0', 'cf_stacks' => ['stack1']},
         {'name' => 'nginx', 'version' => '1.12.0', 'cf_stacks' => ['stack2']},
         {'name' => 'nginx', 'version' => '1.13.1', 'cf_stacks' => ['stack1']},
@@ -356,7 +356,7 @@ describe Dependencies do
           { 'name' => 'ruby', 'version' => '2.3.6', 'cf_stacks' => ['stack1'] }
         ]
     end
-    let(:master_dependencies) do
+    let(:dependencies_latest_released) do
         [
           { 'name' => 'bundler', 'version' => '1.2.1', 'cf_stacks' => ['stack1'] },
           { 'name' => 'ruby', 'version' => '1.2.2', 'cf_stacks' => ['stack1'] },

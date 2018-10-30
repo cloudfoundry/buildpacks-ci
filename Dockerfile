@@ -58,15 +58,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the CF-CLI
-# TODO: UNCOMMENT THIS ONCE OFFICIAL CLI SUPPORTS STACK ASSOCIATION
-#RUN wget -O cf-cli.tgz 'https://packages.cloudfoundry.org/edge?arch=linux64&source=github' \
-#  && [ 0c94e787e49f99af19d528948a3695eda2430167f04b4533c68b35f3fe73765a = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
-#  && tar xzf cf-cli.tgz -C /usr/bin \
-#  && rm cf-cli.tgz
-
-# TODO: DELETE THIS AND 'cf-cli-multi-stack' S3 BUCKET ONCE OFFICIAL CLI SUPPORTS STACK ASSOCIATION
-RUN wget -O cf-cli.tgz 'https://s3.amazonaws.com/cf-cli-multi-stack/cf-6.38.0%2B28c97c6bd.2018-07-23.tgz' \
-  && [ 022305ee3ccd010e692a6aa671a68da8abde89e1fe22c3c76c179752dae1ac35 = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
+RUN wget -O cf-cli.tgz 'https://packages.cloudfoundry.org/stable?release=linux64-binary&version=6.39.1&source=github-rel' \
+  && [ 62c3930b139c71334ad6b69fddc7fa469558873995877ed8bbfdf07e170d1d3e = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
   && tar xzf cf-cli.tgz -C /usr/bin \
   && rm cf-cli.tgz \
   && cf install-plugin -r CF-Community "log-cache" -f
@@ -132,10 +125,10 @@ RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make i
 # Ensure that Concourse filtering is on for non-interactive shells
 ENV BASH_ENV /etc/profile.d/filter.sh
 
-# Install go 1.9
+# Install go 1.11
 RUN cd /usr/local \
-  && curl -L https://buildpacks.cloudfoundry.org/dependencies/go/go1.9.2.linux-amd64-f60fe671.tar.gz -o go.tar.gz \
-  && [ 6af27e6a59b4538fbf196c8019ef67c5cfeb6d21298bf9bb6bab1390a4da3448 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
+  && curl -L https://dl.google.com/go/go1.11.linux-amd64.tar.gz -o go.tar.gz \
+  && [ b3fcf280ff86558e0559e185b601c9eade0fd24c900b4c63cd14d1d38613e499 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && tar xf go.tar.gz \
   && rm go.tar.gz \
   && ln -s /usr/local/go/bin/* /usr/local/bin/

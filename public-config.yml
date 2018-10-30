@@ -1,37 +1,29 @@
 # This file holds public configuration (like github uri, github organization) to ease creation of a new pipeline instance.
-machete-git-uri-public: https://github.com/cloudfoundry/machete
-machete-git-uri: git@github.com:cloudfoundry/machete.git
-
+binary-builder-git-uri: https://github.com/cloudfoundry/binary-builder.git
+binary-builder-os-name: GNU/Linux
+binary-builder-platform: x86_64
+bosh-lite-domain-name: cf-app.com
 buildpack-packager-git-uri-public: https://github.com/cloudfoundry/buildpack-packager
 buildpack-packager-git-uri: git@github.com:cloudfoundry/buildpack-packager.git
-
-binary-builder-git-uri: https://github.com/cloudfoundry/binary-builder.git
-
-cf-release-git-uri: https://github.com/cloudfoundry/cf-release
-
-buildpacks-github-org: cloudfoundry
-buildpacks-binaries-s3-bucket: pivotal-buildpacks
-bosh-lite-domain-name: cf-app.com
-
-buildpacks-ci-pipeline-uri: https://buildpacks.ci.cf-app.com/teams/main/pipelines/buildpacks-ci
-buildpacks-ci-git-uri-public: https://github.com/cloudfoundry/buildpacks-ci
-public-buildpacks-ci-robots-git-uri-public: https://github.com/cloudfoundry/public-buildpacks-ci-robots
-buildpacks-ci-git-uri: git@github.com:cloudfoundry/buildpacks-ci.git
-buildpacks-ci-git-uri-public-develop-branch: develop
-buildpacks-ci-git-uri-public-branch: master
+buildpack-release-canidates-bucket: buildpack-release-candidates
 buildpackapplifecycle-git-branch: develop
-
+buildpacks-binaries-s3-bucket: pivotal-buildpacks
+buildpacks-ci-git-uri-public-branch: master
+buildpacks-ci-git-uri-public-develop-branch: develop
+buildpacks-ci-git-uri-public: https://github.com/cloudfoundry/buildpacks-ci
+buildpacks-ci-git-uri: git@github.com:cloudfoundry/buildpacks-ci.git
+buildpacks-ci-pipeline-uri: https://buildpacks.ci.cf-app.com/teams/main/pipelines/buildpacks-ci
+buildpacks-concourse2tracker-docker-repo: cfbuildpacks/concourse2tracker
 buildpacks-docker-ci-repo: cfbuildpacks/ci
 buildpacks-docker-depwatcher-repo: cfbuildpacks/depwatcher
 buildpacks-docker-user-email: cf-buildpacks-eng@pivotal.io
-buildpacks-concourse2tracker-docker-repo: cfbuildpacks/concourse2tracker
-
-deployments-git-uri: git@github.com:pivotal-cf/deployments-buildpacks
+buildpacks-github-org: cloudfoundry
+cf-release-git-uri: https://github.com/cloudfoundry/cf-release
 current-timezone: America/New_York
-
-run-oracle-php-tests: true
-oracle-client-libs-s3-bucket: buildpacks-oracle-client-libs
+deployments-git-uri: git@github.com:pivotal-cf/deployments-buildpacks
+machete-git-uri-public: https://github.com/cloudfoundry/machete
+machete-git-uri: git@github.com:cloudfoundry/machete.git
 oracle-client-libs-filename: oracle_client_libs.tgz
-
-binary-builder-platform: x86_64
-binary-builder-os-name: GNU/Linux
+oracle-client-libs-s3-bucket: buildpacks-oracle-client-libs
+public-buildpacks-ci-robots-git-uri-public: https://github.com/cloudfoundry/public-buildpacks-ci-robots
+run-oracle-php-tests: true

@@ -25,7 +25,7 @@ puts "Buildpack name: #{ENV['BUILDPACK_NAME']}\n"
 _, status = Open3.capture2e('cf', 'api', ENV['CF_API'])
 raise 'cf target failed' unless status.success?
 
-_, status = Open3.capture2e('cf','auth', ENV['USERNAME'], ENV['PASSWORD'])
+_, status = Open3.capture2e('cf','auth', ENV['USERNAME'], ENV['PASSWORD'], '--client-credentials')
 raise 'cf auth failed' unless status.success?
 
 puts "Original Buildpacks\n==================="
@@ -44,7 +44,9 @@ stacks.each do |stack|
   else
     orig_filename = Dir.glob("pivotal-buildpack-cached-#{stack}/#{ENV['BUILDPACK_NAME']}*.zip").first
     filename = orig_filename.gsub(/\+\d+\.zip$/, '.zip')
-    FileUtils.mv(orig_filename, filename)
+    if filename != orig_filename
+      system('mv', "#{orig_filename}", "#{filename}") or raise 'Failed to remove timestamp from buildpack file'
+    end
   end
 
   stack = '' if stack == 'any'

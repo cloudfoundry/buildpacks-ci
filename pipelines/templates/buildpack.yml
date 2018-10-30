@@ -1,27 +1,73 @@
-<% compile_extensions = %w(php) %>
-<% no_brats = %w(credhub hwc multi r) %>
-<% non_published_pivnet = %(apt credhub hwc multi r nginx) %>
-<% non_published_pws = %(apt credhub multi r nginx) %>
-<% non_lts = %(apt credhub hwc) %>
-<% skip_docker_start = %w(binary r) %>
-<% stacks = {
-  "hwc" => %w(windows2012R2 windows2016),
-  "apt" => %w(cflinuxfs2),
-  "binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016),
-  "credhub" => %w(cflinuxfs2 cflinuxfs3),
-  "dotnet-core" => %w(cflinuxfs2 cflinuxfs3),
-  "go" => %w(cflinuxfs2 cflinuxfs3),
-  "multi" => %w(cflinuxfs2 cflinuxfs3),
-  "nginx" => %w(cflinuxfs2 cflinuxfs3),
-  "nodejs" => %w(cflinuxfs2 cflinuxfs3),
-  "php" => %w(cflinuxfs2 cflinuxfs3),
-  "python" => %w(cflinuxfs2 cflinuxfs3),
-  "r" => %w(cflinuxfs2 cflinuxfs3),
-  "ruby" => %w(cflinuxfs2 cflinuxfs3),
-  "staticfile" => %w(cflinuxfs2 cflinuxfs3)
+<% buildpacks = {
+  'apt' => {
+    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'skip_pivnet_publish' => true,
+    'skip_pws_publish' => true,
+    'non_lts' => true
+  },
+  'binary' => {
+    'stacks' => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016),
+    'product_slug' => 'binary-buildpack',
+    'skip_docker_start' => true,
+    'any_stack' => true
+  },
+  'dotnet-core' => {
+    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'product_slug' => 'dotnet-core-buildpack'
+  },
+  'go' => {
+    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'product_slug' => 'go-buildpack'
+  },
+  'hwc' => {
+    'stacks' => %w(windows2012R2 windows2016),
+    'skip_brats' => true,
+    'non_lts' => true,
+    'any_stack' => true,
+    'product_slug' => 'hwc-buildpack'
+  },
+  'multi' => {
+    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'skip_brats' => true,
+    'skip_pivnet_publish' => true,
+    'skip_pws_publish' => true
+  },
+  'nginx' => {
+    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'product_slug' => 'nginx-buildpack',
+    'skip_pws_publish' => true
+  },
+  'nodejs' => {
+    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'product_slug' => 'nodejs-buildpack'
+  },
+  'php' => {
+    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'product_slug' => 'php-buildpack',
+    'compile_extensions' => true
+  },
+  'python' => {
+    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'product_slug' => 'python-buildpack'
+  },
+  'r' => {
+    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'product_slug' => 'r-buildpack',
+    'skip_brats' => true,
+    'skip_pivnet_publish' => true,
+    'non_lts' => true,
+    'skip_pws_publish' => true,
+    'skip_docker_start' => true
+  },
+  'ruby' => {
+    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'product_slug' => 'ruby-buildpack'
+  },
+  'staticfile' => {
+    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'product_slug' => 'staticfile-buildpack'
+  }
 } %>
-<% any_stack = %w(hwc binary) %>
-<% v3_buildpacks = %w(nodejs) %>
 <% cnb_images = %w(run build) %>
 ---
 resource_types:
@@ -76,7 +122,14 @@ resources: #####################################################################
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
-<% unless non_published_pivnet.include? language %>
+<% unless buildpacks[language]['skip_pivnet_publish'] %>
+  - name: pivnet-buildpack-metadata-lts
+    type: git
+    source:
+      branch: master
+      private_key: {{pivotal-cf-buildpacks-ci-robots}}
+      uri: git@github.com:pivotal-cf/buildpacks-ci-robots.git # pivotal-cf because pivnet is not foundation's
+      paths: [ pivnet-metadata/<%= language %>-lts.yml ]
   - name: pivnet-buildpack-metadata
     type: git
     source:
@@ -91,7 +144,7 @@ resources: #####################################################################
     webhook_token: ob0aigh3
     source:
       uri: https://github.com/cloudfoundry/libbuildpack.git
-<% if compile_extensions.include? language %>
+<% if buildpacks[language]['compile_extensions'] %>
   - name: compile-extensions
     type: git
     source:
@@ -159,7 +212,7 @@ resources: #####################################################################
       access_token: {{buildpacks-github-token}}
 <% end %>
 
-<% if compile_extensions.include? language %>
+<% if buildpacks[language]['compile_extensions'] %>
   - name: buildpack-packager
     type: github-release
     source:
@@ -170,63 +223,58 @@ resources: #####################################################################
 
   ## Pivnet Release ##
 
-<% unless non_published_pivnet.include? language %>
+<% unless buildpacks[language]['skip_pivnet_publish'] %>
+  - name: pivnet-production-lts
+    type: pivnet
+    source:
+      endpoint: https://network.pivotal.io
+      api_token: {{pivnet-refresh-token}}
+      product_slug: buildpacks
+
   - name: pivnet-production
     type: pivnet
     source:
       endpoint: https://network.pivotal.io
-      bucket: pivotalnetwork
-      api_token: {{pivnet-apikey}}
-      product_slug: buildpacks
-      access_key_id: {{pivnet-access-key}}
-      secret_access_key: {{pivnet-secret-key}}
+      api_token: {{pivnet-refresh-token}}
+      product_slug: <%= buildpacks[language]['product_slug'] %>
 <% end %>
 
   ## S3 Buckets ##
 
-  - name: pivotal-buildpack
-    type: s3
-    source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack.*-v(.*).zip
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-
-  - name: pivotal-buildpack-cached
-    type: s3
-    source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached.*-v(.*).zip
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-
-<% unless language.to_s == 'hwc' %>
-<% stacks[language].each do |stack| %>
+<% buildpacks[language]['stacks'].each do |stack| %>
   - name: pivotal-buildpack-<%= stack %>
     type: s3
     source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack<%= if stack == 'any' then '' else "-#{stack}" end %>-v(.*).zip
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+      bucket: {{buildpack-release-canidates-bucket}}
+      regexp: <%= language%>/<%= language %>_buildpack-<%= stack %>-v(.*).zip
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
   - name: pivotal-buildpack-cached-<%= stack %>
     type: s3
     source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached<%= if stack == 'any' then '' else "-#{stack}" end %>-v(.*).zip
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+      bucket: {{buildpack-release-canidates-bucket}}
+      regexp: <%= language%>/<%= language %>_buildpack-cached-<%= stack %>-v(.*).zip
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 <% end %>
-<% end %>
-<% if any_stack.include?(language) %>
+
+<% if buildpacks[language]['any_stack'] %>
   - name: pivotal-buildpack-cached-any
     type: s3
     source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
-      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached-v(.*).zip
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+      bucket: {{buildpack-release-canidates-bucket}}
+      regexp: <%= language%>/<%= language %>_buildpack-cached-v(.*).zip
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+
+  - name: pivotal-buildpack-any
+    type: s3
+    source:
+      bucket: {{buildpack-release-canidates-bucket}}
+      regexp: <%= language%>/<%= language %>_buildpack-v(.*).zip
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 <% end %>
 
   ## Resource Pools ##
@@ -247,7 +295,7 @@ resources: #####################################################################
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
-<% unless non_lts.include? language %>
+<% unless buildpacks[language]['non_lts'] %>
   - name: lts-buildpack-specs-pool
     type: pool
     source:
@@ -270,19 +318,6 @@ resources: #####################################################################
       expression: 0 18 * * 0
       location: {{current-timezone}}
 
-  ## Docker Images ##
-<% if v3_buildpacks.include?(language) %>
-<% cnb_images.each do |image_type| %>
-  - name: cnb-<%= image_type %>-image
-    type: docker-image
-    source:
-      repository: cfbuildpacks/cflinuxfs3-cnb-experimental
-      tag: <%= image_type %>
-      email: {{buildpacks-docker-user-email}}
-      username: {{buildpacks-docker-user-username}}
-      password: {{buildpacks-docker-user-password}}
-<% end %>
-<% end %>
 
 jobs: ################################################################################################################
 <% if language == "php" %>
@@ -315,6 +350,7 @@ jobs: ##########################################################################
         - do:
           - task: ginkgo
             file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
+
   - name: create-buildpack-release-story
     serial: true
     public: true
@@ -322,8 +358,6 @@ jobs: ##########################################################################
       - get: sunday-night
         trigger: true
       - aggregate:
-        - get: pivotal-buildpack
-        - get: pivotal-buildpack-cached
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-master
@@ -335,6 +369,7 @@ jobs: ##########################################################################
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+
   - name: detect-new-version-and-upload-artifacts
     serial: true
     public: true
@@ -344,13 +379,17 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-master
           trigger: true
-        - get: pivotal-buildpack-cached
-        - get: pivotal-buildpack
+<% bucket_stacks = buildpacks[language]['stacks']
+   bucket_stacks = bucket_stacks + ['any'] if (buildpacks[language]['any_stack'])
+   bucket_stacks.each do |stack| %> #change bucket_stacks to buildpacks[language]['stacks'] when removing any_stack
+        - get: pivotal-buildpack-cached-<%= stack %>
+        - get: pivotal-buildpack-<%= stack %>
+<% end %>
       - do:
         - aggregate:
-<% bucket_stacks = language.to_s == 'hwc' ? ['any'] : stacks[language]
-   bucket_stacks = bucket_stacks + ['any'] if language.to_s == 'binary'
-   bucket_stacks.each do |stack| %> #change bucket_stacks to stacks[language] when removing any_stack
+<% bucket_stacks = buildpacks[language]['stacks']
+   bucket_stacks = bucket_stacks + ['any'] if (buildpacks[language]['any_stack'])
+   bucket_stacks.each do |stack| %> #change bucket_stacks to buildpacks[language]['stacks'] when removing any_stack
           - do:
             - task: detect-and-upload-<%= stack %>
               file: buildpacks-ci/tasks/detect-and-upload/task.yml
@@ -359,12 +398,15 @@ jobs: ##########################################################################
                 BUILDPACK_NAME: <%= language %>-buildpack
                 RUBYGEM_MIRROR: {{rubygem-mirror}}
                 CF_STACK: <%= stack %>
+              input_mapping:
+                pivotal-buildpack: pivotal-buildpack-<%= stack %>
+                pivotal-buildpack-cached: pivotal-buildpack-cached-<%= stack %>
               output_mapping:
                 buildpack-artifacts: buildpack-artifacts-<%= stack %>
-            - put: pivotal-buildpack
+            - put: pivotal-buildpack-<%= stack %>
               params:
                 file: buildpack-artifacts-<%= stack %>/uncached/*_buildpack*-v*.zip
-            - put: pivotal-buildpack-cached
+            - put: pivotal-buildpack-cached-<%= stack %>
               params:
                 file: buildpack-artifacts-<%= stack %>/cached/*_buildpack-cached*-v*.zip
 <% end %>
@@ -380,6 +422,18 @@ jobs: ##########################################################################
     public: true
     plan:
       - aggregate:
+        <%
+        all_stacks = buildpacks[language]['stacks']
+        if buildpacks[language]['any_stack']
+          all_stacks = all_stacks + ['any']
+        end
+        all_stacks.each_with_index do |stack, ndx|
+        %>
+        - get: pivotal-buildpack-cached-<%= stack %>
+          passed: [ detect-new-version-and-upload-artifacts ]
+        - get: pivotal-buildpack-<%= stack %>
+          passed: [ detect-new-version-and-upload-artifacts ]
+        <% end %>
         - put: edge-environments
           params:
             acquire: true
@@ -395,18 +449,10 @@ jobs: ##########################################################################
           trigger: true
         - get: repo
           resource: buildpack-master
-        - get: pivotal-buildpacks
-          resource: pivotal-buildpack
-          passed: [ "detect-new-version-and-upload-artifacts" ]
-          trigger: true
-        - get: pivotal-buildpacks-cached
-          resource: pivotal-buildpack-cached
-          passed: [ "detect-new-version-and-upload-artifacts" ]
-          trigger: true
       - task: unit
         file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
       - aggregate:
-<% stacks[language].each do |stack| %>
+<% buildpacks[language]['stacks'].each do |stack| %>
         - do:
           - task: create-cf-space
             file: buildpacks-ci/tasks/create-cf-space/task.yml
@@ -427,7 +473,7 @@ jobs: ##########################################################################
               <% if language == 'php' %>
               COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
               <% end %>
-<% if skip_docker_start.include?(language) %>
+<% if buildpacks[language]['skip_docker_start'] %>
               SKIP_DOCKER_START: true
 <% else %>
             privileged: true
@@ -461,7 +507,7 @@ jobs: ##########################################################################
       - put: edge-environments
         params:
           release: edge-environments
-<% unless non_lts.include? language %>
+<% unless buildpacks[language]['non_lts'] %>
   - name: specs-lts-master
     serial: true
     public: true
@@ -471,6 +517,18 @@ jobs: ##########################################################################
           params:
             claim: <%= language %>
           timeout: 3h
+        <%
+        all_stacks = buildpacks[language]['stacks']
+        if buildpacks[language]['any_stack']
+          all_stacks = all_stacks + ['any']
+        end
+        all_stacks.each_with_index do |stack, ndx|
+        %>
+        - get: pivotal-buildpack-cached-<%= stack %>
+          passed: [ detect-new-version-and-upload-artifacts ]
+        - get: pivotal-buildpack-<%= stack %>
+          passed: [ detect-new-version-and-upload-artifacts ]
+        <% end %>
         - get: buildpacks-ci
         - get: buildpack
           passed: [ "detect-new-version-and-upload-artifacts" ]
@@ -478,14 +536,6 @@ jobs: ##########################################################################
           trigger: true
         - get: repo
           resource: buildpack-master
-        - get: pivotal-buildpacks
-          resource: pivotal-buildpack
-          passed: [ "detect-new-version-and-upload-artifacts" ]
-          trigger: true
-        - get: pivotal-buildpacks-cached
-          resource: pivotal-buildpack-cached
-          passed: [ "detect-new-version-and-upload-artifacts" ]
-          trigger: true
       - do:
         - task: unit
           file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
@@ -506,7 +556,7 @@ jobs: ##########################################################################
             <% if language == 'php' %>
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             <% end %>
-<% if skip_docker_start.include?(language) %>
+<% if buildpacks[language]['skip_docker_start'] %>
             SKIP_DOCKER_START: true
 <% else %>
           privileged: true
@@ -542,23 +592,29 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: pivotal-buildpacks-cached
-          resource: pivotal-buildpack-cached
+        <%
+        all_stacks = buildpacks[language]['stacks']
+        if buildpacks[language]['any_stack']
+          all_stacks = all_stacks + ['any']
+        end
+        all_stacks.each_with_index do |stack, ndx|
+        %>
+        - get: pivotal-buildpack-cached-<%= stack %>
           passed:
-            <% unless non_lts.include? language %>
+            <% unless buildpacks[language]['non_lts'] %>
             - specs-lts-master
             <% end %>
             - specs-edge-master
-        - get: pivotal-buildpacks
-          resource: pivotal-buildpack
+        - get: pivotal-buildpack-<%= stack %>
           passed:
-            <% unless non_lts.include? language %>
+            <% unless buildpacks[language]['non_lts'] %>
             - specs-lts-master
             <% end %>
             - specs-edge-master
+        <% end %>
         - get: buildpack
           passed:
-            <% unless non_lts.include? language %>
+            <% unless buildpacks[language]['non_lts'] %>
             - specs-lts-master
             <% end %>
             - specs-edge-master
@@ -576,25 +632,10 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: pivotal-buildpacks-cached
-          resource: pivotal-buildpack-cached
-          passed: [ ship-it ]
-          trigger: true
-        - get: pivotal-buildpacks
-          resource: pivotal-buildpack
-          passed: [ ship-it ]
-        <% if language.to_s == 'hwc' %>
-        - get: pivotal-buildpacks-cached-stack0
-          resource: pivotal-buildpack-cached
-        - get: pivotal-buildpacks-stack0
-          resource: pivotal-buildpack
-        <% else %>
-        <% stacks[language].each_with_index do |stack, ndx| %>
-        - get: pivotal-buildpacks-cached-stack<%= ndx.to_s %>
-          resource: pivotal-buildpack-cached-<%= stack %>
+        <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
         - get: pivotal-buildpacks-stack<%= ndx.to_s %>
           resource: pivotal-buildpack-<%= stack %>
-        <% end %>
+          passed: [ ship-it ]
         <% end %>
         - get: buildpack
           resource: buildpack-master
@@ -618,58 +659,66 @@ jobs: ##########################################################################
             - buildpack-artifacts/*-buildpack*-v*.zip
             - buildpack-artifacts/*-buildpack*-v*.zip.SHA256SUM.txt
 
-<% if !non_published_pws.include?(language)%>
+<% if !buildpacks[language]['skip_pws_publish'] %>
   - name: buildpack-to-pws
     serial: true
     public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
-        - get: pivotal-buildpacks-cached-passed
-          resource: pivotal-buildpack-cached
-          passed: [ ship-it ]
-          trigger: true
-        <% pws_stacks = any_stack.include?(language) ? ['any'] : stacks[language]
+        <% pws_stacks = buildpacks[language]['stacks'] - ['windows2012R2']
            pws_stacks.each do |stack| %>
         - get: pivotal-buildpack-cached-<%= stack %>
+          passed: [ ship-it ]
         <% end %>
+        - get: buildpack
+          resource: buildpack-master
+          passed: [ ship-it ]
+          trigger: true
       - task: create-or-update-buildpack
         file: buildpacks-ci/tasks/pws-create-or-update-buildpack/task.yml
         params:
           CF_API: https://api.run.pivotal.io
-          USERNAME: {{pws_buildpacks_cf_admin_username}}
-          PASSWORD: {{pws_buildpacks_cf_admin_password}}
+          USERNAME: {{pws_buildpacks_cf_admin_client}}
+          PASSWORD: {{pws_buildpacks_cf_admin_secret}}
           BUILDPACK_NAME: <%= language %>
           STACKS: <%= pws_stacks.join(' ') %>
 <% end %>
-<% unless non_published_pivnet.include? language %>
-  - name: write-pivnet-metadata
+
+##################################################################################
+#
+# We release a global product to pivnet that has all buildpacks bundled within it.
+# This allows users on older foundations to continue to receive buildpack updates.
+#
+# We also release individual products to pivnet for each buildpack.
+# These release allow users to select the stack for their foundation.
+# At some point we will discontinue the global product and only support
+# individual products per buildpack.
+#
+##################################################################################
+<% unless buildpacks[language]['skip_pivnet_publish'] %>
+  - name: write-pivnet-metadata-for-lts-product
     serial: true
     public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: pivnet-buildpack-metadata
-        - get: pivotal-buildpacks-cached-passed
-          resource: pivotal-buildpack-cached
-          passed: [ ship-it ]
-          trigger: true
-        <% pivnet_stacks = ''
-          if language.to_s == 'hwc' || language.to_s == 'binary'
+          resource: pivnet-buildpack-metadata-lts
+        <% pivnet_stacks = []
+          if buildpacks[language]['any_stack']
             pivnet_stacks = ['any']
           else
-            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to stacks[language] when PWS has cflinuxfs3
+            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to buildpacks[language]['stacks'] when removing any_stack
           end
           pivnet_stacks.each_with_index do |stack, ndx| %>
         - get: pivotal-buildpacks-stack<%= ndx %>
           resource: pivotal-buildpack-cached-<%= stack %>
+          passed:  [ ship-it ]
         <% end %>
-        - get: pivotal-buildpacks
-          resource: pivotal-buildpack
-          passed: [ ship-it ]
         - get: buildpack
           resource: buildpack-master
-          passed: [ ship-it ]
+          passed:  [ ship-it ]
           trigger: true
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
@@ -677,38 +726,95 @@ jobs: ##########################################################################
         file: buildpacks-ci/tasks/write-buildpack-pivnet-metadata/task.yml
         params:
           BUILDPACK: <%= language %>
-      - put: pivnet-buildpack-metadata
+          LTS_PRODUCT: true
+      - put: pivnet-buildpack-metadata-lts
         params:
           repository: pivnet-buildpack-metadata-artifacts
           rebase: true
 
-  - name: release-to-pivnet
+  - name: release-lts-product-to-pivnet
     public: true
     plan:
       - aggregate:
-        - get: pivotal-buildpack-cached-passed
-          resource: pivotal-buildpack-cached
-          passed: [ write-pivnet-metadata ]
+        - get: pivnet-buildpack-metadata-lts
+          passed: [ write-pivnet-metadata-for-lts-product ]
           trigger: true
-        - get: pivnet-buildpack-metadata
-          passed: [ write-pivnet-metadata ]
-          trigger: true
-        <% pivnet_stacks = ''
-          if language.to_s == 'hwc' || language.to_s == 'binary'
+        <% pivnet_stacks = []
+          if buildpacks[language]['any_stack']
             pivnet_stacks = ['any']
           else
-            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to stacks[language] when PWS has cflinuxfs3
+            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to buildpacks[language]['stacks'] when removing any_stack
           end
           pivnet_stacks.each_with_index do |stack, ndx| %>
         - get: pivotal-buildpacks-stack<%= ndx %>
           resource: pivotal-buildpack-cached-<%= stack %>
+          passed: [write-pivnet-metadata-for-lts-product]
         <% end %>
-      - put: pivnet-production
+      - put: pivnet-production-lts
         params:
           file_glob: pivotal-buildpacks-stack*/<%= language %>_buildpack-cached*.zip
           s3_filepath_prefix: product-files/buildpacks
-          metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
+          metadata_file: pivnet-buildpack-metadata-lts/pivnet-metadata/<%= language %>-lts.yml
+
+  - name: write-pivnet-metadata
+    serial: true
+    public: true
+    plan:
+    - aggregate:
+      - get: buildpacks-ci
+      - get: pivnet-buildpack-metadata
+      <%
+      all_pivnet_stacks = buildpacks[language]['stacks']
+      if buildpacks[language]['any_stack']
+        all_pivnet_stacks = all_pivnet_stacks + ['any']
+      end
+      all_pivnet_stacks.each_with_index do |stack, ndx|
+      %>
+      - get: pivotal-buildpacks-stack<%= ndx %>
+        resource: pivotal-buildpack-cached-<%= stack %>
+        passed: [ ship-it ]
+      <% end %>
+      - get: buildpack
+        resource: buildpack-master
+        passed: [ ship-it ]
+        trigger: true
+    - task: finalize-buildpack
+      file: buildpacks-ci/tasks/finalize-buildpack/task.yml
+    - task: write-pivnet-metadata
+      file: buildpacks-ci/tasks/write-buildpack-pivnet-metadata/task.yml
+      params:
+        BUILDPACK: <%= language %>
+        LTS_PRODUCT: false
+    - put: pivnet-buildpack-metadata
+      params:
+        repository: pivnet-buildpack-metadata-artifacts
+        rebase: true
+
+  - name: release-product-to-pivnet
+    public: true
+    plan:
+    - aggregate:
+      - get: pivnet-buildpack-metadata
+        passed: [ write-pivnet-metadata ]
+        trigger: true
+      <%
+      pivnet_stacks = buildpacks[language]['stacks']
+      if buildpacks[language]['any_stack']
+        pivnet_stacks = pivnet_stacks + ['any']
+      end
+      pivnet_stacks.each_with_index do |stack, ndx|
+      %>
+      - get: pivotal-buildpacks-stack<%= ndx %>
+        resource: pivotal-buildpack-cached-<%= stack %>
+        passed: [ write-pivnet-metadata ]
+      <% end %>
+    - put: pivnet-production
+      params:
+        file_glob: pivotal-buildpacks-stack*/<%= language %>_buildpack-cached*.zip
+        s3_filepath_prefix: product-files/buildpacks
+        metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
+
   - name: specs-edge-integration-develop
     serial: true
     public: true
@@ -731,7 +837,7 @@ jobs: ##########################################################################
         - get: repo
           resource: buildpack-develop
       - aggregate:
-<% stacks[language].each do |stack| %>
+<% buildpacks[language]['stacks'].each do |stack| %>
         - do:
           - task: create-cf-space
             file: buildpacks-ci/tasks/create-cf-space/task.yml
@@ -752,7 +858,7 @@ jobs: ##########################################################################
               <% if language == 'php' %>
               COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
               <% end %>
-<% if skip_docker_start.include?(language) %>
+<% if buildpacks[language]['skip_docker_start'] %>
               SKIP_DOCKER_START: true
 <% else %>
             privileged: true
@@ -777,7 +883,7 @@ jobs: ##########################################################################
       - put: edge-environments
         params:
           release: edge-environments
-<% unless no_brats.include?(language) %>
+<% unless buildpacks[language]['skip_brats'] %>
   - name: specs-edge-brats-develop
     serial: true
     public: true
@@ -794,7 +900,7 @@ jobs: ##########################################################################
           passed:
           - specs-unit-develop
       - aggregate:
-<% stacks[language].each do |stack| %>
+<% buildpacks[language]['stacks'].each do |stack| %>
         - do:
           - task: create-cf-space
             file: buildpacks-ci/tasks/create-cf-space/task.yml
@@ -830,33 +936,6 @@ jobs: ##########################################################################
         release: edge-environments
 <% end %>
 
-<% if v3_buildpacks.include?(language) %>
-  - name: specs-v3-brats-develop
-    serial: true
-    public: false
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: buildpack
-          resource: buildpack-develop
-          trigger: true
-          passed:
-          - specs-unit-develop
-<% cnb_images.each do |image_type| %>
-        - get: cnb-<%= image_type %>-image
-          trigger: true
-          params:
-            skip_download: true
-<% end %>
-      - task: v3-brats
-        file: buildpacks-ci/tasks/run-bp-v3-brats/task.yml
-        params:
-          GINKGO_ATTEMPTS: 1
-          GINKGO_NODES: 1
-          CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
-        privileged: true
-<% end %>
-
   - name: specs-edge-shared-develop
     serial: true
     public: true
@@ -867,7 +946,7 @@ jobs: ##########################################################################
           resource: buildpack-develop
           trigger: true
           passed:
-<% unless no_brats.include?(language) %>
+<% unless buildpacks[language]['skip_brats'] %>
           - specs-edge-brats-develop
 <% end %>
           - specs-edge-integration-develop
@@ -881,7 +960,7 @@ jobs: ##########################################################################
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge develop spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
-<% unless non_lts.include? language %>
+<% unless buildpacks[language]['non_lts'] %>
   - name: specs-lts-integration-develop
     serial: true
     public: true
@@ -911,13 +990,13 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           params:
             CF_STACK: cflinuxfs2
-            GINKGO_ATTEMPTS: 4
+            GINKGO_ATTEMPTS: <%= language.to_s == 'php' ? 10 : 4 %>
             GINKGO_NODES: 6
             SKIP_WINDOWS_TESTS: true
             <% if language == 'php' %>
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             <% end %>
-<% if skip_docker_start.include?(language) %>
+<% if buildpacks[language]['skip_docker_start'] %>
             SKIP_DOCKER_START: true
 <% else %>
           privileged: true
@@ -936,7 +1015,7 @@ jobs: ##########################################################################
       put: lts-buildpack-specs-pool
       params:
         release: lts-buildpack-specs-pool
-<% unless no_brats.include?(language) %>
+<% unless buildpacks[language]['skip_brats'] %>
   - name: specs-lts-brats-develop
     serial: true
     public: true
@@ -960,7 +1039,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
           params:
             CF_STACK: cflinuxfs2
-            GINKGO_ATTEMPTS: 4
+            GINKGO_ATTEMPTS: <%= language.to_s == 'php' ? 10 : 4 %>
             GINKGO_NODES: 6
         ensure:
           task: delete-cf-space-cflinuxfs2
@@ -983,7 +1062,7 @@ jobs: ##########################################################################
           resource: buildpack-develop
           trigger: true
           passed:
-<% unless no_brats.include?(language) %>
+<% unless buildpacks[language]['skip_brats'] %>
           - specs-lts-brats-develop
 <% end %>
           - specs-lts-integration-develop
@@ -1032,7 +1111,7 @@ jobs: ##########################################################################
         params:
           repository: buildpack-artifacts
           rebase: true
-<% if compile_extensions.include? language %>
+<% if buildpacks[language]['compile_extensions'] %>
   - name: update-compile-extensions
     serial: true
     public: true
@@ -1153,7 +1232,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/build-offline-buildpacks-cutlass/task.yml
           params:
             LANGUAGE: hwc
-            CF_STACKS: "any"
+            CF_STACKS: "windows2012R2 windows2016 any"
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
         - task: create-offline-bosh-release

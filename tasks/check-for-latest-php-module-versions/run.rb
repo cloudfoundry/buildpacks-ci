@@ -14,7 +14,7 @@ def current_pecl_version(name)
   end.reject do |v|
     Gem::Version.new(v).prerelease? rescue false
   end.sort_by do |v|
-    Gem::Version.new(v) rescue v
+    Gem::Version.new(v)
   end
   versions.last
 end
@@ -22,17 +22,20 @@ end
 def current_github_version(url)
   repo = url.match(%r{^https://github.com/(.*)/releases$})[1]
   data = JSON.parse(open("https://api.github.com/repos/#{repo}/releases").read)
+  # puts data
   data.reject do |d|
     d['prerelease'] || d['draft']
   end.map do |d|
-    d['name'].gsub(/^\D*v/,'').gsub(/^version\s*/i,'').gsub(/\s*stable$/i,'')
+    d['tag_name'].gsub(/^\D*[v\-]/,'').gsub(/^version\s*/i,'').gsub(/\s*stable$/i,'')
   end.sort_by do |v|
-    Gem::Version.new(v) rescue v
+    Gem::Version.new(v)
   end.last
 end
 
 def url_for_type(name, type)
   case type.gsub(/Recipe$/,'')
+  when 'LibSodium'
+    'https://github.com/jedisct1/libsodium/releases'
   when 'PHPProtobufPecl'
     'https://github.com/allegro/php-protobuf/releases'
   when 'SuhosinPecl'
@@ -69,9 +72,9 @@ def url_for_type(name, type)
 end
 
 data = {
-  'PHP5' => YAML.load(open('robots-repo/binary-builds/php-extensions.yml').read),
-  'PHP7' => YAML.load(open('robots-repo/binary-builds/php7-extensions.yml').read),
-  'PHP72' => YAML.load(open('robots-repo/binary-builds/php72-extensions.yml').read)
+  'PHP5' => YAML.load(open('buildpacks-ci/tasks/build-binary-new/php-extensions.yml').read),
+  'PHP7' => YAML.load(open('buildpacks-ci/tasks/build-binary-new/php7-extensions.yml').read),
+  'PHP72' => YAML.load(open('buildpacks-ci/tasks/build-binary-new/php72-extensions.yml').read)
 }
 
 Tuple = Struct.new(:name, :klass)
@@ -124,6 +127,11 @@ tracker_client = TrackerClient.new(
 tracker_client.post_to_tracker(
   name: 'Build and/or Include new releases: PHP Modules',
   description: description,
-  tasks: ['Check each PHP module for updates', 'Rebuild PHP versions if any module updates', 'Update PHP Buildpack with new PHP versions', 'Copy 7.0 Extensions to 7.2 and remove solr and xdebug'],
+  tasks: [
+    'Check each PHP module for updates and update extension configs (in `buildpacks-ci`)',
+    'Copy 7.0 extension config to 7.2 and remove `solr`, but **keep** `sodium` entries in 7.2 (IDE diff tool might help)',
+    'Rebuild PHP versions if any module updates',
+    'Update PHP Buildpack with new PHP versions',
+  ],
   labels: %w(maintenance php)
 )

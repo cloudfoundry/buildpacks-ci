@@ -28,7 +28,7 @@
 
   'dotnet-sdk':       { buildpacks: {
                           'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.3X", "2.1.4X"], removal_strategy: 'keep_all' } },
-                        source_params: ['tag_regex: ^v\d+\.\d+\.\d+\+dependencies$'] },
+                        source_params: ['tag_regex: ^(v1\.\d+\.\d+|v2\.\d+\.\d+\+dependencies)$'] },
 
   'dotnet-runtime':   { buildpacks: {
                           'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X"], removal_strategy: 'keep_all' } } },
@@ -41,7 +41,7 @@
                         source_params: ['repo: Masterminds/glide', 'fetch_source: true'] },
 
   go:                 { buildpacks: {
-                          go: { lines: ["1.6.X", "1.7.X", "1.8.X", "1.9.X", "1.10.X", "1.11.X"], removal_strategy: 'keep_master' } } },
+                          go: { lines: ["1.8.X", "1.9.X", "1.10.X", "1.11.X"], removal_strategy: 'keep_latest_released' } } },
 
   godep:              { buildpacks: { go: {}},
                         source_type: 'github_releases',
@@ -84,13 +84,14 @@
                         source_type: 'nginx' },
 
   node:               { buildpacks: {
-                          nodejs: { lines: ["6.X.X", "8.X.X", "9.X.X", "10.X.X"], removal_strategy: 'keep_master'},
-                          ruby: { lines: ["6.X.X"], removal_strategy: 'keep_master'},
-                          'dotnet-core' => { lines: ["6.X.X"], removal_strategy: 'keep_master'}},
+                          nodejs: { lines: ["6.X.X", "8.X.X", "9.X.X", "10.X.X"], removal_strategy: 'keep_latest_released'},
+                          ruby: { lines: ["6.X.X"], removal_strategy: 'keep_latest_released'},
+                          'dotnet-core' => { lines: ["6.X.X"], removal_strategy: 'keep_latest_released'},
+                          'nodejs-cnb' => {lines: ["6.X.X", "8.X.X", "9.X.X", "10.X.X"], removal_strategy: 'keep_latest_released'}},
                         source_type: 'node'},
 
   php:                { buildpacks: {
-                          php: { lines: ["5.6.X", "7.0.X", "7.1.X", "7.2.X"], removal_strategy: 'keep_master'} },
+                          php: { lines: ["5.6.X", "7.0.X", "7.1.X", "7.2.X"], removal_strategy: 'keep_latest_released'} },
                         source_type: 'php'},
 
   pip:                { buildpacks: { python: {} },
@@ -101,13 +102,13 @@
                         source_type: 'pypi'},
 
   python:             { buildpacks: {
-                          python: { lines: ["2.7.X", "3.4.X", "3.5.X", "3.6.X", "3.7.X"], removal_strategy: 'keep_master' } } },
+                          python: { lines: ["2.7.X", "3.4.X", "3.5.X", "3.6.X", "3.7.X"], removal_strategy: 'keep_latest_released' } } },
 
   r:                  { buildpacks: {
-                          r: { lines: ["3.4.X", "3.5.X"], removal_strategy: 'keep_master' } } },
+                          r: { lines: ["3.4.X", "3.5.X"], removal_strategy: 'keep_latest_released' } } },
 
   ruby:               { buildpacks: {
-                          ruby: { lines: ["2.2.X", "2.3.X", "2.4.X", "2.5.X"], removal_strategy: 'keep_master' } } },
+                          ruby: { lines: ["2.2.X", "2.3.X", "2.4.X", "2.5.X"], removal_strategy: 'keep_latest_released' } } },
 
   rubygems:           { buildpacks: { ruby: {} },
                         source_type: 'rubygems_cli',
@@ -127,6 +128,8 @@
 
 stacks = ['cflinuxfs2', 'cflinuxfs3']
 windows_stacks = ['windows2012R2', 'windows2016']
+dotnet_sdk_lines_with_aspnetcore = ['2.1.3X', '2.1.4X']
+deps_extracted_from_dotnet_sdk = ['dotnet-runtime', 'dotnet-aspnetcore']
 
 skip_build = [
   { dep: 'python', line: '3.7.X', stack: 'cflinuxfs2' },
@@ -202,18 +205,35 @@ resources:
 <% end %>
 
 <% dependencies.values.map{|dep| dep[:buildpacks].keys}.flatten.uniq.each do |buildpack| %>
+<% if buildpack.to_s.include? '-cnb' %>
+- name: <%= buildpack %>-buildpack
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/<%= buildpack %>-buildpack.git
+    private_key: {{<%= buildpack %>-private-key}}
+    branch: master
+- name: <%= buildpack %>-buildpack-latest-released
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/<%= buildpack %>-buildpack.git
+    private_key: {{<%= buildpack %>-private-key}}
+    branch: master
+    # TODO: UNCOMMENT LINE BELOW ONCE WE HAVE A RELEASE
+    # tag_filter: v*
+<% else %>
 - name: <%= buildpack %>-buildpack
   type: git
   source:
     uri: git@github.com:cloudfoundry/<%= buildpack %>-buildpack.git
     private_key: {{<%= buildpack %>-buildpack-private-key}}
     branch: develop
-- name: <%= buildpack %>-buildpack-master
+- name: <%= buildpack %>-buildpack-latest-released
   type: git
   source:
     uri: git@github.com:cloudfoundry/<%= buildpack %>-buildpack.git
     private_key: {{<%= buildpack %>-buildpack-private-key}}
     branch: master
+<% end %>
 <% end %>
 
 <% dependencies.each do |dep_name, dep| %>
@@ -237,7 +257,7 @@ resources:
     <% end %>
 <% end %>
 
-<% if !dep[:third_party_hosted] && dep_name.to_s != 'dotnet-runtime' && dep_name.to_s != 'dotnet-aspnetcore' %>
+<% if !dep[:third_party_hosted] %>
 - name: buildpacks-bucket-<%=dep_name%>
   type: s3
   source:
@@ -278,7 +298,7 @@ jobs:
 <% end %>
 
 <% version_lines.each do |line| %>
-<% if dep_name.to_s != 'dotnet-runtime' && dep_name.to_s != 'dotnet-aspnetcore' %>
+<% unless deps_extracted_from_dotnet_sdk.include?(dep_name.to_s) %>
 - name: create-<%=dep_name%>-<%= line %>-story
   serial: true
   public: true
@@ -327,6 +347,27 @@ jobs:
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
 
+<% if dep_name.to_s == 'node' %>
+- name: copy-<%=dep_name%>-<%= line %>-bionic
+  plan:
+  - aggregate:
+    - get: buildpacks-ci
+    - get: source
+      resource: source-<%=dep_name%>-<%= line %>
+      trigger: true
+      version: every
+      passed: [ create-<%=dep_name%>-<%= line %>-story ]
+    - get: builds
+  - do:
+    - task: write-bionic-metadata
+      file: buildpacks-ci/tasks/write-bionic-metadata/task.yml
+    - put: bionic-builds-metadata
+      resource: builds
+      params:
+        repository: builds-artifacts
+        rebase: true
+<% end %>
+
 - name: build-<%=dep_name%>-<%= line %>
   serial: true
   public: true
@@ -360,6 +401,18 @@ jobs:
           resource: buildpacks-bucket-<%= dep_name %>
           params:
             file: <%= stack %>-artifacts/<%= dep_name.to_s == "nginx-static" ? "nginx" : dep_name %>*
+        <% if dep_name.to_s == 'dotnet-sdk' %>
+        - put: buildpacks-bucket-dotnet-runtime-<%= stack %>
+          resource: buildpacks-bucket-dotnet-runtime
+          params:
+            file: <%= stack %>-artifacts/dotnet-runtime*
+        <% if dotnet_sdk_lines_with_aspnetcore.include?(line) %>
+        - put: buildpacks-bucket-dotnet-aspnetcore-<%= stack %>
+          resource: buildpacks-bucket-dotnet-aspnetcore
+          params:
+            file: <%= stack %>-artifacts/dotnet-aspnetcore*
+        <% end %>
+        <% end %>
         <% end %>
         - put: builds-metadata-<%= stack %>
           resource: builds
@@ -369,116 +422,10 @@ jobs:
     <% end %>
     <% end %>
  <% end %>
-
-<% if dep_name.to_s == 'dotnet-sdk' %>
-- name: extract-dotnet-runtime-from-sdk-<%= line %>
-  serial: true
-  public: true
-  plan:
-    - aggregate:
-      - get: buildpacks-ci
-      - get: source
-        resource: source-<%=dep_name%>-<%= line %>
-        trigger: true
-        version: every
-        passed: [ build-<%=dep_name%>-<%= line %> ]
-      - get: builds
-    - aggregate:
-      - do:
-        <% stacks.each do |stack| %>
-        <% unless skip_build.include?({ dep: dep_name.to_s, line: line, stack: stack}) %>
-        - task: extract-dotnet-runtime-<%= stack %>
-          file: buildpacks-ci/tasks/extract-dotnet-runtime/task.yml
-          params:
-            STACK: <%= stack %>
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary/task.yml
-          params:
-            DEPENDENCY: dotnet-runtime
-            BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
-            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            AWS_DEFAULT_REGION: us-east-1
-            TEST_CREDENTIAL_FILTER_WHITELIST: BUCKET_NAME
-            STACK: <%= stack %>
-        - put: builds
-          params:
-            repository: builds-artifacts
-            rebase: true
-        <% end %>
-        <% end %>
-<% if ['2.1.3X', '2.1.4X'].include? line %> # TODO : hack to only extract aspnetcore for these versions
-- name: extract-dotnet-aspnetcore-from-sdk-<%= line %>
-  serial: true
-  public: true
-  plan:
-    - aggregate:
-      - get: buildpacks-ci
-      - get: source
-        resource: source-<%=dep_name%>-<%= line %>
-        trigger: true
-        version: every
-        passed: [ build-<%=dep_name%>-<%= line %> ]
-      - get: builds
-    - aggregate:
-      - do:
-        <% stacks.each do |stack| %>
-        <% unless skip_build.include?({ dep: dep_name.to_s, line: line, stack: stack}) %>
-        - task: extract-dotnet-aspnetcore-<%= stack %>
-          file: buildpacks-ci/tasks/extract-dotnet-aspnetcore/task.yml
-          params:
-            STACK: <%= stack %>
-        - task: push-binary
-          file: buildpacks-ci/tasks/push-binary/task.yml
-          params:
-            DEPENDENCY: dotnet-aspnetcore
-            BUCKET_NAME: {{buildpacks-binaries-s3-bucket}}
-            AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-            AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            AWS_DEFAULT_REGION: us-east-1
-            TEST_CREDENTIAL_FILTER_WHITELIST: BUCKET_NAME
-            STACK: <%= stack %>
-        - put: builds
-          params:
-            repository: builds-artifacts
-            rebase: true
-        <% end %>
-        <% end %>
-<% end %>
-<% end %>
-
-<% if dep_name.to_s == 'dotnet-runtime' || dep_name.to_s == 'dotnet-aspnetcore' %>
-- name: update-<%= dep_name %>-<%= line %>-dotnet-core
-  serial: true
-  public: true
-  plan:
-  - aggregate:
-    - get: buildpack
-      resource: dotnet-core-buildpack
-    - get: buildpack-master
-      resource: dotnet-core-buildpack-master
-    - get: buildpacks-ci
-    - get: builds
-    - get: source
-      resource: source-<%= dep_name %>-<%= line %>
-      version: every
-      trigger: true
-  - do:
-    - task: update-buildpack-dependency
-      file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
-      params:
-        VERSION_LINE: 'minor'
-        REMOVAL_STRATEGY: 'keep_all'
-    - put: dotnet-core-buildpack
-      params:
-        repository: artifacts
-        rebase: true
-<% end %>
-<% end %>
+ <% end %>
 
 <% dep[:buildpacks].each do |bp_name, bp| %>
   <% (bp[:lines] || ['latest']).each do |line| %>
-  <% if dep_name.to_s != 'dotnet-runtime' && dep_name.to_s != 'dotnet-aspnetcore' %>
 - name: update-<%=dep_name%>-<%= line %>-<%= bp_name %>
   serial: true
   public: true
@@ -486,18 +433,26 @@ jobs:
   - aggregate:
     - get: buildpack
       resource: <%= bp_name %>-buildpack
-    - get: buildpack-master
-      resource: <%= bp_name %>-buildpack-master
+    - get: buildpack-latest-released
+      resource: <%= bp_name %>-buildpack-latest-released
     - get: buildpacks-ci
     - get: source
       resource: source-<%=dep_name%>-<%= line %>
-      passed: [build-<%=dep_name%>-<%= line %>]
+      <% unless deps_extracted_from_dotnet_sdk.include?(dep_name.to_s) %>
+      <% must_pass = ["build-#{dep_name}-#{line}"] %>
+      <% must_pass.push("copy-#{dep_name}-#{line}-bionic") if bp_name.to_s.include? '-cnb' %>
+      passed: <%= must_pass %>
+      <% end %>
       version: every
       trigger: true
     - get: builds
   - do:
     - task: update-buildpack-dependency
+      <% if bp_name.to_s.include? '-cnb' %>
+      file: buildpacks-ci/tasks/update-cnb-dependency/task.yml
+      <% else %>
       file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
+      <% end %>
       params:
         VERSION_LINE: <%= if dep_name == :nginx && bp_name == :nginx then 'nginx' else get_version_line_type(bp[:lines]) end %>
         REMOVAL_STRATEGY: <%= bp.fetch(:removal_strategy, 'remove_all') %>
@@ -507,7 +462,6 @@ jobs:
         rebase: true
   <% end %>
   <% end %>
-<% end %>
 <% end %>
 
 groups:
@@ -522,16 +476,13 @@ groups:
     - create-<%= dep_name %>-new-line-story
     <% end %>
     <% version_lines.each do |line| %>
-    <% if dep_name.to_s != 'dotnet-runtime' && dep_name.to_s != 'dotnet-aspnetcore' %>
+    <% unless deps_extracted_from_dotnet_sdk.include?(dep_name.to_s) %>
     - create-<%=dep_name%>-<%= line %>-story
     - finish-<%=dep_name%>-<%= line %>-story
+    <% if dep_name.to_s == 'node' %>
+    - copy-<%=dep_name%>-<%= line %>-bionic
+    <% end %>
     - build-<%=dep_name%>-<%= line %>
-    <% end %>
-    <% if dep_name.to_s == 'dotnet-sdk' %>
-    - extract-dotnet-runtime-from-sdk-<%= line %>
-    <% if ['2.1.3X', '2.1.4X'].include? line %> # TODO : hack to only extract aspnetcore for these versions
-    - extract-dotnet-aspnetcore-from-sdk-<%= line %>
-    <% end %>
     <% end %>
     <% end %>
     <% dep[:buildpacks].each do |bp_name, bp| %>
@@ -552,16 +503,13 @@ groups:
     - create-<%= dep_name %>-new-line-story
     <% end %>
     <% version_lines.each do |line| %>
-    <% if dep_name.to_s != 'dotnet-runtime' && dep_name.to_s != 'dotnet-aspnetcore' %>
+    <% unless deps_extracted_from_dotnet_sdk.include?(dep_name.to_s) %>
     - create-<%=dep_name%>-<%= line %>-story
     - finish-<%=dep_name%>-<%= line %>-story
+    <% if dep_name.to_s == 'node' %>
+    - copy-<%=dep_name%>-<%= line %>-bionic
+    <% end %>
     - build-<%=dep_name%>-<%= line %>
-    <% end %>
-    <% if dep_name.to_s == 'dotnet-sdk' %>
-    - extract-dotnet-runtime-from-sdk-<%= line %>
-    <% if ['2.1.3X', '2.1.4X'].include? line %> # TODO : hack to only extract aspnetcore for these versions
-    - extract-dotnet-aspnetcore-from-sdk-<%= line %>
-    <% end %>
     <% end %>
     <% end %>
     <% dep[:buildpacks].each do |bp_name, bp| %>

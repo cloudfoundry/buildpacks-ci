@@ -3,17 +3,21 @@ require 'json'
 require 'yaml'
 require 'tmpdir'
 require_relative './dependencies'
+require_relative './php_manifest'
 
 CFLINUXFS2 = 'cflinuxfs2'
 CFLINUXFS3 = 'cflinuxfs3'
 ALL_STACKS = [CFLINUXFS2, CFLINUXFS3]
 WINDOWS_STACKS = ['windows2012R2', 'windows2016']
 
+# Stacks we dont want to process (most likely V3 stacks)
+IGNORED_STACKS = ['bionic']
+
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
 manifest = YAML.load_file('buildpack/manifest.yml')
-manifest_master = YAML.load_file('buildpack-master/manifest.yml') # rescue { 'dependencies' => [] }
+manifest_latest_released = YAML.load_file('buildpack-latest-released/manifest.yml') # rescue { 'dependencies' => [] }
 
 data = JSON.parse(open('source/data.json').read)
 source_name = data.dig('source', 'name')
@@ -34,6 +38,8 @@ builds = {}
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
   stack = %r{#{resource_version}-(.*)\.json$}.match(stack_dependency_build)[1]
+  next if IGNORED_STACKS.include?(stack)
+
   stacks = (stack == 'any-stack') ? ALL_STACKS : [stack]
   stacks = WINDOWS_STACKS if source_name == 'hwc'
   total_stacks = total_stacks | stacks
@@ -58,7 +64,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
       ENV['VERSION_LINE'],
       removal_strategy,
       manifest['dependencies'],
-      manifest_master['dependencies']
+      manifest_latest_released['dependencies']
   ).switch
 
   new_versions = manifest['dependencies']
@@ -132,6 +138,7 @@ if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
   php_defaults[varname] = resource_version
   if update_default
     php_defaults['PHP_DEFAULT'] = resource_version
+    manifest['default_versions'] = PHPManifest.update_defaults(manifest, resource_version)
   end
 end
 

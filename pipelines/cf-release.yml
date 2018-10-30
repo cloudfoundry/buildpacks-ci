@@ -76,7 +76,7 @@ resources:
   - name: gcp-stemcell
     type: bosh-io-stemcell
     source:
-      name: bosh-google-kvm-ubuntu-trusty-go_agent
+      name: bosh-google-kvm-ubuntu-xenial-go_agent
   - name: cf-release-cf-deployment
     type: bosh-deployment
     source:
@@ -96,11 +96,9 @@ resources:
     source:
       repository: cloudfoundry/cflinuxfs2-release
   - name: cflinuxfs3-bosh-release
-    type: github-release
+    type: bosh-io-release
     source:
-      user: cloudfoundry
-      repository: cflinuxfs3-release
-      access_token: {{buildpacks-github-token}}
+      repository: cloudfoundry/cflinuxfs3-release
   - name: pivnet-production
     type: pivnet
     source:
@@ -309,8 +307,7 @@ jobs:
             ops_files:
               - cf-deployment/operations/use-latest-stemcell.yml
               - cf-deployment/operations/use-compiled-releases.yml
-              - buildpacks-ci/deployments/operations/cflinuxfs3.yml
-              - buildpacks-ci/deployments/operations/add-cflinuxfs3-buildpacks.yml
+              - cf-deployment/operations/experimental/add-cflinuxfs3.yml
               - buildpacks-ci/deployments/operations/no-canaries.yml
               - bump-buildpacks-opsfile/opsfile.yml
             vars:

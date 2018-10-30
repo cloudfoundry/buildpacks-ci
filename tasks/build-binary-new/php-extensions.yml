@@ -4,12 +4,12 @@ native_modules:
   md5: 3d7a3894e6b191127be7987fbae0e157
   klass: RabbitMQRecipe
 - name: lua
-  version: 5.3.4
-  md5: 53a9c68bcc0eda58bdc2095ad5cdfc63
+  version: 5.3.5
+  md5: 4f4b4f323fd3514a68e0ab3da8ce3455
   klass: LuaRecipe
 - name: hiredis
-  version: 0.13.3
-  md5: 43dca1445ec6d3b702821dba36000279
+  version: 0.14.0
+  md5: 6d565680a4af0d2e261abbc3e3431b2b
   klass: HiredisRecipe
 - name: snmp
   version: nil
@@ -20,16 +20,16 @@ native_modules:
   md5: b3958716b4e53ddc5992e6c49d97e819
   klass: LibmemcachedRecipe
 - name: librdkafka
-  version: 0.11.4
-  md5: ca1e5f8add289323da134279d2a8f79e
+  version: 0.11.5
+  md5: 90bb43499252317ae55723d32ccacf18
   klass: LibRdKafkaRecipe
 - name: cassandracppdriver
   version: 2.9.0
   md5: e686d261ce6960f3f5813914116863d0
   klass: CassandraCppDriverRecipe
 - name: unixodbc
-  version: 2.3.6
-  md5: a8629fd2953b04b4639d0a9d8a5cf9d1
+  version: 2.3.7
+  md5: 274a711b0c77394e052db6493840c6f9
   klass: UnixOdbcRecipe
 
 extensions:
@@ -83,8 +83,8 @@ extensions:
   md5: cde37cae4fafbb66903ce81d44f7f492
   klass: PeclRecipe
 - name: mongodb
-  version: 1.5.1
-  md5: 1ba9c01d39e6e4091876e71125fb948d
+  version: 1.5.3
+  md5: 20b0beb6171f36671ee194af35454092
   klass: PeclRecipe
 - name: msgpack
   version: 0.5.7
@@ -99,9 +99,9 @@ extensions:
   md5: a304ca632b0d7c5710d5590ac06248a9
   klass: PeclRecipe
 - name: redis
-  version: 4.0.2
-  md5: 28f0876eff1b83b4503de80da7dc2637
-  klass: PeclRecipe
+  version: 4.1.1
+  md5: 32488f1d214e60afc5e027ae2d1e895f
+  klass: RedisPeclRecipe
 - name: solr
   version: 2.4.0
   md5: 2c9accf66681a3daaaf371bc07e44902
@@ -133,8 +133,8 @@ extensions:
   md5: c8538be13c90fba9dc7abef1c2cfbdc5
   klass: AmqpPeclRecipe
 - name: ioncube
-  version: 10.2.2
-  md5: e5cd0c672aee7fa13aa483dd6951a085
+  version: 10.2.5
+  md5: 27f116e08b96928067f2c9730909cf2d
   klass: IonCubeRecipe
 - name: lua
   version: 1.1.0
@@ -153,8 +153,8 @@ extensions:
   md5: nil
   klass: OdbcRecipe
 - name: phalcon
-  version: 3.4.0
-  md5: 821068fe1907bf29e12d0476200117e3
+  version: 3.4.1
+  md5: ffacf0eb3bfd6097077099c66ce48103
   klass: PhalconRecipe
 - name: phpiredis
   version: 1.0.0
@@ -169,9 +169,9 @@ extensions:
   md5: 0c26402752b0aff69e4b891f062a52bf
   klass: SuhosinPeclRecipe
 - name: twigpecl
-  version: 1.35.3
+  version: 1.35.4
   notes: stick on 1.x, 2.x does not need to be compiled with PHP
-  md5: 0f6e3892bcfe65662a9e2397e186e19d
+  md5: b96f3fb0a159dded2b65381678a1911c
   klass: TwigPeclRecipe
 - name: xcachepecl
   version: 3.2.0

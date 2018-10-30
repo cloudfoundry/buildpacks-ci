@@ -8,8 +8,9 @@ inputs:
   - name: buildpacks-ci
   - name: buildpack
 run:
-  path: buildpacks-ci/tasks/run-bp-v3-brats/run.sh
+  path: buildpacks-ci/tasks/run-bp-v3-integration/run.sh
 params:
   GINKGO_ATTEMPTS:
   GINKGO_NODES:
   CNB_BUILD_IMAGE:
+  CNB_RUN_IMAGE:

@@ -18,13 +18,13 @@ pushd source
 
   (cd src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager && go install)
 
-  if [[ "$CF_STACKS" == "any" ]]; then
-    buildpack-packager build --cached --any-stack
-  else
-    for stack in $CF_STACKS; do
-      buildpack-packager build --cached "--stack=$stack"
-    done
-  fi
+  for stack in $CF_STACKS; do
+      if [[ "$stack" == "any" ]]; then
+        buildpack-packager build --cached --any-stack
+      else
+        buildpack-packager build --cached "--stack=$stack"
+      fi
+  done
 popd
 
 # shellcheck disable=SC2035

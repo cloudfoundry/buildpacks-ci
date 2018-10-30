@@ -4,14 +4,15 @@ require 'yaml'
 
 class BuildpackPivnetMetadataWriter
 
-  attr_reader :buildpack, :output_dir, :buildpack_dir, :cached_buildpack_filenames, :recent_changes_filename
+  attr_reader :buildpack, :output_dir, :buildpack_dir, :cached_buildpack_filenames, :recent_changes_filename, :lts_product
 
-  def initialize(buildpack, output_dir, buildpack_dir, cached_buildpack_filenames, recent_changes_filename)
+  def initialize(buildpack, output_dir, buildpack_dir, cached_buildpack_filenames, recent_changes_filename, lts_product)
     @buildpack = buildpack
     @output_dir = output_dir
     @buildpack_dir = buildpack_dir
     @cached_buildpack_filenames = cached_buildpack_filenames
     @recent_changes_filename = recent_changes_filename
+    @lts_product = lts_product
   end
 
   def get_version
@@ -21,15 +22,17 @@ class BuildpackPivnetMetadataWriter
   end
 
   def run!
-    metadata_yml = File.join(output_dir, "#{buildpack}.yml")
+    metadata_file_name = lts_product == "true" ? "#{buildpack}-lts.yml" : "#{buildpack}.yml"
+    metadata_yml = File.join(output_dir, metadata_file_name)
+    version = lts_product == "true" ? product_version : get_version
 
     metadata = {}
     metadata['release'] = {
-        'version' => product_version,
-        'release_type' => release_type,
-        'eula_slug' => eula_slug,
-        'release_notes_url' => release_notes_url,
-        'availability' => availability
+      'version' => version,
+      'release_type' => release_type,
+      'eula_slug' => eula_slug,
+      'release_notes_url' => release_notes_url,
+      'availability' => availability
     }
 
     if buildpack != 'dotnet-core'
@@ -41,10 +44,10 @@ class BuildpackPivnetMetadataWriter
     cached_buildpack_filenames.each do |filename|
       stack = filename.match(/.*_buildpack-cached-?(.*)?-v.*.zip/)[1]
       metadata['product_files'].push({
-                                         'file' => filename,
-                                         'upload_as' => display_name(stack),
-                                         'description' => description
-                                     })
+        'file' => filename,
+        'upload_as' => display_name(stack),
+        'description' => description
+      })
     end
 
     puts "Writing metadata to #{metadata_yml}"
@@ -52,6 +55,22 @@ class BuildpackPivnetMetadataWriter
     puts "\n\n"
 
     File.write(metadata_yml, metadata.to_yaml)
+  end
+end
+
+def formatted_name
+  if buildpack == "dotnet-core"
+    ".NET Core"
+  elsif buildpack == 'php'
+    "PHP"
+  elsif buildpack == 'nodejs'
+    "NodeJS"
+  elsif buildpack == 'nginx'
+    "NGINX"
+  elsif buildpack == 'hwc'
+    "HWC"
+  else
+    "#{buildpack.capitalize}"
   end
 end
 
@@ -74,7 +93,8 @@ def release_notes_url
 end
 
 def availability
-  "All Users"
+  (lts_product != 'true' || buildpack == 'hwc') ? "Admins Only" : "All Users"
+  # "All Users"
 end
 
 def eccn
@@ -88,6 +108,8 @@ end
 def display_name(stack = '')
   if !stack.empty?
     "#{formatted_name} Buildpack #{stack} (offline)"
+  elsif lts_product != 'true' && (buildpack == 'hwc' || buildpack == 'binary')
+    "#{formatted_name} Buildpack for PAS 2.2 (offline)"
   else
     "#{formatted_name} Buildpack (offline)"
   end
@@ -95,16 +117,4 @@ end
 
 def description
   File.read(recent_changes_filename)
-end
-
-def formatted_name
-  if buildpack == "dotnet-core"
-    ".NET Core"
-  elsif buildpack == 'php'
-    "PHP"
-  elsif buildpack == 'nodejs'
-    "NodeJS"
-  else
-    "#{buildpack.capitalize}"
-  end
 end
