@@ -5,10 +5,6 @@ set -o pipefail
 
 cd buildpack
 
-export GOPATH=$PWD
-export GOBIN=$PWD/.bin
-export PATH=$GOBIN:$PATH
-
 # for the PHP buildpack
 if [ -e run_tests.sh ]; then
   export TMPDIR=$(mktemp -d)
