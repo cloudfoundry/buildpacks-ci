@@ -211,8 +211,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: cf-sample-app-go-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -248,8 +249,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: cf-sample-app-rails-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -284,8 +286,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: pong-matcher-rails-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -320,8 +323,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: pong-matcher-sails-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -356,8 +360,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: pong-matcher-slim-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -392,8 +397,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: pong-matcher-django-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -428,8 +434,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: pong-matcher-go-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -464,8 +471,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: spring-music-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -500,8 +508,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: cf-ex-phpmyadmin-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -536,8 +545,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: cf-ex-drupal-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -572,8 +582,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: cf-ex-code-igniter-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -608,8 +619,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: cf-ex-phppgadmin-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -644,8 +656,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: cf-ex-php-info-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -680,8 +693,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: cf-ex-pgbouncer-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -716,8 +730,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: cf-ex-composer-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -752,8 +767,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: cf-ex-phalcon-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
@@ -788,8 +804,9 @@ jobs: ##########################################################################
           params:
             ORG: {{pws-org}}
             TARGET: api.run.pivotal.io
-            USERNAME: {{pws-username}}
-            PASSWORD: {{pws-password}}
+            USERNAME: {{pws_buildpacks_cf_client}}
+            PASSWORD: {{pws_buildpacks_cf_secret}}
+            CREDS_FLAG: "--client-credentials"
         - task: dotnet-core-hello-world-smoke-test-<%= stack %>
           attempts: 3
           file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
