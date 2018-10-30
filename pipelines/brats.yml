@@ -134,6 +134,7 @@ jobs:
           trigger: true
       - do:
         - task: create-cf-space
+          attempts: 3
           file: buildpacks-ci/tasks/create-cf-space/task.yml
           params:
             ORG: pivotal
@@ -195,6 +196,7 @@ jobs:
 <% stacks[language].each do |stack| %>
         - do:
           - task: create-cf-space
+            attempts: 3
             file: buildpacks-ci/tasks/create-cf-space/task.yml
             output_mapping: {cf-space: cf-space-<%= stack %>}
             params:
