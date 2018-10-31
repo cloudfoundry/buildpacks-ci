@@ -2,7 +2,7 @@ FROM ruby:2.3-slim
 
 ENV LANG="C.UTF-8"
 
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y curl gnupg apt-transport-https
 
 COPY config/google-chrome-apt-key.pub /tmp/
 RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
@@ -11,8 +11,8 @@ RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >
 RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
   && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 
-RUN apt-key adv --keyserver keys.gnupg.net --recv-keys 09617FD37CC06B54 \
-    && echo "deb http://dist.crystal-lang.org/apt crystal main" > /etc/apt/sources.list.d/crystal.list
+RUN curl -sL "https://keybase.io/crystal/pgp_keys.asc" | apt-key add - \
+    && echo "deb https://dist.crystal-lang.org/apt crystal main" | tee /etc/apt/sources.list.d/crystal.list
 
 RUN apt-get update \
   && apt-get -y install \
@@ -24,14 +24,12 @@ RUN apt-get update \
   google-cloud-sdk \
   iptables \
   jq \
-  libmysqlclient-dev \
+  default-libmysqlclient-dev \
   libpq-dev \
   libsqlite3-dev \
   libgconf-2-4 \
   lsb-release \
-  module-init-tools \
-  npm \
-  php5 \
+  php7.0 \
   python-dev \
   python-pip \
   shellcheck \
@@ -106,8 +104,7 @@ RUN gem update --system \
   && gem install bundler -v 1.15.4
 COPY Gemfile /usr/local/Gemfile
 COPY Gemfile.lock /usr/local/Gemfile.lock
-RUN cd /usr/local && bundle install
-RUN bundle binstub bundler --force
+RUN cd /usr/local && bundle install && bundle binstub bundler --force
 
 #install fly-cli
 RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly \
