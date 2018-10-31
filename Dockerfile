@@ -30,6 +30,7 @@ RUN apt-get update \
   libgconf-2-4 \
   lsb-release \
   php7.0 \
+  pkgconf \
   python-dev \
   python-pip \
   shellcheck \
