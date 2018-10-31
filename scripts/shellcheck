@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+dir="$( dirname "${BASH_SOURCE[0]}" )/.."
+
+pushd "$dir"
+  DIRECTORY_TO_CHECK="$(pwd)" "$dir/tasks/run-shellcheck/run.rb"
+popd

@@ -15,8 +15,8 @@ fi
 cf auth admin "$cf_password" || (sleep 4 && cf auth admin "$cf_password")
 set -x
 
-custom_buildpacks=$(cf buildpacks | tail -n +4 | cut -d ' ' -f1 | grep -v "hwc_buildpack\|apt_buildpack\|binary_buildpack\|credhub_buildpack\|dotnet_core_buildpack\|go_buildpack\|nginx_buildpack\|nodejs_buildpack\|php_buildpack\|python_buildpack\|r_buildpack\|ruby_buildpack\|staticfile_buildpack\|java_buildpack" || true)
-null_buildpacks=$(cf buildpacks | tail -n +4 | grep -v "cflinuxfs2\|cflinuxfs3\|windows2012R2\|windows2016" | cut -d ' ' -f1 || true)
+custom_buildpacks=$(cf buildpacks | tail -n +4 | cut -d ' ' -f1 | grep -v 'hwc_buildpack\|apt_buildpack\|binary_buildpack\|credhub_buildpack\|dotnet_core_buildpack\|go_buildpack\|nginx_buildpack\|nodejs_buildpack\|php_buildpack\|python_buildpack\|r_buildpack\|ruby_buildpack\|staticfile_buildpack\|java_buildpack' || true)
+null_buildpacks=$(cf buildpacks | tail -n +4 | grep -v 'cflinuxfs2\|cflinuxfs3\|windows2012R2\|windows2016' | cut -d ' ' -f1 || true)
 
 for bp in $custom_buildpacks $null_buildpacks; do
   cf delete-buildpack "$bp" -f
