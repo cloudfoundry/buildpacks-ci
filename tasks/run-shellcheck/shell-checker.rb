@@ -4,11 +4,11 @@ require 'set'
 
 class ShellChecker
   def check_shell_files(directory:)
-    ENV['SHELLCHECK_OPTS']='-e SC2164'
+    ENV['SHELLCHECK_OPTS']='-e SC2164 -e SC1091'
     shell_files = find_shell_files(directory)
     shellcheck_results = {}
     shell_files.map do |shell_file_path|
-      shellcheck_results[shell_file_path] = `shellcheck -x #{shell_file_path}`
+      shellcheck_results[shell_file_path] = `shellcheck #{shell_file_path}`
     end
 
     shellcheck_results
