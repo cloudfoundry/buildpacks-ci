@@ -25,7 +25,7 @@ EOF
   fi
 
   rm -rf blobs
-  [ -f config/blobs.yml ] || echo -e "---\n{}" > config/blobs.yml
+  [ -f config/blobs.yml ] || echo -e "---\\n{}" > config/blobs.yml
   for name in $( bosh2 blobs | grep -- '-buildpack/.*buildpack' | awk '{print $1}' ); do
     bosh2 remove-blob "$name"
   done

@@ -7,7 +7,7 @@ BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. >/dev/null 2>&1 && pwd )
 deployment_name=${1-""}
 
 usage() {
-  echo -e "Usage: \n./bin/generate_concourse_manifests <deployment name>"
+  echo -e "Usage: \\n./bin/generate_concourse_manifests <deployment name>"
 }
 
 deployment_name=${1-""}
@@ -17,7 +17,7 @@ deployment_path=${BASE_DIR}/deployments/${deployment_name}
 if [ "$deployment_name" == "" ] || [ "$deployment_name" == "help" ]; then
   usage
 elif [ ! -d "$deployment_path" ]; then
-  echo -e "ERROR! Deployment not found: ${deployment_path}\n"
+  echo -e "ERROR! Deployment not found: ${deployment_path}\\n"
   usage
 else
   #generate concourse manifests if targeting a concourse deployment

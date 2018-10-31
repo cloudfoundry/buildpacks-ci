@@ -4,10 +4,11 @@ require 'set'
 
 class ShellChecker
   def check_shell_files(directory:)
+    ENV['SHELLCHECK_OPTS']='-e SC2164'
     shell_files = find_shell_files(directory)
     shellcheck_results = {}
     shell_files.map do |shell_file_path|
-      shellcheck_results[shell_file_path] = `shellcheck #{shell_file_path}`
+      shellcheck_results[shell_file_path] = `shellcheck -x #{shell_file_path}`
     end
 
     shellcheck_results
@@ -19,7 +20,7 @@ class ShellChecker
     paths_matched = Set.new
 
     Find.find(directory) do |file_path|
-      Find.prune if path_begins_with_dot?(file_path)
+      Find.prune if path_begins_with_dot?(file_path) || vendor_dir?(file_path)
       next if File.zero?(file_path)
 
       if FileTest.file?(file_path)
@@ -49,5 +50,9 @@ class ShellChecker
 
   def ends_with_sh?(file_path)
     Pathname.new(file_path).basename.to_s.end_with?('.sh')
+  end
+
+  def vendor_dir?(file_path)
+    file_path.include? '/vendor/'
   end
 end

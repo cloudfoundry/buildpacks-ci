@@ -7,7 +7,8 @@ cd buildpack
 
 # for the PHP buildpack
 if [ -e run_tests.sh ]; then
-  export TMPDIR=$(mktemp -d)
+  TMPDIR="$(mktemp -d)"
+  export TMPDIR
   pip install -r requirements.txt
 fi
 
