@@ -1,4 +1,4 @@
-FROM ruby:2.3.1-slim
+FROM ruby:2.3-slim
 
 ENV LANG="C.UTF-8"
 
@@ -43,7 +43,6 @@ RUN apt-get update \
 
 RUN curl -sSL https://get.docker.com/ | sh
 
-RUN apt-get -y upgrade git
 RUN git config --global user.email "cf-buildpacks-eng@pivotal.io"
 RUN git config --global user.name "CF Buildpacks Team CI Server"
 RUN git config --global core.pager cat
