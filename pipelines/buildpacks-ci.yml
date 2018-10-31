@@ -27,12 +27,12 @@ resources:
   - name: concourse2tracker
     type: concourse2tracker
 
-  - name: buildpacks-ci-dockerfile-master
+  - name: buildpacks-ci-dockerfile-develop
     type: git
     check_every: 15s
     source:
       uri: {{buildpacks-ci-git-uri}}
-      branch: master
+      branch: develop
       paths: [ "Dockerfile", "build/*", "Gemfile", "Gemfile.lock"]
       private_key: {{buildpacks-ci-private-key}}
 
@@ -109,11 +109,11 @@ jobs:
     serial: true
     public: true
     plan:
-      - get: buildpacks-ci-dockerfile-master
+      - get: buildpacks-ci-dockerfile-develop
         trigger: true
       - put: buildpacks-ci-image
         params:
-          build: buildpacks-ci-dockerfile-master
+          build: buildpacks-ci-dockerfile-develop
           build_args:
             squash: squash
         attempts: 2
