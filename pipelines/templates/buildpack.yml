@@ -350,6 +350,12 @@ jobs: ##########################################################################
         - do:
           - task: ginkgo
             file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
+<% if language == "php" %>
+            privileged: true
+            params:
+              DOCKER_START: true
+<% end %>
+
 
   - name: create-buildpack-release-story
     serial: true
