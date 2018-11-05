@@ -380,7 +380,6 @@ jobs: ##########################################################################
             stemcells:
               - gcp-stemcell/*.tgz
             ops_files:
-              - cf-deployment/operations/use-compiled-releases.yml
               - buildpacks-ci/deployments/operations/no-canaries.yml
               - cflinuxfs2-release-artifacts/use-dev-release-opsfile.yml
               - cf-deployment/operations/use-latest-stemcell.yml
