@@ -69,6 +69,14 @@ resources:
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
+  - name: lts-environments
+    type: pool
+    source:
+      branch: master
+      pool: lts-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
   - name: lts-shared-environments
     type: pool
     source:
@@ -116,6 +124,9 @@ jobs:
     public: true
     plan:
       - aggregate:
+        - put: lts-environments
+          params:
+            acquire: true
 <% unless new_brats.include?(language) %>
         - put: cf-environments
           resource: lts-shared-environments
@@ -160,11 +171,15 @@ jobs:
           ensure:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task.yml
-<% unless new_brats.include?(language) %>
         ensure:
-          put: lts-shared-environments
-          params:
-            release: cf-environments
+          aggregate:
+          - put: lts-environments
+            params:
+              release: lts-environments
+<% unless new_brats.include?(language) %>
+          - put: lts-shared-environments
+            params:
+              release: cf-environments
 <% end %>
 <% end %>
   - name: brats-<%= language %>-edge

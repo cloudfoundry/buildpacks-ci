@@ -296,6 +296,14 @@ resources: #####################################################################
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
 <% unless buildpacks[language]['non_lts'] %>
+  - name: lts-environments
+    type: pool
+    source:
+      branch: master
+      pool: lts-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
   - name: lts-buildpack-specs-pool
     type: pool
     source:
@@ -519,6 +527,9 @@ jobs: ##########################################################################
     public: true
     plan:
       - aggregate:
+        - put: lts-environments
+          params:
+            acquire: true
         - put: lts-buildpack-specs-pool
           params:
             claim: <%= language %>
@@ -587,9 +598,13 @@ jobs: ##########################################################################
         username: concourse
         icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
     ensure:
-      put: lts-buildpack-specs-pool
-      params:
-        release: lts-buildpack-specs-pool
+      aggregate:
+      - put: lts-environments
+        params:
+          release: lts-environments
+      - put: lts-buildpack-specs-pool
+        params:
+          release: lts-buildpack-specs-pool
 
 <% end %>
   - name: ship-it
@@ -972,6 +987,9 @@ jobs: ##########################################################################
     public: true
     plan:
       - aggregate:
+        - put: lts-environments
+          params:
+            acquire: true
         - put: lts-buildpack-specs-pool
           params:
             claim: <%= language %>
@@ -1018,15 +1036,22 @@ jobs: ##########################################################################
         username: concourse
         icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
     ensure:
-      put: lts-buildpack-specs-pool
-      params:
-        release: lts-buildpack-specs-pool
+      aggregate:
+      - put: lts-environments
+        params:
+          release: lts-environments
+      - put: lts-buildpack-specs-pool
+        params:
+          release: lts-buildpack-specs-pool
 <% unless buildpacks[language]['skip_brats'] %>
   - name: specs-lts-brats-develop
     serial: true
     public: true
     plan:
       - aggregate:
+        - put: lts-environments
+          params:
+            acquire: true
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-develop
@@ -1050,6 +1075,10 @@ jobs: ##########################################################################
         ensure:
           task: delete-cf-space-cflinuxfs2
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
+    ensure:
+      put: lts-environments
+      params:
+        release: lts-environments
     on_failure:
       put: failure-alert
       params:
