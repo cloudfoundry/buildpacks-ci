@@ -481,6 +481,7 @@ jobs: ##########################################################################
             CI_CF_PASSWORD: {{<%= rootfs_name %>-cf-password}}
             APPS_DOMAIN: <%= rootfs_name %>.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
+            STACK: <%= rootfs_name %>
         - task: cats
           attempts: 3
           file: cf-deployment-concourse-tasks/run-cats/task.yml
