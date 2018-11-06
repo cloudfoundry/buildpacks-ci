@@ -1,5 +1,5 @@
 require "spec2"
-require "tempfile"
+require "file_utils"
 require "./httpclient_mock"
 require "../../src/depwatcher/github_releases"
 
@@ -20,10 +20,14 @@ Spec2.describe Depwatcher::GithubReleases do
 
   describe "#in" do
     let(dirname) {
-      File.join(Tempfile.dirname, "github_releases_spec-" + Random.new().urlsafe_base64())
+      File.join(Dir.tempdir, "github_releases_spec-" + Random.new().urlsafe_base64())
     }
     before do
       Dir.mkdir dirname
+    end
+
+    after do
+      FileUtils.rm_rf dirname
     end
     context "when fetching a binary" do
       it "returns a release object for the version" do
