@@ -5,7 +5,9 @@ set -o pipefail
 "./cf-space/login"
 cd buildpack
 
-export GOPATH=$PWD
+if [ ! -f ./go.mod ]; then
+    export GOPATH=$PWD
+fi
 export GOBIN=$PWD/.bin
 export PATH=$GOBIN:$PATH
 
