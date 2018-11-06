@@ -6,6 +6,11 @@ set -o pipefail
 
 set -x
 
+if [[ ${DOCKER_START} == "true" ]]; then
+  echo "Start Docker"
+  ../buildpacks-ci/scripts/start-docker >/dev/null
+fi
+
 if [ "$LANGUAGE" = "multi" ]; then
   update_dir="src/compile"
 elif [ "$LANGUAGE" = "dotnet-core" ]; then

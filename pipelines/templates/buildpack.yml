@@ -1147,6 +1147,9 @@ jobs: ##########################################################################
         file: buildpacks-ci/tasks/update-libbuildpack/task.yml
         <% end %>
         params:
+          <% if language == 'php' %>
+          DOCKER_START: true
+          <% end %>
           LANGUAGE: <%= language %>
       - put: buildpack-develop
         params:
