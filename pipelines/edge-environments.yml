@@ -1,7 +1,7 @@
 <% environments = ['brink', 'fringe', 'rim']
    locks_per_environment = 4
    opsfiles = [
-     '../cf-deployment/operations/windows-cell.yml',
+     '../cf-deployment/operations/windows2012R2-cell.yml',
      '../cf-deployment/operations/windows2016-cell.yml',
      '../cf-deployment/operations/use-latest-stemcell.yml',
      '../cf-deployment/operations/use-latest-windows-stemcell.yml',

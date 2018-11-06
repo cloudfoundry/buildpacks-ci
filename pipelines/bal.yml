@@ -229,7 +229,7 @@ jobs:
             - diego-release-artifacts/use-diego-dev-release.yml
             - buildpacks-ci/deployments/operations/no-canaries.yml
             - cf-deployment/operations/scale-to-one-az.yml
-            - cf-deployment/operations/windows-cell.yml
+            - cf-deployment/operations/windows2012R2-cell.yml
             - cf-deployment/operations/windows2016-cell.yml
             - cf-deployment/operations/use-latest-windows2016-stemcell.yml
             - cf-deployment/operations/use-latest-windows-stemcell.yml
