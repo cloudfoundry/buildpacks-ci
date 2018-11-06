@@ -1,8 +1,8 @@
-FROM crystallang/crystal:0.24.2
+FROM crystallang/crystal:latest
 
 ADD . /src
 WORKDIR /src
-RUN crystal deps && crystal spec
+RUN shards && crystal spec --no-debug
 RUN shards build --production
 
 FROM ubuntu:xenial
