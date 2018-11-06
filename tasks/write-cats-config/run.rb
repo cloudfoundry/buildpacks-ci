@@ -10,7 +10,7 @@ credhub_mode = ENV.fetch('CREDHUB_MODE')
 credhub_client = ENV.fetch('CREDHUB_CLIENT')
 credhub_secret = ENV.fetch('CREDHUB_CLIENT_SECRET')
 windows_stack = ENV.fetch('WINDOWS_STACK')
-stack = ENV.fetch('STACK')
+stacks = ENV.fetch('STACKS','')
 
 cats_config = {
   "admin_password" => admin_password,
@@ -47,9 +47,9 @@ cats_config = {
   "verbose" => false
 }
 
-if stack != '' && stack != nil
+if stacks != ''
   cats_config.merge!({
-    "stacks" => [stack],
+    "stacks" => stacks.split(' '),
   })
 end
 

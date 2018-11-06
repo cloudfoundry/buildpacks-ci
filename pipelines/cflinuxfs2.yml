@@ -422,6 +422,7 @@ jobs: ##########################################################################
             CI_CF_PASSWORD: {{cflinuxfs2-cf-password}}
             APPS_DOMAIN: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
+            STACKS: cflinuxfs2
         - task: cats
           attempts: 3
           file: cf-deployment-concourse-tasks/run-cats/task.yml
