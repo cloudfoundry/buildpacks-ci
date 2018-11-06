@@ -24,7 +24,8 @@
     'skip_brats' => true,
     'non_lts' => true,
     'any_stack' => true,
-    'product_slug' => 'hwc-buildpack'
+    'product_slug' => 'hwc-buildpack',
+    'go_modules' => true
   },
   'multi' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
@@ -39,7 +40,8 @@
   },
   'nodejs' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'product_slug' => 'nodejs-buildpack'
+    'product_slug' => 'nodejs-buildpack',
+    'go_modules' => true
   },
   'php' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
@@ -1139,7 +1141,11 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-develop
       - task: update-libbuildpack
+        <% if buildpacks[language]['go_modules'] %>
+        file: buildpacks-ci/tasks/update-libbuildpack-go-modules/task.yml
+        <% else %>
         file: buildpacks-ci/tasks/update-libbuildpack/task.yml
+        <% end %>
         params:
           LANGUAGE: <%= language %>
       - put: buildpack-develop
