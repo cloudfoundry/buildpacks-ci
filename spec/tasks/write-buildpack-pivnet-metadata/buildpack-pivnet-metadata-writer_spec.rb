@@ -137,53 +137,13 @@ describe BuildpackPivnetMetadataWriter do
       let(:cached_buildpack_filenames) {
         [
         "pivotal-buildpacks-stack0/#{buildpack}_buildpack-cached-some-stack-v#{version}.zip",
-        "pivotal-buildpacks-stack1/#{buildpack}_buildpack-cached-v#{version}.zip"
         ]
       }
 
       before {allow(subject).to receive(:get_version).and_return(version)}
 
-      fit 'capitalizes filenames correctly' do
+      it 'capitalizes filenames correctly' do
         expect(formatted_name).to eq('HWC')
-      end
-
-      it 'writes the release metadata to the files' do
-        subject.run!
-        product_files = yaml_contents['product_files']
-
-        product_file = product_files[0]
-        expect(product_file['file']).to eq File.join('pivotal-buildpacks-stack0', 'hwc_buildpack-cached-some-stack-v6.78.99.zip')
-        expect(product_file['upload_as']).to eq 'HWC Buildpack some-stack (offline)'
-
-        product_file2 = product_files[1]
-        expect(product_file2['file']).to eq File.join('pivotal-buildpacks-stack1', 'hwc_buildpack-cached-v6.78.99.zip')
-        expect(product_file2['upload_as']).to eq 'HWC Buildpack for PAS 2.2 (offline)'
-      end
-    end
-
-    context 'the buildpack is binary' do
-      let(:version) {'6.78.99'}
-      let(:buildpack) {'binary'}
-      let(:cached_buildpack_filenames) {
-        [
-        "pivotal-buildpacks-stack0/#{buildpack}_buildpack-cached-some-stack-v#{version}.zip",
-        "pivotal-buildpacks-stack1/#{buildpack}_buildpack-cached-v#{version}.zip"
-        ]
-      }
-
-      before {allow(subject).to receive(:get_version).and_return(version)}
-
-      it 'writes the release metadata to the files' do
-        subject.run!
-        product_files = yaml_contents['product_files']
-
-        product_file = product_files[0]
-        expect(product_file['file']).to eq File.join('pivotal-buildpacks-stack0', 'binary_buildpack-cached-some-stack-v6.78.99.zip')
-        expect(product_file['upload_as']).to eq 'Binary Buildpack some-stack (offline)'
-
-        product_file2 = product_files[1]
-        expect(product_file2['file']).to eq File.join('pivotal-buildpacks-stack1', 'binary_buildpack-cached-v6.78.99.zip')
-        expect(product_file2['upload_as']).to eq 'Binary Buildpack for PAS 2.2 (offline)'
       end
     end
 
