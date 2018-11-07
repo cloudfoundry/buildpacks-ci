@@ -5,6 +5,7 @@ require 'tmpdir'
 require_relative './dependencies'
 
 ALL_STACKS = {
+  'cflinuxfs2' => 'org.cloudfoundry.stacks.cflinuxfs2',
   'cflinuxfs3' => 'org.cloudfoundry.stacks.cflinuxfs3',
   'bionic' => 'io.buildpacks.stacks.bionic'
 }
