@@ -85,7 +85,7 @@ module DependencyBuild
             when 'cflinuxfs2'
               Runner.run('cp', '-L', '/usr/bin/gfortran-4.8', './bin/gfortran')
               Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/f951', './bin/f951')
-              Runner.run('ln', '-s', './bin/gfortran','./bin/f95')
+              Runner.run('ln', '-s', './gfortran','./bin/f95')
               Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libcaf_single.a', './lib')
               Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.a', './lib')
               Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.so', './lib')
@@ -93,7 +93,7 @@ module DependencyBuild
             when 'cflinuxfs3'
               Runner.run('cp', '-L', '/usr/bin/x86_64-linux-gnu-gfortran-7', './bin/gfortran')
               Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/f951',  './bin/f951')
-              Runner.run('ln', '-s', './bin/gfortran','./bin/f95')
+              Runner.run('ln', '-s', './gfortran','./bin/f95')
               Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libcaf_single.a', './lib')
               Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libgfortran.a', './lib')
               Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libgfortran.so', './lib')
