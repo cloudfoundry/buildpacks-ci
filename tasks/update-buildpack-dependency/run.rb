@@ -52,7 +52,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   build = JSON.parse(open(stack_dependency_build).read)
   builds[stack] = build
 
-  version = build[stack]['version'] # We assume that the version is the same for all stacks
+  version = builds[stack]['version'] # We assume that the version is the same for all stacks
 
   dep = {
     'name' => manifest_name,
