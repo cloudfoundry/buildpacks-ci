@@ -4,7 +4,7 @@
      '../cf-deployment/operations/windows2012R2-cell.yml',
      '../cf-deployment/operations/windows2016-cell.yml',
      '../cf-deployment/operations/use-latest-stemcell.yml',
-     '../cf-deployment/operations/use-latest-windows-stemcell.yml',
+     '../cf-deployment/operations/use-latest-windows2012R2-stemcell.yml',
      '../cf-deployment/operations/use-latest-windows2016-stemcell.yml',
      '../cf-deployment/operations/experimental/enable-traffic-to-internal-networks.yml',
      '../cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml',
