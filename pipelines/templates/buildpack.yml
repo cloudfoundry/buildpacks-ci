@@ -786,13 +786,7 @@ jobs: ##########################################################################
     - aggregate:
       - get: buildpacks-ci
       - get: pivnet-buildpack-metadata
-      <%
-      all_pivnet_stacks = buildpacks[language]['stacks']
-      if buildpacks[language]['any_stack']
-        all_pivnet_stacks = all_pivnet_stacks + ['any']
-      end
-      all_pivnet_stacks.each_with_index do |stack, ndx|
-      %>
+      <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
       - get: pivotal-buildpacks-stack<%= ndx %>
         resource: pivotal-buildpack-cached-<%= stack %>
         passed: [ ship-it ]
@@ -820,13 +814,7 @@ jobs: ##########################################################################
       - get: pivnet-buildpack-metadata
         passed: [ write-pivnet-metadata ]
         trigger: true
-      <%
-      pivnet_stacks = buildpacks[language]['stacks']
-      if buildpacks[language]['any_stack']
-        pivnet_stacks = pivnet_stacks + ['any']
-      end
-      pivnet_stacks.each_with_index do |stack, ndx|
-      %>
+      <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
       - get: pivotal-buildpacks-stack<%= ndx %>
         resource: pivotal-buildpack-cached-<%= stack %>
         passed: [ write-pivnet-metadata ]

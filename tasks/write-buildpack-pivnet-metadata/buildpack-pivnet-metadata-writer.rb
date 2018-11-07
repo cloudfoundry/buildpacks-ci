@@ -93,8 +93,7 @@ def release_notes_url
 end
 
 def availability
-  (lts_product != 'true' || buildpack == 'hwc') ? "Admins Only" : "All Users"
-  # "All Users"
+  "All Users"
 end
 
 def eccn
@@ -108,8 +107,6 @@ end
 def display_name(stack = '')
   if !stack.empty?
     "#{formatted_name} Buildpack #{stack} (offline)"
-  elsif lts_product != 'true' && (buildpack == 'hwc' || buildpack == 'binary')
-    "#{formatted_name} Buildpack for PAS 2.2 (offline)"
   else
     "#{formatted_name} Buildpack (offline)"
   end
