@@ -23,8 +23,10 @@ data = JSON.parse(open('source/data.json').read)
 source_name = data.dig('source', 'name')
 resource_version = data.dig('version', 'ref')
 manifest_name = source_name == 'nginx-static' ? 'nginx' : source_name
+
 # create story is one-per-version; it creates the json file with the tracker ID
 story_id = JSON.parse(open("builds/binary-builds-new/#{source_name}/#{resource_version}.json").read)['tracker_story_id']
+
 removal_strategy = ENV['REMOVAL_STRATEGY']
 
 system('rsync -a buildpack/ artifacts/')
@@ -33,8 +35,11 @@ raise 'Could not copy buildpack to artifacts' unless $?.success?
 added = []
 removed = []
 rebuilt = []
+
 total_stacks = []
 builds = {}
+
+version = ''
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
   stack = %r{#{resource_version}-(.*)\.json$}.match(stack_dependency_build)[1]
@@ -46,6 +51,8 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   build = JSON.parse(open(stack_dependency_build).read)
   builds[stack] = build
+
+  version = build[stack]['version'] # We assume that the version is the same for all stacks
 
   dep = {
     'name' => manifest_name,
