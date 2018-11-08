@@ -70,6 +70,17 @@ resources: #####################################################################
       branch: master
       private_key: {{stacks-private-key}}
 
+  - name: cflinuxfs2-build-trigger
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cflinuxfs2.git
+      branch: master
+      private_key: {{stacks-private-key}}
+      ignore_paths:
+      - cflinuxfs2/cflinuxfs2_receipt
+      - README.md
+      - .gitignore
+
   - name: new-cves
     type: git
     source:
@@ -231,6 +242,8 @@ jobs: ##########################################################################
         - get: new-cves
           trigger: true
         - get: cflinuxfs2
+        - get: cflinuxfs2-build-trigger
+          trigger: true
         - get: version
           params: { pre: rc }
         - get: monday-funday
