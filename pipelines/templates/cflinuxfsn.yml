@@ -81,6 +81,19 @@ resources: #####################################################################
       branch: master
       private_key: {{cflinuxfs3-private-key}}
 
+  - name: <%= rootfs_name %>-build-trigger
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cflinuxfs3.git
+      branch: master
+      private_key: {{cflinuxfs3-private-key}}
+      ignore_paths:
+        - receipt.cflinuxfs3.x86_64
+        - receipt.cflinuxfs3m.x86_64
+        - cflinuxfs3/cnb
+        - README.md
+        - .gitignore
+
   - name: new-cves
     type: git
     source:
@@ -269,6 +282,8 @@ jobs: ##########################################################################
           trigger: true
         - get: rootfs
           resource: <%= rootfs_name %>
+        - get: <%= rootfs_name %>-build-trigger
+          trigger: true
         - get: version
           params: { pre: rc }
         - get: monday-funday
