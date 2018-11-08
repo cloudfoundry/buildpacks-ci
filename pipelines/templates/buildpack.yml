@@ -467,6 +467,14 @@ jobs: ##########################################################################
           resource: buildpack-master
       - task: unit
         file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
+        <% if language == 'php' %>
+        privileged: true
+        params:
+          DOCKER_START: true
+        <% else %>
+        params:
+          DOCKER_START: false
+        <% end %>
       - aggregate:
 <% buildpacks[language]['stacks'].each do |stack| %>
         - do:
