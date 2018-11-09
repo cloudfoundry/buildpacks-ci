@@ -566,6 +566,14 @@ jobs: ##########################################################################
       - do:
         - task: unit
           file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
+          <% if language == 'php' %>
+          privileged: true
+          params:
+            DOCKER_START: true
+          <% else %>
+          params:
+            DOCKER_START: false
+          <% end %>
         - task: create-cf-space
           file: buildpacks-ci/tasks/create-cf-space/task.yml
           params:
