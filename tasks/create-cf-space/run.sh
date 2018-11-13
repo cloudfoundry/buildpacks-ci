@@ -14,7 +14,13 @@ fi
 
 set +x
 if [ -z "$PASSWORD" ]; then
-  PASSWORD=$(grep "cf_admin_password:" "$ENVS_DIR/$ENV_NAME/vars-store.yml" | awk '{print $2}')
+  # TODO : remove this check after we've fully cut over to bbl 6
+  if [ ! -f "$ENVS_DIR/$ENV_NAME/vars-store.yml" ]; then
+    eval "$(bbl --state-dir ${ENVS_DIR}/${ENV_NAME} print-env)"
+    PASSWORD=$(credhub get -n /bosh-${ENV_NAME}/cf/cf_admin_password -j | jq -r .value)
+  else
+    PASSWORD=$(grep "cf_admin_password:" "$ENVS_DIR/$ENV_NAME/vars-store.yml" | awk '{print $2}')
+  fi
 fi
 
 cf api "$TARGET" --skip-ssl-validation || (sleep 4 && cf api "$TARGET" --skip-ssl-validation)

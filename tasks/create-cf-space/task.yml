@@ -4,6 +4,7 @@ image_resource:
   type: docker-image
   source:
     repository: cfbuildpacks/ci
+    tag: bbl-6
 inputs:
   - name: buildpacks-ci
   - name: edge-environments
