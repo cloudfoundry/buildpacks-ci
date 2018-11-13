@@ -1,5 +1,5 @@
 #!/bin/bash -l
-# shellcheck disable=SC2086
+
 
 set -o errexit
 set -o pipefail
@@ -17,7 +17,9 @@ set +x
 if [ -z "$PASSWORD" ]; then
   # TODO : remove this check after we've fully cut over to bbl 6
   if [ ! -f "$ENVS_DIR/$ENV_NAME/vars-store.yml" ]; then
+    # shellcheck disable=SC2086
     eval "$(bbl --state-dir ${ENVS_DIR}/${ENV_NAME} print-env)"
+    # shellcheck disable=SC2086
     PASSWORD=$(credhub get -n /bosh-${ENV_NAME}/cf/cf_admin_password -j | jq -r .value)
   else
     PASSWORD=$(grep "cf_admin_password:" "$ENVS_DIR/$ENV_NAME/vars-store.yml" | awk '{print $2}')
