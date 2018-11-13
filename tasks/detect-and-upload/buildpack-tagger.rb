@@ -50,10 +50,7 @@ class BuildpackTagger
                   EOF
         else
           system(<<~EOF)
-                  export GOPATH=$PWD
-                  export GOBIN=$GOPATH/.bin
-                  export PATH=$GOBIN:$PATH
-                  (cd src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager && go install)
+                  ./scripts/install_tools.sh
                   ./.bin/buildpack-packager build --cached=false #{stack_flag}
                   ./.bin/buildpack-packager build --cached=true #{stack_flag}
                   EOF
