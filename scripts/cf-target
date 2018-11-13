@@ -1,14 +1,35 @@
 #!/usr/bin/env ruby
 require 'yaml'
+require 'open3'
 
 name = `hostname`.chomp
-
-edge_envs = ['rim', 'brink', 'fringe']
+edge_envs = ['rim-dev', 'brink-dev', 'fringe-dev']
 
 def env_login(env)
-  cfg = YAML.load_file("#{ENV['HOME']}/workspace/buildpacks-envs/#{env}/vars-store.yml")
   system('cf', 'api', "api.#{env}.buildpacks-gcp.ci.cf-app.com", '--skip-ssl-validation') or raise 'Could not connect'
-  system('cf', 'auth', 'admin', cfg['cf_admin_password']) or raise 'Could not auth'
+  system('cf', 'auth', 'admin', admin_password(env)) or raise 'Could not auth'
+end
+
+def admin_password(env_name)
+  env_home = "#{ENV['HOME']}/workspace/buildpacks-envs/#{env_name}"
+  vars_store = "#{env_home}/vars-store.yml"
+
+  if File.file?(vars_store)
+    puts "Using vars-store for: #{env_name}"
+    cfg = YAML.load_file(vars_store)
+    return cfg['cf_admin_password']
+  else
+    puts "Logging into credhub for: #{env_name}"
+    bbl_env, = Open3.capture3("bbl --state-dir #{env_home} print-env")
+    cf_pass, err, status = Open3.capture3("eval \"#{bbl_env}\" && credhub get -n /bosh-#{env_name}/cf/cf_admin_password -j | jq -r .value")
+
+    if !err.empty?
+      STDERR.puts "ERROR: Could not log in via credhub to: #{env_name}"
+      exit(false)
+    end
+
+    return cf_pass.strip
+  end
 end
 
 system('cf', 'logout') or raise 'Could not logout'
