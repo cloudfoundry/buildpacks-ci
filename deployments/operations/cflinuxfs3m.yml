@@ -9,9 +9,6 @@
     name: cflinuxfs3m-rootfs-setup
     release: cflinuxfs3m
 - type: replace
-  path: /instance_groups/name=diego-cell/jobs/name=garden/properties/garden/persistent_image_list/-
-  value: "/var/vcap/packages/cflinuxfs3m/rootfs"
-- type: replace
   path: /instance_groups/name=diego-cell/jobs/name=rep/properties/diego/rep/preloaded_rootfses/-
   value: "cflinuxfs3m:/var/vcap/packages/cflinuxfs3m/rootfs"
 

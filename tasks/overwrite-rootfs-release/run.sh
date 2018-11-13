@@ -45,10 +45,6 @@ cat <<EOF > ${release_dir}/use-dev-release-opsfile.yml
       $STACK-rootfs:
         trusted_certs: ((application_ca.certificate))
 - type: replace
-  path: /instance_groups/name=diego-cell/jobs/name=garden/properties/garden/persistent_image_list
-  value:
-    - "/var/vcap/packages/$STACK/rootfs.tar"
-- type: replace
   path: /instance_groups/name=diego-cell/jobs/name=rep/properties/diego/rep/preloaded_rootfses
   value:
     - $STACK:/var/vcap/packages/$STACK/rootfs.tar
