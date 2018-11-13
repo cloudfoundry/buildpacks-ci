@@ -1,4 +1,4 @@
-<% environments = ['brink', 'fringe', 'rim']
+<% environments = ['brink-dev', 'fringe-dev', 'rim-dev']
    locks_per_environment = 4
    opsfiles = [
      '../cf-deployment/operations/windows2012R2-cell.yml',
@@ -9,246 +9,363 @@
      '../cf-deployment/operations/experimental/enable-traffic-to-internal-networks.yml',
      '../cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml',
      'deployments/operations/no-canaries.yml',
-     'deployments/edge-shared/num-cells.yml',
-     'deployments/operations/cflinuxfs3.yml',
-     'deployments/operations/add-cflinuxfs3-buildpacks.yml',
-     'deployments/operations/add-windows-binary-buildpacks.yml'
+     'deployments/edge-shared/num-cells.yml'
    ]
 %>
 
-resource_types:
-- name: cron
-  type: docker-image
-  source:
-    repository: cfbuildpacks/cron-resource
+resource_types: ########################################################################################################
 
-- name: google-cloud-storage
-  type: docker-image
-  source:
-    repository: frodenas/gcs-resource
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
 
-resources:
-- name: env-repo
-  type: git
-  source:
-    uri: git@github.com:cloudfoundry/buildpacks-envs
-    branch: master
-    private_key: {{buildpacks-envs-private-key}}
+  - name: cron
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cron-resource
 
-- name: buildpacks-ci
-  type: git
-  source:
-    uri: {{buildpacks-ci-git-uri-public}}
-    branch: {{buildpacks-ci-git-uri-public-branch}}
+  - name: bosh-deployment
+    type: docker-image
+    source:
+      repository: cloudfoundry/bosh-deployment-resource
 
-- name: cf-deployment
-  type: git
-  source:
-    uri: https://github.com/cloudfoundry/cf-deployment
+resources: #############################################################################################################
 
-- name: bosh-deployment
-  type: git
-  source:
-    uri: https://github.com/cloudfoundry/bosh-deployment
-    branch: master
+  ## Git Repos ##
 
-- name: cf-deployment-concourse-tasks
-  type: git
-  source:
-    uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-    tag_filter: v5.*
+  - name: cf-deployment-concourse-tasks
+    type: git
+    source:
+      branch: master
+      uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+      tag_filter: v7.*
 
-- name: 3am-daily-timer
-  type: cron
-  source:
-    expression: 0 3 * * *
-    location: {{current-timezone}}
+  <% environments.each do |env| %>
+  - name: bbl-state-<%= env %>
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: {{buildpacks-envs-private-key}}
+      paths: [<%= env %>]
+  <% end %>
 
-- name: edge-environments
-  type: pool
-  source:
-    branch: master
-    pool: edge-environments
-    private_key: {{public-buildpacks-ci-robots-private-key}}
-    uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+  - name: cf-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-deployment
+      branch: master
 
-- name: cflinuxfs3-bosh-release
-  type: github-release
-  source:
-    user: cloudfoundry
-    repository: cflinuxfs3-release
-    access_token: {{buildpacks-github-token}}
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: master
 
-- name: hwc-buildpack
-  type: git
-  source:
-    uri: https://github.com/cloudfoundry/hwc-buildpack
-    branch: master
+  - name: cflinuxfs3-bosh-release
+    type: github-release
+    source:
+      user: cloudfoundry
+      repository: cflinuxfs3-release
+      access_token: {{buildpacks-github-token}}
 
-<% environments.each_with_index do |env, i| %>
-- name: once-a-week-timer-<%= env %>
-  type: cron
-  source:
-    expression: 0 19 * * <%= i % 7 %>
-    location: {{current-timezone}}
-<% end %>
+  - name: hwc-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/hwc-buildpack
+      branch: master
 
-jobs:
+  ## bosh.io Stemcells ##
+
+  - name: gcp-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-ubuntu-xenial-go_agent
+
+  - name: gcp-windows2012R2-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-windows2012R2-go_agent
+
+  - name: gcp-windows2016-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-google-kvm-windows2016-go_agent
+
+  ## Slack Alerts ##
+
+  - name: failure-alert
+    type: slack-notification
+    source:
+      url: {{concourse-job-failure-notifications-slack-webhook}}
+
+  ## Timers ##
+
+  - name: 3am-daily-timer
+    type: cron
+    source:
+      expression: 0 3 * * *
+      location: {{current-timezone}}
+
+  <% environments.each_with_index do |env, i| %>
+  - name: once-a-week-timer-<%= env %>
+    type: cron
+    source:
+      expression: 0 19 * * <%= i % 7 %>
+      location: {{current-timezone}}
+  <% end %>
+
+  ## Pools ##
+
+  - name: edge-environments
+    type: pool
+    source:
+      branch: master
+      pool: edge-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
+jobs: ##################################################################################################################
+
 <% environments.each do |env| %>
-- name: deploy-<%= env %>
-  serial: true
-  plan:
-  - aggregate:
-    - get: env-repo
-    - get: cf-deployment
-    - get: buildpacks-ci
-    - get: cf-deployment-concourse-tasks
-    - get: cflinuxfs3-bosh-release
-    - get: bosh-deployment
-    - get: hwc-buildpack
-    - get: 3am-daily-timer
-      trigger: true
-<% locks_per_environment.times do |lock_num| %>
-    - put: edge-environments<%= lock_num %>
-      resource: edge-environments
-      params:
-        claim: <%= env %><%= lock_num %>
-<% end %>
-  - aggregate:
-    - task: bosh-upload-windows2012R2-stemcell
-      file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
-      params:
-        BBL_STATE_DIR: <%= env %>
-        MANIFEST_FILE: ../env-repo/manifests/manifest-windows2012R2.yml
-    - task: bosh-upload-windows2016-stemcell
-      file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
-      params:
-        BBL_STATE_DIR: <%= env %>
-        MANIFEST_FILE: ../env-repo/manifests/manifest-windows2016.yml
-    - task: bosh-upload-stemcells
-      file: cf-deployment-concourse-tasks/bosh-upload-stemcell-from-cf-deployment/task.yml
-      params:
-        BBL_STATE_DIR: <%= env %>
-    - task: upload-bosh-release
-      file: buildpacks-ci/tasks/upload-bosh-release/task.yml
-      input_mapping:
-        bosh-release: cflinuxfs3-bosh-release
-      params:
-        BOSH_ENV: <%= env %>
-        RELEASE: "*.tgz"
-  - task: turn-on-bosh-dns
-    file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
-    input_mapping:
-      bbl-state: env-repo
-    params:
-      BBL_STATE_DIR: <%= env %>
-  - task: clean-up-env-buildpacks
-    file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
-    input_mapping:
-      bbl-state: env-repo
-    params:
-      ENV_NAME: <%= env %>
-  - task: bosh-deploy
-    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
-    attempts: 3
-    input_mapping:
-      vars-store: env-repo
-      vars-files: env-repo # not actually used
-      ops-files: buildpacks-ci
-    params:
-      BBL_STATE_DIR: <%= env %>
-      VARS_STORE_FILE: <%= env %>/vars-store.yml
-      SYSTEM_DOMAIN: <%= env %>.buildpacks-gcp.ci.cf-app.com
-      OPS_FILES: "<%= opsfiles.join(' ') %>"
-      GIT_COMMIT_EMAIL: {{github-email}}
-      GIT_COMMIT_USERNAME: {{github-username}}
-  - task: clean-up-env-buildpacks
-    file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
-    input_mapping:
-      bbl-state: updated-vars-store
-    params:
-      ENV_NAME: <%= env %>
-  - put: env-repo
-    params:
-      repository: updated-vars-store
-      rebase: true
-  on_success:
-    aggregate:
-<% locks_per_environment.times do |lock_num| %>
-    - put: edge-environments
-      params:
-        release: edge-environments<%= lock_num %>
+  - name: bbl-up-<%= env %>
+    serial: true
+    serial_groups: [ <%= env %> ]
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: cf-deployment-concourse-tasks
+        - get: bbl-state-<%= env %>
+      - task: bbl-up
+        file: cf-deployment-concourse-tasks/bbl-up/task.yml
+        params:
+          BBL_GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+          BBL_GCP_REGION: us-east1
+          BBL_IAAS: gcp
+          BBL_LB_CERT: {{brink_load_balancer_certificate}}
+          BBL_LB_KEY: {{brink_load_balancer_private_key}}
+          LB_DOMAIN: <%= env %>.buildpacks-gcp.ci.cf-app.com
+          BBL_ENV_NAME: <%= env %>
+          BBL_STATE_DIR: <%= env %>
+        input_mapping:
+          bbl-config: bbl-state-<%= env %>
+        ensure:
+          put: bbl-state-<%= env %>
+          params:
+            repository: updated-bbl-state
+            rebase: true
+      - task: add-gcp-parent-dns-record
+        file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
+        params:
+          ENV_NAME: <%= env %>
+          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+
+  - name: deploy-<%= env %>
+    serial: true
+    serial_groups: [ <%= env %> ]
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: bbl-state-<%= env %>
+            trigger: true
+          - get: cf-deployment
+          - get: gcp-stemcell
+          - get: gcp-windows2012R2-stemcell
+          - get: gcp-windows2016-stemcell
+          - get: cf-deployment-concourse-tasks
+          - get: cflinuxfs3-bosh-release
+          - get: hwc-buildpack
+          - get: 3am-daily-timer
+            trigger: true
+          <% locks_per_environment.times do |lock_num| %>
+          - put: edge-environments<%= lock_num %>
+            resource: edge-environments
+            params:
+              claim: <%= env %><%= lock_num %>
+          <% end %>
+        - aggregate:
+          - task: bosh-upload-windows2012R2-stemcell
+            file: cf-deployment-concourse-tasks/bosh-upload-stemcells/task.yml
+            input_mapping:
+              bbl-state: bbl-state-<%= env %>
+            params:
+              BBL_STATE_DIR: <%= env %>
+              MANIFEST_FILE: ../bbl-state/manifests/manifest-windows2012R2.yml
+          - task: bosh-upload-windows2016-stemcell
+            file: cf-deployment-concourse-tasks/bosh-upload-stemcells/task.yml
+            input_mapping:
+              bbl-state: bbl-state-<%= env %>
+            params:
+              BBL_STATE_DIR: <%= env %>
+              MANIFEST_FILE: ../bbl-state/manifests/manifest-windows2016.yml
+          - task: bosh-upload-stemcells
+            file: cf-deployment-concourse-tasks/bosh-upload-stemcells/task.yml
+            input_mapping:
+              bbl-state: bbl-state-<%= env %>
+            params:
+              BBL_STATE_DIR: <%= env %>
+          - task: upload-bosh-release
+            file: buildpacks-ci/tasks/upload-bosh-release/task.yml
+            input_mapping:
+              bbl-state: bbl-state-<%= env %>
+              bosh-release: cflinuxfs3-bosh-release
+            params:
+              BBL_STATE_DIR: <%= env %>
+              RELEASE: "*.tgz"
+        - task: clean-up-env-buildpacks
+          file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
+          input_mapping:
+            bbl-state: bbl-state-<%= env %>
+          params:
+            ENV_NAME: <%= env %>
+        - task: bosh-deploy
+          file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+          attempts: 3
+          input_mapping:
+            bbl-state: bbl-state-<%= env %>
+            vars-files: bbl-state-<%= env %>
+            ops-files: buildpacks-ci
+          params:
+            BBL_STATE_DIR: <%= env %>
+            SYSTEM_DOMAIN: <%= env %>.buildpacks-gcp.ci.cf-app.com
+            OPS_FILES: "<%= opsfiles.join(' ') %>"
+        - task: clean-up-env-buildpacks
+          file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
+          input_mapping:
+            bbl-state: bbl-state-<%= env %>
+          params:
+            ENV_NAME: <%= env %>
+            INSTALL_STACK_ASSOC_HWC_BPS: true
+        on_failure:
+          put: failure-alert
+          params:
+            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: {{concourse-job-failure-notifications-slack-channel}}
+            username: concourse
+            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+        ensure:
+          aggregate:
+            <% locks_per_environment.times do |lock_num| %>
+            - put: edge-environments
+              params:
+                release: edge-environments<%= lock_num %>
+            <% end %>
+
+  - name: delete-cf-<%= env %>
+    serial: true
+    serial_groups: [ <%= env %> ]
+    plan:
+      - do:
+        - aggregate:
+          - get: bbl-state-<%= env %>
+            passed: [deploy-<%= env %>]
+          - get: cf-deployment-concourse-tasks
+          - get: buildpacks-ci
+          - get: once-a-week-timer-<%= env %>
+            trigger: true
+          <% locks_per_environment.times do |lock_num| %>
+          - put: edge-environments<%= lock_num %>
+            resource: edge-environments
+            params:
+              claim: <%= env %><%= lock_num %>
+          <% end %>
+        - task: delete-deployment
+          file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+          input_mapping:
+            bbl-state: bbl-state-<%= env %>
+          params:
+            BBL_STATE_DIR: <%= env %>
+            DEPLOYMENT_NAME: cf
+        ensure:
+          aggregate:
+          <% locks_per_environment.times do |lock_num| %>
+          - put: edge-environments
+            params:
+              release: edge-environments<%= lock_num %>
+          <% end %>
+
+  - name: bosh-cleanup-<%= env %>
+    serial: true
+    plan:
+      - do:
+        - aggregate:
+          - get: bbl-state-<%= env %>
+            trigger: true
+            passed: [deploy-<%= env %>]
+          - get: cf-deployment-concourse-tasks
+          - get: 3am-daily-timer
+            passed: [deploy-<%= env %>]
+            trigger: true
+          - get: once-a-week-timer-<%= env %>
+            passed: [delete-cf-<%= env %>]
+            trigger: true
+          <% locks_per_environment.times do |lock_num| %>
+          - put: edge-environments<%= lock_num %>
+            resource: edge-environments
+            params:
+              claim: <%= env %><%= lock_num %>
+          <% end %>
+        - task: bosh-cleanup
+          file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+          input_mapping:
+            bbl-state: bbl-state-<%= env %>
+          params:
+            BBL_STATE_DIR: <%= env %>
+        ensure:
+          aggregate:
+          <% locks_per_environment.times do |lock_num| %>
+          - put: edge-environments
+            params:
+              release: edge-environments<%= lock_num %>
+          <% end %>
+
+  - name: bbl-destroy-<%= env %>
+    serial: true
+    serial_groups: [ <%= env %> ]
+    plan:
+      - aggregate:
+        - get: cf-deployment-concourse-tasks
+        - get: bbl-state-<%= env %>
+          passed: [delete-cf-<%= env %>]
+        - get: buildpacks-ci
+      - task: remove-gcp-parent-dns-record
+        file: buildpacks-ci/tasks/remove-gcp-parent-dns-record/task.yml
+        params:
+          GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+          ENV_NAME: <%= env %>
+      - task: bbl-destroy
+        file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+        input_mapping:
+          bbl-state: bbl-state-<%= env %>
+        params:
+          BBL_STATE_DIR: <%= env %>
+          BBL_GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+        ensure:
+          put: bbl-state-<%= env %>
+          params:
+            repository: updated-bbl-state
+            rebase: true
 <% end %>
 
-- name: delete-cf-<%= env %>
-  serial: true
-  plan:
-  - aggregate:
-    - get: env-repo
-    - get: cf-deployment-concourse-tasks
-    - get: once-a-week-timer-<%= env %>
-      trigger: true
-<% locks_per_environment.times do |lock_num| %>
-    - put: edge-environments<%= lock_num %>
-      resource: edge-environments
-      params:
-        claim: <%= env %><%= lock_num %>
-<% end %>
-  - task: delete-deployment
-    file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
-    params:
-      BBL_STATE_DIR: <%= env %>
-      DEPLOYMENT_NAME: cf
-  on_success:
-    aggregate:
-<% locks_per_environment.times do |lock_num| %>
-    - put: edge-environments
-      params:
-        release: edge-environments<%= lock_num %>
-<% end %>
-- name: bosh-cleanup-<%=env%>
-  serial: true
-  plan:
-  - aggregate:
-    - get: env-repo
-    - get: cf-deployment-concourse-tasks
-    - get: 3am-daily-timer
-      passed: [deploy-<%= env %>]
-      trigger: true
-    - get: once-a-week-timer-<%= env %>
-      passed: [delete-cf-<%= env %>]
-      trigger: true
-<% locks_per_environment.times do |lock_num| %>
-    - put: edge-environments<%= lock_num %>
-      resource: edge-environments
-      params:
-        claim: <%= env %><%= lock_num %>
-<% end %>
-  - task: bosh-cleanup
-    file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
-    params:
-      BBL_STATE_DIR: <%= env %>
-  ensure:
-    aggregate:
-<% locks_per_environment.times do |lock_num| %>
-    - put: edge-environments
-      params:
-        release: edge-environments<%= lock_num %>
-<% end %>
-<% end %>
-groups:
-  - name: all
-    jobs:
+groups: ################################################################################################################
+- name: all
+  jobs:
+  <% environments.each do |env| %>
+  - bbl-up-<%= env %>
+  - deploy-<%= env %>
+  - delete-cf-<%= env %>
+  - bosh-cleanup-<%= env %>
+  - bbl-destroy-<%= env %>
+  <% end %>
 <% environments.each do |env| %>
-      - deploy-<%= env %>
-      - delete-cf-<%= env %>
-      - bosh-cleanup-<%= env %>
+- name: <%= env %>
+  jobs:
+  - bbl-up-<%= env %>
+  - deploy-<%= env %>
+  - delete-cf-<%= env %>
+  - bosh-cleanup-<%= env %>
+  - bbl-destroy-<%= env %>
 <% end %>
-<% environments.each do |env| %>
-  - name: <%= env %>
-    jobs:
-      - deploy-<%= env %>
-      - delete-cf-<%= env %>
-      - bosh-cleanup-<%= env %>
-<% end %>
-

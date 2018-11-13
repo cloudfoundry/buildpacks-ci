@@ -4,17 +4,14 @@ image_resource:
   type: docker-image
   source:
     repository: cfbuildpacks/ci
+    tag: bbl-6 # TODO cut this back after all pipelines migrate to bbl 6
 inputs:
   - name: buildpacks-ci
   - name: bosh-release
-  - name: env-repo
+  - name: bbl-state
 
 run:
   path: buildpacks-ci/tasks/upload-bosh-release/run.sh
 params:
-  BOSH_ENV:
-  # ^ relative to env-repo
-  # path to bbl-state dir (to run eval "$(bbl print-env)")
+  BBL_STATE_DIR:
   RELEASE:
-  # ^ relative to bosh-release input
-  # glob to match the release file to upload
