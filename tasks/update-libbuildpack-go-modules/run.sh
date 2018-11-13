@@ -22,6 +22,8 @@ pushd buildpack
   go get -u github.com/onsi/ginkgo/ginkgo
   go install github.com/golang/mock/mockgen
 
+  go mod download
+
   pushd "$update_dir"
 
     go generate || true
