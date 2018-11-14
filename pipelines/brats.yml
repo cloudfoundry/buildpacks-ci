@@ -38,13 +38,13 @@ resources:
   - name: nightly-trigger-1
     type: cron
     source:
-      expression: 0 4 * * *
+      expression: 0 6 * * *
       location: {{current-timezone}}
 
   - name: nightly-trigger-2
     type: cron
     source:
-      expression: 2 4 * * *
+      expression: 2 6 * * *
       location: {{current-timezone}}
 
   - name: buildpacks-ci
