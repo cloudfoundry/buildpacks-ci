@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-env = Env.fetch('ENVIRONMENT')
-locks = Env.fetch('NUMBER_OF_LOCKS').to_i - 1
+env = ENV.fetch('ENVIRONMENT')
+locks = ENV.fetch('NUMBER_OF_LOCKS').to_i - 1
 output_dir = 'environment-locks'
 
 for i in 0..locks do
