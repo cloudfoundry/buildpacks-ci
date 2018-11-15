@@ -3,7 +3,7 @@ require 'yaml'
 require 'open3'
 
 name = `hostname`.chomp
-edge_envs = ['rim-dev', 'brink-dev', 'fringe-dev']
+edge_envs = ['fringe-dev', 'verge', 'frontier', 'tip']
 
 def env_login(env)
   system('cf', 'api', "api.#{env}.buildpacks-gcp.ci.cf-app.com", '--skip-ssl-validation') or raise 'Could not connect'
