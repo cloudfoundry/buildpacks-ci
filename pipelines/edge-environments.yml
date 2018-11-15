@@ -1,4 +1,4 @@
-<% environments = ['brink-dev', 'fringe-dev', 'rim-dev']
+<% environments = ['fringe-dev', 'verge', 'frontier', 'tip']
    locks_per_environment = 4
    opsfiles = [
      '../cf-deployment/operations/windows2012R2-cell.yml',
@@ -41,15 +41,12 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
       tag_filter: v7.*
 
-  <% environments.each do |env| %>
-  - name: bbl-state-<%= env %>
+  - name: bbl-state
     type: git
     source:
       uri: git@github.com:cloudfoundry/buildpacks-envs
       branch: master
       private_key: {{buildpacks-envs-private-key}}
-      paths: [<%= env %>]
-  <% end %>
 
   - name: cf-deployment
     type: git
@@ -132,12 +129,11 @@ jobs: ##########################################################################
   - name: bbl-up-<%= env %>
     serial: true
     serial_groups: [ <%= env %> ]
-    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
         - get: cf-deployment-concourse-tasks
-        - get: bbl-state-<%= env %>
+        - get: bbl-state
       - task: bbl-up
         file: cf-deployment-concourse-tasks/bbl-up/task.yml
         params:
@@ -150,9 +146,9 @@ jobs: ##########################################################################
           BBL_ENV_NAME: <%= env %>
           BBL_STATE_DIR: <%= env %>
         input_mapping:
-          bbl-config: bbl-state-<%= env %>
+          bbl-config: bbl-state
         ensure:
-          put: bbl-state-<%= env %>
+          put: bbl-state
           params:
             repository: updated-bbl-state
             rebase: true
@@ -161,6 +157,19 @@ jobs: ##########################################################################
         params:
           ENV_NAME: <%= env %>
           GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+        on_success:
+          do:
+            - task: write-env-locks
+              file: buildpacks-ci/tasks/write-env-locks/task.yml
+              params:
+                ENVIRONMENT: <%= env %>
+                NUMBER_OF_LOCKS: <%= locks_per_environment %>
+            - aggregate:
+              <% locks_per_environment.times do |lock_num| %>
+              - put: edge-environments
+                params:
+                  add: environment-locks/<%= env %><%= lock_num %>
+              <% end %>
 
   - name: deploy-<%= env %>
     serial: true
@@ -169,8 +178,9 @@ jobs: ##########################################################################
       - do:
         - aggregate:
           - get: buildpacks-ci
-          - get: bbl-state-<%= env %>
+          - get: bbl-state
             trigger: true
+            passed: [bbl-up-<%= env %>]
           - get: cf-deployment
           - get: gcp-stemcell
           - get: gcp-windows2012R2-stemcell
@@ -189,44 +199,34 @@ jobs: ##########################################################################
         - aggregate:
           - task: bosh-upload-windows2012R2-stemcell
             file: cf-deployment-concourse-tasks/bosh-upload-stemcells/task.yml
-            input_mapping:
-              bbl-state: bbl-state-<%= env %>
             params:
               BBL_STATE_DIR: <%= env %>
               MANIFEST_FILE: ../bbl-state/manifests/manifest-windows2012R2.yml
           - task: bosh-upload-windows2016-stemcell
             file: cf-deployment-concourse-tasks/bosh-upload-stemcells/task.yml
-            input_mapping:
-              bbl-state: bbl-state-<%= env %>
             params:
               BBL_STATE_DIR: <%= env %>
               MANIFEST_FILE: ../bbl-state/manifests/manifest-windows2016.yml
           - task: bosh-upload-stemcells
             file: cf-deployment-concourse-tasks/bosh-upload-stemcells/task.yml
-            input_mapping:
-              bbl-state: bbl-state-<%= env %>
             params:
               BBL_STATE_DIR: <%= env %>
           - task: upload-bosh-release
             file: buildpacks-ci/tasks/upload-bosh-release/task.yml
             input_mapping:
-              bbl-state: bbl-state-<%= env %>
               bosh-release: cflinuxfs3-bosh-release
             params:
               BBL_STATE_DIR: <%= env %>
               RELEASE: "*.tgz"
         - task: clean-up-env-buildpacks
           file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
-          input_mapping:
-            bbl-state: bbl-state-<%= env %>
           params:
             ENV_NAME: <%= env %>
         - task: bosh-deploy
           file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
           attempts: 3
           input_mapping:
-            bbl-state: bbl-state-<%= env %>
-            vars-files: bbl-state-<%= env %>
+            vars-files: bbl-state
             ops-files: buildpacks-ci
           params:
             BBL_STATE_DIR: <%= env %>
@@ -234,8 +234,6 @@ jobs: ##########################################################################
             OPS_FILES: "<%= opsfiles.join(' ') %>"
         - task: clean-up-env-buildpacks
           file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
-          input_mapping:
-            bbl-state: bbl-state-<%= env %>
           params:
             ENV_NAME: <%= env %>
             INSTALL_STACK_ASSOC_HWC_BPS: true
@@ -260,7 +258,7 @@ jobs: ##########################################################################
     plan:
       - do:
         - aggregate:
-          - get: bbl-state-<%= env %>
+          - get: bbl-state
             passed: [deploy-<%= env %>]
           - get: cf-deployment-concourse-tasks
           - get: buildpacks-ci
@@ -274,8 +272,6 @@ jobs: ##########################################################################
           <% end %>
         - task: delete-deployment
           file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
-          input_mapping:
-            bbl-state: bbl-state-<%= env %>
           params:
             BBL_STATE_DIR: <%= env %>
             DEPLOYMENT_NAME: cf
@@ -292,8 +288,7 @@ jobs: ##########################################################################
     plan:
       - do:
         - aggregate:
-          - get: bbl-state-<%= env %>
-            trigger: true
+          - get: bbl-state
             passed: [deploy-<%= env %>]
           - get: cf-deployment-concourse-tasks
           - get: 3am-daily-timer
@@ -310,8 +305,6 @@ jobs: ##########################################################################
           <% end %>
         - task: bosh-cleanup
           file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
-          input_mapping:
-            bbl-state: bbl-state-<%= env %>
           params:
             BBL_STATE_DIR: <%= env %>
         ensure:
@@ -327,8 +320,14 @@ jobs: ##########################################################################
     serial_groups: [ <%= env %> ]
     plan:
       - aggregate:
+        <% locks_per_environment.times do |lock_num| %>
+        - put: edge-environments<%= lock_num %>
+          resource: edge-environments
+          params:
+            claim: <%= env %><%= lock_num %>
+        <% end %>
         - get: cf-deployment-concourse-tasks
-        - get: bbl-state-<%= env %>
+        - get: bbl-state
           passed: [delete-cf-<%= env %>]
         - get: buildpacks-ci
       - task: remove-gcp-parent-dns-record
@@ -338,16 +337,22 @@ jobs: ##########################################################################
           ENV_NAME: <%= env %>
       - task: bbl-destroy
         file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
-        input_mapping:
-          bbl-state: bbl-state-<%= env %>
         params:
           BBL_STATE_DIR: <%= env %>
           BBL_GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
+        on_success:
+          aggregate:
+            <% locks_per_environment.times do |lock_num| %>
+            - put: edge-environments
+              params:
+                remove: edge-environments<%= lock_num %>
+            <% end %>
         ensure:
-          put: bbl-state-<%= env %>
+          put: bbl-state
           params:
             repository: updated-bbl-state
             rebase: true
+
 <% end %>
 
 groups: ################################################################################################################
