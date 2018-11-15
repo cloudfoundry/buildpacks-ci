@@ -1,4 +1,4 @@
-<% environments = ['fringe-dev', 'verge', 'frontier', 'tip']
+<% environments = ['fringe-dev', 'verge', 'frontier', 'limit']
    locks_per_environment = 4
    opsfiles = [
      '../cf-deployment/operations/windows2012R2-cell.yml',
@@ -145,8 +145,9 @@ jobs: ##########################################################################
           LB_DOMAIN: <%= env %>.buildpacks-gcp.ci.cf-app.com
           BBL_ENV_NAME: <%= env %>
           BBL_STATE_DIR: <%= env %>
+          BBL_CONFIG_DIR: deployments/patches
         input_mapping:
-          bbl-config: bbl-state
+          bbl-config: buildpacks-ci
         ensure:
           put: bbl-state
           params:
