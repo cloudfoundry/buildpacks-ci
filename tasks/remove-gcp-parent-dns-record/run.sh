@@ -16,8 +16,7 @@ gcloud auth activate-service-account --key-file /tmp/gcp_key
 gcloud config set project cf-buildpacks
 
 # get the NS
-NAMESERVERS=$(gcloud dns managed-zones describe "${ZONE_NAME}" --format='value[delimiter="
-"](nameServers)')
+NAMESERVERS=$(gcloud dns record-sets list -z buildpacks | grep $ENV_NAME | awk '{ print $4 }'| tr , ' ')
 
 # remove the parent zone (buildpacks zone) subdomain NS records
 gcloud dns record-sets transaction start --zone=buildpacks
