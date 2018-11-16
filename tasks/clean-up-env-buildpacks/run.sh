@@ -39,11 +39,9 @@ done
 if [ "$INSTALL_STACK_ASSOC_HWC_BPS" = true ] ; then
   for windows_stack in windows2012R2 windows2016; do
     pushd hwc-buildpack
-        export GOPATH="$PWD"
         export GOBIN=$PWD/.bin
         export PATH=$GOBIN:$PATH
-        git submodule update --init --recursive
-        (cd src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager && go install)
+       (go install github.com/cloudfoundry/libbuildpack/packager/buildpack-packager)
 
         buildpack-packager build -stack "$windows_stack"
         cf create-buildpack hwc_buildpack hwc_buildpack-*.zip 999
