@@ -1,4 +1,4 @@
-<% environments = ['fringe-dev', 'verge', 'frontier', 'limit']
+<% environments = ['verge', 'frontier', 'limit']
    locks_per_environment = 4
    opsfiles = [
      '../cf-deployment/operations/windows2012R2-cell.yml',
@@ -329,7 +329,7 @@ jobs: ##########################################################################
         <% end %>
         - get: cf-deployment-concourse-tasks
         - get: bbl-state
-          passed: [delete-cf-<%= env %>]
+          passed: [bosh-cleanup-<%= env %>]
         - get: buildpacks-ci
       - task: remove-gcp-parent-dns-record
         file: buildpacks-ci/tasks/remove-gcp-parent-dns-record/task.yml
