@@ -9,14 +9,12 @@ GITHUB_ORG=${GITHUB_ORG:-cloudfoundry}
 git clone "https://github.com/$GITHUB_ORG/$LANGUAGE-buildpack.git" source
 
 pushd source
-  export GOPATH="$PWD"
-  export GOBIN=$PWD/.bin
-  export PATH=$GOBIN:$PATH
+  source .envrc
 
   git checkout "$tag"
   git submodule update --init --recursive
 
-  (cd src/*/vendor/github.com/cloudfoundry/libbuildpack/packager/buildpack-packager && go install)
+  ./scripts/install_tools.sh
 
   for stack in $CF_STACKS; do
       if [[ "$stack" == "any" ]]; then
