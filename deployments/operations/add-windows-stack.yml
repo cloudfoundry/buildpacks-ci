@@ -1,0 +1,20 @@
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/diego?/lifecycle_bundles?
+  type: replace
+  value:
+    "buildpack/cflinuxfs2": "buildpack_app_lifecycle/buildpack_app_lifecycle.tgz"
+    "buildpack/cflinuxfs3": "buildpack_app_lifecycle/buildpack_app_lifecycle.tgz"
+    "buildpack/windows": "buildpack_app_lifecycle/buildpack_app_lifecycle.tgz"
+    "buildpack/windows2012R2": "windows_app_lifecycle/windows_app_lifecycle.tgz"
+    "buildpack/windows2016": "buildpack_app_lifecycle/buildpack_app_lifecycle.tgz"
+    "buildpack/windows": "buildpack_app_lifecycle/buildpack_app_lifecycle.tgz"
+    "docker": "docker_app_lifecycle/docker_app_lifecycle.tgz"
+
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/stacks?/-
+  type: replace
+  value:
+    description: Windows Server
+    name: windows
+
+- path: /instance_groups/name=windows2016-cell/jobs/name=rep_windows/properties/diego/rep/preloaded_rootfses/-
+  type: replace
+  value: "windows:oci:///C:/var/vcap/packages/windows2016fs"

@@ -20,7 +20,7 @@
     'product_slug' => 'go-buildpack'
   },
   'hwc' => {
-    'stacks' => %w(windows2012R2 windows2016),
+    'stacks' => %w(windows2012R2 windows2016 windows),
     'skip_brats' => true,
     'non_lts' => true,
     'product_slug' => 'hwc-buildpack',
@@ -708,7 +708,7 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        <% pws_stacks = buildpacks[language]['stacks'] - ['windows2012R2']
+        <% pws_stacks = buildpacks[language]['stacks'] - ['windows2012R2', 'windows']
            pws_stacks.each do |stack| %>
         - get: pivotal-buildpack-cached-<%= stack %>
           passed: [ ship-it ]
