@@ -8,7 +8,6 @@ set -o pipefail
 set -o xtrace
 
 ENV_NAME=${ENV_NAME:-}
-ZONE_NAME="${ENV_NAME}"-zone
 DNS_NAME="${ENV_NAME}.buildpacks-gcp.ci.cf-app.com."
 
 gcloud auth activate-service-account --key-file /tmp/gcp_key
@@ -16,7 +15,7 @@ gcloud auth activate-service-account --key-file /tmp/gcp_key
 gcloud config set project cf-buildpacks
 
 # get the NS
-NAMESERVERS=$(gcloud dns record-sets list -z buildpacks | grep $ENV_NAME | awk '{ print $4 }'| tr , ' ')
+NAMESERVERS=$(gcloud dns record-sets list -z buildpacks | grep "$ENV_NAME" | awk '{ print $4 }'| tr , ' ')
 
 # remove the parent zone (buildpacks zone) subdomain NS records
 gcloud dns record-sets transaction start --zone=buildpacks
