@@ -9,7 +9,8 @@
      '../cf-deployment/operations/experimental/enable-traffic-to-internal-networks.yml',
      '../cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml',
      'deployments/operations/no-canaries.yml',
-     'deployments/edge-shared/num-cells.yml'
+     'deployments/edge-shared/num-cells.yml',
+     'deployments/operations/add-windows-stack.yml'
    ]
 %>
 

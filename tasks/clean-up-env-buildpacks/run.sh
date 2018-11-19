@@ -37,7 +37,7 @@ for bp in $null_buildpacks; do
 done
 
 if [ "$INSTALL_STACK_ASSOC_HWC_BPS" = true ] ; then
-  for windows_stack in windows2012R2 windows2016; do
+  for windows_stack in windows2012R2 windows2016 windows; do
     pushd hwc-buildpack
         export GOBIN=$PWD/.bin
         export PATH=$GOBIN:$PATH
