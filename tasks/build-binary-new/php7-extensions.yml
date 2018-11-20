@@ -8,8 +8,8 @@ native_modules:
   md5: 4f4b4f323fd3514a68e0ab3da8ce3455
   klass: LuaRecipe
 - name: hiredis
-  version: 0.13.0
-  md5: 6d565680a4af0d2e261abbc3e3431b2b
+  version: 0.13.3
+  md5: 43dca1445ec6d3b702821dba36000279
   klass: HiredisRecipe
 - name: snmp
   version: nil
