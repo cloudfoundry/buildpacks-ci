@@ -72,7 +72,7 @@ resources: #####################################################################
     type: git
     source:
       uri: https://github.com/cloudfoundry/hwc-buildpack
-      branch: master
+      branch: develop
 
   ## bosh.io Stemcells ##
 

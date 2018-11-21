@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2086
 
-
-set -o pipefail
-set -o nounset
+set -euo pipefail
 
 set +x
 eval "$(bbl --state-dir bbl-state/${ENV_NAME} print-env)"
@@ -49,5 +47,4 @@ if [ "$INSTALL_STACK_ASSOC_HWC_BPS" = true ] ; then
     popd
   done
 fi
-
 
