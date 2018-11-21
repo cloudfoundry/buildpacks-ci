@@ -54,8 +54,16 @@ when "dotnet-runtime"
   version = Depwatcher::DotnetRuntime.new.in(version["ref"].to_s)
 when "dotnet-aspnetcore"
   version = Depwatcher::DotnetAspNetCore.new.in(version["ref"].to_s)
+when "rserve"
+  version = Depwatcher::CRAN.new.in("Rserve", version["ref"].to_s)
+when "forecast"
+  version = Depwatcher::CRAN.new.in("forecast", version["ref"].to_s)
+when "shiny"
+  version = Depwatcher::CRAN.new.in("shiny", version["ref"].to_s)
+when "plumber"
+  version = Depwatcher::CRAN.new.in("plumber", version["ref"].to_s)
 else
-  raise "Unkown type: #{type}"
+  raise "Unknown type: #{type}"
 end
 
 File.write("#{dir}/data.json", { source: source, version: version }.to_json)

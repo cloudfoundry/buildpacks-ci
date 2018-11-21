@@ -48,6 +48,14 @@ when "dotnet-runtime"
   versions = Depwatcher::DotnetRuntime.new.check
 when "dotnet-aspnetcore"
   versions = Depwatcher::DotnetAspNetCore.new.check
+when "rserve"
+  versions = Depwatcher::CRAN.new.check("Rserve")
+when "forecast"
+  versions = Depwatcher::CRAN.new.check("forecast")
+when "plumber"
+  versions = Depwatcher::CRAN.new.check("plumber")
+when "shiny"
+  versions = Depwatcher::CRAN.new.check("shiny")
 else
   raise "Unkown type: #{source["type"]}"
 end

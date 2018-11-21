@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>CRAN - Package forecast</title>
+<link rel="stylesheet" type="text/css" href="../../CRAN_web.css" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="citation_title" content="Forecasting Functions for Time Series and Linear Models [R package forecast version 8.4]" />
+<meta name="citation_author1" content="Rob Hyndman" />
+<meta name="citation_author2" content="George Athanasopoulos" />
+<meta name="citation_author3" content="Christoph Bergmeir" />
+<meta name="citation_author4" content="Gabriel Caceres" />
+<meta name="citation_author5" content="Leanne Chhay" />
+<meta name="citation_author6" content="Mitchell O'Hara-Wild" />
+<meta name="citation_author7" content="Fotios Petropoulos" />
+<meta name="citation_author8" content="Slava Razbash" />
+<meta name="citation_author9" content="Earo Wang" />
+<meta name="citation_author10" content="Farah Yasmeen" />
+<meta name="citation_publication_date.Published" content="2018-06-21" />
+<meta name="citation_public_url" content="https://CRAN.R-project.org/package=forecast" />
+<meta name="DC.identifier" content="https://CRAN.R-project.org/package=forecast" />
+<meta name="DC.publisher" content="Comprehensive R Archive Network (CRAN)" />
+<style type="text/css">
+  table td { vertical-align: top; }
+</style>
+</head>
+<body>
+<h2>forecast: Forecasting Functions for Time Series and Linear Models</h2>
+<p>Methods and tools for displaying and analysing
+             univariate time series forecasts including exponential smoothing
+             via state space models and automatic ARIMA modelling.</p>
+<table summary="Package forecast summary">
+<tr>
+<td>Version:</td>
+<td>8.4</td>
+</tr>
+<tr>
+<td>Depends:</td>
+<td>R (&ge; 3.0.2)</td>
+</tr>
+<tr>
+<td>Imports:</td>
+<td><a href="../colorspace/index.html">colorspace</a>, <a href="../fracdiff/index.html">fracdiff</a>, <a href="../ggplot2/index.html">ggplot2</a> (&ge; 2.2.1), graphics, <a href="../lmtest/index.html">lmtest</a>, <a href="../magrittr/index.html">magrittr</a>, <a href="../nnet/index.html">nnet</a>, parallel, <a href="../Rcpp/index.html">Rcpp</a> (&ge; 0.11.0), stats, <a href="../timeDate/index.html">timeDate</a>, <a href="../tseries/index.html">tseries</a>, <a href="../urca/index.html">urca</a>, <a href="../uroot/index.html">uroot</a>, <a href="../zoo/index.html">zoo</a></td>
+</tr>
+<tr>
+<td>LinkingTo:</td>
+<td><a href="../Rcpp/index.html">Rcpp</a> (&ge; 0.11.0), <a href="../RcppArmadillo/index.html">RcppArmadillo</a> (&ge; 0.2.35)</td>
+</tr>
+<tr>
+<td>Suggests:</td>
+<td><a href="../expsmooth/index.html">expsmooth</a>, <a href="../knitr/index.html">knitr</a>, <a href="../rmarkdown/index.html">rmarkdown</a>, <a href="../rticles/index.html">rticles</a>, <a href="../testthat/index.html">testthat</a></td>
+</tr>
+<tr>
+<td>Published:</td>
+<td>2018-06-21</td>
+</tr>
+<tr>
+<td>Author:</td>
+<td>Rob Hyndman <a href="https://orcid.org/0000-0002-2140-5352"><img alt="ORCID iD" src="/web/orcid.svg" style="width:16px; height:16px; margin-left:4px; margin-right:4px; vertical-align:middle" /></a> [aut, cre, cph],
+  George Athanasopoulos [aut],
+  Christoph Bergmeir <a href="https://orcid.org/0000-0002-3665-9021"><img alt="ORCID iD" src="/web/orcid.svg" style="width:16px; height:16px; margin-left:4px; margin-right:4px; vertical-align:middle" /></a> [aut],
+  Gabriel Caceres [aut],
+  Leanne Chhay [aut],
+  Mitchell O'Hara-Wild [aut],
+  Fotios Petropoulos <a href="https://orcid.org/0000-0003-3039-4955"><img alt="ORCID iD" src="/web/orcid.svg" style="width:16px; height:16px; margin-left:4px; margin-right:4px; vertical-align:middle" /></a> [aut],
+  Slava Razbash [aut],
+  Earo Wang [aut],
+  Farah Yasmeen <a href="https://orcid.org/0000-0002-1479-5401"><img alt="ORCID iD" src="/web/orcid.svg" style="width:16px; height:16px; margin-left:4px; margin-right:4px; vertical-align:middle" /></a> [aut],
+  R Core Team [ctb, cph],
+  Ross Ihaka [ctb, cph],
+  Daniel Reid [ctb],
+  David Shaub [ctb],
+  Yuan Tang <a href="https://orcid.org/0000-0001-5243-233X"><img alt="ORCID iD" src="/web/orcid.svg" style="width:16px; height:16px; margin-left:4px; margin-right:4px; vertical-align:middle" /></a> [ctb],
+  Zhenyu Zhou [ctb]</td>
+</tr>
+<tr>
+<td>Maintainer:</td>
+<td>Rob Hyndman  &#x3c;&#x52;&#x6f;&#x62;&#x2e;&#x48;&#x79;&#x6e;&#x64;&#x6d;&#x61;&#x6e;&#x20;&#x61;&#x74;&#x20;&#x6d;&#x6f;&#x6e;&#x61;&#x73;&#x68;&#x2e;&#x65;&#x64;&#x75;&#x3e;</td>
+</tr>
+<tr>
+<td>BugReports:</td>
+<td><a href="https://github.com/robjhyndman/forecast/issues">https://github.com/robjhyndman/forecast/issues</a></td>
+</tr>
+<tr>
+<td>License:</td>
+<td><a href="../../licenses/GPL-3">GPL-3</a></td>
+</tr>
+<tr>
+<td>URL:</td>
+<td><a href="http://pkg.robjhyndman.com/forecast">http://pkg.robjhyndman.com/forecast</a>,
+<a href="https://github.com/robjhyndman/forecast">https://github.com/robjhyndman/forecast</a></td>
+</tr>
+<tr>
+<td>NeedsCompilation:</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>Citation:</td>
+<td><a href="citation.html">forecast citation info</a> </td>
+</tr>
+<tr>
+<td>Materials:</td>
+<td><a href="readme/README.html">README</a> <a href="news/news.html">NEWS</a> </td>
+</tr>
+<tr>
+<td>In&nbsp;views:</td>
+<td><a href="../../views/Econometrics.html">Econometrics</a>, <a href="../../views/Environmetrics.html">Environmetrics</a>, <a href="../../views/Finance.html">Finance</a>, <a href="../../views/MissingData.html">MissingData</a>, <a href="../../views/TimeSeries.html">TimeSeries</a></td>
+</tr>
+<tr>
+<td>CRAN&nbsp;checks:</td>
+<td><a href="../../checks/check_results_forecast.html">forecast results</a></td>
+</tr>
+</table>
+<h4>Downloads:</h4>
+<table summary="Package forecast downloads">
+<tr>
+<td> Reference&nbsp;manual: </td>
+<td> <a href="forecast.pdf"> forecast.pdf </a> </td>
+</tr>
+<tr>
+<td>Vignettes:</td>
+<td>
+<a href="vignettes/JSS2008.html">Automatic Time Series Forecasting: the forecast Package for R (Hyndman &amp; Khandakar, JSS 2008)</a><br/>
+</td>
+</tr>
+<tr>
+<td> Package&nbsp;source: </td>
+<td> <a href="../../../src/contrib/forecast_8.4.tar.gz"> forecast_8.4.tar.gz </a> </td>
+</tr>
+<tr>
+<td> Windows&nbsp;binaries: </td>
+<td> r-devel: <a href="../../../bin/windows/contrib/3.6/forecast_8.4.zip">forecast_8.4.zip</a>, r-release: <a href="../../../bin/windows/contrib/3.5/forecast_8.4.zip">forecast_8.4.zip</a>, r-oldrel: <a href="../../../bin/windows/contrib/3.4/forecast_8.4.zip">forecast_8.4.zip</a> </td>
+</tr>
+<tr>
+<td> OS&nbsp;X&nbsp;binaries: </td>
+<td> r-release: <a href="../../../bin/macosx/el-capitan/contrib/3.5/forecast_8.4.tgz">forecast_8.4.tgz</a>, r-oldrel: <a href="../../../bin/macosx/el-capitan/contrib/3.4/forecast_8.4.tgz">forecast_8.4.tgz</a> </td>
+</tr>
+<tr>
+<td> Old&nbsp;sources: </td>
+<td> <a href="https://CRAN.R-project.org/src/contrib/Archive/forecast"> forecast archive </a> </td>
+</tr>
+</table>
+<h4>Reverse dependencies:</h4>
+<table summary="Package forecast reverse dependencies">
+<tr>
+<td>Reverse&nbsp;depends:</td>
+<td><a href="../demography/index.html">demography</a>, <a href="../dendrometeR/index.html">dendrometeR</a>, <a href="../Dowd/index.html">Dowd</a>, <a href="../expsmooth/index.html">expsmooth</a>, <a href="../fma/index.html">fma</a>, <a href="../forecastHybrid/index.html">forecastHybrid</a>, <a href="../forecTheta/index.html">forecTheta</a>, <a href="../fpp/index.html">fpp</a>, <a href="../fpp2/index.html">fpp2</a>, <a href="../ftsa/index.html">ftsa</a>, <a href="../hts/index.html">hts</a>, <a href="../ilc/index.html">ilc</a>, <a href="../MAPA/index.html">MAPA</a>, <a href="../Mcomp/index.html">Mcomp</a>, <a href="../nnfor/index.html">nnfor</a>, <a href="../portes/index.html">portes</a>, <a href="../Rssa/index.html">Rssa</a>, <a href="../StMoMo/index.html">StMoMo</a>, <a href="../thief/index.html">thief</a>, <a href="../Tushare/index.html">Tushare</a>, <a href="../ZRA/index.html">ZRA</a></td>
+</tr>
+<tr>
+<td>Reverse&nbsp;imports:</td>
+<td><a href="../AEDForecasting/index.html">AEDForecasting</a>, <a href="../BETS/index.html">BETS</a>, <a href="../bfast/index.html">bfast</a>, <a href="../cricketr/index.html">cricketr</a>, <a href="../decomposedPSF/index.html">decomposedPSF</a>, <a href="../dsa/index.html">dsa</a>, <a href="../EventDetectR/index.html">EventDetectR</a>, <a href="../fDMA/index.html">fDMA</a>, <a href="../ForecastComb/index.html">ForecastComb</a>, <a href="../GeomComb/index.html">GeomComb</a>, <a href="../gpDDE/index.html">gpDDE</a>, <a href="../grattan/index.html">grattan</a>, <a href="../greybox/index.html">greybox</a>, <a href="../hpiR/index.html">hpiR</a>, <a href="../iClick/index.html">iClick</a>, <a href="../imputeTestbench/index.html">imputeTestbench</a>, <a href="../imputeTS/index.html">imputeTS</a>, <a href="../KarsTS/index.html">KarsTS</a>, <a href="../knnp/index.html">knnp</a>, <a href="../lfl/index.html">lfl</a>, <a href="../mafs/index.html">mafs</a>, <a href="../midasr/index.html">midasr</a>, <a href="../MortalityGaps/index.html">MortalityGaps</a>, <a href="../msltrend/index.html">msltrend</a>, <a href="../nullabor/index.html">nullabor</a>, <a href="../odpc/index.html">odpc</a>, <a href="../portalr/index.html">portalr</a>, <a href="../predtoolsTS/index.html">predtoolsTS</a>, <a href="../PSF/index.html">PSF</a>, <a href="../robets/index.html">robets</a>, <a href="../sazedR/index.html">sazedR</a>, <a href="../ScottKnottESD/index.html">ScottKnottESD</a>, <a href="../smooth/index.html">smooth</a>, <a href="../spduration/index.html">spduration</a>, <a href="../stR/index.html">stR</a>, <a href="../sutteForecastR/index.html">sutteForecastR</a>, <a href="../sweep/index.html">sweep</a>, <a href="../Tcomp/index.html">Tcomp</a>, <a href="../TimeSeries.OBeu/index.html">TimeSeries.OBeu</a>, <a href="../timetk/index.html">timetk</a>, <a href="../tsBSS/index.html">tsBSS</a>, <a href="../tsDyn/index.html">tsDyn</a>, <a href="../tsensembler/index.html">tsensembler</a>, <a href="../TSF/index.html">TSF</a>, <a href="../tsoutliers/index.html">tsoutliers</a>, <a href="../TSPred/index.html">TSPred</a>, <a href="../tsSelect/index.html">tsSelect</a>, <a href="../TSstudio/index.html">TSstudio</a>, <a href="../WaveletArima/index.html">WaveletArima</a>, <a href="../WRTDStidal/index.html">WRTDStidal</a></td>
+</tr>
+<tr>
+<td>Reverse&nbsp;suggests:</td>
+<td><a href="../AER/index.html">AER</a>, <a href="../aurelius/index.html">aurelius</a>, <a href="../caschrono/index.html">caschrono</a>, <a href="../corset/index.html">corset</a>, <a href="../dplR/index.html">dplR</a>, <a href="../epimdr/index.html">epimdr</a>, <a href="../gamclass/index.html">gamclass</a>, <a href="../ggfortify/index.html">ggfortify</a>, <a href="../lifecontingencies/index.html">lifecontingencies</a>, <a href="../mFilter/index.html">mFilter</a>, <a href="../origami/index.html">origami</a>, <a href="../pander/index.html">pander</a>, <a href="../rainbow/index.html">rainbow</a>, <a href="../sophisthse/index.html">sophisthse</a>, <a href="../tactile/index.html">tactile</a>, <a href="../trajectories/index.html">trajectories</a>, <a href="../tsbox/index.html">tsbox</a></td>
+</tr>
+</table>
+<h4>Linking:</h4>
+<p>Please use the canonical form
+<a href="https://CRAN.R-project.org/package=forecast"><samp>https://CRAN.R-project.org/package=forecast</samp></a>
+to link to this page.</p>
+</body>
+</html>
