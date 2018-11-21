@@ -54,12 +54,29 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   version = builds[stack]['version'] # We assume that the version is the same for all stacks
 
+  source_type = 'source'
+  source_url = builds[stack]['source']['url']
+
+  if source_name.include? 'dotnet'
+    git_commit_sha = builds[stack]['git_commit_sha']
+    source_url = "#{source_url}/archive/#{git_commit_sha}.tar.gz"
+  elsif source_name == 'appdynamics'
+    source_type = 'osl'
+    source_url = 'https://docs.appdynamics.com/display/DASH/Legal+Notices'
+  elsif source_name == 'CAAPM'
+    source_type = 'osl'
+    source_url = 'https://docops.ca.com/ca-apm/10-5/en/ca-apm-release-notes/third-party-software-acknowledgments/php-agents-third-party-software-acknowledgments'
+  elsif source_name.include? 'miniconda'
+    source_url = "https://github.com/conda/conda/archive/#{version}.tar.gz"
+  end
+
   dep = {
     'name' => manifest_name,
     'version' => resource_version,
     'uri' => build['url'],
     'sha256' => build['sha256'],
-    'cf_stacks' => stacks
+    'cf_stacks' => stacks,
+    source_type => source_url,
   }
 
   old_versions = manifest['dependencies']
