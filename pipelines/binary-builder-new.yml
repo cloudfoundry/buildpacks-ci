@@ -105,7 +105,11 @@
                           python: { lines: ["2.7.X", "3.4.X", "3.5.X", "3.6.X", "3.7.X"], removal_strategy: 'keep_latest_released' } } },
 
   r:                  { buildpacks: {
-                          r: { lines: ["3.4.X", "3.5.X"], removal_strategy: 'keep_latest_released' } } },
+                          r: { lines: ["3.4.X", "3.5.X"], removal_strategy: 'keep_latest_released' } },
+
+                        # We watch for updates to these libraries to trigger rebuilds of R
+                        monitored_deps: ['rserve', 'forecast', 'shiny', 'plumber']
+                      },
 
   ruby:               { buildpacks: {
                           ruby: { lines: ["2.2.X", "2.3.X", "2.4.X", "2.5.X"], removal_strategy: 'keep_latest_released' } } },
@@ -258,6 +262,15 @@ resources:
     <% end %>
 <% end %>
 
+<% dep.fetch(:monitored_deps, []).each do |monitored_dep_name| %>
+- name: source-<%= monitored_dep_name %>-latest
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: <%= monitored_dep_name %>
+    name: <%= monitored_dep_name %>
+<% end %>
+
 <% if !dep[:third_party_hosted] %>
 - name: buildpacks-bucket-<%=dep_name%>
   type: s3
@@ -310,8 +323,37 @@ jobs:
       resource: source-<%=dep_name%>-<%= line %>
       trigger: true
       version: every
+    <% dep.fetch(:monitored_deps, []).each_with_index do |monitored_dep_name, index| %>
+    - get: monitored-dep-<%= index %>
+      resource: source-<%=monitored_dep_name%>-latest
+      trigger: true
+      version: every
+    <% end %>
     - get: builds
   - do:
+    <% if dep.key? :monitored_deps %>
+    - task: collate-monitored-deps
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cfbuildpacks/ci
+        run:
+          path: bash
+          args:
+          - -cl
+          - buildpacks-ci/tasks/build-binary-new/transform_monitored_deps.rb
+        params:
+          DEP_COUNT: <%= dep[:monitored_deps].size %>
+        inputs:
+          - name: buildpacks-ci
+          <% dep[:monitored_deps].each_index do |index| %>
+          - name: monitored-dep-<%= index %>
+          <% end %>
+        outputs:
+          - name: all-monitored-deps
+    <% end %>
     - task: create-tracker-story
       file: buildpacks-ci/tasks/build-binary-new/create.yml
       params:
@@ -336,10 +378,21 @@ jobs:
       version: every
       passed:
       <% dep[:buildpacks].each do |bp_name, bp_data| %>
-      <% if bp_uses_line?(bp_data, line) %>
-      - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
+        <% if bp_uses_line?(bp_data, line) %>
+        - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
+        <% end %>
       <% end %>
+    <% dep.fetch(:monitored_deps, []).each do |monitored_dep_name| %>
+    - get: source-<%=monitored_dep_name%>-latest
+      trigger: true
+      version: every
+      passed:
+      <% dep[:buildpacks].each do |bp_name, bp_data| %>
+        <% if bp_uses_line?(bp_data, line) %>
+        - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
+        <% end %>
       <% end %>
+    <% end %>
     - get: builds
   - do:
     - task: finish-<%=dep_name%>-<%= line %>-story
@@ -381,6 +434,12 @@ jobs:
       trigger: true
       version: every
       passed: [ create-<%=dep_name%>-<%= line %>-story ]
+    <% dep.fetch(:monitored_deps, []).each do |monitored_dep_name| %>
+    - get: source-<%=monitored_dep_name%>-latest
+      trigger: true
+      version: every
+      passed: [ create-<%=dep_name%>-<%= line %>-story ]
+    <% end %>
     <% stacks.each do |stack| %>
     - get: <%= stack %>-image
     <% end %>
@@ -446,6 +505,12 @@ jobs:
       <% end %>
       version: every
       trigger: true
+    <% dep.fetch(:monitored_deps, []).each do |monitored_dep_name| %>
+    - get: source-<%=monitored_dep_name%>-latest
+      trigger: true
+      version: every
+      passed: [<%= "build-#{dep_name}-#{line}" %>]
+    <% end %>
     - get: builds
   - do:
     - task: update-buildpack-dependency
