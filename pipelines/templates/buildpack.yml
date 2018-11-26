@@ -1287,7 +1287,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/build-offline-buildpacks-cutlass/task.yml
           params:
             LANGUAGE: hwc
-            CF_STACKS: "windows2012R2 windows2016 any"
+            CF_STACKS: <%= (buildpacks[language]['stacks']+['any']).join(' ') %> # add any stack to offline release for install-hwc-buildpack-lts job. Can be removed after 2.1 is gone.
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
         - task: create-offline-bosh-release
