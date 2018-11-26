@@ -16,6 +16,11 @@ version = data.dig('version', 'ref')
 tracker_client = TrackerApi::Client.new(token: ENV['TRACKER_API_TOKEN'])
 buildpack_project = tracker_client.project(ENV['TRACKER_PROJECT_ID'])
 
+if File.file?('all-monitored-deps/data.json')
+  all_monitored_deps = JSON.parse(open('all-monitored-deps/data.json').read)
+  data['packages'] = all_monitored_deps
+end
+
 story = buildpack_project.create_story(
   name: "Build and/or Include new releases: #{name} #{version}",
   description: "```\n#{data.to_yaml}\n```\n",

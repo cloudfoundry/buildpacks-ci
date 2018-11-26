@@ -8,6 +8,8 @@ inputs:
   - name: buildpacks-ci
   - name: source
   - name: builds
+  - name: all-monitored-deps
+    optional: true
 outputs:
   - name: builds-artifacts
 run:
