@@ -224,6 +224,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
           params:
             ENV_NAME: <%= env %>
+            ALLOW_FAILURE: true
         - task: bosh-deploy
           file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
           attempts: 3
@@ -235,6 +236,7 @@ jobs: ##########################################################################
             SYSTEM_DOMAIN: <%= env %>.buildpacks-gcp.ci.cf-app.com
             OPS_FILES: "<%= opsfiles.join(' ') %>"
         - task: clean-up-env-buildpacks
+          attempts: 3
           file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
           params:
             ENV_NAME: <%= env %>

@@ -1,24 +1,18 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2086
 
-set -uo pipefail
-set +x
+set -euo pipefail
+if [ "$ALLOW_FAILURE" = true ] ; then #This script runs before and after deployment so if the env is not deployed yet this script can fail
+  set +e
+fi
 
+set +x
 eval "$(bbl --state-dir bbl-state/${ENV_NAME} print-env)"
 cf_password=$(credhub get -n /bosh-${ENV_NAME}/cf/cf_admin_password -j | jq -r .value)
 
 target="api.$ENV_NAME.buildpacks-gcp.ci.cf-app.com"
 
 cf api "$target" --skip-ssl-validation || (sleep 4 && cf api "$target" --skip-ssl-validation)
-
-# This is run before deploying the environment so this can fail
-if [ "$?" == "1" ]; then
-  exit 0
-fi
-
-# Not setting -e until this point, because we want to let the script keep running
-# even if cf target fails
-set -e
 
 cf auth admin "$cf_password" || (sleep 4 && cf auth admin "$cf_password")
 set -x
