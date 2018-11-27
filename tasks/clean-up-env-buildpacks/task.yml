@@ -14,3 +14,4 @@ run:
 params:
   ENV_NAME:
   INSTALL_STACK_ASSOC_HWC_BPS: false
+  ALLOW_FAILURE: false
