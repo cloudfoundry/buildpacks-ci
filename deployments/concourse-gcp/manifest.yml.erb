@@ -10,8 +10,10 @@ releases:
   version: 1.15.0
   url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.15.0
   sha1: 274a619fe1588c157e6fa147b29ae2652f1fa73d
-- name: windows-tools-release
-  version: latest
+- name: windows-tools
+  version: 26
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/windows-tools-release?v=26
+  sha1: 7b962d804ad2c09f3c49c964c93d878cc2bba1b0
 - name: concourse-windows-worker
   version: 3.14.1
   url: https://bosh.io/d/github.com/pivotal-cf-experimental/concourse-windows-worker-release?v=3.14.1
@@ -111,9 +113,11 @@ instance_groups:
   - name: public
   jobs:
   - name: golang-windows
-    release: windows-tools-release
+    release: windows-tools
   - name: git
-    release: windows-tools-release
+    release: windows-tools
+  - name: ginkgo
+    release: windows-tools
   - name: concourse_windows
     release: concourse-windows-worker
     properties:

@@ -8,26 +8,17 @@ $buildDir=$env:GOPATH + "/src/code.cloudfoundry.org/buildpackapplifecycle"
 md -Force $buildDir
 cp bal-develop/* $buildDir -recurse
 
-echo "Installing chocolatey"
-Set-ExecutionPolicy Bypass -Scope Process -Force
-iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-echo "Installing git"
-choco install -y git --force
-
 push-location $buildDir
- # New-Item -ItemType directory -Path C:\Windows\system32\config\systemprofile\AppData\Local\Temp
+  echo "Go version: "
+  go version
   go get -t ./...
-  go get github.com/onsi/ginkgo/ginkgo
-  push-location ../../github.com/onsi/ginkgo
-    go build
-  pop-location
 
   echo "Running tests..."
-  $(& "$env:GOPATH\bin\ginkgo.exe" -r -race; $ExitCode="$LastExitCode")
+  $(& "c:\var\vcap\packages\ginkgo\bin\ginkgo.exe" -r -race; $ExitCode="$LastExitCode")
   if ($ExitCode) {
     echo "Running tests for windows2012R2 tag..."
     $env:TAR_URL="https://s3.amazonaws.com/bosh-windows-dependencies/tar-1503683828.exe"
-    $(& "$env:GOPATH\bin\ginkgo.exe" -tags windows2012R2 -r; $ExitCode="$LastExitCode")
+    $(& "c:\var\vcap\packages\ginkgo\bin\ginkgo.exe" -tags windows2012R2 -r; $ExitCode="$LastExitCode")
   }
 pop-location
 
