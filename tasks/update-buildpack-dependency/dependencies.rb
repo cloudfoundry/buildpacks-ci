@@ -19,7 +19,7 @@ class Dependencies
       out = @dependencies + [@dep]
     # adding one newer than all existing versions
     elsif latest?
-      # keep deps (from latest released buildpack) and add this new one
+      # keep deps (from latest released buildpack) and add this new one. If removal_strategy is NOT keep_latest_released do not keep any deps from latest released buidpack.
       out = ((@dependencies - @matching_deps) + [@dep] + dependencies_latest_released)
     else
       # if not newer, don't do anything
