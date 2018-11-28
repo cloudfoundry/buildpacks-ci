@@ -74,6 +74,12 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/hwc-buildpack
       branch: develop
 
+  - name: binary-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/binary-buildpack
+      branch: develop
+
   ## bosh.io Stemcells ##
 
   - name: gcp-stemcell
@@ -190,6 +196,7 @@ jobs: ##########################################################################
           - get: cf-deployment-concourse-tasks
           - get: cflinuxfs3-bosh-release
           - get: hwc-buildpack
+          - get: binary-buildpack
           - get: 3am-daily-timer
             trigger: true
           <% locks_per_environment.times do |lock_num| %>

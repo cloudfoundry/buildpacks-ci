@@ -8,6 +8,7 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: hwc-buildpack
+  - name: binary-buildpack
   - name: bbl-state
 run:
   path: buildpacks-ci/tasks/clean-up-env-buildpacks/run.sh
