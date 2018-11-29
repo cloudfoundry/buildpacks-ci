@@ -90,6 +90,21 @@
                           'nodejs-cnb' => {lines: ["6.X.X", "8.X.X", "9.X.X", "10.X.X", "11.X.X"], removal_strategy: 'keep_latest_released'}},
                         source_type: 'node'},
 
+  'org.cloudfoundry.buildpacks.npm': {
+                        branch: 'v3',
+                        buildpacks: { nodejs: { }, },
+                        source_type: 'github_releases',
+                        source_params: ['repo: cloudfoundry/npm-cnb', 'extension: .tgz', 'prerelease: true'],
+                        any_stack: true },
+
+  'org.cloudfoundry.buildpacks.nodejs': {
+                        branch: 'v3',
+                        buildpacks: { nodejs: { }, },
+                        source_type: 'github_releases',
+                        source_params: ['repo: cloudfoundry/nodejs-cnb', 'extension: .tgz', 'prerelease: true'],
+                        any_stack: true },
+
+
   php:                { buildpacks: {
                           php: { lines: ["5.6.X", "7.0.X", "7.1.X", "7.2.X"], removal_strategy: 'keep_latest_released'} },
                         source_type: 'php'},
@@ -207,6 +222,15 @@ resources:
 - name: <%= stack %>-image
   type: docker-image
   source: {repository: cloudfoundry/<%= stack %>}
+<% end %>
+
+<% dependencies.values.select{|dep| dep.fetch(:branch, 'develop') == 'v3' }.map{|dep| dep[:buildpacks].keys}.flatten.uniq.each do |buildpack| %>
+- name: <%= buildpack %>-buildpack-v3
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/<%= buildpack %>-buildpack.git
+    private_key: {{<%= buildpack %>-buildpack-private-key}}
+    branch: v3
 <% end %>
 
 <% dependencies.values.map{|dep| dep[:buildpacks].keys}.flatten.uniq.each do |buildpack| %>
@@ -491,10 +515,17 @@ jobs:
   public: true
   plan:
   - aggregate:
+    <% if dep[:branch] == 'v3' %>
+    - get: buildpack
+      resource: <%= bp_name %>-buildpack-v3
+    - get: buildpack-latest-released
+      resource: <%= bp_name %>-buildpack-v3
+    <% else %>
     - get: buildpack
       resource: <%= bp_name %>-buildpack
     - get: buildpack-latest-released
       resource: <%= bp_name %>-buildpack-latest-released
+    <% end %>
     - get: buildpacks-ci
     - get: source
       resource: source-<%=dep_name%>-<%= line %>
@@ -522,7 +553,7 @@ jobs:
       params:
         VERSION_LINE: <%= if dep_name == :nginx && bp_name == :nginx then 'nginx' else get_version_line_type(bp[:lines]) end %>
         REMOVAL_STRATEGY: <%= bp.fetch(:removal_strategy, 'remove_all') %>
-    - put: <%= bp_name %>-buildpack
+    - put: <%= bp_name %>-buildpack<%= '-v3' if dep[:branch] == 'v3' %>
       params:
         repository: artifacts
         rebase: true
