@@ -308,7 +308,7 @@ class Builder
       out_data[:sha256] = results[1]
       out_data[:url] = source_input.url
 
-    when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower' # TODO : fix me to use artifact_output
+    when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower', 'org.cloudfoundry.buildpacks.nodejs', 'org.cloudfoundry.buildpacks.npm' # TODO : fix me to use artifact_output
       results = Sha.check_sha(source_input)
       ext = File.basename(source_input.url)[/\.((zip|tar\.gz|tar\.xz|tgz))$/, 1]
       File.write('artifacts/temp_file', results[0])
