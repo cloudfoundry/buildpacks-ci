@@ -36,9 +36,9 @@ module Depwatcher
       end
     end
 
-    def check(repo : String) : Array(Internal)
+    def check(repo : String, allow_prerelease : Bool) : Array(Internal)
       releases(repo).reject do |r|
-        r.prerelease || r.draft
+        (r.prerelease && !allow_prerelease) || r.draft
       end.map do |r|
         Internal.new(r.ref) if r.ref != ""
       end.compact.sort_by { |i| SemanticVersion.new(i.ref) }

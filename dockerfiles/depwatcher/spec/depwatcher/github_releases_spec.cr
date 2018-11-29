@@ -14,7 +14,11 @@ Spec2.describe Depwatcher::GithubReleases do
 
   describe "#check" do
     it "returns real releases sorted" do
-      expect(subject.check("yarnpkg/yarn").map(&.ref)).to eq ["1.5.1", "1.6.0"]
+      expect(subject.check("yarnpkg/yarn", false).map(&.ref)).to eq ["1.5.1", "1.6.0"]
+    end
+
+    it "returns pre-releases and real releases sorted" do
+      expect(subject.check("yarnpkg/yarn", true).map(&.ref)).to eq ["0.0.1", "1.5.1", "1.6.0"]
     end
   end
 
@@ -29,6 +33,7 @@ Spec2.describe Depwatcher::GithubReleases do
     after do
       FileUtils.rm_rf dirname
     end
+
     context "when fetching a binary" do
       it "returns a release object for the version" do
         obj = subject.in("yarnpkg/yarn", "tar.gz", "1.5.1", dirname)
