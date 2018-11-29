@@ -40,7 +40,8 @@
   'nodejs' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
     'product_slug' => 'nodejs-buildpack',
-    'go_modules' => true
+    'go_modules' => true,
+    'v3' => true
   },
   'php' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
@@ -99,6 +100,17 @@ resources: #####################################################################
       ignore_paths:
         - VERSION
         - CHANGELOG
+
+  - name: buildpack-v3
+    type: git
+    webhook_token: ob0aigh3
+    source:
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
+      branch: v3
+      ignore_paths:
+      - VERSION
+      - CHANGELOG
 
   - name: buildpack-new-version
     type: git
@@ -846,6 +858,75 @@ jobs: ##########################################################################
         metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
 
+<% if buildpacks[language]['v3'] %>
+  - name: specs-edge-integration-v3
+    serial: true
+    public: true
+    plan:
+    - aggregate:
+      - put: edge-environments
+        params:
+          acquire: true
+      - put: edge-buildpack-specs-pool
+        params:
+          claim: <%= language %>
+        timeout: 3h
+      - get: buildpacks-ci
+      - get: env-repo
+      - get: buildpack
+        resource: buildpack-v3
+        trigger: true
+      - get: repo
+        resource: buildpack-v3
+    - aggregate:
+      <% buildpacks[language]['stacks'].each do |stack| %>
+      - do:
+        - task: create-cf-space
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            ENV_POOL_RESOURCE: edge-environments
+            ENVS_DIR: env-repo
+            ORG: pivotal
+            SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+            USERNAME: admin
+        - task: ginkgo-<%= stack %>
+          file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          params:
+            CF_STACK: <%= stack %>
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 6
+            <% if language == 'php' %>
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            <% end %>
+          <% if buildpacks[language]['skip_docker_start'] %>
+            SKIP_DOCKER_START: true
+          <% else %>
+          privileged: true
+          <% end %>
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: cf-space-<%= stack %>}
+          <% end %>
+    on_failure:
+      put: failure-alert
+      params:
+        text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        channel: {{concourse-job-failure-notifications-slack-channel}}
+        username: concourse
+        icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+    ensure:
+      aggregate:
+      - put: edge-buildpack-specs-pool
+        params:
+          release: edge-buildpack-specs-pool
+      - put: edge-environments
+        params:
+          release: edge-environments
+<% end %>
+
   - name: specs-edge-integration-develop
     serial: true
     public: true
@@ -914,6 +995,7 @@ jobs: ##########################################################################
       - put: edge-environments
         params:
           release: edge-environments
+
 <% unless buildpacks[language]['skip_brats'] %>
   - name: specs-edge-brats-develop
     serial: true
@@ -1138,6 +1220,38 @@ jobs: ##########################################################################
           GITHUB_STATUS_CONTEXT: 'buildpacks-ci/passed-dev-specs'
           GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI develop specs passed'
           PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
+
+<% if buildpacks[language]['v3'] %>
+  - name: update-libbuildpack-v3
+    serial: true
+    public: true
+    plan:
+    - aggregate:
+      - get: buildpacks-ci
+      - get: libbuildpack
+        trigger: true
+      - get: buildpack
+        resource: buildpack-v3
+    - task: update-libbuildpack
+      <% if buildpacks[language]['go_modules'] %>
+      file: buildpacks-ci/tasks/update-libbuildpack-go-modules/task.yml
+      <% else %>
+      file: buildpacks-ci/tasks/update-libbuildpack/task.yml
+      <% end %>
+      <% if language == "php" %>
+      privileged: true
+      <% end %>
+      params:
+        <% if language == 'php' %>
+        DOCKER_START: true
+        <% end %>
+        LANGUAGE: <%= language %>
+    - put: buildpack-v3
+      params:
+        repository: buildpack-artifacts
+        rebase: true
+<% end %>
+
   - name: update-libbuildpack
     serial: true
     public: true
