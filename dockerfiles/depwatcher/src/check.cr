@@ -7,7 +7,12 @@ source = data["source"]
 
 case type = source["type"].to_s
 when "github_releases"
-  versions = Depwatcher::GithubReleases.new.check(source["repo"].to_s)
+  allow_prerelease = source["prerelease"]?
+  if allow_prerelease
+    versions = Depwatcher::GithubReleases.new.check(source["repo"].to_s, allow_prerelease.as_bool)
+  else
+    versions = Depwatcher::GithubReleases.new.check(source["repo"].to_s, false)
+  end
 when "github_tags"
   versions = Depwatcher::GithubTags.new.check(source["repo"].to_s, source["tag_regex"].to_s)
 when "jruby"
