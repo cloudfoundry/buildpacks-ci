@@ -113,7 +113,7 @@ end
 # TODO make work for multiple stacks -- check cf_stacks for v?
 # i.e. python 3.7 is only on cflinuxfs3
 if removal_strategy == 'remove_all'
-  manifest['default_versions'] = manifest['default_versions'].map do |v|
+  manifest['default_versions'] = manifest.fetch('default_versions', []).map do |v|
     v['version'] = resource_version if v['name'] == manifest_name
     v
   end
