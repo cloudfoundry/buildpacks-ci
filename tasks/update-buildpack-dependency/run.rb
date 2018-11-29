@@ -214,9 +214,9 @@ end
 #   Replace their jruby engine version with the one in the manifest.
 ruby_files_to_edit = { 'fixtures/sinatra_jruby/Gemfile' => nil, 'fixtures/jruby_start_command/Gemfile' => nil }
 if !rebuilt && manifest_name == 'jruby' && manifest['language'] == 'ruby'
-  version_number = /(9.2.\d+.\d+)_ruby-2.5/.match(version)
+  version_number = /(9.2.\d+.\d+)/.match(version)
   if version_number
-    jruby_version = version_numbers[1]
+    jruby_version = version_number[0]
     ruby_files_to_edit.each_key do |path|
       text = File.read(File.join('buildpack', path))
       ruby_files_to_edit[path] = text.gsub(/=> '(9.2.\d+.\d+)'/, "=> '#{jruby_version}'")
