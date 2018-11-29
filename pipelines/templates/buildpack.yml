@@ -879,7 +879,10 @@ jobs: ##########################################################################
       - get: repo
         resource: buildpack-v3
     - aggregate:
-      <% buildpacks[language]['stacks'].each do |stack| %>
+      <%
+      #buildpacks[language]['stacks'].each do |stack| #use this when cnb buildpack github releases support cflinuxfs2
+      ['cflinuxfs3'].each do |stack|
+      %>
       - do:
         - task: create-cf-space
           file: buildpacks-ci/tasks/create-cf-space/task.yml
