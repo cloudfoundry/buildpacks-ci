@@ -3,24 +3,24 @@
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
     'skip_pivnet_publish' => true,
     'skip_pws_publish' => true,
-    'non_lts' => true
+    'non_lts' => true,
     'go_modules' => true
   },
   'binary' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016 windows),
     'product_slug' => 'binary-buildpack',
     'skip_docker_start' => true,
-    'any_stack' => true
+    'any_stack' => true,
     'go_modules' => true
   },
   'dotnet-core' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'product_slug' => 'dotnet-core-buildpack'
+    'product_slug' => 'dotnet-core-buildpack',
     'go_modules' => true
   },
   'go' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'product_slug' => 'go-buildpack'
+    'product_slug' => 'go-buildpack',
     'go_modules' => true
   },
   'hwc' => {
