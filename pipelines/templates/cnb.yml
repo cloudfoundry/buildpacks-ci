@@ -1,9 +1,13 @@
 <% cnb_images = %w(run build) %>
 <% buildpacks = {
   'npm' => {
+    'integration' => true,
+    'acceptance' => true,
     'launchable' => true
   },
   'yarn' => {
+    'integration' => true,
+    'acceptance' => true,
     'launchable' => true
   },
   'nodejs' => {
@@ -34,7 +38,7 @@ resources: #####################################################################
     type: git
     source:
       uri: {{buildpacks-ci-git-uri-public}}
-      branch: WIP-#160852974-separate-products
+      branch: master
 
   ## Github Releases ##
 <% if buildpacks[language]['launchable'] %>
@@ -79,9 +83,36 @@ jobs: ##########################################################################
           - task: unit tests
             file: buildpacks-ci/tasks/run-bp-v3-unit/task.yml
 
+<% if buildpacks[language]['integration'] %>
+  - name: specs-integration
+    serial: true
+    public: false
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-master
+          trigger: true
+          passed:
+          - specs-unit
+<% cnb_images.each do |image_type| %>
+        - get: cnb-<%= image_type %>-image
+          trigger: true
+          passed:
+          - specs-unit
+          params:
+            skip_download: true
+<% end %>
+      - task: integration tests
+        file: buildpacks-ci/tasks/run-bp-v3-integration/task.yml
+        params:
+          CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
+          CNB_RUN_IMAGE: packs/run # TODO: change to `cfbuildpacks/cflinuxfs3-cnb-experimental:run` when pack cli can use it
+        privileged: true
+<% end %>
 
-<% if buildpacks[language]['launchable'] %>
-  - name: specs-v3-acceptance
+<% if buildpacks[language]['acceptance'] %>
+  - name: specs-acceptance
     serial: true
     public: false
     plan:
@@ -108,28 +139,3 @@ jobs: ##########################################################################
         privileged: true
 <% end %>
 
-  - name: specs-v3-integration
-    serial: true
-    public: false
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: buildpack
-          resource: buildpack-master
-          trigger: true
-          passed:
-          - specs-unit
-<% cnb_images.each do |image_type| %>
-        - get: cnb-<%= image_type %>-image
-          trigger: true
-          passed:
-          - specs-unit
-          params:
-            skip_download: true
-<% end %>
-      - task: integration tests
-        file: buildpacks-ci/tasks/run-bp-v3-integration/task.yml
-        params:
-          CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
-          CNB_RUN_IMAGE: packs/run # TODO: change to `cfbuildpacks/cflinuxfs3-cnb-experimental:run` when pack cli can use it
-        privileged: true
