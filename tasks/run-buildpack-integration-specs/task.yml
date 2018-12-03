@@ -8,6 +8,10 @@ inputs:
   - name: buildpacks-ci
   - name: buildpack
   - name: cf-space
+  - name: uncached-buildpack
+    optional: true
+  - name: cached-buildpack
+    optional: true
 run:
   path: buildpacks-ci/tasks/run-buildpack-integration-specs/run.sh
 params:

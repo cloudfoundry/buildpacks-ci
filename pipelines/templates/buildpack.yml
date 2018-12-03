@@ -510,7 +510,10 @@ jobs: ##########################################################################
               USERNAME: admin
           - task: ginkgo-<%= stack %>
             file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
-            input_mapping: {cf-space: cf-space-<%= stack %>}
+            input_mapping:
+              cf-space: cf-space-<%= stack %>
+              uncached-buildpack: pivotal-buildpack-<%= stack %>
+              cached-buildpack: pivotal-buildpack-cached-<%= stack %>
             params:
               CF_STACK: <%= stack %>
               GINKGO_ATTEMPTS: 4
@@ -604,6 +607,9 @@ jobs: ##########################################################################
             PASSWORD: {{ci-cf-lts-password}}
         - task: ginkgo-cflinuxfs2
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+          input_mapping:
+            uncached-buildpack: pivotal-buildpack-cflinuxfs2
+            cached-buildpack: pivotal-buildpack-cached-cflinuxfs2
           params:
             CF_STACK: cflinuxfs2
             GINKGO_ATTEMPTS: 4
