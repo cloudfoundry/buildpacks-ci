@@ -45,8 +45,6 @@ class BuildpackTagger
                   bundle install
                   bundle exec buildpack-packager --uncached #{stack_flag}
                   bundle exec buildpack-packager --cached #{stack_flag}
-                  echo "stack: #{stack}" >> manifest.yml
-                  zip *-cached*.zip manifest.yml
                   EOF
         else
           system(<<~EOF)
