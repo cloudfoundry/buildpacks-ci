@@ -105,6 +105,7 @@ resources: #####################################################################
         - VERSION
         - CHANGELOG
 
+<% if buildpacks[language]['v3'] %>
   - name: buildpack-v3
     type: git
     webhook_token: ob0aigh3
@@ -115,6 +116,7 @@ resources: #####################################################################
       ignore_paths:
       - VERSION
       - CHANGELOG
+<% end %>
 
   - name: buildpack-new-version
     type: git
