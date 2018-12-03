@@ -20,8 +20,6 @@ describe BuildpackTagger do
        bundle install
        bundle exec buildpack-packager --uncached --stack=some-stack
        bundle exec buildpack-packager --cached --stack=some-stack
-       echo "stack: some-stack" >> manifest.yml
-       zip *-cached*.zip manifest.yml
     EOF
   end
 
