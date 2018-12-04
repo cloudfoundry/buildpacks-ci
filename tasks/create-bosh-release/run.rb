@@ -5,7 +5,7 @@ require_relative 'buildpack-bosh-release-updater'
 version = File.read('version/number').strip
 access_key_id = ENV.fetch('ACCESS_KEY_ID', false)
 secret_access_key = ENV.fetch('SECRET_ACCESS_KEY', false)
-languages = ENV.fetch('LANGUAGES').split(' ')
+language = ENV.fetch('LANGUAGE')
 release_name = ENV.fetch('RELEASE_NAME')
 
 
@@ -14,7 +14,7 @@ Dir.chdir(ENV.fetch('RELEASE_DIR')) do
     version,
     access_key_id,
     secret_access_key,
-    languages,
+    language,
     release_name)
 
   updater.run!

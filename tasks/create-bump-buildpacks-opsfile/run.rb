@@ -8,11 +8,11 @@ require 'yaml'
 version = "0.#{Time.now.to_i}"
 
 replacements = []
-Dir.glob('*-buildpack-github-release').each do |github_release|
-  release_name = github_release.gsub('-github-release', '')
+Dir.glob('*-bosh-release').each do |bosh_release_dir|
+  release_name = bosh_release_dir.match(/\/(.*-buildpack)-bosh-release/)[1]
 
   ## Bump blobs in bosh release
-  Dir.chdir("#{release_name}-bosh-release") do
+  Dir.chdir(bosh_release_dir) do
       ## Clean out existing blobs
     system(%(rm -rf blobs) || raise("can't remove blobs"))
     if File.exist?('config/blobs.yml')
@@ -28,7 +28,7 @@ Dir.glob('*-buildpack-github-release').each do |github_release|
     end
 
     ## Add new blobs for new buildpacks
-    Dir.glob("../#{github_release}/#{release_name}-*.zip") do |blob|
+    Dir.glob("../#{release_name}*/*.zip") do |blob|
       system(%(bosh2 -n add-blob #{blob} #{release_name}/#{File.basename(blob)})) || raise("cannot add blob #{blob} to #{release_name}")
     end
 
@@ -46,19 +46,6 @@ Dir.glob('*-buildpack-github-release').each do |github_release|
     }
   }
   replacements << release_replacement
-end
-
-['cflinuxfs2', 'cflinuxfs3'].each do |stack|
-  replacements << {
-      "path" => "/releases/name=#{stack}",
-      "type" => "replace",
-      "value" => {
-        "name" => "#{stack}",
-        "version" => File.read("#{stack}-bosh-release/version").strip,
-        "sha1" => File.read("#{stack}-bosh-release/sha1").strip,
-        "url" => File.read("#{stack}-bosh-release/url").strip
-      }
-  }
 end
 
 File.open("bump-buildpacks-opsfile/opsfile.yml", 'w') {|f| f.write replacements.to_yaml }

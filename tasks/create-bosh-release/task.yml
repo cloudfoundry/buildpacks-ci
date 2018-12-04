@@ -6,13 +6,20 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: blob
   - name: version
   - name: release
+  - name: buildpack-zip-stack0
+    optional: true
+  - name: buildpack-zip-stack1
+    optional: true
+  - name: buildpack-zip-stack2
+    optional: true
+  - name: buildpack-zip-stack3
+    optional: true
 outputs:
   - name: release-artifacts
 params:
-  LANGUAGES:
+  LANGUAGE:
   RELEASE_NAME:
   RELEASE_DIR:
   ACCESS_KEY_ID:

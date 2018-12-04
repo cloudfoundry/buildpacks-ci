@@ -5,15 +5,25 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
-  - name: java-buildpack-github-release
-  - name: go-buildpack-github-release
-  - name: python-buildpack-github-release
-  - name: nodejs-buildpack-github-release
-  - name: ruby-buildpack-github-release
-  - name: php-buildpack-github-release
-  - name: staticfile-buildpack-github-release
-  - name: binary-buildpack-github-release
-  - name: dotnet-core-buildpack-github-release
+  - name: java-buildpack
+  - name: go-buildpack-stack0
+  - name: python-buildpack-stack0
+  - name: nodejs-buildpack-stack0
+  - name: ruby-buildpack-stack0
+  - name: php-buildpack-stack0
+  - name: staticfile-buildpack-stack0
+  - name: binary-buildpack-stack0
+  - name: dotnet-core-buildpack-stack0
+  - name: go-buildpack-stack1
+  - name: python-buildpack-stack1
+  - name: nodejs-buildpack-stack1
+  - name: ruby-buildpack-stack1
+  - name: php-buildpack-stack1
+  - name: staticfile-buildpack-stack1
+  - name: binary-buildpack-stack1
+  - name: binary-buildpack-stack2
+  - name: binary-buildpack-stack3
+  - name: dotnet-core-buildpack-stack1
   - name: java-buildpack-bosh-release
   - name: go-buildpack-bosh-release
   - name: python-buildpack-bosh-release
@@ -23,8 +33,6 @@ inputs:
   - name: staticfile-buildpack-bosh-release
   - name: binary-buildpack-bosh-release
   - name: dotnet-core-buildpack-bosh-release
-  - name: cflinuxfs2-bosh-release
-  - name: cflinuxfs3-bosh-release
   - name: buildpacks-ci
 outputs:
   - name: bump-buildpacks-opsfile
