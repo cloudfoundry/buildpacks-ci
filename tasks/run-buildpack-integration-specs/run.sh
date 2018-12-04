@@ -6,11 +6,13 @@ set -o pipefail
 "./cf-space/login"
 
  if [[ -d "uncached-buildpack" ]]; then
-   export UNCACHED_BUILDPACK_FILE=$(realpath $(find ./uncached-buildpack -name "*.zip"))
+   UNCACHED_BUILDPACK_FILE="$(realpath $(find ./uncached-buildpack -name "*.zip"))"
+   export UNCACHED_BUILDPACK_FILE
  fi
 
 if [[ -d "cached-buildpack" ]]; then
-  export CACHED_BUILDPACK_FILE=$(realpath $(find ./cached-buildpack -name "*.zip"))
+  CACHED_BUILDPACK_FILE="$(realpath $(find ./cached-buildpack -name "*.zip"))"
+  export CACHED_BUILDPACK_FILE
   echo "BUILDPACK FILE!!!!!!!!!: $CACHED_BUILDPACK_FILE"
 fi
 
