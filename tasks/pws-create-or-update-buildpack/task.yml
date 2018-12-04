@@ -6,7 +6,7 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: pivotal-buildpack-cached-cflinuxfs2
+  - name: pivotal-buildpacks-cached-cflinuxfs2
     optional: true
   - name: pivotal-buildpack-cached-cflinuxfs3
     optional: true

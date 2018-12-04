@@ -5,7 +5,7 @@ binary-builder-platform: x86_64
 bosh-lite-domain-name: cf-app.com
 buildpack-packager-git-uri-public: https://github.com/cloudfoundry/buildpack-packager
 buildpack-packager-git-uri: git@github.com:cloudfoundry/buildpack-packager.git
-buildpack-release-canidates-bucket: buildpack-release-candidates
+buildpack-release-candidates-bucket: buildpack-release-candidates
 buildpackapplifecycle-git-branch: develop
 buildpacks-binaries-s3-bucket: pivotal-buildpacks
 buildpacks-ci-git-uri-public-branch: master

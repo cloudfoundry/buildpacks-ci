@@ -2,7 +2,7 @@
 require 'spec_helper.rb'
 require 'yaml'
 require 'tmpdir'
-require_relative '../../../tasks/create-online-bosh-release/buildpack-bosh-release-updater'
+require_relative '../../../tasks/create-bosh-release/buildpack-bosh-release-updater'
 
 describe BuildpackBOSHReleaseUpdater do
   let(:version)           { '3.3.3' }
@@ -10,8 +10,8 @@ describe BuildpackBOSHReleaseUpdater do
   let(:secret_access_key) { 'password' }
   let(:test_dir)          { Dir.mktmpdir }
   let(:release_dir)       { File.join(test_dir, 'bosh-release') }
-  let(:buildpack_dir)       { File.join(test_dir, 'blob') }
-  let!(:languages)         { ['test'] }
+  let(:buildpack_dir)       { File.join(test_dir, 'buildpack-zip') }
+  let!(:language)         { 'test' }
   let(:release_name)      { 'test-buildpack' }
   let(:old_blobs) do
     <<~BLOBS
@@ -45,7 +45,7 @@ describe BuildpackBOSHReleaseUpdater do
       version,
       access_key_id,
       secret_access_key,
-      languages,
+      language,
       release_name)
   }
 
@@ -104,7 +104,7 @@ describe BuildpackBOSHReleaseUpdater do
       end
 
       it 'adds the blob and commits the yml' do
-        expect(subject).to receive(:system).with("bosh2 -n add-blob ../blob/test_buildpack-cached-v3.3.3.zip test-buildpack/test_buildpack-cached-v3.3.3.zip")
+        expect(subject).to receive(:system).with("bosh2 -n add-blob ../buildpack-zip/test_buildpack-cached-v3.3.3.zip test-buildpack/test_buildpack-cached-v3.3.3.zip")
         expect(subject).to receive(:system).with("bosh2 -n upload-blobs")
 
         expect(GitClient).to receive(:add_file).with('config/blobs.yml')
