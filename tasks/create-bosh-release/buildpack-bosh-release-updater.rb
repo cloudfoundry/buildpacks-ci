@@ -1,16 +1,15 @@
 #!/usr/bin/env ruby
 
 require 'yaml'
-require_relative '../../lib/cf-release-common'
 require_relative '../../lib/git-client'
 
 
 class BuildpackBOSHReleaseUpdater
-  def initialize(version, access_key_id, secret_access_key, languages, release_name)
+  def initialize(version, access_key_id, secret_access_key, language, release_name)
     @version = version
     @access_key_id = access_key_id
     @secret_access_key = secret_access_key
-    @languages = languages
+    @language = language
     @release_name = release_name
   end
 
@@ -38,22 +37,19 @@ class BuildpackBOSHReleaseUpdater
   def delete_old_blobs
     blobs = YAML.load_file('config/blobs.yml') || {}
 
-    while find_buildpack_key blobs, @release_name.gsub('-buildpack', '')
-      old_buildpack_key = find_buildpack_key blobs, @release_name.gsub('-buildpack', '')
-      blobs.delete(old_buildpack_key)
+    blobs.keys.each do |key|
+      blobs.delete(key) if key.include?('buildpack')
     end
 
     File.write('config/blobs.yml', YAML.dump(blobs))
   end
 
   def add_new_blobs
-    @languages.each do |language|
-      blob_name = "#{language}-buildpack"
-      Dir["../blob/#{language}*.zip"].each do |buildpack|
-        system "bosh2 -n add-blob #{buildpack} #{blob_name}/#{File.basename(buildpack)}" or exit 1
-      end
-
+    blob_name = "#{@language}-buildpack"
+    Dir["../buildpack-zip*/#{@language}*.zip"].each do |buildpack_file|
+      system "bosh2 -n add-blob #{buildpack_file} #{blob_name}/#{File.basename(buildpack_file.gsub(/\+.*\.zip/, '.zip'))}" or exit 1
     end
+
     system "bosh2 -n upload-blobs" or exit 1
 
     GitClient.add_file('config/blobs.yml')
