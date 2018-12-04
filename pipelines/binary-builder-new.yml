@@ -139,7 +139,9 @@
 
   yarn:               { buildpacks: {
                           nodejs: {},
-                          ruby: {} },
+                          ruby: {},
+                          'yarn-cnb' => {}
+                        },
                         source_type: 'github_releases',
                         source_params: ['repo: yarnpkg/yarn', 'extension: .tar.gz'],
                         any_stack: true }

@@ -5,13 +5,14 @@ require 'tmpdir'
 require_relative './dependencies'
 
 ALL_STACKS = {
-  'cflinuxfs2' => 'org.cloudfoundry.stacks.cflinuxfs2',
-  'cflinuxfs3' => 'org.cloudfoundry.stacks.cflinuxfs3',
-  'bionic' => 'io.buildpacks.stacks.bionic'
+    'cflinuxfs2' => 'org.cloudfoundry.stacks.cflinuxfs2',
+    'cflinuxfs3' => 'org.cloudfoundry.stacks.cflinuxfs3',
+    'bionic' => 'io.buildpacks.stacks.bionic'
 }
 
 V3_DEP_NAMES = {
-  'node' => 'NodeJS'
+    'node' => 'NodeJS',
+    'yarn' => 'Yarn'
 }
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
@@ -19,10 +20,10 @@ require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
 buildpack_toml = TOML.load_file('buildpack/buildpack.toml')
 buildpack_toml_latest_released = begin
-                          TOML.load_file('buildpack-latest-released/buildpack.toml')
-                        rescue
-                          { 'metadata' => {'dependencies' => []} }
-                        end
+  TOML.load_file('buildpack-latest-released/buildpack.toml')
+rescue
+  { 'metadata' => { 'dependencies' => [] } }
+end
 
 data = JSON.parse(open('source/data.json').read)
 manifest_name = data.dig('source', 'name')
@@ -41,25 +42,31 @@ builds = {}
 
 Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
   stack = /#{resource_version}-(.*)\.json$/.match(stack_dependency_build)[1]
-  next unless ALL_STACKS.keys.include? stack
 
-  total_stacks.push ALL_STACKS[stack]
+  if stack == 'any-stack'
+    total_stacks.concat ALL_STACKS.values
+    v3_stacks = ALL_STACKS.values
+  else
+    next unless ALL_STACKS.keys.include? stack
+    total_stacks.push ALL_STACKS[stack]
+    v3_stacks = [ALL_STACKS[stack]]
+  end
 
   build = JSON.parse(open(stack_dependency_build).read)
   builds[stack] = build
 
   dep = {
-    'id' => manifest_name,
-    'name' => V3_DEP_NAMES[manifest_name],
-    'version' => resource_version,
-    'uri' => build['url'],
-    'sha256' => build['sha256'],
-    'stacks' => [ALL_STACKS[stack]]
+      'id' => manifest_name,
+      'name' => V3_DEP_NAMES[manifest_name],
+      'version' => resource_version,
+      'uri' => build['url'],
+      'sha256' => build['sha256'],
+      'stacks' => v3_stacks
   }
 
   old_versions = buildpack_toml['metadata']['dependencies']
-                 .select { |d| d['id'] == manifest_name }
-                 .map {|d| d['version']}
+                     .select { |d| d['id'] == manifest_name }
+                     .map { |d| d['version'] }
 
   buildpack_toml['metadata']['dependencies'] = Dependencies.new(
       dep,
@@ -70,8 +77,8 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
   ).switch
 
   new_versions = buildpack_toml['metadata']['dependencies']
-                 .select { |d| d['id'] == manifest_name }
-                 .map { |d| d['version'] }
+                     .select { |d| d['id'] == manifest_name }
+                     .map { |d| d['version'] }
 
   added += (new_versions - old_versions).uniq.sort
   removed += (old_versions - new_versions).uniq.sort
