@@ -114,7 +114,17 @@ end
 # i.e. python 3.7 is only on cflinuxfs3
 if removal_strategy == 'remove_all'
   manifest['default_versions'] = manifest.fetch('default_versions', []).map do |v|
-    v['version'] = resource_version if v['name'] == manifest_name
+    should_update = true
+
+    if manifest_name == 'nginx' && manifest['language'] == 'php'
+      nginx_version = Gem::Version.new(resource_version)
+      should_update = nginx_version.segments[1].odd?
+    end
+
+    if should_update
+      v['version'] = resource_version if v['name'] == manifest_name
+    end
+
     v
   end
 end
