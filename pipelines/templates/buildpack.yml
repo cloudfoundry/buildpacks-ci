@@ -268,7 +268,7 @@ resources: #####################################################################
   - name: pivotal-buildpack-<%= stack %>
     type: s3
     source:
-      bucket: {{buildpack-release-canidates-bucket}}
+      bucket: {{buildpack-release-candidates-bucket}}
       regexp: <%= language%>/<%= language %>_buildpack-<%= stack %>-v(.*).zip
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
@@ -276,7 +276,7 @@ resources: #####################################################################
   - name: pivotal-buildpack-cached-<%= stack %>
     type: s3
     source:
-      bucket: {{buildpack-release-canidates-bucket}}
+      bucket: {{buildpack-release-candidates-bucket}}
       regexp: <%= language%>/<%= language %>_buildpack-cached-<%= stack %>-v(.*).zip
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
@@ -286,7 +286,7 @@ resources: #####################################################################
   - name: pivotal-buildpack-cached-any
     type: s3
     source:
-      bucket: {{buildpack-release-canidates-bucket}}
+      bucket: {{buildpack-release-candidates-bucket}}
       regexp: <%= language%>/<%= language %>_buildpack-cached-v(.*).zip
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
@@ -294,7 +294,7 @@ resources: #####################################################################
   - name: pivotal-buildpack-any
     type: s3
     source:
-      bucket: {{buildpack-release-canidates-bucket}}
+      bucket: {{buildpack-release-candidates-bucket}}
       regexp: <%= language%>/<%= language %>_buildpack-v(.*).zip
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
@@ -1373,8 +1373,8 @@ jobs: ##########################################################################
       - do:
         - task: convert release version to version resource
           file: buildpacks-ci/tasks/convert-release-to-version/task.yml
-        - task: create-online-bosh-release
-          file: buildpacks-ci/tasks/create-online-bosh-release/task.yml
+        - task: create-bosh-release
+          file: buildpacks-ci/tasks/create-bosh-release/task.yml
           params:
             ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}

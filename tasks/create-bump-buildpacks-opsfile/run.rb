@@ -9,7 +9,7 @@ version = "0.#{Time.now.to_i}"
 
 replacements = []
 Dir.glob('*-bosh-release').each do |bosh_release_dir|
-  release_name = bosh_release_dir.match(/\/(.*-buildpack)-bosh-release/)[1]
+  release_name = bosh_release_dir.match(/.*-buildpack/)[0]
 
   ## Bump blobs in bosh release
   Dir.chdir(bosh_release_dir) do
