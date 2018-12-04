@@ -20,8 +20,8 @@ native_modules:
   md5: b3958716b4e53ddc5992e6c49d97e819
   klass: LibmemcachedRecipe
 - name: librdkafka
-  version: 0.11.5
-  md5: 90bb43499252317ae55723d32ccacf18
+  version: 0.11.6
+  md5: 5a1f9b0ee460ea07e2aa50ad6c65383b
   klass: LibRdKafkaRecipe
 - name: cassandracppdriver
   version: 2.9.0
@@ -43,8 +43,8 @@ extensions:
   md5: ebeeffa834e8428c9105a45fe89344aa
   klass: PeclRecipe
 - name: igbinary
-  version: 2.0.7
-  md5: 3e1cd2cbf261a1ed5caeaf476ab45ed9
+  version: 2.0.8
+  md5: d3cbbfe6224923fecdad266569b57535
   klass: PeclRecipe
 - name: imagick
   version: 3.4.3
