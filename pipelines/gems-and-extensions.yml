@@ -65,6 +65,8 @@ jobs:
         - get: buildpacks-ci
         - get: libbuildpack
           trigger: true
+      - task: run-libbuildpack-windows-specs
+        file: buildpacks-ci/tasks/run-libbuildpack-windows-specs/task.yml
       - task: run-libbuildpack-specs
         file: buildpacks-ci/tasks/run-libbuildpack-specs/task.yml
   - name: buildpack-packager-specs
