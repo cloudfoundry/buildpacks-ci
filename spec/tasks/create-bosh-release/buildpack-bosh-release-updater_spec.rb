@@ -6,13 +6,14 @@ require_relative '../../../tasks/create-bosh-release/buildpack-bosh-release-upda
 
 describe BuildpackBOSHReleaseUpdater do
   let(:version)           { '3.3.3' }
-  let(:access_key_id)     { 'username' }
-  let(:secret_access_key) { 'password' }
-  let(:test_dir)          { Dir.mktmpdir }
-  let(:release_dir)       { File.join(test_dir, 'bosh-release') }
-  let(:buildpack_dir)       { File.join(test_dir, 'buildpack-zip') }
-  let!(:language)         { 'test' }
-  let(:release_name)      { 'test-buildpack' }
+  let(:access_key_id)     {'username'}
+  let(:secret_access_key) {'password'}
+  let(:test_dir)          {Dir.mktmpdir}
+  let(:release_dir)       {File.join(test_dir, 'bosh-release')}
+  let(:buildpack_dir)     {File.join(test_dir, 'buildpack-zip-stack0')}
+  let(:version_dir)       {File.join(test_dir, 'version')}
+  let!(:language)         {'test'}
+  let(:release_name)      {'test-buildpack'}
   let(:old_blobs) do
     <<~BLOBS
        ---
@@ -58,6 +59,7 @@ describe BuildpackBOSHReleaseUpdater do
 
     FileUtils.mkdir(release_dir)
     FileUtils.mkdir(buildpack_dir)
+    FileUtils.mkdir(version_dir)
 
     @current_dir = Dir.pwd
     Dir.chdir release_dir
@@ -104,7 +106,7 @@ describe BuildpackBOSHReleaseUpdater do
       end
 
       it 'adds the blob and commits the yml' do
-        expect(subject).to receive(:system).with("bosh2 -n add-blob ../buildpack-zip/test_buildpack-cached-v3.3.3.zip test-buildpack/test_buildpack-cached-v3.3.3.zip")
+        expect(subject).to receive(:system).with("bosh2 -n add-blob ../buildpack-zip-stack0/test_buildpack-cached-v3.3.3.zip test-buildpack/test_buildpack-cached-v3.3.3.zip")
         expect(subject).to receive(:system).with("bosh2 -n upload-blobs")
 
         expect(GitClient).to receive(:add_file).with('config/blobs.yml')
@@ -125,6 +127,13 @@ describe BuildpackBOSHReleaseUpdater do
         expect(GitClient).to receive(:safe_commit).with "Final release for test-buildpack at 3.3.3"
 
         subject.create_release
+      end
+    end
+
+    describe '#write_version' do
+      it 'writes the version to the version output dir with no timestamp' do
+        subject.write_version
+        expect(File.read(File.join(version_dir, 'version'))).to eq('3.3.3')
       end
     end
   end

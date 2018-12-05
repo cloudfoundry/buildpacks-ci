@@ -18,6 +18,7 @@ class BuildpackBOSHReleaseUpdater
     delete_old_blobs
     add_new_blobs
     create_release
+    write_version
   end
 
   def write_private_yml
@@ -64,5 +65,9 @@ class BuildpackBOSHReleaseUpdater
     GitClient.add_file(".final_builds/**/index.yml")
     GitClient.add_file(".final_builds/**/**/index.yml")
     GitClient.safe_commit("Final release for #{@release_name} at #{@version}")
+  end
+
+  def write_version
+    File.write('../version/version', @version)
   end
 end
