@@ -2,7 +2,17 @@
 
 require_relative 'buildpack-bosh-release-updater'
 
-version = File.read('version/number').strip
+
+versions = Dir["buildpack-zip*/version"].map do |buildpack_version_file|
+  File.read(buildpack_version_file).gsub(/\+.*$/, '')
+end.uniq
+
+if versions.size != 1
+  puts "versions do not match #{versions}"
+  exit 1
+end
+
+version = versions.first
 access_key_id = ENV.fetch('ACCESS_KEY_ID', false)
 secret_access_key = ENV.fetch('SECRET_ACCESS_KEY', false)
 language = ENV.fetch('LANGUAGE')

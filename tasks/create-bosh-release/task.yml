@@ -6,7 +6,6 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: version
   - name: release
   - name: buildpack-zip-stack0
     optional: true
@@ -18,6 +17,7 @@ inputs:
     optional: true
 outputs:
   - name: release-artifacts
+  - name: version
 params:
   LANGUAGE:
   RELEASE_NAME:

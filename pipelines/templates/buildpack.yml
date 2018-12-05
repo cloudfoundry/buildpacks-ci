@@ -1366,30 +1366,30 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: release
           resource: buildpack-bosh-release
-        - get: blob
-          resource: buildpack-github-release
+        <% buildpacks[language]['stacks'].each_with_index do |stack, i|
+        - get: buildpack-zip-stack<%= i %>
+          resource: <%= language %>-buildpack-<%= stack %>
           trigger: true
-          passed: [ buildpack-to-github ]
+          passed: [ ship-it ]
+        <% end %>
       - do:
-        - task: convert release version to version resource
-          file: buildpacks-ci/tasks/convert-release-to-version/task.yml
         - task: create-bosh-release
           file: buildpacks-ci/tasks/create-bosh-release/task.yml
           params:
             ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
-            LANGUAGES: "hwc"
+            LANGUAGE: "hwc"
             RELEASE_NAME: hwc-buildpack
             RELEASE_DIR: release
         - put: buildpack-bosh-release
           params:
             repository: release-artifacts
             rebase: true
-            tag: blob/version
+            tag: version/version
         - put: buildpack-bosh-release-github-release
           params:
-            name: blob/version
-            tag: blob/version
+            name: version/version
+            tag: version/version
         on_failure:
           put: failure-alert
           params:
@@ -1405,37 +1405,30 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: release
           resource: offline-buildpack-bosh-release
-        - get: blob
-          resource: buildpack-github-release
+        <% (buildpacks[language]['stacks'] + ['any']).each_with_index do |stack, i|
+        - get: buildpack-zip-stack<%= i %>
+          resource: <%= language %>-buildpack-cached-<%= stack %>
           trigger: true
-          passed: [ buildpack-to-github ]
-          params:
-            include_source_tarball: true
+          passed: [ ship-it ]
+        <% end %>
       - do:
-        - task: build-offline-buildpacks
-          file: buildpacks-ci/tasks/build-offline-buildpacks-cutlass/task.yml
-          params:
-            LANGUAGE: hwc
-            CF_STACKS: <%= (buildpacks[language]['stacks']+['any']).join(' ') %> # add any stack to offline release for install-hwc-buildpack-lts job. Can be removed after 2.1 is gone.
-        - task: convert release version to version resource
-          file: buildpacks-ci/tasks/convert-release-to-version/task.yml
         - task: create-offline-bosh-release
-          file: buildpacks-ci/tasks/create-offline-bosh-release/task.yml
+          file: buildpacks-ci/tasks/create-bosh-release/task.yml
           params:
             ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
             SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
-            LANGUAGES: "hwc"
+            LANGUAGE: "hwc"
             RELEASE_NAME: hwc-offline-buildpack
             RELEASE_DIR: release
         - put: offline-buildpack-bosh-release
           params:
             repository: release-artifacts
             rebase: true
-            tag: blob/version
+            tag: version/version
         - put: offline-buildpack-bosh-release-github-release
           params:
-            name: blob/version
-            tag: blob/version
+            name: version/version
+            tag: version/version
         on_failure:
           put: failure-alert
           params:

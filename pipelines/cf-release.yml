@@ -443,8 +443,6 @@ jobs:
           trigger: true
         <% end %>
       - do:
-        - task: convert release version to version resource
-          file: buildpacks-ci/tasks/convert-release-to-version/task.yml
         - task: create-bosh-release
           file: buildpacks-ci/tasks/create-bosh-release/task.yml
           params:
@@ -457,11 +455,11 @@ jobs:
           params:
             repository: release-artifacts
             rebase: true
-            tag: blob/version
+            tag: version/version
         - put: <%= language %>-buildpack-bosh-release-github-release
           params:
-            name: blob/version
-            tag: blob/version
+            name: version/version
+            tag: version/version
         on_failure:
           put: failure-alert
           params:
@@ -506,8 +504,6 @@ jobs:
           params:
             CF_STACKS: <%= release_type == 'lts' ? 'cflinuxfs2' : stacks[language].join(' ') %>
         <% end %>
-        - task: convert release version to version resource
-          file: buildpacks-ci/tasks/convert-release-to-version/task.yml
         - task: create-offline-bosh-release
           file: buildpacks-ci/tasks/create-bosh-release/task.yml
           params:
@@ -520,11 +516,11 @@ jobs:
           params:
             repository: release-artifacts
             rebase: true
-            tag: blob/version
+            tag: version/version # FIGURE THIS OUT
         - put: private-<%= language %>-offline-buildpack-bosh-release-github-release<%= release_type == 'lts' ? '-lts' : '' %>
           params:
-            name: blob/version
-            tag: blob/version
+            name: version/version
+            tag: version/version
         on_failure:
           put: failure-alert
           params:
