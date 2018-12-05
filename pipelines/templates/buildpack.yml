@@ -1366,9 +1366,9 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: release
           resource: buildpack-bosh-release
-        <% buildpacks[language]['stacks'].each_with_index do |stack, i|
+        <% buildpacks[language]['stacks'].each_with_index do |stack, i| %>
         - get: buildpack-zip-stack<%= i %>
-          resource: <%= language %>-buildpack-<%= stack %>
+          resource: pivotal-buildpack-<%= stack %>
           trigger: true
           passed: [ ship-it ]
         <% end %>
@@ -1405,9 +1405,9 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: release
           resource: offline-buildpack-bosh-release
-        <% (buildpacks[language]['stacks'] + ['any']).each_with_index do |stack, i|
+        <% (buildpacks[language]['stacks']).each_with_index do |stack, i| %>
         - get: buildpack-zip-stack<%= i %>
-          resource: <%= language %>-buildpack-cached-<%= stack %>
+          resource: pivotal-buildpack-cached-<%= stack %>
           trigger: true
           passed: [ ship-it ]
         <% end %>
