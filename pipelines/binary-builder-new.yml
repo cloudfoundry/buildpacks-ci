@@ -106,7 +106,7 @@
 
 
   php:                { buildpacks: {
-                          php: { lines: ["5.6.X", "7.0.X", "7.1.X", "7.2.X"], removal_strategy: 'keep_latest_released'} },
+                          php: { lines: ["5.6.X", "7.0.X", "7.1.X", "7.2.X", "7.3.X"], removal_strategy: 'keep_latest_released'} },
                         source_type: 'php'},
 
   pip:                { buildpacks: { python: {} },
