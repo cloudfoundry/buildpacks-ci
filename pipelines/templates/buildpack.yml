@@ -71,7 +71,8 @@
   },
   'staticfile' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'product_slug' => 'staticfile-buildpack'
+    'product_slug' => 'staticfile-buildpack',
+    'go_modules' => true
   }
 } %>
 <% cnb_images = %w(run build) %>
