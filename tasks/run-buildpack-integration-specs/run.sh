@@ -13,7 +13,6 @@ set -o pipefail
 if [[ -d "cached-buildpack" ]]; then
   CACHED_BUILDPACK_FILE="$(realpath "$(find ./cached-buildpack -name "*.zip")")"
   export CACHED_BUILDPACK_FILE
-  echo "BUILDPACK FILE!!!!!!!!!: $CACHED_BUILDPACK_FILE"
 fi
 
 cd buildpack
