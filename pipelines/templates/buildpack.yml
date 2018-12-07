@@ -54,7 +54,8 @@
   },
   'python' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'product_slug' => 'python-buildpack'
+    'product_slug' => 'python-buildpack',
+    'go_modules' => true
   },
   'r' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
