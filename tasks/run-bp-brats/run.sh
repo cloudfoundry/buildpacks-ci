@@ -11,4 +11,5 @@ fi
 export GOBIN=$PWD/.bin
 export PATH=$GOBIN:$PATH
 
+go mod download
 ./scripts/brats.sh
