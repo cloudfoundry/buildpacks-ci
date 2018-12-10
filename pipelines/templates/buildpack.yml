@@ -3,38 +3,27 @@
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
     'skip_pivnet_publish' => true,
     'skip_pws_publish' => true,
-    'non_lts' => true,
-    'go_modules' => true
+    'non_lts' => true
   },
   'binary' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016 windows),
     'product_slug' => 'binary-buildpack',
     'skip_docker_start' => true,
-    'any_stack' => true,
-    'go_modules' => true
+    'any_stack' => true
   },
   'dotnet-core' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'product_slug' => 'dotnet-core-buildpack',
-    'go_modules' => true
+    'product_slug' => 'dotnet-core-buildpack'
   },
   'go' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'product_slug' => 'go-buildpack',
-    'go_modules' => true
+    'product_slug' => 'go-buildpack'
   },
   'hwc' => {
     'stacks' => %w(windows2012R2 windows2016 windows),
     'skip_brats' => true,
     'non_lts' => true,
-    'product_slug' => 'hwc-buildpack',
-    'go_modules' => true
-  },
-  'multi' => {
-    'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'skip_brats' => true,
-    'skip_pivnet_publish' => true,
-    'skip_pws_publish' => true
+    'product_slug' => 'hwc-buildpack'
   },
   'nginx' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
@@ -44,7 +33,6 @@
   'nodejs' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
     'product_slug' => 'nodejs-buildpack',
-    'go_modules' => true,
     'v3' => true
   },
   'php' => {
@@ -54,8 +42,7 @@
   },
   'python' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'product_slug' => 'python-buildpack',
-    'go_modules' => true
+    'product_slug' => 'python-buildpack'
   },
   'r' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
@@ -72,8 +59,7 @@
   },
   'staticfile' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'product_slug' => 'staticfile-buildpack',
-    'go_modules' => true
+    'product_slug' => 'staticfile-buildpack'
   }
 } %>
 <% cnb_images = %w(run build) %>
@@ -1250,11 +1236,7 @@ jobs: ##########################################################################
       - get: buildpack
         resource: buildpack-v3
     - task: update-libbuildpack
-      <% if buildpacks[language]['go_modules'] %>
-      file: buildpacks-ci/tasks/update-libbuildpack-go-modules/task.yml
-      <% else %>
       file: buildpacks-ci/tasks/update-libbuildpack/task.yml
-      <% end %>
       <% if language == "php" %>
       privileged: true
       <% end %>
@@ -1280,11 +1262,7 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-develop
       - task: update-libbuildpack
-        <% if buildpacks[language]['go_modules'] %>
-        file: buildpacks-ci/tasks/update-libbuildpack-go-modules/task.yml
-        <% else %>
         file: buildpacks-ci/tasks/update-libbuildpack/task.yml
-        <% end %>
         <% if language == "php" %>
         privileged: true
         <% end %>
