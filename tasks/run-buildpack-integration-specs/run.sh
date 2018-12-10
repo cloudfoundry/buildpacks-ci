@@ -16,6 +16,7 @@ if [[ -d "cached-buildpack" ]]; then
 fi
 
 cd buildpack
+go mod download
 
 if [[ -z ${SKIP_DOCKER_START:-} ]]; then
   echo "Start Docker"
