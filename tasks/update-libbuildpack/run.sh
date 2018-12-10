@@ -6,11 +6,6 @@ set -o pipefail
 
 set -x
 
-if [[ ${DOCKER_START} == "true" ]]; then
-  echo "Start Docker"
-  buildpacks-ci/scripts/start-docker >/dev/null
-fi
-
 if [ "$LANGUAGE" = "multi" ]; then
   update_dir="src/compile"
 elif [ "$LANGUAGE" = "dotnet-core" ]; then
@@ -19,32 +14,17 @@ else
   update_dir="src/$LANGUAGE"
 fi
 
-go get github.com/golang/dep/cmd/dep
-
 pushd buildpack
   source .envrc
 
-  # for the PHP buildpack
-  if [ -e run_tests.sh ]; then
-    TMPDIR=$(mktemp -d)
-    export TMPDIR
-    pip install -r requirements.txt
-  fi
+  go get github.com/cloudfoundry/libbuildpack
+  go get github.com/golang/mock/gomock
+  go get -u github.com/onsi/ginkgo/ginkgo
+  go install github.com/golang/mock/mockgen
+
+  go mod download
 
   pushd "$update_dir"
-    if [ -d vendor/github.com/golang/mock/mockgen ]; then
-      pushd vendor/github.com/golang/mock/mockgen
-        go install
-      popd
-    fi
-    pushd vendor/github.com/onsi/ginkgo/ginkgo
-      go install
-    popd
-
-    if [ -f Gopkg.toml ]; then
-      dep ensure
-      dep ensure -update
-    fi
 
     go generate || true
     [ -d compile ] && (cd compile && (go generate || true))
@@ -56,7 +36,7 @@ pushd buildpack
     ginkgo -r -skipPackage=integration,brats
   popd
 
-  git add "$update_dir"
+  git add .
 
   set +e
     git diff --cached --exit-code
