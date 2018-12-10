@@ -82,14 +82,18 @@ extensions:
   version: 2.0.3
   md5: 0f0b4756d1a91a062817f22efc4bed62
   klass: PeclRecipe
-- name: pdo_odbc
-  version: nil
-  md5: nil
-  klass: PdoOdbcRecipe
 - name: odbc
   version: nil
   md5: nil
   klass: OdbcRecipe
+- name: pdo_odbc
+  version: nil
+  md5: nil
+  klass: PdoOdbcRecipe
+- name: pdo_sqlsrv
+  version: 5.3.0
+  md5: cbc086481bfc38e60481f4ae55d2c1ce
+  klass: PeclRecipe
 - name: rdkafka
   version: 3.0.5
   md5: 844bd1528161518a47415f709214bae9
@@ -98,6 +102,10 @@ extensions:
   version: 4.1.1
   md5: 32488f1d214e60afc5e027ae2d1e895f
   klass: RedisPeclRecipe
+- name: sqlsrv
+  version: 5.3.0
+  md5: 8a2d1dbc571df507356b6164cffa4197
+  klass: PeclRecipe
 - name: stomp
   version: 2.0.2
   md5: 507c30184fde736e924cee20c56df061
