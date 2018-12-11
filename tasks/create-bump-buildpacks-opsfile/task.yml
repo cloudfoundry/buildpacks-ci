@@ -23,6 +23,7 @@ inputs:
   - name: binary-buildpack-stack1
   - name: binary-buildpack-stack2
   - name: binary-buildpack-stack3
+  - name: binary-buildpack-stack4
   - name: dotnet-core-buildpack-stack1
   - name: java-buildpack-bosh-release
   - name: go-buildpack-bosh-release
