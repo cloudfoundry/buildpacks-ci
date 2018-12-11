@@ -31,7 +31,7 @@
                         source_params: ['tag_regex: ^(v1\.\d+\.\d+|v2\.\d+\.\d+\+dependencies)$'] },
 
   'dotnet-runtime':   { buildpacks: {
-                          'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X"], removal_strategy: 'keep_all' } } },
+                          'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X", "2.2.X"], removal_strategy: 'keep_all' } } },
 
   'dotnet-aspnetcore':  { buildpacks: {
                           'dotnet-core' => { lines: ["2.1.X"], removal_strategy: 'keep_all' } } },
