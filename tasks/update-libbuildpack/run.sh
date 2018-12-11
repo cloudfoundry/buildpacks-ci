@@ -24,6 +24,13 @@ pushd buildpack
 
   go mod download
 
+  # for the PHP buildpack
+  if [ -e run_tests.sh ]; then
+    TMPDIR=$(mktemp -d)
+    export TMPDIR
+    pip install -r requirements.txt
+  fi
+
   pushd "$update_dir"
 
     go generate || true
