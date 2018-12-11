@@ -1,7 +1,7 @@
 <% supported_languages = %w(dotnet-core go ruby binary staticfile nodejs php python java) %>
 <% cutlass = %w(binary dotnet-core go nodejs python ruby staticfile) %>
 <% stacks = {
-  "binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016),
+  "binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016 windows),
   "java" => %w(cflinuxfs2 cflinuxfs3),
   "dotnet-core" => %w(cflinuxfs2 cflinuxfs3),
   "go" => %w(cflinuxfs2 cflinuxfs3),
@@ -486,7 +486,7 @@ jobs:
             - "java-buildpack-offline-v4*.zip"
         <% else %>
         <% release_stacks = stacks[language]
-           release_stacks = release_stacks - ['cflinuxfs3'] if release_type == 'lts'
+           release_stacks = release_stacks - ['cflinuxfs3', 'windows'] if release_type == 'lts'
            release_stacks.each_with_index do |stack, i| %>
         - get: buildpack-zip-stack<%= i %>
           passed: [ ship-it ]
