@@ -40,6 +40,14 @@ RUN apt-get update \
   google-chrome-stable && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Install packages that are specific to ubuntu and not debian
+RUN wget http://cdn-fastly.deb.debian.org/debian/pool/main/i/icu/libicu52_52.1-8+deb8u7_amd64.deb \
+  && dpkg -i libicu52_52.1-8+deb8u7_amd64.deb \
+  && rm libicu52_52.1-8+deb8u7_amd64.deb \
+  && wget http://ftp.us.debian.org/debian/pool/main/o/openssl/libssl1.0.0_1.0.2l-1~bpo8+1_amd64.deb \
+  && dpkg -i libssl1.0.0_1.0.2l-1~bpo8+1_amd64.deb \
+	&& rm libssl1.0.0_1.0.2l-1~bpo8+1_amd64.deb
+
 RUN curl -sSL https://get.docker.com/ | sh
 
 RUN git config --global user.email "cf-buildpacks-eng@pivotal.io"
