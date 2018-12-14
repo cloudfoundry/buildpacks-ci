@@ -8,7 +8,7 @@ The various depwatchers in this resource (in `src`) are written in Crystal, as a
 
 ## Run unit tests
 
-`crystal spec`
+`crystal spec --no-debug`
 
 (you may need to install dependencies via `crystal deps` before running tests)
 

@@ -2,21 +2,30 @@ require "./base"
 
 module Depwatcher
   class Rubygems < Base
+    class MultiExternal
+      JSON.mapping(
+        number: String,
+        prerelease: Bool,
+      )
+    end
     class External
       JSON.mapping(
         number: String,
         sha: String,
         prerelease: Bool,
+        source_code_uri: String,
       )
     end
     class Release
       JSON.mapping(
         ref: String,
         sha256: String,
+        url: String,
       )
       def initialize(external : External)
         @ref = external.number
         @sha256 = external.sha
+        @url = external.source_code_uri + "tree/v#{external.number}"
       end
     end
 
@@ -32,9 +41,9 @@ module Depwatcher
       Release.new(release(name, ref))
     end
 
-    private def releases(name : String) : Array(External)
+    private def releases(name : String) : Array(MultiExternal)
       response = client.get("https://rubygems.org/api/v1/versions/#{name}.json").body
-      Array(External).from_json(response)
+      Array(MultiExternal).from_json(response)
     end
 
     private def release(name : String, version : String) : External
