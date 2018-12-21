@@ -8,8 +8,7 @@
   'binary' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016 windows),
     'product_slug' => 'binary-buildpack',
-    'skip_docker_start' => true,
-    'any_stack' => true
+    'skip_docker_start' => true
   },
   'dotnet-core' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
@@ -22,8 +21,8 @@
   'hwc' => {
     'stacks' => %w(windows2012R2 windows2016 windows),
     'skip_brats' => true,
-    'non_lts' => true,
-    'product_slug' => 'hwc-buildpack'
+    'product_slug' => 'hwc-buildpack',
+    'non_lts' => true
   },
   'nginx' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
@@ -130,7 +129,6 @@ resources: #####################################################################
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
 <% unless buildpacks[language]['skip_pivnet_publish'] %>
-<% unless language.to_s == 'hwc' %>
   - name: pivnet-buildpack-metadata-lts
     type: git
     source:
@@ -138,7 +136,6 @@ resources: #####################################################################
       private_key: {{pivotal-cf-buildpacks-ci-robots}}
       uri: git@github.com:pivotal-cf/buildpacks-ci-robots.git # pivotal-cf because pivnet is not foundation's
       paths: [ pivnet-metadata/<%= language %>-lts.yml ]
-<% end %>
   - name: pivnet-buildpack-metadata
     type: git
     source:
@@ -233,14 +230,12 @@ resources: #####################################################################
   ## Pivnet Release ##
 
 <% unless buildpacks[language]['skip_pivnet_publish'] %>
-<% unless language.to_s == 'hwc' %>
   - name: pivnet-production-lts
     type: pivnet
     source:
       endpoint: https://network.pivotal.io
       api_token: {{pivnet-refresh-token}}
       product_slug: buildpacks
-<% end %>
 
   - name: pivnet-production
     type: pivnet
@@ -270,7 +265,7 @@ resources: #####################################################################
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 <% end %>
 
-<% if buildpacks[language]['any_stack'] %>
+<% if language.to_s == 'hwc' %>
   - name: pivotal-buildpack-cached-any
     type: s3
     source:
@@ -405,7 +400,7 @@ jobs: ##########################################################################
           resource: buildpack-master
           trigger: true
 <% bucket_stacks = buildpacks[language]['stacks']
-   bucket_stacks = bucket_stacks + ['any'] if (buildpacks[language]['any_stack'])
+   bucket_stacks = bucket_stacks + ['any'] if language.to_s == 'hwc'
    bucket_stacks.each do |stack| %> #change bucket_stacks to buildpacks[language]['stacks'] when removing any_stack
         - get: pivotal-buildpack-cached-<%= stack %>
         - get: pivotal-buildpack-<%= stack %>
@@ -413,7 +408,7 @@ jobs: ##########################################################################
       - do:
         - aggregate:
 <% bucket_stacks = buildpacks[language]['stacks']
-   bucket_stacks = bucket_stacks + ['any'] if (buildpacks[language]['any_stack'])
+   bucket_stacks = bucket_stacks + ['any'] if language.to_s == 'hwc'
    bucket_stacks.each do |stack| %> #change bucket_stacks to buildpacks[language]['stacks'] when removing any_stack
           - do:
             - task: detect-and-upload-<%= stack %>
@@ -449,9 +444,7 @@ jobs: ##########################################################################
       - aggregate:
         <%
         all_stacks = buildpacks[language]['stacks']
-        if buildpacks[language]['any_stack']
-          all_stacks = all_stacks + ['any']
-        end
+        all_stacks = all_stacks + ['any'] if language.to_s == 'hwc'
         all_stacks.each_with_index do |stack, ndx|
         %>
         - get: pivotal-buildpack-cached-<%= stack %>
@@ -558,9 +551,7 @@ jobs: ##########################################################################
           timeout: 3h
         <%
         all_stacks = buildpacks[language]['stacks']
-        if buildpacks[language]['any_stack']
-          all_stacks = all_stacks + ['any']
-        end
+        all_stacks = any_stacks + ['any'] if language.to_s == 'hwc'
         all_stacks.each_with_index do |stack, ndx|
         %>
         - get: pivotal-buildpack-cached-<%= stack %>
@@ -648,9 +639,7 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         <%
         all_stacks = buildpacks[language]['stacks']
-        if buildpacks[language]['any_stack']
-          all_stacks = all_stacks + ['any']
-        end
+        all_stacks = all_stacks + ['any'] if language.to_s == 'hwc'
         all_stacks.each_with_index do |stack, ndx|
         %>
         - get: pivotal-buildpack-cached-<%= stack %>
@@ -751,7 +740,6 @@ jobs: ##########################################################################
 #
 ##################################################################################
 <% unless buildpacks[language]['skip_pivnet_publish'] %>
-<% unless language.to_s == 'hwc' %>
   - name: write-pivnet-metadata-for-lts-product
     serial: true
     public: true
@@ -761,8 +749,8 @@ jobs: ##########################################################################
         - get: pivnet-buildpack-metadata
           resource: pivnet-buildpack-metadata-lts
         <% pivnet_stacks = []
-          if buildpacks[language]['any_stack']
-            pivnet_stacks = ['any']
+          if language.to_s == 'hwc'
+            pivnet_stacks = pivnet_stacks + ['any']
           else
             pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to buildpacks[language]['stacks'] when removing any_stack
           end
@@ -795,8 +783,8 @@ jobs: ##########################################################################
           passed: [ write-pivnet-metadata-for-lts-product ]
           trigger: true
         <% pivnet_stacks = []
-          if buildpacks[language]['any_stack']
-            pivnet_stacks = ['any']
+          if language.to_s == 'hwc'
+            pivnet_stacks = pivnet_stacks + ['any']
           else
             pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to buildpacks[language]['stacks'] when removing any_stack
           end
@@ -810,7 +798,6 @@ jobs: ##########################################################################
           file_glob: pivotal-buildpacks-stack*/<%= language %>_buildpack-cached*.zip
           s3_filepath_prefix: product-files/buildpacks
           metadata_file: pivnet-buildpack-metadata-lts/pivnet-metadata/<%= language %>-lts.yml
-<% end %>
   - name: write-pivnet-metadata
     serial: true
     public: true
@@ -1385,7 +1372,9 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: release
           resource: offline-buildpack-bosh-release
-        <% (buildpacks[language]['stacks']).each_with_index do |stack, i| %>
+        <% all_stacks = buildpacks[language]['stacks'] %>
+        <% all_stacks += ['any'] if language.to_s == 'hwc' %>
+        <% all_stacks.each_with_index do |stack, i| %>
         - get: buildpack-zip-stack<%= i %>
           resource: pivotal-buildpack-cached-<%= stack %>
           trigger: true
