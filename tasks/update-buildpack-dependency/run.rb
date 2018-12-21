@@ -8,7 +8,7 @@ require_relative './php_manifest'
 CFLINUXFS2 = 'cflinuxfs2'
 CFLINUXFS3 = 'cflinuxfs3'
 ALL_STACKS = [CFLINUXFS2, CFLINUXFS3]
-WINDOWS_STACKS = ['windows2012R2', 'windows2016']
+WINDOWS_STACKS = ['windows2012R2', 'windows2016', 'windows']
 
 # Stacks we dont want to process (most likely V3 stacks)
 IGNORED_STACKS = ['bionic']
