@@ -51,7 +51,7 @@ if [ "$INSTALL_STACK_ASSOC_HWC_BPS" = true ] ; then
        (go install github.com/cloudfoundry/libbuildpack/packager/buildpack-packager)
 
         buildpack-packager build -stack "$windows_stack"
-        cf create-buildpack binary_buildpack binary_buildpack-*.zip 999 || cf update-buildpack binary_buildpack -p binary_buildpack-*.zip -s "$windows_stack" || true
+        cf update-buildpack binary_buildpack -p binary_buildpack-*.zip -s "$windows_stack" || cf create-buildpack binary_buildpack binary_buildpack-*.zip 999 || true
         rm binary_buildpack-*.zip
     popd
   done
