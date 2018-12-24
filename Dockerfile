@@ -133,8 +133,8 @@ ENV BASH_ENV /etc/profile.d/filter.sh
 
 # Install go 1.11
 RUN cd /usr/local \
-  && curl -L https://dl.google.com/go/go1.11.linux-amd64.tar.gz -o go.tar.gz \
-  && [ b3fcf280ff86558e0559e185b601c9eade0fd24c900b4c63cd14d1d38613e499 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
+  && curl -L https://dl.google.com/go/go1.11.4.linux-amd64.tar.gz -o go.tar.gz \
+  && [ fb26c30e6a04ad937bbc657a1b5bba92f80096af1e8ee6da6430c045a8db3a5b = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && tar xf go.tar.gz \
   && rm go.tar.gz \
   && ln -s /usr/local/go/bin/* /usr/local/bin/
