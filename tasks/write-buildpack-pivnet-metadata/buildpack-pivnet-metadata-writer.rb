@@ -93,7 +93,7 @@ def release_notes_url
 end
 
 def availability
-  ENV.fetch('ADMINS_ONLY') ? 'Admins Only' : 'All Users'
+  ENV.fetch('ADMINS_ONLY', '') == 'true' ? 'Admins Only' : 'All Users'
 end
 
 def eccn
