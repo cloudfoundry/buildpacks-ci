@@ -13,7 +13,7 @@ apt-get update
 apt-get install libgconf-2-4 unzip google-chrome-stable -y
 
 wget -O chromedriver.zip 'https://chromedriver.storage.googleapis.com/2.34/chromedriver_linux64.zip'
-[ e42a55f9e28c3b545ef7c7727a2b4218c37489b4282e88903e4470e92bc1d967 = $(shasum -a 256 chromedriver.zip | cut -d' ' -f1) ]
+[ e42a55f9e28c3b545ef7c7727a2b4218c37489b4282e88903e4470e92bc1d967 = "$(shasum -a 256 chromedriver.zip | cut -d' ' -f1)" ]
 unzip chromedriver.zip -d /usr/local/bin/
 rm chromedriver.zip
 
