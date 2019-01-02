@@ -32,7 +32,7 @@ describe BuildpackReleaseStoryCreator do
       .and_return(buildpack_project)
 
     allow(buildpack_project).to receive(:stories).with({filter: "label:release AND label:elixir AND -state:unscheduled"}).and_return(release_stories)
-    allow(buildpack_project).to receive(:stories).with({filter: "label:elixir OR label:all", limit: 1000, auto_paginate: true}).and_return(all_stories)
+    allow(buildpack_project).to receive(:stories).with({filter: "(label:elixir OR label:all) AND (accepted_after:09/24/2015 OR -state:accepted)", limit: 1000, auto_paginate: true}).and_return(all_stories)
   end
 
   context 'previous release stories exist' do
