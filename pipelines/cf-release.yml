@@ -1,4 +1,4 @@
-<% supported_languages = %w(dotnet-core go ruby binary staticfile nodejs php python java nginx) %>
+<% supported_languages = %w(dotnet-core go ruby binary staticfile nodejs php python java nginx r) %>
 <% cutlass = %w(binary dotnet-core go nodejs python ruby staticfile) %>
 <% stacks = {
   "binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016 windows),
@@ -10,7 +10,8 @@
   "python" => %w(cflinuxfs2 cflinuxfs3),
   "ruby" => %w(cflinuxfs2 cflinuxfs3),
   "staticfile" => %w(cflinuxfs2 cflinuxfs3),
-  "nginx" => %w(cflinuxfs3)
+  "nginx" => %w(cflinuxfs3),
+  "r" => %w(cflinuxfs3)
 } %>
 ---
 resource_types:
@@ -146,7 +147,7 @@ resources:
       <% end %>
       branch: master
 
-<% if language != "nginx" %>
+<% unless ["nginx", "r"].include?(language) %>
   - name: private-<%= language %>-offline-buildpack-bosh-release-github-release-lts
     type: github-release
     source:
@@ -183,7 +184,7 @@ groups:
     jobs:
 <% (supported_languages - %w(java)).each do |language| %>
       - update-private-<%= language %>-offline-buildpack-bosh-release
-      <% next if language == "nginx" %>
+      <% next if ["nginx", "r"].include?(language) %>
       - update-private-<%= language %>-offline-buildpack-bosh-release-lts
 <% end %>
   - name: java
@@ -476,7 +477,7 @@ jobs:
 
 <% %w(latest lts).each do |release_type| %>
 <% supported_languages.each do |language| %>
-<% next if release_type == "lts" && language == "nginx" %>
+<% next if release_type == "lts" && ["nginx", "r"].include?(language) %>
   - name: update-private-<%= language %>-offline-buildpack-bosh-release<%= release_type == 'lts' ? '-lts' : '' %>
     serial: true
     public: true

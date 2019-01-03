@@ -19,6 +19,10 @@ class BuildpacksCIConfiguration
     ENV.fetch('LPASS_BOSH_RELEASE_PRIVATE_KEYS_FILE', 'Shared-Buildpacks/buildpack-bosh-release-repos-private-keys.yml')
   end
 
+  def bosh_release_private_keys_filename_2
+    ENV.fetch('LPASS_BOSH_RELEASE_PRIVATE_KEYS_FILE_2', 'Shared-Buildpacks/buildpack-bosh-release-repos-private-keys-2.yml')
+  end
+
   def bosh_release_private_keys_filename_lts
     ENV.fetch('LPASS_BOSH_RELEASE_PRIVATE_KEYS_FILE_LTS', 'Shared-Buildpacks/buildpack-bosh-release-repos-private-keys-lts.yml')
   end
