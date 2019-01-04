@@ -178,6 +178,14 @@ extensions:
   version: 2.0.5
   md5: 1eda7c8ebede31a5dcb2dcb730efbbe4
   klass: LuaPeclRecipe
+- name: maxmind
+  version: 1.4.0
+  md5: 0c92c43543b88486ef03b6e0036ad315 
+  klass: MaxMindRecipe
+- name: libmaxmind
+  version: 1.3.2
+  md5: 67a861965b30d045bf29a2126bcc05ed
+  klass: LibMaxMindRecipe
 - name: phalcon
   version: 3.4.1
   md5: ffacf0eb3bfd6097077099c66ce48103
