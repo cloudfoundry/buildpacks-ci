@@ -8,7 +8,7 @@
                         source_type: 'npm',
                         any_stack: true },
 
-  bundler:            { buildpacks: { ruby: {} },
+  bundler:            { buildpacks: { ruby: { lines: ["1.X.X", "2.X.X"] } },
                         source_type: 'rubygems',
                         any_stack: true},
 
