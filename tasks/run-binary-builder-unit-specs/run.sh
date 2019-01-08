@@ -10,7 +10,7 @@ pushd binary-builder
   if [ ! -z "$RUBYGEM_MIRROR" ]; then
     gem sources --clear-all --add "${RUBYGEM_MIRROR}"
   fi
-  gem install bundler --no-ri --no-rdoc
+  gem install bundler --no-document
 
   if [ ! -z "$RUBYGEM_MIRROR" ]; then
     bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
