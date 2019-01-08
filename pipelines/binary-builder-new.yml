@@ -127,7 +127,7 @@
                       },
 
   ruby:               { buildpacks: {
-                          ruby: { lines: ["2.2.X", "2.3.X", "2.4.X", "2.5.X"], removal_strategy: 'keep_latest_released' } } },
+                          ruby: { lines: ["2.2.X", "2.3.X", "2.4.X", "2.5.X", "2.6.X"], removal_strategy: 'keep_latest_released' } } },
 
   rubygems:           { buildpacks: { ruby: {} },
                         source_type: 'rubygems_cli',
