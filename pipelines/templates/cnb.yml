@@ -80,6 +80,7 @@ jobs: ##########################################################################
       - task: update-pack
         file: buildpacks-ci/tasks/update-pack/task.yml
       - put: buildpack
+        resource: buildpack-master
         params:
           repository: updated-buildpack
           rebase: true
@@ -123,8 +124,5 @@ jobs: ##########################################################################
 <% end %>
       - task: integration tests
         file: buildpacks-ci/tasks/run-bp-v3-integration/task.yml
-        params:
-          CNB_BUILD_IMAGE: cfbuildpacks/cflinuxfs3-cnb-experimental:build
-          CNB_RUN_IMAGE: packs/run # TODO: change to `cfbuildpacks/cflinuxfs3-cnb-experimental:run` when pack cli can use it
         privileged: true
 <% end %>
