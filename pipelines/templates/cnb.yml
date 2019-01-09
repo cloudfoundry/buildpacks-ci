@@ -1,19 +1,20 @@
 <% cnb_images = %w(run build) %>
 <% buildpacks = {
   'npm' => {
-    'integration' => true,
-    'launchable' => true
+    'integration' => true
   },
   'yarn' => {
-    'integration' => true,
-    'launchable' => true
+    'integration' => true
   },
   'nodejs' => {
 
   },
   'httpd' => {
+    'integration' => true
+  },
+  'ruby' => {
 
-  }
+  },
 }
 %>
 ---
@@ -42,7 +43,7 @@ resources: #####################################################################
       branch: master
 
   ## Github Releases ##
-<% if buildpacks[language]['launchable'] %>
+<% if buildpacks[language]['integration'] %>
   - name: pack
     type: github-release
     source:
@@ -66,7 +67,6 @@ resources: #####################################################################
 jobs: ################################################################################################################
   - name: specs-unit
     serial: true
-    public: false
     plan:
       - do:
         - aggregate:
@@ -87,7 +87,6 @@ jobs: ##########################################################################
 <% if buildpacks[language]['integration'] %>
   - name: specs-integration
     serial: true
-    public: false
     plan:
       - aggregate:
         - get: buildpacks-ci
