@@ -27,7 +27,7 @@
                         source_params: ['repo: golang/dep', 'fetch_source: true']},
 
   'dotnet-sdk':       { buildpacks: {
-                          'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.3X", "2.1.4X", "2.2.1X"], removal_strategy: 'keep_all' } },
+                          'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.3X", "2.1.4X", "2.1.5X", "2.2.1X"], removal_strategy: 'keep_all' } },
                         source_params: ['tag_regex: ^(v1\.\d+\.\d+|v2\.\d+\.\d+\+dependencies)$'] },
 
   'dotnet-runtime':   { buildpacks: {
@@ -149,7 +149,7 @@
 
 stacks = ['cflinuxfs2', 'cflinuxfs3']
 windows_stacks = ['windows2012R2', 'windows2016']
-dotnet_sdk_lines_with_aspnetcore = ['2.1.3X', '2.1.4X', '2.2.1X']
+dotnet_sdk_lines_with_aspnetcore = ['2.1.3X', '2.1.4X', '2.1.5X', '2.2.1X']
 deps_extracted_from_dotnet_sdk = ['dotnet-runtime', 'dotnet-aspnetcore']
 
 skip_build = [
