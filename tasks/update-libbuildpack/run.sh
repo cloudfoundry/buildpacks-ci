@@ -21,7 +21,9 @@ pushd buildpack
   go get github.com/golang/mock/gomock
   go get -u github.com/onsi/ginkgo/ginkgo
   go install github.com/golang/mock/mockgen
-  go mod vendor
+  if [[ "$LANGUAGE" != "php" ]]; then
+    go mod vendor
+  fi
 
   go mod download
 
