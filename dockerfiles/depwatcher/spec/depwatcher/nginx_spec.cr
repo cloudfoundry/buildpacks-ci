@@ -7,7 +7,6 @@ Spec2.describe Depwatcher::Nginx do
   subject { described_class.new.tap { |s| s.client = client } }
   before do
     client.stub_get("https://api.github.com/repos/nginx/nginx/tags?per_page=1000", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/github_nginx.json")))
-    client.stub_get("http://nginx.org/en/download.html", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/nginx.html")))
   end
 
   describe "#check" do

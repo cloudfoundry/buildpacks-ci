@@ -1,0 +1,32 @@
+[
+  {
+    "name": "v1.13.6.2",
+    "zipball_url": "https://api.github.com/repos/openresty/openresty/zipball/v1.13.6.2",
+    "tarball_url": "https://api.github.com/repos/openresty/openresty/tarball/v1.13.6.2",
+    "commit": {
+      "sha": "116b8fe20d8fe6d708c311a03b77a8e38bdefbc9",
+      "url": "https://api.github.com/repos/openresty/openresty/commits/116b8fe20d8fe6d708c311a03b77a8e38bdefbc9"
+    },
+    "node_id": "MDM6UmVmNDgwMDgwOnYxLjEzLjYuMg=="
+  },
+  {
+    "name": "v1.13.6.1",
+    "zipball_url": "https://api.github.com/repos/openresty/openresty/zipball/v1.13.6.1",
+    "tarball_url": "https://api.github.com/repos/openresty/openresty/tarball/v1.13.6.1",
+    "commit": {
+      "sha": "d2618c31355a2f7e7ac88ab845a72f61c3505f8b",
+      "url": "https://api.github.com/repos/openresty/openresty/commits/d2618c31355a2f7e7ac88ab845a72f61c3505f8b"
+    },
+    "node_id": "MDM6UmVmNDgwMDgwOnYxLjEzLjYuMQ=="
+  },
+  {
+    "name": "v1.11.2.5",
+    "zipball_url": "https://api.github.com/repos/openresty/openresty/zipball/v1.11.2.5",
+    "tarball_url": "https://api.github.com/repos/openresty/openresty/tarball/v1.11.2.5",
+    "commit": {
+      "sha": "90fc91567f050f3e096ff370b2a5bcbcd0f7215e",
+      "url": "https://api.github.com/repos/openresty/openresty/commits/90fc91567f050f3e096ff370b2a5bcbcd0f7215e"
+    },
+    "node_id": "MDM6UmVmNDgwMDgwOnYxLjExLjIuNQ=="
+  }
+]
