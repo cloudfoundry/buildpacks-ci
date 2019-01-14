@@ -10,7 +10,10 @@ The various depwatchers in this resource (in `src`) are written in Crystal, as a
 
 `crystal spec --no-debug`
 
-(you may need to install dependencies via `crystal deps` before running tests)
+### Notes
+* You may need to install dependencies via `crystal deps` before running tests.
+* You may need to set `export PKG_CONFIG_PATH="/usr/local/opt/openssl/lib/pkgconfig"` if crystal fails link against `libssl`.
+
 
 ## Building/Pushing
 

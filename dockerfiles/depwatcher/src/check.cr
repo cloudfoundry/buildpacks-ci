@@ -41,6 +41,8 @@ when "node"
   versions = Depwatcher::Node.new.check
 when "nginx"
   versions = Depwatcher::Nginx.new.check
+when "openresty"
+  versions = Depwatcher::Openresty.new.check
 when "httpd"
   versions = Depwatcher::Httpd.new.check
 when "ca_apm_agent"
