@@ -14,7 +14,7 @@ resources:
   - name: pivnet-production
     type: pivnet
     source:
-      api_token: {{pivnet-apikey}}
+      api_token: {{pivnet-refresh-token}}
       product_slug: buildpacks
       product_version: "Java Buildpack 4\\."
       access_key_id: {{pivnet-access-key}}
