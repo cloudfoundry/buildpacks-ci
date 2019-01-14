@@ -202,6 +202,52 @@ module DependencyBuild
       system('tar', 'Jcf', old_filepath, '.')
     end
   end
+
+  def build_openresty(source_input)
+    artifacts = "#{Dir.pwd}/artifacts"
+    destdir = Dir.mktmpdir
+
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        Runner.run('wget', source_input.url)
+        # TODO validate pgp
+        Runner.run('tar', 'xf', "#{source_input.name}-#{source_input.version}.tar.gz")
+        Dir.chdir("#{source_input.name}-#{source_input.version}") do
+          Runner.run(
+              './configure',
+              "--prefix=#{destdir}/openresty",
+              '-j2',
+              '--error-log-path=stderr',
+              '--with-http_ssl_module',
+              '--with-http_realip_module',
+              '--with-http_gunzip_module',
+              '--with-http_gzip_static_module',
+              '--with-http_auth_request_module',
+              '--with-http_random_index_module',
+              '--with-http_secure_link_module',
+              '--with-http_stub_status_module',
+              '--without-http_uwsgi_module',
+              '--without-http_scgi_module',
+              '--with-pcre',
+              '--with-pcre-jit',
+              '--with-cc-opt=-fPIC -pie',
+              '--with-ld-opt=-fPIC -pie -z now',
+              '--with-compat',
+              '--with-stream=dynamic',
+              )
+          Runner.run('make', '-j2')
+          system({'DEBIAN_FRONTEND' => 'noninteractive'}, 'make install')
+          raise 'Could not run make install' unless $?.success?
+
+          Dir.chdir(destdir) do
+            Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
+            Runner.run('mkdir', 'nginx/conf')
+            Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", '.')
+          end
+        end
+      end
+    end
+  end
 end
 
 module Sha
@@ -481,7 +527,18 @@ class Builder
         version: source_input.version,
         git_commit_sha: source_input.git_commit_sha
       })
-
+    when 'openresty'
+      source_pgp = 'not yet implemented'
+      DependencyBuild.build_openresty source_input
+      out_data.merge!(
+        artifact_output.move_dependency(
+          source_input.name,
+          "artifacts/#{source_input.name}-#{source_input.version}.tgz",
+          "#{source_input.name}-#{source_input.version}-linux-x64-#{stack}",
+          'tgz'
+        )
+      )
+      out_data[:source_pgp] = source_pgp
     else
       raise("Dependency: #{source_input.name} is not currently supported")
     end
