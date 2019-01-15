@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
 
-: '
-******** DETAILS **********
-This script can be used to build buildpack dependencies locally
-Pass in the name of the dependency, the version to build, and the directory to put the artifact
-Dependency names come from binary-builder-new.yml
-This script assumes a specific directory structure as these repos are needed:
-$HOME/workspace/buildpacks-ci
-$HOME/workspace/binary-builder
-$HOME/workspace/public-buildpacks-ci-robots
-
-These directories can also be passed in as args
-'
+# ********* DETAILS *********
+# This script can be used to build buildpack dependencies locally
+# Pass in the name of the dependency, the version to build, and the directory to put the artifact
+# Dependency names come from binary-builder-new.yml
+# This script assumes a specific directory structure as these repos are needed:
+# $HOME/workspace/buildpacks-ci
+# $HOME/workspace/binary-builder
+# $HOME/workspace/public-buildpacks-ci-robots
+#
+# These directories can also be passed in as args
 
 set -eo pipefail
 
