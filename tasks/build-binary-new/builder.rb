@@ -270,7 +270,7 @@ end
 
 
 class Builder
-  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, skip_commit)
+  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, skip_commit = false)
     unless skip_commit
       build_input.copy_to_build_output
     end
