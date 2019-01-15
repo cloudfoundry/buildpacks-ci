@@ -267,4 +267,22 @@ describe 'Builder' do
       end
     end
   end
+
+  context 'whe is true' do
+    let(:source_input) { SourceInput.new('CAAPM', 'fake-url', '1.0.2', nil, 'fake-sha256') }
+
+    before do
+      allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
+      expect(build_output).not_to receive(:add_output)
+      expect(build_output).not_to receive(:commit_outputs)
+    end
+
+    it 'does not write any build metadata' do
+      expect(Sha).to receive(:check_sha)
+                       .with(source_input)
+                       .and_return(['abc', 'fake-sha256'])
+
+      subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, true)
+    end
+  end
 end
