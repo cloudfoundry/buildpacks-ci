@@ -270,8 +270,10 @@ end
 
 
 class Builder
-  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output)
-    build_input.copy_to_build_output
+  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, skip_commit)
+    unless skip_commit
+      build_input.copy_to_build_output
+    end
 
     out_data = {
       tracker_story_id: build_input.tracker_story_id,
@@ -543,8 +545,10 @@ class Builder
       raise("Dependency: #{source_input.name} is not currently supported")
     end
 
-    build_output.add_output("#{source_input.version}-#{stack}.json", out_data)
-    build_output.commit_outputs("Build #{source_input.name} - #{source_input.version} - #{stack} [##{build_input.tracker_story_id}]")
+    unless skip_commit
+      build_output.add_output("#{source_input.version}-#{stack}.json", out_data)
+      build_output.commit_outputs("Build #{source_input.name} - #{source_input.version} - #{stack} [##{build_input.tracker_story_id}]")
+    end
 
     out_data
   end

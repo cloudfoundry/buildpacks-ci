@@ -1,106 +1,106 @@
 <% dependencies = {
-  appdynamics:        { buildpacks: { php: {} },
+  'appdynamics' =>     { buildpacks: { php: {} },
                         third_party_hosted: true,
                         source_type: 'appd_agent',
                         any_stack: true },
 
-  bower:              { buildpacks: { 'dotnet-core' => {} },
+  'bower' =>           { buildpacks: { 'dotnet-core' => {} },
                         source_type: 'npm',
                         any_stack: true },
 
-  bundler:            { buildpacks: { ruby: { lines: ["1.X.X", "2.X.X"] } },
+  'bundler' =>         { buildpacks: { ruby: { lines: ["1.X.X", "2.X.X"] } },
                         source_type: 'rubygems',
                         any_stack: true},
 
-  CAAPM:              { buildpacks: { php: {} },
+  'CAAPM' =>           { buildpacks: { php: {} },
                         third_party_hosted: true,
                         source_type: 'ca_apm_agent',
                         any_stack: true },
 
-  composer:           { buildpacks: { php: {} },
+  'composer' =>        { buildpacks: { php: {} },
                         source_type: 'github_releases',
                         source_params: ['repo: composer/composer', 'extension: .phar'],
                         any_stack: true },
 
-  dep:                { buildpacks: { go: {}},
+  'dep' =>             { buildpacks: { go: {}},
                         source_type: 'github_releases',
                         source_params: ['repo: golang/dep', 'fetch_source: true']},
 
-  'dotnet-sdk':       { buildpacks: {
+  'dotnet-sdk' =>      { buildpacks: {
                           'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.3X", "2.1.4X", "2.1.5X", "2.2.1X"], removal_strategy: 'keep_all' } },
-                        source_params: ['tag_regex: ^(v1\.\d+\.\d+|v2\.\d+\.\d+\+dependencies)$'] },
+                         source_params: ['tag_regex: ^(v1\.\d+\.\d+|v2\.\d+\.\d+\+dependencies)$'] },
 
-  'dotnet-runtime':   { buildpacks: {
+  'dotnet-runtime' =>  { buildpacks: {
                           'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.0.X", "2.1.X", "2.2.X"], removal_strategy: 'keep_all' } } },
 
-  'dotnet-aspnetcore':  { buildpacks: {
-                          'dotnet-core' => { lines: ["2.1.X", "2.2.X"], removal_strategy: 'keep_all' } } },
+  'dotnet-aspnetcore' => {
+                        buildpacks: {
+                          'dotnet-core' => { lines: ["2.1.X", "2.2.X"], removal_strategy: 'keep_all' } }
+                          },
 
-  glide:              { buildpacks: { go: {}},
+  'glide' =>           { buildpacks: { go: {}},
                         source_type: 'github_releases',
                         source_params: ['repo: Masterminds/glide', 'fetch_source: true'] },
 
-  go:                 { buildpacks: {
+  'go' =>              { buildpacks: {
                           go: { lines: ["1.8.X", "1.9.X", "1.10.X", "1.11.X"], removal_strategy: 'keep_latest_released' } } },
 
-  godep:              { buildpacks: { go: {}},
+  'godep' =>           { buildpacks: { go: {}},
                         source_type: 'github_releases',
                         source_params: ['repo: tools/godep', 'fetch_source: true']},
 
-  httpd:              { buildpacks: { php: {} } },
+  'httpd' =>           { buildpacks: { php: {} } },
 
-  hwc:                { buildpacks: {
-                          hwc: {} },
+  'hwc' =>             { buildpacks: { hwc: {} },
                         source_type: 'github_releases',
                         source_params: ['repo: cloudfoundry/hwc', 'fetch_source: true'],
                         any_stack: true},
 
-  jruby:              { buildpacks: {
-                          ruby: { lines: ["9.1.X", "9.2.X"] }},
+  'jruby' =>           { buildpacks: { ruby: { lines: ["9.1.X", "9.2.X"] }},
                         source_type: 'jruby'},
 
-  libunwind:          { buildpacks: { 'dotnet-core' => {} },
+  'libunwind' =>       { buildpacks: { 'dotnet-core' => {} },
                         source_type: 'github_releases',
                         source_params: ['repo: libunwind/libunwind', 'extension: .tar.gz']},
 
-  miniconda2:         { buildpacks: { python: {} },
+  'miniconda2' =>      { buildpacks: { python: {} },
                         third_party_hosted: true,
                         source_type: 'miniconda',
                         source_params: ['generation: 2'],
                         any_stack: true },
 
-  miniconda3:         { buildpacks: { python: {} },
+  'miniconda3' =>      { buildpacks: { python: {} },
                         third_party_hosted: true,
                         source_type: 'miniconda',
                         source_params: ['generation: 3'],
                         any_stack: true },
 
-  nginx:              { buildpacks: {
+  'nginx' =>           { buildpacks: {
                           nginx: { lines: ["1.14.X", "1.15.X"] }}},
 
-  openresty:          { buildpacks: {
+  'openresty' =>       { buildpacks: {
                           nginx: { lines: ["1.13.6.X"] }}},
 
-  'nginx-static':     { buildpacks: {
+  'nginx-static' =>  { buildpacks: {
                           php: { lines: ["1.14.X", "1.15.X"] },
                           staticfile: { lines: ["1.15.X"] } },
                         source_type: 'nginx' },
 
-  node:               { buildpacks: {
+  'node' =>            { buildpacks: {
                           nodejs: { lines: ["6.X.X", "8.X.X", "9.X.X", "10.X.X", "11.X.X"], removal_strategy: 'keep_latest_released'},
                           ruby: { lines: ["6.X.X"] },
                           'dotnet-core' => { lines: ["6.X.X"] },
                           'nodejs-cnb' => {lines: ["6.X.X", "8.X.X", "9.X.X", "10.X.X", "11.X.X"], removal_strategy: 'keep_latest_released'}},
                         source_type: 'node'},
 
-  'org.cloudfoundry.buildpacks.npm': {
+  'org.cloudfoundry.buildpacks.npm' => {
                         branch: 'v3',
                         buildpacks: { nodejs: { }, },
                         source_type: 'github_releases',
                         source_params: ['repo: cloudfoundry/npm-cnb', 'extension: .tgz', 'prerelease: true'],
                         any_stack: true },
 
-  'org.cloudfoundry.buildpacks.nodejs': {
+  'org.cloudfoundry.buildpacks.nodejs' => {
                         branch: 'v3',
                         buildpacks: { nodejs: { }, },
                         source_type: 'github_releases',
@@ -108,39 +108,39 @@
                         any_stack: true },
 
 
-  php:                { buildpacks: {
+  'php' =>             { buildpacks: {
                           php: { lines: ["5.6.X", "7.0.X", "7.1.X", "7.2.X", "7.3.X"], removal_strategy: 'keep_latest_released'} },
                         source_type: 'php'},
 
-  pip:                { buildpacks: { python: {} },
+  'pip' =>             { buildpacks: { python: {} },
                         source_type: 'pypi',
                         any_stack: true },
 
-  pipenv:             { buildpacks: { python: {} },
+  'pipenv' =>          { buildpacks: { python: {} },
                         source_type: 'pypi'},
 
-  python:             { buildpacks: {
+  'python' =>          { buildpacks: {
                           python: { lines: ["2.7.X", "3.4.X", "3.5.X", "3.6.X", "3.7.X"], removal_strategy: 'keep_latest_released' } } },
 
-  r:                  { buildpacks: {
+  'r' =>               { buildpacks: {
                           r: { lines: ["3.4.X", "3.5.X"], removal_strategy: 'keep_latest_released' } },
 
                         # We watch for updates to these libraries to trigger rebuilds of R
                         monitored_deps: ['rserve', 'forecast', 'shiny', 'plumber']
                       },
 
-  ruby:               { buildpacks: {
+  'ruby' =>            { buildpacks: {
                           ruby: { lines: ["2.2.X", "2.3.X", "2.4.X", "2.5.X", "2.6.X"], removal_strategy: 'keep_latest_released' } } },
 
-  rubygems:           { buildpacks: { ruby: {} },
+  'rubygems' =>        { buildpacks: { ruby: {} },
                         source_type: 'rubygems_cli',
                         any_stack: true },
 
-  setuptools:         { buildpacks: { python: {}},
+  'setuptools' =>      { buildpacks: { python: {}},
                         source_type: 'pypi',
                         any_stack: true },
 
-  yarn:               { buildpacks: {
+  'yarn' =>            { buildpacks: {
                           nodejs: {},
                           ruby: {},
                           'yarn-cnb' => {}
@@ -308,7 +308,7 @@ resources:
     access_key_id: {{pivotal-buildpacks-s3-access-key}}
     secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
     # godep has versions of the form 'v80'; everyone else uses 'v1.2.3'
-    regexp: dependencies/<%=dep_name%>/<%=dep_name.to_s == 'nginx-static' ? 'nginx' : dep_name %>.*<%= dep_name.to_s == 'godep' ? '(\d+)' : '(\d+.\d+.\d+)' %>(.*)
+    regexp: dependencies/<%=dep_name%>/<%=dep_name == 'nginx-static' ? 'nginx' : dep_name %>.*<%= dep_name == 'godep' ? '(\d+)' : '(\d+.\d+.\d+)' %>(.*)
 <% end %>
 <% end %>
 
@@ -341,7 +341,7 @@ jobs:
 <% end %>
 
 <% version_lines.each do |line| %>
-<% unless deps_extracted_from_dotnet_sdk.include?(dep_name.to_s) %>
+<% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
 - name: create-<%=dep_name%>-<%= line %>-story
   serial: true
   public: true
@@ -430,7 +430,7 @@ jobs:
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
 
-<% if dep_name.to_s == 'node' %>
+<% if dep_name == 'node' %>
 - name: copy-<%=dep_name%>-<%= line %>-bionic
   plan:
   - aggregate:
@@ -476,10 +476,10 @@ jobs:
   - aggregate:
     <% build_stacks = dep[:any_stack] ? ['any-stack'] : stacks %>
     <% build_stacks.each do |stack| %>
-    <% unless skip_build.include?({ dep: dep_name.to_s, line: line, stack: stack}) %>
+    <% unless skip_build.include?({ dep: dep_name, line: line, stack: stack}) %>
     - do:
       - task: build-binary-<%= stack %>
-        image: <%= if dep_name.to_s == 'bundler' then 'cflinuxfs2' elsif stack == 'any-stack' then stacks.last else stack end%>-image
+        image: <%= if dep_name == 'bundler' then 'cflinuxfs2' elsif stack == 'any-stack' then stacks.last else stack end%>-image
         file: buildpacks-ci/tasks/build-binary-new/build.yml
         output_mapping: {artifacts: <%= stack %>-artifacts, builds-artifacts: <%= stack %>-builds-metadata}
         params:
@@ -489,8 +489,8 @@ jobs:
         - put: buildpacks-bucket-<%= dep_name %>-<%= stack %>
           resource: buildpacks-bucket-<%= dep_name %>
           params:
-            file: <%= stack %>-artifacts/<%= dep_name.to_s == "nginx-static" ? "nginx" : dep_name %>*
-        <% if dep_name.to_s == 'dotnet-sdk' %>
+            file: <%= stack %>-artifacts/<%= dep_name == "nginx-static" ? "nginx" : dep_name %>*
+        <% if dep_name == 'dotnet-sdk' %>
         - put: buildpacks-bucket-dotnet-runtime-<%= stack %>
           resource: buildpacks-bucket-dotnet-runtime
           params:
@@ -534,7 +534,7 @@ jobs:
     - get: buildpacks-ci
     - get: source
       resource: source-<%=dep_name%>-<%= line %>
-      <% unless deps_extracted_from_dotnet_sdk.include?(dep_name.to_s) %>
+      <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
       <% must_pass = ["build-#{dep_name}-#{line}"] %>
       <% must_pass.push("copy-#{dep_name}-#{line}-bionic") if bp_name.to_s.include? 'nodejs-cnb' %>
       passed: <%= must_pass %>
@@ -556,7 +556,7 @@ jobs:
       file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
       <% end %>
       params:
-        VERSION_LINE: <%= if dep_name == :nginx && bp_name == :nginx then 'nginx' else get_version_line_type(bp[:lines]) end %>
+        VERSION_LINE: <%= if dep_name == 'nginx' && bp_name == :nginx then 'nginx' else get_version_line_type(bp[:lines]) end %>
         REMOVAL_STRATEGY: <%= bp.fetch(:removal_strategy, 'remove_all') %>
     - put: <%= bp_name %>-buildpack<%= '-v3' if dep[:branch] == 'v3' %>
       params:
@@ -578,10 +578,10 @@ groups:
     - create-<%= dep_name %>-new-line-story
     <% end %>
     <% version_lines.each do |line| %>
-    <% unless deps_extracted_from_dotnet_sdk.include?(dep_name.to_s) %>
+    <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
     - create-<%=dep_name%>-<%= line %>-story
     - finish-<%=dep_name%>-<%= line %>-story
-    <% if dep_name.to_s == 'node' %>
+    <% if dep_name == 'node' %>
     - copy-<%=dep_name%>-<%= line %>-bionic
     <% end %>
     - build-<%=dep_name%>-<%= line %>
@@ -605,10 +605,10 @@ groups:
     - create-<%= dep_name %>-new-line-story
     <% end %>
     <% version_lines.each do |line| %>
-    <% unless deps_extracted_from_dotnet_sdk.include?(dep_name.to_s) %>
+    <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
     - create-<%=dep_name%>-<%= line %>-story
     - finish-<%=dep_name%>-<%= line %>-story
-    <% if dep_name.to_s == 'node' %>
+    <% if dep_name == 'node' %>
     - copy-<%=dep_name%>-<%= line %>-bionic
     <% end %>
     - build-<%=dep_name%>-<%= line %>
