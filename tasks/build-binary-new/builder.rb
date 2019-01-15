@@ -242,6 +242,7 @@ module DependencyBuild
           Dir.chdir("#{destdir}/openresty") do
             Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
             Runner.run('mkdir', './nginx/conf')
+            Runner.run('rm', './bin/openresty')
             Runner.run('tar', 'zcvf', "#{artifacts}/openresty-#{source_input.version}.tgz", '.')
           end
         end
