@@ -2,6 +2,7 @@
 
 # ********* DETAILS *********
 # This script can be used to build buildpack dependencies locally
+# Docker Daemon is required
 # Pass in the name of the dependency, the version to build, and the directory to put the artifact
 # Dependency names come from binary-builder-new.yml
 # This script assumes a specific directory structure as these repos are needed:
@@ -10,6 +11,11 @@
 # $HOME/workspace/public-buildpacks-ci-robots
 #
 # These directories can also be passed in as args
+# Set STACK for for build image
+#
+# Ex.
+# STACK=cflinuxfs3 ./build-artifact.sh php 7.2.14 /tmp
+#
 
 set -eo pipefail
 
@@ -49,6 +55,8 @@ EOF
 )
 
 command=$(cat <<-EOF
+apt-get update
+apt-get install apt-transport-https -y
 curl -sL "https://keybase.io/crystal/pgp_keys.asc" | apt-key add -
 echo "deb https://dist.crystal-lang.org/apt crystal main" | tee /etc/apt/sources.list.d/crystal.list
 apt-get update
@@ -64,4 +72,4 @@ buildpacks-ci/tasks/build-binary-new/build.rb
 EOF
 )
 
-docker run -e "STACK=$STACK" -e "SKIP_COMMIT=true" -v "$buildpacks_ci":/tmp/buildpacks-ci -v "$binary_builder":/tmp/binary-builder -v "$artifacts":/tmp/artifacts -w/tmp -it "cloudfoundry/$STACK" "bash" "-cl" "$command"
+docker run --rm -e "STACK=$STACK" -e "SKIP_COMMIT=true" -v "$buildpacks_ci":/tmp/buildpacks-ci -v "$binary_builder":/tmp/binary-builder -v "$artifacts":/tmp/artifacts -w/tmp -i "cloudfoundry/$STACK" "bash" "-cl" "$command"
