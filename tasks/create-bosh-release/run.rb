@@ -4,7 +4,7 @@ require_relative 'buildpack-bosh-release-updater'
 
 
 versions = Dir["buildpack-zip*/version"].map do |buildpack_version_file|
-  File.read(buildpack_version_file).gsub(/\+.*$/, '')
+  File.read(buildpack_version_file).gsub(/[\+#].*$/, '')
 end.uniq
 
 if versions.size != 1
