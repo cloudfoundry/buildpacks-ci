@@ -63,6 +63,10 @@
                         source_type: 'github_releases',
                         source_params: ['repo: libunwind/libunwind', 'extension: .tar.gz']},
 
+  'libgdiplus' =>       { buildpacks: { 'dotnet-core' => {} },
+                        source_type: 'github_tags',
+                        source_params: ['repo: mono/libgdiplus', 'tag_regex: ^[0-9]+\.[0-9]+$']},
+
   'miniconda2' =>      { buildpacks: { python: {} },
                         third_party_hosted: true,
                         source_type: 'miniconda',

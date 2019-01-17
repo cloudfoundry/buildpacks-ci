@@ -56,6 +56,29 @@ module DependencyBuild
     File.join(built_path, old_filename)
   end
 
+  def build_libgdiplus(source_input)
+    Runner.run('apt', 'update')
+    Runner.run('apt-get', 'install', '-y', 'automake', 'libtool')
+
+    built_path = File.join(Dir.pwd, 'built')
+    Dir.mkdir(built_path)
+
+    Dir.chdir('source') do
+      # github-releases depwatcher has already downloaded .tar.gz
+      Runner.run('tar', 'zxf', "#{source_input.name}-#{source_input.version}.tar.gz")
+      Dir.chdir("#{source_input.name}-#{source_input.version}") do
+        Runner.run('./autogen.sh', "--prefix=#{built_path}")
+        Runner.run('make')
+        Runner.run('make install')
+      end
+    end
+    old_filename = "#{source_input.name}-#{source_input.version}.tgz"
+    Dir.chdir(built_path) do
+      Runner.run('tar', 'czf', old_filename, 'lib')
+    end
+    File.join(built_path, old_filename)
+  end
+
   def build_r(source_input)
     artifacts = "#{Dir.pwd}/artifacts"
     source_sha = ''
@@ -482,6 +505,17 @@ class Builder
 
     when 'libunwind'
       old_file_path = DependencyBuild.build_libunwind source_input
+      out_data.merge!(
+        artifact_output.move_dependency(
+          source_input.name,
+          old_file_path,
+          "#{source_input.name}-#{source_input.version}-#{stack}",
+          'tar.gz'
+        )
+      )
+
+    when 'libgdiplus'
+      old_file_path = DependencyBuild.build_libgdiplus source_input
       out_data.merge!(
         artifact_output.move_dependency(
           source_input.name,
