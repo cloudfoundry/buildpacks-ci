@@ -64,7 +64,7 @@ module DependencyBuild
     Dir.mkdir(built_path)
 
     Runner.run('wget', "#{source_input.url}/archive/#{source_input.version}.tar.gz")
-    Runner.run('tar', 'zxf', "#{source_input.name}-#{source_input.version}.tar.gz")
+    Runner.run('tar', 'zxf', "#{source_input.version}.tar.gz")
     Dir.chdir("#{source_input.name}-#{source_input.version}") do
       Runner.run('./autogen.sh', "--prefix=#{built_path}")
       Runner.run('make')
