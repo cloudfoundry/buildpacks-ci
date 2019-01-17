@@ -63,15 +63,14 @@ module DependencyBuild
     built_path = File.join(Dir.pwd, 'built')
     Dir.mkdir(built_path)
 
-    Dir.chdir('source') do
-      # github-releases depwatcher has already downloaded .tar.gz
-      Runner.run('tar', 'zxf', "#{source_input.name}-#{source_input.version}.tar.gz")
-      Dir.chdir("#{source_input.name}-#{source_input.version}") do
-        Runner.run('./autogen.sh', "--prefix=#{built_path}")
-        Runner.run('make')
-        Runner.run('make install')
-      end
+    Runner.run('wget', "#{source_input.url}/archive/#{source_input.version}.tar.gz")
+    Runner.run('tar', 'zxf', "#{source_input.name}-#{source_input.version}.tar.gz")
+    Dir.chdir("#{source_input.name}-#{source_input.version}") do
+      Runner.run('./autogen.sh', "--prefix=#{built_path}")
+      Runner.run('make')
+      Runner.run('make install')
     end
+
     old_filename = "#{source_input.name}-#{source_input.version}.tgz"
     Dir.chdir(built_path) do
       Runner.run('tar', 'czf', old_filename, 'lib')
