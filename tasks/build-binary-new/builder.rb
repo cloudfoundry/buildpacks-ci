@@ -1,4 +1,5 @@
 require 'json'
+require 'yaml'
 require 'open-uri'
 require 'digest'
 require 'net/http'
@@ -465,6 +466,14 @@ class Builder
       if source_input.version.start_with?('7.2.')
         extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php72-extensions.yml")
       end
+
+      # FIXME : add mailparse back when it is fixed for php 7.3 (https://github.com/php/pecl-mail-mailparse/pull/5)
+      if source_input.version.start_with?('7.3')
+        obj = YAML::load_file(extension_file)
+        obj['extensions'].reject! {|x| x['name'] == 'mailparse' }
+        File.open(extension_file, 'w') {|f| f.write obj.to_yaml }
+      end
+
       binary_builder.build(source_input, "--php-extensions-file=#{extension_file}")
       out_data.merge!(
         artifact_output.move_dependency(
