@@ -1,0 +1,33 @@
+---
+resource_types:
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+
+resources: ############################################################################################################
+  ## Git ##
+  - name: stack-auditor
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/stack-auditor.git
+      branch: master
+
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: master
+
+jobs: ################################################################################################################
+  - name: test-stack-auditor
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: plugin
+          resource: stack-auditor
+          trigger: true
+      - task: test
+        file: buildpacks-ci/tasks/run-plugin-tests/task.yml
+
