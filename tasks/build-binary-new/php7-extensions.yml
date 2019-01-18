@@ -71,8 +71,8 @@ extensions:
   md5: 20b0beb6171f36671ee194af35454092
   klass: PeclRecipe
 - name: msgpack
-  version: 2.0.2
-  md5: 02f7e109d438072c4b642b01cf78533e
+  version: 2.0.3
+  md5: 8ed9843595c3b183ee79fd76b3039384
   klass: PeclRecipe
 - name: oauth
   version: 2.0.3
