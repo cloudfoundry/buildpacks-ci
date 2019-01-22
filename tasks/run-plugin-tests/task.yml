@@ -8,5 +8,6 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: plugin
+  - name: cf-space
 run:
   path: buildpacks-ci/tasks/run-plugin-tests/run.sh
