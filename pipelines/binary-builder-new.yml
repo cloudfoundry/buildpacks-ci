@@ -162,6 +162,7 @@ deps_extracted_from_dotnet_sdk = ['dotnet-runtime', 'dotnet-aspnetcore']
 skip_build = [
   { dep: 'python', line: '3.7.X', stack: 'cflinuxfs2' },
   { dep: 'php', line: '5.6.X', stack: 'cflinuxfs3'},
+  { dep: 'php', line: '7.3.X', stack: 'cflinuxfs2'},
   { dep: 'dotnet-sdk', line: '1.0.X', stack: 'cflinuxfs3' },
   { dep: 'node', line: '11.X.X', stack: 'cflinuxfs2' }
 ]
