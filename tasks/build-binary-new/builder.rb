@@ -467,10 +467,11 @@ class Builder
         extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php72-extensions.yml")
       end
 
-      # FIXME : add mailparse back when it is fixed for php 7.3 (https://github.com/php/pecl-mail-mailparse/pull/5)
+      # FIXME : add these rejected extensions back when they are fixed for php 7.3.X
       if source_input.version.start_with?('7.3')
+        excluded_exts = ['mailparse', 'pdo_sqlsrv', 'sqlsrv', 'solr', 'xdebug', 'yaf', 'memcached', 'amqp', 'phalcon', 'tideways']
         obj = YAML::load_file(extension_file)
-        obj['extensions'].reject! {|x| x['name'] == 'mailparse' }
+        obj['extensions'].reject! {|x| excluded_exts.include?(x['name']) }
         File.open(extension_file, 'w') {|f| f.write obj.to_yaml }
       end
 
