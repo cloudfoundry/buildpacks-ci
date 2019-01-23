@@ -10,7 +10,7 @@ resources: #####################################################################
   - name: stack-auditor
     type: git
     source:
-      uri: git@github.com:cloudfoundry/stack-auditor.git
+      uri: https://github.com/cloudfoundry/stack-auditor
       branch: master
 
   - name: buildpacks-ci
@@ -47,19 +47,20 @@ jobs: ##########################################################################
         - get: plugin
           resource: stack-auditor
           trigger: true
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        params:
-          ENV_POOL_RESOURCE: edge-environments
-          ENVS_DIR: env-repo
-          ORG: pivotal
-          SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
-          USERNAME: admin
-      - task: test
-        file: buildpacks-ci/tasks/run-plugin-tests/task.yml
-      ensure:
-        task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+      - do:
+        - task: create-cf-space
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          params:
+            ENV_POOL_RESOURCE: edge-environments
+            ENVS_DIR: env-repo
+            ORG: pivotal
+            SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+            USERNAME: admin
+        - task: test
+          file: buildpacks-ci/tasks/run-plugin-tests/task.yml
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
     ensure:
       put: edge-environments
       params:
