@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+require 'tempfile'
+require_relative '../lib/commit'
+require 'toml'
+
+buildpack_toml = TOML.load_file('buildpack.toml')
+old_version = buildpack_toml['buildpack']['version'].to_s
+
+version_parts = old_version.match(/(\d+\.\d+\.)(\d+)/)
+new_version = version_parts[1] + (version_parts[2].to_i + 1).to_s
+
+buildpack_toml['buildpack']['version'] = new_version
+File.write('buildpack.toml', TOML::Generator.new(buildpack_toml).body) 
+
+new_changelog = Tempfile.new('CHANGELOG')
+begin
+  heading = "v#{new_version} #{Time.now.strftime('%b %d, %Y')}\n"
+  new_changelog.write heading
+  new_changelog.write '=' * heading.length
+  new_changelog.write "\n\n"
+
+  commits = Commit.recent(old_version) rescue nil
+  if commits
+    commits.each do |commit|
+      new_changelog.write commit.to_s
+      new_changelog.write "\n\n"
+    end
+  else
+    log = `git log v#{old_version}..HEAD`
+    new_changelog.write log
+  end
+
+  new_changelog.write "\n"
+
+  File.open('CHANGELOG', 'w+').each { |line| new_changelog.write line }
+ensure
+  new_changelog.close
+end
+
+`cp #{new_changelog.path} CHANGELOG`
+
+puts "Bumped to #{new_version}"
