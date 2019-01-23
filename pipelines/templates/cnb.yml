@@ -18,6 +18,9 @@
   'ruby' => {
 
   },
+  'php' => {
+    'integration' => true
+  }
 }
 %>
 ---
