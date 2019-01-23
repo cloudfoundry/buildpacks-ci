@@ -36,8 +36,6 @@ resources: #####################################################################
       uri: git@github.com:<%= organization %>/<%= language %>-cnb.git
       private_key: {{<%= language %>-cnb-private-key}}
       branch: master
-      ignore_paths:
-        - CHANGELOG
 
   - name: buildpacks-ci
     type: git
@@ -54,6 +52,13 @@ resources: #####################################################################
       user: buildpack
       access_token: {{buildpacks-github-token}}
 <% end %>
+
+  - name: buildpack-release
+    type: github-release
+    source:
+      repository: <%=language%>-cnb
+      user: cloudfoundry
+      access_token: {{{<%= language %>-cnb-private-key}}
 
   ## Docker Images ##
 <% cnb_images.each do |image_type| %>
@@ -129,3 +134,29 @@ jobs: ##########################################################################
         file: buildpacks-ci/tasks/run-bp-v3-integration/task.yml
         privileged: true
 <% end %>
+
+  - name: ship-it
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-master
+          passed:
+          - specs-unit
+  <% if buildpacks[language]['integration'] %>
+          - specs-integration
+  <% end %>
+      - task: ship-buildpack
+        file: buildpacks-ci/tasks/ship-v3-buildpack/task.yml
+        params:
+          LANGUAGE: <%= language %>
+          GITHUB_USERNAME: {{github-username}}
+          GITHUB_PASSWORD: {{github-password}}
+      - put: buildpack-release
+        params:
+          name: release-artifacts/name
+          tag: release-artifacts/tag
+          body: release-artifacts/body
+          globs:
+          - release-artifacts/<%= language %>-cnb-*.tgz
