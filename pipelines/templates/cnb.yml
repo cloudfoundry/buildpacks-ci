@@ -6,11 +6,14 @@
   'yarn' => {
     'integration' => true
   },
+  'httpd' => {
+    'integration' => true
+  },
   'nodejs' => {
 
   },
-  'httpd' => {
-    'integration' => true
+  'python' => {
+
   },
   'ruby' => {
 
