@@ -67,8 +67,7 @@ start_docker() {
   fi
 
   # shellcheck disable=SC2046,SC2155
-  local mtu=$(cat /sys/class/net/$(ip route get 8.8.8.8|awk '{ print $5 }')/mtu)
-  local server_args="--mtu ${mtu}"
+  local server_args="--mtu 1200"
 
   # shellcheck disable=SC2086
   dockerd --data-root /scratch/docker ${server_args} >$LOG_FILE 2>&1 &
