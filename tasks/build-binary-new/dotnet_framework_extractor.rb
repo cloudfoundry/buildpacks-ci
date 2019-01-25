@@ -96,7 +96,7 @@ class DotnetFrameworkExtractor
 
     build_output.add_output("#{version}.json", {tracker_story_id: @build_input.tracker_story_id})
     build_output.add_output("#{version}-#{@stack}.json", out_data)
-    build_output.commit_outputs("Build #{framework_name} - #{version} - #{@stack} [##{@build_input.tracker_story_id}]")
+    build_output.commit_outputs("Build #{framework_name} - #{version} - #{@stack}")
 
     out_data
   end
