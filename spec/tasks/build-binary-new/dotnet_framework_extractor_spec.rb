@@ -58,7 +58,7 @@ describe 'DotnetFrameworkExtractor' do
                                     sha256: 'fake-sha256'
                                   })
       expect(build_output).to receive(:commit_outputs)
-                                .with('Build dotnet-aspnetcore - 2.1.2 - cflinuxfs2 [#some-tracker-id]')
+                                .with('Build dotnet-aspnetcore - 2.1.2 - cflinuxfs2')
     end
 
     it 'should extract and remove the Microsoft.AspNetCore.All and Microsoft.AspNetCore.App metapackages when told to remove frameworks' do
@@ -102,7 +102,7 @@ describe 'DotnetFrameworkExtractor' do
                                     sha256: 'fake-sha256'
                                   })
       expect(build_output).to receive(:commit_outputs)
-                                .with('Build dotnet-runtime - 3.1.3 - cflinuxfs2 [#some-tracker-id]')
+                                .with('Build dotnet-runtime - 3.1.3 - cflinuxfs2')
     end
 
     it 'should extract and remove the Microsoft.NETCore.App when told to remove frameworks' do
