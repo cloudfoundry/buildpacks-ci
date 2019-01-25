@@ -472,7 +472,7 @@ class Builder
         all_extensions = YAML::load_file(extension_file)
         additional_extensions_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', 'php73-additional-extensions.yml')
         additional_extensions_contents = YAML::load_file(additional_extensions_file)
-        all_extensions = all_extensions.merge(additional_extensions_contents)
+        all_extensions['extensions'].push(*additional_extensions_contents)
         File.open(extension_file, 'w') {|f| f.write all_extensions.to_yaml }
       end
 
