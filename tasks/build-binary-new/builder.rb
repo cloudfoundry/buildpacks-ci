@@ -467,9 +467,18 @@ class Builder
         extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php72-extensions.yml")
       end
 
+      # add additional extensions for php7.3.x the extensions file
+      if source_input.version.start_with?('7.3')
+        all_extensions = YAML::load_file(extension_file)
+        additional_extensions_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', 'php73-additional-extensions.yml')
+        additional_extensions_contents = YAML::load_file(additional_extensions_file)
+        all_extensions = all_extensions.merge(additional_extensions_contents)
+        File.open(extension_file, 'w') {|f| f.write all_extensions.to_yaml }
+      end
+
       # FIXME : add these rejected extensions back when they are fixed for php 7.3.X
       if source_input.version.start_with?('7.3')
-        excluded_exts = ['mailparse', 'pdo_sqlsrv', 'sqlsrv', 'solr', 'xdebug', 'yaf', 'memcached', 'amqp', 'phalcon', 'tideways']
+        excluded_exts = ['mailparse', 'libz', 'pdo_sqlsrv', 'sqlsrv', 'solr', 'xdebug', 'yaf', 'memcached', 'amqp', 'phalcon', 'tideways']
         obj = YAML::load_file(extension_file)
         obj['extensions'].reject! {|x| excluded_exts.include?(x['name']) }
         File.open(extension_file, 'w') {|f| f.write obj.to_yaml }
