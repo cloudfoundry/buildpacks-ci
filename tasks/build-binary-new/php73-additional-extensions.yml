@@ -1,4 +1,0 @@
-- name: libzip
-  version: 1.5.1
-  md5: ca72a4c93bef1595e5ff45eaf534d4da
-  klass: LibzipRecipe
