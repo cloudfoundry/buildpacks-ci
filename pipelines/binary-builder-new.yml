@@ -124,7 +124,9 @@
                         source_type: 'pypi'},
 
   'python' =>          { buildpacks: {
-                          python: { lines: ["2.7.X", "3.4.X", "3.5.X", "3.6.X", "3.7.X"], removal_strategy: 'keep_latest_released' } } },
+                          python: { lines: ["2.7.X", "3.4.X", "3.5.X", "3.6.X", "3.7.X"], removal_strategy: 'keep_latest_released' },
+                          'python-cnb' => {lines: ["2.7.X", "3.4.X", "3.5.X", "3.6.X", "3.7.X"], removal_strategy: 'keep_latest_released' } } },
+
 
   'r' =>               { buildpacks: {
                           r: { lines: ["3.4.X", "3.5.X"], removal_strategy: 'keep_latest_released' } },
