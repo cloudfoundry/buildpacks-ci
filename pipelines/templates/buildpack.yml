@@ -37,7 +37,8 @@
   'php' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
     'product_slug' => 'php-buildpack',
-    'compile_extensions' => true
+    'compile_extensions' => true,
+    'v3' => true
   },
   'python' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
@@ -1245,6 +1246,7 @@ jobs: ##########################################################################
         DOCKER_START: true
         <% end %>
         LANGUAGE: <%= language %>
+        SHIM: true
     - put: buildpack-v3
       params:
         repository: buildpack-artifacts
