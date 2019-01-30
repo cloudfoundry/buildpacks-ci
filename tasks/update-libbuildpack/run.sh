@@ -21,7 +21,7 @@ pushd buildpack
   go get github.com/golang/mock/gomock
   go get -u github.com/onsi/ginkgo/ginkgo
   go install github.com/golang/mock/mockgen
-  if [[ "$LANGUAGE" != "php" ]]; then
+  if [[ "$LANGUAGE" != "php" || "$SHIM" == "true" ]]; then
     go mod vendor
   fi
 
@@ -34,17 +34,19 @@ pushd buildpack
     pip install -r requirements.txt
   fi
 
-  pushd "$update_dir"
+  if [[ -d "$update_dir" ]]; then
+    pushd "$update_dir"
 
-    go generate || true
-    [ -d compile ] && (cd compile && (go generate || true))
-    [ -d hooks ] && (cd hooks && (go generate || true))
-    [ -d supply ] && (cd supply && (go generate || true))
-    [ -d finalize ] && (cd finalize && (go generate || true))
+      go generate || true
+      [ -d compile ] && (cd compile && (go generate || true))
+      [ -d hooks ] && (cd hooks && (go generate || true))
+      [ -d supply ] && (cd supply && (go generate || true))
+      [ -d finalize ] && (cd finalize && (go generate || true))
 
-    export CF_STACK=${CF_STACK:-cflinuxfs2}
-    ginkgo -r -skipPackage=integration,brats
-  popd
+      export CF_STACK=${CF_STACK:-cflinuxfs2}
+      ginkgo -r -skipPackage=integration,brats
+    popd
+  fi
 
   git add .
 
