@@ -13,7 +13,8 @@ ALL_STACKS = {
 V3_DEP_NAMES = {
     'node' => 'NodeJS',
     'yarn' => 'Yarn',
-    'python' => 'Python'
+    'python' => 'Python',
+    'php' => 'PHP'
 }
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
