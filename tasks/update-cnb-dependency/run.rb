@@ -10,6 +10,10 @@ ALL_STACKS = {
     'bionic' => 'io.buildpacks.stacks.bionic'
 }
 
+V3_DEP_IDS = {
+    'php' => 'php-binary'
+}
+
 V3_DEP_NAMES = {
     'node' => 'NodeJS',
     'yarn' => 'Yarn',
@@ -58,7 +62,7 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
   builds[stack] = build
 
   dep = {
-      'id' => manifest_name,
+      'id' => V3_DEP_IDS.fetch(manifest_name, manifest_name),
       'name' => V3_DEP_NAMES[manifest_name],
       'version' => resource_version,
       'uri' => build['url'],
@@ -67,7 +71,7 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
   }
 
   old_versions = buildpack_toml['metadata']['dependencies']
-                     .select { |d| d['id'] == manifest_name }
+                     .select { |d| d['id'] == V3_DEP_IDS.fetch(manifest_name, manifest_name) }
                      .map { |d| d['version'] }
 
   buildpack_toml['metadata']['dependencies'] = Dependencies.new(
@@ -79,7 +83,7 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
   ).switch
 
   new_versions = buildpack_toml['metadata']['dependencies']
-                     .select { |d| d['id'] == manifest_name }
+                     .select { |d| d['id'] == V3_DEP_IDS.fetch(manifest_name, manifest_name) }
                      .map { |d| d['version'] }
 
   added += (new_versions - old_versions).uniq.sort
