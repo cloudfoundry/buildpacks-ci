@@ -64,7 +64,7 @@ resources: #####################################################################
     source:
       repository: <%=language%>-cnb
       user: cloudfoundry
-      access_token: {{<%= language %>-cnb-private-key}}
+      access_token: {{buildpacks-github-token}}
 
   ## Docker Images ##
 <% cnb_images.each do |image_type| %>
