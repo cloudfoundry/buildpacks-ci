@@ -19,6 +19,9 @@
 
   },
   'php' => {
+
+  },
+  'php-web' => {
     'integration' => true
   }
 }
