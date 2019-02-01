@@ -23,6 +23,9 @@
   },
   'php-web' => {
     'integration' => true
+  },
+  'pip' => {
+    'integration' => true
   }
 }
 %>
