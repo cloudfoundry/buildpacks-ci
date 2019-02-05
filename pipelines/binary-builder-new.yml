@@ -167,7 +167,8 @@ skip_build = [
   { dep: 'php', line: '5.6.X', stack: 'cflinuxfs3'},
   { dep: 'php', line: '7.3.X', stack: 'cflinuxfs2'},
   { dep: 'dotnet-sdk', line: '1.0.X', stack: 'cflinuxfs3' },
-  { dep: 'node', line: '11.X.X', stack: 'cflinuxfs2' }
+  { dep: 'node', line: '11.X.X', stack: 'cflinuxfs2' },
+  { dep: 'node', line: '10.X.X', stack: 'cflinuxfs2' }
 ]
 
 def validate_dependencies(deps)
