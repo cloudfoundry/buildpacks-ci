@@ -5,9 +5,9 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: buildpack
+  - name: cnb-scripts
   - name: pack
 outputs:
-  - name: updated-buildpack
+  - name: updated-cnb-scripts
 run:
   path: buildpacks-ci/tasks/update-pack/run.sh

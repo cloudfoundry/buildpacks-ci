@@ -5,10 +5,10 @@ set -o nounset
 set -o pipefail
 
 NEW_PACK_VERSION=$(cat pack/version)
-sed "s/PACK_VERSION=\".*\"/PACK_VERSION=\"$NEW_PACK_VERSION\"/g" -i buildpack/scripts/install_tools.sh
-rsync -a buildpack/ updated-buildpack/
+sed "s/PACK_VERSION=\".*\"/PACK_VERSION=\"$NEW_PACK_VERSION\"/g" -i cnb-scripts/install_tools.sh
+rsync -a cnb-scripts/ updated-cnb-scripts/
 
-pushd updated-buildpack
+pushd updated-cnb-scripts
   git add .
 
   set +e
