@@ -2,7 +2,8 @@
 set -o errexit
 set -o pipefail
 
-export PACK_VERSION="$(cat pack/version)"
+PACK_VERSION="$(cat pack/version)"
+export PACK_VERSION
 
 cd buildpack
 
