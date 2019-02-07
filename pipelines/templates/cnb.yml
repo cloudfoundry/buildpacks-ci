@@ -38,7 +38,7 @@ resource_types:
 
 resources: ############################################################################################################
   ## Git ##
-  - name: buildpack-master
+  - name: buildpack-git
     type: git
     webhook_token: ob0aigh3
     source:
@@ -52,6 +52,12 @@ resources: #####################################################################
       uri: {{buildpacks-ci-git-uri-public}}
       branch: master
 
+  - name: cnb-scripts-git
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cnb-scripts
+      branch: master
+
   ## Github Releases ##
 <% if buildpacks[language]['integration'] %>
   - name: pack
@@ -62,7 +68,7 @@ resources: #####################################################################
       access_token: {{buildpacks-github-token}}
 <% end %>
 
-  - name: buildpack-release
+  - name: buildpack-github-release
     type: github-release
     source:
       repository: <%=language%>-cnb
@@ -82,6 +88,24 @@ resources: #####################################################################
 <% end %>
 
 jobs: ################################################################################################################
+  - name: update-scripts
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-git
+        - get: cnb-scripts
+          resource: cnb-scripts-git
+          trigger: true
+      - task: update-scripts
+        file: buildpacks-ci/tasks/update-cnb-scripts/task.yml
+      - put: buildpack
+        resource: buildpack-git
+        params:
+          repository: updated-buildpack
+          rebase: true
+
 <% if buildpacks[language]['integration'] %>
   - name: update-pack
     serial: true
@@ -90,14 +114,14 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-master
+          resource: buildpack-git
         - get: pack
           resource: pack
           trigger: true
       - task: update-pack
         file: buildpacks-ci/tasks/update-pack/task.yml
       - put: buildpack
-        resource: buildpack-master
+        resource: buildpack-git
         params:
           repository: updated-buildpack
           rebase: true
@@ -111,7 +135,7 @@ jobs: ##########################################################################
         - aggregate:
           - get: buildpacks-ci
           - get: buildpack
-            resource: buildpack-master
+            resource: buildpack-git
             trigger: true
   <% cnb_images.each do |image_type| %>
           - get: cnb-<%= image_type %>-image
@@ -130,7 +154,7 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-master
+          resource: buildpack-git
           trigger: true
           passed:
           - specs-unit
@@ -150,7 +174,7 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-master
+          resource: buildpack-git
           passed:
           - specs-unit
   <% if buildpacks[language]['integration'] %>
@@ -162,7 +186,7 @@ jobs: ##########################################################################
           LANGUAGE: <%= language %>
           GITHUB_USERNAME: {{github-username}}
           GITHUB_PASSWORD: {{github-password}}
-      - put: buildpack-release
+      - put: buildpack-github-release
         params:
           name: release-artifacts/name
           tag: release-artifacts/tag
