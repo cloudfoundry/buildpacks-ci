@@ -7,6 +7,7 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: buildpack
+  - name: pack
 run:
   path: buildpacks-ci/tasks/run-bp-v3-integration/run.sh
 params:
