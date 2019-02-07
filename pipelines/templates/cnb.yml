@@ -43,7 +43,7 @@ resources: #####################################################################
     webhook_token: ob0aigh3
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-cnb.git
-      private_key: {{<%= language %>-cnb-private-key}}
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
       branch: master
 
   - name: buildpacks-ci
@@ -106,28 +106,6 @@ jobs: ##########################################################################
           repository: updated-buildpack
           rebase: true
 
-<% if buildpacks[language]['integration'] %>
-  - name: update-pack
-    serial: true
-    public: false
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: buildpack
-          resource: buildpack-git
-        - get: pack
-          resource: pack
-          trigger: true
-      - task: update-pack
-        file: buildpacks-ci/tasks/update-pack/task.yml
-      - put: buildpack
-        resource: buildpack-git
-        params:
-          repository: updated-buildpack
-          rebase: true
-<% end %>
-
-
   - name: specs-unit
     serial: true
     plan:
@@ -153,6 +131,8 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: pack
+          trigger: true
         - get: buildpack
           resource: buildpack-git
           trigger: true

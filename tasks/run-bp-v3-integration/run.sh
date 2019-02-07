@@ -2,6 +2,8 @@
 set -o errexit
 set -o pipefail
 
+export PACK_VERSION="$(cat pack/version)"
+
 cd buildpack
 
 export GOBIN=$PWD/.bin
