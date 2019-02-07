@@ -9,7 +9,6 @@ rsync -a buildpack/ updated-buildpack/
 
 pushd updated-buildpack/scripts
   git checkout master
-  git pull
   submodule_commit="$(git log --format=%B -n 1 HEAD | head -n 1)"
 popd
 
