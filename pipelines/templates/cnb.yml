@@ -52,11 +52,12 @@ resources: #####################################################################
       uri: {{buildpacks-ci-git-uri-public}}
       branch: master
 
-  - name: cnb-scripts-git
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/cnb-scripts
-      branch: master
+# TODO : add this back when we have a solution for common scripts
+#  - name: cnb-scripts-git
+#    type: git
+#    source:
+#      uri: https://github.com/cloudfoundry/cnb-scripts
+#      branch: master
 
   ## Github Releases ##
 <% if buildpacks[language]['integration'] %>
@@ -88,23 +89,24 @@ resources: #####################################################################
 <% end %>
 
 jobs: ################################################################################################################
-  - name: update-scripts
-    serial: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: buildpack
-          resource: buildpack-git
-        - get: cnb-scripts
-          resource: cnb-scripts-git
-          trigger: true
-      - task: update-scripts
-        file: buildpacks-ci/tasks/update-cnb-scripts/task.yml
-      - put: buildpack
-        resource: buildpack-git
-        params:
-          repository: updated-buildpack
-          rebase: true
+# TODO : add this back when we have a solution for common scripts
+#  - name: update-scripts
+#    serial: true
+#    plan:
+#      - aggregate:
+#        - get: buildpacks-ci
+#        - get: buildpack
+#          resource: buildpack-git
+#        - get: cnb-scripts
+#          resource: cnb-scripts-git
+#          trigger: true
+#      - task: update-scripts
+#        file: buildpacks-ci/tasks/update-cnb-scripts/task.yml
+#      - put: buildpack
+#        resource: buildpack-git
+#        params:
+#          repository: updated-buildpack
+#          rebase: true
 
   - name: specs-unit
     serial: true
