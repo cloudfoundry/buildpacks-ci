@@ -7,8 +7,11 @@ set -x
 
 rsync -a buildpack/ updated-buildpack/
 
+pushd updated-buildpack
+  git submodule update --init --remote
+popd
+
 pushd updated-buildpack/scripts
-  git checkout master
   submodule_commit="$(git log --format=%B -n 1 HEAD | head -n 1)"
 popd
 
