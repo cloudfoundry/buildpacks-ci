@@ -263,7 +263,7 @@ jobs:
     public: true
     plan:
       - get: monday-funday
-          trigger: true
+        trigger: true
       - get: buildpacks-ci
       - task: renew-lts-env
         file: buildpacks-ci/tasks/renew-lts-env/task.yml
