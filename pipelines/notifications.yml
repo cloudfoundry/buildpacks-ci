@@ -42,6 +42,12 @@ resources:
     source:
       expression: 12 5 1 * *
       location: {{current-timezone}}
+  - name: every-third-month
+    type: cron
+    check_every: 1h
+    source:
+      expression: 1 30 9 */3 * # Run every three months on the 9th of the month at 1:30 AM
+      location: {{current-timezone}}
   - name: check-interval
     type: cron
     source:
@@ -258,14 +264,18 @@ jobs:
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
 
-  - name: renew-lts-env
+
+  - name: update-lts-environment
     serial: false
     public: true
     plan:
-      - get: monday-funday
+      - get: every-third-month
         trigger: true
       - get: buildpacks-ci
-      - task: renew-lts-env
-        file: buildpacks-ci/tasks/renew-lts-env/task.yml
+      - task: create-update-lts-environment-story
+        file: buildpacks-ci/tasks/create-update-lts-environment-story/task.yml
         params:
-          ENV_ID: {{ci-cf-lts-env-id}}
+          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+          ENV_URL: {{ci-cf-lts-target}}
