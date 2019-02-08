@@ -46,7 +46,7 @@ resources:
     type: cron
     check_every: 1h
     source:
-      expression: 1 30 9 */3 * # Run every three months on the 9th of the month at 1:30 AM
+      expression: 30 1 9 */3 * # Run every three months on the 9th of the month at 1:30 AM
       location: {{current-timezone}}
   - name: check-interval
     type: cron

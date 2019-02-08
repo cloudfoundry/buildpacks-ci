@@ -8,9 +8,9 @@ name = 'Upgrade LTS'
 date = (Time.now - (8 * 24 * 60 * 60)).strftime('%Y-%m-%d')
 description = <<~HEREDOC
     **Upgrade** out Toolsmiths LTS Environment.
-    Our current enviroment is: #{ENV.fetch('ENVIRONMENT_URL')}"
+    Our current enviroment is: #{ENV.fetch('ENV_URL')}
 
-    ***Notes**:
+    ***Notes***:
     - This will be a new toolsmiths environment on GCP which you can create [here](https://environments.toolsmiths.cf-app.com/deploy).
     - We will need our gcp json key which will be in lastpass
     - We will need to save the credentials for the new environment in lastpass
