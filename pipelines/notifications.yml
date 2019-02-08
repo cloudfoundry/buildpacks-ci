@@ -257,3 +257,15 @@ jobs:
             TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+
+  - name: renew-lts-env
+    serial: false
+    public: true
+    plan:
+      - get: monday-funday
+          trigger: true
+      - get: buildpacks-ci
+      - task: renew-lts-env
+        file: buildpacks-ci/tasks/renew-lts-env/task.yml
+        params:
+          ENV_ID: {{ci-cf-lts-env-id}}
