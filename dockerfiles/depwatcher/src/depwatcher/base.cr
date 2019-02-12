@@ -45,5 +45,12 @@ module Depwatcher
     property client : HTTPClient
     def initialize(@client = HTTPClientImpl.new)
     end
+
+    def get_sha256(url : String)
+      data = client.get(url).body
+      hash = OpenSSL::Digest.new("SHA256")
+      hash.update(data)
+      return hash.hexdigest
+    end
   end
 end

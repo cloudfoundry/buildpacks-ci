@@ -56,6 +56,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   source_type = 'source'
   source_url = builds[stack]['source']['url']
+  source_sha256 = builds[stack]['source'].fetch('sha256', '')
 
   if source_name.include? 'dotnet'
     git_commit_sha = builds[stack]['git_commit_sha']
@@ -77,6 +78,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
     'sha256' => build['sha256'],
     'cf_stacks' => stacks,
     source_type => source_url,
+    'source_sha256' => source_sha256
   }
 
   old_versions = manifest['dependencies']

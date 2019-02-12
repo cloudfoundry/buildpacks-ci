@@ -10,8 +10,9 @@ module Depwatcher
         ref: String,
         url: String,
         md5: String,
+        sha256: String
       )
-      def initialize(@ref : String, @url : String, @md5 : String)
+      def initialize(@ref : String, @url : String, @md5 : String, @sha256 : String)
       end
     end
 
@@ -23,7 +24,7 @@ module Depwatcher
       url = "https://repo.continuum.io/miniconda/Miniconda#{generation}-#{ref}-Linux-x86_64.sh"
       (releases(generation) { |m, e|
         if m[1] == ref
-          Release.new(ref, url, e.children[7].text)
+          Release.new(ref, url, e.children[7].text, get_sha256(url))
         end
       }).first
     end

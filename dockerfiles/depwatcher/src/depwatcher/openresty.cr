@@ -9,8 +9,9 @@ module Depwatcher
         ref: String,
         url: String,
         pgp: String,
+        sha256: String
       )
-      def initialize(@ref : String, @url : String, @pgp : String)
+      def initialize(@ref : String, @url : String, @pgp : String, @sha256 : String)
       end
     end
 
@@ -23,7 +24,8 @@ module Depwatcher
     end
 
     def in(ref : String) : Release
-      Release.new(ref, "http://openresty.org/download/openresty-#{ref}.tar.gz", "http://openresty.org/download/openresty-#{ref}.tar.gz.asc")
+      url = "http://openresty.org/download/openresty-#{ref}.tar.gz"
+      Release.new(ref, url, "http://openresty.org/download/openresty-#{ref}.tar.gz.asc", get_sha256(url))
     end
   end
 end

@@ -8,8 +8,9 @@ module Depwatcher
       JSON.mapping(
         ref: String,
         url: String,
+        sha256: String
       )
-      def initialize(@ref : String, @url : String)
+      def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
 
@@ -29,7 +30,8 @@ module Depwatcher
 
     def in(ref : String) : Release
       major = ref.split(".")[0]
-      Release.new(ref, "https://cran.cnr.berkeley.edu/src/base/R-#{major}/R-#{ref}.tar.gz")
+      url = "https://cran.cnr.berkeley.edu/src/base/R-#{major}/R-#{ref}.tar.gz"
+      Release.new(ref, url, get_sha256(url))
     end
   end
 end

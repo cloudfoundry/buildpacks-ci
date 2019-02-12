@@ -7,13 +7,15 @@ module Depwatcher
       JSON.mapping(
         ref: String,
         url: String,
-        git_commit_sha: String
+        git_commit_sha: String,
+        sha256: String
       )
 
       def initialize(
         @ref : String,
         @url : String,
-        @git_commit_sha : String
+        @git_commit_sha : String,
+        @sha256 : String
       )
       end
     end
@@ -40,7 +42,8 @@ module Depwatcher
     def in(repo : String, ref : String) : Tag
       t = tags(repo).find { |t| t.name == ref }
       raise "Could not find data for version #{ref}" unless t
-      Tag.new(t.name, "https://github.com/#{repo}", t.commit.sha)
+
+      Tag.new(t.name, "https://github.com/#{repo}", t.commit.sha, get_sha256("https://github.com/#{repo}/archive/#{t.commit.sha}.tar.gz"))
     end
 
     def matched_tags(repo : String, tag_regex : String) : Array(External)
