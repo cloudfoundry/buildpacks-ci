@@ -15,6 +15,11 @@ Spec2.describe Depwatcher::DotnetSdk do
         File.read(__DIR__ + "/../fixtures/dotnet_tags.json")
       )
     )
+    client.stub_get(
+      "https://github.com/dotnet/cli/archive/2a1f1c6d30c73c1bce0b557ebbdfba1008e9ae63.tar.gz",
+      nil,
+      HTTP::Client::Response.new( 200, "hello")
+    )
   end
 
   describe "#check" do
@@ -31,6 +36,7 @@ Spec2.describe Depwatcher::DotnetSdk do
       expect(obj.ref).to eq "2.1.301"
       expect(obj.url).to eq "https://github.com/dotnet/cli"
       expect(obj.git_commit_sha).to eq "2a1f1c6d30c73c1bce0b557ebbdfba1008e9ae63"
+      expect(obj.sha256).to eq "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
     end
   end
 end

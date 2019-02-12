@@ -7,6 +7,7 @@ Spec2.describe Depwatcher::Nginx do
   subject { described_class.new.tap { |s| s.client = client } }
   before do
     client.stub_get("https://api.github.com/repos/nginx/nginx/tags?per_page=1000", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/github_nginx.json")))
+    client.stub_get("http://nginx.org/download/nginx-1.12.2.tar.gz", nil, HTTP::Client::Response.new(200, "hello"))
   end
 
   describe "#check" do
@@ -26,6 +27,7 @@ Spec2.describe Depwatcher::Nginx do
       expect(obj.ref).to eq "1.12.2"
       expect(obj.url).to eq "http://nginx.org/download/nginx-1.12.2.tar.gz"
       expect(obj.pgp).to eq "http://nginx.org/download/nginx-1.12.2.tar.gz.asc"
+      expect(obj.sha256).to eq "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
     end
   end
 end
