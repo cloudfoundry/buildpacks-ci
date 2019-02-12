@@ -368,7 +368,6 @@ class Builder
       )
 
     when 'nginx-static'
-      source_input.sha256 = Sha.get_sha(source_input.url)
       binary_builder.build(source_input)
       out_data.merge!(
         artifact_output.move_dependency(

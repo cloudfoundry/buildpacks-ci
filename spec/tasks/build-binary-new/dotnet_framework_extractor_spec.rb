@@ -29,6 +29,8 @@ describe 'DotnetFrameworkExtractor' do
 
     allow(source_input).to receive(:url).and_return('some-cli-url')
     allow(source_input).to receive(:git_commit_sha).and_return('some-git-sha')
+    allow(source_input).to receive(:sha256).and_return('some-source-code-sha256')
+
     allow(build_input).to receive(:tracker_story_id).and_return('some-tracker-id')
   end
 
@@ -52,7 +54,7 @@ describe 'DotnetFrameworkExtractor' do
                                   {
                                     tracker_story_id: 'some-tracker-id',
                                     version: '2.1.2',
-                                    source: {url: 'some-cli-url'},
+                                    source: {url: 'some-cli-url', sha256: 'some-source-code-sha256'},
                                     url: 'fake-url',
                                     git_commit_sha: 'some-git-sha',
                                     sha256: 'fake-sha256'
@@ -96,7 +98,7 @@ describe 'DotnetFrameworkExtractor' do
                                   {
                                     tracker_story_id: 'some-tracker-id',
                                     version: '3.1.3',
-                                    source: {url: 'some-cli-url'},
+                                    source: {url: 'some-cli-url', sha256: 'some-source-code-sha256'},
                                     git_commit_sha: 'some-git-sha',
                                     url: 'fake-url',
                                     sha256: 'fake-sha256'
