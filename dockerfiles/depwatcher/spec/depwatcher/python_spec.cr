@@ -8,6 +8,7 @@ Spec2.describe Depwatcher::Python do
   before do
     client.stub_get("https://www.python.org/downloads/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/python.html")))
     client.stub_get("https://www.python.org/downloads/release/python-355/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/python-355.html")))
+    client.stub_get("https://www.python.org/ftp/python/3.5.5/Python-3.5.5.tgz", nil, HTTP::Client::Response.new(200, "hello"))
   end
 
   describe "#check" do
@@ -25,6 +26,7 @@ Spec2.describe Depwatcher::Python do
       expect(obj.ref).to eq "3.5.5"
       expect(obj.url).to eq "https://www.python.org/ftp/python/3.5.5/Python-3.5.5.tgz"
       expect(obj.md5_digest).to eq "7c825b747d25c11e669e99b912398585"
+      expect(obj.sha256).to eq "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
     end
   end
 end

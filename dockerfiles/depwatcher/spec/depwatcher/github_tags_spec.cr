@@ -7,6 +7,7 @@ Spec2.describe Depwatcher::GithubTags do
   subject {described_class.new.tap {|s| s.client = client}}
   before do
     client.stub_get("https://api.github.com/repos/dotnet/cli/tags?per_page=1000", nil, HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/github_tags.json")))
+    client.stub_get("https://github.com/dotnet/cli/archive/2edba8d7f10739031100193636112628263f669c.tar.gz", nil, HTTP::Client::Response.new(200, "hello"))
   end
 
   describe "#check" do
@@ -27,6 +28,7 @@ Spec2.describe Depwatcher::GithubTags do
       expect(obj.ref).to eq "v2.1.200"
       expect(obj.url).to eq "https://github.com/dotnet/cli"
       expect(obj.git_commit_sha).to eq "2edba8d7f10739031100193636112628263f669c"
+      expect(obj.sha256).to eq "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
     end
   end
 end

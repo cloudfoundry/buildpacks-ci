@@ -7,6 +7,8 @@ Spec2.describe Depwatcher::Miniconda do
   subject { described_class.new.tap { |s| s.client = client } }
   before do
     client.stub_get("https://repo.continuum.io/miniconda/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/miniconda.html")))
+    client.stub_get("https://repo.continuum.io/miniconda/Miniconda2-4.5.4-Linux-x86_64.sh", nil, HTTP::Client::Response.new(200, "hello"))
+    client.stub_get("https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh", nil, HTTP::Client::Response.new(200, "hello"))
   end
 
   describe "#check" do
@@ -35,12 +37,14 @@ Spec2.describe Depwatcher::Miniconda do
       expect(obj.ref).to eq "4.5.4"
       expect(obj.url).to eq "https://repo.continuum.io/miniconda/Miniconda2-4.5.4-Linux-x86_64.sh"
       expect(obj.md5).to eq "8a1c02f6941d8778f8afad7328265cf5"
+      expect(obj.sha256).to eq "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
     end
     it "returns the release version, url, md5 for miniconda3" do
      obj = subject.in("3", "4.5.4")
      expect(obj.ref).to eq "4.5.4"
      expect(obj.url).to eq "https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh"
      expect(obj.md5).to eq "a946ea1d0c4a642ddf0c3a26a18bb16d"
+     expect(obj.sha256).to eq "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
    end
  end
 end
