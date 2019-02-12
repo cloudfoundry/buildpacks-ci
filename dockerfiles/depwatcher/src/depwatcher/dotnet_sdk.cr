@@ -10,12 +10,14 @@ module Depwatcher
         ref: String,
         url: String,
         git_commit_sha: String,
+        sha256: String
       )
 
       def initialize(
         @ref : String,
         @url : String,
-        @git_commit_sha : String
+        @git_commit_sha : String,
+        @sha256 : String
       )
       end
     end
@@ -43,7 +45,9 @@ module Depwatcher
       tag = dotnet_tags(tag_regex)
         .select { |t| t.name == ref }
         .first
-      DotnetRelease.new(tag.name, "https://github.com/dotnet/cli", tag.commit)
+
+      url = "https://github.com/dotnet/cli/archive/#{tag.commit}.tar.gz"
+      DotnetRelease.new(tag.name, "https://github.com/dotnet/cli", tag.commit, get_sha256(url))
     end
 
     private def dotnet_tags(tag_regex : String) : Array(External)

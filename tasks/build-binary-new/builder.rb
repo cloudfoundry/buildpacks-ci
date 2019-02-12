@@ -307,6 +307,10 @@ class Builder
     out_data[:source][:md5] = source_input.md5
     out_data[:source][:sha256] = source_input.sha256
 
+    unless out_data[:source][:sha256]
+      out_data[:source][:sha256] = Sha::get_sha(source_input.url)
+    end
+
     case source_input.name
     when 'bundler'
       binary_builder.build(source_input)

@@ -83,7 +83,7 @@ class DotnetFrameworkExtractor
     out_data = {
       tracker_story_id: @build_input.tracker_story_id,
       version: version,
-      source: {url: source_input.url},
+      source: {url: source_input.url, sha256: source_input.sha256},
       git_commit_sha: source_input.git_commit_sha
     }
 
