@@ -43,7 +43,8 @@ module Depwatcher
       t = tags(repo).find { |t| t.name == ref }
       raise "Could not find data for version #{ref}" unless t
 
-      Tag.new(t.name, "https://github.com/#{repo}", t.commit.sha, get_sha256("https://github.com/#{repo}/archive/#{t.commit.sha}.tar.gz"))
+      url = "https://github.com/#{repo}/archive/#{t.commit.sha}.tar.gz"
+      Tag.new(t.name, url, t.commit.sha, get_sha256(url))
     end
 
     def matched_tags(repo : String, tag_regex : String) : Array(External)
