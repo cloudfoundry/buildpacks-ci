@@ -54,21 +54,24 @@ describe 'Builder' do
 
           allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
           expect(build_input).to receive(:copy_to_build_output)
+
           allow(Sha).to receive(:get_sha_from_text_file)
-          expect(Sha).to receive(:get_sha).and_return('some bogus').at_most(1).times
+          expect(Sha).to receive(:get_sha).and_return('some-bogus-sha256').at_most(1).times
 
           allow(build_output).to receive(:add_output)
             .with("#{input.version}-bionic.json", any_args)
+
           expect(build_output).to receive(:add_output)
             .with("#{input.version}-cflinuxfs2.json",
               {
                 tracker_story_id: 'fake-story-id',
                 version:          input.version,
-                source:           { url: 'https://fake.com', md5: 'fake-md5', sha256: nil },
+                source:           { url: 'https://fake.com', md5: 'fake-md5', sha256: 'some-bogus-sha256' },
                 sha256:           'fake-sha256',
                 url:              'fake-url'
               }
             )
+
           expect(build_output).to receive(:commit_outputs)
             .with("Build #{input.dep} - #{input.version} - cflinuxfs2 [#fake-story-id]")
         end
