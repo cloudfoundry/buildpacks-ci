@@ -26,7 +26,7 @@ Spec2.describe Depwatcher::GithubTags do
     it "returns real releases sorted" do
       obj = subject.in("dotnet/cli", "v2.1.200")
       expect(obj.ref).to eq "v2.1.200"
-      expect(obj.url).to eq "https://github.com/dotnet/cli"
+      expect(obj.url).to eq "https://github.com/dotnet/cli/archive/2edba8d7f10739031100193636112628263f669c.tar.gz"
       expect(obj.git_commit_sha).to eq "2edba8d7f10739031100193636112628263f669c"
       expect(obj.sha256).to eq "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
     end
