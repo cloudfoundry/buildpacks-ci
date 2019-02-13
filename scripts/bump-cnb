@@ -34,7 +34,7 @@ begin
 
   new_changelog.write "\n"
 
-  File.open('CHANGELOG', 'w+').each { |line| new_changelog.write line }
+  File.open('CHANGELOG').each { |line| new_changelog.write line }
 ensure
   new_changelog.close
 end
