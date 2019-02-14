@@ -10,8 +10,7 @@ rm ./deployments/concourse-gcp/manifest.yml
 gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && cd ~/bosh-deployment && git pull && cd buildpacks-bosh && ./deploy.sh"
 gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh upload-stemcell https://bosh.io/d/stemcells/bosh-google-kvm-ubuntu-trusty-go_agent"
 gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh upload-stemcell https://bosh.io/d/stemcells/bosh-google-kvm-windows2016-go_agent"
-gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh manifest -d concourse > /tmp/manifest.yml"
-gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh deploy --tty -d concourse /tmp/manifest.yml"
+gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh deploy --no-redact --tty -d concourse ~/manifest.yml --vars-store ~/concourse-cluster-creds.yml"
 gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh clean-up --all -n"
 
 exit 0
