@@ -3,21 +3,21 @@ name: concourse
 director_uuid: <%= concourse_gcp_bosh_director_uuid %>
 releases:
 - name: concourse
-  version: 3.14.1
-  url: https://bosh.io/d/github.com/concourse/concourse?v=3.14.1
-  sha1: 6be91b70ecc7ce233d2aff5d03ed28c8eab3d132
+  version: 4.2.1
+  url: https://bosh.io/d/github.com/concourse/concourse?v=4.2.1
+  sha1: 470a6fdd7cb82fc723d7d78930c7d261ca4a6cb4
 - name: garden-runc
-  version: 1.15.0
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.15.0
-  sha1: 274a619fe1588c157e6fa147b29ae2652f1fa73d
+  version: 1.16.3
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.16.3
+  sha1: 2a7c813e7e4d862e19334addf022916fb6b91eb0
 - name: windows-tools
   version: 26
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/windows-tools-release?v=26
   sha1: 7b962d804ad2c09f3c49c964c93d878cc2bba1b0
 - name: concourse-windows-worker
-  version: 3.14.1
-  url: https://bosh.io/d/github.com/pivotal-cf-experimental/concourse-windows-worker-release?v=3.14.1
-  sha1: 5681463f0766e786a5ea8bf12558238bf69fc8f3
+  version: 4.0.0
+  url: https://bosh.io/d/github.com/pivotal-cf-experimental/concourse-windows-worker-release?v=4.0.0
+  sha1: 59badb165e81627813d486142ee1748ba8882730
 instance_groups:
 - name: web
   instances: 1
@@ -37,25 +37,27 @@ instance_groups:
   - name: atc
     release: concourse
     properties:
+      add_local_users:
+      - buildpacks:<%= concourse_basic_auth_password %>
       token_signing_key: ((token_signing_key))
       external_url: https://buildpacks.ci.cf-app.com
       publicly_viewable: true
-      basic_auth_username: buildpacks
-      basic_auth_password: <%= concourse_basic_auth_password %>
+      main_team:
+        auth:
+          github:
+            teams:
+            - cloudfoundry:CF Buildpacks
+            users:
+            - nebhale
+            - slowestgirl
+            - sclevine
+            - shanks3012
+          local:
+            users:
+            - buildpacks
       github_auth:
         client_id: <%= gcp_concourse_github_auth_client_id %>
         client_secret: <%= gcp_concourse_github_auth_client_secret %>
-        authorize:
-        - organization: cloudfoundry
-          teams:
-          - CF Buildpacks
-        - user: wfernandes
-        - user: roxtar
-        - user: nebhale
-        - user: slowestgirl
-        - user: ematpl
-        - user: vito
-        - user: mariash
       postgresql:
         database: <%= gcp_concourse_db_name %>
         role:
@@ -87,6 +89,7 @@ instance_groups:
   jobs:
   - name: worker
     release: concourse
+    consumes: {baggageclaim: {from: worker-baggageclaim}}
     properties:
       tsa_host: 10.150.0.2
       drain_timeout: 10m
@@ -95,6 +98,7 @@ instance_groups:
       tsa_worker_private_key: ((worker_key.private_key))
   - name: baggageclaim
     release: concourse
+    provides: {baggageclaim: {as: worker-baggageclaim}}
     properties: {}
   - name: garden
     release: garden-runc
