@@ -7,8 +7,10 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: buildpack
-  - name: cnb-scripts
 outputs:
-  - name: updated-buildpack
+- name: buildpack-artifacts
 run:
-  path: buildpacks-ci/tasks/update-cnb-scripts/run.sh
+  path: buildpacks-ci/tasks/detect-and-upload-cnb-artifact/run.rb
+params:
+  BUILDPACK_NAME:
+  GIT_REPO_ORG:
