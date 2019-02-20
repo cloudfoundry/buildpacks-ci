@@ -72,9 +72,8 @@ def url_for_type(name, type)
 end
 
 data = {
-  'PHP5' => YAML.load(open('buildpacks-ci/tasks/build-binary-new/php-extensions.yml').read),
-  'PHP7' => YAML.load(open('buildpacks-ci/tasks/build-binary-new/php7-extensions.yml').read),
-  'PHP72' => YAML.load(open('buildpacks-ci/tasks/build-binary-new/php72-extensions.yml').read)
+  'PHP71' => YAML.load(open('buildpacks-ci/tasks/build-binary-new/php71-extensions.yml').read),
+  'PHP72' => YAML.load(open('buildpacks-ci/tasks/build-binary-new/php72-extensions.yml').read),
 }
 
 Tuple = Struct.new(:name, :klass)
@@ -115,6 +114,10 @@ description += <<-DESCRIPTION
 
 If you're updating cassandra modules (including datastax/cpp-driver) please do so in individual commits, then rebuild appropriate php versions, so integration tests can run in CI with only cassandra changes.
 This will help isolate the php cassandra module change(s) if the changes cause problems.
+
+Note php 7.0 extensions still exist, but they will not be updated untill it is removed from the buildpack
+
+With the addition of php7.3 please check the modules listed in the excluded_exts vars variables in the task build-binary-new/builder.rb, some of these may have recieved 7.3 compatible updates.
 DESCRIPTION
 
 puts description
@@ -129,7 +132,6 @@ tracker_client.post_to_tracker(
   description: description,
   tasks: [
     'Check each PHP module for updates and update extension configs (in `buildpacks-ci`)',
-    'Copy 7.0 extension config to 7.2 and remove `solr`, but **keep** `sodium` entries in 7.2 (IDE diff tool might help)',
     'Rebuild PHP versions if any module updates',
     'Update PHP Buildpack with new PHP versions',
   ],

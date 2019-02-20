@@ -467,6 +467,12 @@ class Builder
       end
 
       # add the right extensions
+      # add the right extensions
+      extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "#{full_name}-extensions.yml")
+      if source_input.version.start_with?('7.1.')
+        extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php71-extensions.yml")
+      end
+
       extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "#{full_name}-extensions.yml")
       if source_input.version.start_with?('7.2.')
         extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php72-extensions.yml")
