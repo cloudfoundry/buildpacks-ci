@@ -77,7 +77,9 @@ instance_groups:
     properties:
       host_key: ((tsa_host_key))
       token_signing_key: ((token_signing_key))
-      authorized_keys: [((worker_key.public_key))]
+      authorized_keys:
+      - ((worker_key.public_key))
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4S+edcGVNnLSrRHKrXWOKlGVzYDoPgb984IXkBxuVIw4vtS842AQJR1MXzw4RvfPbXMcaOgoU/PKkGXiuw7YmK8MLOZn1a/xFQXJNLtJ+mw5vVgvMd+Uy4YEc6wHPhk9X2nHKw9QtoW4J6z1BzEiP+qUUnbXrBRNFzWCQnFl2jg9ilboqBXpYVJdqLf+1QbpFV9+9qY2MAg9gRqjUn5tUDCCRmE3etYDG/6fm/wrf8X4m0WNDmbTC7J97w+qCqfCyGnLpbjbJxjo+5UM9V9qGe4OGPaz4N/fqfH3JWdGImOrNkpSPhcy1idUdGMaJckuzK6qLac65mHXg8JJqALE9 pivotal@john"
 - name: worker
   instances: 12
   vm_type: worker
