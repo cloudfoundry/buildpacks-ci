@@ -112,6 +112,12 @@ resources: #####################################################################
       expression: 0 3 * * *
       location: {{current-timezone}}
 
+  - name: once-a-week-timer
+      type: cron
+      source:
+        expression: 0 10 * * 3
+        location: {{current-timezone}}
+
   <% environments.each_with_index do |env, i| %>
   - name: once-a-week-timer-<%= env %>
     type: cron
@@ -365,6 +371,21 @@ jobs: ##########################################################################
             rebase: true
 
 <% end %>
+
+  - name: renew-lts-environment
+    tags: [buildpacks-eng-vsphere]
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: once-a-week-timer
+          trigger: true
+      - task: renew-toolsmiths-env
+        file: buildpacks-ci/tasks/renew-toolsmiths-env/task.yml
+        params:
+          ENV_ID: 557
+
+
 
 groups: ################################################################################################################
 - name: all
