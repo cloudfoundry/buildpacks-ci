@@ -36,6 +36,7 @@ resources:
   - name: version
     type: semver
     source:
+      initial_version: 0.0.1
       bucket: cnb-versions
       key: builder/cflinuxfs3
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
@@ -82,7 +83,11 @@ jobs:
       - put: builder-image
         params:
           load_file: docker-artifacts/builder.tgz
-          tag_file: version/cnb-builder-cflinuxfs3
+          load_repository: cloudfoundry/cnb
+          tag_file: version/version
           tag_prefix: "cflinuxfs3-v"
           tag_as_latest: true
+          get_params: {skip_download: true}
       - put: version
+        params:
+          file: version/version
