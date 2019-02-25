@@ -78,6 +78,7 @@ jobs:
           params: { bump: patch }
       - task: update-builder-image
         file: buildpacks-ci/tasks/update-builder-image/task.yml
+        privileged: true
       - put: builder-image
         params:
           load_file: docker-artifacts/builder.tgz
