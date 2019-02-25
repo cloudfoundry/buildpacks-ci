@@ -9,6 +9,7 @@ inputs:
   - name: nodejs-cnb
   - name: npm-cnb
   - name: yarn-cnb
+  - name: version
 #  - name: lifecycle
 #  - name: pack
 outputs:
