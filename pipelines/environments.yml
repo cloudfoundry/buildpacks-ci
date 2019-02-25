@@ -12,6 +12,7 @@
      'deployments/edge-shared/num-cells.yml',
      'deployments/operations/add-windows-stack.yml'
    ]
+   toolsmiths_envs = {'lts' => 557, 'menifee' => 360, 'pittsburg' => 421}
 %>
 
 resource_types: ########################################################################################################
@@ -371,7 +372,8 @@ jobs: ##########################################################################
             rebase: true
 <% end %>
 
-  - name: renew-lts-environment
+<% toolsmiths_envs.each do |name, id| %>
+  - name: renew-toolsmiths-environment-<%= name %>
     serial: true
     plan:
       - aggregate:
@@ -382,7 +384,8 @@ jobs: ##########################################################################
         tags: [buildpacks-eng-vsphere]
         file: buildpacks-ci/tasks/renew-toolsmiths-env/task.yml
         params:
-          ENV_ID: 557
+          ENV_ID: <%= id %>
+<% end %>
 
 groups: ################################################################################################################
 - name: all
@@ -394,7 +397,9 @@ groups: ########################################################################
   - bosh-cleanup-<%= env %>
   - bbl-destroy-<%= env %>
   <% end %>
-  - renew-lts-environment
+  <% toolsmiths_envs.each do |name, _| %>
+  - renew-toolsmiths-environment-<%= name %>
+  <% end %>
 <% environments.each do |env| %>
 - name: <%= env %>
   jobs:
@@ -406,4 +411,4 @@ groups: ########################################################################
 <% end %>
 - name: lts
   jobs:
-  - renew-lts-environment
+  - renew-toolsmiths-environment-lts
