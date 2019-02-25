@@ -1,0 +1,30 @@
+[[buildpacks]]
+  id = "org.cloudfoundry.buildpacks.nodejs"
+  uri = "<%= packaged_nodejs  %>"
+  latest = true
+
+[[buildpacks]]
+  id = "org.cloudfoundry.buildpacks.npm"
+  uri = "<%= packaged_npm  %>"
+  latest = true
+
+[[buildpacks]]
+  id = "org.cloudfoundry.buildpacks.yarn"
+  uri = "<%= packaged_yarn %>"
+  latest = true
+
+[[groups]]
+  labels = ["nodejs", "npm"]
+  buildpacks = [
+    { id = "org.cloudfoundry.buildpacks.nodejs" },
+    { id = "org.cloudfoundry.buildpacks.npm", optional=true }
+  ]
+
+[[groups]]
+  labels = ["nodejs", "yarn"]
+  buildpacks = [
+    { id = "org.cloudfoundry.buildpacks.nodejs" },
+    { id = "org.cloudfoundry.buildpacks.yarn", optional=true }
+  ]
+
+# end of node stuff
