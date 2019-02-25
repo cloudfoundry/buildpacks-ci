@@ -113,10 +113,10 @@ resources: #####################################################################
       location: {{current-timezone}}
 
   - name: once-a-week-timer
-      type: cron
-      source:
-        expression: 0 10 * * 3
-        location: {{current-timezone}}
+    type: cron
+    source:
+      expression: 0 10 * * 3
+      location: {{current-timezone}}
 
   <% environments.each_with_index do |env, i| %>
   - name: once-a-week-timer-<%= env %>
@@ -369,11 +369,9 @@ jobs: ##########################################################################
           params:
             repository: updated-bbl-state
             rebase: true
-
 <% end %>
 
   - name: renew-lts-environment
-    tags: [buildpacks-eng-vsphere]
     serial: true
     plan:
       - aggregate:
@@ -381,11 +379,10 @@ jobs: ##########################################################################
         - get: once-a-week-timer
           trigger: true
       - task: renew-toolsmiths-env
+        tags: [buildpacks-eng-vsphere]
         file: buildpacks-ci/tasks/renew-toolsmiths-env/task.yml
         params:
           ENV_ID: 557
-
-
 
 groups: ################################################################################################################
 - name: all
@@ -397,6 +394,7 @@ groups: ########################################################################
   - bosh-cleanup-<%= env %>
   - bbl-destroy-<%= env %>
   <% end %>
+  - renew-lts-environment
 <% environments.each do |env| %>
 - name: <%= env %>
   jobs:
@@ -406,3 +404,6 @@ groups: ########################################################################
   - bosh-cleanup-<%= env %>
   - bbl-destroy-<%= env %>
 <% end %>
+- name: lts
+  jobs:
+  - renew-lts-environment
