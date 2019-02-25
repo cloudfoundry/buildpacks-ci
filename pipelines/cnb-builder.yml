@@ -44,7 +44,7 @@ resources:
   - name: builder-image
     type: docker-image
     source:
-      repository: {{buildpacks-docker-ci-repo}}
+      repository: cfbuildpacks/node-cnb-builder
       email: {{buildpacks-docker-user-email}}
       username: {{buildpacks-docker-user-username}}
       password: {{buildpacks-docker-user-password}}
