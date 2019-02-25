@@ -32,7 +32,7 @@ popd
 
 erb packaged_nodejs="$NODE" packaged_npm="$NPM" packaged_yarn="$YARN" ./buildpacks-ci/tasks/update-builder-image/builder-template.toml.erb > final.toml
 
-builder_ver=cflinuxfs3-v"$(cat ./version/cflinuxfs3)"
+builder_ver=cflinuxfs3-v"$(cat ./version/version)"
 
 ./pack add-stack org.cloudfoundry.stacks.cflinuxfs3 -b cfbuildpacks/cflinuxfs3-cnb-experimental:build -r cfbuildpacks/cflinuxfs3-cnb-experimental:run
 ./buildpacks-ci/scripts/start-docker >/dev/null
