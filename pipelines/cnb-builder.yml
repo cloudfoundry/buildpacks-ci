@@ -50,16 +50,19 @@ resources:
       username: {{buildpacks-docker-user-username}}
       password: {{buildpacks-docker-user-password}}
 
+# TODO: update this when lifecycle binaries are actually being released.
 #  - name: lifecycle
 #    type: google-cloud-storage
 #    source:
-#      bucket: cloud-native-buildpacks-lifecycle-binaries/development/lifecycle-binaries-latest.tgz
+#      bucket: cloud-native-buildpacks-lifecycle-binaries/releases
+#      regexp: lifecycle-binaries-latest.tgz
 
-#  - name: pack
-#    type: git
-#    source:
-#      uri: git@github.com:cloudfoundry/pack
-#      branch: master
+  - name: pack-release
+    type: github-release
+    source:
+      owner: buildpack
+      repository: pack
+
 jobs:
   - name: update-builder-image
     plan:
@@ -73,8 +76,8 @@ jobs:
           trigger: true
 #        - get: lifecycle
 #          trigger: true
-#        - get: pack
-#          trigger: true
+        - get: pack-release
+          trigger: true
         - get: version
           params: { bump: patch }
       - task: update-builder-image

@@ -10,8 +10,7 @@ inputs:
   - name: npm-cnb
   - name: yarn-cnb
   - name: version
-#  - name: lifecycle
-#  - name: pack
+  - name: pack-release
 outputs:
   - name: docker-artifacts
 run:
