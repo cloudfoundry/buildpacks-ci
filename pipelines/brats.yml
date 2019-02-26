@@ -99,13 +99,6 @@ resources:
       repository: buildpack-packager
       access_token: {{buildpacks-github-token}}
 
-  - name: machete
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: machete
-      access_token: {{buildpacks-github-token}}
-
 <% new_brats.each do |language| %>
   - name: buildpack-<%= language %>
     type: git
@@ -277,27 +270,3 @@ jobs:
         params:
           repository: repo-with-gemfile-artifacts
           rebase: true
-
-  - name: update-machete
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: gem
-          resource: machete
-          trigger: true
-        - get: repo-with-gemfile
-          resource: brats
-      - task: update-machete
-        file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
-        params:
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-          GEM_NAME: machete
-          GEM_GIT_REPOSITORY: {{machete-git-uri-public}}
-          GEMFILE_NAME: Gemfile
-      - put: brats
-        params:
-          repository: repo-with-gemfile-artifacts
-          rebase: true
-
