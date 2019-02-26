@@ -1,9 +1,4 @@
 ---
-resource_types:
-  - name: cf-space-resource
-    type: docker-image
-    source:
-      repository: cfbuildpacks/cf-space-resource
 resources:
   - name: buildpacks-ci
     type: git
@@ -22,18 +17,6 @@ resources:
       user: {{buildpacks-github-org}}
       repository: buildpack-packager
       access_token: {{buildpacks-github-token}}
-  - name: machete
-    type: git
-    source:
-      uri: {{machete-git-uri}}
-      branch: master
-      private_key: {{machete-private-key}}
-  - name: machete-github-release
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: machete
-      access_token: {{buildpacks-github-token}}
   - name: compile-extensions
     type: git
     source:
@@ -42,20 +25,6 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/libbuildpack.git
-  - name: language-locks
-    type: pool
-    source:
-      branch: master
-      pool: edge-shared-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-  - name: cf-space
-    type: cf-space-resource
-    source:
-      target: api.edge.buildpacks-gcp.ci.cf-app.com
-      username: {{ci-cf-username}}
-      password: {{ci_cf_shared_password}}
-      organization: pivotal
 jobs:
   - name: libbuildpack-specs
     serial: true
@@ -119,69 +88,6 @@ jobs:
           globs:
             - gem-artifacts/buildpack-packager-v*.zip
             - gem-artifacts/buildpack-packager-v*.tar.gz
-  - name: machete-specs
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: machete
-          trigger: true
-      - put: lock-null
-        resource: language-locks
-        params:
-          claim: "null"
-        timeout: 3h
-      - put: cf-space
-      - task: run-machete-specs
-        file: buildpacks-ci/tasks/run-machete-specs/task.yml
-        params:
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-        ensure:
-          aggregate:
-          - put: language-locks
-            params:
-              release: lock-null
-            timeout: 3h
-          - task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task-cf.yml
-  - name: machete-tag
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: gem
-          resource: machete
-          passed: [ machete-specs ]
-      - task: bump-machete-version
-        file: buildpacks-ci/tasks/bump-gem-version/task.yml
-      - put: machete
-        params:
-          repository: gem-artifacts
-          tag: gem-artifacts/VERSION
-          tag_prefix: v
-  - name: machete-release
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: gem
-          passed: [ machete-tag ]
-          resource: machete
-          trigger: true
-      - task: create-new-machete-release
-        file: buildpacks-ci/tasks/create-gem-release/task.yml
-        params:
-          GEM_NAME: machete
-      - put: machete-github-release
-        params:
-          name: gem-artifacts/tag
-          tag: gem-artifacts/tag
-          globs:
-            - gem-artifacts/machete-v*.zip
-            - gem-artifacts/machete-v*.tar.gz
   - name: compile-extensions
     serial: true
     public: true

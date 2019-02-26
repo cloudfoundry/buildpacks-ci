@@ -21,8 +21,6 @@ buildpacks-github-org: cloudfoundry
 cf-release-git-uri: https://github.com/cloudfoundry/cf-release
 current-timezone: America/New_York
 deployments-git-uri: git@github.com:pivotal-cf/deployments-buildpacks
-machete-git-uri-public: https://github.com/cloudfoundry/machete
-machete-git-uri: git@github.com:cloudfoundry/machete.git
 oracle-client-libs-filename: oracle_client_libs.tgz
 oracle-client-libs-s3-bucket: buildpacks-oracle-client-libs
 public-buildpacks-ci-robots-git-uri-public: https://github.com/cloudfoundry/public-buildpacks-ci-robots
