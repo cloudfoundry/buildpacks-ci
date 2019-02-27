@@ -37,14 +37,6 @@ cat <<EOF > ${release_dir}/use-dev-release-opsfile.yml
     - name: $STACK
       description: Cloud Foundry Linux-based filesystem (Ubuntu 18.04)
 - type: replace
-  path: /instance_groups/name=diego-cell/jobs/name=$STACK-rootfs-setup?
-  value:
-    name: $STACK-rootfs-setup
-    release: $STACK
-    properties:
-      $STACK-rootfs:
-        trusted_certs: ((application_ca.certificate))
-- type: replace
   path: /instance_groups/name=diego-cell/jobs/name=rep/properties/diego/rep/preloaded_rootfses
   value:
     - $STACK:/var/vcap/packages/$STACK/rootfs.tar
