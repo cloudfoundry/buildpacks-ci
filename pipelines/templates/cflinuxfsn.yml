@@ -450,7 +450,7 @@ jobs: ##########################################################################
             ops_files:
               - buildpacks-opsfile/use-latest-buildpack-releases.yml
               - buildpacks-ci/deployments/operations/no-canaries.yml
-              - buildpacks-ci/deployments/operations/rootfs-certs-as-list.yml
+              - buildpacks-ci/deployments/operations/<%= rootfs_name %>-rootfs-certs-as-list.yml
               - buildpacks-ci/deployments/operations/add-<%= rootfs_name %>-only-buildpacks.yml
               - rootfs-release-artifacts/use-dev-release-opsfile.yml
               - capi-release-artifacts/use-dev-release-opsfile.yml

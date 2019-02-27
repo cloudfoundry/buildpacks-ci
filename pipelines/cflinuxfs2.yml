@@ -394,6 +394,7 @@ jobs: ##########################################################################
               - gcp-stemcell/*.tgz
             ops_files:
               - buildpacks-ci/deployments/operations/no-canaries.yml
+              - buildpacks-ci/deployments/operations/cflinuxfs2-rootfs-certs-as-list.yml
               - cflinuxfs2-release-artifacts/use-dev-release-opsfile.yml
               - cf-deployment/operations/use-latest-stemcell.yml
             vars:
