@@ -1,3 +1,5 @@
+<% cnb_images = %w(run build) %>
+<% cnb_names = %w(npm-cnb nodejs-cnb yarn-cnb) %>
 ---
 resource_types:
   - name: google-cloud-storage
@@ -45,17 +47,22 @@ resources:
   - name: builder-image
     type: docker-image
     source:
-      repository: cfbuildpacks/node-cnb-builder
+      email: cf-buildpacks-eng@pivotal.io
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+      repository: cloudfoundry/cnb
+
+<% cnb_images.each do |image_type| %>
+  - name: cflinuxfs3-cnb-<%= image_type %>-image
+    type: docker-image
+    check_every: 15s
+    source:
+      repository: cfbuildpacks/cflinuxfs3-cnb-experimental
+      tag: <%= image_type %>
       email: {{buildpacks-docker-user-email}}
       username: {{buildpacks-docker-user-username}}
       password: {{buildpacks-docker-user-password}}
-
-# TODO: update this when lifecycle binaries are actually being released.
-#  - name: lifecycle
-#    type: google-cloud-storage
-#    source:
-#      bucket: cloud-native-buildpacks-lifecycle-binaries/releases
-#      regexp: lifecycle-binaries-latest.tgz
+<% end %>
 
   - name: pack-release
     type: github-release
@@ -67,19 +74,20 @@ jobs:
   - name: update-builder-image
     plan:
       - aggregate:
+      <% cnb_images.each do |image_type| %>
+        - get: cflinuxfs3-cnb-<%= image_type %>-image
+          params: {skip_download: true}
+          trigger: true
+      <% end %>
         - get: buildpacks-ci
-        - get: nodejs-cnb
+      <% cnb_names.each do |cnb_name| %>
+        - get: <%= cnb_name %>
           trigger: true
-        - get: npm-cnb
-          trigger: true
-        - get: yarn-cnb
-          trigger: true
-#        - get: lifecycle
-#          trigger: true
+      <% end %>
         - get: pack-release
           trigger: true
         - get: version
-          params: { bump: patch }
+          params: {bump: patch}
       - task: update-builder-image
         file: buildpacks-ci/tasks/update-builder-image/task.yml
         privileged: true
@@ -90,7 +98,8 @@ jobs:
           tag_file: version/version
           tag_prefix: "cflinuxfs3-v"
           tag_as_latest: true
-          get_params: {skip_download: true}
+          params: {skip_download: true}
+          get_params:  {skip_download: true}
       - put: version
         params:
           file: version/version
