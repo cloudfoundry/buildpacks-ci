@@ -493,7 +493,8 @@ jobs:
             - "java-buildpack-offline-v4*.zip"
         <% else %>
         <% release_stacks = stacks[language]
-           release_stacks = release_stacks - ['cflinuxfs3', 'windows'] if release_type == 'lts'
+           release_stacks = release_stacks - ['windows'] if release_type == 'lts'
+           release_stacks = release_stacks - ['cflinuxfs2'] if release_type == 'latest'
            release_stacks.each_with_index do |stack, i| %>
         - get: buildpack-zip-stack<%= i %>
           passed: [ ship-it ]
@@ -509,7 +510,7 @@ jobs:
           file: buildpacks-ci/tasks/download-offline-buildpack/task.yml
           output_mapping: {buildpack-zip-stack0: buildpack-zip}
           params:
-            CF_STACKS: <%= release_type == 'lts' ? 'cflinuxfs2' : stacks[language].join(' ') %>
+            CF_STACKS: <%= release_type == 'lts' ? stacks[language].join(' ') : 'cflinuxfs3' %>
         <% end %>
         - task: create-offline-bosh-release
           file: buildpacks-ci/tasks/create-bosh-release/task.yml
