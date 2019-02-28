@@ -10,6 +10,13 @@ def env_login(env)
   system('cf', 'auth', 'admin', admin_password(env)) or raise 'Could not auth'
 end
 
+def err_handle(err)
+    if !err.empty?
+      STDERR.puts "ERROR: #{err}"
+      exit(false)
+    end
+end
+
 def admin_password(env_name)
   env_home = "#{ENV['HOME']}/workspace/buildpacks-envs/#{env_name}"
   vars_store = "#{env_home}/vars-store.yml"
@@ -20,13 +27,10 @@ def admin_password(env_name)
     return cfg['cf_admin_password']
   else
     puts "Logging into credhub for: #{env_name}"
-    bbl_env, = Open3.capture3("bbl --state-dir #{env_home} print-env")
+    bbl_env, err = Open3.capture3("bbl --state-dir #{env_home} print-env")
+    err_handle(err)
     cf_pass, err, status = Open3.capture3("eval \"#{bbl_env}\" && credhub get -n /bosh-#{env_name}/cf/cf_admin_password -j | jq -r .value")
-
-    if !err.empty?
-      STDERR.puts "ERROR: Could not log in via credhub to: #{env_name}"
-      exit(false)
-    end
+    err_handle(err)
 
     return cf_pass.strip
   end
