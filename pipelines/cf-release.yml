@@ -83,6 +83,7 @@ resources:
     type: bosh-deployment
     source:
       deployment: cf
+      skip_check: true
       vars_store:
         provider: gcs
         config:
