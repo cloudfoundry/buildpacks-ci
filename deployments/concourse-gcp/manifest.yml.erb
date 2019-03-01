@@ -18,6 +18,9 @@ releases:
   version: 4.0.0
   url: https://bosh.io/d/github.com/pivotal-cf-experimental/concourse-windows-worker-release?v=4.0.0
   sha1: 59badb165e81627813d486142ee1748ba8882730
+- name: ulimit
+  version: latest
+  url: https://github.com/pivotal-cf/ulimit-release/releases/download/v1/ulimit.tgz
 instance_groups:
 - name: web
   instances: 1
@@ -34,6 +37,12 @@ instance_groups:
     static_ips:
     - 104.196.174.175
   jobs:
+  - name: ulimit
+    release: ulimit
+    properties:
+      nofile:
+        soft: 32768
+        hard: 32768
   - name: atc
     release: concourse
     properties:
