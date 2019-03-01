@@ -173,6 +173,7 @@ resources: #####################################################################
     type: bosh-deployment
     source:
       deployment: cf
+      skip_check: true
       vars_store:
         provider: gcs
         config:
@@ -183,6 +184,7 @@ resources: #####################################################################
   - name: <%= rootfs_name %>-rootfs-smoke-test-deployment
     type: bosh-deployment
     source:
+      skip_check: true
       deployment: rootfs-smoke-test
 
   ## bosh.io stemcell ##
