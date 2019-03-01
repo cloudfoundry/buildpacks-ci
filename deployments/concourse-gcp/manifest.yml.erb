@@ -37,6 +37,7 @@ instance_groups:
   - name: atc
     release: concourse
     properties:
+      open_files_limit: 4096
       add_local_users:
       - buildpacks:<%= concourse_basic_auth_password %>
       token_signing_key: ((token_signing_key))
