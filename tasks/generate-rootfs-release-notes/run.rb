@@ -12,7 +12,6 @@ stack = ENV.fetch('STACK')
 ubuntu_version = {
   'cflinuxfs2' => '14.04',
   'cflinuxfs3' => '18.04',
-  'cflinuxfs3m' => '18.04'
 }.fetch(stack) or raise "Unsupported stack: #{stack}"
 
 receipt_file_name = stack == 'cflinuxfs2' ? "#{stack}_receipt" : "receipt.#{stack}.x86_64"
