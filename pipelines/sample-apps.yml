@@ -184,7 +184,7 @@ jobs: ##########################################################################
           params:
             STACK: <%= stack %>
             BUILDPACK_URL: https://github.com/cloudfoundry/java-buildpack
-            APPLICATION_NAME: cf-spring
+            APPLICATION_NAME: cf-java-sample-app
             REQUEST_PATH: "/"
             REQUEST_TYPE: 'GET'
             DATABASE_TO_BIND: none
