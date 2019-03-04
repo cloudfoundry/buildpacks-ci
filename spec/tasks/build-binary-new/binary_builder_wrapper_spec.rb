@@ -35,16 +35,6 @@ describe 'BinaryBuilderWrapper' do
     end
   end
 
-  context 'with php5' do
-    let(:source_input) { SourceInput.new('php', 'fake-url', '5.3.15', nil, '123456') }
-
-    it 'uses php as the name it runs with' do
-      expect(runner).to receive(:run)
-        .with('./bin/binary-builder', '--name=php', '--version=5.3.15', '--sha256=123456')
-      subject.build(source_input)
-    end
-  end
-
   context 'with php7.1.X' do
     let(:source_input) { SourceInput.new('php', 'fake-url', '7.1.21', nil, '123456') }
 

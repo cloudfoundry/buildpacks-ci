@@ -34,7 +34,6 @@ describe 'Builder' do
       TableTestInput.new('httpd', '2.7.14')       => TableTestOutput.new('/fake-binary-builder/httpd-2.7.14-linux-x64.tgz', 'httpd-2.7.14-linux-x64-cflinuxfs2', 'tgz'),
       TableTestInput.new('ruby', '2.7.14')        => TableTestOutput.new('/fake-binary-builder/ruby-2.7.14-linux-x64.tgz', 'ruby-2.7.14-linux-x64-cflinuxfs2', 'tgz'),
       TableTestInput.new('jruby', '9.2.0')        => TableTestOutput.new('/fake-binary-builder/jruby-9.2.0_ruby-2.5-linux-x64.tgz', 'jruby-9.2.0_ruby-2.5-linux-x64-cflinuxfs2', 'tgz'),
-      TableTestInput.new('php', '7.0.0')          => TableTestOutput.new('/fake-binary-builder/php7-7.0.0-linux-x64.tgz', 'php7-7.0.0-linux-x64-cflinuxfs2', 'tgz'),
       TableTestInput.new('nginx-static', '7.0.0') => TableTestOutput.new('/fake-binary-builder/nginx-static-7.0.0-linux-x64.tgz', 'nginx-7.0.0-linux-x64-cflinuxfs2', 'tgz'),
     }.each do |input, output|
       describe "to build #{input.dep}" do
