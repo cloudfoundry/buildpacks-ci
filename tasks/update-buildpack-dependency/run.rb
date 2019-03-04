@@ -156,10 +156,6 @@ php_defaults = nil
 if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
   update_default = false
   case resource_version
-  when /^5.6/
-    varname = 'PHP_56_LATEST'
-  when /^7.0/
-    varname = 'PHP_70_LATEST'
   when /^7.1/
     varname = 'PHP_71_LATEST'
   when /^7.2/

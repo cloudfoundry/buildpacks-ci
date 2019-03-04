@@ -89,12 +89,12 @@ data.each do |name, hash|
 end
 
 description = <<-DESCRIPTION
-Check that the PHP Module versions used in building PHP 5 and PHP 7 are up to date. If there are new, compatible versions, update them and build new PHP binaries.
+Check that the PHP Module versions used in building PHP 7 are up to date. If there are new, compatible versions, update them and build new PHP binaries.
 
-Reference the PHP5 and PHP7 recipes and module versions used in cooking these recipes in [binary-builder](https://github.com/cloudfoundry/binary-builder)
+Reference the PHP7 recipes and module versions used in cooking these recipes in [binary-builder](https://github.com/cloudfoundry/binary-builder)
 DESCRIPTION
 
-description += "\n\n" + %w(Name Latest PHP5 PHP7 PHP72).join(' | ') + "\n"
+description += "\n\n" + %w(Name Latest PHP7 PHP72).join(' | ') + "\n"
 description += '--- | ---' + "\n"
 extensions.keys.sort_by(&:name).each do |key|
   name = "#{key.name} (#{key.klass.gsub(/Recipe$/,'')})"
@@ -102,7 +102,7 @@ extensions.keys.sort_by(&:name).each do |key|
   latest = current_pecl_version(key.name) if key.klass =~ /PECL/i
   latest = current_github_version(url) if url =~ %r{^https://github.com}
   data = [url ? "[#{name}](#{url})" : name, latest]
-  %w(PHP5 PHP7 PHP72).each do |v|
+  %w(PHP7 PHP72).each do |v|
     val = extensions[key][v]
     val = "**#{val}**" if val && val != latest
     data << val
@@ -114,8 +114,6 @@ description += <<-DESCRIPTION
 
 If you're updating cassandra modules (including datastax/cpp-driver) please do so in individual commits, then rebuild appropriate php versions, so integration tests can run in CI with only cassandra changes.
 This will help isolate the php cassandra module change(s) if the changes cause problems.
-
-Note php 7.0 extensions still exist, but they will not be updated untill it is removed from the buildpack
 
 With the addition of php7.3 please check the modules listed in the excluded_exts vars variables in the task build-binary-new/builder.rb, some of these may have recieved 7.3 compatible updates.
 DESCRIPTION
