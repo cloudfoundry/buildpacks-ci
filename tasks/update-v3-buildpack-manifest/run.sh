@@ -7,6 +7,5 @@ pushd binaries
   shasum -a 256 analyzer builder detector exporter launcher > shasum.txt
 popd
 
-# upload each binary to our s3
-# modify manifest with s3 url and sha
-
+version=$(cat binaries/VERSION)
+tar cvf binaries-$version.tgz binaries
