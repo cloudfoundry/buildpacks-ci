@@ -1,0 +1,15 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: lifecycle-tar
+  - name: nodejs-buildpack
+outputs:
+  - name: binaries
+
+run:
+  path: buildpacks-ci/tasks/update-v3-buildpack-manifest/run.sh
