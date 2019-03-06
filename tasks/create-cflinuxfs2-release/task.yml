@@ -17,5 +17,8 @@ params:
   RELEASE_NAME:
   ACCESS_KEY_ID:
   SECRET_ACCESS_KEY:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  AWS_DEFAULT_REGION:
 run:
   path: buildpacks-ci/tasks/create-cflinuxfs2-release/run.sh
