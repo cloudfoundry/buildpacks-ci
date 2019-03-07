@@ -7,7 +7,7 @@ set -o pipefail
 tar xvf pack-release/pack-0.0.9-linux.tar.gz -o pack
 
 cnbs=(nodejs npm yarn)
-erbCmd=""
+erbCmd="erb "
 
 for i in "${cnbs[@]}"; do
   buildpack="${i}-cnb"
@@ -18,7 +18,7 @@ for i in "${cnbs[@]}"; do
 done
 
 erbCmd+="./buildpacks-ci/tasks/update-builder-image/builder-template.toml.erb > final.toml"
-erb "$erbCmd"
+eval $erbCmd
 
 ./pack add-stack org.cloudfoundry.stacks.cflinuxfs3 -b cfbuildpacks/cflinuxfs3-cnb-experimental:build -r cfbuildpacks/cflinuxfs3-cnb-experimental:run
 ./buildpacks-ci/scripts/start-docker >/dev/null
