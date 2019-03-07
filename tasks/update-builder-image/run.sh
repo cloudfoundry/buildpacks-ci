@@ -18,7 +18,7 @@ for i in "${cnbs[@]}"; do
 done
 
 erbCmd+="./buildpacks-ci/tasks/update-builder-image/builder-template.toml.erb > final.toml"
-eval $erbCmd
+eval "$erbCmd"
 
 ./pack add-stack org.cloudfoundry.stacks.cflinuxfs3 -b cfbuildpacks/cflinuxfs3-cnb-experimental:build -r cfbuildpacks/cflinuxfs3-cnb-experimental:run
 ./buildpacks-ci/scripts/start-docker >/dev/null
