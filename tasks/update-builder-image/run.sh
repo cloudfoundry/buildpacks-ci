@@ -4,30 +4,25 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-pushd nodejs-cnb
-    ./scripts/install_tools.sh
-    mv .bin/pack ./..
-popd
+tar xvf pack-release/pack-0.0.9-linux.tar.gz -o pack
 
-pushd nodejs-cnb
-    NODE=$(./scripts/package.sh | grep -e "/tmp/nodejs-cnb_*" | awk -F' ' '{print $4}')
-popd
+cnbs=(nodejs npm yarn)
+erbCmd=""
 
-pushd npm-cnb
-    NPM=$(./scripts/package.sh | grep -e "/tmp/npm-cnb_*" | awk -F' ' '{print $4}')
-popd
+for i in "${cnbs[@]}"; do
+  buildpack="${i}-cnb"
+  pushd "$buildpack"
+    path=$(./scripts/package.sh | grep -e "packaged into" | awk -F' ' '{print $4}')
+  popd
+  erbCmd+="packaged_${i}=$path "
+done
 
-pushd yarn-cnb
-    YARN=$(./scripts/package.sh | grep -e "/tmp/yarn-cnb_*" | awk -F' ' '{print $4}')
-popd
-
-erb packaged_nodejs="$NODE" packaged_npm="$NPM" packaged_yarn="$YARN" ./buildpacks-ci/tasks/update-builder-image/builder-template.toml.erb > final.toml
+erbCmd+="./buildpacks-ci/tasks/update-builder-image/builder-template.toml.erb > final.toml"
+erb "$erbCmd"
 
 ./pack add-stack org.cloudfoundry.stacks.cflinuxfs3 -b cfbuildpacks/cflinuxfs3-cnb-experimental:build -r cfbuildpacks/cflinuxfs3-cnb-experimental:run
 ./buildpacks-ci/scripts/start-docker >/dev/null
 
-IMG_NAME="cloudfoundry/cnb"
-./pack create-builder "$IMG_NAME" --builder-config ./final.toml --stack org.cloudfoundry.stacks.cflinuxfs3
-
-docker save "$IMG_NAME" -o ./docker-artifacts/builder.tgz
-
+img_name="cloudfoundry/cnb"
+./pack create-builder "$img_name" --builder-config ./final.toml --stack org.cloudfoundry.stacks.cflinuxfs3
+docker save "$img_name" -o ./docker-artifacts/builder.tgz
