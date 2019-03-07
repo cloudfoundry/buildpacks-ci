@@ -17,14 +17,14 @@
   labels = ["nodejs", "npm"]
   buildpacks = [
     { id = "org.cloudfoundry.buildpacks.nodejs" },
-    { id = "org.cloudfoundry.buildpacks.npm", optional=true }
+    { id = "org.cloudfoundry.buildpacks.npm", optional=false }
   ]
 
 [[groups]]
   labels = ["nodejs", "yarn"]
   buildpacks = [
     { id = "org.cloudfoundry.buildpacks.nodejs" },
-    { id = "org.cloudfoundry.buildpacks.yarn", optional=true }
+    { id = "org.cloudfoundry.buildpacks.yarn", optional=false }
   ]
 
 # end of node stuff
