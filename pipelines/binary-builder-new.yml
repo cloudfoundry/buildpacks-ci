@@ -43,7 +43,7 @@
                         source_params: ['repo: Masterminds/glide', 'fetch_source: true'] },
 
   'go' =>              { buildpacks: {
-                          go: { lines: ["1.8.X", "1.9.X", "1.10.X", "1.11.X"], removal_strategy: 'keep_latest_released' } } },
+                          go: { lines: ["1.10.X", "1.11.X", "1.12.X"], removal_strategy: 'keep_latest_released' } } },
 
   'godep' =>           { buildpacks: { go: {}},
                         source_type: 'github_releases',
