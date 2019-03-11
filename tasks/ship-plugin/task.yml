@@ -1,0 +1,17 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: stack-auditor
+  - name: version
+outputs:
+  - name: plugin-artifacts
+run:
+  path: buildpacks-ci/tasks/ship-plugin/run.sh
+params:
+  GITHUB_USERNAME:
+  GITHUB_PASSWORD:
