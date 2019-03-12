@@ -21,7 +21,7 @@ describe BuildpacksCIConfiguration do
     end
 
     it 'has a default value' do
-      expect(subject).to eq('Shared-Buildpacks/concourse-private.yml')
+      expect(subject).to include('concourse-private.yml')
     end
   end
 
@@ -43,7 +43,7 @@ describe BuildpacksCIConfiguration do
     end
 
     it 'has a default value' do
-      expect(subject).to eq('Shared-Buildpacks/deployments-buildpacks.yml')
+      expect(subject).to include('deployments-buildpacks.yml')
     end
   end
 
@@ -65,7 +65,7 @@ describe BuildpacksCIConfiguration do
     end
 
     it 'has a default value' do
-      expect(subject).to eq('Shared-Buildpacks/buildpack-repos-private-keys.yml')
+      expect(subject).to include('buildpack-repos-private-keys.yml')
     end
   end
 
@@ -87,7 +87,7 @@ describe BuildpacksCIConfiguration do
     end
 
     it 'has a default value' do
-      expect(subject).to eq('Shared-Buildpacks/git-repos-private-keys.yml')
+      expect(subject).to include('git-repos-private-keys.yml')
     end
   end
 
@@ -109,7 +109,7 @@ describe BuildpacksCIConfiguration do
     end
 
     it 'has a default value' do
-      expect(subject).to eq('Shared-Buildpacks/git-repos-private-keys-two.yml')
+      expect(subject).to include('git-repos-private-keys-two.yml')
     end
   end
 
@@ -131,7 +131,7 @@ describe BuildpacksCIConfiguration do
     end
 
     it 'has a default value' do
-      expect(subject).to eq('Shared-Buildpacks/dockerhub-cflinuxfs2.yml')
+      expect(subject).to include('dockerhub-cflinuxfs2.yml')
     end
   end
 
@@ -153,7 +153,7 @@ describe BuildpacksCIConfiguration do
     end
 
     it 'has a default value' do
-      expect(subject).to eq('Shared-Buildpacks/git-repos-private-keys-three.yml')
+      expect(subject).to include('git-repos-private-keys-three.yml')
     end
   end
 
@@ -175,7 +175,7 @@ describe BuildpacksCIConfiguration do
     end
 
     it 'has a default value' do
-      expect(subject).to eq('Shared-Buildpacks/buildpack-bosh-release-repos-private-keys.yml')
+      expect(subject).to include('buildpack-bosh-release-repos-private-keys.yml')
     end
   end
 
