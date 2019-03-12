@@ -60,8 +60,7 @@ jobs: ##########################################################################
         - put: edge-environments
           params:
             acquire: true
-        - get: plugin
-          resource: stack-auditor
+        - get: stack-auditor
           trigger: true
       - do:
         - task: create-cf-space
@@ -87,10 +86,9 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: version
-        - get: plugin
-          resource: stack-auditor
+        - get: stack-auditor
           passed:
-          - test-stack-auditor
+            - test-stack-auditor
       - task: ship-plugin
         file: buildpacks-ci/tasks/ship-plugin/task.yml
         params:
