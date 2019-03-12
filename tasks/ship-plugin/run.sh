@@ -39,6 +39,6 @@ echo "v$version" > release-artifacts/tag
 
 day=$(date +'%b %-d, %Y')
 header="v$version $day"
-seperator="$(eval $(echo printf '"=%0.s"' {1..${#header}}))"
+seperator="$(printf '=%0.s' $(seq ${#header}))"
 printf "%s\n%s\n\n%s" "$header" "$seperator" "$gitlog" > release-artifacts/body
 
