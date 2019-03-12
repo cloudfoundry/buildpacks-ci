@@ -24,7 +24,12 @@ if next_version > last_version
   File.write('release-artifacts/name', "v#{next_version.to_s}")
   File.write('release-artifacts/tag', "v#{next_version.to_s}")
   FileUtils.cp('buildpack/CHANGELOG', 'release-artifacts/body')
-  output = `buildpack/scripts/package.sh`
+
+  output = ""
+  Dir.chdir('buildpack') do
+    output = `scripts/package.sh`
+  end
+
   packaged_buildpack = /^Buildpack packaged into: (.*)$/.match(output)[1]
   `tar cvzf release-artifacts/#{language}-cnb-#{next_version.to_s}.tgz -C #{packaged_buildpack} .`
 else
