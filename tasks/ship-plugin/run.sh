@@ -22,14 +22,11 @@ pushd stack-auditor
       fi
     popd
   done
-popd
 
-echo "v$version" > release-artifacts/name
-echo "v$version" > release-artifacts/tag
-
-pushd stack-auditor
+  set +e
   latest=$(git describe --tags --abbrev=0 2>/dev/null)
   exit_code=$?
+  set -e
   if [ $exit_code -ne 0 ]; then
     gitlog=$(git log --pretty=format:"* %s")
   else
@@ -37,5 +34,7 @@ pushd stack-auditor
   fi
 popd
 
+echo "v$version" > release-artifacts/name
+echo "v$version" > release-artifacts/tag
 printf "%s" "$gitlog" > release-artifacts/body
 
