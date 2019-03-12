@@ -36,7 +36,6 @@ resources: #####################################################################
   - name: version
     type: semver
     source:
-      initial_version: 0.0.1
       bucket: buildpack-plugin-versions
       key: stack-auditor
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
@@ -86,7 +85,9 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: version
+          params: {bump: patch}
         - get: stack-auditor
+          resource: stack-auditor
           passed:
             - test-stack-auditor
       - task: ship-plugin
@@ -100,4 +101,8 @@ jobs: ##########################################################################
           tag: release-artifacts/tag
           body: release-artifacts/body
           globs:
-            - plugin-artifacts/*.tgz
+            - release-artifacts/*.tgz
+            - release-artifacts/*.zip
+      - put: version
+        params:
+          file: version/version
