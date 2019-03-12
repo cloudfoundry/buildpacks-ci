@@ -7,7 +7,7 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: plugin
+  - name: stack-auditor
   - name: cf-space
 run:
   path: buildpacks-ci/tasks/run-plugin-tests/run.sh
