@@ -6,7 +6,7 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: plugin
+  - name: stack-auditor
   - name: version
 outputs:
   - name: plugin-artifacts
