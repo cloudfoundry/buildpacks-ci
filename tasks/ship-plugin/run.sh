@@ -12,7 +12,7 @@ version=$(cat version/version)
 pushd stack-auditor
   for os in "${OSes[@]}"; do
     binary="stack-auditor-$version-${os}"
-    artifacts="../plugin-artifacts/"
+    artifacts="../release-artifacts/"
     GOOS="${os}" go build -o "$artifacts$binary" -ldflags="-s -w" github.com/cloudfoundry/stack-auditor
     pushd $artifacts
       if [ "${os}" == "windows" ]; then
@@ -24,7 +24,7 @@ pushd stack-auditor
   done
 popd
 
-echo "v$version" > plugin-artifacts/name
-echo "v$version" > plugin-artifacts/tag
-echo "Fill this out" > plugin-artifacts/body
+echo "v$version" > release-artifacts/name
+echo "v$version" > release-artifacts/tag
+echo "Fill this out" > release-artifacts/body
 
