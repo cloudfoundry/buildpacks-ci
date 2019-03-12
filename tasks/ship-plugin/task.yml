@@ -9,7 +9,7 @@ inputs:
   - name: stack-auditor
   - name: version
 outputs:
-  - name: plugin-artifacts
+  - name: release-artifacts
 run:
   path: buildpacks-ci/tasks/ship-plugin/run.sh
 params:
