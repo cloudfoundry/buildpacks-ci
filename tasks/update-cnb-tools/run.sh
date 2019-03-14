@@ -7,9 +7,6 @@ set -o pipefail
 set -x
 
 pushd buildpack
-  go get github.com/cloudfoundry/cnb-tools
-  go mod vendor
-  ./scripts/unit.sh
   git add .
 
   set +e
