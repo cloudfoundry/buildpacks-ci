@@ -4,7 +4,7 @@ This contains the configuration for the Cloud Foundry Buildpacks team [Concourse
 
 # Pipelines
 
-* [binary-builder-new](pipelines/binary-builder-new.yml): build binaries for Cloud Foundry buildpacks
+* [dependency-builds](pipelines/dependency-builds.yml): build binaries for Cloud Foundry buildpacks
 * [buildpacks](pipelines/templates/buildpack.yml): test and release all of the buildpacks
 * [bosh-lite](pipelines/templates/bosh-lite.yml): deploy CF LTS environment
 * [edge-shared](pipelines/edge-shared.yml): deploy CF Deployment environment
@@ -95,9 +95,9 @@ rspec
 
 ## Making Changes to Build Scripts
 
-When you want to change how a binary gets built, there are two places you may need to make changes. All binaries are built by the `binary-builder-new` pipeline, and you may need to change the task that builds them. For many binaries, the `binary-builder-new` pipeline runs recipes from the `binary-builder` repo; for those binaries, you will usually need to change the recipe rather than the concourse task.
+When you want to change how a binary gets built, there are two places you may need to make changes. All binaries are built by the `dependency-builds` pipeline, and you may need to change the task that builds them. For many binaries, the `dependency-builds` pipeline runs recipes from the `binary-builder` repo; for those binaries, you will usually need to change the recipe rather than the concourse task.
 
-For the list of currently supported binaries, check out our `binary-builder-new` [pipeline](https://buildpacks.ci.cf-app.com/teams/main/pipelines/binary-builder-new).
+For the list of currently supported binaries, check out our `dependency-builds` [pipeline](https://buildpacks.ci.cf-app.com/teams/main/pipelines/dependency-builds).
 
 The concourse task that orchestrates the building is `buildpacks-ci/tasks/build-binary-new/builder.rb`; many of the recipes are in [binary-builder](https://github.com/cloudfoundry/binary-builder). 
 
@@ -105,7 +105,7 @@ To test these changes locally, you can execute the concourse task for it, but po
 
 ```
 $ cd buildpacks-ci
-$ STACK=cflinuxfs2 fly -t buildpacks e -c tasks/build-binary-new/build.yml -j binary-builder-new/build-r-3.4.X -i buildpacks-ci=.
+$ STACK=cflinuxfs2 fly -t buildpacks e -c tasks/build-binary-new/build.yml -j dependency-builds/build-r-3.4.X -i buildpacks-ci=.
 ```
 
 For binaries that use recipes in `binary-builder`, you can also test in Docker. For instance:

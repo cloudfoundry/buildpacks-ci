@@ -63,8 +63,8 @@ tracker_client = TrackerApi::Client.new(token: ENV['TRACKER_API_TOKEN'])
 buildpack_project = tracker_client.project(ENV['TRACKER_PROJECT_ID'])
 
 story = buildpack_project.create_story(
-  name: "Add new version line in binary-builder-new: #{name} #{version}",
-  description: "```\n#{data.to_yaml}\n```\n\nPlease edit the binary-builder-new pipeline to add the new version line to the relevant dependency/buildpack.",
+  name: "Add new version line in dependency-builds: #{name} #{version}",
+  description: "```\n#{data.to_yaml}\n```\n\nPlease edit the dependency-builds pipeline to add the new version line to the relevant dependency/buildpack.",
   estimate: 1,
   labels: (['deps', name] + BUILDPACKS).uniq,
   requested_by_id: ENV['TRACKER_REQUESTER_ID'].to_i,

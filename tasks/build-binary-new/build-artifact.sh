@@ -4,7 +4,7 @@
 # This script can be used to build buildpack dependencies locally
 # Docker Daemon is required
 # Pass in the name of the dependency, the version to build, and the directory to put the artifact
-# Dependency names come from binary-builder-new.yml
+# Dependency names come from dependency-builds.yml
 # This script assumes a specific directory structure as these repos are needed:
 # $HOME/workspace/buildpacks-ci
 # $HOME/workspace/binary-builder
@@ -39,7 +39,7 @@ if [[ -z "$binary_builder" ]]; then
 fi
 
 export STACK=${STACK:-cflinuxfs3}
-source_type=$(echo "$(erb -x pipelines/binary-builder-new.yml);puts dependencies['$dep_name'].fetch(:source_type, '$dep_name')" | ruby)
+source_type=$(echo "$(erb -x pipelines/dependency-builds.yml);puts dependencies['$dep_name'].fetch(:source_type, '$dep_name')" | ruby)
 
 data=$(cat <<-EOF
 {
