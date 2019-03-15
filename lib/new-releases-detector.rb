@@ -106,7 +106,7 @@ class NewReleasesDetector
 
   def buildpacks_tracker_story_info(dependency,versions)
     name = "Build and/or Include new releases: #{dependency} #{versions.join(', ')}"
-    description = "We have #{versions.count} new releases for **#{dependency}**:\n**version #{versions.join(', ')}**\n\nThis dependency is NOT handled by the binary-builder-new pipeline.\n"
+    description = "We have #{versions.count} new releases for **#{dependency}**:\n**version #{versions.join(', ')}**\n\nThis dependency is NOT handled by the dependency-builds pipeline.\n"
 
     buildpack_names = BuildpackDependency.for(dependency)
     tasks = buildpack_names.map do |buildpack|
