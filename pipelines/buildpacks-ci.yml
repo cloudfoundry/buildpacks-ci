@@ -157,6 +157,7 @@ jobs:
           resource: ci-master
           trigger: true
       - task: run-all-ci-specs
+        timeout: 30m
         file: buildpacks-ci/tasks/run-buildpacks-ci-specs/task.yml
         params:
           CI_USERNAME: buildpacks
