@@ -97,7 +97,6 @@ class BuildpacksCIPipelineUpdater
     options = parse_args(args)
 
     update_standard_pipelines(options) unless options.has_key?(:template)
-    update_bosh_lite_pipelines(options)
     update_buildpack_pipelines(options)
     update_cnb_buildpack_pipelines(options)
     update_rootfs_pipelines(options)
