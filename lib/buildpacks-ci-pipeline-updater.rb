@@ -26,30 +26,6 @@ class BuildpacksCIPipelineUpdater
     end
   end
 
-  def update_bosh_lite_pipelines(options)
-    header('For bosh-lite pipelines')
-
-    buildpacks_configuration = BuildpacksCIConfiguration.new
-    concourse_target_name = buildpacks_configuration.concourse_target_name
-    bosh_lite_domain_name = buildpacks_configuration.bosh_lite_domain_name
-
-    Dir['config/bosh-lite/*.yml'].each do |pipeline_variables_filename|
-      next if options.has_key?(:template) && !pipeline_variables_filename.include?(options[:template])
-
-      deployment_name = File.basename(pipeline_variables_filename, '.yml')
-      cf_version_type = get_cf_version_from_deployment_name(deployment_name)
-      full_deployment_name = YAML.load_file(pipeline_variables_filename)['deployment-name']
-
-      BuildpacksCIPipelineUpdateCommand.new.run!(
-        concourse_target_name: concourse_target_name,
-        pipeline_name: deployment_name,
-        config_generation_command: "erb bosh_lite_domain_name='#{bosh_lite_domain_name}' deployment_name=#{deployment_name} full_deployment_name=#{full_deployment_name} pipelines/templates/bosh-lite-cf-#{cf_version_type}.yml",
-        pipeline_variable_filename: pipeline_variables_filename,
-        options: options
-      )
-    end
-  end
-
   def update_buildpack_pipelines(options)
     header('For buildpack pipelines')
 

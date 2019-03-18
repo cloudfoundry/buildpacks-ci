@@ -1,9 +1,0 @@
-#!/usr/bin/env ruby
-
-require_relative '../lib/gcp-terraform-deployer'
-
-terraform_dir = File.expand_path(File.join(File.dirname(__FILE__),'..','deployments','concourse-gcp-terraform'))
-bosh_init_dir = File.expand_path(File.join(File.dirname(__FILE__),'..','deployments','concourse-gcp','bosh-init'))
-
-deployer =  GCPTerraformDeployer.new(terraform_dir, bosh_init_dir)
-deployer.run!
