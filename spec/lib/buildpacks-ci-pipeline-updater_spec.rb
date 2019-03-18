@@ -312,7 +312,6 @@ describe BuildpacksCIPipelineUpdater do
 
     before do
       allow(buildpacks_ci_pipeline_updater).to receive(:check_if_lastpass_installed)
-      allow(buildpacks_ci_pipeline_updater).to receive(:update_bosh_lite_pipelines)
       allow(buildpacks_ci_pipeline_updater).to receive(:update_buildpack_pipelines)
       allow(buildpacks_ci_pipeline_updater).to receive(:update_standard_pipelines)
       allow(buildpacks_ci_pipeline_updater).to receive(:update_cnb_buildpack_pipelines)
@@ -327,12 +326,6 @@ describe BuildpacksCIPipelineUpdater do
 
         subject
       end
-    end
-
-    it 'updates bosh lite pipelines' do
-      expect(buildpacks_ci_pipeline_updater).to receive(:update_bosh_lite_pipelines).with({})
-
-      subject
     end
 
     it 'updates buildpack pipelines' do
