@@ -208,6 +208,7 @@ jobs: ##########################################################################
             trigger: true
           <% locks_per_environment.times do |lock_num| %>
           - put: edge-environments<%= lock_num %>
+            timeout: 30m
             resource: edge-environments
             params:
               claim: <%= env %><%= lock_num %>
@@ -284,6 +285,7 @@ jobs: ##########################################################################
             trigger: true
           <% locks_per_environment.times do |lock_num| %>
           - put: edge-environments<%= lock_num %>
+            timeout: 30m
             resource: edge-environments
             params:
               claim: <%= env %><%= lock_num %>
@@ -317,6 +319,7 @@ jobs: ##########################################################################
             trigger: true
           <% locks_per_environment.times do |lock_num| %>
           - put: edge-environments<%= lock_num %>
+            timeout: 30m
             resource: edge-environments
             params:
               claim: <%= env %><%= lock_num %>
@@ -340,6 +343,7 @@ jobs: ##########################################################################
       - aggregate:
         <% locks_per_environment.times do |lock_num| %>
         - put: edge-environments<%= lock_num %>
+          timeout: 30m
           resource: edge-environments
           params:
             claim: <%= env %><%= lock_num %>
