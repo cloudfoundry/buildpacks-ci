@@ -105,10 +105,6 @@ resources: #####################################################################
       branch: master
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
-  - name: bosh-lite
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/bosh-lite
 
   - name: cflinuxfs2-release
     type: git
@@ -357,7 +353,6 @@ jobs: ##########################################################################
           - get: cflinuxfs2-release
           - get: buildpacks-ci
           - get: bbl-state
-          - get: bosh-lite
           - get: cf-deployment
           - get: gcp-stemcell
           - get: bosh-deployment

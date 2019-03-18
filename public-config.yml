@@ -2,7 +2,6 @@
 binary-builder-git-uri: https://github.com/cloudfoundry/binary-builder.git
 binary-builder-os-name: GNU/Linux
 binary-builder-platform: x86_64
-bosh-lite-domain-name: cf-app.com
 buildpack-packager-git-uri-public: https://github.com/cloudfoundry/buildpack-packager
 buildpack-packager-git-uri: git@github.com:cloudfoundry/buildpack-packager.git
 buildpack-release-candidates-bucket: buildpack-release-candidates

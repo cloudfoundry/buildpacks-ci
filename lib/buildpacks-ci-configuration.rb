@@ -51,10 +51,6 @@ class BuildpacksCIConfiguration
     YAML.load_file('public-config.yml')['run-oracle-php-tests']
   end
 
-  def bosh_lite_domain_name
-    YAML.load_file('public-config.yml')['bosh-lite-domain-name']
-  end
-
   def concourse_target_name
     ENV.fetch('CONCOURSE_TARGET_NAME', 'buildpacks')
   end

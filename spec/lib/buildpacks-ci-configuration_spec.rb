@@ -217,25 +217,6 @@ describe BuildpacksCIConfiguration do
     end
   end
 
-  describe '#bosh_lite_domain_name' do
-    subject { BuildpacksCIConfiguration.new.bosh_lite_domain_name }
-
-    before do
-      allow(YAML).to receive(:load_file).with('public-config.yml').
-        and_return({'bosh-lite-domain-name' => 'domain.name'})
-    end
-
-    it 'loads the public-config.yml file' do
-      expect(YAML).to receive(:load_file).with('public-config.yml')
-
-      subject
-    end
-
-    it 'returns string from the yml data' do
-      expect(subject).to eq('domain.name')
-    end
-  end
-
   describe '#concourse_target_name' do
     subject { BuildpacksCIConfiguration.new.concourse_target_name }
 
