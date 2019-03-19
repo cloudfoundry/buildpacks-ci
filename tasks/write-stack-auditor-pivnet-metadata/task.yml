@@ -5,6 +5,7 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
+  - name: buildpacks-ci
   - name: plugin-release
 
 run:
