@@ -114,7 +114,7 @@ jobs: ##########################################################################
       - do:
         - aggregate:
           - get: buildpacks-ci
-          - get: buildpack
+          - get: repo
             resource: buildpack-git
             trigger: true
   <% cnb_images.each do |image_type| %>
@@ -125,7 +125,7 @@ jobs: ##########################################################################
   <% end %>
         - do:
           - task: unit tests
-            file: buildpacks-ci/tasks/run-bp-v3-unit/task.yml
+            file: buildpacks-ci/tasks/run-scripts-unit/task.yml
 
 <% if buildpacks[language]['integration'] %>
   - name: specs-integration
