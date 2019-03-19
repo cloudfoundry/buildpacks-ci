@@ -3,7 +3,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-cd buildpack
+cd repo
 
 export GOBIN=$PWD/.bin
 export PATH=$GOBIN:$PATH

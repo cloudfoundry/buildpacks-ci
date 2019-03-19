@@ -5,7 +5,8 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
+  - name: cf-space
   - name: buildpacks-ci
-  - name: buildpack
+  - name: repo
 run:
-  path: buildpacks-ci/tasks/run-bp-v3-unit/run.sh
+  path: buildpacks-ci/tasks/run-scripts-integration/run.sh
