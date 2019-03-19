@@ -26,6 +26,9 @@
   },
   'pip' => {
     'integration' => true
+  },
+  'pipenv' => {
+    'integration' => true
   }
 }
 %>
