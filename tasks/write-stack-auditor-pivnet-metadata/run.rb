@@ -37,7 +37,7 @@ artifacts = [ "darwin", "linux", "windows" ]
 metadata['product_files'] = []
 artifacts.each do |os|
   extension = os == "windows" ? "zip" : "tgz"
-  filename = "../plugin-release/stack-auditor-#{version}-#{os}.#{extension}"
+  filename = "plugin-release/stack-auditor-#{version}-#{os}.#{extension}"
   metadata['product_files'].push({
                                      'file' => filename,
                                      'upload_as' => display_name(os),
