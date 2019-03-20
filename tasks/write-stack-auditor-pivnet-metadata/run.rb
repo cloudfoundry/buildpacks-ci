@@ -16,7 +16,11 @@ def display_name(os)
 end
 
 def description
-  File.read(File.join($product_dir, "body"))
+  description = File.read(File.join($product_dir, "body"))
+  if description.start_with?"# "
+    return description[2..-1]
+  end
+  return description
 end
 
 metadata_file_name = "stack-auditor.yml"
@@ -32,8 +36,6 @@ metadata['release'] = {
     'availability' => "All Users",
     'description' => description
 }
-# metadata['release']['eccn'] = eccn
-# metadata['release']['license_exception'] = license_exception
 
 artifacts = [ "darwin", "linux", "windows" ]
 metadata['product_files'] = []

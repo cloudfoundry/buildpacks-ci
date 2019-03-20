@@ -1,5 +1,10 @@
 ---
 resource_types:
+  - name: pivnet
+    type: docker-image
+    source:
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final
   - name: slack-notification
     type: docker-image
     source:
@@ -54,6 +59,13 @@ resources: #####################################################################
       repository: stack-auditor
       access_token: {{buildpacks-github-token}}
 
+  - name: pivnet-production
+    type: pivnet
+    source:
+      endpoint: https://network.pivotal.io
+      api_token: {{pivnet-refresh-token}}
+      product_slug: 'buildpack-extensions'
+      copy_metadata: true
 
 jobs: ################################################################################################################
   - name: test-stack-auditor
@@ -85,6 +97,7 @@ jobs: ##########################################################################
       put: edge-environments
       params:
         release: edge-environments
+
   - name: ship-it
     serial: true
     plan:
@@ -112,6 +125,20 @@ jobs: ##########################################################################
       - put: version
         params:
           file: version/version
+
+  - name: release-stack-auditor-to-pivnet
+    public: true
+    plan:
+    - get: plugin-release
+      passed: [ ship-it ]
+      trigger: true
+    - get: buildpacks-ci
+    - task: write-pivnet-metadata
+      file: buildpacks-ci/tasks/write-stack-auditor-pivnet-metadata/task.yml
+    - put: pivnet-production
+      params:
+        file_glob: plugin-release/stack-auditor-*
+        metadata_file: pivnet-metadata-artifacts/stack-auditor.yml
 
   - name: test-unit-cnb2cf
     serial: true
