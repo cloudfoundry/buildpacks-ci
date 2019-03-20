@@ -20,7 +20,7 @@ def description
 end
 
 metadata_file_name = "stack-auditor.yml"
-metadata_yml = File.join(Dir.pwd, metadata_file_name)
+metadata_yml = File.join(Dir.pwd, "pivnet-metadata-artifacts", metadata_file_name)
 version = get_version
 
 metadata = {}
