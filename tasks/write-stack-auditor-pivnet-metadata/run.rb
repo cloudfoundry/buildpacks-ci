@@ -2,23 +2,8 @@
 
 require 'yaml'
 
-# class BuildpackPivnetMetadataWriter
-#
-#   attr_reader :buildpack, :output_dir, :buildpack_dir, :cached_buildpack_filenames, :recent_changes_filename, :lts_product
-#
-#   def initialize(buildpack, output_dir, buildpack_dir, cached_buildpack_filenames, recent_changes_filename, lts_product)
-#     @buildpack = buildpack
-#     @output_dir = output_dir
-#     @buildpack_dir = buildpack_dir
-#     @cached_buildpack_filenames = cached_buildpack_filenames
-#     @recent_changes_filename = recent_changes_filename
-#     @lts_product = lts_product
-#   end
-
-# def get_version
 root_dir = Dir.pwd
 $product_dir = File.join(root_dir, "plugin-release")
-metadata_dir = root_dir
 
 def get_version
   Dir.chdir($product_dir) do

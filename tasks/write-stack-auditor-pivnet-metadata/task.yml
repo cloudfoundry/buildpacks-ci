@@ -8,8 +8,10 @@ inputs:
   - name: buildpacks-ci
   - name: plugin-release
 
+outputs:
+  - name: pivnet-metadata-artifacts
+
 run:
-  path: bash
+  path: ruby
   args:
-    - -cl
     - buildpacks-ci/tasks/write-stack-auditor-pivnet-metadata/run.rb
