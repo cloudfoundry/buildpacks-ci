@@ -29,6 +29,8 @@ metadata['release'] = {
     'release_type' => "Minor Release",
     'eula_slug' => "pivotal_software_eula",
     'release_notes_url' => "https://github.com/cloudfoundry/stack-auditor/releases/tag/v#{version}",
+    'availability' => "All Users",
+    'description' => description
 }
 # metadata['release']['eccn'] = eccn
 # metadata['release']['license_exception'] = license_exception
