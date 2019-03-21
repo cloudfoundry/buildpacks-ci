@@ -25,8 +25,6 @@ pushd buildpack
     go mod vendor
   fi
 
-  go mod download
-
   # for the PHP buildpack
   if [ -e run_tests.sh ]; then
     TMPDIR=$(mktemp -d)
@@ -44,7 +42,7 @@ pushd buildpack
       [ -d finalize ] && (cd finalize && (go generate || true))
 
       export CF_STACK=${CF_STACK:-cflinuxfs2}
-      ginkgo -r -skipPackage=integration,brats
+      ginkgo -r -mod=vendor -skipPackage=integration,brats
     popd
   fi
 

@@ -11,7 +11,4 @@ fi
 export GOBIN=$PWD/.bin
 export PATH=$GOBIN:$PATH
 
-if [ -f ./go.mod ]; then
-    go mod download
-fi
 ./scripts/brats.sh
