@@ -6,9 +6,9 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: nodejs-cnb
-  - name: npm-cnb
-  - name: yarn-cnb
+  - name: nodejs-cnb-release
+  - name: npm-cnb-release
+  - name: yarn-cnb-release
   - name: version
   - name: pack-release
 outputs:

@@ -1,7 +1,5 @@
 --- #Template parameters rootfs_name (cflinuxfs3)   cve_notification_file (ubuntu18.04.yml)
 
-<% cnb_images = %w(base build run) %>
-
 resource_types:
   - name: slack-notification
     type: docker-image
@@ -131,24 +129,6 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/capi-release
       branch: master
 
-<% if rootfs_name == 'cflinuxfs3' %>
-<% cnb_images.each do |image_type| %>
-  - name: <%= rootfs_name %>-cnb-<%= image_type %>-master
-    type: git
-    check_every: 15s
-    source:
-      uri: https://github.com/cloudfoundry/<%= rootfs_name %>
-      branch: master
-      paths: [ "cnb/<%= image_type %>/**" ]
-<% end %>
-
-  - name: cnb-lifecycle-master
-    type: git
-    source:
-      uri: https://github.com/buildpack/lifecycle
-      branch: master
-<% end %>
-
   ## S3 Buckets ##
 
   - name: stack-s3
@@ -203,20 +183,6 @@ resources: #####################################################################
       username: {{dockerhub-cflinuxfs2-username}}
       password: {{dockerhub-cflinuxfs2-password}}
       email: cf-buildpacks-eng@pivotal.io
-
-<% if rootfs_name == 'cflinuxfs3' %>
-<% cnb_images.each do |image_type| %>
-  - name: <%= rootfs_name %>-cnb-<%= image_type %>-image
-    type: docker-image
-    check_every: 15s
-    source:
-      repository: cfbuildpacks/<%= rootfs_name %>-cnb-experimental
-      tag: <%= image_type %>
-      email: {{buildpacks-docker-user-email}}
-      username: {{buildpacks-docker-user-username}}
-      password: {{buildpacks-docker-user-password}}
-<% end %>
-<% end %>
 
   ## Github Release ##
 
@@ -744,35 +710,6 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-
-<% if rootfs_name == 'cflinuxfs3' %>
-<% cnb_images.each do |image_type| %>
-  - name: update-<%= rootfs_name %>-cnb-<%= image_type %>-image
-    serial: true
-    public: true
-    plan:
-      - get: <%= rootfs_name %>-cnb-<%= image_type %>-master
-        trigger: true
-<% if image_type == 'base' %>
-      # Changes in lifecycle repo should trigger an update for base
-      - get: cnb-lifecycle-master
-        trigger: true
-      # Changes in cflinuxfs3 image should trigger an update for base
-      - get: cflinuxfs3-image
-        trigger: true
-<% else %>
-      # Changes in base image should also trigger an update for children
-      - get: <%= rootfs_name %>-cnb-base-image
-        trigger: true
-<% end %>
-      - put: <%= rootfs_name %>-cnb-<%= image_type %>-image
-        params:
-          build: <%= rootfs_name %>-cnb-<%= image_type %>-master/cnb/<%= image_type %>
-          build_args:
-            squash: squash
-        attempts: 2
-<% end %>
-<% end %>
 
   - name: create-<%= rootfs_name %>-release
     serial: true

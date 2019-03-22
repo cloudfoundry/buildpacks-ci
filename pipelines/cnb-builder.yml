@@ -1,12 +1,8 @@
-<% cnb_images = %w(run build) %>
+<% cnb_child_images = %w(run build) %>
+<% cnb_images = cnb_child_images + ['base'] %>
+
 <% cnb_names = %w(npm-cnb nodejs-cnb yarn-cnb) %>
 ---
-resource_types:
-  - name: google-cloud-storage
-    type: docker-image
-    source:
-      repository: frodenas/gcs-resource
-
 resources:
   - name: buildpacks-ci
     type: git
@@ -14,26 +10,13 @@ resources:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: master
 
-  - name: nodejs-cnb
-    type: git
+<% cnb_names.each do |cnb| %>
+  - name: <%= cnb %>-release
+    type: github-release
     source:
-      uri: git@github.com:cloudfoundry/nodejs-cnb.git
-      private_key: {{cf-buildpacks-eng-github-ssh-key}}
-      branch: master
-
-  - name: npm-cnb
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/npm-cnb.git
-      private_key: {{cf-buildpacks-eng-github-ssh-key}}
-      branch: master
-
-  - name: yarn-cnb
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/yarn-cnb.git
-      private_key: {{cf-buildpacks-eng-github-ssh-key}}
-      branch: master
+      owner: cloudfoundry
+      repository: <%= cnb %>
+<% end %>
 
   - name: version
     type: semver
@@ -51,6 +34,15 @@ resources:
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
       repository: cloudfoundry/cnb
+
+  # Rootfs Docker Image
+  - name: cflinuxfs3-image
+    type: docker-image
+    source:
+      repository: cloudfoundry/cflinuxfs3
+      username: {{dockerhub-cflinuxfs2-username}}
+      password: {{dockerhub-cflinuxfs2-password}}
+      email: cf-buildpacks-eng@pivotal.io
 
 <% cnb_images.each do |image_type| %>
   - name: cflinuxfs3-cnb-<%= image_type %>-image
@@ -70,22 +62,93 @@ resources:
       owner: buildpack
       repository: pack
 
+  - name: pack-master
+    type: git
+    source:
+      uri: https://github.com/buildpack/pack.git
+      branch: master
+
+  # Dockerfiles for cnb stack images
+  <% cnb_images.each do |image_type| %>
+  - name: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master
+    type: git
+    check_every: 15s
+    source:
+      uri: https://github.com/cloudfoundry/cflinuxfs3
+      branch: master
+      paths: [ "cnb/<%= image_type %>/**" ]
+  <% end %>
+
+  # Eventually releases?
+  - name: cnb-lifecycle-master
+    type: git
+    source:
+      uri: https://github.com/buildpack/lifecycle
+      branch: master
+
 jobs:
+  - name: update-cflinuxfs3-cnb-base-image
+    serial: true
+    public: true
+    plan:
+      # Changes in cnb stack image Dockerfiles
+      - get: cflinuxfs3-cnb-base-dockerfile-master
+        trigger: true
+      # Changes in lifecycle repo should trigger an update for base
+      - get: cnb-lifecycle-master
+        trigger: true
+      # Changes in cflinuxfs3 image should trigger an update for base
+      - get: cflinuxfs3-image
+        trigger: true
+      - put: cflinuxfs3-cnb-base-image
+        params:
+          build: cflinuxfs3-cnb-base-dockerfile-master/cnb/base
+          build_args:
+            squash: squash
+        attempts: 2
+
+<% cnb_child_images.each do |image_type| %>
+  - name: update-cflinuxfs3-cnb-<%= image_type %>-image
+    serial: true
+    public: true
+    plan:
+      # Changes in cnb stack image Dockerfiles
+      - get: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master
+        trigger: true
+      # Changes in base image should also trigger an update for children
+      - get: cflinuxfs3-cnb-base-image
+        trigger: true
+      - put: cflinuxfs3-cnb-<%= image_type %>-image
+        params:
+          build: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master/cnb/<%= image_type %>
+          build_args:
+            squash: squash
+        attempts: 2
+<% end %>
+
   - name: update-builder-image
     plan:
       - aggregate:
-      <% cnb_images.each do |image_type| %>
+        - get: cflinuxfs3-cnb-base-image
+          trigger: true
+          passed:
+          - update-cflinuxfs3-cnb-run-image
+          - update-cflinuxfs3-cnb-build-image
+      <% cnb_child_images.each do |image_type| %>
+        - get: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master
+          trigger: true
+          passed:
+          - update-cflinuxfs3-cnb-<%= image_type %>-image
         - get: cflinuxfs3-cnb-<%= image_type %>-image
           params: {skip_download: true}
-          trigger: true
       <% end %>
-        - get: buildpacks-ci
       <% cnb_names.each do |cnb_name| %>
-        - get: <%= cnb_name %>
+        - get: <%= cnb_name %>-release
           trigger: true
       <% end %>
         - get: pack-release
           trigger: true
+        - get: buildpacks-ci
         - get: version
           params: {bump: patch}
       - task: update-builder-image
@@ -98,6 +161,46 @@ jobs:
           tag_file: version/version
           tag_prefix: "cflinuxfs3-v"
           tag_as_latest: true
+          params: {skip_download: true}
+          get_params:  {skip_download: true}
+      - put: version
+        params:
+          file: version/version
+
+  - name: update-builder-release-candidate
+    plan:
+      - aggregate:
+        - get: cflinuxfs3-cnb-base-image
+          trigger: true
+          passed:
+          - update-cflinuxfs3-cnb-run-image
+          - update-cflinuxfs3-cnb-build-image
+      <% cnb_child_images.each do |image_type| %>
+        - get: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master
+          trigger: true
+          passed:
+          - update-cflinuxfs3-cnb-<%= image_type %>-image
+        - get: cflinuxfs3-cnb-<%= image_type %>-image
+          params: {skip_download: true}
+      <% end %>
+      <% cnb_names.each do |cnb_name| %>
+        - get: <%= cnb_name %>-release
+          trigger: true
+      <% end %>
+        - get: pack-master
+          trigger: true
+        - get: buildpacks-ci
+        - get: version
+          params: {bump: patch}
+      - task: update-builder-image
+        file: buildpacks-ci/tasks/update-builder-image/task.yml
+        privileged: true
+      - put: builder-image
+        params:
+          load_file: docker-artifacts/builder.tgz
+          load_repository: cloudfoundry/cnb
+          tag_file: version/version
+          tag_prefix: "cflinuxfs3-rc-v"
           params: {skip_download: true}
           get_params:  {skip_download: true}
       - put: version
