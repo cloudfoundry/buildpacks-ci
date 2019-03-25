@@ -10,7 +10,7 @@ cnbs=(nodejs npm yarn) # Do not hardcode
 erbCmd="erb "
 
 for i in "${cnbs[@]}"; do
-  buildpack="${i}-cnb-release "
+  buildpack="${i}-cnb-release"
   pushd "$buildpack"
     path=$(./scripts/package.sh | grep -e "packaged into" | awk -F' ' '{print $4}')
   popd
