@@ -23,7 +23,9 @@ next_version = Gem::Version.new(TOML.load_file('buildpack/buildpack.toml')['buil
 if next_version > last_version
   File.write('release-artifacts/name', "v#{next_version.to_s}")
   File.write('release-artifacts/tag', "v#{next_version.to_s}")
-  FileUtils.cp('buildpack/CHANGELOG', 'release-artifacts/body')
+  changes = File.read('buildpack/CHANGELOG')
+  recent_changes = changes.split(/^v[0-9\.]+.*?=+$/m)[1].strip
+  File.write('release-artifacts/body', "#{recent_changes}\n")
 
   output = ""
   Dir.chdir('buildpack') do

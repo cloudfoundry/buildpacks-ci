@@ -161,9 +161,10 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-git
           passed:
-          - specs-unit
   <% if buildpacks[language]['integration'] %>
           - specs-integration
+  <% else %>
+          - specs-unit
   <% end %>
       - task: ship-buildpack
         file: buildpacks-ci/tasks/ship-v3-buildpack/task.yml
