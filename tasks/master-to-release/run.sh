@@ -6,5 +6,5 @@ set -o pipefail
 
 pushd git-repo
   go build ./cmd/pack
-  tar -zcvf ./release-tgz/$RELEASE_NAME pack
+  tar -zcvf ./release-tgz/"$RELEASE_NAME" pack
 popd
