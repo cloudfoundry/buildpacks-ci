@@ -187,11 +187,15 @@ jobs:
         - get: <%= cnb_name %>-release
           trigger: true
       <% end %>
-        - get: pack-master
+        - get: git-repo
           trigger: true
+          resource: pack-master
         - get: buildpacks-ci
         - get: version
           params: {bump: patch}
+      - task: pack-master-release
+        file: buildpacks-ci/tasks/master-to-release/task.yml
+        output_mapping: { release-tgz: pack-release}
       - task: update-builder-image
         file: buildpacks-ci/tasks/update-builder-image/task.yml
         privileged: true

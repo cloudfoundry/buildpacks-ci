@@ -4,9 +4,9 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-tar xvf pack-release/pack-0.0.9-linux.tar.gz -o pack
+tar xvf pack-release/release.tgz -o pack # Do not hardcode
 
-cnbs=(nodejs npm yarn)
+cnbs=(nodejs npm yarn) # Do not hardcode
 erbCmd="erb "
 
 for i in "${cnbs[@]}"; do
