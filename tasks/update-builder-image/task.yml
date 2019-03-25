@@ -17,3 +17,4 @@ run:
   path: buildpacks-ci/tasks/update-builder-image/run.sh
 params:
   LANGUAGE:
+  RELEASE_NAME:
