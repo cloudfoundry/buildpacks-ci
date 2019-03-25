@@ -36,11 +36,12 @@ resources: #####################################################################
       branch: master
       private_key: {{buildpacks-envs-private-key}}
 
-  - name: edge-environments
+
+  - name: plugin-environments
     type: pool
     source:
       branch: master
-      pool: edge-environments
+      pool: plugin-environments
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
@@ -74,29 +75,29 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: env-repo
-        - put: edge-environments
+        - put: plugin-environments
           params:
             acquire: true
         - get: stack-auditor
           trigger: true
       - do:
         - task: create-cf-space
+          attempts: 3
           file: buildpacks-ci/tasks/create-cf-space/task.yml
           params:
-            ENV_POOL_RESOURCE: edge-environments
-            ENVS_DIR: env-repo
             ORG: pivotal
-            SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+            TARGET: {{ci-cf-plugins-target}}
             USERNAME: admin
+            PASSWORD: {{ci-cf-plugins-password}}
         - task: test
           file: buildpacks-ci/tasks/run-plugin-tests/task.yml
         ensure:
           task: delete-cf-space
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
     ensure:
-      put: edge-environments
+      put: plugin-environments
       params:
-        release: edge-environments
+        release: plugin-environments
 
   - name: ship-it
     serial: true
@@ -158,7 +159,7 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: env-repo
-        - put: edge-environments
+        - put: plugin-environments
           params:
             acquire: true
         - get: repo
@@ -168,19 +169,19 @@ jobs: ##########################################################################
             - test-unit-cnb2cf
       - do:
         - task: create-cf-space
+          attempts: 3
           file: buildpacks-ci/tasks/create-cf-space/task.yml
           params:
-            ENV_POOL_RESOURCE: edge-environments
-            ENVS_DIR: env-repo
             ORG: pivotal
-            SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+            TARGET: {{ci-cf-plugins-target}}
             USERNAME: admin
+            PASSWORD: {{ci-cf-plugins-password}}
         - task: run-integration-test
           file: buildpacks-ci/tasks/run-scripts-integration/task.yml
         ensure:
           task: delete-cf-space
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
     ensure:
-      put: edge-environments
+      put: plugin-environments
       params:
-        release: edge-environments
+        release: plugin-environments
