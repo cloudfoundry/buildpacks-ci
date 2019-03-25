@@ -12,7 +12,7 @@
      'deployments/edge-shared/num-cells.yml',
      'deployments/operations/add-windows-stack.yml'
    ]
-   toolsmiths_envs = {'lts' => 557, 'menifee' => 360, 'pittsburg' => 421}
+   toolsmiths_envs = {'lts' => 557, 'menifee' => 360, 'pittsburg' => 421, 'orinda' => 399}
 %>
 
 resource_types: ########################################################################################################
