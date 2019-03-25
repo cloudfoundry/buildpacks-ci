@@ -18,3 +18,4 @@ run:
 params:
   LANGUAGE:
   RELEASE_NAME:
+  MASTER:
