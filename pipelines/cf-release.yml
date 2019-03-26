@@ -509,7 +509,6 @@ jobs:
         <% if language == 'java' %>
         - task: download-offline-buildpack
           file: buildpacks-ci/tasks/download-offline-buildpack/task.yml
-          output_mapping: {buildpack-zip-stack0: buildpack-zip}
           params:
             CF_STACKS: <%= release_type == 'lts' ? stacks[language].join(' ') : 'cflinuxfs3' %>
         <% end %>
