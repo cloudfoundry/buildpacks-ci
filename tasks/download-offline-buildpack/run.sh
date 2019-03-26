@@ -21,3 +21,4 @@ popd
 
 # shellcheck disable=SC2035
 mv pivnet-production/java-buildpack-offline*.zip buildpack-zip-stack0/
+mv pivnet-production/version buildpack-zip-stack0/
