@@ -23,6 +23,4 @@ pushd cnb2cf
   fi
 popd
 
-echo "WE MADE IT ALL THE WAY HERE"
-
 rsync -a cnb2cf/ cnb2cf-artifacts

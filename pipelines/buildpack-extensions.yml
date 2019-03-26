@@ -20,7 +20,8 @@ resources: #####################################################################
   - name: cnb2cf
     type: git
     source:
-      uri: https://github.com/cloudfoundry/cnb2cf
+      uri: git@github.com:cloudfoundry/cnb2cf.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
       branch: master
 
   - name: libbuildpack
