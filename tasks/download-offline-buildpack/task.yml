@@ -7,7 +7,6 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: pivnet-production
-  - name: blob
 outputs:
   - name: buildpack-zip
 run:
