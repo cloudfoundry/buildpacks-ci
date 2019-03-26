@@ -1,0 +1,50 @@
+[[groups]]
+  labels = ["nodejs", "yarn"]
+  [[groups.buildpacks]]
+    id = "org.cloudfoundry.buildpacks.nodejs"
+    version = "latest"
+  [[groups.buildpacks]]
+    id = "org.cloudfoundry.buildpacks.yarn"
+    version = "latest"
+
+[[groups]]
+  labels = ["nodejs", "npm"]
+  [[groups.buildpacks]]
+    id = "org.cloudfoundry.buildpacks.nodejs"
+    version = "latest"
+  [[groups.buildpacks]]
+    id = "org.cloudfoundry.buildpacks.npm"
+    version = "latest"
+
+[[groups]]
+  labels = ["nodejs", "yarn"]
+  [[groups.buildpacks]]
+    id = "org.cloudfoundry.openjdk"
+    version = "latest"
+  [[groups.buildpacks]]
+    id = "org.cloudfoundry.buildsystem"
+    version = "latest"
+  [[groups.buildpacks]]
+    id = "org.cloudfoundry.jvmapplication"
+    version = "latest"
+    optional = true
+  [[groups.buildpacks]]
+    id = "org.cloudfoundry.azureapplicationinsights"
+    version = "latest"
+    optional = true
+  [[groups.buildpacks]]
+    id = "org.cloudfoundry.debug"
+    version = "latest"
+    optional = true
+  [[groups.buildpacks]]
+    id = "org.cloudfoundry.googlestackdriver"
+    version = "latest"
+    optional = true
+  [[groups.buildpacks]]
+    id = "org.cloudfoundry.jmx"
+    version = "latest"
+    optional = true
+#  [[groups.buildpacks]]
+#    id = "org.cloudfoundry.procfile"
+#    version = "latest"
+#    optional = true
