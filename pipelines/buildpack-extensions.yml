@@ -23,6 +23,12 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/cnb2cf
       branch: master
 
+  - name: libbuildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/libbuildpack
+      branch: master
+
   - name: buildpacks-ci
     type: git
     source:
@@ -35,7 +41,6 @@ resources: #####################################################################
       uri: git@github.com:cloudfoundry/buildpacks-envs
       branch: master
       private_key: {{buildpacks-envs-private-key}}
-
 
   - name: plugin-environments
     type: pool
@@ -140,6 +145,21 @@ jobs: ##########################################################################
       params:
         file_glob: plugin-release/stack-auditor-*
         metadata_file: pivnet-metadata-artifacts/stack-auditor.yml
+
+  - name: update-libbuildpack
+    serial: true
+    plan:
+    - aggregate:
+      - get: buildpacks-ci
+      - get: libbuildpack
+        trigger: true
+      - get: cnb2cf
+    - task: update-libbuildpack-cnb2cf
+      file: buildpacks-ci/tasks/update-libbuildpack-cnb2cf/task.yml
+    - put: cnb2cf
+      params:
+        repository: cnb2cf-artifacts
+        rebase: true
 
   - name: test-unit-cnb2cf
     serial: true
