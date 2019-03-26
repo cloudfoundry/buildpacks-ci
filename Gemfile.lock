@@ -87,6 +87,7 @@ GEM
     thread_safe (0.3.6)
     toml (0.2.0)
       parslet (~> 1.8.0)
+    tomlrb (1.2.8)
     tracker_api (1.8.0)
       addressable
       equalizer
@@ -128,6 +129,7 @@ DEPENDENCIES
   rubocop
   rubocop-rspec
   toml
+  tomlrb
   tracker_api
   version_sorter
   webmock
