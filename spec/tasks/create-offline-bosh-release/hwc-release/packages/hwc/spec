@@ -1,5 +1,0 @@
----
-name: hwc
-
-files:
-- hwc-buildpack/hwc_buildpack-*.zip

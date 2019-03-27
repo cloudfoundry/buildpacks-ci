@@ -1,6 +1,0 @@
----
-name: no_op
-templates:
-  ctl: bin/ctl
-
-packages:
