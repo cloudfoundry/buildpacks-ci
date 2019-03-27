@@ -56,5 +56,5 @@ builder_config = TOML::Generator.new(config_hash).body
 File.write(builder_config_file, builder_config)
 
 system "buildpacks-ci/scripts/start-docker" or exit 1
-system "./pack/pack", "create-builder", "#{builder_repo}:#{stack}-v#{version}", "--builder-config", "#{builder_config_file}" or exit 1
-system "docker", "save", "#{builder_repo}:#{stack}-v#{version}", "-o", "builder-image/builder.tgz" or exit 1
+system "./pack/pack", "create-builder", "#{builder_repo}:#{stack}", "--builder-config", "#{builder_config_file}" or exit 1
+system "docker", "save", "#{builder_repo}:#{stack}", "-o", "builder-image/builder.tgz" or exit 1
