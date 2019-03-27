@@ -6,41 +6,15 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: cnb-repo0
-    optional: true
-  - name: cnb-repo1
-    optional: true
-  - name: cnb-repo2
-    optional: true
-  - name: cnb-repo3
-    optional: true
-  - name: cnb-repo4
-    optional: true
-  - name: cnb-repo5
-    optional: true
-  - name: cnb-repo6
-    optional: true
-  - name: cnb-repo7
-    optional: true
-  - name: cnb-repo8
-    optional: true
-  - name: cnb-repo9
-    optional: true
-  - name: cnb-repo10
-    optional: true
+  - name: sources
   - name: version
   - name: pack
 outputs:
   - name: builder-image
+
 run:
-  path: bash
-  args:
-    - -c
-    - |
-      pushd buildpacks-ci
-      bundle
-      popd
-      buildpacks-ci/tasks/create-builder/run.rb
+  path: buildpacks-ci/tasks/create-builder/run.rb
+
 params:
   BUILDER_IMAGE:
   BUILD_IMAGE:
