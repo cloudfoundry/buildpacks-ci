@@ -14,7 +14,7 @@ Dir.chdir "pack" do
   system "go", "build", "./cmd/pack" or exit 1
 end
 
-buildpacks = Dir.glob("cnb-repo*/").map do |dir|
+buildpacks = Dir.glob("sources/*/").map do |dir|
   id = Tomlrb.load_file(File.join(dir, "buildpack.toml"))['buildpack']['id']
   bp_file = ""
   Dir.chdir dir do

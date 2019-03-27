@@ -1,11 +1,11 @@
-[[groups]]
-  labels = ["nodejs", "yarn"]
-  [[groups.buildpacks]]
-    id = "org.cloudfoundry.buildpacks.nodejs"
-    version = "latest"
-  [[groups.buildpacks]]
-    id = "org.cloudfoundry.buildpacks.yarn"
-    version = "latest"
+#[[groups]]
+#  labels = ["nodejs", "yarn"]
+#  [[groups.buildpacks]]
+#    id = "org.cloudfoundry.buildpacks.nodejs"
+#    version = "latest"
+#  [[groups.buildpacks]]
+#    id = "org.cloudfoundry.buildpacks.yarn"
+#    version = "latest"
 
 [[groups]]
   labels = ["nodejs", "npm"]
@@ -44,7 +44,7 @@
     id = "org.cloudfoundry.jmx"
     version = "latest"
     optional = true
-#  [[groups.buildpacks]]
-#    id = "org.cloudfoundry.procfile"
-#    version = "latest"
-#    optional = true
+  [[groups.buildpacks]]
+    id = "org.cloudfoundry.procfile"
+    version = "latest"
+    optional = true
