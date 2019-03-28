@@ -12,7 +12,7 @@ stack = cnb_stack.split('.').last
 builder_config_file = "builder.toml"
 
 Dir.chdir "pack" do
-  system "go", "build", "./cmd/pack" or exit 1
+  system "go", "build", "-mod=vendor", "./cmd/pack" or exit 1
 end
 
 buildpacks = Dir.glob("sources/*/").map do |dir|
