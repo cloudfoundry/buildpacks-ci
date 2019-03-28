@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'tomlrb' # One gem to read (supports v0.4.0)
-require 'toml'   # One to write
+require 'toml' # One to write
 
 version = File.read(File.join("version", "version")).strip()
 builder_repo = ENV.fetch("BUILDER_REPO")
@@ -55,6 +55,12 @@ config_hash = {
 builder_config = TOML::Generator.new(config_hash).body
 File.write(builder_config_file, builder_config)
 
+puts "**************builder.toml**************"
+puts builder_config
+
 system "buildpacks-ci/scripts/start-docker" or exit 1
 system "./pack/pack", "create-builder", "#{builder_repo}:#{stack}", "--builder-config", "#{builder_config_file}" or exit 1
 system "docker", "save", "#{builder_repo}:#{stack}", "-o", "builder-image/builder.tgz" or exit 1
+
+tag = "#{version}-#{stack}"
+File.write(File.join("tag", "name"), tag)
