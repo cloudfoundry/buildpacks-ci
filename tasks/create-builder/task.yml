@@ -12,6 +12,7 @@ inputs:
 outputs:
   - name: builder-image
   - name: tag
+  - name: release-tag
 
 run:
   path: buildpacks-ci/tasks/create-builder/run.rb
@@ -21,3 +22,4 @@ params:
   BUILD_IMAGE:
   RUN_IMAGE:
   STACK:
+  FINAL:
