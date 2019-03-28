@@ -64,3 +64,7 @@ system "docker", "save", "#{builder_repo}:#{stack}", "-o", "builder-image/builde
 
 tag = "#{version}-#{stack}"
 File.write(File.join("tag", "name"), tag)
+
+if ENV.fetch('FINAL') == "true"
+  File.write(File.join("release-tag", "name"), stack)
+end
