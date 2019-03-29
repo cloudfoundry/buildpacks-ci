@@ -10,7 +10,7 @@
     'integration' => true
   },
   'nodejs' => {
-
+    'integration' => true
   },
   'python' => {
 
