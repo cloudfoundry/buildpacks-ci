@@ -1,7 +1,23 @@
 <% cnb_child_images = %w(run build) %>
 <% cnb_images = cnb_child_images + ['base'] %>
 
-<% cnb_names = %w(npm-cnb nodejs-cnb yarn-cnb) %>
+<% cnbs = {
+    'nodejs'                   => {'git_repo' => 'https://github.com/cloudfoundry/nodejs-cnb'},
+    'npm'                      => {'git_repo' => 'https://github.com/cloudfoundry/npm-cnb'},
+    'yarn'                     => {'git_repo' => 'https://github.com/cloudfoundry/yarn-cnb'},
+    'python'                   => {'git_repo' => 'https://github.com/cloudfoundry/python-cnb', 'skip_bionic' => true},
+    'pip'                      => {'git_repo' => 'https://github.com/cloudfoundry/pip-cnb', 'skip_bionic' => true},
+    'pipenv'                   => {'git_repo' => 'https://github.com/cloudfoundry/pipenv-cnb', 'skip_bionic' => true},
+    'openjdk'                  => {'git_repo' => 'https://github.com/cloudfoundry/openjdk-buildpack'},
+    'buildsystem'              => {'git_repo' => 'https://github.com/cloudfoundry/build-system-buildpack'},
+    'jvmapplication'           => {'git_repo' => 'https://github.com/cloudfoundry/jvm-application-buildpack'},
+    'azureapplicationinsights' => {'git_repo' => 'https://github.com/cloudfoundry/azure-application-insights-buildpack'},
+    'debug'                    => {'git_repo' => 'https://github.com/cloudfoundry/debug-buildpack'},
+    'googlestackdriver'        => {'git_repo' => 'https://github.com/cloudfoundry/google-stackdriver-buildpack'},
+    'jmx'                      => {'git_repo' => 'https://github.com/cloudfoundry/jmx-buildpack'},
+    'procfile'                 => {'git_repo' => 'https://github.com/cloudfoundry/procfile-buildpack'}
+} %>
+
 ---
 resources:
   - name: buildpacks-ci
@@ -10,20 +26,35 @@ resources:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: master
 
-<% cnb_names.each do |cnb| %>
-  - name: <%= cnb %>-release
-    type: github-release
+  <% cnbs.keys.each do |cnb_name| %>
+  - name: <%= cnb_name %>-cnb
+    type: git
     source:
-      owner: cloudfoundry
-      repository: <%= cnb %>
-<% end %>
+      uri: <%= cnbs[cnb_name]['git_repo'] %>
+  - name: <%= cnb_name %>-cnb-release
+    type: git
+    source:
+      uri: <%= cnbs[cnb_name]['git_repo'] %>
+      <% next if ['openjdk', 'buildsystem', 'jvmapplication', 'azureapplicationinsights', 'debug', 'googlestackdriver', 'jmx', 'procfile'].include?(cnb_name) %>
+      tag_filter: "v*"
 
-  - name: version
+  <% end %>
+
+  - name: cflinuxfs3-version
     type: semver
     source:
       initial_version: 0.0.1
       bucket: cnb-versions
       key: builder/cflinuxfs3
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+
+  - name: bionic-version
+    type: semver
+    source:
+      initial_version: 0.0.1
+      bucket: cnb-versions
+      key: builder/bionic
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
@@ -56,11 +87,12 @@ resources:
       password: {{buildpacks-docker-user-password}}
 <% end %>
 
-  - name: pack-release
-    type: github-release
-    source:
-      owner: buildpack
-      repository: pack
+#  - name: pack-release
+#    type: git
+#    source:
+#      uri: https://github.com/buildpack/pack.git
+#      branch: master
+#      tag_filter: "v*"
 
   - name: pack-master
     type: git
@@ -79,7 +111,6 @@ resources:
       paths: [ "cnb/<%= image_type %>/**" ]
   <% end %>
 
-  # Eventually releases?
   - name: cnb-lifecycle-master
     type: git
     source:
@@ -118,6 +149,8 @@ jobs:
       # Changes in base image should also trigger an update for children
       - get: cflinuxfs3-cnb-base-image
         trigger: true
+        passed:
+          - update-cflinuxfs3-cnb-base-image
       - put: cflinuxfs3-cnb-<%= image_type %>-image
         params:
           build: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master/cnb/<%= image_type %>
@@ -126,89 +159,268 @@ jobs:
         attempts: 2
 <% end %>
 
-  - name: update-builder-image
+  - name: create-builder-release-candidate-cflinuxfs3
     plan:
       - aggregate:
         - get: cflinuxfs3-cnb-base-image
           trigger: true
           passed:
-          - update-cflinuxfs3-cnb-run-image
-          - update-cflinuxfs3-cnb-build-image
+            - update-cflinuxfs3-cnb-run-image
+            - update-cflinuxfs3-cnb-build-image
       <% cnb_child_images.each do |image_type| %>
         - get: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master
           trigger: true
           passed:
-          - update-cflinuxfs3-cnb-<%= image_type %>-image
+            - update-cflinuxfs3-cnb-<%= image_type %>-image
         - get: cflinuxfs3-cnb-<%= image_type %>-image
           params: {skip_download: true}
-      <% end %>
-      <% cnb_names.each do |cnb_name| %>
-        - get: <%= cnb_name %>-release
+        <% end %>
+        <% cnbs.keys.each do |cnb_name| %>
+        - get: <%= cnb_name %>-cnb
           trigger: true
-      <% end %>
-        - get: pack-release
-          trigger: true
-        - get: buildpacks-ci
-        - get: version
-          params: {bump: patch}
-      - task: update-builder-image
-        file: buildpacks-ci/tasks/update-builder-image/task.yml
-        privileged: true
-      - put: builder-image
-        params:
-          load_file: docker-artifacts/builder.tgz
-          load_repository: cloudfoundry/cnb
-          tag_file: version/version
-          tag_prefix: "cflinuxfs3-v"
-          tag_as_latest: true
-          params: {skip_download: true}
-          get_params:  {skip_download: true}
-      - put: version
-        params:
-          file: version/version
-
-  - name: update-builder-release-candidate
-    plan:
-      - aggregate:
-        - get: cflinuxfs3-cnb-base-image
-          trigger: true
-          passed:
-          - update-cflinuxfs3-cnb-run-image
-          - update-cflinuxfs3-cnb-build-image
-      <% cnb_child_images.each do |image_type| %>
-        - get: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master
-          trigger: true
-          passed:
-          - update-cflinuxfs3-cnb-<%= image_type %>-image
-        - get: cflinuxfs3-cnb-<%= image_type %>-image
-          params: {skip_download: true}
-      <% end %>
-      <% cnb_names.each do |cnb_name| %>
-        - get: <%= cnb_name %>-release
-          trigger: true
-      <% end %>
-        - get: git-repo
+        <% end %>
+        - get: pack
           trigger: true
           resource: pack-master
         - get: buildpacks-ci
         - get: version
-          params: {bump: patch}
-      - task: pack-master-release
-        file: buildpacks-ci/tasks/master-to-release/task.yml
-        output_mapping: { release-tgz: pack-release}
-      - task: update-builder-image
-        file: buildpacks-ci/tasks/update-builder-image/task.yml
+          params: {pre: "rc"}
+          resource: cflinuxfs3-version
+      - task: get-cnb-sources
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
+          inputs:
+            <% cnbs.keys.each do |cnb_name| %>
+            - name: <%= cnb_name %>-cnb
+            <% end %>
+          outputs:
+            - name: sources
+          run:
+            path: bash
+            args:
+              - -cl
+              - |
+                <% cnbs.keys.each do |cnb_name| %>
+                  cp -r <%= cnb_name %>-cnb sources/<%= cnb_name %>-cnb
+                <% end %>
+      - task: create-builder-image
+        file: buildpacks-ci/tasks/create-builder/task.yml
         privileged: true
         params:
-          MASTER: true
+          BUILDER_REPO: cloudfoundry/cnb
+          STACK: "org.cloudfoundry.stacks.cflinuxfs3"
+          BUILD_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:build"
+          RUN_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:run"
+      - task: smoke-test-builder
+        file: buildpacks-ci/tasks/test-builder/task.yml
+        privileged: true
+        params:
+          STACK: cflinuxfs3
+          BUILDER_REPO: cloudfoundry/cnb
       - put: builder-image
         params:
-          load_file: docker-artifacts/builder.tgz
+          load_file: builder-image/builder.tgz
           load_repository: cloudfoundry/cnb
-          tag_file: version/version
-          tag_prefix: "cflinuxfs3-rc-v"
-          params: {skip_download: true}
-          get_params:  {skip_download: true}
-      - put: version
+          load_tag: cflinuxfs3
+          tag_file: tag/name
+          tag_as_latest: false
+      - put: cflinuxfs3-version
         params:
           file: version/version
+
+  - name: release-builder-cflinuxfs3
+    plan:
+      - aggregate:
+        <% cnb_child_images.each do |image_type| %>
+        - get: cflinuxfs3-cnb-<%= image_type %>-image
+          params: {skip_download: true}
+        <% end %>
+        <% cnbs.keys.each do |cnb_name| %>
+        - get: <%= cnb_name %>-cnb
+          resource: <%= cnb_name %>-cnb-release
+        <% end %>
+        - get: pack
+          resource: pack-master # BACK TO pack-release
+        - get: buildpacks-ci
+        - get: version
+          params: {bump: "final"}
+          resource: cflinuxfs3-version
+      - task: get-cnb-sources
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
+          inputs:
+            <% cnbs.keys.each do |cnb_name| %>
+            - name: <%= cnb_name %>-cnb
+            <% end %>
+          outputs:
+            - name: sources
+          run:
+            path: bash
+            args:
+              - -cl
+              - |
+                <% cnbs.keys.each do |cnb_name| %>
+                  cp -r <%= cnb_name %>-cnb sources/<%= cnb_name %>-cnb
+                <% end %>
+      - task: create-builder-image
+        file: buildpacks-ci/tasks/create-builder/task.yml
+        privileged: true
+        params:
+          BUILDER_REPO: cloudfoundry/cnb
+          STACK: "org.cloudfoundry.stacks.cflinuxfs3"
+          BUILD_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:build"
+          RUN_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:run"
+          FINAL: true
+          TAG: "v1.0.0-M6"
+      - task: smoke-test-builder
+        file: buildpacks-ci/tasks/test-builder/task.yml
+        privileged: true
+        params:
+          STACK: cflinuxfs3
+          BUILDER_REPO: cloudfoundry/cnb
+      - put: builder-image
+        params:
+          load_file: builder-image/builder.tgz
+          load_repository: cloudfoundry/cnb
+          load_tag: cflinuxfs3
+          tag_file: tag/name
+          tag_as_latest: true
+      - put: cflinuxfs3-version
+        params:
+          file: version/version
+
+  - name: update-builder-release-candidate-bionic
+    plan:
+      - aggregate:
+        <% cnbs.keys.each do |cnb_name| %>
+        <% next if cnbs[cnb_name]['skip_bionic'] %>
+        - get: <%= cnb_name %>-cnb
+          trigger: true
+        <% end %>
+        - get: pack
+          trigger: true
+          resource: pack-master
+        - get: buildpacks-ci
+        - get: version
+          resource: bionic-version
+          params: {pre: "rc"}
+      - task: get-cnb-sources
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
+          inputs:
+              <% cnbs.keys.each do |cnb_name| %>
+              <% next if cnbs[cnb_name]['skip_bionic'] %>
+                - name: <%= cnb_name %>-cnb
+              <% end %>
+          outputs:
+            - name: sources
+          run:
+            path: bash
+            args:
+              - -cl
+              - |
+                <% cnbs.keys.each do |cnb_name| %>
+                <% next if cnbs[cnb_name]['skip_bionic'] %>
+                  cp -r <%= cnb_name %>-cnb sources/<%= cnb_name %>-cnb
+                <% end %>
+      - task: create-builder-image
+        file: buildpacks-ci/tasks/create-builder/task.yml
+        privileged: true
+        params:
+          BUILDER_REPO: cloudfoundry/cnb
+          STACK: "io.buildpacks.stacks.bionic"
+          BUILD_IMAGE: "packs/build:0.1.0"
+          RUN_IMAGE: "packs/run:0.1.0"
+      - task: smoke-test-builder
+        file: buildpacks-ci/tasks/test-builder/task.yml
+        privileged: true
+        params:
+          STACK: bionic
+          BUILDER_REPO: cloudfoundry/cnb
+      - put: builder-image
+        params:
+          load_file: builder-image/builder.tgz
+          load_repository: cloudfoundry/cnb
+          load_tag: bionic
+          tag_file: tag/name
+          tag_as_latest: false
+      - put: bionic-version
+        params:
+          file: version/version
+
+  - name: release-builder-bionic
+    plan:
+    - aggregate:
+      <% cnbs.keys.each do |cnb_name| %>
+      <% next if cnbs[cnb_name]['skip_bionic'] %>
+      - get: <%= cnb_name %>-cnb
+        resource: <%= cnb_name %>-cnb-release
+      <% end %>
+      - get: pack
+        resource: pack-master # BACK TO pack-release
+      - get: buildpacks-ci
+      - get: version
+        resource: bionic-version
+        params: {bump: "final"}
+    - task: get-cnb-sources
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cfbuildpacks/ci
+        inputs:
+            <% cnbs.keys.each do |cnb_name| %>
+            <% next if cnbs[cnb_name]['skip_bionic'] %>
+              - name: <%= cnb_name %>-cnb
+            <% end %>
+        outputs:
+          - name: sources
+        run:
+          path: bash
+          args:
+            - -cl
+            - |
+              <% cnbs.keys.each do |cnb_name| %>
+              <% next if cnbs[cnb_name]['skip_bionic'] %>
+                cp -r <%= cnb_name %>-cnb sources/<%= cnb_name %>-cnb
+              <% end %>
+    - task: create-builder-image
+      file: buildpacks-ci/tasks/create-builder/task.yml
+      privileged: true
+      params:
+        BUILDER_REPO: cloudfoundry/cnb
+        STACK: "io.buildpacks.stacks.bionic"
+        BUILD_IMAGE: "packs/build:0.1.0"
+        RUN_IMAGE: "packs/run:0.1.0"
+        FINAL: true
+        TAG: "v1.0.0-M6"
+    - task: smoke-test-builder
+      file: buildpacks-ci/tasks/test-builder/task.yml
+      privileged: true
+      params:
+        STACK: bionic
+        BUILDER_REPO: cloudfoundry/cnb
+    - put: builder-image
+      params:
+        load_file: builder-image/builder.tgz
+        load_repository: cloudfoundry/cnb
+        load_tag: bionic
+        tag_file: tag/name
+        tag_as_latest: false
+        additional_tags: release-tag/name
+    - put: bionic-version
+      params:
+        bump: patch
