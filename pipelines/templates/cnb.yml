@@ -12,6 +12,9 @@
   'nodejs' => {
     'integration' => true
   },
+  'nodejs-compat' => {
+    'integration' => true
+  },
   'python' => {},
   'ruby' => {},
   'php' => {},
