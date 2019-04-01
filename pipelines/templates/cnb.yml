@@ -12,15 +12,9 @@
   'nodejs' => {
     'integration' => true
   },
-  'python' => {
-
-  },
-  'ruby' => {
-
-  },
-  'php' => {
-
-  },
+  'python' => {},
+  'ruby' => {},
+  'php' => {},
   'php-web' => {
     'integration' => true
   },
@@ -28,6 +22,9 @@
     'integration' => true
   },
   'pipenv' => {
+    'integration' => true
+  },
+  'python-compat' => {
     'integration' => true
   }
 }
