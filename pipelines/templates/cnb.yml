@@ -151,6 +151,8 @@ jobs: ##########################################################################
       - task: integration tests
         file: buildpacks-ci/tasks/run-bp-v3-integration/task.yml
         privileged: true
+        params:
+          GIT_TOKEN: {{buildpacks-github-token}}
 <% end %>
 
   - name: ship-it
