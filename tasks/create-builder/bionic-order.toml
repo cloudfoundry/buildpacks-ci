@@ -1,26 +1,4 @@
 [[groups]]
-  labels = ["nodejs", "yarn"]
-  buildpacks = [
-    {id = "org.cloudfoundry.buildpacks.nodejs",         version = "latest" },
-    {id = "org.cloudfoundry.buildpacks.yarn",           version = "latest" }
-  ]
-
-[[groups]]
-  labels = ["nodejs", "npm"]
-  buildpacks = [
-    {id = "org.cloudfoundry.buildpacks.nodejs",         version = "latest" },
-    {id = "org.cloudfoundry.buildpacks.npm",            version = "latest" }
-  ]
-
-[[groups]]
-  labels = [ "python" ]
-  buildpacks = [
-    {id = "org.cloudfoundry.buildpacks.python",         version = "latest" },
-    {id = "org.cloudfoundry.buildpacks.pipenv",         version = "latest", optional = true },
-    {id = "org.cloudfoundry.buildpacks.pip",            version = "latest" }
-  ]
-
-[[groups]]
   labels = [ "java" ]
   buildpacks = [
     { id = "org.cloudfoundry.openjdk",                  version = "latest" },
@@ -33,4 +11,18 @@
     { id = "org.cloudfoundry.jmx",                      version = "latest", optional = true },
 
     { id = "org.cloudfoundry.procfile",                 version = "latest", optional = true },
+  ]
+
+[[groups]]
+  labels = ["nodejs", "yarn"]
+  buildpacks = [
+    {id = "org.cloudfoundry.buildpacks.nodejs",         version = "latest" },
+    {id = "org.cloudfoundry.buildpacks.yarn",           version = "latest" }
+  ]
+
+[[groups]]
+  labels = ["nodejs", "npm"]
+  buildpacks = [
+    {id = "org.cloudfoundry.buildpacks.nodejs",         version = "latest" },
+    {id = "org.cloudfoundry.buildpacks.npm",            version = "latest" }
   ]
