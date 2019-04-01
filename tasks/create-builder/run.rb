@@ -3,12 +3,12 @@
 require 'tomlrb' # One gem to read (supports v0.4.0)
 require 'toml' # One to write
 
-version = File.read(File.join("version", "version")).strip()
-builder_repo = ENV.fetch("BUILDER_REPO")
-build_image = ENV.fetch("BUILD_IMAGE")
-run_image = ENV.fetch("RUN_IMAGE")
-cnb_stack = ENV.fetch("STACK")
-stack = cnb_stack.split('.').last
+version             = File.read(File.join("version", "version")).strip()
+builder_repo        = ENV.fetch("BUILDER_REPO")
+build_image         = ENV.fetch("BUILD_IMAGE")
+run_image           = ENV.fetch("RUN_IMAGE")
+cnb_stack           = ENV.fetch("STACK")
+stack               = cnb_stack.split('.').last
 builder_config_file = "builder.toml"
 
 Dir.chdir "pack" do
@@ -16,13 +16,15 @@ Dir.chdir "pack" do
 end
 
 buildpacks = Dir.glob("sources/*/").map do |dir|
-  id = Tomlrb.load_file(File.join(dir, "buildpack.toml"))['buildpack']['id']
+  id          = Tomlrb.load_file(File.join(dir, "buildpack.toml"))['buildpack']['id']
   bp_location = ""
   Dir.chdir dir do
     if Dir.exist?("ci") # This exists because we package Buildpacks differently
-      tag = ENV.fetch("TAG")
-      system("git", "fetch", "--tags") or exit 1
-      system("git", "checkout", tag) or exit 1
+      tag = ENV.fetch("TAG", "")
+      if tag != ""
+        system("git", "fetch", "--tags") or exit 1
+        system("git", "checkout", tag) or exit 1
+      end
       system File.join("ci", "package.sh") or exit 1
       bp_tar = Dir.glob(File.join("artifactory", "*", "*", "*", "*", "*", "*.tgz")).first
       # Remove dependency-cache because we can only package as a cached buildpack for now
@@ -37,22 +39,22 @@ buildpacks = Dir.glob("sources/*/").map do |dir|
     end
   end
   {
-      "id": id,
-      "uri": bp_location,
-      "latest": true,
+    "id":     id,
+    "uri":    bp_location,
+    "latest": true,
   }
 end
 
 groups = Tomlrb.load_file(File.join("buildpacks-ci", "tasks", "create-builder", "#{stack}-order.toml"))['groups']
 
 config_hash = {
-    "buildpacks": buildpacks,
-    "groups": groups,
-    "stack": {
-        "id": cnb_stack,
-        "build-image": build_image,
-        "run-image": run_image
-    }
+  "buildpacks": buildpacks,
+  "groups":     groups,
+  "stack":      {
+    "id":          cnb_stack,
+    "build-image": build_image,
+    "run-image":   run_image
+  }
 }
 
 builder_config = TOML::Generator.new(config_hash).body
