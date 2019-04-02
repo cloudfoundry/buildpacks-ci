@@ -14,6 +14,9 @@ RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee 
 RUN curl -sL "https://keybase.io/crystal/pgp_keys.asc" | apt-key add - \
     && echo "deb https://dist.crystal-lang.org/apt crystal main" | tee /etc/apt/sources.list.d/crystal.list
 
+RUN curl -sL "https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key" | apt-key add - \
+  && echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+
 RUN apt-get update \
   && apt-get -y install \
   aufs-tools \
@@ -34,6 +37,7 @@ RUN apt-get update \
   python-dev \
   python-pip \
   shellcheck \
+  cf-cli \
   vim \
   wget \
   zip \
@@ -63,13 +67,6 @@ RUN git config --global core.pager cat
 # composer is a package manager for PHP apps
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
-
-# download the CF-CLI
-RUN wget -O cf-cli.tgz 'https://packages.cloudfoundry.org/stable?release=linux64-binary&version=6.40.0&source=github-rel' \
-  && [ de34bb9755ec9f9ca9605b14c690a9013157cc3c83fc647beb2c842a03c8b5b2 = $(shasum -a 256 cf-cli.tgz | cut -d' ' -f1) ] \
-  && tar xzf cf-cli.tgz -C /usr/bin \
-  && rm cf-cli.tgz \
-  && cf install-plugin -r CF-Community "log-cache" -f
 
 # download the bosh2 CLI
 RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.45-linux-amd64 -o /usr/local/bin/bosh2 \
