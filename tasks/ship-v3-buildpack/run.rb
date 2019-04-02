@@ -7,8 +7,9 @@ Octokit.auto_paginate = true
 Octokit.configure do |c|
   c.login    = ENV.fetch('GITHUB_USERNAME')
   c.password = ENV.fetch('GITHUB_PASSWORD')
+  token = ENV.fetch("GIT_TOKEN","")
+  c.access_token = token if token != ""
 end
-
 language = ENV['LANGUAGE']
 
 last_version = Gem::Version.new("0.0.0")
