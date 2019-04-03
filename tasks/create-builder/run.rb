@@ -21,11 +21,11 @@ if json_resp['results'].any? { |r| r['name'] == tag }
 end
 
 
-Dir.chdir " pack " do
-  system " go ", " build ", " - mod = vendor ", "./ cmd / pack " or exit 1
+Dir.chdir 'pack' do
+  system 'go', 'build', '-mod=vendor', './cmd/pack' or exit 1
 end
 
-buildpacks = Dir.glob(" sources / * /").map do |dir|
+buildpacks = Dir.glob('sources/*/').map do |dir|
   id          = Tomlrb.load_file(File.join(dir, "buildpack.toml"))['buildpack']['id']
   bp_location = ""
   Dir.chdir dir do
@@ -68,9 +68,9 @@ File.write(builder_config_file, builder_config)
 puts "**************builder.toml**************"
 puts builder_config
 
-system "buildpacks-ci/s cripts / start - docker " or exit 1
-system "./ pack / pack ", " create - builder ", " #{builder_repo}:#{stack}", "--builder-config", "#{builder_config_file}" or exit 1
-system "docker", "save", "#{builder_repo}:#{stack}", "-o", "builder-image/builder.tgz" or exit 1
+system 'buildpacks-ci/scripts/start-docker' or exit 1
+system './pack/pack', 'create-builder', "#{builder_repo}:#{stack}", '--builder-config', "#{builder_config_file}" or exit 1
+system 'docker', 'save', "#{builder_repo}:#{stack}", '-o', 'builder-image/builder.tgz' or exit 1
 
 File.write(File.join("tag", "name"), tag)
 

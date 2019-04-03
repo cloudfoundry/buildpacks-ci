@@ -52,7 +52,6 @@ resources:
     source:
       uri: <%= cnbs[cnb_name]['git_repo'] %>
       tag_filter: "v*"
-
   <% end %>
 
   - name: cflinuxfs3-version
@@ -102,12 +101,12 @@ resources:
       password: {{buildpacks-docker-user-password}}
 <% end %>
 
-#  - name: pack-release
-#    type: git
-#    source:
-#      uri: https://github.com/buildpack/pack.git
-#      branch: master
-#      tag_filter: "v*"
+  - name: pack-release
+    type: git
+    source:
+      uri: https://github.com/buildpack/pack.git
+      branch: master
+      tag_filter: "v*"
 
   - name: pack-master
     type: git
@@ -264,7 +263,7 @@ jobs:
         - get: order
           resource: cflinuxfs3-order-git
         - get: pack
-          resource: pack-master # BACK TO pack-release
+          resource: pack-release
         - get: buildpacks-ci
         - get: version
           params: {bump: "final"}
@@ -394,7 +393,7 @@ jobs:
       - get: order
         resource: bionic-order-git
       - get: pack
-        resource: pack-master # BACK TO pack-release
+        resource: pack-release
       - get: buildpacks-ci
       - get: version
         resource: bionic-version
