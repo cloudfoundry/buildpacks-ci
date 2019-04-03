@@ -7,10 +7,10 @@ ruby -rerb -ryaml -rostruct -e "lp = YAML.load(\`lpass show 'Shared-CF Buildpack
 gcloud compute scp ./deployments/concourse-gcp/manifest.yml pivotal@bosh-bastion-concourse:~/
 rm ./deployments/concourse-gcp/manifest.yml
 
-#gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && cd ~/bosh-deployment && git pull && cd buildpacks-bosh && ./deploy.sh"
-#gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh upload-stemcell https://bosh.io/d/stemcells/bosh-google-kvm-ubuntu-xenial-go_agent"
-#gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh upload-stemcell https://bosh.io/d/stemcells/bosh-google-kvm-windows2016-go_agent"
-gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh deploy --no-redact --tty -d concourse ~/manifest.yml --vars-store ~/concourse-cluster-creds.yml --skip-drain=worker"
+gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && cd ~/bosh-deployment && git pull && cd buildpacks-bosh && ./deploy.sh"
+gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh upload-stemcell https://bosh.io/d/stemcells/bosh-google-kvm-ubuntu-xenial-go_agent"
+gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh upload-stemcell https://bosh.io/d/stemcells/bosh-google-kvm-windows2016-go_agent"
+gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh deploy --no-redact --tty -d concourse ~/manifest.yml --vars-store ~/concourse-cluster-creds.yml"
 gcloud compute ssh pivotal@bosh-bastion-concourse --command=". ~/bosh-env.sh && bosh clean-up --all -n"
 
 exit 0

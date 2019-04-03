@@ -3,31 +3,24 @@ name: concourse
 director_uuid: <%= concourse_gcp_bosh_director_uuid %>
 releases:
 - name: concourse
-  version: 4.2.1
-  url: https://bosh.io/d/github.com/concourse/concourse?v=4.2.1
-  sha1: 470a6fdd7cb82fc723d7d78930c7d261ca4a6cb4
-- name: garden-runc
-  version: 1.16.3
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.16.3
-  sha1: 2a7c813e7e4d862e19334addf022916fb6b91eb0
-- name: windows-tools
-  version: 26
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/windows-tools-release?v=26
-  sha1: 7b962d804ad2c09f3c49c964c93d878cc2bba1b0
-- name: concourse-windows-worker
-  version: 4.0.0
-  url: https://bosh.io/d/github.com/pivotal-cf-experimental/concourse-windows-worker-release?v=4.0.0
-  sha1: 59badb165e81627813d486142ee1748ba8882730
-- name: ulimit
-  version: latest
-  url: https://github.com/pivotal-cf/ulimit-release/releases/download/v1/ulimit.tgz
+  version: 5.0.1
+  url: https://bosh.io/d/github.com/concourse/concourse-bosh-release?v=5.0.1
+  sha1: 122b2775423cbed5dfc147ed771c864940a19bb3
+- name: bpm
+  version: 1.0.4
+  sha1: 41df19697d6a69d2552bc2c132928157fa91abe0
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bpm-release?v=1.0.4
+- name: windows-utilities
+  version: 0.11.0
+  url: "https://bosh.io/d/github.com/cloudfoundry-incubator/windows-utilities-release?v=0.11.0"
+  sha1: efc10ac0f4acae23637ce2c6f864d20df2e3a781
 instance_groups:
 - name: web
   instances: 1
   vm_type: web
   azs:
   - z1
-  stemcell: trusty
+  stemcell: xenial
   networks:
   - name: public
     default:
@@ -37,20 +30,22 @@ instance_groups:
     static_ips:
     - 104.196.174.175
   jobs:
-  - name: ulimit
-    release: ulimit
-    properties:
-      nofile:
-        soft: 32768
-        hard: 32768
-  - name: atc
+  - release: bpm
+    name: bpm
+  - name: web
     release: concourse
     properties:
       add_local_users:
       - buildpacks:<%= concourse_basic_auth_password %>
+      default_check_interval: 3m
       token_signing_key: ((token_signing_key))
       external_url: https://buildpacks.ci.cf-app.com
       publicly_viewable: true
+      worker_gateway:
+        host_key: ((tsa_host_key))
+        authorized_keys:
+        - ((worker_key.public_key))
+        - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4S+edcGVNnLSrRHKrXWOKlGVzYDoPgb984IXkBxuVIw4vtS842AQJR1MXzw4RvfPbXMcaOgoU/PKkGXiuw7YmK8MLOZn1a/xFQXJNLtJ+mw5vVgvMd+Uy4YEc6wHPhk9X2nHKw9QtoW4J6z1BzEiP+qUUnbXrBRNFzWCQnFl2jg9ilboqBXpYVJdqLf+1QbpFV9+9qY2MAg9gRqjUn5tUDCCRmE3etYDG/6fm/wrf8X4m0WNDmbTC7J97w+qCqfCyGnLpbjbJxjo+5UM9V9qGe4OGPaz4N/fqfH3JWdGImOrNkpSPhcy1idUdGMaJckuzK6qLac65mHXg8JJqALE9 pivotal@john"
       main_team:
         auth:
           github:
@@ -81,68 +76,41 @@ instance_groups:
         <%= concourse_buildpacks_gcp_crt.gsub("\n", "\n        ").chomp  %>
         <%= concourse_buildpacks_gcp_chain.gsub("\n", "\n        ").chomp %>
       tls_bind_port: 443
-  - name: tsa
-    release: concourse
-    properties:
-      host_key: ((tsa_host_key))
-      token_signing_key: ((token_signing_key))
-      authorized_keys:
-      - ((worker_key.public_key))
-      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4S+edcGVNnLSrRHKrXWOKlGVzYDoPgb984IXkBxuVIw4vtS842AQJR1MXzw4RvfPbXMcaOgoU/PKkGXiuw7YmK8MLOZn1a/xFQXJNLtJ+mw5vVgvMd+Uy4YEc6wHPhk9X2nHKw9QtoW4J6z1BzEiP+qUUnbXrBRNFzWCQnFl2jg9ilboqBXpYVJdqLf+1QbpFV9+9qY2MAg9gRqjUn5tUDCCRmE3etYDG/6fm/wrf8X4m0WNDmbTC7J97w+qCqfCyGnLpbjbJxjo+5UM9V9qGe4OGPaz4N/fqfH3JWdGImOrNkpSPhcy1idUdGMaJckuzK6qLac65mHXg8JJqALE9 pivotal@john"
 - name: worker
   instances: 12
   vm_type: worker
   azs:
   - z1
-  stemcell: trusty
+  stemcell: xenial
   networks:
   - name: public
   jobs:
   - name: worker
     release: concourse
-    consumes: {baggageclaim: {from: worker-baggageclaim}}
     properties:
-      tsa_host: 10.150.0.2
       drain_timeout: 10m
-      tsa: {worker_key: ((worker_key))}
-      tsa_public_key: ((tsa_host_key.public_key))
-      tsa_worker_private_key: ((worker_key.private_key))
-  - name: baggageclaim
-    release: concourse
-    provides: {baggageclaim: {as: worker-baggageclaim}}
-    properties: {}
-  - name: garden
-    release: garden-runc
-    properties:
-      garden:
-        listen_network: tcp
-        listen_address: 0.0.0.0:7777
-        network_mtu: 1432
-- name: windows2016_worker
+      worker_gateway:
+        worker_key: ((worker_key))
+
+- name: windows-worker
   instances: 1
   vm_type: worker
-  azs:
-  - z1
   stemcell: windows2016
   networks:
   - name: public
+  azs: [z1]
   jobs:
-  - name: golang-windows
-    release: windows-tools
-  - name: git
-    release: windows-tools
-  - name: ginkgo
-    release: windows-tools
-  - name: concourse_windows
-    release: concourse-windows-worker
+  - name: enable_ssh
+    release: windows-utilities
+  - name: worker-windows
+    release: concourse
     properties:
-      concourse_windows:
-        tsa_host: 10.150.0.2:2222
-        drain_timeout: 10m
-        tsa: {worker_key: ((worker_key))}
-        tsa_public_key: ((tsa_host_key.public_key))
-        tsa_worker_private_key: ((worker_key.private_key))
-
+      drain_timeout: 10m
+      worker_gateway:
+        hosts:
+        - 10.150.0.2:2222
+        host_public_key: ((tsa_host_key.public_key))
+        worker_key: ((worker_key))
 variables:
 - name: token_signing_key
   type: rsa
@@ -157,8 +125,8 @@ update:
   canary_watch_time: 1000-120000
   update_watch_time: 1000-120000
 stemcells:
-- alias: trusty
-  os: ubuntu-trusty
+- alias: xenial
+  os: ubuntu-xenial
   version: latest
 - alias: windows2016
   os: windows2016
