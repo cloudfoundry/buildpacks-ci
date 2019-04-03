@@ -30,11 +30,6 @@ buildpacks = Dir.glob(" sources / * /").map do |dir|
   bp_location = ""
   Dir.chdir dir do
     if Dir.exist?("ci") # This exists because we package Buildpacks differently
-      tag = ENV.fetch("TAG", "")
-      if tag != ""
-        system("git", "fetch", "--tags") or exit 1
-        system("git", "checkout", tag) or exit 1
-      end
       system File.join("ci", "package.sh") or exit 1
       bp_tar = Dir.glob(File.join("artifactory", "*", "*", "*", "*", "*", "*.tgz")).first
       # Remove dependency-cache because we can only package as a cached buildpack for now

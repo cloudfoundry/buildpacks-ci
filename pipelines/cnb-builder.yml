@@ -35,7 +35,6 @@ resources:
     type: git
     source:
       uri: <%= cnbs[cnb_name]['git_repo'] %>
-      <% next if ['openjdk', 'buildsystem', 'jvmapplication', 'azureapplicationinsights', 'debug', 'googlestackdriver', 'jmx', 'procfile'].include?(cnb_name) %>
       tag_filter: "v*"
 
   <% end %>
@@ -279,7 +278,6 @@ jobs:
           BUILD_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:build"
           RUN_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:run"
           FINAL: true
-          TAG: "v1.0.0-M6"
       - task: smoke-test-builder
         file: buildpacks-ci/tasks/test-builder/task.yml
         privileged: true
@@ -407,7 +405,6 @@ jobs:
         BUILD_IMAGE: "packs/build:0.1.0"
         RUN_IMAGE: "packs/run:0.1.0"
         FINAL: true
-        TAG: "v1.0.0-M6"
     - task: smoke-test-builder
       file: buildpacks-ci/tasks/test-builder/task.yml
       privileged: true
