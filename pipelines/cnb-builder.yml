@@ -288,6 +288,7 @@ jobs:
           BUILDER_REPO: cloudfoundry/cnb
       - put: builder-image
         params:
+          additional_tags: release-tag/name
           load_file: builder-image/builder.tgz
           load_repository: cloudfoundry/cnb
           load_tag: cflinuxfs3
@@ -295,7 +296,7 @@ jobs:
           tag_as_latest: true
       - put: cflinuxfs3-version
         params:
-          file: version/version
+          bump: patch
 
   - name: update-builder-release-candidate-bionic
     plan:
