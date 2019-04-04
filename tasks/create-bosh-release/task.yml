@@ -26,5 +26,6 @@ params:
   RELEASE_DIR:
   ACCESS_KEY_ID:
   SECRET_ACCESS_KEY:
+  LTS: false
 run:
   path: buildpacks-ci/tasks/create-bosh-release/run.rb
