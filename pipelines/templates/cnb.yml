@@ -15,12 +15,12 @@
   'nodejs-compat' => {
     'integration' => true
   },
-  'python' => {},
   'ruby' => {},
   'php' => {},
   'php-web' => {
     'integration' => true
   },
+  'python' => {},
   'pip' => {
     'integration' => true
   },
@@ -29,7 +29,8 @@
   },
   'python-compat' => {
     'integration' => true
-  }
+  },
+  'conda' => {}
 }
 %>
 ---
