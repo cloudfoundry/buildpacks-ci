@@ -133,7 +133,6 @@ resources:
 
 jobs:
   - name: update-cflinuxfs3-cnb-base-image
-    serial: true
     public: true
     plan:
       # Changes in cnb stack image Dockerfiles
@@ -154,7 +153,6 @@ jobs:
 
 <% cnb_child_images.each do |image_type| %>
   - name: update-cflinuxfs3-cnb-<%= image_type %>-image
-    serial: true
     public: true
     plan:
       # Changes in cnb stack image Dockerfiles
