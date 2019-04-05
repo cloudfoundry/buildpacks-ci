@@ -525,7 +525,7 @@ jobs:
           params:
             repository: release-artifacts
             rebase: true
-            tag: version/version # FIGURE THIS OUT
+            tag: version/version
         - put: private-<%= language %>-offline-buildpack-bosh-release-github-release<%= release_type == 'lts' ? '-lts' : '' %>
           params:
             name: version/version
