@@ -21,6 +21,7 @@ pushd buildpack
   go get github.com/golang/mock/gomock
   go get -u github.com/onsi/ginkgo/ginkgo
   go install github.com/golang/mock/mockgen
+  go mod tidy
   if [[ "$LANGUAGE" != "php" || "$SHIM" == "true" ]]; then
     go mod vendor
   fi
@@ -42,7 +43,11 @@ pushd buildpack
       [ -d finalize ] && (cd finalize && (go generate || true))
 
       export CF_STACK=${CF_STACK:-cflinuxfs2}
-      ginkgo -r -mod=vendor -skipPackage=integration,brats
+      if [[ "$LANGUAGE" != "php" || "$SHIM" == "true" ]]; then
+            ginkgo -r -mod=vendor -skipPackage=integration,brats
+      else
+            ginkgo -r -skipPackage=integration,brats
+      fi
     popd
   fi
 
@@ -60,5 +65,3 @@ pushd buildpack
     echo "libbuildpack is up to date"
   fi
 popd
-
-rsync -a buildpack/ buildpack-artifacts
