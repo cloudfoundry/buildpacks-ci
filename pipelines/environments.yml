@@ -81,12 +81,6 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/nginx-buildpack
       branch: develop
 
-  - name: binary-buildpack
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/binary-buildpack
-      branch: develop
-
   ## bosh.io Stemcells ##
 
   - name: gcp-stemcell
