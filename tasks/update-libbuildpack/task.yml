@@ -8,9 +8,10 @@ inputs:
   - name: buildpacks-ci
   - name: buildpack
 outputs:
-  - name: buildpack-artifacts
+  - name: buildpack
 run:
   path: buildpacks-ci/tasks/update-libbuildpack/run.sh
 params:
+  START_DOCKER:
   LANGUAGE:
   SHIM:
