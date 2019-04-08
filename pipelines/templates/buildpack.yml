@@ -375,7 +375,6 @@ jobs: ##########################################################################
               DOCKER_START: true
 <% end %>
 
-
   - name: create-buildpack-release-story
     serial: true
     public: true
@@ -1226,7 +1225,7 @@ jobs: ##########################################################################
           PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
 <% if buildpacks[language]['v3'] %>
-  - name: update-libbuildpack-v3
+  - name: update-libbuildpack-v3-branch
     serial: true
     public: true
     plan:
@@ -1238,18 +1237,11 @@ jobs: ##########################################################################
         resource: buildpack-v3
     - task: update-libbuildpack
       file: buildpacks-ci/tasks/update-libbuildpack/task.yml
-      <% if language == "php" %>
-      privileged: true
-      <% end %>
       params:
-        <% if language == 'php' %>
-        DOCKER_START: true
-        <% end %>
         LANGUAGE: <%= language %>
-        SHIM: true
     - put: buildpack-v3
       params:
-        repository: buildpack-artifacts
+        repository: buildpack
         rebase: true
 <% end %>
 
@@ -1275,7 +1267,7 @@ jobs: ##########################################################################
           LANGUAGE: <%= language %>
       - put: buildpack-develop
         params:
-          repository: buildpack-artifacts
+          repository: buildpack
           rebase: true
 <% if buildpacks[language]['compile_extensions'] %>
   - name: update-compile-extensions
