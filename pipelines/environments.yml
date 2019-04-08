@@ -3,6 +3,7 @@
    opsfiles = [
      '../cf-deployment/operations/windows2012R2-cell.yml',
      '../cf-deployment/operations/windows2019-cell.yml',
+     '../cf-deployment/operations/use-online-windows2019fs.yml',
      '../cf-deployment/operations/use-latest-stemcell.yml',
      '../cf-deployment/operations/use-latest-windows2012R2-stemcell.yml',
      '../cf-deployment/operations/use-latest-windows2019-stemcell.yml',
@@ -10,7 +11,6 @@
      '../cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml',
      'deployments/operations/no-canaries.yml',
      'deployments/edge-shared/num-cells.yml',
-     'deployments/operations/add-windows-stack.yml'
    ]
    toolsmiths_envs = {'lts' => 557, 'menifee' => 360, 'pittsburg' => 421, 'orinda' => 399}
 %>
@@ -183,7 +183,7 @@ jobs: ##########################################################################
               <% locks_per_environment.times do |lock_num| %>
               - put: edge-environments
                 params:
-                  add: environment-locks/<%= env %><%= lock_num %>
+                  update: environment-locks/<%= env %><%= lock_num %>
               <% end %>
 
   - name: deploy-<%= env %>
@@ -204,6 +204,8 @@ jobs: ##########################################################################
           - get: cflinuxfs3-bosh-release
           - get: r-buildpack
           - get: nginx-buildpack
+          - get: ops-files
+            resource: bbl-state
           - get: 3am-daily-timer
             trigger: true
           <% locks_per_environment.times do |lock_num| %>
@@ -219,7 +221,7 @@ jobs: ##########################################################################
             params:
               BBL_STATE_DIR: <%= env %>
               MANIFEST_FILE: cf-deployment.yml
-              OPS_FILES: "operations/use-latest-windows2012R2-stemcell.yml operations/use-latest-windows2019-stemcell.yml"
+              OPS_FILES: "../cf-deployment/operations/windows2012R2-cell.yml ../cf-deployment/operations/windows2019-cell.yml"
           - task: upload-bosh-release
             file: buildpacks-ci/tasks/upload-bosh-release/task.yml
             input_mapping:
