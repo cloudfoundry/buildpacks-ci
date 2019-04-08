@@ -7,12 +7,12 @@ image_resource:
     tag: bbl-6 # TODO cut this back after all pipelines migrate to bbl 6
 inputs:
   - name: buildpacks-ci
-  - name: hwc-buildpack
-  - name: binary-buildpack
+  - name: r-buildpack
+  - name: nginx-buildpack
   - name: bbl-state
 run:
   path: buildpacks-ci/tasks/clean-up-env-buildpacks/run.sh
 params:
   ENV_NAME:
-  INSTALL_STACK_ASSOC_HWC_BPS: false
+  INSTALL_ADDITIONAL: false
   ALLOW_FAILURE: false

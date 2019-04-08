@@ -2,10 +2,10 @@
    locks_per_environment = 4
    opsfiles = [
      '../cf-deployment/operations/windows2012R2-cell.yml',
-     '../cf-deployment/operations/windows2016-cell.yml',
+     '../cf-deployment/operations/windows2019-cell.yml',
      '../cf-deployment/operations/use-latest-stemcell.yml',
      '../cf-deployment/operations/use-latest-windows2012R2-stemcell.yml',
-     '../cf-deployment/operations/use-latest-windows2016-stemcell.yml',
+     '../cf-deployment/operations/use-latest-windows2019-stemcell.yml',
      '../cf-deployment/operations/experimental/enable-traffic-to-internal-networks.yml',
      '../cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml',
      'deployments/operations/no-canaries.yml',
@@ -69,10 +69,16 @@ resources: #####################################################################
       repository: cflinuxfs3-release
       access_token: {{buildpacks-github-token}}
 
-  - name: hwc-buildpack
+  - name: r-buildpack
     type: git
     source:
-      uri: https://github.com/cloudfoundry/hwc-buildpack
+      uri: https://github.com/cloudfoundry/r-buildpack
+      branch: develop
+
+  - name: nginx-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/nginx-buildpack
       branch: develop
 
   - name: binary-buildpack
@@ -202,8 +208,8 @@ jobs: ##########################################################################
           - get: gcp-windows2016-stemcell
           - get: cf-deployment-concourse-tasks
           - get: cflinuxfs3-bosh-release
-          - get: hwc-buildpack
-          - get: binary-buildpack
+          - get: r-buildpack
+          - get: nginx-buildpack
           - get: 3am-daily-timer
             trigger: true
           <% locks_per_environment.times do |lock_num| %>
@@ -214,20 +220,12 @@ jobs: ##########################################################################
               claim: <%= env %><%= lock_num %>
           <% end %>
         - aggregate:
-          - task: bosh-upload-windows2012R2-stemcell
+          - task: bosh-upload-all-stemcells
             file: cf-deployment-concourse-tasks/bosh-upload-stemcells/task.yml
             params:
               BBL_STATE_DIR: <%= env %>
-              MANIFEST_FILE: ../bbl-state/manifests/manifest-windows2012R2.yml
-          - task: bosh-upload-windows2016-stemcell
-            file: cf-deployment-concourse-tasks/bosh-upload-stemcells/task.yml
-            params:
-              BBL_STATE_DIR: <%= env %>
-              MANIFEST_FILE: ../bbl-state/manifests/manifest-windows2016.yml
-          - task: bosh-upload-stemcells
-            file: cf-deployment-concourse-tasks/bosh-upload-stemcells/task.yml
-            params:
-              BBL_STATE_DIR: <%= env %>
+              MANIFEST_FILE: cf-deployment.yml
+              OPS_FILES: "operations/use-latest-windows2012R2-stemcell.yml operations/use-latest-windows2019-stemcell.yml"
           - task: upload-bosh-release
             file: buildpacks-ci/tasks/upload-bosh-release/task.yml
             input_mapping:
@@ -255,7 +253,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
           params:
             ENV_NAME: <%= env %>
-            INSTALL_STACK_ASSOC_HWC_BPS: true
+            INSTALL_ADDITIONAL: true
         on_failure:
           put: failure-alert
           params:
