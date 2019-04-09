@@ -15,29 +15,29 @@ describe GitClient do
   end
 
   describe '#clone_repo' do
-    let(:url) { "https://some-url" }
-    let(:dir) {Dir.mktmpdir }
-    subject { described_class.clone_repo(url, dir) }
+      let(:url) { "https://some-url" }
+      let(:dir) {Dir.mktmpdir }
+      subject { described_class.clone_repo(url, dir) }
 
-    before { allow(described_class).to receive(:system).and_return(git_successful) }
+      before { allow(described_class).to receive(:system).and_return(git_successful) }
 
-    context 'git works properly' do
-      let(:git_successful) { true }
+      context 'git works properly' do
+        let(:git_successful) { true }
 
-      it 'should git clone' do
-        expect(described_class).to receive(:system).with("git clone #{url} #{dir}")
+        it 'should git clone' do
+          expect(described_class).to receive(:system).with("git clone #{url} #{dir}")
 
-        subject
+          subject
+        end
       end
-    end
 
-    context 'git fails' do
-      let(:git_successful) { false }
+      context 'git fails' do
+        let(:git_successful) { false }
 
-      it 'throws an exception about not cloning' do
-        expect{ subject }.to raise_error(GitClient::GitError, 'Could not clone')
+        it 'throws an exception about not cloning' do
+          expect{ subject }.to raise_error(GitClient::GitError, 'Could not clone')
+        end
       end
-    end
   end
 
   describe '#update_submodule_to_latest' do
