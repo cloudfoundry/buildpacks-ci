@@ -21,8 +21,8 @@ def release_notes
   return "https://github.com/cloudfoundry/stack-auditor/releases/tag/v#{version}"
 end
 
-def description
-  description = <<HEREDOC
+description =
+  <<~HEREDOC.chomp
   Buildpack extensions is a suite of add-on tools that assist in work related to buildpacks.
 
   Stack Auditor:
@@ -30,9 +30,6 @@ def description
   - To install, follow the Installation Steps outlined here: https://github.com/cloudfoundry/stack-auditor
   - For release notes, see: #{release_notes}
 HEREDOC
-
-  return description
-end
 
 metadata_file_name = "stack-auditor.yml"
 metadata_yml = File.join(Dir.pwd, "pivnet-metadata-artifacts", metadata_file_name)
