@@ -50,6 +50,10 @@ class DeprecationNotifier
 end
 
 def find_dates(manifest, today)
+  if !manifest['dependency_deprecation_dates']
+    return []
+  end
+
   return manifest['dependency_deprecation_dates']
              .select {|d| d['date'] <= today + 45}
              .map {|d| d['date'] = d['date'].to_s; d}
