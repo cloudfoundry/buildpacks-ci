@@ -92,7 +92,7 @@
 
   'node' =>            { buildpacks: {
                           nodejs: { lines: ["6.X.X", "8.X.X", "10.X.X", "11.X.X"], removal_strategy: 'keep_latest_released'},
-                          ruby: { lines: ["6.X.X"] },
+                          ruby: { lines: ["6.X.X", "10.X.X"] },
                           'dotnet-core' => { lines: ["6.X.X"] },
                           'nodejs-cnb' => {lines: ["6.X.X", "8.X.X", "10.X.X", "11.X.X"], removal_strategy: 'keep_latest_released'}},
                         source_type: 'node'},
