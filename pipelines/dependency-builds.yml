@@ -341,8 +341,8 @@ jobs:
     - task: create-new-version-line-story
       file: buildpacks-ci/tasks/build-binary-new/create-new-version-line-story.yml
       params:
-        TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-        TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+        TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
+        TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         BUILDPACKS: <%= dep[:buildpacks].keys.join(' ') %>
         EXISTING_VERSION_LINES: <%= version_lines.join(' ') %>
@@ -394,8 +394,8 @@ jobs:
     - task: create-tracker-story
       file: buildpacks-ci/tasks/build-binary-new/create.yml
       params:
-        TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-        TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+        TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
+        TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         BUILDPACKS: <%= dep[:buildpacks].select{ |_, bp_data| bp_uses_line?(bp_data,line) }.keys.join(' ') %>
     - put: builds
@@ -436,7 +436,7 @@ jobs:
       file: buildpacks-ci/tasks/build-binary-new/finish.yml
       params:
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-        TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+        TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
 
 <% if dep_name == 'node' %>
 - name: copy-<%=dep_name%>-<%= line %>-bionic

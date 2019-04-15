@@ -232,9 +232,9 @@ jobs: ##########################################################################
       - task: create-tracker-story
         file: buildpacks-ci/tasks/create-new-rootfs-release-story/task.yml
         params:
-          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+          TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
           STACK: <%= rootfs_name %>
 
   - name: build-rootfs
@@ -633,8 +633,8 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/finalize-security-notice-stories/task.yml
           attempts: 20
           params:
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+            TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
+            TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             STACK: <%= rootfs_name %>
 
