@@ -18,7 +18,7 @@ resources:
   - name: davos-cve-stories-cflinuxfs2
     type: cf-tracker-resource
     source:
-      project_id: {{cf-buildpacks-public-tracker-id}}
+      project_id: '{{cf-buildpacks-public-tracker-id}}'
       token: {{pivotal-tracker-api-token}}
       labels:
         - cflinuxfs2
@@ -26,7 +26,7 @@ resources:
   - name: davos-cve-stories-cflinuxfs3
     type: cf-tracker-resource
     source:
-      project_id: {{cf-buildpacks-public-tracker-id}}
+      project_id: '{{cf-buildpacks-public-tracker-id}}'
       token: {{pivotal-tracker-api-token}}
       labels:
         - cflinuxfs3
@@ -120,7 +120,7 @@ jobs:
           file: buildpacks-ci/tasks/categorize-security-notices/task.yml
           params:
             TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
-            TRACKER_PROJECT_REQUESTER: {{cf-buildpacks-requester-id}}
+            TRACKER_PROJECT_REQUESTER: '{{cf-buildpacks-requester-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             STACK: cflinuxfs2
   - name: categorize-security-notices-cflinuxfs3
@@ -140,7 +140,7 @@ jobs:
           file: buildpacks-ci/tasks/categorize-security-notices/task.yml
           params:
             TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
-            TRACKER_PROJECT_REQUESTER: {{cf-buildpacks-requester-id}}
+            TRACKER_PROJECT_REQUESTER: '{{cf-buildpacks-requester-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             STACK: cflinuxfs3
   - name: new-releases
@@ -159,7 +159,7 @@ jobs:
           BUILDPACKS_SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
           CAPI_SLACK_CHANNEL: {{capi-slack-channel}}
           CAPI_SLACK_WEBHOOK: {{capi-slack-webhook}}
-          BUILDPACKS_TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          BUILDPACKS_TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
           CAPI_TRACKER_PROJECT_ID: {{capi-public-tracker-id}}
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
           TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
