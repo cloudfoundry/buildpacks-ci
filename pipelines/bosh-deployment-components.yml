@@ -91,9 +91,9 @@ jobs: ########################################################
       - task: create-new-bosh-deployment-components-story
         file: buildpacks-ci/tasks/create-new-bosh-deployment-components-story/task.yml
         params:
-          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+          TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
       - put: public-buildpacks-ci-robots
         params:
           repository: buildpacks-robots-artifacts

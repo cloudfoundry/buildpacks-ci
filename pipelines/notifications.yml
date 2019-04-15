@@ -119,7 +119,7 @@ jobs:
         - task: categorize-security-notices-cflinuxfs2
           file: buildpacks-ci/tasks/categorize-security-notices/task.yml
           params:
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
             TRACKER_PROJECT_REQUESTER: {{cf-buildpacks-requester-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             STACK: cflinuxfs2
@@ -139,7 +139,7 @@ jobs:
         - task: categorize-security-notices-cflinuxfs3
           file: buildpacks-ci/tasks/categorize-security-notices/task.yml
           params:
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
             TRACKER_PROJECT_REQUESTER: {{cf-buildpacks-requester-id}}
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             STACK: cflinuxfs3
@@ -162,7 +162,7 @@ jobs:
           BUILDPACKS_TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
           CAPI_TRACKER_PROJECT_ID: {{capi-public-tracker-id}}
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+          TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
       - put: new-releases
         params:
           repository: new-releases-artifacts
@@ -178,9 +178,9 @@ jobs:
       - task: create-latest-upstream-changes-story
         file: buildpacks-ci/tasks/create-latest-upstream-changes-story/task.yml
         params:
-          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+          TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
 
   - name: new-buildpack-cves
     serial: true
@@ -220,9 +220,9 @@ jobs:
             params:
               SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
               SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
-              TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+              TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
               TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-              TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+              TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
               STACK: cflinuxfs2
             output_mapping:
               output-new-cves: output-new-cves-cflinuxfs2
@@ -237,9 +237,9 @@ jobs:
             params:
               SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
               SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
-              TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+              TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
               TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-              TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+              TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
               STACK: cflinuxfs3
             output_mapping:
               output-new-cves: output-new-cves-cflinuxfs3
@@ -260,9 +260,9 @@ jobs:
       - task: check-for-latest-php-module-versions
         file: buildpacks-ci/tasks/check-for-latest-php-module-versions/task.yml
         params:
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+            TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+            TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
 
 
   - name: update-lts-environment
@@ -275,7 +275,7 @@ jobs:
       - task: create-update-lts-environment-story
         file: buildpacks-ci/tasks/create-update-lts-environment-story/task.yml
         params:
-          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+          TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
           ENV_URL: {{ci-cf-lts-target}}

@@ -349,7 +349,7 @@ jobs:
       - put: concourse2tracker
         params:
           git_path: bal-develop
-          project_id: {{cf-buildpacks-public-tracker-id}}
+          project_id: '{{cf-buildpacks-public-tracker-id}}'
           api_token: {{pivotal-tracker-api-token}}
 
   - name: update-diego-release

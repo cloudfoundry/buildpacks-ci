@@ -224,9 +224,9 @@ jobs: ##########################################################################
       - task: create-tracker-story
         file: buildpacks-ci/tasks/create-new-cflinuxfs2-release-story/task.yml
         params:
-          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
           TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-          TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+          TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
 
   - name: build-rootfs
     serial: true
@@ -599,8 +599,8 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/finalize-security-notice-stories/task.yml
           attempts: 20
           params:
-            TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
-            TRACKER_REQUESTER_ID: {{cf-buildpacks-requester-id}}
+            TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
+            TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             STACK: cflinuxfs2
   - name: upload-to-github
