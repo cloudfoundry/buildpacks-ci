@@ -6,7 +6,7 @@ require_relative '../../lib/release-notes-creator'
 require_relative '../../lib/git-client'
 
 
-previous_version = File.read('previous-cflinuxfs2-release/version').strip
+previous_version = File.read('previous-cflinuxfs2-release/.git/ref').strip
 new_version = File.read('version/number').strip
 
 if ENV.fetch('STACK') == 'cflinuxfs2'
