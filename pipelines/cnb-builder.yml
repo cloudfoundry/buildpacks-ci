@@ -42,6 +42,12 @@ resources:
       paths:
         - bionic-order.toml
 
+  - name: cnb-builder
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cnb-builder
+      branch: master
+
   <% cnbs.keys.each do |cnb_name| %>
   - name: <%= cnb_name %>-cnb
     type: git
@@ -174,6 +180,7 @@ jobs:
   - name: create-builder-release-candidate-cflinuxfs3
     plan:
       - aggregate:
+        - get: cnb-builder
         - get: order
           resource: cflinuxfs3-order-git
           trigger: true
@@ -260,6 +267,7 @@ jobs:
         <% end %>
         - get: order
           resource: cflinuxfs3-order-git
+        - get: cnb-builder
         - get: pack
           resource: pack-release
         - get: buildpacks-ci
@@ -314,7 +322,7 @@ jobs:
         params:
           bump: patch
 
-  - name: update-builder-release-candidate-bionic
+  - name: create-builder-release-candidate-bionic
     plan:
       - aggregate:
         <% cnbs.keys.each do |cnb_name| %>
@@ -328,6 +336,7 @@ jobs:
         - get: pack
           trigger: true
           resource: pack-master
+        - get: cnb-builder
         - get: buildpacks-ci
         - get: version
           resource: bionic-version
@@ -392,6 +401,7 @@ jobs:
         resource: bionic-order-git
       - get: pack
         resource: pack-release
+      - get: cnb-builder
       - get: buildpacks-ci
       - get: version
         resource: bionic-version
