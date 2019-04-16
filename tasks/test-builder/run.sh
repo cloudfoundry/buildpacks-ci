@@ -12,4 +12,4 @@ pushd pack
     go build -mod=vendor -o pack ./cmd/pack/main.go
 popd
 
-./pack/pack build node-app --builder "$BUILDER_REPO:$STACK" -p pack/acceptance/testdata/node_app
+./pack/pack build node-app --builder "$BUILDER_REPO:$STACK" -p cnb-builder/fixtures/node_app
