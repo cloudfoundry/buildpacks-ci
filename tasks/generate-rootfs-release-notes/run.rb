@@ -6,7 +6,7 @@ require_relative '../../lib/release-notes-creator'
 require_relative '../../lib/git-client'
 
 
-previous_version = File.read('previous-rootfs-release/version').strip
+previous_version = File.read('previous-rootfs-release/.git/ref').strip
 new_version = File.read('version/number').strip
 stack = ENV.fetch('STACK')
 ubuntu_version = {
