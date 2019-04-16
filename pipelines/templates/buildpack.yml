@@ -408,7 +408,7 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-master
+          resource: buildpack-develop
       - do:
         - task: create-deprecation-stories
           file: buildpacks-ci/tasks/create-deprecation-stories/task.yml
