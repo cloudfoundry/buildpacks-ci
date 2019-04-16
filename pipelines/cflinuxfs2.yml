@@ -70,6 +70,14 @@ resources: #####################################################################
       branch: master
       private_key: {{stacks-private-key}}
 
+  - name: cflinuxfs2-github-tags
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cflinuxfs2.git
+      branch: master
+      private_key: {{stacks-private-key}}
+      tag_filter: "*"
+
   - name: cflinuxfs2-build-trigger
     type: git
     source:
@@ -235,7 +243,7 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: previous-cflinuxfs2-release
-          resource: cflinuxfs2-github-release-drafts
+          resource: cflinuxfs2-github-tags
         - get: buildpacks-ci
         - get: new-cves
           trigger: true
@@ -610,7 +618,7 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: previous-cflinuxfs2-release
-          resource: cflinuxfs2-github-release-drafts
+          resource: cflinuxfs2-github-tags
         - get: cflinuxfs2
           passed: [ release-cflinuxfs2 ]
         - get: new-cves
