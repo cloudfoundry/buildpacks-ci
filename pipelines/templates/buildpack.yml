@@ -737,7 +737,7 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: buildpacks-ci
-        <% pws_stacks = buildpacks[language]['stacks'] - ['windows2012R2', 'windows']
+        <% pws_stacks = buildpacks[language]['stacks'] - ['windows2012R2']
            pws_stacks.each do |stack| %>
         - get: pivotal-buildpack-cached-<%= stack %>
           passed: [ ship-it ]
