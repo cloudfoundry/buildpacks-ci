@@ -1,0 +1,93 @@
+<% languages = ['nodejs'] %>
+
+---
+resources:
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
+
+  - name: cnb2cf
+    type: git
+    source:
+      uri: git@github.com/cloudfoundry/cnb2cf
+      branch: master
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+
+  <% languages.each do |lang| %>
+  - name: <%= lang %>-buildpack
+    type: git
+    source:
+      uri: git@github.com/cloudfoundry/<%= lang %>-buildpack
+      branch: v3
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+  <%end%>
+
+  - name: shim-git
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/libbuildpack
+      branch: master
+      paths:
+        - shims
+
+  - name: shim-version
+    type: semver
+    source:
+      initial_version: 0.0.1
+      bucket: shim-versions
+      key: version
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+
+  - name: buildpacks-bucket-shim-bundle
+    type: s3
+    source:
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+      regexp: dependencies/shim-bundle/shim-bundle-(\d+.\d+.\d+).*tgz
+
+jobs:
+  - name: create-shim-bundle
+    plan:
+      - aggregate:
+          - get: buildpacks-ci
+          - get: shim
+            resource: shim-git
+            trigger: true
+          - get: version
+            resource: shim-version
+          - get: cnb2cf
+      - task: create-shim-bundle
+        file: buildpacks-ci/tasks/create-shim-bundle/task.yml
+      - aggregate:
+          - put: buildpacks-bucket-shim-bundle
+            params:
+              file: archive/shim-bundle*
+          - do:
+            - task: update-cnb2cf-template
+              file: buildpacks-ci/tasks/update-cnb2cf-template/task.yml
+            - put: cnb2cf
+              params:
+                repository: cnb2cf
+      - put: shim-version
+        params:
+          bump: minor
+  <% languages.each do |lang| %>
+  - name: update-shim-bundle-in-<%= lang %>
+    plan:
+      - aggregate:
+          - get: buildpacks-ci
+          - get: s3
+            resource: buildpacks-bucket-shim-bundle
+            trigger: true
+          - get: buildpack
+            resource: <%= lang %>-buildpack
+      - task: update-shim-bundle-url
+        file: buildpacks-ci/tasks/update-shim-bundle-url/task.yml
+      - put: <%= lang %>-buildpack
+        params:
+          repository: buildpack
+  <% end %>
