@@ -337,7 +337,8 @@ class Builder
         )
       )
 
-    when 'dep', 'glide', 'godep'
+    # just copy the file
+    when 'dep', 'glide', 'godep', 'lifecycle'
       binary_builder.build(source_input)
       out_data.merge!(
         artifact_output.move_dependency(
