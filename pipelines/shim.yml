@@ -67,7 +67,7 @@ jobs:
           file: archive/shim-bundle*
       - put: shim-version
         params:
-          bump: minor
+          bump: patch
 
   - name: update-cnb2cf-template-shim-binaries
     plan:
