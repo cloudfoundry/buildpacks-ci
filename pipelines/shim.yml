@@ -11,7 +11,7 @@ resources:
   - name: cnb2cf
     type: git
     source:
-      uri: git@github.com/cloudfoundry/cnb2cf
+      uri: git@github.com:cloudfoundry/cnb2cf
       branch: master
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
 
@@ -19,7 +19,7 @@ resources:
   - name: <%= lang %>-buildpack
     type: git
     source:
-      uri: git@github.com/cloudfoundry/<%= lang %>-buildpack
+      uri: git@github.com:cloudfoundry/<%= lang %>-buildpack
       branch: v3
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
   <%end%>
@@ -53,38 +53,45 @@ jobs:
   - name: create-shim-bundle
     plan:
       - aggregate:
-          - get: buildpacks-ci
-          - get: shim
-            resource: shim-git
-            trigger: true
-          - get: version
-            resource: shim-version
-          - get: cnb2cf
+        - get: buildpacks-ci
+        - get: shim
+          resource: shim-git
+          trigger: true
+        - get: version
+          resource: shim-version
+        - get: cnb2cf
       - task: create-shim-bundle
         file: buildpacks-ci/tasks/create-shim-bundle/task.yml
-      - aggregate:
-          - put: buildpacks-bucket-shim-bundle
-            params:
-              file: archive/shim-bundle*
-          - do:
-            - task: update-cnb2cf-template
-              file: buildpacks-ci/tasks/update-cnb2cf-template/task.yml
-            - put: cnb2cf
-              params:
-                repository: cnb2cf
+      - put: buildpacks-bucket-shim-bundle
+        params:
+          file: archive/shim-bundle*
       - put: shim-version
         params:
           bump: minor
+
+  - name: update-cnb2cf-template-shim-binaries
+    plan:
+      - aggregate:
+        - get: s3
+          resource: buildpacks-bucket-shim-bundle
+          trigger: true
+          unpack: true
+        - get: cnb2cf
+      - task: update-cnb2cf-template
+        file: buildpacks-ci/tasks/update-cnb2cf-template/task.yml
+      - put: cnb2cf
+        params:
+          repository: cnb2cf
   <% languages.each do |lang| %>
   - name: update-shim-bundle-in-<%= lang %>
     plan:
       - aggregate:
-          - get: buildpacks-ci
-          - get: s3
-            resource: buildpacks-bucket-shim-bundle
-            trigger: true
-          - get: buildpack
-            resource: <%= lang %>-buildpack
+        - get: buildpacks-ci
+        - get: s3
+          resource: buildpacks-bucket-shim-bundle
+          trigger: true
+        - get: buildpack
+          resource: <%= lang %>-buildpack
       - task: update-shim-bundle-url
         file: buildpacks-ci/tasks/update-shim-bundle-url/task.yml
       - put: <%= lang %>-buildpack

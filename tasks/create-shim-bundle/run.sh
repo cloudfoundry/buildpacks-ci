@@ -5,15 +5,13 @@ set -euo pipefail
 version=$(cat version/version)
 
 pushd shim
-    GOOS=linux go build -ldflags="-s -w" -o binaries/detect shims/cmd/detect/main.go
-    GOOS=linux go build -ldflags="-s -w" -o binaries/supply shims/cmd/supply/main.go
-    GOOS=linux go build -ldflags="-s -w" -o binaries/finalize shims/cmd/finalize/main.go
-    GOOS=linux go build -ldflags="-s -w" -o binaries/release shims/cmd/release/main.go
+    GOOS=linux go build -ldflags="-s -w" -o ../detect shims/cmd/detect/main.go
+    GOOS=linux go build -ldflags="-s -w" -o ../supply shims/cmd/supply/main.go
+    GOOS=linux go build -ldflags="-s -w" -o ../finalize shims/cmd/finalize/main.go
+    GOOS=linux go build -ldflags="-s -w" -o ../release shims/cmd/release/main.go
 popd
 
-pushd binaries
-    tar czf ../archive/shim-bundle.tgz detect supply finalize release
-popd
+tar czf archive/shim-bundle.tgz detect supply finalize release
 
 sha=$(sha256sum archive/shim-bundle.tgz | cut -d ' ' -f 1)
 
