@@ -79,15 +79,6 @@ jobs:
         - get: repo
           resource: ci-develop
           trigger: true
-      - task: run-ci-unit-tests
-        file: buildpacks-ci/tasks/run-buildpacks-ci-unit-specs/task.yml
-        params:
-          CI_USERNAME: buildpacks
-          CI_PASSWORD: {{concourse_basic_auth_password}}
-          GITHUB_USERNAME: {{github-username}}
-          GITHUB_PASSWORD: {{github-password}}
-          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-          PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
       - task: github-set-status-success
         file: buildpacks-ci/tasks/set-status-success/task.yml
         params:

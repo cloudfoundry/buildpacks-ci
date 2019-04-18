@@ -18,5 +18,10 @@ run:
     - |
       set -ex
       cd buildpacks-ci
+      bundle exec rspec --tag ~fly
+      pushd dockerfiles/depwatcher
+        shards
+        crystal spec --no-debug
+      popd
       ./tasks/run-buildpacks-ci-specs/fly-login.sh $CI_USERNAME $CI_PASSWORD
       bundle exec rake
