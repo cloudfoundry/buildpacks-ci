@@ -72,6 +72,7 @@ jobs:
   - name: update-cnb2cf-template-shim-binaries
     plan:
       - aggregate:
+        - get: buildpacks-ci
         - get: s3
           resource: buildpacks-bucket-shim-bundle
           trigger: true
@@ -83,6 +84,7 @@ jobs:
       - put: cnb2cf
         params:
           repository: cnb2cf
+          rebase: true
   <% languages.each do |lang| %>
   - name: update-shim-bundle-in-<%= lang %>
     plan:
@@ -98,4 +100,5 @@ jobs:
       - put: <%= lang %>-buildpack
         params:
           repository: buildpack
+          rebase: true
   <% end %>
