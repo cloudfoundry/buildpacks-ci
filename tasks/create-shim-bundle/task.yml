@@ -10,6 +10,5 @@ inputs:
   - name: version
 outputs:
   - name: archive
-  - name: binaries
 run:
   path: buildpacks-ci/tasks/create-shim-bundle/run.sh

@@ -2,8 +2,11 @@
 
 set -euo pipefail
 
-version=$(cat version/version)
-mv binaries/* cnb2cf/template/bin/
+version=$(cat s3/version)
+mv s3/detect cnb2cf/template/bin/
+mv s3/supply cnb2cf/template/bin/
+mv s3/finalize cnb2cf/template/bin/
+mv s3/release cnb2cf/template/bin/
 
 pushd cnb2cf
   git add .

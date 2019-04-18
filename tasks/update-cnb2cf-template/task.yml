@@ -6,9 +6,8 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: binaries
+  - name: s3
   - name: cnb2cf
-  - name: version
 outputs:
   - name: cnb2cf
 run:
