@@ -49,6 +49,22 @@ resources:
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
       regexp: dependencies/shim-bundle/shim-bundle-(\d+.\d+.\d+).*tgz
 
+  - name: lifecycle-builds
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ binary-builds-new/lifecycle ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+
+  - name: buildpacks-bucket-lifecycle-bundle
+    type: s3
+    source:
+      bucket: {{buildpacks-binaries-s3-bucket}}
+      access_key_id: {{pivotal-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+      regexp: dependencies/lifecycle/lifecycle-(\d+.\d+.\d+)-any-stack.*tgz
+
 jobs:
   - name: create-shim-bundle
     plan:
@@ -69,7 +85,7 @@ jobs:
         params:
           bump: patch
 
-  - name: update-cnb2cf-template-shim-binaries
+  - name: update-cnb2cf-template-shim-binaries-shim-binaries
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -79,8 +95,8 @@ jobs:
           params:
             unpack: true
         - get: cnb2cf
-      - task: update-cnb2cf-template
-        file: buildpacks-ci/tasks/update-cnb2cf-template/task.yml
+      - task: update-cnb2cf-template-shim-binaries
+        file: buildpacks-ci/tasks/update-cnb2cf-template-shim-binaries/task.yml
       - put: cnb2cf
         params:
           repository: cnb2cf
@@ -102,3 +118,29 @@ jobs:
           repository: buildpack
           rebase: true
   <% end %>
+
+  - name: update-cnb2cf-template-shim-binaries-lifecycle-binaries
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: s3
+          resource: buildpacks-bucket-lifecycle-bundle
+          trigger: true
+        - get: cnb2cf
+        - get: builds
+          resource: lifecycle-builds
+      - task: update-cnb2cf-template-shim-binaries
+        file: buildpacks-ci/tasks/update-cnb2cf-template-shim-binaries/task.yml
+      - put: cnb2cf
+        params:
+          repository: cnb2cf
+          rebase: true
+
+  - name: update-cnb2cf-dependencies
+    plan:
+    - aggregate:
+      - get: buildpacks-ci
+      - get: libbuildpack
+      - get: cnb2cf
+      - get: builds
+       resource: lifecycle-builds
