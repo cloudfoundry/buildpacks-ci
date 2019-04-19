@@ -11,4 +11,4 @@ inputs:
 outputs:
   - name: cnb2cf
 run:
-  path: buildpacks-ci/tasks/update-cnb2cf-template/run.sh
+  path: buildpacks-ci/tasks/update-cnb2cf-template-shim-binaries/run.sh
