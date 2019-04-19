@@ -67,6 +67,12 @@
                         source_type: 'github_tags',
                         source_params: ['repo: mono/libgdiplus', 'tag_regex: ^[0-9]+\.[0-9]+$']},
 
+  'lifecycle' =>        { buildpacks: { nodejs: { } },
+                          branch: 'v3',
+                          source_type: 'github_releases',
+                          source_params: ['repo: buildpack/lifecycle', 'extension: .tgz'],
+                          any_stack: true },
+
   'miniconda2' =>      { buildpacks: { python: {} },
                         third_party_hosted: true,
                         source_type: 'miniconda',
@@ -260,8 +266,7 @@ resources:
     uri: git@github.com:cloudfoundry/<%= buildpack %>.git
     private_key: {{<%= buildpack %>-private-key}}
     branch: master
-    # TODO: UNCOMMENT LINE BELOW ONCE WE HAVE A RELEASE
-    # tag_filter: v*
+    tag_filter: v*
 <% else %>
 - name: <%= buildpack %>-buildpack
   type: git
