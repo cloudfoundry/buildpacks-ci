@@ -1,0 +1,17 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: module
+  - name: project
+outputs:
+  - name: project
+run:
+  path: buildpacks-ci/tasks/update-go-module/run.sh
+params:
+  MODULE_PATH:
+  VENDOR: false
