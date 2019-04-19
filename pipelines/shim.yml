@@ -65,6 +65,27 @@ resources:
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
       regexp: dependencies/lifecycle/lifecycle-(\d+.\d+.\d+)-any-stack.*tgz
 
+  - name: libbuildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/libbuildpack
+      branch: master
+      paths: [ shims ]
+
+
+  - name: buildpack-libbuildpack
+    type: git
+    source:
+      uri: https://github.com/buildpack/libbuildpack
+      branch: master
+
+
+  - name: libcfbuildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/libcfbuildpack
+      branch: master
+
 jobs:
   - name: create-shim-bundle
     plan:
@@ -125,22 +146,57 @@ jobs:
         - get: buildpacks-ci
         - get: s3
           resource: buildpacks-bucket-lifecycle-bundle
+          params:
+            unpack: true
           trigger: true
         - get: cnb2cf
         - get: builds
           resource: lifecycle-builds
       - task: update-cnb2cf-template-shim-binaries
-        file: buildpacks-ci/tasks/update-cnb2cf-template-shim-binaries/task.yml
+        file: buildpacks-ci/tasks/update-cnb2cf-template-lifecycle-bundle/task.yml
       - put: cnb2cf
         params:
           repository: cnb2cf
           rebase: true
 
-  - name: update-cnb2cf-dependencies
+  - name: update-cnb2cf-depencies
     plan:
-    - aggregate:
-      - get: buildpacks-ci
-      - get: libbuildpack
-      - get: cnb2cf
-      - get: builds
-       resource: lifecycle-builds
+      - aggregate:
+        - get: buildpacks-ci
+        - get: module
+          resource: libbuildpack
+          trigger: true
+        - get: project
+          resource: cnb2cf
+      - task: update-module-libbuildpack
+        file: buildpacks-ci/tasks/update-go-module/task.yml
+        params:
+          MODULE_PATH: 'github.com/cloudfoundry/libbuildpack'
+
+  - name: update-cnb2cf-buildpack-libbuildpack
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: module
+          resource: buildpack-libbuildpack
+          trigger: true
+        - get: project
+          resource: cnb2cf
+      - task: update-module-libbuildpack
+        file: buildpacks-ci/tasks/update-go-module/task.yml
+        params:
+          MODULE_PATH: 'github.com/buildpack/libbuildpack'
+
+  - name: update-cnb2cf-libcfbuildpack
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: module
+          resource: libcfbuildpack
+          trigger: true
+        - get: project
+          resource: cnb2cf
+      - task: update-module-libbuildpack
+        file: buildpacks-ci/tasks/update-go-module/task.yml
+        params:
+          MODULE_PATH: 'github.com/cloudfoundry/libcfbuildpack'
