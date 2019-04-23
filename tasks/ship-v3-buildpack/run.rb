@@ -25,7 +25,13 @@ if next_version > last_version
   File.write('release-artifacts/name', "v#{next_version.to_s}")
   File.write('release-artifacts/tag', "v#{next_version.to_s}")
   changes = File.read('buildpack/CHANGELOG')
-  recent_changes = changes.split(/^v[0-9\.]+.*?=+$/m)[1].strip
+  recent_changes = changes.split(/^v[0-9\.]+.*?=+$/m)[1]
+
+  if recent_changes != nil 
+    recent_changes = recent_changes.strip
+  else 
+    recent_changes = ""
+  
   File.write('release-artifacts/body', "#{recent_changes}\n")
 
   output = ""
