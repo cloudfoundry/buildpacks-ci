@@ -15,6 +15,10 @@
   'nodejs-compat' => {
     'integration' => true
   },
+  'go' => {},
+  'go-mod' => {
+    'integration' => true
+  },
   'ruby' => {},
   'php' => {},
   'php-web' => {
