@@ -10,6 +10,7 @@
      '../cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml',
      'deployments/operations/no-canaries.yml',
      'deployments/edge-shared/num-cells.yml',
+     'deployments/operations/add-cflinuxfs2.yml', # Added when cf-deployment removed cflinuxfs2
    ]
    toolsmiths_envs = {'lts' => 557, 'menifee' => 360, 'pittsburg' => 421, 'orinda' => 399}
 %>
