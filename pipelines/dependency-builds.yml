@@ -43,7 +43,8 @@
                         source_params: ['repo: Masterminds/glide', 'fetch_source: true'] },
 
   'go' =>              { buildpacks: {
-                          go: { lines: ["1.10.X", "1.11.X", "1.12.X"], removal_strategy: 'keep_latest_released' } } },
+                          go: { lines: ["1.10.X", "1.11.X", "1.12.X"], removal_strategy: 'keep_latest_released' },
+                          'go-cnb': { lines: ["1.10.X", "1.11.X", "1.12.X"], removal_strategy: 'keep_latest_released' } } },
 
   'godep' =>           { buildpacks: { go: {}},
                         source_type: 'github_releases',
@@ -248,7 +249,7 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/<%= buildpack %>-buildpack.git
-    private_key: {{<%= buildpack %>-buildpack-private-key}}
+    private_key: {{cf-buildpacks-eng-github-ssh-key}}
     branch: v3
 <% end %>
 
@@ -258,13 +259,13 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/<%= buildpack %>.git
-    private_key: {{<%= buildpack %>-private-key}}
+    private_key: {{cf-buildpacks-eng-github-ssh-key}}
     branch: master
 - name: <%= buildpack %>-buildpack-latest-released
   type: git
   source:
     uri: git@github.com:cloudfoundry/<%= buildpack %>.git
-    private_key: {{<%= buildpack %>-private-key}}
+    private_key: {{cf-buildpacks-eng-github-ssh-key}}
     branch: master
     tag_filter: v*
 <% else %>
@@ -272,13 +273,13 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/<%= buildpack %>-buildpack.git
-    private_key: {{<%= buildpack %>-buildpack-private-key}}
+    private_key: {{cf-buildpacks-eng-github-ssh-key}}
     branch: develop
 - name: <%= buildpack %>-buildpack-latest-released
   type: git
   source:
     uri: git@github.com:cloudfoundry/<%= buildpack %>-buildpack.git
-    private_key: {{<%= buildpack %>-buildpack-private-key}}
+    private_key: {{cf-buildpacks-eng-github-ssh-key}}
     branch: master
 <% end %>
 <% end %>
