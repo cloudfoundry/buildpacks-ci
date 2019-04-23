@@ -31,6 +31,7 @@ if next_version > last_version
     recent_changes = recent_changes.strip
   else 
     recent_changes = ""
+  end
   
   File.write('release-artifacts/body', "#{recent_changes}\n")
 
