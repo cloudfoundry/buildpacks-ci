@@ -1,0 +1,72 @@
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/stacks/-
+  type: replace
+  value:
+    name: cflinuxfs2
+    description: Cloud Foundry Linux-based filesystem (Ubuntu 14.04)
+
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks/-
+  type: replace
+  value:
+    name: staticfile_buildpack
+    package: staticfile-buildpack-cflinuxfs2
+
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks/-
+  type: replace
+  value:
+    name: java_buildpack
+    package: java-buildpack-cflinuxfs2
+
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks/-
+  type: replace
+  value:
+    name: ruby_buildpack
+    package: ruby-buildpack-cflinuxfs2
+
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks/-
+  type: replace
+  value:
+    name: dotnet_core_buildpack
+    package: dotnet_core-buildpack-cflinuxfs2
+
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks/-
+  type: replace
+  value:
+    name: nodejs_buildpack
+    package: nodejs-buildpack-cflinuxfs2
+
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks/-
+  type: replace
+  value:
+    name: go_buildpack
+    package: go-buildpack-cflinuxfs2
+
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks/-
+  type: replace
+  value:
+    name: python_buildpack
+    package: python-buildpack-cflinuxfs2
+
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks/-
+  type: replace
+  value:
+    name: php_buildpack
+    package: php-buildpack-cflinuxfs2
+
+- path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks/-
+  type: replace
+  value:
+    name: binary_buildpack
+    package: binary-buildpack-cflinuxfs2
+
+- path: /instance_groups/name=diego-cell/jobs/name=rep/properties/diego/rep/preloaded_rootfses/-
+  type: replace
+  value: cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs.tar
+
+- path: /releases/name=cflinuxfs2?
+  type: replace
+  value:
+    name: cflinuxfs2
+    url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs2-release?v=1.280.0
+    version: 1.280.0
+    sha1: 5269266bfc431ec6c4b965d79d9292ba424827ad
+
