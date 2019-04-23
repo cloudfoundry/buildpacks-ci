@@ -52,7 +52,6 @@ case ARGV[0]
   when 'cflinuxfs2'
     cfg = YAML.load(`lpass show --notes "Shared-CF Buildpacks/concourse-private.yml"`)
     system('cf', 'api', 'api.cflinuxfs2.buildpacks-gcp.ci.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
-    p('cf', 'auth', cfg['cflinuxfs2-cf-username'], cfg['cflinuxfs2-cf-password'])
     system('cf', 'auth', cfg['cflinuxfs2-cf-username'], cfg['cflinuxfs2-cf-password']) or raise 'Could not auth'
   when 'cf-release'
     cfg = YAML.load(`lpass show --notes "Shared-CF Buildpacks/concourse-private.yml"`)
