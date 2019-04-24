@@ -62,6 +62,18 @@
   type: replace
   value: cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs.tar
 
+- path: /instance_groups/name=diego-cell/jobs/-
+  type: replace
+  value:
+    name: cflinuxfs2-rootfs-setup
+    release: cflinuxfs2
+    properties:
+      cflinuxfs2-rootfs:
+        trusted_certs:
+        - ((application_ca.certificate))
+        - ((credhub_ca.certificate))
+        - ((uaa_ca.certificate))
+
 - path: /releases/name=cflinuxfs2?
   type: replace
   value:
