@@ -87,7 +87,7 @@
                         any_stack: true },
 
   'nginx' =>           { buildpacks: {
-                          nginx: { lines: ["1.14.X", "1.15.X"] }}},
+                          nginx: { lines: ["1.14.X", "1.15.X", "1.16.X"] }}},
 
   'openresty' =>       { buildpacks: {
                           nginx: { lines: ["1.13.X"] }}},
@@ -175,7 +175,8 @@ skip_build = [
   { dep: 'dotnet-sdk', line: '1.0.X', stack: 'cflinuxfs3' },
   { dep: 'dotnet-sdk', line: '2.2.2X', stack: 'cflinuxfs2' },
   { dep: 'node', line: '11.X.X', stack: 'cflinuxfs2' },
-  { dep: 'node', line: '10.X.X', stack: 'cflinuxfs2' }
+  { dep: 'node', line: '10.X.X', stack: 'cflinuxfs2' },
+  { dep: 'nginx', line: '1.16.X', stack: 'cflinuxfs2' }
 ]
 
 def validate_dependencies(deps)
