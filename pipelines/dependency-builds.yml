@@ -98,10 +98,10 @@
                         source_type: 'nginx' },
 
   'node' =>            { buildpacks: {
-                          nodejs: { lines: ["8.X.X", "10.X.X", "11.X.X"], removal_strategy: 'keep_latest_released'},
+                          nodejs: { lines: ["8.X.X", "10.X.X", "11.X.X", "12.X.X"], removal_strategy: 'keep_latest_released'},
                           ruby: { lines: ["6.X.X", "10.X.X"] },
                           'dotnet-core' => { lines: ["6.X.X"] },
-                          'nodejs-cnb' => {lines: ["8.X.X", "10.X.X", "11.X.X"], removal_strategy: 'keep_latest_released'}},
+                          'nodejs-cnb' => {lines: ["8.X.X", "10.X.X", "11.X.X", "12.X.X"], removal_strategy: 'keep_latest_released'}},
                         source_type: 'node'},
 
   'org.cloudfoundry.buildpacks.npm' => {
@@ -176,6 +176,7 @@ skip_build = [
   { dep: 'dotnet-sdk', line: '2.2.2X', stack: 'cflinuxfs2' },
   { dep: 'node', line: '11.X.X', stack: 'cflinuxfs2' },
   { dep: 'node', line: '10.X.X', stack: 'cflinuxfs2' },
+  { dep: 'node', line: '12.X.X', stack: 'cflinuxfs2' },
   { dep: 'nginx', line: '1.16.X', stack: 'cflinuxfs2' },
   { dep: 'nginx-static', line: '1.16.X', stack: 'cflinuxfs2' }
 ]
