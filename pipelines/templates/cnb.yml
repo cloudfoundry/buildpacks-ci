@@ -34,7 +34,9 @@
   'python-compat' => {
     'integration' => true
   },
-  'conda' => {}
+  'conda' => {
+    'integration' => true
+  }
 }
 %>
 ---
