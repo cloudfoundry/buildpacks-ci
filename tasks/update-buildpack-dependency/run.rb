@@ -118,7 +118,7 @@ if removal_strategy == 'remove_all'
   manifest['default_versions'] = manifest.fetch('default_versions', []).map do |v|
     should_update = true
 
-    if manifest_name == 'nginx' && manifest['language'] == 'php'
+    if manifest_name == 'nginx' && %w(php nginx).include?(manifest['language'])
       nginx_version = Gem::Version.new(resource_version)
       should_update = nginx_version.segments[1].odd?
     end
