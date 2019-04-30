@@ -220,9 +220,6 @@ jobs:
             params:
               SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
               SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
-              TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
-              TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-              TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
               STACK: cflinuxfs2
             output_mapping:
               output-new-cves: output-new-cves-cflinuxfs2
@@ -237,9 +234,6 @@ jobs:
             params:
               SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
               SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
-              TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
-              TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-              TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
               STACK: cflinuxfs3
             output_mapping:
               output-new-cves: output-new-cves-cflinuxfs3
