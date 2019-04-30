@@ -8,10 +8,9 @@ stacks_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', stack.gsub(/m$/
 cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'output-new-cves', 'new-cve-notifications'))
 
 require "#{buildpacks_ci_dir}/lib/rootfs-cve-notifier"
-require "#{buildpacks_ci_dir}/lib/notifiers/cve-tracker-notifier"
 require "#{buildpacks_ci_dir}/lib/notifiers/cve-slack-notifier"
 
-notifiers = [CVETrackerNotifier, CVESlackNotifier]
+notifiers = [CVESlackNotifier]
 cve_notifier = RootFSCVENotifier.new(cves_dir, stacks_dir)
 
 case stack
