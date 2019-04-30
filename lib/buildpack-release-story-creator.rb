@@ -26,7 +26,7 @@ class BuildpackReleaseStoryCreator
     story = buildpack_project.create_story(
       name: story_name,
       description: story_description,
-      estimate: 1,
+      estimate: 0,
       labels: [buildpack_name, 'release'],
       requested_by_id: tracker_requester_id
     )
