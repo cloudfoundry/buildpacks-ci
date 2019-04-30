@@ -222,6 +222,11 @@ resource_types:
   type: docker-image
   source:
     repository: cfbuildpacks/depwatcher
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
 resources:
 - name: binary-builder
   type: git
@@ -327,6 +332,12 @@ resources:
     regexp: dependencies/<%=dep_name%>/<%=dep_name == 'nginx-static' ? 'nginx' : dep_name %>.*<%= dep_name == 'godep' ? '(\d+)' : '(\d+.\d+.\d+)' %>(.*)
 <% end %>
 <% end %>
+  ## Alerts ##
+
+- name: failure-alert
+  type: slack-notification
+  source:
+    url: {{dependency-notifier-slack-webhook}}
 
 jobs:
 <% dependencies.each do |dep_name, dep| %>
@@ -410,6 +421,13 @@ jobs:
       params:
         repository: builds-artifacts
         rebase: true
+  on_failure:
+    put: failure-alert
+    params:
+      channel: {{dependency-notifier-slack-channel}}
+      text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+      username: concourse
+
 
 - name: finish-<%=dep_name%>-<%= line %>-story
   serial: true
