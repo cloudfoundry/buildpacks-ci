@@ -85,7 +85,7 @@ describe BuildpackReleaseStoryCreator do
     expect(buildpack_project).to receive(:create_story).
         with(name: '**Release:** elixir-buildpack 2.10.4',
              description: anything(),
-             estimate: 1,
+             estimate: 0,
              labels: %w(elixir release),
              requested_by_id: 555555
             ).and_return(new_story)
