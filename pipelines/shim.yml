@@ -159,7 +159,7 @@ jobs:
           repository: cnb2cf
           rebase: true
 
-  - name: update-cnb2cf-depencies
+  - name: update-cnb2cf-dependencies
     plan:
       - aggregate:
         - get: buildpacks-ci
