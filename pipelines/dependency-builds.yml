@@ -176,7 +176,8 @@ skip_build = [
   { dep: 'dotnet-sdk', line: '2.2.2X', stack: 'cflinuxfs2' },
   { dep: 'node', line: '11.X.X', stack: 'cflinuxfs2' },
   { dep: 'node', line: '10.X.X', stack: 'cflinuxfs2' },
-  { dep: 'node', line: '12.X.X', stack: 'cflinuxfs2' }
+  { dep: 'node', line: '12.X.X', stack: 'cflinuxfs2' },
+  { dep: 'r', line: '3.6.X', stack: 'cflinuxfs2' }
 ]
 
 def validate_dependencies(deps)
