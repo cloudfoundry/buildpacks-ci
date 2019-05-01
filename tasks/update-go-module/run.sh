@@ -1,11 +1,6 @@
 #!/bin/bash -l
 
-set -o errexit
-set -o nounset
-set -o pipefail
-
-set -x
-
+set -euxo pipefail
 
 pushd project
   go get "$MODULE_PATH"
@@ -23,7 +18,7 @@ pushd project
 
   if [ $no_changes -ne 0 ]
   then
-    git commit -m "Update $MODULE_PATH"
+    git commit -m "Update go module $MODULE_PATH"
   else
     echo "$MODULE_PATH is up to date"
   fi

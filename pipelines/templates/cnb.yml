@@ -162,7 +162,7 @@ jobs: ##########################################################################
       - task: update-libcfbuildpack
         file: buildpacks-ci/tasks/update-go-module/task.yml
         params:
-          MODULE: github.com/cloudfoundry/libcfbuildpack
+          MODULE_PATH: github.com/cloudfoundry/libcfbuildpack
           VENDOR: true
       - put: buildpack-git
         params:
@@ -182,7 +182,7 @@ jobs: ##########################################################################
       - task: update-dagger
         file: buildpacks-ci/tasks/update-go-module/task.yml
         params:
-          MODULE: github.com/cloudfoundry/dagger
+          MODULE_PATH: github.com/cloudfoundry/dagger
           VENDOR: true
       - put: buildpack-git
         params:
