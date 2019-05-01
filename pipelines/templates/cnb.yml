@@ -52,7 +52,7 @@ resources: #####################################################################
     type: git
     webhook_token: ob0aigh3
     source:
-      uri: git@github.com:<%= organization %>/<%= language %>-cnb.git
+      uri: git@github.com:cloudfoundry/<%= language %>-cnb.git
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
       branch: master
 
@@ -65,12 +65,26 @@ resources: #####################################################################
   - name: cnb-tools-git
     type: git
     source:
-      uri: git@github.com:<%= organization %>/cnb-tools.git
+      uri: git@github.com:cloudfoundry/cnb-tools.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+      branch: master
+
+  - name: libcfbuildpack
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/libcfbuildpack.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+      branch: master
+
+<% if buildpacks[language]['integration'] %>
+  - name: dagger
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/dagger.git
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
       branch: master
 
   ## Github Releases ##
-<% if buildpacks[language]['integration'] %>
   - name: pack
     type: github-release
     source:
@@ -137,7 +151,44 @@ jobs: ##########################################################################
           - task: unit tests
             file: buildpacks-ci/tasks/run-scripts-unit/task.yml
 
+  - name: update-libcfbuildpack
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: libcfbuildpack
+          trigger: true
+        - get: project
+          resource: buildpack-git
+      - task: update-libcfbuildpack
+        file: buildpacks-ci/tasks/update-go-module/task.yml
+        params:
+          MODULE: github.com/cloudfoundry/libcfbuildpack
+          VENDOR: true
+      - put: buildpack-git
+        params:
+          repository: project
+          rebase: true
+
 <% if buildpacks[language]['integration'] %>
+
+  - name: update-dagger
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: dagger
+          trigger: true
+        - get: project
+          resource: buildpack-git
+      - task: update-dagger
+        file: buildpacks-ci/tasks/update-go-module/task.yml
+        params:
+          MODULE: github.com/cloudfoundry/dagger
+          VENDOR: true
+      - put: buildpack-git
+        params:
+          repository: project
+          rebase: true
+
   - name: specs-integration
     serial: true
     plan:
