@@ -391,7 +391,7 @@ class Builder
       File.write('artifacts/temp_file', results[0])
 
       cnbName = source_input.repo.split("/").last
-      uri = "https://github.com/#{source_input.repo}/releases/download/#{source_input.version}/#{cnbName}-#{source_input.version[1..-1]}.tgz"
+      uri = "https://github.com/#{source_input.repo}/releases/download/v#{source_input.version}/#{cnbName}-#{source_input.version}.tgz"
       download = open(uri)
       IO.copy_stream(download, "artifacts/#{cnbName}.tgz")
 
