@@ -397,7 +397,7 @@ class Builder
 
       out_data.merge!(
         artifact_output.move_dependency(
-          "#{cnbName}.tgz",
+          "#{cnbName}",
           "artifacts/#{cnbName}.tgz",
           "#{source_input.name}-#{source_input.version}-#{stack}",
           "tgz"
