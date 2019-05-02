@@ -2,7 +2,7 @@ class SourceInput
   attr_reader :url, :md5, :git_commit_sha
   attr_accessor :name, :repo, :version, :sha256
 
-  def initialize(name, repo, url, version, md5, sha256, git_commit_sha = nil)
+  def initialize(name, url, version, md5, sha256, git_commit_sha = nil, repo = '')
     @name    = name
     @repo    = repo
     @url     = url
@@ -16,12 +16,12 @@ class SourceInput
     data = JSON.parse(open(source_file).read)
     SourceInput.new(
       data.dig('source', 'name') || '',
-      data.dig('source', 'repo') || '',
       data.dig('version', 'url') || '',
       data.dig('version', 'ref') || '',
       data.dig('version', 'md5_digest'),
       data.dig('version', 'sha256'),
-      data.dig('version', 'git_commit_sha')
+      data.dig('version', 'git_commit_sha'),
+      data.dig('source', 'repo') || ''
     )
   end
 
