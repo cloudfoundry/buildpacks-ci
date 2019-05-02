@@ -386,8 +386,25 @@ class Builder
       out_data[:sha256] = results[1]
       out_data[:url] = source_input.url
 
-      # just copy the file from github
-    when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower', 'org.cloudfoundry.buildpacks.nodejs', 'org.cloudfoundry.buildpacks.npm', 'lifecycle' # TODO : fix me to use artifact_output
+    when 'org.cloudfoundry.buildpacks.nodejs', 'org.cloudfoundry.buildpacks.npm'
+      results = Sha.check_sha(source_input)
+      File.write('artifacts/temp_file', results[0])
+
+      cnbName = source_input.repo.split("/").last
+      uri = "https://github.com/#{source_input.repo}/releases/download/#{source_input.version}/#{cnbName}-#{source_input.version[1..-1]}.tgz"
+      download = open(uri)
+      IO.copy_stream(download, "artifacts/#{cnbName}.tgz")
+
+      out_data.merge!(
+        artifact_output.move_dependency(
+          "#{cnbName}.tgz",
+          'artifacts',
+          "#{source_input.name}-#{source_input.version}-#{stack}",
+          "tgz"
+        )
+      )
+
+    when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower', 'lifecycle' # TODO : fix me to use artifact_output
       results = Sha.check_sha(source_input)
       ext = File.basename(source_input.url)[/\.((zip|tar\.gz|tar\.xz|tgz))$/, 1]
       File.write('artifacts/temp_file', results[0])

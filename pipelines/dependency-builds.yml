@@ -108,14 +108,14 @@
                         branch: 'v3',
                         buildpacks: { nodejs: { }, },
                         source_type: 'github_releases',
-                        source_params: ['repo: cloudfoundry/npm-cnb', 'extension: .tgz', 'prerelease: true'],
+                        source_params: ['repo: cloudfoundry/npm-cnb', 'fetch_source: true', 'prerelease: true'],
                         any_stack: true },
 
   'org.cloudfoundry.buildpacks.nodejs' => {
                         branch: 'v3',
                         buildpacks: { nodejs: { }, },
                         source_type: 'github_releases',
-                        source_params: ['repo: cloudfoundry/nodejs-cnb', 'extension: .tgz', 'prerelease: true'],
+                        source_params: ['repo: cloudfoundry/nodejs-cnb', 'fetch_source: true', 'prerelease: true'],
                         any_stack: true },
 
 
