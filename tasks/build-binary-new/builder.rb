@@ -393,12 +393,12 @@ class Builder
       cnbName = source_input.repo.split("/").last
       uri = "https://github.com/#{source_input.repo}/releases/download/v#{source_input.version}/#{cnbName}-#{source_input.version}.tgz"
       download = open(uri)
-      IO.copy_stream(download, "artifacts/#{cnbName}.tgz")
+      IO.copy_stream(download, "artifacts/#{source_input.name}.tgz")
 
       out_data.merge!(
         artifact_output.move_dependency(
-          "#{cnbName}",
-          "artifacts/#{cnbName}.tgz",
+          source_input.name,
+          "artifacts/#{source_input.name}.tgz",
           "#{source_input.name}-#{source_input.version}-#{stack}",
           "tgz"
         )
