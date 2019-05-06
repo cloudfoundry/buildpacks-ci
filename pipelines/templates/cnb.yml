@@ -24,6 +24,9 @@
   'php-web' => {
     'integration' => true
   },
+  'php-composer' => {
+    'integration' => true
+  },
   'python' => {},
   'pip' => {
     'integration' => true
