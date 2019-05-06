@@ -9,7 +9,8 @@ ALL_STACKS = ['cflinuxfs2', 'cflinuxfs3']
 
 repo = 'cnb2cf'
 name = 'lifecycle'
-manifest = YAML.load_file("#{repo}/template/manifest.yml")
+manifest_path = "#{repo}/template/manifest.yml"
+manifest = YAML.load_file(manifest_path)
 version = File.read('s3/version').strip()
 build = JSON.parse(File.read("builds/binary-builds-new/lifecycle/#{version}-any-stack.json"))
 
@@ -76,8 +77,8 @@ Dir.chdir(repo) do
   GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
   GitClient.set_global_config('user.name', 'CF Buildpacks Team CI Server')
 
-  File.write('manifest.yml', manifest.to_yaml)
-  GitClient.add_file('manifest.yml')
+  File.write(manifest_path, manifest.to_yaml)
+  GitClient.add_file(manifest_path)
 
   GitClient.safe_commit(commit_message)
 end
