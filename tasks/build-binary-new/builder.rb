@@ -81,7 +81,7 @@ module DependencyBuild
     File.join(built_path, old_filename)
   end
 
-  def build_r(source_input)
+  def build_r(source_input,forecast_input, plumber_input, rserve_input, shiny_input)
     artifacts = "#{Dir.pwd}/artifacts"
     source_sha = ''
     Dir.mktmpdir do |dir|
@@ -103,7 +103,16 @@ module DependencyBuild
           Runner.run('make')
           Runner.run('make install')
 
-          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'install.packages(c("Rserve","forecast","shiny", "plumber"), repos="https://cran.r-project.org", dependencies=TRUE)')
+          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "install.packages('devtools', repos='https://cran.r-project.org')")
+
+          rserve_version = rserve_input.version.split(".")[0..1].join(".") + "-" +rserve_input.version.split(".")[2..-1].join(".")
+
+          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('Rserve', '#{rserve_version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('forecast', '#{forecast_input.version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('shiny', '#{shiny_input.version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('plumber', '#{plumber_input.version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+
+          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'remove.packages("devtools")')
 
           Dir.chdir('/usr/local/lib/R') do
             case stack
@@ -576,7 +585,13 @@ class Builder
       )
 
     when 'r'
-      source_sha = DependencyBuild.build_r source_input
+      forecast_input = SourceInput.from_file("#{Dir.pwd}/source-forecast-latest/data.json")
+      plumber_input = SourceInput.from_file("#{Dir.pwd}/source-plumber-latest/data.json")
+      rserve_input = SourceInput.from_file("#{Dir.pwd}/source-rserve-latest/data.json")
+      shiny_input = SourceInput.from_file("#{Dir.pwd}/source-shiny-latest/data.json")
+
+      source_sha = DependencyBuild.build_r(source_input, forecast_input, plumber_input, rserve_input, shiny_input)
+
       out_data.merge!(
         artifact_output.move_dependency(
           source_input.name,
@@ -586,6 +601,11 @@ class Builder
         )
       )
       out_data[:git_commit_sha] = source_sha
+
+      out_data[:sub_dependencies] = {}
+      [forecast_input, plumber_input, rserve_input, shiny_input].each do |sub_dep|
+        out_data[:sub_dependencies][sub_dep.name.to_sym] = {source: { url: sub_dep.url, sha256: sub_dep.sha_from_url()}}
+      end
 
     when 'nginx'
       source_pgp = 'not yet implemented'
