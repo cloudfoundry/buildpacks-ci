@@ -9,6 +9,14 @@ inputs:
   - name: buildpacks-ci
   - name: source
   - name: builds
+  - name: source-forecast-latest
+    optional: true
+  - name: source-rserve-latest
+    optional: true
+  - name: source-plumber-latest
+    optional: true
+  - name: source-shiny-latest
+    optional: true
 outputs:
   - name: artifacts
   - name: builds-artifacts

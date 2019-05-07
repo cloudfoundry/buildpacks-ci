@@ -1,3 +1,5 @@
+require 'net/http'
+
 class SourceInput
   attr_reader :url, :md5, :git_commit_sha
   attr_accessor :name, :repo, :version, :sha256
@@ -23,6 +25,11 @@ class SourceInput
       data.dig('version', 'git_commit_sha'),
       data.dig('source', 'repo') || ''
     )
+  end
+
+  def sha_from_url()
+    response = Net::HTTP.get_response(URI(@url))
+    Digest::SHA256.hexdigest(response.body)
   end
 
   def md5?
