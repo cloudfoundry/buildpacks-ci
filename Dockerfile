@@ -128,10 +128,10 @@ RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make i
 # Ensure that Concourse filtering is on for non-interactive shells
 ENV BASH_ENV /etc/profile.d/filter.sh
 
-# Install go 1.11
+# Install go 1.12
 RUN cd /usr/local \
-  && curl -L https://dl.google.com/go/go1.11.4.linux-amd64.tar.gz -o go.tar.gz \
-  && [ fb26c30e6a04ad937bbc657a1b5bba92f80096af1e8ee6da6430c045a8db3a5b = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
+  && curl -L https://dl.google.com/go/go1.12.4.linux-amd64.tar.gz -o go.tar.gz \
+  && [ d7d1f1f88ddfe55840712dc1747f37a790cbcaa448f6c9cf51bbe10aa65442f5 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && tar xf go.tar.gz \
   && rm go.tar.gz \
   && ln -s /usr/local/go/bin/* /usr/local/bin/
