@@ -234,9 +234,20 @@ if !rebuilt && manifest_name == 'jruby' && manifest['language'] == 'ruby'
   end
 end
 
-commit_message = "Add #{manifest_name} #{resource_version}"
+# Special R commit message logic, assumes that
+# for all stacks we have the same sub-dependency(forecast, plumber,...)
+r_commit_versions_message = ""
+
+if manifest['language'].downcase == 'r'
+  version_messages = builds[total_stacks.first]['sub_dependencies'].map do |sub_dep_key, sub_dep_value |
+    "#{sub_dep_key} #{sub_dep_value['version'].to_s}"
+  end.join(", ")
+  r_commit_versions_message = ' with dependencies: ' + version_messages
+end
+
+commit_message = "Add #{manifest_name} #{resource_version}" + r_commit_versions_message
 if rebuilt
-  commit_message = "Rebuild #{manifest_name} #{resource_version}"
+  commit_message = "Rebuild #{manifest_name} #{resource_version}" + r_commit_versions_message
 end
 if removed.length > 0
   commit_message = "#{commit_message}, remove #{manifest_name} #{removed.join(', ')}"

@@ -604,7 +604,7 @@ class Builder
 
       out_data[:sub_dependencies] = {}
       [forecast_input, plumber_input, rserve_input, shiny_input].each do |sub_dep|
-        out_data[:sub_dependencies][sub_dep.name.to_sym] = {source: { url: sub_dep.url, sha256: sub_dep.sha_from_url()}}
+        out_data[:sub_dependencies][sub_dep.name.to_sym] = {source: { url: sub_dep.url, sha256: sub_dep.sha_from_url()}, version: sub_dep.version}
       end
 
     when 'nginx'
