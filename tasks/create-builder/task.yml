@@ -10,6 +10,7 @@ inputs:
   - name: version
   - name: pack
   - name: order
+  - name: packager
 outputs:
   - name: builder-image
   - name: tag
@@ -24,3 +25,4 @@ params:
   RUN_IMAGE:
   STACK:
   FINAL:
+  ENTERPRISE:
