@@ -10,9 +10,12 @@ builder_repo        = ENV.fetch("BUILDER_REPO")
 build_image         = ENV.fetch("BUILD_IMAGE")
 run_image           = ENV.fetch("RUN_IMAGE")
 cnb_stack           = ENV.fetch("STACK")
+enterprise          = ENV.fetch("ENTERPRISE") == 'true'
 stack               = cnb_stack.split('.').last
 tag                 = "#{version}-#{stack}"
 builder_config_file = "builder.toml"
+pack_path           = File.absolute_path('pack-cli')
+packager_path       = File.absolute_path('packager-cli')
 
 json_resp = JSON.load(Net::HTTP.get(URI("https://hub.docker.com/v2/repositories/#{builder_repo}/tags/?page_size=10000")))
 if json_resp['results'].any? { |r| r['name'] == tag }
@@ -20,28 +23,25 @@ if json_resp['results'].any? { |r| r['name'] == tag }
   exit 1
 end
 
-
+puts 'Building pack...'
 Dir.chdir 'pack' do
-  system 'go', 'build', '-mod=vendor', './cmd/pack' or exit 1
+  system 'go', 'build', '-mod=vendor', '-o', pack_path, 'cmd/pack/main.go' or exit 1
+end
+
+puts 'Building cnb packager...'
+Dir.chdir 'packager' do
+  system 'go', 'build', '-o', packager_path, 'packager/main.go' or exit 1
 end
 
 buildpacks = Dir.glob('sources/*/').map do |dir|
   id          = Tomlrb.load_file(File.join(dir, "buildpack.toml"))['buildpack']['id']
-  bp_location = ""
+  bp_location = File.absolute_path(File.join(dir,id))
+  local_packager = './packager-cli'
+  args = [local_packager, '-uncached']
+  args.pop if enterprise
   Dir.chdir dir do
-    if Dir.exist?("ci") # This exists because we package Buildpacks differently
-      system File.join("ci", "package.sh") or exit 1
-      bp_tar = Dir.glob(File.join("artifactory", "*", "*", "*", "*", "*", "*.tgz")).first
-      # Remove dependency-cache because we can only package as a cached buildpack for now
-      output = 'built-buildpack'
-      Dir.mkdir(output)
-      system "tar", "xvf", bp_tar, "-C", output or exit 1
-      system "rm", "-rf", File.join(output, "dependency-cache")
-      bp_location = File.join(dir, output)
-    else
-      system File.join("scripts", "package.sh") or exit 1
-      bp_location = File.join(dir, Dir.glob("*.tgz").first)
-    end
+    system 'cp', packager_path, local_packager or exit 1 # We have to do this b/c cnb packager uses arg[0] to find the buildpack.toml. We should fix this to use working dir or an arg.
+    system *args, bp_location or exit 1
   end
   {
     "id":     id,
@@ -69,7 +69,7 @@ puts "**************builder.toml**************"
 puts builder_config
 
 system 'buildpacks-ci/scripts/start-docker' or exit 1
-system './pack/pack', 'create-builder', "#{builder_repo}:#{stack}", '--builder-config', "#{builder_config_file}" or exit 1
+system pack_path, 'create-builder', "#{builder_repo}:#{stack}", '--builder-config', "#{builder_config_file}" or exit 1
 system 'docker', 'save', "#{builder_repo}:#{stack}", '-o', 'builder-image/builder.tgz' or exit 1
 
 File.write(File.join("tag", "name"), tag)
