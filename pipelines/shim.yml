@@ -86,7 +86,62 @@ resources:
       uri: https://github.com/cloudfoundry/libcfbuildpack
       branch: master
 
+  - name: edge-environments
+    type: pool
+    source:
+      branch: master
+      pool: edge-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
+  - name: env-repo
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: {{buildpacks-envs-private-key}}
+
 jobs:
+  - name: unit-test-cnb2cf
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: repo
+          resource: cnb2cf
+          trigger: true
+      - task: unit-test
+        file: buildpacks-ci/tasks/run-scripts-unit/task.yml
+
+  - name: integration-test-cnb2cf
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: repo
+          resource: cnb2cf
+          trigger: true
+          passed: [unit-test-cnb2cf]
+        - put: edge-environments
+          params:
+            acquire: true
+        - get: env-repo
+      - task: create-cf-space
+        file: buildpacks-ci/tasks/create-cf-space/task.yml
+        params:
+          ENV_POOL_RESOURCE: edge-environments
+          ENVS_DIR: env-repo
+          ORG: pivotal
+          SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+          USERNAME: admin
+      - task: integration-test
+        file: buildpacks-ci/tasks/run-scripts-integration/task.yml
+    ensure:
+      aggregate:
+        - task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+        - put: edge-environments
+          params:
+            release: edge-environments
+
   - name: create-shim-bundle
     plan:
       - aggregate:
