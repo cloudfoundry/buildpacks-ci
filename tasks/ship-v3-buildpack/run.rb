@@ -35,13 +35,12 @@ if next_version > last_version
   
   File.write('release-artifacts/body', "#{recent_changes}\n")
 
-  output = ""
+  target = File.join(Dir.pwd, "release-artifacts", "#{language}-cnb-#{next_version.to_s}")
   Dir.chdir('buildpack') do
-    output = `scripts/package.sh`
+    `scripts/install_tools.sh`
+    `.bin/packager -archive -uncached #{target}`
   end
 
-  packaged_buildpack = /^Buildpack packaged into: (.*)$/.match(output)[1]
-  `tar cvzf release-artifacts/#{language}-cnb-#{next_version.to_s}.tgz -C #{packaged_buildpack} .`
 else
   raise "#{next_version.to_s} does not come after the current release #{last_version.to_s}"
 end
