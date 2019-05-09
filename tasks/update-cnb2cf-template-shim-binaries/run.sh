@@ -9,6 +9,8 @@ mv s3/finalize cnb2cf/template/bin/
 mv s3/release cnb2cf/template/bin/
 
 pushd cnb2cf
+  go get github.com/rakyll/statik
+  statik -src=./template -f
   git add .
 
   set +e
