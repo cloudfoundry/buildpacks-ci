@@ -9,7 +9,7 @@ inputs:
   - name: sources
   - name: version
   - name: pack
-  - name: order
+  - name: cnb-builder
   - name: packager
 outputs:
   - name: builder-image

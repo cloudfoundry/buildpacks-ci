@@ -53,7 +53,7 @@ buildpacks = Dir.glob('sources/*/').map do |dir|
   }
 end
 
-groups = Tomlrb.load_file(File.join("order", "#{stack}-order.toml"))['groups']
+groups = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.toml"))['groups']
 
 config_hash = {
   "buildpacks": buildpacks,
