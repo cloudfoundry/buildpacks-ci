@@ -19,7 +19,7 @@ pack_path           = File.absolute_path('pack-cli')
 packager_path       = File.absolute_path('packager-cli')
 
 if !enterprise # not in a public repo
-  json_resp = JSON.load(Net::HTTP.get(URI("#{host}/v2/repositories/#{repo}/tags/?page_size=100")))
+  json_resp = JSON.load(Net::HTTP.get(URI("https://#{host}/v2/repositories/#{repo}/tags/?page_size=100")))
   if json_resp['results'].any? { |r| r['name'] == tag }
     puts "Image already exists with immutable tag: #{tag}"
     exit 1
