@@ -6,21 +6,24 @@ require 'json'
 require 'net/http'
 
 version             = File.read(File.join("version", "version")).strip()
-builder_repo        = ENV.fetch("BUILDER_REPO")
+repo                = ENV.fetch("REPO")
 build_image         = ENV.fetch("BUILD_IMAGE")
 run_image           = ENV.fetch("RUN_IMAGE")
 cnb_stack           = ENV.fetch("STACK")
+host                = ENV.fetch("HOST")
 enterprise          = ENV.fetch("ENTERPRISE") == 'true'
 stack               = cnb_stack.split('.').last
 tag                 = "#{version}-#{stack}"
-builder_config_file = "builder.toml"
+builder_config_file = File.absolute_path("builder.toml")
 pack_path           = File.absolute_path('pack-cli')
 packager_path       = File.absolute_path('packager-cli')
 
-json_resp = JSON.load(Net::HTTP.get(URI("https://hub.docker.com/v2/repositories/#{builder_repo}/tags/?page_size=10000")))
-if json_resp['results'].any? { |r| r['name'] == tag }
-  puts "Image already exists with immutable tag: #{tag}"
-  exit 1
+if !enterprise # not in a public repo
+  json_resp = JSON.load(Net::HTTP.get(URI("#{host}/v2/repositories/#{repo}/tags/?page_size=100")))
+  if json_resp['results'].any? { |r| r['name'] == tag }
+    puts "Image already exists with immutable tag: #{tag}"
+    exit 1
+  end
 end
 
 puts 'Building pack...'
@@ -40,7 +43,7 @@ buildpacks = Dir.glob('sources/*/').map do |dir|
   args = [local_packager, '-uncached']
   args.pop if enterprise
   Dir.chdir dir do
-    system 'cp', packager_path, local_packager or exit 1 # We have to do this b/c cnb packager uses arg[0] to find the buildpack.toml. We should fix this to use working dir or an arg.
+    system 'cp', packager_path, local_packager or exit 1 # We have to do this b/c cnb packager uses arg[0] to find the buildpack.toml
     system *args, bp_location or exit 1
   end
   {
@@ -69,8 +72,8 @@ puts "**************builder.toml**************"
 puts builder_config
 
 system 'buildpacks-ci/scripts/start-docker' or exit 1
-system pack_path, 'create-builder', "#{builder_repo}:#{stack}", '--builder-config', "#{builder_config_file}" or exit 1
-system 'docker', 'save', "#{builder_repo}:#{stack}", '-o', 'builder-image/builder.tgz' or exit 1
+system pack_path, 'create-builder', "#{repo}:#{stack}", '--builder-config', "#{builder_config_file}" or exit 1
+system 'docker', 'save', "#{repo}:#{stack}", '-o', 'builder-image/builder.tgz' or exit 1
 
 File.write(File.join("tag", "name"), tag)
 

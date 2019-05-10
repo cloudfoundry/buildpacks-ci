@@ -14,5 +14,5 @@ run:
   path: buildpacks-ci/tasks/test-builder/run.sh
 
 params:
-  BUILDER_REPO:
+  REPO:
   STACK:
