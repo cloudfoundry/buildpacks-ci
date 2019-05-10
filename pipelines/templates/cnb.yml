@@ -209,7 +209,7 @@ jobs: ##########################################################################
           params:
             skip_download: true
 <% end %>
-      - task: integration tests
+      - task: integration-tests
         file: buildpacks-ci/tasks/run-bp-v3-integration/task.yml
         privileged: true
         params:
