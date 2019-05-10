@@ -146,17 +146,18 @@ jobs:
             USERNAME: admin
             PASSWORD: {{ci-cf-lts-password}}
 <% if new_brats.include?(language) %>
-        - task: run-brats
+        - task: run-brats-cflinuxfs2
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
           attempts: <%= if language == "ruby" then 3 else 1 end %>
           params:
-            STACKS: cflinuxfs2
+            CF_STACK: cflinuxfs2
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 6
 <% else %>
-        - task: run-brats
+        - task: run-brats-cflinuxfs2
           file: buildpacks-ci/tasks/run-shared-brats/task.yml
           params:
+            STACK: cflinuxfs2
             BUILDPACK_BRANCH: master
             LANGUAGE: <%= language %>
             RUBYGEM_MIRROR: {{rubygem-mirror}}
