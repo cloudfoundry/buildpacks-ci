@@ -395,7 +395,7 @@ class Builder
       out_data[:sha256] = results[1]
       out_data[:url] = source_input.url
 
-    when 'org.cloudfoundry.buildpacks.nodejs', 'org.cloudfoundry.buildpacks.npm'
+    when 'org.cloudfoundry.nodejs', 'org.cloudfoundry.npm'
       results = Sha.check_sha(source_input)
       File.write('artifacts/temp_file', results[0])
 
