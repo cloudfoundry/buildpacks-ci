@@ -104,14 +104,14 @@
                           'nodejs-cnb' => {lines: ["8.X.X", "10.X.X", "11.X.X", "12.X.X"], removal_strategy: 'keep_latest_released'}},
                         source_type: 'node'},
 
-  'org.cloudfoundry.buildpacks.npm' => {
+  'org.cloudfoundry.npm' => {
                         branch: 'v3',
                         buildpacks: { nodejs: { }, },
                         source_type: 'github_releases',
                         source_params: ['repo: cloudfoundry/npm-cnb', 'fetch_source: true', 'prerelease: true'],
                         any_stack: true },
 
-  'org.cloudfoundry.buildpacks.nodejs' => {
+  'org.cloudfoundry.nodejs' => {
                         branch: 'v3',
                         buildpacks: { nodejs: { }, },
                         source_type: 'github_releases',
