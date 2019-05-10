@@ -105,12 +105,12 @@ module DependencyBuild
 
           Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "install.packages('devtools', repos='https://cran.r-project.org')")
 
-          rserve_version = rserve_input.version.split(".")[0..1].join(".") + "-" +rserve_input.version.split(".")[2..-1].join(".")
+          rserve_version = rserve_input.split(".")[0..1].join(".") + "-" +rserve_input.split(".")[2..-1].join(".")
 
           Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('Rserve', '#{rserve_version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
-          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('forecast', '#{forecast_input.version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
-          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('shiny', '#{shiny_input.version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
-          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('plumber', '#{plumber_input.version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('forecast', '#{forecast_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('shiny', '#{shiny_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('plumber', '#{plumber_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
 
           Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'remove.packages("devtools")')
 
@@ -590,7 +590,7 @@ class Builder
       rserve_input = SourceInput.from_file("#{Dir.pwd}/source-rserve-latest/data.json")
       shiny_input = SourceInput.from_file("#{Dir.pwd}/source-shiny-latest/data.json")
 
-      source_sha = DependencyBuild.build_r(source_input, forecast_input, plumber_input, rserve_input, shiny_input)
+      source_sha = DependencyBuild.build_r(source_input, forecast_input.version, plumber_input.version, rserve_input.version, shiny_input.version)
 
       out_data.merge!(
         artifact_output.move_dependency(

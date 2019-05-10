@@ -13,6 +13,14 @@ end
 TableTestOutput = Struct.new(:old_file_path, :prefix, :extension) do
 end
 
+def createDataJSON(path, name)
+  FileUtils.mkdir_p(path)
+  filepath = File.join(path, "data.json")
+  filepath = File.new(filepath, 'w')
+  filepath.puts ('{"source":{"name":"' + name + '","type":"' + name + '"},"version":{"ref":"8.7","url":"https://cran.cnr.berkeley.edu/src/contrib/' + name + '_8.7.tar.gz"}}')
+  filepath.close
+end
+
 describe 'Builder' do
   subject { Builder.new }
 
@@ -220,28 +228,59 @@ describe 'Builder' do
     end
 
     context 'and a git commit sha' do
-      before do
-        expect(build_output).to receive(:add_output)
-          .with("1.0.2-cflinuxfs2.json",
-            {
-              tracker_story_id: 'fake-story-id',
-              version:          '1.0.2',
-              source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
-              sha256:           'fake-sha256',
-              url:              'fake-url',
-              git_commit_sha:   'fake-source-sha-123'
-            }
-          )
-        expect(build_output).to receive(:commit_outputs)
-          .with("Build #{source_input.name} - 1.0.2 - cflinuxfs2 [#fake-story-id]")
-      end
 
       describe 'to build r' do
+        before do
+          expect(build_output).to receive(:add_output)
+                                    .with("1.0.2-cflinuxfs2.json",
+                                      {
+                                        tracker_story_id: 'fake-story-id',
+                                        version:          '1.0.2',
+                                        source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
+                                        sha256:           'fake-sha256',
+                                        url:              'fake-url',
+                                        git_commit_sha:   'fake-source-sha-123',
+                                        sub_dependencies: {
+                                          forecast: {
+                                            source: {
+                                              url: 'https://cran.cnr.berkeley.edu/src/contrib/forecast_8.7.tar.gz',
+                                              sha256: '0d3aec2d10e05cb7961695f0639d3c4b848dbfd4f551c7bc699b9f95e06e3a39',
+                                            },
+                                            version: '8.7'},
+                                          plumber: {
+                                            source: {
+                                              url: 'https://cran.cnr.berkeley.edu/src/contrib/plumber_8.7.tar.gz',
+                                              sha256: '4a60f220c4d19e1b3cf46e6f4392897fc54f8ee3f96f0b896079aed70753a5d7',
+                                            },
+                                            version: '8.7'},
+                                          rserve: {
+                                            source: {
+                                              url: 'https://cran.cnr.berkeley.edu/src/contrib/rserve_8.7.tar.gz',
+                                              sha256: 'c0ba71614fe4a8b6eeac2d299cc360f60a5088387793183735420c25216ef5db',
+                                            },
+                                            version: '8.7'},
+                                          shiny: {
+                                            source: {
+                                              url: 'https://cran.cnr.berkeley.edu/src/contrib/shiny_8.7.tar.gz',
+                                              sha256: 'c9963e266f5838eec0df4fe64f5268f04fb00e125ba13e60a63e0ad68bb4a33e',
+                                            },
+                                            version: '8.7'},
+                                        },
+                                      }
+                                    )
+          expect(build_output).to receive(:commit_outputs)
+                                    .with("Build #{source_input.name} - 1.0.2 - cflinuxfs2 [#fake-story-id]")
+        end
         let(:source_input) { SourceInput.new('r', 'https://fake.com', '1.0.2', nil, 'fake-sha256') }
+
+        createDataJSON("source-rserve-latest", "rserve")
+        createDataJSON("source-plumber-latest", "plumber")
+        createDataJSON("source-shiny-latest", "shiny")
+        createDataJSON("source-forecast-latest", "forecast")
 
         it 'should build correctly' do
           expect(DependencyBuild).to receive(:build_r)
-            .with(source_input)
+            .with(source_input, "8.7", "8.7", "8.7", "8.7")
             .and_return 'fake-source-sha-123'
 
           expect(artifact_output).to receive(:move_dependency)
@@ -250,9 +289,25 @@ describe 'Builder' do
 
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
         end
+
       end
 
       describe 'dotnet-sdk' do
+        before do
+          expect(build_output).to receive(:add_output)
+            .with("1.0.2-cflinuxfs2.json",
+              {
+                tracker_story_id: 'fake-story-id',
+                version:          '1.0.2',
+                source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
+                sha256:           'fake-sha256',
+                url:              'fake-url',
+                git_commit_sha:   'fake-source-sha-123',
+              }
+            )
+          expect(build_output).to receive(:commit_outputs)
+                                    .with("Build #{source_input.name} - 1.0.2 - cflinuxfs2 [#fake-story-id]")
+        end
         let(:source_input) { SourceInput.new('dotnet-sdk', 'https://fake.com', '1.0.2', nil, 'fake-sha256', 'fake-source-sha-123') }
 
         it 'should build correctly' do
