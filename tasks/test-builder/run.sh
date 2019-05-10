@@ -16,6 +16,6 @@ pushd pack
 popd
 
 echo "Building test apps..."
-for app_path in "cnb-builder/fixtures/*"; do
-    ./pack/pack build $(basename "$app_path") --builder "$REPO:$STACK" -p "$app_path"
+for app_path in cnb-builder/fixtures/*; do
+    ./pack/pack build "$(basename "$app_path")" --builder "$REPO:$STACK" -p "$app_path"
 done
