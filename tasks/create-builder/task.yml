@@ -20,9 +20,10 @@ run:
   path: buildpacks-ci/tasks/create-builder/run.rb
 
 params:
-  BUILDER_REPO:
+  REPO:
   BUILD_IMAGE:
   RUN_IMAGE:
   STACK:
   FINAL:
   ENTERPRISE:
+  HOST:
