@@ -303,6 +303,9 @@ jobs: ##########################################################################
     public: true
     plan:
       - aggregate:
+        - get: previous-rootfs-release
+          resource: <%= rootfs_name %>-github-tags
+          passed: [ build-rootfs ]
         - get: cf-deployment-concourse-tasks
         - get: env-repo
           resource: bbl-state
@@ -366,6 +369,9 @@ jobs: ##########################################################################
             passed: [ bbl-up ]
           - get: rootfs
             resource: <%= rootfs_name %>
+            passed: [ bbl-up ]
+          - get: previous-rootfs-release
+            resource: <%= rootfs_name %>-github-tags
             passed: [ bbl-up ]
           - get: rootfs-release
             resource: <%= rootfs_name %>-release
@@ -450,6 +456,9 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: cf-deployment-concourse-tasks
           resource: cf-deployment-concourse-tasks-latest
+        - get: previous-rootfs-release
+          resource: <%= rootfs_name %>-github-tags
+          passed: [ deploy ]
         - get: cf-acceptance-tests
         - get: new-cves
           passed: [ deploy ]
@@ -500,6 +509,18 @@ jobs: ##########################################################################
           trigger: true
         - get: latest-version
           resource: version
+        - get: previous-rootfs-release
+          resource: <%= rootfs_name %>-github-tags
+          passed: [ cats ]
+        - get: new-cves
+          passed: [ cats ]
+        - get: stack-s3
+          passed: [ cats ]
+        - get: receipt-s3
+          passed: [ cats ]
+        - get: rootfs
+          resource: <%= rootfs_name %>
+          passed: [ cats ]
       - task: check-for-rootfs-race-condition
         file: buildpacks-ci/tasks/check-for-rootfs-race-condition/task.yml
 
@@ -569,23 +590,21 @@ jobs: ##########################################################################
       - aggregate:
         - get: buildpacks-ci
         - get: new-cves
-          passed:
-            - cats
+          passed: [ check-for-race-condition ]
         - get: stack-s3
-          passed:
-            - cats
+          passed: [ check-for-race-condition ]
         - get: receipt-s3
-          passed:
-            - cats
+          passed: [ check-for-race-condition ]
         - get: rootfs
           resource: <%= rootfs_name %>
-          passed:
-            - cats
+          passed: [ check-for-race-condition ]
         - get: version
           trigger: true
-          passed:
-            - bbl-destroy
+          passed: [ check-for-race-condition ]
           params: { bump: final }
+        - get: previous-rootfs-release
+          resource: <%= rootfs_name %>-github-tags
+          passed: [ check-for-race-condition ]
       - do:
         - task: update-receipt
           file: buildpacks-ci/tasks/update-rootfs-receipt/task.yml
@@ -625,26 +644,6 @@ jobs: ##########################################################################
       - put: version
         params: {file: version/number}
 
-  - name: finalize-security-notices
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-          resource: buildpacks-ci
-        - get: version
-          trigger: true
-          passed: [ upload-to-github ]
-      - do:
-        - task: finalize-security-notices
-          file: buildpacks-ci/tasks/finalize-security-notice-stories/task.yml
-          attempts: 20
-          params:
-            TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
-            TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            STACK: <%= rootfs_name %>
-
   - name: upload-to-github
     serial: true
     public: true
@@ -653,6 +652,7 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: previous-rootfs-release
           resource: <%= rootfs_name %>-github-tags
+          passed: [ release-<%= rootfs_name %> ]
         - get: rootfs
           resource: <%= rootfs_name %>
           passed: [ release-<%= rootfs_name %> ]
@@ -686,6 +686,26 @@ jobs: ##########################################################################
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+
+  - name: finalize-security-notices
+    serial: true
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+          resource: buildpacks-ci
+        - get: version
+          trigger: true
+          passed: [ upload-to-github ]
+      - do:
+        - task: finalize-security-notices
+          file: buildpacks-ci/tasks/finalize-security-notice-stories/task.yml
+          attempts: 20
+          params:
+            TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
+            TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            STACK: <%= rootfs_name %>
 
   - name: upload-to-docker
     serial: true
