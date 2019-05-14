@@ -35,6 +35,7 @@ instance_groups:
   - name: web
     release: concourse
     properties:
+      container_placement_strategy: fewest-build-containers
       add_local_users:
       - buildpacks:<%= concourse_basic_auth_password %>
       default_check_interval: 3m
