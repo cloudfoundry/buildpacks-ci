@@ -3,46 +3,55 @@
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
     'skip_pivnet_publish' => true,
     'skip_pws_publish' => true,
+    'edge_skip_stacks' => %w(cflinuxfs2),
     'non_lts' => true
   },
   'binary' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016 windows),
     'product_slug' => 'binary-buildpack',
+    'edge_skip_stacks' => %w(cflinuxfs2),
     'skip_docker_start' => true
   },
   'dotnet-core' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'edge_skip_stacks' => %w(cflinuxfs2),
     'product_slug' => 'dotnet-core-buildpack'
   },
   'go' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'edge_skip_stacks' => %w(cflinuxfs2),
     'product_slug' => 'go-buildpack'
   },
   'hwc' => {
     'stacks' => %w(windows2012R2 windows2016 windows),
     'skip_brats' => true,
     'product_slug' => 'hwc-buildpack',
+    'edge_skip_stacks' => [],
     'non_lts' => true
   },
   'nginx' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
     'product_slug' => 'nginx-buildpack',
+    'edge_skip_stacks' => %w(cflinuxfs2),
     'skip_pws_publish' => true
   },
   'nodejs' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
     'product_slug' => 'nodejs-buildpack',
+    'edge_skip_stacks' => %w(cflinuxfs2),
     'v3' => true
   },
   'php' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
     'product_slug' => 'php-buildpack',
     'compile_extensions' => true,
+    'edge_skip_stacks' => %w(cflinuxfs2),
     'v3' => true
   },
   'python' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'product_slug' => 'python-buildpack'
+    'product_slug' => 'python-buildpack',
+    'edge_skip_stacks' => %w(cflinuxfs2)
   },
   'r' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
@@ -51,15 +60,18 @@
     'non_lts' => true,
     'non_lts_pivnet' => true,
     'skip_pws_publish' => true,
-    'skip_docker_start' => true
+    'skip_docker_start' => true,
+    'edge_skip_stacks' => %w(cflinuxfs2)
   },
   'ruby' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'product_slug' => 'ruby-buildpack'
+    'product_slug' => 'ruby-buildpack',
+    'edge_skip_stacks' => %w(cflinuxfs2)
   },
   'staticfile' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'product_slug' => 'staticfile-buildpack'
+    'product_slug' => 'staticfile-buildpack',
+    'edge_skip_stacks' => %w(cflinuxfs2)
   }
 } %>
 <% cnb_images = %w(run build) %>
@@ -506,7 +518,10 @@ jobs: ##########################################################################
           DOCKER_START: false
         <% end %>
       - aggregate:
-<% buildpacks[language]['stacks'].each do |stack| %>
+<%
+relevant_stacks = buildpacks[language]['stacks']
+relevant_stacks -= buildpacks[language]['edge_skip_stacks'] unless buildpacks[language]['edge_skip_stacks'].empty?
+relevant_stacks.each do |stack| %>
         - do:
           - task: create-cf-space
             file: buildpacks-ci/tasks/create-cf-space/task.yml
@@ -976,7 +991,9 @@ jobs: ##########################################################################
         - get: repo
           resource: buildpack-develop
       - aggregate:
-<% buildpacks[language]['stacks'].each do |stack| %>
+<% relevant_stacks = buildpacks[language]['stacks'] %>
+<% relevant_stacks -= buildpacks[language]['edge_skip_stacks'] unless buildpacks[language]['edge_skip_stacks'].empty? %>
+<% relevant_stacks.each do |stack| %>
         - do:
           - task: create-cf-space
             file: buildpacks-ci/tasks/create-cf-space/task.yml
@@ -1040,7 +1057,9 @@ jobs: ##########################################################################
           passed:
           - specs-unit-develop
       - aggregate:
-<% buildpacks[language]['stacks'].each do |stack| %>
+<% relevant_stacks = buildpacks[language]['stacks'] %>
+<% relevant_stacks -= buildpacks[language]['edge_skip_stacks'] unless buildpacks[language]['edge_skip_stacks'].empty? %>
+<% relevant_stacks.each do |stack| %>
         - do:
           - task: create-cf-space
             file: buildpacks-ci/tasks/create-cf-space/task.yml
