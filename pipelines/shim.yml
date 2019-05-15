@@ -54,7 +54,7 @@ resources:
     source:
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
       branch: master
-      paths: [ binary-builds-new/lifecycle ]
+      paths: [ binary-builds-new/lifecycle/*-any-stack.json ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
   - name: buildpacks-bucket-lifecycle-bundle
