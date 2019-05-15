@@ -80,5 +80,9 @@ Dir.chdir(repo) do
   File.write(manifest_path, manifest.to_yaml)
   GitClient.add_file(manifest_path)
 
+  puts 'Updating static files...'
+  system './scripts/update_statik.sh'
+  GitClient.add_file('statik/statik.go')
+
   GitClient.safe_commit(commit_message)
 end
