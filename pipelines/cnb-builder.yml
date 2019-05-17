@@ -45,6 +45,11 @@ resources:
       branch: master
 
   <% $cnbs.keys.each do |cnb_name| %>
+  - name: <%= cnb_name %>-cnb
+    type: git
+    source:
+      uri: <%= $cnbs[cnb_name]['git_repo'] %>
+
   - name: <%= cnb_name %>-cnb-release
     type: git
     source:
@@ -191,7 +196,7 @@ jobs:
         attempts: 2
 <% end %>
 
-  - name: create-cf-builder-rc-cflinuxfs3
+  - name: smoke-test-cf-builder-cflinuxfs3
     plan:
       - aggregate:
         - get: cnb-builder
@@ -211,7 +216,6 @@ jobs:
         <% end %>
         <% $cnbs.keys.each do |cnb_name| %>
         - get: <%= cnb_name %>-cnb
-          resource: <%= cnb_name %>-cnb-release
           trigger: true
         <% end %>
         - get: pack
@@ -258,18 +262,8 @@ jobs:
         params:
           STACK: cflinuxfs3
           REPO: cloudfoundry/cnb
-      - put: builder-image
-        params:
-          load_file: builder-image/builder.tgz
-          load_repository: cloudfoundry/cnb # must match REPO
-          load_tag: cflinuxfs3
-          tag_file: tag/name
-          tag_as_latest: false
-      - put: cflinuxfs3-version
-        params:
-          file: version/version
 
-  - name: release-builder-cflinuxfs3
+  - name: release-cf-builder-cflinuxfs3
     plan:
       - aggregate:
         <% cnb_child_images.each do |image_type| %>
@@ -337,7 +331,7 @@ jobs:
         params:
           bump: patch
 
-  - name: create-p-builder-rc-cflinuxfs3
+  - name: smoke-test-p-builder-cflinuxfs3
     plan:
       - aggregate:
         - get: cnb-builder
@@ -358,7 +352,6 @@ jobs:
         <% end %>
         <% piv_cnbs.keys.each do |cnb_name| %>
         - get: <%= cnb_name %>-cnb
-          resource: <%= cnb_name %>-cnb-release
           trigger: true
         <% end %>
         - get: pack
@@ -405,16 +398,6 @@ jobs:
         params:
           STACK: cflinuxfs3
           REPO: p-cnb-builder
-      - put: pivotal-builder-image
-        params:
-          load_file: builder-image/builder.tgz
-          load_repository: p-cnb-builder # must match REPO
-          load_tag: cflinuxfs3
-          tag_file: tag/name
-          tag_as_latest: false
-      - put: cflinuxfs3-piv-version
-        params:
-          file: version/version
 
   - name: release-p-builder-cflinuxfs3
     plan:
@@ -485,13 +468,12 @@ jobs:
         params:
           bump: patch
 
-  - name: create-cf-builder-rc-bionic
+  - name: smoke-test-cf-builder-bionic
     plan:
       - aggregate:
         <% $cnbs.keys.each do |cnb_name| %>
         <% next if $cnbs[cnb_name]['skip_bionic'] %>
         - get: <%= cnb_name %>-cnb
-          resource: <%= cnb_name %>-cnb-release
           trigger: true
         <% end %>
         - get: pack
@@ -541,18 +523,8 @@ jobs:
         params:
           STACK: bionic
           REPO: cloudfoundry/cnb
-      - put: builder-image
-        params:
-          load_file: builder-image/builder.tgz
-          load_repository: cloudfoundry/cnb # must match REPO
-          load_tag: bionic
-          tag_file: tag/name
-          tag_as_latest: false
-      - put: bionic-version
-        params:
-          file: version/version
 
-  - name: release-builder-bionic
+  - name: release-cf-builder-bionic
     plan:
     - aggregate:
       <% $cnbs.keys.each do |cnb_name| %>
