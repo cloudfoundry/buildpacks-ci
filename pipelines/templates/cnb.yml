@@ -236,6 +236,8 @@ jobs: ##########################################################################
           GITHUB_USERNAME: {{github-username}}
           GITHUB_PASSWORD: {{github-password}}
           GIT_TOKEN: {{buildpacks-github-token}}
+      - task: finalize-cnb
+        file: buildpacks-ci/tasks/finalize-cnb/task.yml
       - put: buildpack-github-release
         params:
           name: release-artifacts/name
