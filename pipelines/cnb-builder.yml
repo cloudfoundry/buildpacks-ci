@@ -124,6 +124,16 @@ resources:
       email: {{buildpacks-docker-user-email}}
       username: {{buildpacks-docker-user-username}}
       password: {{buildpacks-docker-user-password}}
+
+  - name: cloudfoundry-cflinuxfs3-cnb-<%= image_type %>-image
+    type: docker-image
+    check_every: 15s
+    source:
+      repository: cloudfoundry/cnb-<%= image_type %>
+      tag: cflinuxfs3
+      email: {{buildpacks-docker-user-email}}
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
 <% end %>
 
   - name: pack-release
@@ -175,6 +185,13 @@ jobs:
           build_args:
             squash: squash
         attempts: 2
+      # update new cloudfoundry-base-image
+      - put: cloudfoundry-cflinuxfs3-cnb-base-image
+        params:
+          build: cflinuxfs3-cnb-base-dockerfile-master/cnb/base
+          build_args:
+            squash: squash
+        attempts: 2
 
 <% cnb_child_images.each do |image_type| %>
   - name: update-cflinuxfs3-cnb-<%= image_type %>-image
@@ -189,6 +206,12 @@ jobs:
         passed:
           - update-cflinuxfs3-cnb-base-image
       - put: cflinuxfs3-cnb-<%= image_type %>-image
+        params:
+          build: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master/cnb/<%= image_type %>
+          build_args:
+            squash: squash
+        attempts: 2
+      - put: cloudfoundry-cflinuxfs3-cnb-<%= image_type %>-image
         params:
           build: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master/cnb/<%= image_type %>
           build_args:
