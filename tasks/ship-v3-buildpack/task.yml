@@ -17,6 +17,3 @@ run:
   - buildpacks-ci/tasks/ship-v3-buildpack/run.rb
 params:
   LANGUAGE:
-  GITHUB_USERNAME:
-  GITHUB_PASSWORD:
-  GIT_TOKEN:
