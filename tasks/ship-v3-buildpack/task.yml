@@ -6,9 +6,10 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
 - name: buildpack
-- name: buildpack-github-release
 - name: buildpacks-ci
 - name: packager
+- name: buildpack-github-release
+  optional: true
 outputs:
 - name: release-artifacts
 run:
