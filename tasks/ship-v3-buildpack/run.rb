@@ -33,6 +33,6 @@ File.write(release_body_file, "#{recent_changes}\n")
 
 target = File.join(Dir.pwd, "release-artifacts", "#{language}-cnb-#{next_version.to_s}")
 Dir.chdir('buildpack') do
-  `#{packager_path} -archive -uncached #{target}`
+  `#{packager_path} -archive -uncached #{target}` or raise 'failed to package cnb'
   File.write(release_body_file, `#{packager_path} -summary`, mode: 'a')
 end
