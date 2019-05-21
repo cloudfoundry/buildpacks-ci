@@ -40,7 +40,9 @@ class Commit
   end
 
   def self.recent(old_version)
-    hashes, _ = Open3.capture2(%Q{git log --pretty=format:'%H' v#{old_version}..HEAD})
+    cmd = %Q{git log --pretty=format:'%H'}
+    cmd = cmd + " v#{old_version}..HEAD" if old_version != ''
+    hashes, _ = Open3.capture2(cmd)
     hashes.split(/\n/).map do |hash|
       begin
         commit, _ = Open3.capture2(%Q{git log --pretty=format:'{"commit": "%H", "subject": "%s", "body": "%b"}' -n 1 #{hash}})
