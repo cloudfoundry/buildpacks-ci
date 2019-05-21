@@ -188,6 +188,7 @@ jobs:
       # update new cloudfoundry-base-image
       - put: cloudfoundry-cflinuxfs3-cnb-base-image
         params:
+          tag_as_latest: true
           build: cflinuxfs3-cnb-base-dockerfile-master/cnb/base
           build_args:
             squash: squash
@@ -201,7 +202,7 @@ jobs:
       - get: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master
         trigger: true
       # Changes in base image should also trigger an update for children
-      - get: cflinuxfs3-cnb-base-image
+      - get: cloudfoundry-cflinuxfs3-cnb-base-image
         trigger: true
         passed:
           - update-cflinuxfs3-cnb-base-image
@@ -213,6 +214,7 @@ jobs:
         attempts: 2
       - put: cloudfoundry-cflinuxfs3-cnb-<%= image_type %>-image
         params:
+          tag_as_latest: true
           build: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master/cnb/<%= image_type %>
           build_args:
             squash: squash
@@ -224,7 +226,7 @@ jobs:
       - aggregate:
         - get: cnb-builder
           trigger: true
-        - get: cflinuxfs3-cnb-base-image
+        - get: cloudfoundry-cflinuxfs3-cnb-base-image
           trigger: true
           passed:
             - update-cflinuxfs3-cnb-run-image
@@ -234,7 +236,7 @@ jobs:
           trigger: true
           passed:
             - update-cflinuxfs3-cnb-<%= image_type %>-image
-        - get: cflinuxfs3-cnb-<%= image_type %>-image
+        - get: cloudfoundry-cflinuxfs3-cnb-<%= image_type %>-image
           params: {skip_download: true}
         <% end %>
         <% $cnbs.keys.each do |cnb_name| %>
@@ -276,8 +278,8 @@ jobs:
         params:
           REPO: cloudfoundry/cnb
           STACK: "org.cloudfoundry.stacks.cflinuxfs3"
-          BUILD_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:build"
-          RUN_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:run"
+          BUILD_IMAGE: "cloudfoundry/cnb-build:cflinuxfs3"
+          RUN_IMAGE: "cloudfoundry/cnb-run:cflinuxfs3"
           HOST: "hub.docker.com"
       - task: smoke-test-builder
         file: buildpacks-ci/tasks/test-builder/task.yml
@@ -290,7 +292,7 @@ jobs:
     plan:
       - aggregate:
         <% cnb_child_images.each do |image_type| %>
-        - get: cflinuxfs3-cnb-<%= image_type %>-image
+        - get: cloudfoundry-cflinuxfs3-cnb-<%= image_type %>-image
           params: {skip_download: true}
         <% end %>
         <% $cnbs.keys.each do |cnb_name| %>
@@ -332,8 +334,8 @@ jobs:
         params:
           REPO: cloudfoundry/cnb
           STACK: "org.cloudfoundry.stacks.cflinuxfs3"
-          BUILD_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:build"
-          RUN_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:run"
+          BUILD_IMAGE: "cloudfoundry/cnb-build:cflinuxfs3"
+          RUN_IMAGE: "cloudfoundry/cnb-run:cflinuxfs3"
           HOST: "hub.docker.com"
           FINAL: true
       - task: smoke-test-builder
@@ -360,7 +362,7 @@ jobs:
         - get: cnb-builder
           resource: p-cnb-builder
           trigger: true
-        - get: cflinuxfs3-cnb-base-image
+        - get: cloudfoundry-cflinuxfs3-cnb-base-image
           trigger: true
           passed:
             - update-cflinuxfs3-cnb-run-image
@@ -370,7 +372,7 @@ jobs:
           trigger: true
           passed:
             - update-cflinuxfs3-cnb-<%= image_type %>-image
-        - get: cflinuxfs3-cnb-<%= image_type %>-image
+        - get: cloudfoundry-cflinuxfs3-cnb-<%= image_type %>-image
           params: {skip_download: true}
         <% end %>
         <% piv_cnbs.keys.each do |cnb_name| %>
@@ -412,8 +414,8 @@ jobs:
         params:
           REPO: p-cnb-builder
           STACK: "org.cloudfoundry.stacks.cflinuxfs3"
-          BUILD_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:build"
-          RUN_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:run"
+          BUILD_IMAGE: "cloudfoundry/cnb-build:cflinuxfs3"
+          RUN_IMAGE: "cloudfoundry/cnb-run:cflinuxfs3"
           ENTERPRISE: true
       - task: smoke-test-builder
         file: buildpacks-ci/tasks/test-builder/task.yml
@@ -426,7 +428,7 @@ jobs:
     plan:
       - aggregate:
         <% cnb_child_images.each do |image_type| %>
-        - get: cflinuxfs3-cnb-<%= image_type %>-image
+        - get: cloudfoundry-cflinuxfs3-cnb-<%= image_type %>-image
           params: {skip_download: true}
         <% end %>
         <% piv_cnbs.keys.each do |cnb_name| %>
@@ -469,8 +471,8 @@ jobs:
         params:
           REPO: p-cnb-builder
           STACK: "org.cloudfoundry.stacks.cflinuxfs3"
-          BUILD_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:build"
-          RUN_IMAGE: "cfbuildpacks/cflinuxfs3-cnb-experimental:run"
+          BUILD_IMAGE: "cloudfoundry/cnb-build:cflinuxfs3"
+          RUN_IMAGE: "cloudfoundry/cnb-run:cflinuxfs3"
           FINAL: true
           ENTERPRISE: true
       - task: smoke-test-builder

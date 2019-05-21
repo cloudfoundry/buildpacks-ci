@@ -103,18 +103,6 @@ resources: #####################################################################
       user: cloudfoundry
       access_token: {{buildpacks-github-token}}
 
-  ## Docker Images ##
-<% cnb_images.each do |image_type| %>
-  - name: cnb-<%= image_type %>-image
-    type: docker-image
-    source:
-      repository: cfbuildpacks/cflinuxfs3-cnb-experimental
-      tag: <%= image_type %>
-      email: {{buildpacks-docker-user-email}}
-      username: {{buildpacks-docker-user-username}}
-      password: {{buildpacks-docker-user-password}}
-<% end %>
-
 jobs: ################################################################################################################
 
   - name: update-cnb-tools
@@ -144,12 +132,6 @@ jobs: ##########################################################################
           - get: repo
             resource: buildpack-git
             trigger: true
-  <% cnb_images.each do |image_type| %>
-          - get: cnb-<%= image_type %>-image
-            trigger: true
-            params:
-              skip_download: true
-  <% end %>
         - do:
           - task: unit tests
             file: buildpacks-ci/tasks/run-scripts-unit/task.yml
@@ -204,11 +186,6 @@ jobs: ##########################################################################
           trigger: true
           passed:
           - specs-unit
-<% cnb_images.each do |image_type| %>
-        - get: cnb-<%= image_type %>-image
-          params:
-            skip_download: true
-<% end %>
       - task: integration-tests
         file: buildpacks-ci/tasks/run-bp-v3-integration/task.yml
         privileged: true
