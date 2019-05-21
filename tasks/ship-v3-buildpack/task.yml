@@ -8,8 +8,6 @@ inputs:
 - name: buildpack
 - name: buildpacks-ci
 - name: packager
-- name: buildpack-github-release
-  optional: true
 outputs:
 - name: release-artifacts
 run:

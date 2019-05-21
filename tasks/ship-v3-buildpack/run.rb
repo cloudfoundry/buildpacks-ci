@@ -8,12 +8,10 @@ packager_path = File.absolute_path(File.join('buildpack', '.bin', 'packager'))
 release_body_file = File.absolute_path(File.join('release-artifacts', 'body'))
 
 next_version = Gem::Version.new(TOML.load_file('buildpack/buildpack.toml')['buildpack']['version'])
+last_version = `git tag`.split("\n").map {|i| Gem::Version.new(i.strip().tr('v', ''))}.sort.last
 
-if File.directory?('buildpack-github-release') # won't exist on first release
-  last_version = Gem::Version.new(File.read(File.join('buildpack-github-release', 'version')).strip.tr('v',''))
-  if next_version <= last_version
-    raise "#{next_version.to_s} does not come after the current release #{last_version.to_s}"
-  end
+if last_version && next_version <= last_version
+  raise "#{next_version.to_s} does not come after the current release #{last_version.to_s}"
 end
 
 Dir.chdir('packager/packager') do
