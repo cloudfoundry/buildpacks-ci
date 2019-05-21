@@ -7,13 +7,10 @@ release_body_file = File.join(artifact_dir, 'body')
 buildpack_repo_dir = 'buildpack'
 
 
-# TODO: remove this cloning when we have a new libcfbuildpack release
-`git clone https://github.com/cloudfoundry/libcfbuildpack`
-startingDir = Dir.pwd
-Dir.chdir('libcfbuildpack/packager')
-`go build -o my_packager`
-`mv my_packager ../../buildpack`
-Dir.chdir(startingDir)
+Dir.chdir('packager/packager') do
+  `go build -o my_packager`
+  `mv my_packager ../../buildpack`
+end
 
 Dir.chdir(buildpack_repo_dir) do
   go_mod_file = File.file?("go.mod")
