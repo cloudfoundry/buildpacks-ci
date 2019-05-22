@@ -51,24 +51,24 @@ extensions:
     md5: 4f5f4b8a41a5802de6591c79b85cc838
     klass: GeoipRecipe
   - name: igbinary
-    version: 3.0.0
-    md5: 1410ad1f9d433cb84b7204a7e13d62ed
+    version: 3.0.1
+    md5: fb3b2f7fa306ca582afd9f382c409a24
     klass: PeclRecipe
   - name: gnupg
     version: 1.4.0
     md5: 2354cb56168d8ea0f643e548e139d013
     klass: PeclRecipe
   - name: imagick
-    version: 3.4.3
-    md5: d0ee25c007cd2a28cefccc0b9ee63a28
+    version: 3.4.4
+    md5: 6d3a7048ab73b0fab931f28c484dbf76
     klass: PeclRecipe
   - name: LZF
     version: 1.6.7
     md5: 3c5db2561efaad9f3d81fa9427139ba3
     klass: PeclRecipe
   - name: mailparse
-    version: 3.0.2
-    md5: 4bd96a980013374f23a7461cc0a919aa
+    version: 3.0.3
+    md5: a7c169e3b3d5fec295a768edcea2a82e
     klass: PeclRecipe
   - name: mongodb
     version: 1.5.3
@@ -91,28 +91,28 @@ extensions:
     md5: nil
     klass: PdoOdbcRecipe
   - name: pdo_sqlsrv
-    version: 5.3.0
-    md5: cbc086481bfc38e60481f4ae55d2c1ce
+    version: 5.6.1
+    md5: fa932e2d60e9c3782f30ba0b0ab77516
     klass: PeclRecipe
   - name: rdkafka
-    version: 3.0.5
-    md5: 844bd1528161518a47415f709214bae9
+    version: 3.1.0
+    md5: aa8a602d7cd61abc4db983c38a99fbee
     klass: PeclRecipe
   - name: redis
-    version: 4.2.0
-    md5: 86754c34431bdc639a0adfcd0f47b4be
+    version: 4.3.0
+    md5: d1fdb05c3dea40c45c279f88895309f8
     klass: RedisPeclRecipe
   - name: sqlsrv
-    version: 5.3.0
-    md5: 8a2d1dbc571df507356b6164cffa4197
+    version: 5.6.1
+    md5: c7b66e343d4ae0760a658964552966b4
     klass: PeclRecipe
   - name: stomp
     version: 2.0.2
     md5: 507c30184fde736e924cee20c56df061
     klass: PeclRecipe
   - name: xdebug
-    version: 2.6.1
-    md5: 35cc0f2e8b7d40556a9ad9afd9c49aee
+    version: 2.7.2
+    md5: 5d1a8ca3101df93938d283933f256493
     klass: PeclRecipe
   - name: yaf
     version: 3.0.7
@@ -171,8 +171,8 @@ extensions:
     md5: d45a7137edd361998494a8894fe50888
     klass: AmqpPeclRecipe
   - name: ioncube
-    version: 10.3.2
-    md5: 8e746ab9cfdb32c2932bfad44539851f
+    version: 10.3.4
+    md5: 0dc4059f37ab75e68d4e101e260226d7
     klass: IonCubeRecipe
   - name: lua
     version: 2.0.6
@@ -187,8 +187,8 @@ extensions:
     md5: 67a861965b30d045bf29a2126bcc05ed
     klass: LibMaxMindRecipe
   - name: phalcon
-    version: 3.4.2
-    md5: 3568df73efbe0033b6b83912e03bd948
+    version: 3.4.3
+    md5: 336cdd9f34536e2c4fcba0f5138685de
     klass: PhalconRecipe
   - name: phpiredis
     version: 1.0.0

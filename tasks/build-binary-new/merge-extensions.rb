@@ -47,6 +47,12 @@ class BaseExtensions
     return true
   end
 
+  def patch(patch_file) # return a new BaseExtensions object that has been patched
+    new_base_extensions = BaseExtensions.new(@base_path)
+    new_base_extensions.patch!(patch_file)
+    return new_base_extensions
+  end
+
   def write_yml(extension_file)
     File.open(extension_file, 'w') {|f| f.write @base_yml.to_yaml }
   end
