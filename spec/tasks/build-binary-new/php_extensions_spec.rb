@@ -1,27 +1,43 @@
+require 'yaml'
+require 'pry'
+
+#TODO: lets try to load this without require relative
+require_relative '../../../tasks/build-binary-new/merge-extensions'
+
 describe 'PhpExtensions' do
-  modules_72_only = ['libsodium']
-  extensions_72_only = ['sodium']
-  extensions_7_only = ['solr']
-
-  it '7.2 extensions contains correct extensions' do
-    php_yaml_72 = YAML.load_file(File.join(File.dirname(__FILE__), '..', '..', '..', 'tasks', 'build-binary-new', 'php72-extensions.yml'))
-    php_modules_72 = php_yaml_72['native_modules'].map {|m| m['name'] }
-    php_extensions_72 = php_yaml_72['extensions'].map {|m| m['name'] }
-
-    expect(php_modules_72).to include(*modules_72_only)
-
-    expect(php_extensions_72).to include(*extensions_72_only)
-    expect(php_extensions_72).not_to include(*extensions_7_only)
+  before(:each) do
+    @testdata = File.join(__dir__,'testdata')
+    path = File.join(@testdata, 'php-base-extensions-test.yml')
+    @base_obj = BaseExtensions.new(File.absolute_path(path))
+  end
+  it 'correctly adds new extensions' do
+    expect(@base_obj.patch!(File.join(@testdata, 'php-patch-extensions-test.yml'))).to eq true
+    expect(@base_obj.find_ext_index('solr')).not_to be_nil
   end
 
-  it '7 extensions contains correct extensions' do
-    php_yaml_7 = YAML.load_file(File.join(File.dirname(__FILE__), '..', '..', '..', 'tasks', 'build-binary-new', 'php7-extensions.yml'))
-    php_modules_7 = php_yaml_7['native_modules'].map {|m| m['name'] }
-    php_extensions_7 = php_yaml_7['extensions'].map {|m| m['name'] }
+  it 'patches existing extensions' do
+    expect(@base_obj.find_ext('apcu')['version']).to eq '5.1.17'
+    expect(@base_obj.patch!(File.join(@testdata, 'php-patch-extensions-test.yml'))).to eq true
+    expect(@base_obj.find_ext('apcu')['version']).to eq '99.99.99'
+  end
 
-    expect(php_modules_7).not_to include(*modules_72_only)
+  it 'deletes excluded extensions' do
+    expect(@base_obj.find_ext_index('libsodium','native_modules')).not_to be_nil
+    expect(@base_obj.find_ext_index('sodium')).not_to be_nil
+    expect(@base_obj.patch!(File.join(@testdata, 'php-patch-extensions-test.yml'))).to eq true
+    expect(@base_obj.find_ext_index('libsodium','native_modules')).to be_nil
+    expect(@base_obj.find_ext_index('sodium')).to be_nil
+  end
 
-    expect(php_extensions_7).to include(*extensions_7_only)
-    expect(php_extensions_7).not_to include(*extensions_72_only)
+  it 'does nothing when merging an empty patch.yml' do
+    previous_obj = Marshal.load(Marshal.dump(@base_obj.base_yml))
+    expect(@base_obj.patch!(File.join(@testdata, 'php-empty-patch-test.yml'))). to eq false
+    expect(@base_obj.base_yml).to eq previous_obj
+  end
+
+  it 'does nothing when attempting to delete a missing extension' do
+    previous_obj = Marshal.load(Marshal.dump(@base_obj.base_yml))
+    expect(@base_obj.patch!(File.join(@testdata, 'php-patch-missing-extension-test.yml'))). to eq true
+    expect(@base_obj.base_yml).to eq previous_obj
   end
 end
