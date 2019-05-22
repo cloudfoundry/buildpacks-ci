@@ -5,6 +5,7 @@ require 'digest'
 require 'net/http'
 require 'tmpdir'
 require_relative 'dotnet_framework_extractor'
+require_relative 'merge-extensions'
 
 module Runner
   def run(*args)
@@ -490,42 +491,28 @@ class Builder
       full_name = source_input.name
       if source_input.version.start_with?('7')
         full_name = 'php7'
-      elsif !source_input.version.start_with?('5')
-        raise "Unexpected PHP version #{source_input.version}. Expected 5.X or 7.X"
+      elsif !source_input.version.start_with?('7')
+        raise "Unexpected PHP version #{source_input.version}. Expected 7.X"
       end
 
-      # add the right extensions
-      # add the right extensions
-      extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "#{full_name}-extensions.yml")
+      base_extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php7-base-extensions.yml")
+      php_extensions = BaseExtensions.new(base_extension_file)
+
+      # figure out extensions file to use
+      patch_file = nil
       if source_input.version.start_with?('7.1.')
-        extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php71-extensions.yml")
+        patch_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php71-extensions-patch.yml")
+      elsif  source_input.version.start_with?('7.2.')
+        patch_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php72-extensions-patch.yml")
+      elsif  source_input.version.start_with?('7.3.')
+        patch_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php73-extensions-patch.yml")
       end
 
-      extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "#{full_name}-extensions.yml")
-      if source_input.version.start_with?('7.2.')
-        extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php72-extensions.yml")
-      end
+      php_extensions.patch!(patch_file) if patch_file
+      output_yml =  File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php-final-extensions.yml")
+      php_extensions.write_yml(output_yml)
 
-      # add additional extensions for php7.3.x the extensions file
-      if source_input.version.start_with?('7.3')
-        all_extensions = YAML::load_file(extension_file)
-        additional_extensions_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', 'php73-additional-extensions.yml')
-        additional_extensions_contents = YAML::load_file(additional_extensions_file)
-        if additional_extensions_contents
-          all_extensions['extensions'].push(*additional_extensions_contents)
-        end
-        File.open(extension_file, 'w') {|f| f.write all_extensions.to_yaml }
-      end
-
-      # FIXME : add these rejected extensions back when they are fixed for php 7.3.X
-      if source_input.version.start_with?('7.3')
-        excluded_exts = ['mailparse', 'libz', 'pdo_sqlsrv', 'sqlsrv', 'solr', 'xdebug', 'yaf', 'memcached', 'amqp', 'phalcon', 'tideways']
-        obj = YAML::load_file(extension_file)
-        obj['extensions'].reject! {|x| excluded_exts.include?(x['name']) }
-        File.open(extension_file, 'w') {|f| f.write obj.to_yaml }
-      end
-
-      binary_builder.build(source_input, "--php-extensions-file=#{extension_file}")
+      binary_builder.build(source_input, "--php-extensions-file=#{output_yml}")
       out_data.merge!(
         artifact_output.move_dependency(
           source_input.name,

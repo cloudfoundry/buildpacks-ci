@@ -1,0 +1,23 @@
+---
+extensions:
+  exclusions:
+    - name: sodium
+      version: nil
+      md5: nil
+      klass: SodiumRecipe
+  additions:
+    - name: apcu
+      version: 99.99.99
+      md5: some-md5
+      klass: DeliciousRecipe
+    - name: solr
+      version: 2.4.0
+      md5: 2c9accf66681a3daaaf371bc07e44902
+      klass: PeclRecipe
+
+native_modules:
+  exclusions:
+    - name: libsodium
+      version: 1.0.17
+      md5: 0f71e2680187a1558b5461e6879342c5
+      klass: LibSodiumRecipe

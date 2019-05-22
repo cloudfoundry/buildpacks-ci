@@ -1,0 +1,15 @@
+---
+extensions:
+  exclusions:
+    - name: sodium
+    - name: mailparse
+    - name: libz
+    - name: pdo_sqlsrv
+    - name: sqlsrv
+    - name: solr
+    - name: xdebug
+    - name: yaf
+    - name: memcached
+    - name: amqp
+    - name: phalcon
+    - name: tideways

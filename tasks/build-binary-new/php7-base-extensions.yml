@@ -31,6 +31,10 @@ native_modules:
     version: 2.3.7
     md5: 274a711b0c77394e052db6493840c6f9
     klass: UnixOdbcRecipe
+  - name: libsodium
+    version: 1.0.17
+    md5: 0f71e2680187a1558b5461e6879342c5
+    klass: LibSodiumRecipe
 
 extensions:
   #standard pecl
@@ -122,6 +126,10 @@ extensions:
     version: 3.1.3
     md5: 29e64c6b6484a2aed6185974c8108465
     klass: MemcachedPeclRecipe
+  - name: sodium
+    version: nil
+    md5: nil
+    klass: SodiumRecipe
 
   #bundled w/PHP
   - name: tidy
@@ -156,10 +164,6 @@ extensions:
     version: nil
     md5: nil
     klass: FakePeclRecipe
-  - name: solr
-    version: 2.4.0
-    md5: 2c9accf66681a3daaaf371bc07e44902
-    klass: PeclRecipe
 
   #non-standard
   - name: amqp
