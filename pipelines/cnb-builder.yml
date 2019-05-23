@@ -110,8 +110,8 @@ resources:
     type: docker-image
     source:
       repository: cloudfoundry/cflinuxfs3
-      username: {{dockerhub-cflinuxfs2-username}}
-      password: {{dockerhub-cflinuxfs2-password}}
+      username: {{dockerhub-cflinuxfs-username}}
+      password: {{dockerhub-cflinuxfs-password}}
       email: cf-buildpacks-eng@pivotal.io
 
 <% cnb_images.each do |image_type| %>

@@ -172,16 +172,16 @@ resources: #####################################################################
     type: docker-image
     source:
       repository: cloudfoundry/cflinuxfs2
-      username: {{dockerhub-cflinuxfs2-username}}
-      password: {{dockerhub-cflinuxfs2-password}}
+      username: {{dockerhub-cflinuxfs-username}}
+      password: {{dockerhub-cflinuxfs-password}}
       email: cf-buildpacks-eng@pivotal.io
 
   - name: docker-cflinuxfs2-tagged
     type: docker-image
     source:
       repository: cloudfoundry/cflinuxfs2
-      username: {{dockerhub-cflinuxfs2-username}}
-      password: {{dockerhub-cflinuxfs2-password}}
+      username: {{dockerhub-cflinuxfs-username}}
+      password: {{dockerhub-cflinuxfs-password}}
       email: cf-buildpacks-eng@pivotal.io
 
   ## Github Release ##

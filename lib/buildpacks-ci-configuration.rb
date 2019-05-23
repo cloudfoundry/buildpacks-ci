@@ -39,8 +39,8 @@ class BuildpacksCIConfiguration
     ENV.fetch('LPASS_GIT_REPOS_PRIVATE_KEYS_THREE_FILE', 'Shared-CF\ Buildpacks/git-repos-private-keys-three.yml')
   end
 
-  def dockerhub_cflinuxfs2_credentials_filename
-    ENV.fetch('LPASS_DOCKERHUB_CFLINUXFS2_CREDENTIALS_FILE', 'Shared-CF\ Buildpacks/dockerhub-cflinuxfs2.yml')
+  def dockerhub_cflinuxfs_credentials_filename
+    ENV.fetch('LPASS_DOCKERHUB_CFLINUXFS_CREDENTIALS_FILE', 'Shared-CF\ Buildpacks/dockerhub-cflinuxfs.yml')
   end
 
   def organization
