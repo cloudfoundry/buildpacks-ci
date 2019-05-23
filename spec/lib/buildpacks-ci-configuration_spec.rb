@@ -113,25 +113,25 @@ describe BuildpacksCIConfiguration do
     end
   end
 
-  describe '#dockerhub_cflinuxfs2_credentials_filename' do
-    subject { BuildpacksCIConfiguration.new.dockerhub_cflinuxfs2_credentials_filename }
+  describe '#dockerhub_cflinuxfs_credentials_filename' do
+    subject { BuildpacksCIConfiguration.new.dockerhub_cflinuxfs_credentials_filename }
 
     context 'configured by env variable' do
       it 'returns the value of the env var' do
-        allow(ENV).to receive(:fetch).with('LPASS_DOCKERHUB_CFLINUXFS2_CREDENTIALS_FILE', anything).and_return('creds.yml')
+        allow(ENV).to receive(:fetch).with('LPASS_DOCKERHUB_CFLINUXFS_CREDENTIALS_FILE', anything).and_return('creds.yml')
 
         expect(subject).to eq('creds.yml')
       end
 
       it 'asks ENV for the value' do
-        expect(ENV).to receive(:fetch).with('LPASS_DOCKERHUB_CFLINUXFS2_CREDENTIALS_FILE', anything)
+        expect(ENV).to receive(:fetch).with('LPASS_DOCKERHUB_CFLINUXFS_CREDENTIALS_FILE', anything)
 
         subject
       end
     end
 
     it 'has a default value' do
-      expect(subject).to include('dockerhub-cflinuxfs2.yml')
+      expect(subject).to include('dockerhub-cflinuxfs.yml')
     end
   end
 
