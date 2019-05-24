@@ -24,8 +24,8 @@ native_modules:
     md5: 5a1f9b0ee460ea07e2aa50ad6c65383b
     klass: LibRdKafkaRecipe
   - name: cassandracppdriver
-    version: 2.11.0
-    md5: d38ae00eb72a41883f97c8129a1ab9bf
+    version: 2.12.0
+    md5: daf99bc84eb42c1257d53416b71dd469
     klass: CassandraCppDriverRecipe
   - name: unixodbc
     version: 2.3.7
