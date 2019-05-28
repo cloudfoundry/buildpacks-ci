@@ -14,5 +14,4 @@ run:
   path: buildpacks-ci/tasks/clean-up-env-buildpacks/run.sh
 params:
   ENV_NAME:
-  INSTALL_ADDITIONAL: false
   ALLOW_FAILURE: false
