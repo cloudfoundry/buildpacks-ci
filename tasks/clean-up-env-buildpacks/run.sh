@@ -30,26 +30,3 @@ null_buildpacks=$(cf buildpacks | tail -n +4 | grep -v 'cflinuxfs2\|cflinuxfs3\|
 for bp in $null_buildpacks; do
   cf delete-buildpack "$bp" -f -s ""
 done
-
-if [ "$INSTALL_ADDITIONAL" = true ] ; then
-    pushd r-buildpack
-        export GOBIN=$PWD/.bin
-        export PATH=$GOBIN:$PATH
-       (go install github.com/cloudfoundry/libbuildpack/packager/buildpack-packager)
-
-        buildpack-packager build -stack "cflinuxfs2"
-        cf create-buildpack r_buildpack r_buildpack-*.zip 999
-        rm r_buildpack-*.zip
-    popd
-
-    pushd nginx-buildpack
-        export GOBIN=$PWD/.bin
-        export PATH=$GOBIN:$PATH
-       (go install github.com/cloudfoundry/libbuildpack/packager/buildpack-packager)
-
-        buildpack-packager build -stack "cflinuxfs2"
-        cf create-buildpack nginx_buildpack nginx_buildpack-*.zip 999
-        rm nginx_buildpack-*.zip
-    popd
-fi
-

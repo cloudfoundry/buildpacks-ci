@@ -248,7 +248,6 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
           params:
             ENV_NAME: <%= env %>
-            INSTALL_ADDITIONAL: true
         on_failure:
           put: failure-alert
           params:
