@@ -17,6 +17,7 @@ tag                 = "#{version}-#{stack}"
 builder_config_file = File.absolute_path("builder.toml")
 pack_path           = File.absolute_path('pack-cli')
 packager_path       = File.absolute_path('packager-cli')
+lifecycle_version   = File.read(File.join("lifecycle", "version")).strip()
 
 if !enterprise # not in a public repo
   json_resp = JSON.load(Net::HTTP.get(URI("https://#{host}/v2/repositories/#{repo}/tags/?page_size=100")))
@@ -53,15 +54,22 @@ buildpacks = Dir.glob('sources/*/').map do |dir|
   }
 end
 
-groups = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.toml"))['groups']
+puts "Loading #{stack}-order.toml"
+static_builder_file = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.toml"))
+groups = static_builder_file['groups']
+description = static_builder_file['description']
 
 config_hash = {
+  "description": description,
   "buildpacks": buildpacks,
   "groups":     groups,
   "stack":      {
     "id":          cnb_stack,
     "build-image": build_image,
     "run-image":   run_image
+  },
+  "lifecycle": {
+      "version": lifecycle_version
   }
 }
 
