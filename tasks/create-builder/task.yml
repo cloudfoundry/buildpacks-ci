@@ -11,6 +11,7 @@ inputs:
   - name: pack
   - name: cnb-builder
   - name: packager
+  - name: lifecycle
 outputs:
   - name: builder-image
   - name: tag
