@@ -1,4 +1,4 @@
-<% stacks = %w(cflinuxfs2 cflinuxfs3) %>
+<% stacks = %w(cflinuxfs3) %>
 ---
 resource_types:
   - name: cron
