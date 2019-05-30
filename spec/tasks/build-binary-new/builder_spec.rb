@@ -17,7 +17,7 @@ def createDataJSON(path, name)
   FileUtils.mkdir_p(path)
   filepath = File.join(path, "data.json")
   filepath = File.new(filepath, 'w')
-  filepath.puts ('{"source":{"name":"' + name + '","type":"' + name + '"},"version":{"ref":"8.7","url":"https://cran.cnr.berkeley.edu/src/contrib/' + name + '_8.7.tar.gz"}}')
+  filepath.puts ('{"source":{"name":"' + name + '","type":"' + name + '"},"version":{"ref":"8.7","url":"https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/pip-pop/pip-pop-0.1.3-fc106ef6.tar.gz"}}')
   filepath.close
 end
 
@@ -243,26 +243,26 @@ describe 'Builder' do
                                         sub_dependencies: {
                                           forecast: {
                                             source: {
-                                              url: 'https://cran.cnr.berkeley.edu/src/contrib/forecast_8.7.tar.gz',
-                                              sha256: '0d3aec2d10e05cb7961695f0639d3c4b848dbfd4f551c7bc699b9f95e06e3a39',
+                                              url: 'https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/pip-pop/pip-pop-0.1.3-fc106ef6.tar.gz',
+                                              sha256: 'fc106ef6e87c9da64ca3b5eda2a4b531bdd2d1965304e9385772c546c6a6fe59',
                                             },
                                             version: '8.7'},
                                           plumber: {
                                             source: {
-                                              url: 'https://cran.cnr.berkeley.edu/src/contrib/plumber_8.7.tar.gz',
-                                              sha256: '4a60f220c4d19e1b3cf46e6f4392897fc54f8ee3f96f0b896079aed70753a5d7',
+                                              url: 'https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/pip-pop/pip-pop-0.1.3-fc106ef6.tar.gz',
+                                              sha256: 'fc106ef6e87c9da64ca3b5eda2a4b531bdd2d1965304e9385772c546c6a6fe59',
                                             },
                                             version: '8.7'},
                                           rserve: {
                                             source: {
-                                              url: 'https://cran.cnr.berkeley.edu/src/contrib/rserve_8.7.tar.gz',
-                                              sha256: 'c0ba71614fe4a8b6eeac2d299cc360f60a5088387793183735420c25216ef5db',
+                                              url: 'https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/pip-pop/pip-pop-0.1.3-fc106ef6.tar.gz',
+                                              sha256: 'fc106ef6e87c9da64ca3b5eda2a4b531bdd2d1965304e9385772c546c6a6fe59',
                                             },
                                             version: '8.7'},
                                           shiny: {
                                             source: {
-                                              url: 'https://cran.cnr.berkeley.edu/src/contrib/shiny_8.7.tar.gz',
-                                              sha256: 'c9963e266f5838eec0df4fe64f5268f04fb00e125ba13e60a63e0ad68bb4a33e',
+                                              url: 'https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/pip-pop/pip-pop-0.1.3-fc106ef6.tar.gz',
+                                              sha256: 'fc106ef6e87c9da64ca3b5eda2a4b531bdd2d1965304e9385772c546c6a6fe59',
                                             },
                                             version: '8.7'},
                                         },
