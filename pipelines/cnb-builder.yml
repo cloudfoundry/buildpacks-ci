@@ -166,6 +166,13 @@ resources:
       uri: https://github.com/buildpack/lifecycle
       branch: master
 
+  - name: cnb-lifecycle-release
+    type: github-release
+    source:
+      repository: lifecycle
+      user: buildpack
+      access_token: {{buildpacks-github-token}}
+
 jobs:
   - name: update-cflinuxfs3-cnb-base-image
     public: true
@@ -251,6 +258,9 @@ jobs:
         - get: version
           params: {pre: "rc"}
           resource: cflinuxfs3-version
+        - get: lifecycle
+          resource: cnb-lifecycle-release
+          trigger: true
       - task: get-cnb-sources
         config:
           platform: linux
@@ -307,6 +317,8 @@ jobs:
         - get: version
           params: {bump: "final"}
           resource: cflinuxfs3-version
+        - get: lifecycle
+          resource: cnb-lifecycle-release
       - task: get-cnb-sources
         config:
           platform: linux
@@ -387,6 +399,9 @@ jobs:
           params: {pre: "rc"}
           resource: cflinuxfs3-piv-version
         - get: packager
+        - get: lifecycle
+          resource: cnb-lifecycle-release
+          trigger: true
       - task: get-cnb-sources
         config:
           platform: linux
@@ -444,6 +459,8 @@ jobs:
         - get: version
           params: {bump: "final"}
           resource: cflinuxfs3-piv-version
+        - get: lifecycle
+          resource: cnb-lifecycle-release
       - task: get-cnb-sources
         config:
           platform: linux
@@ -510,6 +527,9 @@ jobs:
           resource: bionic-version
           params: {pre: "rc"}
         - get: packager
+        - get: lifecycle
+          resource: cnb-lifecycle-release
+          trigger: true
       - task: get-cnb-sources
         config:
           platform: linux
@@ -539,8 +559,8 @@ jobs:
         params:
           REPO: cloudfoundry/cnb
           STACK: "io.buildpacks.stacks.bionic"
-          BUILD_IMAGE: "packs/build:0.1.0"
-          RUN_IMAGE: "packs/run:0.1.0"
+          BUILD_IMAGE: "cnbs/build:0.0.1"
+          RUN_IMAGE: "cnbs/run:0.0.1"
           HOST: "hub.docker.com"
       - task: smoke-test-builder
         file: buildpacks-ci/tasks/test-builder/task.yml
@@ -565,6 +585,8 @@ jobs:
         resource: bionic-version
         params: {bump: "final"}
       - get: packager
+      - get: lifecycle
+        resource: cnb-lifecycle-release
     - task: get-cnb-sources
       config:
         platform: linux
@@ -594,8 +616,8 @@ jobs:
       params:
         REPO: cloudfoundry/cnb
         STACK: "io.buildpacks.stacks.bionic"
-        BUILD_IMAGE: "packs/build:0.1.0"
-        RUN_IMAGE: "packs/run:0.1.0"
+        BUILD_IMAGE: "cnbs/build:0.0.1"
+        RUN_IMAGE: "cnbs/run:0.0.1"
         HOST: "hub.docker.com"
         FINAL: true
     - task: smoke-test-builder
