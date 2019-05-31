@@ -77,7 +77,7 @@ class NewReleasesDetector
                                      description: story_info[:description],
                                      tasks: story_info[:tasks],
                                      labels: story_info[:labels],
-                                     point_value: 1)
+                                     point_value: 0)
       if notify_capi?(dependency, versions)
         story_info = capi_tracker_story_info(dependency, versions)
 
