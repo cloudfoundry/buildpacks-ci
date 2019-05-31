@@ -112,25 +112,6 @@ if added.empty? && !rebuilt
   exit 0
 end
 
-# TODO make work for multiple stacks -- check cf_stacks for v?
-# i.e. python 3.7 is only on cflinuxfs3
-if removal_strategy == 'remove_all'
-  manifest['default_versions'] = manifest.fetch('default_versions', []).map do |v|
-    should_update = true
-
-    if manifest_name == 'nginx' && %w(php nginx).include?(manifest['language'])
-      nginx_version = Gem::Version.new(resource_version)
-      should_update = nginx_version.segments[1].odd?
-    end
-
-    if should_update
-      v['version'] = resource_version if v['name'] == manifest_name
-    end
-
-    v
-  end
-end
-
 #
 # Special Nginx stuff (for Nginx buildpack)
 # * There are two version lines, stable & mainline
