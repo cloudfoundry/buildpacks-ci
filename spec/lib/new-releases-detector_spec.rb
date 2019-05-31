@@ -341,9 +341,9 @@ describe NewReleasesDetector do
         subject.post_to_tracker
       end
 
-      it 'posts a tracker story worth 1 story point' do
+      it 'posts a tracker story worth 0 story point' do
         expect(buildpacks_tracker_client).to receive(:post_to_tracker).
-          with(point_value: 1,
+          with(point_value: 0,
                name: anything, description: anything, tasks: anything, labels: anything)
 
         expect(capi_tracker_client).not_to receive(:post_to_tracker)
