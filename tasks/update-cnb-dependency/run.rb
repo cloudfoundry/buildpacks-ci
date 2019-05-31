@@ -29,7 +29,7 @@ buildpack_toml = TOML.load_file('buildpack/buildpack.toml')
 buildpack_toml_latest_released = begin
   TOML.load_file('buildpack-latest-released/buildpack.toml')
 rescue
-  { 'metadata' => { 'dependencies' => [] } }
+  {'metadata' => {'dependencies' => []}}
 end
 
 data = JSON.parse(open('source/data.json').read)
@@ -62,18 +62,37 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
   build = JSON.parse(open(stack_dependency_build).read)
   builds[stack] = build
 
+  source_type = 'source'
+  source_url = builds[stack]['source']['url']
+  source_sha256 = builds[stack]['source'].fetch('sha256', '')
+
+  if source_name.include? 'dotnet'
+    git_commit_sha = builds[stack]['git_commit_sha']
+    source_url = "#{source_url}/archive/#{git_commit_sha}.tar.gz"
+  elsif source_name == 'appdynamics'
+    source_type = 'osl'
+    source_url = 'https://docs.appdynamics.com/display/DASH/Legal+Notices'
+  elsif source_name == 'CAAPM'
+    source_type = 'osl'
+    source_url = 'https://docops.ca.com/ca-apm/10-5/en/ca-apm-release-notes/third-party-software-acknowledgments/php-agents-third-party-software-acknowledgments'
+  elsif source_name.include? 'miniconda'
+    source_url = "https://github.com/conda/conda/archive/#{version}.tar.gz"
+  end
+
   dep = {
       'id' => V3_DEP_IDS.fetch(manifest_name, manifest_name),
       'name' => V3_DEP_NAMES[manifest_name],
       'version' => resource_version,
       'uri' => build['url'],
       'sha256' => build['sha256'],
-      'stacks' => v3_stacks
+      'stacks' => v3_stacks,
+      source_type => source_url,
+      'source_sha256' => source_sha256
   }
 
   old_versions = buildpack_toml['metadata']['dependencies']
-                     .select { |d| d['id'] == V3_DEP_IDS.fetch(manifest_name, manifest_name) }
-                     .map { |d| d['version'] }
+                     .select {|d| d['id'] == V3_DEP_IDS.fetch(manifest_name, manifest_name)}
+                     .map {|d| d['version']}
 
   buildpack_toml['metadata']['dependencies'] = Dependencies.new(
       dep,
@@ -84,8 +103,8 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
   ).switch
 
   new_versions = buildpack_toml['metadata']['dependencies']
-                     .select { |d| d['id'] == V3_DEP_IDS.fetch(manifest_name, manifest_name) }
-                     .map { |d| d['version'] }
+                     .select {|d| d['id'] == V3_DEP_IDS.fetch(manifest_name, manifest_name)}
+                     .map {|d| d['version']}
 
   added += (new_versions - old_versions).uniq.sort
   removed += (old_versions - new_versions).uniq.sort
