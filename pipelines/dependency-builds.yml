@@ -17,12 +17,12 @@
                         source_type: 'ca_apm_agent',
                         any_stack: true },
 
-  'composer' =>        { buildpacks: { php: {} },
+  'composer' =>        { buildpacks: { php: {}, 'php-composer-cnb': {} },
                         source_type: 'github_releases',
                         source_params: ['repo: composer/composer', 'extension: .phar'],
                         any_stack: true },
 
-  'dep' =>             { buildpacks: { go: {}},
+  'dep' =>             { buildpacks: { go: {}, 'dep-cnb': {} },
                         source_type: 'github_releases',
                         source_params: ['repo: golang/dep', 'fetch_source: true']},
 
@@ -80,7 +80,7 @@
                         source_params: ['generation: 2'],
                         any_stack: true },
 
-  'miniconda3' =>      { buildpacks: { python: {} },
+  'miniconda3' =>      { buildpacks: { python: {}, 'conda-cnb': {} },
                         third_party_hosted: true,
                         source_type: 'miniconda',
                         source_params: ['generation: 3'],
@@ -124,11 +124,11 @@
                           'php-cnb' => { lines: ["7.1.X", "7.2.X", "7.3.X"], removal_strategy: 'keep_latest_released'} },
                         source_type: 'php'},
 
-  'pip' =>             { buildpacks: { python: {} },
+  'pip' =>             { buildpacks: { python: {}, 'pip-cnb': {} },
                         source_type: 'pypi',
                         any_stack: true },
 
-  'pipenv' =>          { buildpacks: { python: {} },
+  'pipenv' =>          { buildpacks: { python: {}, 'pipenv-cnb': {} },
                         source_type: 'pypi'},
 
   'python' =>          { buildpacks: {
@@ -144,7 +144,8 @@
                       },
 
   'ruby' =>            { buildpacks: {
-                          ruby: { lines: ["2.2.X", "2.3.X", "2.4.X", "2.5.X", "2.6.X"], removal_strategy: 'keep_latest_released' } } },
+                          ruby: { lines: ["2.2.X", "2.3.X", "2.4.X", "2.5.X", "2.6.X"], removal_strategy: 'keep_latest_released' },
+                          'ruby-cnb': { lines: ["2.2.X", "2.3.X", "2.4.X", "2.5.X", "2.6.X"], removal_strategy: 'keep_latest_released' } } },
 
   'rubygems' =>        { buildpacks: { ruby: {} },
                         source_type: 'rubygems_cli',
