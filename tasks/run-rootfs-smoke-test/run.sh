@@ -1,9 +1,5 @@
 #!/bin/bash -l
 
-set -o errexit
-set -o nounset
-set -o pipefail
-
 set -x
 
 pushd "bbl-state/$ENV_NAME"
