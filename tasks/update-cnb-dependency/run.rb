@@ -98,7 +98,8 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
       'source_sha256' => source_sha256
   }
 
-  old_versions = buildpack_toml['metadata']['dependencies']
+  old_deps = buildpack_toml['metadata'].fetch('dependencies', [])
+  old_versions = old_deps
                      .select {|d| d['id'] == V3_DEP_IDS.fetch(manifest_name, manifest_name)}
                      .map {|d| d['version']}
 
@@ -106,8 +107,8 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
       dep,
       ENV['VERSION_LINE'],
       removal_strategy,
-      buildpack_toml['metadata']['dependencies'],
-      buildpack_toml_latest_released['metadata']['dependencies']
+      old_deps,
+      buildpack_toml_latest_released['metadata'].fetch('dependencies', [])
   ).switch
 
   new_versions = buildpack_toml['metadata']['dependencies']
