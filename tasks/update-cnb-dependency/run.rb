@@ -63,19 +63,26 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
   builds[stack] = build
 
   source_type = 'source'
-  source_url = builds[stack]['source']['url']
-  source_sha256 = builds[stack]['source'].fetch('sha256', '')
+  source_url = ''
+  source_sha256 = ''
 
-  if source_name.include? 'dotnet'
+  begin
+    source_url = builds[stack]['source']['url']
+    source_sha256 = builds[stack]['source'].fetch('sha256', '')
+  rescue
+    next
+  end
+
+  if manifest_name.include? 'dotnet'
     git_commit_sha = builds[stack]['git_commit_sha']
     source_url = "#{source_url}/archive/#{git_commit_sha}.tar.gz"
-  elsif source_name == 'appdynamics'
+  elsif manifest_name == 'appdynamics'
     source_type = 'osl'
     source_url = 'https://docs.appdynamics.com/display/DASH/Legal+Notices'
-  elsif source_name == 'CAAPM'
+  elsif manifest_name == 'CAAPM'
     source_type = 'osl'
     source_url = 'https://docops.ca.com/ca-apm/10-5/en/ca-apm-release-notes/third-party-software-acknowledgments/php-agents-third-party-software-acknowledgments'
-  elsif source_name.include? 'miniconda'
+  elsif manifest_name.include? 'miniconda'
     source_url = "https://github.com/conda/conda/archive/#{version}.tar.gz"
   end
 
