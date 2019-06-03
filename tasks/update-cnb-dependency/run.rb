@@ -62,6 +62,7 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
   build = JSON.parse(open(stack_dependency_build).read)
   builds[stack] = build
 
+  version = builds[stack]['version'] # We assume that the version is the same for all stacks
   source_type = 'source'
   source_url = ''
   source_sha256 = ''
