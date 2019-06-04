@@ -29,7 +29,7 @@ resources: #####################################################################
     source:
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-      tag_filter: v5.*
+      tag_filter: v8.*
   - name: cf-deployment-concourse-tasks-latest
     type: git
     source:
@@ -297,7 +297,8 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: cf-deployment-concourse-tasks
-        - get: env-repo
+        - get: bbl-state
+        - get: bbl-config
           resource: bbl-state
         - get: bosh-deployment
         - get: buildpacks-ci
@@ -326,13 +327,12 @@ jobs: ##########################################################################
           LB_DOMAIN: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
           BBL_ENV_NAME: cflinuxfs2
           BBL_STATE_DIR: cflinuxfs2
-          OPS_FILES: "local-dns.yml"
         input_mapping:
           ops-files: bosh-deployment
         ensure:
           put: bbl-state
           params:
-            repository: updated-env-repo
+            repository: updated-bbl-state
             rebase: true
       - task: add-gcp-parent-dns-record
         file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
@@ -365,10 +365,6 @@ jobs: ##########################################################################
           - get: gcp-stemcell
           - get: bosh-deployment
         - aggregate:
-          - task: turn-on-bosh-dns
-            file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
-            params:
-              BBL_STATE_DIR: cflinuxfs2
           - task: create-deployment-source-config
             file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
             params:
@@ -507,8 +503,7 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: cf-deployment-concourse-tasks
-        - get: env-repo
-          resource: bbl-state
+        - get: bbl-state
         - get: buildpacks-ci
         - get: version
           passed: [ delete-deployment ]
@@ -527,7 +522,7 @@ jobs: ##########################################################################
         ensure:
           put: bbl-state
           params:
-            repository: updated-env-repo
+            repository: updated-bbl-state
             rebase: true
 
   - name: release-cflinuxfs2

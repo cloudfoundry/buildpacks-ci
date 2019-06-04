@@ -59,7 +59,7 @@ resources:
     source:
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-      tag_filter: v5.*
+      tag_filter: v8.*
   - name: cf-deployment-concourse-tasks-latest
     type: git
     source:
@@ -203,7 +203,8 @@ jobs:
     plan:
       - aggregate:
         - get: cf-deployment-concourse-tasks
-        - get: env-repo
+        - get: bbl-state
+        - get: bbl-config
           resource: bbl-state
         - get: bosh-deployment
         - get: public-robots
@@ -221,13 +222,12 @@ jobs:
           LB_DOMAIN: cf-release.buildpacks-gcp.ci.cf-app.com
           BBL_ENV_NAME: cf-release
           BBL_STATE_DIR: cf-release
-          OPS_FILES: "local-dns.yml"
         input_mapping:
           ops-files: bosh-deployment
         ensure:
           put: bbl-state
           params:
-            repository: updated-env-repo
+            repository: updated-bbl-state
             rebase: true
       - task: add-gcp-parent-dns-record
         file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
@@ -282,10 +282,6 @@ jobs:
             file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
             params:
               ENV_NAME: cf-release
-          - task: turn-on-bosh-dns
-            file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
-            params:
-              BBL_STATE_DIR: cf-release
         - put: cf-release-cf-deployment
           params:
             source_file: deployment-source-config/source_file.yml
@@ -382,8 +378,7 @@ jobs:
     plan:
       - aggregate:
         - get: cf-deployment-concourse-tasks
-        - get: env-repo
-          resource: bbl-state
+        - get: bbl-state
         - get: buildpacks-ci
         - get: public-robots
           passed: [ delete-deployment ]
@@ -402,7 +397,7 @@ jobs:
         ensure:
           put: bbl-state
           params:
-            repository: updated-env-repo
+            repository: updated-bbl-state
             rebase: true
 
   - name: ship-it
