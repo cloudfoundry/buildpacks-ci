@@ -39,7 +39,7 @@ resources: #####################################################################
     source:
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-      tag_filter: v5.*
+      tag_filter: v8.*
   - name: cf-acceptance-tests
     type: git
     source:
@@ -307,7 +307,8 @@ jobs: ##########################################################################
           resource: <%= rootfs_name %>-github-tags
           passed: [ build-rootfs ]
         - get: cf-deployment-concourse-tasks
-        - get: env-repo
+        - get: bbl-state
+        - get: bbl-config
           resource: bbl-state
         - get: bosh-deployment
         - get: buildpacks-ci
@@ -337,13 +338,12 @@ jobs: ##########################################################################
           LB_DOMAIN: <%= rootfs_name %>.buildpacks-gcp.ci.cf-app.com
           BBL_ENV_NAME: <%= rootfs_name %>
           BBL_STATE_DIR: <%= rootfs_name %>
-          OPS_FILES: "local-dns.yml"
         input_mapping:
           ops-files: bosh-deployment
         ensure:
           put: bbl-state
           params:
-            repository: updated-env-repo
+            repository: updated-bbl-state
             rebase: true
       - task: add-gcp-parent-dns-record
         file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
@@ -398,10 +398,6 @@ jobs: ##########################################################################
             file: buildpacks-ci/tasks/create-capi-release-with-rootfs/task.yml
             params:
               STACK: <%= rootfs_name %>
-          - task: turn-on-bosh-dns
-            file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
-            params:
-              BBL_STATE_DIR: <%= rootfs_name %>
           - task: use-new-buildpack-bosh-releases
             file: buildpacks-ci/tasks/use-new-buildpack-bosh-releases/task.yml
             params:
@@ -559,8 +555,7 @@ jobs: ##########################################################################
     plan:
       - aggregate:
         - get: cf-deployment-concourse-tasks
-        - get: env-repo
-          resource: bbl-state
+        - get: bbl-state
         - get: buildpacks-ci
         - get: version
           passed: [ delete-deployment ]
@@ -579,7 +574,7 @@ jobs: ##########################################################################
         ensure:
           put: bbl-state
           params:
-            repository: updated-env-repo
+            repository: updated-bbl-state
             rebase: true
 
   - name: release-<%= rootfs_name %>
