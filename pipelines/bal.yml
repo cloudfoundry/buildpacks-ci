@@ -64,7 +64,7 @@ resources:
     source:
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-      tag_filter: v5.*
+      tag_filter: v8.*
 
   - name: cf-deployment-concourse-tasks-latest
     type: git
@@ -152,7 +152,8 @@ jobs:
         - get: bal-develop
           passed: [unit-specs-windows, unit-specs-linux]
           trigger: true
-        - get: env-repo
+        - get: bbl-state
+        - get: bbl-config
           resource: bbl-state
         - get: bosh-deployment
         - get: buildpacks-ci
@@ -175,7 +176,7 @@ jobs:
         ensure:
           put: bbl-state
           params:
-            repository: updated-env-repo
+            repository: updated-bbl-state
             rebase: true
       - task: add-gcp-parent-dns-record
         file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
@@ -212,10 +213,6 @@ jobs:
           file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
           params:
             ENV_NAME: bal
-        - task: turn-on-bosh-dns
-          file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
-          params:
-            BBL_STATE_DIR: bal
         - put: bal-cf-deployment
           params:
             source_file: deployment-source-config/source_file.yml
@@ -404,8 +401,7 @@ jobs:
           trigger: true
           passed: [ destroy-cf-deployment ]
         - get: cf-deployment-concourse-tasks
-        - get: env-repo
-          resource: bbl-state
+        - get: bbl-state
         - get: buildpacks-ci
         - get: bal-develop
           passed: [ destroy-cf-deployment ]
@@ -424,5 +420,5 @@ jobs:
         ensure:
           put: bbl-state
           params:
-            repository: updated-env-repo
+            repository: updated-bbl-state
             rebase: true

@@ -75,16 +75,9 @@ RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.45-linux-amd64
   && ln -s /usr/local/bin/bosh2 /usr/local/bin/bosh
 
 # download bbl
-RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v5.11.6/bbl-v5.11.6_linux_x86-64' \
-  && [ 2ee595a0b8bc2546151f26e5fb986f599c1149557c9e15791b0043844f881866 = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
+RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.0.0/bbl-v8.0.0_linux_x86-64' \
+  && [ 0b1569472f34ed14cb3ba6af5214f584707d1a1fd9c90b807b52280d8ce8c7f9 = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bbl
-
-# download terraform (used by bbl)
-RUN wget -O terraform.zip 'https://releases.hashicorp.com/terraform/0.10.8/terraform_0.10.8_linux_amd64.zip' \
-  && [ b786c0cf936e24145fad632efd0fe48c831558cc9e43c071fffd93f35e3150db = $(shasum -a 256 terraform.zip | cut -d' ' -f1) ] \
-  && funzip terraform.zip > /usr/local/bin/terraform \
-  && rm terraform.zip \
-  && chmod 755 /usr/local/bin/terraform
 
 #download spiff for spiffy things
 RUN wget -O spiff.zip 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.8/spiff_linux_amd64.zip' \
