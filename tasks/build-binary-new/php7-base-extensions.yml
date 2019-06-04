@@ -115,8 +115,8 @@ extensions:
     md5: 5d1a8ca3101df93938d283933f256493
     klass: PeclRecipe
   - name: yaf
-    version: 3.0.7
-    md5: d09cdd5b04a25a3fd5a44d3507653e88
+    version: 3.0.8
+    md5: 636b2284f0c89640e598f59956b4c0f8
     klass: PeclRecipe
   - name: yaml
     version: 2.0.4
