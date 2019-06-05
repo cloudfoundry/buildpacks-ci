@@ -7,7 +7,6 @@ image_resource:
 inputs:
   - name: new-cves
   - name: buildpacks-ci
-  - name: cflinuxfs2
   - name: cflinuxfs3
 outputs:
   - name: output-new-cves
