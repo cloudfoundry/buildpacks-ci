@@ -75,8 +75,8 @@ RUN curl https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.45-linux-amd64
   && ln -s /usr/local/bin/bosh2 /usr/local/bin/bosh
 
 # download bbl
-RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.0.0/bbl-v8.0.0_linux_x86-64' \
-  && [ 0b1569472f34ed14cb3ba6af5214f584707d1a1fd9c90b807b52280d8ce8c7f9 = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
+RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v7.6.0/bbl-v7.6.0_linux_x86-64' \
+  && [ 2e81f0560310791d604145b39f0b0c21cfd50d2c314fcd58059ff7a006cf12ca = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bbl
 
 #download spiff for spiffy things
