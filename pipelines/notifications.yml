@@ -15,14 +15,6 @@ resource_types:
       repository: cfbuildpacks/cron-resource
 
 resources:
-  - name: davos-cve-stories-cflinuxfs2
-    type: cf-tracker-resource
-    source:
-      project_id: '{{cf-buildpacks-public-tracker-id}}'
-      token: {{pivotal-tracker-api-token}}
-      labels:
-        - cflinuxfs2
-        - security-notice
   - name: davos-cve-stories-cflinuxfs3
     type: cf-tracker-resource
     source:
@@ -79,17 +71,6 @@ resources:
       branch: master
       paths: [ new-buildpack-cve-notifications/* ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
-  - name: cflinuxfs2
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/cflinuxfs2
-      branch: master
-  - name: cflinuxfs2-release
-    type: github-release
-    source:
-      owner: cloudfoundry
-      repository: cflinuxfs2
-      access_token: {{buildpacks-github-token}}
   - name: cflinuxfs3
     type: git
     source:
@@ -103,26 +84,6 @@ resources:
       access_token: {{buildpacks-github-token}}
 
 jobs:
-  - name: categorize-security-notices-cflinuxfs2
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: davos-cve-stories
-          resource: davos-cve-stories-cflinuxfs2
-          trigger: true
-        - get: buildpacks-ci
-        - get: cflinuxfs2-release
-          params:
-            include_source_tarball: true
-      - aggregate:
-        - task: categorize-security-notices-cflinuxfs2
-          file: buildpacks-ci/tasks/categorize-security-notices/task.yml
-          params:
-            TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
-            TRACKER_PROJECT_REQUESTER: '{{cf-buildpacks-requester-id}}'
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            STACK: cflinuxfs2
   - name: categorize-security-notices-cflinuxfs3
     serial: true
     public: true
@@ -209,25 +170,10 @@ jobs:
       - aggregate:
         - get: buildpacks-ci
         - get: new-cves
-        - get: cflinuxfs2
         - get: cflinuxfs3
         - get: check-interval
           trigger: true
       - aggregate:
-        - do:
-          - task: check-for-new-cflinuxfs2-cves
-            file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
-            params:
-              SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
-              SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
-              STACK: cflinuxfs2
-            output_mapping:
-              output-new-cves: output-new-cves-cflinuxfs2
-          - put: new-cves-cflinuxfs2
-            resource: new-cves
-            params:
-              repository: output-new-cves-cflinuxfs2
-              rebase: true
         - do:
           - task: check-for-new-cflinuxfs3-cves
             file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
