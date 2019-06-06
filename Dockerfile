@@ -80,8 +80,10 @@ RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/
   && chmod +x /usr/local/bin/bbl
 
 # download credhub cli
-RUN wget -O /usr/local/bin/credhub 'https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/2.4.0/credhub-linux-2.4.0.tgz' \
-  && [ 73edaf1ee47323c4f0aa455bcc17303a73c0cf2a6d9156542f1f6b7b1b1aa3db = $(shasum -a 256 /usr/local/bin/credhub | cut -d' ' -f1) ] \
+RUN curl -L https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/2.4.0/credhub-linux-2.4.0.tgz -o credhub.tgz \
+  && [ 73edaf1ee47323c4f0aa455bcc17303a73c0cf2a6d9156542f1f6b7b1b1aa3db = $(shasum -a 256 credhub.tgz | cut -d' ' -f1) ] \
+  && tar -zxf credhub.tgz --to-stdout > /usr/local/bin/credhub \
+  && rm credhub.tgz \
   && chmod +x /usr/local/bin/credhub
 
 
