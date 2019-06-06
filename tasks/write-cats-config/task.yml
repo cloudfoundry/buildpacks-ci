@@ -6,6 +6,7 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
+  - name: cf-admin-password
 outputs:
   - name: integration-config
 run:
@@ -14,8 +15,6 @@ run:
     - "-cl"
     - "buildpacks-ci/tasks/write-cats-config/run.rb"
 params:
-  CI_CF_USERNAME:
-  CI_CF_PASSWORD:
   APPS_DOMAIN:
   DIEGO_DOCKER_ON:
   CREDHUB_MODE:
