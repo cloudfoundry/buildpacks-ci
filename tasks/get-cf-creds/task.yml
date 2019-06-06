@@ -1,0 +1,16 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: bbl-state
+outputs:
+  - name: cf-admin-password
+run:
+  path: buildpacks-ci/tasks/get-cf-creds/run.sh
+
+params:
+  ENV_NAME:
