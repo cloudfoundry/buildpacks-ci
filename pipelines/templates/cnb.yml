@@ -147,7 +147,7 @@ jobs: ##########################################################################
       - task: update-libcfbuildpack
         file: buildpacks-ci/tasks/update-go-module/task.yml
         params:
-          MODULE_PATH: github.com/cloudfoundry/libcfbuildpack
+          MODULE_PATH: github.com/cloudfoundry/libcfbuildpack@master
           VENDOR: true
       - put: buildpack-git
         params:
