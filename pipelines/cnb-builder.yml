@@ -312,6 +312,7 @@ jobs:
         - get: cnb-builder
         - get: pack
           resource: pack-release
+          trigger: true
         - get: packager
         - get: buildpacks-ci
         - get: version
@@ -392,8 +393,8 @@ jobs:
           trigger: true
         <% end %>
         - get: pack
-          trigger: true
           resource: pack-master
+          trigger: true
         - get: buildpacks-ci
         - get: version
           params: {pre: "rc"}
@@ -454,6 +455,7 @@ jobs:
           resource: p-cnb-builder
         - get: pack
           resource: pack-release
+          trigger: true
         - get: packager
         - get: buildpacks-ci
         - get: version
@@ -519,8 +521,8 @@ jobs:
           trigger: true
         <% end %>
         - get: pack
-          trigger: true
           resource: pack-master
+          trigger: true
         - get: cnb-builder
         - get: buildpacks-ci
         - get: version
@@ -579,6 +581,7 @@ jobs:
       <% end %>
       - get: pack
         resource: pack-release
+        trigger: true
       - get: cnb-builder
       - get: buildpacks-ci
       - get: version
