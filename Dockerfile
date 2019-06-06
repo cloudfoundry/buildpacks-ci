@@ -79,6 +79,12 @@ RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/
   && [ 2e81f0560310791d604145b39f0b0c21cfd50d2c314fcd58059ff7a006cf12ca = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bbl
 
+# download credhub cli
+RUN wget -O /usr/local/bin/credhub 'https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/2.4.0/credhub-linux-2.4.0.tgz' \
+  && [ 73edaf1ee47323c4f0aa455bcc17303a73c0cf2a6d9156542f1f6b7b1b1aa3db = $(shasum -a 256 /usr/local/bin/credhub | cut -d' ' -f1) ] \
+  && chmod +x /usr/local/bin/credhub
+
+
 #download spiff for spiffy things
 RUN wget -O spiff.zip 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.8/spiff_linux_amd64.zip' \
   && [ e5b49b7f32b2b3973536bf2a48beda2d236956bebff7677aa109cc2b71f56002 = $(shasum -a 256 spiff.zip | cut -d' ' -f1) ] \
