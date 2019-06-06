@@ -2,6 +2,7 @@
 
 require 'json'
 
+admin_user = "admin"
 admin_password = File.read("cf-admin-password/password")
 apps_domain = ENV.fetch('APPS_DOMAIN')
 diego_docker_on = ENV.fetch('DIEGO_DOCKER_ON')
@@ -13,7 +14,7 @@ stacks = ENV.fetch('STACKS','')
 
 cats_config = {
   "admin_password" => admin_password,
-  "admin_user" => "admin",
+  "admin_user" => admin_user,
   "api" => "api.#{apps_domain}",
   "apps_domain" => apps_domain,
   "credhub_mode" => credhub_mode,
