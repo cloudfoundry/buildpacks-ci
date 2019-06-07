@@ -229,12 +229,14 @@ jobs:
             - cf-deployment/operations/use-latest-stemcell.yml
             vars:
               system_domain: bal.buildpacks-gcp.ci.cf-app.com
+        - task: get-cf-creds
+          file: buildpacks-ci/tasks/get-cf-creds/task.yml
+          params:
+            ENV_NAME: bal
         - task: set-up-environment-for-credhub
           attempts: 3
           file: buildpacks-ci/tasks/set-up-environment-for-credhub/task.yml
           params:
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-bal-password}}
             APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
             ENV_NAME: bal
         on_failure:
