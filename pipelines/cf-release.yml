@@ -84,12 +84,6 @@ resources:
     source:
       deployment: cf
       skip_check: true
-      vars_store:
-        provider: gcs
-        config:
-          bucket: cf-release-cf-deployment
-          file_name: vars-store.yml
-          json_key: {{cf-release-cf-deployment-gcs-service-account-key}}
   - name: failure-alert
     type: slack-notification
     source:
@@ -310,6 +304,7 @@ jobs:
     plan:
       - aggregate:
         - get: buildpacks-ci
+        - get: bbl-state
         - get: cf-deployment-concourse-tasks
           resource: cf-deployment-concourse-tasks-latest
         - get: cf-acceptance-tests
@@ -327,11 +322,13 @@ jobs:
         - get: java-pivnet-production
           passed: [ deploy ]
       - do:
+        - task: get-cf-creds
+          file: buildpacks-ci/tasks/get-cf-creds/task.yml
+          params:
+            ENV_NAME: cf-release
         - task: write-cats-config
           file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
-            CI_CF_USERNAME: {{cf-release-cf-username}}
-            CI_CF_PASSWORD: {{cf-release-cf-password}}
             APPS_DOMAIN: cf-release.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
         - task: cats

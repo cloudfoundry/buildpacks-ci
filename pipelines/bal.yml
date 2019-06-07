@@ -95,12 +95,7 @@ resources:
     source:
       deployment: cf
       skip_check: true
-      vars_store:
-        provider: gcs
-        config:
-          bucket: bal-cf-deployment
-          file_name: vars-store.yml
-          json_key: {{bal-cf-deployment-gcs-service-account-key}}
+
 
   - name: gcp-stemcell
     type: bosh-io-stemcell
@@ -256,6 +251,7 @@ jobs:
     public: true
     plan:
       - aggregate:
+        - get: bbl-state
         - get: monday-funday
           trigger: true
           passed: [deploy-cf-and-diego-to-cf-release]
@@ -267,11 +263,13 @@ jobs:
           resource: cf-deployment-concourse-tasks-latest
         - get: cf-acceptance-tests
       - do:
+        - task: get-cf-creds
+          file: buildpacks-ci/tasks/get-cf-creds/task.yml
+          params:
+            ENV_NAME: bal
         - task: write-cats-config-for-windows2012R2
           file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-bal-password}}
             APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
             CREDHUB_MODE: assisted

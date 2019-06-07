@@ -146,12 +146,6 @@ resources: #####################################################################
     source:
       deployment: cf
       skip_check: true
-      vars_store:
-        provider: gcs
-        config:
-          bucket: cflinuxfs2-cf-deployment
-          file_name: vars-store.yml
-          json_key: {{cflinuxfs2-cf-deployment-gcs-service-account-key}}
 
   - name: cflinuxfs2-rootfs-smoke-test-deployment
     type: bosh-deployment
@@ -414,6 +408,7 @@ jobs: ##########################################################################
     public: true
     plan:
       - aggregate:
+        - get: bbl-state
         - get: buildpacks-ci
         - get: cf-deployment-concourse-tasks
           resource: cf-deployment-concourse-tasks-latest
@@ -430,11 +425,13 @@ jobs: ##########################################################################
         - get: cflinuxfs2
           passed: [ deploy ]
       - do:
+        - task: get-cf-creds
+          file: buildpacks-ci/tasks/get-cf-creds/task.yml
+          params:
+            ENV_NAME: cflinuxfs2
         - task: write-cats-config
           file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
-            CI_CF_USERNAME: {{cflinuxfs2-cf-username}}
-            CI_CF_PASSWORD: {{cflinuxfs2-cf-password}}
             APPS_DOMAIN: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
             STACKS: cflinuxfs2
