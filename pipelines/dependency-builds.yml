@@ -101,7 +101,7 @@
                           nodejs: { lines: ["8.X.X", "10.X.X", "11.X.X", "12.X.X"], removal_strategy: 'keep_latest_released'},
                           ruby: { lines: ["6.X.X", "10.X.X"] },
                           'dotnet-core' => { lines: ["6.X.X"] },
-                          'nodejs-cnb' => {lines: ["8.X.X", "10.X.X", "11.X.X", "12.X.X"], removal_strategy: 'keep_latest_released'}},
+                          'node-engine-cnb' => {lines: ["8.X.X", "10.X.X", "11.X.X", "12.X.X"], removal_strategy: 'keep_latest_released'}},
                         source_type: 'node'},
 
   'org.cloudfoundry.npm' => {
@@ -111,11 +111,11 @@
                         source_params: ['repo: cloudfoundry/npm-cnb', 'fetch_source: true', 'prerelease: true'],
                         any_stack: true },
 
-  'org.cloudfoundry.nodejs' => {
+  'org.cloudfoundry.node-engine' => {
                         branch: 'v3',
                         buildpacks: { nodejs: { }, },
                         source_type: 'github_releases',
-                        source_params: ['repo: cloudfoundry/nodejs-cnb', 'fetch_source: true', 'prerelease: true'],
+                        source_params: ['repo: cloudfoundry/node-engine-cnb', 'fetch_source: true', 'prerelease: true'],
                         any_stack: true },
 
 
@@ -572,7 +572,7 @@ jobs:
       resource: source-<%=dep_name%>-<%= line %>
       <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
       <% must_pass = ["build-#{dep_name}-#{line}"] %>
-      <% must_pass.push("copy-#{dep_name}-#{line}-bionic") if bp_name.to_s.include? 'nodejs-cnb' %>
+      <% must_pass.push("copy-#{dep_name}-#{line}-bionic") if bp_name.to_s.include? 'node-engine-cnb' %>
       passed: <%= must_pass %>
       <% end %>
       version: every

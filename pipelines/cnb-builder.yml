@@ -2,7 +2,7 @@
 <% cnb_images = cnb_child_images + ['base'] %>
 
 <% $cnbs = {
-    'nodejs'                   => {'git_repo' => 'https://github.com/cloudfoundry/nodejs-cnb', 'p_cnb' => true},
+    'node-engine'                   => {'git_repo' => 'https://github.com/cloudfoundry/node-engine-cnb', 'p_cnb' => true},
     'npm'                      => {'git_repo' => 'https://github.com/cloudfoundry/npm-cnb', 'p_cnb' => true},
     'yarn'                     => {'git_repo' => 'https://github.com/cloudfoundry/yarn-cnb', 'p_cnb' => true},
     'python'                   => {'git_repo' => 'https://github.com/cloudfoundry/python-cnb', 'skip_bionic' => true},
