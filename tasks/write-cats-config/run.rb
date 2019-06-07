@@ -3,7 +3,7 @@
 require 'json'
 
 admin_user = "admin"
-admin_password = File.read("cf-admin-password/password")
+admin_password = File.read("cf-admin-password/password").strip
 apps_domain = ENV.fetch('APPS_DOMAIN')
 diego_docker_on = ENV.fetch('DIEGO_DOCKER_ON')
 credhub_mode = ENV.fetch('CREDHUB_MODE')
