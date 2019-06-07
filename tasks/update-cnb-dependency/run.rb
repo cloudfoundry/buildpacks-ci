@@ -15,7 +15,7 @@ V3_DEP_IDS = {
 }
 
 V3_DEP_NAMES = {
-    'node' => 'NodeJS',
+    'node' => 'Node Engine',
     'yarn' => 'Yarn',
     'python' => 'Python',
     'php' => 'PHP',
