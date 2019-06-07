@@ -9,7 +9,7 @@
   'httpd' => {
     'integration' => true
   },
-  'nodejs' => {
+  'node-engine' => {
     'integration' => true
   },
   'nodejs-compat' => {
