@@ -3,7 +3,7 @@ require 'yaml'
 require 'open3'
 
 name = `hostname`.chomp
-edge_envs = ['verge', 'frontier', 'limit']
+credhub_envs = ['verge', 'frontier', 'limit', 'bal', 'cf-release', 'cflinuxfs2', 'cflinuxfs3']
 
 def env_login(env)
   system('cf', 'api', "api.#{env}.buildpacks-gcp.ci.cf-app.com", '--skip-ssl-validation') or raise 'Could not connect'
@@ -39,24 +39,12 @@ end
 system('cf', 'logout') or raise 'Could not logout'
 
 case ARGV[0]
-  when *edge_envs
+  when *credhub_envs
     env_login(ARGV[0])
   when 'lts'
     cfg = YAML.load(`lpass show --notes "Shared-CF Buildpacks/concourse-private.yml"`)
     system('cf', 'api', cfg['ci-cf-lts-target'], '--skip-ssl-validation') or raise 'Could not connect'
     system('cf', 'auth', 'admin', cfg['ci-cf-lts-password']) or raise 'Could not auth'
-  when 'bal'
-    cfg = YAML.load(`lpass show --notes "Shared-CF Buildpacks/concourse-private.yml"`)
-    system('cf', 'api', 'api.bal.buildpacks-gcp.ci.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
-    system('cf', 'auth', 'admin', cfg['ci-cf-bal-password']) or raise 'Could not auth'
-  when 'cflinuxfs2'
-    cfg = YAML.load(`lpass show --notes "Shared-CF Buildpacks/concourse-private.yml"`)
-    system('cf', 'api', 'api.cflinuxfs2.buildpacks-gcp.ci.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
-    system('cf', 'auth', cfg['cflinuxfs2-cf-username'], cfg['cflinuxfs2-cf-password']) or raise 'Could not auth'
-  when 'cf-release'
-    cfg = YAML.load(`lpass show --notes "Shared-CF Buildpacks/concourse-private.yml"`)
-    system('cf', 'api', 'api.cf-release.buildpacks-gcp.ci.cf-app.com', '--skip-ssl-validation') or raise 'Could not connect'
-    system('cf', 'auth', cfg['cf-release-cf-username'], cfg['cf-release-cf-password']) or raise 'Could not auth'
   when 'dev'
     system('cf', 'api', 'api.v3.pcfdev.io', '--skip-ssl-validation') or raise 'Could not connect'
     system('cf', 'auth', 'admin', 'admin') or raise 'Could not connect'
@@ -66,7 +54,7 @@ case ARGV[0]
     system('cf', 'auth', cfg['pws_buildpacks_cf_client'], cfg['pws_buildpacks_cf_secret'], '--client-credentials') or raise 'Could not connect'
     system('cf', 'target', '-o', 'cf-buildpacks', '-s', 'development') or raise 'Could not connect'
   else
-    puts "Usage: #{$0} <#{edge_envs.join('|')}|lts|bal|dev|pws>"
+    puts "Usage: #{$0} <#{credhub_envs.join('|')}|lts|dev|pws>"
     exit 1
 end
 
