@@ -14,14 +14,16 @@ pushd cnb2cf
   git add .
 
   set +e
-    git diff --cached --exit-code
+    git diff --cached --exit-code > /dev/null
     no_changes=$?
   set -e
 
   if [ $no_changes -ne 0 ]
   then
+    echo "Changes found in git repository"
     git commit -m "Update create template with new shim binaries $version"
   else
+    echo "No changes found in git repository"
     echo "create template is up to date"
   fi
 popd
