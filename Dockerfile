@@ -48,9 +48,9 @@ RUN apt-get update \
 RUN wget http://cdn-fastly.deb.debian.org/debian/pool/main/i/icu/libicu52_52.1-8+deb8u7_amd64.deb \
   && dpkg -i libicu52_52.1-8+deb8u7_amd64.deb \
   && rm libicu52_52.1-8+deb8u7_amd64.deb \
-  && wget http://ftp.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.0j-1~deb9u1_amd64.deb   \
-  && dpkg -i libssl1.1_1.1.0j-1~deb9u1_amd64.deb   \
-	&& rm libssl1.1_1.1.0j-1~deb9u1_amd64.deb
+  && wget http://mirror.nus.edu.sg/Debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1%2Bdeb8u8_amd64.deb   \
+  && dpkg -i libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb \
+	&& rm libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
 
 RUN curl -sSL https://get.docker.com/ | sh
 
