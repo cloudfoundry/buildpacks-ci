@@ -9,7 +9,7 @@ def credhub_creds
   creds.split(" ")
 end
 
-@credhub_client ||= credhub_creds
+@credhub_login ||= credhub_creds
 admin_user = "admin"
 admin_password = File.read("cf-admin-password/password").strip
 apps_domain = ENV.fetch('APPS_DOMAIN')
