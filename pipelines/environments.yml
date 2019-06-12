@@ -49,6 +49,12 @@ resources: #####################################################################
       branch: master
       private_key: {{buildpacks-envs-private-key}}
 
+  - name: bosh-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-deployment.git
+      branch: master
+
   - name: cf-deployment
     type: git
     source:
@@ -198,6 +204,7 @@ jobs: ##########################################################################
             trigger: true
             passed: [bbl-up-<%= env %>]
           - get: cf-deployment
+          - get: bosh-deployment
           - get: gcp-stemcell
           - get: gcp-windows2012R2-stemcell
           - get: gcp-windows2016-stemcell
@@ -230,6 +237,10 @@ jobs: ##########################################################################
             params:
               BBL_STATE_DIR: <%= env %>
               RELEASE: "*.tgz"
+          - task: turn-on-bosh-dns # bosh-dns release gets removed up during bosh-cleanup so we bring it back every deploy
+            file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
+            params:
+              BBL_STATE_DIR: <%= env %>
         - task: clean-up-env-buildpacks
           file: buildpacks-ci/tasks/clean-up-env-buildpacks/task.yml
           params:
