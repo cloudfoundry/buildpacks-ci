@@ -1,193 +1,21 @@
-<% dependencies = {
-  'appdynamics' =>     { buildpacks: { php: {} },
-                        third_party_hosted: true,
-                        source_type: 'appd_agent',
-                        any_stack: true },
+<%
+require 'yaml'
+config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds.yml'))
 
-  'bower' =>           { buildpacks: { 'dotnet-core' => {} },
-                        source_type: 'npm',
-                        any_stack: true },
-
-  'bundler' =>         { buildpacks: { ruby: { lines: ["1.X.X", "2.X.X"] } },
-                        source_type: 'rubygems',
-                        any_stack: true},
-
-  'CAAPM' =>           { buildpacks: { php: {} },
-                        third_party_hosted: true,
-                        source_type: 'ca_apm_agent',
-                        any_stack: true },
-
-  'composer' =>        { buildpacks: { php: {}, 'php-composer-cnb': {} },
-                        source_type: 'github_releases',
-                        source_params: ['repo: composer/composer', 'extension: .phar'],
-                        any_stack: true },
-
-  'dep' =>             { buildpacks: { go: {}, 'dep-cnb': {} },
-                        source_type: 'github_releases',
-                        source_params: ['repo: golang/dep', 'fetch_source: true']},
-
-  'dotnet-sdk' =>      { buildpacks: {
-                          'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.1.4X", "2.1.5X", "2.2.1X", "2.2.2X"], removal_strategy: 'keep_all' } },
-                         source_params: ['tag_regex: ^(v1\.\d+\.\d+|v2\.\d+\.\d+\+dependencies)$'] },
-
-  'dotnet-runtime' =>  { buildpacks: {
-                          'dotnet-core' => { lines: ["1.0.X", "1.1.X", "2.1.X", "2.2.X"], removal_strategy: 'keep_all' } } },
-
-  'dotnet-aspnetcore' => {
-                        buildpacks: {
-                          'dotnet-core' => { lines: ["2.1.X", "2.2.X"], removal_strategy: 'keep_all' } }
-                          },
-
-  'glide' =>           { buildpacks: { go: {}},
-                        source_type: 'github_releases',
-                        source_params: ['repo: Masterminds/glide', 'fetch_source: true'] },
-
-  'go' =>              { buildpacks: {
-                          go: { lines: ["1.10.X", "1.11.X", "1.12.X"], removal_strategy: 'keep_latest_released' },
-                          'go-cnb': { lines: ["1.10.X", "1.11.X", "1.12.X"], removal_strategy: 'keep_latest_released' } } },
-
-  'godep' =>           { buildpacks: { go: {}},
-                        source_type: 'github_releases',
-                        source_params: ['repo: tools/godep', 'fetch_source: true']},
-
-  'httpd' =>           { buildpacks: { php: {}, 'httpd-cnb': {} } },
-
-  'hwc' =>             { buildpacks: { hwc: {} },
-                        source_type: 'github_releases',
-                        source_params: ['repo: cloudfoundry/hwc', 'fetch_source: true'],
-                        any_stack: true},
-
-  'jruby' =>           { buildpacks: { ruby: { lines: ["9.1.X", "9.2.X"] }},
-                        source_type: 'jruby'},
-
-  'libunwind' =>       { buildpacks: { 'dotnet-core' => {} },
-                        source_type: 'github_releases',
-                        source_params: ['repo: libunwind/libunwind', 'extension: .tar.gz']},
-
-  'libgdiplus' =>       { buildpacks: { 'dotnet-core' => {} },
-                        source_type: 'github_tags',
-                        source_params: ['repo: mono/libgdiplus', 'tag_regex: ^[0-9]+\.[0-9]+$']},
-
-  'lifecycle' =>        { buildpacks: { nodejs: { } },
-                          branch: 'v3',
-                          source_type: 'github_releases',
-                          source_params: ['repo: buildpack/lifecycle', 'extension: .tgz'],
-                          any_stack: true },
-
-  'miniconda2' =>      { buildpacks: { python: {} },
-                        third_party_hosted: true,
-                        source_type: 'miniconda',
-                        source_params: ['generation: 2'],
-                        any_stack: true },
-
-  'miniconda3' =>      { buildpacks: { python: {}, 'conda-cnb': {} },
-                        third_party_hosted: true,
-                        source_type: 'miniconda',
-                        source_params: ['generation: 3'],
-                        any_stack: true },
-
-  'nginx' =>           { buildpacks: {
-                          nginx: { lines: ["1.15.X", "1.16.X", "1.17.X"] }}},
-
-  'openresty' =>       { buildpacks: {
-                          nginx: { lines: ["1.13.X", "1.15.X"] }}},
-
-  'nginx-static' =>  { buildpacks: {
-                          php: { lines: ["1.15.X", "1.16.X", "1.17.X"] },
-                          staticfile: { lines: ["1.15.X", "1.17.X"] } },
-                        source_type: 'nginx' },
-
-  'node' =>            { buildpacks: {
-                          nodejs: { lines: ["8.X.X", "10.X.X", "11.X.X", "12.X.X"], removal_strategy: 'keep_latest_released'},
-                          ruby: { lines: ["6.X.X", "10.X.X"] },
-                          'dotnet-core' => { lines: ["6.X.X"] },
-                          'node-engine-cnb' => {lines: ["8.X.X", "10.X.X", "11.X.X", "12.X.X"], removal_strategy: 'keep_latest_released'}},
-                        source_type: 'node'},
-
-  'org.cloudfoundry.npm' => {
-                        branch: 'v3',
-                        buildpacks: { nodejs: { }, },
-                        source_type: 'github_releases',
-                        source_params: ['repo: cloudfoundry/npm-cnb', 'fetch_source: true', 'prerelease: true'],
-                        any_stack: true },
-
-  'org.cloudfoundry.node-engine' => {
-                        branch: 'v3',
-                        buildpacks: { nodejs: { }, },
-                        source_type: 'github_releases',
-                        source_params: ['repo: cloudfoundry/node-engine-cnb', 'fetch_source: true', 'prerelease: true'],
-                        any_stack: true },
-
-
-  'php' =>             { buildpacks: {
-                          php: { lines: ["7.1.X", "7.2.X", "7.3.X"], removal_strategy: 'keep_latest_released'},
-                          'php-cnb' => { lines: ["7.1.X", "7.2.X", "7.3.X"], removal_strategy: 'keep_latest_released'} },
-                        source_type: 'php'},
-
-  'pip' =>             { buildpacks: { python: {}, 'pip-cnb': {} },
-                        source_type: 'pypi',
-                        any_stack: true },
-
-  'pipenv' =>          { buildpacks: { python: {}, 'pipenv-cnb': {} },
-                        source_type: 'pypi'},
-
-  'python' =>          { buildpacks: {
-                          python: { lines: ["2.7.X", "3.4.X", "3.5.X", "3.6.X", "3.7.X"], removal_strategy: 'keep_latest_released' },
-                          'python-cnb' => {lines: ["2.7.X", "3.4.X", "3.5.X", "3.6.X", "3.7.X"], removal_strategy: 'keep_latest_released' } } },
-
-
-  'r' =>               { buildpacks: {
-                          r: { lines: ["3.4.X", "3.5.X", "3.6.X"], removal_strategy: 'keep_latest_released' } },
-
-                        # We watch for updates to these libraries to trigger rebuilds of R
-                        monitored_deps: ['rserve', 'forecast', 'shiny', 'plumber']
-                      },
-
-  'ruby' =>            { buildpacks: {
-                          ruby: { lines: ["2.4.X", "2.5.X", "2.6.X"], removal_strategy: 'keep_latest_released' },
-                          'ruby-cnb': { lines: ["2.4.X", "2.5.X", "2.6.X"], removal_strategy: 'keep_latest_released' } } },
-
-  'rubygems' =>        { buildpacks: { ruby: {} },
-                        source_type: 'rubygems_cli',
-                        any_stack: true },
-
-  'setuptools' =>      { buildpacks: { python: {}},
-                        source_type: 'pypi',
-                        any_stack: true },
-
-  'yarn' =>            { buildpacks: {
-                          nodejs: {},
-                          ruby: {},
-                          'yarn-cnb' => {}
-                        },
-                        source_type: 'github_releases',
-                        source_params: ['repo: yarnpkg/yarn', 'extension: .tar.gz'],
-                        any_stack: true }
-}
-
-stacks = ['cflinuxfs2', 'cflinuxfs3']
-windows_stacks = ['windows2012R2', 'windows2016']
-dotnet_sdk_lines_with_aspnetcore = ['2.1.4X', '2.1.5X', '2.2.1X']
-deps_extracted_from_dotnet_sdk = ['dotnet-runtime', 'dotnet-aspnetcore']
-
-skip_build = [
-  { dep: 'python', line: '3.7.X', stack: 'cflinuxfs2' },
-  { dep: 'php', line: '7.3.X', stack: 'cflinuxfs2'},
-  { dep: 'dotnet-sdk', line: '1.0.X', stack: 'cflinuxfs3' },
-  { dep: 'dotnet-sdk', line: '2.2.2X', stack: 'cflinuxfs2' },
-  { dep: 'node', line: '11.X.X', stack: 'cflinuxfs2' },
-  { dep: 'node', line: '10.X.X', stack: 'cflinuxfs2' },
-  { dep: 'node', line: '12.X.X', stack: 'cflinuxfs2' },
-  { dep: 'r', line: '3.6.X', stack: 'cflinuxfs2' }
-]
+dependencies = config['dependencies']
+stacks = config['stacks']
+windows_stacks = config['windows_stacks']
+dotnet_sdk_lines_with_aspnetcore = config['dotnet_sdk_lines_with_aspnetcore']
+deps_extracted_from_dotnet_sdk = config['deps_extracted_from_dotnet_sdk']
+skip_build = config['skip_build']
 
 def validate_dependencies(deps)
   deps.each do |dep_name, dep|
-    if !(dep[:buildpacks].values.all? {|bp| bp[:lines].nil? } || dep[:buildpacks].values.all? {|bp| bp[:lines] })
+    if !(dep['buildpacks'].values.all? {|bp| bp['lines'].nil? } || dep['buildpacks'].values.all? {|bp| bp['lines'] })
       raise "For #{dep_name}, mixing buildpacks that specify version lines and ones that do not is NOT currently supported"
     end
 
-    if dep[:buildpacks].values.flat_map { |bp| (bp[:lines] || []).map {|l| l.count('X') } }.uniq.length > 1
+    if dep['buildpacks'].values.flat_map { |bp| (bp['lines'] || []).map {|l| l.count('X') } }.uniq.length > 1
       raise "For #{dep_name}, overlapping version lines are not supported (e.g. 1.X.X and 1.2.X)"
     end
   end
@@ -196,7 +24,7 @@ end
 validate_dependencies(dependencies)
 
 def is_multiline?(dep)
-  dep[:buildpacks].values.any? { |bp| bp[:lines] }
+  dep['buildpacks'].values.any? { |bp| bp['lines'] }
 end
 
 def get_version_line_type(lines)
@@ -215,7 +43,7 @@ def get_version_line_type(lines)
 end
 
 def bp_uses_line?(bp_data, line)
-  bp_data.dig(:lines).nil? || bp_data[:lines].include?(line)
+  bp_data.dig('lines').nil? || bp_data['lines'].include?(line)
 end
 %>
 
@@ -253,7 +81,7 @@ resources:
   source: {repository: cloudfoundry/<%= stack %>}
 <% end %>
 
-<% dependencies.values.select{|dep| dep.fetch(:branch, 'develop') == 'v3' }.map{|dep| dep[:buildpacks].keys}.flatten.uniq.each do |buildpack| %>
+<% dependencies.values.select{|dep| dep.fetch('branch', 'develop') == 'v3' }.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack| %>
 - name: <%= buildpack %>-buildpack-v3
   type: git
   source:
@@ -262,8 +90,8 @@ resources:
     branch: v3
 <% end %>
 
-<% dependencies.values.map{|dep| dep[:buildpacks].keys}.flatten.uniq.each do |buildpack| %>
-<% if buildpack.to_s.include? '-cnb' %>
+<% dependencies.values.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack| %>
+<% if buildpack.include? '-cnb' %>
 - name: <%= buildpack %>-buildpack
   type: git
   source:
@@ -295,7 +123,7 @@ resources:
 
 <% dependencies.each do |dep_name, dep| %>
 <%
-  lines = dep[:buildpacks].values.reduce([]) {|sum, bp| sum | (bp[:lines] || [])}
+  lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | (bp['lines'] || [])}
   lines.push('latest')
   lines.each do |line|
 %>
@@ -304,17 +132,17 @@ resources:
   type: depwatcher
   check_every: 1h
   source:
-    type: <%= dep[:source_type] || dep_name %>
+    type: <%= dep['source_type'] || dep_name %>
     name: <%= dep_name %>
     <% if line != 'latest' %>
     version_filter: <%= line %>
     <% end %>
-    <% (dep[:source_params] || []).each do |param| %>
+    <% (dep['source_params'] || []).each do |param| %>
     <%= param %>
     <% end %>
 <% end %>
 
-<% dep.fetch(:monitored_deps, []).each do |monitored_dep_name| %>
+<% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
 - name: source-<%= monitored_dep_name %>-latest
   type: depwatcher
   check_every: 1h
@@ -323,7 +151,7 @@ resources:
     name: <%= monitored_dep_name %>
 <% end %>
 
-<% if !dep[:third_party_hosted] %>
+<% if !dep['third_party_hosted'] %>
 - name: buildpacks-bucket-<%=dep_name%>
   type: s3
   source:
@@ -344,7 +172,7 @@ resources:
 jobs:
 <% dependencies.each do |dep_name, dep| %>
 <%
-  version_lines = dep[:buildpacks].values.reduce([]) {|sum, bp| sum | (bp[:lines] || [])}
+  version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | (bp['lines'] || [])}
   version_lines = ['latest'] if version_lines.empty?
 %>
 <% if is_multiline?(dep) %>
@@ -365,7 +193,7 @@ jobs:
         TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
         TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-        BUILDPACKS: <%= dep[:buildpacks].keys.join(' ') %>
+        BUILDPACKS: <%= dep['buildpacks'].keys.join(' ') %>
         EXISTING_VERSION_LINES: <%= version_lines.join(' ') %>
 <% end %>
 
@@ -381,7 +209,7 @@ jobs:
       resource: source-<%=dep_name%>-<%= line %>
       trigger: true
       version: every
-    <% dep.fetch(:monitored_deps, []).each_with_index do |monitored_dep_name, index| %>
+    <% dep.fetch('monitored_deps', []).each_with_index do |monitored_dep_name, index| %>
     - get: monitored-dep-<%= index %>
       resource: source-<%=monitored_dep_name%>-latest
       trigger: true
@@ -389,7 +217,7 @@ jobs:
     <% end %>
     - get: builds
   - do:
-    <% if dep.key? :monitored_deps %>
+    <% if dep.key? 'monitored_deps' %>
     - task: collate-monitored-deps
       config:
         platform: linux
@@ -403,10 +231,10 @@ jobs:
           - -cl
           - buildpacks-ci/tasks/build-binary-new/transform_monitored_deps.rb
         params:
-          DEP_COUNT: <%= dep[:monitored_deps].size %>
+          DEP_COUNT: <%= dep['monitored_deps'].size %>
         inputs:
           - name: buildpacks-ci
-          <% dep[:monitored_deps].each_index do |index| %>
+          <% dep['monitored_deps'].each_index do |index| %>
           - name: monitored-dep-<%= index %>
           <% end %>
         outputs:
@@ -418,7 +246,7 @@ jobs:
         TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
         TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-        BUILDPACKS: <%= dep[:buildpacks].select{ |_, bp_data| bp_uses_line?(bp_data,line) }.keys.join(' ') %>
+        BUILDPACKS: <%= dep['buildpacks'].select{ |_, bp_data| bp_uses_line?(bp_data,line) }.keys.join(' ') %>
     - put: builds
       params:
         repository: builds-artifacts
@@ -442,17 +270,17 @@ jobs:
       trigger: true
       version: every
       passed:
-      <% dep[:buildpacks].each do |bp_name, bp_data| %>
+      <% dep['buildpacks'].each do |bp_name, bp_data| %>
         <% if bp_uses_line?(bp_data, line) %>
         - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
         <% end %>
       <% end %>
-    <% dep.fetch(:monitored_deps, []).each do |monitored_dep_name| %>
+    <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
     - get: source-<%=monitored_dep_name%>-latest
       trigger: true
       version: every
       passed:
-      <% dep[:buildpacks].each do |bp_name, bp_data| %>
+      <% dep['buildpacks'].each do |bp_name, bp_data| %>
         <% if bp_uses_line?(bp_data, line) %>
         - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
         <% end %>
@@ -499,7 +327,7 @@ jobs:
       trigger: true
       version: every
       passed: [ create-<%=dep_name%>-<%= line %>-story ]
-    <% dep.fetch(:monitored_deps, []).each do |monitored_dep_name| %>
+    <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
     - get: source-<%=monitored_dep_name%>-latest
       trigger: true
       version: every
@@ -510,9 +338,9 @@ jobs:
     <% end %>
     - get: builds
   - aggregate:
-    <% build_stacks = dep[:any_stack] ? ['any-stack'] : stacks %>
+    <% build_stacks = dep['any_stack'] ? ['any-stack'] : stacks %>
     <% build_stacks.each do |stack| %>
-    <% unless skip_build.include?({ dep: dep_name, line: line, stack: stack}) %>
+    <% unless skip_build.include?({ 'dep' => dep_name, 'line' => line, 'stack' => stack}) %>
     - do:
       - task: build-binary-<%= stack %>
         image: <%= if dep_name == 'bundler' then 'cflinuxfs2' elsif stack == 'any-stack' then stacks.last else stack end%>-image
@@ -521,7 +349,7 @@ jobs:
         params:
           STACK: <%= stack %>
       - aggregate:
-        <% if !dep[:third_party_hosted] %>
+        <% if !dep['third_party_hosted'] %>
         - put: buildpacks-bucket-<%= dep_name %>-<%= stack %>
           resource: buildpacks-bucket-<%= dep_name %>
           params:
@@ -549,14 +377,14 @@ jobs:
  <% end %>
  <% end %>
 
-<% dep[:buildpacks].each do |bp_name, bp| %>
-  <% (bp[:lines] || ['latest']).each do |line| %>
+<% dep['buildpacks'].each do |bp_name, bp| %>
+  <% (bp['lines'] || ['latest']).each do |line| %>
 - name: update-<%=dep_name%>-<%= line %>-<%= bp_name %>
   serial: true
   public: true
   plan:
   - aggregate:
-    <% if dep[:branch] == 'v3' %>
+    <% if dep['branch'] == 'v3' %>
     - get: buildpack
       resource: <%= bp_name %>-buildpack-v3
     - get: buildpack-latest-released
@@ -572,12 +400,12 @@ jobs:
       resource: source-<%=dep_name%>-<%= line %>
       <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
       <% must_pass = ["build-#{dep_name}-#{line}"] %>
-      <% must_pass.push("copy-#{dep_name}-#{line}-bionic") if bp_name.to_s.include? 'node-engine-cnb' %>
+      <% must_pass.push("copy-#{dep_name}-#{line}-bionic") if bp_name.include? 'node-engine-cnb' %>
       passed: <%= must_pass %>
       <% end %>
       version: every
       trigger: true
-    <% dep.fetch(:monitored_deps, []).each do |monitored_dep_name| %>
+    <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
     - get: source-<%=monitored_dep_name%>-latest
       trigger: true
       version: every
@@ -586,15 +414,15 @@ jobs:
     - get: builds
   - do:
     - task: update-buildpack-dependency
-      <% if bp_name.to_s.include? '-cnb' %>
+      <% if bp_name.include? '-cnb' %>
       file: buildpacks-ci/tasks/update-cnb-dependency/task.yml
       <% else %>
       file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
       <% end %>
       params:
-        VERSION_LINE: <%= if dep_name == 'nginx' && bp_name == :nginx then 'nginx' else get_version_line_type(bp[:lines]) end %>
-        REMOVAL_STRATEGY: <%= bp.fetch(:removal_strategy, 'remove_all') %>
-    - put: <%= bp_name %>-buildpack<%= '-v3' if dep[:branch] == 'v3' %>
+        VERSION_LINE: <%= if dep_name == 'nginx' && bp_name == 'nginx' then 'nginx' else get_version_line_type(bp['lines']) end %>
+        REMOVAL_STRATEGY: <%= bp.fetch('removal_strategy', 'remove_all') %>
+    - put: <%= bp_name %>-buildpack<%= '-v3' if dep['branch'] == 'v3' %>
       params:
         repository: artifacts
         rebase: true
@@ -607,7 +435,7 @@ groups:
     jobs:
 <% dependencies.each do |dep_name, dep| %>
 <%
-  version_lines = dep[:buildpacks].values.reduce([]) {|sum, bp| sum | (bp[:lines] || [])}
+  version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | (bp['lines'] || [])}
   version_lines = ['latest'] if version_lines.empty?
 %>
     <% if is_multiline?(dep) %>
@@ -623,8 +451,8 @@ groups:
     - build-<%=dep_name%>-<%= line %>
     <% end %>
     <% end %>
-    <% dep[:buildpacks].each do |bp_name, bp| %>
-    <% (bp[:lines] || ['latest']).each do |line| %>
+    <% dep['buildpacks'].each do |bp_name, bp| %>
+    <% (bp['lines'] || ['latest']).each do |line| %>
     - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
     <% end %>
 <% end %>
@@ -632,7 +460,7 @@ groups:
 
 <% dependencies.each do |dep_name, dep| %>
 <%
-  version_lines = dep[:buildpacks].values.reduce([]) {|sum, bp| sum | (bp[:lines] || [])}
+  version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | (bp['lines'] || [])}
   version_lines = ['latest'] if version_lines.empty?
 %>
   - name: <%= dep_name %>
@@ -650,8 +478,8 @@ groups:
     - build-<%=dep_name%>-<%= line %>
     <% end %>
     <% end %>
-    <% dep[:buildpacks].each do |bp_name, bp| %>
-    <% (bp[:lines] || ['latest']).each do |line| %>
+    <% dep['buildpacks'].each do |bp_name, bp| %>
+    <% (bp['lines'] || ['latest']).each do |line| %>
     - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
     <% end %>
     <% end %>
