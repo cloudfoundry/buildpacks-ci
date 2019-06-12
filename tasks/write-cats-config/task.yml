@@ -7,6 +7,7 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: cf-admin-password
+  - name: bbl-state
 outputs:
   - name: integration-config
 run:
@@ -21,3 +22,4 @@ params:
   CREDHUB_CLIENT_SECRET:
   CREDHUB_CLIENT:
   WINDOWS_STACK:
+  ENV_NAME:

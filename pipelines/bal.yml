@@ -276,6 +276,7 @@ jobs:
             DIEGO_DOCKER_ON: true
             CREDHUB_MODE: assisted
             WINDOWS_STACK: windows2012R2
+            ENV_NAME: bal
         - task: cats-for-windows2012R2
           attempts: 3
           file: cf-deployment-concourse-tasks/run-cats/task.yml
@@ -290,6 +291,7 @@ jobs:
             DIEGO_DOCKER_ON: true
             CREDHUB_MODE: assisted
             WINDOWS_STACK: windows2016
+            ENV_NAME: bal
         - task: cats-for-windows2016
           attempts: 3
           file: cf-deployment-concourse-tasks/run-cats/task.yml
