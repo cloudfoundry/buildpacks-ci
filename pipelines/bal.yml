@@ -275,8 +275,6 @@ jobs:
             APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
             CREDHUB_MODE: assisted
-            CREDHUB_CLIENT: credhub_admin_client
-            CREDHUB_CLIENT_SECRET: {{ci-cf-bal-credhub-client-secret}}
             WINDOWS_STACK: windows2012R2
         - task: cats-for-windows2012R2
           attempts: 3
@@ -288,13 +286,9 @@ jobs:
         - task: write-cats-config-for-windows2016
           file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
-            CI_CF_USERNAME: {{ci-cf-username}}
-            CI_CF_PASSWORD: {{ci-cf-bal-password}}
             APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
             CREDHUB_MODE: assisted
-            CREDHUB_CLIENT: credhub_admin_client
-            CREDHUB_CLIENT_SECRET: {{ci-cf-bal-credhub-client-secret}}
             WINDOWS_STACK: windows2016
         - task: cats-for-windows2016
           attempts: 3
