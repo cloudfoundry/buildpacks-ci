@@ -2,8 +2,6 @@
 set -eux
 set -o pipefail
 
-trap "pkill -f ssh" EXIT
-
 set +x
 pushd "bbl-state/${BBL_STATE_DIR}"
   eval "$(bbl print-env)"
