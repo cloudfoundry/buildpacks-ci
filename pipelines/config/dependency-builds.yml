@@ -1,0 +1,349 @@
+---
+dependencies:
+  appdynamics:
+    buildpacks:
+      php: {}
+    third_party_hosted: true
+    source_type: appd_agent
+    any_stack: true
+  bower:
+    buildpacks:
+      dotnet-core: {}
+    source_type: npm
+    any_stack: true
+  bundler:
+    buildpacks:
+      ruby:
+        lines:
+          - 1.X.X
+          - 2.X.X
+    source_type: rubygems
+    any_stack: true
+  CAAPM:
+    buildpacks:
+      php: {}
+    third_party_hosted: true
+    source_type: ca_apm_agent
+    any_stack: true
+  composer:
+    buildpacks:
+      php: {}
+      php-composer-cnb: {}
+    source_type: github_releases
+    source_params:
+      - 'repo: composer/composer'
+      - 'extension: .phar'
+    any_stack: true
+  dep:
+    buildpacks:
+      go: {}
+      dep-cnb: {}
+    source_type: github_releases
+    source_params:
+      - 'repo: golang/dep'
+      - 'fetch_source: true'
+  dotnet-sdk:
+    buildpacks:
+      dotnet-core:
+        lines:
+          - 1.0.X
+          - 1.1.X
+          - 2.1.4X
+          - 2.1.5X
+          - 2.2.1X
+          - 2.2.2X
+        removal_strategy: keep_all
+    source_params:
+      - 'tag_regex: ^(v1\.\d+\.\d+|v2\.\d+\.\d+\+dependencies)$'
+  dotnet-runtime:
+    buildpacks:
+      dotnet-core:
+        lines:
+          - 1.0.X
+          - 1.1.X
+          - 2.1.X
+          - 2.2.X
+        removal_strategy: keep_all
+  dotnet-aspnetcore:
+    buildpacks:
+      dotnet-core:
+        lines:
+          - 2.1.X
+          - 2.2.X
+        removal_strategy: keep_all
+  glide:
+    buildpacks:
+      go: {}
+    source_type: github_releases
+    source_params:
+      - 'repo: Masterminds/glide'
+      - 'fetch_source: true'
+  go:
+    buildpacks:
+      go:
+        lines:
+          - 1.10.X
+          - 1.11.X
+          - 1.12.X
+        removal_strategy: keep_latest_released
+      go-cnb:
+        lines:
+          - 1.10.X
+          - 1.11.X
+          - 1.12.X
+        removal_strategy: keep_latest_released
+  godep:
+    buildpacks:
+      go: {}
+    source_type: github_releases
+    source_params:
+      - 'repo: tools/godep'
+      - 'fetch_source: true'
+  httpd:
+    buildpacks:
+      php: {}
+      httpd-cnb: {}
+  hwc:
+    buildpacks:
+      hwc: {}
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/hwc'
+      - 'fetch_source: true'
+    any_stack: true
+  jruby:
+    buildpacks:
+      ruby:
+        lines:
+          - 9.1.X
+          - 9.2.X
+    source_type: jruby
+  libunwind:
+    buildpacks:
+      dotnet-core: {}
+    source_type: github_releases
+    source_params:
+      - 'repo: libunwind/libunwind'
+      - 'extension: .tar.gz'
+  libgdiplus:
+    buildpacks:
+      dotnet-core: {}
+    source_type: github_tags
+    source_params:
+      - 'repo: mono/libgdiplus'
+      - 'tag_regex: ^[0-9]+\.[0-9]+$'
+  lifecycle:
+    buildpacks:
+      nodejs: {}
+    branch: v3
+    source_type: github_releases
+    source_params:
+      - 'repo: buildpack/lifecycle'
+      - 'extension: .tgz'
+    any_stack: true
+  miniconda2:
+    buildpacks:
+      python: {}
+    third_party_hosted: true
+    source_type: miniconda
+    source_params:
+      - 'generation: 2'
+    any_stack: true
+  miniconda3:
+    buildpacks:
+      python: {}
+      conda-cnb: {}
+    third_party_hosted: true
+    source_type: miniconda
+    source_params:
+      - 'generation: 3'
+    any_stack: true
+  nginx:
+    buildpacks:
+      nginx:
+        lines:
+          - 1.15.X
+          - 1.16.X
+          - 1.17.X
+  openresty:
+    buildpacks:
+      nginx:
+        lines:
+          - 1.13.X
+          - 1.15.X
+  nginx-static:
+    buildpacks:
+      php:
+        lines:
+          - 1.15.X
+          - 1.16.X
+          - 1.17.X
+      staticfile:
+        lines:
+          - 1.15.X
+          - 1.17.X
+    source_type: nginx
+  node:
+    buildpacks:
+      nodejs:
+        lines:
+          - 8.X.X
+          - 10.X.X
+          - 11.X.X
+          - 12.X.X
+        removal_strategy: keep_latest_released
+      ruby:
+        lines:
+          - 6.X.X
+          - 10.X.X
+      dotnet-core:
+        lines:
+          - 6.X.X
+      node-engine-cnb:
+        lines:
+          - 8.X.X
+          - 10.X.X
+          - 11.X.X
+          - 12.X.X
+        removal_strategy: keep_latest_released
+    source_type: node
+  org.cloudfoundry.npm:
+    branch: v3
+    buildpacks:
+      nodejs: {}
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/npm-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.node-engine:
+    branch: v3
+    buildpacks:
+      nodejs: {}
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/node-engine-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  php:
+    buildpacks:
+      php:
+        lines:
+          - 7.1.X
+          - 7.2.X
+          - 7.3.X
+        removal_strategy: keep_latest_released
+      php-cnb:
+        lines:
+          - 7.1.X
+          - 7.2.X
+          - 7.3.X
+        removal_strategy: keep_latest_released
+    source_type: php
+  pip:
+    buildpacks:
+      python: {}
+      pip-cnb: {}
+    source_type: pypi
+    any_stack: true
+  pipenv:
+    buildpacks:
+      python: {}
+      pipenv-cnb: {}
+    source_type: pypi
+  python:
+    buildpacks:
+      python:
+        lines:
+          - 2.7.X
+          - 3.4.X
+          - 3.5.X
+          - 3.6.X
+          - 3.7.X
+        removal_strategy: keep_latest_released
+      python-cnb:
+        lines:
+          - 2.7.X
+          - 3.4.X
+          - 3.5.X
+          - 3.6.X
+          - 3.7.X
+        removal_strategy: keep_latest_released
+  r:
+    buildpacks:
+      r:
+        lines:
+          - 3.4.X
+          - 3.5.X
+          - 3.6.X
+        removal_strategy: keep_latest_released
+    monitored_deps:
+      - rserve
+      - forecast
+      - shiny
+      - plumber
+  ruby:
+    buildpacks:
+      ruby:
+        lines:
+          - 2.4.X
+          - 2.5.X
+          - 2.6.X
+        removal_strategy: keep_latest_released
+      ruby-cnb:
+        lines:
+          - 2.4.X
+          - 2.5.X
+          - 2.6.X
+        removal_strategy: keep_latest_released
+  rubygems:
+    buildpacks:
+      ruby: {}
+    source_type: rubygems_cli
+    any_stack: true
+  setuptools:
+    buildpacks:
+      python: {}
+    source_type: pypi
+    any_stack: true
+  yarn:
+    buildpacks:
+      nodejs: {}
+      ruby: {}
+      yarn-cnb: {}
+    source_type: github_releases
+    source_params:
+      - 'repo: yarnpkg/yarn'
+      - 'extension: .tar.gz'
+    any_stack: true
+stacks: ['cflinuxfs2', 'cflinuxfs3']
+windows_stacks: ['windows2012R2', 'windows2016']
+dotnet_sdk_lines_with_aspnetcore: ['2.1.4X', '2.1.5X', '2.2.1X']
+deps_extracted_from_dotnet_sdk: ['dotnet-runtime', 'dotnet-aspnetcore']
+skip_build:
+  - dep: 'python'
+    line: '3.7.X'
+    stack: 'cflinuxfs2'
+  - dep: 'php'
+    line: '7.3.X'
+    stack: 'cflinuxfs2'
+  - dep: 'dotnet-sdk'
+    line: '1.0.X'
+    stack: 'cflinuxfs3'
+  - dep: 'dotnet-sdk'
+    line: '2.2.2X'
+    stack: 'cflinuxfs2'
+  - dep: 'node'
+    line: '11.X.X'
+    stack: 'cflinuxfs2'
+  - dep: 'node'
+    line: '10.X.X'
+    stack: 'cflinuxfs2'
+  - dep: 'node'
+    line: '12.X.X'
+    stack: 'cflinuxfs2'
+  - dep: 'r'
+    line: '3.6.X'
+    stack: 'cflinuxfs2'
