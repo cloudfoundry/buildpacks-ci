@@ -1,16 +1,23 @@
 #!/usr/bin/env ruby
 
 require 'json'
+require 'open3'
 
+def credhub_creds
+  bbl_env, _err = Open3.capture3("bbl --state-dir bbl-state/#{ENV.fetch('ENV_NAME')} print-env")
+  creds, _err, _status = Open3.capture3("eval \"#{bbl_env}\" && echo -n $CREDHUB_CLIENT $CREDHUB_SECRET")
+  creds.split(" ")
+end
+
+@credhub_client ||= credhub_creds
 admin_user = "admin"
 admin_password = File.read("cf-admin-password/password").strip
 apps_domain = ENV.fetch('APPS_DOMAIN')
 diego_docker_on = ENV.fetch('DIEGO_DOCKER_ON')
 credhub_mode = ENV.fetch('CREDHUB_MODE')
-credhub_client = ENV.fetch('CREDHUB_CLIENT')
-credhub_secret = ENV.fetch('CREDHUB_CLIENT_SECRET')
 windows_stack = ENV.fetch('WINDOWS_STACK')
 stacks = ENV.fetch('STACKS','')
+
 
 cats_config = {
   "admin_password" => admin_password,
@@ -18,8 +25,8 @@ cats_config = {
   "api" => "api.#{apps_domain}",
   "apps_domain" => apps_domain,
   "credhub_mode" => credhub_mode,
-  "credhub_client" => credhub_client,
-  "credhub_secret" => credhub_secret,
+  "credhub_client" => @credhub_login.first,
+  "credhub_secret" => @credhub_login.last,
   "async_service_operation_timeout" => 1200,
   "backend" => "diego",
   "cf_push_timeout" => 600,
