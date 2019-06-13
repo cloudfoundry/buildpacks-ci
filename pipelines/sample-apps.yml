@@ -68,11 +68,6 @@ resources: #####################################################################
   source:
     uri: https://github.com/cloudfoundry-samples/pong_matcher_slim.git
 
-- name: pong-matcher-sails
-  type: git
-  source:
-    uri: https://github.com/cloudfoundry-samples/pong_matcher_sails.git
-
 - name: spring-music
   type: git
   source:
@@ -297,43 +292,6 @@ jobs: ##########################################################################
             STACK: <%= stack %>
             BUILDPACK_URL: https://github.com/cloudfoundry/ruby-buildpack#develop
             APPLICATION_NAME: railspong
-            REQUEST_PATH: "/all"
-            REQUEST_TYPE: 'DELETE'
-            DATABASE_TO_BIND: 'mysql'
-        ensure:
-          task: delete-cf-space
-          file: buildpacks-ci/tasks/delete-cf-space/task.yml
-          input_mapping: {cf-space: cf-space-<%= stack %>}
-<% end %>
-
-- name: pong-matcher-sails-smoke-test
-  plan:
-    - aggregate:
-      - get: nightly-trigger
-        trigger: true
-      - get: sample-app
-        resource: pong-matcher-sails
-      - get: buildpacks-ci
-    - aggregate:
-<% stacks.each do |stack| %>
-      - do:
-        - task: create-cf-space-<%= stack %>
-          file: buildpacks-ci/tasks/create-cf-space/task.yml
-          output_mapping: {cf-space: cf-space-<%= stack %>}
-          params:
-            ORG: {{pws-org}}
-            TARGET: api.run.pivotal.io
-            USERNAME: {{pws_buildpacks_cf_client}}
-            PASSWORD: {{pws_buildpacks_cf_secret}}
-            CREDS_FLAG: "--client-credentials"
-        - task: pong-matcher-sails-smoke-test-<%= stack %>
-          attempts: 3
-          file: buildpacks-ci/tasks/sample-app-smoke-test/task.yml
-          input_mapping: {cf-space: cf-space-<%= stack %>}
-          params:
-            STACK: <%= stack %>
-            BUILDPACK_URL: https://github.com/cloudfoundry/nodejs-buildpack#develop
-            APPLICATION_NAME: sailspong
             REQUEST_PATH: "/all"
             REQUEST_TYPE: 'DELETE'
             DATABASE_TO_BIND: 'mysql'
@@ -828,7 +786,6 @@ groups: ########################################################################
 
 - name: nodejs
   jobs:
-    - pong-matcher-sails-smoke-test
     - cf-sample-app-nodejs-smoke-test
 
 - name: ruby
