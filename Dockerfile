@@ -1,4 +1,4 @@
-FROM ruby:2.3-slim
+FROM cloudfoundry/cflinuxfs3 
 
 ENV LANG="C.UTF-8"
 
@@ -20,6 +20,7 @@ RUN curl -sL "https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key"
 RUN apt-get update \
   && apt-get -y install \
   aufs-tools \
+  ruby-dev \
   crystal \
   libxml2-dev \
   expect \
@@ -47,10 +48,10 @@ RUN apt-get update \
 # Install packages that are specific to ubuntu and not debian
 RUN wget http://cdn-fastly.deb.debian.org/debian/pool/main/i/icu/libicu52_52.1-8+deb8u7_amd64.deb \
   && dpkg -i libicu52_52.1-8+deb8u7_amd64.deb \
-  && rm libicu52_52.1-8+deb8u7_amd64.deb \
-  && wget http://mirror.nus.edu.sg/Debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1%2Bdeb8u8_amd64.deb   \
-  && dpkg -i libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb \
-	&& rm libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
+  && rm libicu52_52.1-8+deb8u7_amd64.deb 
+  # && wget http://mirror.nus.edu.sg/Debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1%2Bdeb8u8_amd64.deb   \
+  # && dpkg -i libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb \
+	#  && rm libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
 
 RUN curl -sSL https://get.docker.com/ | sh
 
