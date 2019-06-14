@@ -45,6 +45,7 @@ RUN apt-get update \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install packages that are specific to ubuntu and not debian
+# Including libssl allows us to build php on this image
 RUN wget http://cdn-fastly.deb.debian.org/debian/pool/main/i/icu/libicu52_52.1-8+deb8u7_amd64.deb \
   && dpkg -i libicu52_52.1-8+deb8u7_amd64.deb \
   && rm libicu52_52.1-8+deb8u7_amd64.deb \
