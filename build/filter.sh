@@ -75,6 +75,7 @@ STACKS,\
 TERM,\
 TMPDIR,\
 USE_SQL,\
+CF_STACK,\
 USER"
 
 if [ ! -z "${TEST_CREDENTIAL_FILTER_WHITELIST:-}" ]; then
