@@ -15,24 +15,32 @@ def validate_dependencies(deps)
       raise "For #{dep_name}, mixing buildpacks that specify version lines and ones that do not is NOT currently supported"
     end
 
-    if dep['buildpacks'].values.flat_map { |bp| (bp['lines'] || []).map {|l| l.count('X') } }.uniq.length > 1
+    if dep['buildpacks'].values.flat_map { |bp| get_version_lines(bp['lines']).map {|l| l.count('X') } }.uniq.length > 1
       raise "For #{dep_name}, overlapping version lines are not supported (e.g. 1.X.X and 1.2.X)"
     end
+
+  # TODO validate dep dates -  if dep is not in skip_deprecation it must have deprecation dates for all version lines
+
   end
+end
+
+def get_version_lines(bp_lines, default_return = [])
+  bp_lines&.map { |ln| ln['line']} || default_return
 end
 
 validate_dependencies(dependencies)
 
 def is_multiline?(dep)
-  dep['buildpacks'].values.any? { |bp| bp['lines'] }
+  dep['buildpacks'].values.map{ |ln| get_version_lines(ln['lines']).select {|ver| ver != 'latest'} }.flatten.any?
 end
 
 def get_version_line_type(lines)
   return nil if lines.nil?
 
-  line = lines.first
-  x_idx = line.index('X')
-  case line[0, x_idx].count('.')
+  line = lines.first['line']
+  x_idx = line.to_s.downcase.index('x')
+  return nil unless x_idx
+  case line.to_s[0, x_idx].count('.')
   when 1
     'major'
   when 2
@@ -43,7 +51,8 @@ def get_version_line_type(lines)
 end
 
 def bp_uses_line?(bp_data, line)
-  bp_data.dig('lines').nil? || bp_data['lines'].include?(line)
+  lines_present = get_version_lines(bp_data['lines']).nil?
+  !lines_present && get_version_lines(bp_data['lines']).include?(line)
 end
 %>
 
@@ -123,8 +132,8 @@ resources:
 
 <% dependencies.each do |dep_name, dep| %>
 <%
-  lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | (bp['lines'] || [])}
-  lines.push('latest')
+  lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'])}
+  lines.push('latest') unless lines.include?('latest')
   lines.each do |line|
 %>
 
@@ -171,10 +180,7 @@ resources:
 
 jobs:
 <% dependencies.each do |dep_name, dep| %>
-<%
-  version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | (bp['lines'] || [])}
-  version_lines = ['latest'] if version_lines.empty?
-%>
+<% version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} %>
 <% if is_multiline?(dep) %>
 - name: create-<%= dep_name %>-new-line-story
   serial: true
@@ -378,7 +384,7 @@ jobs:
  <% end %>
 
 <% dep['buildpacks'].each do |bp_name, bp| %>
-  <% (bp['lines'] || ['latest']).each do |line| %>
+  <% get_version_lines(bp['lines'],['latest']).each do |line| %>
 - name: update-<%=dep_name%>-<%= line %>-<%= bp_name %>
   serial: true
   public: true
@@ -434,10 +440,7 @@ groups:
   - name: all
     jobs:
 <% dependencies.each do |dep_name, dep| %>
-<%
-  version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | (bp['lines'] || [])}
-  version_lines = ['latest'] if version_lines.empty?
-%>
+<% version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} %>
     <% if is_multiline?(dep) %>
     - create-<%= dep_name %>-new-line-story
     <% end %>
@@ -452,17 +455,14 @@ groups:
     <% end %>
     <% end %>
     <% dep['buildpacks'].each do |bp_name, bp| %>
-    <% (bp['lines'] || ['latest']).each do |line| %>
+    <% get_version_lines(bp['lines'], ['latest']).each do |line| %>
     - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
     <% end %>
 <% end %>
 <% end %>
 
 <% dependencies.each do |dep_name, dep| %>
-<%
-  version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | (bp['lines'] || [])}
-  version_lines = ['latest'] if version_lines.empty?
-%>
+<% version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} %>
   - name: <%= dep_name %>
     jobs:
     <% if is_multiline?(dep) %>
@@ -479,7 +479,7 @@ groups:
     <% end %>
     <% end %>
     <% dep['buildpacks'].each do |bp_name, bp| %>
-    <% (bp['lines'] || ['latest']).each do |line| %>
+    <% get_version_lines(bp['lines'], ['latest']).each do |line| %>
     - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
     <% end %>
     <% end %>
