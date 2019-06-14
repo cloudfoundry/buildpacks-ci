@@ -351,16 +351,6 @@ dependencies:
             link: http://php.net/supported-versions.php
         removal_strategy: keep_latest_released
     source_type: php
-  pip:
-    buildpacks:
-      python:
-        lines:
-          - line: latest
-      pip-cnb:
-        lines:
-          - line: latest
-    source_type: pypi
-    any_stack: true
   pipenv:
     buildpacks:
       python:
