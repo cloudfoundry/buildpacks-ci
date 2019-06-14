@@ -8,8 +8,9 @@ windows_stacks = config['windows_stacks']
 dotnet_sdk_lines_with_aspnetcore = config['dotnet_sdk_lines_with_aspnetcore']
 deps_extracted_from_dotnet_sdk = config['deps_extracted_from_dotnet_sdk']
 skip_build = config['skip_build']
+skip_deprecation_check = config['skip_deprecation_check']
 
-def validate_dependencies(deps)
+def validate_dependencies(deps, skip_deprecation_check)
   deps.each do |dep_name, dep|
     if !(dep['buildpacks'].values.all? {|bp| bp['lines'].nil? } || dep['buildpacks'].values.all? {|bp| bp['lines'] })
       raise "For #{dep_name}, mixing buildpacks that specify version lines and ones that do not is NOT currently supported"
@@ -19,20 +20,36 @@ def validate_dependencies(deps)
       raise "For #{dep_name}, overlapping version lines are not supported (e.g. 1.X.X and 1.2.X)"
     end
 
-  # TODO validate dep dates -  if dep is not in skip_deprecation it must have deprecation dates for all version lines
+  # validate dep dates -  if dep is not in skip_deprecation it must have deprecation dates for all version lines
+    if is_multiline?(dep) && !(skip_deprecation_check.include?(dep_name))
+      lines_missing = get_all_lines_missing_deprecation_dates(dep)
+      if lines_missing.any?
+        raise "For #{dep_name}, there are missing deprecation dates for these version lines: #{lines_missing}"
+      end
+    end
 
   end
+end
+
+def get_all_lines_missing_deprecation_dates(dep)
+  # return an array of hashes which are lines missing deprecation dates across all relevant buildpacks for given dep
+  dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_lines_missing_deprecation_dates(bp['lines'])}
+end
+
+def get_lines_missing_deprecation_dates(bp_lines)
+  # return only the hashes missing deprecation dates from an array of hashes
+  bp_lines&.select{|line_hash| line_hash['deprecation_date'].nil?}.map{|line_hash| line_hash['line']}
 end
 
 def get_version_lines(bp_lines, default_return = [])
   bp_lines&.map { |ln| ln['line']} || default_return
 end
 
-validate_dependencies(dependencies)
-
 def is_multiline?(dep)
   dep['buildpacks'].values.map{ |ln| get_version_lines(ln['lines']).select {|ver| ver != 'latest'} }.flatten.any?
 end
+
+validate_dependencies(dependencies, skip_deprecation_check)
 
 def get_version_line_type(lines)
   return nil if lines.nil?
