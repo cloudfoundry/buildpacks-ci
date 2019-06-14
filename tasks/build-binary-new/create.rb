@@ -4,7 +4,16 @@ require 'json'
 require 'yaml'
 require 'tracker_api'
 
-BUILDPACKS = ENV['BUILDPACKS'].split(' ').compact
+BUILDPACKS = ENV['BUILDPACKS']
+                 .split(' ')
+                 .compact
+                 .map {|bp|
+                   if bp.include? "-cnb"
+                     bp
+                   else
+                     "#{bp}-buildpack"
+                   end
+                 }
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
@@ -22,12 +31,12 @@ if File.file?('all-monitored-deps/data.json')
 end
 
 story = buildpack_project.create_story(
-  name: "Build and/or Include new releases: #{name} #{version}",
-  description: "```\n#{data.to_yaml}\n```\n",
-  estimate: 1,
-  labels: (['deps', name] + BUILDPACKS).uniq,
-  requested_by_id: ENV['TRACKER_REQUESTER_ID'].to_i,
-  owner_ids: [ ENV['TRACKER_REQUESTER_ID'].to_i ]
+    name: "Build and/or Include new releases: #{name} #{version}",
+    description: "```\n#{data.to_yaml}\n```\n",
+    estimate: 1,
+    labels: (['deps', name] + BUILDPACKS).uniq,
+    requested_by_id: ENV['TRACKER_REQUESTER_ID'].to_i,
+    owner_ids: [ENV['TRACKER_REQUESTER_ID'].to_i]
 )
 
 puts "Created tracker story #{story.id}"
@@ -40,7 +49,7 @@ Dir.chdir('builds-artifacts') do
 
   version = data.dig('version', 'ref')
   FileUtils.mkdir_p("binary-builds-new/#{data.dig('source', 'name')}")
-  File.write("binary-builds-new/#{data.dig('source', 'name')}/#{version}.json", { tracker_story_id: story.id }.to_json)
+  File.write("binary-builds-new/#{data.dig('source', 'name')}/#{version}.json", {tracker_story_id: story.id}.to_json)
 
   GitClient.add_file("binary-builds-new/#{data.dig('source', 'name')}/#{version}.json")
   GitClient.safe_commit("Create Tracker Story #{data.dig('source', 'name')} - #{version}")
