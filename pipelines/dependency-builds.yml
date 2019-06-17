@@ -443,11 +443,13 @@ jobs:
       file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
       <% end %>
       params:
-        VERSION_LINE: <%= if dep_name == 'nginx' && bp_name == 'nginx' then 'nginx' else get_version_line_type(bp['lines']) end %>
+        VERSION_LINE_TYPE: <%= if dep_name == 'nginx' && bp_name == 'nginx' then 'nginx' else get_version_line_type(bp['lines']) end %>
         REMOVAL_STRATEGY: <%= bp.fetch('removal_strategy', 'remove_all') %>
         DEPRECATION_DATE: <%= line_hash['deprecation_date'] %>
         DEPRECATION_LINK: <%= line_hash['link'] %>
         DEPRECATION_MATCH: <%= line_hash['match'] %>
+        VERSION_LINE: <%= line_hash['version_line'] %>
+
 
     - put: <%= bp_name %>-buildpack<%= '-v3' if dep['branch'] == 'v3' %>
       params:

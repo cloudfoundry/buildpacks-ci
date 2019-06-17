@@ -18,6 +18,7 @@ run:
     - -cl
     - buildpacks-ci/tasks/update-cnb-dependency/run.rb
 params:
+  VERSION_LINE_TYPE:
   VERSION_LINE:
   REMOVAL_STRATEGY:
   DEPRECATION_DATE:

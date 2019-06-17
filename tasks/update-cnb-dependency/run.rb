@@ -36,7 +36,8 @@ data = JSON.parse(open('source/data.json').read)
 manifest_name = data.dig('source', 'name')
 resource_version = data.dig('version', 'ref')
 story_id = JSON.parse(open("builds/binary-builds-new/#{manifest_name}/#{resource_version}.json").read)['tracker_story_id']
-removal_strategy = ENV['REMOVAL_STRATEGY']
+removal_strategy  = ENV['REMOVAL_STRATEGY']
+version_line_type = ENV['VERSION_LINE_TYPE']
 version_line      = ENV['VERSION_LINE']
 deprecation_date  = ENV['DEPRECATION_DATE']
 deprecation_link  = ENV['DEPRECATION_LINK']
@@ -118,7 +119,7 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
 
   buildpack_toml['metadata']['dependencies'] = Dependencies.new(
       dep,
-      version_line,
+      version_line_type,
       removal_strategy,
       old_deps,
       buildpack_toml_latest_released['metadata'].fetch('dependencies', [])
