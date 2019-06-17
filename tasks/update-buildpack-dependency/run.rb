@@ -27,7 +27,11 @@ manifest_name = source_name == 'nginx-static' ? 'nginx' : source_name
 # create story is one-per-version; it creates the json file with the tracker ID
 story_id = JSON.parse(open("builds/binary-builds-new/#{source_name}/#{resource_version}.json").read)['tracker_story_id']
 
-removal_strategy = ENV['REMOVAL_STRATEGY']
+removal_strategy  = ENV['REMOVAL_STRATEGY']
+version_line      = ENV['VERSION_LINE']
+deprecation_date  = ENV['DEPRECATION_DATE']
+deprecation_link  = ENV['DEPRECATION_LINK']
+deprecation_match = ENV['DEPRECATION_MATCH']
 
 system('rsync -a buildpack/ artifacts/')
 raise 'Could not copy buildpack to artifacts' unless $?.success?
@@ -42,6 +46,17 @@ builds = {}
 version = ''
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
+  unless deprecation_date.nil? or deprecation_link.nil?
+    dependency_deprecation_date = {'version_line' => version_line, 'name' => manifest_name, 'deprecation_date' => deprecation_date, 'deprecation_link' => deprecation_link, }
+    dependency_deprecation_date['match'] = deprecation_match unless deprecation_match == ''
+
+    deprecation_dates = manifest.fetch('dependency_deprecation_dates', [])
+    deprecation_dates = deprecation_dates.reject{ |d| d['version_line'] == version_line and d['name'] == manifest_name}
+      .push(dependency_deprecation_date)
+      .sort_by{ |d| [d['name'], d['version_line'] ]}
+    manifest['dependency_deprecation_dates'] = deprecation_dates
+  end
+
   stack = %r{#{resource_version}-(.*)\.json$}.match(stack_dependency_build)[1]
   next if IGNORED_STACKS.include?(stack)
 
@@ -87,15 +102,15 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   manifest['dependencies'] = Dependencies.new(
       dep,
-      ENV['VERSION_LINE'],
+      version_line,
       removal_strategy,
       manifest['dependencies'],
       manifest_latest_released['dependencies']
   ).switch
 
   new_versions = manifest['dependencies']
-                 .select { |d| d['name'] == manifest_name }
-                 .map { |d| d['version'] }
+                   .select { |d| d['name'] == manifest_name }
+                   .map { |d| d['version'] }
 
   added += (new_versions - old_versions).uniq.sort
   removed += (old_versions - new_versions).uniq.sort
