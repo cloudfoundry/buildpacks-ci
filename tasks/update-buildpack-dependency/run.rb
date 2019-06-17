@@ -27,11 +27,12 @@ manifest_name = source_name == 'nginx-static' ? 'nginx' : source_name
 # create story is one-per-version; it creates the json file with the tracker ID
 story_id = JSON.parse(open("builds/binary-builds-new/#{source_name}/#{resource_version}.json").read)['tracker_story_id']
 
-removal_strategy  = ENV['REMOVAL_STRATEGY']
-version_line      = ENV['VERSION_LINE']
-deprecation_date  = ENV['DEPRECATION_DATE']
-deprecation_link  = ENV['DEPRECATION_LINK']
-deprecation_match = ENV['DEPRECATION_MATCH']
+removal_strategy   = ENV['REMOVAL_STRATEGY']
+version_line       = ENV['VERSION_LINE']
+version_line_type  = ENV['VERSION_LINE_TYPE']
+deprecation_date   = ENV['DEPRECATION_DATE']
+deprecation_link   = ENV['DEPRECATION_LINK']
+deprecation_match  = ENV['DEPRECATION_MATCH']
 
 system('rsync -a buildpack/ artifacts/')
 raise 'Could not copy buildpack to artifacts' unless $?.success?
@@ -102,7 +103,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   manifest['dependencies'] = Dependencies.new(
       dep,
-      version_line,
+      version_line_type,
       removal_strategy,
       manifest['dependencies'],
       manifest_latest_released['dependencies']
