@@ -448,7 +448,7 @@ jobs:
         DEPRECATION_DATE: <%= line_hash['deprecation_date'] %>
         DEPRECATION_LINK: <%= line_hash['link'] %>
         DEPRECATION_MATCH: <%= line_hash['match'] %>
-        VERSION_LINE: <%= line_hash['version_line'] %>
+        VERSION_LINE: <%= line_hash['line'] %>
 
 
     - put: <%= bp_name %>-buildpack<%= '-v3' if dep['branch'] == 'v3' %>
