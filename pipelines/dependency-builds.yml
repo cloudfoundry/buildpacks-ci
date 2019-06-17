@@ -401,8 +401,8 @@ jobs:
  <% end %>
 
 <% dep['buildpacks'].each do |bp_name, bp| %>
-  <% get_version_lines(bp['lines'],['latest']).each do |line| %>
-- name: update-<%=dep_name%>-<%= line %>-<%= bp_name %>
+  <% bp.fetch('lines', []).each do |line_hash| %>
+- name: update-<%=dep_name%>-<%= line_hash['line'] %>-<%= bp_name %>
   serial: true
   public: true
   plan:
@@ -420,10 +420,10 @@ jobs:
     <% end %>
     - get: buildpacks-ci
     - get: source
-      resource: source-<%=dep_name%>-<%= line %>
+      resource: source-<%=dep_name%>-<%= line_hash['line'] %>
       <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
-      <% must_pass = ["build-#{dep_name}-#{line}"] %>
-      <% must_pass.push("copy-#{dep_name}-#{line}-bionic") if bp_name.include? 'node-engine-cnb' %>
+      <% must_pass = ["build-#{dep_name}-#{line_hash['line']}"] %>
+      <% must_pass.push("copy-#{dep_name}-#{line_hash['line']}-bionic") if bp_name.include? 'node-engine-cnb' %>
       passed: <%= must_pass %>
       <% end %>
       version: every
@@ -432,7 +432,7 @@ jobs:
     - get: source-<%=monitored_dep_name%>-latest
       trigger: true
       version: every
-      passed: [<%= "build-#{dep_name}-#{line}" %>]
+      passed: [<%= "build-#{dep_name}-#{line_hash['line']}" %>]
     <% end %>
     - get: builds
   - do:
@@ -445,6 +445,10 @@ jobs:
       params:
         VERSION_LINE: <%= if dep_name == 'nginx' && bp_name == 'nginx' then 'nginx' else get_version_line_type(bp['lines']) end %>
         REMOVAL_STRATEGY: <%= bp.fetch('removal_strategy', 'remove_all') %>
+        DEPRECATION_DATE: <%= line_hash['deprecation_date'] %>
+        DEPRECATION_LINK: <%= line_hash['link'] %>
+        DEPRECATION_MATCH: <%= line_hash.fetch('match', '') %>
+
     - put: <%= bp_name %>-buildpack<%= '-v3' if dep['branch'] == 'v3' %>
       params:
         repository: artifacts
