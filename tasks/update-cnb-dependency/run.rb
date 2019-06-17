@@ -53,7 +53,7 @@ total_stacks = []
 builds = {}
 
 Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
-  unless deprecation_date.nil? or deprecation_link.nil?
+  unless deprecation_date.nil? or deprecation_link.nil? or version_line == 'latest'
     dependency_deprecation_date = {'version_line' => version_line, 'name' => manifest_name, 'deprecation_date' => deprecation_date, 'deprecation_link' => deprecation_link, }
     dependency_deprecation_date['match'] = deprecation_match unless deprecation_match.nil? or deprecation_match.empty? or deprecation_match.downcase == 'null'
 
