@@ -447,7 +447,7 @@ jobs:
         REMOVAL_STRATEGY: <%= bp.fetch('removal_strategy', 'remove_all') %>
         DEPRECATION_DATE: <%= line_hash['deprecation_date'] %>
         DEPRECATION_LINK: <%= line_hash['link'] %>
-        DEPRECATION_MATCH: <%= line_hash.fetch('match', '') %>
+        DEPRECATION_MATCH: <%= line_hash['match'] %>
 
     - put: <%= bp_name %>-buildpack<%= '-v3' if dep['branch'] == 'v3' %>
       params:
