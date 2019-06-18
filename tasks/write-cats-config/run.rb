@@ -3,13 +3,12 @@
 require 'json'
 require 'open3'
 
-def credhub_creds
+def credhub_secret
   bbl_env, _err = Open3.capture3("bbl --state-dir bbl-state/#{ENV.fetch('ENV_NAME')} print-env")
-  creds, _err, _status = Open3.capture3("eval \"#{bbl_env}\" && echo -n $CREDHUB_CLIENT $CREDHUB_SECRET")
-  creds.split(" ")
+  creds, _err, _status = Open3.capture3("eval \"#{bbl_env}\" && credhub get -n /bosh-#{ENV.fetch('ENV_NAME')}/cf/credhub_admin_client_secret -j | jq -r .value")
+  creds
 end
 
-@credhub_login ||= credhub_creds
 admin_user = "admin"
 admin_password = File.read("cf-admin-password/password").strip
 apps_domain = ENV.fetch('APPS_DOMAIN')
@@ -25,8 +24,7 @@ cats_config = {
   "api" => "api.#{apps_domain}",
   "apps_domain" => apps_domain,
   "credhub_mode" => credhub_mode,
-  "credhub_client" => @credhub_login.first,
-  "credhub_secret" => @credhub_login.last,
+  "credhub_secret" => credhub_secret,
   "async_service_operation_timeout" => 1200,
   "backend" => "diego",
   "cf_push_timeout" => 600,
