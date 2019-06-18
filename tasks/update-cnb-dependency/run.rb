@@ -54,11 +54,11 @@ builds = {}
 
 Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
   unless deprecation_date.nil? or deprecation_link.nil? or version_line == 'latest'
-    dependency_deprecation_date = {'version_line' => version_line, 'name' => manifest_name, 'date' => deprecation_date, 'link' => deprecation_link, }
+    dependency_deprecation_date = {'version_line' => version_line.downcase, 'name' => manifest_name, 'date' => deprecation_date, 'link' => deprecation_link, }
     dependency_deprecation_date['match'] = deprecation_match unless deprecation_match.nil? or deprecation_match.empty? or deprecation_match.downcase == 'null'
 
     deprecation_dates = buildpack_toml['metadata'].fetch('dependency_deprecation_dates', [])
-    deprecation_dates = deprecation_dates.reject{ |d| d['version_line'] == version_line and d['name'] == manifest_name}.push(dependency_deprecation_date).sort_by{ |d| [d['name'], d['version_line'] ]}
+    deprecation_dates = deprecation_dates.reject{ |d| d['version_line'] == version_line.downcase and d['name'] == manifest_name}.push(dependency_deprecation_date).sort_by{ |d| [d['name'], d['version_line'] ]}
     buildpack_toml['metadata']['dependency_deprecation_dates'] = deprecation_dates
   end
 
