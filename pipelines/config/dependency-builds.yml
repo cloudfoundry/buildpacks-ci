@@ -318,6 +318,30 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+  org.cloudfoundry.yarn:
+    branch: v3
+    buildpacks:
+      nodejs:
+        lines:
+        - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/yarn-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.nodejs-compat:
+    branch: v3
+    buildpacks:
+      nodejs:
+        lines:
+        - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/nodejs-compat-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
   php:
     buildpacks:
       php:
