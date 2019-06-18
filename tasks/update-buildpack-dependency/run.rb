@@ -2,6 +2,7 @@
 require 'json'
 require 'yaml'
 require 'tmpdir'
+require 'date'
 require_relative './dependencies'
 require_relative './php_manifest'
 
@@ -47,7 +48,8 @@ builds = {}
 version = ''
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
-  unless deprecation_date.nil? or deprecation_link.nil? or version_line == 'latest'
+  unless deprecation_date.nil? or deprecation_link.nil? or version_line == 'latest' or deprecation_date.empty?
+    deprecation_date = Date.parse(deprecation_date)
     dependency_deprecation_date = {'version_line' => version_line.downcase, 'name' => manifest_name, 'date' => deprecation_date, 'link' => deprecation_link, }
     dependency_deprecation_date['match'] = deprecation_match unless deprecation_match.nil? or deprecation_match.empty? or deprecation_match.downcase == 'null'
 
