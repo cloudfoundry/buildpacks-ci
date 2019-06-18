@@ -74,16 +74,16 @@ dependencies:
       dotnet-core:
         lines:
           - line: 1.0.X
-            deprecation_date: "2019-06-27"
+            deprecation_date: 2019-06-27
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 1.1.X
-            deprecation_date: "2019-06-27"
+            deprecation_date: 2019-06-27
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 2.1.X
-            deprecation_date: "2021-08-21" #link says supported at least this long
+            deprecation_date: 2021-08-21 #link says supported at least this long
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 2.2.X
-            deprecation_date: "2019-12-23"
+            deprecation_date: 2019-12-23
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: keep_all
   dotnet-aspnetcore:
@@ -108,19 +108,19 @@ dependencies:
         lines:
           # go deprecation dates are on the 1st day 12 months after their release
           - line: 1.11.X
-            deprecation_date: "2019-08-01"
+            deprecation_date: 2019-08-01
             link: https://golang.org/doc/devel/release.html
           - line: 1.12.X
-            deprecation_date: "2020-02-01"
+            deprecation_date: 2020-02-01
             link: https://golang.org/doc/devel/release.html
         removal_strategy: keep_latest_released
       go-cnb:
         lines:
           - line: 1.11.X
-            deprecation_date: "2019-08-01"
+            deprecation_date: 2019-08-01
             link: https://golang.org/doc/devel/release.html
           - line: 1.12.X
-            deprecation_date: "2020-02-01"
+            deprecation_date: 2020-02-01
             link: https://golang.org/doc/devel/release.html
         removal_strategy: keep_latest_released
   godep:
@@ -215,13 +215,13 @@ dependencies:
         lines:
           # nginx deprecation dates are on the 1st day 12 months after their release
           - line: 1.15.X
-            deprecation_date: "2019-05-21"
+            deprecation_date: 2019-05-21
             link: https://nginx.org/
           - line: 1.16.X
-            deprecation_date: "2020-04-01"
+            deprecation_date: 2020-04-01
             link: https://nginx.org/
           - line: 1.17.X
-            deprecation_date: "2020-05-01"
+            deprecation_date: 2020-05-01
             link: https://nginx.org/
   openresty:
     buildpacks:
@@ -234,21 +234,21 @@ dependencies:
       php:
         lines:
           - line: 1.15.X
-            deprecation_date: "2019-05-21"
+            deprecation_date: 2019-05-21
             link: https://nginx.org/
           - line: 1.16.X
-            deprecation_date: "2020-04-01"
+            deprecation_date: 2020-04-01
             link: https://nginx.org/
           - line: 1.17.X
-            deprecation_date: "2020-05-01"
+            deprecation_date: 2020-05-01
             link: https://nginx.org/
       staticfile:
         lines:
           - line: 1.15.X
-            deprecation_date: "2019-05-21"
+            deprecation_date: 2019-05-21
             link: https://nginx.org/
           - line: 1.17.X
-            deprecation_date: "2020-05-01"
+            deprecation_date: 2020-05-01
             link: https://nginx.org/
     source_type: nginx
   node:
@@ -256,41 +256,41 @@ dependencies:
       nodejs:
         lines:
           - line: 8.X.X
-            deprecation_date: "2019-12-01"
+            deprecation_date: 2019-12-01
             link: https://github.com/nodejs/Release
           - line: 10.X.X
-            deprecation_date: "2021-04-01"
+            deprecation_date: 2021-04-01
             link: https://github.com/nodejs/Release
           - line: 11.X.X
-            deprecation_date: "2019-06-01"
+            deprecation_date: 2019-06-01
             link: https://github.com/nodejs/Release
           - line: 12.X.X
-            deprecation_date: "2020-04-01"
+            deprecation_date: 2020-04-01
             link: https://github.com/nodejs/Release
         removal_strategy: keep_latest_released
       ruby:
         lines:
           - line: 10.X.X
-            deprecation_date: "2021-04-01"
+            deprecation_date: 2021-04-01
             link: https://github.com/nodejs/Release
       dotnet-core:
         lines:
           - line: 10.X.X
-            deprecation_date: "2021-04-01"
+            deprecation_date: 2021-04-01
             link: https://github.com/nodejs/Release
       node-engine-cnb:
         lines:
           - line: 8.X.X
-            deprecation_date: "2019-12-01"
+            deprecation_date: 2019-12-01
             link: https://github.com/nodejs/Release
           - line: 10.X.X
-            deprecation_date: "2021-04-01"
+            deprecation_date: 2021-04-01
             link: https://github.com/nodejs/Release
           - line: 11.X.X
-            deprecation_date: "2019-06-01"
+            deprecation_date: 2019-06-01
             link: https://github.com/nodejs/Release
           - line: 12.X.X
-            deprecation_date: "2020-04-01"
+            deprecation_date: 2020-04-01
             link: https://github.com/nodejs/Release
         removal_strategy: keep_latest_released
     source_type: node
@@ -324,30 +324,30 @@ dependencies:
         lines:
           - line: 7.1.X
             match: 7.1.\d+
-            deprecation_date: "2019-12-01"
+            deprecation_date: 2019-12-01
             link: http://php.net/supported-versions.php
           - line: 7.2.X
             match: 7.2.\d+
-            deprecation_date: "2020-11-30"
+            deprecation_date: 2020-11-30
             link: http://php.net/supported-versions.php
           - line: 7.3.X
             match: 7.3.\d+
-            deprecation_date: "2021-12-06"
+            deprecation_date: 2021-12-06
             link: http://php.net/supported-versions.php
         removal_strategy: keep_latest_released
       php-cnb:
         lines:
           - line: 7.1.X
             match: 7.1.\d+
-            deprecation_date: "2019-12-01"
+            deprecation_date: 2019-12-01
             link: http://php.net/supported-versions.php
           - line: 7.2.X
             match: 7.2.\d+
-            deprecation_date: "2020-11-30"
+            deprecation_date: 2020-11-30
             link: http://php.net/supported-versions.php
           - line: 7.3.X
             match: 7.3.\d+
-            deprecation_date: "2021-12-06"
+            deprecation_date: 2021-12-06
             link: http://php.net/supported-versions.php
         removal_strategy: keep_latest_released
     source_type: php
@@ -365,37 +365,37 @@ dependencies:
       python:
         lines:  # python 3 minor version EOLs are 5 years after their first final release
           - line: 2.7.X
-            deprecation_date: "2020-01-01"
+            deprecation_date: 2020-01-01
             link: https://www.python.org/dev/peps/pep-0373/
           - line: 3.4.X
-            deprecation_date: "2019-03-16"
+            deprecation_date: 2019-03-16
             link: https://www.python.org/dev/peps/pep-0429/
           - line: 3.5.X
-            deprecation_date: "2020-09-13"
+            deprecation_date: 2020-09-13
             link: https://www.python.org/dev/peps/pep-0478/
           - line: 3.6.X
-            deprecation_date: "2021-12-23"
+            deprecation_date: 2021-12-23
             link: https://www.python.org/dev/peps/pep-0494/
           - line: 3.7.X
-            deprecation_date: "2023-06-27"
+            deprecation_date: 2023-06-27
             link: https://www.python.org/dev/peps/pep-0537/
         removal_strategy: keep_latest_released
       python-cnb:
         lines:
           - line: 2.7.X
-            deprecation_date: "2020-01-01"
+            deprecation_date: 2020-01-01
             link: https://www.python.org/dev/peps/pep-0373/
           - line: 3.4.X
-            deprecation_date: "2019-03-16"
+            deprecation_date: 2019-03-16
             link: https://www.python.org/dev/peps/pep-0429/
           - line: 3.5.X
-            deprecation_date: "2020-09-13"
+            deprecation_date: 2020-09-13
             link: https://www.python.org/dev/peps/pep-0478/
           - line: 3.6.X
-            deprecation_date: "2021-12-23"
+            deprecation_date: 2021-12-23
             link: https://www.python.org/dev/peps/pep-0494/
           - line: 3.7.X
-            deprecation_date: "2023-06-27"
+            deprecation_date: 2023-06-27
             link: https://www.python.org/dev/peps/pep-0537/
         removal_strategy: keep_latest_released
   r:
@@ -403,13 +403,13 @@ dependencies:
       r:
         lines: # final release for each minor version is every spring ( just before next minor version release )
           - line: 3.4.X
-            deprecation_date: "2018-04-23"  # why do we still have this in the buildpack?
+            deprecation_date: 2018-04-23  # why do we still have this in the buildpack?
             link: https://developer.r-project.org/
           - line: 3.5.X
-            deprecation_date: "2019-03-11"
+            deprecation_date: 2019-03-11
             link: https://developer.r-project.org/
           - line: 3.6.X
-            deprecation_date: "2020-03-01" #Estimate make sure 3.7 is out before deprecating
+            deprecation_date: 2020-03-01 #Estimate make sure 3.7 is out before deprecating
             link: https://developer.r-project.org/
         removal_strategy: keep_latest_released
     monitored_deps:
@@ -422,7 +422,7 @@ dependencies:
       ruby:
         lines:
           - line: 2.4.X
-            deprecation_date: "2020-04-01"
+            deprecation_date: 2020-04-01
             link: https://www.ruby-lang.org/en/news/2019/04/01/ruby-2-4-6-released/
           - line: 2.5.X
           - line: 2.6.X
@@ -430,7 +430,7 @@ dependencies:
       ruby-cnb:
         lines:
           - line: 2.4.X
-            deprecation_date: "2020-04-01"
+            deprecation_date: 2020-04-01
             link: https://www.ruby-lang.org/en/news/2019/04/01/ruby-2-4-6-released/
           - line: 2.5.X
           - line: 2.6.X
