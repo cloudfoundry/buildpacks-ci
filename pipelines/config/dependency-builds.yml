@@ -177,10 +177,9 @@ dependencies:
       - 'tag_regex: ^[0-9]+\.[0-9]+$'
   lifecycle:
     buildpacks:
-      nodejs:
+      nodejs-cnb:
         lines:
           - line: latest
-    branch: v3
     source_type: github_releases
     source_params:
       - 'repo: buildpack/lifecycle'
@@ -295,9 +294,8 @@ dependencies:
         removal_strategy: keep_latest_released
     source_type: node
   org.cloudfoundry.npm:
-    branch: v3
     buildpacks:
-      nodejs:
+      nodejs-cnb:
         lines:
           - line: latest
     source_type: github_releases
@@ -307,9 +305,8 @@ dependencies:
       - 'prerelease: true'
     any_stack: true
   org.cloudfoundry.node-engine:
-    branch: v3
     buildpacks:
-      nodejs:
+      nodejs-cnb:
         lines:
           - line: latest
     source_type: github_releases
@@ -319,9 +316,8 @@ dependencies:
       - 'prerelease: true'
     any_stack: true
   org.cloudfoundry.yarn:
-    branch: v3
     buildpacks:
-      nodejs:
+      nodejs-cnb:
         lines:
         - line: latest
     source_type: github_releases
@@ -331,9 +327,8 @@ dependencies:
       - 'prerelease: true'
     any_stack: true
   org.cloudfoundry.nodejs-compat:
-    branch: v3
     buildpacks:
-      nodejs:
+      nodejs-cnb:
         lines:
         - line: latest
     source_type: github_releases
