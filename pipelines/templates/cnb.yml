@@ -1,4 +1,4 @@
-<% cnb_images = %w(run build) %>
+ <% cnb_images = %w(run build) %>
 <% buildpacks = {
   'npm' => {
     'integration' => true

@@ -1,4 +1,9 @@
-<% languages = ['nodejs'] %>
+<% languages = {
+  'nodejs-cnb' => {
+    'branch' => 'master',
+  }
+}
+%>
 
 ---
 resources:
@@ -15,12 +20,12 @@ resources:
       branch: master
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
 
-  <% languages.each do |lang| %>
-  - name: <%= lang %>-buildpack
+  <% languages.each do |lang, data| %>
+  - name: <%= lang %>
     type: git
     source:
-      uri: git@github.com:cloudfoundry/<%= lang %>-buildpack
-      branch: v3
+      uri: git@github.com:cloudfoundry/<%= lang %>
+      branch: <%= data['branch'] %>
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
   <%end%>
 
@@ -177,7 +182,7 @@ jobs:
         params:
           repository: cnb2cf
           rebase: true
-  <% languages.each do |lang| %>
+  <% languages.each do |lang, data| %>
   - name: update-shim-bundle-in-<%= lang %>
     plan:
       - aggregate:
@@ -186,10 +191,10 @@ jobs:
           resource: buildpacks-bucket-shim-bundle
           trigger: true
         - get: buildpack
-          resource: <%= lang %>-buildpack
+          resource: <%= lang %>
       - task: update-shim-bundle-url
         file: buildpacks-ci/tasks/update-shim-bundle-url/task.yml
-      - put: <%= lang %>-buildpack
+      - put: <%= lang %>
         params:
           repository: buildpack
           rebase: true
