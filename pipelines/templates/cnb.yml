@@ -137,6 +137,7 @@ jobs: ##########################################################################
             file: buildpacks-ci/tasks/run-scripts-unit/task.yml
 
   - name: update-libcfbuildpack
+    serial: true
     plan:
       - aggregate:
         - get: buildpacks-ci
