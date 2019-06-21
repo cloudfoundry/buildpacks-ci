@@ -34,6 +34,9 @@ module Depwatcher
       lis = doc.xpath("//li/a[starts-with(text(),'Ruby ')]")
       raise "Could not parse ruby website" unless lis.is_a?(XML::NodeSet)
 
+      lis = lis.reject { |item| item.to_s.includes? "preview" }
+      lis = lis.select { |item| item.to_s.match(/\d+/) }
+
       lis.map do |a|
         parent = a.parent
         version = a.text.gsub(/^Ruby /, "")
