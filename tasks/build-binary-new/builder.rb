@@ -141,7 +141,28 @@ module DependencyBuild
     source_sha
   end
 
+
+  def replace_openssl()
+    filebase = 'OpenSSL_1_1_0g'
+    filename = "#{filebase}.tar.gz"
+    openssltar = "https://github.com/openssl/openssl/archive/#{filename}"
+
+    Dir.mktmpdir do |dir|
+      Runner.run('wget', openssltar)
+      Runner.run('tar', 'xf', filename)
+      Dir.chdir("openssl-#{filebase}") do
+        Runner.run("./config",
+                   "--prefix=/usr",
+                   "--libdir=/lib/x86_64-linux-gnu",
+                   "--openssldir=/include/x86_64-linux-gnu/openssl")
+        Runner.run('make')
+        Runner.run('make', 'install')
+      end
+    end
+  end
+
   def build_nginx(source_input)
+    replace_openssl
     artifacts = "#{Dir.pwd}/artifacts"
     source_pgp = 'not yet implemented'
     destdir = Dir.mktmpdir
