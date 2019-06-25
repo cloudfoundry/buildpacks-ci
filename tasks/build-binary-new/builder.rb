@@ -162,7 +162,11 @@ module DependencyBuild
   end
 
   def build_nginx(source_input)
-    replace_openssl
+    stack = ENV.fetch('STACK')
+    if stack == 'cflinuxfs3'
+      replace_openssl
+    end
+
     artifacts = "#{Dir.pwd}/artifacts"
     source_pgp = 'not yet implemented'
     destdir = Dir.mktmpdir
@@ -171,8 +175,10 @@ module DependencyBuild
         Runner.run('wget', source_input.url)
         # TODO validate pgp
         Runner.run('tar', 'xf', "#{source_input.name}-#{source_input.version}.tar.gz")
+
         Dir.chdir("#{source_input.name}-#{source_input.version}") do
           Runner.run(
+            'which openssl &&' ,
             './configure',
             '--prefix=/',
             '--error-log-path=stderr',
