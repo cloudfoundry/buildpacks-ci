@@ -39,6 +39,9 @@
   },
   'conda' => {
     'integration' => true
+  },
+  'dotnet-core-conf' => {
+    'integration' => true
   }
 }
 %>
