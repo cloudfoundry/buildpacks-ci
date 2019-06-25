@@ -41,11 +41,13 @@ module Depwatcher
         .sort_by { |i| SemanticVersion.new(i.ref) }
     end
 
-    def in(ref : String, tag_regex : String) : DotnetRelease
+    def in(ref : String, tag_regex : String) : DotnetRelease | Nil
       tag = dotnet_tags(tag_regex)
         .select { |t| t.name == ref }
-        .first
-
+        .first?
+      if tag.nil?
+        return tag
+      end
       url = "https://github.com/dotnet/cli/archive/#{tag.commit}.tar.gz"
       DotnetRelease.new(tag.name, "https://github.com/dotnet/cli", tag.commit, get_sha256(url))
     end

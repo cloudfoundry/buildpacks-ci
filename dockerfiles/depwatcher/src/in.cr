@@ -68,6 +68,11 @@ else
   raise "Unknown type: #{type}"
 end
 
-File.write("#{dir}/data.json", { source: source, version: version }.to_json)
-STDERR.puts version.to_json
-puts({ version: data["version"] }.to_json)
+if version
+  File.write("#{dir}/data.json", { source: source, version: version }.to_json)
+  STDERR.puts version.to_json
+  puts({ version: data["version"] }.to_json)
+else
+  raise "Unable to retrieve version:\n#{data}"
+end
+
