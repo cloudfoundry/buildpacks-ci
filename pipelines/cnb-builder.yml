@@ -16,10 +16,13 @@
     'debug'                    => {'git_repo' => 'https://github.com/cloudfoundry/debug-cnb', 'p_cnb' => true},
     'googlestackdriver'        => {'git_repo' => 'https://github.com/cloudfoundry/google-stackdriver-cnb', 'p_cnb' => true},
     'jmx'                      => {'git_repo' => 'https://github.com/cloudfoundry/jmx-cnb', 'p_cnb' => true},
-    'procfile'                 => {'git_repo' => 'https://github.com/cloudfoundry/procfile-cnb', 'p_cnb' => true}
+    'procfile'                 => {'git_repo' => 'https://github.com/cloudfoundry/procfile-cnb', 'p_cnb' => true},
+    'dotnet-core-conf'         => {'git_repo' => 'https://github.com/cloudfoundry/dotnet-core-conf-cnb', 'p_cnb' => true}
   }
 
   $pcnbs = {
+    'archivexpanding'             => {'git_repo' => 'https://github.com/cloudfoundry/archive-expanding-cnb'},
+    'tomcat'                      => {'git_repo' => 'https://github.com/cloudfoundry/tomcat-cnb'},
     'jdbc'                        => {'git_repo' => 'https://github.com/cloudfoundry/jdbc-cnb'},
     'springautoreconfiguration'   => {'git_repo' => 'https://github.com/cloudfoundry/spring-auto-reconfiguration-cnb'},
     'springboot'                  => {'git_repo' => 'https://github.com/cloudfoundry/spring-boot-cnb'},
