@@ -178,7 +178,6 @@ module DependencyBuild
 
         Dir.chdir("#{source_input.name}-#{source_input.version}") do
           Runner.run(
-            'which openssl &&' ,
             './configure',
             '--prefix=/',
             '--error-log-path=stderr',
