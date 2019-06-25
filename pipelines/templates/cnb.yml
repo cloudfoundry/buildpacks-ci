@@ -109,6 +109,7 @@ resources: #####################################################################
 jobs: ################################################################################################################
 
   - name: update-cnb-tools
+    public: true
     serial: true
     plan:
     - aggregate:
@@ -127,6 +128,7 @@ jobs: ##########################################################################
         rebase: true
 
   - name: specs-unit
+    public: true
     serial: true
     plan:
       - do:
@@ -140,6 +142,7 @@ jobs: ##########################################################################
             file: buildpacks-ci/tasks/run-scripts-unit/task.yml
 
   - name: update-libcfbuildpack
+    public: true
     serial: true
     plan:
       - aggregate:
@@ -162,6 +165,7 @@ jobs: ##########################################################################
 <% if buildpacks[language]['integration'] %>
 
   - name: update-dagger
+    public: true
     plan:
       - aggregate:
         - get: buildpacks-ci
@@ -180,6 +184,7 @@ jobs: ##########################################################################
           rebase: true
 
   - name: specs-integration
+    public: true
     serial: true
     plan:
       - aggregate:
@@ -199,6 +204,7 @@ jobs: ##########################################################################
 <% end %>
 
   - name: ship-it
+    public: true
     serial: true
     plan:
       - aggregate:
