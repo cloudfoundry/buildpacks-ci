@@ -178,6 +178,7 @@ dependencies:
   lifecycle:
     buildpacks:
       nodejs-cnb:
+        shim: true
         lines:
           - line: latest
     source_type: github_releases
@@ -296,6 +297,7 @@ dependencies:
   org.cloudfoundry.npm:
     buildpacks:
       nodejs-cnb:
+        shim: true
         lines:
           - line: latest
     source_type: github_releases
@@ -307,6 +309,7 @@ dependencies:
   org.cloudfoundry.node-engine:
     buildpacks:
       nodejs-cnb:
+        shim: true
         lines:
           - line: latest
     source_type: github_releases
@@ -318,6 +321,7 @@ dependencies:
   org.cloudfoundry.yarn:
     buildpacks:
       nodejs-cnb:
+        shim: true
         lines:
         - line: latest
     source_type: github_releases
@@ -329,6 +333,7 @@ dependencies:
   org.cloudfoundry.nodejs-compat:
     buildpacks:
       nodejs-cnb:
+        shim: true
         lines:
         - line: latest
     source_type: github_releases
