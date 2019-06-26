@@ -71,6 +71,14 @@ def bp_uses_line?(bp_data, line)
   lines_present = get_version_lines(bp_data['lines']).nil?
   !lines_present && get_version_lines(bp_data['lines']).include?(line)
 end
+
+def get_git_uri(buildpack)
+  if buildpack.include? '-cnb'
+    return "git@github.com:cloudfoundry/#{buildpack}.git"
+  else
+    bp_uri = "git@github.com:cloudfoundry/#{buildpack}-buildpack.git"
+  end
+end
 %>
 
 resource_types:
@@ -111,40 +119,32 @@ resources:
 - name: <%= buildpack %>-buildpack-v3
   type: git
   source:
-    uri: git@github.com:cloudfoundry/<%= buildpack %>-buildpack.git
+    uri: <%= get_git_uri(buildpack) %>
     private_key: {{cf-buildpacks-eng-github-ssh-key}}
     branch: v3
 <% end %>
 
-<% dependencies.values.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack| %>
-<% if buildpack.include? '-cnb' %>
+<% dependencies.values.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack|
+branch = 'develop'
+if buildpack.include? '-cnb'
+  branch = 'master'
+end
+%>
 - name: <%= buildpack %>-buildpack
   type: git
   source:
-    uri: git@github.com:cloudfoundry/<%= buildpack %>.git
+    uri: <%= get_git_uri(buildpack) %>
     private_key: {{cf-buildpacks-eng-github-ssh-key}}
-    branch: master
+    branch: <%= branch %>
 - name: <%= buildpack %>-buildpack-latest-released
   type: git
   source:
-    uri: git@github.com:cloudfoundry/<%= buildpack %>.git
+    uri: <%= get_git_uri(buildpack) %>
     private_key: {{cf-buildpacks-eng-github-ssh-key}}
     branch: master
+    <% if buildpack.include? '-cnb' %>
     tag_filter: v*
-<% else %>
-- name: <%= buildpack %>-buildpack
-  type: git
-  source:
-    uri: git@github.com:cloudfoundry/<%= buildpack %>-buildpack.git
-    private_key: {{cf-buildpacks-eng-github-ssh-key}}
-    branch: develop
-- name: <%= buildpack %>-buildpack-latest-released
-  type: git
-  source:
-    uri: git@github.com:cloudfoundry/<%= buildpack %>-buildpack.git
-    private_key: {{cf-buildpacks-eng-github-ssh-key}}
-    branch: master
-<% end %>
+    <% end %>
 <% end %>
 
 <% dependencies.each do |dep_name, dep| %>
