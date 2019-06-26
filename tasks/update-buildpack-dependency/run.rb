@@ -245,7 +245,7 @@ end
 r_commit_versions_message = ""
 
 if manifest['language'].downcase == 'r'
-  version_messages = builds[total_stacks.first]['sub_dependencies'].map do |sub_dep_key, sub_dep_value |
+  version_messages = (builds[total_stacks.first]['sub_dependencies'] || []).map do |sub_dep_key, sub_dep_value |
     "#{sub_dep_key} #{sub_dep_value['version'].to_s}"
   end.join(", ")
   r_commit_versions_message = ' with dependencies: ' + version_messages
