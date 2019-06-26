@@ -54,6 +54,8 @@ describe 'Builder' do
             expect(binary_builder).to receive(:build).with source_input
           elsif input.dep == 'php'
             expect(binary_builder).to receive(:build).with(source_input, anything)
+          elsif input.dep == 'python'
+            expect(DependencyBuild).to receive(:replace_openssl)
           else
             full_version = "#{source_input.version}_ruby-2.5"
             expect(binary_builder).to receive(:build) {|src| expect(src.version).to eq(full_version)}
