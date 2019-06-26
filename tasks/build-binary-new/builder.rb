@@ -154,7 +154,27 @@ module DependencyBuild
         Runner.run("./config",
                    "--prefix=/usr",
                    "--libdir=/lib/x86_64-linux-gnu",
-                   "--openssldir=/include/x86_64-linux-gnu/openssl")
+                   "--openssldir=/include/x86_64-linux-gnu/openssl",
+                   "--no-asan",
+                   "--no-crypto-mdebug",
+                   "--no-crypto-mdebug-backtrace",
+                   "--no-ec_nistp_64_gcc_128",
+                   "--no-egd",
+                   "--no-fuzz-afl",
+                   "--no-fuzz-libfuzzer",
+                   "--no-heartbeats",
+                   "--no-md2",
+                   "--no-msan",
+                   "--no-rc5",
+                   "--no-sctp",
+                   "--no-ssl-trace",
+                   "--no-ssl3",
+                   "--no-ssl3-method",
+                   "--no-ubsan",
+                   "--no-unit-test",
+                   "--no-weak-ssl-ciphers",
+                   "--no-zlib",
+                   "--no-zlib-dynamic")
         Runner.run('make')
         Runner.run('make', 'install')
       end
