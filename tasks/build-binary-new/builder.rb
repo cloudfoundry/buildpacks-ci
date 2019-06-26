@@ -14,6 +14,45 @@ module Runner
   end
 end
 
+def replace_openssl()
+  filebase = 'OpenSSL_1_1_0g'
+  filename = "#{filebase}.tar.gz"
+  openssltar = "https://github.com/openssl/openssl/archive/#{filename}"
+
+  Dir.mktmpdir do |dir|
+    Runner.run('wget', openssltar)
+    Runner.run('tar', 'xf', filename)
+    Dir.chdir("openssl-#{filebase}") do
+      Runner.run("./config",
+                 "--prefix=/usr",
+                 "--libdir=/lib/x86_64-linux-gnu",
+                 "--openssldir=/include/x86_64-linux-gnu/openssl",
+                 "--no-asan",
+                 "--no-crypto-mdebug",
+                 "--no-crypto-mdebug-backtrace",
+                 "--no-ec_nistp_64_gcc_128",
+                 "--no-egd",
+                 "--no-fuzz-afl",
+                 "--no-fuzz-libfuzzer",
+                 "--no-heartbeats",
+                 "--no-md2",
+                 "--no-msan",
+                 "--no-rc5",
+                 "--no-sctp",
+                 "--no-ssl-trace",
+                 "--no-ssl3",
+                 "--no-ssl3-method",
+                 "--no-ubsan",
+                 "--no-unit-test",
+                 "--no-weak-ssl-ciphers",
+                 "--no-zlib",
+                 "--no-zlib-dynamic")
+      Runner.run('make')
+      Runner.run('make', 'install')
+    end
+  end
+end
+
 module DependencyBuild
   def build_pipenv(source_input)
     old_file_path = "/tmp/pipenv-v#{source_input.version}.tgz"
@@ -139,46 +178,6 @@ module DependencyBuild
       end
     end
     source_sha
-  end
-
-
-  def replace_openssl()
-    filebase = 'OpenSSL_1_1_0g'
-    filename = "#{filebase}.tar.gz"
-    openssltar = "https://github.com/openssl/openssl/archive/#{filename}"
-
-    Dir.mktmpdir do |dir|
-      Runner.run('wget', openssltar)
-      Runner.run('tar', 'xf', filename)
-      Dir.chdir("openssl-#{filebase}") do
-        Runner.run("./config",
-                   "--prefix=/usr",
-                   "--libdir=/lib/x86_64-linux-gnu",
-                   "--openssldir=/include/x86_64-linux-gnu/openssl",
-                   "--no-asan",
-                   "--no-crypto-mdebug",
-                   "--no-crypto-mdebug-backtrace",
-                   "--no-ec_nistp_64_gcc_128",
-                   "--no-egd",
-                   "--no-fuzz-afl",
-                   "--no-fuzz-libfuzzer",
-                   "--no-heartbeats",
-                   "--no-md2",
-                   "--no-msan",
-                   "--no-rc5",
-                   "--no-sctp",
-                   "--no-ssl-trace",
-                   "--no-ssl3",
-                   "--no-ssl3-method",
-                   "--no-ubsan",
-                   "--no-unit-test",
-                   "--no-weak-ssl-ciphers",
-                   "--no-zlib",
-                   "--no-zlib-dynamic")
-        Runner.run('make')
-        Runner.run('make', 'install')
-      end
-    end
   end
 
   def build_nginx(source_input)
