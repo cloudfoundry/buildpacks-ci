@@ -573,6 +573,8 @@ class Builder
       if major == '3' && minor == '4' && stack == 'cflinuxfs3'
         Runner.run('apt', 'update')
         Runner.run('apt-get', 'install', '-y', 'libssl1.0-dev')
+      else
+        replace_openssl
       end
       binary_builder.build(source_input)
       out_data.merge!(
