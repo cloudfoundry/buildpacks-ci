@@ -255,7 +255,7 @@ if manifest['language'].downcase == 'r'
     if dep["version"] == version
       dep["dependencies"] = []
       sub_deps = dep["dependencies"]
-      builds[total_stacks.first]['sub_dependencies'].map do |sub_dep_key, sub_dep_value |
+      (builds[total_stacks.first]['sub_dependencies'] || []).map do |sub_dep_key, sub_dep_value |
         sub_dep = {
           'version' => sub_dep_value['version'],
           'source' => sub_dep_value['source']['url'],
