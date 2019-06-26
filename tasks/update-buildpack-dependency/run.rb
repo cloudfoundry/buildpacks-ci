@@ -130,6 +130,15 @@ if added.empty? && !rebuilt
   exit 0
 end
 
+commit_message = "Add #{manifest_name} #{resource_version}"
+if rebuilt
+  commit_message = "Rebuild #{manifest_name} #{resource_version}"
+end
+if removed.length > 0
+  commit_message = "#{commit_message}, remove #{manifest_name} #{removed.join(', ')}"
+end
+commit_message = commit_message + "\n\nfor stack(s) #{total_stacks.join(', ')}"
+
 #
 # Special Nginx stuff (for Nginx buildpack)
 # * There are two version lines, stable & mainline
@@ -233,49 +242,39 @@ if !rebuilt && manifest_name == 'jruby' && manifest['language'] == 'ruby'
   end
 end
 
-
-
-
-
-
-
+#
 # Special R Stuff
 # * For the manifest there will be a sub-dependency section for R, as all the dependencies are compiled within
-# for all stacks we have the same sub-dependency(forecast, plumber,...)
-r_commit_versions_message = ""
+#   for all stacks we have the same sub-dependency(forecast, plumber,...)
 
 if manifest['language'].downcase == 'r'
-  version_messages = (builds[total_stacks.first]['sub_dependencies'] || []).map do |sub_dep_key, sub_dep_value |
-    "#{sub_dep_key} #{sub_dep_value['version'].to_s}"
-  end.join(", ")
-  r_commit_versions_message = ' with dependencies: ' + version_messages
+  total_stacks.each do |stack|
+    version_messages = (builds[stack]['sub_dependencies'] || []).map do |sub_dep_key, sub_dep_value |
+      "#{sub_dep_key} #{sub_dep_value['version'].to_s}"
+    end.join(", ")
 
-  manifest["dependencies"].map do |dep|
+    unless version_messages == ""
+      commit_message += "\nwith dependencies for stack #{stack}: #{version_messages}"
+    end
 
-    if dep["version"] == version
-      dep["dependencies"] = []
-      sub_deps = dep["dependencies"]
-      (builds[total_stacks.first]['sub_dependencies'] || []).map do |sub_dep_key, sub_dep_value |
-        sub_dep = {
-          'version' => sub_dep_value['version'],
-          'source' => sub_dep_value['source']['url'],
-          'source_sha256' =>  sub_dep_value['source']['sha256']
-        }
-        sub_deps.push(sub_dep_key => sub_dep)
+    manifest["dependencies"].map do |dep|
+
+      if dep["version"] == version
+        dep["dependencies"] = []
+        sub_deps = dep["dependencies"]
+        (builds[stack]['sub_dependencies'] || []).map do |sub_dep_key, sub_dep_value |
+          sub_dep = {
+            'version' => sub_dep_value['version'],
+            'source' => sub_dep_value['source']['url'],
+            'source_sha256' =>  sub_dep_value['source']['sha256']
+          }
+          sub_deps.push(sub_dep_key => sub_dep)
+        end
       end
     end
   end
-
 end
 
-commit_message = "Add #{manifest_name} #{resource_version}" + r_commit_versions_message
-if rebuilt
-  commit_message = "Rebuild #{manifest_name} #{resource_version}" + r_commit_versions_message
-end
-if removed.length > 0
-  commit_message = "#{commit_message}, remove #{manifest_name} #{removed.join(', ')}"
-end
-commit_message = commit_message + "\n\nfor stack(s) #{total_stacks.join(', ')}"
 
 Dir.chdir('artifacts') do
   GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
