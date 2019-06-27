@@ -21,12 +21,13 @@ def get_sha_from_file(file)
 end
 
 case source_input.name
-  when 'go'
-    url = "https://dl.google.com/go/go#{source_input.version}.linux-amd64.tar.gz"
-    file = `wget #{url}`
+when 'go'
+    path = "go#{source_input.version}.linux-amd64.tar.gz"
+    url = "https://dl.google.com/go/#{path}"
+    `wget #{url}`
     build_output.add_output("#{source_input.version}-bionic.json",
       {
-        sha256: get_sha_from_file(file),
+        sha256: get_sha_from_file(path),
         url: url
       }
     )
