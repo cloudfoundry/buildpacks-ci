@@ -41,7 +41,7 @@ class Commit
 
   def self.recent(old_version)
     cmd = %Q{git log --pretty=format:'%H'}
-    cmd = cmd + " v#{old_version}..HEAD" if old_version != ''
+    cmd = cmd + " v#{old_version}..HEAD" if old_version != '0.0.0'
     hashes, _ = Open3.capture2(cmd)
     hashes.split(/\n/).map do |hash|
       begin
