@@ -261,9 +261,6 @@ dependencies:
           - line: 10.X.X
             deprecation_date: 2021-04-01
             link: https://github.com/nodejs/Release
-          - line: 11.X.X
-            deprecation_date: 2019-06-01
-            link: https://github.com/nodejs/Release
           - line: 12.X.X
             deprecation_date: 2020-04-01
             link: https://github.com/nodejs/Release
@@ -285,9 +282,6 @@ dependencies:
             link: https://github.com/nodejs/Release
           - line: 10.X.X
             deprecation_date: 2021-04-01
-            link: https://github.com/nodejs/Release
-          - line: 11.X.X
-            deprecation_date: 2019-06-01
             link: https://github.com/nodejs/Release
           - line: 12.X.X
             deprecation_date: 2020-04-01
@@ -505,9 +499,6 @@ skip_build:
     stack: cflinuxfs3
   - dep: dotnet-sdk
     line: 2.2.2X
-    stack: cflinuxfs2
-  - dep: node
-    line: 11.X.X
     stack: cflinuxfs2
   - dep: node
     line: 10.X.X
