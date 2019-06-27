@@ -11,8 +11,6 @@ old_version = buildpack_toml['buildpack']['version'].to_s
 version_parts = old_version.match(/(\d+\.\d+\.)(\d+)/)
 new_version = version_parts[1] + (version_parts[2].to_i + 1).to_s
 
-old_version = '' if old_version == '0.0.0'
-
 buildpack_toml['buildpack']['version'] = new_version
 File.write('buildpack.toml', TOML::Generator.new(buildpack_toml).body) 
 
@@ -30,13 +28,13 @@ begin
       new_changelog.write "\n\n"
     end
   else
-    log = `git log v#{old_version}..HEAD`
+    log = `git log HEAD`
     new_changelog.write log
   end
 
   new_changelog.write "\n"
 
-  File.open('CHANGELOG').each { |line| new_changelog.write line }
+  File.open('CHANGELOG', 'a+').each { |line| new_changelog.write line }
 ensure
   new_changelog.close
 end
