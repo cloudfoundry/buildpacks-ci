@@ -20,7 +20,8 @@ V3_DEP_NAMES = {
     'yarn' => 'Yarn',
     'python' => 'Python',
     'php' => 'PHP',
-    'httpd' => 'Apache HTTP Server'
+    'httpd' => 'Apache HTTP Server',
+    'go' => 'Go'
 }
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
