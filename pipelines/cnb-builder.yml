@@ -17,15 +17,16 @@
     'googlestackdriver'        => {'git_repo' => 'https://github.com/cloudfoundry/google-stackdriver-cnb', 'p_cnb' => true},
     'jmx'                      => {'git_repo' => 'https://github.com/cloudfoundry/jmx-cnb', 'p_cnb' => true},
     'procfile'                 => {'git_repo' => 'https://github.com/cloudfoundry/procfile-cnb', 'p_cnb' => true},
-    'dotnet-core-conf'         => {'git_repo' => 'https://github.com/cloudfoundry/dotnet-core-conf-cnb', 'p_cnb' => true}
+    'dotnet-core-conf'         => {'git_repo' => 'https://github.com/cloudfoundry/dotnet-core-conf-cnb', 'p_cnb' => true},
+    'archivexpanding'             => {'git_repo' => 'https://github.com/cloudfoundry/archive-expanding-cnb', 'p_cnb' => true},
+    'tomcat'                      => {'git_repo' => 'https://github.com/cloudfoundry/tomcat-cnb', 'p_cnb' => true},
+    'jdbc'                        => {'git_repo' => 'https://github.com/cloudfoundry/jdbc-cnb', 'p_cnb' => true},
+    'springautoreconfiguration'   => {'git_repo' => 'https://github.com/cloudfoundry/spring-auto-reconfiguration-cnb', 'p_cnb' => true},
+    'springboot'                  => {'git_repo' => 'https://github.com/cloudfoundry/spring-boot-cnb', 'p_cnb' => true},
+    'distzip'                   => {'git_repo' => 'https://github.com/cloudfoundry/dist-zip-cnb', 'p_cnb' => true },
   }
 
   $pcnbs = {
-    'archivexpanding'             => {'git_repo' => 'https://github.com/cloudfoundry/archive-expanding-cnb'},
-    'tomcat'                      => {'git_repo' => 'https://github.com/cloudfoundry/tomcat-cnb'},
-    'jdbc'                        => {'git_repo' => 'https://github.com/cloudfoundry/jdbc-cnb'},
-    'springautoreconfiguration'   => {'git_repo' => 'https://github.com/cloudfoundry/spring-auto-reconfiguration-cnb'},
-    'springboot'                  => {'git_repo' => 'https://github.com/cloudfoundry/spring-boot-cnb'},
     'p-openjdk'                   => {'git_repo' => 'git@github.com:pivotal-cf/p-openjdk-cnb.git'},
     'p-appdynamics'               => {'git_repo' => 'git@github.com:pivotal-cf/p-appdynamics-cnb.git'},
     'p-buildsystem'               => {'git_repo' => 'git@github.com:pivotal-cf/p-build-system-cnb.git'},
