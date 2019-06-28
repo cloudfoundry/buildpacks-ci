@@ -42,7 +42,6 @@ describe 'Builder' do
       TableTestInput.new('httpd', '2.7.14')       => TableTestOutput.new('/fake-binary-builder/httpd-2.7.14-linux-x64.tgz', 'httpd-2.7.14-linux-x64-cflinuxfs2', 'tgz'),
       TableTestInput.new('ruby', '2.7.14')        => TableTestOutput.new('/fake-binary-builder/ruby-2.7.14-linux-x64.tgz', 'ruby-2.7.14-linux-x64-cflinuxfs2', 'tgz'),
       TableTestInput.new('jruby', '9.2.0')        => TableTestOutput.new('/fake-binary-builder/jruby-9.2.0_ruby-2.5-linux-x64.tgz', 'jruby-9.2.0_ruby-2.5-linux-x64-cflinuxfs2', 'tgz'),
-      TableTestInput.new('nginx-static', '7.0.0') => TableTestOutput.new('/fake-binary-builder/nginx-static-7.0.0-linux-x64.tgz', 'nginx-7.0.0-linux-x64-cflinuxfs2', 'tgz'),
     }.each do |input, output|
       describe "to build #{input.dep}" do
         let(:source_input) { SourceInput.new(input.dep, 'https://fake.com', input.version, 'fake-md5', nil) }
@@ -163,6 +162,23 @@ describe 'Builder' do
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
         end
       end
+
+      describe 'nginx-static' do
+        let(:source_input) { SourceInput.new('nginx-static', 'https://fake.com', '1.0.2', nil, 'fake-sha256') }
+
+        it 'should build correctly' do
+          expect(DependencyBuild).to receive(:build_nginx)
+                                         .with(source_input, true)
+                                         .and_return 'fake-source-sha-123'
+
+          expect(artifact_output).to receive(:move_dependency)
+                                         .with('nginx-static', 'artifacts/nginx-1.0.2.tgz', 'nginx-1.0.2-linux-x64-cflinuxfs2', 'tgz')
+                                         .and_return(sha256: 'fake-sha256', url: 'fake-url')
+
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+        end
+      end
+
     end
 
     context 'and no git commit sha' do

@@ -1,10 +1,10 @@
 require 'net/http'
 
 class SourceInput
-  attr_reader :url, :md5, :git_commit_sha
+  attr_reader :url, :md5, :git_commit_sha, :type
   attr_accessor :name, :repo, :version, :sha256
 
-  def initialize(name, url, version, md5, sha256, git_commit_sha = nil, repo = '')
+  def initialize(name, url, version, md5, sha256, git_commit_sha = nil, repo = '', type = '')
     @name    = name
     @repo    = repo
     @url     = url
@@ -12,6 +12,7 @@ class SourceInput
     @md5     = md5
     @sha256  = sha256
     @git_commit_sha = git_commit_sha
+    @type = type
   end
 
   def self.from_file(source_file)
@@ -23,7 +24,8 @@ class SourceInput
       data.dig('version', 'md5_digest'),
       data.dig('version', 'sha256'),
       data.dig('version', 'git_commit_sha'),
-      data.dig('source', 'repo') || ''
+      data.dig('source', 'repo') || '',
+      data.dig('source', 'type') || '',
     )
   end
 
