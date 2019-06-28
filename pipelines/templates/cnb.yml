@@ -82,13 +82,14 @@ resources: #####################################################################
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
       branch: master
 
-<% if buildpacks[language]['integration'] %>
+  <% if buildpacks[language]['integration'] %>
   - name: dagger
     type: git
     source:
       uri: git@github.com:cloudfoundry/dagger.git
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
       branch: master
+  <% end %>
 
   ## Github Releases ##
   - name: pack
@@ -97,7 +98,6 @@ resources: #####################################################################
       repository: pack
       user: buildpack
       access_token: {{buildpacks-github-token}}
-<% end %>
 
   - name: buildpack-github-release
     type: github-release
@@ -127,20 +127,6 @@ jobs: ##########################################################################
         repository: buildpack-artifacts
         rebase: true
 
-  - name: specs-unit
-    public: true
-    serial: true
-    plan:
-      - do:
-        - aggregate:
-          - get: buildpacks-ci
-          - get: repo
-            resource: buildpack-git
-            trigger: true
-        - do:
-          - task: unit tests
-            file: buildpacks-ci/tasks/run-scripts-unit/task.yml
-
   - name: update-libcfbuildpack
     public: true
     serial: true
@@ -163,7 +149,6 @@ jobs: ##########################################################################
           rebase: true
 
 <% if buildpacks[language]['integration'] %>
-
   - name: update-dagger
     public: true
     plan:
@@ -182,6 +167,21 @@ jobs: ##########################################################################
         params:
           repository: project
           rebase: true
+<% end %>
+
+  - name: specs-unit
+    public: true
+    serial: true
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: repo
+            resource: buildpack-git
+            trigger: true
+        - do:
+          - task: unit tests
+            file: buildpacks-ci/tasks/run-scripts-unit/task.yml
 
   - name: specs-integration
     public: true
@@ -201,7 +201,6 @@ jobs: ##########################################################################
         privileged: true
         params:
           GIT_TOKEN: {{buildpacks-github-token}}
-<% end %>
 
   - name: ship-it
     public: true
@@ -214,11 +213,7 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-git
           passed:
-  <% if buildpacks[language]['integration'] %>
           - specs-integration
-  <% else %>
-          - specs-unit
-  <% end %>
       - task: ship-buildpack
         file: buildpacks-ci/tasks/ship-v3-buildpack/task.yml
         params:
