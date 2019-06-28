@@ -6,7 +6,7 @@ require 'open3'
 def credhub_secret
   bbl_env, _err = Open3.capture3("bbl --state-dir bbl-state/#{ENV.fetch('ENV_NAME')} print-env")
   creds, _err, _status = Open3.capture3("eval \"#{bbl_env}\" && credhub get -n /bosh-#{ENV.fetch('ENV_NAME')}/cf/credhub_admin_client_secret -j | jq -r .value")
-  creds
+  creds.chop
 end
 
 admin_user = "admin"
