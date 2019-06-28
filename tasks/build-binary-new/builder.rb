@@ -159,8 +159,8 @@ module DependencyBuild
       end
     end
   end
-
-  def build_nginx(source_input)
+  
+  def build_nginx(source_input, static = false)
     artifacts = "#{Dir.pwd}/artifacts"
     source_pgp = 'not yet implemented'
     destdir = Dir.mktmpdir
@@ -168,11 +168,8 @@ module DependencyBuild
       Dir.chdir(dir) do
         Runner.run('wget', source_input.url)
         # TODO validate pgp
-        Runner.run('tar', 'xf', "#{source_input.name}-#{source_input.version}.tar.gz")
-
-        Dir.chdir("#{source_input.name}-#{source_input.version}") do
-          Runner.run(
-            './configure',
+        Runner.run('tar', 'xf', "#{source_input.type}-#{source_input.version}.tar.gz")
+        base_nginx_options = [
             '--prefix=/',
             '--error-log-path=stderr',
             '--with-http_ssl_module',
@@ -183,16 +180,28 @@ module DependencyBuild
             '--with-http_random_index_module',
             '--with-http_secure_link_module',
             '--with-http_stub_status_module',
-            '--with-http_sub_module',
             '--without-http_uwsgi_module',
             '--without-http_scgi_module',
             '--with-pcre',
             '--with-pcre-jit',
+        ]
+
+        nginx_static_options = [
+            '--with-cc-opt=-fPIE -pie',
+            '--with-ld-opt=-fPIE -pie -z now',
+        ]
+
+        nginx_options = [
             '--with-cc-opt=-fPIC -pie',
             '--with-ld-opt=-fPIC -pie -z now',
             '--with-compat',
             '--with-stream=dynamic',
-          )
+            '--with-http_sub_module',
+        ]
+
+        Dir.chdir("#{source_input.type}-#{source_input.version}") do
+          options = ['./configure'] + base_nginx_options + (static ? nginx_static_options : nginx_options)
+          Runner.run(*options)
           Runner.run('make')
           system({'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR' => "#{destdir}/nginx"}, 'make install')
           raise 'Could not run make install' unless $?.success?
@@ -401,15 +410,20 @@ class Builder
       )
 
     when 'nginx-static'
-      binary_builder.build(source_input)
+      if stack == 'cflinuxfs3'
+        DependencyBuild.replace_openssl
+      end
+      source_pgp = 'not yet implemented'
+      DependencyBuild.build_nginx(source_input, true)
       out_data.merge!(
-        artifact_output.move_dependency(
-          source_input.name,
-          "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}-linux-x64.tgz",
-          "nginx-#{source_input.version}-linux-x64-#{stack}", # want filename in manifest to read 'nginx-...', not 'nginx-static-...'
-          'tgz'
-        )
+          artifact_output.move_dependency(
+              source_input.name,
+              "artifacts/nginx-#{source_input.version}.tgz",
+              "nginx-#{source_input.version}-linux-x64-#{stack}",
+              'tgz'
+          )
       )
+      out_data[:source_pgp] = source_pgp
 
     when 'CAAPM', 'appdynamics', 'miniconda2', 'miniconda3'
       results = Sha.check_sha(source_input)
