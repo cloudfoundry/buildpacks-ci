@@ -208,6 +208,10 @@ jobs:
           file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
           params:
             ENV_NAME: bal
+        - task: turn-on-bosh-dns
+          file: buildpacks-ci/tasks/turn-on-bosh-dns/task.yml
+          params:
+            BBL_STATE_DIR: bal
         - put: bal-cf-deployment
           params:
             source_file: deployment-source-config/source_file.yml
@@ -229,16 +233,28 @@ jobs:
             - cf-deployment/operations/use-latest-stemcell.yml
             vars:
               system_domain: bal.buildpacks-gcp.ci.cf-app.com
-        - task: get-cf-creds
-          file: buildpacks-ci/tasks/get-cf-creds/task.yml
+        - task: open-asgs-for-credhub
+          file: cf-deployment-concourse-tasks/open-asgs-for-bosh-instance-group/task.yml
           params:
-            ENV_NAME: bal
-        - task: set-up-environment-for-credhub
-          attempts: 3
-          file: buildpacks-ci/tasks/set-up-environment-for-credhub/task.yml
+            BBL_STATE_DIR: bal
+            BOSH_DEPLOYMENT: cf
+            INSTANCE_GROUP_NAME: credhub
+            SECURITY_GROUP_NAME: credhub
+            SYSTEM_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
+          input_mapping:
+            bbl-state: bbl-state
+            runtime-ci: buildpacks-ci
+        - task: open-asgs-for-uaa
+          file: cf-deployment-concourse-tasks/open-asgs-for-bosh-instance-group/task.yml
           params:
-            APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
-            ENV_NAME: bal
+            BBL_STATE_DIR: bal
+            BOSH_DEPLOYMENT: cf
+            INSTANCE_GROUP_NAME: uaa
+            SECURITY_GROUP_NAME: uaa
+            SYSTEM_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
+          input_mapping:
+            bbl-state: bbl-state
+            runtime-ci: buildpacks-ci
         on_failure:
           put: failure-alert
           params:
