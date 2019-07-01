@@ -160,8 +160,7 @@ module DependencyBuild
     end
   end
 
-  def build_python(source_input)
-    # TODO: add ssh replace logic
+  def build_python(source_input, stack)
 
     artifacts = "#{Dir.pwd}/artifacts"
     source_pgp = 'not yet implemented'
@@ -207,9 +206,7 @@ module DependencyBuild
           if major == '3' && minor == '4' && stack == 'cflinuxfs3'
             Runner.run('apt', 'update')
             Runner.run('apt-get', 'install', '-y', 'libssl1.0-dev')
-          elsif major == '2'
-            nil
-          else
+          elsif stack == 'cflinuxfs3' && major != '2'
             DependencyBuild.replace_openssl
           end
 
@@ -620,7 +617,7 @@ class Builder
       )
 
     when 'python'
-      DependencyBuild.build_python source_input
+      DependencyBuild.build_python(source_input, stack)
       # binary_builder.build(source_input)
       out_data.merge!(
           artifact_output.move_dependency(
