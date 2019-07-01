@@ -201,7 +201,7 @@ describe 'Builder' do
 
 
           expect(DependencyBuild).to receive(:build_python)
-                                         .with(source_input)
+                                         .with(source_input, 'cflinuxfs3')
                                          .and_return 'fake-source-sha-123'
 
           expect(artifact_output).to receive(:move_dependency)
