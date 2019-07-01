@@ -159,7 +159,71 @@ module DependencyBuild
       end
     end
   end
-  
+
+  def build_python(source_input)
+    # TODO: add ssh replace logic
+
+    artifacts = "#{Dir.pwd}/artifacts"
+    source_pgp = 'not yet implemented'
+    destdir = Dir.mktmpdir
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        Runner.run('wget', source_input.url)
+        # TODO validate pgp
+        tar_name = source_input.name.capitalize
+        Runner.run('tar', 'xf', "#{tar_name}-#{source_input.version}.tgz")
+
+        # Python specific configuration here
+        Dir.chdir("#{tar_name}-#{source_input.version}") do
+
+          prefix_path = '/app/./vendor'
+          options = [
+              './configure',
+              '--enable-shared',
+              '--with-ensurepip=yes',
+              '--with-dbmliborder=bdb:gdbm',
+              '--with-tcltk-includes="-I/usr/include/tcl8.6"',
+              '--with-tcltk-libs="-L/usr/lib/x86_64-linux-gnu -ltcl8.6 -L/usr/lib/x86_64-linux-gnu -ltk8.6"',
+              "--prefix=#{prefix_path}",
+              '--enable-unicode=ucs4'
+          ]
+
+          Runner.run(*options)
+          packages = %w[libdb-dev libgdbm-dev tk8.6-dev]
+          # install apt packages
+          STDOUT.print "Running 'install dependencies' for #{@name} #{@version}... "
+          Runner.run("sudo apt-get update && sudo apt-get -y install " + packages.join(' '))
+
+          Runner.run('apt-get -y --force-yes -d install --reinstall libtcl8.6 libtk8.6 libxss1')
+
+          FileUtils.mkdir_p prefix_path
+          Dir.glob('/var/cache/apt/archives/lib{tcl8.6,tk8.6,xss1}_*.deb').each do |path|
+            STDOUT.puts("dpkg -x #{path} #{prefix_path}")
+            Runner.run("dpkg -x #{path} #{prefix_path}")
+          end
+
+          # replace openssl if needed
+          major, minor, _ = source_input.version.split('.')
+          if major == '3' && minor == '4' && stack == 'cflinuxfs3'
+            Runner.run('apt', 'update')
+            Runner.run('apt-get', 'install', '-y', 'libssl1.0-dev')
+          elsif major == '2'
+            nil
+          else
+            DependencyBuild.replace_openssl
+          end
+
+          Runner.run("make")
+          Runner.run("make install")
+          raise 'Could not run make install' unless $?.success?
+          Dir.chdir(destdir) do
+            Runner.run('tar', 'zcvf', "#{artifacts}/python-#{source_input.version}.tgz", '.')
+          end
+        end
+      end
+    end
+  end
+
   def build_nginx(source_input, static = false)
     artifacts = "#{Dir.pwd}/artifacts"
     source_pgp = 'not yet implemented'
@@ -556,11 +620,6 @@ class Builder
       )
 
     when 'python'
-      major, minor, _ = source_input.version.split('.')
-      if major == '3' && minor == '4' && stack == 'cflinuxfs3'
-        Runner.run('apt', 'update')
-        Runner.run('apt-get', 'install', '-y', 'libssl1.0-dev')
-      end
       DependencyBuild.build_python source_input
       # binary_builder.build(source_input)
       out_data.merge!(

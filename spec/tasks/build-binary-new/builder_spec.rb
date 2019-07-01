@@ -32,7 +32,6 @@ describe 'Builder' do
   context 'when using the old binary-builder' do
     {
       TableTestInput.new('bundler', '2.7.14')     => TableTestOutput.new('/fake-binary-builder/bundler-2.7.14.tgz', 'bundler-2.7.14-cflinuxfs2', 'tgz'),
-      TableTestInput.new('python', '2.7.14')      => TableTestOutput.new('/fake-binary-builder/python-2.7.14-linux-x64.tgz', 'python-2.7.14-linux-x64-cflinuxfs2', 'tgz'),
       TableTestInput.new('hwc', '2.7.14')         => TableTestOutput.new('/fake-binary-builder/hwc-2.7.14-windows-amd64.zip', 'hwc-2.7.14-windows-amd64', 'zip'),
       TableTestInput.new('dep', '2.7.14')         => TableTestOutput.new('/fake-binary-builder/dep-v2.7.14-linux-x64.tgz', 'dep-v2.7.14-linux-x64-cflinuxfs2', 'tgz'),
       TableTestInput.new('glide', '2.7.14')       => TableTestOutput.new('/fake-binary-builder/glide-v2.7.14-linux-x64.tgz', 'glide-v2.7.14-linux-x64-cflinuxfs2', 'tgz'),
@@ -178,7 +177,41 @@ describe 'Builder' do
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
         end
       end
+    end
 
+    context "Python" do
+      before do
+        expect(build_output).to receive(:add_output)
+                                    .with("1.0.2-cflinuxfs2.json",
+                                          {
+                                              tracker_story_id: 'fake-story-id',
+                                              version:          '1.0.2',
+                                              source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
+                                              sha256:           'fake-sha256',
+                                              url:              'fake-url',
+                                          }
+                                    )
+        expect(build_output).to receive(:commit_outputs)
+                                    .with("Build #{source_input.name} - 1.0.2 - cflinuxfs2 [#fake-story-id]")
+      end
+
+      context 'building python with binary-builder-new' do
+        let(:source_input) { SourceInput.new('python', 'https://fake.com', '1.0.2', nil, 'fake-sha256') }
+        it 'should build correctly' do
+
+          expect(DependencyBuild).to receive(:replace_openssl)
+
+          expect(DependencyBuild).to receive(:build_python)
+                                         .with(source_input)
+                                         .and_return 'fake-source-sha-123'
+
+          expect(artifact_output).to receive(:move_dependency)
+                                         .with('python', 'artifacts/python-1.0.2.tgz', 'python-1.0.2-linux-x64-cflinuxfs2', 'tgz')
+                                         .and_return(sha256: 'fake-sha256', url: 'fake-url')
+
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+        end
+      end
     end
 
     context 'and no git commit sha' do
