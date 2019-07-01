@@ -155,7 +155,7 @@ module DependencyBuild
                    "--libdir=/lib/x86_64-linux-gnu",
                    "--openssldir=/include/x86_64-linux-gnu/openssl")
         Runner.run('make')
-        Runner.run('make', 'install')
+        Runner.run('make', 'install_sw')
       end
     end
   end
@@ -163,7 +163,6 @@ module DependencyBuild
   def build_python(source_input, stack)
 
     artifacts = "#{Dir.pwd}/artifacts"
-    source_pgp = 'not yet implemented'
     destdir = Dir.mktmpdir
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
@@ -175,7 +174,6 @@ module DependencyBuild
         # Python specific configuration here
         Dir.chdir("#{tar_name}-#{source_input.version}") do
 
-          prefix_path = '/app/./vendor'
           options = [
               './configure',
               '--enable-shared',
@@ -183,7 +181,7 @@ module DependencyBuild
               '--with-dbmliborder=bdb:gdbm',
               '--with-tcltk-includes="-I/usr/include/tcl8.6"',
               '--with-tcltk-libs="-L/usr/lib/x86_64-linux-gnu -ltcl8.6 -L/usr/lib/x86_64-linux-gnu -ltk8.6"',
-              "--prefix=#{prefix_path}",
+              "--prefix=#{destdir}",
               '--enable-unicode=ucs4'
           ]
 
@@ -195,10 +193,10 @@ module DependencyBuild
 
           Runner.run('apt-get -y --force-yes -d install --reinstall libtcl8.6 libtk8.6 libxss1')
 
-          FileUtils.mkdir_p prefix_path
+          FileUtils.mkdir_p destdir
           Dir.glob('/var/cache/apt/archives/lib{tcl8.6,tk8.6,xss1}_*.deb').each do |path|
-            STDOUT.puts("dpkg -x #{path} #{prefix_path}")
-            Runner.run("dpkg -x #{path} #{prefix_path}")
+            STDOUT.puts("dpkg -x #{path} #{destdir}")
+            Runner.run("dpkg -x #{path} #{destdir}")
           end
 
           # replace openssl if needed
