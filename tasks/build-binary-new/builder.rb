@@ -210,13 +210,13 @@ module DependencyBuild
 
           Runner.run("make")
           Runner.run("make install")
-          # create python symlink 
+          # create python symlink
           unless File.exist?("#{destdir}/bin/python")
             File.symlink('./python3', "#{destdir}/bin/python")
           end
           raise 'Could not run make install' unless $?.success?
           Dir.chdir(destdir) do
-            Runner.run('tar', 'zcvf', "#{artifacts}/python-#{source_input.version}.tgz", '.')
+            Runner.run('tar', 'zcvf', "#{artifacts}/python-#{source_input.version}.tgz", '.', '--hard-dereference')
           end
         end
       end
