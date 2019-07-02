@@ -1,0 +1,178 @@
+ <% cnb_images = %w(run build) %>
+
+resource_types:
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+
+resources: ############################################################################################################
+  - name: yarn-cnb-version
+    type: semver
+    source:
+      initial_version: 0.0.100
+      bucket: cnb-versions
+      key: yarn-cnb
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+
+  ## Git ##
+  - name: buildpack-git
+    type: git
+    webhook_token: ob0aigh3
+    source:
+      uri: git@github.com:cloudfoundry/yarn-cnb.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+      branch: master
+
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: master
+
+  - name: cnb-tools-git
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cnb-tools.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+      branch: master
+
+  - name: libcfbuildpack
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/libcfbuildpack.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+      branch: master
+
+  - name: dagger
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/dagger.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+      branch: master
+
+  ## Github Releases ##
+  - name: pack
+    type: github-release
+    source:
+      repository: pack
+      user: buildpack
+      access_token: {{buildpacks-github-token}}
+
+  - name: buildpack-github-release
+    type: github-release
+    source:
+      repository: yarn-cnb
+      user: cloudfoundry
+      access_token: {{buildpacks-github-token}}
+
+jobs: ################################################################################################################
+
+  - name: update-cnb-tools
+    public: true
+    serial: true
+    plan:
+    - aggregate:
+      - get: buildpacks-ci
+      - get: cnb-tools-git
+        trigger: true
+      - get: buildpack
+        resource: buildpack-git
+    - task: update-cnb-tools
+      file: buildpacks-ci/tasks/update-cnb-tools/task.yml
+    - put: buildpack-git
+      params:
+        repository: buildpack-artifacts
+        rebase: true
+
+  - name: update-libcfbuildpack
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: libcfbuildpack
+          trigger: true
+        - get: project
+          resource: buildpack-git
+      - task: update-libcfbuildpack
+        file: buildpacks-ci/tasks/update-go-module/task.yml
+        attempts: 2
+        params:
+          MODULE_PATH: github.com/cloudfoundry/libcfbuildpack@master
+          VENDOR: true
+      - put: buildpack-git
+        params:
+          repository: project
+          rebase: true
+
+  - name: update-dagger
+    public: true
+    plan:
+      - aggregate:
+        - get: buildpacks-ci
+        - get: dagger
+          trigger: true
+        - get: project
+          resource: buildpack-git
+      - task: update-dagger
+        file: buildpacks-ci/tasks/update-go-module/task.yml
+        params:
+          MODULE_PATH: github.com/cloudfoundry/dagger
+          VENDOR: true
+      - put: buildpack-git
+        params:
+          repository: project
+          rebase: true
+
+
+  - name: specs-unit
+    public: true
+    serial: true
+    serial_group: yarn
+    plan:
+      - do:
+        - aggregate:
+          - get: buildpacks-ci
+          - get: repo
+            resource: buildpack-git
+            trigger: true
+        - do:
+          - task: unit tests
+            file: buildpacks-ci/tasks/run-scripts-unit/task.yml
+
+  - name: run-integration-and-release
+    public: true
+    serial: true
+    serial_group: yarn
+    plan:
+      - aggregate:
+          - get: yarn-cnb-version
+            params:
+              bump: patch
+          - get: buildpacks-ci
+          - get: buildpack
+            resource: buildpack-git
+            trigger: true
+            passed:
+              - specs-unit
+      - task: package-buildpack
+        file: buildpacks-ci/tasks/package-v3-buildpack/task.yml
+        outputs:
+          - name: packaged-buildpack
+        params:
+          LANGUAGE: yarn
+      - task: integration-tests
+        file: buildpacks-ci/tasks/run-packaged-v3-bp-integration/task.yml
+        privileged: true
+        params:
+          GIT_TOKEN: {{buildpacks-github-token}}
+#      - put: buildpack-github-release
+#        params:
+#          name: release-artifacts/name
+#          tag: release-artifacts/tag
+#          body: release-artifacts/body
+#          globs:
+#            - release-artifacts/yarn-cnb-*.tgz
+      - put: yarn-cnb-version
