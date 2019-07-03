@@ -6,22 +6,22 @@ require 'date'
 require_relative './dependencies'
 
 ALL_STACKS = {
-    'cflinuxfs2' => 'org.cloudfoundry.stacks.cflinuxfs2',
-    'cflinuxfs3' => 'org.cloudfoundry.stacks.cflinuxfs3',
-    'bionic' => 'io.buildpacks.stacks.bionic'
+  'cflinuxfs2' => 'org.cloudfoundry.stacks.cflinuxfs2',
+  'cflinuxfs3' => 'org.cloudfoundry.stacks.cflinuxfs3',
+  'bionic' => 'io.buildpacks.stacks.bionic'
 }
 
 V3_DEP_IDS = {
-    'php' => 'php-binary'
+  'php' => 'php-binary'
 }
 
 V3_DEP_NAMES = {
-    'node' => 'Node Engine',
-    'yarn' => 'Yarn',
-    'python' => 'Python',
-    'php' => 'PHP',
-    'httpd' => 'Apache HTTP Server',
-    'go' => 'Go'
+  'node' => 'Node Engine',
+  'yarn' => 'Yarn',
+  'python' => 'Python',
+  'php' => 'PHP',
+  'httpd' => 'Apache HTTP Server',
+  'go' => 'Go'
 }
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
