@@ -22,23 +22,23 @@ end
 
 case source_input.name
 when 'go'
-    path = "go#{source_input.version}.linux-amd64.tar.gz"
-    url = "https://dl.google.com/go/#{path}"
-    `wget #{url}`
-    build_output.add_output("#{source_input.version}-bionic.json",
-      {
-        sha256: get_sha_from_file(path),
-        url: url
-      }
-    )
+  path = "go#{source_input.version}.linux-amd64.tar.gz"
+  url = "https://dl.google.com/go/#{path}"
+  `wget #{url}`
+  build_output.add_output("#{source_input.version}-bionic.json",
+    {
+      sha256: get_sha_from_file(path),
+      url: url
+    }
+  )
 
-  when 'node'
-    build_output.add_output("#{source_input.version}-bionic.json",
-      {
-        sha256: get_sha_from_text_file("https://nodejs.org/dist/v#{source_input.version}/SHASUMS256.txt"),
-        url: "https://nodejs.org/dist/v#{source_input.version}/node-v#{source_input.version}-linux-x64.tar.gz"
-      }
-    )
+when 'node'
+  build_output.add_output("#{source_input.version}-bionic.json",
+    {
+      sha256: get_sha_from_text_file("https://nodejs.org/dist/v#{source_input.version}/SHASUMS256.txt"),
+      url: "https://nodejs.org/dist/v#{source_input.version}/node-v#{source_input.version}-linux-x64.tar.gz"
+    }
+  )
 end
 
 
