@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Crystal Docs 0.27.2">
+
+
+<link href="../css/style.css" rel="stylesheet" type="text/css">
+
+<script type="text/javascript" src="../js/doc.js"></script>
+<script type="text/javascript">
+  CrystalDoc.base_path = "../";
+</script>
+
+  <meta id="repository-name" content="github.com/cloudfoundry/buildpacks-ci">
+  <title>Depwatcher::Openresty - github.com/cloudfoundry/buildpacks-ci</title>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="repository-links">
+      <a href="../index.html">README</a>
+    </div>
+  </div>
+
+  <div class="search-results" class="hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class="parent open current" data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher" data-name="depwatcher">
+      <a href="../Depwatcher.html">Depwatcher</a>
+      
+        <ul>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/AppDynamicsAgent" data-name="depwatcher::appdynamicsagent">
+      <a href="../Depwatcher/AppDynamicsAgent.html">AppDynamicsAgent</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/AppDynamicsAgent/Release" data-name="depwatcher::appdynamicsagent::release">
+      <a href="../Depwatcher/AppDynamicsAgent/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Base" data-name="depwatcher::base">
+      <a href="../Depwatcher/Base.html">Base</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Base/Internal" data-name="depwatcher::base::internal">
+      <a href="../Depwatcher/Base/Internal.html">Internal</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/CaApmAgent" data-name="depwatcher::caapmagent">
+      <a href="../Depwatcher/CaApmAgent.html">CaApmAgent</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/CaApmAgent/Release" data-name="depwatcher::caapmagent::release">
+      <a href="../Depwatcher/CaApmAgent/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/CRAN" data-name="depwatcher::cran">
+      <a href="../Depwatcher/CRAN.html">CRAN</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/CRAN/Release" data-name="depwatcher::cran::release">
+      <a href="../Depwatcher/CRAN/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/DotnetAspNetCore" data-name="depwatcher::dotnetaspnetcore">
+      <a href="../Depwatcher/DotnetAspNetCore.html">DotnetAspNetCore</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/DotnetAspNetCore/External" data-name="depwatcher::dotnetaspnetcore::external">
+      <a href="../Depwatcher/DotnetAspNetCore/External.html">External</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/DotnetRuntime" data-name="depwatcher::dotnetruntime">
+      <a href="../Depwatcher/DotnetRuntime.html">DotnetRuntime</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/DotnetRuntime/External" data-name="depwatcher::dotnetruntime::external">
+      <a href="../Depwatcher/DotnetRuntime/External.html">External</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/DotnetSdk" data-name="depwatcher::dotnetsdk">
+      <a href="../Depwatcher/DotnetSdk.html">DotnetSdk</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/DotnetSdk/DotnetRelease" data-name="depwatcher::dotnetsdk::dotnetrelease">
+      <a href="../Depwatcher/DotnetSdk/DotnetRelease.html">DotnetRelease</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/DotnetSdk/External" data-name="depwatcher::dotnetsdk::external">
+      <a href="../Depwatcher/DotnetSdk/External.html">External</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Entries" data-name="depwatcher::entries">
+      <a href="../Depwatcher/Entries.html">Entries</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Entry" data-name="depwatcher::entry">
+      <a href="../Depwatcher/Entry.html">Entry</a>
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/GithubReleases" data-name="depwatcher::githubreleases">
+      <a href="../Depwatcher/GithubReleases.html">GithubReleases</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/GithubReleases/GithubAsset" data-name="depwatcher::githubreleases::githubasset">
+      <a href="../Depwatcher/GithubReleases/GithubAsset.html">GithubAsset</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/GithubReleases/GithubRelease" data-name="depwatcher::githubreleases::githubrelease">
+      <a href="../Depwatcher/GithubReleases/GithubRelease.html">GithubRelease</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/GithubReleases/Release" data-name="depwatcher::githubreleases::release">
+      <a href="../Depwatcher/GithubReleases/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/GithubTags" data-name="depwatcher::githubtags">
+      <a href="../Depwatcher/GithubTags.html">GithubTags</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/GithubTags/Commit" data-name="depwatcher::githubtags::commit">
+      <a href="../Depwatcher/GithubTags/Commit.html">Commit</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/GithubTags/External" data-name="depwatcher::githubtags::external">
+      <a href="../Depwatcher/GithubTags/External.html">External</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/GithubTags/Tag" data-name="depwatcher::githubtags::tag">
+      <a href="../Depwatcher/GithubTags/Tag.html">Tag</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Go" data-name="depwatcher::go">
+      <a href="../Depwatcher/Go.html">Go</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Go/Release" data-name="depwatcher::go::release">
+      <a href="../Depwatcher/Go/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/HTTPClient" data-name="depwatcher::httpclient">
+      <a href="../Depwatcher/HTTPClient.html">HTTPClient</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/HTTPClientImpl" data-name="depwatcher::httpclientimpl">
+      <a href="../Depwatcher/HTTPClientImpl.html">HTTPClientImpl</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/HTTPClientInsecure" data-name="depwatcher::httpclientinsecure">
+      <a href="../Depwatcher/HTTPClientInsecure.html">HTTPClientInsecure</a>
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Httpd" data-name="depwatcher::httpd">
+      <a href="../Depwatcher/Httpd.html">Httpd</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Httpd/Release" data-name="depwatcher::httpd::release">
+      <a href="../Depwatcher/Httpd/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/JRuby" data-name="depwatcher::jruby">
+      <a href="../Depwatcher/JRuby.html">JRuby</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/JRuby/Release" data-name="depwatcher::jruby::release">
+      <a href="../Depwatcher/JRuby/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Miniconda" data-name="depwatcher::miniconda">
+      <a href="../Depwatcher/Miniconda.html">Miniconda</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Miniconda/Release" data-name="depwatcher::miniconda::release">
+      <a href="../Depwatcher/Miniconda/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Nginx" data-name="depwatcher::nginx">
+      <a href="../Depwatcher/Nginx.html">Nginx</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Nginx/Release" data-name="depwatcher::nginx::release">
+      <a href="../Depwatcher/Nginx/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Node" data-name="depwatcher::node">
+      <a href="../Depwatcher/Node.html">Node</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Node/Dist" data-name="depwatcher::node::dist">
+      <a href="../Depwatcher/Node/Dist.html">Dist</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Node/External" data-name="depwatcher::node::external">
+      <a href="../Depwatcher/Node/External.html">External</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Node/Release" data-name="depwatcher::node::release">
+      <a href="../Depwatcher/Node/Release.html">Release</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Node/Version" data-name="depwatcher::node::version">
+      <a href="../Depwatcher/Node/Version.html">Version</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Npm" data-name="depwatcher::npm">
+      <a href="../Depwatcher/Npm.html">Npm</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Npm/Dist" data-name="depwatcher::npm::dist">
+      <a href="../Depwatcher/Npm/Dist.html">Dist</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Npm/External" data-name="depwatcher::npm::external">
+      <a href="../Depwatcher/Npm/External.html">External</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Npm/Release" data-name="depwatcher::npm::release">
+      <a href="../Depwatcher/Npm/Release.html">Release</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Npm/Version" data-name="depwatcher::npm::version">
+      <a href="../Depwatcher/Npm/Version.html">Version</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent open current" data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Openresty" data-name="depwatcher::openresty">
+      <a href="../Depwatcher/Openresty.html">Openresty</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Openresty/Release" data-name="depwatcher::openresty::release">
+      <a href="../Depwatcher/Openresty/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Php" data-name="depwatcher::php">
+      <a href="../Depwatcher/Php.html">Php</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Php/Release" data-name="depwatcher::php::release">
+      <a href="../Depwatcher/Php/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Pypi" data-name="depwatcher::pypi">
+      <a href="../Depwatcher/Pypi.html">Pypi</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Pypi/External" data-name="depwatcher::pypi::external">
+      <a href="../Depwatcher/Pypi/External.html">External</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Pypi/ExternalRelease" data-name="depwatcher::pypi::externalrelease">
+      <a href="../Depwatcher/Pypi/ExternalRelease.html">ExternalRelease</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Pypi/Release" data-name="depwatcher::pypi::release">
+      <a href="../Depwatcher/Pypi/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Python" data-name="depwatcher::python">
+      <a href="../Depwatcher/Python.html">Python</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Python/Release" data-name="depwatcher::python::release">
+      <a href="../Depwatcher/Python/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/R" data-name="depwatcher::r">
+      <a href="../Depwatcher/R.html">R</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/R/Release" data-name="depwatcher::r::release">
+      <a href="../Depwatcher/R/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Ruby" data-name="depwatcher::ruby">
+      <a href="../Depwatcher/Ruby.html">Ruby</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Ruby/Release" data-name="depwatcher::ruby::release">
+      <a href="../Depwatcher/Ruby/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Rubygems" data-name="depwatcher::rubygems">
+      <a href="../Depwatcher/Rubygems.html">Rubygems</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Rubygems/External" data-name="depwatcher::rubygems::external">
+      <a href="../Depwatcher/Rubygems/External.html">External</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Rubygems/MultiExternal" data-name="depwatcher::rubygems::multiexternal">
+      <a href="../Depwatcher/Rubygems/MultiExternal.html">MultiExternal</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Rubygems/Release" data-name="depwatcher::rubygems::release">
+      <a href="../Depwatcher/Rubygems/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/RubygemsCli" data-name="depwatcher::rubygemscli">
+      <a href="../Depwatcher/RubygemsCli.html">RubygemsCli</a>
+      
+        <ul>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/RubygemsCli/Release" data-name="depwatcher::rubygemscli::release">
+      <a href="../Depwatcher/RubygemsCli/Release.html">Release</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/Depwatcher/Version" data-name="depwatcher::version">
+      <a href="../Depwatcher/Version.html">Version</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/SemanticVersion" data-name="semanticversion">
+      <a href="../SemanticVersion.html">SemanticVersion</a>
+      
+    </li>
+  
+  <li class=" " data-id="github.com/cloudfoundry/buildpacks-ci/SemanticVersionFilter" data-name="semanticversionfilter">
+      <a href="../SemanticVersionFilter.html">SemanticVersionFilter</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">class</span> Depwatcher::Openresty
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../Depwatcher/Openresty.html">Depwatcher::Openresty</a></li><li class="superclass"><a href="../Depwatcher/Base.html">Depwatcher::Base</a></li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>Defined in:</h2>
+  
+    
+      <a href="https://github.com/cloudfoundry/buildpacks-ci/blob/837650c95563308d6b6c48016ee4924e2a555ee8/src/depwatcher/openresty.cr#L6" target="_blank">
+        depwatcher/openresty.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+
+
+
+
+
+
+  <h2>Instance Method Summary</h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#check%3AArray%28Internal%29-instance-method" class="signature"><strong>#check</strong> : Array(Internal)</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#in%28ref%3AString%29%3ARelease-instance-method" class="signature"><strong>#in</strong>(ref : String) : Release</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+  <h3>Instance methods inherited from class <code><a href="../Depwatcher/Base.html">Depwatcher::Base</a></code></h3>
+  
+  
+    <a href="../Depwatcher/Base.html#client%3AHTTPClient-instance-method" class="tooltip">
+      <span>client : HTTPClient</span>
+    client</a>, 
+    
+  
+    <a href="../Depwatcher/Base.html#client%3D%28client%3AHTTPClient%29-instance-method" class="tooltip">
+      <span>client=(client : HTTPClient)</span>
+    client=</a>, 
+    
+  
+    <a href="../Depwatcher/Base.html#get_sha256%28url%3AString%29-instance-method" class="tooltip">
+      <span>get_sha256(url : String)</span>
+    get_sha256</a>
+    
+  
+
+
+    
+
+  <h3>Constructor methods inherited from class <code><a href="../Depwatcher/Base.html">Depwatcher::Base</a></code></h3>
+  
+  
+    <a href="../Depwatcher/Base.html#new%28client%3DHTTPClientImpl.new%29-class-method" class="tooltip">
+      <span>new(client = <span class="t">HTTPClientImpl</span>.<span class="k">new</span>)</span>
+    new</a>
+    
+  
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+
+
+
+
+  <h2>Instance Method Detail</h2>
+  
+    <div class="entry-detail" id="check:Array(Internal)-instance-method">
+      <div class="signature">
+        
+        def <strong>check</strong> : Array(<a href="../Depwatcher/Base/Internal.html">Internal</a>)
+
+        <a class="method-permalink" href="#check%3AArray%28Internal%29-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/cloudfoundry/buildpacks-ci/blob/837650c95563308d6b6c48016ee4924e2a555ee8/src/depwatcher/openresty.cr#L18" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="in(ref:String):Release-instance-method">
+      <div class="signature">
+        
+        def <strong>in</strong>(ref : String) : <a href="../Depwatcher/Openresty/Release.html">Release</a>
+
+        <a class="method-permalink" href="#in%28ref%3AString%29%3ARelease-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/cloudfoundry/buildpacks-ci/blob/837650c95563308d6b6c48016ee4924e2a555ee8/src/depwatcher/openresty.cr#L26" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>

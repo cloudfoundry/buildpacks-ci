@@ -59,7 +59,7 @@ module Depwatcher
           if !m.nil?
             External.new(m[0], t.commit.sha)
           end
-        end.compact
+        end.compact.uniq { |m| m.name}
     end
   end
 end
