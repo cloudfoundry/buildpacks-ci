@@ -20,12 +20,19 @@ Spec2.describe Depwatcher::DotnetSdk do
       nil,
       HTTP::Client::Response.new( 200, "hello")
     )
+    client.stub_get(
+      "https://github.com/dotnet/cli/archive/99151dfa08364242d93c861568abaf044e134d8c.tar.gz",
+      nil,
+      HTTP::Client::Response.new( 200, "hello")
+    )
   end
 
   describe "#check" do
     it "returns dotnet sdk release versions sorted" do
-      expect(subject.check(".*\\+dependencies").map(&.ref)).to eq [
-        "2.1.103", "2.1.104", "2.1.105", "2.1.200", "2.1.301",
+      regex = "^(v1\\.\\d+\\.\\d+|v2\\.\\d+\\.\\d+\\+dependencies|v3\\.\\d+.\\d+-preview\\d+-\\d+)$"
+      checked_deps = subject.check(regex)
+      expect(checked_deps.map(&.ref)).to eq [
+      "1.1.0", "1.1.3", "1.1.4", "1.1.5", "1.1.6", "1.1.7", "1.1.8", "1.1.9", "1.1.10", "1.1.11", "1.1.12", "1.1.13", "1.1.14", "2.1.301", "2.1.402", "2.1.403", "2.1.500", "2.1.503", "2.1.504", "2.1.505", "2.1.506", "2.1.507", "2.1.602", "2.1.603", "2.2.100", "2.2.102", "2.2.104", "2.2.105", "2.2.106", "2.2.107", "2.2.202", "2.2.203", "2.2.204", "3.0.100"
       ]
     end
   end
@@ -43,4 +50,19 @@ Spec2.describe Depwatcher::DotnetSdk do
       end
     end
   end
+
+  describe "#in for 3.0.X preview" do
+      it "returns the latest dotnet sdk release" do
+        regex = "^(v1\\.\\d+\\.\\d+|v2\\.\\d+\\.\\d+\\+dependencies|v3\\.\\d+.\\d+-preview\\d+-\\d+)$"
+        obj = subject.in("3.0.100", regex)
+        if obj
+          expect(obj.ref).to eq "3.0.100"
+          expect(obj.url).to eq "https://github.com/dotnet/cli"
+          expect(obj.git_commit_sha).to eq "99151dfa08364242d93c861568abaf044e134d8c"
+          expect(obj.sha256).to eq "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+        else
+          expect(obj.nil?).to be_false
+        end
+      end
+    end
 end
