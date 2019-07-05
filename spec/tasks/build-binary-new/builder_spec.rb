@@ -151,7 +151,7 @@ describe 'Builder' do
 
         it 'should build correctly' do
           expect(DependencyBuild).to receive(:build_nginx)
-            .with(source_input)
+            .with(source_input,'cflinuxfs2', false)
             .and_return 'fake-source-sha-123'
 
           expect(artifact_output).to receive(:move_dependency)
@@ -167,7 +167,7 @@ describe 'Builder' do
 
         it 'should build correctly' do
           expect(DependencyBuild).to receive(:build_nginx)
-                                         .with(source_input, true)
+                                         .with(source_input, 'cflinuxfs2', true)
                                          .and_return 'fake-source-sha-123'
 
           expect(artifact_output).to receive(:move_dependency)
