@@ -36,11 +36,14 @@ class DotnetFrameworkExtractor
     create_dependency(runtime_tar, version, @source_input, build_output, 'dotnet-runtime')
   end
 
-  def extract_aspnetcore(remove_frameworks)
+  def extract_aspnetcore(remove_frameworks, both_apps = false)
     build_output = BuildOutput.new('dotnet-aspnetcore')
     aspcorenet_tar = File.join(@base_dir, "dotnet-aspnetcore.tar.xz")
 
-    version = extract_framework_dep(@sdk_dir, aspcorenet_tar, %w(Microsoft.AspNetCore.App Microsoft.AspNetCore.All), remove_frameworks)
+    package_names = both_apps ? %w(Microsoft.AspNetCore.App Microsoft.AspNetCore.App) : %w(Microsoft.AspNetCore.App Microsoft.AspNetCore.All)
+
+    version = extract_framework_dep(@sdk_dir, aspcorenet_tar, package_names, remove_frameworks)
+
 
     create_dependency(aspcorenet_tar, version, @source_input, build_output, 'dotnet-aspnetcore')
   end
@@ -65,9 +68,7 @@ class DotnetFrameworkExtractor
                   .map {|path| Pathname.new(path).basename.to_s}
                   .sort_by {|version| Gem::Version.new(version)}
                   .last
-
-      raise "Version #{version} of #{package_names.join('/')} contains metadata, exiting" if Gem::Version.new(version).prerelease?
-
+      
       paths_with_version = paths.map {|path| File.join(path, version)}
       system("tar Jcf #{tar} #{paths_with_version.join(' ')} *.txt") or raise "Tarring the #{package_names.join(', ')} assemblies failed"
 
