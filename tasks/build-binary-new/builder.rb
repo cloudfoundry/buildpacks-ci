@@ -223,7 +223,7 @@ module DependencyBuild
     end
   end
 
-  def build_nginx(source_input, static = false)
+  def build_nginx(source_input, stack, static = false)
     artifacts = "#{Dir.pwd}/artifacts"
     source_pgp = 'not yet implemented'
     destdir = Dir.mktmpdir
@@ -261,6 +261,8 @@ module DependencyBuild
             '--with-stream=dynamic',
             '--with-http_sub_module',
         ]
+
+        DependencyBuild.replace_openssl if stack == 'cflinuxfs3'
 
         Dir.chdir("#{source_input.type}-#{source_input.version}") do
           options = ['./configure'] + base_nginx_options + (static ? nginx_static_options : nginx_options)
@@ -481,11 +483,8 @@ class Builder
       )
 
     when 'nginx-static'
-      if stack == 'cflinuxfs3'
-        DependencyBuild.replace_openssl
-      end
       source_pgp = 'not yet implemented'
-      DependencyBuild.build_nginx(source_input, true)
+      DependencyBuild.build_nginx(source_input, stack, true)
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
@@ -697,11 +696,8 @@ class Builder
       end
 
     when 'nginx'
-      if stack == 'cflinuxfs3'
-        DependencyBuild.replace_openssl
-      end
       source_pgp = 'not yet implemented'
-      DependencyBuild.build_nginx source_input
+      DependencyBuild.build_nginx(source_input, stack, false)
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
