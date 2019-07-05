@@ -6,8 +6,7 @@ set -o pipefail
 #export PACK_VERSION
 
 if [[ -d "release-artifacts" ]]; then
-    BP_PACKAGED_PATH="$(realpath "$(find release-artifacts -name "*.tgz")")"
-    export BP_PACKAGED_PATH
+    export BP_PACKAGED_PATH="$(realpath "$(find release-artifacts -name "*.tgz")")"
     echo "${BP_PACKAGED_PATH}"
 fi
 
