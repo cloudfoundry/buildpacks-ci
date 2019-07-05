@@ -5,10 +5,12 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
-- name: buildpack
-- name: buildpacks-ci
+  - name: version
+  - name: buildpacks-ci
+  - name: packager
+  - name: buildpack
 outputs:
-- name: release-artifacts
+  - name: release-artifacts
 run:
   path: bash
   args:

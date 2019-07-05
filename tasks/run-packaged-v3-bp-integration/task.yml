@@ -6,10 +6,11 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
+  - name: pack
   - name: buildpack
   - name: release-artifacts
 run:
-  path: buildpacks-ci/tasks/run-bp-v3-integration/run.sh
+  path: buildpacks-ci/tasks/run-packaged-v3-bp-integration/run.sh
 params:
   CNB_BUILD_IMAGE:
   CNB_RUN_IMAGE:
