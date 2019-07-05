@@ -11,7 +11,10 @@ if [[ -d "release-artifacts" ]]; then
     echo ${BP_PACKAGED_PATH}
 fi
 
-pushd pack
+PACK_PATH="$(realpath "$(find pack -name "*.tar.gz")")"
+mkdir -p pack_source
+tar xvf $PACK_PATH -C pack_source
+pushd pack_source
     echo "Building pack..."
     go build -o ../buildpack/.bin/pack ./cmd/pack/main.go
 popd
