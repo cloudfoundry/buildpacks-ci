@@ -10,13 +10,44 @@ deps_extracted_from_dotnet_sdk = config['deps_extracted_from_dotnet_sdk']
 skip_build = config['skip_build']
 skip_deprecation_check = config['skip_deprecation_check']
 
+def common_prefix(stringA, stringB)
+  max_len = 0
+  (0..[stringA.size, stringB.size].min).each do |idx|
+    if stringA[idx] == stringB[idx]
+      max_len = idx+1
+    else
+      break
+    end
+  end
+  stringA.slice(0,max_len)
+end
+
+def check_for_lines_overlap(lines_array)
+  partition_hash = {}
+  lines_array.each do|i|
+    x_count = i.count('X')
+    if partition_hash[x_count]
+      partition_hash[x_count] += [i]
+    else
+      partition_hash[x_count] = [i]
+    end
+  end
+  pairs = partition_hash.keys.combination(2).to_a.each do |p1, p2|
+    partition_hash[p1].product(partition_hash[p2]).each do |strA, strB|
+      return true if common_prefix(strA,strB) != ''
+    end
+  end
+  false
+end
+
+
 def validate_dependencies(deps, skip_deprecation_check)
   deps.each do |dep_name, dep|
     if !(dep['buildpacks'].values.all? {|bp| bp['lines'].nil? } || dep['buildpacks'].values.all? {|bp| bp['lines'] })
       raise "For #{dep_name}, mixing buildpacks that specify version lines and ones that do not is NOT currently supported"
     end
 
-    if dep['buildpacks'].values.flat_map { |bp| get_version_lines(bp['lines']).map {|l| l.count('X') } }.uniq.length > 1
+  if check_for_lines_overlap(dep['buildpacks'].values.flat_map { |bp| get_version_lines(bp['lines'])})
       raise "For #{dep_name}, overlapping version lines are not supported (e.g. 1.X.X and 1.2.X)"
     end
 
