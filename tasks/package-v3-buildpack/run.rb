@@ -1,36 +1,44 @@
 #!/usr/bin/env ruby
-require 'toml'
-require 'fileutils'
+require_relative '../../lib/commit'
 
+# For each individual release of a CNB, we filter out all of the commits
+# which aren't related to a Tracker story.
 def get_changes
-  changes = File.read('buildpack/CHANGELOG')
-  recent_changes = changes.split(/^v[0-9\.]+.*?=+$/m)[1]
-
-  if recent_changes != nil
-    recent_changes = recent_changes.strip
-  else
-    recent_changes = ""
+  latest_version = `git tag`.split("\n").map {|i| Gem::Version.new(i.strip.tr('v', ''))}.sort.last
+  changelog = ""
+  commits = Commit.recent(latest_version) rescue nil
+  if commits
+    commits.each do |commit|
+      commit_string = commit.to_s
+      if commit_string.include? "www.pivotaltracker.com"
+        changelog.concat(commit_string).concat("\n\n")
+      end
+    end
   end
-  "TODO"
+
+  changelog.concat("No major changes.\n\n") if changelog == ""
+
+  changelog
 end
 
 language = ENV['LANGUAGE']
+version=File.read(File.join('version', 'version'))
 release_body_file = File.absolute_path(File.join('release-artifacts', 'body'))
+release_packaged_bp = File.absolute_path(File.join('release-artifacts', "#{language}-cnb-#{version}"))
+packager_path = File.absolute_path(File.join('buildpack', '.bin', 'packager'))
 
-next_version = Gem::Version.new(TOML.load_file('buildpack/buildpack.toml')['buildpack']['version'])
-last_version = `git tag`.split("\n").map {|i| Gem::Version.new(i.strip().tr('v', ''))}.sort.last
-
-if last_version && next_version <= last_version
-  raise "#{next_version.to_s} does not come after the current release #{last_version.to_s}"
+# Need to build packager, to make sure it's compiled for the right OS
+Dir.chdir('packager/packager') do
+  `go build -o #{packager_path}`
 end
 
-File.write('release-artifacts/name', "v#{next_version.to_s}")
-File.write('release-artifacts/tag', "v#{next_version.to_s}")
-
-File.write(release_body_file, "#{get_changes}\n")
-
-target = File.join(Dir.pwd, "release-artifacts", "#{language}-cnb-#{next_version.to_s}")
 Dir.chdir('buildpack') do
-  `PACKAGE_DIR=#{target} ./scripts/package.sh -a -v #{next_version.to_s}` or raise 'failed to package cnb'
+  # Need to set the PACKAGE_DIR
+  ENV["PACKAGE_DIR"]=release_packaged_bp
+  `./scripts/package.sh -a -v #{version}`
+  File.write(release_body_file, get_changes)
   File.write(release_body_file, `#{packager_path} -summary`, mode: 'a')
 end
+
+File.write('release-artifacts/name', "v#{version}")
+File.write('release-artifacts/tag', "v#{version}")
