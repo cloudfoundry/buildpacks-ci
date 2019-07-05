@@ -6,13 +6,14 @@ set -o pipefail
 #export PACK_VERSION
 
 if [[ -d "release-artifacts" ]]; then
-    export BP_PACKAGED_PATH="$(realpath "$(find release-artifacts -name "*.tgz")")"
+    BP_PACKAGED_PATH="$(realpath "$(find release-artifacts -name "*.tgz")")"
+    export BP_PACKAGED_PATH
     echo "${BP_PACKAGED_PATH}"
 fi
 
 PACK_PATH="$(realpath "$(find pack -name "*linux.tgz")")"
 mkdir -p buildpack/.bin
-tar xvf ${PACK_PATH} -C buildpack/.bin
+tar xvf "${PACK_PATH}" -C buildpack/.bin
 
 cd buildpack
 
