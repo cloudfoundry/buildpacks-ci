@@ -12,5 +12,3 @@ outputs:
   - name: buildpack-artifacts
 run:
   path: buildpacks-ci/tasks/update-cnb-tools/run.sh
-params:
-  LANGUAGE:

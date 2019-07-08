@@ -1,0 +1,34 @@
+---
+conda:
+  integration: true
+dep:
+  integration: true
+dotnet-core-conf:
+  integration: true
+go: {}
+go-mod:
+  integration: true
+httpd:
+  integration: true
+node-engine:
+  integration: true
+nodejs-compat:
+  integration: true
+npm:
+  integration: true
+php: {}
+php-composer:
+  integration: true
+php-web:
+  integration: true
+pip:
+  integration: true
+pipenv:
+  integration: true
+python: {}
+python-compat:
+  integration: true
+ruby: {}
+yarn:
+  integration: true
+  auto_release: true

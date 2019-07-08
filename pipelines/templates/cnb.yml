@@ -1,49 +1,5 @@
- <% cnb_images = %w(run build) %>
-<% buildpacks = {
-  'npm' => {
-    'integration' => true
-  },
-  'yarn' => {
-    'integration' => true
-  },
-  'httpd' => {
-    'integration' => true
-  },
-  'node-engine' => {
-    'integration' => true
-  },
-  'nodejs-compat' => {
-    'integration' => true
-  },
-  'go' => {},
-  'go-mod' => {
-    'integration' => true
-  },
-  'ruby' => {},
-  'php' => {},
-  'php-web' => {
-    'integration' => true
-  },
-  'php-composer' => {
-    'integration' => true
-  },
-  'python' => {},
-  'pip' => {
-    'integration' => true
-  },
-  'pipenv' => {
-    'integration' => true
-  },
-  'python-compat' => {
-    'integration' => true
-  },
-  'conda' => {
-    'integration' => true
-  },
-  'dotnet-core-conf' => {
-    'integration' => true
-  }
-}
+<% require 'yaml'
+  buildpacks = YAML.load_file(File.join(__dir__, '..', 'config', 'cnb-builds.yml'))
 %>
 ---
 resource_types:
@@ -106,6 +62,17 @@ resources: #####################################################################
       user: cloudfoundry
       access_token: {{buildpacks-github-token}}
 
+  <% if buildpacks[language]['auto_release'] %>
+  - name: <%= language %>-cnb-version
+    type: semver
+    source:
+      initial_version: 0.0.20
+      driver: gcs
+      bucket: artifacts.cf-buildpacks.appspot.com
+      key: cnb-versions/<%= language %>-version
+      json_key: {{gcp-service-account-key}}
+  <% end %>
+
 jobs: ################################################################################################################
 
   - name: update-cnb-tools
@@ -120,8 +87,6 @@ jobs: ##########################################################################
         resource: buildpack-git
     - task: update-cnb-tools
       file: buildpacks-ci/tasks/update-cnb-tools/task.yml
-      params:
-        LANGUAGE: <%= language %>
     - put: buildpack-git
       params:
         repository: buildpack-artifacts
@@ -160,6 +125,7 @@ jobs: ##########################################################################
           resource: buildpack-git
       - task: update-dagger
         file: buildpacks-ci/tasks/update-go-module/task.yml
+        attempts: 2
         params:
           MODULE_PATH: github.com/cloudfoundry/dagger
           VENDOR: true
@@ -183,6 +149,46 @@ jobs: ##########################################################################
           - task: unit tests
             file: buildpacks-ci/tasks/run-scripts-unit/task.yml
 
+ <% if buildpacks[language]['auto_release'] %>
+  - name: run-integration-and-release
+    public: true
+    serial: true
+    plan:
+      - aggregate:
+          - get: version
+            resource: yarn-cnb-version
+            params:
+              bump: patch
+          - get: buildpacks-ci
+          - get: packager
+            resource: libcfbuildpack
+          - get: pack
+          - get: buildpack
+            resource: buildpack-git
+            trigger: true
+            passed:
+              - specs-unit
+      - task: package-buildpack
+        file: buildpacks-ci/tasks/package-v3-buildpack/task.yml
+        params:
+          LANGUAGE: yarn
+      - task: integration-tests
+        file: buildpacks-ci/tasks/run-packaged-v3-bp-integration/task.yml
+        privileged: true
+        params:
+          GIT_TOKEN: {{buildpacks-github-token}}
+      - put: buildpack-github-release
+        params:
+          name: release-artifacts/name
+          tag: release-artifacts/tag
+          body: release-artifacts/body
+          globs:
+            - release-artifacts/yarn-cnb-*.tgz
+      - put: version
+        resource: yarn-cnb-version
+        params:
+          file: version/version
+<% else %>
   - name: specs-integration
     public: true
     serial: true
@@ -225,3 +231,4 @@ jobs: ##########################################################################
           body: release-artifacts/body
           globs:
           - release-artifacts/<%= language %>-cnb-*.tgz
+ <% end %>
