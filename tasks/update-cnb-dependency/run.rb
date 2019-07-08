@@ -27,7 +27,9 @@ V3_DEP_NAMES = {
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
-buildpack_toml = TOML.load_file('buildpack/buildpack.toml')
+buildpack_toml_file = File.file?("buildpack/buildpack.toml.tmpl") ? 'buildpack.toml.tmpl' : 'buildpack.toml'
+buildpack_toml = TOML.load_file("buildpack/#{buildpack_toml_file}")
+# Releases have buildpack.toml files, compiled by the release process
 buildpack_toml_latest_released = begin
   TOML.load_file('buildpack-latest-released/buildpack.toml')
 rescue
@@ -158,8 +160,8 @@ Dir.chdir('artifacts') do
   GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
   GitClient.set_global_config('user.name', 'CF Buildpacks Team CI Server')
 
-  File.write('buildpack.toml', TOML::Generator.new(buildpack_toml).body)
-  GitClient.add_file('buildpack.toml')
+  File.write(buildpack_toml_file, TOML::Generator.new(buildpack_toml).body)
+  GitClient.add_file(buildpack_toml_file)
 
   GitClient.safe_commit("#{commit_message} [##{story_id}]")
 end
