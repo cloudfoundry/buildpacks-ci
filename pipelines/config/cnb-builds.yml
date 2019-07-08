@@ -12,6 +12,7 @@ httpd:
   integration: true
 node-engine:
   integration: true
+  auto_release: true
 nodejs-compat:
   integration: true
 npm:

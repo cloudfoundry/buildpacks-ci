@@ -66,7 +66,7 @@ resources: #####################################################################
   - name: <%= language %>-cnb-version
     type: semver
     source:
-      initial_version: 0.0.20
+      initial_version: 0.0.12
       driver: gcs
       bucket: artifacts.cf-buildpacks.appspot.com
       key: cnb-versions/<%= language %>-version
@@ -156,7 +156,7 @@ jobs: ##########################################################################
     plan:
       - aggregate:
           - get: version
-            resource: yarn-cnb-version
+            resource: <%= language %>-cnb-version
             params:
               bump: patch
           - get: buildpacks-ci
@@ -171,7 +171,7 @@ jobs: ##########################################################################
       - task: package-buildpack
         file: buildpacks-ci/tasks/package-v3-buildpack/task.yml
         params:
-          LANGUAGE: yarn
+          LANGUAGE: <%= language %>
       - task: integration-tests
         file: buildpacks-ci/tasks/run-packaged-v3-bp-integration/task.yml
         privileged: true
@@ -183,9 +183,9 @@ jobs: ##########################################################################
           tag: release-artifacts/tag
           body: release-artifacts/body
           globs:
-            - release-artifacts/yarn-cnb-*.tgz
+            - release-artifacts/<%= language %>-cnb-*.tgz
       - put: version
-        resource: yarn-cnb-version
+        resource: <%= language %>-cnb-version
         params:
           file: version/version
 <% else %>
