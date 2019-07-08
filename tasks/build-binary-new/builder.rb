@@ -311,7 +311,7 @@ module DependencyBuild
         File.open('run-build.sh ', 'w') { |f| f.write runbuildsh }
       end
       if major == '3'
-        Runner.run('./build.sh --configuration Release') if major == '3'
+        Runner.run('./build.sh --configuration Release')
       else
         Runner.run('./build.sh', '/t:Compile')
       end

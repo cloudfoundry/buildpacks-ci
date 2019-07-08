@@ -53,7 +53,7 @@ class DotnetFrameworkExtractor
   def write_runtime_file(sdk_dir)
     Dir.chdir(sdk_dir) do
       runtime_glob = File.join("shared", "Microsoft.NETCore.App", "*")
-      version = Pathname.new(Dir[runtime_glob].first()).basename.to_s
+      version = Pathname.new(Dir[runtime_glob].last()).basename.to_s
 
       File.open("RuntimeVersion.txt", "w") do |f|
         f.write(version)
