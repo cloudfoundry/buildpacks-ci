@@ -38,7 +38,8 @@ Dir.chdir 'packager' do
 end
 
 buildpacks = Dir.glob('sources/*/').map do |dir|
-  id          = Tomlrb.load_file(File.join(dir, "buildpack.toml"))['buildpack']['id']
+  buildpack_toml_file = File.file?(File.join(dir, "buildpack.toml.tmpl")) ? 'buildpack.toml.tmpl' : 'buildpack.toml'
+  id          = Tomlrb.load_file(File.join(dir, buildpack_toml_file))['buildpack']['id']
   bp_location = File.absolute_path(File.join(dir,id))
   local_packager = './packager-cli'
   args = [local_packager, '-uncached']
