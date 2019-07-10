@@ -1,35 +1,56 @@
 ---
+bundler:
+  auto_release: true
 conda:
   integration: true
+  auto_release: true
 dep:
   integration: true
+  auto_release: true
 dotnet-core-conf:
   integration: true
-go: {}
+  auto_release: true
+go:
+  auto_release: true
 go-mod:
   integration: true
+  auto_release: true
 httpd:
   integration: true
+  auto_release: true
 node-engine:
   integration: true
   auto_release: true
 nodejs-compat:
   integration: true
+  auto_release: true
 npm:
   integration: true
-php: {}
+  auto_release: true
+nginx:
+  integration: true
+  auto_release: true
+php:
+  auto_release: true
 php-composer:
   integration: true
+  auto_release: true
 php-web:
   integration: true
+  auto_release: true
 pip:
   integration: true
+  auto_release: true
 pipenv:
   integration: true
-python: {}
+  auto_release: true
+python:
+  auto_release: true
 python-compat:
   integration: true
-ruby: {}
+  auto_release: true
+ruby:
+  auto_release: true
 yarn:
   integration: true
   auto_release: true
