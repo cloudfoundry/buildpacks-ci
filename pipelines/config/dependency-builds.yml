@@ -294,54 +294,55 @@ dependencies:
             link: https://github.com/nodejs/Release
         removal_strategy: keep_latest_released
     source_type: node
-  org.cloudfoundry.npm:
-    buildpacks:
-      nodejs-cnb:
-        shim: true
-        lines:
-          - line: latest
-    source_type: github_releases
-    source_params:
-      - 'repo: cloudfoundry/npm-cnb'
-      - 'fetch_source: true'
-      - 'prerelease: true'
-    any_stack: true
-  org.cloudfoundry.node-engine:
-    buildpacks:
-      nodejs-cnb:
-        shim: true
-        lines:
-          - line: latest
-    source_type: github_releases
-    source_params:
-      - 'repo: cloudfoundry/node-engine-cnb'
-      - 'fetch_source: true'
-      - 'prerelease: true'
-    any_stack: true
-  org.cloudfoundry.yarn:
-    buildpacks:
-      nodejs-cnb:
-        shim: true
-        lines:
-        - line: latest
-    source_type: github_releases
-    source_params:
-      - 'repo: cloudfoundry/yarn-cnb'
-      - 'fetch_source: true'
-      - 'prerelease: true'
-    any_stack: true
-  org.cloudfoundry.nodejs-compat:
-    buildpacks:
-      nodejs-cnb:
-        shim: true
-        lines:
-        - line: latest
-    source_type: github_releases
-    source_params:
-      - 'repo: cloudfoundry/nodejs-compat-cnb'
-      - 'fetch_source: true'
-      - 'prerelease: true'
-    any_stack: true
+#    Comment out until https://www.pivotaltracker.com/story/show/167050557 is played
+#  org.cloudfoundry.npm:
+#    buildpacks:
+#      nodejs-cnb:
+#        shim: true
+#        lines:
+#          - line: latest
+#    source_type: github_releases
+#    source_params:
+#      - 'repo: cloudfoundry/npm-cnb'
+#      - 'fetch_source: true'
+#      - 'prerelease: true'
+#    any_stack: true
+#  org.cloudfoundry.node-engine:
+#    buildpacks:
+#      nodejs-cnb:
+#        shim: true
+#        lines:
+#          - line: latest
+#    source_type: github_releases
+#    source_params:
+#      - 'repo: cloudfoundry/node-engine-cnb'
+#      - 'fetch_source: true'
+#      - 'prerelease: true'
+#    any_stack: true
+#  org.cloudfoundry.yarn:
+#    buildpacks:
+#      nodejs-cnb:
+#        shim: true
+#        lines:
+#        - line: latest
+#    source_type: github_releases
+#    source_params:
+#      - 'repo: cloudfoundry/yarn-cnb'
+#      - 'fetch_source: true'
+#      - 'prerelease: true'
+#    any_stack: true
+#  org.cloudfoundry.nodejs-compat:
+#    buildpacks:
+#      nodejs-cnb:
+#        shim: true
+#        lines:
+#        - line: latest
+#    source_type: github_releases
+#    source_params:
+#      - 'repo: cloudfoundry/nodejs-compat-cnb'
+#      - 'fetch_source: true'
+#      - 'prerelease: true'
+#    any_stack: true
   php:
     buildpacks:
       php:
