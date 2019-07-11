@@ -71,6 +71,10 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
 
   stack = /#{resource_version}-(.*)\.json$/.match(stack_dependency_build)[1]
 
+  if stack == 'cflinuxfs2'
+    next
+  end
+  
   if stack == 'any-stack'
     total_stacks.concat ALL_STACKS.values
     v3_stacks = ALL_STACKS.values
@@ -88,11 +92,13 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
   source_url = ''
   source_sha256 = ''
 
-  begin
-    source_url = builds[stack]['source']['url']
-    source_sha256 = builds[stack]['source'].fetch('sha256', '')
-  rescue
-    next
+  if stack != "bionic"
+    begin
+      source_url = builds[stack]['source']['url']
+      source_sha256 = builds[stack]['source'].fetch('sha256', '')
+    rescue
+      next
+    end
   end
 
   if manifest_name.include? 'dotnet'
@@ -108,7 +114,8 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
     source_url = "https://github.com/conda/conda/archive/#{version}.tar.gz"
   end
 
-  dep = {
+  if source_sha256 != ""
+    dep = {
       'id' => V3_DEP_IDS.fetch(manifest_name, manifest_name),
       'name' => V3_DEP_NAMES[manifest_name],
       'version' => resource_version,
@@ -117,7 +124,17 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
       'stacks' => v3_stacks,
       source_type => source_url,
       'source_sha256' => source_sha256
-  }
+    }
+  else
+    dep = {
+        'id' => V3_DEP_IDS.fetch(manifest_name, manifest_name),
+        'name' => V3_DEP_NAMES[manifest_name],
+        'version' => resource_version,
+        'uri' => build['url'],
+        'sha256' => build['sha256'],
+        'stacks' => v3_stacks,
+    }
+  end
 
   old_deps = buildpack_toml['metadata'].fetch('dependencies', [])
   old_versions = old_deps
