@@ -33,6 +33,7 @@
     'p-aspectj'                   => {'git_repo' => 'git@github.com:pivotal-cf/p-aspectj-cnb.git'},
     'p-caintroscope'              => {'git_repo' => 'git@github.com:pivotal-cf/p-ca-introscope-cnb.git'},
     'p-clientcertificatemapper'   => {'git_repo' => 'git@github.com:pivotal-cf/p-client-certificate-mapper-cnb.git'},
+    'p-containersecurityprovider'   => {'git_repo' => 'git@github.com:pivotal-cf/p-container-security-provider-cnb.git'},
     'p-elasticapm'                => {'git_repo' => 'git@github.com:pivotal-cf/p-elastic-apm-cnb.git'},
     'p-jacoco'                    => {'git_repo' => 'git@github.com:pivotal-cf/p-jacoco-cnb.git'},
     'p-jprofiler'                 => {'git_repo' => 'git@github.com:pivotal-cf/p-jprofiler-cnb.git'},
