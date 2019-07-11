@@ -45,6 +45,9 @@ buildpacks = Dir.glob('sources/*/').map do |dir|
   args = [local_packager, '-uncached']
   args.pop if enterprise
   Dir.chdir dir do
+    if File.file?("buildpack.toml.tmpl")
+      `./scripts/package.sh`
+    end
     system 'cp', packager_path, local_packager or exit 1 # We have to do this b/c cnb packager uses arg[0] to find the buildpack.toml
     system *args, bp_location or exit 1
   end
