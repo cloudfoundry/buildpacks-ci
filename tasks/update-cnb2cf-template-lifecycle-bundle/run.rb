@@ -5,7 +5,7 @@ require_relative '../update-buildpack-dependency/dependencies'
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
-ALL_STACKS = ['cflinuxfs2', 'cflinuxfs3']
+CNB_STACKS = ['cflinuxfs2', 'cflinuxfs3']
 
 repo          = 'cnb2cf'
 name          = 'lifecycle'
@@ -29,7 +29,7 @@ dep = {
   'version'       => version,
   'uri'           => build['url'],
   'sha256'        => build['sha256'],
-  'cf_stacks'     => ALL_STACKS,
+  'cf_stacks'     => CNB_STACKS,
   'source'        => source_url,
   'source_sha256' => source_sha256
 }

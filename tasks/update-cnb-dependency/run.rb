@@ -5,10 +5,9 @@ require 'tmpdir'
 require 'date'
 require_relative './dependencies'
 
-ALL_STACKS = {
-  'cflinuxfs2' => 'org.cloudfoundry.stacks.cflinuxfs2',
+CNB_STACKS = {
   'cflinuxfs3' => 'org.cloudfoundry.stacks.cflinuxfs3',
-  'bionic' => 'io.buildpacks.stacks.bionic'
+  'bionic'     => 'io.buildpacks.stacks.bionic'
 }
 
 V3_DEP_IDS = {
@@ -56,10 +55,20 @@ rebuilt = []
 total_stacks = []
 builds = {}
 
-Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
-  unless deprecation_date.nil? or deprecation_link.nil? or version_line == 'latest'
-    dependency_deprecation_date = {'version_line' => version_line.downcase, 'name' => manifest_name, 'date' => DateTime.parse(deprecation_date), 'link' => deprecation_link, }
-    dependency_deprecation_date['match'] = deprecation_match unless deprecation_match.nil? or deprecation_match.empty? or deprecation_match.downcase == 'null'
+dependency_build_glob = "builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"
+Dir[dependency_build_glob].each do |stack_dependency_build|
+  no_deprecation_info = (deprecation_date.nil? or deprecation_link.nil?)
+  unless no_deprecation_info or (version_line == 'latest')
+    dependency_deprecation_date = {
+      'version_line' => version_line.downcase,
+      'name'         => manifest_name,
+      'date'         => DateTime.parse(deprecation_date),
+      'link'         => deprecation_link,
+    }
+
+    unless deprecation_match.nil? or deprecation_match.empty? or deprecation_match.downcase == 'null'
+      dependency_deprecation_date['match'] = deprecation_match
+    end
 
     deprecation_dates = buildpack_toml['metadata'].fetch('dependency_deprecation_dates', [])
     deprecation_dates = deprecation_dates
@@ -74,14 +83,14 @@ Dir["builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"].each
   if stack == 'cflinuxfs2'
     next
   end
-  
+
   if stack == 'any-stack'
-    total_stacks.concat ALL_STACKS.values
-    v3_stacks = ALL_STACKS.values
+    total_stacks.concat CNB_STACKS.values
+    v3_stacks = CNB_STACKS.values
   else
-    next unless ALL_STACKS.keys.include? stack
-    total_stacks.push ALL_STACKS[stack]
-    v3_stacks = [ALL_STACKS[stack]]
+    next unless CNB_STACKS.keys.include? stack
+    total_stacks.push CNB_STACKS[stack]
+    v3_stacks = [CNB_STACKS[stack]]
   end
 
   build = JSON.parse(open(stack_dependency_build).read)
