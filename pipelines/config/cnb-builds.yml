@@ -10,7 +10,7 @@ dep:
 dotnet-core-conf:
   integration: true
   auto_release: true
-go:
+go-compiler:
   auto_release: true
 go-mod:
   integration: true
