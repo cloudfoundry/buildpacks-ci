@@ -55,9 +55,14 @@ module Depwatcher
     private def dotnet_tags(tag_regex : String) : Array(External)
       GithubTags.new(client).matched_tags("dotnet/cli", tag_regex)
         .map do |t|
-          m = t.name.match(/\d+\.\d+\.\d+/)
+          m = t.name.match(/\d+.\d+.\d+-preview\d+/)
           if !m.nil?
             External.new(m[0], t.commit.sha)
+          else
+            m = t.name.match(/\d+\.\d+\.\d+/)
+            if !m.nil?
+                External.new(m[0], t.commit.sha)
+            end
           end
         end.compact.uniq { |m| m.name}
     end
