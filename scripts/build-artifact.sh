@@ -39,7 +39,8 @@ if [[ -z "$binary_builder" ]]; then
 fi
 
 export STACK=${STACK:-cflinuxfs3}
-source_type=$(echo "$(erb -x pipelines/dependency-builds.yml);puts dependencies['$dep_name'].fetch(:source_type, '$dep_name')" | ruby)
+
+source_type=$(ruby -e "require 'YAML'; puts YAML.load_file(File.join(Dir.pwd, 'pipelines','config', 'dependency-builds.yml')).dig('dependencies', '$dep_name','source_type')")
 
 data=$(cat <<-EOF
 {
