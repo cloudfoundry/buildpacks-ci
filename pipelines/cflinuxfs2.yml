@@ -1,27 +1,17 @@
 ---
 resource_types:
-  - name: slack-notification
-    type: docker-image
-    source:
-      repository: cfcommunity/slack-notification-resource
-  - name: cron
-    type: docker-image
-    source:
-      repository: cfbuildpacks/cron-resource
   - name: bosh-deployment
     type: docker-image
     source:
       repository: cloudfoundry/bosh-deployment-resource
 
-resources: ###########################################################################################################
-
-  ## Cron Resource ##
-
-  - name: monday-funday
-    type: cron
+  - name: pivnet
+    type: docker-image
     source:
-      expression: 0 5 * * 1
-      location: {{current-timezone}}
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final
+
+resources: ###########################################################################################################
 
   ## Git Repos ##
   - name: cf-deployment-concourse-tasks
@@ -30,27 +20,32 @@ resources: #####################################################################
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
       tag_filter: v8.*
+
   - name: cf-deployment-concourse-tasks-latest
     type: git
     source:
       branch: master
       uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+
   - name: cf-acceptance-tests
     type: git
     source:
       branch: master
       uri: https://github.com/cloudfoundry/cf-acceptance-tests.git
+
   - name: bbl-state
     type: git
     source:
       uri: git@github.com:cloudfoundry/buildpacks-envs
       branch: master
       private_key: {{buildpacks-envs-private-key}}
+
   - name: bosh-deployment
     type: git
     source:
       uri: https://github.com/cloudfoundry/bosh-deployment.git
       branch: master
+
   - name: cf-deployment
     type: git
     source:
@@ -63,27 +58,27 @@ resources: #####################################################################
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
-  - name: cflinuxfs2
+  - name: p-cflinuxfs2
     type: git
     source:
-      uri: git@github.com:cloudfoundry/cflinuxfs2.git
+      uri: git@github.com:pivotal-cf/p-cflinuxfs2.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
       branch: master
-      private_key: {{stacks-private-key}}
 
-  - name: cflinuxfs2-github-tags
+  - name: p-cflinuxfs2-github-tags
     type: git
     source:
-      uri: git@github.com:cloudfoundry/cflinuxfs2.git
+      uri: git@github.com:pivotal-cf/p-cflinuxfs2.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
       branch: master
-      private_key: {{stacks-private-key}}
       tag_filter: "*"
 
-  - name: cflinuxfs2-build-trigger
+  - name: p-cflinuxfs2-build-trigger
     type: git
     source:
-      uri: git@github.com:cloudfoundry/cflinuxfs2.git
+      uri: git@github.com:pivotal-cf/p-cflinuxfs2.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
       branch: master
-      private_key: {{stacks-private-key}}
       ignore_paths:
       - cflinuxfs2/cflinuxfs2_receipt
       - README.md
@@ -114,30 +109,44 @@ resources: #####################################################################
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
 
-  - name: cflinuxfs2-release
+  - name: p-cflinuxfs2-release
     type: git
     source:
-      uri: git@github.com:cloudfoundry/cflinuxfs2-release.git
+      uri: git@github.com:pivotal-cf/p-cflinuxfs2-release.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
       branch: master
-      private_key: {{cflinuxfs2-release-private-key}}
+
+  - name: p-cflinuxfs2-esm-github-release
+    type: github-release
+    source:
+      owner: pivotal-cf
+      repository: p-cflinuxfs2-release
+      access_token: {{buildpacks-github-token}}
+
+  - name: p-cflinuxfs2-release-pivnet-release
+    type: pivnet
+    source:
+      endpoint: https://pivnet-integration.cfapps.io/
+      api_token: yjm2jhyXi9m-1VXRP2X2
+      product_slug: cflinuxfs2-esm
+
 
   ## S3 Buckets ##
-
   - name: stack-s3
     type: s3
     source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
+      bucket: {{p-cflinuxfs2-s3-bucket}}
       regexp: rootfs/cflinuxfs2-(.*).tar.gz
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
   - name: receipt-s3
     type: s3
     source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
+      bucket: {{p-cflinuxfs2-s3-bucket}}
       regexp: rootfs/cflinuxfs2_receipt-(.*)
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
   ## BOSH Deployments ##
 
@@ -160,41 +169,15 @@ resources: #####################################################################
     source:
       name: bosh-google-kvm-ubuntu-xenial-go_agent
 
-  ## Docker Image ##
-
-  - name: docker-cflinuxfs2
-    type: docker-image
-    source:
-      repository: cloudfoundry/cflinuxfs2
-      username: {{dockerhub-cflinuxfs-username}}
-      password: {{dockerhub-cflinuxfs-password}}
-      email: cf-buildpacks-eng@pivotal.io
-
-  - name: docker-cflinuxfs2-tagged
-    type: docker-image
-    source:
-      repository: cloudfoundry/cflinuxfs2
-      username: {{dockerhub-cflinuxfs-username}}
-      password: {{dockerhub-cflinuxfs-password}}
-      email: cf-buildpacks-eng@pivotal.io
-
   ## Github Release ##
 
-  - name: cflinuxfs2-github-release-drafts
-    type: github-release
-    source:
-      drafts: true
-      user: {{buildpacks-github-org}}
-      repository: cflinuxfs2
-      access_token: {{buildpacks-github-token}}
-
-  - name: cflinuxfs2-release-github-release
-    type: github-release
-    source:
-      drafts: false
-      user: {{buildpacks-github-org}}
-      repository: cflinuxfs2-release
-      access_token: {{buildpacks-github-token}}
+#  - name: p-cflinuxfs2-release-github-release
+#    type: github-release
+#    source:
+#      drafts: false
+#      user: pivotal-cf
+#      access_token: {{buildpacks-github-token}}
+#      repository: p-cflinuxfs2-release
 
   ## Semver Versions ##
 
@@ -206,54 +189,32 @@ resources: #####################################################################
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 
-  ## Slack Alerts ##
-
-  - name: failure-alert
-    type: slack-notification
-    source:
-      url: {{concourse-job-failure-notifications-slack-webhook}}
-
 jobs: ################################################################################################################
-
-  - name: notification
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: monday-funday
-          trigger: true
-      - task: create-tracker-story
-        file: buildpacks-ci/tasks/create-new-cflinuxfs2-release-story/task.yml
-        params:
-          TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
-          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-          TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
 
   - name: build-rootfs
     serial: true
-    serial_groups: [ cflinuxfs2 ]
-    public: true
+    serial_groups: [ p-cflinuxfs2 ]
     plan:
       - in_parallel:
         - get: previous-cflinuxfs2-release
-          resource: cflinuxfs2-github-tags
+          resource: p-cflinuxfs2-github-tags
         - get: buildpacks-ci
         - get: new-cves
           trigger: true
         - get: cflinuxfs2
+          resource: p-cflinuxfs2
         - get: cflinuxfs2-build-trigger
+          resource: p-cflinuxfs2-build-trigger
           trigger: true
         - get: version
           params: { pre: rc }
-        - get: monday-funday
-          passed: [ "notification" ]
-          trigger: true
         - get: public-robots
       - do:
         - task: make-rootfs
           file: buildpacks-ci/tasks/make-rootfs-cflinuxfs2/task.yml
           privileged: true
+          params:
+            ESM_TOKEN: {{ci-cflinuxfs2-esm-token}}
         - task: test-rootfs
           file: buildpacks-ci/tasks/test-cflinuxfs2/task.yml
           privileged: true
@@ -276,18 +237,10 @@ jobs: ##########################################################################
             repository: public-robots-artifacts
             rebase: true
             tag: git-tags/TAG
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
   - name: bbl-up
     serial: true
-    serial_groups: [ cflinuxfs2 ]
-    public: true
+    serial_groups: [ p-cflinuxfs2 ]
     plan:
       - in_parallel:
         - get: cf-deployment-concourse-tasks
@@ -307,6 +260,7 @@ jobs: ##########################################################################
         - get: receipt-s3
           passed: [ build-rootfs ]
         - get: cflinuxfs2
+          resource: p-cflinuxfs2
           passed: [ build-rootfs ]
       - task: bbl-up
         file: cf-deployment-concourse-tasks/bbl-up/task.yml
@@ -336,8 +290,7 @@ jobs: ##########################################################################
 
   - name: deploy
     serial: true
-    serial_groups: [ cflinuxfs2 ]
-    public: true
+    serial_groups: [ p-cflinuxfs2 ]
     plan:
       - do:
         - in_parallel:
@@ -351,8 +304,10 @@ jobs: ##########################################################################
           - get: receipt-s3
             passed: [ bbl-up ]
           - get: cflinuxfs2
+            resource: p-cflinuxfs2
             passed: [ bbl-up ]
           - get: cflinuxfs2-release
+            resource: p-cflinuxfs2-release
           - get: buildpacks-ci
           - get: bbl-state
           - get: cf-deployment
@@ -394,18 +349,10 @@ jobs: ##########################################################################
               - cf-deployment/operations/use-latest-stemcell.yml
             vars:
               system_domain: cflinuxfs2.buildpacks-gcp.ci.cf-app.com
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
   - name: cats
     serial: true
-    serial_groups: [ cflinuxfs2 ]
-    public: true
+    serial_groups: [ p-cflinuxfs2 ]
     plan:
       - in_parallel:
         - get: bbl-state
@@ -423,6 +370,7 @@ jobs: ##########################################################################
         - get: receipt-s3
           passed: [ deploy ]
         - get: cflinuxfs2
+          resource: p-cflinuxfs2
           passed: [ deploy ]
       - do:
         - task: get-cf-creds
@@ -442,18 +390,10 @@ jobs: ##########################################################################
             NODES: 12
             CONFIG_FILE_PATH: integration_config.json
             FLAKE_ATTEMPTS: 3
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
   - name: check-for-race-condition
     serial: true
-    serial_groups: [ cflinuxfs2 ]
-    public: true
+    serial_groups: [ p-cflinuxfs2 ]
     plan:
       - in_parallel:
         - get: buildpacks-ci
@@ -467,8 +407,7 @@ jobs: ##########################################################################
 
   - name: delete-deployment
     serial: true
-    serial_groups: [ cflinuxfs2 ]
-    public: true
+    serial_groups: [ p-cflinuxfs2 ]
     plan:
       - in_parallel:
         - get: version
@@ -495,8 +434,7 @@ jobs: ##########################################################################
 
   - name: bbl-destroy
     serial: true
-    serial_groups: [ cflinuxfs2 ]
-    public: true
+    serial_groups: [ p-cflinuxfs2 ]
     plan:
       - in_parallel:
         - get: cf-deployment-concourse-tasks
@@ -522,10 +460,9 @@ jobs: ##########################################################################
             repository: updated-bbl-state
             rebase: true
 
-  - name: release-cflinuxfs2
+  - name: release-p-cflinuxfs2
     serial: true
-    serial_groups: [ cflinuxfs2 ]
-    public: true
+    serial_groups: [ p-cflinuxfs2 ]
     plan:
       - in_parallel:
         - get: buildpacks-ci
@@ -538,7 +475,7 @@ jobs: ##########################################################################
           passed:
             - cats
         - get: rootfs
-          resource: cflinuxfs2
+          resource: p-cflinuxfs2
           passed:
             - cats
         - get: version
@@ -555,7 +492,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/update-rootfs-filename/task.yml
           params:
             STACK: cflinuxfs2
-        - put: cflinuxfs2
+        - put: p-cflinuxfs2
           params:
             repository: new-rootfs-commit
             tag: version/number
@@ -565,137 +502,78 @@ jobs: ##########################################################################
             file: rootfs-archive/cflinuxfs2-*.tar.gz
         - put: version
           params: { file: version/number }
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
   - name: reset-minor-version-to-rc
     serial: true
-    public: true
     plan:
       - get: version
         trigger: true
-        passed: [ release-cflinuxfs2 ]
+        passed: [ release-p-cflinuxfs2 ]
         params: {bump: minor, pre: rc}
       - put: version
         params: {file: version/number}
 
+  - name: generate-release-notes
+    serial: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: previous-cflinuxfs2-release
+          resource: p-cflinuxfs2-github-tags
+        - get: cflinuxfs2
+          resource: p-cflinuxfs2
+          passed: [ release-p-cflinuxfs2 ]
+        - get: new-cves
+          passed: [ release-p-cflinuxfs2 ]
+        - get: stack-s3
+          passed: [ release-p-cflinuxfs2 ]
+        - get: version
+          trigger: true
+          passed: [ release-p-cflinuxfs2 ]
+      - do:
+        - task: generate-rootfs-release-notes
+          file: buildpacks-ci/tasks/generate-cflinuxfs2-release-notes/task.yml
+          params:
+            STACK: cflinuxfs2
+        - put: new-cves
+          params:
+            repository: new-cves-artifacts
+            rebase: true
+
   - name: finalize-security-notices
     serial: true
-    public: true
     plan:
       - in_parallel:
         - get: buildpacks-ci
           resource: buildpacks-ci
         - get: version
           trigger: true
-          passed: [ upload-to-github ]
+          passed: [ generate-release-notes ]
       - do:
         - task: finalize-security-notices
           file: buildpacks-ci/tasks/finalize-security-notice-stories/task.yml
           attempts: 20
           params:
-            TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
+            TRACKER_PROJECT_ID: '{{cf-buildpacks-private-tracker-id}}'
             TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             STACK: cflinuxfs2
-  - name: upload-to-github
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: previous-cflinuxfs2-release
-          resource: cflinuxfs2-github-tags
-        - get: cflinuxfs2
-          passed: [ release-cflinuxfs2 ]
-        - get: new-cves
-          passed: [ release-cflinuxfs2 ]
-        - get: stack-s3
-          passed: [ release-cflinuxfs2 ]
-        - get: version
-          trigger: true
-          passed: [ release-cflinuxfs2 ]
-      - do:
-        - task: generate-rootfs-release-notes
-          file: buildpacks-ci/tasks/generate-cflinuxfs2-release-notes/task.yml
-          params:
-            STACK: cflinuxfs2
-        - put: cflinuxfs2-github-release-drafts
-          params:
-            name: version/number
-            tag: version/number
-            body: release-body/body
-            globs:
-              - stack-s3/cflinuxfs2-*.tar.gz
-        - put: new-cves
-          params:
-            repository: new-cves-artifacts
-            rebase: true
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 
-  - name: upload-to-docker
+  - name: create-cflinuxfs2-esm-release
     serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: stack-s3
-          passed: [ release-cflinuxfs2 ]
-        - get: version
-          trigger: true
-          passed: [ release-cflinuxfs2 ]
-      - do:
-        - task: rename
-          file: buildpacks-ci/tasks/rename-rootfs-for-docker/task.yml
-          params:
-            STACK: cflinuxfs2
-        - in_parallel:
-          - put: docker latest version
-            resource: docker-cflinuxfs2
-            params:
-              import_file: docker-s3/cflinuxfs2.tar.gz
-              skip_download: true
-          - put: docker tagged version
-            resource: docker-cflinuxfs2-tagged
-            params:
-              skip_download: true
-              import_file: docker-s3/cflinuxfs2.tar.gz
-              tag: version/number
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-
-  - name: create-cflinuxfs2-release
-    serial: true
-    public: true
     plan:
       - in_parallel:
         - get: buildpacks-ci
         - get: blob
           resource: stack-s3
-          passed: [ release-cflinuxfs2 ]
+          passed: [ release-p-cflinuxfs2 ]
           trigger: true
         - get: version
-          passed: [ release-cflinuxfs2 ]
+          passed: [ release-p-cflinuxfs2 ]
         - get: release
-          resource: cflinuxfs2-release
+          resource: p-cflinuxfs2-release
       - do:
-        - task: create-cflinuxfs2-release
+        - task: create-cflinuxfs2-esm-release
           file: buildpacks-ci/tasks/create-cflinuxfs2-release/task.yml
           params:
             BLOB_NAME: rootfs
@@ -706,25 +584,30 @@ jobs: ##########################################################################
         - task: create-release-body
           file: buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes/task.yml
           params:
-            STACK: cflinuxfs2
+            STACK: p-cflinuxfs2
+            ORG: pivotal-cf
         - task: create-release-commit
           file: buildpacks-ci/tasks/create-rootfs-bosh-release-commit/task.yml
-        - put: cflinuxfs2-release
+        - put: p-cflinuxfs2-release
           params:
             repository: release-artifacts
-        - put: cflinuxfs2-release-github-release
+
+  - name: upload-cflinuxfs2-esm-to-pivnet
+    serial: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: p-cflinuxfs2-esm-github-release
           params:
-            name: version/number
-            tag: version/number
-            tag_prefix: 'v'
-            commitish: release-commit/sha
-            body: release-body/body
-            globs:
-              - release-artifacts/releases/cflinuxfs2/*.tgz
-        on_failure:
-          put: failure-alert
+            include_source_tarball: true
+        - get: p-cflinuxfs2-release
+          passed: [ create-cflinuxfs2-esm-release ]
+          trigger: true
+      - do:
+        - task: generate-esm-pivnet-metadata
+          file: buildpacks-ci/tasks/write-esm-pivnet-metadata/task.yml
+        - put: p-cflinuxfs2-release-pivnet-release
           params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+            file_glob: p-cflinuxfs2-esm-github-release/source.tar.gz
+            s3_filepath_prefix: p-cflinuxfs2/rootfs
+            metadata_file: pivnet-esm-metadata/esm.yml

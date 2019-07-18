@@ -1,7 +1,10 @@
 #!/usr/bin/env ruby
 
 stack = ENV['STACK']
-repo = "cloudfoundry/#{stack}"
+org =  ENV['ORG'].empty? ? 'cloudfoundry' : ENV['ORG']
+
+
+repo = "#{org}/#{stack}"
 
 body_file = 'release-body/body'
 version = `cat version/number`

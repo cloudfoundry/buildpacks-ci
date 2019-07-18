@@ -7,6 +7,7 @@ buildpack-packager-git-uri: git@github.com:cloudfoundry/buildpack-packager.git
 buildpack-release-candidates-bucket: buildpack-release-candidates
 buildpackapplifecycle-git-branch: develop
 buildpacks-binaries-s3-bucket: pivotal-buildpacks
+p-cflinuxfs2-s3-bucket: p-cflinuxfs2
 buildpacks-ci-git-uri-public-branch: master
 buildpacks-ci-git-uri-public-develop-branch: develop
 buildpacks-ci-git-uri-public: https://github.com/cloudfoundry/buildpacks-ci
