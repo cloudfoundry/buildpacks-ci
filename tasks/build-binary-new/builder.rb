@@ -338,7 +338,7 @@ module DependencyBuild
     end
 
     Dir.chdir(dotnet_dir) do
-      system('tar', 'Jcf', old_filepath, '.')
+      system('tar', 'Jcf', old_filepath, '.', '--hard-dereference')
     end
   end
 
