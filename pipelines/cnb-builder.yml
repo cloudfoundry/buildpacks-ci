@@ -149,12 +149,6 @@ resources:
       paths: [ "cnb/<%= image_type %>/**" ]
   <% end %>
 
-  - name: cnb-lifecycle-master
-    type: git
-    source:
-      uri: https://github.com/buildpack/lifecycle
-      branch: master
-
   - name: cnb-lifecycle-release
     type: github-release
     source:
@@ -163,45 +157,23 @@ resources:
       access_token: {{buildpacks-github-token}}
 
 jobs:
-  - name: update-cflinuxfs3-cnb-base-image
-    public: true
-    plan:
-      # Changes in cnb stack image Dockerfiles
-      - get: cflinuxfs3-cnb-base-dockerfile-master
-        trigger: true
-      # Changes in lifecycle repo should trigger an update for base
-      - get: cnb-lifecycle-master
-        trigger: true
-      # Changes in cflinuxfs3 image should trigger an update for base
-      - get: cflinuxfs3-image
-        trigger: true
-      - put: cflinuxfs3-cnb-base-image
-        params:
-          build: cflinuxfs3-cnb-base-dockerfile-master/cnb/base
-          build_args:
-            squash: squash
-        attempts: 2
-      # update new cloudfoundry-base-image
-      - put: cloudfoundry-cflinuxfs3-cnb-base-image
-        params:
-          tag_as_latest: true
-          build: cflinuxfs3-cnb-base-dockerfile-master/cnb/base
-          build_args:
-            squash: squash
-        attempts: 2
-
-<% cnb_child_images.each do |image_type| %>
+  <% cnb_images.each do |image_type| %>
   - name: update-cflinuxfs3-cnb-<%= image_type %>-image
     public: true
     plan:
       # Changes in cnb stack image Dockerfiles
       - get: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master
         trigger: true
-      # Changes in base image should also trigger an update for children
+      <% if image_type == "base"%>
+      # Changes in cflinuxfs3 image should trigger an update for base
+      - get: cflinuxfs3-image
+        trigger: true
+      <% else %>
       - get: cloudfoundry-cflinuxfs3-cnb-base-image
         trigger: true
         passed:
           - update-cflinuxfs3-cnb-base-image
+      <% end %>
       - put: cflinuxfs3-cnb-<%= image_type %>-image
         params:
           build: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master/cnb/<%= image_type %>
@@ -215,7 +187,7 @@ jobs:
           build_args:
             squash: squash
         attempts: 2
-<% end %>
+  <% end %>
 
   <% builders.each do |builder_name, builder_data|
      all_cnb_hash = builder_data["private"] ? piv_cnbs : cnbs
