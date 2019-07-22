@@ -1,54 +1,16 @@
+<%
+  require 'yaml'
+  config = YAML.load_file(File.join(__dir__, 'config', 'cnb-builders.yml'))
+
+  builders = config['builders']
+  all_cnbs = config['cnbs']
+  cnbs = all_cnbs.select{|cnb, data| data["public"]}
+  piv_cnbs = all_cnbs.select{|cnb, data| data["private"]}
+%>
+
 <% cnb_child_images = %w(run build) %>
 <% cnb_images = cnb_child_images + ['base'] %>
 
-<%
-  $cnbs = {
-    'node-engine'              => {'git_repo' => 'https://github.com/cloudfoundry/node-engine-cnb', 'p_cnb' => true},
-    'npm'                      => {'git_repo' => 'https://github.com/cloudfoundry/npm-cnb', 'p_cnb' => true},
-    'yarn'                     => {'git_repo' => 'https://github.com/cloudfoundry/yarn-cnb', 'p_cnb' => true},
-    'python'                   => {'git_repo' => 'https://github.com/cloudfoundry/python-cnb', 'skip_bionic' => true},
-    'pip'                      => {'git_repo' => 'https://github.com/cloudfoundry/pip-cnb', 'skip_bionic' => true},
-    'pipenv'                   => {'git_repo' => 'https://github.com/cloudfoundry/pipenv-cnb', 'skip_bionic' => true},
-    'openjdk'                  => {'git_repo' => 'https://github.com/cloudfoundry/openjdk-cnb'},
-    'buildsystem'              => {'git_repo' => 'https://github.com/cloudfoundry/build-system-cnb'},
-    'jvmapplication'           => {'git_repo' => 'https://github.com/cloudfoundry/jvm-application-cnb', 'p_cnb' => true},
-    'azureapplicationinsights' => {'git_repo' => 'https://github.com/cloudfoundry/azure-application-insights-cnb', 'p_cnb' => true},
-    'debug'                    => {'git_repo' => 'https://github.com/cloudfoundry/debug-cnb', 'p_cnb' => true},
-    'googlestackdriver'        => {'git_repo' => 'https://github.com/cloudfoundry/google-stackdriver-cnb', 'p_cnb' => true},
-    'jmx'                      => {'git_repo' => 'https://github.com/cloudfoundry/jmx-cnb', 'p_cnb' => true},
-    'procfile'                 => {'git_repo' => 'https://github.com/cloudfoundry/procfile-cnb', 'p_cnb' => true},
-    'dotnet-core-conf'         => {'git_repo' => 'https://github.com/cloudfoundry/dotnet-core-conf-cnb', 'p_cnb' => true},
-    'archivexpanding'             => {'git_repo' => 'https://github.com/cloudfoundry/archive-expanding-cnb', 'p_cnb' => true},
-    'tomcat'                      => {'git_repo' => 'https://github.com/cloudfoundry/tomcat-cnb', 'p_cnb' => true},
-    'jdbc'                        => {'git_repo' => 'https://github.com/cloudfoundry/jdbc-cnb', 'p_cnb' => true},
-    'springautoreconfiguration'   => {'git_repo' => 'https://github.com/cloudfoundry/spring-auto-reconfiguration-cnb', 'p_cnb' => true},
-    'springboot'                  => {'git_repo' => 'https://github.com/cloudfoundry/spring-boot-cnb', 'p_cnb' => true},
-    'distzip'                   => {'git_repo' => 'https://github.com/cloudfoundry/dist-zip-cnb', 'p_cnb' => true },
-  }
-
-  $pcnbs = {
-    'p-openjdk'                   => {'git_repo' => 'git@github.com:pivotal-cf/p-openjdk-cnb.git'},
-    'p-appdynamics'               => {'git_repo' => 'git@github.com:pivotal-cf/p-appdynamics-cnb.git'},
-    'p-buildsystem'               => {'git_repo' => 'git@github.com:pivotal-cf/p-build-system-cnb.git'},
-    'p-aspectj'                   => {'git_repo' => 'git@github.com:pivotal-cf/p-aspectj-cnb.git'},
-    'p-caintroscope'              => {'git_repo' => 'git@github.com:pivotal-cf/p-ca-introscope-cnb.git'},
-    'p-clientcertificatemapper'   => {'git_repo' => 'git@github.com:pivotal-cf/p-client-certificate-mapper-cnb.git'},
-    'p-containersecurityprovider'   => {'git_repo' => 'git@github.com:pivotal-cf/p-container-security-provider-cnb.git'},
-    'p-elasticapm'                => {'git_repo' => 'git@github.com:pivotal-cf/p-elastic-apm-cnb.git'},
-    'p-jacoco'                    => {'git_repo' => 'git@github.com:pivotal-cf/p-jacoco-cnb.git'},
-    'p-jprofiler'                 => {'git_repo' => 'git@github.com:pivotal-cf/p-jprofiler-cnb.git'},
-    'p-jrebel'                    => {'git_repo' => 'git@github.com:pivotal-cf/p-jrebel-cnb.git'},
-    'p-newrelic'                  => {'git_repo' => 'git@github.com:pivotal-cf/p-new-relic-cnb.git'},
-    'p-overops'                   => {'git_repo' => 'git@github.com:pivotal-cf/p-overops-cnb.git'},
-    'p-riverbedappinternals'      => {'git_repo' => 'git@github.com:pivotal-cf/p-riverbed-appinternals-cnb.git'},
-    'p-skywalking'                => {'git_repo' => 'git@github.com:pivotal-cf/p-skywalking-cnb.git'},
-    'p-yourkit'                   => {'git_repo' => 'git@github.com:pivotal-cf/p-yourkit-cnb.git'},
-  }
-
-  def piv_cnbs
-    $cnbs.select{|k,v|v['p_cnb']}.merge($pcnbs)
-  end
-%>
 
 
 ---
@@ -72,22 +34,7 @@ resources:
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
       branch: master
 
-  <% $cnbs.keys.each do |cnb_name| %>
-  - name: <%= cnb_name %>-cnb
-    type: git
-    source:
-      uri: <%= $cnbs[cnb_name]['git_repo'] %>
-      private_key: {{cf-buildpacks-eng-github-ssh-key}}
-
-  - name: <%= cnb_name %>-cnb-release
-    type: git
-    source:
-      uri: <%= $cnbs[cnb_name]['git_repo'] %>
-      private_key: {{cf-buildpacks-eng-github-ssh-key}}
-      tag_filter: "v*"
-  <% end %>
-
-  <% $pcnbs.each do |cnb_name, data| %>
+  <% all_cnbs.each do |cnb_name, data| %>
   - name: <%= cnb_name %>-cnb
     type: git
     source:
@@ -291,18 +238,18 @@ jobs:
         - get: cloudfoundry-cflinuxfs3-cnb-<%= image_type %>-image
           params: {skip_download: true}
         <% end %>
-        <% $cnbs.keys.each do |cnb_name| %>
+        <% cnbs.keys.each do |cnb_name| %>
         - get: <%= cnb_name %>-cnb
           trigger: true
         <% end %>
         - get: pack
-          trigger: true
           resource: pack-master
-        - get: packager
+          trigger: true
         - get: buildpacks-ci
         - get: version
           params: {pre: "rc"}
           resource: cflinuxfs3-version
+        - get: packager
         - get: lifecycle
           resource: cnb-lifecycle-release
           trigger: true
@@ -314,7 +261,7 @@ jobs:
             source:
               repository: cfbuildpacks/ci
           inputs:
-            <% $cnbs.keys.each do |cnb_name| %>
+            <% cnbs.keys.each do |cnb_name| %>
             - name: <%= cnb_name %>-cnb
             <% end %>
           outputs:
@@ -324,7 +271,7 @@ jobs:
             args:
               - -cl
               - |
-                <% $cnbs.keys.each do |cnb_name| %>
+                <% cnbs.keys.each do |cnb_name| %>
                   cp -r <%= cnb_name %>-cnb sources/<%= cnb_name %>-cnb
                 <% end %>
       - task: create-builder-image
@@ -350,7 +297,7 @@ jobs:
         - get: cloudfoundry-cflinuxfs3-cnb-<%= image_type %>-image
           params: {skip_download: true}
         <% end %>
-        <% $cnbs.keys.each do |cnb_name| %>
+        <% cnbs.keys.each do |cnb_name| %>
         - get: <%= cnb_name %>-cnb
           resource: <%= cnb_name %>-cnb-release
         <% end %>
@@ -373,7 +320,7 @@ jobs:
             source:
               repository: cfbuildpacks/ci
           inputs:
-            <% $cnbs.keys.each do |cnb_name| %>
+            <% cnbs.keys.each do |cnb_name| %>
             - name: <%= cnb_name %>-cnb
             <% end %>
           outputs:
@@ -383,7 +330,7 @@ jobs:
             args:
               - -cl
               - |
-                <% $cnbs.keys.each do |cnb_name| %>
+                <% cnbs.keys.each do |cnb_name| %>
                   cp -r <%= cnb_name %>-cnb sources/<%= cnb_name %>-cnb
                 <% end %>
       - task: create-builder-image
@@ -560,19 +507,20 @@ jobs:
   - name: smoke-test-cf-builder-bionic
     plan:
       - aggregate:
-        <% $cnbs.keys.each do |cnb_name| %>
-        <% next if $cnbs[cnb_name]['skip_bionic'] %>
+        - get: cnb-builder
+          trigger: true
+        <% cnbs.keys.each do |cnb_name| %>
+        <% next if cnbs[cnb_name]['skip_bionic'] %>
         - get: <%= cnb_name %>-cnb
           trigger: true
         <% end %>
         - get: pack
           resource: pack-master
           trigger: true
-        - get: cnb-builder
         - get: buildpacks-ci
         - get: version
-          resource: bionic-version
           params: {pre: "rc"}
+          resource: bionic-version
         - get: packager
         - get: lifecycle
           resource: cnb-lifecycle-release
@@ -585,8 +533,8 @@ jobs:
             source:
               repository: cfbuildpacks/ci
           inputs:
-              <% $cnbs.keys.each do |cnb_name| %>
-              <% next if $cnbs[cnb_name]['skip_bionic'] %>
+              <% cnbs.keys.each do |cnb_name| %>
+              <% next if cnbs[cnb_name]['skip_bionic'] %>
                 - name: <%= cnb_name %>-cnb
               <% end %>
           outputs:
@@ -596,8 +544,8 @@ jobs:
             args:
               - -cl
               - |
-                <% $cnbs.keys.each do |cnb_name| %>
-                <% next if $cnbs[cnb_name]['skip_bionic'] %>
+                <% cnbs.keys.each do |cnb_name| %>
+                <% next if cnbs[cnb_name]['skip_bionic'] %>
                   cp -r <%= cnb_name %>-cnb sources/<%= cnb_name %>-cnb
                 <% end %>
       - task: create-builder-image
@@ -619,8 +567,8 @@ jobs:
   - name: release-cf-builder-bionic
     plan:
     - aggregate:
-      <% $cnbs.keys.each do |cnb_name| %>
-      <% next if $cnbs[cnb_name]['skip_bionic'] %>
+      <% cnbs.keys.each do |cnb_name| %>
+      <% next if cnbs[cnb_name]['skip_bionic'] %>
       - get: <%= cnb_name %>-cnb
         resource: <%= cnb_name %>-cnb-release
       <% end %>
@@ -643,8 +591,8 @@ jobs:
           source:
             repository: cfbuildpacks/ci
         inputs:
-            <% $cnbs.keys.each do |cnb_name| %>
-            <% next if $cnbs[cnb_name]['skip_bionic'] %>
+            <% cnbs.keys.each do |cnb_name| %>
+            <% next if cnbs[cnb_name]['skip_bionic'] %>
               - name: <%= cnb_name %>-cnb
             <% end %>
         outputs:
@@ -654,8 +602,8 @@ jobs:
           args:
             - -cl
             - |
-              <% $cnbs.keys.each do |cnb_name| %>
-              <% next if $cnbs[cnb_name]['skip_bionic'] %>
+              <% cnbs.keys.each do |cnb_name| %>
+              <% next if cnbs[cnb_name]['skip_bionic'] %>
                 cp -r <%= cnb_name %>-cnb sources/<%= cnb_name %>-cnb
               <% end %>
     - task: create-builder-image

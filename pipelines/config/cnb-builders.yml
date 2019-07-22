@@ -1,0 +1,167 @@
+---
+builders:
+  cf-builder-bionic:
+    stack: bionic
+    private: false
+    base-image: false
+    repo:
+    builder-image:
+      repo: cloudfoundry/cnb
+      stack: "io.buildpacks.stacks.bionic"
+      build-image: "cnbs/build:0.0.1"
+      run-image: "cnbs/run:0.0.1"
+      host: "hub.docker.com"
+      enterprise: false
+  cf-builder-cflinuxfs3:
+    stack: cflinuxfs3
+    private: false
+    base-image: true
+    builder-image:
+      repo: cloudfoundry/cnb
+      stack: "org.cloudfoundry.stacks.cflinuxfs3"
+      build-image: "cloudfoundry/cnb-build:cflinuxfs3"
+      run-image: "cloudfoundry/cnb-run:cflinuxfs3"
+      host: "hub.docker.com"
+      enterprise: false
+  p-builder-cflinuxfs3:
+    stack: cflinuxfs3
+    private: true
+    base-image: true
+    builder-image:
+      repo: p-cnb-builder
+      stack: "org.cloudfoundry.stacks.cflinuxfs3"
+      build-image: "cloudfoundry/cnb-build:cflinuxfs3"
+      run-image: "cloudfoundry/cnb-run:cflinuxfs3"
+      enterprise: true
+      host:
+cnbs:
+      node-engine:
+        git_repo: "https://github.com/cloudfoundry/node-engine-cnb"
+        public: true
+        private: true
+      npm:
+        git_repo: "https://github.com/cloudfoundry/npm-cnb"
+        public: true
+        private: true
+      yarn:
+        git_repo: "https://github.com/cloudfoundry/yarn-cnb"
+        public: true
+        private: true
+      python:
+        git_repo: "https://github.com/cloudfoundry/python-cnb"
+        public: true
+        skip_bionic: true
+      pip:
+        git_repo: "https://github.com/cloudfoundry/pip-cnb"
+        public: true
+        skip_bionic: true
+      pipenv:
+        git_repo: "https://github.com/cloudfoundry/pipenv-cnb"
+        public: true
+        skip_bionic: true
+      openjdk:
+        git_repo: "https://github.com/cloudfoundry/openjdk-cnb"
+        public: true
+      buildsystem:
+        git_repo: "https://github.com/cloudfoundry/build-system-cnb"
+        public: true
+      jvmapplication:
+        git_repo: "https://github.com/cloudfoundry/jvm-application-cnb"
+        public: true
+        private: true
+      azureapplicationinsights:
+        git_repo: "https://github.com/cloudfoundry/azure-application-insights-cnb"
+        public: true
+        private: true
+      debug:
+        git_repo: "https://github.com/cloudfoundry/debug-cnb"
+        public: true
+        private: true
+      googlestackdriver:
+        git_repo: "https://github.com/cloudfoundry/google-stackdriver-cnb"
+        public: true
+        private: true
+      jmx:
+        git_repo: "https://github.com/cloudfoundry/jmx-cnb"
+        public: true
+        private: true
+      procfile:
+        git_repo: "https://github.com/cloudfoundry/procfile-cnb"
+        public: true
+        private: true
+      dotnet-core-conf:
+        git_repo: "https://github.com/cloudfoundry/dotnet-core-conf-cnb"
+        public: true
+        private: true
+      archivexpanding:
+        git_repo: "https://github.com/cloudfoundry/archive-expanding-cnb"
+        public: true
+        private: true
+      tomcat:
+        git_repo: "https://github.com/cloudfoundry/tomcat-cnb"
+        public: true
+        private: true
+      jdbc:
+        git_repo: "https://github.com/cloudfoundry/jdbc-cnb"
+        public: true
+        private: true
+      springautoreconfiguration:
+        git_repo: "https://github.com/cloudfoundry/spring-auto-reconfiguration-cnb"
+        public: true
+        private: true
+      springboot:
+        git_repo: "https://github.com/cloudfoundry/spring-boot-cnb"
+        public: true
+        private: true
+      distzip:
+        git_repo: "https://github.com/cloudfoundry/dist-zip-cnb"
+        public: true
+        private: true
+      p-openjdk:
+        git_repo: "git@github.com:pivotal-cf/p-openjdk-cnb.git"
+        private: true
+      p-appdynamics:
+        git_repo: "git@github.com:pivotal-cf/p-appdynamics-cnb.git"
+        private: true
+      p-buildsystem:
+        git_repo: "git@github.com:pivotal-cf/p-build-system-cnb.git"
+        private: true
+      p-aspectj:
+        git_repo: "git@github.com:pivotal-cf/p-aspectj-cnb.git"
+        private: true
+      p-caintroscope:
+        git_repo: "git@github.com:pivotal-cf/p-ca-introscope-cnb.git"
+        private: true
+      p-clientcertificatemapper:
+        git_repo: "git@github.com:pivotal-cf/p-client-certificate-mapper-cnb.git"
+        private: true
+      p-containersecurityprovider:
+        git_repo: "git@github.com:pivotal-cf/p-container-security-provider-cnb.git"
+        private: true
+      p-elasticapm:
+        git_repo: "git@github.com:pivotal-cf/p-elastic-apm-cnb.git"
+        private: true
+      p-jacoco:
+        git_repo: "git@github.com:pivotal-cf/p-jacoco-cnb.git"
+        private: true
+      p-jprofiler:
+        git_repo: "git@github.com:pivotal-cf/p-jprofiler-cnb.git"
+        private: true
+      p-jrebel:
+        git_repo: "git@github.com:pivotal-cf/p-jrebel-cnb.git"
+        private: true
+      p-newrelic:
+        git_repo: "git@github.com:pivotal-cf/p-new-relic-cnb.git"
+        private: true
+      p-overops:
+        git_repo: "git@github.com:pivotal-cf/p-overops-cnb.git"
+        private: true
+      p-riverbedappinternals:
+        git_repo: "git@github.com:pivotal-cf/p-riverbed-appinternals-cnb.git"
+        private: true
+      p-skywalking:
+        git_repo: "git@github.com:pivotal-cf/p-skywalking-cnb.git"
+        private: true
+      p-yourkit:
+        git_repo: "git@github.com:pivotal-cf/p-yourkit-cnb.git"
+        private: true
