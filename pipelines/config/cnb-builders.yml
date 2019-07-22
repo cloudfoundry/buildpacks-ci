@@ -1,39 +1,39 @@
 ---
 builders:
   cf-builder-bionic:
-    stack: bionic
+    stack: "bionic"
     private: false
-    base-image: false
+    include-base-image: false
     repo:
-    builder-image:
-      repo: cloudfoundry/cnb
-      stack: "io.buildpacks.stacks.bionic"
-      build-image: "cnbs/build:0.0.1"
-      run-image: "cnbs/run:0.0.1"
-      host: "hub.docker.com"
-      enterprise: false
+    version-resource: bionic-version
+    builder-image-params:
+      REPO: cloudfoundry/cnb
+      STACK: "io.buildpacks.stacks.bionic"
+      BUILD_IMAGE: "cnbs/build:0.0.1"
+      RUN_IMAGE: "cnbs/run:0.0.1"
+      HOST: "hub.docker.com"
   cf-builder-cflinuxfs3:
     stack: cflinuxfs3
     private: false
-    base-image: true
-    builder-image:
-      repo: cloudfoundry/cnb
-      stack: "org.cloudfoundry.stacks.cflinuxfs3"
-      build-image: "cloudfoundry/cnb-build:cflinuxfs3"
-      run-image: "cloudfoundry/cnb-run:cflinuxfs3"
-      host: "hub.docker.com"
-      enterprise: false
+    include-base-image: true
+    version-resource: cflinuxfs3-version
+    builder-image-params:
+      REPO: cloudfoundry/cnb
+      STACK: "org.cloudfoundry.stacks.cflinuxfs3"
+      BUILD_IMAGE: "cloudfoundry/cnb-build:cflinuxfs3"
+      RUN_IMAGE: "cloudfoundry/cnb-run:cflinuxfs3"
+      HOST: "hub.docker.com"
   p-builder-cflinuxfs3:
     stack: cflinuxfs3
     private: true
-    base-image: true
-    builder-image:
-      repo: p-cnb-builder
-      stack: "org.cloudfoundry.stacks.cflinuxfs3"
-      build-image: "cloudfoundry/cnb-build:cflinuxfs3"
-      run-image: "cloudfoundry/cnb-run:cflinuxfs3"
-      enterprise: true
-      host:
+    include-base-image: true
+    version-resource: cflinuxfs3-piv-version
+    builder-image-params:
+      REPO: p-cnb-builder
+      STACK: "org.cloudfoundry.stacks.cflinuxfs3"
+      BUILD_IMAGE: "cloudfoundry/cnb-build:cflinuxfs3"
+      RUN_IMAGE: "cloudfoundry/cnb-run:cflinuxfs3"
+      ENTERPRISE: true
 cnbs:
       node-engine:
         git_repo: "https://github.com/cloudfoundry/node-engine-cnb"
@@ -51,14 +51,20 @@ cnbs:
         git_repo: "https://github.com/cloudfoundry/python-cnb"
         public: true
         skip_bionic: true
+        skip_stack:
+          - "bionic"
       pip:
         git_repo: "https://github.com/cloudfoundry/pip-cnb"
         public: true
         skip_bionic: true
+        skip_stack:
+          - "bionic"
       pipenv:
         git_repo: "https://github.com/cloudfoundry/pipenv-cnb"
         public: true
         skip_bionic: true
+        skip_stack:
+          - "bionic"
       openjdk:
         git_repo: "https://github.com/cloudfoundry/openjdk-cnb"
         public: true
