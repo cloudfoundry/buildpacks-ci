@@ -274,7 +274,11 @@ module DependencyBuild
           Dir.chdir(destdir) do
             Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
             Runner.run('mkdir', 'nginx/conf')
-            Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", '.')
+            if static
+              Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", 'nginx')
+            else
+              Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", '.')
+            end
           end
         end
       end
