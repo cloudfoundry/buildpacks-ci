@@ -73,4 +73,4 @@ buildpacks-ci/tasks/build-binary-new/build.rb
 EOF
 )
 
-docker run --rm -e "STACK=$STACK" -e "SKIP_COMMIT=true" -v "$buildpacks_ci":/tmp/buildpacks-ci -v "$binary_builder":/tmp/binary-builder -v "$artifacts":/tmp/artifacts -w/tmp -i "cloudfoundry/$STACK" "bash" "-cl" "$command"
+docker run --rm -e "STACK=$STACK" -e "SKIP_COMMIT=true" -m 4g -v "$buildpacks_ci":/tmp/buildpacks-ci -v "$binary_builder":/tmp/binary-builder -v "$artifacts":/tmp/artifacts -w/tmp -i "cloudfoundry/$STACK" "bash" "-cl" "$command"
