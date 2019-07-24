@@ -28,12 +28,7 @@ require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
 buildpack_toml_file = File.file?("buildpack/buildpack.toml.tmpl") ? 'buildpack.toml.tmpl' : 'buildpack.toml'
 buildpack_toml = TOML.load_file("buildpack/#{buildpack_toml_file}")
-# Releases have buildpack.toml files, compiled by the release process
-buildpack_toml_latest_released = begin
-  TOML.load_file('buildpack-latest-released/buildpack.toml')
-rescue
-  {'metadata' => {'dependencies' => []}}
-end
+buildpack_toml_latest_released = TOML.load_file('buildpack-latest-released/buildpack.toml.tmpl')
 
 data = JSON.parse(open('source/data.json').read)
 manifest_name = data.dig('source', 'name')
