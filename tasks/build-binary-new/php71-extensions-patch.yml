@@ -4,8 +4,8 @@ extensions:
     - name: sodium
   additions:
     - name: solr
-      version: 2.4.0
-      md5: 2c9accf66681a3daaaf371bc07e44902
+      version: 2.5.0
+      md5: 5034f5d274e2c80b8ac63f601d0beb01
       klass: PeclRecipe
 
 native_modules:
