@@ -66,6 +66,7 @@ dependencies:
           - line: 2.1.5X
           - line: 2.2.1X
           - line: 2.2.2X
+          - line: 2.2.3X
           - line: 3.0.1X
         removal_strategy: keep_all
     source_params:
@@ -506,6 +507,9 @@ skip_build:
     stack: cflinuxfs3
   - dep: dotnet-sdk
     line: 2.2.2X
+    stack: cflinuxfs2
+  - dep: dotnet-sdk
+    line: 2.2.3X
     stack: cflinuxfs2
   - dep: dotnet-sdk
     line: 3.0.1X
