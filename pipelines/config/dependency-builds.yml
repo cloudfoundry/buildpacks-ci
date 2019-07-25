@@ -487,7 +487,7 @@ dependencies:
     any_stack: true
 stacks: ['cflinuxfs2', 'cflinuxfs3']
 windows_stacks: ['windows2012R2', 'windows2016']
-dotnet_sdk_lines_with_aspnetcore: ['2.1.4X', '2.1.5X', '2.2.1X']
+dotnet_sdk_lines_with_aspnetcore: ['2.1.4X', '2.1.5X', '2.2.1X', '2.2.2X', '2.2.3X']
 deps_extracted_from_dotnet_sdk: ['dotnet-runtime', 'dotnet-aspnetcore']
 skip_build:
   - dep: python
