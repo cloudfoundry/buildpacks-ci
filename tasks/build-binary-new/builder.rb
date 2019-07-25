@@ -314,31 +314,22 @@ module DependencyBuild
         runbuildsh.gsub!('WriteDynamicPropsToStaticPropsFiles "${args[@]}"', 'WriteDynamicPropsToStaticPropsFiles')
         File.open('run-build.sh ', 'w') { |f| f.write runbuildsh }
       end
-      if major == '3'
-        Runner.run('./build.sh --configuration Release')
-      else
-        Runner.run('./build.sh', '/t:Compile')
-      end
-
+<
+      Runner.run('./build.sh', '/t:Compile')
     end
 
     # The path to the built files changes in dotnet-v2.1.300
+    has_artifacts_dir = major.to_i <= 2 && minor.to_i <= 1 && patch.to_i < 300
     old_filepath = "/tmp/#{source_input.name}.#{source_input.version}.linux-amd64.tar.xz"
-    if major.to_i <= 2 && minor.to_i <= 1 && patch.to_i < 300
-      dotnet_dir = Dir['cli/artifacts/*-x64/stage2'][0]
-    elsif major == '3'
-      dotnet_dir = 'cli/artifacts/tmp/Release/dotnet'
-    else
-      dotnet_dir = 'cli/bin/2/linux-x64/dotnet'
-    end
+    dotnet_dir = has_artifacts_dir ? Dir['cli/artifacts/*-x64/stage2'][0] : 'cli/bin/2/linux-x64/dotnet'
 
-    remove_frameworks = (major.to_i >= 2 && minor.to_i >= 1) || major.to_i >= 3
+    remove_frameworks = major.to_i >= 2 && minor.to_i >= 1
     framework_extractor = DotnetFrameworkExtractor.new(dotnet_dir, stack, source_input, build_input, artifact_output)
     framework_extractor.extract_runtime(remove_frameworks)
 
     # There are only separate ASP.net packages for dotnet core 2+
     if major.to_i >= 2
-      framework_extractor.extract_aspnetcore(remove_frameworks, major.to_i >= 3)
+      framework_extractor.extract_aspnetcore(remove_frameworks)
     end
 
     Dir.chdir(dotnet_dir) do
