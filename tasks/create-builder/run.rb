@@ -90,5 +90,10 @@ system 'docker', 'save', "#{repo}:#{stack}", '-o', 'builder-image/builder.tgz' o
 File.write(File.join("tag", "name"), tag)
 
 if ENV.fetch('FINAL') == "true"
-  File.write(File.join("release-tag", "name"), stack)
+  tagFile = stack
+  if stack == 'bionic'
+    tagFile += " base" # Need a white-space separated list of tags
+  end
+  File.write(File.join("release-tag", "name"), tagFile)
+
 end

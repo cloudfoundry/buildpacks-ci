@@ -4,13 +4,12 @@ builders:
     stack: bionic
     private: false
     include-base-image: false
-    repo:
     version-resource: bionic-version
     builder-image-params:
       REPO: cloudfoundry/cnb
       STACK: "io.buildpacks.stacks.bionic"
-      BUILD_IMAGE: "cnbs/build:0.0.1"
-      RUN_IMAGE: "cnbs/run:0.0.1"
+      BUILD_IMAGE: "cloudfoundry/build:base-cnb"
+      RUN_IMAGE: "cloudfoundry/run:base-cnb"
       HOST: "hub.docker.com"
   cf-builder-cflinuxfs3:
     stack: cflinuxfs3
@@ -167,6 +166,9 @@ cnbs:
         private: true
       p-skywalking:
         git_repo: "git@github.com:pivotal-cf/p-skywalking-cnb.git"
+        private: true
+      p-wso2:
+        git_repo: "git@github.com:pivotal-cf/p-wso2-cnb.git"
         private: true
       p-yourkit:
         git_repo: "git@github.com:pivotal-cf/p-yourkit-cnb.git"
