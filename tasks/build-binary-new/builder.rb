@@ -314,7 +314,7 @@ module DependencyBuild
         runbuildsh.gsub!('WriteDynamicPropsToStaticPropsFiles "${args[@]}"', 'WriteDynamicPropsToStaticPropsFiles')
         File.open('run-build.sh ', 'w') { |f| f.write runbuildsh }
       end
-<
+
       Runner.run('./build.sh', '/t:Compile')
     end
 
