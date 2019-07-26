@@ -6,11 +6,13 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: version
-  - name: go/src/code.cloudfoundry.org/cli-plugin-repo
-
 outputs:
-  - name: metadata
+  - name: environment-locks
 run:
-  path: buildpacks-ci/tasks/write-plugins-file/run.sh
-
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/write-env-locks/run.rb
+params:
+  ENVIRONMENT:
+  NUMBER_OF_LOCKS:
