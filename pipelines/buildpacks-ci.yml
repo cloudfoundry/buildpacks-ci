@@ -71,7 +71,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: ci-master
         - get: buildpacks-ci
           resource: ci-develop
@@ -140,7 +140,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
           resource: ci-master
           trigger: true

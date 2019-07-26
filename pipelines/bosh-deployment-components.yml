@@ -57,7 +57,7 @@ jobs: ########################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: public-buildpacks-ci-robots
         - get: gcp-stemcell

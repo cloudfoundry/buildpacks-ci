@@ -219,7 +219,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: monday-funday
           trigger: true
@@ -235,7 +235,7 @@ jobs: ##########################################################################
     serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: previous-cflinuxfs2-release
           resource: cflinuxfs2-github-tags
         - get: buildpacks-ci
@@ -289,7 +289,7 @@ jobs: ##########################################################################
     serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: cf-deployment-concourse-tasks
         - get: bbl-state
         - get: bbl-config
@@ -340,7 +340,7 @@ jobs: ##########################################################################
     public: true
     plan:
       - do:
-        - aggregate:
+        - in_parallel:
           - get: new-cves
             passed: [ bbl-up ]
           - get: stack-s3
@@ -358,7 +358,7 @@ jobs: ##########################################################################
           - get: cf-deployment
           - get: gcp-stemcell
           - get: bosh-deployment
-        - aggregate:
+        - in_parallel:
           - task: create-deployment-source-config
             file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
             params:
@@ -407,7 +407,7 @@ jobs: ##########################################################################
     serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: bbl-state
         - get: buildpacks-ci
         - get: cf-deployment-concourse-tasks
@@ -455,7 +455,7 @@ jobs: ##########################################################################
     serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: version
           passed: [ cats ]
@@ -470,7 +470,7 @@ jobs: ##########################################################################
     serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: version
           passed: [ check-for-race-condition ]
           trigger: true
@@ -498,7 +498,7 @@ jobs: ##########################################################################
     serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: cf-deployment-concourse-tasks
         - get: bbl-state
         - get: buildpacks-ci
@@ -527,7 +527,7 @@ jobs: ##########################################################################
     serial_groups: [ cflinuxfs2 ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: new-cves
           passed: [ 'cats' ]
@@ -588,7 +588,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
           resource: buildpacks-ci
         - get: version
@@ -607,7 +607,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: previous-cflinuxfs2-release
           resource: cflinuxfs2-github-tags
@@ -648,7 +648,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: stack-s3
           passed: [ release-cflinuxfs2 ]
@@ -660,7 +660,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/rename-rootfs-for-docker/task.yml
           params:
             STACK: cflinuxfs2
-        - aggregate:
+        - in_parallel:
           - put: docker latest version
             resource: docker-cflinuxfs2
             params:
@@ -684,7 +684,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: blob
           resource: stack-s3

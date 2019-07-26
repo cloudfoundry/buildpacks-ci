@@ -38,7 +38,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: binary-builder
           trigger: true
@@ -51,7 +51,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: docker-cflinuxfs2-rootfs
           trigger: true
@@ -72,7 +72,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: docker-cflinuxfs2-rootfs
           trigger: true
@@ -80,7 +80,7 @@ jobs: ##########################################################################
           passed: [ binary-builder-specs-unit ]
           trigger: true
       - do:
-        - aggregate:
+        - in_parallel:
           - task: integration-<%= spec_name %>
             file: buildpacks-ci/tasks/run-binary-builder-integration-specs/task.yml
             params:

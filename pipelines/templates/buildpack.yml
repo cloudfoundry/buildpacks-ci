@@ -361,7 +361,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-develop
@@ -375,7 +375,7 @@ jobs: ##########################################################################
     public: true
     plan:
       - do:
-        - aggregate:
+        - in_parallel:
           - get: buildpacks-ci
           - get: buildpack
             resource: buildpack-develop
@@ -398,7 +398,7 @@ jobs: ##########################################################################
     plan:
       - get: sunday-night
         trigger: true
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-master
@@ -417,7 +417,7 @@ jobs: ##########################################################################
     plan:
       - get: daily-midnight
         trigger: true
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-develop
@@ -434,7 +434,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-master
@@ -446,7 +446,7 @@ jobs: ##########################################################################
         - get: pivotal-buildpack-<%= stack %>
 <% end %>
       - do:
-        - aggregate:
+        - in_parallel:
 <% bucket_stacks = buildpacks[language]['stacks']
    bucket_stacks = bucket_stacks + ['any'] if language.to_s == 'hwc' || language.to_s == 'binary'
    bucket_stacks.each do |stack| %> #change bucket_stacks to buildpacks[language]['stacks'] when removing any_stack
@@ -481,7 +481,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         <%
         all_stacks = buildpacks[language]['stacks']
         all_stacks = all_stacks + ['any'] if language.to_s == 'hwc' || language.to_s == 'binary'
@@ -517,7 +517,7 @@ jobs: ##########################################################################
         params:
           DOCKER_START: false
         <% end %>
-      - aggregate:
+      - in_parallel:
 <%
 relevant_stacks = buildpacks[language]['stacks']
 relevant_stacks -= buildpacks[language]['edge_skip_stacks'] unless buildpacks[language]['edge_skip_stacks'].empty?
@@ -572,7 +572,7 @@ relevant_stacks.each do |stack| %>
         username: concourse
         icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
     ensure:
-      aggregate:
+      in_parallel:
       - put: edge-buildpack-specs-pool
         params:
           release: edge-buildpack-specs-pool
@@ -584,7 +584,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - put: lts-environments
           params:
             acquire: true
@@ -665,7 +665,7 @@ relevant_stacks.each do |stack| %>
         username: concourse
         icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
     ensure:
-      aggregate:
+      in_parallel:
       - put: lts-environments
         params:
           release: lts-environments
@@ -678,7 +678,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         <%
         all_stacks = buildpacks[language]['stacks']
@@ -716,7 +716,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
         - get: pivotal-buildpacks-stack<%= ndx.to_s %>
@@ -750,7 +750,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         <% pws_stacks = buildpacks[language]['stacks'] - ['windows2012R2']
            pws_stacks.each do |stack| %>
@@ -788,7 +788,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: pivnet-buildpack-metadata
           resource: pivnet-buildpack-metadata-lts
@@ -826,7 +826,7 @@ relevant_stacks.each do |stack| %>
   - name: release-lts-product-to-pivnet
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: pivnet-buildpack-metadata-lts
           passed: [ write-pivnet-metadata-for-lts-product ]
           trigger: true
@@ -851,7 +851,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-    - aggregate:
+    - in_parallel:
       - get: buildpacks-ci
       - get: pivnet-buildpack-metadata
       <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
@@ -881,7 +881,7 @@ relevant_stacks.each do |stack| %>
   - name: release-product-to-pivnet
     public: true
     plan:
-    - aggregate:
+    - in_parallel:
       - get: pivnet-buildpack-metadata
         passed: [ write-pivnet-metadata ]
         trigger: true
@@ -902,7 +902,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-    - aggregate:
+    - in_parallel:
       - put: edge-environments
         params:
           acquire: true
@@ -917,7 +917,7 @@ relevant_stacks.each do |stack| %>
         trigger: true
       - get: repo
         resource: buildpack-v3
-    - aggregate:
+    - in_parallel:
       <%
       #buildpacks[language]['stacks'].each do |stack| #use this when cnb buildpack github releases support cflinuxfs2
       ['cflinuxfs3'].each do |stack|
@@ -960,7 +960,7 @@ relevant_stacks.each do |stack| %>
         username: concourse
         icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
     ensure:
-      aggregate:
+      in_parallel:
       - put: edge-buildpack-specs-pool
         params:
           release: edge-buildpack-specs-pool
@@ -973,7 +973,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - put: edge-environments
           params:
             acquire: true
@@ -990,7 +990,7 @@ relevant_stacks.each do |stack| %>
           - specs-unit-develop
         - get: repo
           resource: buildpack-develop
-      - aggregate:
+      - in_parallel:
 <% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks -= buildpacks[language]['edge_skip_stacks'] unless buildpacks[language]['edge_skip_stacks'].empty? %>
 <% relevant_stacks.each do |stack| %>
@@ -1032,7 +1032,7 @@ relevant_stacks.each do |stack| %>
         username: concourse
         icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
     ensure:
-      aggregate:
+      in_parallel:
       - put: edge-buildpack-specs-pool
         params:
           release: edge-buildpack-specs-pool
@@ -1045,7 +1045,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - put: edge-environments
           params:
             acquire: true
@@ -1056,7 +1056,7 @@ relevant_stacks.each do |stack| %>
           trigger: true
           passed:
           - specs-unit-develop
-      - aggregate:
+      - in_parallel:
 <% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks -= buildpacks[language]['edge_skip_stacks'] unless buildpacks[language]['edge_skip_stacks'].empty? %>
 <% relevant_stacks.each do |stack| %>
@@ -1124,7 +1124,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - put: lts-environments
           params:
             acquire: true
@@ -1174,7 +1174,7 @@ relevant_stacks.each do |stack| %>
         username: concourse
         icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
     ensure:
-      aggregate:
+      in_parallel:
       - put: lts-environments
         params:
           release: lts-environments
@@ -1186,7 +1186,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - put: lts-environments
           params:
             acquire: true
@@ -1253,7 +1253,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: repo
           trigger: true
@@ -1272,7 +1272,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-    - aggregate:
+    - in_parallel:
       - get: buildpacks-ci
       - get: libbuildpack
         trigger: true
@@ -1292,7 +1292,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: libbuildpack
           trigger: true
@@ -1317,7 +1317,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: compile-extensions
           trigger: true
@@ -1334,7 +1334,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: gem
           resource: buildpack-packager
@@ -1358,7 +1358,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: buildpackapplifecycle
           trigger: true
@@ -1379,7 +1379,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: release
           resource: buildpack-bosh-release
@@ -1418,7 +1418,7 @@ relevant_stacks.each do |stack| %>
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: release
           resource: offline-buildpack-bosh-release
