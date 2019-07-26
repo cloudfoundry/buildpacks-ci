@@ -502,9 +502,6 @@ skip_build:
   - dep: dotnet-sdk
     line: 2.2.2X
     stack: cflinuxfs2
-  - dep: dotnet-sdk
-    line: 2.2.3X
-    stack: cflinuxfs2
   - dep: node
     line: 10.X.X
     stack: cflinuxfs2
