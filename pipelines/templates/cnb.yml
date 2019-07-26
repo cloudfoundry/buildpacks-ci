@@ -79,7 +79,7 @@ jobs: ##########################################################################
     public: true
     serial: true
     plan:
-    - aggregate:
+    - in_parallel:
       - get: buildpacks-ci
       - get: cnb-tools-git
         trigger: true
@@ -96,7 +96,7 @@ jobs: ##########################################################################
     public: true
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: libcfbuildpack
           trigger: true
@@ -117,7 +117,7 @@ jobs: ##########################################################################
   - name: update-dagger
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: dagger
           trigger: true
@@ -140,7 +140,7 @@ jobs: ##########################################################################
     serial: true
     plan:
       - do:
-        - aggregate:
+        - in_parallel:
           - get: buildpacks-ci
           - get: repo
             resource: buildpack-git
@@ -154,7 +154,7 @@ jobs: ##########################################################################
     public: true
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
           - get: version
             resource: <%= language %>-cnb-version
             params:
@@ -193,7 +193,7 @@ jobs: ##########################################################################
     public: true
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: pack
           trigger: true
@@ -212,7 +212,7 @@ jobs: ##########################################################################
     public: true
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: packager
           resource: libcfbuildpack

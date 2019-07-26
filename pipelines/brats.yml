@@ -116,7 +116,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - put: lts-environments
           params:
             acquire: true
@@ -166,7 +166,7 @@ jobs:
             task: delete-cf-space
             file: buildpacks-ci/tasks/delete-cf-space/task.yml
         ensure:
-          aggregate:
+          in_parallel:
           - put: lts-environments
             params:
               release: lts-environments
@@ -180,7 +180,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - put: edge-environments
           params:
             acquire: true
@@ -201,7 +201,7 @@ jobs:
 <% end %>
         - get: nightly-trigger-<%= (index % 2) + 1 %>
           trigger: true
-      - aggregate:
+      - in_parallel:
 <% stacks[language].each do |stack| %>
         - do:
           - task: create-cf-space
@@ -253,7 +253,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: gem
           resource: buildpack-packager

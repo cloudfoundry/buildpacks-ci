@@ -24,13 +24,13 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: pivnet-production
   - name: buildpack-to-pws
     public: true
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: pivnet-production
           passed: [ship-it]

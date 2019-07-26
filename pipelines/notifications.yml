@@ -88,7 +88,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: davos-cve-stories
           resource: davos-cve-stories-cflinuxfs3
           trigger: true
@@ -96,7 +96,7 @@ jobs:
         - get: cflinuxfs3-release
           params:
             include_source_tarball: true
-      - aggregate:
+      - in_parallel:
         - task: categorize-security-notices-cflinuxfs3
           file: buildpacks-ci/tasks/categorize-security-notices/task.yml
           params:
@@ -108,7 +108,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: new-releases
         - get: check-interval
@@ -147,7 +147,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: new-cves
         - get: new-buildpack-cves
@@ -167,13 +167,13 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: new-cves
         - get: cflinuxfs3
         - get: check-interval
           trigger: true
-      - aggregate:
+      - in_parallel:
         - do:
           - task: check-for-new-cflinuxfs3-cves
             file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
@@ -193,7 +193,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: month-start
           trigger: true
         - get: buildpacks-ci

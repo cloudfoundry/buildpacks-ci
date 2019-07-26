@@ -234,7 +234,7 @@ jobs:
   serial: true
   public: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: buildpacks-ci
     - get: source
       resource: source-<%= dep_name %>-latest
@@ -257,7 +257,7 @@ jobs:
   serial: true
   public: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: buildpacks-ci
     - get: source
       resource: source-<%=dep_name%>-<%= line %>
@@ -317,7 +317,7 @@ jobs:
   serial: true
   public: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: buildpacks-ci
     - get: source
       resource: source-<%=dep_name%>-<%= line %>
@@ -351,7 +351,7 @@ jobs:
 <% if dep_name == 'node' || dep_name == 'go' %>
 - name: copy-<%=dep_name%>-<%= line %>-bionic
   plan:
-  - aggregate:
+  - in_parallel:
     - get: buildpacks-ci
     - get: source
       resource: source-<%=dep_name%>-<%= line %>
@@ -373,7 +373,7 @@ jobs:
   serial: true
   public: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: buildpacks-ci
     - get: binary-builder
     - get: source
@@ -391,7 +391,7 @@ jobs:
     - get: <%= stack %>-image
     <% end %>
     - get: builds
-  - aggregate:
+  - in_parallel:
     <% build_stacks = dep['any_stack'] ? ['any-stack'] : stacks %>
     <% build_stacks.each do |stack| %>
     <% unless skip_build.include?({ 'dep' => dep_name, 'line' => line, 'stack' => stack}) %>
@@ -402,7 +402,7 @@ jobs:
         output_mapping: {artifacts: <%= stack %>-artifacts, builds-artifacts: <%= stack %>-builds-metadata}
         params:
           STACK: <%= stack %>
-      - aggregate:
+      - in_parallel:
         <% if !dep['third_party_hosted'] %>
         - put: buildpacks-bucket-<%= dep_name %>-<%= stack %>
           resource: buildpacks-bucket-<%= dep_name %>
@@ -437,7 +437,7 @@ jobs:
   serial: true
   public: true
   plan:
-  - aggregate:
+  - in_parallel:
     <% if dep['branch'] == 'v3' %>
     - get: buildpack
       resource: <%= bp_name %>-buildpack-v3

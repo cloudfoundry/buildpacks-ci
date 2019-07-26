@@ -45,7 +45,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         <% buildpacks.each do |name| %>
         - get: <%= name %>_buildpack
           trigger: true

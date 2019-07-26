@@ -78,7 +78,7 @@ jobs: ##########################################################################
   - name: test-stack-auditor
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: env-repo
         - put: plugin-environments
@@ -108,7 +108,7 @@ jobs: ##########################################################################
   - name: ship-it
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: version
           params: {bump: patch}
@@ -150,7 +150,7 @@ jobs: ##########################################################################
   - name: update-libbuildpack
     serial: true
     plan:
-    - aggregate:
+    - in_parallel:
       - get: buildpacks-ci
       - get: libbuildpack
         trigger: true
@@ -165,7 +165,7 @@ jobs: ##########################################################################
   - name: test-unit-cnb2cf
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: repo
           resource: cnb2cf
@@ -177,7 +177,7 @@ jobs: ##########################################################################
   - name: test-integration-cnb2cf
     serial: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: env-repo
         - put: plugin-environments

@@ -46,7 +46,7 @@ jobs:
     public: true
     plan:
       - do:
-        - aggregate:
+        - in_parallel:
           - get: buildpacks-ci
           - get: verification-whitelist
           - get: verification-interval

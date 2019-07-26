@@ -117,13 +117,13 @@ jobs: ##########################################################################
 
 - name: cf-sample-app-nodejs-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: cf-sample-app-nodejs
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -154,13 +154,13 @@ jobs: ##########################################################################
 
 - name: cf-sample-app-spring-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: cf-sample-app-spring
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -191,13 +191,13 @@ jobs: ##########################################################################
 
 - name: cf-sample-app-go-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: cf-sample-app-go
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -229,13 +229,13 @@ jobs: ##########################################################################
 
 - name: cf-sample-app-rails-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: cf-sample-app-rails
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -266,13 +266,13 @@ jobs: ##########################################################################
 
 - name: pong-matcher-rails-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: pong-matcher-rails
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -303,13 +303,13 @@ jobs: ##########################################################################
 
 - name: pong-matcher-slim-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: pong-matcher-slim
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -340,13 +340,13 @@ jobs: ##########################################################################
 
 - name: pong-matcher-django-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: pong-matcher-django
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -377,13 +377,13 @@ jobs: ##########################################################################
 
 - name: pong-matcher-go-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: pong-matcher-go
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -414,13 +414,13 @@ jobs: ##########################################################################
 
 - name: spring-music-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: spring-music
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -451,13 +451,13 @@ jobs: ##########################################################################
 
 - name: cf-ex-phpmyadmin-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: cf-ex-phpmyadmin
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -488,13 +488,13 @@ jobs: ##########################################################################
 
 - name: cf-ex-drupal-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: cf-ex-drupal
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -525,13 +525,13 @@ jobs: ##########################################################################
 
 - name: cf-ex-code-igniter-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: cf-ex-code-igniter
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -562,13 +562,13 @@ jobs: ##########################################################################
 
 - name: cf-ex-phppgadmin-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: cf-ex-phppgadmin
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -599,13 +599,13 @@ jobs: ##########################################################################
 
 - name: cf-ex-php-info-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: cf-ex-php-info
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -636,13 +636,13 @@ jobs: ##########################################################################
 
 - name: cf-ex-pgbouncer-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: cf-ex-pgbouncer
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -673,13 +673,13 @@ jobs: ##########################################################################
 
 - name: cf-ex-composer-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: cf-ex-composer
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -710,13 +710,13 @@ jobs: ##########################################################################
 
 - name: cf-ex-phalcon-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: cf-ex-phalcon
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>
@@ -747,13 +747,13 @@ jobs: ##########################################################################
 
 - name: dotnet-core-hello-world-smoke-test
   plan:
-    - aggregate:
+    - in_parallel:
       - get: nightly-trigger
         trigger: true
       - get: sample-app
         resource: dotnet-core-hello-world
       - get: buildpacks-ci
-    - aggregate:
+    - in_parallel:
 <% stacks.each do |stack| %>
       - do:
         - task: create-cf-space-<%= stack %>

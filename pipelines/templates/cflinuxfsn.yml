@@ -244,7 +244,7 @@ jobs: ##########################################################################
     serial_groups: [ <%= rootfs_name %> ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: previous-rootfs-release
           resource: <%= rootfs_name %>-github-tags
         - get: buildpacks-ci
@@ -296,7 +296,7 @@ jobs: ##########################################################################
     serial_groups: [ <%= rootfs_name %> ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: previous-rootfs-release
           resource: <%= rootfs_name %>-github-tags
           passed: [ build-rootfs ]
@@ -351,7 +351,7 @@ jobs: ##########################################################################
     public: true
     plan:
       - do:
-        - aggregate:
+        - in_parallel:
           - get: new-cves
             passed: [ bbl-up ]
           - get: stack-s3
@@ -379,7 +379,7 @@ jobs: ##########################################################################
           <% languages.each do |language| %>
           - get: <%= language %>-buildpack-release
           <% end %>
-        - aggregate:
+        - in_parallel:
           - task: create-deployment-source-config
             file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
             params:
@@ -442,7 +442,7 @@ jobs: ##########################################################################
     serial_groups: [ <%= rootfs_name %> ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: bbl-state
         - get: buildpacks-ci
         - get: cf-deployment-concourse-tasks
@@ -495,7 +495,7 @@ jobs: ##########################################################################
     serial_groups: [ <%= rootfs_name %> ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: version
           passed: [ cats ]
@@ -522,7 +522,7 @@ jobs: ##########################################################################
     serial_groups: [ <%= rootfs_name %> ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: version
           passed: [ check-for-race-condition ]
           trigger: true
@@ -550,7 +550,7 @@ jobs: ##########################################################################
     serial_groups: [ <%= rootfs_name %> ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: cf-deployment-concourse-tasks
         - get: bbl-state
         - get: buildpacks-ci
@@ -579,7 +579,7 @@ jobs: ##########################################################################
     serial_groups: [ <%= rootfs_name %> ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: new-cves
           passed: [ check-for-race-condition ]
@@ -640,7 +640,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: previous-rootfs-release
           resource: <%= rootfs_name %>-github-tags
@@ -683,7 +683,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
           resource: buildpacks-ci
         - get: version
@@ -703,7 +703,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: stack-s3
           passed: [ release-<%= rootfs_name %> ]
@@ -715,7 +715,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/rename-rootfs-for-docker/task.yml
           params:
             STACK: <%= rootfs_name %>
-        - aggregate:
+        - in_parallel:
           - put: <%= rootfs_name %>-image
             params:
               skip_download: true
@@ -734,7 +734,7 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: blob
           resource: stack-s3

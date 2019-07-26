@@ -30,7 +30,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: libbuildpack
           trigger: true
@@ -42,7 +42,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: buildpack-packager
           trigger: true
@@ -54,7 +54,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: gem
           resource: buildpack-packager
@@ -70,7 +70,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: gem
           passed: [ buildpack-packager-tag ]
@@ -92,7 +92,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: compile-extensions
           trigger: true

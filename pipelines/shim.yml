@@ -109,7 +109,7 @@ resources:
 jobs:
   - name: unit-test-cnb2cf
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: repo
           resource: cnb2cf
@@ -119,7 +119,7 @@ jobs:
 
   - name: integration-test-cnb2cf
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: repo
           resource: cnb2cf
@@ -140,7 +140,7 @@ jobs:
       - task: integration-test
         file: buildpacks-ci/tasks/run-scripts-integration/task.yml
     ensure:
-      aggregate:
+      in_parallel:
         - task: delete-cf-space
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
         - put: edge-environments
@@ -149,7 +149,7 @@ jobs:
 
   - name: create-shim-bundle
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: shim
           resource: shim-git
@@ -168,7 +168,7 @@ jobs:
 
   - name: update-cnb2cf-template-shim-binaries-shim-binaries
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: s3
           resource: buildpacks-bucket-shim-bundle
@@ -185,7 +185,7 @@ jobs:
   <% languages.each do |lang, data| %>
   - name: update-shim-bundle-in-<%= lang %>
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: s3
           resource: buildpacks-bucket-shim-bundle
@@ -202,7 +202,7 @@ jobs:
 
   - name: update-cnb2cf-template-shim-binaries-lifecycle-binaries
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: s3
           resource: buildpacks-bucket-lifecycle-bundle
@@ -221,7 +221,7 @@ jobs:
 
   - name: update-cnb2cf-dependencies
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: module
           resource: libbuildpack
@@ -235,7 +235,7 @@ jobs:
 
   - name: update-cnb2cf-buildpack-libbuildpack
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: module
           resource: buildpack-libbuildpack
@@ -249,7 +249,7 @@ jobs:
 
   - name: update-cnb2cf-libcfbuildpack
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: module
           resource: libcfbuildpack

@@ -120,7 +120,7 @@ resources:
 jobs:
   - name: unit-specs-linux
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: bal-develop
           trigger: true
@@ -128,7 +128,7 @@ jobs:
         file: buildpacks-ci/tasks/run-bal-specs/task.yml
   - name: unit-specs-windows
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: bal-develop
           trigger: true
@@ -140,7 +140,7 @@ jobs:
     serial_groups: [ bal ]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: monday-funday
           trigger: true
         - get: cf-deployment-concourse-tasks
@@ -185,7 +185,7 @@ jobs:
     public: true
     plan:
       - do:
-        - aggregate:
+        - in_parallel:
           - get: monday-funday
             passed: [bbl-up]
             trigger: true
@@ -268,7 +268,7 @@ jobs:
     serial_groups: [bal]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: bbl-state
         - get: monday-funday
           trigger: true
@@ -327,7 +327,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: repo
           resource: bal-develop
@@ -346,7 +346,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: bal-master
         - get: buildpacks-ci
         - get: bal-develop
@@ -365,7 +365,7 @@ jobs:
     serial: true
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: diego-release
         - get: bal-develop
@@ -383,7 +383,7 @@ jobs:
     serial_groups: [bal]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: monday-funday
           trigger: true
           passed: [cats]
@@ -408,7 +408,7 @@ jobs:
     serial_groups: [bal]
     public: true
     plan:
-      - aggregate:
+      - in_parallel:
         - get: monday-funday
           trigger: true
           passed: [ destroy-cf-deployment ]

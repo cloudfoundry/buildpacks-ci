@@ -148,7 +148,7 @@ jobs: ##########################################################################
   - name: bbl-up-<%= env %>
     serial_groups: [ <%= env %> ]
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: cf-deployment-concourse-tasks
         - get: edge-environments
@@ -186,7 +186,7 @@ jobs: ##########################################################################
               params:
                 ENVIRONMENT: <%= env %>
                 NUMBER_OF_LOCKS: <%= locks_per_environment %>
-            - aggregate:
+            - in_parallel:
               <% locks_per_environment.times do |lock_num| %>
               - put: edge-environments
                 timeout: 1h
@@ -198,7 +198,7 @@ jobs: ##########################################################################
     serial_groups: [ <%= env %> ]
     plan:
       - do:
-        - aggregate:
+        - in_parallel:
           - get: buildpacks-ci
           - get: bbl-state
             trigger: true
@@ -223,7 +223,7 @@ jobs: ##########################################################################
             params:
               claim: <%= env %><%= lock_num %>
           <% end %>
-        - aggregate:
+        - in_parallel:
           - task: bosh-upload-all-stemcells
             file: cf-deployment-concourse-tasks/bosh-upload-stemcells/task.yml
             params:
@@ -269,7 +269,7 @@ jobs: ##########################################################################
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
         ensure:
-          aggregate:
+          in_parallel:
             <% locks_per_environment.times do |lock_num| %>
             - put: edge-environments
               params:
@@ -280,7 +280,7 @@ jobs: ##########################################################################
     serial_groups: [ <%= env %> ]
     plan:
       - do:
-        - aggregate:
+        - in_parallel:
           - get: bbl-state
             passed: [deploy-<%= env %>]
           - get: cf-deployment-concourse-tasks
@@ -300,7 +300,7 @@ jobs: ##########################################################################
             BBL_STATE_DIR: <%= env %>
             DEPLOYMENT_NAME: cf
         ensure:
-          aggregate:
+          in_parallel:
           <% locks_per_environment.times do |lock_num| %>
           - put: edge-environments
             params:
@@ -310,7 +310,7 @@ jobs: ##########################################################################
   - name: bosh-cleanup-<%= env %>
     plan:
       - do:
-        - aggregate:
+        - in_parallel:
           - get: bbl-state
             passed: [deploy-<%= env %>]
           - get: cf-deployment-concourse-tasks
@@ -332,7 +332,7 @@ jobs: ##########################################################################
           params:
             BBL_STATE_DIR: <%= env %>
         ensure:
-          aggregate:
+          in_parallel:
           <% locks_per_environment.times do |lock_num| %>
           - put: edge-environments
             params:
@@ -342,7 +342,7 @@ jobs: ##########################################################################
   - name: bbl-destroy-<%= env %>
     serial_groups: [ <%= env %> ]
     plan:
-      - aggregate:
+      - in_parallel:
         <% locks_per_environment.times do |lock_num| %>
         - put: edge-environments<%= lock_num %>
           timeout: 30m
@@ -367,7 +367,7 @@ jobs: ##########################################################################
           BBL_STATE_DIR: <%= env %>
           BBL_GCP_SERVICE_ACCOUNT_KEY: {{gcp-service-account-key}}
         on_success:
-          aggregate:
+          in_parallel:
             <% locks_per_environment.times do |lock_num| %>
             - put: edge-environments
               params:
@@ -383,7 +383,7 @@ jobs: ##########################################################################
 <% toolsmiths_envs.each do |name, id| %>
   - name: renew-toolsmiths-environment-<%= name %>
     plan:
-      - aggregate:
+      - in_parallel:
         - get: buildpacks-ci
         - get: once-a-week-timer
           trigger: true
