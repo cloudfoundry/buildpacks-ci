@@ -20,7 +20,8 @@ V3_DEP_NAMES = {
   'python' => 'Python',
   'php' => 'PHP',
   'httpd' => 'Apache HTTP Server',
-  'go' => 'Go'
+  'go' => 'Go',
+  'dep' => 'Dep'
 }
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
@@ -80,6 +81,9 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
   end
 
   if stack == 'any-stack'
+    total_stacks.concat CNB_STACKS.values
+    v3_stacks = CNB_STACKS.values
+  elsif stack == 'cflinuxfs3' and dependency_name == 'dep' # NOTE: This case is temporary. For now, we will use cflinuxfs3 dependencies for bionic as well.
     total_stacks.concat CNB_STACKS.values
     v3_stacks = CNB_STACKS.values
   else
