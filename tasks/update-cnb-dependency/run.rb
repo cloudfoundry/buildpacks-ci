@@ -174,8 +174,8 @@ if added.empty? && !rebuilt
   exit 0
 end
 
-commit_message = "Add #{manifest_name} #{resource_version}"
-commit_message = "Rebuild #{manifest_name} #{resource_version}" if rebuilt
+commit_message = "Add #{dependency_name} #{resource_version}"
+commit_message = "Rebuild #{dependency_name} #{resource_version}" if rebuilt
 if removed.length > 0
   commit_message = "#{commit_message}, remove #{dependency_name} #{removed.join(', ')}"
 end
