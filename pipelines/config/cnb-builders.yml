@@ -64,6 +64,18 @@ cnbs:
         skip_bionic: true
         skip_stack:
           - "bionic"
+      go-compiler:
+        git_repo: "https://github.com/cloudfoundry/go-compiler-cnb"
+        public: true
+        private: true
+      go-mod:
+        git_repo: "https://github.com/cloudfoundry/go-mod-cnb"
+        public: true
+        private: true
+      dep:
+        git_repo: "https://github.com/cloudfoundry/dep-cnb"
+        public: true
+        private: true
       openjdk:
         git_repo: "https://github.com/cloudfoundry/openjdk-cnb"
         public: true
