@@ -5,24 +5,12 @@ resource_types:
     type: docker-image
     source:
       repository: cfcommunity/slack-notification-resource
-  - name: cron
-    type: docker-image
-    source:
-      repository: cfbuildpacks/cron-resource
   - name: bosh-deployment
     type: docker-image
     source:
       repository: cloudfoundry/bosh-deployment-resource
 
 resources: ###########################################################################################################
-
-  ## Cron Resource ##
-
-  - name: monday-funday
-    type: cron
-    source:
-      expression: 0 5 * * 1
-      location: {{current-timezone}}
 
   ## Git Repos ##
   <% languages = %w(binary dotnet-core go java nodejs php python ruby staticfile) %>
@@ -223,22 +211,6 @@ resources: #####################################################################
 
 jobs: ################################################################################################################
 
-  - name: notification
-    serial: true
-    public: true
-    plan:
-      - aggregate:
-        - get: buildpacks-ci
-        - get: monday-funday
-          trigger: true
-      - task: create-tracker-story
-        file: buildpacks-ci/tasks/create-new-rootfs-release-story/task.yml
-        params:
-          TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
-          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-          TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
-          STACK: <%= rootfs_name %>
-
   - name: build-rootfs
     serial: true
     serial_groups: [ <%= rootfs_name %> ]
@@ -256,9 +228,6 @@ jobs: ##########################################################################
           trigger: true
         - get: version
           params: { pre: rc }
-        - get: monday-funday
-          passed: [ "notification" ]
-          trigger: true
         - get: public-robots
       - do:
         - task: make-rootfs
