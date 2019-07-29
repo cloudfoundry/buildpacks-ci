@@ -31,9 +31,9 @@ buildpack_toml = TOML.load_file("buildpack/#{buildpack_toml_file}")
 buildpack_toml_latest_released = TOML.load_file('buildpack-latest-released/buildpack.toml.tmpl')
 
 data = JSON.parse(open('source/data.json').read)
-manifest_name = data.dig('source', 'name')
+dependency_name = data.dig('source', 'name')
 resource_version = data.dig('version', 'ref')
-story_id = JSON.parse(open("builds/binary-builds-new/#{manifest_name}/#{resource_version}.json").read)['tracker_story_id']
+story_id = JSON.parse(open("builds/binary-builds-new/#{dependency_name}/#{resource_version}.json").read)['tracker_story_id']
 removal_strategy  = ENV['REMOVAL_STRATEGY']
 version_line_type = ENV['VERSION_LINE_TYPE']
 version_line      = ENV['VERSION_LINE']
@@ -50,13 +50,13 @@ rebuilt = []
 total_stacks = []
 builds = {}
 
-dependency_build_glob = "builds/binary-builds-new/#{manifest_name}/#{resource_version}-*.json"
+dependency_build_glob = "builds/binary-builds-new/#{dependency_name}/#{resource_version}-*.json"
 Dir[dependency_build_glob].each do |stack_dependency_build|
   no_deprecation_info = (deprecation_date.nil? or deprecation_link.nil?)
   unless no_deprecation_info or (version_line == 'latest')
     dependency_deprecation_date = {
       'version_line' => version_line.downcase,
-      'name'         => manifest_name,
+      'name'         => dependency_name,
       'date'         => DateTime.parse(deprecation_date),
       'link'         => deprecation_link,
     }
@@ -67,7 +67,7 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
 
     deprecation_dates = buildpack_toml['metadata'].fetch('dependency_deprecation_dates', [])
     deprecation_dates = deprecation_dates
-                          .reject{ |d| d['version_line'] == version_line.downcase and d['name'] == manifest_name}
+                          .reject{ |d| d['version_line'] == version_line.downcase and d['name'] == dependency_name}
                           .push(dependency_deprecation_date)
                           .sort_by{ |d| [d['name'], d['version_line'] ]}
     buildpack_toml['metadata']['dependency_deprecation_dates'] = deprecation_dates
@@ -105,23 +105,23 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
     end
   end
 
-  if manifest_name.include? 'dotnet'
+  if dependency_name.include? 'dotnet'
     git_commit_sha = builds[stack]['git_commit_sha']
     source_url = "#{source_url}/archive/#{git_commit_sha}.tar.gz"
-  elsif manifest_name == 'appdynamics'
+  elsif dependency_name == 'appdynamics'
     source_type = 'osl'
     source_url = 'https://docs.appdynamics.com/display/DASH/Legal+Notices'
-  elsif manifest_name == 'CAAPM'
+  elsif dependency_name == 'CAAPM'
     source_type = 'osl'
     source_url = 'https://docops.ca.com/ca-apm/10-5/en/ca-apm-release-notes/third-party-software-acknowledgments/php-agents-third-party-software-acknowledgments'
-  elsif manifest_name.include? 'miniconda'
+  elsif dependency_name.include? 'miniconda'
     source_url = "https://github.com/conda/conda/archive/#{version}.tar.gz"
   end
 
   if source_sha256 != ""
     dep = {
-      'id' => V3_DEP_IDS.fetch(manifest_name, manifest_name),
-      'name' => V3_DEP_NAMES[manifest_name],
+      'id' => V3_DEP_IDS.fetch(dependency_name, dependency_name),
+      'name' => V3_DEP_NAMES[dependency_name],
       'version' => resource_version,
       'uri' => build['url'],
       'sha256' => build['sha256'],
@@ -131,8 +131,8 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
     }
   else
     dep = {
-        'id' => V3_DEP_IDS.fetch(manifest_name, manifest_name),
-        'name' => V3_DEP_NAMES[manifest_name],
+        'id' => V3_DEP_IDS.fetch(dependency_name, dependency_name),
+        'name' => V3_DEP_NAMES[dependency_name],
         'version' => resource_version,
         'uri' => build['url'],
         'sha256' => build['sha256'],
@@ -142,7 +142,7 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
 
   old_deps = buildpack_toml['metadata'].fetch('dependencies', [])
   old_versions = old_deps
-                     .select {|d| d['id'] == V3_DEP_IDS.fetch(manifest_name, manifest_name)}
+                     .select {|d| d['id'] == V3_DEP_IDS.fetch(dependency_name, dependency_name)}
                      .map {|d| d['version']}
 
   buildpack_toml['metadata']['dependencies'] = Dependencies.new(
@@ -154,7 +154,7 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
   ).switch
 
   new_versions = buildpack_toml['metadata']['dependencies']
-                     .select {|d| d['id'] == V3_DEP_IDS.fetch(manifest_name, manifest_name)}
+                     .select {|d| d['id'] == V3_DEP_IDS.fetch(dependency_name, dependency_name)}
                      .map {|d| d['version']}
 
   added += (new_versions - old_versions).uniq.sort
@@ -173,7 +173,7 @@ end
 commit_message = "Add #{manifest_name} #{resource_version}"
 commit_message = "Rebuild #{manifest_name} #{resource_version}" if rebuilt
 if removed.length > 0
-  commit_message = "#{commit_message}, remove #{manifest_name} #{removed.join(', ')}"
+  commit_message = "#{commit_message}, remove #{dependency_name} #{removed.join(', ')}"
 end
 commit_message = commit_message + "\n\nfor stack(s) #{total_stacks.join(', ')}"
 
