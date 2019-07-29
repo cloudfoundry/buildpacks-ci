@@ -234,6 +234,7 @@ jobs:
             vars:
               system_domain: bal.buildpacks-gcp.ci.cf-app.com
         - task: open-asgs-for-credhub
+          attempts: 3
           file: cf-deployment-concourse-tasks/open-asgs-for-bosh-instance-group/task.yml
           params:
             BBL_STATE_DIR: bal
