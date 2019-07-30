@@ -1,0 +1,66 @@
+---
+resources:
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
+
+  - name: cnb2cf
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cnb2cf
+      branch: master
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+
+  - name: repo
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/nodejs-cnb
+      branch: master
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+      path: /manifest.yml # Only do stuff when this changes
+
+  - name: release-candidate
+    type: s3
+    source:
+      bucket: {{buildpack-release-candidates-bucket}}
+      regexp: shims/nodejs/nodejs-cnb-buildpack-v(\d+\.\d+\.\d+-rc\.\d+).zip
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+
+  - name: nodejs-cnb-version
+    type: semver
+    source:
+      initial_version: 0.0.1
+      driver: gcs
+      bucket: artifacts.cf-buildpacks.appspot.com
+      key: cnb-versions/<%= language %>-version
+      json_key: {{gcp-service-account-key}}
+
+jobs:
+  - name: create-rc-zip
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: nodejs-cnb-version
+          params:
+            bump: patch
+            pre: rc
+        - get: repo
+          trigger: true
+    - task: build-artifact
+      file: buildpacks-ci/tasks/build-cnb-buildpack/task.yml
+    - put: release-candidate
+
+  - name: test-rc
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: repo
+          trigger: true
+        - get: release-candidate
+      - task: run-integration-test-cnb-buildpack
+        file: buildpacks-ci/tasks/run-integration-test-cnb-buildpack/task.yml

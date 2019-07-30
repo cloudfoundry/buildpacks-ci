@@ -17,19 +17,6 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/stack-auditor
       branch: master
 
-  - name: cnb2cf
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/cnb2cf.git
-      private_key: {{cf-buildpacks-eng-github-ssh-key}}
-      branch: master
-
-  - name: libbuildpack
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/libbuildpack
-      branch: master
-
   - name: buildpacks-ci
     type: git
     source:
@@ -146,63 +133,3 @@ jobs: ##########################################################################
       params:
         file_glob: plugin-release/stack-auditor-*
         metadata_file: pivnet-metadata-artifacts/stack-auditor.yml
-
-  - name: update-libbuildpack
-    serial: true
-    plan:
-    - in_parallel:
-      - get: buildpacks-ci
-      - get: libbuildpack
-        trigger: true
-      - get: cnb2cf
-    - task: update-libbuildpack-cnb2cf
-      file: buildpacks-ci/tasks/update-libbuildpack-cnb2cf/task.yml
-    - put: cnb2cf
-      params:
-        repository: cnb2cf-artifacts
-        rebase: true
-
-  - name: test-unit-cnb2cf
-    serial: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: repo
-          resource: cnb2cf
-          trigger: true
-      - do:
-        - task: test
-          file: buildpacks-ci/tasks/run-scripts-unit/task.yml
-
-  - name: test-integration-cnb2cf
-    serial: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: env-repo
-        - put: plugin-environments
-          params:
-            acquire: true
-        - get: repo
-          resource: cnb2cf
-          trigger: true
-          passed:
-            - test-unit-cnb2cf
-      - do:
-        - task: create-cf-space
-          attempts: 3
-          file: buildpacks-ci/tasks/create-cf-space/task.yml
-          params:
-            ORG: pivotal
-            TARGET: {{ci-cf-plugins-target}}
-            USERNAME: admin
-            PASSWORD: {{ci-cf-plugins-password}}
-        - task: run-integration-test
-          file: buildpacks-ci/tasks/run-scripts-integration/task.yml
-        ensure:
-          task: delete-cf-space
-          file: buildpacks-ci/tasks/delete-cf-space/task.yml
-    ensure:
-      put: plugin-environments
-      params:
-        release: plugin-environments
