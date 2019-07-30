@@ -70,14 +70,6 @@ resources:
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
       regexp: dependencies/lifecycle/lifecycle-(\d+.\d+.\d+)-any-stack.*tgz
 
-  - name: libbuildpack
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/libbuildpack
-      branch: master
-      paths: [ shims ]
-
-
   - name: buildpack-libbuildpack
     type: git
     source:
@@ -219,20 +211,6 @@ jobs:
           repository: cnb2cf
           rebase: true
 
-  - name: update-cnb2cf-dependencies
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: module
-          resource: libbuildpack
-          trigger: true
-        - get: project
-          resource: cnb2cf
-      - task: update-module-libbuildpack
-        file: buildpacks-ci/tasks/update-go-module/task.yml
-        params:
-          MODULE_PATH: 'github.com/cloudfoundry/libbuildpack'
-
   - name: update-cnb2cf-buildpack-libbuildpack
     plan:
       - in_parallel:
@@ -244,8 +222,15 @@ jobs:
           resource: cnb2cf
       - task: update-module-libbuildpack
         file: buildpacks-ci/tasks/update-go-module/task.yml
+        output_mapping:
+          project: cnb2cf
         params:
           MODULE_PATH: 'github.com/buildpack/libbuildpack'
+          VENDOR: true
+      - put: cnb2cf
+        params:
+          repository: cnb2cf
+          rebase: true
 
   - name: update-cnb2cf-libcfbuildpack
     plan:
@@ -256,7 +241,14 @@ jobs:
           trigger: true
         - get: project
           resource: cnb2cf
-      - task: update-module-libbuildpack
+      - task: update-module-libcfbuildpack
         file: buildpacks-ci/tasks/update-go-module/task.yml
+        output_mapping:
+          project: cnb2cf
         params:
           MODULE_PATH: 'github.com/cloudfoundry/libcfbuildpack'
+          VENDOR: true
+      - put: cnb2cf
+        params:
+          repository: cnb2cf
+          rebase: true
