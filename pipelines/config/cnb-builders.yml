@@ -176,6 +176,9 @@ cnbs:
       p-riverbedappinternals:
         git_repo: "git@github.com:pivotal-cf/p-riverbed-appinternals-cnb.git"
         private: true
+      p-snyk:
+        git_repo: "git@github.com:pivotal-cf/p-snyk-cnb.git"
+        private: true
       p-skywalking:
         git_repo: "git@github.com:pivotal-cf/p-skywalking-cnb.git"
         private: true
