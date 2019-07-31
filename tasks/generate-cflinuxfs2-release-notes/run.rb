@@ -6,11 +6,8 @@ require_relative '../../lib/release-notes-creator'
 require_relative '../../lib/git-client'
 
 
-# previous_version = File.read('previous-cflinuxfs2-release/.git/ref').strip
-new_version = File.read('version/number').strip
-
 if ENV.fetch('STACK') == 'cflinuxfs2'
-  old_receipt_uri = 'previous-cflinuxfs2-release/cflinuxfs2/cflinuxfs2_receipt'#"https://raw.githubusercontent.com/cloudfoundry/cflinuxfs2/#{previous_version}/cflinuxfs2/cflinuxfs2_receipt"
+  old_receipt_uri = 'previous-cflinuxfs2-release/cflinuxfs2/cflinuxfs2_receipt'
   cve_yaml_file = 'new-cves/new-cve-notifications/ubuntu14.04.yml'
   cves_dir = 'new-cve-notifications'
 else
@@ -29,6 +26,7 @@ old_receipt.unlink
 
 cves = YAML.load_file(cve_yaml_file)
 
+new_version = File.read('version/number').strip
 updated_cves = cves.map do |cve|
   if cve['stack_release'] == 'unreleased'
     cve['stack_release'] = new_version
