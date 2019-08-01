@@ -98,11 +98,11 @@ system pack_path, 'create-builder', "#{repository_host}:#{repository_port}/#{rep
 puts "Pulling images from local registry"
 system 'docker', 'pull', "#{repository_host}:#{repository_port}/#{repo}:#{stack}"
 
-puts "Saving the docker image to a local file"
-system 'docker', 'save', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", '-o', 'builder-image/builder.tgz' or exit 1
-
 puts "Renaming the docker image"
 system 'docker', 'tag', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", "#{repo}:#{stack}"
+
+puts "Saving the docker image to a local file"
+system 'docker', 'save', "#{repo}:#{stack}", '-o', 'builder-image/builder.tgz' or exit 1
 
 File.write(File.join("tag", "name"), tag)
 
