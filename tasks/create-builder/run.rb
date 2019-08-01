@@ -83,9 +83,26 @@ File.write(builder_config_file, builder_config)
 puts "**************builder.toml**************"
 puts builder_config
 
+puts "Starting docker daemon"
 system 'buildpacks-ci/scripts/start-docker' or exit 1
-system pack_path, 'create-builder', "#{repo}:#{stack}", '--builder-config', "#{builder_config_file}" or exit 1
-system 'docker', 'save', "#{repo}:#{stack}", '-o', 'builder-image/builder.tgz' or exit 1
+
+repository_host = "localhost"
+repository_port = "5000"
+
+puts "Starting local docker registry"
+system 'docker', 'run', '-d', '-p', "#{repository_port}:#{repository_port}", '--restart=always', '--name', 'local_registry', 'registry:2' or exit 1
+
+puts "Creating the builder and publishing it to a local registry"
+system pack_path, 'create-builder', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", '--builder-config', "#{builder_config_file}", '--publish' or exit 1
+
+puts "Pulling images from local registry"
+system 'docker', 'pull', "#{repository_host}:#{repository_port}/#{repo}:#{stack}"
+
+puts "Saving the docker image to a local file"
+system 'docker', 'save', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", '-o', 'builder-image/builder.tgz' or exit 1
+
+puts "Renaming the docker image"
+system 'docker', 'tag', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", "#{repo}:#{stack}"
 
 File.write(File.join("tag", "name"), tag)
 
