@@ -127,7 +127,7 @@ resources: #####################################################################
     type: pivnet
     source:
       endpoint: https://pivnet-integration.cfapps.io/
-      api_token: yjm2jhyXi9m-1VXRP2X2
+      api_token: {{pivnet-acceptance-token}}
       product_slug: cflinuxfs2-esm
 
 
@@ -168,16 +168,6 @@ resources: #####################################################################
     type: bosh-io-stemcell
     source:
       name: bosh-google-kvm-ubuntu-xenial-go_agent
-
-  ## Github Release ##
-
-#  - name: p-cflinuxfs2-release-github-release
-#    type: github-release
-#    source:
-#      drafts: false
-#      user: pivotal-cf
-#      access_token: {{buildpacks-github-token}}
-#      repository: p-cflinuxfs2-release
 
   ## Semver Versions ##
 
@@ -579,8 +569,8 @@ jobs: ##########################################################################
             BLOB_NAME: rootfs
             BLOB_GLOB: blob/cflinuxfs2-*.tar.gz
             RELEASE_NAME: cflinuxfs2
-            ACCESS_KEY_ID: {{cloudfoundry-s3-access-key}}
-            SECRET_ACCESS_KEY: {{cloudfoundry-s3-secret-key}}
+            ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
+            SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
         - task: create-release-body
           file: buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes/task.yml
           params:
@@ -591,6 +581,15 @@ jobs: ##########################################################################
         - put: p-cflinuxfs2-release
           params:
             repository: release-artifacts
+        - put: p-cflinuxfs2-esm-github-release
+          params:
+            name: version/number
+            tag: version/number
+            tag_prefix: 'v'
+            commitish: release-commit/sha
+            body: release-body/body
+            globs:
+              - release-artifacts/releases/cflinuxfs2/*.tgz
 
   - name: upload-cflinuxfs2-esm-to-pivnet
     serial: true
@@ -598,11 +597,10 @@ jobs: ##########################################################################
       - in_parallel:
         - get: buildpacks-ci
         - get: p-cflinuxfs2-esm-github-release
-          params:
-            include_source_tarball: true
-        - get: p-cflinuxfs2-release
           passed: [ create-cflinuxfs2-esm-release ]
           trigger: true
+          params:
+            include_source_tarball: true
       - do:
         - task: generate-esm-pivnet-metadata
           file: buildpacks-ci/tasks/write-esm-pivnet-metadata/task.yml

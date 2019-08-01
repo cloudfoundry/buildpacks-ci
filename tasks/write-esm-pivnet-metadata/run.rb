@@ -12,11 +12,11 @@ version = File.read(File.join(release, "version")).strip
 metadata = {}
 metadata['release'] = {
   'version' => version,
-  'release_type' => "??",
+  'release_type' => "Minor Release",
   'eula_slug' => 'pivotal_software_eula',
   'availability' => 'Admins Only',
   'eccn' => '5D992',
-  'license_exception' => "??"
+  #'license_exception' => ""
 }
 
 metadata['product_files'] = [
