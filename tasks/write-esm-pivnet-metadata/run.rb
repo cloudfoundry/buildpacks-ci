@@ -2,12 +2,12 @@
 
 require 'yaml'
 
-puts `ls p-cflinuxfs2-esm-github-release`
-release = "p-cflinuxfs2-esm-github-release"
-esm_github_bosh_release_path = File.join(release, "source.tar.gz")
+puts `ls -al p-cflinuxfs2-esm-github-release`
+release_dir = "p-cflinuxfs2-esm-github-release"
 
 metadata_yml = File.join('pivnet-esm-metadata', "esm.yml")
-version = File.read(File.join(release, "version")).strip
+version = File.read(File.join(release_dir, "version")).strip
+esm_github_bosh_release_path = File.join(release_dir, "cflinuxfs2-#{version}.tgz")
 
 metadata = {}
 metadata['release'] = {
@@ -22,7 +22,7 @@ metadata['release'] = {
 metadata['product_files'] = [
   {
     'file' => esm_github_bosh_release_path,
-    'upload_as' => "cflinuxfs2-esm",
+    'upload_as' => "cflinuxfs2-esm v#{version} BOSH Release",
     'description' => "CFLinuxfs2 ESM"
   }
 ]
