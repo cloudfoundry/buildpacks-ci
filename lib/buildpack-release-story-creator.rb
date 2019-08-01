@@ -40,6 +40,7 @@ class BuildpackReleaseStoryCreator
   def stories_since_last_release
     story_id = most_recent_release_story_id
     all = buildpack_project.stories(filter: "(label:#{buildpack_name} OR label:all) AND (accepted_after:09/24/2015 OR -state:accepted)", limit: 1000, auto_paginate: true) #accepted_after is because the api was returning very old stories at the wrong indexes
+    all.sort! {|a,b| a.id <=> b.id}
     idx = all.find_index{ |s| s.id == story_id } if story_id
     idx ? all[(idx+1)..-1] : all
   end
