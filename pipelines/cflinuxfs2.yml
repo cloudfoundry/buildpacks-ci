@@ -606,6 +606,6 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/write-esm-pivnet-metadata/task.yml
         - put: p-cflinuxfs2-release-pivnet-release
           params:
-            file_glob: p-cflinuxfs2-esm-github-release/source.tar.gz
+            file_glob: p-cflinuxfs2-esm-github-release/cflinuxfs2-v*.tgz
             s3_filepath_prefix: p-cflinuxfs2/rootfs
             metadata_file: pivnet-esm-metadata/esm.yml
