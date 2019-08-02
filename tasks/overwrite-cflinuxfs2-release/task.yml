@@ -14,3 +14,5 @@ run:
   path: buildpacks-ci/tasks/overwrite-cflinuxfs2-release/run.sh
 params:
   ROOTFS_RELEASE:
+  ACCESS_KEY_ID:
+  SECRET_ACCESS_KEY:

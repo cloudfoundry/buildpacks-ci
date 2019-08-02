@@ -312,6 +312,8 @@ jobs: ##########################################################################
             file: buildpacks-ci/tasks/overwrite-cflinuxfs2-release/task.yml
             params:
               ROOTFS_RELEASE: cflinuxfs2
+              ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
+              SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
         - put: cflinuxfs2-rootfs-smoke-test-deployment
           params:
             source_file: deployment-source-config/source_file.yml
