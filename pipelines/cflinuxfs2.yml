@@ -512,6 +512,7 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: previous-cflinuxfs2-release
           resource: p-cflinuxfs2-github-tags
+          passed: [ build-rootfs ]
         - get: cflinuxfs2
           resource: p-cflinuxfs2
           passed: [ release-p-cflinuxfs2 ]
