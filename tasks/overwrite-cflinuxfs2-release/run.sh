@@ -10,6 +10,17 @@ release_dir=cflinuxfs2-release
 version="212.0.$(date +"%s")"
 
 pushd $release_dir
+  if [ -n "${SECRET_ACCESS_KEY:+1}" ]; then
+  echo "creating private.yml..."
+  cat > config/private.yml <<EOF
+---
+blobstore:
+  options:
+    access_key_id: $ACCESS_KEY_ID
+    secret_access_key: $SECRET_ACCESS_KEY
+EOF
+  fi
+
   for name in $( bosh2 blobs | grep -- 'rootfs/cflinuxfs2-*' | awk '{print $1}' ); do
     bosh2 remove-blob "$name"
   done
