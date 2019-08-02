@@ -12,9 +12,9 @@ describe BuildpackReleaseStoryCreator do
   let(:buildpack_project) { instance_double(TrackerApi::Resources::Project) }
   let(:new_story) { double('new_story', id: 987) }
   let(:release_stories) { [] }
-  let(:all_stories) { [double(id:888, name:'Older Release'),
+  let(:all_stories) { [double(id:110, name:'Older Release'),
                        double(id:111, name:'Elixir should be faster'),
-                       double(id:999, name:'Latest Release'),
+                       double(id:221, name:'Latest Release'),
                        double(id:222, name:'Buildpack should tweet on stage'),
                        double(id:333, name:'All buildpacks should be awesome')] }
 
@@ -36,7 +36,7 @@ describe BuildpackReleaseStoryCreator do
   end
 
   context 'previous release stories exist' do
-    let(:release_stories) { [double(id: 888), double(id: 999)] }
+    let(:release_stories) { [double(id: 110), double(id: 221)] }
     it 'finds all the stories tagged buildpack_name or all that are lower in the backlog than the last release' do
       expect(buildpack_project).to receive(:create_story).
         with(hash_including(description: <<~DESCRIPTION,
@@ -64,9 +64,9 @@ describe BuildpackReleaseStoryCreator do
         with(hash_including(description: <<~DESCRIPTION,
           Stories:
 
-          #888 - Older Release
+          #110 - Older Release
           #111 - Elixir should be faster
-          #999 - Latest Release
+          #221 - Latest Release
           #222 - Buildpack should tweet on stage
           #333 - All buildpacks should be awesome
 
