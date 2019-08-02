@@ -15,7 +15,7 @@ cve_notifier = RootFSCVENotifier.new(cves_dir, stacks_dir)
 
 case stack
 when 'cflinuxfs2'
-  cve_notifier.run!(stack, 'Ubuntu 14.04', 'ubuntu14.04', notifiers)
+  cve_notifier.run!(stack, 'Ubuntu 14.04', 'ubuntu14.04', [])
 when 'cflinuxfs3'
   cve_notifier.run!(stack, 'Ubuntu 18.04', 'ubuntu18.04', notifiers)
 else

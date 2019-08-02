@@ -8,6 +8,7 @@ inputs:
   - name: new-cves
   - name: buildpacks-ci
   - name: cflinuxfs3
+  - name: cflinuxfs2
 outputs:
   - name: output-new-cves
 run:
