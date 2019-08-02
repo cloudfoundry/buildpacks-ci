@@ -38,14 +38,14 @@ Dir.chdir 'packager' do
 end
 
 buildpacks = Dir.glob('sources/*/').map do |dir|
-  buildpack_toml_file = File.file?(File.join(dir, "buildpack.toml.tmpl")) ? 'buildpack.toml.tmpl' : 'buildpack.toml'
+  buildpack_toml_file = 'buildpack.toml'
   id          = Tomlrb.load_file(File.join(dir, buildpack_toml_file))['buildpack']['id']
   bp_location = File.absolute_path(File.join(dir,id))
   local_packager = './packager-cli'
   args = [local_packager, '-uncached']
   args.pop if enterprise
   Dir.chdir dir do
-    if File.file?("buildpack.toml.tmpl")
+    if File.file?("./scripts/package.sh")
       `./scripts/package.sh`
     end
     system 'cp', packager_path, local_packager or exit 1 # We have to do this b/c cnb packager uses arg[0] to find the buildpack.toml
