@@ -355,7 +355,7 @@ dependencies:
             deprecation_date: 2021-12-06
             link: http://php.net/supported-versions.php
         removal_strategy: keep_latest_released
-      php-cnb:
+      php-dist-cnb:
         lines:
           - line: 7.1.X
             match: 7.1.\d+
