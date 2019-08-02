@@ -126,8 +126,8 @@ resources: #####################################################################
   - name: p-cflinuxfs2-release-pivnet-release
     type: pivnet
     source:
-      endpoint: https://pivnet-integration.cfapps.io/
-      api_token: {{pivnet-acceptance-token}}
+      endpoint: https://network.pivotal.io
+      api_token: {{pivnet-refresh-token}}
       product_slug: cflinuxfs2-esm
 
 
@@ -175,7 +175,7 @@ resources: #####################################################################
     type: semver
     source:
       bucket: {{buildpacks-binaries-s3-bucket}}
-      key: versions/stack
+      key: versions/stack-cflinuxfs2
       access_key_id: {{pivotal-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
 

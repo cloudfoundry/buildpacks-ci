@@ -16,7 +16,7 @@ metadata['release'] = {
   'eula_slug' => 'pivotal_software_eula',
   'availability' => 'Admins Only',
   'eccn' => '5D992',
-  #'license_exception' => ""
+  'license_exception' => "NLR"
 }
 
 metadata['product_files'] = [
