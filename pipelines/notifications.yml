@@ -82,8 +82,9 @@ resources:
   - name: p-cflinuxfs2
     type: git
     source:
-      uri: https://github.com/pivotal-cf/p-cflinuxfs2
+      uri: git@github.com:pivotal-cf/p-cflinuxfs2
       branch: master
+      private_key: {{public-buildpacks-ci-robots-private-key}}
   - name: p-cflinuxfs2-release
     type: github-release
     source:
