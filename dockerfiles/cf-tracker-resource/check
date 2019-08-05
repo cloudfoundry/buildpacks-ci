@@ -7,11 +7,11 @@ payload=$TMPDIR/cf-tracker-resource-request
 cat > "$payload" <&0
 
 PROJECT_ID=$(jq -r '.source.project_id' < "$payload")
+TOKEN=$(jq -r '.source.token' < "$payload")
 LABELS_QUERY_PART=$(jq -r '.source.labels | map("label%3A"  + .) | join ("%20AND%20")' < "$payload")
 
 # get list of all story ids in project with Security Triage label
-STORY_LIST=$(wget --quiet --no-verbose -O - "https://www.pivotaltracker.com/services/v5/projects/${PROJECT_ID}/search?query=${LABELS_QUERY_PART}%20AND%20state%3Aunscheduled" | jq -r ".stories.stories|sort_by(.created_at)|reverse|map({ id, description, labels })")
+STORY_LIST=$(wget --header="X-TrackerToken: ${TOKEN}" -O - "https://www.pivotaltracker.com/services/v5/projects/${PROJECT_ID}/search?query=${LABELS_QUERY_PART}%20AND%20state%3Aunscheduled" | jq -r ".stories.stories|sort_by(.created_at)|reverse|map({ id, description, labels })")
 
 # shellcheck disable=SC2086
 echo $STORY_LIST | jq -R '.' | jq -s "map({ ref: . })" >&3
-
