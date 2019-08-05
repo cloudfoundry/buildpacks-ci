@@ -4,11 +4,12 @@ image_resource:
   type: docker-image
   source:
     repository: cfbuildpacks/ci
+
 inputs:
-  - name: cf-space
   - name: buildpacks-ci
   - name: repo
+output:
+  - name: release-candidate
+
 run:
-  path: buildpacks-ci/tasks/run-scripts-integration/run.sh
-params:
-  BUILDPACK_FILE:
+  path: buildpacks-ci/tasks/build-cnb-buildpack/run.sh
