@@ -8,7 +8,7 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: repo
-output:
+outputs:
   - name: release-candidate
 
 run:
