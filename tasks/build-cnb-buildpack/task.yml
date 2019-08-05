@@ -8,6 +8,8 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: repo
+  - name: cnb2cf
+  - name: version
 outputs:
   - name: release-candidate
 
