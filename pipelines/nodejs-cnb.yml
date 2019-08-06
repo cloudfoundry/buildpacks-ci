@@ -19,7 +19,6 @@ resources:
       uri: git@github.com:cloudfoundry/nodejs-cnb
       branch: master
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
-      path: /manifest.yml # Only do stuff when this changes
 
   - name: release-candidate
     type: s3
@@ -35,32 +34,66 @@ resources:
       initial_version: 0.0.1
       driver: gcs
       bucket: artifacts.cf-buildpacks.appspot.com
-      key: cnb-versions/<%= language %>-version
+      key: cnb-versions/nodejs-family-version
       json_key: {{gcp-service-account-key}}
+
+  - name: edge-environments
+    type: pool
+    source:
+      branch: master
+      pool: edge-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
 jobs:
   - name: create-rc-zip
-    serial: true
-    public: true
     plan:
       - in_parallel:
         - get: buildpacks-ci
-        - get: nodejs-cnb-version
+        - get: version
+          resource: nodejs-cnb-version
           params:
             bump: patch
             pre: rc
         - get: repo
           trigger: true
-    - task: build-artifact
-      file: buildpacks-ci/tasks/build-cnb-buildpack/task.yml
-    - put: release-candidate
+        - get: cnb2cf
+      - task: build-artifact
+        file: buildpacks-ci/tasks/build-cnb-buildpack/task.yml
+      - put: release-candidate
+      - put: version
+        resource: nodejs-cnb-version
+        params: {file: version/number}
 
   - name: test-rc
     plan:
       - in_parallel:
         - get: buildpacks-ci
         - get: repo
-          trigger: true
+          passed:
+            - create-rc-zip
         - get: release-candidate
-      - task: run-integration-test-cnb-buildpack
-        file: buildpacks-ci/tasks/run-integration-test-cnb-buildpack/task.yml
+          trigger: true
+          passed:
+            - create-rc-zip
+      - task: create-cf-space
+        file: buildpacks-ci/tasks/create-cf-space/task.yml
+        params:
+          ENV_POOL_RESOURCE: edge-environments
+          ENVS_DIR: env-repo
+          ORG: pivotal
+          SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+          USERNAME: admin
+      - task: integration-test
+        file: buildpacks-ci/tasks/run-scripts-integration/task.yml
+        params:
+          BUILDPACK_FILE: release-candidate/*.zip
+    ensure:
+      in_parallel:
+        - task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+        - put: edge-environments
+          params:
+            release: edge-environments
+
+# Ship it

@@ -6,7 +6,7 @@ set -o pipefail
 set -x
 
 pushd cnb2cf
-  ./scripts/build.sh
+  go build -o build/cnb2cf ./cmd/cnb2cf/main.go
 popd
 
 version=$(cat version/version)
