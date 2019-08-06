@@ -49,19 +49,16 @@ cnbs:
       python:
         git_repo: "https://github.com/cloudfoundry/python-cnb"
         public: true
-        skip_bionic: true
         skip_stack:
           - "bionic"
       pip:
         git_repo: "https://github.com/cloudfoundry/pip-cnb"
         public: true
-        skip_bionic: true
         skip_stack:
           - "bionic"
       pipenv:
         git_repo: "https://github.com/cloudfoundry/pipenv-cnb"
         public: true
-        skip_bionic: true
         skip_stack:
           - "bionic"
       go-compiler:
@@ -76,6 +73,36 @@ cnbs:
         git_repo: "https://github.com/cloudfoundry/dep-cnb"
         public: true
         private: true
+      php-dist:
+        git_repo: "https://github.com/cloudfoundry/php-dist-cnb"
+        public: true
+        private: true
+        skip_stack:
+          - "bionic"
+      php-composer:
+        git_repo: "https://github.com/cloudfoundry/php-composer-cnb"
+        public: true
+        private: true
+        skip_stack:
+          - "bionic"
+      httpd:
+        git_repo: "https://github.com/cloudfoundry/httpd-cnb"
+        public: true
+        private: true
+        skip_stack:
+          - "bionic"
+      nginx:
+        git_repo: "https://github.com/cloudfoundry/nginx-cnb"
+        public: true
+        private: true
+        skip_stack:
+          - "bionic"
+      php-web:
+        git_repo: "https://github.com/cloudfoundry/php-web-cnb"
+        public: true
+        private: true
+        skip_stack:
+          - "bionic"
       openjdk:
         git_repo: "https://github.com/cloudfoundry/openjdk-cnb"
         public: true
