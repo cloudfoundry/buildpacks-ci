@@ -47,7 +47,7 @@ buildpacks = Dir.glob('sources/*/').map do |dir|
   args.pop if enterprise
   Dir.chdir dir do
     if File.file?("./scripts/package.sh")
-      system File.join(ci_path, 'create-builder', 'set-version.sh')
+      system File.join(ci_path, 'tasks', 'create-builder', 'set-version.sh') or exit 1
     end
 
     system 'cp', packager_path, local_packager or exit 1 # We have to do this b/c cnb packager uses arg[0] to find the buildpack.toml
