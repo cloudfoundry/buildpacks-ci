@@ -24,7 +24,7 @@ resources:
     type: s3
     source:
       bucket: {{buildpack-release-candidates-bucket}}
-      regexp: shims/nodejs/nodejs-cnb-buildpack-v(\d+\.\d+\.\d+-rc\.\d+).zip
+      regexp: shims/nodejs/nodejs_buildpack-v(\d+\.\d+\.\d+-rc\.\d+).zip
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
@@ -45,55 +45,159 @@ resources:
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
+  - name: env-repo
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: {{buildpacks-envs-private-key}}
+
+  - name: libbuildpack
+    type: git
+    webhook_token: ob0aigh3
+    source:
+      uri: https://github.com/cloudfoundry/libbuildpack.git
+
+
 jobs:
-  - name: create-rc-zip
+  - name: create-and-test-rc
+    serial: true
     plan:
       - in_parallel:
         - get: buildpacks-ci
         - get: version
           resource: nodejs-cnb-version
           params:
-            bump: patch
             pre: rc
         - get: repo
           trigger: true
         - get: cnb2cf
-      - task: build-artifact
+        - get: env-repo
+        - put: edge-environments
+          params:
+            acquire: true
+      - task: create-candidate
         file: buildpacks-ci/tasks/build-cnb-buildpack/task.yml
-      - put: release-candidate
-      - put: version
-        resource: nodejs-cnb-version
-        params: {file: version/number}
-
-  - name: test-rc
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: repo
-          passed:
-            - create-rc-zip
-        - get: release-candidate
-          trigger: true
-          passed:
-            - create-rc-zip
       - task: create-cf-space
         file: buildpacks-ci/tasks/create-cf-space/task.yml
+        output_mapping: {cf-space: cf-space-cflinuxfs3}
         params:
           ENV_POOL_RESOURCE: edge-environments
           ENVS_DIR: env-repo
           ORG: pivotal
           SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
           USERNAME: admin
-      - task: integration-test
+      - task: integration-test-using-candidate
+        privileged: true
         file: buildpacks-ci/tasks/run-scripts-integration/task.yml
+        input_mapping:
+          cf-space: cf-space-cflinuxfs3
         params:
-          BUILDPACK_FILE: release-candidate/*.zip
+          BUILDPACK_FILE: candidate/candidate.zip
+      - task: promote-candidate-to-rc
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
+          inputs:
+            - name: candidate
+            - name: version
+          outputs:
+            - name: release-candidate
+          run:
+            path: bash
+            args:
+              - -cl
+              - |
+                set -exo pipefail
+                mv candidate/candidate.zip release-candidate/nodejs_buildpack-v$(cat version/version).zip
+      - put: release-candidate
+        params:
+          file: release-candidate/*.zip
+      - put: version
+        resource: nodejs-cnb-version
+        params: {file: version/number}
     ensure:
       in_parallel:
         - task: delete-cf-space
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping:
+            cf-space: cf-space-cflinuxfs3
         - put: edge-environments
           params:
             release: edge-environments
 
-# Ship it
+  - name: update-libbuildpack
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: libbuildpack
+          trigger: true
+        - get: buildpack
+          resource: repo
+      - task: update-libbuildpack
+        file: buildpacks-ci/tasks/update-libbuildpack/task.yml
+        params:
+          LANGUAGE: nodejs
+          SHIM: true
+      - put: repo
+        params:
+          repository: buildpack
+          rebase: true
+
+
+#  - name: buildpack-checksums #TODO move this up to resources list
+#    type: git
+#    source:
+#      uri: git@bitbucket.org:cloudfoundry-buildpacks/buildpack-checksums.git
+#      private_key: {{buildpack-checksums-private-key}}
+#      branch: master
+#
+#  - name: ship-it
+#    serial: true
+#    public: true
+#    plan:
+#      - in_parallel:
+#        - get: buildpacks-ci
+#        - get: buildpack
+#          resource: repo
+#          passed: [create-and-test-rc-zip]
+#      - task: check-tag-not-already-added
+#        file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
+#      - put: buildpack
+#        params:
+#          repository: repo
+#          tag: repo/VERSION
+#          tag_prefix: v
+#
+#  - name: buildpack-to-github
+#    serial: true
+#    public: true
+#    plan:
+#      - in_parallel:
+#        - get: buildpacks-ci
+#        - get: buildpack
+#          resource: repo
+#          passed: [ ship-it ]
+#          trigger: true
+#        - get: buildpack-checksums
+#      - task: finalize-buildpack
+#        file: buildpacks-ci/tasks/finalize-buildpack/task.yml
+#      - task: commit-shas
+#        file: buildpacks-ci/tasks/get-commit-shasums/task.yml
+#      - put: buildpack-checksums
+#        params:
+#          repository: sha-artifacts
+#          rebase: true
+#      - put: buildpack-github-release
+#        params:
+#          name: buildpack-artifacts/tag
+#          tag: buildpack-artifacts/tag
+#          body: buildpack-artifacts/RECENT_CHANGES
+#          globs:
+#            - buildpack-artifacts/*-buildpack*-v*.zip
+#            - buildpack-artifacts/*-buildpack*-v*.zip.SHA256SUM.txt
