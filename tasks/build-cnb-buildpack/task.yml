@@ -11,7 +11,7 @@ inputs:
   - name: cnb2cf
   - name: version
 outputs:
-  - name: release-candidate
+  - name: candidate
 
 run:
   path: buildpacks-ci/tasks/build-cnb-buildpack/run.sh
