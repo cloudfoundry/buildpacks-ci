@@ -11,5 +11,3 @@ inputs:
   - name: candidate
 run:
   path: buildpacks-ci/tasks/run-scripts-integration/run.sh
-params:
-  BUILDPACK_FILE:

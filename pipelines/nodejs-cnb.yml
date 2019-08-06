@@ -92,8 +92,6 @@ jobs:
         file: buildpacks-ci/tasks/run-scripts-integration/task.yml
         input_mapping:
           cf-space: cf-space-cflinuxfs3
-        params:
-          BUILDPACK_FILE: candidate/candidate.zip
       - task: promote-candidate-to-rc
         config:
           platform: linux
