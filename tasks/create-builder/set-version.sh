@@ -13,6 +13,8 @@ if [[ -z "$version" ]]; then #version not provided, use latest git tag
     version=${git_tag:1}
 fi
 
-go run -ldflags="-X main.VersionString=${version}" ./template.go
+SOURCE="${BASH_SOURCE[0]}"
+DIR=$(dirname $SOURCE)
+go run -ldflags="-X main.VersionString=${version}" $DIR/template.go
 
 
