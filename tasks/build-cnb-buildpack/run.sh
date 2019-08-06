@@ -15,5 +15,5 @@ pushd repo
   mv ../cnb2cf/build/cnb2cf .bin/cnb2cf
   ./scripts/package.sh -v "${version}"
 #  TODO: Configure cnb2cf to output to desired dir
-  mv "nodejs_buildpack-v${version}.zip" ../release-candidate
+  mv "nodejs_buildpack-v${version}.zip" ../candidate/candidate.zip
 popd
