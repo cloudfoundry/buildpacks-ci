@@ -17,6 +17,7 @@ tag                 = "#{version}-#{stack}"
 builder_config_file = File.absolute_path("builder.toml")
 pack_path           = File.absolute_path('pack-cli')
 packager_path       = File.absolute_path('packager-cli')
+ci_path             = File.absolute_path('buildpacks-ci')
 lifecycle_version   = File.read(File.join("lifecycle", "version")).strip()
 
 if !enterprise # not in a public repo
@@ -46,8 +47,9 @@ buildpacks = Dir.glob('sources/*/').map do |dir|
   args.pop if enterprise
   Dir.chdir dir do
     if File.file?("./scripts/package.sh")
-      `./scripts/package.sh`
+      system File.join(ci_path, 'create-builder', 'set-version.sh')
     end
+
     system 'cp', packager_path, local_packager or exit 1 # We have to do this b/c cnb packager uses arg[0] to find the buildpack.toml
     system *args, bp_location or exit 1
   end
@@ -96,10 +98,10 @@ puts "Creating the builder and publishing it to a local registry"
 system pack_path, 'create-builder', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", '--builder-config', "#{builder_config_file}", '--publish' or exit 1
 
 puts "Pulling images from local registry"
-system 'docker', 'pull', "#{repository_host}:#{repository_port}/#{repo}:#{stack}"
+system 'docker', 'pull', "#{repository_host}:#{repository_port}/#{repo}:#{stack}" or exit 1
 
 puts "Renaming the docker image"
-system 'docker', 'tag', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", "#{repo}:#{stack}"
+system 'docker', 'tag', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", "#{repo}:#{stack}" or exit 1
 
 puts "Saving the docker image to a local file"
 system 'docker', 'save', "#{repo}:#{stack}", '-o', 'builder-image/builder.tgz' or exit 1
