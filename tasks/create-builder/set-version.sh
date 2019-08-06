@@ -15,6 +15,6 @@ fi
 
 SOURCE="${BASH_SOURCE[0]}"
 DIR="$(dirname $SOURCE)"
-go run -ldflags="-X main.VersionString=${version}" $DIR/template.go
+go run -ldflags="-X main.VersionString=${version}" "$DIR"/template.go
 
 
