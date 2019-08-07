@@ -27,9 +27,9 @@ V3_DEP_NAMES = {
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
-buildpack_toml_file = File.file?("buildpack/buildpack.toml.tmpl") ? 'buildpack.toml.tmpl' : 'buildpack.toml'
+buildpack_toml_file = 'buildpack.toml'
 buildpack_toml = TOML.load_file("buildpack/#{buildpack_toml_file}")
-buildpack_toml_latest_released = TOML.load_file('buildpack-latest-released/buildpack.toml.tmpl')
+buildpack_toml_latest_released = TOML.load_file('buildpack-latest-released/buildpack.toml')
 
 data = JSON.parse(open('source/data.json').read)
 dependency_name = data.dig('source', 'name')
