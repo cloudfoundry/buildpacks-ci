@@ -116,6 +116,14 @@ resources: #####################################################################
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
       branch: master
 
+  - name: p-cflinuxfs2-github-release-drafts
+    type: github-release
+    source:
+      drafts: true
+      user: pivotal-cf
+      repository: p-cflinuxfs2
+      access_token: {{buildpacks-github-token}}
+
   - name: p-cflinuxfs2-esm-github-release
     type: github-release
     source:
@@ -528,6 +536,13 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/generate-cflinuxfs2-release-notes/task.yml
           params:
             STACK: cflinuxfs2
+        - put: p-cflinuxfs2-github-release-drafts
+          params:
+            name: version/number
+            tag: version/number
+            body: release-body/body
+            globs:
+              - stack-s3/cflinuxfs2-*.tar.gz
         - put: new-cves
           params:
             repository: new-cves-artifacts
