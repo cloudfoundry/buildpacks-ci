@@ -203,15 +203,15 @@ cnbs:
       p-riverbedappinternals:
         git_repo: "git@github.com:pivotal-cf/p-riverbed-appinternals-cnb.git"
         private: true
-      p-snyk:
-        git_repo: "git@github.com:pivotal-cf/p-snyk-cnb.git"
-        private: true
+      # p-snyk:
+      #   git_repo: "git@github.com:pivotal-cf/p-snyk-cnb.git"
+      #   private: true
       p-skywalking:
         git_repo: "git@github.com:pivotal-cf/p-skywalking-cnb.git"
         private: true
-      p-wso2:
-        git_repo: "git@github.com:pivotal-cf/p-wso2-cnb.git"
-        private: true
+      # p-wso2:
+      #   git_repo: "git@github.com:pivotal-cf/p-wso2-cnb.git"
+      #   private: true
       p-yourkit:
         git_repo: "git@github.com:pivotal-cf/p-yourkit-cnb.git"
         private: true
