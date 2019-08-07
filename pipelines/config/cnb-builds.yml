@@ -30,6 +30,9 @@ npm:
 nginx:
   integration: true
   auto_release: true
+php-compat:
+  integration: true
+  auto_release: true
 php-dist:
   auto_release: true
 php-composer:
