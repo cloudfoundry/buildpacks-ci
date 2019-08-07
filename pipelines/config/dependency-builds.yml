@@ -289,7 +289,6 @@ dependencies:
             link: https://github.com/nodejs/Release
         removal_strategy: keep_latest_released
     source_type: node
-#    Comment out until https://www.pivotaltracker.com/story/show/167050557 is played
   org.cloudfoundry.npm:
     buildpacks:
       nodejs-cnb:
