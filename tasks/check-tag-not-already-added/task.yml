@@ -9,3 +9,5 @@ inputs:
   - name: buildpack
 run:
   path: buildpacks-ci/tasks/check-tag-not-already-added/run.sh
+params:
+  VERSION:

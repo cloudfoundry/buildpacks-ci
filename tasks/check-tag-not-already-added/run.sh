@@ -5,4 +5,5 @@ set -o nounset
 set -o pipefail
 
 cd buildpack
-git tag "v$(cat VERSION)"
+TEST_VERSION=${VERSION:-$(cat VERSION)}
+git tag "v${TEST_VERSION}"
