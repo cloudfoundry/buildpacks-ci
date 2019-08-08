@@ -19,8 +19,7 @@ gem 'tracker_api'
 gem 'webmock'
 gem 'toml'
 gem 'tomlrb'
-gem 'down'
-gem 'zip'
+gem 'rubyzip', require: 'zip'
 
 group :development do
   gem 'rubocop'
