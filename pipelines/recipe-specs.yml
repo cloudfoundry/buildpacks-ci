@@ -23,7 +23,7 @@ resources: #####################################################################
 
 groups: ###############################################################################################################
 
-<% integration_spec_names = %w(bundler glide go godep dep httpd hwc jruby nginx nodejs php7_with_oracle python ruby url_output yaml_flag) %>
+<% integration_spec_names = %w(bundler glide go godep dep httpd hwc jruby nodejs php7_with_oracle ruby url_output yaml_flag) %>
   - name: binary-builder-specs
     jobs:
     - binary-builder-specs
