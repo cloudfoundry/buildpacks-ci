@@ -16,3 +16,4 @@ run:
 params:
   REPO:
   STACK:
+  RUN_IMAGE:
