@@ -19,6 +19,7 @@ gem 'tracker_api'
 gem 'webmock'
 gem 'toml'
 gem 'tomlrb'
+gem 'down'
 
 group :development do
   gem 'rubocop'
