@@ -8,6 +8,7 @@ set -o pipefail
 
 set -x
 
+docker pull "$RUN_IMAGE"
 docker load -i builder-image/builder.tgz
 
 pushd pack
