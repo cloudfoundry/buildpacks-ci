@@ -5,7 +5,7 @@ require 'yaml'
 require 'rubygems'
 require 'zip'
 require 'digest'
-require 'down'
+require 'fileutils'
 
 repo = ENV.fetch('REPO')
 stack = ENV.fetch('STACK', "cflinuxfs3")
@@ -15,12 +15,11 @@ Octokit.configure do |c|
   c.access_token = GITHUB_ACCESS_TOKEN
 end
 
-#read manifest
 def open_manifest_from_zip(path)
   manifest = ""
   Zip::File.open(path) do |zip_file|
-    entry = zip_file.glob('*/manifest.yml').first
-    if entry.file?
+    entry = zip_file.glob('{*/,}manifest.yml').first
+    if !entry.nil?
       manifest = YAML.load(entry.get_input_stream.read)
     end
   end
@@ -29,7 +28,7 @@ end
 
 def reduce_manifest(manifest)
   deps = manifest.fetch('dependencies').reduce({}) do |accumulator, dep|
-    accumulator[dep['name']] = ['version']
+    accumulator[dep['name']] = dep['version']
     accumulator
   end
   deps.reject!{|key| key == "lifecycle"}
@@ -68,7 +67,6 @@ def find_version_diffs(old_deps, new_deps)
       cnb_version_map[dep] = diff_version
     else
       cnb_version_map[dep] = ['new-cnb', "v#{version}"]
-    #   Do something to indicate that we added a cnb
     end
   end
 
@@ -99,14 +97,13 @@ def download_latest_release_if_exists(repo)
   unless Octokit.releases(repo_url)  == []
     latest_url = Octokit.latest_release(repo_url).zipball_url
     path = "source.zip"
-    Down.download(latest_url, destination: path)
+    `wget -O #{path} #{latest_url}`
     path
   end
 end
 
 old_manifest_deps = {}
 latest_release_path = download_latest_release_if_exists(repo)
-# See if buildpack-github-release passed in first
 if File.exist? latest_release_path
   old_manifest = open_manifest_from_zip(latest_release_path)
   old_manifest_deps = reduce_manifest(old_manifest)
@@ -123,15 +120,12 @@ release_notes = compile_release_notes(cnbs)
 version = File.read(File.join("version", "version")).strip()
 tag = "v#{version}"
 
-# get shasum of rc file
 rc_shasum = Digest::SHA256.file(absolute_rc_path).hexdigest
 
-# write version, release notes, shasum to output dir
-# Move and rename rc to buildpack path
 output_dir = File.absolute_path("buildpack-artifacts")
 bp_name = "#{repo}-#{stack}-#{tag}.zip"
 sha_file_name = "#{bp_name}.SHA256SUM.txt"
 File.write(File.join(output_dir, "tag"), tag)
 File.write(File.join(output_dir, "release_notes"), release_notes)
-File.rename(absolute_rc_path, File.join(output_dir, bp_name))
+FileUtils.mv(absolute_rc_path, File.join(output_dir, bp_name))
 File.write(File.join(output_dir, sha_file_name), rc_shasum)
