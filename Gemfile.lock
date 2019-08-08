@@ -111,6 +111,7 @@ GEM
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
       hashdiff
+    zip (2.0.2)
 
 PLATFORMS
   ruby
@@ -135,6 +136,7 @@ DEPENDENCIES
   tracker_api
   version_sorter
   webmock
+  zip
 
 RUBY VERSION
    ruby 2.3.1p112
