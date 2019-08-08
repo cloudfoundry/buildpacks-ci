@@ -20,6 +20,7 @@ gem 'webmock'
 gem 'toml'
 gem 'tomlrb'
 gem 'down'
+gem 'zip'
 
 group :development do
   gem 'rubocop'
