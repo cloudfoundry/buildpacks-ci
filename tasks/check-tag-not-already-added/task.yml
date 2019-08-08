@@ -7,7 +7,7 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: buildpack
+  - name: version
+    optional: true
 run:
   path: buildpacks-ci/tasks/check-tag-not-already-added/run.sh
-params:
-  VERSION:
