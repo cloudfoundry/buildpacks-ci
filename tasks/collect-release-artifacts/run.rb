@@ -3,6 +3,7 @@ require 'yaml'
 require 'rubygems'
 require 'zip'
 require 'digest'
+require 'down'
 
 repo = ENV.fetch('REPO')
 stack = ENV.fetch('STACK', "cflinuxfs3")
@@ -12,7 +13,7 @@ Octokit.configure do |c|
   c.access_token = GITHUB_ACCESS_TOKEN
 end
 
-#read manifest of previous version here by unzipping buildpack-github-release
+#read manifest
 def open_manifest_from_zip(path)
   manifest = ""
   Zip::File.open(path) do |zip_file|
@@ -63,6 +64,9 @@ def find_version_diffs(old_deps, new_deps)
       # Get the releases in between the last and the current, inclusive of the current release
       diff_version = cnb_tags[cnb_tags.index("v#{version}"),cnb_tags.index("v#{old_version}") - 1]
       cnb_version_map[dep] = diff_version
+    else
+      cnb_version_map[dep] = ['new-cnb', "v#{version}"]
+    #   Do something to indicate that we added a cnb
     end
   end
 
@@ -74,19 +78,37 @@ def compile_release_notes(cnbs)
 
   cnbs.each do |cnb, versions|
     release_notes << "\n# #{cnb_name(cnb)} \n"
-    # Assumes there's no weird stuff
-    releases = Octokit.releases(get_url(cnb)).select{|release| versions.include? release.name}
-    releases.each do |release|
-      trimmed_release_notes = release.body.split('Supported stacks:')[0].strip!
-      release_notes << "## #{release.name}\n#{trimmed_release_notes}\n"
+    if versions.first == 'new-cnb'
+      release_notes << "## Added version #{versions.last}\n"
+    else
+      releases = Octokit.releases(get_url(cnb)).select{|release| versions.include? release.name}
+      releases.each do |release|
+        trimmed_release_notes = release.body.split('Supported stacks:')[0].strip!
+        release_notes << "## #{release.name}\n#{trimmed_release_notes}\n"
+      end
     end
   end
 
   release_notes
 end
 
-old_manifest = open_manifest_from_zip(File.absolute_path(File.join('buildpack-github-release', 'source.zip')))
-old_manifest_deps = reduce_manifest(old_manifest)
+def download_latest_release_if_exists(repo)
+  repo_url = "cloudfoundry/#{repo}"
+  unless Octokit.releases(repo_url)  == []
+    latest_url = Octokit.latest_release(repo_url).zipball_url
+    path = "source.zip"
+    Down.download(latest_url, destination: path)
+    path
+  end
+end
+
+old_manifest_deps = {}
+latest_release_path = download_latest_release_if_exists(repo)
+# See if buildpack-github-release passed in first
+if File.exist? latest_release_path
+  old_manifest = open_manifest_from_zip(latest_release_path)
+  old_manifest_deps = reduce_manifest(old_manifest)
+end
 
 rc_path = Dir.glob(File.join("release-candidate", "*-v*.zip")).first
 absolute_rc_path = File.absolute_path(rc_path)
