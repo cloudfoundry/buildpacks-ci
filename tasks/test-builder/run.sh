@@ -19,3 +19,11 @@ echo "Building test apps..."
 for app_path in cnb-builder/fixtures/*; do
     ./pack/pack build "$(basename "$app_path")" --builder "$REPO:$STACK" -p "$app_path"
 done
+
+if [ "$STACK" == "cflinuxfs3" ]; then
+    for app_path in cnb-builder/fs3-fixtures/*; do
+	./pack/pack build "$(basename "$app_path")" --builder "$REPO:$STACK" -p "$app_path"
+    done
+fi
+
+
