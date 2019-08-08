@@ -64,6 +64,9 @@ dependencies:
           - line: 1.1.X
           - line: 2.1.4X
           - line: 2.1.5X
+          - line: 2.1.6X
+          - line: 2.1.7X
+          - line: 2.1.8X
           - line: 2.2.1X
           - line: 2.2.2X
           - line: 2.2.3X
