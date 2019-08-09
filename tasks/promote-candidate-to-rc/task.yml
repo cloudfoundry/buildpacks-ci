@@ -11,4 +11,5 @@ inputs:
 outputs:
   - name: release-candidate
 
-run: buildpacks-ci/tasks/promote-candidate-to-rc/run.sh
+run:
+  path: buildpacks-ci/tasks/promote-candidate-to-rc/run.sh
