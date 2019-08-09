@@ -9,7 +9,8 @@ pushd cnb2cf
   go build -o build/cnb2cf ./cmd/cnb2cf/main.go
 popd
 
-version=$(cat version/version)
+# Cut off the rc part of the version, so that ultimate RC will have the correct version file
+version=$(cat version/version | cut -d '-' -f 1 )
 pushd repo
   mkdir .bin
   mv ../cnb2cf/build/cnb2cf .bin/cnb2cf
