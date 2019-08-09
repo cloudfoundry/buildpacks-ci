@@ -44,7 +44,7 @@ func TestFixtures(t *testing.T) {
 			t.Parallel()
 
 			imgName := filepath.Base(fixture)
-			packCmd := exec.Command("pack", "build", imgName, "-p", filepath.Join("..", "..", "..", "cnb-builder", fixture),
+			packCmd := exec.Command("pack", "build", imgName, "-p", fixture,
 				"--builder", fmt.Sprintf("%s:%s", repo, stack), "--no-pull")
 
 			out, err := packCmd.CombinedOutput()
