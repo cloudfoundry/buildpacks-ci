@@ -409,6 +409,7 @@ jobs:
         params:
           STACK: <%= builder_data["stack"] %>
           REPO: <%= builder_data.fetch("builder-image-params",[]).fetch("REPO") %>
+          RUN_IMAGE: <%= builder_data.fetch("builder-image-params",[]).fetch("RUN_IMAGE") %>
       - put: <%= builder_data["private"] ? "pivotal-":""%>builder-image
         params:
           additional_tags: release-tag/name

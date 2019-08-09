@@ -21,10 +21,15 @@ for app_path in cnb-builder/fixtures/*; do
     ./pack/pack build "$(basename "$app_path")" --builder "$REPO:$STACK" -p "$app_path" --no-pull
 done
 
-if [ "$STACK" == "cflinuxfs3" ]; then
-    for app_path in cnb-builder/fs3-fixtures/*; do
-	./pack/pack build "$(basename "$app_path")" --builder "$REPO:$STACK" -p "$app_path" --no-pull
-    done
-fi
+PATH="$PATH":"$(pwd)"/pack
+export PATH
 
+export GOMAXPROCS=4
 
+pushd buildpacks-ci/tasks/test-builder
+    go test -args fixtures
+
+    if [ "$STACK" == "cflinuxfs3" ]; then
+	go test -args fs3-fixtures
+    fi
+popd
