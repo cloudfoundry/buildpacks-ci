@@ -78,6 +78,7 @@ jobs: ##########################################################################
   - name: update-cnb-tools
     public: true
     serial: true
+    serial_groups: [ update ]
     plan:
     - in_parallel:
       - get: buildpacks-ci
@@ -95,6 +96,7 @@ jobs: ##########################################################################
   - name: update-libcfbuildpack
     public: true
     serial: true
+    serial_groups: [ update ]
     plan:
       - in_parallel:
         - get: buildpacks-ci
@@ -116,6 +118,8 @@ jobs: ##########################################################################
 <% if buildpacks[language]['integration'] %>
   - name: update-dagger
     public: true
+    serial: true
+    serial_groups: [ update ]
     plan:
       - in_parallel:
         - get: buildpacks-ci
