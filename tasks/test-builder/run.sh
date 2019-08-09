@@ -17,19 +17,18 @@ pushd pack
 popd
 
 echo "Building test apps..."
-for app_path in cnb-builder/fixtures/*; do
-    ./pack/pack build "$(basename "$app_path")" --builder "$REPO:$STACK" -p "$app_path" --no-pull
-done
 
 PATH="$PATH":"$(pwd)"/pack
+fixtures="$(realpath cnb-builder/fixtures)"
+fs3fixtures="$(realpath cnb-builder/fs3-fixtures)"
 export PATH
 
 export GOMAXPROCS=4
 
 pushd buildpacks-ci/tasks/test-builder
-    go test -args fixtures
+    go test -args "$fixtures"
 
     if [ "$STACK" == "cflinuxfs3" ]; then
-	go test -args fs3-fixtures
+	go test -args "$fs3fixtures"
     fi
 popd
