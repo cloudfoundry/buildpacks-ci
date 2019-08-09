@@ -10,7 +10,7 @@ pushd cnb2cf
 popd
 
 # Cut off the rc part of the version, so that ultimate RC will have the correct version file
-version=$(cat version/version | cut -d '-' -f 1 )
+version=$( cut -d '-' -f 1 version/version )
 pushd repo
   mkdir .bin
   mv ../cnb2cf/build/cnb2cf .bin/cnb2cf
