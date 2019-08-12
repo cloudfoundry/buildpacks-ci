@@ -43,29 +43,21 @@ def reduce_manifest(manifest)
   end
 end
 
-def cnb_name(name)
+def cnb_name_and_url(name)
   cnb_name = name.split('.').last
+  url = ""
   if name.start_with? "org.cloudfoundry"
-    "#{cnb_name}-cnb"
+    name = "#{cnb_name}-cnb"
+    url = "cloudfoundry/#{name}"
   elsif name.start_with? "io.pivotal"
-    "p-#{cnb_name}-cnb"
+    name = "p-#{cnb_name}-cnb"
+    url "pivotal-cf/#{name}"
   elsif name.start_with? "lifecycle"
-    name
+    url = "buildpack/#{name}"
   else
     raise "unknown cnb path"
   end
-end
-
-def get_url(name)
-  if name.start_with? "org.cloudfoundry"
-    "cloudfoundry/#{cnb_name(name)}"
-  elsif name.start_with? "io.pivotal"
-    "pivotal-cf/#{cnb_name(name)}"
-  elsif name.start_with? "lifecycle"
-    "buildpack/#{cnb_name(name)}"
-  else
-    raise "unknown cnb path"
-  end
+  [name, url]
 end
 
 def find_version_diffs(old_deps, new_deps)
@@ -73,8 +65,8 @@ def find_version_diffs(old_deps, new_deps)
   new_deps.each do |dep, version|
     if old_deps.include? dep
       old_version = old_deps[dep]
-
-      cnb_tags = Octokit.tags(get_url(dep)).collect{|tag| tag.name}
+      _, url = cnb_name_and_url(dep)
+      cnb_tags = Octokit.tags(url).collect{|tag| tag.name}
       # Get the releases in between the last and the current, inclusive of the current release
       diff_version = cnb_tags[cnb_tags.index("v#{version}"),cnb_tags.index("v#{old_version}")]
       cnb_version_map[dep] = diff_version
@@ -82,7 +74,6 @@ def find_version_diffs(old_deps, new_deps)
       cnb_version_map[dep] = ['new-cnb', "v#{version}"]
     end
   end
-
   cnb_version_map
 end
 
@@ -107,14 +98,16 @@ def compile_release_notes(repo, cnbs)
   intro_release_notes = "# #{repo.upcase} \nBelow are the release notes for:\n"
   cnbs_release_notes = ""
   cnbs.each do |cnb, versions|
-    intro_release_notes << "\n* #{cnb_name(cnb)} "
-    cnbs_release_notes << "\n## #{cnb_name(cnb)} \n"
+    name, url = cnb_name_and_url(cnb)
+    intro_release_notes << "\n* #{name} "
+    cnbs_release_notes << "\n## #{name} \n"
     if versions.first == 'new-cnb'
       cnbs_release_notes << "### Added version #{versions.last}\n"
     else
-      releases = Octokit.releases(get_url(cnb)).select{|release| versions.include? release.tag_name}
+      releases = Octokit.releases(url).select{|release| versions.include? release.tag_name}
       releases.each_with_index do |release, index|
         if index == 0
+          # Add binaries and stack information before any version specific release notes
           cnbs_release_notes << "#{binaries_and_stacks_for_cnb(release.body)}\n"
         end
         trimmed_release_notes = clean_release_notes(release.body)
