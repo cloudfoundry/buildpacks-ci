@@ -68,6 +68,7 @@ dependencies:
           - line: 2.2.1X
           - line: 2.2.2X
           - line: 2.2.3X
+          - line: 2.2.4X
         removal_strategy: keep_all
     source_params:
       - 'tag_regex: ^(v1\.\d+\.\d+|v2\.\d+\.\d+\+dependencies)$'
@@ -501,6 +502,9 @@ skip_build:
     stack: cflinuxfs2
   - dep: dotnet-sdk
     line: 2.2.2X
+    stack: cflinuxfs2
+  - dep: dotnet-sdk
+    line: 2.2.4X
     stack: cflinuxfs2
   - dep: node
     line: 10.X.X
