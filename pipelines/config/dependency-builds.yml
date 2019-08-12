@@ -60,8 +60,6 @@ dependencies:
     buildpacks:
       dotnet-core:
         lines:
-          - line: 1.0.X
-          - line: 1.1.X
           - line: 2.1.4X
           - line: 2.1.5X
           - line: 2.1.6X
@@ -77,12 +75,6 @@ dependencies:
     buildpacks:
       dotnet-core:
         lines:
-          - line: 1.0.X
-            deprecation_date: 2019-06-27
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-          - line: 1.1.X
-            deprecation_date: 2019-06-27
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 2.1.X
             deprecation_date: 2021-08-21 #link says supported at least this long
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
@@ -498,9 +490,6 @@ skip_build:
   - dep: php
     line: 7.3.X
     stack: cflinuxfs2
-  - dep: dotnet-sdk
-    line: 1.0.X
-    stack: cflinuxfs3
   - dep: dotnet-sdk
     line: 2.1.6X
     stack: cflinuxfs2
