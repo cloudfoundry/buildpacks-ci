@@ -99,14 +99,14 @@ jobs: ##########################################################################
             environment: pcf-2-4-gcp-env
         - task: test
           file: buildpacks-ci/tasks/run-plugin-tests/task.yml
-        - put: pcf-2-4-gcp-env
-          params:
-            action: unclaim
-            env_file: pcf-2-4-gcp-env/metadata
-          tags: [buildpacks-eng-vsphere]
         ensure:
           task: delete-cf-space
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
+      - put: pcf-2-4-gcp-env
+        params:
+          action: unclaim
+          env_file: pcf-2-4-gcp-env/metadata
+        tags: [buildpacks-eng-vsphere]
     ensure:
       put: plugin-environments
       params:
