@@ -211,9 +211,6 @@ dependencies:
       nginx:
         lines:
           # nginx deprecation dates are 1 year after the mainline release date
-          - line: 1.15.X
-            deprecation_date: 2019-05-21
-            link: https://nginx.org/2018.html
           - line: 1.16.X
             deprecation_date: 2020-04-01
             link: https://nginx.org/
@@ -223,9 +220,6 @@ dependencies:
       nginx-cnb:
         lines:
           # nginx deprecation dates are 1 year after the mainline release date
-          - line: 1.15.X
-            deprecation_date: 2019-05-21
-            link: https://nginx.org/2018.html
           - line: 1.16.X
             deprecation_date: 2020-04-01
             link: https://nginx.org/
