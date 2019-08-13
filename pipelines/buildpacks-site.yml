@@ -37,6 +37,7 @@ jobs:
         trigger: true
       - task: build-and-publish
         file: buildpacks-ci/tasks/build-and-publish/task.yml
+        attempts: 2
         params:
           AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
           AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
@@ -52,7 +53,7 @@ jobs:
         <% end %>
         - get: buildpacks-ci
         - get: buildpacks-site
-      - task: build-and-publish
+      - task: generate-buildpacks-json
         file: buildpacks-ci/tasks/generate-buildpacks-json/task.yml
         params:
           ACCESS_TOKEN: {{buildpacks-github-token}}
