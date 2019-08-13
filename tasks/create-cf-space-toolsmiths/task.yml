@@ -1,0 +1,16 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: environment
+outputs:
+  - name: cf-space
+
+run:
+  path: buildpacks-ci/tasks/create-cf-space-toolsmiths/run.sh
+params:
+  ORG:
