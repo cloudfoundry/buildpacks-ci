@@ -85,6 +85,8 @@ NOTES
   def clean_release_notes(release_body)
     if release_body.include? "No major changes"
       return ""
+    elsif name == "lifecycle"
+      return ""
     end
     release_body
       .split('Packaged binaries:')[0]
