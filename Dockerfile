@@ -17,6 +17,9 @@ RUN curl -sL "https://keybase.io/crystal/pgp_keys.asc" | apt-key add - \
 RUN curl -sL "https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key" | apt-key add - \
   && echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list
 
+RUN curl -sL "https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key" | apt-key add - \
+  && echo "deb http://apt.starkandwayne.com stable main" |  tee /etc/apt/sources.list.d/starkandwayne.list
+
 RUN apt-get update \
   && apt-get -y install \
   aufs-tools \
@@ -41,7 +44,8 @@ RUN apt-get update \
   vim \
   wget \
   zip \
-  google-chrome-stable && \
+  google-chrome-stable \
+  om && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install packages that are specific to ubuntu and not debian
