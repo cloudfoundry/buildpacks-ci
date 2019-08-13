@@ -20,6 +20,14 @@ resources:
       branch: master
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
 
+  - name: buildpack-github-release
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: nodejs-cnb
+      access_token: {{buildpacks-github-token}}
+      drafts: true
+
   - name: release-candidate
     type: s3
     source:
@@ -60,8 +68,30 @@ resources:
 
 
 jobs:
+  # Updates
+  - name: update-libbuildpack
+    public: true
+    plan:
+      - in_parallel:
+          - get: buildpacks-ci
+          - get: libbuildpack
+            trigger: true
+          - get: buildpack
+            resource: repo
+      - task: update-libbuildpack
+        file: buildpacks-ci/tasks/update-libbuildpack/task.yml
+        params:
+          LANGUAGE: nodejs
+          SHIM: true
+      - put: repo
+        params:
+          repository: buildpack
+          rebase: true
+
+  # Test and Release
   - name: create-and-test-rc
     serial: true
+    public: true
     plan:
       - in_parallel:
         - get: buildpacks-ci
@@ -93,24 +123,7 @@ jobs:
         input_mapping:
           cf-space: cf-space-cflinuxfs3
       - task: promote-candidate-to-rc
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: candidate
-            - name: version
-          outputs:
-            - name: release-candidate
-          run:
-            path: bash
-            args:
-              - -cl
-              - |
-                set -exo pipefail
-                mv candidate/candidate.zip release-candidate/nodejs_buildpack-v$(cat version/version).zip
+        file: buildpacks-ci/tasks/promote-candidate-to-rc/task.yml
       - put: release-candidate
         params:
           file: release-candidate/*.zip
@@ -127,75 +140,66 @@ jobs:
           params:
             release: edge-environments
 
-  - name: update-libbuildpack
+  - name: ship-it
     serial: true
     public: true
     plan:
       - in_parallel:
         - get: buildpacks-ci
-        - get: libbuildpack
-          trigger: true
         - get: buildpack
           resource: repo
-      - task: update-libbuildpack
-        file: buildpacks-ci/tasks/update-libbuildpack/task.yml
-        params:
-          LANGUAGE: nodejs
-          SHIM: true
-      - put: repo
-        params:
-          repository: buildpack
-          rebase: true
-
-
-#  - name: buildpack-checksums #TODO move this up to resources list
-#    type: git
-#    source:
-#      uri: git@bitbucket.org:cloudfoundry-buildpacks/buildpack-checksums.git
-#      private_key: {{buildpack-checksums-private-key}}
-#      branch: master
-#
-#  - name: ship-it
-#    serial: true
-#    public: true
-#    plan:
-#      - in_parallel:
-#        - get: buildpacks-ci
-#        - get: buildpack
-#          resource: repo
-#          passed: [create-and-test-rc-zip]
-#      - task: check-tag-not-already-added
-#        file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
-#      - put: buildpack
+          passed:
+            - create-and-test-rc
+        - get: release-candidate
+          passed:
+            - create-and-test-rc
+        - get: version
+          resource: nodejs-cnb-version
+          params:
+            bump: final
+      - task: check-tag-not-already-added
+        file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
+#      - put: repo
 #        params:
-#          repository: repo
-#          tag: repo/VERSION
+#          repository: buildpack
+#          tag: version/version
 #          tag_prefix: v
-#
-#  - name: buildpack-to-github
-#    serial: true
-#    public: true
-#    plan:
-#      - in_parallel:
-#        - get: buildpacks-ci
-#        - get: buildpack
-#          resource: repo
-#          passed: [ ship-it ]
-#          trigger: true
-#        - get: buildpack-checksums
-#      - task: finalize-buildpack
-#        file: buildpacks-ci/tasks/finalize-buildpack/task.yml
-#      - task: commit-shas
-#        file: buildpacks-ci/tasks/get-commit-shasums/task.yml
-#      - put: buildpack-checksums
+
+  - name: buildpack-to-github
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: release-candidate
+          passed:
+            - ship-it
+        - get: version
+          resource: nodejs-cnb-version
+          params:
+            bump: final
+        - get: buildpack
+          resource: repo
+          passed:
+            - ship-it
+          trigger: true
+      - task: collect-release-artifacts
+        privileged: true
+        file: buildpacks-ci/tasks/collect-release-artifacts/task.yml
+        params:
+          REPO: nodejs-cnb
+          STACK: cflinuxfs3
+          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+      - put: buildpack-github-release
+        params:
+          name: buildpack-artifacts/tag
+          tag: buildpack-artifacts/tag
+          body: buildpack-artifacts/release_notes
+          globs:
+            - buildpack-artifacts/*-v*.zip
+            - buildpack-artifacts/*-v*.zip.SHA256SUM.txt
+#      - put: version
+#        resource: nodejs-cnb-version
 #        params:
-#          repository: sha-artifacts
-#          rebase: true
-#      - put: buildpack-github-release
-#        params:
-#          name: buildpack-artifacts/tag
-#          tag: buildpack-artifacts/tag
-#          body: buildpack-artifacts/RECENT_CHANGES
-#          globs:
-#            - buildpack-artifacts/*-buildpack*-v*.zip
-#            - buildpack-artifacts/*-buildpack*-v*.zip.SHA256SUM.txt
+#          - file: version/number
+#          - bump: patch
