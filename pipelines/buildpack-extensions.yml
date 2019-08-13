@@ -71,6 +71,7 @@ resources: #####################################################################
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
       pool_name: us_2_4
+    tags: [buildpacks-eng-vsphere]
 
 jobs: ################################################################################################################
   - name: test-stack-auditor
@@ -87,6 +88,7 @@ jobs: ##########################################################################
         - put: pcf-2-4-gcp-env
           params:
             action: claim
+          tags: [buildpacks-eng-vsphere]
       - do:
         - task: create-cf-space
           attempts: 3
@@ -101,6 +103,7 @@ jobs: ##########################################################################
           params:
             action: unclaim
             env_file: pcf-2-4-gcp-env/metadata
+          tags: [buildpacks-eng-vsphere]
         ensure:
           task: delete-cf-space
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
