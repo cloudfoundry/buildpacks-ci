@@ -4,7 +4,7 @@ require 'yaml'
 require_relative '../../lib/release-notes-creator'
 require_relative '../../lib/usn-release-notes'
 
-describe ReleaseNotesCreator do
+describe RootfsReleaseNotesCreator do
 
   let(:temp_dir)         { Dir.mktmpdir }
   let(:cves_yaml_file)   { File.join(temp_dir, 'ubuntu14.04.yml' )}

@@ -16,7 +16,7 @@ new_receipt_file = Dir["receipt-artifacts/cflinuxfs2_receipt*"].first
 old_receipt = Tempfile.new('old-receipt')
 File.write(old_receipt.path, open(old_receipt_uri).read)
 
-creator = ReleaseNotesCreator.new(nil, old_receipt.path, new_receipt_file)
+creator = RootfsReleaseNotesCreator.new(nil, old_receipt.path, new_receipt_file)
 notes = creator.receipt_diff_section
 new_packages = creator.new_packages?
 

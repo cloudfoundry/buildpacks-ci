@@ -26,7 +26,7 @@ old_receipt = Tempfile.new('old-receipt')
 File.write(old_receipt.path, open(old_receipt_uri).read)
 
 body_file = 'release-body/body'
-notes = ReleaseNotesCreator.new(cve_yaml_file, old_receipt.path, new_receipt_file).release_notes
+notes = RootfsReleaseNotesCreator.new(cve_yaml_file, old_receipt.path, new_receipt_file).release_notes
 puts notes
 File.write(body_file, notes)
 old_receipt.unlink
