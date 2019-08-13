@@ -11,7 +11,7 @@
      'deployments/operations/no-canaries.yml',
      'deployments/edge-shared/num-cells.yml',
    ]
-   toolsmiths_envs = {'lts' => 557, 'menifee' => 360, 'picorivera' => 417}
+   toolsmiths_envs = {'lts' => 557, 'menifee' => 360, 'etna' => 238,'picorivera' => 417}
 %>
 
 resource_types: ########################################################################################################
