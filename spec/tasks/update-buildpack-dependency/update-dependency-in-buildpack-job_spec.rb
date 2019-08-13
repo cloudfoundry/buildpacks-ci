@@ -189,62 +189,6 @@ describe Dependencies do
     end
   end
 
-  # Ignore for now, until we decide how we want to handle dotnet's strange version lines
-  xcontext 'when dotnet 2.1.201 already exists' do
-    let(:dependencies) {[
-        {'name' => 'dotnet', 'version' => '2.1.201', 'cf_stacks' => ['stack1'] },
-        {'name' => 'dotnet', 'version' => '2.1.201', 'cf_stacks' => ['stack2'] },
-        {'name' => 'dotnet', 'version' => '2.1.300', 'cf_stacks' => ['stack1'] },
-        {'name' => 'dotnet', 'version' => '2.1.300', 'cf_stacks' => ['stack2'] },
-        {'name' => 'dotnet', 'version' => '2.1.301', 'cf_stacks' => ['stack1'] },
-        {'name' => 'dotnet', 'version' => '2.1.301', 'cf_stacks' => ['stack2'] },
-    ].freeze}
-    let(:dependencies_latest_released) {[
-        {'name' => 'dotnet', 'version' => '2.1.201', 'cf_stacks' => ['stack1'] },
-        {'name' => 'dotnet', 'version' => '2.1.201', 'cf_stacks' => ['stack2'] },
-        {'name' => 'dotnet', 'version' => '2.1.300', 'cf_stacks' => ['stack1'] },
-        {'name' => 'dotnet', 'version' => '2.1.300', 'cf_stacks' => ['stack2'] },
-    ]}
-
-    let(:line) {nil}
-    let(:removal_strategy) {'keep_latest_released'}
-
-    let(:dep) {{'name' => 'dotnet', 'version' => '2.1.302', 'cf_stacks' => ['stack1'] }}
-    it 'keeps dotnet 2.1.201 when there is a new version of dotnet in the same line' do
-      expect(subject).to eq([
-                                {'name' => 'dotnet', 'version' => '2.1.201', 'cf_stacks' => ['stack1'] },
-                                {'name' => 'dotnet', 'version' => '2.1.201', 'cf_stacks' => ['stack2'] },
-                                {'name' => 'dotnet', 'version' => '2.1.300', 'cf_stacks' => ['stack1'] },
-                                {'name' => 'dotnet', 'version' => '2.1.300', 'cf_stacks' => ['stack2'] },
-                                {'name' => 'dotnet', 'version' => '2.1.301', 'cf_stacks' => ['stack2'] },
-                                {'name' => 'dotnet', 'version' => '2.1.302', 'cf_stacks' => ['stack1'] }
-                            ])
-    end
-
-    context 'when dotnet 2.1.201 gets rebuilt' do
-      let(:dependencies) {[
-          {'name' => 'dotnet', 'version' => '2.1.201', 'foo' => 'bar', 'cf_stacks' => ['stack1']},
-          {'name' => 'dotnet', 'version' => '2.1.201', 'foo' => 'bar', 'cf_stacks' => ['stack2']},
-          {'name' => 'dotnet', 'version' => '2.1.300', 'cf_stacks' => ['stack1']},
-          {'name' => 'dotnet', 'version' => '2.1.300', 'cf_stacks' => ['stack2']},
-          {'name' => 'dotnet', 'version' => '2.1.301', 'cf_stacks' => ['stack1']},
-          {'name' => 'dotnet', 'version' => '2.1.301', 'cf_stacks' => ['stack2']}
-      ].freeze}
-
-      let(:dep) {{'name' => 'dotnet', 'version' => '2.1.201', 'foo' => 'baz', 'cf_stacks' => ['stack1'] }}
-      it 'replaces dotnet 2.1.201 with dotnet 2.1.201' do
-        expect(subject).to eq([
-                                  {'name' => 'dotnet', 'version' => '2.1.201', 'foo' => 'baz', 'cf_stacks' => ['stack1']},
-                                  {'name' => 'dotnet', 'version' => '2.1.201', 'foo' => 'bar', 'cf_stacks' => ['stack2']},
-                                  {'name' => 'dotnet', 'version' => '2.1.300', 'cf_stacks' => ['stack1']},
-                                  {'name' => 'dotnet', 'version' => '2.1.300', 'cf_stacks' => ['stack2']},
-                                  {'name' => 'dotnet', 'version' => '2.1.301', 'cf_stacks' => ['stack1']},
-                                  {'name' => 'dotnet', 'version' => '2.1.301', 'cf_stacks' => ['stack2']}
-                              ])
-      end
-    end
-  end
-
   context 'nginx' do
     let(:dependencies_latest_released) {[
         {'name' => 'nginx', 'version' => '1.12.0', 'cf_stacks' => ['stack1']},

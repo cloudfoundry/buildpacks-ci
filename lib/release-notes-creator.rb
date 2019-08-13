@@ -3,7 +3,7 @@ require 'diffy'
 
 require_relative 'usn-release-notes'
 
-class ReleaseNotesCreator
+class RootfsReleaseNotesCreator
 
   def initialize(cves_yaml_file, old_receipt_file, new_receipt_file)
     @cves_yaml_file = cves_yaml_file

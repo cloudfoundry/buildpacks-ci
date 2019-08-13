@@ -6,8 +6,7 @@ require_relative '../../lib/usn-release-notes'
 # These tests should just be used to verify that we are correctly scraping a CVE,
 # should be useful if getting release notes break again. 
 
-xdescribe UsnReleaseNotes do
-
+describe UsnReleaseNotes do
   let(:usn_id) {'3806-1'}
   WebMock.allow_net_connect!
 
