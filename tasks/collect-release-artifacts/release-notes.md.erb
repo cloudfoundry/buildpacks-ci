@@ -1,0 +1,11 @@
+# <%= shim %> <%= tag %>
+Below are the release notes for:
+
+<% cnbs.each do |cnb| %>* <%= cnb.name %>
+<% end %>
+<% cnbs.each do |cnb|%>
+## <%= cnb.name %>
+<%= cnb.dependencies %>
+<%= cnb.stacks %>
+<%= cnb.release_notes %>
+<% end %>

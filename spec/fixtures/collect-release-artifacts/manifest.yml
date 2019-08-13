@@ -1,0 +1,35 @@
+---
+language: nodejs
+include_files:
+  - LICENSE
+  - NOTICE
+  - README.md
+  - VERSION
+  - bin/compile
+  - bin/detect
+  - bin/finalize
+  - bin/release
+  - bin/supply
+  - order.toml
+  - manifest.yml
+dependencies:
+  - name: org.cloudfoundry.node-engine
+    version: 0.0.27
+    uri: https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.node-engine/org.cloudfoundry.node-engine-0.0.27-any-stack-19a50cbe.tgz
+    sha256: 19a50cbee9bab15a3269095c4f5da743b1e363761cffa7eda4434ebde0112e6b
+    cf_stacks:
+      - cflinuxfs2
+      - cflinuxfs3
+    source: https://github.com/cloudfoundry/node-engine-cnb/archive/v0.0.27.tar.gz
+    source_sha256: 87d056349dd39a3861ebe9cb81b918801be34fb7efcafdafd36d04c51b0a9645
+  - name: org.cloudfoundry.nodejs-compat
+    version: 0.0.7
+    uri: https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.nodejs-compat/org.cloudfoundry.nodejs-compat-0.0.7-any-stack-95a98769.tgz
+    sha256: 95a987696687363b7297a966e7f36f181b231d77b5ddf5cceb1b21b628f8a6c5
+    cf_stacks:
+      - cflinuxfs2
+      - cflinuxfs3
+    source: https://github.com/cloudfoundry/nodejs-compat-cnb/archive/v0.0.7.tar.gz
+    source_sha256: 3c583c34a17cb1f090090f380102f5fe0e17503bbe356ca25bbddc4a5fa38383
+pre_package: scripts/build.sh
+default_versions: []
