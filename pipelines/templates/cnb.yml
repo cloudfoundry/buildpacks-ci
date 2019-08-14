@@ -62,7 +62,6 @@ resources: #####################################################################
       user: cloudfoundry
       access_token: {{buildpacks-github-token}}
 
-  <% if buildpacks[language]['auto_release'] %>
   - name: <%= language %>-cnb-version
     type: semver
     source:
@@ -71,7 +70,6 @@ resources: #####################################################################
       bucket: artifacts.cf-buildpacks.appspot.com
       key: cnb-versions/<%= language %>-version
       json_key: {{gcp-service-account-key}}
-  <% end %>
 
 jobs: ################################################################################################################
 
@@ -153,7 +151,6 @@ jobs: ##########################################################################
           - task: unit tests
             file: buildpacks-ci/tasks/run-scripts-unit/task.yml
 
- <% if buildpacks[language]['auto_release'] %>
   - name: run-integration-and-release
     public: true
     serial: true
@@ -192,47 +189,3 @@ jobs: ##########################################################################
         resource: <%= language %>-cnb-version
         params:
           file: version/version
-<% else %>
-  - name: specs-integration
-    public: true
-    serial: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: pack
-          trigger: true
-        - get: buildpack
-          resource: buildpack-git
-          trigger: true
-          passed:
-          - specs-unit
-      - task: integration-tests
-        file: buildpacks-ci/tasks/run-bp-v3-integration/task.yml
-        privileged: true
-        params:
-          GIT_TOKEN: {{buildpacks-github-token}}
-
-  - name: ship-it
-    public: true
-    serial: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: packager
-          resource: libcfbuildpack
-        - get: buildpack
-          resource: buildpack-git
-          passed:
-          - specs-integration
-      - task: ship-buildpack
-        file: buildpacks-ci/tasks/ship-v3-buildpack/task.yml
-        params:
-          LANGUAGE: <%= language %>
-      - put: buildpack-github-release
-        params:
-          name: release-artifacts/name
-          tag: release-artifacts/tag
-          body: release-artifacts/body
-          globs:
-          - release-artifacts/<%= language %>-cnb-*.tgz
- <% end %>
