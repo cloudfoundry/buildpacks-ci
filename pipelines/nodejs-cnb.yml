@@ -159,11 +159,11 @@ jobs:
             bump: final
       - task: check-tag-not-already-added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
-#      - put: repo
-#        params:
-#          repository: buildpack
-#          tag: version/version
-#          tag_prefix: v
+      - put: repo
+        params:
+          repository: buildpack
+          tag: version/version
+          tag_prefix: v
 
   - name: buildpack-to-github
     serial: true
@@ -198,8 +198,8 @@ jobs:
           globs:
             - buildpack-artifacts/*-v*.zip
             - buildpack-artifacts/*-v*.zip.SHA256SUM.txt
-#      - put: version
-#        resource: nodejs-cnb-version
-#        params:
-#          - file: version/number
-#          - bump: patch
+      - put: version
+        resource: nodejs-cnb-version
+        params:
+          file: version/number
+          bump: patch
