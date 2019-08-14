@@ -112,6 +112,8 @@ if ENV.fetch('FINAL') == "true"
   tagFile = stack
   if stack == 'bionic'
     tagFile += " base" # Need a white-space separated list of tags
+  else if stack == 'cflinuxfs3'
+    tagFile += " full"
   end
   File.write(File.join("release-tag", "name"), tagFile)
 
