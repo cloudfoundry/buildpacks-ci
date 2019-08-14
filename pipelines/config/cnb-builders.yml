@@ -22,6 +22,17 @@ builders:
       BUILD_IMAGE: "cloudfoundry/cnb-build:cflinuxfs3"
       RUN_IMAGE: "cloudfoundry/cnb-run:cflinuxfs3"
       HOST: "hub.docker.com"
+  p-builder-bionic:
+    stack: bionic
+    private: true
+    include-base-image: true
+    version-resource: bionic-piv-version
+    builder-image-params:
+      REPO: p-cnb-builder
+      STACK: "io.buildpack.stacks.bionic"
+      BUILD_IMAGE: "cloudfoundry/build:base-cnb"
+      RUN_IMAGE: "cloudfoundry/run:base-cnb"
+      ENTERPRISE: true
   p-builder-cflinuxfs3:
     stack: cflinuxfs3
     private: true
