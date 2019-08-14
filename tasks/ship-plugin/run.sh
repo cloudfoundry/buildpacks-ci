@@ -13,7 +13,7 @@ pushd stack-auditor
   for os in "${OSes[@]}"; do
     binary="stack-auditor-$version-${os}"
     artifacts="../release-artifacts/"
-    GOOS="${os}" go build -o "$artifacts$binary" -ldflags="-s -w" github.com/cloudfoundry/stack-auditor
+    GOOS="${os}" go build -o "$artifacts$binary" -ldflags="-s -w -X main.tagVersion=$version" github.com/cloudfoundry/stack-auditor
     pushd $artifacts
       if [ "${os}" == "windows" ]; then
         zip "$binary".zip "$binary"
