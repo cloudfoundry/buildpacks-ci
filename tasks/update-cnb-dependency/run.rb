@@ -21,7 +21,8 @@ V3_DEP_NAMES = {
   'php' => 'PHP',
   'httpd' => 'Apache HTTP Server',
   'go' => 'Go',
-  'dep' => 'Dep'
+  'dep' => 'Dep',
+  'nginx' => 'Nginx Server'
 }
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
