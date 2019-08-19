@@ -165,7 +165,7 @@ resources: #####################################################################
     source:
       name: bosh-google-kvm-ubuntu-xenial-go_agent
 
-  ## Docker Image ##
+  ## Docker Images ##
 
   - name: <%= rootfs_name %>-image
     type: docker-image
@@ -173,6 +173,24 @@ resources: #####################################################################
       repository: cloudfoundry/<%= rootfs_name %>
       username: {{dockerhub-cflinuxfs-username}}
       password: {{dockerhub-cflinuxfs-password}}
+      email: cf-buildpacks-eng@pivotal.io
+
+  - name: <%= rootfs_name %>-build-base-image
+    type: docker-image
+    source:
+      repository: cloudfoundry/build
+      tag: full
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+      email: cf-buildpacks-eng@pivotal.io
+
+  - name: <%= rootfs_name %>-run-base-image
+    type: docker-image
+    source:
+      repository: cloudfoundry/run
+      tag: full
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
 
   ## Github Release ##
@@ -692,6 +710,14 @@ jobs: ##########################################################################
               import_file: docker-s3/<%= rootfs_name %>.tar.gz
               tag: version/number
               tag_as_latest: true
+          - put: <%= rootfs_name %>-build-base-image
+            params:
+              skip_download: true
+              import_file: docker-s3/<%= rootfs_name %>.tar.gz
+          - put: <%= rootfs_name %>-run-base-image
+            params:
+              skip_download: true
+              import_file: docker-s3/<%= rootfs_name %>.tar.gz
         on_failure:
           put: failure-alert
           params:
