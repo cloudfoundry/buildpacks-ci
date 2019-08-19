@@ -3,7 +3,6 @@ builders:
   cf-builder-bionic:
     stack: bionic
     private: false
-    include-base-image: false
     version-resource: bionic-version
     builder-image-params:
       REPO: cloudfoundry/cnb
@@ -14,18 +13,16 @@ builders:
   cf-builder-cflinuxfs3:
     stack: cflinuxfs3
     private: false
-    include-base-image: true
     version-resource: cflinuxfs3-version
     builder-image-params:
       REPO: cloudfoundry/cnb
       STACK: "org.cloudfoundry.stacks.cflinuxfs3"
-      BUILD_IMAGE: "cloudfoundry/cnb-build:cflinuxfs3"
-      RUN_IMAGE: "cloudfoundry/cnb-run:cflinuxfs3"
+      BUILD_IMAGE: "cloudfoundry/build:full-cnb"
+      RUN_IMAGE: "cloudfoundry/run:full-cnb"
       HOST: "hub.docker.com"
   p-builder-bionic:
     stack: bionic
     private: true
-    include-base-image: true
     version-resource: bionic-piv-version
     builder-image-params:
       REPO: p-cnb-builder
@@ -36,13 +33,12 @@ builders:
   p-builder-cflinuxfs3:
     stack: cflinuxfs3
     private: true
-    include-base-image: true
     version-resource: cflinuxfs3-piv-version
     builder-image-params:
       REPO: p-cnb-builder
       STACK: "org.cloudfoundry.stacks.cflinuxfs3"
-      BUILD_IMAGE: "cloudfoundry/cnb-build:cflinuxfs3"
-      RUN_IMAGE: "cloudfoundry/cnb-run:cflinuxfs3"
+      BUILD_IMAGE: "cloudfoundry/build:full-cnb"
+      RUN_IMAGE: "cloudfoundry/run:full-cnb"
       ENTERPRISE: true
 cnbs:
       node-engine:

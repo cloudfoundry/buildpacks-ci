@@ -32,20 +32,20 @@ resources:
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
       branch: master
 
-  <% all_cnbs.each do |cnb_name, data| %>
+<% all_cnbs.each do |cnb_name, data| %>
   - name: <%= cnb_name %>-cnb
     type: git
     source:
       uri: <%= data['git_repo'] %>
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
 
-  - name: <%= cnb_name %>-cnb-release
+  - name: <%= cnb_name %>-cnb-release # move this github release resource
     type: git
     source:
       uri: <%= data['git_repo'] %>
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
       tag_filter: "v*"
-  <% end %>
+<% end %>
 
   - name: packager
     type: git
@@ -73,33 +73,29 @@ resources:
       user: buildpack
       access_token: {{buildpacks-github-token}}
 
-  # Dockerfiles for cnb cflinuxfs3 stack images
-  <% cnb_images.each do |image_type| %>
-  - name: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master
-    type: git
-    check_every: 15s
-    source:
-      uri: https://github.com/cloudfoundry/cflinuxfs3
-      branch: master
-      paths: [ "cnb/<%= image_type %>/**" ]
-  <% end %>
-
   # Dockerfiles for cnb bionic stack images
-  <% cnb_child_images.each do |image_type| %>
-  - name: cf-bionic-<%= image_type %>-base-dockerfile
+<% cnb_child_images.each do |image_type| %>
+  - name: cflinuxfs3-<%= image_type %>-cnb-dockerfile
     type: git
     source:
       uri: https://github.com/cloudfoundry/stacks
       branch: master
-      paths: [ "base/<%= image_type %>/**" ]
+      paths: [ "cflinuxfs3/cnb/<%= image_type %>/**" ]
 
-  - name: cf-bionic-<%= image_type %>-dockerfile
+  - name: bionic-<%= image_type %>-base-dockerfile
     type: git
     source:
       uri: https://github.com/cloudfoundry/stacks
       branch: master
-      paths: [ "cnb/<%= image_type %>/**" ]
-  <% end %>
+      paths: [ "bionic/base/<%= image_type %>/**" ]
+
+  - name: bionic-<%= image_type %>-cnb-dockerfile
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/stacks
+      branch: master
+      paths: [ "bionic/cnb/<%= image_type %>/**" ]
+<% end %>
 
   # Versions
   - name: cflinuxfs3-version
@@ -154,18 +150,9 @@ resources:
       username: _json_key
       password: {{gcp-service-account-key}}
 
-  # Rootfs Docker Image
-  - name: cflinuxfs3-image
-    type: docker-image
-    source:
-      repository: cloudfoundry/cflinuxfs3
-      username: {{dockerhub-cflinuxfs-username}}
-      password: {{dockerhub-cflinuxfs-password}}
-      email: cf-buildpacks-eng@pivotal.io
-
-  # Dockerfiles for cnb stack images
-  <% cnb_child_images.each do |image_type| %>
-  - name: cf-bionic-<%= image_type %>-base-image
+  # CNB stack images
+<% cnb_child_images.each do |image_type| %>
+  - name: bionic-<%= image_type %>-base-image
     type: docker-image
     source:
       repository: cloudfoundry/<%= image_type %>
@@ -174,7 +161,7 @@ resources:
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
 
-  - name: cf-bionic-<%= image_type %>-image
+  - name: bionic-<%= image_type %>-cnb-image
     type: docker-image
     source:
       repository: cloudfoundry/<%= image_type %>
@@ -182,99 +169,75 @@ resources:
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
-  <% end %>
 
-  <% cnb_images.each do |image_type| %>
-  - name: cflinuxfs3-cnb-<%= image_type %>-image
+  - name: cflinuxfs3-<%= image_type %>-base-image
     type: docker-image
-    check_every: 15s
     source:
-      repository: cfbuildpacks/cflinuxfs3-cnb-experimental
-      tag: <%= image_type %>
-      email: {{buildpacks-docker-user-email}}
-      username: {{buildpacks-docker-user-username}}
-      password: {{buildpacks-docker-user-password}}
+      repository: cloudfoundry/<%= image_type %>
+      tag: full
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+      email: cf-buildpacks-eng@pivotal.io
 
-  - name: cloudfoundry-cflinuxfs3-cnb-<%= image_type %>-image
+  - name: cflinuxfs3-<%= image_type %>-cnb-image
     type: docker-image
-    check_every: 15s
     source:
-      repository: cloudfoundry/cnb-<%= image_type %>
-      tag: cflinuxfs3
+      repository: cloudfoundry/<%= image_type %>
+      tag: full-cnb
       email: {{buildpacks-docker-user-email}}
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
-  <% end %>
-
+<% end %>
 
 jobs:
-  <% cnb_images.each do |image_type| %>
-  - name: update-cflinuxfs3-cnb-<%= image_type %>-image
+<% cnb_child_images.each do |image_type| %>
+  - name: update-cflinuxfs3-<%= image_type %>-cnb-image
     public: true
     plan:
-      # Changes in cnb stack image Dockerfiles
-      - get: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master
+      - get: cflinuxfs3-<%= image_type %>-cnb-dockerfile
         trigger: true
-      <% if image_type == "base"%>
-      # Changes in cflinuxfs3 image should trigger an update for base
-      - get: cflinuxfs3-image
+      - get: cflinuxfs3-<%= image_type %>-base-image
         trigger: true
-      <% else %>
-      - get: cloudfoundry-cflinuxfs3-cnb-base-image
-        trigger: true
-        passed:
-          - update-cflinuxfs3-cnb-base-image
-      <% end %>
-      - put: cflinuxfs3-cnb-<%= image_type %>-image
+      - put: cflinuxfs3-<%= image_type %>-cnb-image
         params:
-          build: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master/cnb/<%= image_type %>
+          build: cflinuxfs3-<%= image_type %>-cnb-dockerfile/cflinuxfs3/cnb/<%= image_type %>
           build_args:
+            base_image: "cloudfoundry/<%= image_type %>:full"
             squash: squash
         attempts: 2
-      - put: cloudfoundry-cflinuxfs3-cnb-<%= image_type %>-image
-        params:
-          tag_as_latest: true
-          build: cflinuxfs3-cnb-<%= image_type %>-dockerfile-master/cnb/<%= image_type %>
-          build_args:
-            squash: squash
-        attempts: 2
-  <% end %>
 
-  <% cnb_child_images.each do |image_type| %>
-  # build/update base image
-  - name: update-cf-bionic-<%= image_type %>-base-image
+  - name: update-bionic-<%= image_type %>-base-image
     public: true
     plan:
-    - get: cf-bionic-<%= image_type %>-base-dockerfile
+    - get: bionic-<%= image_type %>-base-dockerfile
       trigger: true
-    - put: cf-bionic-<%= image_type %>-base-image
+    - put: bionic-<%= image_type %>-base-image
       params:
-        build: cf-bionic-<%= image_type %>-base-dockerfile/base/<%= image_type %>
+        build: bionic-<%= image_type %>-base-dockerfile/bionic/base/<%= image_type %>
         build_args:
           squash: squash
         attempts: 2
 
-  # build/update actual image_type image
-  - name: update-cf-bionic-<%= image_type %>-image
+  - name: update-bionic-<%= image_type %>-cnb-image
     public: true
     plan:
-    - get: cf-bionic-<%= image_type %>-dockerfile
+    - get: bionic-<%= image_type %>-cnb-dockerfile
       trigger: true
-    - get: cf-bionic-<%= image_type %>-base-image
+    - get: bionic-<%= image_type %>-base-image
       trigger: true
       passed:
-        - update-cf-bionic-<%= image_type %>-base-image
-    - put: cf-bionic-<%= image_type %>-image
+        - update-bionic-<%= image_type %>-base-image
+    - put: bionic-<%= image_type %>-cnb-image
       params:
-        build: cf-bionic-<%= image_type %>-dockerfile/cnb/<%= image_type %>
+        build: bionic-<%= image_type %>-cnb-dockerfile/bionic/cnb/<%= image_type %>
         build_args:
           base_image: "cloudfoundry/<%= image_type %>:base"
           squash: squash
         attempts: 2
         tag_as_latest: true
-  <% end %>
+<% end %>
 
-  <% builders.each do |builder_name, builder_data|
+<% builders.each do |builder_name, builder_data|
      all_cnb_hash = builder_data["private"] ? piv_cnbs : cnbs
      cnb_hash = all_cnb_hash.reject{|cnb, data| data.fetch("skip_stack",[]).include? builder_data.fetch("stack")} %>
   - name: smoke-test-<%= builder_name %>
@@ -285,27 +248,19 @@ jobs:
           <% if builder_data["private"] %>
           resource: p-cnb-builder
           <% end %>
-        <% if builder_data["stack"] == "bionic" %>
-        - get: cf-bionic-build-image
+        - get: <%= builder_data["stack"] %>-build-cnb-image
           trigger: true
           passed:
-            - update-cf-bionic-build-image
-        - get: cf-bionic-run-image
+            - update-<%= builder_data["stack"] %>-build-cnb-image
+        - get: <%= builder_data["stack"] %>-run-cnb-image
           trigger: true
           passed:
-            - update-cf-bionic-run-image
-        <% else %>
-        - get: cloudfoundry-cflinuxfs3-cnb-base-image
-          trigger: true
-          passed:
-            - update-cflinuxfs3-cnb-run-image
-            - update-cflinuxfs3-cnb-build-image
-        <% end %>
+            - update-<%= builder_data["stack"] %>-run-cnb-image
         <% cnb_hash.each do |cnb_name, cnb_data| %>
         - get: <%= cnb_name %>-cnb
           trigger: true
         <% end %>
-        - get: pack
+        - get: pack # do we need this anymore
           resource: pack-master
           trigger: true
         - get: buildpacks-ci
@@ -313,9 +268,10 @@ jobs:
           params: {pre: "rc"}
           resource: <%= builder_data["version-resource"] %>
         - get: packager
-        - get: lifecycle
+        - get: lifecycle # use lifecycle version in order.toml instead?
           resource: cnb-lifecycle-release
           trigger: true
+      # Should create-builder-image just ls *-cnb?
       - task: get-cnb-sources
         config:
           platform: linux
@@ -351,20 +307,18 @@ jobs:
           STACK: <%= builder_data["stack"] %>
           REPO: <%= builder_data.fetch("builder-image-params",[]).fetch("REPO") %>
           RUN_IMAGE: <%= builder_data.fetch("builder-image-params",[]).fetch("RUN_IMAGE") %>
-  <% end %>
 
-  <% builders.each do |builder_name, builder_data| %>
-  <% all_cnb_hash = builder_data["private"] ? piv_cnbs : cnbs %>
-  <% cnb_hash = all_cnb_hash.reject{|cnb, data| data.fetch("skip_stack",[]).include? builder_data.fetch("stack")} %>
   - name: release-<%=builder_name%>
     plan:
       - in_parallel:
-        <% if builder_data["include-base-image"] %>
-        <% cnb_child_images.each do |image_type| %>
-        - get: cloudfoundry-cflinuxfs3-cnb-<%= image_type %>-image
-          params: {skip_download: true}
-        <% end %>
-        <% end %>
+        - get: <%= builder_data["stack"] %>-build-cnb-image
+          trigger: true
+          passed:
+            - update-<%= builder_data["stack"] %>-build-cnb-image
+        - get: <%= builder_data["stack"] %>-run-cnb-image
+          trigger: true
+          passed:
+            - update-<%= builder_data["stack"] %>-run-cnb-image
         <% cnb_hash.keys.each do |cnb_name| %>
         - get: <%= cnb_name %>-cnb
           resource: <%= cnb_name %>-cnb-release
@@ -430,4 +384,4 @@ jobs:
       - put: <%= builder_data.fetch("version-resource") %>
         params:
           bump: patch
-  <% end %>
+<% end %>
