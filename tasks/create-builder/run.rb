@@ -54,9 +54,9 @@ buildpacks = Dir.glob('sources/*/').map do |dir|
     system *args, bp_location or exit 1
   end
   {
-    "id":     id,
-    "uri":    bp_location,
-    "latest": true,
+    "id" => id,
+    "uri" => bp_location,
+    "latest" => true,
   }
 end
 
@@ -66,16 +66,16 @@ groups = static_builder_file['groups']
 description = static_builder_file['description']
 
 config_hash = {
-  "description": description,
-  "buildpacks": buildpacks,
-  "groups":     groups,
-  "stack":      {
-    "id":          cnb_stack,
-    "build-image": build_image,
-    "run-image":   run_image
+  "description" => description,
+  "buildpacks" => buildpacks,
+  "groups" => groups,
+  "stack" => {
+    "id" => cnb_stack,
+    "build-image" => build_image,
+    "run-image" => run_image
   },
-  "lifecycle": {
-      "version": lifecycle_version
+  "lifecycle" => {
+    "version" => lifecycle_version
   }
 }
 
@@ -112,9 +112,8 @@ if ENV.fetch('FINAL') == "true"
   tagFile = stack
   if stack == 'bionic'
     tagFile += " base" # Need a white-space separated list of tags
-  else if stack == 'cflinuxfs3'
+  elsif stack == 'cflinuxfs3'
     tagFile += " full"
   end
   File.write(File.join("release-tag", "name"), tagFile)
-
 end
