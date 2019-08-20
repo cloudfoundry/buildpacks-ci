@@ -16,7 +16,6 @@ gem 'rake'
 gem 'rspec'
 gem 'rspec-rerun'
 gem 'tracker_api'
-gem 'webmock'
 gem 'toml'
 gem 'tomlrb'
 gem 'rubyzip', require: 'zip'
@@ -25,4 +24,8 @@ group :development do
   gem 'rubocop'
   gem 'rubocop-rspec'
   gem 'version_sorter'
+end
+
+group :test do
+  gem 'webmock'
 end

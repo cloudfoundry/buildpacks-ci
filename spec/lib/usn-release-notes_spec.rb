@@ -8,7 +8,9 @@ require_relative '../../lib/usn-release-notes'
 
 describe UsnReleaseNotes do
   let(:usn_id) {'3806-1'}
-  WebMock.allow_net_connect!
+  before(:all){
+    WebMock.allow_net_connect!
+  }
 
   after(:all){
     WebMock.disable_net_connect!
