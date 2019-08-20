@@ -34,12 +34,14 @@ resources:
 <% all_cnbs.each do |cnb_name, data| %>
   - name: <%= cnb_name %>-cnb
     type: git
+    check_every: 15m # to avoid thundering herd of cnb autobumping
     source:
       uri: <%= data['git_repo'] %>
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
 
   - name: <%= cnb_name %>-cnb-release # move this github release resource
     type: git
+    check_every: 15m # to avoid thundering herd of cnb autobumping
     source:
       uri: <%= data['git_repo'] %>
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
