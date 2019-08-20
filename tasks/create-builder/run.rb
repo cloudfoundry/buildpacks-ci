@@ -5,20 +5,20 @@ require 'toml' # One to write
 require 'json'
 require 'net/http'
 
-version             = File.read(File.join("version", "version")).strip()
-repo                = ENV.fetch("REPO")
-build_image         = ENV.fetch("BUILD_IMAGE")
-run_image           = ENV.fetch("RUN_IMAGE")
-cnb_stack           = ENV.fetch("STACK")
-host                = ENV.fetch("HOST")
-enterprise          = ENV.fetch("ENTERPRISE") == 'true'
-stack               = cnb_stack.split('.').last
-tag                 = "#{version}-#{stack}"
+version = File.read(File.join("version", "version")).strip()
+repo = ENV.fetch("REPO")
+build_image = ENV.fetch("BUILD_IMAGE")
+run_image = ENV.fetch("RUN_IMAGE")
+cnb_stack = ENV.fetch("STACK")
+host = ENV.fetch("HOST")
+enterprise = ENV.fetch("ENTERPRISE") == 'true'
+stack = cnb_stack.split('.').last
+tag = "#{version}-#{stack}"
 builder_config_file = File.absolute_path("builder.toml")
-pack_path           = File.absolute_path('pack-cli')
-packager_path       = File.absolute_path('packager-cli')
-ci_path             = File.absolute_path('buildpacks-ci')
-lifecycle_version   = File.read(File.join("lifecycle", "version")).strip()
+pack_path = File.absolute_path('pack-cli')
+packager_path = File.absolute_path('packager-cli')
+ci_path = File.absolute_path('buildpacks-ci')
+lifecycle_version = File.read(File.join("lifecycle", "version")).strip()
 
 if !enterprise # not in a public repo
   json_resp = JSON.load(Net::HTTP.get(URI("https://#{host}/v2/repositories/#{repo}/tags/?page_size=100")))
@@ -40,8 +40,8 @@ end
 
 buildpacks = Dir.glob('sources/*/').map do |dir|
   buildpack_toml_file = 'buildpack.toml'
-  id          = Tomlrb.load_file(File.join(dir, buildpack_toml_file))['buildpack']['id']
-  bp_location = File.absolute_path(File.join(dir,id))
+  id = Tomlrb.load_file(File.join(dir, buildpack_toml_file))['buildpack']['id']
+  bp_location = File.absolute_path(File.join(dir, id))
   local_packager = './packager-cli'
   args = [local_packager, '-uncached']
   args.pop if enterprise
