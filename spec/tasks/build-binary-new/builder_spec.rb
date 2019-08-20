@@ -1,5 +1,6 @@
 require 'tmpdir'
 require 'fileutils'
+require 'webmock/rspec'
 require_relative '../../../tasks/build-binary-new/builder'
 require_relative '../../../tasks/build-binary-new/source_input'
 require_relative '../../../tasks/build-binary-new/build_input'
@@ -13,16 +14,24 @@ end
 TableTestOutput = Struct.new(:old_file_path, :prefix, :extension) do
 end
 
-def createDataJSON(path, name)
+def createDataJSON(path, name, ver)
   FileUtils.mkdir_p(path)
   filepath = File.join(path, "data.json")
   filepath = File.new(filepath, 'w')
-  filepath.puts ('{"source":{"name":"' + name + '","type":"' + name + '"},"version":{"ref":"8.7","url":"https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/pip-pop/pip-pop-0.1.3-fc106ef6.tar.gz"}}')
+  filepath.puts ('{"source":{"name":"' + name + '","type":"' + name + '"},"version":{"ref":"' + ver.to_s() +'","url":"https://fake.url.com"}}')
   filepath.close
 end
 
 describe 'Builder' do
-  subject { Builder.new }
+  before(:all) do
+    WebMock.disable_net_connect!
+  end
+
+  after(:all) do
+    WebMock.allow_net_connect!
+  end
+
+  subject! { Builder.new }
 
   let(:binary_builder) { double(BinaryBuilderWrapper) }
   let(:build_input) { double(BuildInput) }
@@ -291,26 +300,26 @@ describe 'Builder' do
                                         sub_dependencies: {
                                           forecast: {
                                             source: {
-                                              url: 'https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/pip-pop/pip-pop-0.1.3-fc106ef6.tar.gz',
-                                              sha256: 'fc106ef6e87c9da64ca3b5eda2a4b531bdd2d1965304e9385772c546c6a6fe59',
+                                              url: 'https://fake.url.com',
+                                              sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
                                             },
-                                            version: '8.7'},
+                                            version: '8.4'},
                                           plumber: {
                                             source: {
-                                              url: 'https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/pip-pop/pip-pop-0.1.3-fc106ef6.tar.gz',
-                                              sha256: 'fc106ef6e87c9da64ca3b5eda2a4b531bdd2d1965304e9385772c546c6a6fe59',
+                                              url: 'https://fake.url.com',
+                                              sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
                                             },
-                                            version: '8.7'},
+                                            version: '8.5'},
                                           rserve: {
                                             source: {
-                                              url: 'https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/pip-pop/pip-pop-0.1.3-fc106ef6.tar.gz',
-                                              sha256: 'fc106ef6e87c9da64ca3b5eda2a4b531bdd2d1965304e9385772c546c6a6fe59',
+                                              url: 'https://fake.url.com',
+                                              sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
                                             },
-                                            version: '8.7'},
+                                            version: '8.6'},
                                           shiny: {
                                             source: {
-                                              url: 'https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/pip-pop/pip-pop-0.1.3-fc106ef6.tar.gz',
-                                              sha256: 'fc106ef6e87c9da64ca3b5eda2a4b531bdd2d1965304e9385772c546c6a6fe59',
+                                              url: 'https://fake.url.com',
+                                              sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
                                             },
                                             version: '8.7'},
                                         },
@@ -321,19 +330,34 @@ describe 'Builder' do
         end
         let(:source_input) { SourceInput.new('r', 'https://fake.com', '1.0.2', nil, 'fake-sha256') }
 
-        createDataJSON("source-rserve-latest", "rserve")
-        createDataJSON("source-plumber-latest", "plumber")
-        createDataJSON("source-shiny-latest", "shiny")
-        createDataJSON("source-forecast-latest", "forecast")
+        createDataJSON("source-rserve-latest", "rserve", "8.6")
+        createDataJSON("source-plumber-latest", "plumber", "8.5")
+        createDataJSON("source-shiny-latest", "shiny", "8.7")
+        createDataJSON("source-forecast-latest", "forecast", "8.4")
+
+        after(:each) do
+          FileUtils.remove_dir("source-rserve-latest")
+          FileUtils.remove_dir("source-plumber-latest")
+          FileUtils.remove_dir("source-shiny-latest")
+          FileUtils.remove_dir("source-forecast-latest")
+        end
 
         it 'should build correctly' do
           expect(DependencyBuild).to receive(:build_r)
-            .with(source_input, "8.7", "8.7", "8.7", "8.7")
+            .with(source_input, "8.4", "8.5", "8.6", "8.7")
             .and_return 'fake-source-sha-123'
 
           expect(artifact_output).to receive(:move_dependency)
             .with('r', 'artifacts/r-v1.0.2.tgz', 'r-v1.0.2-cflinuxfs2', 'tgz')
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
+
+          stub_request(:get, "https://fake.url.com").
+            with(  headers: {
+              'Accept'=>'*/*',
+              'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+              'Host'=>'fake.url.com',
+              'User-Agent'=>'Ruby'
+            }).to_return(status: 200, body: "", headers: {}).times(4)
 
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
         end
