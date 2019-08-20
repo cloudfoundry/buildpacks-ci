@@ -25,6 +25,8 @@ describe 'DotnetFrameworkExtractor' do
     FileUtils.mkdir_p(File.join(sdk_dir, 'shared', 'Microsoft.NETCore.App', '3.1.3'))
     FileUtils.mkdir_p(File.join(sdk_dir, 'shared', 'Microsoft.AspNetCore.All', '2.1.2'))
     FileUtils.mkdir_p(File.join(sdk_dir, 'shared', 'Microsoft.AspNetCore.App', '2.1.2'))
+    FileUtils.mkdir_p(File.join(sdk_dir, 'host', 'fxr', '2.1.2'))
+    FileUtils.mkdir_p(File.join(sdk_dir, 'host', 'fxr', '3.1.3'))
     File.write(File.join(sdk_dir, 'something.txt'), 'foo')
 
     allow(source_input).to receive(:url).and_return('some-cli-url')
@@ -64,7 +66,7 @@ describe 'DotnetFrameworkExtractor' do
     end
 
     it 'should extract and remove the Microsoft.AspNetCore.All and Microsoft.AspNetCore.App metapackages when told to remove frameworks' do
-      expect(FileUtils).to receive(:rm_rf).with(%w(shared/Microsoft.AspNetCore.App shared/Microsoft.AspNetCore.All))
+      expect(FileUtils).to receive(:rm_rf).with(%w(shared/Microsoft.AspNetCore.App shared/Microsoft.AspNetCore.All host/fxr))
       expect(subject).not_to receive(:write_runtime_file)  # No file written for aspnetcore
 
       subject.extract_aspnetcore(true)
@@ -108,14 +110,14 @@ describe 'DotnetFrameworkExtractor' do
     end
 
     it 'should extract and remove the Microsoft.NETCore.App when told to remove frameworks' do
-      expect(FileUtils).to receive(:rm_rf).with(%w(shared/Microsoft.NETCore.App)).and_return(true)
+      expect(FileUtils).to receive(:rm_rf).with(%w(shared/Microsoft.NETCore.App host/fxr)).and_return(true)
       expect(subject).to receive(:write_runtime_file).with(sdk_dir)
 
       subject.extract_runtime(true)
     end
 
     it 'should extract and keep the Microsoft.NETCore.App when told to keep frameworks' do
-      expect(FileUtils).not_to receive(:rm_rf).with(%w(shared/Microsoft.NETCore.App))
+      expect(FileUtils).not_to receive(:rm_rf).with(%w(shared/Microsoft.NETCore.App host/fxr))
       expect(subject).not_to receive(:write_runtime_file)
 
       subject.extract_runtime(false)

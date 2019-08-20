@@ -61,7 +61,7 @@ class DotnetFrameworkExtractor
   def extract_framework_dep(sdk_dir, tar, package_names, remove_frameworks)
     Dir.chdir(sdk_dir) do
       paths = package_names.map {|package| File.join("shared", package)}
-      paths += File.join("host", "fxr")
+      paths += [File.join("host", "fxr")]
       version = Dir[File.join(paths.first, "*")]
                   .map {|path| Pathname.new(path).basename.to_s}
                   .sort_by {|version| Gem::Version.new(version)}
