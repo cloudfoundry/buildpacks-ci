@@ -7,7 +7,6 @@
   cnbs = all_cnbs.select{|cnb, data| data["public"]}
   piv_cnbs = all_cnbs.select{|cnb, data| data["private"]}
   cnb_child_images = %w(run build)
-  cnb_images = cnb_child_images + ['base']
 %>
 
 ---
