@@ -66,7 +66,7 @@ describe 'DotnetFrameworkExtractor' do
     end
 
     it 'should extract and remove the Microsoft.AspNetCore.All and Microsoft.AspNetCore.App metapackages when told to remove frameworks' do
-      expect(FileUtils).to receive(:rm_rf).with(%w(shared/Microsoft.AspNetCore.App shared/Microsoft.AspNetCore.All host/fxr))
+      expect(FileUtils).to receive(:rm_rf).with(%w(shared/Microsoft.AspNetCore.App shared/Microsoft.AspNetCore.All))
       expect(subject).not_to receive(:write_runtime_file)  # No file written for aspnetcore
 
       subject.extract_aspnetcore(true)
@@ -110,14 +110,14 @@ describe 'DotnetFrameworkExtractor' do
     end
 
     it 'should extract and remove the Microsoft.NETCore.App when told to remove frameworks' do
-      expect(FileUtils).to receive(:rm_rf).with(%w(shared/Microsoft.NETCore.App host/fxr)).and_return(true)
+      expect(FileUtils).to receive(:rm_rf).with(%w(shared/Microsoft.NETCore.App)).and_return(true)
       expect(subject).to receive(:write_runtime_file).with(sdk_dir)
 
       subject.extract_runtime(true)
     end
 
     it 'should extract and keep the Microsoft.NETCore.App when told to keep frameworks' do
-      expect(FileUtils).not_to receive(:rm_rf).with(%w(shared/Microsoft.NETCore.App host/fxr))
+      expect(FileUtils).not_to receive(:rm_rf).with(%w(shared/Microsoft.NETCore.App))
       expect(subject).not_to receive(:write_runtime_file)
 
       subject.extract_runtime(false)
