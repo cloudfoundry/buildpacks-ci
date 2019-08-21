@@ -22,7 +22,11 @@ V3_DEP_NAMES = {
   'httpd' => 'Apache HTTP Server',
   'go' => 'Go',
   'dep' => 'Dep',
-  'nginx' => 'Nginx Server'
+  'nginx' => 'Nginx Server',
+  'pipenv' => "Pipenv",
+  'miniconda3' => "Miniconda",
+  'bundler' => "Bundler",
+  'ruby' => "Ruby"
 }
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
