@@ -73,7 +73,7 @@ class DotnetFrameworkExtractor
       system("tar Jcf #{tar} #{paths_with_version.join(' ')} *.txt") or raise "Tarring the #{package_names.join(', ')} assemblies failed"
 
       if remove_frameworks
-        FileUtils.rm_rf(paths)
+        FileUtils.rm_rf(paths-[File.join("host", "fxr")])
       end
 
       return version
