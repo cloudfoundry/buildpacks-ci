@@ -2,11 +2,6 @@
   buildpacks = YAML.load_file(File.join(__dir__, '..', 'config', 'cnb-builds.yml'))
 %>
 ---
-resource_types:
-  - name: slack-notification
-    type: docker-image
-    source:
-      repository: cfcommunity/slack-notification-resource
 
 resources: ############################################################################################################
   ## Git ##

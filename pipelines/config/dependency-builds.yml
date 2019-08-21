@@ -83,6 +83,15 @@ dependencies:
             deprecation_date: 2019-12-23
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: keep_all
+      dotnet-core-runtime-cnb:
+        lines:
+          - line: 2.1.X
+            deprecation_date: 2021-08-21 #link says supported at least this long
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+          - line: 2.2.X
+            deprecation_date: 2019-12-23
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+        removal_strategy: keep_all
   dotnet-aspnetcore:
     buildpacks:
       dotnet-core:
