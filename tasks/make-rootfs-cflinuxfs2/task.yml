@@ -4,6 +4,7 @@ image_resource:
   type: docker-image
   source:
     repository: cfbuildpacks/ci
+    tag: 'docker-18.03'
 inputs:
   - name: buildpacks-ci
   - name: cflinuxfs2
