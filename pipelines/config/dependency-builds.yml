@@ -99,6 +99,11 @@ dependencies:
           - line: 2.1.X
           - line: 2.2.X
         removal_strategy: keep_all
+      dotnet-core-aspnet-cnb:
+        lines:
+          - line: 2.1.X
+          - line: 2.2.X
+        removal_strategy: keep_all
   glide:
     buildpacks:
       go:

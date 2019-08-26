@@ -11,7 +11,8 @@ CNB_STACKS = {
 }
 
 V3_DEP_IDS = {
-  'php' => 'php-binary'
+  'php' => 'php-binary',
+  'dotnet-aspnetcore' => 'dotnet-aspnet'
 }
 
 V3_DEP_NAMES = {
