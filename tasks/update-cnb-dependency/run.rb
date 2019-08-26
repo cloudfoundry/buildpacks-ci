@@ -59,7 +59,7 @@ builds = {}
 
 dependency_build_glob = "builds/binary-builds-new/#{dependency_name}/#{resource_version}-*.json"
 Dir[dependency_build_glob].each do |stack_dependency_build|
-  no_deprecation_info = (deprecation_date.nil? or deprecation_link.nil?)
+  no_deprecation_info = (deprecation_date == 'null' or deprecation_link == 'null')
   unless no_deprecation_info or (version_line == 'latest')
     dependency_deprecation_date = {
       'version_line' => version_line.downcase,
