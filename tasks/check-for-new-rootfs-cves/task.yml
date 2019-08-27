@@ -9,6 +9,7 @@ inputs:
   - name: buildpacks-ci
   - name: cflinuxfs3
   - name: cflinuxfs2
+  - name: pivotal-tiny
 outputs:
   - name: output-new-cves
 run:
