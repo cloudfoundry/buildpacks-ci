@@ -18,7 +18,7 @@ when 'cflinuxfs2'
   cve_notifier.run!(stack, 'Ubuntu 14.04', 'ubuntu14.04', [])
 when 'cflinuxfs3'
   cve_notifier.run!(stack, 'Ubuntu 18.04', 'ubuntu18.04', notifiers)
-when 'pivotal-tiny'
+when 'tiny'
   cve_notifier.run!(stack, 'Ubuntu 18.04', 'ubuntu18.04-tiny', notifiers)
 else
   raise "Unsupported stack: #{stack}"
