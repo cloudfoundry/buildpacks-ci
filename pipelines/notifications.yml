@@ -96,6 +96,12 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/cflinuxfs3
       branch: master
+  - name: tiny
+    type: git
+    source:
+      uri: git@github.com:pivotal/pivotal-tiny
+      branch: master
+      private_key: {{pivotal-tiny-private-key}}
   - name: cflinuxfs3-release
     type: github-release
     source:
@@ -214,6 +220,7 @@ jobs:
         - get: cflinuxfs2
           resource: p-cflinuxfs2
         - get: cflinuxfs3
+        - get: tiny
         - get: check-interval
           trigger: true
       - in_parallel:
@@ -242,6 +249,20 @@ jobs:
             resource: new-cves
             params:
               repository: output-new-cves-cflinuxfs3
+              rebase: true
+        - do:
+          - task: check-for-new-pivotal-cves
+            file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
+            params:
+#              SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
+#              SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
+              STACK: tiny
+            output_mapping:
+              output-new-cves: output-new-cves-tiny
+          - put: new-cves-tiny
+            resource: new-cves
+            params:
+              repository: output-new-cves-tiny
               rebase: true
 
   - name: PHP Module Checker
