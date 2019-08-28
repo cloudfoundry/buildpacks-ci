@@ -48,6 +48,55 @@ resources:
       tag_filter: "v*"
 <% end %>
 
+  - name: tiny-image
+    type: docker-image
+    source:
+      repository: cloudfoundry/tiny
+      tag: latest
+      email: {{buildpacks-docker-user-email}}
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+
+  - name: tiny-cnb-base-image
+    type: docker-image
+    source:
+      repository: cloudfoundry/cnb-base
+      tag: tiny
+      email: {{buildpacks-docker-user-email}}
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+
+  - name: tiny-cnb-run-image
+    type: docker-image
+    source:
+      repository: cloudfoundry/cnb-run
+      tag: tiny
+      email: {{buildpacks-docker-user-email}}
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+
+  - name: tiny-stack-base-git
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/stacks
+      paths: [ tiny/base/* ]
+      branch: master
+
+  - name: tiny-stack-cnb-git
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/stacks
+      paths: [ tiny/cnb/* ]
+      branch: master
+
+  - name: new-cves
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: master
+      paths: [ new-cve-notifications/ubuntu18.04-tiny.yml ]
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+
   - name: packager
     type: git
     source:
@@ -191,6 +240,78 @@ resources:
 <% end %>
 
 jobs:
+  - name: test-tiny
+    plan:
+      - get: tiny-stack-base-git
+        trigger: true
+      - get: new-cves
+        trigger: true
+      - task: integration-test
+        privileged: true
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: pivotalnavcon/docker-go
+          inputs:
+            - name: tiny-stack-base-git
+          run:
+            path: /bin/bash
+            args:
+              - -c
+              - |
+                  set -eux -o pipefail
+                  source /opt/resource/common.sh
+                  sanitize_cgroups
+                  start_docker 3 3 "" ""
+
+                  apk add coreutils ncurses curl
+                  curl -#L https://github.com/bats-core/bats-core/archive/master.zip | unzip -
+                  bash bats-core-master/install.sh /usr/local
+
+                  cd tiny-stack-base-git/tiny/base/run
+                  docker build -t tiny .
+                  bats -t ./tests/test.bats && bats -t ./tests/testapp.bats
+
+  - name: build-and-publish-tiny-base
+    public: true
+    plan:
+      - get: tiny-stack-base-git
+        passed: [test-tiny]
+        trigger: true
+      - get: new-cves
+        passed: [test-tiny]
+        trigger: true
+      - put: tiny-image
+        params:
+          build: tiny-stack-base-git/tiny/base/run
+          build_args:
+            squash: squash
+        attempts: 2
+      - put: tiny-cnb-base-image
+        params:
+          build: tiny-stack-base-git/tiny/base/run
+          build_args:
+            squash: squash
+        attempts: 2
+
+  - name: build-and-publish-tiny-cnb
+    public: true
+    plan:
+      - get: tiny-stack-cnb-git
+        trigger: true
+      - get: tiny-cnb-base-image
+        passed: [ build-and-publish-tiny-base ]
+        trigger: true
+      - put: tiny-cnb-run-image
+        params:
+          build: tiny-stack-cnb-git/tiny/cnb/run
+          build_args:
+            squash: squash
+        attempts: 2
+
+
 <% cnb_child_images.each do |image_type| %>
   - name: update-cflinuxfs3-<%= image_type %>-cnb-image
     public: true
