@@ -33,7 +33,8 @@ end
 #   system 'go', 'build', '-mod=vendor', '-o', pack_path, 'cmd/pack/main.go' or exit 1
 # end
 puts 'moving pack release candidate'
-`tar xvf pack -C #{pack_path}`
+pack_tar = Dir["pack/*.tgz"].first
+`tar xvf #{Dir.pwd}/#{pack_tar} -C #{pack_path}`
 
 puts 'Building cnb packager...'
 Dir.chdir 'packager' do
