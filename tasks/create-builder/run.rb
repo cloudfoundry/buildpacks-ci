@@ -4,6 +4,7 @@ require 'tomlrb' # One gem to read (supports v0.4.0)
 require 'toml' # One to write
 require 'json'
 require 'net/http'
+require 'fileutils'
 
 version = File.read(File.join("version", "version")).strip()
 repo = ENV.fetch("REPO")
