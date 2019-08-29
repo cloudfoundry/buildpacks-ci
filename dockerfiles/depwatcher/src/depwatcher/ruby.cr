@@ -10,11 +10,12 @@ module Depwatcher
         url: String,
         sha256: String,
       )
+
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       name = "ruby/ruby"
       regexp = "^v\\d+_\\d+_\\d+$"
       GithubTags.new(client).matched_tags(name, regexp).map do |r|
@@ -22,13 +23,13 @@ module Depwatcher
       end.sort_by { |i| SemanticVersion.new(i.ref) }
     end
 
-    def in(ref : String) : Release
+    def in(ref : String) : Release | Nil
       releases().select do |r|
         r.ref == ref
-      end.first
+      end.first?
     end
 
-    private def releases() : Array(Release)
+    private def releases : Array(Release)
       response = client.get("https://www.ruby-lang.org/en/downloads/").body
       doc = XML.parse_html(response)
       lis = doc.xpath("//li/a[starts-with(text(),'Ruby ')]")
