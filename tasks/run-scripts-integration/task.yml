@@ -9,5 +9,6 @@ inputs:
   - name: buildpacks-ci
   - name: repo
   - name: candidate
+    optional: true
 run:
   path: buildpacks-ci/tasks/run-scripts-integration/run.sh
