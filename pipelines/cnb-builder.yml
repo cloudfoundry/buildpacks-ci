@@ -102,13 +102,13 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/libcfbuildpack
       branch: master
-
-  - name: pack-release
-    type: git
-    source:
-      uri: https://github.com/buildpack/pack.git
-      branch: master
-      tag_filter: "v*"
+#
+#  - name: pack-release
+#    type: git
+#    source:
+#      uri: https://github.com/buildpack/pack.git
+#      branch: master
+#      tag_filter: "v*"
 
   - name: pack-release-candidate
     type: s3
