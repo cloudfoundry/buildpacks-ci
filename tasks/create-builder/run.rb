@@ -34,6 +34,7 @@ end
 # end
 puts 'moving pack release candidate'
 pack_tar = Dir["pack/*.tgz"].first
+FileUtils.mkdir_p pack_path
 `tar xvf #{Dir.pwd}/#{pack_tar} -C #{pack_path}`
 
 puts 'Building cnb packager...'
