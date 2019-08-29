@@ -1,4 +1,4 @@
-FROM ruby:2.3-slim
+FROM ruby:2.6-slim
 
 ENV LANG="C.UTF-8"
 
@@ -45,7 +45,8 @@ RUN apt-get update \
   wget \
   zip \
   google-chrome-stable \
-  om && \
+  om \
+  multiarch-support && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install packages that are specific to ubuntu and not debian
@@ -90,14 +91,6 @@ RUN curl -L https://github.com/cloudfoundry-incubator/credhub-cli/releases/downl
   && tar -zxf credhub.tgz --to-stdout > /usr/local/bin/credhub \
   && rm credhub.tgz \
   && chmod +x /usr/local/bin/credhub
-
-
-#download spiff for spiffy things
-RUN wget -O spiff.zip 'https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.8/spiff_linux_amd64.zip' \
-  && [ e5b49b7f32b2b3973536bf2a48beda2d236956bebff7677aa109cc2b71f56002 = $(shasum -a 256 spiff.zip | cut -d' ' -f1) ] \
-  && funzip spiff.zip > /usr/bin/spiff \
-  && rm spiff.zip
-RUN chmod 755 /usr/bin/spiff
 
 # Ensure Concourse Filter binary is present
 RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.0.4/concourse-filter' \
