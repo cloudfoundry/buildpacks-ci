@@ -12,3 +12,6 @@ inputs:
     optional: true
 run:
   path: buildpacks-ci/tasks/run-scripts-integration/run.sh
+
+params:
+  SKIP_DOCKER_START:
