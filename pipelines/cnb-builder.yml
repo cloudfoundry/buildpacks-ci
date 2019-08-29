@@ -110,6 +110,14 @@ resources:
       branch: master
       tag_filter: "v*"
 
+  - name: pack-release-candidate
+    type: s3
+    source:
+      bucket: {{cnb-release-candidates-bucket}}
+      regexp: pack-(.*)\+.*linux.tgz
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+
   - name: pack-master
     type: git
     source:
@@ -450,7 +458,7 @@ jobs:
           resource: p-cnb-builder
           <% end %>
         - get: pack
-          resource: pack-release
+          resource: pack-release-candidate
           trigger: true
         - get: packager
         - get: buildpacks-ci

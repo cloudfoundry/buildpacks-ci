@@ -28,10 +28,12 @@ if !enterprise # not in a public repo
   end
 end
 
-puts 'Building pack...'
-Dir.chdir 'pack' do
-  system 'go', 'build', '-mod=vendor', '-o', pack_path, 'cmd/pack/main.go' or exit 1
-end
+# puts 'Building pack...'
+# Dir.chdir 'pack' do
+#   system 'go', 'build', '-mod=vendor', '-o', pack_path, 'cmd/pack/main.go' or exit 1
+# end
+puts 'moving pack release candidate'
+`tar xvf pack -C #{pack_path}`
 
 puts 'Building cnb packager...'
 Dir.chdir 'packager' do
