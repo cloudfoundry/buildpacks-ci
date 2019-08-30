@@ -131,6 +131,8 @@ jobs:
           USERNAME: admin
       - task: integration-test
         file: buildpacks-ci/tasks/run-scripts-integration/task.yml
+        params:
+          SKIP_DOCKER_START: true
     ensure:
       in_parallel:
         - task: delete-cf-space
