@@ -16,6 +16,9 @@ dotnet-core-runtime:
 dotnet-core-aspnet:
   integration: true
   auto_release: true
+dotnet-core-sdk:
+  integration: true
+  auto_release: true
 go-compiler:
   auto_release: true
 go-mod:
