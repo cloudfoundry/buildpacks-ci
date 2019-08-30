@@ -48,19 +48,11 @@ resources:
       tag_filter: "v*"
 <% end %>
 
-  - name: tiny-image
-    type: docker-image
-    source:
-      repository: cloudfoundry/tiny
-      tag: latest
-      email: {{buildpacks-docker-user-email}}
-      username: {{buildpacks-docker-username}}
-      password: {{buildpacks-docker-password}}
 
-  - name: tiny-cnb-base-image
+- name: tiny-cnb-base-image
     type: docker-image
     source:
-      repository: cloudfoundry/cnb-base
+      repository: cloudfoundry/run
       tag: tiny
       email: {{buildpacks-docker-user-email}}
       username: {{buildpacks-docker-username}}
@@ -69,8 +61,8 @@ resources:
   - name: tiny-cnb-run-image
     type: docker-image
     source:
-      repository: cloudfoundry/cnb-run
-      tag: tiny
+      repository: cloudfoundry/run
+      tag: tiny-cnb
       email: {{buildpacks-docker-user-email}}
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
