@@ -26,7 +26,7 @@ builders:
     version-resource: bionic-piv-version
     builder-image-params:
       REPO: p-cnb-builder
-      STACK: "io.buildpack.stacks.bionic"
+      STACK: "io.buildpacks.stacks.bionic"
       BUILD_IMAGE: "cloudfoundry/build:base-cnb"
       RUN_IMAGE: "cloudfoundry/run:base-cnb"
       ENTERPRISE: true
