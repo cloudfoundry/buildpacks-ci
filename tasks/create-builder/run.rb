@@ -66,13 +66,13 @@ end
 
 puts "Loading #{stack}-order.toml"
 static_builder_file = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.toml"))
-groups = static_builder_file['groups']
+order = static_builder_file['order']
 description = static_builder_file['description']
 
 config_hash = {
   "description" => description,
   "buildpacks" => buildpacks,
-  "groups" => groups,
+  "order" => order,
   "stack" => {
     "id" => cnb_stack,
     "build-image" => build_image,
