@@ -99,7 +99,7 @@ puts "Starting local docker registry"
 system 'docker', 'run', '-d', '-p', "#{repository_port}:#{repository_port}", '--restart=always', '--name', 'local_registry', 'registry:2' or exit 1
 
 puts "Creating the builder and publishing it to a local registry"
-system "#{pack_path}\pack", 'create-builder', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", '--builder-config', "#{builder_config_file}", '--publish' or exit 1
+system "#{pack_path}/pack", 'create-builder', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", '--builder-config', "#{builder_config_file}", '--publish' or exit 1
 
 puts "Pulling images from local registry"
 system 'docker', 'pull', "#{repository_host}:#{repository_port}/#{repo}:#{stack}" or exit 1
