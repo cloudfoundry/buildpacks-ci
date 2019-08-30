@@ -250,9 +250,6 @@ dependencies:
     buildpacks:
       php:
         lines:
-          - line: 1.15.X
-            deprecation_date: 2019-05-21
-            link: https://nginx.org/
           - line: 1.16.X
             deprecation_date: 2020-04-01
             link: https://nginx.org/
@@ -261,9 +258,6 @@ dependencies:
             link: https://nginx.org/
       staticfile:
         lines:
-          - line: 1.15.X
-            deprecation_date: 2019-05-21
-            link: https://nginx.org/
           - line: 1.17.X
             deprecation_date: 2020-05-01
             link: https://nginx.org/
