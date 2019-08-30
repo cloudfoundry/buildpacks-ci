@@ -48,8 +48,7 @@ resources:
       tag_filter: "v*"
 <% end %>
 
-
-- name: tiny-cnb-base-image
+  - name: tiny-cnb-base-image
     type: docker-image
     source:
       repository: cloudfoundry/run
@@ -283,12 +282,6 @@ jobs:
       - get: new-cves
         passed: [test-tiny]
         trigger: true
-      - put: tiny-image
-        params:
-          build: tiny-stack-base-git/tiny/base/run
-          build_args:
-            squash: squash
-        attempts: 2
       - put: tiny-cnb-base-image
         params:
           build: tiny-stack-base-git/tiny/base/run
