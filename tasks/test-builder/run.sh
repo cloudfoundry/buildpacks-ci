@@ -12,8 +12,8 @@ docker pull "$RUN_IMAGE"
 docker load -i builder-image/builder.tgz
 
 pushd pack
-    echo "Building pack..."
-    go build -mod=vendor -o pack ./cmd/pack/main.go
+    echo "Unpacking pack..."
+    tar xvf pack*.linux.tgz pack -C ./
 popd
 
 echo "Building test apps..."
