@@ -431,9 +431,6 @@ dependencies:
     buildpacks:
       r:
         lines: # final release for each minor version is every spring ( just before next minor version release )
-          - line: 3.4.X
-            deprecation_date: 2018-04-23  # why do we still have this in the buildpack?
-            link: https://developer.r-project.org/
           - line: 3.5.X
             deprecation_date: 2019-03-11
             link: https://developer.r-project.org/
