@@ -61,7 +61,6 @@ buildpacks = Dir.glob('sources/*/').map do |dir|
   {
     "id" => id,
     "uri" => bp_location,
-    "latest" => true,
   }
 end
 
