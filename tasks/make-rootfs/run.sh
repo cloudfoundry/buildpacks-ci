@@ -20,6 +20,6 @@ pushd rootfs
   versioned_receipt_filename="../receipt-artifacts/receipt.${STACK}.x86_64-$(cat ../version/number)"
   mv "receipt.${STACK}.x86_64" "$versioned_receipt_filename"
 
-  which git
+  command -v git
   TERM=xterm-color git --no-pager diff "$old_receipt_copy" "$versioned_receipt_filename" || true
 popd
