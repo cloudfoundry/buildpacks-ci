@@ -48,38 +48,6 @@ resources:
       tag_filter: "v*"
 <% end %>
 
-  - name: tiny-cnb-base-image
-    type: docker-image
-    source:
-      repository: cloudfoundry/run
-      tag: tiny
-      email: {{buildpacks-docker-user-email}}
-      username: {{buildpacks-docker-username}}
-      password: {{buildpacks-docker-password}}
-
-  - name: tiny-cnb-run-image
-    type: docker-image
-    source:
-      repository: cloudfoundry/run
-      tag: tiny-cnb
-      email: {{buildpacks-docker-user-email}}
-      username: {{buildpacks-docker-username}}
-      password: {{buildpacks-docker-password}}
-
-  - name: tiny-stack-base-git
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/stacks
-      paths: [ tiny/base/* ]
-      branch: master
-
-  - name: tiny-stack-cnb-git
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/stacks
-      paths: [ tiny/cnb/* ]
-      branch: master
-
   - name: new-cves
     type: git
     source:
@@ -93,7 +61,7 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/libcfbuildpack
       branch: master
-#
+
 #  - name: pack-release
 #    type: git
 #    source:
@@ -146,7 +114,21 @@ resources:
       paths: [ "bionic/cnb/<%= image_type %>/**" ]
 <% end %>
 
-  # Versions
+  - name: tiny-run-base-dockerfile
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/stacks
+      branch: master
+      paths: [ "tiny/base/*" ]
+
+  - name: tiny-run-cnb-dockerfile
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/stacks
+      branch: master
+      paths: [ "tiny/cnb/*" ]
+
+# Versions
   - name: cflinuxfs3-version
     type: semver
     source:
@@ -183,7 +165,7 @@ resources:
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
-  # Docker Images
+# Docker Images
   - name: builder-image
     type: docker-image
     source:
@@ -199,7 +181,7 @@ resources:
       username: _json_key
       password: {{gcp-service-account-key}}
 
-  # CNB stack images
+# CNB stack images
 <% cnb_child_images.each do |image_type| %>
   - name: bionic-<%= image_type %>-base-image
     type: docker-image
@@ -238,10 +220,37 @@ resources:
       password: {{buildpacks-docker-password}}
 <% end %>
 
+  - name: tiny-run-base-image
+    type: docker-image
+    source:
+      repository: cloudfoundry/run
+      tag: tiny
+      email: {{buildpacks-docker-user-email}}
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+
+  - name: tiny-run-cnb-image
+    type: docker-image
+    source:
+      repository: cloudfoundry/run
+      tag: tiny-cnb
+      email: {{buildpacks-docker-user-email}}
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+
+  - name: tiny-build-cnb-image
+    type: docker-image
+    source:
+      repository: cloudfoundry/build
+      tag: tiny-cnb
+      email: {{buildpacks-docker-user-email}}
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+
 jobs:
   - name: test-tiny
     plan:
-      - get: tiny-stack-base-git
+      - get: tiny-run-base-dockerfile
         trigger: true
       - get: new-cves
         trigger: true
@@ -254,7 +263,7 @@ jobs:
             source:
               repository: pivotalnavcon/docker-go
           inputs:
-            - name: tiny-stack-base-git
+            - name: tiny-run-base-dockerfile
           run:
             path: /bin/bash
             args:
@@ -269,41 +278,59 @@ jobs:
                   curl -#L https://github.com/bats-core/bats-core/archive/master.zip | unzip -
                   bash bats-core-master/install.sh /usr/local
 
-                  cd tiny-stack-base-git/tiny/base/run
+                  cd tiny-run-base-dockerfile/tiny/base/run
                   docker build -t tiny .
                   bats -t ./tests/test.bats && bats -t ./tests/testapp.bats
 
-  - name: build-and-publish-tiny-base
+  - name: update-tiny-base-image
     public: true
     plan:
-      - get: tiny-stack-base-git
+      - get: tiny-run-base-dockerfile
         passed: [test-tiny]
         trigger: true
       - get: new-cves
         passed: [test-tiny]
         trigger: true
-      - put: tiny-cnb-base-image
+      - put: tiny-run-base-image
         params:
-          build: tiny-stack-base-git/tiny/base/run
+          build: tiny-run-base-dockerfile/tiny/base/run
           build_args:
             squash: squash
         attempts: 2
 
-  - name: build-and-publish-tiny-cnb
+  - name: update-tiny-run-cnb-image
     public: true
     plan:
-      - get: tiny-stack-cnb-git
+      - get: tiny-run-cnb-dockerfile
         trigger: true
-      - get: tiny-cnb-base-image
-        passed: [ build-and-publish-tiny-base ]
+      - get: tiny-run-base-image
+        passed: [ update-tiny-base-image ]
         trigger: true
-      - put: tiny-cnb-run-image
+      - put: tiny-run-cnb-image
         params:
-          build: tiny-stack-cnb-git/tiny/cnb/run
+          build: tiny-run-cnb-dockerfile/tiny/cnb/run
           build_args:
+            base_image: "cloudfoundry/run:tiny"
             squash: squash
         attempts: 2
 
+  - name: update-tiny-build-cnb-image
+    public: true
+    plan:
+      - get: bionic-build-cnb-dockerfile
+        trigger: true
+      - get: bionic-build-base-image
+        trigger: true
+        passed:
+          - update-bionic-build-base-image
+      - put: tiny-build-cnb-image
+        params:
+          build: bionic-build-cnb-dockerfile/bionic/cnb/build
+          build_args:
+            base_image: "cloudfoundry/build:base"
+            stack_id: "org.cloudfoundry.stacks.tiny"
+            squash: squash
+        attempts: 2
 
 <% cnb_child_images.each do |image_type| %>
   - name: update-cflinuxfs3-<%= image_type %>-cnb-image
