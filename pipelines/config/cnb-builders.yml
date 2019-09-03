@@ -1,5 +1,15 @@
 ---
 builders:
+  cf-builder-tiny:
+    stack: tiny
+    private: false
+    version-resource: tiny-version
+    builder-image-params:
+      REPO: cloudfoundry/cnb
+      STACK: "org.cloudfoundry.stacks.tiny"
+      BUILD_IMAGE: "cloudfoundry/build:tiny-cnb"
+      RUN_IMAGE: "cloudfoundry/run:tiny-cnb"
+      HOST: "hub.docker.com"
   cf-builder-bionic:
     stack: bionic
     private: false
@@ -45,19 +55,26 @@ cnbs:
     git_repo: "https://github.com/cloudfoundry/node-engine-cnb"
     public: true
     private: true
+    skip_stack:
+      - "tiny"
   npm:
     git_repo: "https://github.com/cloudfoundry/npm-cnb"
     public: true
     private: true
+    skip_stack:
+      - "tiny"
   yarn:
     git_repo: "https://github.com/cloudfoundry/yarn-cnb"
     public: true
     private: true
+    skip_stack:
+      - "tiny"
   python:
     git_repo: "https://github.com/cloudfoundry/python-cnb"
     public: true
     private: true
     skip_stack:
+      - "tiny"
       - "bionic"
   pip:
     git_repo: "https://github.com/cloudfoundry/pip-cnb"
@@ -65,18 +82,21 @@ cnbs:
     private: true
     skip_stack:
       - "bionic"
+      - "tiny"
   pipenv:
     git_repo: "https://github.com/cloudfoundry/pipenv-cnb"
     public: true
     private: true
     skip_stack:
       - "bionic"
+      - "tiny"
   conda:
     git_repo: "https://github.com/cloudfoundry/conda-cnb"
     public: true
     private: true
     skip_stack:
       - "bionic"
+      - "tiny"
   go-compiler:
     git_repo: "https://github.com/cloudfoundry/go-compiler-cnb"
     public: true
@@ -95,76 +115,111 @@ cnbs:
     private: true
     skip_stack:
       - "bionic"
+      - "tiny"
   php-composer:
     git_repo: "https://github.com/cloudfoundry/php-composer-cnb"
     public: true
     private: true
     skip_stack:
       - "bionic"
+      - "tiny"
   httpd:
     git_repo: "https://github.com/cloudfoundry/httpd-cnb"
     public: true
     private: true
     skip_stack:
       - "bionic"
+      - "tiny"
   nginx:
     git_repo: "https://github.com/cloudfoundry/nginx-cnb"
     public: true
     private: true
     skip_stack:
       - "bionic"
+      - "tiny"
   php-web:
     git_repo: "https://github.com/cloudfoundry/php-web-cnb"
     public: true
     private: true
     skip_stack:
       - "bionic"
+      - "tiny"
   openjdk:
     git_repo: "https://github.com/cloudfoundry/openjdk-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   buildsystem:
     git_repo: "https://github.com/cloudfoundry/build-system-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   jvmapplication:
     git_repo: "https://github.com/cloudfoundry/jvm-application-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   azureapplicationinsights:
     git_repo: "https://github.com/cloudfoundry/azure-application-insights-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   debug:
     git_repo: "https://github.com/cloudfoundry/debug-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   googlestackdriver:
     git_repo: "https://github.com/cloudfoundry/google-stackdriver-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   jmx:
     git_repo: "https://github.com/cloudfoundry/jmx-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   procfile:
     git_repo: "https://github.com/cloudfoundry/procfile-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   dotnet-core-conf:
     git_repo: "https://github.com/cloudfoundry/dotnet-core-conf-cnb"
     public: true
     private: true
+    skip_stack:
+      - "tiny"
   archiveexpanding:
     git_repo: "https://github.com/cloudfoundry/archive-expanding-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   tomcat:
     git_repo: "https://github.com/cloudfoundry/tomcat-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   jdbc:
     git_repo: "https://github.com/cloudfoundry/jdbc-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   springautoreconfiguration:
     git_repo: "https://github.com/cloudfoundry/spring-auto-reconfiguration-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   springboot:
     git_repo: "https://github.com/cloudfoundry/spring-boot-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   distzip:
     git_repo: "https://github.com/cloudfoundry/dist-zip-cnb"
     public: true
+    skip_stack:
+      - "tiny"
   p-openjdk:
     git_repo: "git@github.com:pivotal-cf/p-openjdk-cnb.git"
     private: true
