@@ -62,7 +62,7 @@ buildpacks = Dir.glob('sources/*/').map do |dir|
     "id" => id,
     "uri" => bp_location,
   }
-end
+end || {}
 
 puts "Loading #{stack}-order.toml"
 static_builder_file = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.toml"))

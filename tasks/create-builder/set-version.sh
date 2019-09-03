@@ -5,6 +5,7 @@ while getopts "v:" arg
 do
     case $arg in
     v) version="${OPTARG}";;
+    *) ;;
     esac
 done
 
