@@ -40,6 +40,7 @@ RUN apt-get update \
   python-dev \
   python-pip \
   shellcheck \
+  rsync \
   cf-cli \
   vim \
   wget \
