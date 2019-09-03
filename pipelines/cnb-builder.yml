@@ -77,12 +77,12 @@ resources:
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
-  - name: pack-master
-    type: git
-    source:
-      uri: https://github.com/buildpack/pack.git
-      branch: master
-
+#  - name: pack-master
+#    type: git
+#    source:
+#      uri: https://github.com/buildpack/pack.git
+#      branch: master
+#
   - name: cnb-lifecycle-release
     type: github-release
     source:
@@ -162,6 +162,15 @@ resources:
       initial_version: 0.0.1
       bucket: cnb-versions
       key: builder/bionic-piv
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+
+  - name: tiny-version
+    type: semver
+    source:
+      initial_version: 0.0.1
+      bucket: cnb-versions
+      key: builder/tiny
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
@@ -402,8 +411,8 @@ jobs:
         - get: <%= cnb_name %>-cnb
           trigger: true
         <% end %>
-        - get: pack # do we need this anymore
-          resource: pack-master
+        - get: pack
+          resource: pack-release-candidate
           trigger: true
         - get: buildpacks-ci
         - get: version
