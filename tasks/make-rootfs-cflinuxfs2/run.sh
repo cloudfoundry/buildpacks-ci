@@ -21,6 +21,6 @@ pushd cflinuxfs2
   echo "" >> "$versioned_receipt_filename"
   cat cflinuxfs2/cflinuxfs2_dpkg_l.out >> "$versioned_receipt_filename"
 
-  which git
+  command -v git
   TERM=xterm-color git --no-pager diff cflinuxfs2/cflinuxfs2_receipt "$versioned_receipt_filename" || true
 popd
