@@ -19,15 +19,14 @@ tracker_client = TrackerClient.new(
     tracker_requester_id.to_i
 )
 
-receipt_file = stack == 'cflinuxfs2' ?
-                   File.join('cflinuxfs2', 'cflinuxfs2_receipt') :
-                   "receipt.#{stack}.x86_64"
+receipt_file_glob = stack == 'cflinuxfs2' ?
+                   File.join('*p-cflinuxfs2-*', 'cflinuxfs2', 'cflinuxfs2_receipt') :
+                   File.join("cloudfoundry-#{stack}-*", "receipt.#{stack}.x86_64")
 
 receipt_path = Dir.glob(File.join(
     "#{stack}-release",
     'source',
-    "cloudfoundry-#{stack}-*",
-    receipt_file
+    receipt_file_glob,
 )).first
 
 CategorizeSecurityNotices.new(
