@@ -251,11 +251,9 @@ jobs:
               repository: output-new-cves-cflinuxfs3
               rebase: true
         - do:
-          - task: check-for-new-pivotal-cves
+          - task: check-for-new-tiny-cves
             file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
             params:
-#              SLACK_CHANNEL: {{dependency-notifier-slack-channel}}
-#              SLACK_WEBHOOK: {{dependency-notifier-slack-webhook}}
               STACK: tiny
             output_mapping:
               output-new-cves: output-new-cves-tiny
