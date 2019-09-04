@@ -57,6 +57,7 @@ pipenv:
   integration: true
   auto_release: true
 python:
+  integration: true
   auto_release: true
 python-compat:
   integration: true
