@@ -179,13 +179,6 @@ resources: #####################################################################
       uri: https://github.com/cloudfoundry/buildpackapplifecycle.git
 <% end %>
 
-  - name: buildpack-checksums
-    type: git
-    source:
-      uri: git@bitbucket.org:cloudfoundry-buildpacks/buildpack-checksums.git
-      private_key: {{buildpack-checksums-private-key}}
-      branch: master
-
 <% if language == 'hwc' %>
   - name: buildpack-bosh-release
     type: git
@@ -727,15 +720,8 @@ relevant_stacks.each do |stack| %>
           resource: buildpack-master
           passed: [ ship-it ]
           trigger: true
-        - get: buildpack-checksums
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
-      - task: commit-shas
-        file: buildpacks-ci/tasks/get-commit-shasums/task.yml
-      - put: buildpack-checksums
-        params:
-          repository: sha-artifacts
-          rebase: true
       - put: buildpack-github-release
         params:
           name: buildpack-artifacts/tag
