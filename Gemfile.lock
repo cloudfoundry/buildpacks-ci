@@ -27,7 +27,7 @@ GEM
     faraday_middleware (0.12.2)
       faraday (>= 0.7.4, < 1.0)
     git (1.3.0)
-    hashdiff (0.3.7)
+    hashdiff (1.0.0)
     ice_nine (0.11.2)
     method_source (0.9.0)
     mimemagic (0.3.2)
@@ -48,7 +48,7 @@ GEM
     pry (0.11.3)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
-    public_suffix (3.0.2)
+    public_suffix (3.1.1)
     rainbow (3.0.0)
     rake (12.3.0)
     representable (3.0.4)
@@ -81,7 +81,7 @@ GEM
       rubocop (>= 0.52.1)
     ruby-progressbar (1.9.0)
     rubyzip (1.2.3)
-    safe_yaml (1.0.4)
+    safe_yaml (1.0.5)
     sawyer (0.8.1)
       addressable (>= 2.3.5, < 2.6)
       faraday (~> 0.8, < 1.0)
@@ -107,10 +107,10 @@ GEM
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
       equalizer (~> 0.0, >= 0.0.9)
-    webmock (3.3.0)
+    webmock (3.7.1)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
-      hashdiff
+      hashdiff (>= 0.4.0, < 2.0.0)
 
 PLATFORMS
   ruby
