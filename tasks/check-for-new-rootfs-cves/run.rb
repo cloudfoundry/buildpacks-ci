@@ -5,6 +5,9 @@ stack = ENV['STACK']
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 stacks_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', stack.gsub(/m$/, '')))
+if stack == 'tiny'
+  stacks_dir = File.expand_path(File.join(buildpacks_ci_dir,  '..', 'tiny', 'tiny', 'base', 'run'))
+end
 cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'output-new-cves', 'new-cve-notifications'))
 
 require "#{buildpacks_ci_dir}/lib/rootfs-cve-notifier"

@@ -99,9 +99,8 @@ resources:
   - name: tiny
     type: git
     source:
-      uri: git@github.com:pivotal/pivotal-tiny
+      uri: https://github.com/cloudfoundry/stacks
       branch: master
-      private_key: {{pivotal-tiny-private-key}}
   - name: cflinuxfs3-release
     type: github-release
     source:
