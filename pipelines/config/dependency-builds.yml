@@ -526,6 +526,9 @@ skip_build:
   - dep: r
     line: 3.6.X
     stack: cflinuxfs2
+  - dep: go
+    line: 1.13.X
+    stack: cflinuxfs2
 
 # only check deprecation dates for dotnet-runtime as they are redundant for sdk and aspnetcore
 skip_deprecation_check:
