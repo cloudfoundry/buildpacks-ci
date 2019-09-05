@@ -21,14 +21,20 @@ echo "Building test apps..."
 PATH="$PATH":"$(pwd)"/pack
 fixtures="$(realpath cnb-builder/fixtures)"
 fs3fixtures="$(realpath cnb-builder/fs3-fixtures)"
+tinyfixtures="$(realpath cnb-builder/tiny-fixtures)"
 export PATH
 
 export GOMAXPROCS=4
 
 pushd buildpacks-ci/tasks/test-builder
-    go test -args "$fixtures"
+    go test -args "$tinyfixtures"
+
+    if [ "$STACK" == "bionic" ]; then
+	go test -args "$fixtures"
+    fi
 
     if [ "$STACK" == "cflinuxfs3" ]; then
+	go test -args "$fixtures"
 	go test -args "$fs3fixtures"
     fi
 popd
