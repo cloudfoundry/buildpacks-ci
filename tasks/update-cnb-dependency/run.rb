@@ -38,6 +38,10 @@ buildpack_toml_file = 'buildpack.toml'
 buildpack_toml = Tomlrb.load_file("buildpack/#{buildpack_toml_file}")
 buildpack_toml_latest_released = Tomlrb.load_file('buildpack-latest-released/buildpack.toml')
 
+if buildpack_toml['metadata'] == nil
+  buildpack_toml['metadata'] = {}
+end
+
 data = JSON.parse(open('source/data.json').read)
 dependency_name = data.dig('source', 'name')
 resource_version = data.dig('version', 'ref')
@@ -161,7 +165,7 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
       version_line_type,
       removal_strategy,
       old_deps,
-      buildpack_toml_latest_released['metadata'].fetch('dependencies', [])
+      buildpack_toml_latest_released.fetch('metadata', {}).fetch('dependencies', [])
   ).switch
 
   new_versions = buildpack_toml['metadata']['dependencies']
