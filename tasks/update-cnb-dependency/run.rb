@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'json'
 require 'toml'
+require 'tomlrb'
 require 'tmpdir'
 require 'date'
 require_relative './dependencies'
@@ -34,8 +35,8 @@ buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
 buildpack_toml_file = 'buildpack.toml'
-buildpack_toml = TOML.load_file("buildpack/#{buildpack_toml_file}")
-buildpack_toml_latest_released = TOML.load_file('buildpack-latest-released/buildpack.toml')
+buildpack_toml = Tomlrb.load_file("buildpack/#{buildpack_toml_file}")
+buildpack_toml_latest_released = Tomlrb.load_file('buildpack-latest-released/buildpack.toml')
 
 data = JSON.parse(open('source/data.json').read)
 dependency_name = data.dig('source', 'name')
