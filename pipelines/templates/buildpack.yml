@@ -1,6 +1,6 @@
 <% buildpacks = {
   'apt' => {
-    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'stacks' => %w(cflinuxfs3),
     'skip_pivnet_publish' => true,
     'skip_pws_publish' => true,
     'edge_skip_stacks' => %w(cflinuxfs2),
