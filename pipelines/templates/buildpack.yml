@@ -18,9 +18,10 @@
     'product_slug' => 'dotnet-core-buildpack'
   },
   'go' => {
-    'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'edge_skip_stacks' => %w(cflinuxfs2),
-    'product_slug' => 'go-buildpack'
+    'stacks' => %w(cflinuxfs3),
+    'edge_skip_stacks' => [],
+    'product_slug' => 'go-buildpack',
+    'non_lts_pivnet' => true
   },
   'hwc' => {
     'stacks' => %w(windows2012R2 windows2016 windows),
