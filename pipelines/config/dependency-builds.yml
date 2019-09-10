@@ -299,6 +299,50 @@ dependencies:
             link: https://github.com/nodejs/Release
         removal_strategy: keep_latest_released
     source_type: node
+  org.cloudfoundry.dotnet-core-runtime:
+    buildpacks:
+      dotnet-core-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/dotnet-core-runtime'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.dotnet-core-aspnet:
+    buildpacks:
+      dotnet-core-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/dotnet-core-aspnet'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.dotnet-core-sdk:
+    buildpacks:
+      dotnet-core-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/dotnet-core-sdk'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.dotnet-core-conf:
+    buildpacks:
+      dotnet-core-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/dotnet-core-conf'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
   org.cloudfoundry.npm:
     buildpacks:
       nodejs-cnb:
