@@ -184,6 +184,30 @@ cnbs:
     public: true
     skip_stack:
       - "tiny"
+  dotnet-core:
+    git_repo: "https://github.com/cloudfoundry/dotnet-core-cnb"
+    public: true
+    private: true
+    skip_stack:
+      - "tiny"
+  dotnet-core-runtime:
+    git_repo: "https://github.com/cloudfoundry/dotnet-core-runtime-cnb"
+    public: true
+    private: true
+    skip_stack:
+      - "tiny"
+  dotnet-core-aspnet:
+    git_repo: "https://github.com/cloudfoundry/dotnet-core-aspnet-cnb"
+    public: true
+    private: true
+    skip_stack:
+      - "tiny"
+  dotnet-core-sdk:
+    git_repo: "https://github.com/cloudfoundry/dotnet-core-sdk-cnb"
+    public: true
+    private: true
+    skip_stack:
+      - "tiny"
   dotnet-core-conf:
     git_repo: "https://github.com/cloudfoundry/dotnet-core-conf-cnb"
     public: true
