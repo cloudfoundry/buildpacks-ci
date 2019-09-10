@@ -306,7 +306,7 @@ dependencies:
           - line: latest
     source_type: github_releases
     source_params:
-      - 'repo: cloudfoundry/dotnet-core-runtime'
+      - 'repo: cloudfoundry/dotnet-core-runtime-cnb'
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
@@ -317,7 +317,7 @@ dependencies:
           - line: latest
     source_type: github_releases
     source_params:
-      - 'repo: cloudfoundry/dotnet-core-aspnet'
+      - 'repo: cloudfoundry/dotnet-core-aspnet-cnb'
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
@@ -328,7 +328,7 @@ dependencies:
           - line: latest
     source_type: github_releases
     source_params:
-      - 'repo: cloudfoundry/dotnet-core-sdk'
+      - 'repo: cloudfoundry/dotnet-core-sdk-cnb'
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
@@ -339,7 +339,7 @@ dependencies:
           - line: latest
     source_type: github_releases
     source_params:
-      - 'repo: cloudfoundry/dotnet-core-conf'
+      - 'repo: cloudfoundry/dotnet-core-conf-cnb'
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
