@@ -4,6 +4,7 @@ require 'toml'
 require 'tomlrb'
 require 'tmpdir'
 require 'date'
+require 'set'
 require_relative './dependencies'
 
 CNB_STACKS = {
@@ -176,6 +177,20 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
   removed += (old_versions - new_versions).uniq.sort
   rebuilt += [old_versions.include?(resource_version)]
 end
+
+# update version in order field
+
+puts "updating buildpack.toml order contents"
+
+buildpack_toml.dig('order')&.each do |order_group|
+   order_group.dig('group')&.each do |order_elem|
+
+     if order_elem.dig('id') == dependency_name
+       order_elem ['version'] = resource_version
+     end
+   end
+end
+
 
 rebuilt = rebuilt.all?()
 puts 'REBUILD: skipping most version updating logic' if rebuilt
