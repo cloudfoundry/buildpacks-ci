@@ -1,5 +1,6 @@
 <%
 require 'yaml'
+require 'set'
 config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds.yml'))
 
 dependencies = config['dependencies']
@@ -467,12 +468,17 @@ jobs:
     <% end %>
     - get: builds
   - do:
-    - task: update-buildpack-dependency
-      <% if bp_name.include? '-cnb' and !bp['shim'] %>
-      file: buildpacks-ci/tasks/update-cnb-dependency/task.yml
-      <% else %>
-      file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
-      <% end %>
+   <% [
+      { 'name' => 'update-buildpack-dependency', 'path' => 'buildpacks-ci/tasks/update-buildpack-dependency/task.yml', 'type' => Set['buildpack', 'shim'] },
+      { 'name' => 'update-cnb-dependency', 'path' => 'buildpacks-ci/tasks/update-cnb-dependency/task.yml', 'type' => Set['cnb', 'shim'] }
+    ].each do |task| %>
+      <% is_v3 = bp_name.include?('cnb') %>
+      <% should_do_shim = bp['shim'] %>
+      <% should_do_cnb = is_v3 && task['type'].include?('cnb') %>
+      <% should_do_reg = !is_v3 && task['type'].include?('buildpack') %>
+      <% if should_do_cnb || should_do_reg || should_do_shim  %>
+    - task: <%= task['name'] %>
+      file: <%= task['path'] %>
       params:
         VERSION_LINE_TYPE: <%= if dep_name == 'nginx' && bp_name == 'nginx' then 'nginx' else get_version_line_type(bp['lines']) end %>
         REMOVAL_STRATEGY: <%= bp.fetch('removal_strategy', 'remove_all') %>
@@ -480,11 +486,13 @@ jobs:
         DEPRECATION_LINK: <%= line_hash['link'] %>
         DEPRECATION_MATCH: <%= line_hash['match'] %>
         VERSION_LINE: <%= line_hash['line'] %>
-
-
+      output_mapping:
+        artifacts: buildpack
+      <% end %>
+    <% end %>
     - put: <%= bp_name %>-buildpack<%= '-v3' if dep['branch'] == 'v3' %>
       params:
-        repository: artifacts
+        repository: buildpack
         rebase: true
   <% end %>
   <% end %>
