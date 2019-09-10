@@ -7,6 +7,36 @@ require 'date'
 require 'set'
 require_relative './dependencies'
 
+def time_to_datetime(time)
+  return DateTime.parse(time.to_s)
+end
+
+# replace all Time objects with DateTime (needed to use toml library)
+# will not replace Time objects if they occur as the key in a map.
+def replace_date_with_time(obj, parent_obj = nil, accessor = nil)
+  if obj.class == Time
+    converted_time = time_to_datetime(obj)
+    if parent_obj == nil
+      return converted_time
+    end
+    parent_obj[accessor] = converted_time
+
+  elsif obj.class == Array
+    obj.each_with_index  do |val,index|
+      obj[index] = replace_date_with_time(val,obj,index)
+    end
+    return obj
+  elsif obj.class == Hash
+    obj.each do |key, value|
+      obj[key] = replace_date_with_time(value, obj, key)
+    end
+    return obj
+  else return obj
+  end
+end
+
+
+
 CNB_STACKS = {
   'cflinuxfs3' => 'org.cloudfoundry.stacks.cflinuxfs3',
   'bionic'     => 'io.buildpacks.stacks.bionic'
@@ -206,6 +236,8 @@ if removed.length > 0
   commit_message = "#{commit_message}, remove #{dependency_name} #{removed.join(', ')}"
 end
 commit_message = commit_message + "\n\nfor stack(s) #{total_stacks.join(', ')}"
+
+buildpack_toml = replace_date_with_time(buildpack_toml)
 
 Dir.chdir('artifacts') do
   GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
