@@ -56,7 +56,7 @@ pip:
 pipenv:
   integration: true
   auto_release: true
-python:
+python-runtime:
   integration: true
   auto_release: true
 python-compat:
