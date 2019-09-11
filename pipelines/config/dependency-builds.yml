@@ -453,7 +453,7 @@ dependencies:
             deprecation_date: 2023-06-27
             link: https://www.python.org/dev/peps/pep-0537/
         removal_strategy: keep_latest_released
-      python-cnb:
+      python-runtime-cnb:
         lines:
           - line: 2.7.X
             deprecation_date: 2020-01-01

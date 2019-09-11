@@ -69,8 +69,8 @@ cnbs:
     private: true
     skip_stack:
       - "tiny"
-  python:
-    git_repo: "https://github.com/cloudfoundry/python-cnb"
+  python-runtime:
+    git_repo: "https://github.com/cloudfoundry/python-runtime-cnb"
     public: true
     private: true
     skip_stack:
