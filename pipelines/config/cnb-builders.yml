@@ -51,24 +51,13 @@ builders:
       RUN_IMAGE: "cloudfoundry/run:full-cnb"
       ENTERPRISE: true
 cnbs:
-  node-engine:
-    git_repo: "https://github.com/cloudfoundry/node-engine-cnb"
+  nodejs:
+    git_repo: "https://github.com/cloudfoundry/nodejs-cnb"
     public: true
     private: true
     skip_stack:
       - "tiny"
-  npm:
-    git_repo: "https://github.com/cloudfoundry/npm-cnb"
-    public: true
-    private: true
-    skip_stack:
-      - "tiny"
-  yarn:
-    git_repo: "https://github.com/cloudfoundry/yarn-cnb"
-    public: true
-    private: true
-    skip_stack:
-      - "tiny"
+
   python-runtime:
     git_repo: "https://github.com/cloudfoundry/python-runtime-cnb"
     public: true

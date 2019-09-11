@@ -213,12 +213,11 @@ end
 puts "updating buildpack.toml order contents"
 
 buildpack_toml.dig('order')&.each do |order_group|
-   order_group.dig('group')&.each do |order_elem|
-
-     if order_elem.dig('id') == dependency_name
-       order_elem ['version'] = resource_version
-     end
-   end
+  order_group.dig('group')&.each do |order_elem|
+    if order_elem.dig('id') == dependency_name
+       order_elem['version'] = resource_version
+    end
+  end
 end
 
 
