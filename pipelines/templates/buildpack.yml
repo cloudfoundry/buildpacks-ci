@@ -75,6 +75,13 @@
     'edge_skip_stacks' => %w(cflinuxfs2)
   }
 } %>
+<%
+pas_versions = {
+  'latest' => '2_6',
+  'n-1' => '2_5',
+  'n-2' => '2_4',
+}
+%>
 <% cnb_images = %w(run build) %>
 ---
 resource_types:
@@ -91,6 +98,10 @@ resource_types:
     type: docker-image
     source:
       repository: cfbuildpacks/cron-resource
+  - name: pcf-pool
+    type: docker-image
+    source:
+      repository: cftoolsmiths/toolsmiths-envs-resource
 
 resources: ############################################################################################################
   ## Git ##
@@ -313,21 +324,14 @@ resources: #####################################################################
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
 <% unless buildpacks[language]['non_lts'] %>
-  - name: lts-environments
-    type: pool
+  - name: smith-environments-<%= pas_versions['n-2'] %>
+    type: pcf-pool
     source:
-      branch: master
-      pool: lts-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-
-  - name: lts-buildpack-specs-pool
-    type: pool
-    source:
-      branch: master
-      pool: lts-shared-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      api_token: {{toolsmiths-api-token}}
+      hostname: environments.toolsmiths.cf-app.com
+      pool_name: us_<%= pas_versions['n-2'] %>
+    tags:
+    - buildpacks-eng-vsphere
 <% end %>
 
   ## Alerts ##
@@ -579,13 +583,11 @@ relevant_stacks.each do |stack| %>
     public: true
     plan:
       - in_parallel:
-        - put: lts-environments
+        - put: smith-environments-<%= pas_versions['n-2'] %>
           params:
-            acquire: true
-        - put: lts-buildpack-specs-pool
-          params:
-            claim: <%= language %>
-          timeout: 3h
+            action: claim
+          tags:
+          - buildpacks-eng-vsphere
         <%
         all_stacks = buildpacks[language]['stacks']
         all_stacks = all_stacks + ['any'] if language.to_s == 'hwc' || language.to_s == 'binary'
@@ -615,12 +617,11 @@ relevant_stacks.each do |stack| %>
             DOCKER_START: false
           <% end %>
         - task: create-cf-space
-          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
+          input_mapping:
+            environment: smith-environments-<%= pas_versions['n-2'] %>
           params:
             ORG: pivotal
-            TARGET: {{ci-cf-lts-target}}
-            USERNAME: admin
-            PASSWORD: {{ci-cf-lts-password}}
         - task: ginkgo-cflinuxfs3
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           input_mapping:
@@ -659,13 +660,12 @@ relevant_stacks.each do |stack| %>
         username: concourse
         icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
     ensure:
-      in_parallel:
-      - put: lts-environments
-        params:
-          release: lts-environments
-      - put: lts-buildpack-specs-pool
-        params:
-          release: lts-buildpack-specs-pool
+      put: smith-environments-<%= pas_versions['n-2'] %>
+      params:
+        action: unclaim
+        env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
+      tags:
+      - buildpacks-eng-vsphere
 
 <% end %>
   - name: ship-it
@@ -1112,13 +1112,11 @@ relevant_stacks.each do |stack| %>
     public: true
     plan:
       - in_parallel:
-        - put: lts-environments
+        - put: smith-environments-<%= pas_versions['n-2'] %>
           params:
-            acquire: true
-        - put: lts-buildpack-specs-pool
-          params:
-            claim: <%= language %>
-          timeout: 3h
+            action: claim
+          tags:
+          - buildpacks-eng-vsphere
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-develop
@@ -1129,12 +1127,11 @@ relevant_stacks.each do |stack| %>
           resource: buildpack-develop
       - do:
         - task: create-cf-space
-          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
+          input_mapping:
+            environment: smith-environments-<%= pas_versions['n-2'] %>
           params:
             ORG: pivotal
-            TARGET: {{ci-cf-lts-target}}
-            USERNAME: admin
-            PASSWORD: {{ci-cf-lts-password}}
         - task: ginkgo-cflinuxfs3
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           params:
@@ -1161,22 +1158,23 @@ relevant_stacks.each do |stack| %>
         username: concourse
         icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
     ensure:
-      in_parallel:
-      - put: lts-environments
-        params:
-          release: lts-environments
-      - put: lts-buildpack-specs-pool
-        params:
-          release: lts-buildpack-specs-pool
+      put: smith-environments-<%= pas_versions['n-2'] %>
+      params:
+        action: unclaim
+        env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
+      tags:
+      - buildpacks-eng-vsphere
 <% unless buildpacks[language]['skip_brats'] %>
   - name: specs-lts-brats-develop
     serial: true
     public: true
     plan:
       - in_parallel:
-        - put: lts-environments
+        - put: smith-environments-<%= pas_versions['n-2'] %>
           params:
-            acquire: true
+            action: claim
+          tags:
+          - buildpacks-eng-vsphere
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-develop
@@ -1185,12 +1183,11 @@ relevant_stacks.each do |stack| %>
           - specs-unit-develop
       - do:
         - task: create-cf-space
-          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
+          input_mapping:
+            environment: smith-environments-<%= pas_versions['n-2'] %>
           params:
             ORG: pivotal
-            TARGET: {{ci-cf-lts-target}}
-            USERNAME: admin
-            PASSWORD: {{ci-cf-lts-password}}
         - task: brats-cflinuxfs3
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
           params:
@@ -1201,9 +1198,12 @@ relevant_stacks.each do |stack| %>
           task: delete-cf-space-cflinuxfs3
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
     ensure:
-      put: lts-environments
+      put: smith-environments-<%= pas_versions['n-2'] %>
       params:
-        release: lts-environments
+        action: unclaim
+        env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
+      tags:
+      - buildpacks-eng-vsphere
     on_failure:
       put: failure-alert
       params:
