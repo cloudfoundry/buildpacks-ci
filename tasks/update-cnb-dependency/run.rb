@@ -132,7 +132,7 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
     next unless CNB_STACKS.keys.include? stack
     total_stacks.push CNB_STACKS[stack]
     v3_stacks = [CNB_STACKS[stack]]
-    if stack == 'cflinuxfs3' and dependency_name == 'go'
+    if stack == 'bionic' and dependency_name == 'go'
       v3_stacks += [CNB_STACKS['tiny']]
     end
   end
