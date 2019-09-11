@@ -6,6 +6,13 @@ resources:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
+  - name: cnb-tools-git
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cnb-tools.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+      branch: master
+
   - name: cnb2cf
     type: git
     source:
@@ -69,8 +76,28 @@ resources:
 
 jobs:
   # Updates
+  - name: update-cnb-tools
+    public: true
+    serial: true
+    serial_groups: [ update ]
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: cnb-tools-git
+          trigger: true
+        - get: buildpack
+          resource: repo
+      - task: update-cnb-tools
+        file: buildpacks-ci/tasks/update-cnb-tools/task.yml
+      - put: repo
+        params:
+          repository: buildpack-artifacts
+          rebase: true
+
   - name: update-libbuildpack
     public: true
+    serial: true
+    serial_groups: [ update ]
     plan:
       - in_parallel:
           - get: buildpacks-ci
