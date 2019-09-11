@@ -435,6 +435,61 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+  org.cloudfoundry.php-dist:
+    buildpacks:
+      php-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/php-dist-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.php-composer:
+    buildpacks:
+      php-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/php-composer-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.httpd:
+    buildpacks:
+      php-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/httpd-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.nginx:
+    buildpacks:
+      php-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/nginx-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.php-web:
+    buildpacks:
+      php-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/php-web-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
   php:
     buildpacks:
       php:
