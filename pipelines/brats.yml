@@ -15,6 +15,11 @@
 "staticfile" => %w(cflinuxfs3),
 "java" => %w(cflinuxfs3)
 } %>
+<% pas_versions = {
+  'latest' => '2_6',
+  'n-1' => '2_5',
+  'n-2' => '2_4',
+} %>
 
 ---
 resource_types:
@@ -26,6 +31,10 @@ resource_types:
     type: docker-image
     source:
       repository: cfbuildpacks/cf-space-resource
+  - name: pcf-pool
+    type: docker-image
+    source:
+      repository: cftoolsmiths/toolsmiths-envs-resource
 
 resources:
   - name: brats
@@ -35,16 +44,10 @@ resources:
       private_key: {{brats-private-key}}
       branch: master
 
-  - name: nightly-trigger-1
+  - name: nightly-trigger
     type: cron
     source:
       expression: 0 6 * * *
-      location: {{current-timezone}}
-
-  - name: nightly-trigger-2
-    type: cron
-    source:
-      expression: 2 6 * * *
       location: {{current-timezone}}
 
   - name: buildpacks-ci
@@ -77,14 +80,6 @@ resources:
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
-  - name: lts-shared-environments
-    type: pool
-    source:
-      branch: master
-      pool: lts-shared-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-
   - name: env-repo
     type: git
     source:
@@ -99,6 +94,15 @@ resources:
       repository: buildpack-packager
       access_token: {{buildpacks-github-token}}
 
+  - name: smith-environments-<%= pas_versions['n-2'] %>
+    type: pcf-pool
+    source:
+      api_token: {{toolsmiths-api-token}}
+      hostname: environments.toolsmiths.cf-app.com
+      pool_name: us_<%= pas_versions['n-2'] %>
+    tags:
+    - buildpacks-eng-vsphere
+
 <% new_brats.each do |language| %>
   - name: buildpack-<%= language %>
     type: git
@@ -110,7 +114,7 @@ resources:
 <% end %>
 
 jobs:
-<% languages.each.with_index do |language,index| %>
+<% languages.each do |language| %>
 <% unless not_lts.include?(language) %>
   - name: brats-<%= language %>-lts
     serial: true
@@ -120,13 +124,6 @@ jobs:
         - put: lts-environments
           params:
             acquire: true
-<% unless new_brats.include?(language) %>
-        - put: cf-environments
-          resource: lts-shared-environments
-          params:
-            claim: <%= language %>
-          timeout: 3h
-<% end %>
         - get: buildpacks-ci
 <% if new_brats.include?(language) %>
         - get: buildpack
@@ -134,47 +131,48 @@ jobs:
 <% else %>
         - get: brats
 <% end %>
-        - get: nightly-trigger-<%= (index % 2) + 1 %>
+        - get: nightly-trigger
           trigger: true
       - do:
+        - put: smith-environments-<%= pas_versions['n-2'] %>
+          params:
+            action: claim
+          tags:
+          - buildpacks-eng-vsphere
         - task: create-cf-space
-          attempts: 3
-          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
+          input_mapping:
+            environment: smith-environments-<%= pas_versions['n-2'] %>
           params:
             ORG: pivotal
-            TARGET: {{ci-cf-lts-target}}
-            USERNAME: admin
-            PASSWORD: {{ci-cf-lts-password}}
 <% if new_brats.include?(language) %>
-        - task: run-brats-cflinuxfs2
+        - task: run-brats-cflinuxfs3
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
           attempts: <%= if language == "ruby" then 3 else 1 end %>
           params:
-            CF_STACK: cflinuxfs2
+            CF_STACK: cflinuxfs3
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 6
 <% else %>
-        - task: run-brats-cflinuxfs2
+        - task: run-brats-cflinuxfs3
           file: buildpacks-ci/tasks/run-shared-brats/task.yml
           params:
-            STACK: cflinuxfs2
+            STACK: cflinuxfs3
             BUILDPACK_BRANCH: master
             LANGUAGE: <%= language %>
             RUBYGEM_MIRROR: {{rubygem-mirror}}
 <% end %>
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task.yml
         ensure:
           in_parallel:
+          - put: smith-environments-<%= pas_versions['n-2'] %>
+            params:
+              action: unclaim
+              env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
+            tags:
+            - buildpacks-eng-vsphere
           - put: lts-environments
             params:
               release: lts-environments
-<% unless new_brats.include?(language) %>
-          - put: lts-shared-environments
-            params:
-              release: cf-environments
-<% end %>
 <% end %>
   - name: brats-<%= language %>-edge
     serial: true
@@ -199,7 +197,7 @@ jobs:
 <% else %>
         - get: brats
 <% end %>
-        - get: nightly-trigger-<%= (index % 2) + 1 %>
+        - get: nightly-trigger
           trigger: true
       - in_parallel:
 <% stacks[language].each do |stack| %>

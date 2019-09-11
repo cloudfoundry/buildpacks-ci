@@ -276,19 +276,3 @@ jobs:
             TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
-
-
-  - name: update-lts-environment
-    serial: false
-    public: true
-    plan:
-      - get: every-third-month
-        trigger: true
-      - get: buildpacks-ci
-      - task: create-update-lts-environment-story
-        file: buildpacks-ci/tasks/create-update-lts-environment-story/task.yml
-        params:
-          TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
-          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-          TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
-          ENV_URL: {{ci-cf-lts-target}}
