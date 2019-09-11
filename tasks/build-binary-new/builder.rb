@@ -495,7 +495,7 @@ class Builder
       out_data[:sha256] = results[1]
       out_data[:url] = source_input.url
 
-    when 'org.cloudfoundry.node-engine', 'org.cloudfoundry.npm', 'org.cloudfoundry.yarn', 'org.cloudfoundry.nodejs-compat', 'org.cloudfoundry.dotnet-core-runtime', 'org.cloudfoundry.dotnet-core-aspnet', 'org.cloudfoundry.dotnet-core-sdk', 'org.cloudfoundry.dotnet-core-conf'
+    when 'org.cloudfoundry.node-engine', 'org.cloudfoundry.npm', 'org.cloudfoundry.yarn', 'org.cloudfoundry.nodejs-compat', 'org.cloudfoundry.dotnet-core-runtime', 'org.cloudfoundry.dotnet-core-aspnet', 'org.cloudfoundry.dotnet-core-sdk', 'org.cloudfoundry.dotnet-core-conf', 'org.cloudfoundry.python-runtime', 'org.cloudfoundry.pip', 'org.cloudfoundry.pipenv', 'org.cloudfoundry.conda'
       results = Sha.check_sha(source_input)
       File.write('artifacts/temp_file', results[0])
 

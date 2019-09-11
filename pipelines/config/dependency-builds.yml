@@ -391,6 +391,50 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+  org.cloudfoundry.python-runtime:
+    buildpacks:
+      python-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/python-runtime-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.pip:
+    buildpacks:
+      python-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/pip-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.pipenv:
+    buildpacks:
+      python-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/pipenv-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.conda:
+    buildpacks:
+      python-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/conda-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
   php:
     buildpacks:
       php:
