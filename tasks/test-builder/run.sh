@@ -27,14 +27,14 @@ export PATH
 export GOMAXPROCS=4
 
 pushd buildpacks-ci/tasks/test-builder
-    go test -args "$tinyfixtures"
+    go test -args "$tinyfixtures" -v
 
     if [ "$STACK" == "bionic" ]; then
-	go test -args "$fixtures"
+    	go test -args "$fixtures" -v
     fi
 
     if [ "$STACK" == "cflinuxfs3" ]; then
-	go test -args "$fixtures"
-	go test -args "$fs3fixtures"
+    	go test -args "$fixtures" -v
+	    go test -args "$fs3fixtures" -v
     fi
 popd
