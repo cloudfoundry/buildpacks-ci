@@ -54,11 +54,11 @@ Dir.glob('sources/*/').map do |dir|
   if is_metabuildpack
 
     metabuildpacks.push({
-      "id" => buildpack_toml_data['buildpack']['id'],
+      "id" => buildpack_toml_data.dig('buildpack','id'),
       "uri" => dir
     })
 
-    buildpack_toml_data['metadata']['dependencies'].each do |dep|
+    buildpack_toml_data.dig('metadata','dependencies').each do |dep|
       bp_location = File.absolute_path(File.join(dir, dep['id']))
 
       res = Net::HTTP.get_response(URI(dep['uri']))
@@ -75,7 +75,7 @@ end || []
 
 individual_buildpacks = Dir.glob('sources/*/').map do |dir|
   buildpack_toml_file = 'buildpack.toml'
-  id = Tomlrb.load_file(File.join(dir, buildpack_toml_file))['buildpack']['id']
+  id = Tomlrb.load_file(File.join(dir, buildpack_toml_file)).dig('buildpack','id')
   bp_location = File.absolute_path(File.join(dir, id))
   next if (metabuildpacks+child_buildpacks).map {|buildpack_ids| buildpack_ids['id'] }.include?(id)
   local_packager = './packager-cli'
