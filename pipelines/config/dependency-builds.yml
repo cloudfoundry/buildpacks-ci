@@ -682,3 +682,17 @@ skip_deprecation_check:
   - openresty  # depends on nginx and lua deprecation
   - php  # complicated
   - ruby  # doesn't publish EOL schedule
+
+v3_child_buildpacks:
+  - org.cloudfoundry.conda
+  - org.cloudfoundry.dotnet-core-runtime
+  - org.cloudfoundry.dotnet-core-aspnet
+  - org.cloudfoundry.dotnet-core-sdk
+  - org.cloudfoundry.dotnet-core-conf
+  - org.cloudfoundry.npm
+  - org.cloudfoundry.node-engine
+  - org.cloudfoundry.yarn
+  - org.cloudfoundry.nodejs-compat
+  - org.cloudfoundry.python-runtime
+  - org.cloudfoundry.pip
+  - org.cloudfoundry.pipenv

@@ -10,6 +10,7 @@ dotnet_sdk_lines_with_aspnetcore = config['dotnet_sdk_lines_with_aspnetcore']
 deps_extracted_from_dotnet_sdk = config['deps_extracted_from_dotnet_sdk']
 skip_build = config['skip_build']
 skip_deprecation_check = config['skip_deprecation_check']
+v3_child_buildpacks = config['v3_child_buildpacks']
 
 def common_prefix(stringA, stringB)
   max_len = 0
@@ -254,6 +255,7 @@ jobs:
 
 <% version_lines.each do |line| %>
 <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
+<% unless v3_child_buildpacks.include?(dep_name) %>
 - name: create-<%=dep_name%>-<%= line %>-story
   serial: true
   public: true
@@ -348,6 +350,8 @@ jobs:
       params:
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
+<% end %>
+
 
 <% if dep_name == 'node' || dep_name == 'go' %>
 - name: copy-<%=dep_name%>-<%= line %>-bionic
@@ -381,7 +385,9 @@ jobs:
       resource: source-<%=dep_name%>-<%= line %>
       trigger: true
       version: every
+      <% unless v3_child_buildpacks.include?(dep_name) %>
       passed: [ create-<%=dep_name%>-<%= line %>-story ]
+      <% end %>
     <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
     - get: source-<%=monitored_dep_name%>-latest
       trigger: true
@@ -508,8 +514,10 @@ groups:
     <% end %>
     <% version_lines.each do |line| %>
     <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
+    <% unless v3_child_buildpacks.include?(dep_name) %>
     - create-<%=dep_name%>-<%= line %>-story
     - finish-<%=dep_name%>-<%= line %>-story
+    <% end %>
     <% if dep_name == 'node' || dep_name == 'go' %>
     - copy-<%=dep_name%>-<%= line %>-bionic
     <% end %>
@@ -532,8 +540,10 @@ groups:
     <% end %>
     <% version_lines.each do |line| %>
     <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
+    <% unless v3_child_buildpacks.include?(dep_name) %>
     - create-<%=dep_name%>-<%= line %>-story
     - finish-<%=dep_name%>-<%= line %>-story
+    <% end %>
     <% if dep_name == 'node' || dep_name == 'go' %>
     - copy-<%=dep_name%>-<%= line %>-bionic
     <% end %>
