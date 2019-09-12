@@ -49,7 +49,7 @@ metabuildpacks = []
 Dir.glob('sources/*/').map do |dir|
   buildpack_toml_file = 'buildpack.toml'
   buildpack_toml_data = Tomlrb.load_file(File.join(dir, buildpack_toml_file))
-  is_metabuildpack = buildpack_toml_data['metadata']['metabuildpack']
+  is_metabuildpack = buildpack_toml_data['order']
 
   if is_metabuildpack
 
