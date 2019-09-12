@@ -476,11 +476,11 @@ jobs:
   - do:
    <% [
       { 'name' => 'update-buildpack-dependency', 'path' => 'buildpacks-ci/tasks/update-buildpack-dependency/task.yml', 'type' => Set['buildpack', 'shim'] },
-      { 'name' => 'update-cnb-dependency', 'path' => 'buildpacks-ci/tasks/update-cnb-dependency/task.yml', 'type' => Set['cnb', 'shim'] }
+      { 'name' => 'update-cnb-dependency', 'path' => 'buildpacks-ci/tasks/update-cnb-dependency/task.yml', 'type' => Set['cnb'] }
     ].each do |task| %>
       <% is_v3 = bp_name.include?('cnb') %>
-      <% should_do_shim = bp['shim'] %>
-      <% should_do_cnb = is_v3 && task['type'].include?('cnb') %>
+      <% should_do_shim = bp['shim'] && task['type'].include?('shim') %>
+      <% should_do_cnb = is_v3 && task['type'].include?('cnb') && !dep_name.include?('compat') %>
       <% should_do_reg = !is_v3 && task['type'].include?('buildpack') %>
       <% if should_do_cnb || should_do_reg || should_do_shim  %>
     - task: <%= task['name'] %>
