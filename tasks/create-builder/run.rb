@@ -44,20 +44,13 @@ Dir.chdir 'packager' do
 end
 
 child_buildpacks = []
-metabuildpacks = []
 
-Dir.glob('sources/*/').map do |dir|
+Dir.glob('sources/*/').each do |dir|
   buildpack_toml_file = 'buildpack.toml'
   buildpack_toml_data = Tomlrb.load_file(File.join(dir, buildpack_toml_file))
   is_metabuildpack = buildpack_toml_data['order']
 
   if is_metabuildpack
-
-    metabuildpacks.push({
-      "id" => buildpack_toml_data.dig('buildpack','id'),
-      "uri" => dir
-    })
-
     buildpack_toml_data.dig('metadata','dependencies').each do |dep|
       bp_location = File.absolute_path(File.join(dir, dep['id']))
 
@@ -65,19 +58,19 @@ Dir.glob('sources/*/').map do |dir|
       File.open(bp_location, "wb") do |file|
         file.write res.body
       end
-      child_buildpacks.push({
+      child_buildpacks.push(
         "id" => dep['id'],
         "uri" => bp_location,
-      })
+      )
     end
   end
-end || []
+end
 
 individual_buildpacks = Dir.glob('sources/*/').map do |dir|
   buildpack_toml_file = 'buildpack.toml'
   id = Tomlrb.load_file(File.join(dir, buildpack_toml_file)).dig('buildpack','id')
   bp_location = File.absolute_path(File.join(dir, id))
-  next if (metabuildpacks+child_buildpacks).map {|buildpack_ids| buildpack_ids['id'] }.include?(id)
+  next if child_buildpacks.map { |buildpack_ids| buildpack_ids['id'] }.include?(id)
   local_packager = './packager-cli'
   args = [local_packager, '-uncached']
   args.pop if enterprise
@@ -94,10 +87,10 @@ individual_buildpacks = Dir.glob('sources/*/').map do |dir|
     "uri" => bp_location,
   }
 end || []
-individual_buildpacks.select! {|i| i != nil  }
+individual_buildpacks.select! { |i| i != nil  }
 
 puts "Loading #{stack}-order.toml"
-buildpacks = individual_buildpacks + metabuildpacks + child_buildpacks
+buildpacks = individual_buildpacks + child_buildpacks
 static_builder_file = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.toml"))
 order = static_builder_file['order']
 description = static_builder_file['description']
