@@ -696,3 +696,8 @@ v3_child_buildpacks:
   - org.cloudfoundry.python-runtime
   - org.cloudfoundry.pip
   - org.cloudfoundry.pipenv
+  - org.cloudfoundry.php-dist
+  - org.cloudfoundry.php-web
+  - org.cloudfoundry.nginx
+  - org.cloudfoundry.php-composer
+  - org.cloudfoundry.httpd
