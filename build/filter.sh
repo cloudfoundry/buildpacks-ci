@@ -83,3 +83,5 @@ USER"
 if [ ! -z "${TEST_CREDENTIAL_FILTER_WHITELIST:-}" ]; then
   export CREDENTIAL_FILTER_WHITELIST="$CREDENTIAL_FILTER_WHITELIST,$TEST_CREDENTIAL_FILTER_WHITELIST"
 fi
+
+exec > >(concourse-filter) 2> >(concourse-filter -stderr)

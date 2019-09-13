@@ -1,8 +1,15 @@
-FROM ruby:2.6-slim
+FROM ubuntu:latest
 
 ENV LANG="C.UTF-8"
+ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update && apt-get install -y curl gnupg apt-transport-https
+RUN apt-get -qqy update \
+  && apt-get -qqy install \
+    curl \
+    gnupg \
+    apt-transport-https \
+  && apt-get -qqy clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY config/google-chrome-apt-key.pub /tmp/
 RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
@@ -20,44 +27,62 @@ RUN curl -sL "https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key"
 RUN curl -sL "https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key" | apt-key add - \
   && echo "deb http://apt.starkandwayne.com stable main" |  tee /etc/apt/sources.list.d/starkandwayne.list
 
-RUN apt-get update \
-  && apt-get -y install \
-  aufs-tools \
-  crystal \
-  libxml2-dev \
-  expect \
-  git \
-  google-cloud-sdk \
-  iptables \
-  jq \
-  default-libmysqlclient-dev \
-  libpq-dev \
-  libsqlite3-dev \
-  libgconf-2-4 \
-  lsb-release \
-  php7.0 \
-  pkgconf \
-  python-dev \
-  python-pip \
-  shellcheck \
-  rsync \
-  cf-cli \
-  vim \
-  wget \
-  zip \
-  google-chrome-stable \
-  om \
-  multiarch-support && \
-  apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get -qqy update \
+  && apt-get -qqy install \
+    aufs-tools \
+    crystal \
+    libxml2-dev \
+    expect \
+    git \
+    google-cloud-sdk \
+    iptables \
+    jq \
+    default-libmysqlclient-dev \
+    libpq-dev \
+    libsqlite3-dev \
+    libgconf-2-4 \
+    lsb-release \
+    php7.0 \
+    pkgconf \
+    python-dev \
+    python-pip \
+    shellcheck \
+    rsync \
+    cf-cli \
+    vim \
+    wget \
+    zip \
+    google-chrome-stable \
+    om \
+    multiarch-support \
+  && apt-get -qqy clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install packages that are specific to ubuntu and not debian
 # Including libssl allows us to build php on this image
-RUN wget http://cdn-fastly.deb.debian.org/debian/pool/main/i/icu/libicu52_52.1-8+deb8u7_amd64.deb \
-  && dpkg -i libicu52_52.1-8+deb8u7_amd64.deb \
-  && rm libicu52_52.1-8+deb8u7_amd64.deb \
-  && wget http://mirror.nus.edu.sg/Debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1%2Bdeb8u8_amd64.deb   \
-  && dpkg -i libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb \
-	&& rm libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
+#RUN wget http://cdn-fastly.deb.debian.org/debian/pool/main/i/icu/libicu52_52.1-8+deb8u7_amd64.deb \
+#  && dpkg -i libicu52_52.1-8+deb8u7_amd64.deb \
+#  && rm libicu52_52.1-8+deb8u7_amd64.deb \
+#  && wget http://mirror.nus.edu.sg/Debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1%2Bdeb8u8_amd64.deb   \
+#  && dpkg -i libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb \
+#	&& rm libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
+
+ARG RUBY_INSTALL_VERSION=0.7.0
+RUN wget -O ruby-install-$RUBY_INSTALL_VERSION.tar.gz https://github.com/postmodern/ruby-install/archive/v$RUBY_INSTALL_VERSION.tar.gz \
+  && tar -xzvf ruby-install-$RUBY_INSTALL_VERSION.tar.gz \
+  && cd ruby-install-$RUBY_INSTALL_VERSION/ \
+  && make install \
+  && rm -rf ruby-install-$RUBY_INSTALL_VERSION*
+
+RUN apt-get -qqy update \
+  && ruby-install ruby \
+  && ln -s /opt/rubies/$(ls /opt/rubies | head -1) /opt/rubies/latest \
+  && apt-get -qqy clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENV GEM_HOME $HOME/.gem
+ENV GEM_PATH $HOME/.gem
+ENV PATH /opt/rubies/latest/bin:$PATH
 
 RUN curl -sSL https://get.docker.com/ | sh
 
@@ -105,12 +130,15 @@ RUN pip install awscli
 # when docker container starts, ensure login scripts run
 COPY build/*.sh /etc/profile.d/
 
+# Ensure that Concourse filtering is on for non-interactive shells
+ENV BASH_ENV /etc/profile.d/filter.sh
+
 # install buildpacks-ci Gemfile
-RUN gem update --system \
-  && gem install bundler -v 2.0.1
-COPY Gemfile /usr/local/Gemfile
-COPY Gemfile.lock /usr/local/Gemfile.lock
-RUN cd /usr/local && bundle install && bundle binstub bundler --force
+COPY Gemfile /tmp/Gemfile
+COPY Gemfile.lock /tmp/Gemfile.lock
+RUN /bin/bash -l -c "gem update --no-document --system \
+  && gem install bundler -v 2.0.1 \
+  && cd /tmp && bundle install && bundle binstub bundler --force"
 
 #install fly-cli
 RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly \
@@ -125,27 +153,16 @@ RUN curl -L https://github.com/git-hooks/git-hooks/releases/download/v1.1.4/git-
 
 RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make install
 
-# Ensure that Concourse filtering is on for non-interactive shells
-ENV BASH_ENV /etc/profile.d/filter.sh
-
 # Install go 1.12
 RUN cd /usr/local \
   && curl -L https://dl.google.com/go/go1.12.4.linux-amd64.tar.gz -o go.tar.gz \
   && [ d7d1f1f88ddfe55840712dc1747f37a790cbcaa448f6c9cf51bbe10aa65442f5 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && tar xf go.tar.gz \
-  && rm go.tar.gz \
-  && ln -s /usr/local/go/bin/* /usr/local/bin/
+  && rm go.tar.gz
 
 ENV GOROOT=/usr/local/go
-
-# Install gems
-# poltergeist for running dotnet-core-buildpack specs
-RUN gem install phantomjs open4 \
-  && ruby -e 'require "phantomjs"; Phantomjs.path'
+ENV GOPATH=/go
+ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 # Add git known host
 RUN mkdir -p /root/.ssh/ && echo github.com,192.30.252.131 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ== > /root/.ssh/known_hosts
-
-RUN mv /bin/bash /bin/bash.real \
-  && printf '%s\n%s' '#!/bin/bash.real' '/bin/bash.real $@ |& concourse-filter' > /bin/bash \
-  && chmod +x /bin/bash
