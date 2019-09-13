@@ -107,10 +107,10 @@ resources:
     source:
       name: bosh-google-kvm-windows2012R2-go_agent
 
-  - name: windows2016-stemcell
+  - name: windows2019-stemcell
     type: bosh-io-stemcell
     source:
-      name: bosh-google-kvm-windows2016-go_agent
+      name: bosh-google-kvm-windows2019-go_agent
 
   - name: failure-alert
     type: slack-notification
@@ -196,7 +196,7 @@ jobs:
           - get: diego-release
           - get: cf-deployment
           - get: windows2012-stemcell
-          - get: windows2016-stemcell
+          - get: windows2019-stemcell
           - get: bbl-state
           - get: gcp-stemcell
             attempts: 3
@@ -221,16 +221,17 @@ jobs:
             stemcells:
               - gcp-stemcell/*.tgz
               - windows2012-stemcell/*.tgz
-              - windows2016-stemcell/*.tgz
+              - windows2019-stemcell/*.tgz
             ops_files:
             - diego-release-artifacts/use-diego-dev-release.yml
             - buildpacks-ci/deployments/operations/no-canaries.yml
             - cf-deployment/operations/scale-to-one-az.yml
             - cf-deployment/operations/windows2012R2-cell.yml
-            - cf-deployment/operations/windows2016-cell.yml
-            - cf-deployment/operations/use-latest-windows2016-stemcell.yml
+            - cf-deployment/operations/windows2019-cell.yml
+            - cf-deployment/operations/use-latest-windows2019-stemcell.yml
             - cf-deployment/operations/use-latest-windows2012R2-stemcell.yml
             - cf-deployment/operations/use-latest-stemcell.yml
+            - cf-deployment/operations/use-online-windows2019fs.yml
             vars:
               system_domain: bal.buildpacks-gcp.ci.cf-app.com
         - task: open-asgs-for-credhub
@@ -301,15 +302,15 @@ jobs:
             NODES: 12
             CONFIG_FILE_PATH: integration_config.json
             FLAKE_ATTEMPTS: 3
-        - task: write-cats-config-for-windows2016
+        - task: write-cats-config-for-windows
           file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
             APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
             DIEGO_DOCKER_ON: true
             CREDHUB_MODE: assisted
-            WINDOWS_STACK: windows2016
+            WINDOWS_STACK: windows
             ENV_NAME: bal
-        - task: cats-for-windows2016
+        - task: cats-for-windows
           attempts: 3
           file: cf-deployment-concourse-tasks/run-cats/task.yml
           params:
