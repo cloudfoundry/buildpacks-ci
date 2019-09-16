@@ -70,6 +70,18 @@ dependencies:
           - line: 2.2.3X
           - line: 2.2.4X
         removal_strategy: keep_all
+      dotnet-core-sdk-cnb:
+        lines:
+          - line: 2.1.4X
+          - line: 2.1.5X
+          - line: 2.1.6X
+          - line: 2.1.7X
+          - line: 2.1.8X
+          - line: 2.2.1X
+          - line: 2.2.2X
+          - line: 2.2.3X
+          - line: 2.2.4X
+        removal_strategy: keep_all
     source_params:
       - 'tag_regex: ^(v1\.\d+\.\d+|v2\.\d+\.\d+\+dependencies)$'
   dotnet-runtime:
