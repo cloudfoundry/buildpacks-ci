@@ -304,6 +304,7 @@ jobs:
         TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         BUILDPACKS: <%= dep['buildpacks'].select{ |_, bp_data| bp_uses_line?(bp_data,line) }.keys.join(' ') %>
+        CHILD_CNB: <%= v3_child_buildpacks.include?(dep_name) ? 'true' : 'false' %>
     - put: builds
       params:
         repository: builds-artifacts
