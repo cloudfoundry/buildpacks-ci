@@ -98,20 +98,6 @@ cnbs:
     git_repo: "https://github.com/cloudfoundry/dep-cnb"
     public: true
     private: true
-  php-dist:
-    git_repo: "https://github.com/cloudfoundry/php-dist-cnb"
-    public: true
-    private: true
-    skip_stack:
-      - "bionic"
-      - "tiny"
-  php-composer:
-    git_repo: "https://github.com/cloudfoundry/php-composer-cnb"
-    public: true
-    private: true
-    skip_stack:
-      - "bionic"
-      - "tiny"
   httpd:
     git_repo: "https://github.com/cloudfoundry/httpd-cnb"
     public: true
@@ -126,8 +112,8 @@ cnbs:
     skip_stack:
       - "bionic"
       - "tiny"
-  php-web:
-    git_repo: "https://github.com/cloudfoundry/php-web-cnb"
+  php:
+    git_repo: "https://github.com/cloudfoundry/php-cnb"
     public: true
     private: true
     skip_stack:
