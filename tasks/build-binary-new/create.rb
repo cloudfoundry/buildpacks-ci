@@ -34,7 +34,7 @@ end
 story_params = {
     name: "Build and/or Include new releases: #{name} #{version}",
     description: "```\n#{data.to_yaml}\n```\n",
-    estimate: 1,
+    estimate: 0,
     labels: (['deps', name] + BUILDPACKS).uniq,
     requested_by_id: ENV['TRACKER_REQUESTER_ID'].to_i,
     owner_ids: [ENV['TRACKER_REQUESTER_ID'].to_i]
