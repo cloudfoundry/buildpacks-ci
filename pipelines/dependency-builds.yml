@@ -315,7 +315,7 @@ jobs:
       text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
       username: concourse
 
-
+<% if !v3_child_buildpacks.include?(dep_name) %>
 - name: finish-<%=dep_name%>-<%= line %>-story
   serial: true
   public: true
@@ -350,6 +350,8 @@ jobs:
       params:
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
+<% end %>
+
 
 <% if dep_name == 'node' || dep_name == 'go' %>
 - name: copy-<%=dep_name%>-<%= line %>-bionic
@@ -511,7 +513,9 @@ groups:
     <% version_lines.each do |line| %>
     <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
     - create-<%=dep_name%>-<%= line %>-story
+    <% if !v3_child_buildpacks.include?(dep_name) %>
     - finish-<%=dep_name%>-<%= line %>-story
+    <% end %>
     <% if dep_name == 'node' || dep_name == 'go' %>
     - copy-<%=dep_name%>-<%= line %>-bionic
     <% end %>
@@ -535,7 +539,9 @@ groups:
     <% version_lines.each do |line| %>
     <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
     - create-<%=dep_name%>-<%= line %>-story
+    <% if !v3_child_buildpacks.include?(dep_name) %>
     - finish-<%=dep_name%>-<%= line %>-story
+    <% end %>
     <% if dep_name == 'node' || dep_name == 'go' %>
     - copy-<%=dep_name%>-<%= line %>-bionic
     <% end %>
