@@ -62,27 +62,21 @@ resources:
       uri: https://github.com/cloudfoundry/libcfbuildpack
       branch: master
 
-#  - name: pack-release
-#    type: git
-#    source:
-#      uri: https://github.com/buildpack/pack.git
-#      branch: master
-#      tag_filter: "v*"
-
-  - name: pack-release-candidate
-    type: s3
+  - name: pack-release
+    type: git
     source:
-      bucket: {{cnb-release-candidates-bucket}}
-      regexp: pack-(.*)\+release.linux.tgz
-      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+      uri: https://github.com/buildpack/pack.git
+      branch: master
+      tag_filter: "v*"
 
-#  - name: pack-master
-#    type: git
+#  - name: pack-release-candidate
+#    type: s3
 #    source:
-#      uri: https://github.com/buildpack/pack.git
-#      branch: master
-#
+#      bucket: {{cnb-release-candidates-bucket}}
+#      regexp: pack-(.*)\+release.linux.tgz
+#      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+#      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+
   - name: cnb-lifecycle-release
     type: github-release
     source:
@@ -412,7 +406,7 @@ jobs:
           trigger: true
         <% end %>
         - get: pack
-          resource: pack-release-candidate
+          resource: pack-release
           trigger: true
         - get: buildpacks-ci
         - get: version
@@ -479,7 +473,7 @@ jobs:
           resource: p-cnb-builder
           <% end %>
         - get: pack
-          resource: pack-release-candidate
+          resource: pack-release
           trigger: true
         - get: packager
         - get: buildpacks-ci
