@@ -454,6 +454,7 @@ jobs:
           RUN_IMAGE: <%= builder_data.fetch("builder-image-params",[]).fetch("RUN_IMAGE") %>
 
   - name: release-<%=builder_name%>
+    serial: true
     plan:
       - in_parallel:
         - get: <%= builder_data["stack"] %>-build-cnb-image
