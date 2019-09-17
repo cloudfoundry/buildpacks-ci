@@ -344,6 +344,17 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+  org.cloudfoundry.dotnet-core-build:
+    buildpacks:
+      dotnet-core-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/dotnet-core-build-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
   org.cloudfoundry.dotnet-core-conf:
     buildpacks:
       dotnet-core-cnb:
