@@ -13,7 +13,8 @@ docker load -i builder-image/builder.tgz
 
 pushd pack
     echo "Unpacking pack..."
-    tar xvf pack*.linux.tgz pack -C ./
+    PACK_FILE="$(realpath "$(find . -name "*-linux.tgz")")"
+    tar xvf "$PACK_FILE" pack -C ./
 popd
 
 echo "Building test apps..."
