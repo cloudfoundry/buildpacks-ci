@@ -8,10 +8,10 @@ require 'fileutils'
 require 'open3'
 
 def run(*cmd)
-    output, err = Open3.capture3(cmd)
-    if !err.empty?
+    output, err, status = Open3.capture3(*cmd)
+    if !status.success?
       STDERR.puts "ERROR: #{err}"
-      exit 1
+      exit status.exitstatus
     else
       puts output
     end
@@ -40,12 +40,8 @@ if !enterprise # not in a public repo
   end
 end
 
-# puts 'Building pack...'
-# Dir.chdir 'pack' do
-#   run 'go', 'build', '-mod=vendor', '-o', pack_path, 'cmd/pack/main.go'
-# end
-puts 'moving pack release candidate'
-pack_tar = Dir["pack/*.tgz"].first
+puts 'Untarring pack'
+pack_tar = Dir["pack/*-linux.tgz"].first
 FileUtils.mkdir_p pack_path
 `tar xvf #{Dir.pwd}/#{pack_tar} -C #{pack_path}`
 
