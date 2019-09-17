@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+
+require 'yaml'
+require 'json'
+require 'tmpdir'
+
+if ARGV.length != 1
+  STDERR.puts 'Usage: osl-commits.rb <builder name or ID>'
+  exit 1
+end
+
+builder_groups = JSON.parse(`docker inspect #{ARGV[0]} | jq -r .[].Config.Labels | jq -r '.["io.buildpacks.builder.metadata"]'`)
+builder_buildpacks = builder_groups['groups'].flat_map { |group| group['buildpacks'] }
+builder_cnbs = YAML.load_file('./pipelines/config/cnb-builders.yml')['cnbs']
+
+releases = builder_buildpacks.map do |cnb|
+  name = cnb['id'].split('.')
+  id = name[0] == 'io' ? 'p-' + name[2] : name[2]
+  { 'id' => id, 'version' => cnb['version'] }
+end
+
+release_metadata = {}
+
+puts 'type,repo,commit'
+
+Dir.mktmpdir do |dir|
+  Dir.chdir(dir) do
+    releases.each do |release|
+      repo = builder_cnbs.dig(release['id'], 'git_repo')
+      if !repo
+        repo = "https://github.com/cloudfoundry/#{release['id']}-cnb"
+      end
+      folder = repo.split('/')[-1].gsub('.git', '')
+
+      `git clone -q #{repo}`.strip
+      commit = ''
+      Dir.chdir(folder) do
+        version = 'v' + release['version'].delete('v')
+        commit = `git rev-list -n 1 #{version}`.strip
+      end
+
+      puts "repo,#{repo},#{commit}"
+      puts "url-list,#{folder}-url-list,#{commit}"
+    end
+  end
+end
