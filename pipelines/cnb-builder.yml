@@ -32,13 +32,6 @@ resources:
       branch: master
 
 <% all_cnbs.each do |cnb_name, data| %>
-  - name: <%= cnb_name %>-cnb
-    type: git
-    check_every: 15m # to avoid thundering herd of cnb autobumping
-    source:
-      uri: <%= data['git_repo'] %>
-      private_key: {{cf-buildpacks-eng-github-ssh-key}}
-
   - name: <%= cnb_name %>-cnb-release # move this github release resource
     type: git
     check_every: 15m # to avoid thundering herd of cnb autobumping
@@ -63,19 +56,12 @@ resources:
       branch: master
 
   - name: pack-release
-    type: git
+    type: github-release
     source:
-      uri: https://github.com/buildpack/pack.git
-      branch: master
-      tag_filter: "v*"
-
-#  - name: pack-release-candidate
-#    type: s3
-#    source:
-#      bucket: {{cnb-release-candidates-bucket}}
-#      regexp: pack-(.*)\+release.linux.tgz
-#      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
-#      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+      user: buildpack
+      repository: pack
+      access_token: {{buildpacks-github-token}}
+      globs: ['*-linux.tgz']
 
   - name: cnb-lifecycle-release
     type: github-release
@@ -402,7 +388,7 @@ jobs:
           passed:
             - update-<%= builder_data["stack"] %>-run-cnb-image
         <% cnb_hash.each do |cnb_name, cnb_data| %>
-        - get: <%= cnb_name %>-cnb
+        - get: <%= cnb_name %>-cnb-release
           trigger: true
         <% end %>
         - get: pack

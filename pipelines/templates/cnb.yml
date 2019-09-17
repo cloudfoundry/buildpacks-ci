@@ -50,14 +50,6 @@ resources: #####################################################################
       user: buildpack
       access_token: {{buildpacks-github-token}}
 
-#  - name: pack
-#    type: s3
-#    source:
-#      bucket: {{cnb-release-candidates-bucket}}
-#      regexp: pack-(.*)\+.*linux.tgz
-#      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
-#      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
-
   - name: buildpack-github-release
     type: github-release
     source:
