@@ -1,10 +1,21 @@
 #!/usr/bin/env ruby
 
-require 'tomlrb' # One gem to read (supports v0.4.0)
-require 'toml' # One to write
-require 'json'
-require 'net/http'
+require 'tomlrb' # One gem to read them all (supports v0.4.0)
+require 'toml' # One to write them
+require 'json' # One to bring them all
+require 'net/http' # And in the darkness bind them
 require 'fileutils'
+require 'open3'
+
+def run(*cmd)
+    output, err = Open3.capture3(cmd)
+    if !err.empty?
+      STDERR.puts "ERROR: #{err}"
+      exit 1
+    else
+      puts output
+    end
+end
 
 version = File.read(File.join("version", "version")).strip()
 repo = ENV.fetch("REPO")
@@ -31,7 +42,7 @@ end
 
 # puts 'Building pack...'
 # Dir.chdir 'pack' do
-#   system 'go', 'build', '-mod=vendor', '-o', pack_path, 'cmd/pack/main.go' or exit 1
+#   run 'go', 'build', '-mod=vendor', '-o', pack_path, 'cmd/pack/main.go'
 # end
 puts 'moving pack release candidate'
 pack_tar = Dir["pack/*.tgz"].first
@@ -40,7 +51,7 @@ FileUtils.mkdir_p pack_path
 
 puts 'Building cnb packager...'
 Dir.chdir 'packager' do
-  system 'go', 'build', '-o', packager_path, 'packager/main.go' or exit 1
+  run 'go', 'build', '-o', packager_path, 'packager/main.go'
 end
 
 child_buildpacks = []
@@ -76,11 +87,11 @@ individual_buildpacks = Dir.glob('sources/*/').map do |dir|
   args.pop if enterprise
   Dir.chdir dir do
     if File.file?("./scripts/package.sh")
-      system File.join(ci_path, 'tasks', 'create-builder', 'set-version.sh') or exit 1
+      run File.join(ci_path, 'tasks', 'create-builder', 'set-version.sh')
     end
 
-    system 'cp', packager_path, local_packager or exit 1 # We have to do this b/c cnb packager uses arg[0] to find the buildpack.toml
-    system *args, bp_location or exit 1
+    run 'cp', packager_path, local_packager # We have to do this b/c cnb packager uses arg[0] to find the buildpack.toml
+    run *args, bp_location
   end
   {
     "id" => id,
@@ -116,25 +127,25 @@ puts "**************builder.toml**************"
 puts builder_config
 
 puts "Starting docker daemon"
-system 'buildpacks-ci/scripts/start-docker' or exit 1
+run 'buildpacks-ci/scripts/start-docker'
 
 repository_host = "localhost"
 repository_port = "5000"
 
 puts "Starting local docker registry"
-system 'docker', 'run', '-d', '-p', "#{repository_port}:#{repository_port}", '--restart=always', '--name', 'local_registry', 'registry:2' or exit 1
+run 'docker', 'run', '-d', '-p', "#{repository_port}:#{repository_port}", '--restart=always', '--name', 'local_registry', 'registry:2'
 
 puts "Creating the builder and publishing it to a local registry"
-system "#{pack_path}/pack", 'create-builder', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", '--builder-config', "#{builder_config_file}", '--publish' or exit 1
+run "#{pack_path}/pack", 'create-builder', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", '--builder-config', "#{builder_config_file}", '--publish'
 
 puts "Pulling images from local registry"
-system 'docker', 'pull', "#{repository_host}:#{repository_port}/#{repo}:#{stack}" or exit 1
+run 'docker', 'pull', "#{repository_host}:#{repository_port}/#{repo}:#{stack}"
 
 puts "Renaming the docker image"
-system 'docker', 'tag', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", "#{repo}:#{stack}" or exit 1
+run 'docker', 'tag', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", "#{repo}:#{stack}"
 
 puts "Saving the docker image to a local file"
-system 'docker', 'save', "#{repo}:#{stack}", '-o', 'builder-image/builder.tgz' or exit 1
+run 'docker', 'save', "#{repo}:#{stack}", '-o', 'builder-image/builder.tgz'
 
 File.write(File.join("tag", "name"), tag)
 
