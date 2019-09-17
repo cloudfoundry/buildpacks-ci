@@ -31,10 +31,11 @@ if File.file?('all-monitored-deps/data.json')
   data['packages'] = all_monitored_deps
 end
 
+estimate = is_child_cnb ? 0 : 1
 story_params = {
     name: "Build and/or Include new releases: #{name} #{version}",
     description: "```\n#{data.to_yaml}\n```\n",
-    estimate: 0,
+    estimate: estimate,
     labels: (['deps', name] + BUILDPACKS).uniq,
     requested_by_id: ENV['TRACKER_REQUESTER_ID'].to_i,
     owner_ids: [ENV['TRACKER_REQUESTER_ID'].to_i]
