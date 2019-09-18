@@ -135,7 +135,7 @@ puts "Creating the builder and publishing it to a local registry"
 system "#{pack_path}/pack", 'create-builder', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", '--builder-config', "#{builder_config_file}", '--publish'
 
 puts "Pulling images from local registry"
-run 'docker', 'pull', "#{repository_host}:#{repository_port}/#{repo}:#{stack}"
+system 'docker', 'pull', "#{repository_host}:#{repository_port}/#{repo}:#{stack}"
 
 puts "Renaming the docker image"
 run 'docker', 'tag', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", "#{repo}:#{stack}"
