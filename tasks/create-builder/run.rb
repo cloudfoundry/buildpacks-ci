@@ -138,10 +138,10 @@ puts "Pulling images from local registry"
 system 'docker', 'pull', "#{repository_host}:#{repository_port}/#{repo}:#{stack}"
 
 puts "Renaming the docker image"
-run 'docker', 'tag', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", "#{repo}:#{stack}"
+system 'docker', 'tag', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", "#{repo}:#{stack}"
 
 puts "Saving the docker image to a local file"
-run 'docker', 'save', "#{repo}:#{stack}", '-o', 'builder-image/builder.tgz'
+system 'docker', 'save', "#{repo}:#{stack}", '-o', 'builder-image/builder.tgz'
 
 File.write(File.join("tag", "name"), tag)
 
