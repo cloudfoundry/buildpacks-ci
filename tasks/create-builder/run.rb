@@ -8,13 +8,15 @@ require 'fileutils'
 require 'open3'
 
 def run(*cmd)
-    output, err, status = Open3.capture3(*cmd)
-    if !status.success?
-      STDERR.puts "ERROR: #{err}"
-      exit status.exitstatus
-    else
-      puts output
-    end
+    puts *cmd
+    system *cmd
+    # output, err, status = Open3.capture3(*cmd)
+    # if !status.success?
+    #   STDERR.puts "ERROR: #{err}"
+    #   # exit status.exitstatus
+    # else
+    #   puts output
+    # end
 end
 
 version = File.read(File.join("version", "version")).strip()
@@ -132,16 +134,16 @@ puts "Starting local docker registry"
 run 'docker', 'run', '-d', '-p', "#{repository_port}:#{repository_port}", '--restart=always', '--name', 'local_registry', 'registry:2'
 
 puts "Creating the builder and publishing it to a local registry"
-system "#{pack_path}/pack", 'create-builder', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", '--builder-config', "#{builder_config_file}", '--publish'
+run "#{pack_path}/pack", 'create-builder', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", '--builder-config', "#{builder_config_file}", '--publish'
 
-puts "Pulling images from local registry"
-system 'docker', 'pull', "#{repository_host}:#{repository_port}/#{repo}:#{stack}"
+# puts "Pulling images from local registry"
+# run 'docker', 'pull', "#{repository_host}:#{repository_port}/#{repo}:#{stack}"
 
 puts "Renaming the docker image"
-system 'docker', 'tag', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", "#{repo}:#{stack}"
+run 'docker', 'tag', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", "#{repo}:#{stack}"
 
 puts "Saving the docker image to a local file"
-system 'docker', 'save', "#{repo}:#{stack}", '-o', 'builder-image/builder.tgz'
+run 'docker', 'save', "#{repo}:#{stack}", '-o', 'builder-image/builder.tgz'
 
 File.write(File.join("tag", "name"), tag)
 
