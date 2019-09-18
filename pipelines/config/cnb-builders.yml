@@ -58,34 +58,13 @@ cnbs:
     skip_stack:
       - "tiny"
 
-  python-runtime:
-    git_repo: "https://github.com/cloudfoundry/python-runtime-cnb"
+  python:
+    git_repo: "https://github.com/cloudfoundry/python-cnb"
     public: true
     private: true
     skip_stack:
       - "tiny"
-      - "bionic"
-  pip:
-    git_repo: "https://github.com/cloudfoundry/pip-cnb"
-    public: true
-    private: true
-    skip_stack:
-      - "bionic"
-      - "tiny"
-  pipenv:
-    git_repo: "https://github.com/cloudfoundry/pipenv-cnb"
-    public: true
-    private: true
-    skip_stack:
-      - "bionic"
-      - "tiny"
-  conda:
-    git_repo: "https://github.com/cloudfoundry/conda-cnb"
-    public: true
-    private: true
-    skip_stack:
-      - "bionic"
-      - "tiny"
+
   go-compiler:
     git_repo: "https://github.com/cloudfoundry/go-compiler-cnb"
     public: true
