@@ -84,10 +84,8 @@ individual_buildpacks = Dir.glob('sources/*/').map do |dir|
   args = [local_packager, '-uncached']
   args.pop if enterprise
   Dir.chdir dir do
-    if File.file?("./scripts/package.sh")
-      run File.join(ci_path, 'tasks', 'create-builder', 'set-version.sh')
-    end
-
+    version = File.read(File.join(".git", "ref")).chomp
+    args.push("-version", version)
     run 'cp', packager_path, local_packager # We have to do this b/c cnb packager uses arg[0] to find the buildpack.toml
     run *args, bp_location
   end
