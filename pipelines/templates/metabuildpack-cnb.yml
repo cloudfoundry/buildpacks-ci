@@ -1,0 +1,204 @@
+---
+resources:
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: {{buildpacks-ci-git-uri-public}}
+      branch: {{buildpacks-ci-git-uri-public-branch}}
+
+  - name: cnb-tools-git
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cnb-tools.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+      branch: master
+
+  - name: cnb2cf
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/cnb2cf
+      branch: master
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+
+  - name: repo
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/<%= language %>-cnb
+      branch: master
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+
+  - name: buildpack-github-release
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: <%= language %>-cnb
+      access_token: {{buildpacks-github-token}}
+      drafts: true
+
+  - name: release-candidate
+    type: s3
+    source:
+      bucket: {{buildpack-release-candidates-bucket}}
+      regexp: shims/<%= language %>/<%= language %>_buildpack-v(\d+\.\d+\.\d+-rc\.\d+).zip
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+
+  - name: <%= language %>-cnb-version
+    type: semver
+    source:
+      initial_version: 0.0.1
+      driver: gcs
+      bucket: artifacts.cf-buildpacks.appspot.com
+      key: cnb-versions/<%= language %>-family-version
+      json_key: {{gcp-service-account-key}}
+
+  - name: edge-environments
+    type: pool
+    source:
+      branch: master
+      pool: edge-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
+  - name: env-repo
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: {{buildpacks-envs-private-key}}
+
+jobs:
+  # Updates
+  - name: update-cnb-tools
+    public: true
+    serial: true
+    serial_groups: [ update ]
+    plan:
+      - in_parallel:
+          - get: buildpacks-ci
+          - get: cnb-tools-git
+            trigger: true
+          - get: buildpack
+            resource: repo
+      - task: update-cnb-tools
+        file: buildpacks-ci/tasks/update-cnb-tools/task.yml
+      - put: repo
+        params:
+          repository: buildpack-artifacts
+          rebase: true
+
+  # Test and Release
+  - name: create-and-test-rc
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+          - get: buildpacks-ci
+          - get: version
+            resource: <%= language %>-cnb-version
+            params:
+              pre: rc
+          - get: repo
+            trigger: true
+          - get: cnb2cf
+          - get: env-repo
+          - put: edge-environments
+            params:
+              acquire: true
+      - task: create-candidate
+        file: buildpacks-ci/tasks/build-cnb-buildpack/task.yml
+      - task: create-cf-space
+        file: buildpacks-ci/tasks/create-cf-space/task.yml
+        output_mapping: {cf-space: cf-space-cflinuxfs3}
+        params:
+          ENV_POOL_RESOURCE: edge-environments
+          ENVS_DIR: env-repo
+          ORG: pivotal
+          SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+          USERNAME: admin
+      - task: integration-test-using-candidate
+        privileged: true
+        file: buildpacks-ci/tasks/run-scripts-integration/task.yml
+        input_mapping:
+          cf-space: cf-space-cflinuxfs3
+      - task: promote-candidate-to-rc
+        file: buildpacks-ci/tasks/promote-candidate-to-rc/task.yml
+      - put: release-candidate
+        params:
+          file: release-candidate/*.zip
+      - put: version
+        resource: <%= language %>-cnb-version
+        params: {file: version/number}
+    ensure:
+      in_parallel:
+        - task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping:
+            cf-space: cf-space-cflinuxfs3
+        - put: edge-environments
+          params:
+            release: edge-environments
+
+  - name: ship-it
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+          - get: buildpacks-ci
+          - get: buildpack
+            resource: repo
+            passed:
+              - create-and-test-rc
+          - get: release-candidate
+            passed:
+              - create-and-test-rc
+          - get: version
+            resource: <%= language %>-cnb-version
+            params:
+              bump: final
+      - task: check-tag-not-already-added
+        file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
+      - put: repo
+        params:
+          repository: buildpack
+          tag: version/version
+          tag_prefix: v
+
+  - name: buildpack-to-github
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+          - get: buildpacks-ci
+          - get: release-candidate
+            passed:
+              - ship-it
+          - get: version
+            resource: <%= language %>-cnb-version
+            params:
+              bump: final
+          - get: buildpack
+            resource: repo
+            passed:
+              - ship-it
+            trigger: true
+      - task: collect-release-artifacts
+        privileged: true
+        file: buildpacks-ci/tasks/collect-release-artifacts/task.yml
+        params:
+          REPO: <%= language %>-cnb
+          STACK: cflinuxfs3
+          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+      - put: buildpack-github-release
+        params:
+          name: buildpack-artifacts/tag
+          tag: buildpack-artifacts/tag
+          body: buildpack-artifacts/release_notes
+          globs:
+            - buildpack-artifacts/*-v*.zip
+            - buildpack-artifacts/*-v*.zip.SHA256SUM.txt
+      - put: version
+        resource: <%= language %>-cnb-version
+        params:
+          file: version/number
+          bump: patch
