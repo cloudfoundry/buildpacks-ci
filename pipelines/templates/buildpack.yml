@@ -40,7 +40,7 @@
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
     'product_slug' => 'nodejs-buildpack',
     'edge_skip_stacks' => %w(cflinuxfs2),
-    'v3' => true
+    'v3' => false
   },
   'php' => {
     'stacks' => %w(cflinuxfs2 cflinuxfs3),
