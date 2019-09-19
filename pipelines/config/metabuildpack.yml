@@ -1,0 +1,5 @@
+---
+metabuildpacks:
+  - "nodejs"
+  - "python"
+  - "dotnet-core"
