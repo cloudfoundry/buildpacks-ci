@@ -7,6 +7,7 @@ require 'tmpdir'
 require_relative 'dotnet_framework_extractor'
 require_relative 'merge-extensions'
 
+
 module Runner
   def run(*args)
     system({ 'DEBIAN_FRONTEND' => 'noninteractive' }, *args)
@@ -15,6 +16,7 @@ module Runner
 end
 
 module DependencyBuild
+
   def build_pipenv(source_input)
     old_file_path = "/tmp/pipenv-v#{source_input.version}.tgz"
     Runner.run('apt', 'update')
@@ -404,6 +406,30 @@ end
 
 
 class Builder
+  cnb_list = [
+    'org.cloudfoundry.node-engine',
+    'org.cloudfoundry.npm',
+    'org.cloudfoundry.yarn',
+    'org.cloudfoundry.nodejs-compat',
+    'org.cloudfoundry.dotnet-core-runtime',
+    'org.cloudfoundry.dotnet-core-aspnet',
+    'org.cloudfoundry.dotnet-core-sdk',
+    'org.cloudfoundry.dotnet-core-conf',
+    'org.cloudfoundry.python-runtime',
+    'org.cloudfoundry.pip',
+    'org.cloudfoundry.pipenv',
+    'org.cloudfoundry.conda',
+    'org.cloudfoundry.php-dist',
+    'org.cloudfoundry.php-composer',
+    'org.cloudfoundry.httpd',
+    'org.cloudfoundry.nginx',
+    'org.cloudfoundry.php-web',
+    'org.cloudfoundry.dotnet-core-build',
+    'org.cloudfoundry.go-compiler-cnb',
+    'org.cloudfoundry.go-mod-cnb',
+    'org.cloudfoundry.go-dep-cnb',
+  ]
+
   def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, skip_commit = false)
     unless skip_commit
       build_input.copy_to_build_output
@@ -495,7 +521,7 @@ class Builder
       out_data[:sha256] = results[1]
       out_data[:url] = source_input.url
 
-    when 'org.cloudfoundry.node-engine', 'org.cloudfoundry.npm', 'org.cloudfoundry.yarn', 'org.cloudfoundry.nodejs-compat', 'org.cloudfoundry.dotnet-core-runtime', 'org.cloudfoundry.dotnet-core-aspnet', 'org.cloudfoundry.dotnet-core-sdk', 'org.cloudfoundry.dotnet-core-conf', 'org.cloudfoundry.python-runtime', 'org.cloudfoundry.pip', 'org.cloudfoundry.pipenv', 'org.cloudfoundry.conda', 'org.cloudfoundry.php-dist','org.cloudfoundry.php-composer','org.cloudfoundry.httpd','org.cloudfoundry.nginx','org.cloudfoundry.php-web', 'org.cloudfoundry.dotnet-core-build'
+    when -> (elem) { cnb_list.include?(elem) }
       results = Sha.check_sha(source_input)
       File.write('artifacts/temp_file', results[0])
 
