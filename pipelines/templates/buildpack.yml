@@ -630,7 +630,11 @@ relevant_stacks.each do |stack| %>
           params:
             CF_STACK: cflinuxfs3
             GINKGO_ATTEMPTS: 4
-            GINKGO_NODES: 6
+            <% if language == 'ruby' %>
+            GINKGO_NODES: 2
+            <% else %>
+            GINKGO_NODES: 4
+            <% end %>
             SKIP_WINDOWS_TESTS: true
             <% if language == 'php' %>
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
