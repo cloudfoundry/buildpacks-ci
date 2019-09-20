@@ -241,35 +241,12 @@ jobs:
     plan:
       - get: tiny-run-base-dockerfile
         trigger: true
+      - get: buildpacks-ci
       - get: new-cves
         trigger: true
       - task: integration-test
         privileged: true
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: pivotalnavcon/docker-go
-          inputs:
-            - name: tiny-run-base-dockerfile
-          run:
-            path: /bin/bash
-            args:
-              - -c
-              - |
-                  set -eux -o pipefail
-                  source /opt/resource/common.sh
-                  sanitize_cgroups
-                  start_docker 3 3 "" ""
-
-                  apk add coreutils ncurses curl
-                  curl -#L https://github.com/bats-core/bats-core/archive/master.zip | unzip -
-                  bash bats-core-master/install.sh /usr/local
-
-                  cd tiny-run-base-dockerfile/tiny/base/run
-                  docker build -t tiny .
-                  bats -t ./tests/test.bats && bats -t ./tests/testapp.bats
+        file: buildpacks-ci/tasks/test-tiny-docker-image/task.yml
 
   - name: update-tiny-base-image
     public: true
