@@ -65,18 +65,11 @@ cnbs:
     skip_stack:
       - "tiny"
 
-  go-compiler:
-    git_repo: "https://github.com/cloudfoundry/go-compiler-cnb"
+  go:
+    git_repo: "https://github.com/cloudfoundry/go-cnb"
     public: true
     private: true
-  go-mod:
-    git_repo: "https://github.com/cloudfoundry/go-mod-cnb"
-    public: true
-    private: true
-  dep:
-    git_repo: "https://github.com/cloudfoundry/dep-cnb"
-    public: true
-    private: true
+
   httpd:
     git_repo: "https://github.com/cloudfoundry/httpd-cnb"
     public: true
