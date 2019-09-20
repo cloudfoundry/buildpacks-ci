@@ -39,7 +39,8 @@ end
 
 CNB_STACKS = {
   'cflinuxfs3' => 'org.cloudfoundry.stacks.cflinuxfs3',
-  'bionic'     => 'io.buildpacks.stacks.bionic'
+  'bionic'     => 'io.buildpacks.stacks.bionic',
+  'tiny'       => 'org.cloudfoundry.stacks.tiny'
 }
 
 V3_DEP_IDS = {
@@ -132,8 +133,10 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
     next unless CNB_STACKS.keys.include? stack
     total_stacks.push CNB_STACKS[stack]
     v3_stacks = [CNB_STACKS[stack]]
-    if stack == 'bionic' and dependency_name == 'go'
-      v3_stacks += [CNB_STACKS['tiny']]
+    if stack == 'bionic'
+      if dependency_name == "go" or dependency_name == "dep"
+        v3_stacks += [CNB_STACKS['tiny']]
+      end
     end
   end
 

@@ -427,9 +427,9 @@ class Builder
       'org.cloudfoundry.nginx',
       'org.cloudfoundry.php-web',
       'org.cloudfoundry.dotnet-core-build',
-      'org.cloudfoundry.go-compiler-cnb',
-      'org.cloudfoundry.go-mod-cnb',
-      'org.cloudfoundry.go-dep-cnb',
+      'org.cloudfoundry.go-compiler',
+      'org.cloudfoundry.go-mod',
+      'org.cloudfoundry.dep',
     ]
 
     unless skip_commit
