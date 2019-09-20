@@ -489,7 +489,7 @@ jobs:
           load_repository: <%= builder_data.fetch("builder-image-params",[]).fetch("REPO") %> # must match REPO
           load_tag: <%= builder_data["stack"] %>
           tag_file: tag/name
-          tag_as_latest: <%= builder_data["stack"] != "bionic" %>
+          tag_as_latest: <%= builder_data["stack"] == "cflinuxfs3" %>
       - put: <%= builder_data.fetch("version-resource") %>
         params:
           bump: patch
