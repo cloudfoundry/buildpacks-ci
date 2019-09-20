@@ -513,6 +513,39 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+  org.cloudfoundry.go-compiler:
+    buildpacks:
+      go-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/go-compiler-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.go-mod:
+    buildpacks:
+      go-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/go-mod-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+  org.cloudfoundry.dep:
+    buildpacks:
+      go-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/dep-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
   php:
     buildpacks:
       php:
