@@ -8,15 +8,14 @@ require 'fileutils'
 require 'open3'
 
 def run(*cmd)
-    puts *cmd
-    system *cmd
-    # output, err, status = Open3.capture3(*cmd)
-    # if !status.success?
-    #   STDERR.puts "ERROR: #{err}"
-    #   # exit status.exitstatus
-    # else
-    #   puts output
-    # end
+    puts "Running: #{*cmd.join(" ")}"
+    output, err, status = Open3.capture3(*cmd)
+    if !status.success?
+      STDERR.puts "ERROR: #{err}"
+      # exit status.exitstatus
+    else
+      puts output
+    end
 end
 
 version = File.read(File.join("version", "version")).strip()
