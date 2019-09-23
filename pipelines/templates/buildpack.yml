@@ -406,6 +406,7 @@ jobs: ##########################################################################
           params:
             BUILDPACK_NAME: <%= language %>
             TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
+            RELENG_TRACKER_PROJECT_ID: '{{cf-buildpacks-releng-public-tracker-id}}'
             TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
 
