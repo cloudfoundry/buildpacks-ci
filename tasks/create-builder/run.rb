@@ -8,7 +8,7 @@ require 'fileutils'
 require 'open3'
 
 def run(*cmd)
-    puts "Running: #{*cmd.join(" ")}"
+    puts *cmd.join(" ")
     output, err, status = Open3.capture3(*cmd)
     if !status.success?
       STDERR.puts "ERROR: #{err}"
