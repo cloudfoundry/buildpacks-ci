@@ -26,7 +26,7 @@ resources:
   - name: davos-cve-stories-cflinuxfs3
     type: cf-tracker-resource
     source:
-      project_id: '{{cf-buildpacks-public-tracker-id}}'
+      project_id: '{{cf-buildpacks-rel-eng-tracker-id}}'
       token: {{pivotal-tracker-api-token}}
       labels:
         - cflinuxfs3
@@ -146,7 +146,7 @@ jobs:
         - task: categorize-security-notices-cflinuxfs3
           file: buildpacks-ci/tasks/categorize-security-notices/task.yml
           params:
-            TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
+            TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
             TRACKER_PROJECT_REQUESTER: '{{cf-buildpacks-requester-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             STACK: cflinuxfs3
