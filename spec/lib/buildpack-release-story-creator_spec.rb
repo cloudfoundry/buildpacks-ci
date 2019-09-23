@@ -6,23 +6,26 @@ describe BuildpackReleaseStoryCreator do
   let(:buildpack_name) { 'elixir' }
   let(:previous_buildpack_version) { '2.10.3' }
   let(:tracker_project_id) { 'tracker_project_id_stub' }
+  let(:releng_tracker_project_id) { 'releng_tracker_project_id_stub' }
   let(:tracker_requester_id) { 555555 }
   let(:tracker_api_token) { 'tracker_api_token_stub' }
   let(:tracker_client) { double(TrackerApi::Client) }
   let(:buildpack_project) { instance_double(TrackerApi::Resources::Project) }
+  let(:buildpack_releng_project) { instance_double(TrackerApi::Resources::Project) }
   let(:new_story) { double('new_story', id: 987) }
   let(:release_stories) { [] }
-  let(:all_stories) { [double(id:110, name:'Older Release'),
+  let(:all_buildpacks_stories) { [double(id:110, name:'Older Release'),
                        double(id:111, name:'Elixir should be faster'),
-                       double(id:221, name:'Latest Release'),
-                       double(id:222, name:'Buildpack should tweet on stage'),
+                       double(id:221, name:'Latest Release')] }
+  let(:all_buildpacks_releng_stories) { [double(id:222, name:'Buildpack should tweet on stage'),
                        double(id:333, name:'All buildpacks should be awesome')] }
 
   subject { described_class.new(buildpack_name: buildpack_name,
                                 previous_buildpack_version: previous_buildpack_version,
                                 tracker_project_id: tracker_project_id,
                                 tracker_requester_id: tracker_requester_id,
-                                tracker_api_token: tracker_api_token
+                                tracker_api_token: tracker_api_token,
+                                releng_tracker_project_id: releng_tracker_project_id
                                 )}
 
   before do
@@ -30,9 +33,12 @@ describe BuildpackReleaseStoryCreator do
       .and_return(tracker_client)
     allow(tracker_client).to receive(:project).with(tracker_project_id)
       .and_return(buildpack_project)
+    allow(tracker_client).to receive(:project).with(releng_tracker_project_id)
+      .and_return(buildpack_releng_project)
 
     allow(buildpack_project).to receive(:stories).with({filter: "label:release AND label:elixir AND -state:unscheduled"}).and_return(release_stories)
-    allow(buildpack_project).to receive(:stories).with({filter: "(label:elixir OR label:elixir-buildpack OR label:all) AND (accepted_after:09/24/2015 OR -state:accepted)", limit: 1000, auto_paginate: true}).and_return(all_stories)
+    allow(buildpack_project).to receive(:stories).with({filter: "(label:elixir OR label:elixir-buildpack OR label:all) AND (accepted_after:09/24/2015 OR -state:accepted)", limit: 1000, auto_paginate: true}).and_return(all_buildpacks_stories)
+    allow(buildpack_releng_project).to receive(:stories).with({filter: "(label:elixir OR label:elixir-buildpack OR label:all) AND (accepted_after:09/24/2015 OR -state:accepted)", limit: 1000, auto_paginate: true}).and_return(all_buildpacks_releng_stories)
   end
 
   context 'previous release stories exist' do

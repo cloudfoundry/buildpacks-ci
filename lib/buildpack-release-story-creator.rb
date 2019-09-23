@@ -3,9 +3,9 @@ require 'tracker_api'
 
 class BuildpackReleaseStoryCreator
   attr_reader :buildpack_name, :previous_buildpack_version,
-              :tracker_requester_id, :buildpack_project
+              :tracker_requester_id, :buildpack_project, :buildpack_releng_project
 
-  def initialize(buildpack_name:, previous_buildpack_version:, tracker_project_id:,
+  def initialize(buildpack_name:, previous_buildpack_version:, tracker_project_id:, releng_tracker_project_id:,
                  tracker_requester_id:, tracker_api_token:)
     @buildpack_name = buildpack_name
     @previous_buildpack_version = previous_buildpack_version
@@ -13,6 +13,7 @@ class BuildpackReleaseStoryCreator
 
     tracker_client = TrackerApi::Client.new(token: tracker_api_token)
     @buildpack_project = tracker_client.project(tracker_project_id)
+    @buildpack_releng_project = tracker_client.project(releng_tracker_project_id)
   end
 
   def run!
@@ -39,7 +40,10 @@ class BuildpackReleaseStoryCreator
 
   def stories_since_last_release
     story_id = most_recent_release_story_id
-    all = buildpack_project.stories(filter: "(label:#{buildpack_name} OR label:#{buildpack_name}-buildpack OR label:all) AND (accepted_after:09/24/2015 OR -state:accepted)", limit: 1000, auto_paginate: true) #accepted_after is because the api was returning very old stories at the wrong indexes
+    all = [
+        buildpack_project.stories(filter: "(label:#{buildpack_name} OR label:#{buildpack_name}-buildpack OR label:all) AND (accepted_after:09/24/2015 OR -state:accepted)", limit: 1000, auto_paginate: true), #accepted_after is because the api was returning very old stories at the wrong indexes
+        buildpack_releng_project.stories(filter: "(label:#{buildpack_name} OR label:#{buildpack_name}-buildpack OR label:all) AND (accepted_after:09/24/2015 OR -state:accepted)", limit: 1000, auto_paginate: true) #accepted_after is because the api was returning very old stories at the wrong indexes
+    ].flatten
     all.sort! {|a,b| a.id <=> b.id}
     idx = all.find_index{ |s| s.id == story_id } if story_id
     idx ? all[(idx+1)..-1] : all
