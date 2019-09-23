@@ -63,8 +63,8 @@ cnbs:
     public: true
     private: true
     skip_stack:
+      - "bionic"
       - "tiny"
-
   go:
     git_repo: "https://github.com/cloudfoundry/go-cnb"
     public: true
