@@ -365,7 +365,8 @@ jobs:
           passed:
             - update-<%= builder_data["stack"] %>-run-cnb-image
         <% cnb_hash.each do |cnb_name, cnb_data| %>
-        - get: <%= cnb_name %>-cnb-release
+        - get: <%= cnb_name %>-cnb
+          resource: <%= cnb_name %>-cnb-release
           trigger: true
         <% end %>
         - get: pack
