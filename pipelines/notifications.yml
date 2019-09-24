@@ -42,12 +42,6 @@ resources:
     source:
       expression: 12 5 1 * *
       location: {{current-timezone}}
-  - name: every-third-month
-    type: cron
-    check_every: 1h
-    source:
-      expression: 30 1 9 */3 * # Run every three months on the 9th of the month at 1:30 AM
-      location: {{current-timezone}}
   - name: check-interval
     type: cron
     source:
