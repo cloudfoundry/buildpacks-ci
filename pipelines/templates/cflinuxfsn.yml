@@ -682,7 +682,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/finalize-security-notice-stories/task.yml
           attempts: 20
           params:
-            TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
+            TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
             TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             STACK: <%= rootfs_name %>
