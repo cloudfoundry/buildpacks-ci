@@ -9,6 +9,8 @@ describe BuildpackReleaseStoryCreator do
   let(:releng_tracker_project_id) { 'releng_tracker_project_id_stub' }
   let(:tracker_requester_id) { 555555 }
   let(:tracker_api_token) { 'tracker_api_token_stub' }
+  let(:old_manifest) { 'dependencies: [{name: "dep-upgraded", version: "1.1"}, {name: "dep-removed", version: "2"}, {name: "dep-doesnt-change", version: "1"}]' }
+  let(:new_manifest) { 'dependencies: [{name: "dep-upgraded", version: "1.2"}, {name: "dep-added", version: "2"}, {name: "dep-doesnt-change", version: "1"}]' }
   let(:tracker_client) { double(TrackerApi::Client) }
   let(:buildpack_project) { instance_double(TrackerApi::Resources::Project) }
   let(:buildpack_releng_project) { instance_double(TrackerApi::Resources::Project) }
@@ -25,7 +27,9 @@ describe BuildpackReleaseStoryCreator do
                                 tracker_project_id: tracker_project_id,
                                 tracker_requester_id: tracker_requester_id,
                                 tracker_api_token: tracker_api_token,
-                                releng_tracker_project_id: releng_tracker_project_id
+                                releng_tracker_project_id: releng_tracker_project_id,
+                                new_manifest: new_manifest,
+                                old_manifest: old_manifest
                                 )}
 
   before do
@@ -51,6 +55,14 @@ describe BuildpackReleaseStoryCreator do
           #222 - Buildpack should tweet on stage
           #333 - All buildpacks should be awesome
 
+          **Dependency Changes:**
+
+          ```
+          dep-upgraded: 1.1 -> 1.2
+          + dep-added: 2
+          - dep-removed: 2
+          ```
+
           Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
           DESCRIPTION
         )).and_return(new_story)
@@ -75,6 +87,14 @@ describe BuildpackReleaseStoryCreator do
           #221 - Latest Release
           #222 - Buildpack should tweet on stage
           #333 - All buildpacks should be awesome
+
+          **Dependency Changes:**
+
+          ```
+          dep-upgraded: 1.1 -> 1.2
+          + dep-added: 2
+          - dep-removed: 2
+          ```
 
           Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
           DESCRIPTION
