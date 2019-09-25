@@ -29,14 +29,6 @@ resources:
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
   <%end%>
 
-  - name: shim-git
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/libbuildpack
-      branch: master
-      paths:
-        - shims
-
   - name: shim-version
     type: semver
     source:
@@ -148,7 +140,7 @@ jobs:
       - in_parallel:
         - get: buildpacks-ci
         - get: shim
-          resource: shim-git
+          resource: cnb2cf
           trigger: true
         - get: version
           resource: shim-version
