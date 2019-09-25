@@ -1,11 +1,17 @@
 ---
 platform: linux
+
 image_resource:
   type: docker-image
   source:
     repository: cfbuildpacks/ci
+
 inputs:
   - name: buildpacks-ci
   - name: repo
+
+params:
+  RUN_UNPRIVILEGED: false
+
 run:
   path: buildpacks-ci/tasks/run-scripts-unit/run.sh

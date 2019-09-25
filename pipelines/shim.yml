@@ -108,6 +108,8 @@ jobs:
           trigger: true
       - task: unit-test
         file: buildpacks-ci/tasks/run-scripts-unit/task.yml
+        params:
+          RUN_UNPRIVILEGED: true
 
   - name: integration-test-cnb2cf
     plan:
