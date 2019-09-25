@@ -8,4 +8,8 @@ cd repo
 export GOBIN=$PWD/.bin
 export PATH=$GOBIN:$PATH
 
-./scripts/unit.sh
+if [[ "${RUN_UNPRIVILEGED}" == "true" ]]; then
+  chpst -u testuser:testuser ./scripts/unit.sh
+else
+  ./scripts/unit.sh
+fi
