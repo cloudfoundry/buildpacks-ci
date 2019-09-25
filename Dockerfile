@@ -30,31 +30,32 @@ RUN curl -sL "https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master
 RUN apt-get -qqy update \
   && apt-get -qqy install \
     aufs-tools \
+    cf-cli \
     crystal \
-    libxml2-dev \
+    default-libmysqlclient-dev \
     expect \
     git \
+    google-chrome-stable \
     google-cloud-sdk \
     iptables \
     jq \
-    default-libmysqlclient-dev \
+    libgconf-2-4 \
     libpq-dev \
     libsqlite3-dev \
-    libgconf-2-4 \
+    libxml2-dev \
     lsb-release \
+    multiarch-support \
+    om \
     php7.0 \
     pkgconf \
     python-dev \
     python-pip \
-    shellcheck \
     rsync \
-    cf-cli \
+    runit \
+    shellcheck \
     vim \
     wget \
     zip \
-    google-chrome-stable \
-    om \
-    multiarch-support \
   && apt-get -qqy clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
