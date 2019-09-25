@@ -5,10 +5,8 @@ config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds.yml'))
 
 dependencies = config['dependencies']
 stacks = config['stacks']
-windows_stacks = config['windows_stacks']
 dotnet_sdk_lines_with_aspnetcore = config['dotnet_sdk_lines_with_aspnetcore']
 deps_extracted_from_dotnet_sdk = config['deps_extracted_from_dotnet_sdk']
-skip_build = config['skip_build']
 skip_deprecation_check = config['skip_deprecation_check']
 v3_child_buildpacks = config['v3_child_buildpacks']
 
@@ -399,10 +397,9 @@ jobs:
   - in_parallel:
     <% build_stacks = dep['any_stack'] ? ['any-stack'] : stacks %>
     <% build_stacks.each do |stack| %>
-    <% unless skip_build.include?({ 'dep' => dep_name, 'line' => line, 'stack' => stack}) %>
     - do:
       - task: build-binary-<%= stack %>
-        image: <%= if dep_name == 'bundler' then 'cflinuxfs2' elsif stack == 'any-stack' then stacks.last else stack end%>-image
+        image: <%= stack == 'any-stack' ? stacks.last : stack %>-image
         file: buildpacks-ci/tasks/build-binary-new/build.yml
         output_mapping: {artifacts: <%= stack %>-artifacts, builds-artifacts: <%= stack %>-builds-metadata}
         params:
@@ -431,7 +428,6 @@ jobs:
           params:
             repository: <%= stack %>-builds-metadata
             rebase: true
-    <% end %>
     <% end %>
  <% end %>
  <% end %>
