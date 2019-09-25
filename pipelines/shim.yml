@@ -13,39 +13,6 @@ resources:
       branch: master
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
 
-  - name: shim-version
-    type: semver
-    source:
-      initial_version: 0.0.1
-      bucket: buildpacks-versions
-      key: shim-version
-      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
-
-  - name: buildpacks-bucket-shim-bundle
-    type: s3
-    source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-      regexp: dependencies/shim-bundle/shim-bundle-(\d+.\d+.\d+).*tgz
-
-  - name: lifecycle-builds
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-      branch: master
-      paths: [ binary-builds-new/lifecycle/*-any-stack.json ]
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-
-  - name: buildpacks-bucket-lifecycle-bundle
-    type: s3
-    source:
-      bucket: {{buildpacks-binaries-s3-bucket}}
-      access_key_id: {{pivotal-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-      regexp: dependencies/lifecycle/lifecycle-(\d+.\d+.\d+)-any-stack.*tgz
-
   - name: buildpack-libbuildpack
     type: git
     source:
