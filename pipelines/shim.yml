@@ -1,10 +1,3 @@
-<% languages = {
-  'nodejs-cnb' => {
-    'branch' => 'master',
-  }
-}
-%>
-
 ---
 resources:
   - name: buildpacks-ci
@@ -19,15 +12,6 @@ resources:
       uri: git@github.com:cloudfoundry/cnb2cf
       branch: master
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
-
-  <% languages.each do |lang, data| %>
-  - name: <%= lang %>
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/<%= lang %>
-      branch: <%= data['branch'] %>
-      private_key: {{cf-buildpacks-eng-github-ssh-key}}
-  <%end%>
 
   - name: shim-version
     type: semver
@@ -134,78 +118,6 @@ jobs:
         - put: edge-environments
           params:
             release: edge-environments
-
-  - name: create-shim-bundle
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: shim
-          resource: cnb2cf
-          trigger: true
-        - get: version
-          resource: shim-version
-        - get: cnb2cf
-      - task: create-shim-bundle
-        file: buildpacks-ci/tasks/create-shim-bundle/task.yml
-      - put: buildpacks-bucket-shim-bundle
-        params:
-          file: archive/shim-bundle*
-      - put: shim-version
-        params:
-          bump: patch
-
-  - name: update-cnb2cf-template-shim-binaries-shim-binaries
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: s3
-          resource: buildpacks-bucket-shim-bundle
-          trigger: true
-          params:
-            unpack: true
-        - get: cnb2cf
-      - task: update-cnb2cf-template-shim-binaries
-        file: buildpacks-ci/tasks/update-cnb2cf-template-shim-binaries/task.yml
-      - put: cnb2cf
-        params:
-          repository: cnb2cf
-          rebase: true
-  <% languages.each do |lang, data| %>
-  - name: update-shim-bundle-in-<%= lang %>
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: s3
-          resource: buildpacks-bucket-shim-bundle
-          trigger: true
-        - get: buildpack
-          resource: <%= lang %>
-      - task: update-shim-bundle-url
-        file: buildpacks-ci/tasks/update-shim-bundle-url/task.yml
-      - put: <%= lang %>
-        params:
-          repository: buildpack
-          rebase: true
-  <% end %>
-
-  - name: update-cnb2cf-template-shim-binaries-lifecycle-binaries
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: s3
-          resource: buildpacks-bucket-lifecycle-bundle
-          params:
-            unpack: true
-          trigger: true
-        - get: cnb2cf
-        - get: builds
-          resource: lifecycle-builds
-      - task: update-cnb2cf-template-shim-binaries
-        file: buildpacks-ci/tasks/update-cnb2cf-template-lifecycle-bundle/task.yml
-      - put: cnb2cf
-        params:
-          repository: cnb2cf
-          rebase: true
 
   - name: update-cnb2cf-buildpack-libbuildpack
     plan:
