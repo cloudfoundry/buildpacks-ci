@@ -11,8 +11,9 @@
     'skip_docker_start' => true,
   },
   'dotnet-core' => {
-    'stacks' => %w(cflinuxfs2 cflinuxfs3),
-    'product_slug' => 'dotnet-core-buildpack'
+    'stacks' => %w(cflinuxfs3),
+    'product_slug' => 'dotnet-core-buildpack',
+    'non_lts_pivnet' => true,
   },
   'go' => {
     'stacks' => %w(cflinuxfs3),
