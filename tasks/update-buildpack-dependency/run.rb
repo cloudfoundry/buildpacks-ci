@@ -5,7 +5,7 @@ require 'tmpdir'
 require 'date'
 require_relative './dependencies'
 require_relative './php_manifest'
-config = YAML.load_file('../../pipelines/config/dependency-builds.yml')
+config = YAML.load_file(File.join(__dir__, '../../pipelines/config/dependency-builds.yml'))
 
 ALL_STACKS = config['stacks']
 WINDOWS_STACKS = config['windows_stacks']
