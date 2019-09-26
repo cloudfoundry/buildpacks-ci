@@ -15,6 +15,20 @@ resource_types:
       repository: cftoolsmiths/toolsmiths-envs-resource
 
 resources: ############################################################################################################
+  - name: buildpack-packager
+    type: git
+    source:
+      uri: {{buildpack-packager-git-uri}}
+      branch: master
+      private_key: {{buildpack-packager-private-key}}
+
+  - name: buildpack-packager-github-release
+    type: github-release
+    source:
+      user: {{buildpacks-github-org}}
+      repository: buildpack-packager
+      access_token: {{buildpacks-github-token}}
+
   - name: stack-auditor
     type: git
     source:
@@ -153,3 +167,54 @@ jobs: ##########################################################################
       params:
         file_glob: plugin-release/stack-auditor-*
         metadata_file: pivnet-metadata-artifacts/stack-auditor.yml
+
+  - name: buildpack-packager-specs
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: buildpack-packager
+          trigger: true
+      - task: run-buildpack-packager-specs
+        file: buildpacks-ci/tasks/run-buildpack-packager-specs/task.yml
+        params:
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
+  - name: buildpack-packager-tag
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: gem
+          resource: buildpack-packager
+          passed: [ buildpack-packager-specs ]
+      - task: bump-buildpack-packager-version
+        file: buildpacks-ci/tasks/bump-gem-version/task.yml
+      - put: buildpack-packager
+        params:
+          repository: gem-artifacts
+          tag: gem-artifacts/VERSION
+          tag_prefix: v
+  - name: buildpack-packager-release
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: gem
+          passed: [ buildpack-packager-tag ]
+          resource: buildpack-packager
+          trigger: true
+      - task: create-new-buildpack-packager-release
+        file: buildpacks-ci/tasks/create-gem-release/task.yml
+        params:
+          RUBYGEM_MIRROR: {{rubygem-mirror}}
+          GEM_NAME: buildpack-packager
+      - put: buildpack-packager-github-release
+        params:
+          name: gem-artifacts/tag
+          tag: gem-artifacts/tag
+          globs:
+            - gem-artifacts/buildpack-packager-v*.zip
+            - gem-artifacts/buildpack-packager-v*.tar.gz
