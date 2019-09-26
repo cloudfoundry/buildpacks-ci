@@ -15,8 +15,7 @@ class BuildpacksCIPipelineUpdateCommand
     puts "   #{pipeline_name} pipeline"
 
     if !system(config_generation_command, out: File::NULL)
-      puts 'Failed to run config generation command'
-      exit 1
+      raise 'Failed to run config generation command'
     end
 
     secrets_cmd = [

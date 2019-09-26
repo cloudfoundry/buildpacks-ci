@@ -45,7 +45,7 @@ describe BuildpacksCIPipelineUpdateCommand do
 
     describe 'building the fly command' do
       let(:concourse_target_name) { 'concourse-target' }
-      let(:config_generation_command)  { 'erb this' }
+      let(:config_generation_command)  { 'echo "erb this"' }
       let(:options)       { { } }
       let(:pipeline_name) { 'our-pipeline' }
       let(:buildpacks_ci_configuration) { BuildpacksCIConfiguration.new }
@@ -56,17 +56,20 @@ describe BuildpacksCIPipelineUpdateCommand do
       end
 
       it 'has a pipeline name' do
+        expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(config_generation_command, out: File::NULL).and_return(true)
         expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(/pipeline=our-pipeline/)
         subject
       end
 
       it 'has a concourse target' do
+        expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(config_generation_command, out: File::NULL).and_return(true)
         expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(/target=concourse-target/)
         subject
       end
 
       it 'has config set by an evaluated command' do
-        expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(/config=<\(erb this\)/)
+        expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(config_generation_command, out: File::NULL).and_return(true)
+        expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(/config=<\(#{config_generation_command}\)/)
         subject
       end
 
@@ -79,6 +82,7 @@ describe BuildpacksCIPipelineUpdateCommand do
         allow(buildpacks_ci_configuration).to receive(:git_repos_private_keys_three_filename).and_return('git_keys_three.yml')
         allow(buildpacks_ci_configuration).to receive(:bosh_release_private_keys_filename).and_return('bosh.yml')
         allow(buildpacks_ci_configuration).to receive(:dockerhub_cflinuxfs_credentials_filename).and_return('dockerhub-cflinuxfs.yml')
+        expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(config_generation_command, out: File::NULL).and_return(true)
         expect(buildpacks_ci_pipeline_update_command).to receive(:system) do |fly_command|
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show private.yml.*\)/
           expect(fly_command).to match /load-vars-from=\<\(.*lpass show deployments.yml.*\)/
@@ -93,14 +97,24 @@ describe BuildpacksCIPipelineUpdateCommand do
       end
 
       it 'loads env vars from public config' do
+        expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(config_generation_command, out: File::NULL).and_return(true)
         expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(/load-vars-from=public-config.yml/)
         subject
+      end
+
+      context 'when the erb templating fails' do
+        let(:config_generation_command)  { 'false' }
+
+        it 'raises an error' do
+          expect { subject }.to raise_error('Failed to run config generation command')
+        end
       end
 
       context 'when pipeline specific config is specified' do
         let(:pipeline_variable_filename) { 'specific-config.yml' }
 
         it 'loads env vars from specified config file' do
+          expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(config_generation_command, out: File::NULL).and_return(true)
           expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(/load-vars-from=specific-config.yml/)
           subject
         end
@@ -112,6 +126,7 @@ describe BuildpacksCIPipelineUpdateCommand do
         after { ENV.store('PIPELINE_PREFIX', nil) }
 
         it 'has a pipeline name' do
+          expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(config_generation_command, out: File::NULL).and_return(true)
           expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(/pipeline=prefix-our-pipeline/)
           subject
         end
@@ -123,36 +138,42 @@ describe BuildpacksCIPipelineUpdateCommand do
         end
 
         it 'gets the concourse private filename' do
+          expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(config_generation_command, out: File::NULL).and_return(true)
           expect(buildpacks_ci_configuration).to receive(:concourse_private_filename)
 
           subject
         end
 
         it 'gets the concourse buildpacks deployments filename' do
+          expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(config_generation_command, out: File::NULL).and_return(true)
           expect(buildpacks_ci_configuration).to receive(:deployments_buildpacks_filename)
 
           subject
         end
 
         it 'gets the concourse repo private keys filename' do
+          expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(config_generation_command, out: File::NULL).and_return(true)
           expect(buildpacks_ci_configuration).to receive(:repos_private_keys_filename)
 
           subject
         end
 
         it 'gets the concourse git repo private keys filename' do
+          expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(config_generation_command, out: File::NULL).and_return(true)
           expect(buildpacks_ci_configuration).to receive(:git_repos_private_keys_filename)
 
           subject
         end
 
         it 'gets the concourse git repo private keys two filename' do
+          expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(config_generation_command, out: File::NULL).and_return(true)
           expect(buildpacks_ci_configuration).to receive(:git_repos_private_keys_two_filename)
 
           subject
         end
 
         it 'gets the concourse BOSH release private keys filename' do
+          expect(buildpacks_ci_pipeline_update_command).to receive(:system).with(config_generation_command, out: File::NULL).and_return(true)
           expect(buildpacks_ci_configuration).to receive(:bosh_release_private_keys_filename)
 
           subject
