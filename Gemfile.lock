@@ -44,6 +44,7 @@ GEM
     parser (2.4.0.2)
       ast (~> 2.3)
     parslet (1.8.2)
+    phantomjs (2.1.1.0)
     powerpack (0.1.1)
     pry (0.11.3)
       coderay (~> 1.1.0)
@@ -123,6 +124,7 @@ DEPENDENCIES
   octokit
   open4
   open_uri_redirections
+  phantomjs
   pry
   rake
   rspec
@@ -140,4 +142,4 @@ RUBY VERSION
    ruby 2.6.4p104
 
 BUNDLED WITH
-   2.0.1
+   2.0.2
