@@ -8,7 +8,6 @@ stacks = config['stacks']
 dotnet_sdk_lines_with_aspnetcore = config['dotnet_sdk_lines_with_aspnetcore']
 deps_extracted_from_dotnet_sdk = config['deps_extracted_from_dotnet_sdk']
 skip_deprecation_check = config['skip_deprecation_check']
-v3_child_buildpacks = config['v3_child_buildpacks']
 
 def common_prefix(stringA, stringB)
   max_len = 0
@@ -109,6 +108,10 @@ def get_git_uri(buildpack)
   else
     bp_uri = "git@github.com:cloudfoundry/#{buildpack}-buildpack.git"
   end
+end
+
+def is_child_cnb(dep_name)
+  dep_name.start_with?('org.cloudfoundry')
 end
 %>
 
@@ -301,7 +304,7 @@ jobs:
         TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         BUILDPACKS: <%= dep['buildpacks'].select{ |_, bp_data| bp_uses_line?(bp_data,line) }.keys.join(' ') %>
-        CHILD_CNB: <%= v3_child_buildpacks.include?(dep_name) ? 'true' : 'false' %>
+        CHILD_CNB: <%= is_child_cnb(dep_name) %>
     - put: builds
       params:
         repository: builds-artifacts
@@ -313,7 +316,7 @@ jobs:
       text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
       username: concourse
 
-<% if !v3_child_buildpacks.include?(dep_name) %>
+<% if !is_child_cnb(dep_name) %>
 - name: finish-<%=dep_name%>-<%= line %>-story
   serial: true
   public: true
@@ -509,7 +512,7 @@ groups:
     <% version_lines.each do |line| %>
     <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
     - create-<%=dep_name%>-<%= line %>-story
-    <% if !v3_child_buildpacks.include?(dep_name) %>
+    <% if !is_child_cnb(dep_name) %>
     - finish-<%=dep_name%>-<%= line %>-story
     <% end %>
     <% if dep_name == 'node' || dep_name == 'go' %>
@@ -535,7 +538,7 @@ groups:
     <% version_lines.each do |line| %>
     <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
     - create-<%=dep_name%>-<%= line %>-story
-    <% if !v3_child_buildpacks.include?(dep_name) %>
+    <% if !is_child_cnb(dep_name) %>
     - finish-<%=dep_name%>-<%= line %>-story
     <% end %>
     <% if dep_name == 'node' || dep_name == 'go' %>
