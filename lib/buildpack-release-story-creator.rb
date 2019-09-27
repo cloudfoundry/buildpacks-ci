@@ -46,8 +46,8 @@ class BuildpackReleaseStoryCreator
   def stories_since_last_release
     story_id = most_recent_release_story_id
     all = [
-        buildpack_project.stories(filter: "(label:#{buildpack_name} OR label:#{buildpack_name}-buildpack OR label:all) AND (accepted_after:09/24/2015 OR -state:accepted)", limit: 1000, auto_paginate: true), #accepted_after is because the api was returning very old stories at the wrong indexes
-        buildpack_releng_project.stories(filter: "(label:#{buildpack_name} OR label:#{buildpack_name}-buildpack OR label:all) AND (accepted_after:09/24/2015 OR -state:accepted)", limit: 1000, auto_paginate: true) #accepted_after is because the api was returning very old stories at the wrong indexes
+        buildpack_project.stories(filter: "(label:#{buildpack_name} OR label:#{buildpack_name}-buildpack OR label:all) AND (accepted_after:09/24/2015 OR -state:accepted) AND (-label:deps)", limit: 1000, auto_paginate: true), #accepted_after is because the api was returning very old stories at the wrong indexes
+        buildpack_releng_project.stories(filter: "(label:#{buildpack_name} OR label:#{buildpack_name}-buildpack OR label:all) AND (accepted_after:09/24/2015 OR -state:accepted) AND (-label:deps)", limit: 1000, auto_paginate: true) #accepted_after is because the api was returning very old stories at the wrong indexes
     ].flatten
     all.sort! {|a,b| a.id <=> b.id}
     idx = all.find_index{ |s| s.id == story_id } if story_id
@@ -66,11 +66,11 @@ class BuildpackReleaseStoryCreator
   end
 
   def get_added_versions(new_deps, old_deps, name)
-    ((new_deps[name] || []) - (old_deps[name] || [])).uniq.sort
+    ((new_deps[name] || []) - (old_deps[name] || [])).collect{|i| i.to_s}.uniq.sort
   end
 
   def get_removed_versions(new_deps, old_deps, name)
-    ((old_deps[name] || []) - (new_deps[name] || [])).uniq.sort
+    ((old_deps[name] || []) - (new_deps[name] || [])).collect{|i| i.to_s}.uniq.sort
   end
 
   def generate_dependency_changes
