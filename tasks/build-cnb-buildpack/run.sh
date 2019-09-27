@@ -6,7 +6,7 @@ set -o pipefail
 set -x
 
 pushd cnb2cf
-  go build -o build/cnb2cf ./cmd/cnb2cf/main.go
+  ./scripts/build.sh
 popd
 
 # Cut off the rc part of the version, so that ultimate RC will have the correct version file
