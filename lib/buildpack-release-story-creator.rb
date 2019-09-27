@@ -89,7 +89,7 @@ class BuildpackReleaseStoryCreator
       end
     end
 
-    description = "```\n"
+    description = ""
 
     new_dependencies.each_key do |name|
       added_versions = get_added_versions(new_dependencies, old_dependencies, name)
@@ -112,6 +112,10 @@ class BuildpackReleaseStoryCreator
         description += "- #{name}: #{removed_versions.join(', ')}\n"
       end
     end
-    description += "```\n"
+
+    if description == ""
+      description+="No dependency changes\n"
+    end
+      "```\n#{description}```\n"
   end
 end

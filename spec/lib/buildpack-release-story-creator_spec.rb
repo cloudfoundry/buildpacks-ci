@@ -107,6 +107,39 @@ describe BuildpackReleaseStoryCreator do
     end
   end
 
+  context 'no dependency changes exist' do
+    let(:release_stories) { [] }
+    let(:old_manifest) { 'dependencies: []' }
+    let(:new_manifest) { 'dependencies: []' }
+
+    it 'finds all the stories tagged buildpack_name or all' do
+      expect(buildpack_project).to receive(:create_story).
+          with(hash_including(description: <<~DESCRIPTION,
+          Stories:
+
+          #110 - Older Release
+          #111 - Elixir should be faster
+          #221 - Latest Release
+          #222 - Buildpack should tweet on stage
+          #333 - All buildpacks should be awesome
+
+          **Dependency Changes:**
+
+          ```
+          No dependency changes
+          ```
+
+          Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
+                              DESCRIPTION
+               )).and_return(new_story)
+      expect(new_story).to receive(:description=).
+          with(anything())
+      expect(new_story).to receive(:save)
+
+      subject.run!
+    end
+  end
+
   it 'posts a new buildpack release story to Tracker' do
     expect(buildpack_project).to receive(:create_story).
         with(name: '**Release:** elixir-buildpack 2.10.4',
