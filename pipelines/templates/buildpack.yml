@@ -63,8 +63,9 @@
     'product_slug' => 'ruby-buildpack',
   },
   'staticfile' => {
-    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'stacks' => %w(cflinuxfs3),
     'product_slug' => 'staticfile-buildpack',
+    'non_lts_pivnet' => true,
   }
 } %>
 <%
