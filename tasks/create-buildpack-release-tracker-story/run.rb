@@ -8,7 +8,7 @@ tracker_project_id = ENV.fetch('TRACKER_PROJECT_ID')
 releng_tracker_project_id = ENV.fetch('RELENG_TRACKER_PROJECT_ID')
 tracker_requester_id = ENV.fetch('TRACKER_REQUESTER_ID').to_i
 tracker_api_token = ENV.fetch('TRACKER_API_TOKEN')
-old_manifest = `git -C buildpack show v#{previous_buildpack_version.strip}:manifest.yml`
+old_manifest = `git -C buildpack show master:manifest.yml`
 new_manifest = File.read('buildpack/manifest.yml')
 
 buildpack_release_story_creator = BuildpackReleaseStoryCreator.new(
