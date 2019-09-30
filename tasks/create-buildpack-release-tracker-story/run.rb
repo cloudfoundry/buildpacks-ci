@@ -3,12 +3,13 @@
 require_relative '../../lib/buildpack-release-story-creator'
 
 buildpack_name = ENV.fetch('BUILDPACK_NAME')
-previous_buildpack_version = File.read('buildpack/VERSION')
+previous_buildpack_version = `git tag -C buildpack`.split("\n").map{|i| i.strip.gsub('v','') }
+    .select{|i| Gem::Version.correct?(i)}.map {|i| Gem::Version.new(i) }.sort.last
 tracker_project_id = ENV.fetch('TRACKER_PROJECT_ID')
 releng_tracker_project_id = ENV.fetch('RELENG_TRACKER_PROJECT_ID')
 tracker_requester_id = ENV.fetch('TRACKER_REQUESTER_ID').to_i
 tracker_api_token = ENV.fetch('TRACKER_API_TOKEN')
-old_manifest = `git -C buildpack show master:manifest.yml`
+old_manifest = `git -C buildpack show v#{previous_buildpack_version}:manifest.yml`
 new_manifest = File.read('buildpack/manifest.yml')
 
 buildpack_release_story_creator = BuildpackReleaseStoryCreator.new(

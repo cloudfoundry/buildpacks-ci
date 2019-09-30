@@ -4,7 +4,8 @@ require_relative '../../lib/commit'
 # For each individual release of a CNB, we filter out all of the commits
 # which aren't related to a Tracker story.
 def get_changes
-  latest_version = `git tag`.split("\n").map {|i| Gem::Version.new(i.strip.tr('v', ''))}.sort.last
+  latest_version = `git tag`.split("\n").map{|i| i.strip.gsub('v','') }
+    .select{|i| Gem::Version.correct?(i)}.map {|i| Gem::Version.new(i) }.sort.last
   changelog = ""
   commits = Commit.recent(latest_version) rescue nil
   if commits
