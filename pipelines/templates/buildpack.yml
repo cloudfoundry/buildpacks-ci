@@ -59,8 +59,9 @@
     'skip_docker_start' => true,
   },
   'ruby' => {
-    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'stacks' => %w(cflinuxfs3),
     'product_slug' => 'ruby-buildpack',
+    'non_lts_pivnet' => true,
   },
   'staticfile' => {
     'stacks' => %w(cflinuxfs3),
@@ -1132,7 +1133,7 @@ relevant_stacks.each do |stack| %>
           params:
             CF_STACK: cflinuxfs3
             GINKGO_ATTEMPTS: <%= language.to_s == 'php' ? 10 : 4 %>
-            GINKGO_NODES: 6
+            GINKGO_NODES: <%= language.to_s == 'ruby' ? 2 : 6 %>
             SKIP_WINDOWS_TESTS: true
             <% if language == 'php' %>
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
