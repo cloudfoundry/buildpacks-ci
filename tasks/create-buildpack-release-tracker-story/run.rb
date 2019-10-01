@@ -4,7 +4,7 @@ require_relative '../../lib/buildpack-release-story-creator'
 
 buildpack_name = ENV.fetch('BUILDPACK_NAME')
 previous_buildpack_version = `git -C buildpack tag`.split("\n").map{ |i| i.strip.delete('v') }
-  .select { |i| Gem::Version.correct?(i) }.map { |i| Gem::Version.new(i) }.sort.last.to_s
+  .select { |i| i =~ /\d+\.\d+\.\d+/ }.map { |i| Gem::Version.new(i) }.sort.last.to_s
 tracker_project_id = ENV.fetch('TRACKER_PROJECT_ID')
 releng_tracker_project_id = ENV.fetch('RELENG_TRACKER_PROJECT_ID')
 tracker_requester_id = ENV.fetch('TRACKER_REQUESTER_ID').to_i
