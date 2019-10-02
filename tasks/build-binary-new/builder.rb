@@ -4,7 +4,6 @@ require 'open-uri'
 require 'digest'
 require 'net/http'
 require 'tmpdir'
-require_relative 'dotnet_framework_extractor'
 require_relative 'merge-extensions'
 
 
@@ -16,7 +15,6 @@ module Runner
 end
 
 module DependencyBuild
-
   def build_pipenv(source_input)
     old_file_path = "/tmp/pipenv-v#{source_input.version}.tgz"
     Runner.run('apt', 'update')
@@ -287,56 +285,30 @@ module DependencyBuild
     end
   end
 
-  def build_dotnet_sdk(source_input, build_input, build_output, artifact_output)
-    GitClient.clone_repo('https://github.com/dotnet/cli.git', 'cli')
+  def build_dotnet_sdk(source_input)
+    prune_dotnet_files(source_input, ["./shared/*"])
+  end
 
-    stack = ENV.fetch('STACK')
-    major, minor, patch = source_input.version.split('.')
-    Dir.chdir('cli') do
-      GitClient.checkout(source_input.git_commit_sha)
+  def build_dotnet_runtime(source_input)
+    prune_dotnet_files(source_input, ["./dotnet"])
+  end
 
-      # TODO: This is a temporary workaround to get 2.1.401 to build properly.
-      # Remove this block after 2.1.402 is released and builds properly.
-      # See: https://github.com/dotnet/cli/issues/9897#issuecomment-416361988
-      if [major, minor, patch] == %w(2 1 401)
-        GitClient.cherry_pick('257cf7a4784cc925742ef4e2706e752ab1f578b0')
+  def build_dotnet_aspnetcore(source_input)
+    prune_dotnet_files(source_input, ["./dotnet", "./shared/Microsoft.NETCore.App/*"])
+  end
+
+  def prune_dotnet_files(source_input, files_to_exclude)
+    source_file = File.expand_path(Dir.glob('source/*.tar.gz').first)
+    adjusted_file = "/tmp/#{source_input.name}.#{source_input.version}.linux-amd64.tar.xz"
+    exclude_list = files_to_exclude.map{ |file| "--exclude=#{file}"}.join(" ")
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        `tar -xf #{source_file} #{exclude_list}`
+        # Use xz to compress smaller than gzip
+        `tar -Jcf #{adjusted_file} ./*`
       end
-
-      Runner.run('apt-get', 'update')
-      Runner.run('apt-get', '-y', 'upgrade')
-      fs_specific_packages = stack == 'cflinuxfs2' ? ['liburcu1', 'libllvm3.6', 'liblldb-3.6'] : ['liburcu6', 'libllvm3.9', 'liblldb-3.9']
-      Runner.run('apt-get', '-y', 'install', 'clang', 'devscripts', 'debhelper', 'libunwind8', 'libpython2.7', 'liblttng-ust0', *fs_specific_packages)
-
-      ENV['DropSuffix'] = 'true'
-      ENV['TERM'] = 'linux'
-
-      # We must fix the build script for dotnet-sdk versions 2.1.4 to 2.1.2XX (see https://github.com/dotnet/cli/issues/8358)
-      if major == '2' && minor == '1' && patch.to_i >= 4 && patch.to_i < 300
-        runbuildsh = File.open('run-build.sh', 'r') { |f| f.read }
-        runbuildsh.gsub!('WriteDynamicPropsToStaticPropsFiles "${args[@]}"', 'WriteDynamicPropsToStaticPropsFiles')
-        File.open('run-build.sh ', 'w') { |f| f.write runbuildsh }
-      end
-
-      Runner.run('./build.sh', '/t:Compile')
     end
-
-    # The path to the built files changes in dotnet-v2.1.300
-    has_artifacts_dir = major.to_i <= 2 && minor.to_i <= 1 && patch.to_i < 300
-    old_filepath = "/tmp/#{source_input.name}.#{source_input.version}.linux-amd64.tar.xz"
-    dotnet_dir = has_artifacts_dir ? Dir['cli/artifacts/*-x64/stage2'][0] : 'cli/bin/2/linux-x64/dotnet'
-
-    remove_frameworks = major.to_i >= 2 && minor.to_i >= 1
-    framework_extractor = DotnetFrameworkExtractor.new(dotnet_dir, stack, source_input, build_input, artifact_output)
-    framework_extractor.extract_runtime(remove_frameworks)
-
-    # There are only separate ASP.net packages for dotnet core 2+
-    if major.to_i >= 2
-      framework_extractor.extract_aspnetcore(remove_frameworks)
-    end
-
-    Dir.chdir(dotnet_dir) do
-      system('tar', 'Jcf', old_filepath, '.', '--hard-dereference')
-    end
+    adjusted_file
   end
 
   def build_openresty(source_input)
@@ -650,12 +622,10 @@ class Builder
 
     when 'python'
       DependencyBuild.build_python(source_input, stack)
-      # binary_builder.build(source_input)
       out_data.merge!(
           artifact_output.move_dependency(
               'python',
               "artifacts/python-#{source_input.version}.tgz",
-              # "#{binary_builder.base_dir}/python-#{source_input.version}-linux-x64.tgz",
               "python-#{source_input.version}-linux-x64-#{stack}",
               'tgz'
           )
@@ -731,19 +701,38 @@ class Builder
       out_data[:source_pgp] = source_pgp
 
     when 'dotnet-sdk'
-      DependencyBuild.build_dotnet_sdk source_input, build_input, build_output, artifact_output
+      old_file_path = DependencyBuild.build_dotnet_sdk source_input
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
-              "/tmp/#{source_input.name}.#{source_input.version}.linux-amd64.tar.xz",
+              old_file_path,
               "#{source_input.name}.#{source_input.version}.linux-amd64-#{stack}",
               'tar.xz'
           )
       )
-      out_data.merge!({
-                          version: source_input.version,
-                          git_commit_sha: source_input.git_commit_sha
-                      })
+
+    when 'dotnet-runtime'
+      old_file_path = DependencyBuild.build_dotnet_runtime source_input
+      out_data.merge!(
+          artifact_output.move_dependency(
+              source_input.name,
+              old_file_path,
+              "#{source_input.name}.#{source_input.version}.linux-amd64-#{stack}",
+              'tar.xz'
+          )
+      )
+
+    when 'dotnet-aspnetcore'
+      old_file_path = DependencyBuild.build_dotnet_aspnetcore source_input
+      out_data.merge!(
+          artifact_output.move_dependency(
+              source_input.name,
+              old_file_path,
+              "#{source_input.name}.#{source_input.version}.linux-amd64-#{stack}",
+              'tar.xz'
+          )
+      )
+
     when 'openresty'
       source_pgp = 'not yet implemented'
       DependencyBuild.build_openresty source_input

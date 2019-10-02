@@ -50,11 +50,11 @@ when "ca_apm_agent"
 when "appd_agent"
   versions = Depwatcher::AppDynamicsAgent.new.check
 when "dotnet-sdk"
-  versions = Depwatcher::DotnetSdk.new.check(source["tag_regex"].to_s)
+  versions = Depwatcher::DotnetSdk.new.check(source["version_filter"].to_s)
 when "dotnet-runtime"
-  versions = Depwatcher::DotnetRuntime.new.check
+  versions = Depwatcher::DotnetRuntime.new.check(source["version_filter"].to_s)
 when "dotnet-aspnetcore"
-  versions = Depwatcher::DotnetAspNetCore.new.check
+  versions = Depwatcher::AspnetcoreRuntime.new.check(source["version_filter"].to_s)
 when "rserve"
   versions = Depwatcher::CRAN.new.check("Rserve")
 when "forecast"

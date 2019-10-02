@@ -6,7 +6,6 @@ config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds.yml'))
 dependencies = config['dependencies']
 stacks = config['stacks']
 dotnet_sdk_lines_with_aspnetcore = config['dotnet_sdk_lines_with_aspnetcore']
-deps_extracted_from_dotnet_sdk = config['deps_extracted_from_dotnet_sdk']
 skip_deprecation_check = config['skip_deprecation_check']
 
 def common_prefix(stringA, stringB)
@@ -255,7 +254,6 @@ jobs:
 <% end %>
 
 <% version_lines.each do |line| %>
-<% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
 - name: create-<%=dep_name%>-<%= line %>-story
   serial: true
   public: true
@@ -266,15 +264,15 @@ jobs:
       resource: source-<%=dep_name%>-<%= line %>
       trigger: true
       version: every
-    <% dep.fetch('monitored_deps', []).each_with_index do |monitored_dep_name, index| %>
+  <% dep.fetch('monitored_deps', []).each_with_index do |monitored_dep_name, index| %>
     - get: monitored-dep-<%= index %>
       resource: source-<%=monitored_dep_name%>-latest
       trigger: true
       version: every
-    <% end %>
+  <% end %>
     - get: builds
   - do:
-    <% if dep.key? 'monitored_deps' %>
+  <% if dep.key? 'monitored_deps' %>
     - task: collate-monitored-deps
       config:
         platform: linux
@@ -291,12 +289,12 @@ jobs:
           DEP_COUNT: <%= dep['monitored_deps'].size %>
         inputs:
           - name: buildpacks-ci
-          <% dep['monitored_deps'].each_index do |index| %>
+        <% dep['monitored_deps'].each_index do |index| %>
           - name: monitored-dep-<%= index %>
-          <% end %>
+        <% end %>
         outputs:
           - name: all-monitored-deps
-    <% end %>
+  <% end %>
     - task: create-tracker-story
       file: buildpacks-ci/tasks/build-binary-new/create.yml
       params:
@@ -316,7 +314,7 @@ jobs:
       text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
       username: concourse
 
-<% if !is_child_cnb(dep_name) %>
+  <% if !is_child_cnb(dep_name) %>
 - name: finish-<%=dep_name%>-<%= line %>-story
   serial: true
   public: true
@@ -328,11 +326,11 @@ jobs:
       trigger: true
       version: every
       passed:
-      <% dep['buildpacks'].each do |bp_name, bp_data| %>
-        <% if bp_uses_line?(bp_data, line) %>
+    <% dep['buildpacks'].each do |bp_name, bp_data| %>
+      <% if bp_uses_line?(bp_data, line) %>
         - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
-        <% end %>
       <% end %>
+    <% end %>
     <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
     - get: source-<%=monitored_dep_name%>-latest
       trigger: true
@@ -351,10 +349,10 @@ jobs:
       params:
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
-<% end %>
+  <% end %>
 
 
-<% if dep_name == 'node' || dep_name == 'go' %>
+  <% if dep_name == 'node' || dep_name == 'go' %>
 - name: copy-<%=dep_name%>-<%= line %>-bionic
   plan:
   - in_parallel:
@@ -373,7 +371,7 @@ jobs:
       params:
         repository: builds-artifacts
         rebase: true
-<% end %>
+  <% end %>
 
 - name: build-<%=dep_name%>-<%= line %>
   serial: true
@@ -387,19 +385,19 @@ jobs:
       trigger: true
       version: every
       passed: [ create-<%=dep_name%>-<%= line %>-story ]
-    <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
+  <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
     - get: source-<%=monitored_dep_name%>-latest
       trigger: true
       version: every
       passed: [ create-<%=dep_name%>-<%= line %>-story ]
-    <% end %>
-    <% stacks.each do |stack| %>
+  <% end %>
+  <% stacks.each do |stack| %>
     - get: <%= stack %>-image
-    <% end %>
+  <% end %>
     - get: builds
   - in_parallel:
-    <% build_stacks = dep['any_stack'] ? ['any-stack'] : stacks %>
-    <% build_stacks.each do |stack| %>
+  <% build_stacks = dep['any_stack'] ? ['any-stack'] : stacks %>
+  <% build_stacks.each do |stack| %>
     - do:
       - task: build-binary-<%= stack %>
         image: <%= stack == 'any-stack' ? stacks.last : stack %>-image
@@ -408,12 +406,12 @@ jobs:
         params:
           STACK: <%= stack %>
       - in_parallel:
-        <% if !dep['third_party_hosted'] %>
+    <% if !dep['third_party_hosted'] %>
         - put: buildpacks-bucket-<%= dep_name %>-<%= stack %>
           resource: buildpacks-bucket-<%= dep_name %>
           params:
             file: <%= stack %>-artifacts/<%= dep_name == "nginx-static" ? "nginx" : dep_name %>*
-        <% if dep_name == 'dotnet-sdk' %>
+      <% if dep_name == 'dotnet-sdk' %>
         - put: buildpacks-bucket-dotnet-runtime-<%= stack %>
           resource: buildpacks-bucket-dotnet-runtime
           params:
@@ -424,16 +422,15 @@ jobs:
           params:
             file: <%= stack %>-artifacts/dotnet-aspnetcore*
         <% end %>
-        <% end %>
-        <% end %>
+      <% end %>
+    <% end %>
         - put: builds-metadata-<%= stack %>
           resource: builds
           params:
             repository: <%= stack %>-builds-metadata
             rebase: true
-    <% end %>
- <% end %>
- <% end %>
+  <% end %>
+<% end %>
 
 <% dep['buildpacks'].each do |bp_name, bp| %>
   <% bp.fetch('lines', []).each do |line_hash| %>
@@ -456,11 +453,9 @@ jobs:
     - get: buildpacks-ci
     - get: source
       resource: source-<%=dep_name%>-<%= line_hash['line'] %>
-      <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
       <% must_pass = ["build-#{dep_name}-#{line_hash['line']}"] %>
       <% must_pass.push("copy-#{dep_name}-#{line_hash['line']}-bionic") if (bp_name.include? 'node-engine-cnb') || (bp_name.include? 'go-compiler-cnb')  %>
       passed: <%= must_pass %>
-      <% end %>
       version: every
       trigger: true
     <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
@@ -510,7 +505,6 @@ groups:
     - create-<%= dep_name %>-new-line-story
     <% end %>
     <% version_lines.each do |line| %>
-    <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
     - create-<%=dep_name%>-<%= line %>-story
     <% if !is_child_cnb(dep_name) %>
     - finish-<%=dep_name%>-<%= line %>-story
@@ -519,7 +513,6 @@ groups:
     - copy-<%=dep_name%>-<%= line %>-bionic
     <% end %>
     - build-<%=dep_name%>-<%= line %>
-    <% end %>
     <% end %>
     <% dep['buildpacks'].each do |bp_name, bp| %>
     <% get_version_lines(bp['lines'], ['latest']).each do |line| %>
@@ -536,7 +529,6 @@ groups:
     - create-<%= dep_name %>-new-line-story
     <% end %>
     <% version_lines.each do |line| %>
-    <% unless deps_extracted_from_dotnet_sdk.include?(dep_name) %>
     - create-<%=dep_name%>-<%= line %>-story
     <% if !is_child_cnb(dep_name) %>
     - finish-<%=dep_name%>-<%= line %>-story
@@ -545,7 +537,6 @@ groups:
     - copy-<%=dep_name%>-<%= line %>-bionic
     <% end %>
     - build-<%=dep_name%>-<%= line %>
-    <% end %>
     <% end %>
     <% dep['buildpacks'].each do |bp_name, bp| %>
     <% get_version_lines(bp['lines'], ['latest']).each do |line| %>
