@@ -69,6 +69,7 @@ dependencies:
           - line: 2.2.2X
           - line: 2.2.3X
           - line: 2.2.4X
+          - line: 3.0.0X
         removal_strategy: keep_all
       dotnet-core-sdk-cnb:
         lines:
@@ -81,9 +82,8 @@ dependencies:
           - line: 2.2.2X
           - line: 2.2.3X
           - line: 2.2.4X
+          - line: 3.0.0X
         removal_strategy: keep_all
-    source_params:
-      - 'tag_regex: ^(v1\.\d+\.\d+|v2\.\d+\.\d+\+dependencies)$'
   dotnet-runtime:
     buildpacks:
       dotnet-core:
@@ -94,6 +94,9 @@ dependencies:
           - line: 2.2.X
             deprecation_date: 2019-12-23
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+          - line: 3.0.X
+            deprecation_date: ''
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: keep_all
       dotnet-core-runtime-cnb:
         lines:
@@ -103,6 +106,9 @@ dependencies:
           - line: 2.2.X
             deprecation_date: 2019-12-23
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+          - line: 3.0.X
+            deprecation_date: ''
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: keep_all
   dotnet-aspnetcore:
     buildpacks:
@@ -110,11 +116,13 @@ dependencies:
         lines:
           - line: 2.1.X
           - line: 2.2.X
+          - line: 3.0.X
         removal_strategy: keep_all
       dotnet-core-aspnet-cnb:
         lines:
           - line: 2.1.X
           - line: 2.2.X
+          - line: 3.0.X
         removal_strategy: keep_all
   glide:
     buildpacks:
@@ -693,7 +701,6 @@ dependencies:
 stacks: ['cflinuxfs3']
 windows_stacks: ['windows2012R2', 'windows2016', 'windows']
 dotnet_sdk_lines_with_aspnetcore: ['2.1.4X', '2.1.5X', '2.1.6X', '2.1.7X', '2.1.8X', '2.2.1X', '2.2.2X', '2.2.3X', '2.2.4X']
-deps_extracted_from_dotnet_sdk: ['dotnet-runtime', 'dotnet-aspnetcore']
 
 # only check deprecation dates for dotnet-runtime as they are redundant for sdk and aspnetcore
 skip_deprecation_check:

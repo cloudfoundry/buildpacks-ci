@@ -224,7 +224,6 @@ describe 'Builder' do
 
     context 'and no git commit sha' do
       before do
-
         expect(build_output).to receive(:add_output)
           .with("1.0.2-cflinuxfs2.json",
             {
@@ -282,10 +281,57 @@ describe 'Builder' do
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
         end
       end
+
+      describe 'to build dotnet-sdk' do
+        let(:source_input) { SourceInput.new('dotnet-sdk', 'https://fake.com', '1.0.2', nil, 'fake-sha256') }
+
+        it 'should build correctly' do
+          expect(DependencyBuild).to receive(:build_dotnet_sdk)
+                                       .with(source_input)
+                                       .and_return '/tmp/dotnet-sdk.1.0.2.linux-amd64.tar.xz'
+
+          expect(artifact_output).to receive(:move_dependency)
+                                       .with('dotnet-sdk', '/tmp/dotnet-sdk.1.0.2.linux-amd64.tar.xz', 'dotnet-sdk.1.0.2.linux-amd64-cflinuxfs2', 'tar.xz')
+                                       .and_return(sha256: 'fake-sha256', url: 'fake-url')
+
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+        end
+      end
+
+      describe 'to build dotnet-runtime' do
+        let(:source_input) { SourceInput.new('dotnet-runtime', 'https://fake.com', '1.0.2', nil, 'fake-sha256') }
+
+        it 'should build correctly' do
+          expect(DependencyBuild).to receive(:build_dotnet_runtime)
+                                       .with(source_input)
+                                       .and_return '/tmp/dotnet-runtime.1.0.2.linux-amd64.tar.xz'
+
+          expect(artifact_output).to receive(:move_dependency)
+                                       .with('dotnet-runtime', '/tmp/dotnet-runtime.1.0.2.linux-amd64.tar.xz', 'dotnet-runtime.1.0.2.linux-amd64-cflinuxfs2', 'tar.xz')
+                                       .and_return(sha256: 'fake-sha256', url: 'fake-url')
+
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+        end
+      end
+
+      describe 'to build dotnet-aspnetcore' do
+        let(:source_input) { SourceInput.new('dotnet-aspnetcore', 'https://fake.com', '1.0.2', nil, 'fake-sha256') }
+
+        it 'should build correctly' do
+          expect(DependencyBuild).to receive(:build_dotnet_aspnetcore)
+                                       .with(source_input)
+                                       .and_return '/tmp/dotnet-aspnetcore.1.0.2.linux-amd64.tar.xz'
+
+          expect(artifact_output).to receive(:move_dependency)
+                                       .with('dotnet-aspnetcore', '/tmp/dotnet-aspnetcore.1.0.2.linux-amd64.tar.xz', 'dotnet-aspnetcore.1.0.2.linux-amd64-cflinuxfs2', 'tar.xz')
+                                       .and_return(sha256: 'fake-sha256', url: 'fake-url')
+
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+        end
+      end
     end
 
     context 'and a git commit sha' do
-
       describe 'to build r' do
         before do
           expect(build_output).to receive(:add_output)
@@ -363,41 +409,10 @@ describe 'Builder' do
         end
 
       end
-
-      describe 'dotnet-sdk' do
-        before do
-          expect(build_output).to receive(:add_output)
-            .with("1.0.2-cflinuxfs2.json",
-              {
-                tracker_story_id: 'fake-story-id',
-                version:          '1.0.2',
-                source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
-                sha256:           'fake-sha256',
-                url:              'fake-url',
-                git_commit_sha:   'fake-source-sha-123',
-              }
-            )
-          expect(build_output).to receive(:commit_outputs)
-                                    .with("Build #{source_input.name} - 1.0.2 - cflinuxfs2 [#fake-story-id]")
-        end
-        let(:source_input) { SourceInput.new('dotnet-sdk', 'https://fake.com', '1.0.2', nil, 'fake-sha256', 'fake-source-sha-123') }
-
-        it 'should build correctly' do
-          expect(DependencyBuild).to receive(:build_dotnet_sdk)
-            .with(source_input, build_input, build_output, artifact_output)
-            .and_return 'fake-source-sha-123'
-
-          expect(artifact_output).to receive(:move_dependency)
-            .with('dotnet-sdk', '/tmp/dotnet-sdk.1.0.2.linux-amd64.tar.xz', 'dotnet-sdk.1.0.2.linux-amd64-cflinuxfs2', 'tar.xz')
-            .and_return(sha256: 'fake-sha256', url: 'fake-url')
-
-          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
-        end
-      end
     end
   end
 
-  context 'whe is true' do
+  context 'when skip-commit is true' do
     let(:source_input) { SourceInput.new('CAAPM', 'fake-url', '1.0.2', nil, 'fake-sha256') }
 
     before do
