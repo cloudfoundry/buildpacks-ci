@@ -392,6 +392,7 @@ jobs: ##########################################################################
         trigger: true
       - in_parallel:
         - get: buildpacks-ci
+        - get: buildpack-develop
         - get: buildpack
           resource: buildpack-master
       - do:

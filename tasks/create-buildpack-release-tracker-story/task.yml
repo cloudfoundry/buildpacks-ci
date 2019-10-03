@@ -9,6 +9,7 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: buildpack
+  - name: buildpack-develop
 
 run:
   path: bash
