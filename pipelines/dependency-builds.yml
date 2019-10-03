@@ -5,7 +5,6 @@ config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds.yml'))
 
 dependencies = config['dependencies']
 stacks = config['stacks']
-dotnet_sdk_lines_with_aspnetcore = config['dotnet_sdk_lines_with_aspnetcore']
 skip_deprecation_check = config['skip_deprecation_check']
 
 def common_prefix(stringA, stringB)
@@ -411,18 +410,6 @@ jobs:
           resource: buildpacks-bucket-<%= dep_name %>
           params:
             file: <%= stack %>-artifacts/<%= dep_name == "nginx-static" ? "nginx" : dep_name %>*
-      <% if dep_name == 'dotnet-sdk' %>
-        - put: buildpacks-bucket-dotnet-runtime-<%= stack %>
-          resource: buildpacks-bucket-dotnet-runtime
-          params:
-            file: <%= stack %>-artifacts/dotnet-runtime*
-        <% if dotnet_sdk_lines_with_aspnetcore.include?(line) %>
-        - put: buildpacks-bucket-dotnet-aspnetcore-<%= stack %>
-          resource: buildpacks-bucket-dotnet-aspnetcore
-          params:
-            file: <%= stack %>-artifacts/dotnet-aspnetcore*
-        <% end %>
-      <% end %>
     <% end %>
         - put: builds-metadata-<%= stack %>
           resource: builds
