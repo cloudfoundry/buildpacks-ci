@@ -22,9 +22,10 @@ class BuildpackReleaseStoryCreator
   def run!
     story_name = "**Release:** #{buildpack_name}-buildpack #{new_release_version}"
 
-    story_description = stories_since_last_release.inject("Stories:\n\n") do |story_text, story|
+    story_description = stories_since_last_release.empty? ? "**No feature stories**\n\n" : stories_since_last_release.inject("**Stories:**\n\n") do |story_text, story|
       story_text + "##{story.id} - #{story.name}\n"
     end
+
     story_description += "\n**Dependency Changes:**\n\n"
     story_description += generate_dependency_changes
     story_description += "\nRefer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).\n"
@@ -117,8 +118,8 @@ class BuildpackReleaseStoryCreator
     end
 
     if description == "\n"
-      description="No dependency changes\n"
+      description="\nNo dependency changes\n"
     end
-      "```diff\n#{description}```\n"
+      "```diff#{description}```\n"
   end
 end

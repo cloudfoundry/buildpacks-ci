@@ -50,7 +50,7 @@ describe BuildpackReleaseStoryCreator do
     it 'finds all the stories tagged buildpack_name or all that are lower in the backlog than the last release' do
       expect(buildpack_project).to receive(:create_story).
         with(hash_including(description: <<~DESCRIPTION,
-          Stories:
+          **Stories:**
 
           #222 - Buildpack should tweet on stage
           #333 - All buildpacks should be awesome
@@ -58,7 +58,6 @@ describe BuildpackReleaseStoryCreator do
           **Dependency Changes:**
 
           ```diff
-
           dep-upgraded:
           - 1.1
           + 1.2
@@ -84,7 +83,7 @@ describe BuildpackReleaseStoryCreator do
     it 'finds all the stories tagged buildpack_name or all' do
       expect(buildpack_project).to receive(:create_story).
         with(hash_including(description: <<~DESCRIPTION,
-          Stories:
+          **Stories:**
 
           #110 - Older Release
           #111 - Elixir should be faster
@@ -95,7 +94,6 @@ describe BuildpackReleaseStoryCreator do
           **Dependency Changes:**
 
           ```diff
-
           dep-upgraded:
           - 1.1
           + 1.2
@@ -123,7 +121,7 @@ describe BuildpackReleaseStoryCreator do
     it 'finds all the stories tagged buildpack_name or all' do
       expect(buildpack_project).to receive(:create_story).
           with(hash_including(description: <<~DESCRIPTION,
-          Stories:
+          **Stories:**
 
           #110 - Older Release
           #111 - Elixir should be faster

@@ -393,7 +393,6 @@ jobs: ##########################################################################
       - in_parallel:
         - get: buildpacks-ci
         - get: buildpack-develop
-          resource: buildpack-master
       - do:
         - task: create-buildpack-release-story
           file: buildpacks-ci/tasks/create-buildpack-release-tracker-story/task.yml
