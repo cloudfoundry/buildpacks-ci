@@ -700,7 +700,6 @@ dependencies:
     any_stack: true
 stacks: ['cflinuxfs3']
 windows_stacks: ['windows2012R2', 'windows2016', 'windows']
-dotnet_sdk_lines_with_aspnetcore: ['2.1.4X', '2.1.5X', '2.1.6X', '2.1.7X', '2.1.8X', '2.2.1X', '2.2.2X', '2.2.3X', '2.2.4X']
 
 # only check deprecation dates for dotnet-runtime as they are redundant for sdk and aspnetcore
 skip_deprecation_check:
