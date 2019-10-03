@@ -57,10 +57,14 @@ describe BuildpackReleaseStoryCreator do
 
           **Dependency Changes:**
 
-          ```
-          dep-upgraded: 1.1 -> 1.2
-          + dep-added: 2
-          - dep-removed: 2
+          ```diff
+
+          dep-upgraded:
+          - 1.1
+          + 1.2
+
+          + Added dep-added at version(s): 2
+          - Removed dep-removed at version(s): 2
           ```
 
           Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
@@ -90,10 +94,14 @@ describe BuildpackReleaseStoryCreator do
 
           **Dependency Changes:**
 
-          ```
-          dep-upgraded: 1.1 -> 1.2
-          + dep-added: 2
-          - dep-removed: 2
+          ```diff
+
+          dep-upgraded:
+          - 1.1
+          + 1.2
+
+          + Added dep-added at version(s): 2
+          - Removed dep-removed at version(s): 2
           ```
 
           Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
@@ -125,7 +133,7 @@ describe BuildpackReleaseStoryCreator do
 
           **Dependency Changes:**
 
-          ```
+          ```diff
           No dependency changes
           ```
 

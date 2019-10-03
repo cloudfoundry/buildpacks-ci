@@ -95,27 +95,30 @@ class BuildpackReleaseStoryCreator
       added_versions = get_added_versions(new_dependencies, old_dependencies, name)
       removed_versions = get_removed_versions(new_dependencies, old_dependencies, name)
       if !added_versions.empty? && !removed_versions.empty?
-        description += "#{name}: #{removed_versions.join(', ')} -> #{added_versions.join(', ')}\n"
+        description += "\n#{name}:\n"
+        description += "- #{removed_versions.join("\n- ")}\n"
+        description += "+ #{added_versions.join("\n+ ")}\n"
       end
     end
+    description += "\n"
     new_dependencies.each_key do |name|
       added_versions = get_added_versions(new_dependencies, old_dependencies, name)
       removed_versions = get_removed_versions(new_dependencies, old_dependencies, name)
       if !added_versions.empty? && removed_versions.empty?
-        description += "+ #{name}: #{added_versions.join(', ')}\n"
+        description += "+ Added #{name} at version(s): #{added_versions.join(', ')}\n"
       end
     end
     old_dependencies.each_key do |name|
       added_versions = get_added_versions(new_dependencies, old_dependencies, name)
       removed_versions = get_removed_versions(new_dependencies, old_dependencies, name)
       if added_versions.empty? && !removed_versions.empty?
-        description += "- #{name}: #{removed_versions.join(', ')}\n"
+        description += "- Removed #{name} at version(s): #{removed_versions.join(', ')}\n"
       end
     end
 
-    if description == ""
-      description+="No dependency changes\n"
+    if description == "\n"
+      description="No dependency changes\n"
     end
-      "```\n#{description}```\n"
+      "```diff\n#{description}```\n"
   end
 end
