@@ -7,12 +7,12 @@ module Depwatcher
   class DotnetBase < Base
     class DotnetReleasesIndex
       JSON.mapping(
-        releases_index: Array(DotnetReleases),
+        releases_index: { type: Array(DotnetReleases), key: "releases-index" },
       )
 
       class DotnetReleases
         JSON.mapping(
-          channel_version: String,
+          channel_version: { type: String, key: "channel-version" },
         )
       end
     end
@@ -84,6 +84,10 @@ module Depwatcher
     end
 
     def check(version : String) : Array(Internal)
+      if version == "latest"
+        version = get_latest_version()
+      end
+
       channel_version = version.split('.')[0..1].join('.')
       releases_url = "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/#{channel_version}/releases.json"
       releases = DotnetReleasesJSON.from_json(client.get(releases_url).body).releases
@@ -102,6 +106,12 @@ module Depwatcher
         download_file(file.url, output_dir, file.hash)
         DotnetRelease.new(ref, file.url, file.hash)
       end
+    end
+
+    private def get_latest_version() : String
+      releases_url = "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json"
+      releases = DotnetReleasesIndex.from_json(client.get(releases_url).body).releases_index
+      releases[0].channel_version
     end
 
     private def download_file(download_url : String, dest_dir : String, expected_hash : String) : Nil

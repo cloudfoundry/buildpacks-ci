@@ -27,6 +27,26 @@ Spec2.describe Depwatcher::DotnetBase do
         checked_deps = subject.check("2.1.7X")
         expect(checked_deps.map(&.ref)).to eq ["2.1.701", "2.1.700"]
       end
+
+      context "when the version is latest" do
+        before do
+          client.stub_get(
+            "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json",
+            nil,
+            HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet-releases-index.json"))
+          )
+          client.stub_get(
+            "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/3.0/releases.json",
+            nil,
+            HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet-3.0_releases.json"))
+          )
+        end
+
+        it "uses the latest version" do
+          checked_deps = subject.check("latest")
+          expect(checked_deps.map(&.ref)).to eq ["3.0.100"]
+        end
+      end
     end
 
     describe "#in" do
