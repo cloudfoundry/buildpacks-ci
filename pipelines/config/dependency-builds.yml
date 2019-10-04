@@ -69,7 +69,7 @@ dependencies:
           - line: 2.2.2X
           - line: 2.2.3X
           - line: 2.2.4X
-          - line: 3.0.0X
+          - line: 3.0.1X
         removal_strategy: keep_all
       dotnet-core-sdk-cnb:
         lines:
@@ -82,7 +82,7 @@ dependencies:
           - line: 2.2.2X
           - line: 2.2.3X
           - line: 2.2.4X
-          - line: 3.0.0X
+          - line: 3.0.1X
         removal_strategy: keep_all
   dotnet-runtime:
     buildpacks:
