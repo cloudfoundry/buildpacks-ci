@@ -135,10 +135,7 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
     end
   end
 
-  if dependency_name.include? 'dotnet'
-    git_commit_sha = builds[stack]['git_commit_sha']
-    source_url = "#{source_url}/archive/#{git_commit_sha}.tar.gz"
-  elsif dependency_name == 'appdynamics'
+  if dependency_name == 'appdynamics'
     source_type = 'osl'
     source_url = 'https://docs.appdynamics.com/display/DASH/Legal+Notices'
   elsif dependency_name == 'CAAPM'
@@ -157,7 +154,7 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
       'sha256' => build['sha256'],
       'stacks' => v3_stacks,
       source_type => source_url,
-      'source_sha256' => source_sha256
+      'source_sha256' => source_sha256,
     }
   else
     dep = {
