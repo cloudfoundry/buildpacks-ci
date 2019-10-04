@@ -70,15 +70,13 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   builds[stack] = build
 
   version = builds[stack]['version'] # We assume that the version is the same for all stacks
+  next unless version
 
   source_type = 'source'
   source_url = builds[stack]['source']['url']
   source_sha256 = builds[stack]['source'].fetch('sha256', '')
 
-  if source_name.include? 'dotnet'
-    git_commit_sha = builds[stack]['git_commit_sha']
-    source_url = "#{source_url}/archive/#{git_commit_sha}.tar.gz"
-  elsif source_name == 'appdynamics'
+  if source_name == 'appdynamics'
     source_type = 'osl'
     source_url = 'https://docs.appdynamics.com/display/DASH/Legal+Notices'
   elsif source_name == 'CAAPM'
