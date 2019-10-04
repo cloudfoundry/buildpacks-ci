@@ -7,6 +7,15 @@ require 'date'
 require 'set'
 require_relative './dependencies'
 
+buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
+require_relative "#{buildpacks_ci_dir}/lib/git-client"
+config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/config/dependency-builds.yml'))
+
+CNB_STACKS = config['v3_stacks']
+V3_DEP_IDS = config['v3_dep_ids']
+V3_DEP_NAMES = config['v3_dep_names']
+DEPRECATED_STACKS = config['deprecated_stacks']
+
 def time_to_datetime(time)
   return DateTime.parse(time.to_s)
 end
@@ -36,35 +45,6 @@ def replace_date_with_time(obj, parent_obj = nil, accessor = nil)
 end
 
 
-
-CNB_STACKS = {
-  'cflinuxfs3' => 'org.cloudfoundry.stacks.cflinuxfs3',
-  'bionic'     => 'io.buildpacks.stacks.bionic',
-  'tiny'       => 'org.cloudfoundry.stacks.tiny'
-}
-
-V3_DEP_IDS = {
-  'php' => 'php-binary',
-  'dotnet-aspnetcore' => 'dotnet-aspnet'
-}
-
-V3_DEP_NAMES = {
-  'node' => 'Node Engine',
-  'yarn' => 'Yarn',
-  'python' => 'Python',
-  'php' => 'PHP',
-  'httpd' => 'Apache HTTP Server',
-  'go' => 'Go',
-  'dep' => 'Dep',
-  'nginx' => 'Nginx Server',
-  'pipenv' => "Pipenv",
-  'miniconda3' => "Miniconda",
-  'bundler' => "Bundler",
-  'ruby' => "Ruby"
-}
-
-buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
-require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
 buildpack_toml_file = 'buildpack.toml'
 buildpack_toml = Tomlrb.load_file("buildpack/#{buildpack_toml_file}")
@@ -119,23 +99,21 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
 
   stack = /#{resource_version}-(.*)\.json$/.match(stack_dependency_build)[1]
 
-  if stack == 'cflinuxfs2'
-    next
+  if DEPRECATED_STACKS.include?(stack)
+    raise "We should not be building for #{stack}"
   end
 
-  if stack == 'any-stack'
-    total_stacks.concat CNB_STACKS.values
-    v3_stacks = CNB_STACKS.values
-  elsif stack == 'cflinuxfs3' and dependency_name == 'dep' # NOTE: This case is temporary. For now, we will use cflinuxfs3 dependencies for bionic as well.
-    total_stacks.concat CNB_STACKS.values
+  if (stack == 'any-stack') || (stack == 'cflinuxfs3' && dependency_name == 'dep') # TODO Figur out if temporary
+    total_stacks += CNB_STACKS.values
     v3_stacks = CNB_STACKS.values
   else
     next unless CNB_STACKS.keys.include? stack
-    total_stacks.push CNB_STACKS[stack]
+    total_stacks += [CNB_STACKS[stack]]
     v3_stacks = [CNB_STACKS[stack]]
     if stack == 'bionic'
       if dependency_name == "go" or dependency_name == "dep"
         v3_stacks += [CNB_STACKS['tiny']]
+        total_stacks |= [CNB_STACKS['tiny']]
       end
     end
   end
