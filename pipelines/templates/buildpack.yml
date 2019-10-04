@@ -77,6 +77,7 @@ pas_versions = {
 }
 %>
 <% cnb_images = %w(run build) %>
+<% low_nodes_lts = ['ruby', 'python'] %>
 ---
 resource_types:
   - name: slack-notification
@@ -623,11 +624,7 @@ relevant_stacks.each do |stack| %>
           params:
             CF_STACK: cflinuxfs3
             GINKGO_ATTEMPTS: 4
-            <% if language == 'ruby' %>
-            GINKGO_NODES: 2
-            <% else %>
-            GINKGO_NODES: 6
-            <% end %>
+            GINKGO_NODES: <%= low_nodes_lts.include?(language.to_s) ? 2 : 6 %>
             SKIP_WINDOWS_TESTS: true
             <% if language == 'php' %>
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
@@ -1132,7 +1129,7 @@ relevant_stacks.each do |stack| %>
           params:
             CF_STACK: cflinuxfs3
             GINKGO_ATTEMPTS: <%= language.to_s == 'php' ? 10 : 4 %>
-            GINKGO_NODES: <%= language.to_s == 'ruby' ? 2 : 6 %>
+            GINKGO_NODES: <%= low_nodes_lts.include?(language.to_s) ? 2 : 6 %>
             SKIP_WINDOWS_TESTS: true
             <% if language == 'php' %>
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
