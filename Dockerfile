@@ -83,7 +83,7 @@ RUN apt-get -qqy update \
 
 ENV GEM_HOME $HOME/.gem
 ENV GEM_PATH $HOME/.gem
-ENV PATH /opt/rubies/latest/bin:$PATH
+ENV PATH /opt/rubies/latest/bin:$GEM_PATH/bin:$PATH
 
 RUN curl -sSL https://get.docker.com/ | sh
 
