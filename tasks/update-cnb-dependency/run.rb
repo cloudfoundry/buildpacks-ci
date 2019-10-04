@@ -5,6 +5,7 @@ require 'tomlrb'
 require 'tmpdir'
 require 'date'
 require 'set'
+require 'yaml'
 require_relative './dependencies'
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
