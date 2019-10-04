@@ -3,18 +3,21 @@ require 'json'
 require 'yaml'
 require 'tmpdir'
 require 'date'
+
 require_relative './dependencies'
 require_relative './php_manifest'
-config = YAML.load_file(File.join(__dir__, '../../pipelines/config/dependency-builds.yml'))
-
-ALL_STACKS = config['stacks']
-WINDOWS_STACKS = config['windows_stacks']
-
-# Stacks we dont want to process (most likely V3 stacks)
-IGNORED_STACKS = ['bionic']
-
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
+
+config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/config/dependency-builds.yml'))
+
+BUILD_STACKS = config['build_stacks']
+WINDOWS_STACKS = config['windows_stacks']
+IGNORED_STACKS = config['copy_stacks']
+ALL_STACKS = IGNORED_STACKS + BUILD_STACKS + WINDOWS_STACKS
+DEPRECATED_STACKS = config['deprecated_stacks']
+
+# Stacks we dont want to process (most likely V3 stacks)
 
 manifest = YAML.load_file('buildpack/manifest.yml')
 manifest_latest_released = YAML.load_file('buildpack-latest-released/manifest.yml') # rescue { 'dependencies' => [] }
@@ -60,6 +63,10 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   end
 
   stack = %r{#{resource_version}-(.*)\.json$}.match(stack_dependency_build)[1]
+  if DEPRECATED_STACKS.include?(stack)
+    raise "#{stack} is a deprecated stack"
+  end
+  next unless ALL_STACKS.include?(stack) # make sure we not pulling something thats not a stack eg 'preview'
   next if IGNORED_STACKS.include?(stack)
 
   stacks = (stack == 'any-stack') ? ALL_STACKS : [stack]

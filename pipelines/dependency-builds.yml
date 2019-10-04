@@ -4,7 +4,7 @@ require 'set'
 config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds.yml'))
 
 dependencies = config['dependencies']
-stacks = config['stacks']
+stacks = config['build_stacks']
 skip_deprecation_check = config['skip_deprecation_check']
 
 def common_prefix(stringA, stringB)
