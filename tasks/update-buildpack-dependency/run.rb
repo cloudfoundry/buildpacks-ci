@@ -69,7 +69,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   next unless ALL_STACKS.include?(stack) # make sure we not pulling something thats not a stack eg 'preview'
   next if IGNORED_STACKS.include?(stack)
 
-  stacks = (stack == 'any-stack') ? ALL_STACKS : [stack]
+  stacks = (stack == 'any-stack') ? BUILD_STACKS : [stack]
   stacks = WINDOWS_STACKS if source_name == 'hwc'
   total_stacks = total_stacks | stacks
 
