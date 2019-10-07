@@ -14,7 +14,7 @@ config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/config/dependenc
 BUILD_STACKS = config['build_stacks']
 WINDOWS_STACKS = config['windows_stacks']
 IGNORED_STACKS = config['copy_stacks']
-ALL_STACKS = IGNORED_STACKS + BUILD_STACKS + WINDOWS_STACKS
+ALL_STACKS = IGNORED_STACKS + BUILD_STACKS + WINDOWS_STACKS + ["any-stack"]
 DEPRECATED_STACKS = config['deprecated_stacks']
 
 # Stacks we dont want to process (most likely V3 stacks)
