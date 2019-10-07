@@ -6,9 +6,10 @@
     'non_lts' => true,
   },
   'binary' => {
-    'stacks' => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016 windows),
+    'stacks' => %w(cflinuxfs3 windows2012R2 windows2016 windows),
     'product_slug' => 'binary-buildpack',
     'skip_docker_start' => true,
+    'non_lts_pivnet' => true,
   },
   'dotnet-core' => {
     'stacks' => %w(cflinuxfs3),
