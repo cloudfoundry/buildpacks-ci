@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+cmd=${1-""}
+pipeline=${2-""}
+
+usage() {
+  echo -e "Usage: \\n./bin/pipespy <command> <pipeline>\nCommands: rerun, failed"
+}
+
+get_failed_jobs() {
+  fly -t buildpacks js -p "$pipeline" --json | jq -r '.[] | select(.finished_build.status != "succeeded") .name'
+}
+
+if [ "$pipeline" == "" ] || [ "$cmd" == "" ] || [ "$pipeline" == "help" ]; then
+  usage
+elif [ "$cmd" == "rerun" ]; then
+  get_failed_jobs | xargs -I _ -n1 fly -t buildpacks tj -j "$pipeline"/_
+elif [ "$cmd" == "failed" ]; then
+  get_failed_jobs
+else
+  echo "Something went wrong"
+  exit 1
+fi
