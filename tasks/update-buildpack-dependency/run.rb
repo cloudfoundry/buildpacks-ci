@@ -63,11 +63,8 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   end
 
   stack = %r{#{resource_version}-(.*)\.json$}.match(stack_dependency_build)[1]
-  if DEPRECATED_STACKS.include?(stack)
-    raise "#{stack} is a deprecated stack"
-  end
   next unless ALL_STACKS.include?(stack) # make sure we not pulling something thats not a stack eg 'preview'
-  next if IGNORED_STACKS.include?(stack)
+  next if IGNORED_STACKS.include?(stack) || DEPRECATED_STACKS.include?(stack)
 
   stacks = (stack == 'any-stack') ? BUILD_STACKS : [stack]
   stacks = WINDOWS_STACKS if source_name == 'hwc'
