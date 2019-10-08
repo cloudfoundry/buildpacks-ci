@@ -71,7 +71,7 @@ extensions:
     md5: a7c169e3b3d5fec295a768edcea2a82e
     klass: PeclRecipe
   - name: mongodb
-    version: 1.5.5
+    version: 1.6.0
     md5: 0839657e7fb4f5ea8113ef140835674a
     klass: PeclRecipe
   - name: msgpack
@@ -99,8 +99,8 @@ extensions:
     md5: 5a42df2c7c54ac53f6d73900dcd551cf
     klass: PeclRecipe
   - name: redis
-    version: 5.0.1
-    md5: b58c6126e2f2f62ad1b6458d7c4df451
+    version: 5.0.2
+    md5: 0fed05402f8eabc2030ae327df0d1e27
     klass: RedisPeclRecipe
   - name: sqlsrv
     version: 5.6.1
@@ -123,8 +123,8 @@ extensions:
     md5: 4f2c2620fb18db8ef6a1d5727f57d945
     klass: PeclRecipe
   - name: memcached
-    version: 3.1.3
-    md5: 29e64c6b6484a2aed6185974c8108465
+    version: 3.1.4
+    md5: c50f416ff9fc66360b5bd7a5017dc829
     klass: MemcachedPeclRecipe
   - name: sodium
     version: nil
@@ -171,8 +171,8 @@ extensions:
     md5: d45a7137edd361998494a8894fe50888
     klass: AmqpPeclRecipe
   - name: ioncube
-    version: 10.3.7
-    md5: d8c6b4a367cdf19307024c8cc78ffc79
+    version: 10.3.8
+    md5: 5d65b82946f773b496716ebd988bf926
     klass: IonCubeRecipe
   - name: lua
     version: 2.0.6
@@ -199,8 +199,8 @@ extensions:
     md5: 77a77a429af4a5ff97778ccafeffa43a
     klass: PHPProtobufPeclRecipe
   - name: tideways
-    version: 4.1.7
-    md5: 7ca0429d4465debb5dad4680825d22b8
+    version: 5.0.0
+    md5: 0af7f73d73a47075fe1e887651da2aca
     klass: TidewaysXhprofRecipe
   - name: tideways_xhprof
     version: 5.0-beta3
