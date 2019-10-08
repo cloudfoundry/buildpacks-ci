@@ -52,7 +52,7 @@
     'non_lts_pivnet' => true,
   },
   'r' => {
-    'stacks' => %w(cflinuxfs2 cflinuxfs3),
+    'stacks' => %w(cflinuxfs3),
     'product_slug' => 'r-buildpack',
     'skip_brats' => true,
     'non_lts' => true,
