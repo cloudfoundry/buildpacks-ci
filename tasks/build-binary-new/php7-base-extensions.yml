@@ -72,7 +72,7 @@ extensions:
     klass: PeclRecipe
   - name: mongodb
     version: 1.6.0
-    md5: 0839657e7fb4f5ea8113ef140835674a
+    md5: f86a9dbdf95e352114e44f850c293bfa
     klass: PeclRecipe
   - name: msgpack
     version: 2.0.3
