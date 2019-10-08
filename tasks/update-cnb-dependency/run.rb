@@ -100,9 +100,7 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
 
   stack = /#{resource_version}-(.*)\.json$/.match(stack_dependency_build)[1]
 
-  if DEPRECATED_STACKS.include?(stack)
-    raise "We should not be building for #{stack}"
-  end
+  next if DEPRECATED_STACKS.include?(stack)
 
   if (stack == 'any-stack') || (stack == 'cflinuxfs3' && dependency_name == 'dep') # TODO Figur out if temporary
     total_stacks += CNB_STACKS.values
