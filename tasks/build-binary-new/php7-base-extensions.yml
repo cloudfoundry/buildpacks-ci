@@ -200,7 +200,7 @@ extensions:
     klass: PHPProtobufPeclRecipe
   - name: tideways
     version: 4.1.7
-    md5: 72a562882b6ea5e3bb25bd68c58707e3
+    md5: 7ca0429d4465debb5dad4680825d22b8
     klass: TidewaysXhprofRecipe
   - name: tideways_xhprof
     version: 5.0.0
