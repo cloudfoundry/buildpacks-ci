@@ -14,8 +14,8 @@ class BuildpacksCIPipelineUpdater
     organization = buildpacks_configuration.organization
     run_php_oracle_tests = buildpacks_configuration.run_oracle_php_tests?
 
-    Dir['pipelines/*.yml'].each do |filename|
-      pipeline_name = File.basename(filename, '.yml')
+    Dir['pipelines/*.{erb,yml}'].each do |filename|
+      pipeline_name = File.basename(filename).split('.')[0]
 
       BuildpacksCIPipelineUpdateCommand.new.run!(
         concourse_target_name: concourse_target_name,
@@ -41,7 +41,7 @@ class BuildpacksCIPipelineUpdater
       BuildpacksCIPipelineUpdateCommand.new.run!(
         concourse_target_name: concourse_target_name,
         pipeline_name: "#{language}-buildpack",
-        config_generation_command: "erb language=#{language} organization=#{organization} pipelines/templates/buildpack.yml",
+        config_generation_command: "erb language=#{language} organization=#{organization} pipelines/templates/buildpack.yml.erb",
         pipeline_variable_filename: pipeline_variables_filename,
         options: options
       )
@@ -64,7 +64,7 @@ class BuildpacksCIPipelineUpdater
       BuildpacksCIPipelineUpdateCommand.new.run!(
         concourse_target_name: concourse_target_name,
         pipeline_name: "#{language}-cnb",
-        config_generation_command: "erb language=#{language} organization=#{organization} pipelines/templates/cnb.yml",
+        config_generation_command: "erb language=#{language} organization=#{organization} pipelines/templates/cnb.yml.erb",
         pipeline_variable_filename: pipeline_variables_filename,
         options: options
       )
@@ -78,7 +78,7 @@ class BuildpacksCIPipelineUpdater
       BuildpacksCIPipelineUpdateCommand.new.run!(
         concourse_target_name: concourse_target_name,
         pipeline_name: "#{language}-cnb",
-        config_generation_command: "erb language=#{language} organization=#{organization} pipelines/templates/metabuildpack-cnb.yml",
+        config_generation_command: "erb language=#{language} organization=#{organization} pipelines/templates/metabuildpack-cnb.yml.erb",
         pipeline_variable_filename: pipeline_variables_filename,
         options: options
       )
@@ -101,7 +101,7 @@ class BuildpacksCIPipelineUpdater
       BuildpacksCIPipelineUpdateCommand.new.run!(
         concourse_target_name: concourse_target_name,
         pipeline_name: rootfs_name,
-        config_generation_command: "erb rootfs_name=#{rootfs_name} cve_notification_file=ubuntu18.04.yml pipelines/templates/cflinuxfsn.yml",
+        config_generation_command: "erb rootfs_name=#{rootfs_name} cve_notification_file=ubuntu18.04.yml pipelines/templates/cflinuxfsn.yml.erb",
         pipeline_variable_filename: pipeline_variables_filename,
         options: options
       )

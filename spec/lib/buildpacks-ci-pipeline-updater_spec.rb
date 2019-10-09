@@ -54,7 +54,7 @@ describe BuildpacksCIPipelineUpdater do
       allow(buildpacks_ci_configuration).to receive(:concourse_target_name).and_return(concourse_target_name)
       allow_any_instance_of(BuildpacksCIPipelineUpdateCommand).to receive(:run!).with(anything).and_return(true)
 
-      allow(Dir).to receive(:[]).with('pipelines/*.yml').and_return(%w(first.yml))
+      allow(Dir).to receive(:[]).with('pipelines/*.{erb,yml}').and_return(%w(first.yml.erb))
       allow(BuildpacksCIPipelineUpdateCommand).to receive(:new).and_return(buildpacks_ci_pipeline_update_command)
 
     end
@@ -66,13 +66,13 @@ describe BuildpacksCIPipelineUpdater do
     end
 
     it 'looks for yaml files in the pipelines/ directory' do
-      expect(Dir).to receive(:[]).with('pipelines/*.yml').and_return([])
+      expect(Dir).to receive(:[]).with('pipelines/*.{erb,yml}').and_return([])
 
       subject
     end
 
     it 'iterates over pipeline names' do
-      allow(Dir).to receive(:[]).with('pipelines/*.yml').and_return(%w(first.yml second.yml))
+      allow(Dir).to receive(:[]).with('pipelines/*.{erb,yml}').and_return(%w(first.yml.erb second.yml))
 
       expect(buildpacks_ci_pipeline_update_command).to receive(:run!).with(anything).twice
 
@@ -135,7 +135,7 @@ describe BuildpacksCIPipelineUpdater do
 
       it 'passes in a pipeline filename' do
         expect(buildpacks_ci_pipeline_update_command).to receive(:run!).
-          with(config_generation_command: /first\.yml/,
+          with(config_generation_command: /first\.yml\.erb/,
                concourse_target_name: anything, pipeline_name: anything, options: anything)
 
         subject
