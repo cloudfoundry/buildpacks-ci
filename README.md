@@ -4,17 +4,13 @@ This contains the configuration for the Cloud Foundry Buildpacks team [Concourse
 
 # Pipelines
 
-* [dependency-builds](pipelines/dependency-builds.yml): build binaries for Cloud Foundry buildpacks
-* [buildpacks](pipelines/templates/buildpack.yml): test and release all of the buildpacks
-* [edge-shared](pipelines/edge-shared.yml): deploy CF Deployment environment
-* [brats](pipelines/brats.yml): run [BRATS](https://github.com/cloudfoundry/brats) against the master branch of buildpacks
-* [buildpack-verification](pipelines/buildpack-verification.yml): generate static site for buildpack verification
+* [dependency-builds](pipelines/dependency-builds.yml.erb): build binaries for Cloud Foundry buildpacks
+* [buildpacks](pipelines/templates/buildpack.yml.erb): test and release all of the buildpacks
+* [brats](pipelines/brats.yml.erb): run [BRATS](https://github.com/cloudfoundry/brats) against the master branch of buildpacks
+* [buildpack-verification](pipelines/buildpack-verification.yml.erb): generate static site for buildpack verification
 * [buildpacks-ci](pipelines/buildpacks-ci.yml): testing tasks for correct usage, rebuild CI docker images
-* [cf-release](pipelines/cf-release.yml): deployment of latest buildpacks to
-	cf-release develop
-* [gems-and-extensions](pipelines/gems-and-extensions.yml): gems and extensions that support buildpack development and deployment
-* [notifications](pipelines/notifications.yml): monitor upstream sources for
-	changes and notify on Slack
+* [cf-release](pipelines/cf-release.yml.erb): deployment of latest buildpacks to cf-release develop
+* [notifications](pipelines/notifications.yml): monitor upstream sources for changes and notify on Slack
 * [cflinuxfs2](pipelines/cflinuxfs2.yml): test and release Cloud Foundry [cflinuxfs2](https://github.com/cloudfoundry/cflinuxfs2)
 
 # Concourse State
