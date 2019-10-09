@@ -199,8 +199,8 @@ extensions:
     md5: 77a77a429af4a5ff97778ccafeffa43a
     klass: PHPProtobufPeclRecipe
   - name: tideways
-    version: 4.1.17
-    md5: 0af7f73d73a47075fe1e887651da2aca
+    version: 4.1.7
+    md5: 72a562882b6ea5e3bb25bd68c58707e3
     klass: TidewaysXhprofRecipe
   - name: tideways_xhprof
     version: 5.0.0
