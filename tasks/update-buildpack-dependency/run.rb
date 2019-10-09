@@ -50,9 +50,17 @@ builds = {}
 version = ''
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
-  unless deprecation_date == 'null' or deprecation_link == 'null' or version_line == 'latest'
-    dependency_deprecation_date = {'version_line' => version_line.downcase, 'name' => manifest_name, 'date' => Date.parse(deprecation_date), 'link' => deprecation_link, }
-    dependency_deprecation_date['match'] = deprecation_match unless deprecation_match.nil? or deprecation_match.empty? or deprecation_match.downcase == 'null'
+  if !deprecation_date && !deprecation_link && version_line != 'latest'
+    dependency_deprecation_date = {
+      'version_line' => version_line.downcase,
+      'name' => manifest_name,
+      'date' => Date.parse(deprecation_date),
+      'link' => deprecation_link,
+    }
+
+    if deprecation_match.nil? && deprecation_match.empty? && deprecation_match.downcase == 'null'
+      dependency_deprecation_date['match'] = deprecation_match
+    end
 
     deprecation_dates = manifest.fetch('dependency_deprecation_dates', [])
     deprecation_dates = deprecation_dates
