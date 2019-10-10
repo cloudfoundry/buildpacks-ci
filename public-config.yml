@@ -13,7 +13,6 @@ buildpacks-ci-git-uri-public-develop-branch: develop
 buildpacks-ci-git-uri-public: https://github.com/cloudfoundry/buildpacks-ci
 buildpacks-ci-git-uri: git@github.com:cloudfoundry/buildpacks-ci.git
 buildpacks-ci-pipeline-uri: https://buildpacks.ci.cf-app.com/teams/main/pipelines/buildpacks-ci
-buildpacks-concourse2tracker-docker-repo: cfbuildpacks/concourse2tracker
 buildpacks-docker-ci-repo: cfbuildpacks/ci
 buildpacks-docker-depwatcher-repo: cfbuildpacks/depwatcher
 buildpacks-docker-user-email: cf-buildpacks-eng@pivotal.io
