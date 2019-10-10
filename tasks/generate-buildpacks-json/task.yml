@@ -7,6 +7,8 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: buildpacks-site
+caches:
+  - path: buildpacks-site/downloader/vendor
 outputs:
   - name: buildpacks-json
 params:

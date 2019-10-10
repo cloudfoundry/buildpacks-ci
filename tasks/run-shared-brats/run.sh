@@ -12,7 +12,8 @@ pushd brats
   if [ ! -z "$RUBYGEM_MIRROR" ]; then
     bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
   fi
-  bundle install
+  bundle install --deployment
+  bundle cache
 
   if [ -z "${STACK-}" ]; then
     bundle exec rspec cf_spec/integration --tag language:"${LANGUAGE}" --tag buildpack_branch:"${BUILDPACK_BRANCH}"

@@ -6,6 +6,8 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: concourse2tracker-source
+caches:
+  - path: concourse2tracker-source/lib/concourse2tracker-resource/vendor
 run:
   path: bash
   args:
@@ -15,7 +17,8 @@ run:
       if [ ! -z "$RUBYGEM_MIRROR" ]; then
         bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
       fi
-      bundle
+      bundle install --deployment
+      bundle cache
       bundle exec rspec
 params:
   RUBYGEM_MIRROR:

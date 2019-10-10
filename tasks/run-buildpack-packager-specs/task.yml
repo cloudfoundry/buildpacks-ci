@@ -7,6 +7,8 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: buildpack-packager
+caches:
+  - path: buildpack-packager/vendor
 run:
   path: buildpacks-ci/tasks/run-buildpack-packager-specs/run.sh
 params:

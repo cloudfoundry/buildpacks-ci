@@ -7,5 +7,6 @@ set -x
 export BUILDDIR=$PWD
 cd buildpacks-site/downloader
 export BUNDLE_GEMFILE=$PWD/Gemfile
-bundle
+bundle install --deployment
+bundle cache
 bundle exec dl.rb "${BUILDDIR}/buildpacks-json/buildpacks.json"

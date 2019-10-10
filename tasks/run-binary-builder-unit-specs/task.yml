@@ -6,6 +6,8 @@ image_resource:
 inputs:
   - name: binary-builder
   - name: buildpacks-ci
+caches:
+  - path: binary-builder/vendor
 params:
   RUBYGEM_MIRROR:
 run:

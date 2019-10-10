@@ -8,6 +8,8 @@ inputs:
   - name: buildpacks-ci
   - name: brats
   - name: cf-space
+caches:
+  - path: brats/vendor
 run:
   path: buildpacks-ci/tasks/run-shared-brats/run.sh
 params:
