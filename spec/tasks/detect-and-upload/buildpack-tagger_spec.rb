@@ -17,7 +17,8 @@ describe BuildpackTagger do
        if [ ! -z "$RUBYGEM_MIRROR" ]; then
          bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
        fi
-       bundle install
+       bundle install --deployment
+       bundle cache
        bundle exec buildpack-packager --uncached --stack=some-stack
        bundle exec buildpack-packager --cached --stack=some-stack
     EOF
