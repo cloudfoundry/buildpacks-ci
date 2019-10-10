@@ -7,6 +7,8 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: compile-extensions
+caches:
+  - path: compile-extensions/vendor
 run:
   path: buildpacks-ci/tasks/run-compile-extensions-specs/run.sh
 params:

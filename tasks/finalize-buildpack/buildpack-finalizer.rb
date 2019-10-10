@@ -42,7 +42,8 @@ class BuildpackFinalizer
         File.write(@recent_changes_file, `buildpack-packager summary`, mode: 'a')
       else
         num_cores = `nproc`
-        system("BUNDLE_GEMFILE=cf.Gemfile bundle install --jobs=#{num_cores}")
+        system("BUNDLE_GEMFILE=cf.Gemfile bundle install --jobs=#{num_cores} --deployment")
+        system('BUNDLE_GEMFILE=cf.Gemfile bundle cache')
 
         File.write(@recent_changes_file, [
           "\n\nPackaged binaries:\n",

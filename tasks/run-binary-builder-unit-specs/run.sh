@@ -10,13 +10,14 @@ pushd binary-builder
   if [ ! -z "$RUBYGEM_MIRROR" ]; then
     gem sources --clear-all --add "${RUBYGEM_MIRROR}"
   fi
-  gem install bundler --no-document
+  gem install bundler --no-document --silent
 
   if [ ! -z "$RUBYGEM_MIRROR" ]; then
     bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
   fi
 
-  bundle install --jobs="$(nproc)"
+  bundle install --jobs="$(nproc)" --deployment
+  bundle cache
 
   bundle exec rspec spec/unit
 popd

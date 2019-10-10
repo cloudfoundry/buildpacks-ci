@@ -9,6 +9,8 @@ inputs:
   - name: cflinuxfs2
   - name: version
   - name: cflinuxfs2-artifacts
+caches:
+  - path: cflinuxfs2/vendor
 run:
   path: buildpacks-ci/tasks/test-cflinuxfs2/run.sh
 params:

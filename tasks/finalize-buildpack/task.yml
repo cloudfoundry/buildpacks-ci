@@ -16,6 +16,8 @@ inputs:
     optional: true
   - name: pivotal-buildpacks-stack4
     optional: true
+caches:
+  - path: buildpack/vendor
 outputs:
   - name: buildpack-artifacts
 run:
