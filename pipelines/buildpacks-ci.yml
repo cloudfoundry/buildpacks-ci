@@ -1,9 +1,4 @@
 resource_types:
-  - name: concourse2tracker
-    type: docker-image
-    source:
-      repository: cfbuildpacks/concourse2tracker
-
   - name: slack-notification
     type: docker-image
     source:
@@ -17,22 +12,11 @@ resources:
       branch: master
       private_key: {{buildpacks-ci-private-key}}
 
-  - name: ci-develop
-    type: git
-    webhook_token: ob0aigh3
-    source:
-      uri: {{buildpacks-ci-git-uri-public}}
-      branch: {{buildpacks-ci-git-uri-public-develop-branch}}
-
-  - name: concourse2tracker
-    type: concourse2tracker
-
-  - name: buildpacks-ci-dockerfile-develop
+  - name: buildpacks-ci-dockerfile
     type: git
     check_every: 15s
     source:
       uri: {{buildpacks-ci-git-uri}}
-      branch: develop
       paths: [ "Dockerfile", "build/*", "Gemfile", "Gemfile.lock"]
       private_key: {{buildpacks-ci-private-key}}
 
@@ -44,12 +28,11 @@ resources:
       username: {{buildpacks-docker-user-username}}
       password: {{buildpacks-docker-user-password}}
 
-  - name: depwatcher-dockerfile-master
+  - name: depwatcher-dockerfile
     type: git
     check_every: 15s
     source:
       uri: {{buildpacks-ci-git-uri}}
-      branch: master
       paths: [ dockerfiles/depwatcher/ ]
       private_key: {{buildpacks-ci-private-key}}
 
@@ -67,44 +50,15 @@ resources:
       url: {{concourse-job-failure-notifications-slack-webhook}}
 
 jobs:
-  - name: merge-to-master
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: ci-master
-        - get: buildpacks-ci
-          resource: ci-develop
-          trigger: true
-        - get: repo
-          resource: ci-develop
-          trigger: true
-      - task: github-set-status-success
-        file: buildpacks-ci/tasks/set-status-success/task.yml
-        params:
-          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-          GITHUB_REPO: 'cloudfoundry/buildpacks-ci'
-          GITHUB_STATUS_CONTEXT: 'buildpacks-ci/merge-to-master'
-          GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI build success'
-          PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
-      - put: ci-master
-        params:
-          repository: buildpacks-ci
-      - put: concourse2tracker
-        params:
-          git_path: buildpacks-ci
-          project_id: '{{cf-buildpacks-public-tracker-id}}'
-          api_token: {{pivotal-tracker-api-token}}
-
   - name: update-buildpacks-ci-image
     serial: true
     public: true
     plan:
-      - get: buildpacks-ci-dockerfile-develop
+      - get: buildpacks-ci-dockerfile
         trigger: true
       - put: buildpacks-ci-image
         params:
-          build: buildpacks-ci-dockerfile-develop
+          build: buildpacks-ci-dockerfile
           build_args:
             squash: squash
         attempts: 2
@@ -120,11 +74,11 @@ jobs:
     serial: true
     public: true
     plan:
-      - get: depwatcher-dockerfile-master
+      - get: depwatcher-dockerfile
         trigger: true
       - put: depwatcher-image
         params:
-          build: depwatcher-dockerfile-master/dockerfiles/depwatcher
+          build: depwatcher-dockerfile/dockerfiles/depwatcher
           build_args:
             squash: squash
         attempts: 2
@@ -161,9 +115,9 @@ jobs:
   - name: shellcheck-buildpacks-ci
     public: true
     plan:
-      - get: ci-develop
+      - get: ci-master
         trigger: true
       - task: run-shellcheck
-        file: ci-develop/tasks/run-shellcheck/task.yml
+        file: ci-master/tasks/run-shellcheck/task.yml
         params:
-          DIRECTORY_TO_CHECK: ci-develop
+          DIRECTORY_TO_CHECK: ci-master

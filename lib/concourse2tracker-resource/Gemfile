@@ -1,8 +1,0 @@
-# encoding: utf-8
-source 'https://rubygems.org'
-
-group :development do
-  gem 'rspec'
-  gem 'with_env'
-  gem 'webmock'
-end

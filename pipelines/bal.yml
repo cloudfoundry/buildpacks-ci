@@ -4,10 +4,6 @@ resource_types:
     type: docker-image
     source:
       repository: cfbuildpacks/cron-resource
-  - name: concourse2tracker
-    type: docker-image
-    source:
-      repository: cfbuildpacks/concourse2tracker
   - name: slack-notification
     type: docker-image
     source:
@@ -22,9 +18,6 @@ resources:
     source:
       expression: 0 5 * * 1
       location: {{current-timezone}}
-
-  - name: concourse2tracker
-    type: concourse2tracker
 
   - name: buildpacks-ci
     type: git
@@ -357,11 +350,6 @@ jobs:
       - put: bal-master
         params:
           repository: bal-develop
-      - put: concourse2tracker
-        params:
-          git_path: bal-develop
-          project_id: '{{cf-buildpacks-public-tracker-id}}'
-          api_token: {{pivotal-tracker-api-token}}
 
   - name: update-diego-release
     serial: true
