@@ -1,4 +1,4 @@
-class Dependencies
+class CNBDependencies
   def initialize(dep, line, removal_strategy, dependencies, dependencies_latest_released)
     @dep = dep
     @line = line
@@ -33,7 +33,17 @@ class Dependencies
     end
   end
 
+  def update_default_dependencies(defaults)
+  end
+
   private
+
+  def update_default_deps(buildpack_toml, removal_strategy)
+    if buildpack_toml.dig('metadata', 'default_versions').nil?
+      return false
+    end
+    removal_strategy == "remove_all"
+  end
 
   def latest?
     @matching_deps.all? do |d|

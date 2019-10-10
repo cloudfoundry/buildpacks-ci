@@ -6,7 +6,7 @@ require 'tmpdir'
 require 'date'
 require 'set'
 require 'yaml'
-require_relative './dependencies'
+require_relative './cnb_dependencies'
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
@@ -171,7 +171,7 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
                      .select {|d| d['id'] == V3_DEP_IDS.fetch(dependency_name, dependency_name)}
                      .map {|d| d['version']}
 
-  buildpack_toml['metadata']['dependencies'] = Dependencies.new(
+  buildpack_toml['metadata']['dependencies'] = CNBDependencies.new(
       dep,
       version_line_type,
       removal_strategy,
@@ -182,6 +182,11 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
   new_versions = buildpack_toml['metadata']['dependencies']
                      .select {|d| d['id'] == V3_DEP_IDS.fetch(dependency_name, dependency_name)}
                      .map {|d| d['version']}
+
+  if update_default_deps(buildpack_toml, removal_strategy)
+    default_deps = buildpack_toml.dig('metadata', 'default_versions')
+    default_deps[dependency_name] = version
+  end
 
   added += (new_versions - old_versions).uniq.sort
   removed += (old_versions - new_versions).uniq.sort
