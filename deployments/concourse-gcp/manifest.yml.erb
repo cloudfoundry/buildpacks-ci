@@ -94,6 +94,8 @@ instance_groups:
   - name: worker
     release: concourse
     properties:
+      baggageclaim:
+        driver: overlay
       drain_timeout: 10m
       worker_gateway:
         worker_key: ((worker_key))
