@@ -9,8 +9,14 @@ if [[ -d "release-artifacts" ]]; then
 fi
 
 PACK_PATH="$(realpath "$(find pack -name "*linux.tgz")")"
+PACKAGER_PATH="$(realpath packager/packager)"
 mkdir -p buildpack/.bin
-tar xvf "${PACK_PATH}" -C buildpack/.bin > /dev/null
+BUILDPACK_BIN="$(realpath buildpack/.bin)"
+tar xvf "${PACK_PATH}" -C "${BUILDPACK_BIN}" > /dev/null
+
+pushd "${PACKAGER_PATH}"
+    go build -o "${BUILDPACK_BIN}/packager" > /dev/null
+popd
 
 cd buildpack
 
