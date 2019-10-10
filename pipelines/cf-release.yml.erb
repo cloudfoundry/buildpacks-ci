@@ -1,15 +1,15 @@
 <% supported_languages = %w(dotnet-core go ruby binary staticfile nodejs php python java nginx r) %>
 <% cutlass = %w(binary dotnet-core go nodejs python ruby staticfile) %>
 <% stacks = {
-  "binary" => %w(cflinuxfs2 cflinuxfs3 windows2012R2 windows2016 windows),
-  "java" => %w(cflinuxfs2 cflinuxfs3),
-  "dotnet-core" => %w(cflinuxfs2 cflinuxfs3),
-  "go" => %w(cflinuxfs2 cflinuxfs3),
-  "nodejs" => %w(cflinuxfs2 cflinuxfs3),
-  "php" => %w(cflinuxfs2 cflinuxfs3),
-  "python" => %w(cflinuxfs2 cflinuxfs3),
-  "ruby" => %w(cflinuxfs2 cflinuxfs3),
-  "staticfile" => %w(cflinuxfs2 cflinuxfs3),
+  "binary" => %w(cflinuxfs3 windows2012R2 windows2016 windows),
+  "java" => %w(cflinuxfs3),
+  "dotnet-core" => %w(cflinuxfs3),
+  "go" => %w(cflinuxfs3),
+  "nodejs" => %w(cflinuxfs3),
+  "php" => %w(cflinuxfs3),
+  "python" => %w(cflinuxfs3),
+  "ruby" => %w(cflinuxfs3),
+  "staticfile" => %w(cflinuxfs3),
   "nginx" => %w(cflinuxfs3),
   "r" => %w(cflinuxfs3)
 } %>
@@ -141,26 +141,6 @@ resources:
       private_key:  {{<%= language %>-offline-buildpack-bosh-release-private-key}}
       <% end %>
       branch: master
-
-<% unless ['nginx', 'r', 'binary'].include?(language) %>
-  - name: private-<%= language %>-offline-buildpack-bosh-release-github-release-lts
-    type: github-release
-    source:
-      user: pivotal-cf
-      repository: <%= language %>-offline-buildpack-release-lts
-      access_token: {{buildpacks-github-token}}
-
-  - name: private-<%= language %>-offline-buildpack-bosh-release-lts
-    type: git
-    source:
-      uri: git@github.com:pivotal-cf/<%= language %>-offline-buildpack-release-lts.git
-      <% if language == 'java'%>
-      private_key:  {{private-<%= language %>-offline-buildpack-bosh-release-private-key-lts}}
-      <% else %>
-      private_key:  {{<%= language %>-offline-buildpack-bosh-release-private-key-lts}}
-      <% end %>
-      branch: master
-<% end %>
 <% end %>
 
 groups:
@@ -180,14 +160,12 @@ groups:
 <% (supported_languages - %w(java)).each do |language| %>
       - update-private-<%= language %>-offline-buildpack-bosh-release
       <% next if ['nginx', 'r', 'binary'].include?(language) %>
-      - update-private-<%= language %>-offline-buildpack-bosh-release-lts
 <% end %>
   - name: java
     jobs:
       - ship-it-java
       - update-java-buildpack-bosh-release
       - update-private-java-offline-buildpack-bosh-release
-      - update-private-java-offline-buildpack-bosh-release-lts
 
 jobs:
   - name: bbl-up
@@ -468,10 +446,8 @@ jobs:
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
 <% end %>
 
-<% %w(latest lts).each do |release_type| %>
 <% supported_languages.each do |language| %>
-<% next if release_type == "lts" && ["nginx", "r", "binary"].include?(language) %>
-  - name: update-private-<%= language %>-offline-buildpack-bosh-release<%= release_type == 'lts' ? '-lts' : '' %>
+  - name: update-private-<%= language %>-offline-buildpack-bosh-release
     serial: true
     public: true
     plan:
@@ -486,7 +462,6 @@ jobs:
             - "java-buildpack-offline-v4*.zip"
         <% else %>
         <% release_stacks = stacks[language]
-           release_stacks = release_stacks - ['cflinuxfs2'] if release_type == 'latest' && language != 'binary'
            release_stacks.each_with_index do |stack, i| %>
         - get: buildpack-zip-stack<%= i %>
           passed: [ ship-it ]
@@ -495,13 +470,13 @@ jobs:
         <% end %>
         <% end %>
         - get: release
-          resource: private-<%= language %>-offline-buildpack-bosh-release<%= release_type == 'lts' ? '-lts' : '' %>
+          resource: private-<%= language %>-offline-buildpack-bosh-release
       - do:
         <% if language == 'java' %>
         - task: download-offline-buildpack
           file: buildpacks-ci/tasks/download-offline-buildpack/task.yml
           params:
-            CF_STACKS: <%= release_type == 'lts' ? stacks[language].join(' ') : 'cflinuxfs3' %>
+            CF_STACKS: 'cflinuxfs3'
         <% end %>
         - task: create-offline-bosh-release
           file: buildpacks-ci/tasks/create-bosh-release/task.yml
@@ -511,13 +486,12 @@ jobs:
             LANGUAGE: <%= language %>
             RELEASE_NAME: <%= language %>-offline-buildpack
             RELEASE_DIR: release
-            LTS: <%= release_type == 'lts' ? 'true' : 'false' %>
-        - put: private-<%= language %>-offline-buildpack-bosh-release<%= release_type == 'lts' ? '-lts' : '' %>
+        - put: private-<%= language %>-offline-buildpack-bosh-release
           params:
             repository: release-artifacts
             rebase: true
             tag: version/version
-        - put: private-<%= language %>-offline-buildpack-bosh-release-github-release<%= release_type == 'lts' ? '-lts' : '' %>
+        - put: private-<%= language %>-offline-buildpack-bosh-release-github-release
           params:
             name: version/version
             tag: version/version
@@ -528,5 +502,4 @@ jobs:
             channel: {{concourse-job-failure-notifications-slack-channel}}
             username: concourse
             icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-<% end %>
 <% end %>

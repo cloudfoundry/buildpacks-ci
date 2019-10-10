@@ -2,8 +2,6 @@
 
 require_relative 'buildpack-bosh-release-updater'
 
-LTS = '-lts'
-
 versions = Dir["buildpack-zip*/version"].map do |buildpack_version_file|
   File.read(buildpack_version_file).gsub(/[\+#].*$/, '').gsub('Java Buildpack ', '')
 end.uniq
@@ -14,10 +12,6 @@ if versions.size != 1
 end
 
 version = versions.first
-if ENV.fetch('LTS') == 'true'
-  version = version + LTS
-end
-
 access_key_id = ENV.fetch('ACCESS_KEY_ID', false)
 secret_access_key = ENV.fetch('SECRET_ACCESS_KEY', false)
 language = ENV.fetch('LANGUAGE')
