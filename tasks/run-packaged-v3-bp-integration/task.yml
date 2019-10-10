@@ -7,7 +7,6 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: pack
-  - name: packager
   - name: buildpack
   - name: release-artifacts
 outputs:
