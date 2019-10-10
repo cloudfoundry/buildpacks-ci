@@ -81,7 +81,7 @@ GEM
     rubocop-rspec (1.22.2)
       rubocop (>= 0.52.1)
     ruby-progressbar (1.9.0)
-    rubyzip (1.2.3)
+    rubyzip (2.0.0)
     safe_yaml (1.0.5)
     sawyer (0.8.1)
       addressable (>= 2.3.5, < 2.6)
