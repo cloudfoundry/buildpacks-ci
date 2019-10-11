@@ -42,7 +42,7 @@ pushd buildpack
       [ -d supply ] && (cd supply && (go generate || true))
       [ -d finalize ] && (cd finalize && (go generate || true))
 
-      export CF_STACK=${CF_STACK:-cflinuxfs2}
+      export CF_STACK=${CF_STACK:-cflinuxfs3}
       if [[ "$LANGUAGE" != "php" || "$SHIM" == "true" ]]; then
             ginkgo -r -mod=vendor -skipPackage=integration,brats
       else
