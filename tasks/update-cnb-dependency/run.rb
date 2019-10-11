@@ -6,46 +6,16 @@ require 'tmpdir'
 require 'date'
 require 'set'
 require 'yaml'
+require_relative './dependency'
 require_relative './cnb_dependencies'
+require_relative './cnb_dependency_updates'
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/config/dependency-builds.yml'))
 
 CNB_STACKS = config['v3_stacks']
-V3_DEP_IDS = config['v3_dep_ids']
-V3_DEP_NAMES = config['v3_dep_names']
 DEPRECATED_STACKS = config['deprecated_stacks']
-
-def time_to_datetime(time)
-  return DateTime.parse(time.to_s)
-end
-
-# replace all Time objects with DateTime (needed to use toml library)
-# will not replace Time objects if they occur as the key in a map.
-def replace_date_with_time(obj, parent_obj = nil, accessor = nil)
-  if obj.class == Time
-    converted_time = time_to_datetime(obj)
-    if parent_obj == nil
-      return converted_time
-    end
-    parent_obj[accessor] = converted_time
-
-  elsif obj.class == Array
-    obj.each_with_index  do |val,index|
-      obj[index] = replace_date_with_time(val,obj,index)
-    end
-    return obj
-  elsif obj.class == Hash
-    obj.each do |key, value|
-      obj[key] = replace_date_with_time(value, obj, key)
-    end
-    return obj
-  else return obj
-  end
-end
-
-
 
 buildpack_toml_file = 'buildpack.toml'
 buildpack_toml = Tomlrb.load_file("buildpack/#{buildpack_toml_file}")
@@ -73,103 +43,45 @@ added = []
 removed = []
 rebuilt = []
 total_stacks = []
-builds = {}
+
+# Refactoring Thoughts:
+# Maybe have 3 main classes used: Dependency (for cnb dependency), BuildpackToml (for wrapping all buildpack toml stuff)
+# And CNBDependencyUpdater (to take in the current bpToml, releasedBPToml, removalStrategy), and have an update-dependency method
+# which takes in a dependency, and wraps all the required logic
+# The CNBDependency updator or bpToml can keep track of all stacks used, for the commit message stuff
+#
+# 1. Make CNBDependencies without dep object (so you can have one), and pass the dep into the switch method, so you can pull it out of the loop
+# 2. Add method to CNBDependencyUpdates to to wrap within the loop
+# 3. Make class to wrap buildpack.toml accessors and getters, and move cnb_dependencies functionality into it(?)
+# 4. Ideally restrict config reads to as few files as possible, and enable dependency injection/inversion wherever possible
+# 5. Test everything rigorously
+
+no_deprecation_info = (deprecation_date == 'null' or deprecation_link == 'null')
+unless no_deprecation_info or (version_line == 'latest')
+  deprecation_dates = buildpack_toml['metadata'].fetch('dependency_deprecation_dates', [])
+  buildpack_toml['metadata']['dependency_deprecation_dates'] =
+      CNBDependencyUpdates.update_dependency_deprecation_dates(deprecation_date, deprecation_link, version_line,
+                                                               dependency_name, deprecation_match, deprecation_dates)
+end
 
 dependency_build_glob = "builds/binary-builds-new/#{dependency_name}/#{resource_version}-*.json"
 Dir[dependency_build_glob].each do |stack_dependency_build|
-  no_deprecation_info = (deprecation_date == 'null' or deprecation_link == 'null')
-  unless no_deprecation_info or (version_line == 'latest')
-    dependency_deprecation_date = {
-      'version_line' => version_line.downcase,
-      'name'         => dependency_name,
-      'date'         => DateTime.parse(deprecation_date),
-      'link'         => deprecation_link,
-    }
-
-    unless deprecation_match.nil? or deprecation_match.empty? or deprecation_match.downcase == 'null'
-      dependency_deprecation_date['match'] = deprecation_match
-    end
-
-    deprecation_dates = buildpack_toml['metadata'].fetch('dependency_deprecation_dates', [])
-    deprecation_dates = deprecation_dates
-                          .reject{ |d| d['version_line'] == version_line.downcase and d['name'] == dependency_name}
-                          .push(dependency_deprecation_date)
-                          .sort_by{ |d| [d['name'], d['version_line'] ]}
-    buildpack_toml['metadata']['dependency_deprecation_dates'] = deprecation_dates
-  end
-
   stack = /#{resource_version}-(.*)\.json$/.match(stack_dependency_build)[1]
-
   next if DEPRECATED_STACKS.include?(stack)
-
-  if (stack == 'any-stack') || (stack == 'cflinuxfs3' && dependency_name == 'dep') # TODO Figur out if temporary
-    total_stacks += CNB_STACKS.values
-    v3_stacks = CNB_STACKS.values
-  else
-    next unless CNB_STACKS.keys.include? stack
-    total_stacks += [CNB_STACKS[stack]]
-    v3_stacks = [CNB_STACKS[stack]]
-    if stack == 'bionic'
-      if dependency_name == "go" or dependency_name == "dep"
-        v3_stacks += [CNB_STACKS['tiny']]
-        total_stacks |= [CNB_STACKS['tiny']]
-      end
-    end
-  end
+  next unless (CNB_STACKS.keys.include? stack) or stack == 'any-stack'
 
   build = JSON.parse(open(stack_dependency_build).read)
-  builds[stack] = build
+  version = build['version']
+  source_url = build.dig('source','url')
+  source_sha256 = build.dig('source','sha256')
 
-  version = builds[stack]['version'] # We assume that the version is the same for all stacks
-  source_type = 'source'
-  source_url = ''
-  source_sha256 = ''
-
-  if stack != "bionic"
-    begin
-      source_url = builds[stack]['source']['url']
-      source_sha256 = builds[stack]['source'].fetch('sha256', '')
-    rescue
-      next
-    end
-  end
-
-  if dependency_name == 'appdynamics'
-    source_type = 'osl'
-    source_url = 'https://docs.appdynamics.com/display/DASH/Legal+Notices'
-  elsif dependency_name == 'CAAPM'
-    source_type = 'osl'
-    source_url = 'https://docops.ca.com/ca-apm/10-5/en/ca-apm-release-notes/third-party-software-acknowledgments/php-agents-third-party-software-acknowledgments'
-  elsif dependency_name.include? 'miniconda'
-    source_url = "https://github.com/conda/conda/archive/#{version}.tar.gz"
-  end
-
-  if source_sha256 != ""
-    dep = {
-      'id' => V3_DEP_IDS.fetch(dependency_name, dependency_name),
-      'name' => V3_DEP_NAMES[dependency_name],
-      'version' => resource_version,
-      'uri' => build['url'],
-      'sha256' => build['sha256'],
-      'stacks' => v3_stacks,
-      source_type => source_url,
-      'source_sha256' => source_sha256,
-    }
-  else
-    dep = {
-        'id' => V3_DEP_IDS.fetch(dependency_name, dependency_name),
-        'name' => V3_DEP_NAMES[dependency_name],
-        'version' => resource_version,
-        'uri' => build['url'],
-        'sha256' => build['sha256'],
-        'stacks' => v3_stacks,
-    }
-  end
-
+  v3_stacks, total_stacks = CNBDependencyUpdates.update_stacks_list(stack, dependency_name, total_stacks, CNB_STACKS)
+  dep = Dependency.new(dependency_name, resource_version, build['url'], build['sha256'], v3_stacks, source_url, source_sha256)
   old_deps = buildpack_toml['metadata'].fetch('dependencies', [])
   old_versions = old_deps
-                     .select {|d| d['id'] == V3_DEP_IDS.fetch(dependency_name, dependency_name)}
+                     .select {|d| d['id'] == dep.id}
                      .map {|d| d['version']}
+
 
   buildpack_toml['metadata']['dependencies'] = CNBDependencies.new(
       dep,
@@ -180,10 +92,10 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
   ).switch
 
   new_versions = buildpack_toml['metadata']['dependencies']
-                     .select {|d| d['id'] == V3_DEP_IDS.fetch(dependency_name, dependency_name)}
+                     .select {|d| d['id'] == dep.id}
                      .map {|d| d['version']}
 
-  if update_default_deps(buildpack_toml, removal_strategy)
+  if CNBDependencyUpdates.update_default_deps?(buildpack_toml, removal_strategy)
     default_deps = buildpack_toml.dig('metadata', 'default_versions')
     default_deps[dependency_name] = version
   end
@@ -193,10 +105,7 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
   rebuilt += [old_versions.include?(resource_version)]
 end
 
-# update version in order field
-
-puts "updating buildpack.toml order contents"
-
+puts "updating buildpack.toml order contents, if they exist, with correct versions"
 buildpack_toml.dig('order')&.each do |order_group|
   order_group.dig('group')&.each do |order_elem|
     if order_elem.dig('id') == dependency_name
@@ -205,23 +114,16 @@ buildpack_toml.dig('order')&.each do |order_group|
   end
 end
 
-
 rebuilt = rebuilt.all?()
-puts 'REBUILD: skipping most version updating logic' if rebuilt
+puts 'REBUILD' if rebuilt
 
 if added.empty? && !rebuilt
   puts 'SKIP: Built version is not required by buildpack.'
   exit 0
 end
 
-commit_message = "Add #{dependency_name} #{resource_version}"
-commit_message = "Rebuild #{dependency_name} #{resource_version}" if rebuilt
-if removed.length > 0
-  commit_message = "#{commit_message}, remove #{dependency_name} #{removed.join(', ')}"
-end
-commit_message = commit_message + "\n\nfor stack(s) #{total_stacks.join(', ')}"
-
-buildpack_toml = replace_date_with_time(buildpack_toml)
+commit_message = CNBDependencyUpdates.commit_message(dependency_name, resource_version, rebuilt, removed, total_stacks)
+buildpack_toml = CNBDependencyUpdates.replace_date_with_time(buildpack_toml)
 
 Dir.chdir('artifacts') do
   GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')

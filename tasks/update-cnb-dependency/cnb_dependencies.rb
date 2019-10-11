@@ -37,14 +37,6 @@ class CNBDependencies
   end
 
   private
-
-  def update_default_deps(buildpack_toml, removal_strategy)
-    if buildpack_toml.dig('metadata', 'default_versions').nil?
-      return false
-    end
-    removal_strategy == "remove_all"
-  end
-
   def latest?
     @matching_deps.all? do |d|
       Gem::Version.new(@dep['version']) > Gem::Version.new(d['version'])
