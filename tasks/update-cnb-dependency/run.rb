@@ -98,6 +98,7 @@ Dir[dependency_build_glob].each do |stack_dependency_build|
   if CNBDependencyUpdates.update_default_deps?(buildpack_toml, removal_strategy)
     default_deps = buildpack_toml.dig('metadata', 'default_versions')
     default_deps[dependency_name] = version
+    buildpack_toml['metadata']['default_versions'] = default_deps
   end
 
   added += (new_versions - old_versions).uniq.sort
