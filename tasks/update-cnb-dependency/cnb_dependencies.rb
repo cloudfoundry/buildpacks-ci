@@ -33,9 +33,6 @@ class CNBDependencies
     end
   end
 
-  def update_default_dependencies(defaults)
-  end
-
   private
   def latest?
     @matching_deps.all? do |d|
