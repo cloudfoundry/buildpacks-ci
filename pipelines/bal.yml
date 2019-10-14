@@ -197,6 +197,8 @@ jobs:
           - get: bosh-deployment
         - task: create-diego-release-with-bal-develop
           file: buildpacks-ci/tasks/create-diego-release-with-bal-develop/task.yml
+          output_mapping:
+            diego-release: diego-release-artifacts
         - task: create-deployment-source-config
           file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
           params:

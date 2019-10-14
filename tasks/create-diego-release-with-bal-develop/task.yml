@@ -9,9 +9,6 @@ inputs:
   - name: diego-release
   - name: bal-develop
 outputs:
-  - name: diego-release-artifacts
+  - name: diego-release
 run:
-  path: bash
-  args:
-    - -cl
-    - buildpacks-ci/tasks/create-diego-release-with-bal-develop/run.rb
+  path: buildpacks-ci/tasks/create-diego-release-with-bal-develop/run.sh
