@@ -89,7 +89,7 @@ dependencies:
       dotnet-core:
         lines:
           - line: 2.1.X
-            deprecation_date: 2021-08-21 #link says supported at least this long
+            deprecation_date: 2021-08-21 #!link says supported at least this long
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 2.2.X
             deprecation_date: 2019-12-23
@@ -101,7 +101,7 @@ dependencies:
       dotnet-core-runtime-cnb:
         lines:
           - line: 2.1.X
-            deprecation_date: 2021-08-21 #link says supported at least this long
+            deprecation_date: 2021-08-21 #!link says supported at least this long
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 2.2.X
             deprecation_date: 2019-12-23
@@ -137,7 +137,7 @@ dependencies:
     buildpacks:
       go:
         lines:
-          # go deprecation dates are on the 1st day 12 months after their release
+          #! go deprecation dates are on the 1st day 12 months after their release
           - line: 1.12.X
             deprecation_date: 2020-02-01
             link: https://golang.org/doc/devel/release.html
@@ -244,7 +244,7 @@ dependencies:
     buildpacks:
       nginx:
         lines:
-          # nginx deprecation dates are 1 year after the mainline release date
+          #! nginx deprecation dates are 1 year after the mainline release date
           - line: 1.16.X
             deprecation_date: 2020-04-01
             link: https://nginx.org/
@@ -253,7 +253,7 @@ dependencies:
             link: https://nginx.org/
       nginx-cnb:
         lines:
-          # nginx deprecation dates are 1 year after the mainline release date
+          #! nginx deprecation dates are 1 year after the mainline release date
           - line: 1.16.X
             deprecation_date: 2020-04-01
             link: https://nginx.org/
@@ -599,13 +599,10 @@ dependencies:
   python:
     buildpacks:
       python:
-        lines:  # python 3 minor version EOLs are 5 years after their first final release
+        lines:  #! python 3 minor version EOLs are 5 years after their first final release
           - line: 2.7.X
             deprecation_date: 2020-01-01
             link: https://www.python.org/dev/peps/pep-0373/
-          - line: 3.4.X
-            deprecation_date: 2019-03-16
-            link: https://www.python.org/dev/peps/pep-0429/
           - line: 3.5.X
             deprecation_date: 2020-09-13
             link: https://www.python.org/dev/peps/pep-0478/
@@ -615,15 +612,15 @@ dependencies:
           - line: 3.7.X
             deprecation_date: 2023-06-27
             link: https://www.python.org/dev/peps/pep-0537/
+          - line: 3.8.X
+            deprecation_date: 2024-10-14
+            link: https://www.python.org/dev/peps/pep-0569/
         removal_strategy: keep_latest_released
       python-runtime-cnb:
         lines:
           - line: 2.7.X
             deprecation_date: 2020-01-01
             link: https://www.python.org/dev/peps/pep-0373/
-          - line: 3.4.X
-            deprecation_date: 2019-03-16
-            link: https://www.python.org/dev/peps/pep-0429/
           - line: 3.5.X
             deprecation_date: 2020-09-13
             link: https://www.python.org/dev/peps/pep-0478/
@@ -633,16 +630,19 @@ dependencies:
           - line: 3.7.X
             deprecation_date: 2023-06-27
             link: https://www.python.org/dev/peps/pep-0537/
+          - line: 3.8.X
+            deprecation_date: 2023-06-27
+            link: https://www.python.org/dev/peps/pep-0537/
         removal_strategy: keep_latest_released
   r:
     buildpacks:
       r:
-        lines: # final release for each minor version is every spring ( just before next minor version release )
+        lines: #! final release for each minor version is every spring ( just before next minor version release )
           - line: 3.5.X
             deprecation_date: 2019-03-11
             link: https://developer.r-project.org/
           - line: 3.6.X
-            deprecation_date: 2020-03-01 #Estimate make sure 3.7 is out before deprecating
+            deprecation_date: 2020-03-01 #!Estimate make sure 3.7 is out before deprecating
             link: https://developer.r-project.org/
         removal_strategy: keep_latest_released
     monitored_deps:
@@ -723,12 +723,12 @@ v3_dep_names:
   bundler: Bundler
   ruby: Ruby
 
-# only check deprecation dates for dotnet-runtime as they are redundant for sdk and aspnetcore
+#! only check deprecation dates for dotnet-runtime as they are redundant for sdk and aspnetcore
 skip_deprecation_check:
-  - bundler  # doesn't publish EOL schedule
-  - dotnet-sdk  # same as dotnet-runtime
-  - dotnet-aspnetcore  # same as dotnet-runtime
-  - jruby  # tied to ruby, ruby doesn't publish EOL schedule
-  - openresty  # depends on nginx and lua deprecation
-  - php  # complicated
-  - ruby  # doesn't publish EOL schedule
+  - bundler  #! doesn't publish EOL schedule
+  - dotnet-sdk  #! same as dotnet-runtime
+  - dotnet-aspnetcore  #! same as dotnet-runtime
+  - jruby  #! tied to ruby, ruby doesn't publish EOL schedule
+  - openresty  #! depends on nginx and lua deprecation
+  - php  #! complicated
+  - ruby  #! doesn't publish EOL schedule
