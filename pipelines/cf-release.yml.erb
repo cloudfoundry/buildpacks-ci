@@ -460,6 +460,7 @@ jobs:
           params:
             globs:
             - "java-buildpack-offline-v4*.zip"
+          trigger: true
         <% else %>
         <% release_stacks = stacks[language]
            release_stacks.each_with_index do |stack, i| %>
