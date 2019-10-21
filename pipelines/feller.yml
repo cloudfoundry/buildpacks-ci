@@ -13,13 +13,6 @@ resources:
     uri: {{buildpacks-ci-git-uri-public}}
     branch: {{buildpacks-ci-git-uri-public-branch}}
 
-- name: release
-  type: github-release
-  source:
-    owner: pivotal
-    repository: feller
-    access_token: {{something}}
-
 - name: once-a-day
   type: time
   source:
