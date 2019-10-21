@@ -14,4 +14,4 @@ run:
   path: bash
   args:
   - -cl
-  - buildpacks-ci/tasks/feller/tests/task.sh
+  - buildpacks-ci/tasks/feller/release/task.sh
