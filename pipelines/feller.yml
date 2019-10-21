@@ -1,0 +1,24 @@
+---
+resources:
+
+- name: feller
+  type: git
+  source:
+    uri: git@github.com:pivotal/feller.git
+    branch: master
+    private_key: {{public-buildpacks-ci-robots-private-key}}
+
+- name: buildpacks-ci
+  type: git
+  source:
+    uri: {{buildpacks-ci-git-uri-public}}
+    branch: {{buildpacks-ci-git-uri-public-branch}}
+
+jobs:
+- name: tests
+  plan:
+  - in_parallel:
+    - get: feller
+    - get: buildpacks-ci
+  - task: tests
+    file: tasks/feller/tests/task.yml
