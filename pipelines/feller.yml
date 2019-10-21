@@ -1,6 +1,5 @@
 ---
 resources:
-
 - name: feller
   type: git
   source:
@@ -14,6 +13,20 @@ resources:
     uri: {{buildpacks-ci-git-uri-public}}
     branch: {{buildpacks-ci-git-uri-public-branch}}
 
+- name: release
+  type: github-release
+  source:
+    owner: pivotal
+    repository: feller
+    access_token: {{something}}
+
+- name: once-a-day
+  type: time
+  source:
+    start: 8:00 AM
+    stop: 9:00 AM
+    location: America/New_York
+
 jobs:
 - name: tests
   plan:
@@ -23,3 +36,29 @@ jobs:
     - get: buildpacks-ci
   - task: tests
     file: buildpacks-ci/tasks/feller/tests/task.yml
+
+- name: release
+  plan:
+  - in_parallel:
+    - get: feller
+      trigger: true
+      passed: [tests]
+    - get: buildpacks-ci
+  - task: tests
+    file: buildpacks-ci/tasks/feller/release/task.yml
+
+- name: run
+  plan:
+  - in_parallel:
+    - get: feller
+      trigger: true
+      passed: [release]
+    - get: buildpacks-ci
+    - get: once-a-day
+      trigger: true
+  - task: run
+    file: buildpacks-ci/tasks/feller/run/task.yml
+    params:
+      TRACKER_PROJECT: 1042066
+      TRACKER_TOKEN: {{pivotal-tracker-api-token}}
+      GITHUB_TOKEN: {{buildpacks-github-token}}
