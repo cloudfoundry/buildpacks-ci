@@ -11,4 +11,7 @@ inputs:
   - name: feller
 
 run:
-  path: tasks/feller/tests/task.sh
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/feller/tests/task.sh
