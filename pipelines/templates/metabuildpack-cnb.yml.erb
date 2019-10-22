@@ -35,11 +35,20 @@ resources:
       access_token: {{buildpacks-github-token}}
       drafts: true
 
-  - name: release-candidate
+# Comments remove the building and releasing of shimmed buildpack until we are ready to.
+#  - name: release-candidate
+#    type: s3
+#    source:
+#      bucket: {{buildpack-release-candidates-bucket}}
+#      regexp: shims/<%#= language %>/<%#= language %>_buildpack-v(\d+\.\d+\.\d+-rc\.\d+).zip
+#      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+#      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+
+  - name: cnb-release-candidate
     type: s3
     source:
       bucket: {{buildpack-release-candidates-bucket}}
-      regexp: shims/<%= language %>/<%= language %>_buildpack-v(\d+\.\d+\.\d+-rc\.\d+).zip
+      regexp: cnb/<%= language %>/<%= language %>_cnb-v(\d+\.\d+\.\d+-rc\.\d+).tgz
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
@@ -125,10 +134,10 @@ jobs:
         file: buildpacks-ci/tasks/promote-candidate-to-rc/task.yml
         params:
           LANGUAGE: <%= language %>
-      - put: release-candidate
+      - put: cnb-release-candidate
         params:
           #file: release-candidate/*.zip
-          file: release-candidate/*.tgz
+          file: cnb-release-candidate/*.tgz
       - put: version
         resource: <%= language %>-cnb-version
         params: {file: version/number}
@@ -152,7 +161,7 @@ jobs:
             resource: repo
             passed:
               - create-and-test-rc
-          - get: release-candidate
+          - get: cnb-release-candidate
             passed:
               - create-and-test-rc
           - get: version
@@ -173,7 +182,7 @@ jobs:
     plan:
       - in_parallel:
           - get: buildpacks-ci
-          - get: release-candidate
+          - get: cnb-release-candidate
             passed:
               - ship-it
           - get: version
