@@ -23,7 +23,9 @@ if File.exist? latest_release_path
   old_manifest_deps = ReleaseArtifacts.reduce_manifest(old_manifest)
 end
 
-rc_path = Dir.glob(File.join("release-candidate", "*-v*.zip")).first
+# below path is needed for the shimmed buildpack
+# rc_path = Dir.glob(File.join("cnb-release-candidate", "*-v*.zip")).first
+rc_path = Dir.glob(File.join("cnb-release-candidate", "*-v*.tgz")).first
 absolute_rc_path = File.absolute_path(rc_path)
 current_manifest = ReleaseArtifacts.open_manifest_from_zip(absolute_rc_path)
 current_manifest_deps = ReleaseArtifacts.reduce_manifest(current_manifest)
@@ -38,9 +40,10 @@ puts release_notes
 rc_shasum = Digest::SHA256.file(absolute_rc_path).hexdigest
 
 output_dir = File.absolute_path("buildpack-artifacts")
-bp_name = "#{repo}-compat-#{stack}-#{tag}.zip"
+# bp_name = "#{repo}-compat-#{stack}-#{tag}.zip"
+cnb_name = "#{repo}-#{tag}.tgz"
 sha_file_name = "#{bp_name}.SHA256SUM.txt"
 File.write(File.join(output_dir, "tag"), tag)
 File.write(File.join(output_dir, "release_notes"), release_notes)
-FileUtils.mv(absolute_rc_path, File.join(output_dir, bp_name))
+FileUtils.mv(absolute_rc_path, File.join(output_dir, cnb_name))
 File.write(File.join(output_dir, sha_file_name), rc_shasum)
