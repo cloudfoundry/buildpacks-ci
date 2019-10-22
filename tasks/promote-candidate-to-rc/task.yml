@@ -10,6 +10,8 @@ inputs:
   - name: version
 outputs:
   - name: release-candidate
+params:
+  LANGUAGE:
 
 run:
   path: buildpacks-ci/tasks/promote-candidate-to-rc/run.sh

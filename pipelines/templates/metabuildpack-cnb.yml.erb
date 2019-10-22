@@ -107,34 +107,37 @@ jobs:
               acquire: true
       - task: create-candidate
         file: buildpacks-ci/tasks/build-cnb-buildpack/task.yml
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        output_mapping: {cf-space: cf-space-cflinuxfs3}
-        params:
-          ENV_POOL_RESOURCE: edge-environments
-          ENVS_DIR: env-repo
-          ORG: pivotal
-          SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
-          USERNAME: admin
-      - task: integration-test-using-candidate
-        privileged: true
-        file: buildpacks-ci/tasks/run-scripts-integration/task.yml
-        input_mapping:
-          cf-space: cf-space-cflinuxfs3
+#      - task: create-cf-space
+#        file: buildpacks-ci/tasks/create-cf-space/task.yml
+#        output_mapping: {cf-space: cf-space-cflinuxfs3}
+#        params:
+#          ENV_POOL_RESOURCE: edge-environments
+#          ENVS_DIR: env-repo
+#          ORG: pivotal
+#          SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+#          USERNAME: admin
+#      - task: integration-test-using-candidate
+#        privileged: true
+#        file: buildpacks-ci/tasks/run-scripts-integration/task.yml
+#        input_mapping:
+#          cf-space: cf-space-cflinuxfs3
       - task: promote-candidate-to-rc
         file: buildpacks-ci/tasks/promote-candidate-to-rc/task.yml
+        params:
+          LANGUAGE: <%= language %>
       - put: release-candidate
         params:
-          file: release-candidate/*.zip
+          #file: release-candidate/*.zip
+          file: release-candidate/*.tgz
       - put: version
         resource: <%= language %>-cnb-version
         params: {file: version/number}
     ensure:
       in_parallel:
-        - task: delete-cf-space
-          file: buildpacks-ci/tasks/delete-cf-space/task.yml
-          input_mapping:
-            cf-space: cf-space-cflinuxfs3
+#        - task: delete-cf-space
+#          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+#          input_mapping:
+#            cf-space: cf-space-cflinuxfs3
         - put: edge-environments
           params:
             release: edge-environments
