@@ -7,6 +7,10 @@ require 'zip'
 require 'digest'
 require 'fileutils'
 require 'erb'
+require 'toml'
+require 'zlib'
+require 'rubygems/package'
+require 'tomlrb'
 
 require_relative './cnb'
 
@@ -20,6 +24,17 @@ class ReleaseArtifacts
         `wget -O #{path} #{latest_url}`
         path
       end
+    end
+
+    def open_buildpacktoml_from_tgz(path)
+      Gem::Package::TarReader.new( Zlib::GzipReader.open path ) do |tar|
+        tar.each do |entry|
+          if entry.full_name == 'buildpack.toml'
+           return Tomlrb.parse(entry.read.strip)
+          end
+        end
+      end
+      {}
     end
 
     def open_manifest_from_zip(path)

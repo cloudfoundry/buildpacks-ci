@@ -5,6 +5,7 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
+  - name: buildpack
   - name: buildpacks-ci
   - name: cnb-release-candidate
   - name: version
