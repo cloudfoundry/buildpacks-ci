@@ -13,6 +13,9 @@ repo = ENV.fetch('REPO', '')
 stack = ENV.fetch('STACK', "cflinuxfs3")
 GITHUB_ACCESS_TOKEN = ENV.fetch('GITHUB_ACCESS_TOKEN', '')
 
+# COMMENTED out code below is for shimmed buildpack releases,
+# this will all need to be added back in when we are ready to release shimmed bps.
+
 Octokit.configure do |c|
   c.access_token = GITHUB_ACCESS_TOKEN
 end
@@ -28,7 +31,6 @@ end
 # rc_path = Dir.glob(File.join("cnb-release-candidate", "*-v*.zip")).first
 rc_path = Dir.glob(File.join("cnb-release-candidate", "*-v*.tgz")).first
 absolute_rc_path = File.absolute_path(rc_path)
-puts absolute_rc_path
 
 # current_manifest = ReleaseArtifacts.open_manifest_from_zip(absolute_rc_path)
 # current_manifest_deps = ReleaseArtifacts.reduce_manifest(current_manifest)
@@ -57,8 +59,8 @@ rc_shasum = Digest::SHA256.file(absolute_rc_path).hexdigest
 
 output_dir = File.absolute_path("buildpack-artifacts")
 cnb_name = "#{repo}-#{tag}.tgz"
-bp_name = File.basename(absolute_rc_path)
-sha_file_name = "#{bp_name}.SHA256SUM.txt"
+sha_file_name = "#{repo}-#{tag}.SHA256SUM.txt"
+
 File.write(File.join(output_dir, "tag"), tag)
 File.write(File.join(output_dir, "release_notes"), release_notes)
 FileUtils.mv(absolute_rc_path, File.join(output_dir, cnb_name))
