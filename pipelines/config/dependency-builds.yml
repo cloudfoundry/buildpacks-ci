@@ -293,7 +293,10 @@ dependencies:
             deprecation_date: 2021-04-01
             link: https://github.com/nodejs/Release
           - line: 12.X.X
-            deprecation_date: 2020-04-01
+            deprecation_date: 2022-04-01
+            link: https://github.com/nodejs/Release
+          - line: 13.X.X
+            deprecation_date: 2020-06-01
             link: https://github.com/nodejs/Release
         removal_strategy: keep_latest_released
       ruby:
@@ -315,7 +318,10 @@ dependencies:
             deprecation_date: 2021-04-01
             link: https://github.com/nodejs/Release
           - line: 12.X.X
-            deprecation_date: 2020-04-01
+            deprecation_date: 2022-04-01
+            link: https://github.com/nodejs/Release
+          - line: 13.X.X
+            deprecation_date: 2020-06-01
             link: https://github.com/nodejs/Release
         removal_strategy: keep_latest_released
     source_type: node
