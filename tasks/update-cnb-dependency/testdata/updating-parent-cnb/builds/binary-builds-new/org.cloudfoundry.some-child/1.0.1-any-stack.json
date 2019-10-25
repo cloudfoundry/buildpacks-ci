@@ -1,0 +1,11 @@
+{
+  "tracker_story_id": 111111111,
+  "version": "1.0.1",
+  "source": {
+    "url": "https://github.com/cloudfoundry/some-child-cnb/archive/v1.0.1.tar.gz",
+    "md5": null,
+    "sha256": "sha256-for-source-1.0.1"
+  },
+  "sha256": "sha256-for-binary-1.0.1",
+  "url": "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz"
+}

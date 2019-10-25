@@ -1,6 +1,5 @@
 .idea/
 .bundle/
-vendor/
 private.yml
 .vagrant/
 .rspec
@@ -12,3 +11,5 @@ deployments/concourse-gcp/bosh-init/bosh.yml
 deployments/concourse-gcp-terraform/concourse.tf
 deployments/concourse-gcp-terraform/terraform.tfstate
 deployments/concourse-gcp-terraform/terraform.tfstate.backup
+tasks/update-cnb-dependency/test/fixtures/updating-child-cnb/artifacts
+tasks/update-cnb-dependency/test/fixtures/updating-parent-cnb/artifacts

@@ -10,7 +10,7 @@ require_relative './dependencies'
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
-config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/config/dependency-builds.yml'))
+config = YAML.load_file('config/dependency-builds.yml') # TODO: DON'T FORGET TO UPDATE PIPELINE TO FIX THIS
 
 CNB_STACKS = config['v3_stacks']
 V3_DEP_IDS = config['v3_dep_ids']
@@ -77,8 +77,8 @@ builds = {}
 
 dependency_build_glob = "builds/binary-builds-new/#{dependency_name}/#{resource_version}-*.json"
 Dir[dependency_build_glob].each do |stack_dependency_build|
-  no_deprecation_info = (deprecation_date == 'null' or deprecation_link == 'null')
-  unless no_deprecation_info or (version_line == 'latest')
+  deprecation_info = (deprecation_date != 'null' and deprecation_link != 'null')
+  if deprecation_info and version_line != 'latest'
     dependency_deprecation_date = {
       'version_line' => version_line.downcase,
       'name'         => dependency_name,
