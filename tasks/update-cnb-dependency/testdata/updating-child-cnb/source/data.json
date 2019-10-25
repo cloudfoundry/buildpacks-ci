@@ -1,0 +1,12 @@
+{
+  "source": {
+    "name": "some-dep",
+    "type": "some-dep",
+    "version_filter": "2.X.X"
+  },
+  "version": {
+    "ref": "2.1.0",
+    "url": "https://example.org/some-dep-2.1.0-source.tgz",
+    "sha256": "sha256-for-source-2.1.0"
+  }
+}
