@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+PRIVATE_CI_NAME="buildpacks-private"
+setup_private_fly() {
+  fly -t $PRIVATE_CI_NAME status
+  RESULT=$?
+  if [[ $RESULT -ne 0 ]]; then
+    fly -t $PRIVATE_CI_NAME login --concourse-url=https://buildpacks-private.ci.cf-app.com/
+  fi
+}
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+setup_private_fly
+CONCOURSE_TARGET_NAME=$PRIVATE_CI_NAME ./bin/update-pipelines "$@"
