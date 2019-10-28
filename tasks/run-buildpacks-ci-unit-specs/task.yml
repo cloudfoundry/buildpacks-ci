@@ -9,15 +9,4 @@ inputs:
 params:
   TERM: xterm-color
 run:
-  path: bash
-  args:
-    - "-cl"
-    - |
-      set -ex
-      pushd buildpacks-ci
-        bundle exec rspec --tag ~fly
-        pushd dockerfiles/depwatcher
-          shards
-          crystal spec --no-debug
-        popd
-      popd
+  path: buildpacks-ci/scripts/unit-test.sh
