@@ -11,4 +11,7 @@ popd
 
 bundle exec rake
 
+go test -v ./...
+
+# Clean up directories
 rm -rf source-*-latest
