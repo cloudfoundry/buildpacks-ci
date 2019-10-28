@@ -489,10 +489,15 @@ class Builder
       )
       out_data[:source_pgp] = source_pgp
 
-    when 'CAAPM', 'appdynamics', 'miniconda2', 'miniconda3'
+    when 'CAAPM', 'appdynamics'
       results = Sha.check_sha(source_input)
       out_data[:sha256] = results[1]
       out_data[:url] = source_input.url
+
+    when 'miniconda2', 'miniconda3'
+      out_data[:url] = "https://github.com/conda/conda/archive/#{source_input.version}.tar.gz"
+      results = Sha.check_sha(out_data[:url])
+      out_data[:sha256] = results[1]
 
     when -> (elem) { cnb_list.include?(elem) }
       results = Sha.check_sha(source_input)
