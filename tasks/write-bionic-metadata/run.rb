@@ -12,6 +12,8 @@ end
 source_input    = SourceInput.from_file('source/data.json')
 build_input     = BuildInput.from_file("builds/binary-builds-new/#{source_input.name}/#{source_input.version}.json")
 build_output    = BuildOutput.new(source_input.name)
+stack = ENV.fetch("STACK")
+stack_id = ENV.fetch("STACK_ID")
 
 build_input.copy_to_build_output
 
@@ -25,7 +27,7 @@ when 'go'
   path = "go#{source_input.version}.linux-amd64.tar.gz"
   url = "https://dl.google.com/go/#{path}"
   `wget #{url}`
-  build_output.add_output("#{source_input.version}-bionic.json",
+  build_output.add_output("#{source_input.version}-#{stack}.json",
     {
       sha256: get_sha_from_file(path),
       url: url
@@ -33,7 +35,7 @@ when 'go'
   )
 
 when 'node'
-  build_output.add_output("#{source_input.version}-bionic.json",
+  build_output.add_output("#{source_input.version}-#{stack}.json",
     {
       sha256: get_sha_from_text_file("https://nodejs.org/dist/v#{source_input.version}/SHASUMS256.txt"),
       url: "https://nodejs.org/dist/v#{source_input.version}/node-v#{source_input.version}-linux-x64.tar.gz"
@@ -42,4 +44,4 @@ when 'node'
 end
 
 
-build_output.commit_outputs("Build #{source_input.name} - #{source_input.version} - io.buildpacks.stacks.bionic [##{build_input.tracker_story_id}]")
+build_output.commit_outputs("Build #{source_input.name} - #{source_input.version} - #{stack_id} [##{build_input.tracker_story_id}]")
