@@ -4,7 +4,7 @@ import (
 	"sort"
 )
 
-func AddNewDep(existingDeps, newDeps []Dependency) ([]Dependency, error) {
+func MergeDependencyLists(existingDeps, newDeps []Dependency) ([]Dependency, error) {
 	depsMap := map[string]Dependency{}
 
 	for _, dep := range existingDeps {
@@ -19,7 +19,7 @@ func AddNewDep(existingDeps, newDeps []Dependency) ([]Dependency, error) {
 		allDeps = append(allDeps, dep)
 	}
 
-	sort.Slice(allDeps, sortDeps(allDeps))
+	sort.Slice(allDeps, sortDependencies(allDeps))
 	return allDeps, nil
 }
 

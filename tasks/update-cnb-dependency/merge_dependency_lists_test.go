@@ -10,11 +10,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAddNewDep(t *testing.T) {
-	spec.Run(t, "AddNewDep", testAddNewDep, spec.Report(report.Terminal{}))
+func TestMergeDependencyLists(t *testing.T) {
+	spec.Run(t, "MergeDependencyLists", testMergeDependencyLists, spec.Report(report.Terminal{}))
 }
 
-func testAddNewDep(t *testing.T, when spec.G, it spec.S) {
+func testMergeDependencyLists(t *testing.T, when spec.G, it spec.S) {
 	when("the new deps IDs are different", func() {
 		it("adds the deps", func() {
 			existingDeps := []Dependency{
@@ -26,7 +26,7 @@ func testAddNewDep(t *testing.T, when spec.G, it spec.S) {
 				{ID: "some-id-2", Stacks: []string{"some-stack-1"}, Version: "2.0.0"},
 			}
 
-			newDeps, err := AddNewDep(existingDeps, depsToAdd)
+			newDeps, err := MergeDependencyLists(existingDeps, depsToAdd)
 			require.NoError(t, err)
 			assert.Equal(t, []Dependency{
 				{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
@@ -48,7 +48,7 @@ func testAddNewDep(t *testing.T, when spec.G, it spec.S) {
 				{ID: "some-id-1", Stacks: []string{"some-stack-2"}, Version: "2.0.0"},
 			}
 
-			newDeps, err := AddNewDep(existingDeps, depsToAdd)
+			newDeps, err := MergeDependencyLists(existingDeps, depsToAdd)
 			require.NoError(t, err)
 			assert.Equal(t, []Dependency{
 				{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
@@ -70,7 +70,7 @@ func testAddNewDep(t *testing.T, when spec.G, it spec.S) {
 				{ID: "some-id-1", Stacks: []string{"some-stack-2"}, Version: "2.0.0"},
 			}
 
-			newDeps, err := AddNewDep(existingDeps, depsToAdd)
+			newDeps, err := MergeDependencyLists(existingDeps, depsToAdd)
 			require.NoError(t, err)
 			assert.Equal(t, []Dependency{
 				{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
@@ -92,7 +92,7 @@ func testAddNewDep(t *testing.T, when spec.G, it spec.S) {
 				{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "2.0.0", Sha256: "some-new-sha"},
 			}
 
-			newDeps, err := AddNewDep(existingDeps, depsToAdd)
+			newDeps, err := MergeDependencyLists(existingDeps, depsToAdd)
 			require.NoError(t, err)
 			assert.Equal(t, []Dependency{
 				{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0", Sha256: "some-new-sha"},

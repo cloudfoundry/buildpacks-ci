@@ -17,6 +17,7 @@ func TestUpdateDeprecationDates(t *testing.T) {
 }
 
 func testUpdateDeprecationDates(t *testing.T, when spec.G, it spec.S) {
+	var envs EnvVars
 	name1 := "some-name-1"
 	name2 := "some-name-2"
 	versionLine1 := "1.x.x"
@@ -25,6 +26,16 @@ func testUpdateDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 	deprecationDate := time.Date(2019, 1, 1, 0, 0, 0, 0, time.UTC)
 	deprecationLink := "some-link"
 	deprecationMatch := "some-match"
+
+	it.Before(func() {
+		envs = EnvVars{
+			DeprecationDate:  deprecationDateString,
+			DeprecationLink:  deprecationLink,
+			DeprecationMatch: deprecationMatch,
+			VersionLine:      versionLine1,
+			VersionsToKeep:   0,
+		}
+	})
 
 	when("the dep name and version line are not in existing deprecation dates", func() {
 		when("the dep name is different", func() {
@@ -35,13 +46,7 @@ func testUpdateDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 				}
 
 				updatedDeprecationDates, err := UpdateDeprecationDates(
-					existingDeprecationDates,
-					name1,
-					versionLine1,
-					deprecationDateString,
-					deprecationLink,
-					deprecationMatch,
-				)
+					existingDeprecationDates, name1, envs)
 				require.NoError(t, err)
 				assert.Equal(t, []DependencyDeprecationDate{
 					{Name: name1, VersionLine: versionLine1, Date: deprecationDate, Link: deprecationLink, Match: deprecationMatch},
@@ -58,14 +63,9 @@ func testUpdateDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 					{Name: name2, VersionLine: versionLine2},
 				}
 
+				envs.VersionLine = versionLine2
 				updatedDeprecationDates, err := UpdateDeprecationDates(
-					existingDeprecationDates,
-					name1,
-					versionLine2,
-					deprecationDateString,
-					deprecationLink,
-					deprecationMatch,
-				)
+					existingDeprecationDates, name1, envs)
 				require.NoError(t, err)
 				assert.Equal(t, []DependencyDeprecationDate{
 					{Name: name1, VersionLine: versionLine1},
@@ -83,14 +83,11 @@ func testUpdateDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 				{Name: name2, VersionLine: versionLine2},
 			}
 
+			envs.DeprecationLink = "some-new-link"
+			envs.DeprecationMatch = "some-new-match"
+			envs.DeprecationDate = "2020-01-01"
 			updatedDeprecationDates, err := UpdateDeprecationDates(
-				existingDeprecationDates,
-				name1,
-				versionLine1,
-				"2020-01-01",
-				"some-new-link",
-				"some-new-match",
-			)
+				existingDeprecationDates, name1, envs)
 			require.NoError(t, err)
 			newDate := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
 			assert.Equal(t, []DependencyDeprecationDate{
@@ -102,14 +99,9 @@ func testUpdateDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 
 	when("deprecation date is null", func() {
 		it("does not add the deprecation date", func() {
+			envs.DeprecationDate = "null"
 			updatedDeprecationDates, err := UpdateDeprecationDates(
-				nil,
-				name1,
-				versionLine1,
-				"null",
-				deprecationLink,
-				deprecationMatch,
-			)
+				nil, name1, envs)
 			require.NoError(t, err)
 			assert.Len(t, updatedDeprecationDates, 0)
 		})
@@ -117,14 +109,9 @@ func testUpdateDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 
 	when("deprecation link is null", func() {
 		it("does not add the deprecation date", func() {
+			envs.DeprecationLink = "null"
 			updatedDeprecationDates, err := UpdateDeprecationDates(
-				nil,
-				name1,
-				versionLine1,
-				deprecationDateString,
-				"null",
-				deprecationMatch,
-			)
+				nil, name1, envs)
 			require.NoError(t, err)
 			assert.Len(t, updatedDeprecationDates, 0)
 
@@ -133,14 +120,9 @@ func testUpdateDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 
 	when("deprecation date is empty", func() {
 		it("does not add the deprecation date", func() {
+			envs.DeprecationDate = ""
 			updatedDeprecationDates, err := UpdateDeprecationDates(
-				nil,
-				name1,
-				versionLine1,
-				"",
-				deprecationLink,
-				deprecationMatch,
-			)
+				nil, name1, envs)
 			require.NoError(t, err)
 			assert.Len(t, updatedDeprecationDates, 0)
 		})
@@ -148,14 +130,9 @@ func testUpdateDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 
 	when("deprecation link is empty", func() {
 		it("does not add the deprecation date", func() {
+			envs.DeprecationLink = ""
 			updatedDeprecationDates, err := UpdateDeprecationDates(
-				nil,
-				name1,
-				versionLine1,
-				deprecationDateString,
-				"",
-				deprecationMatch,
-			)
+				nil, name1, envs)
 			require.NoError(t, err)
 			assert.Len(t, updatedDeprecationDates, 0)
 
@@ -164,14 +141,9 @@ func testUpdateDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 
 	when("match is 'null'", func() {
 		it("does not set match", func() {
+			envs.DeprecationMatch = "null"
 			updatedDeprecationDates, err := UpdateDeprecationDates(
-				nil,
-				name1,
-				versionLine1,
-				deprecationDateString,
-				deprecationLink,
-				"null",
-			)
+				nil, name1, envs)
 			require.NoError(t, err)
 			assert.Equal(t, []DependencyDeprecationDate{
 				{Name: name1, VersionLine: versionLine1, Date: deprecationDate, Link: deprecationLink, Match: ""},
@@ -181,14 +153,10 @@ func testUpdateDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 
 	when("deprecation date is not in the correct format", func() {
 		it("returns an error", func() {
+			envs.DeprecationDate = "invalid-date"
+			envs.DeprecationMatch = "null"
 			_, err := UpdateDeprecationDates(
-				nil,
-				name1,
-				versionLine1,
-				"invalid-date",
-				deprecationLink,
-				"null",
-			)
+				nil, name1, envs)
 			assert.EqualError(t, err, `could not parse date 'invalid-date', must be in format YYYY-MM-DD`)
 		})
 	})

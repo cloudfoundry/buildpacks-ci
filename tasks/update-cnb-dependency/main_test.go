@@ -50,7 +50,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			taskOutput, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(taskOutput))
 
-			var buildpackDescriptor BuildpackDescriptor
+			var buildpackDescriptor BuildpackToml
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackDescriptor)
 			require.NoError(t, err)
 
@@ -137,7 +137,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			taskOutput, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(taskOutput))
 
-			var buildpackDescriptor BuildpackDescriptor
+			var buildpackDescriptor BuildpackToml
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackDescriptor)
 			require.NoError(t, err)
 
@@ -200,7 +200,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			taskOutput, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(taskOutput))
 
-			var buildpackDescriptor BuildpackDescriptor
+			var buildpackDescriptor BuildpackToml
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackDescriptor)
 			require.NoError(t, err)
 
