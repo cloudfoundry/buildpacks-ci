@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"os"
-	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/pkg/errors"
@@ -26,25 +26,6 @@ type Metadata struct {
 	DependencyDeprecationDates []DependencyDeprecationDate `toml:"dependency_deprecation_dates"`
 }
 
-type Dependency struct {
-	ID           string
-	Name         string `toml:",omitempty"`
-	Sha256       string
-	Source       string `toml:",omitempty"`
-	SourceSha256 string `toml:"source_sha256,omitempty"`
-	Stacks       []string
-	URI          string
-	Version      string
-}
-
-type DependencyDeprecationDate struct {
-	Date        time.Time
-	Link        string
-	Name        string
-	VersionLine string `toml:"version_line"`
-	Match       string `toml:",omitempty"`
-}
-
 type Order struct {
 	Group []Group
 }
@@ -58,14 +39,18 @@ type Stack struct {
 	ID string
 }
 
-func updateBuildpackTomlFile(buildpackToml BuildpackToml) error {
-	buildpackTOML, err := os.OpenFile("artifacts/buildpack.toml", os.O_RDWR|os.O_CREATE, 0666)
-	if err != nil {
-		return errors.Wrap(err, "failed to open buildpack.toml")
-	}
-	defer buildpackTOML.Close()
+func (buildpackToml BuildpackToml) LoadExpandedDependencies() []Dependency {
+	return expandDependenciesForEachStack(buildpackToml.Metadata.Dependencies)
+}
 
-	if err := toml.NewEncoder(buildpackTOML).Encode(buildpackToml); err != nil {
+func (buildpackToml BuildpackToml) WriteToFile(filepath string) error {
+	buildpackTomlFile, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("failed to open buildpack.toml at: %s", filepath))
+	}
+	defer buildpackTomlFile.Close()
+
+	if err := toml.NewEncoder(buildpackTomlFile).Encode(buildpackToml); err != nil {
 		return errors.Wrap(err, "failed to save updated buildpack.toml")
 	}
 	return nil
