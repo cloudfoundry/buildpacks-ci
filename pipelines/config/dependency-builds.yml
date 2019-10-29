@@ -157,6 +157,7 @@ dependencies:
         removal_strategy: keep_latest_released
     copy-stacks:
       - bionic
+      - tiny
   godep:
     buildpacks:
       go:
