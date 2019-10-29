@@ -154,6 +154,8 @@ dependencies:
             deprecation_date: 2020-09-03
             link: https://golang.org/doc/devel/release.html
         removal_strategy: keep_latest_released
+    copy-stacks:
+      - bionic
   godep:
     buildpacks:
       go:
@@ -325,6 +327,8 @@ dependencies:
             link: https://github.com/nodejs/Release
         removal_strategy: keep_latest_released
     source_type: node
+    copy-stacks:
+      - bionic
   org.cloudfoundry.dotnet-core-runtime:
     buildpacks:
       dotnet-core-cnb:
