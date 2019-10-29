@@ -17,3 +17,4 @@ run:
   - buildpacks-ci/tasks/write-bionic-metadata/run.rb
 params:
   STACK:
+  STACK_ID:
