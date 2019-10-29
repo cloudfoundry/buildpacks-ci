@@ -351,8 +351,8 @@ jobs:
   <% end %>
 
 
-  <% if dep_name == 'node' || dep_name == 'go' %>
-- name: copy-<%=dep_name%>-<%= line %>-bionic
+  <% dep['copy-stacks']&.each do |stack| %>
+- name: copy-<%=dep_name%>-<%= line %>-<%= stack %>
   plan:
   - in_parallel:
     - get: buildpacks-ci
@@ -496,7 +496,7 @@ groups:
     <% if !is_child_cnb(dep_name) %>
     - finish-<%=dep_name%>-<%= line %>-story
     <% end %>
-    <% if dep_name == 'node' || dep_name == 'go' %>
+    <% if dep['copy-stacks'] %>
     - copy-<%=dep_name%>-<%= line %>-bionic
     <% end %>
     - build-<%=dep_name%>-<%= line %>
@@ -520,8 +520,8 @@ groups:
     <% if !is_child_cnb(dep_name) %>
     - finish-<%=dep_name%>-<%= line %>-story
     <% end %>
-    <% if dep_name == 'node' || dep_name == 'go' %>
-    - copy-<%=dep_name%>-<%= line %>-bionic
+    <% dep['copy-stacks']&.each do |stack| %>
+    - copy-<%=dep_name%>-<%= line %>-<%= stack %>
     <% end %>
     - build-<%=dep_name%>-<%= line %>
     <% end %>
