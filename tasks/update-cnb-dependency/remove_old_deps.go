@@ -51,10 +51,6 @@ func RemoveOldDeps(deps []Dependency, depID, versionLine string, keepN int) ([]D
 	return retainedDeps, nil
 }
 
-func getVersionRange(versionLine string) string {
-	return strings.Replace(versionLine, ".x.x", ".x", 1)
-}
-
 func getVersionLineConstraint(versionLine string) (semver.Range, error) {
 	if versionLine == latest {
 		return semver.ParseRange(">=0.0.0")
@@ -69,6 +65,10 @@ func getVersionLineConstraint(versionLine string) (semver.Range, error) {
 	}
 
 	return semver.ParseRange(versionLine)
+}
+
+func getVersionRange(versionLine string) string {
+	return strings.Replace(versionLine, ".x.x", ".x", 1)
 }
 
 func getMicrosoftVersionLineConstraint(matches [][]string) (semver.Range, error) {

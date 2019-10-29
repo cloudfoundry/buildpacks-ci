@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"gopkg.in/yaml.v2"
 
 	"github.com/BurntSushi/toml"
@@ -26,19 +28,39 @@ type DependencyMetadata struct {
 	} `json:"version"`
 }
 
-func loadResources() (EnvVars, DependencyOrchestratorConfig, BuildpackToml, Dependency, BuildMetadata, error) {
-	envVars, err := loadEnvVariables()
-	if err != nil {
-		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackToml{}, Dependency{}, BuildMetadata{}, err
-	}
+type BuildMetadata struct {
+	TrackerStoryID int    `json:"tracker_story_id"`
+	Version        string `json:"version"`
+	Source         struct {
+		URL    string `json:"url"`
+		Md5    string `json:"md5"`
+		Sha256 string `json:"sha256"`
+	} `json:"source"`
+	Sha256 string `json:"sha256"`
+	URL    string `json:"url"`
+}
 
+type DependencyOrchestratorConfig struct {
+	DeprecatedStacks []string          `yaml:"deprecated_stacks"`
+	V3Stacks         map[string]string `yaml:"v3_stacks"`
+	V3DepIDs         map[string]string `yaml:"v3_dep_ids"`
+	V3DepNames       map[string]string `yaml:"v3_dep_names"`
+}
+
+type EnvVars struct {
+	DeprecationDate DependencyDeprecationDate
+	VersionLine     string
+	VersionsToKeep  int
+}
+
+func loadResources() (EnvVars, DependencyOrchestratorConfig, BuildpackToml, Dependency, BuildMetadata, error) {
 	var depOrchestratorConfig DependencyOrchestratorConfig
 	if err := loadYAML(filepath.Join("config", "dependency-builds.yml"), &depOrchestratorConfig); err != nil {
 		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackToml{}, Dependency{}, BuildMetadata{}, err
 	}
 
-	var buildpackDescriptor BuildpackToml
-	if _, err := toml.DecodeFile(filepath.Join("buildpack", "buildpack.toml"), &buildpackDescriptor); err != nil {
+	var buildpackToml BuildpackToml
+	if _, err := toml.DecodeFile(filepath.Join("buildpack", "buildpack.toml"), &buildpackToml); err != nil {
 		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackToml{}, Dependency{}, BuildMetadata{}, err
 	}
 
@@ -51,21 +73,31 @@ func loadResources() (EnvVars, DependencyOrchestratorConfig, BuildpackToml, Depe
 		Version: depMetadata.Version.Ref,
 	}
 
+	envVars, err := loadEnvVariables(dep.ID)
+	if err != nil {
+		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackToml{}, Dependency{}, BuildMetadata{}, err
+	}
+
 	var buildMetadata BuildMetadata
 	if err := loadJSON(filepath.Join("builds", "binary-builds-new", depMetadata.Source.Name, depMetadata.Version.Ref+".json"), &buildMetadata); err != nil {
 		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackToml{}, Dependency{}, BuildMetadata{}, err
 	}
 
-	return envVars, depOrchestratorConfig, buildpackDescriptor, dep, buildMetadata, nil
+	return envVars, depOrchestratorConfig, buildpackToml, dep, buildMetadata, nil
 }
 
-func loadEnvVariables() (EnvVars, error) {
+func loadEnvVariables(dependencyDeprecationDateName string) (EnvVars, error) {
 	envVars := EnvVars{}
 	var err error
-	envVars.DeprecationDate = os.Getenv("DEPRECATION_DATE")
-	envVars.DeprecationLink = os.Getenv("DEPRECATION_LINK")
-	envVars.DeprecationMatch = os.Getenv("DEPRECATION_MATCH")
+	deprecationDate := os.Getenv("DEPRECATION_DATE")
+	deprecationLink := os.Getenv("DEPRECATION_LINK")
+	deprecationMatch := os.Getenv("DEPRECATION_MATCH")
 	envVars.VersionLine = strings.ToLower(os.Getenv("VERSION_LINE"))
+	envVars.DeprecationDate, err = NewDependencyDeprecationDate(deprecationDate, deprecationLink, dependencyDeprecationDateName, envVars.VersionLine, deprecationMatch)
+	if err != nil {
+		return EnvVars{}, errors.Wrap(err, "failed to initialize dependency deprecation date")
+	}
+
 	envVars.VersionsToKeep, err = strconv.Atoi(os.Getenv("VERSIONS_TO_KEEP"))
 	return envVars, err
 }
