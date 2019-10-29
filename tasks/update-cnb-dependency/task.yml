@@ -14,10 +14,10 @@ inputs:
 outputs:
   - name: artifacts
 run:
-  path: bash
+  path: go
   args:
-    - -cl
-    - buildpacks-ci/tasks/update-cnb-dependency/run.rb
+    - run
+    - buildpacks-ci/tasks/update-cnb-dependency/main.go
 params:
   VERSION_LINE_TYPE:
   VERSION_LINE:

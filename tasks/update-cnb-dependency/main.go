@@ -27,6 +27,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	buildpackToml.Order = UpdateOrderDependencyVersion(buildpackToml.Order, dep)
+
 	updatedDeprecationDates, err := UpdateDeprecationDatesWithDependency(
 		buildpackToml.Metadata.DependencyDeprecationDates, envs.DeprecationDate)
 	if err != nil {

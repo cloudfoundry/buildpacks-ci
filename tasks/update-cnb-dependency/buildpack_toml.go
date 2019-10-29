@@ -26,15 +26,6 @@ type Metadata struct {
 	DependencyDeprecationDates []DependencyDeprecationDate `toml:"dependency_deprecation_dates"`
 }
 
-type Order struct {
-	Group []Group
-}
-
-type Group struct {
-	ID      string
-	Version string
-}
-
 type Stack struct {
 	ID string
 }
