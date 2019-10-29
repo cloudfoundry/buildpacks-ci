@@ -6,36 +6,36 @@ import (
 	"strings"
 )
 
-func GenerateCommitMessage(oldDeps, newDeps []Dependency, depID, depVersion string, storyID int) string {
+func GenerateCommitMessage(oldDeps, newDeps []Dependency, dep Dependency, storyID int) string {
 	added := false
 	rebuilt := false
 	stacks := map[string]bool{}
 	removedDeps := map[string]bool{}
 
-	for _, dep := range newDeps {
-		if dep.ID != depID || dep.Version != depVersion {
+	for _, newDep := range newDeps {
+		if newDep.ID != dep.ID || newDep.Version != dep.Version {
 			continue
 		}
 
-		oldDep, exists := findDependency(oldDeps, dep)
+		oldDep, exists := findDependency(oldDeps, newDep)
 		if exists {
-			if oldDep.Sha256 != dep.Sha256 || oldDep.URI != dep.URI {
+			if oldDep.Sha256 != newDep.Sha256 || oldDep.URI != newDep.URI {
 				rebuilt = true
-				stacks[dep.Stacks[0]] = true
+				stacks[newDep.Stacks[0]] = true
 			}
 		} else {
 			added = true
-			stacks[dep.Stacks[0]] = true
+			stacks[newDep.Stacks[0]] = true
 		}
 	}
 
 	for _, dep := range oldDeps {
-		if dep.ID != depID {
+		if dep.ID != dep.ID {
 			continue
 		}
 
 		if !containsDependency(newDeps, dep) {
-			removedDeps[depID+" "+dep.Version] = true
+			removedDeps[dep.ID+" "+dep.Version] = true
 			stacks[dep.Stacks[0]] = true
 		}
 	}
@@ -46,9 +46,9 @@ func GenerateCommitMessage(oldDeps, newDeps []Dependency, depID, depVersion stri
 
 	var commitMessage string
 	if added {
-		commitMessage = fmt.Sprintf("Add %s %s", depID, depVersion)
+		commitMessage = fmt.Sprintf("Add %s %s", dep.ID, dep.Version)
 	} else {
-		commitMessage = fmt.Sprintf("Rebuild %s %s", depID, depVersion)
+		commitMessage = fmt.Sprintf("Rebuild %s %s", dep.ID, dep.Version)
 	}
 
 	if len(removedDeps) > 0 {

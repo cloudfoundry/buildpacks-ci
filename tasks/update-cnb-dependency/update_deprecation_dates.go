@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"time"
@@ -9,32 +10,28 @@ import (
 func UpdateDeprecationDates(
 	deprecationDates []DependencyDeprecationDate,
 	depName string,
-	versionLine string,
-	deprecationDateString string,
-	deprecationLink string,
-	deprecationMatch string,
-) ([]DependencyDeprecationDate, error) {
+	envs EnvVars) ([]DependencyDeprecationDate, error) {
 
-	if deprecationDateString == "null" || deprecationLink == "null" || deprecationDateString == "" || deprecationLink == "" {
+	if envs.DeprecationDate == "null" || envs.DeprecationLink == "null" || envs.DeprecationDate == "" || envs.DeprecationLink == "" {
 		return deprecationDates, nil
 	}
 
-	if deprecationMatch == "null" {
-		deprecationMatch = ""
+	if envs.DeprecationMatch == "null" {
+		envs.DeprecationMatch = ""
 	}
 
-	deprecationDate, err := time.Parse("2006-01-02", deprecationDateString)
+	deprecationDate, err := time.Parse("2006-01-02", envs.DeprecationDate)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse date '%s', must be in format YYYY-MM-DD", deprecationDateString)
+		return nil, errors.New(fmt.Sprintf("could not parse date '%s', must be in format YYYY-MM-DD", envs.DeprecationDate))
 	}
 
 	overwroteExistingDate := false
 
 	for i, existingDeprecationDate := range deprecationDates {
-		if existingDeprecationDate.Name == depName && existingDeprecationDate.VersionLine == versionLine {
+		if existingDeprecationDate.Name == depName && existingDeprecationDate.VersionLine == envs.VersionLine {
 			deprecationDates[i].Date = deprecationDate
-			deprecationDates[i].Link = deprecationLink
-			deprecationDates[i].Match = deprecationMatch
+			deprecationDates[i].Link = envs.DeprecationLink
+			deprecationDates[i].Match = envs.DeprecationMatch
 			overwroteExistingDate = true
 			break
 		}
@@ -43,10 +40,10 @@ func UpdateDeprecationDates(
 	if !overwroteExistingDate {
 		deprecationDates = append(deprecationDates, DependencyDeprecationDate{
 			Name:        depName,
-			VersionLine: versionLine,
+			VersionLine: envs.VersionLine,
 			Date:        deprecationDate,
-			Link:        deprecationLink,
-			Match:       deprecationMatch,
+			Link:        envs.DeprecationLink,
+			Match:       envs.DeprecationMatch,
 		})
 	}
 
