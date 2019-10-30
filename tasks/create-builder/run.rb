@@ -60,6 +60,7 @@ Dir.glob('sources/*/').each do |dir|
 
   if is_metabuildpack
     buildpack_toml_data.dig('metadata','dependencies').each do |dep|
+      next if dep['id'] == "lifecycle"
       bp_location = File.absolute_path(File.join(dir, dep['id']))
 
       res = Net::HTTP.get_response(URI(dep['uri']))
