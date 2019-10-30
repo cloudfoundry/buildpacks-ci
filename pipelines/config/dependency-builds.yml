@@ -8,6 +8,7 @@ dependencies:
     third_party_hosted: true
     source_type: appd_agent
     any_stack: true
+    versions_to_keep: 2
   bower:
     buildpacks:
       dotnet-core:
@@ -15,6 +16,7 @@ dependencies:
           - line: latest
     source_type: npm
     any_stack: true
+    versions_to_keep: 2
   bundler:
     buildpacks:
       ruby:
@@ -23,6 +25,7 @@ dependencies:
           - line: 2.X.X
     source_type: rubygems
     any_stack: true
+    versions_to_keep: 2
   CAAPM:
     buildpacks:
       php:
@@ -31,6 +34,7 @@ dependencies:
     third_party_hosted: true
     source_type: ca_apm_agent
     any_stack: true
+    versions_to_keep: 2
   composer:
     buildpacks:
       php:
@@ -44,6 +48,7 @@ dependencies:
       - 'repo: composer/composer'
       - 'extension: .phar'
     any_stack: true
+    versions_to_keep: 2
   dep:
     buildpacks:
       go:
@@ -57,6 +62,7 @@ dependencies:
       - 'repo: golang/dep'
       - 'fetch_source: true'
     copy-stacks:
+    versions_to_keep: 2
   dotnet-sdk:
     buildpacks:
       dotnet-core:
@@ -85,6 +91,7 @@ dependencies:
           - line: 2.2.4X
           - line: 3.0.1X
         removal_strategy: keep_all
+    versions_to_keep: 99
   dotnet-runtime:
     buildpacks:
       dotnet-core:
@@ -111,6 +118,7 @@ dependencies:
             deprecation_date: ''
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: keep_all
+    versions_to_keep: 99
   dotnet-aspnetcore:
     buildpacks:
       dotnet-core:
@@ -125,6 +133,7 @@ dependencies:
           - line: 2.2.X
           - line: 3.0.X
         removal_strategy: keep_all
+    versions_to_keep: 99
   glide:
     buildpacks:
       go:
@@ -134,6 +143,7 @@ dependencies:
     source_params:
       - 'repo: Masterminds/glide'
       - 'fetch_source: true'
+    versions_to_keep: 2
   go:
     buildpacks:
       go:
@@ -158,6 +168,7 @@ dependencies:
     copy-stacks:
       - bionic
       - tiny
+    versions_to_keep: 2
   godep:
     buildpacks:
       go:
@@ -167,6 +178,7 @@ dependencies:
     source_params:
       - 'repo: tools/godep'
       - 'fetch_source: true'
+    versions_to_keep: 2
   httpd:
     buildpacks:
       php:
@@ -175,6 +187,7 @@ dependencies:
       httpd-cnb:
         lines:
           - line: latest
+    versions_to_keep: 2
   hwc:
     buildpacks:
       hwc:
@@ -185,6 +198,7 @@ dependencies:
       - 'repo: cloudfoundry/hwc'
       - 'fetch_source: true'
     any_stack: true
+    versions_to_keep: 2
   jruby:
     buildpacks:
       ruby:
@@ -192,6 +206,7 @@ dependencies:
           - line: 9.1.X
           - line: 9.2.X
     source_type: jruby
+    versions_to_keep: 2
   libunwind:
     buildpacks:
       dotnet-core:
@@ -201,6 +216,7 @@ dependencies:
     source_params:
       - 'repo: libunwind/libunwind'
       - 'extension: .tar.gz'
+    versions_to_keep: 2
   libgdiplus:
     buildpacks:
       dotnet-core:
@@ -210,6 +226,7 @@ dependencies:
     source_params:
       - 'repo: mono/libgdiplus'
       - 'tag_regex: ^[0-9]+\.[0-9]+$'
+    versions_to_keep: 2
   lifecycle:
     buildpacks:
       nodejs-cnb:
@@ -221,6 +238,7 @@ dependencies:
       - 'repo: buildpack/lifecycle'
       - 'extension: .tgz'
     any_stack: true
+    versions_to_keep: 1
   miniconda2:
     buildpacks:
       python:
@@ -231,6 +249,7 @@ dependencies:
     source_params:
       - 'generation: 2'
     any_stack: true
+    versions_to_keep: 2
   miniconda3:
     buildpacks:
       python:
@@ -244,6 +263,7 @@ dependencies:
     source_params:
       - 'generation: 3'
     any_stack: true
+    versions_to_keep: 2
   nginx:
     buildpacks:
       nginx:
@@ -264,12 +284,14 @@ dependencies:
           - line: 1.17.X
             deprecation_date: 2020-05-01
             link: https://nginx.org/
+    versions_to_keep: 2
   openresty:
     buildpacks:
       nginx:
         lines:
           - line: 1.13.X
           - line: 1.15.X
+    versions_to_keep: 2
   nginx-static:
     buildpacks:
       php:
@@ -286,6 +308,7 @@ dependencies:
             deprecation_date: 2020-05-01
             link: https://nginx.org/
     source_type: nginx
+    versions_to_keep: 2
   node:
     buildpacks:
       nodejs:
@@ -331,6 +354,7 @@ dependencies:
     source_type: node
     copy-stacks:
       - bionic
+    versions_to_keep: 2
   org.cloudfoundry.dotnet-core-runtime:
     buildpacks:
       dotnet-core-cnb:
@@ -342,6 +366,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.dotnet-core-aspnet:
     buildpacks:
       dotnet-core-cnb:
@@ -353,6 +378,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.dotnet-core-sdk:
     buildpacks:
       dotnet-core-cnb:
@@ -364,6 +390,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.dotnet-core-build:
     buildpacks:
       dotnet-core-cnb:
@@ -375,6 +402,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.dotnet-core-conf:
     buildpacks:
       dotnet-core-cnb:
@@ -386,6 +414,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.npm:
     buildpacks:
       nodejs-cnb:
@@ -398,6 +427,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.node-engine:
     buildpacks:
       nodejs-cnb:
@@ -410,6 +440,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.yarn:
     buildpacks:
       nodejs-cnb:
@@ -422,6 +453,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.nodejs-compat:
     buildpacks:
       nodejs-cnb:
@@ -434,6 +466,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.python-runtime:
     buildpacks:
       python-cnb:
@@ -445,6 +478,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.pip:
     buildpacks:
       python-cnb:
@@ -456,6 +490,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.pipenv:
     buildpacks:
       python-cnb:
@@ -467,6 +502,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.conda:
     buildpacks:
       python-cnb:
@@ -478,6 +514,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.php-dist:
     buildpacks:
       php-cnb:
@@ -489,6 +526,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.php-composer:
     buildpacks:
       php-cnb:
@@ -500,6 +538,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.httpd:
     buildpacks:
       php-cnb:
@@ -511,6 +550,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.nginx:
     buildpacks:
       php-cnb:
@@ -522,6 +562,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.php-web:
     buildpacks:
       php-cnb:
@@ -533,6 +574,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.go-compiler:
     buildpacks:
       go-cnb:
@@ -544,6 +586,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.go-mod:
     buildpacks:
       go-cnb:
@@ -555,6 +598,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.dep:
     buildpacks:
       go-cnb:
@@ -566,6 +610,7 @@ dependencies:
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
+    versions_to_keep: 1
   php:
     buildpacks:
       php:
@@ -599,6 +644,7 @@ dependencies:
             link: http://php.net/supported-versions.php
         removal_strategy: keep_latest_released
     source_type: php
+    versions_to_keep: 2
   pipenv:
     buildpacks:
       python:
@@ -608,6 +654,7 @@ dependencies:
         lines:
           - line: latest
     source_type: pypi
+    versions_to_keep: 2
   python:
     buildpacks:
       python:
@@ -646,6 +693,7 @@ dependencies:
             deprecation_date: 2023-06-27
             link: https://www.python.org/dev/peps/pep-0537/
         removal_strategy: keep_latest_released
+    versions_to_keep: 2
   r:
     buildpacks:
       r:
@@ -662,6 +710,7 @@ dependencies:
       - forecast
       - shiny
       - plumber
+    versions_to_keep: 2
   ruby:
     buildpacks:
       ruby:
@@ -680,6 +729,7 @@ dependencies:
           - line: 2.5.X
           - line: 2.6.X
         removal_strategy: keep_latest_released
+    versions_to_keep: 2
   rubygems:
     buildpacks:
       ruby:
@@ -687,6 +737,7 @@ dependencies:
           - line: latest
     source_type: rubygems_cli
     any_stack: true
+    versions_to_keep: 2
   setuptools:
     buildpacks:
       python:
@@ -694,6 +745,7 @@ dependencies:
           - line: latest
     source_type: pypi
     any_stack: true
+    versions_to_keep: 2
   yarn:
     buildpacks:
       nodejs:
@@ -710,6 +762,7 @@ dependencies:
       - 'repo: yarnpkg/yarn'
       - 'extension: .tar.gz'
     any_stack: true
+    versions_to_keep: 2
 build_stacks: ['cflinuxfs3']
 copy_stacks: ['bionic']
 windows_stacks: ['windows2012R2', 'windows2016', 'windows']
