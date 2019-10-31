@@ -270,12 +270,33 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			assert.Contains(t, string(latestCommitMessage), "Add org.cloudfoundry.some-child 1.0.1, remove org.cloudfoundry.some-child 1.0.0")
 			assert.Contains(t, string(latestCommitMessage), "for stack(s) io.buildpacks.stacks.bionic, org.cloudfoundry.stacks.cflinuxfs3 [#111111111]")
 		})
+	})
 
-		it("includes tiny stack in dependencies and commit message if requested", func() {
+	when("updating a parent CNB with tiny included", func() {
+		var (
+			outputDir = "testdata/updating-parent-cnb-with-tiny-stack/artifacts"
+			envVars   = []string{
+				"VERSION_LINE=latest",
+				"VERSIONS_TO_KEEP=1",
+				"HOME=" + os.Getenv("HOME"),
+				"PATH=" + os.Getenv("PATH"),
+			}
+		)
+
+		it.Before(func() {
+			require.NoError(t, os.RemoveAll(outputDir))
+			require.NoError(t, os.Mkdir(outputDir, 0755))
+			require.NoError(t, exec.Command("git", "-C", outputDir, "init").Run())
+		})
+
+		it.After(func() {
+			require.NoError(t, os.RemoveAll(outputDir))
+		})
+
+		it("includes tiny stack in dependencies and commit message", func() {
 			cmd := exec.Command("go", "run", "../../")
-			cmd.Dir = "./testdata/updating-parent-cnb"
+			cmd.Dir = "./testdata/updating-parent-cnb-with-tiny-stack"
 			cmd.Env = append(cmd.Env, envVars...)
-			cmd.Env = append(cmd.Env, "INCLUDE_TINY=true")
 			taskOutput, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(taskOutput))
 
@@ -318,5 +339,4 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			}, buildpackToml.Metadata.Dependencies)
 		})
 	})
-
 }
