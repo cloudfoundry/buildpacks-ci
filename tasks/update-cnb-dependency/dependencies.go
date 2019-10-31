@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
-	"strings"
 
 	"github.com/blang/semver"
 )
@@ -20,6 +19,9 @@ type Dependency struct {
 	URI          string
 	Version      string
 }
+
+const AnyStack = "any-stack"
+const TinyStack = "tiny"
 
 func sortDependencies(deps []Dependency) func(i, j int) bool {
 	return func(i, j int) bool {
@@ -56,7 +58,7 @@ func expandDependenciesForEachStack(deps []Dependency) []Dependency {
 	return expandedDeps
 }
 
-func loadDependenciesFromBinaryBuildsForDep(dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig) ([]Dependency, error) {
+func loadDependenciesFromBinaryBuildsForDep(dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig, includeTiny bool) ([]Dependency, error) {
 	var depsToAdd []Dependency
 
 	buildMetadataPaths, err := filepath.Glob(filepath.Join("builds", "binary-builds-new", dep.ID, fmt.Sprintf("%s-*.json", dep.Version)))
@@ -65,7 +67,7 @@ func loadDependenciesFromBinaryBuildsForDep(dep Dependency, depOrchestratorConfi
 	}
 
 	for _, buildMetadataPath := range buildMetadataPaths {
-		deps, err := constructDependenciesFromBuildMetadata(dep, buildMetadataPath, depOrchestratorConfig)
+		deps, err := constructDependenciesFromBuildMetadata(dep, buildMetadataPath, depOrchestratorConfig, includeTiny)
 		if err != nil {
 			return depsToAdd, err
 		}
@@ -74,13 +76,13 @@ func loadDependenciesFromBinaryBuildsForDep(dep Dependency, depOrchestratorConfi
 	return depsToAdd, nil
 }
 
-func constructDependenciesFromBuildMetadata(dep Dependency, buildMetadataPath string, depOrchestratorConfig DependencyOrchestratorConfig) ([]Dependency, error) {
+func constructDependenciesFromBuildMetadata(dep Dependency, buildMetadataPath string, depOrchestratorConfig DependencyOrchestratorConfig, includeTiny bool) ([]Dependency, error) {
 	var buildMetadata BuildMetadata
 	if err := loadJSON(buildMetadataPath, &buildMetadata); err != nil {
 		return nil, err
 	}
 
-	stacks, err := determineStacks(buildMetadataPath, depOrchestratorConfig.V3Stacks, depOrchestratorConfig.DeprecatedStacks)
+	stacks, err := determineStacks(buildMetadataPath, depOrchestratorConfig.V3Stacks, depOrchestratorConfig.DeprecatedStacks, includeTiny)
 	if err != nil {
 		return nil, err
 	}
@@ -101,39 +103,48 @@ func constructDependenciesFromBuildMetadata(dep Dependency, buildMetadataPath st
 	return deps, nil
 }
 
-func determineStacks(buildMetadataPath string, stacksMap map[string]string, deprecatedStacks []string) ([]string, error) {
-	var stacks []string
-	if strings.HasSuffix(buildMetadataPath, "any-stack.json") {
-		for _, stackID := range stacksMap {
-			stacks = append(stacks, stackID)
-		}
-		if len(stacks) == 0 {
-			return nil, errors.New("stack is 'any-stack' but no stacks are configured, check dependency-builds.yml")
-		}
-	} else {
-		stackRegexp := regexp.MustCompile(`-([^-]*)\.json$`)
-		matches := stackRegexp.FindStringSubmatch(buildMetadataPath)
-		if len(matches) != 2 {
-			return nil, errors.New(fmt.Sprintf("expected to find one stack name in filename (%s) but found: %v", filepath.Base(buildMetadataPath), matches[1:]))
-		}
-		stack := matches[1]
+func determineStacks(buildMetadataPath string, stacksMap map[string]string, deprecatedStacks []string, includeTiny bool) ([]string, error) {
+	stackRegexp := regexp.MustCompile(`\/(?:\.|\d)*-(.*)\.json$`)
+	matches := stackRegexp.FindStringSubmatch(buildMetadataPath)
+	if len(matches) != 2 {
+		return nil, errors.New(fmt.Sprintf("expected to find one stack name in filename (%s) but found: %v", filepath.Base(buildMetadataPath), matches[1:]))
+	}
+	stack := matches[1]
 
-		for _, deprecatedStack := range deprecatedStacks {
-			if stack == deprecatedStack {
-				return nil, nil
-			}
-		}
-
-		for stackName, stackID := range stacksMap {
-			if stack == stackName {
-				stacks = []string{stackID}
-				break
-			}
-		}
-		if len(stacks) == 0 {
-			return nil, errors.New(fmt.Sprintf("%s is not a valid stack", stack))
-		}
+	if stack == AnyStack {
+		return handleAnyStack(stacksMap, includeTiny)
+	} else if stackIsDeprecated(stack, deprecatedStacks) {
+		return nil, nil
 	}
 
+	for stackName, stackID := range stacksMap {
+		if stack == stackName {
+			return []string{stackID}, nil
+		}
+	}
+	return nil, errors.New(fmt.Sprintf("%s is not a valid stack", stack))
+}
+
+func handleAnyStack(stacksMap map[string]string, includeTiny bool) ([]string, error) {
+	var stacks []string
+	for stack, stackID := range stacksMap {
+		if stack == TinyStack && !includeTiny {
+			continue
+		}
+		stacks = append(stacks, stackID)
+	}
+
+	if len(stacks) == 0 {
+		return nil, errors.New("stack is 'any-stack' but no stacks are configured, check dependency-builds.yml")
+	}
 	return stacks, nil
+}
+
+func stackIsDeprecated(stack string, deprecatedStacks []string) bool {
+	for _, deprecatedStack := range deprecatedStacks {
+		if stack == deprecatedStack {
+			return true
+		}
+	}
+	return false
 }

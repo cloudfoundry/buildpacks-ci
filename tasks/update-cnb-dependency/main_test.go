@@ -16,7 +16,7 @@ import (
 )
 
 func TestUpdateCNBDependencyTask(t *testing.T) {
-	spec.Run(t, "update-cnb-dependency task", testUpdateCNBDependencyTask, spec.Report(report.Terminal{}))
+	spec.Run(t, "UpdateCNBDependencyTask", testUpdateCNBDependencyTask, spec.Report(report.Terminal{}))
 }
 
 func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
@@ -127,6 +127,14 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/some-dep/some-dep-2.1.0.linux-amd64-cflinuxfs3-eeeeeeee.tar.gz",
 					Version:      "2.1.0",
 				},
+				{
+					ID:      "some-dep",
+					Name:    "Some Dep",
+					Sha256:  "sha256-for-tiny-binary-2.1.0",
+					Stacks:  []string{"org.cloudfoundry.stacks.tiny"},
+					URI:     "https://example.org/some-dep-2.1.0.tgz",
+					Version: "2.1.0",
+				},
 			}, buildpackToml.Metadata.Dependencies)
 		})
 
@@ -168,7 +176,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			latestCommitMessage, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(latestCommitMessage))
 			assert.Contains(t, string(latestCommitMessage), "Add some-dep 2.1.0, remove some-dep 2.0.0")
-			assert.Contains(t, string(latestCommitMessage), "for stack(s) io.buildpacks.stacks.bionic, org.cloudfoundry.stacks.cflinuxfs3 [#111111111]")
+			assert.Contains(t, string(latestCommitMessage), "for stack(s) io.buildpacks.stacks.bionic, org.cloudfoundry.stacks.cflinuxfs3, org.cloudfoundry.stacks.tiny [#111111111]")
 		})
 	})
 
@@ -223,16 +231,30 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz",
 					Version:      "1.0.1",
 				},
-				{
-					ID:           "org.cloudfoundry.some-child",
-					Sha256:       "sha256-for-binary-1.0.1",
-					Source:       "https://github.com/cloudfoundry/some-child-cnb/archive/v1.0.1.tar.gz",
-					SourceSha256: "sha256-for-source-1.0.1",
-					Stacks:       []string{"org.cloudfoundry.stacks.tiny"},
-					URI:          "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz",
-					Version:      "1.0.1",
-				},
 			}, buildpackToml.Metadata.Dependencies)
+		})
+
+		it("updates versions in order", func() {
+			cmd := exec.Command("go", "run", "../../")
+			cmd.Dir = "./testdata/updating-parent-cnb"
+			cmd.Env = append(cmd.Env, envVars...)
+			taskOutput, err := cmd.CombinedOutput()
+			require.NoError(t, err, string(taskOutput))
+
+			var buildpackToml BuildpackToml
+			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackToml)
+			require.NoError(t, err)
+
+			assert.Equal(t, []Order{{Group: []Group{
+				{
+					ID:      "org.cloudfoundry.some-child",
+					Version: "1.0.1",
+				},
+				{
+					ID:      "org.cloudfoundry.other-child",
+					Version: "2.0.0",
+				},
+			}}}, buildpackToml.Order)
 		})
 
 		it("shows the added and removed child CNB versions in the commit message", func() {
@@ -246,7 +268,55 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			latestCommitMessage, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(latestCommitMessage))
 			assert.Contains(t, string(latestCommitMessage), "Add org.cloudfoundry.some-child 1.0.1, remove org.cloudfoundry.some-child 1.0.0")
+			assert.Contains(t, string(latestCommitMessage), "for stack(s) io.buildpacks.stacks.bionic, org.cloudfoundry.stacks.cflinuxfs3 [#111111111]")
+		})
+
+		it("includes tiny stack in dependencies and commit message if requested", func() {
+			cmd := exec.Command("go", "run", "../../")
+			cmd.Dir = "./testdata/updating-parent-cnb"
+			cmd.Env = append(cmd.Env, envVars...)
+			cmd.Env = append(cmd.Env, "INCLUDE_TINY=true")
+			taskOutput, err := cmd.CombinedOutput()
+			require.NoError(t, err, string(taskOutput))
+
+			cmd = exec.Command("git", "-C", outputDir, "log", "-1", "--format=%B")
+			latestCommitMessage, err := cmd.CombinedOutput()
+			require.NoError(t, err, string(latestCommitMessage))
+			assert.Contains(t, string(latestCommitMessage), "Add org.cloudfoundry.some-child 1.0.1, remove org.cloudfoundry.some-child 1.0.0")
 			assert.Contains(t, string(latestCommitMessage), "for stack(s) io.buildpacks.stacks.bionic, org.cloudfoundry.stacks.cflinuxfs3, org.cloudfoundry.stacks.tiny [#111111111]")
+
+			var buildpackToml BuildpackToml
+			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackToml)
+			require.NoError(t, err)
+			assert.Equal(t, []Dependency{
+				{
+					ID:           "org.cloudfoundry.some-child",
+					Sha256:       "sha256-for-binary-1.0.1",
+					Source:       "https://github.com/cloudfoundry/some-child-cnb/archive/v1.0.1.tar.gz",
+					SourceSha256: "sha256-for-source-1.0.1",
+					Stacks:       []string{"io.buildpacks.stacks.bionic"},
+					URI:          "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz",
+					Version:      "1.0.1",
+				},
+				{
+					ID:           "org.cloudfoundry.some-child",
+					Sha256:       "sha256-for-binary-1.0.1",
+					Source:       "https://github.com/cloudfoundry/some-child-cnb/archive/v1.0.1.tar.gz",
+					SourceSha256: "sha256-for-source-1.0.1",
+					Stacks:       []string{"org.cloudfoundry.stacks.cflinuxfs3"},
+					URI:          "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz",
+					Version:      "1.0.1",
+				}, {
+					ID:           "org.cloudfoundry.some-child",
+					Sha256:       "sha256-for-binary-1.0.1",
+					Source:       "https://github.com/cloudfoundry/some-child-cnb/archive/v1.0.1.tar.gz",
+					SourceSha256: "sha256-for-source-1.0.1",
+					Stacks:       []string{"org.cloudfoundry.stacks.tiny"},
+					URI:          "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz",
+					Version:      "1.0.1",
+				},
+			}, buildpackToml.Metadata.Dependencies)
 		})
 	})
+
 }

@@ -16,7 +16,6 @@ func UpdateOrderDependencyVersion(orders []Order, dep Dependency) []Order {
 				orders[i].Group[j].Version = dep.Version
 			}
 		}
-
 	}
 
 	return orders

@@ -10,7 +10,7 @@ func main() {
 		log.Fatalf("Failed to load task resources: %s", err)
 	}
 
-	depsToAdd, err := loadDependenciesFromBinaryBuildsForDep(dep, depOrchestratorConfig)
+	depsToAdd, err := loadDependenciesFromBinaryBuildsForDep(dep, depOrchestratorConfig, envs.IncludeTiny)
 	if err != nil {
 		log.Fatalf("Failed to construct list of dependencies to add: %s", err)
 	}
@@ -27,7 +27,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	buildpackToml.Order = UpdateOrderDependencyVersion(buildpackToml.Order, dep)
+	updatedOrder := UpdateOrderDependencyVersion(buildpackToml.Order, dep)
 
 	updatedDeprecationDates, err := UpdateDeprecationDatesWithDependency(
 		buildpackToml.Metadata.DependencyDeprecationDates, envs.DeprecationDate)
@@ -37,6 +37,7 @@ func main() {
 
 	buildpackToml.Metadata.Dependencies = updatedDeps
 	buildpackToml.Metadata.DependencyDeprecationDates = updatedDeprecationDates
+	buildpackToml.Order = updatedOrder
 
 	if err := buildpackToml.WriteToFile("artifacts/buildpack.toml"); err != nil {
 		log.Fatalf("failed to update buildpack toml: %s", err)
