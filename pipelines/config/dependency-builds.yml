@@ -787,6 +787,11 @@ v3_dep_names:
   miniconda3: Miniconda
   bundler: Bundler
   ruby: Ruby
+include_tiny_in_any_stack:
+  - dep
+  - org.cloudfoundry.go
+  - org.cloudfoundry.go-compiler
+  - org.cloudfoundr.go-mod
 
 #! only check deprecation dates for dotnet-runtime as they are redundant for sdk and aspnetcore
 skip_deprecation_check:

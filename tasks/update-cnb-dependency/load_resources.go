@@ -45,13 +45,13 @@ type DependencyOrchestratorConfig struct {
 	V3Stacks         map[string]string `yaml:"v3_stacks"`
 	V3DepIDs         map[string]string `yaml:"v3_dep_ids"`
 	V3DepNames       map[string]string `yaml:"v3_dep_names"`
+	IncludeTiny      []string          `yaml:"include_tiny_in_any_stack"`
 }
 
 type EnvVars struct {
 	DeprecationDate DependencyDeprecationDate
 	VersionLine     string
 	VersionsToKeep  int
-	IncludeTiny     bool
 }
 
 func loadResources() (EnvVars, DependencyOrchestratorConfig, BuildpackToml, Dependency, BuildMetadata, error) {
@@ -97,13 +97,6 @@ func loadEnvVariables(dependencyDeprecationDateName string) (EnvVars, error) {
 	envVars.DeprecationDate, err = NewDependencyDeprecationDate(deprecationDate, deprecationLink, dependencyDeprecationDateName, envVars.VersionLine, deprecationMatch)
 	if err != nil {
 		return EnvVars{}, errors.Wrap(err, "failed to initialize dependency deprecation date")
-	}
-
-	if includeTiny, exists := os.LookupEnv("INCLUDE_TINY"); exists {
-		envVars.IncludeTiny, err = strconv.ParseBool(includeTiny)
-		if err != nil {
-			return EnvVars{}, errors.Wrap(err, "failed to parse INCLUDE_TINY environment variable")
-		}
 	}
 
 	envVars.VersionsToKeep, err = strconv.Atoi(os.Getenv("VERSIONS_TO_KEEP"))

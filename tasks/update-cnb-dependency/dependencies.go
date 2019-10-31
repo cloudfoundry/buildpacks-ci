@@ -58,7 +58,7 @@ func expandDependenciesForEachStack(deps []Dependency) []Dependency {
 	return expandedDeps
 }
 
-func loadDependenciesFromBinaryBuildsForDep(dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig, includeTiny bool) ([]Dependency, error) {
+func loadDependenciesFromBinaryBuildsForDep(dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig) ([]Dependency, error) {
 	var depsToAdd []Dependency
 
 	buildMetadataPaths, err := filepath.Glob(filepath.Join("builds", "binary-builds-new", dep.ID, fmt.Sprintf("%s-*.json", dep.Version)))
@@ -67,7 +67,7 @@ func loadDependenciesFromBinaryBuildsForDep(dep Dependency, depOrchestratorConfi
 	}
 
 	for _, buildMetadataPath := range buildMetadataPaths {
-		deps, err := constructDependenciesFromBuildMetadata(dep, buildMetadataPath, depOrchestratorConfig, includeTiny)
+		deps, err := constructDependenciesFromBuildMetadata(dep, buildMetadataPath, depOrchestratorConfig)
 		if err != nil {
 			return depsToAdd, err
 		}
@@ -76,13 +76,13 @@ func loadDependenciesFromBinaryBuildsForDep(dep Dependency, depOrchestratorConfi
 	return depsToAdd, nil
 }
 
-func constructDependenciesFromBuildMetadata(dep Dependency, buildMetadataPath string, depOrchestratorConfig DependencyOrchestratorConfig, includeTiny bool) ([]Dependency, error) {
+func constructDependenciesFromBuildMetadata(dep Dependency, buildMetadataPath string, depOrchestratorConfig DependencyOrchestratorConfig) ([]Dependency, error) {
 	var buildMetadata BuildMetadata
 	if err := loadJSON(buildMetadataPath, &buildMetadata); err != nil {
 		return nil, err
 	}
 
-	stacks, err := determineStacks(buildMetadataPath, depOrchestratorConfig.V3Stacks, depOrchestratorConfig.DeprecatedStacks, includeTiny)
+	stacks, err := determineStacks(buildMetadataPath, dep, depOrchestratorConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func constructDependenciesFromBuildMetadata(dep Dependency, buildMetadataPath st
 	return deps, nil
 }
 
-func determineStacks(buildMetadataPath string, stacksMap map[string]string, deprecatedStacks []string, includeTiny bool) ([]string, error) {
+func determineStacks(buildMetadataPath string, dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig) ([]string, error) {
 	stackRegexp := regexp.MustCompile(`\/(?:\.|\d)*-(.*)\.json$`)
 	matches := stackRegexp.FindStringSubmatch(buildMetadataPath)
 	if len(matches) != 2 {
@@ -112,12 +112,12 @@ func determineStacks(buildMetadataPath string, stacksMap map[string]string, depr
 	stack := matches[1]
 
 	if stack == AnyStack {
-		return handleAnyStack(stacksMap, includeTiny)
-	} else if stackIsDeprecated(stack, deprecatedStacks) {
+		return handleAnyStack(dep, depOrchestratorConfig)
+	} else if stackIsDeprecated(stack, depOrchestratorConfig.DeprecatedStacks) {
 		return nil, nil
 	}
 
-	for stackName, stackID := range stacksMap {
+	for stackName, stackID := range depOrchestratorConfig.V3Stacks {
 		if stack == stackName {
 			return []string{stackID}, nil
 		}
@@ -125,10 +125,10 @@ func determineStacks(buildMetadataPath string, stacksMap map[string]string, depr
 	return nil, errors.New(fmt.Sprintf("%s is not a valid stack", stack))
 }
 
-func handleAnyStack(stacksMap map[string]string, includeTiny bool) ([]string, error) {
+func handleAnyStack(dep Dependency, config DependencyOrchestratorConfig) ([]string, error) {
 	var stacks []string
-	for stack, stackID := range stacksMap {
-		if stack == TinyStack && !includeTiny {
+	for stack, stackID := range config.V3Stacks {
+		if stack == TinyStack && !includeTiny(dep.ID, config.IncludeTiny) {
 			continue
 		}
 		stacks = append(stacks, stackID)
@@ -141,8 +141,16 @@ func handleAnyStack(stacksMap map[string]string, includeTiny bool) ([]string, er
 }
 
 func stackIsDeprecated(stack string, deprecatedStacks []string) bool {
-	for _, deprecatedStack := range deprecatedStacks {
-		if stack == deprecatedStack {
+	return arrayContains(stack, deprecatedStacks)
+}
+
+func includeTiny(id string, includeTinyStacks []string) bool {
+	return arrayContains(id, includeTinyStacks)
+}
+
+func arrayContains(item string, array []string) bool {
+	for _, element := range array {
+		if item == element {
 			return true
 		}
 	}

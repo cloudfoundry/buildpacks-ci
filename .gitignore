@@ -13,3 +13,4 @@ deployments/concourse-gcp-terraform/terraform.tfstate
 deployments/concourse-gcp-terraform/terraform.tfstate.backup
 tasks/update-cnb-dependency/test/fixtures/updating-child-cnb/artifacts
 tasks/update-cnb-dependency/test/fixtures/updating-parent-cnb/artifacts
+tasks/update-cnb-dependency/test/fixtures/updating-parent-cnb-with-tiny-stack/artifacts

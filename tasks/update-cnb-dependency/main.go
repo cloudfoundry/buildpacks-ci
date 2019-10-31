@@ -10,7 +10,7 @@ func main() {
 		log.Fatalf("Failed to load task resources: %s", err)
 	}
 
-	depsToAdd, err := loadDependenciesFromBinaryBuildsForDep(dep, depOrchestratorConfig, envs.IncludeTiny)
+	depsToAdd, err := loadDependenciesFromBinaryBuildsForDep(dep, depOrchestratorConfig)
 	if err != nil {
 		log.Fatalf("Failed to construct list of dependencies to add: %s", err)
 	}
