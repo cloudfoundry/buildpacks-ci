@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func GenerateCommitMessage(oldDeps, newDeps []Dependency, dep Dependency, storyID int) string {
+func GenerateCommitMessage(oldDeps, newDeps Dependencies, dep Dependency, storyID int) string {
 	added := false
 	rebuilt := false
 	stacks := map[string]bool{}
@@ -17,9 +17,9 @@ func GenerateCommitMessage(oldDeps, newDeps []Dependency, dep Dependency, storyI
 			continue
 		}
 
-		oldDep, exists := findDependency(oldDeps, newDep)
+		oldDep, exists := oldDeps.findDependency(newDep)
 		if exists {
-			if oldDep.Sha256 != newDep.Sha256 || oldDep.URI != newDep.URI {
+			if oldDep.SHA256 != newDep.SHA256 || oldDep.URI != newDep.URI {
 				rebuilt = true
 				stacks[newDep.Stacks[0]] = true
 			}
@@ -34,7 +34,7 @@ func GenerateCommitMessage(oldDeps, newDeps []Dependency, dep Dependency, storyI
 			continue
 		}
 
-		if !containsDependency(newDeps, dep) {
+		if !newDeps.containsDependency(dep) {
 			removedDeps[dep.ID+" "+dep.Version] = true
 			stacks[dep.Stacks[0]] = true
 		}
@@ -58,20 +58,6 @@ func GenerateCommitMessage(oldDeps, newDeps []Dependency, dep Dependency, storyI
 	commitMessage += fmt.Sprintf("\n\nfor stack(s) %s [#%d]", joinMap(stacks), storyID)
 
 	return commitMessage
-}
-
-func containsDependency(deps []Dependency, dep Dependency) bool {
-	_, exists := findDependency(deps, dep)
-	return exists
-}
-
-func findDependency(deps []Dependency, dep Dependency) (Dependency, bool) {
-	for _, d := range deps {
-		if d.ID == dep.ID && d.Version == dep.Version && d.Stacks[0] == dep.Stacks[0] {
-			return d, true
-		}
-	}
-	return Dependency{}, false
 }
 
 func joinMap(m map[string]bool) string {

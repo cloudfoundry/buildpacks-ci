@@ -50,15 +50,15 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			taskOutput, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(taskOutput))
 
-			var buildpackToml BuildpackToml
+			var buildpackToml BuildpackTOML
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackToml)
 			require.NoError(t, err)
 
-			assert.Equal(t, []Dependency{
+			assert.Equal(t, Dependencies{
 				{
 					ID:      "some-dep",
 					Name:    "Some Dep",
-					Sha256:  "sha256-for-bionic-binary-1.0.0",
+					SHA256:  "sha256-for-bionic-binary-1.0.0",
 					Stacks:  []string{"io.buildpacks.stacks.bionic"},
 					URI:     "https://example.org/some-dep-1.0.0.tgz",
 					Version: "1.0.0",
@@ -66,9 +66,9 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				{
 					ID:           "some-dep",
 					Name:         "Some Dep",
-					Sha256:       "sha256-for-cflinuxfs3-binary-1.0.0",
+					SHA256:       "sha256-for-cflinuxfs3-binary-1.0.0",
 					Source:       "https://example.org/some-dep-1.0.0-source.tgz",
-					SourceSha256: "sha256-for-source-1.0.0",
+					SourceSHA256: "sha256-for-source-1.0.0",
 					Stacks:       []string{"org.cloudfoundry.stacks.cflinuxfs3"},
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/some-dep/some-dep-1.0.0.linux-amd64-cflinuxfs3-aaaaaaaa.tar.gz",
 					Version:      "1.0.0",
@@ -76,7 +76,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				{
 					ID:      "some-dep",
 					Name:    "Some Dep",
-					Sha256:  "sha256-for-bionic-binary-1.0.1",
+					SHA256:  "sha256-for-bionic-binary-1.0.1",
 					Stacks:  []string{"io.buildpacks.stacks.bionic"},
 					URI:     "https://example.org/some-dep-1.0.1.tgz",
 					Version: "1.0.1",
@@ -84,9 +84,9 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				{
 					ID:           "some-dep",
 					Name:         "Some Dep",
-					Sha256:       "sha256-for-cflinuxfs3-binary-1.0.1",
+					SHA256:       "sha256-for-cflinuxfs3-binary-1.0.1",
 					Source:       "https://example.org/some-dep-1.0.1-source.tgz",
-					SourceSha256: "sha256-for-source-1.0.1",
+					SourceSHA256: "sha256-for-source-1.0.1",
 					Stacks:       []string{"org.cloudfoundry.stacks.cflinuxfs3"},
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/some-dep/some-dep-1.0.1.linux-amd64-cflinuxfs3-bbbbbbbb.tar.gz",
 					Version:      "1.0.1",
@@ -94,7 +94,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				{
 					ID:      "some-dep",
 					Name:    "Some Dep",
-					Sha256:  "sha256-for-bionic-binary-2.0.1",
+					SHA256:  "sha256-for-bionic-binary-2.0.1",
 					Stacks:  []string{"io.buildpacks.stacks.bionic"},
 					URI:     "https://example.org/some-dep-2.0.1.tgz",
 					Version: "2.0.1",
@@ -102,9 +102,9 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				{
 					ID:           "some-dep",
 					Name:         "Some Dep",
-					Sha256:       "sha256-for-cflinuxfs3-binary-2.0.1",
+					SHA256:       "sha256-for-cflinuxfs3-binary-2.0.1",
 					Source:       "https://example.org/some-dep-2.0.1-source.tgz",
-					SourceSha256: "sha256-for-source-2.0.1",
+					SourceSHA256: "sha256-for-source-2.0.1",
 					Stacks:       []string{"org.cloudfoundry.stacks.cflinuxfs3"},
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/some-dep/some-dep-2.0.1.linux-amd64-cflinuxfs3-dddddddd.tar.gz",
 					Version:      "2.0.1",
@@ -112,7 +112,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				{
 					ID:      "some-dep",
 					Name:    "Some Dep",
-					Sha256:  "sha256-for-bionic-binary-2.1.0",
+					SHA256:  "sha256-for-bionic-binary-2.1.0",
 					Stacks:  []string{"io.buildpacks.stacks.bionic"},
 					URI:     "https://example.org/some-dep-2.1.0.tgz",
 					Version: "2.1.0",
@@ -120,9 +120,9 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				{
 					ID:           "some-dep",
 					Name:         "Some Dep",
-					Sha256:       "sha256-for-cflinuxfs3-binary-2.1.0",
+					SHA256:       "sha256-for-cflinuxfs3-binary-2.1.0",
 					Source:       "https://example.org/some-dep-2.1.0-source.tgz",
-					SourceSha256: "sha256-for-source-2.1.0",
+					SourceSHA256: "sha256-for-source-2.1.0",
 					Stacks:       []string{"org.cloudfoundry.stacks.cflinuxfs3"},
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/some-dep/some-dep-2.1.0.linux-amd64-cflinuxfs3-eeeeeeee.tar.gz",
 					Version:      "2.1.0",
@@ -130,7 +130,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				{
 					ID:      "some-dep",
 					Name:    "Some Dep",
-					Sha256:  "sha256-for-tiny-binary-2.1.0",
+					SHA256:  "sha256-for-tiny-binary-2.1.0",
 					Stacks:  []string{"org.cloudfoundry.stacks.tiny"},
 					URI:     "https://example.org/some-dep-2.1.0.tgz",
 					Version: "2.1.0",
@@ -145,11 +145,11 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			taskOutput, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(taskOutput))
 
-			var buildpackToml BuildpackToml
+			var buildpackToml BuildpackTOML
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackToml)
 			require.NoError(t, err)
 
-			assert.Equal(t, []DependencyDeprecationDate{
+			assert.Equal(t, DeprecationDates{
 				{
 					Name:        "some-dep",
 					VersionLine: "1.x.x",
@@ -208,25 +208,25 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			taskOutput, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(taskOutput))
 
-			var buildpackToml BuildpackToml
+			var buildpackToml BuildpackTOML
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackToml)
 			require.NoError(t, err)
 
-			assert.Equal(t, []Dependency{
+			assert.Equal(t, Dependencies{
 				{
 					ID:           "org.cloudfoundry.some-child",
-					Sha256:       "sha256-for-binary-1.0.1",
+					SHA256:       "sha256-for-binary-1.0.1",
 					Source:       "https://github.com/cloudfoundry/some-child-cnb/archive/v1.0.1.tar.gz",
-					SourceSha256: "sha256-for-source-1.0.1",
+					SourceSHA256: "sha256-for-source-1.0.1",
 					Stacks:       []string{"io.buildpacks.stacks.bionic"},
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz",
 					Version:      "1.0.1",
 				},
 				{
 					ID:           "org.cloudfoundry.some-child",
-					Sha256:       "sha256-for-binary-1.0.1",
+					SHA256:       "sha256-for-binary-1.0.1",
 					Source:       "https://github.com/cloudfoundry/some-child-cnb/archive/v1.0.1.tar.gz",
-					SourceSha256: "sha256-for-source-1.0.1",
+					SourceSHA256: "sha256-for-source-1.0.1",
 					Stacks:       []string{"org.cloudfoundry.stacks.cflinuxfs3"},
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz",
 					Version:      "1.0.1",
@@ -241,11 +241,11 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			taskOutput, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(taskOutput))
 
-			var buildpackToml BuildpackToml
+			var buildpackToml BuildpackTOML
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackToml)
 			require.NoError(t, err)
 
-			assert.Equal(t, []Order{{Group: []Group{
+			assert.Equal(t, Orders{{Group: []Group{
 				{
 					ID:      "org.cloudfoundry.some-child",
 					Version: "1.0.1",
@@ -254,7 +254,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 					ID:      "org.cloudfoundry.other-child",
 					Version: "2.0.0",
 				},
-			}}}, buildpackToml.Order)
+			}}}, buildpackToml.Orders)
 		})
 
 		it("shows the added and removed child CNB versions in the commit message", func() {
@@ -306,32 +306,32 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			assert.Contains(t, string(latestCommitMessage), "Add org.cloudfoundry.some-child 1.0.1, remove org.cloudfoundry.some-child 1.0.0")
 			assert.Contains(t, string(latestCommitMessage), "for stack(s) io.buildpacks.stacks.bionic, org.cloudfoundry.stacks.cflinuxfs3, org.cloudfoundry.stacks.tiny [#111111111]")
 
-			var buildpackToml BuildpackToml
+			var buildpackToml BuildpackTOML
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackToml)
 			require.NoError(t, err)
-			assert.Equal(t, []Dependency{
+			assert.Equal(t, Dependencies{
 				{
 					ID:           "org.cloudfoundry.some-child",
-					Sha256:       "sha256-for-binary-1.0.1",
+					SHA256:       "sha256-for-binary-1.0.1",
 					Source:       "https://github.com/cloudfoundry/some-child-cnb/archive/v1.0.1.tar.gz",
-					SourceSha256: "sha256-for-source-1.0.1",
+					SourceSHA256: "sha256-for-source-1.0.1",
 					Stacks:       []string{"io.buildpacks.stacks.bionic"},
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz",
 					Version:      "1.0.1",
 				},
 				{
 					ID:           "org.cloudfoundry.some-child",
-					Sha256:       "sha256-for-binary-1.0.1",
+					SHA256:       "sha256-for-binary-1.0.1",
 					Source:       "https://github.com/cloudfoundry/some-child-cnb/archive/v1.0.1.tar.gz",
-					SourceSha256: "sha256-for-source-1.0.1",
+					SourceSHA256: "sha256-for-source-1.0.1",
 					Stacks:       []string{"org.cloudfoundry.stacks.cflinuxfs3"},
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz",
 					Version:      "1.0.1",
 				}, {
 					ID:           "org.cloudfoundry.some-child",
-					Sha256:       "sha256-for-binary-1.0.1",
+					SHA256:       "sha256-for-binary-1.0.1",
 					Source:       "https://github.com/cloudfoundry/some-child-cnb/archive/v1.0.1.tar.gz",
-					SourceSha256: "sha256-for-source-1.0.1",
+					SourceSHA256: "sha256-for-source-1.0.1",
 					Stacks:       []string{"org.cloudfoundry.stacks.tiny"},
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz",
 					Version:      "1.0.1",

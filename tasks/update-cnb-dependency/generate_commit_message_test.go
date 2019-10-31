@@ -83,8 +83,8 @@ for stack(s) some-stack-1, some-stack-2 [#123456789]`, commitMessage)
 			newDeps := []Dependency{
 				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
 				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "1.0.0"},
-				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "3.0.0", Sha256: "some-new-sha"},
-				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "3.0.0", Sha256: "some-new-sha"},
+				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "3.0.0", SHA256: "some-new-sha"},
+				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "3.0.0", SHA256: "some-new-sha"},
 			}
 
 			commitMessage := GenerateCommitMessage(oldDeps, newDeps, depAdded, 123456789)
@@ -103,8 +103,8 @@ for stack(s) some-stack-1, some-stack-2 [#123456789]`, commitMessage)
 				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "3.0.0"},
 			}
 			newDeps := []Dependency{
-				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "3.0.0", Sha256: "some-new-sha"},
-				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "3.0.0", Sha256: "some-new-sha"},
+				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "3.0.0", SHA256: "some-new-sha"},
+				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "3.0.0", SHA256: "some-new-sha"},
 			}
 
 			commitMessage := GenerateCommitMessage(oldDeps, newDeps, depAdded, 123456789)

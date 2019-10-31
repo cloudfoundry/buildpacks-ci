@@ -24,7 +24,7 @@ type DependencyMetadata struct {
 	Version struct {
 		Ref    string `json:"ref"`
 		URL    string `json:"url"`
-		Sha256 string `json:"sha256"`
+		SHA256 string `json:"sha256"`
 	} `json:"version"`
 }
 
@@ -34,9 +34,9 @@ type BuildMetadata struct {
 	Source         struct {
 		URL    string `json:"url"`
 		Md5    string `json:"md5"`
-		Sha256 string `json:"sha256"`
+		SHA256 string `json:"sha256"`
 	} `json:"source"`
-	Sha256 string `json:"sha256"`
+	SHA256 string `json:"sha256"`
 	URL    string `json:"url"`
 }
 
@@ -54,20 +54,20 @@ type EnvVars struct {
 	VersionsToKeep  int
 }
 
-func loadResources() (EnvVars, DependencyOrchestratorConfig, BuildpackToml, Dependency, BuildMetadata, error) {
+func loadResources() (EnvVars, DependencyOrchestratorConfig, BuildpackTOML, Dependency, BuildMetadata, error) {
 	var depOrchestratorConfig DependencyOrchestratorConfig
 	if err := loadYAML(filepath.Join("config", "dependency-builds.yml"), &depOrchestratorConfig); err != nil {
-		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackToml{}, Dependency{}, BuildMetadata{}, err
+		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackTOML{}, Dependency{}, BuildMetadata{}, err
 	}
 
-	var buildpackToml BuildpackToml
+	var buildpackToml BuildpackTOML
 	if _, err := toml.DecodeFile(filepath.Join("buildpack", "buildpack.toml"), &buildpackToml); err != nil {
-		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackToml{}, Dependency{}, BuildMetadata{}, err
+		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackTOML{}, Dependency{}, BuildMetadata{}, err
 	}
 
 	var depMetadata DependencyMetadata
 	if err := loadJSON(filepath.Join("source", "data.json"), &depMetadata); err != nil {
-		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackToml{}, Dependency{}, BuildMetadata{}, err
+		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackTOML{}, Dependency{}, BuildMetadata{}, err
 	}
 	dep := Dependency{
 		ID:      depMetadata.Source.Name,
@@ -76,12 +76,12 @@ func loadResources() (EnvVars, DependencyOrchestratorConfig, BuildpackToml, Depe
 
 	envVars, err := loadEnvVariables(dep.ID)
 	if err != nil {
-		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackToml{}, Dependency{}, BuildMetadata{}, err
+		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackTOML{}, Dependency{}, BuildMetadata{}, err
 	}
 
 	var buildMetadata BuildMetadata
 	if err := loadJSON(filepath.Join("builds", "binary-builds-new", depMetadata.Source.Name, depMetadata.Version.Ref+".json"), &buildMetadata); err != nil {
-		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackToml{}, Dependency{}, BuildMetadata{}, err
+		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackTOML{}, Dependency{}, BuildMetadata{}, err
 	}
 
 	return envVars, depOrchestratorConfig, buildpackToml, dep, buildMetadata, nil

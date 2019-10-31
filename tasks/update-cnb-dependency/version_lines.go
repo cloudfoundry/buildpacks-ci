@@ -1,58 +1,18 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/blang/semver"
 )
 
-var (
-	latest = "latest"
-)
-
-func RemoveOldDeps(deps []Dependency, depID, versionLine string, keepN int) ([]Dependency, error) {
-	if keepN <= 0 {
-		return nil, errors.New("please specify a valid number of versions (>0) to retain")
-	}
-
-	var retainedDeps []Dependency
-	retainedPerStack := map[string]int{}
-
-	versionLineConstraint, err := getVersionLineConstraint(versionLine)
-	if err != nil {
-		return nil, err
-	}
-
-	for i := len(deps) - 1; i >= 0; i-- {
-		dep := deps[i]
-		depVersion, err := semver.Parse(dep.Version)
-		if err != nil {
-			return nil, err
-		}
-
-		differentDep := dep.ID != depID
-		differentVersionLine := !versionLineConstraint(depVersion)
-		haveNotRetainedNForStack := retainedPerStack[dep.Stacks[0]] < keepN
-
-		if differentDep || differentVersionLine {
-			retainedDeps = append(retainedDeps, dep)
-		} else if haveNotRetainedNForStack {
-			retainedDeps = append(retainedDeps, dep)
-			retainedPerStack[dep.Stacks[0]]++
-		}
-	}
-
-	sort.Slice(retainedDeps, sortDependencies(retainedDeps))
-	return retainedDeps, nil
-}
+const Latest = "latest"
 
 func getVersionLineConstraint(versionLine string) (semver.Range, error) {
-	if versionLine == latest {
+	if versionLine == Latest {
 		return semver.ParseRange(">=0.0.0")
 	}
 
