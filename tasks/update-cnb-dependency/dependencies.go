@@ -22,7 +22,7 @@ type Dependency struct {
 	Version      string
 }
 
-func (deps Dependencies) MergeDependencyLists(newDeps Dependencies) (Dependencies, error) {
+func (deps Dependencies) MergeWith(newDeps Dependencies) (Dependencies, error) {
 	depsMap := map[string]Dependency{}
 
 	for _, dep := range deps {
@@ -111,7 +111,7 @@ func (deps Dependencies) ExpandByStack() Dependencies {
 	return expandedDeps
 }
 
-func loadDependenciesFromBinaryBuildsForDep(dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
+func loadDependenciesFromBinaryBuilds(dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
 	var depsToAdd Dependencies
 
 	buildMetadataPaths, err := filepath.Glob(filepath.Join("builds", "binary-builds-new", dep.ID, fmt.Sprintf("%s-*.json", dep.Version)))

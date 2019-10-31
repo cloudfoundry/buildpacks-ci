@@ -54,20 +54,28 @@ type EnvVars struct {
 	VersionsToKeep  int
 }
 
-func loadResources() (EnvVars, DependencyOrchestratorConfig, BuildpackTOML, Dependency, BuildMetadata, error) {
+type UpdateConfig struct {
+	Envs          EnvVars
+	Orchestrator  DependencyOrchestratorConfig
+	BuildMetadata BuildMetadata
+	Dep           Dependency
+	BuildpackTOML BuildpackTOML
+}
+
+func NewUpdateConfig() (UpdateConfig, error) {
 	var depOrchestratorConfig DependencyOrchestratorConfig
 	if err := loadYAML(filepath.Join("config", "dependency-builds.yml"), &depOrchestratorConfig); err != nil {
-		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackTOML{}, Dependency{}, BuildMetadata{}, err
+		return UpdateConfig{}, err
 	}
 
-	var buildpackToml BuildpackTOML
-	if _, err := toml.DecodeFile(filepath.Join("buildpack", "buildpack.toml"), &buildpackToml); err != nil {
-		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackTOML{}, Dependency{}, BuildMetadata{}, err
+	var buildpackTOML BuildpackTOML
+	if _, err := toml.DecodeFile(filepath.Join("buildpack", "buildpack.toml"), &buildpackTOML); err != nil {
+		return UpdateConfig{}, err
 	}
 
 	var depMetadata DependencyMetadata
 	if err := loadJSON(filepath.Join("source", "data.json"), &depMetadata); err != nil {
-		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackTOML{}, Dependency{}, BuildMetadata{}, err
+		return UpdateConfig{}, err
 	}
 	dep := Dependency{
 		ID:      depMetadata.Source.Name,
@@ -76,15 +84,21 @@ func loadResources() (EnvVars, DependencyOrchestratorConfig, BuildpackTOML, Depe
 
 	envVars, err := loadEnvVariables(dep.ID)
 	if err != nil {
-		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackTOML{}, Dependency{}, BuildMetadata{}, err
+		return UpdateConfig{}, err
 	}
 
 	var buildMetadata BuildMetadata
 	if err := loadJSON(filepath.Join("builds", "binary-builds-new", depMetadata.Source.Name, depMetadata.Version.Ref+".json"), &buildMetadata); err != nil {
-		return EnvVars{}, DependencyOrchestratorConfig{}, BuildpackTOML{}, Dependency{}, BuildMetadata{}, err
+		return UpdateConfig{}, err
 	}
 
-	return envVars, depOrchestratorConfig, buildpackToml, dep, buildMetadata, nil
+	return UpdateConfig{
+		Envs:          envVars,
+		Orchestrator:  depOrchestratorConfig,
+		BuildMetadata: buildMetadata,
+		Dep:           dep,
+		BuildpackTOML: buildpackTOML,
+	}, nil
 }
 
 func loadEnvVariables(dependencyDeprecationDateName string) (EnvVars, error) {
