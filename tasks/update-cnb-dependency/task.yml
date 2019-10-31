@@ -17,7 +17,7 @@ run:
   path: go
   args:
     - run
-    - buildpacks-ci/tasks/update-cnb-dependency/main.go
+    - github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency/
 params:
   DEPRECATION_DATE:
   DEPRECATION_LINK:
