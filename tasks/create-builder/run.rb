@@ -11,8 +11,8 @@ def run(*cmd)
     puts *cmd.join(" ")
     output, err, status = Open3.capture3(*cmd)
     if !status.success?
-      STDERR.puts "ERROR: #{err}"
-      # exit status.exitstatus
+      STDERR.puts "\n\nERROR: #{err}\n\n\n OUTPUT: #{output}\n\n"
+      exit status.exitstatus
     else
       puts output
     end
