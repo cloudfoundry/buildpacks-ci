@@ -55,7 +55,7 @@ func (d DependencyDeprecationDate) isNull() bool {
 	return d.Date == time.Time{} || d.Link == "" || d.VersionLine == "latest"
 }
 
-func (deprecationDates DeprecationDates) UpdateDeprecationDatesWithDependency(dep DependencyDeprecationDate) (DeprecationDates, error) {
+func (deprecationDates DeprecationDates) Update(dep DependencyDeprecationDate) (DeprecationDates, error) {
 	if dep.isNull() {
 		return deprecationDates, nil
 	}

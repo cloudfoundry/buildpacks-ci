@@ -17,7 +17,7 @@ func TestUpdateDeprecationDates(t *testing.T) {
 }
 
 func testDeprecationDates(t *testing.T, when spec.G, it spec.S) {
-	when("UpdateDeprecationDatesWithDependency", func() {
+	when("Update", func() {
 
 		var newDepDeprecationDate DependencyDeprecationDate
 		name1 := "some-name-1"
@@ -47,7 +47,7 @@ func testDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 						{Name: name2, VersionLine: versionLine2},
 					}
 
-					updatedDeprecationDates, err := existingDeprecationDates.UpdateDeprecationDatesWithDependency(newDepDeprecationDate)
+					updatedDeprecationDates, err := existingDeprecationDates.Update(newDepDeprecationDate)
 					require.NoError(t, err)
 					assert.Equal(t, DeprecationDates{
 						{Name: name1, VersionLine: versionLine1, Date: deprecationDate1, Link: deprecationLink, Match: deprecationMatch},
@@ -65,7 +65,7 @@ func testDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 					}
 
 					newDepDeprecationDate.VersionLine = versionLine2
-					updatedDeprecationDates, err := existingDeprecationDates.UpdateDeprecationDatesWithDependency(newDepDeprecationDate)
+					updatedDeprecationDates, err := existingDeprecationDates.Update(newDepDeprecationDate)
 					require.NoError(t, err)
 					assert.Equal(t, DeprecationDates{
 						{Name: name1, VersionLine: versionLine1},
@@ -86,7 +86,7 @@ func testDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 				newDepDeprecationDate.Link = "some-new-link"
 				newDepDeprecationDate.Match = "some-new-match"
 				newDepDeprecationDate.Date = deprecationDate2
-				updatedDeprecationDates, err := existingDeprecationDates.UpdateDeprecationDatesWithDependency(newDepDeprecationDate)
+				updatedDeprecationDates, err := existingDeprecationDates.Update(newDepDeprecationDate)
 				require.NoError(t, err)
 				assert.Equal(t, DeprecationDates{
 					{Name: name1, VersionLine: versionLine1, Date: deprecationDate2, Link: "some-new-link", Match: "some-new-match"},
@@ -99,7 +99,7 @@ func testDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 			it("does not add the deprecation date", func() {
 				newDepDeprecationDate.Date = time.Time{}
 				existingDeprecationDates := DeprecationDates{}
-				updatedDeprecationDates, err := existingDeprecationDates.UpdateDeprecationDatesWithDependency(newDepDeprecationDate)
+				updatedDeprecationDates, err := existingDeprecationDates.Update(newDepDeprecationDate)
 				require.NoError(t, err)
 				assert.Len(t, updatedDeprecationDates, 0)
 			})
@@ -109,7 +109,7 @@ func testDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 			it("does not add the deprecation date", func() {
 				existingDeprecationDates := DeprecationDates{}
 				newDepDeprecationDate.Link = ""
-				updatedDeprecationDates, err := existingDeprecationDates.UpdateDeprecationDatesWithDependency(newDepDeprecationDate)
+				updatedDeprecationDates, err := existingDeprecationDates.Update(newDepDeprecationDate)
 				require.NoError(t, err)
 				assert.Len(t, updatedDeprecationDates, 0)
 
@@ -120,7 +120,7 @@ func testDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 			it("does not set match", func() {
 				existingDeprecationDates := DeprecationDates{}
 				newDepDeprecationDate.Match = ""
-				updatedDeprecationDates, err := existingDeprecationDates.UpdateDeprecationDatesWithDependency(newDepDeprecationDate)
+				updatedDeprecationDates, err := existingDeprecationDates.Update(newDepDeprecationDate)
 				require.NoError(t, err)
 				assert.Equal(t, DeprecationDates{
 					{Name: name1, VersionLine: versionLine1, Date: deprecationDate1, Link: deprecationLink, Match: ""},
@@ -135,7 +135,7 @@ func testDeprecationDates(t *testing.T, when spec.G, it spec.S) {
 					{Name: name2, VersionLine: versionLine2},
 				}
 				newDepDeprecationDate.VersionLine = "latest"
-				updatedDeprecationDates, err := deprecationDates.UpdateDeprecationDatesWithDependency(newDepDeprecationDate)
+				updatedDeprecationDates, err := deprecationDates.Update(newDepDeprecationDate)
 				assert.Equal(t, deprecationDates, updatedDeprecationDates)
 				assert.NoError(t, err)
 			})

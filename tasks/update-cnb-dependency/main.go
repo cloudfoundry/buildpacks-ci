@@ -14,43 +14,43 @@ func main() {
 }
 
 func updateCNBDependencies() error {
-	envs, depOrchestratorConfig, buildpackToml, dep, buildMetadata, err := loadResources()
+	config, err := NewUpdateConfig()
 	if err != nil {
 		return errors.Wrap(err, "failed to load task resources")
 	}
 
-	depsToAdd, err := loadDependenciesFromBinaryBuildsForDep(dep, depOrchestratorConfig)
+	depsToAdd, err := loadDependenciesFromBinaryBuilds(config.Dep, config.Orchestrator)
 	if err != nil {
 		return errors.Wrap(err, "failed to construct list of dependencies to add")
 	}
 
-	originalDeps := buildpackToml.LoadExpandedDependencies()
-	updatedDeps, err := originalDeps.MergeDependencyLists(depsToAdd)
+	originalDeps := config.BuildpackTOML.Metadata.Dependencies.ExpandByStack()
+	updatedDeps, err := originalDeps.MergeWith(depsToAdd)
 	if err != nil {
 		return errors.Wrap(err, "failed to merge dependency lists")
 	}
 
-	updatedDeps, err = updatedDeps.RemoveOldDeps(dep.ID, envs.VersionLine, envs.VersionsToKeep)
+	updatedDeps, err = updatedDeps.RemoveOldDeps(config.Dep.ID, config.Envs.VersionLine, config.Envs.VersionsToKeep)
 	if err != nil {
 		return errors.Wrap(err, "failed to remove old dependencies")
 	}
 
-	updatedOrder := buildpackToml.Orders.UpdateOrderDependencyVersion(dep)
+	updatedOrder := config.BuildpackTOML.Orders.UpdateOrderDependencyVersion(config.Dep)
 
-	updatedDeprecationDates, err := buildpackToml.Metadata.DependencyDeprecationDates.UpdateDeprecationDatesWithDependency(envs.DeprecationDate)
+	updatedDeprecationDates, err := config.BuildpackTOML.Metadata.DependencyDeprecationDates.Update(config.Envs.DeprecationDate)
 	if err != nil {
 		return errors.Wrap(err, "failed to update deprecation dates")
 	}
 
-	buildpackToml.Metadata.Dependencies = updatedDeps
-	buildpackToml.Metadata.DependencyDeprecationDates = updatedDeprecationDates
-	buildpackToml.Orders = updatedOrder
+	config.BuildpackTOML.Metadata.Dependencies = updatedDeps
+	config.BuildpackTOML.Metadata.DependencyDeprecationDates = updatedDeprecationDates
+	config.BuildpackTOML.Orders = updatedOrder
 
-	if err := buildpackToml.WriteToFile(filepath.Join("artifacts", "buildpack.toml")); err != nil {
+	if err := config.BuildpackTOML.WriteToFile(filepath.Join("artifacts", "buildpack.toml")); err != nil {
 		return errors.Wrap(err, "failed to update buildpack toml")
 	}
 
-	commitMessage := GenerateCommitMessage(originalDeps, updatedDeps, dep, buildMetadata.TrackerStoryID)
+	commitMessage := GenerateCommitMessage(originalDeps, updatedDeps, config.Dep, config.BuildMetadata.TrackerStoryID)
 	if err := CommitArtifacts(commitMessage); err != nil {
 		return errors.Wrap(err, "failed to commit artifacts")
 	}

@@ -26,10 +26,6 @@ type Metadata struct {
 	DependencyDeprecationDates DeprecationDates `toml:"dependency_deprecation_dates"`
 }
 
-func (buildpackTOML BuildpackTOML) LoadExpandedDependencies() Dependencies {
-	return buildpackTOML.Metadata.Dependencies.ExpandByStack()
-}
-
 func (buildpackTOML BuildpackTOML) WriteToFile(filepath string) error {
 	buildpackTOMLFile, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
