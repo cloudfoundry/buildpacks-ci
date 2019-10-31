@@ -15,6 +15,8 @@ type DependencyDeprecationDate struct {
 	Match       string `toml:",omitempty"`
 }
 
+type DeprecationDates []DependencyDeprecationDate
+
 func NewDependencyDeprecationDate(date, link, name, versionLine, match string) (DependencyDeprecationDate, error) {
 	var (
 		deprecationDate time.Time
@@ -53,7 +55,7 @@ func (d DependencyDeprecationDate) isNull() bool {
 	return d.Date == time.Time{} || d.Link == "" || d.VersionLine == "latest"
 }
 
-func UpdateDeprecationDatesWithDependency(deprecationDates []DependencyDeprecationDate, dep DependencyDeprecationDate) ([]DependencyDeprecationDate, error) {
+func (deprecationDates DeprecationDates) UpdateDeprecationDatesWithDependency(dep DependencyDeprecationDate) (DeprecationDates, error) {
 	if dep.isNull() {
 		return deprecationDates, nil
 	}
@@ -71,11 +73,11 @@ func UpdateDeprecationDatesWithDependency(deprecationDates []DependencyDeprecati
 		deprecationDates = append(deprecationDates, dep)
 	}
 
-	sort.Slice(deprecationDates, sortDeprecationDates(deprecationDates))
+	sort.Slice(deprecationDates, deprecationDates.Sort())
 	return deprecationDates, nil
 }
 
-func sortDeprecationDates(deprecationDates []DependencyDeprecationDate) func(i, j int) bool {
+func (deprecationDates DeprecationDates) Sort() func(i, j int) bool {
 	return func(i, j int) bool {
 		if deprecationDates[i].Name != deprecationDates[j].Name {
 			return deprecationDates[i].Name < deprecationDates[j].Name
