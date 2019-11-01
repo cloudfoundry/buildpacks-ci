@@ -6,9 +6,7 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpack
-  - name: buildpack-latest-released
   - name: buildpacks-ci
-  - name: config
   - name: source
   - name: builds
 outputs:

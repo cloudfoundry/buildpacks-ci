@@ -64,7 +64,7 @@ type UpdateConfig struct {
 
 func NewUpdateConfig() (UpdateConfig, error) {
 	var depOrchestratorConfig DependencyOrchestratorConfig
-	if err := loadYAML(filepath.Join("config", "dependency-builds.yml"), &depOrchestratorConfig); err != nil {
+	if err := loadYAML(filepath.Join("buildpacks-ci", "pipelines", "config", "dependency-builds.yml"), &depOrchestratorConfig); err != nil {
 		return UpdateConfig{}, err
 	}
 
