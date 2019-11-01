@@ -6,21 +6,19 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpack
-  - name: buildpack-latest-released
   - name: buildpacks-ci
   - name: source
   - name: builds
 outputs:
   - name: artifacts
 run:
-  path: bash
+  path: go
   args:
-    - -cl
-    - buildpacks-ci/tasks/update-cnb-dependency/run.rb
+    - run
+    - github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency/
 params:
-  VERSION_LINE_TYPE:
-  VERSION_LINE:
-  REMOVAL_STRATEGY:
   DEPRECATION_DATE:
   DEPRECATION_LINK:
   DEPRECATION_MATCH:
+  VERSION_LINE:
+  VERSIONS_TO_KEEP:
