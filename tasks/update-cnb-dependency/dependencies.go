@@ -111,10 +111,10 @@ func (deps Dependencies) ExpandByStack() Dependencies {
 	return expandedDeps
 }
 
-func loadDependenciesFromBinaryBuilds(dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
+func loadDependenciesFromBinaryBuilds(binaryBuildsPath string, dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
 	var depsToAdd Dependencies
 
-	buildMetadataPaths, err := filepath.Glob(filepath.Join("builds", "binary-builds-new", dep.ID, fmt.Sprintf("%s-*.json", dep.Version)))
+	buildMetadataPaths, err := filepath.Glob(filepath.Join(binaryBuildsPath, dep.ID, fmt.Sprintf("%s-*.json", dep.Version)))
 	if err != nil {
 		return depsToAdd, err
 	}

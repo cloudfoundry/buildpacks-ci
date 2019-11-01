@@ -3,12 +3,7 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
-	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
-
-	"github.com/pkg/errors"
 
 	"gopkg.in/yaml.v2"
 
@@ -55,26 +50,25 @@ type EnvVars struct {
 }
 
 type UpdateConfig struct {
-	Envs          EnvVars
 	Orchestrator  DependencyOrchestratorConfig
 	BuildMetadata BuildMetadata
 	Dep           Dependency
 	BuildpackTOML BuildpackTOML
 }
 
-func NewUpdateConfig() (UpdateConfig, error) {
+func NewUpdateConfig(dependencyBuildsConfig, buildpackTOMLContents, sourceData, binaryBuildsPath string) (UpdateConfig, error) {
 	var depOrchestratorConfig DependencyOrchestratorConfig
-	if err := loadYAML(filepath.Join("buildpacks-ci", "pipelines", "config", "dependency-builds.yml"), &depOrchestratorConfig); err != nil {
+	if err := yaml.Unmarshal([]byte(dependencyBuildsConfig), &depOrchestratorConfig); err != nil {
 		return UpdateConfig{}, err
 	}
 
 	var buildpackTOML BuildpackTOML
-	if _, err := toml.DecodeFile(filepath.Join("buildpack", "buildpack.toml"), &buildpackTOML); err != nil {
+	if _, err := toml.Decode(buildpackTOMLContents, &buildpackTOML); err != nil {
 		return UpdateConfig{}, err
 	}
 
 	var depMetadata DependencyMetadata
-	if err := loadJSON(filepath.Join("source", "data.json"), &depMetadata); err != nil {
+	if err := json.Unmarshal([]byte(sourceData), &depMetadata); err != nil {
 		return UpdateConfig{}, err
 	}
 	dep := Dependency{
@@ -82,39 +76,22 @@ func NewUpdateConfig() (UpdateConfig, error) {
 		Version: depMetadata.Version.Ref,
 	}
 
-	envVars, err := loadEnvVariables(dep.ID)
+	buildMetadataContents, err := ioutil.ReadFile(filepath.Join(binaryBuildsPath, depMetadata.Source.Name, depMetadata.Version.Ref+".json"))
 	if err != nil {
 		return UpdateConfig{}, err
 	}
 
 	var buildMetadata BuildMetadata
-	if err := loadJSON(filepath.Join("builds", "binary-builds-new", depMetadata.Source.Name, depMetadata.Version.Ref+".json"), &buildMetadata); err != nil {
+	if err := json.Unmarshal(buildMetadataContents, &buildMetadata); err != nil {
 		return UpdateConfig{}, err
 	}
 
 	return UpdateConfig{
-		Envs:          envVars,
 		Orchestrator:  depOrchestratorConfig,
 		BuildMetadata: buildMetadata,
 		Dep:           dep,
 		BuildpackTOML: buildpackTOML,
 	}, nil
-}
-
-func loadEnvVariables(dependencyDeprecationDateName string) (EnvVars, error) {
-	envVars := EnvVars{}
-	var err error
-	deprecationDate := os.Getenv("DEPRECATION_DATE")
-	deprecationLink := os.Getenv("DEPRECATION_LINK")
-	deprecationMatch := os.Getenv("DEPRECATION_MATCH")
-	envVars.VersionLine = strings.ToLower(os.Getenv("VERSION_LINE"))
-	envVars.DeprecationDate, err = NewDependencyDeprecationDate(deprecationDate, deprecationLink, dependencyDeprecationDateName, envVars.VersionLine, deprecationMatch)
-	if err != nil {
-		return EnvVars{}, errors.Wrap(err, "failed to initialize dependency deprecation date")
-	}
-
-	envVars.VersionsToKeep, err = strconv.Atoi(os.Getenv("VERSIONS_TO_KEEP"))
-	return envVars, err
 }
 
 func loadJSON(path string, out interface{}) error {
