@@ -12,6 +12,7 @@ inputs:
 outputs:
   - name: artifacts
 run:
+  dir: buildpacks-ci
   path: go
   args:
     - run
