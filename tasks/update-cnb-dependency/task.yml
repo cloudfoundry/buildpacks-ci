@@ -7,19 +7,16 @@ image_resource:
 inputs:
   - name: buildpack
   - name: buildpacks-ci
+    path: go/src/github.com/cloudfoundry/buildpacks-ci
   - name: source
   - name: builds
 outputs:
   - name: artifacts
-run:
-  dir: buildpacks-ci
-  path: go
-  args:
-    - run
-    - github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency/
 params:
   DEPRECATION_DATE:
   DEPRECATION_LINK:
   DEPRECATION_MATCH:
   VERSION_LINE:
   VERSIONS_TO_KEEP:
+run:
+  path: go/src/github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency/run.sh
