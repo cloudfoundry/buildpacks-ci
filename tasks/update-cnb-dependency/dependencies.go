@@ -1,0 +1,182 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+	"path/filepath"
+	"sort"
+
+	"github.com/blang/semver"
+)
+
+type Dependencies []Dependency
+
+type Dependency struct {
+	ID           string
+	Name         string `toml:",omitempty"`
+	SHA256       string
+	Source       string `toml:",omitempty"`
+	SourceSHA256 string `toml:"source_sha256,omitempty"`
+	Stacks       []string
+	URI          string
+	Version      string
+}
+
+func (deps Dependencies) MergeWith(newDeps Dependencies) (Dependencies, error) {
+	depsMap := map[string]Dependency{}
+
+	for _, dep := range deps {
+		depsMap[makeKey(dep)] = dep
+	}
+	for _, dep := range newDeps {
+		depsMap[makeKey(dep)] = dep
+	}
+
+	allDeps := Dependencies{}
+	for _, dep := range depsMap {
+		allDeps = append(allDeps, dep)
+	}
+
+	sort.Slice(allDeps, allDeps.sortDependencies())
+	return allDeps, nil
+}
+
+func (deps Dependencies) RemoveOldDeps(depID, versionLine string, keepN int) (Dependencies, error) {
+	if keepN <= 0 {
+		return nil, errors.New("please specify a valid number of versions (>0) to retain")
+	}
+
+	retainedDeps := Dependencies{}
+	retainedPerStack := map[string]int{}
+
+	versionLineConstraint, err := getVersionLineConstraint(versionLine)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := len(deps) - 1; i >= 0; i-- {
+		dep := deps[i]
+		depVersion, err := semver.Parse(dep.Version)
+		if err != nil {
+			return nil, err
+		}
+
+		differentDep := dep.ID != depID
+		differentVersionLine := !versionLineConstraint(depVersion)
+		haveNotRetainedNForStack := retainedPerStack[dep.Stacks[0]] < keepN
+
+		if differentDep || differentVersionLine {
+			retainedDeps = append(retainedDeps, dep)
+		} else if haveNotRetainedNForStack {
+			retainedDeps = append(retainedDeps, dep)
+			retainedPerStack[dep.Stacks[0]]++
+		}
+	}
+
+	sort.Slice(retainedDeps, retainedDeps.sortDependencies())
+	return retainedDeps, nil
+}
+
+func (deps Dependencies) sortDependencies() func(i, j int) bool {
+	return func(i, j int) bool {
+		if deps[i].ID != deps[j].ID {
+			return deps[i].ID < deps[j].ID
+		}
+
+		firstVersion := semver.MustParse(deps[i].Version)
+		secondVersion := semver.MustParse(deps[j].Version)
+
+		if firstVersion.EQ(secondVersion) {
+			return deps[i].Stacks[0] < deps[j].Stacks[0]
+		}
+
+		return firstVersion.LT(secondVersion)
+	}
+}
+
+func (deps Dependencies) ExpandByStack() Dependencies {
+	var expandedDeps Dependencies
+	for _, dep := range deps {
+		if len(dep.Stacks) == 1 {
+			expandedDeps = append(expandedDeps, dep)
+		} else {
+			for _, stack := range dep.Stacks {
+				depForStack := dep
+				depForStack.Stacks = []string{stack}
+				expandedDeps = append(expandedDeps, depForStack)
+			}
+		}
+	}
+
+	return expandedDeps
+}
+
+func loadDependenciesFromBinaryBuilds(dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
+	var depsToAdd Dependencies
+
+	buildMetadataPaths, err := filepath.Glob(filepath.Join("builds", "binary-builds-new", dep.ID, fmt.Sprintf("%s-*.json", dep.Version)))
+	if err != nil {
+		return depsToAdd, err
+	}
+
+	for _, buildMetadataPath := range buildMetadataPaths {
+		deps, err := constructDependenciesFromBuildMetadata(dep, buildMetadataPath, depOrchestratorConfig)
+		if err != nil {
+			return depsToAdd, err
+		}
+		depsToAdd = append(depsToAdd, deps...)
+	}
+	return depsToAdd, nil
+}
+
+func (deps Dependencies) containsDependency(dep Dependency) bool {
+	_, exists := deps.findDependency(dep)
+	return exists
+}
+
+func (deps Dependencies) findDependency(dep Dependency) (Dependency, bool) {
+	for _, d := range deps {
+		if d.ID == dep.ID && d.Version == dep.Version && d.Stacks[0] == dep.Stacks[0] {
+			return d, true
+		}
+	}
+	return Dependency{}, false
+}
+
+func makeKey(dep Dependency) string { return dep.ID + dep.Version + dep.Stacks[0] }
+
+func constructDependenciesFromBuildMetadata(dep Dependency, buildMetadataPath string, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
+	var buildMetadata BuildMetadata
+	if err := loadJSON(buildMetadataPath, &buildMetadata); err != nil {
+		return nil, err
+	}
+
+	stacks, err := determineStacks(buildMetadataPath, dep, depOrchestratorConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	var deps Dependencies
+	for _, stack := range stacks {
+		deps = append(deps, Dependency{
+			ID:           dep.ID,
+			Name:         depOrchestratorConfig.V3DepNames[dep.ID],
+			SHA256:       buildMetadata.SHA256,
+			Source:       buildMetadata.Source.URL,
+			SourceSHA256: buildMetadata.Source.SHA256,
+			Stacks:       []string{stack},
+			URI:          buildMetadata.URL,
+			Version:      dep.Version,
+		})
+	}
+	return deps, nil
+}
+
+func arrayContains(item string, array []string) bool {
+	for _, element := range array {
+		if item == element {
+			return true
+		}
+	}
+	return false
+}

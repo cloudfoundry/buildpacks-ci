@@ -1,0 +1,11 @@
+{
+  "tracker_story_id": 111111111,
+  "version": "2.1.0",
+  "source": {
+    "url": "https://example.org/some-dep-2.1.0-source.tgz",
+    "md5": null,
+    "sha256": "sha256-for-source-2.1.0"
+  },
+  "sha256": "sha256-for-cflinuxfs3-binary-2.1.0",
+  "url": "https://buildpacks.cloudfoundry.org/dependencies/some-dep/some-dep-2.1.0.linux-amd64-cflinuxfs3-eeeeeeee.tar.gz"
+}
