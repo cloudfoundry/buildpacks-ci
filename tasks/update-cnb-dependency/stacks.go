@@ -8,7 +8,7 @@ import (
 )
 
 type Stack struct {
-	ID string
+	ID string `toml:"id"`
 }
 
 type Stacks []Stack

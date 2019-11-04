@@ -12,14 +12,14 @@ import (
 type Dependencies []Dependency
 
 type Dependency struct {
-	ID           string
-	Name         string `toml:",omitempty"`
-	SHA256       string
-	Source       string `toml:",omitempty"`
-	SourceSHA256 string `toml:"source_sha256,omitempty"`
-	Stacks       []string
-	URI          string
-	Version      string
+	ID           string   `toml:"id"`
+	Name         string   `toml:"name,omitempty"`
+	SHA256       string   `toml:"sha256"`
+	Source       string   `toml:"source,omitempty"`
+	SourceSHA256 string   `toml:"source_sha256,omitempty"`
+	Stacks       []string `toml:"stacks"`
+	URI          string   `toml:"uri"`
+	Version      string   `toml:"version"`
 }
 
 func (deps Dependencies) MergeWith(newDeps Dependencies) (Dependencies, error) {
