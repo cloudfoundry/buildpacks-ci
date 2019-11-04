@@ -8,11 +8,11 @@ import (
 )
 
 type DependencyDeprecationDate struct {
-	Date        time.Time
-	Link        string
-	Name        string
-	VersionLine string `toml:"version_line"`
-	Match       string `toml:",omitempty"`
+	Date        time.Time `toml:"date"`
+	Link        string    `toml:"link"`
+	Name        string    `toml:"name"`
+	VersionLine string    `toml:"version_line"`
+	Match       string    `toml:"match,omitempty"`
 }
 
 type DeprecationDates []DependencyDeprecationDate

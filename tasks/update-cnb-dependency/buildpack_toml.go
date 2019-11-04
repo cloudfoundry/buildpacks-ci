@@ -9,20 +9,20 @@ import (
 )
 
 type BuildpackTOML struct {
-	API       string
+	API       string `toml:"api"`
 	Buildpack struct {
-		ID      string
-		Name    string
-		Version string
+		ID      string `toml:"id"`
+		Name    string `toml:"name"`
+		Version string `toml:"version"`
 	} `toml:"buildpack"`
-	Metadata Metadata
-	Orders   Orders `toml:"order"`
-	Stacks   Stacks `toml:"stack"`
+	Metadata Metadata `toml:"metadata"`
+	Orders   Orders   `toml:"order"`
+	Stacks   Stacks   `toml:"stacks"`
 }
 
 type Metadata struct {
-	IncludeFiles               []string `toml:"include_files"`
-	Dependencies               Dependencies
+	IncludeFiles               []string         `toml:"include_files"`
+	Dependencies               Dependencies     `toml:"dependencies"`
 	DependencyDeprecationDates DeprecationDates `toml:"dependency_deprecation_dates"`
 }
 

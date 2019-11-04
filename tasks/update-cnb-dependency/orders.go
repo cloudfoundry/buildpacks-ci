@@ -3,12 +3,12 @@ package main
 type Orders []Order
 
 type Order struct {
-	Group []Group
+	Group []Group `toml:"group"`
 }
 
 type Group struct {
-	ID      string
-	Version string
+	ID      string `toml:"id"`
+	Version string `toml:"version"`
 }
 
 func (orders Orders) UpdateOrderDependencyVersion(dep Dependency) Orders {
