@@ -30,6 +30,8 @@ go-mod:
 httpd:
   integration: true
   auto_release: true
+icu:
+  auto_release: true
 node-engine:
   integration: true
   auto_release: true
