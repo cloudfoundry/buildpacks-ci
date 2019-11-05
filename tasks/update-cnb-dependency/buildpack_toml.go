@@ -22,7 +22,7 @@ type BuildpackTOML struct {
 
 type Metadata struct {
 	IncludeFiles               []string         `toml:"include_files"`
-	PrePackage                 string           `toml:"pre_package"`
+	PrePackage                 string           `toml:"pre_package,omitempty"`
 	Dependencies               Dependencies     `toml:"dependencies"`
 	DependencyDeprecationDates DeprecationDates `toml:"dependency_deprecation_dates"`
 }
