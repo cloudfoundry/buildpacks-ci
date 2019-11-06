@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"github.com/mitchellh/mapstructure"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -47,7 +48,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			dependencyBuildsConfig, err := ioutil.ReadFile("testdata/updating-child-cnb/dependency-builds.yml")
 			require.NoError(t, err)
 
-			buildpackTOML, err := ioutil.ReadFile("testdata/updating-child-cnb/buildpack.toml")
+			sourceBuildpackTOML, err := ioutil.ReadFile("testdata/updating-child-cnb/buildpack.toml")
 			require.NoError(t, err)
 
 			sourceData, err := ioutil.ReadFile("testdata/updating-child-cnb/data.json")
@@ -56,7 +57,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			taskCmd = exec.Command(
 				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency",
 				"--dependency-builds-config", string(dependencyBuildsConfig),
-				"--buildpack-toml", string(buildpackTOML),
+				"--buildpack-toml", string(sourceBuildpackTOML),
 				"--source-data", string(sourceData),
 				"--binary-builds-path", binaryBuildsPath,
 				"--output-dir", outputDir,
@@ -72,14 +73,22 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			require.NoError(t, os.RemoveAll(outputDir))
 		})
 
-		it("updates the dep in the buildpack.toml deps", func() {
+		it("updates the dep in the buildpack.toml deps and retains existing arbitrary metadata", func() {
 			taskOutput, err := taskCmd.CombinedOutput()
 			require.NoError(t, err, string(taskOutput))
 
 			var buildpackTOML BuildpackTOML
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackTOML)
 			require.NoError(t, err)
+			assert.Equal(t, "./scripts/build.sh", buildpackTOML.Metadata[PrePackageKey], )
+			assert.Equal(t, "random", buildpackTOML.Metadata["random"], )
+			assert.Equal(t, []interface{}{"bin/build", "bin/detect", "buildpack.toml"}, buildpackTOML.Metadata[IncludeFilesKey], )
+			assert.Equal(t, map[string]interface{}{
+				"some-dep": "2.x",
+			}, buildpackTOML.Metadata[DefaultVersionsKey])
 
+			var deps Dependencies
+			require.NoError(t, mapstructure.Decode(buildpackTOML.Metadata["dependencies"], &deps))
 			assert.Equal(t, Dependencies{
 				{
 					ID:      "some-dep",
@@ -161,7 +170,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 					URI:     "https://example.org/some-dep-2.1.0.tgz",
 					Version: "2.1.0",
 				},
-			}, buildpackTOML.Metadata.Dependencies)
+			}, deps)
 		})
 
 		it("updates deprecation dates", func() {
@@ -172,6 +181,8 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackTOML)
 			require.NoError(t, err)
 
+			var deps DeprecationDates
+			require.NoError(t, mapstructure.Decode(buildpackTOML.Metadata["dependency_deprecation_dates"], &deps))
 			assert.Equal(t, DeprecationDates{
 				{
 					Name:        "some-dep",
@@ -185,7 +196,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 					Link:        "some-updated-deprecation-link",
 					Date:        time.Date(2040, 1, 1, 0, 0, 0, 0, time.UTC),
 				},
-			}, buildpackTOML.Metadata.DependencyDeprecationDates)
+			}, deps)
 		})
 
 		it("shows the added and removed dep versions in the commit message", func() {
@@ -247,6 +258,8 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackTOML)
 			require.NoError(t, err)
 
+			var deps Dependencies
+			require.NoError(t, mapstructure.Decode(buildpackTOML.Metadata["dependencies"], &deps))
 			assert.Equal(t, Dependencies{
 				{
 					ID:           "org.cloudfoundry.some-child",
@@ -266,7 +279,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz",
 					Version:      "1.0.1",
 				},
-			}, buildpackTOML.Metadata.Dependencies)
+			}, deps)
 		})
 
 		it("updates versions in order", func() {
@@ -353,6 +366,9 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			var buildpackTOML BuildpackTOML
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackTOML)
 			require.NoError(t, err)
+
+			var deps Dependencies
+			require.NoError(t, mapstructure.Decode(buildpackTOML.Metadata["dependencies"], &deps))
 			assert.Equal(t, Dependencies{
 				{
 					ID:           "org.cloudfoundry.some-child",
@@ -380,7 +396,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz",
 					Version:      "1.0.1",
 				},
-			}, buildpackTOML.Metadata.Dependencies)
+			}, deps)
 		})
 	})
 }
