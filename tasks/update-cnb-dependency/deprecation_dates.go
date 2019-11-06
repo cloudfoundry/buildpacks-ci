@@ -11,7 +11,7 @@ type DependencyDeprecationDate struct {
 	Date        time.Time `toml:"date"`
 	Link        string    `toml:"link"`
 	Name        string    `toml:"name"`
-	VersionLine string    `toml:"version_line"`
+	VersionLine string    `toml:"version_line" mapstructure:"version_line"`
 	Match       string    `toml:"match,omitempty"`
 }
 
