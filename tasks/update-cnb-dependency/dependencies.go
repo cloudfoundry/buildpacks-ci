@@ -16,7 +16,7 @@ type Dependency struct {
 	Name         string   `toml:"name,omitempty"`
 	SHA256       string   `toml:"sha256"`
 	Source       string   `toml:"source,omitempty"`
-	SourceSHA256 string   `toml:"source_sha256,omitempty"`
+	SourceSHA256 string   `mapstructure:"source_sha256" toml:"source_sha256,omitempty"`
 	Stacks       []string `toml:"stacks"`
 	URI          string   `toml:"uri"`
 	Version      string   `toml:"version"`

@@ -8,6 +8,8 @@ version = "{{.Version}}"
 [metadata]
 include_files = ["bin/build", "bin/detect", "buildpack.toml"]
 pre_package = "./scripts/build.sh"
+random = "random"
+
 
 [metadata.default-versions]
 some-dep = "2.x"
