@@ -79,9 +79,9 @@ func init() {
 func main() {
 	flag.Parse()
 	if err := run(); err != nil {
-		log.Fatalf("\nfailed to run: %s", err)
+		log.Fatalf("failed to run: %s", err)
 	}
-	log.Println("\nsuccesfully ran")
+	log.Println("succesfully ran")
 }
 
 func run() error {
@@ -126,14 +126,14 @@ func runOnManifest() error {
 func logDependencyDiffs(passedThreshold []DependencyDiff, totalDiffs int) {
 	postSLO := len(passedThreshold)
 	preSLO := totalDiffs - postSLO
-	average := ((preSLO - postSLO) / totalDiffs) * 100
+	average := (float64(preSLO-postSLO) / float64(totalDiffs)) * 100.0
 
 	fmt.Printf("\n\n%d dependencies that were released within our SLO:\n", preSLO)
 	fmt.Printf("Found %d dependencies that were released after our SLO:\n\n", postSLO)
 	for _, dep := range passedThreshold {
 		fmt.Printf("%s v%s in %s took %d days to release\n", dep.Name, dep.Version, dep.Product, dep.DaysToRelease)
 	}
-	fmt.Printf("We are averaging %d%% below our SLO for %s\n", average, flags.product)
+	fmt.Printf("We are averaging %f%% below our SLO for %s\n", average, flags.product)
 }
 
 func DaysBetweenDates(dateA, dateB time.Time) int {
