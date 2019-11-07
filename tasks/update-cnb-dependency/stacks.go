@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"path/filepath"
 	"regexp"
 )
@@ -35,7 +36,8 @@ func determineStacks(buildMetadataPath string, dep Dependency, depOrchestratorCo
 			return []string{stackID}, nil
 		}
 	}
-	return nil, errors.New(fmt.Sprintf("%s is not a valid stack", stack))
+	log.Printf(fmt.Sprintf("%s is not a valid stack", stack))
+	return nil, nil
 }
 
 func handleAnyStack(dep Dependency, config DependencyOrchestratorConfig) ([]string, error) {
