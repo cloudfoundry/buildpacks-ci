@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require_relative '../../lib/commit'
+require 'open3'
 
 # For each individual release of a CNB, we filter out all of the commits
 # which aren't related to a Tracker story.
@@ -36,7 +37,13 @@ end
 Dir.chdir('buildpack') do
   # Need to set the PACKAGE_DIR
   ENV["PACKAGE_DIR"]=release_packaged_bp
-  `./scripts/package.sh -a -v #{version}`
+  stdout, stderr, status = Open3.capture3("./scripts/package.sh -a -v #{version}")
+  if !status.success?
+    STDERR.puts stderr
+    exit status.exitstatus
+  else
+    puts stdout
+  end
   File.write(release_body_file, get_changes)
   File.write(release_body_file, `#{packager_path} -summary`, mode: 'a')
 end
