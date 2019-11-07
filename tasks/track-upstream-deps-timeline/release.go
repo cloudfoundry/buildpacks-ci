@@ -22,7 +22,7 @@ type Release struct {
 	ReleasedAt  time.Time
 }
 
-func FindGithubReleaseOfStory(org, product, githubToken string, storyID int) (string, time.Time, bool, error) {
+func NewGithubRelease(org, product, githubToken string, storyID int) (Release, error) {
 	var tc *http.Client
 	ctx := context.Background()
 
@@ -39,13 +39,16 @@ func FindGithubReleaseOfStory(org, product, githubToken string, storyID int) (st
 	for {
 		releases, response, err := client.Repositories.ListReleases(ctx, org, product, opts)
 		if err != nil {
-			return "", time.Time{}, released, errors.Wrap(err, fmt.Sprintf("failed to get releases for %s/%s", org, product))
+			return Release{}, errors.Wrap(err, fmt.Sprintf("failed to get releases for %s/%s", org, product))
 		}
 
 		for _, release := range releases {
 			if strings.Contains(*release.Body, strconv.Itoa(storyID)) {
 				released = true
-				return *release.Name, release.PublishedAt.Time, released, nil
+				return Release{
+					released,
+					*release.Name,
+					release.PublishedAt.Time}, nil
 			}
 		}
 
@@ -55,10 +58,10 @@ func FindGithubReleaseOfStory(org, product, githubToken string, storyID int) (st
 		opts.Page = response.NextPage
 	}
 
-	return "", time.Time{}, released, nil
+	return Release{}, nil
 }
 
-func FindPivnetReleaseDate(product, releaseName string) (time.Time, error) {
+func NewPivnetRelease(product, releaseName string) (Release, error) {
 	config := pivnet.ClientConfig{
 		Host: pivnet.DefaultHost,
 	}
@@ -67,17 +70,21 @@ func FindPivnetReleaseDate(product, releaseName string) (time.Time, error) {
 
 	releases, err := client.Releases.List(product)
 	if err != nil {
-		return time.Time{}, errors.Wrap(err, fmt.Sprintf("failed to get releases of %s", product))
+		return Release{}, errors.Wrap(err, fmt.Sprintf("failed to get releases of %s", product))
 	}
 	for _, release := range releases {
 		if release.Version == releaseName {
 			releaseTime, err := time.Parse(time.RFC3339, release.SoftwareFilesUpdatedAt)
 			if err != nil {
-				return time.Time{}, errors.Wrap(err, "failed to parse time from release")
+				return Release{}, errors.Wrap(err, "failed to parse time from release")
 			}
-			return releaseTime, nil
+			return Release{
+				Released:    true,
+				ReleaseName: releaseName,
+				ReleasedAt:  releaseTime,
+			}, nil
 		}
 	}
 
-	return time.Time{}, errors.New("this version hasn't been released yet")
+	return Release{}, errors.New("this version hasn't been released yet")
 }

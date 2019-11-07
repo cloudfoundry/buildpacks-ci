@@ -13,10 +13,6 @@ import (
 
 const DaysReleasedThreshold = 7
 
-var DepsToSkip = map[string]bool{
-	"openjdk1.8-latest": true, //This was added manually 2 years ago, and isn't in buildpacks-ci-robots
-}
-
 type DependencyDiff struct {
 	Name                string
 	Version             string
@@ -30,40 +26,40 @@ type DependencyDiff struct {
 
 func NewDependencyDiff(dependency, version string, flags Flags) (DependencyDiff, error) {
 	filePath := fmt.Sprintf("/Users/pivotal/workspace/public-buildpacks-ci-robots/binary-builds-new/%s/%s.json", dependency, version)
-	binaryBuilds, err := NewBinaryBuild(filePath)
+	binaryBuilds, err := NewBuildInformation(filePath)
 	if err != nil {
 		return DependencyDiff{}, errors.Wrap(err, "failed to get binary builds story and date")
 	}
 	log.Printf("Upstream Dependency Released: %v\n", binaryBuilds.CreatedAt)
 
-	githubReleaseVersion, githubReleaseDate, released, err := FindGithubReleaseOfStory(flags.organization, flags.product, flags.githubToken, binaryBuilds.TrackerStoryID)
+	githubRelease, err := NewGithubRelease(flags.organization, flags.product, flags.githubToken, binaryBuilds.TrackerStoryID)
 	if err != nil {
 		return DependencyDiff{}, errors.Wrap(err, "failed to get github release date")
-	} else if !released {
+	} else if !githubRelease.Released {
 		return DependencyDiff{}, nil
 	}
-	log.Printf("Dependency Released on Github: %v\n", githubReleaseDate)
+	log.Printf("Dependency Released on Github: %v\n", githubRelease.ReleasedAt)
 
-	pastThreshold := false
-	daysToGithub := DaysBetweenDates(binaryBuilds.CreatedAt, githubReleaseDate)
+	passedThreshold := false
+	daysToGithub := DaysBetweenDates(binaryBuilds.CreatedAt, githubRelease.ReleasedAt)
 	log.Printf("It took %d day(s) for %s %s to get released on github", daysToGithub, dependency, version)
 	if daysToGithub > DaysReleasedThreshold {
-		pastThreshold = true
+		passedThreshold = true
 		log.Printf("WARNING!!! Failed to meet our desired threshold of %d days", DaysReleasedThreshold)
 	}
 
-	var pivnetReleaseDate time.Time
+	var pivnetRelease Release
 	if !flags.skipPivnet {
-		pivnetReleaseDate, err = FindPivnetReleaseDate(flags.product, strings.TrimPrefix(githubReleaseVersion, "v"))
+		pivnetRelease, err = NewPivnetRelease(flags.product, strings.TrimPrefix(githubRelease.ReleaseName, "v"))
 		if err != nil {
 			return DependencyDiff{}, errors.Wrap(err, "failed to get pivnet release date")
 		}
-		log.Printf("Dependency Released on Pivnet: %v\n", pivnetReleaseDate)
+		log.Printf("Dependency Released on Pivnet: %v\n", pivnetRelease)
 
-		daysToPivnet := DaysBetweenDates(binaryBuilds.CreatedAt, pivnetReleaseDate)
+		daysToPivnet := DaysBetweenDates(binaryBuilds.CreatedAt, pivnetRelease.ReleasedAt)
 		log.Printf("It took %d day(s) for %s %s to get released on pivnet", daysToPivnet, dependency, version)
 		if daysToGithub > DaysReleasedThreshold {
-			pastThreshold = true
+			passedThreshold = true
 			log.Printf("WARNING!!! Failed to meet our desired threshold of %d days", DaysReleasedThreshold)
 		}
 	}
@@ -73,17 +69,17 @@ func NewDependencyDiff(dependency, version string, flags Flags) (DependencyDiff,
 		Version:             version,
 		Product:             flags.product,
 		UpstreamReleaseTime: binaryBuilds.CreatedAt,
-		GithubReleaseTime:   githubReleaseDate,
-		PivnetReleaseTime:   pivnetReleaseDate,
+		GithubReleaseTime:   githubRelease.ReleasedAt,
+		PivnetReleaseTime:   pivnetRelease.ReleasedAt,
 		DaysToRelease:       daysToGithub,
-		PassedThreshold:     pastThreshold,
+		PassedThreshold:     passedThreshold,
 	}, nil
 }
 
-func DependencyDiffsFromManifest(manifest utils.ManifestYAML) ([]DependencyDiff, error) {
+func DependencyDiffsFromManifest(manifest utils.ManifestYAML, depsToSkip map[string]bool) ([]DependencyDiff, error) {
 	var deps []DependencyDiff
 	for _, dep := range manifest.Dependencies {
-		if DepsToSkip[dep.Name] {
+		if depsToSkip[dep.Name] {
 			continue
 		}
 

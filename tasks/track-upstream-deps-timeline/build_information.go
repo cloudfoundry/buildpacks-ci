@@ -18,7 +18,7 @@ type BuildInformation struct {
 	CreatedAt      time.Time
 }
 
-func NewBinaryBuild(path string) (BuildInformation, error) {
+func NewBuildInformation(path string) (BuildInformation, error) {
 	fileDir := filepath.Dir(path)
 	fileName := filepath.Base(path)
 
@@ -31,7 +31,7 @@ func NewBinaryBuild(path string) (BuildInformation, error) {
 		return BuildInformation{}, errors.Wrap(err, fmt.Sprintf("failed to parse binary build from %s", string(contents)))
 	}
 
-	//Running git log -1 --format="%aI" --reverse public-buildpacks-ci-robots/binary-builds-new/ruby/2.6.5.json
+	//Running git log -1 --format="%aI" --reverse PATH
 	cmd := exec.Command("git", "log", "-1", "--format=\"%aI\"", "--reverse", fileName)
 	cmd.Dir = fileDir
 	output, err := cmd.CombinedOutput()

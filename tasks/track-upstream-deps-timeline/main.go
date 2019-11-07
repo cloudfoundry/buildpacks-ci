@@ -12,33 +12,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type Flags struct {
-	githubToken  string
-	dependency   string
-	version      string
-	organization string
-	product      string
-	manifestPath string
-	skipPivnet   bool
-}
-
-var flags Flags
-
-// Problem Statement:
-// Display the time difference between the release of a dependency (ruby-2.6.5)
-// when it was released on github
-// and when it was released on pivnet
-func init() {
-	flag.StringVar(&flags.githubToken, "github-token", "", "github token to authenticate")
-	flag.StringVar(&flags.dependency, "dependency", "", "upstream dependency")
-	flag.StringVar(&flags.version, "version", "", "version of dependency")
-	flag.StringVar(&flags.organization, "organization", "cloudfoundry", "github organization of output")
-	flag.StringVar(&flags.product, "product", "", "product dependency is put into")
-	flag.StringVar(&flags.manifestPath, "manifest-path", "", "manifest to load, and iterate over all dependencies")
-	flag.BoolVar(&flags.skipPivnet, "skip-pivnet", false, "skip the search for pivnet release date")
-}
-
 /*
+Problem Statement:
+Display the time difference between the release of a dependency (ruby-2.6.5)
+when it was released on github
+and when it was released on pivnet
+
 Usage:
 To parse manifest, run:
 go run github.com/cloudfoundry/buildpacks-ci/tasks/track-upstream-deps-timeline \
@@ -68,11 +47,36 @@ go run github.com/cloudfoundry/buildpacks-ci/tasks/track-upstream-deps-timeline 
 	-organization cloudfoundry
 
 One important assumption that this makes is on the location of public-ci-robots, in order to do a search.
-It assumes that it's at /Users/pivotal/workspace/public-buildpacks-ci-robots
+It assumes that it's at /Users/pivotal/workspace/public-buildpacks-ci-robots, for testing on local environments purposes
 */
 
-func main() {
+type Flags struct {
+	githubToken  string
+	dependency   string
+	version      string
+	organization string
+	product      string
+	manifestPath string
+	skipPivnet   bool
+}
 
+var flags Flags
+
+var DepsToSkip = map[string]bool{
+	"openjdk1.8-latest": true, //This was added manually 2 years ago, and isn't in buildpacks-ci-robots
+}
+
+func init() {
+	flag.StringVar(&flags.githubToken, "github-token", "", "github token to authenticate")
+	flag.StringVar(&flags.dependency, "dependency", "", "upstream dependency")
+	flag.StringVar(&flags.version, "version", "", "version of dependency")
+	flag.StringVar(&flags.organization, "organization", "cloudfoundry", "github organization of output")
+	flag.StringVar(&flags.product, "product", "", "product dependency is put into")
+	flag.StringVar(&flags.manifestPath, "manifest-path", "", "manifest to load, and iterate over all dependencies")
+	flag.BoolVar(&flags.skipPivnet, "skip-pivnet", false, "skip the search for pivnet release date")
+}
+
+func main() {
 	flag.Parse()
 	if err := run(); err != nil {
 		log.Fatalf("\nfailed to run: %s", err)
@@ -82,16 +86,15 @@ func main() {
 
 func run() error {
 	if flags.manifestPath != "" {
-		return timeDifferenceForAllDependencies()
+		return runOnManifest()
 	} else {
 		_, err := NewDependencyDiff(flags.dependency, flags.version, flags)
 		return err
 	}
 }
 
-func timeDifferenceForAllDependencies() error {
+func runOnManifest() error {
 	var passedThreshold []DependencyDiff
-
 	var manifest utils.ManifestYAML
 	contents, err := ioutil.ReadFile(flags.manifestPath)
 	if err != nil {
@@ -102,7 +105,7 @@ func timeDifferenceForAllDependencies() error {
 		return err
 	}
 
-	diffs, err := DependencyDiffsFromManifest(manifest)
+	diffs, err := DependencyDiffsFromManifest(manifest, DepsToSkip)
 	if err != nil {
 		return err
 	}
@@ -116,9 +119,14 @@ func timeDifferenceForAllDependencies() error {
 		}
 	}
 
+	logDependencyDiffs(passedThreshold, len(diffs))
+	return nil
+}
+
+func logDependencyDiffs(passedThreshold []DependencyDiff, totalDiffs int) {
 	postSLO := len(passedThreshold)
-	preSLO := len(diffs) - postSLO
-	average := ((preSLO - postSLO) / len(diffs)) * 100
+	preSLO := totalDiffs - postSLO
+	average := ((preSLO - postSLO) / totalDiffs) * 100
 
 	fmt.Printf("\n\n%d dependencies that were released within our SLO:\n", preSLO)
 	fmt.Printf("Found %d dependencies that were released after our SLO:\n\n", postSLO)
@@ -126,8 +134,6 @@ func timeDifferenceForAllDependencies() error {
 		fmt.Printf("%s v%s in %s took %d days to release\n", dep.Name, dep.Version, dep.Product, dep.DaysToRelease)
 	}
 	fmt.Printf("We are averaging %d%% below our SLO for %s\n", average, flags.product)
-
-	return nil
 }
 
 func DaysBetweenDates(dateA, dateB time.Time) int {
