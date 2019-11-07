@@ -294,7 +294,7 @@ module DependencyBuild
   end
 
   def build_dotnet_aspnetcore(source_input)
-    prune_dotnet_files(source_input, ["./dotnet", "./shared/Microsoft.NETCore.App/"])
+    prune_dotnet_files(source_input, ["./dotnet", "./shared/Microsoft.NETCore.App"])
   end
 
   def prune_dotnet_files(source_input, files_to_exclude)
