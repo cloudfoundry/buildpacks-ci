@@ -20,12 +20,15 @@ type BuildpackTOML struct {
 	Stacks   Stacks   `toml:"stacks"`
 }
 
-type Metadata struct {
-	IncludeFiles               []string         `toml:"include_files"`
-	PrePackage                 string           `toml:"pre_package,omitempty"`
-	Dependencies               Dependencies     `toml:"dependencies"`
-	DependencyDeprecationDates DeprecationDates `toml:"dependency_deprecation_dates"`
-}
+type Metadata map[string]interface{}
+
+var (
+	IncludeFilesKey = "include_files"
+	PrePackageKey = "pre_package"
+	DeprecationDatesKey = "dependency_deprecation_dates"
+	DependenciesKey = "dependencies"
+	DefaultVersionsKey = "default-versions"
+)
 
 func (buildpackTOML BuildpackTOML) WriteToFile(filepath string) error {
 	buildpackTOMLFile, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE, 0666)

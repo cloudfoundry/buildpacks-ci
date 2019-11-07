@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
 
@@ -58,7 +59,12 @@ func updateCNBDependencies() error {
 		return errors.Wrap(err, "failed to construct list of dependencies to add")
 	}
 
-	originalDeps := config.BuildpackTOML.Metadata.Dependencies.ExpandByStack()
+	var deps Dependencies
+	err = mapstructure.Decode(config.BuildpackTOML.Metadata[DependenciesKey], &deps)
+	if err != nil {
+		return errors.Wrap(err, "failed to decode dependencies")
+	}
+	originalDeps := deps.ExpandByStack()
 	updatedDeps, err := originalDeps.MergeWith(depsToAdd)
 	if err != nil {
 		return errors.Wrap(err, "failed to merge dependency lists")
@@ -71,13 +77,18 @@ func updateCNBDependencies() error {
 
 	updatedOrder := config.BuildpackTOML.Orders.UpdateOrderDependencyVersion(config.Dep)
 
-	updatedDeprecationDates, err := config.BuildpackTOML.Metadata.DependencyDeprecationDates.Update(deprecationDate)
+	var deprecationDates DeprecationDates
+	err = mapstructure.Decode(config.BuildpackTOML.Metadata[DeprecationDatesKey], &deprecationDates)
+	if err != nil {
+		return errors.Wrap(err, "failed to decode deprecation dates")
+	}
+	updatedDeprecationDates, err := deprecationDates.Update(deprecationDate)
 	if err != nil {
 		return errors.Wrap(err, "failed to update deprecation dates")
 	}
 
-	config.BuildpackTOML.Metadata.Dependencies = updatedDeps
-	config.BuildpackTOML.Metadata.DependencyDeprecationDates = updatedDeprecationDates
+	config.BuildpackTOML.Metadata[DependenciesKey] = updatedDeps
+	config.BuildpackTOML.Metadata[DeprecationDatesKey] = updatedDeprecationDates
 	config.BuildpackTOML.Orders = updatedOrder
 
 	if err := config.BuildpackTOML.WriteToFile(filepath.Join(flags.outputDir, "buildpack.toml")); err != nil {
