@@ -88,7 +88,11 @@ func updateCNBDependencies() error {
 	}
 
 	config.BuildpackTOML.Metadata[DependenciesKey] = updatedDeps
-	config.BuildpackTOML.Metadata[DeprecationDatesKey] = updatedDeprecationDates
+	if len(updatedDeprecationDates) > 0 {
+		config.BuildpackTOML.Metadata[DeprecationDatesKey] = updatedDeprecationDates
+	}
+	// onfig.BuildpackTOML.Metadata = zeroMetadata(config.BuildpackTOML.Metadata => see comment below
+
 	config.BuildpackTOML.Orders = updatedOrder
 
 	if err := config.BuildpackTOML.WriteToFile(filepath.Join(flags.outputDir, "buildpack.toml")); err != nil {
@@ -102,3 +106,14 @@ func updateCNBDependencies() error {
 
 	return nil
 }
+
+// This wont work until golang 1.13
+//func zeroMetadata(metadata map[string]interface{}) map[string]interface{} {
+//	for k, v := range metadata {
+//		value := reflect.ValueOf(v)
+//		if value.IsZero(v) {
+//			delete(metadata, k)
+//		}
+//	}
+//	return metadata
+//}
