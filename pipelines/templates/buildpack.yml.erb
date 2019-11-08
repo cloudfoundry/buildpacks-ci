@@ -112,6 +112,14 @@ resources: #####################################################################
         - VERSION
         - CHANGELOG
 
+  - name: buildpack-develop-with-version-and-changelog
+    type: git
+    webhook_token: ob0aigh3
+    source:
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
+      private_key: {{<%= language %>-buildpack-private-key}}
+      branch: develop
+
 <% if buildpacks[language]['v3'] %>
   - name: buildpack-v3
     type: git
@@ -394,6 +402,7 @@ jobs: ##########################################################################
       - in_parallel:
         - get: buildpacks-ci
         - get: buildpack-develop
+          resource: buildpack-develop-with-version-and-changelog
       - do:
         - task: create-buildpack-release-story
           file: buildpacks-ci/tasks/create-buildpack-release-tracker-story/task.yml
