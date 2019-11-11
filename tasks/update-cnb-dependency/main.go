@@ -75,7 +75,7 @@ func updateCNBDependencies() error {
 		return errors.Wrap(err, "failed to remove old dependencies")
 	}
 
-	collapsedUpdatedDeps := updatedDeps.CollapseEqualDependecies()
+	collapsedUpdatedDeps := updatedDeps.CollapseByStack()
 
 	updatedOrder := config.BuildpackTOML.Orders.UpdateOrderDependencyVersion(config.Dep)
 
