@@ -26,10 +26,10 @@ func (deps Dependencies) MergeWith(newDeps Dependencies) (Dependencies, error) {
 	depsMap := map[string]Dependency{}
 
 	for _, dep := range deps {
-		depsMap[makeKey(dep)] = dep
+		depsMap[makeKeyWithStack(dep)] = dep
 	}
 	for _, dep := range newDeps {
-		depsMap[makeKey(dep)] = dep
+		depsMap[makeKeyWithStack(dep)] = dep
 	}
 
 	allDeps := Dependencies{}
@@ -143,7 +143,52 @@ func (deps Dependencies) findDependency(dep Dependency) (Dependency, bool) {
 	return Dependency{}, false
 }
 
-func makeKey(dep Dependency) string { return dep.ID + dep.Version + dep.Stacks[0] }
+func (deps Dependencies) CollapseEqualDependecies() Dependencies {
+	depsMap := map[string]Dependency{}
+	for _, dep := range deps {
+		key := makeKeyWithoutStack(dep)
+		if mapDep, exists := depsMap[key]; exists {
+			mapDep.Stacks = combineStacks(mapDep.Stacks, dep.Stacks)
+			depsMap[key] = mapDep
+		} else {
+			depsMap[key] = dep
+		}
+	}
+
+	allDeps := Dependencies{}
+	for _, dep := range depsMap {
+		allDeps = append(allDeps, dep)
+	}
+
+	sort.Slice(allDeps, allDeps.sortDependencies())
+	return allDeps
+}
+
+func combineStacks(a, b []string) []string {
+	stacksMap := map[string]bool{}
+
+	for _, stack := range a {
+		stacksMap[stack] = true
+	}
+
+	for _, stack := range b {
+		stacksMap[stack] = true
+	}
+
+	var allStacks []string
+	for stack, _ := range stacksMap {
+		allStacks = append(allStacks, stack)
+	}
+
+	sort.Strings(allStacks)
+	return allStacks
+}
+
+func makeKeyWithStack(dep Dependency) string { return dep.ID + dep.Version + dep.Stacks[0] }
+
+func makeKeyWithoutStack(dep Dependency) string {
+	return dep.ID + dep.Version + dep.URI + dep.SHA256 + dep.Source + dep.SourceSHA256
+}
 
 func constructDependenciesFromBuildMetadata(dep Dependency, buildMetadataPath string, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
 	var buildMetadata BuildMetadata

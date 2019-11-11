@@ -75,6 +75,8 @@ func updateCNBDependencies() error {
 		return errors.Wrap(err, "failed to remove old dependencies")
 	}
 
+	collapsedUpdatedDeps := updatedDeps.CollapseEqualDependecies()
+
 	updatedOrder := config.BuildpackTOML.Orders.UpdateOrderDependencyVersion(config.Dep)
 
 	var deprecationDates DeprecationDates
@@ -87,11 +89,11 @@ func updateCNBDependencies() error {
 		return errors.Wrap(err, "failed to update deprecation dates")
 	}
 
-	config.BuildpackTOML.Metadata[DependenciesKey] = updatedDeps
+	config.BuildpackTOML.Metadata[DependenciesKey] = collapsedUpdatedDeps
 	if len(updatedDeprecationDates) > 0 {
 		config.BuildpackTOML.Metadata[DeprecationDatesKey] = updatedDeprecationDates
 	}
-	// onfig.BuildpackTOML.Metadata = zeroMetadata(config.BuildpackTOML.Metadata => see comment below
+	// config.BuildpackTOML.Metadata = zeroMetadata(config.BuildpackTOML.Metadata => see comment below
 
 	config.BuildpackTOML.Orders = updatedOrder
 
