@@ -77,21 +77,25 @@ func (deps Dependencies) RemoveOldDeps(depID, versionLine string, keepN int) (De
 	return retainedDeps, nil
 }
 
-func (deps Dependencies) sortDependencies() func(i, j int) bool {
-	return func(i, j int) bool {
-		if deps[i].ID != deps[j].ID {
-			return deps[i].ID < deps[j].ID
+func (deps Dependencies) CollapseByStack() Dependencies {
+	depsMap := map[string]Dependency{}
+	for _, dep := range deps {
+		key := makeKeyWithoutStack(dep)
+		if mapDep, exists := depsMap[key]; exists {
+			mapDep.Stacks = combineStacks(mapDep.Stacks, dep.Stacks)
+			depsMap[key] = mapDep
+		} else {
+			depsMap[key] = dep
 		}
-
-		firstVersion := semver.MustParse(deps[i].Version)
-		secondVersion := semver.MustParse(deps[j].Version)
-
-		if firstVersion.EQ(secondVersion) {
-			return deps[i].Stacks[0] < deps[j].Stacks[0]
-		}
-
-		return firstVersion.LT(secondVersion)
 	}
+
+	allDeps := Dependencies{}
+	for _, dep := range depsMap {
+		allDeps = append(allDeps, dep)
+	}
+
+	sort.Slice(allDeps, allDeps.sortDependencies())
+	return allDeps
 }
 
 func (deps Dependencies) ExpandByStack() Dependencies {
@@ -109,6 +113,23 @@ func (deps Dependencies) ExpandByStack() Dependencies {
 	}
 
 	return expandedDeps
+}
+
+func (deps Dependencies) sortDependencies() func(i, j int) bool {
+	return func(i, j int) bool {
+		if deps[i].ID != deps[j].ID {
+			return deps[i].ID < deps[j].ID
+		}
+
+		firstVersion := semver.MustParse(deps[i].Version)
+		secondVersion := semver.MustParse(deps[j].Version)
+
+		if firstVersion.EQ(secondVersion) {
+			return deps[i].Stacks[0] < deps[j].Stacks[0]
+		}
+
+		return firstVersion.LT(secondVersion)
+	}
 }
 
 func loadDependenciesFromBinaryBuilds(binaryBuildsPath string, dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
@@ -141,27 +162,6 @@ func (deps Dependencies) findDependency(dep Dependency) (Dependency, bool) {
 		}
 	}
 	return Dependency{}, false
-}
-
-func (deps Dependencies) CollapseEqualDependecies() Dependencies {
-	depsMap := map[string]Dependency{}
-	for _, dep := range deps {
-		key := makeKeyWithoutStack(dep)
-		if mapDep, exists := depsMap[key]; exists {
-			mapDep.Stacks = combineStacks(mapDep.Stacks, dep.Stacks)
-			depsMap[key] = mapDep
-		} else {
-			depsMap[key] = dep
-		}
-	}
-
-	allDeps := Dependencies{}
-	for _, dep := range depsMap {
-		allDeps = append(allDeps, dep)
-	}
-
-	sort.Slice(allDeps, allDeps.sortDependencies())
-	return allDeps
 }
 
 func combineStacks(a, b []string) []string {

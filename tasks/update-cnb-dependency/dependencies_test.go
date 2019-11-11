@@ -226,7 +226,7 @@ func testDependencies(t *testing.T, when spec.G, it spec.S) {
 					{ID: "some-id-3", Stacks: []string{"some-stack-2"}, Version: "3.0.0"},
 				}
 
-				newDeps := originalDeps.CollapseEqualDependecies()
+				newDeps := originalDeps.CollapseByStack()
 				assert.Equal(t, collapsedDeps, newDeps)
 			})
 		})
@@ -251,7 +251,7 @@ func testDependencies(t *testing.T, when spec.G, it spec.S) {
 					{ID: "some-id-6", Stacks: []string{"some-stack-2"}, Version: "3.0.0"},
 				}
 
-				newDeps := originalDeps.CollapseEqualDependecies()
+				newDeps := originalDeps.CollapseByStack()
 				assert.Equal(t, collapsedDeps, newDeps)
 			})
 		})
