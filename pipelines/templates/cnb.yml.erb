@@ -146,7 +146,29 @@ jobs: ##########################################################################
           - task: unit tests
             file: buildpacks-ci/tasks/run-scripts-unit/task.yml
 
-  - name: run-integration-and-release
+<% if buildpacks[language]['integration'] %>
+  - name: specs-integration
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: buildpacks-ci
+          - get: packager
+            resource: libcfbuildpack
+          - get: pack
+          - get: buildpack
+            resource: buildpack-git
+            trigger: true
+            passed:
+              - specs-unit
+      - task: integration-tests
+        file: buildpacks-ci/tasks/run-packaged-v3-bp-integration/task.yml
+        privileged: true
+        params:
+          GIT_TOKEN: {{buildpacks-github-token}}
+<% end %>
+
+  - name: build-and-release-buildpack
     public: true
     serial: true
     plan:
@@ -158,21 +180,15 @@ jobs: ##########################################################################
           - get: buildpacks-ci
           - get: packager
             resource: libcfbuildpack
-          - get: pack
           - get: buildpack
             resource: buildpack-git
             trigger: true
             passed:
-              - specs-unit
+              - specs-integration
       - task: package-buildpack
         file: buildpacks-ci/tasks/package-v3-buildpack/task.yml
         params:
           LANGUAGE: <%= language %>
-      - task: integration-tests
-        file: buildpacks-ci/tasks/run-packaged-v3-bp-integration/task.yml
-        privileged: true
-        params:
-          GIT_TOKEN: {{buildpacks-github-token}}
       - put: buildpack-github-release
         params:
           name: release-artifacts/name
