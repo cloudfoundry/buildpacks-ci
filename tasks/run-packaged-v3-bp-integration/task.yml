@@ -6,11 +6,9 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
+  - name: packager
   - name: pack
   - name: buildpack
-  - name: release-artifacts
-outputs:
-  - name: release-artifacts
 run:
   path: buildpacks-ci/tasks/run-packaged-v3-bp-integration/run.sh
 params:
