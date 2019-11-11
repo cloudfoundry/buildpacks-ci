@@ -43,12 +43,14 @@ resources: #####################################################################
   <% end %>
 
   ## Github Releases ##
+  <% if buildpacks[language]['integration'] %>
   - name: pack
     type: github-release
     source:
       repository: pack
       user: buildpack
       access_token: {{buildpacks-github-token}}
+  <% end %>
 
   - name: buildpack-github-release
     type: github-release
@@ -184,7 +186,11 @@ jobs: ##########################################################################
             resource: buildpack-git
             trigger: true
             passed:
+              <% if buildpacks[language]['integration'] %>
               - specs-integration
+              <% else %>
+              - specs-unit
+              <% end %>
       - task: package-buildpack
         file: buildpacks-ci/tasks/package-v3-buildpack/task.yml
         params:
