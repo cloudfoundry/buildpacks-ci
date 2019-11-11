@@ -380,7 +380,6 @@ jobs:
         - get: lifecycle # use lifecycle version in order.toml instead?
           resource: cnb-lifecycle-release
           trigger: true
-      # Should create-builder-image just ls *-cnb?
       - task: get-cnb-sources
         config:
           platform: linux
