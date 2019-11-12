@@ -6,11 +6,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
 
-var flags struct {
+type Flags struct {
 	dependencyBuildsConfig string
 	buildpackTOML          string
 	sourceData             string
@@ -22,6 +21,8 @@ var flags struct {
 	versionLine            string
 	versionsToKeep         int
 }
+
+var flags Flags
 
 func main() {
 	flag.StringVar(&flags.dependencyBuildsConfig, "dependency-builds-config", "", "config for dependency builds pipeline")
@@ -49,59 +50,50 @@ func updateCNBDependencies() error {
 		return errors.Wrap(err, "failed to load task resources")
 	}
 
-	deprecationDate, err := NewDependencyDeprecationDate(flags.deprecationDate, flags.deprecationLink, config.Dep.ID, flags.versionLine, flags.deprecationMatch)
-	if err != nil {
-		return errors.Wrap(err, "failed to create deprecation date")
-	}
-
+	// Load, update and save dependencies
 	depsToAdd, err := loadDependenciesFromBinaryBuilds(flags.binaryBuildsPath, config.Dep, config.Orchestrator)
 	if err != nil {
 		return errors.Wrap(err, "failed to construct list of dependencies to add")
 	}
 
-	var deps Dependencies
-	err = mapstructure.Decode(config.BuildpackTOML.Metadata[DependenciesKey], &deps)
+	deps, err := config.BuildpackTOML.Dependencies()
 	if err != nil {
 		return errors.Wrap(err, "failed to decode dependencies")
 	}
-	originalDeps := deps.ExpandByStack()
-	updatedDeps, err := originalDeps.MergeWith(depsToAdd)
+
+	updatedDeps, err := deps.Update(flags, config.Dep, depsToAdd)
 	if err != nil {
-		return errors.Wrap(err, "failed to merge dependency lists")
+		return errors.Wrap(err, "failed to add new dependencies to the dependencies list")
+	}
+	config.BuildpackTOML.SaveDependencies(updatedDeps)
+
+	// Load and update Deprecation Dates
+	deprecationDate, err := NewDependencyDeprecationDate(flags.deprecationDate, flags.deprecationLink, config.Dep.ID, flags.versionLine, flags.deprecationMatch)
+	if err != nil {
+		return errors.Wrap(err, "failed to create deprecation date")
 	}
 
-	updatedDeps, err = updatedDeps.RemoveOldDeps(config.Dep.ID, flags.versionLine, flags.versionsToKeep)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove old dependencies")
-	}
-
-	collapsedUpdatedDeps := updatedDeps.CollapseByStack()
-
-	updatedOrder := config.BuildpackTOML.Orders.UpdateOrderDependencyVersion(config.Dep)
-
-	var deprecationDates DeprecationDates
-	err = mapstructure.Decode(config.BuildpackTOML.Metadata[DeprecationDatesKey], &deprecationDates)
+	deprecationDates, err := config.BuildpackTOML.DeprecationDates()
 	if err != nil {
 		return errors.Wrap(err, "failed to decode deprecation dates")
 	}
+
 	updatedDeprecationDates, err := deprecationDates.Update(deprecationDate)
 	if err != nil {
 		return errors.Wrap(err, "failed to update deprecation dates")
 	}
+	config.BuildpackTOML.SaveDeprecationDates(updatedDeprecationDates)
 
-	config.BuildpackTOML.Metadata[DependenciesKey] = collapsedUpdatedDeps
-	if len(updatedDeprecationDates) > 0 {
-		config.BuildpackTOML.Metadata[DeprecationDatesKey] = updatedDeprecationDates
-	}
 	// config.BuildpackTOML.Metadata = zeroMetadata(config.BuildpackTOML.Metadata => see comment below
-
+	// Update and save Order
+	updatedOrder := config.BuildpackTOML.Orders.Update(config.Dep)
 	config.BuildpackTOML.Orders = updatedOrder
 
 	if err := config.BuildpackTOML.WriteToFile(filepath.Join(flags.outputDir, "buildpack.toml")); err != nil {
 		return errors.Wrap(err, "failed to update buildpack toml")
 	}
 
-	commitMessage := GenerateCommitMessage(originalDeps, updatedDeps, config.Dep, config.BuildMetadata.TrackerStoryID)
+	commitMessage := GenerateCommitMessage(deps, updatedDeps, config.Dep, config.BuildMetadata.TrackerStoryID)
 	if err := CommitArtifacts(commitMessage, flags.outputDir); err != nil {
 		return errors.Wrap(err, "failed to commit artifacts")
 	}

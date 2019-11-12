@@ -7,10 +7,17 @@ import (
 )
 
 func GenerateCommitMessage(oldDeps, newDeps Dependencies, dep Dependency, storyID int) string {
-	added := false
-	rebuilt := false
+	added, rebuilt, stacks := findAddedDeps(dep, oldDeps, newDeps)
+
+	removedDeps, stacks := findRemovedDeps(dep, oldDeps, newDeps, stacks)
+
+	return formCommitMessage(dep, added, rebuilt, removedDeps, stacks, storyID)
+}
+
+func findAddedDeps(dep Dependency, oldDeps, newDeps Dependencies) (bool, bool, map[string]bool) {
+	var added, rebuilt bool
+	// Use maps to ensure no duplicates
 	stacks := map[string]bool{}
-	removedDeps := map[string]bool{}
 
 	for _, newDep := range newDeps {
 		if newDep.ID != dep.ID || newDep.Version != dep.Version {
@@ -18,29 +25,43 @@ func GenerateCommitMessage(oldDeps, newDeps Dependencies, dep Dependency, storyI
 		}
 
 		oldDep, exists := oldDeps.findDependency(newDep)
-		if exists {
-			if oldDep.SHA256 != newDep.SHA256 || oldDep.URI != newDep.URI {
-				rebuilt = true
-				stacks[newDep.Stacks[0]] = true
-			}
-		} else {
+		if exists && rebuild(oldDep, newDep) {
+			rebuilt = true
+		} else if !exists {
 			added = true
-			stacks[newDep.Stacks[0]] = true
-		}
-	}
-
-	for _, dep := range oldDeps {
-		if dep.ID != dep.ID {
+		} else {
 			continue
 		}
 
-		if !newDeps.containsDependency(dep) {
-			removedDeps[dep.ID+" "+dep.Version] = true
-			stacks[dep.Stacks[0]] = true
+		for _, stack := range newDep.Stacks {
+			stacks[stack] = true
 		}
 	}
 
-	if !added && !rebuilt && len(removedDeps) == 0 {
+	return added, rebuilt, stacks
+}
+
+func findRemovedDeps(dep Dependency, oldDeps, newDeps Dependencies, stacks map[string]bool) (map[string]bool, map[string]bool) {
+	removedDeps := map[string]bool{}
+
+	for _, oldDep := range oldDeps {
+		if oldDep.ID != dep.ID {
+			continue
+		}
+
+		if !newDeps.containsDependency(oldDep) {
+			removedDeps[oldDep.ID+" "+oldDep.Version] = true
+			for _, stack := range oldDep.Stacks {
+				stacks[stack] = true
+			}
+		}
+	}
+
+	return removedDeps, stacks
+}
+
+func formCommitMessage(dep Dependency, added, rebuilt bool, removedDeps, stacks map[string]bool, storyID int) string {
+	if noChanges(added, rebuilt, removedDeps) {
 		return ""
 	}
 
@@ -58,6 +79,14 @@ func GenerateCommitMessage(oldDeps, newDeps Dependencies, dep Dependency, storyI
 	commitMessage += fmt.Sprintf("\n\nfor stack(s) %s [#%d]", joinMap(stacks), storyID)
 
 	return commitMessage
+}
+
+func noChanges(added, rebuilt bool, removedDeps map[string]bool) bool {
+	return !added && !rebuilt && len(removedDeps) == 0
+}
+
+func rebuild(dep, newDep Dependency) bool {
+	return dep.SHA256 != newDep.SHA256 || dep.URI != newDep.URI
 }
 
 func joinMap(m map[string]bool) string {
