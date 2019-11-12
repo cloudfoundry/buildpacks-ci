@@ -190,10 +190,13 @@ jobs:
           - get: buildpack
             resource: repo
             passed:
-              - create-rc
+              - create-and-test-v2-rc
           - get: cnb-release-candidate
             passed:
-              - create-rc
+              - create-and-test-v2-rc
+          - get: v2-release-candidate
+            passed:
+              - create-and-test-v2-rc
           - get: version
             resource: <%= language %>-cnb-version
             params:
