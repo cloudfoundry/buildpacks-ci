@@ -367,6 +367,18 @@ dependencies:
       - 'prerelease: true'
     any_stack: true
     versions_to_keep: 1
+  org.cloudfoundry.icu:
+    buildpacks:
+      dotnet-core-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/icu-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.dotnet-core-aspnet:
     buildpacks:
       dotnet-core-cnb:
@@ -771,8 +783,6 @@ v3_stacks:
   tiny: 'org.cloudfoundry.stacks.tiny'
   bionic: 'io.buildpacks.stacks.bionic'
   cflinuxfs3: 'org.cloudfoundry.stacks.cflinuxfs3'
-v3_dep_ids:
-  dotnet-aspnetcore: dotnet-aspnet
 v3_dep_names:
   node: Node Engine
   yarn: Yarn

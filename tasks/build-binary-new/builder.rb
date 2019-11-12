@@ -402,6 +402,7 @@ class Builder
       'org.cloudfoundry.go-compiler',
       'org.cloudfoundry.go-mod',
       'org.cloudfoundry.dep',
+      'org.cloudfoundry.icu',
     ]
 
     unless skip_commit
