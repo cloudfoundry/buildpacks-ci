@@ -68,7 +68,7 @@ resources: #####################################################################
       key: cnb-versions/<%= language %>-version
       json_key: {{gcp-service-account-key}}
 
-  <% if buildpacks[language]['cached_build'] %>
+  <% if buildpacks[language]['build_cache'] %>
   - name: cached-cnb
     type: s3
     source:
@@ -216,8 +216,8 @@ jobs: ##########################################################################
         resource: <%= language %>-cnb-version
         params:
           file: version/version
-      <% if buildpacks[language]['cached_build'] %>
-      - put: cached-cnb-bucket
+      <% if buildpacks[language]['build_cache'] %>
+      - put: cached-cnb
         params:
           file: release-artifacts/<%= language %>-cnb-*-cached.tgz
       <% end %>
