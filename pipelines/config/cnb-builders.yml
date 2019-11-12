@@ -1,4 +1,24 @@
 ---
+stacks:
+  cflinuxfs3:
+    images:
+      - build
+      - run
+    piv-version: true
+    tag: full
+  bionic:
+    images:
+      - build
+      - run
+    base: true
+    piv-version: true
+    tag: base
+    latest: true
+  tiny:
+    images:
+      - run
+    base: true
+    tag: tiny
 builders:
   cf-builder-tiny:
     stack: tiny
