@@ -35,14 +35,13 @@ resources:
       access_token: {{buildpacks-github-token}}
       drafts: true
 
-# Comments remove the building and releasing of shimmed buildpack until we are ready to.
-#  - name: release-candidate
-#    type: s3
-#    source:
-#      bucket: {{buildpack-release-candidates-bucket}}
-#      regexp: shims/<%#= language %>/<%#= language %>_buildpack-v(\d+\.\d+\.\d+-rc\.\d+).zip
-#      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
-#      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+  - name: v2-release-candidate
+    type: s3
+    source:
+      bucket: {{buildpack-release-candidates-bucket}}
+      regexp: shims/<%= language %>/<%= language %>_buildpack-v(\d+\.\d+\.\d+-rc\.\d+).zip
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
   - name: cnb-release-candidate
     type: s3
@@ -96,8 +95,8 @@ jobs:
           repository: buildpack-artifacts
           rebase: true
 
-  # Test and Release
-  - name: create-and-test-rc
+  # Create & Promote
+  - name: create-rc
     serial: true
     public: true
     plan:
@@ -109,44 +108,75 @@ jobs:
               pre: rc
           - get: repo
             trigger: true
+      - task: create-candidate
+        file: buildpacks-ci/tasks/cnb/build/task.yml
+#        TODO: actually run the tests
+#      - task: integration-test-using-candidate
+#        privileged: true
+#        file: buildpacks-ci/tasks/run-scripts-integration/task.yml
+      - task: promote-candidate-to-rc
+        file: buildpacks-ci/tasks/cnb/promote-candidate-to-rc/task.yml
+        params:
+          LANGUAGE: <%= language %>
+      - put: cnb-release-candidate
+        params:
+          file: cnb-release-candidate/*.tgz
+      - put: version
+        resource: <%= language %>-cnb-version
+        params: {file: version/number}
+
+  # Create, Test & Promote v2
+  - name: create-and-test-v2-rc
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+          - get: buildpacks-ci
+          - get: version
+            resource: <%= language %>-cnb-version
+            params:
+              pre: rc
+          - get: cnb-tarball
+            resource: cnb-release-candidate
+            passed: [create-rc]
+            trigger: true
           - get: cnb2cf
           - get: env-repo
           - put: edge-environments
             params:
               acquire: true
       - task: create-candidate
-        file: buildpacks-ci/tasks/build-cnb-buildpack/task.yml
-#      - task: create-cf-space
-#        file: buildpacks-ci/tasks/create-cf-space/task.yml
-#        output_mapping: {cf-space: cf-space-cflinuxfs3}
-#        params:
-#          ENV_POOL_RESOURCE: edge-environments
-#          ENVS_DIR: env-repo
-#          ORG: pivotal
-#          SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
-#          USERNAME: admin
+        file: buildpacks-ci/tasks/cnb/build-v2/task.yml
+      - task: create-cf-space
+        file: buildpacks-ci/tasks/create-cf-space/task.yml
+        output_mapping: {cf-space: cf-space-cflinuxfs3}
+        params:
+          ENV_POOL_RESOURCE: edge-environments
+          ENVS_DIR: env-repo
+          ORG: pivotal
+          SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+          USERNAME: admin
 #      - task: integration-test-using-candidate
 #        privileged: true
 #        file: buildpacks-ci/tasks/run-scripts-integration/task.yml
 #        input_mapping:
 #          cf-space: cf-space-cflinuxfs3
       - task: promote-candidate-to-rc
-        file: buildpacks-ci/tasks/promote-candidate-to-rc/task.yml
+        file: buildpacks-ci/tasks/cnb/promote-v2-to-rc/task.yml
         params:
           LANGUAGE: <%= language %>
-      - put: cnb-release-candidate
+      - put: v2-release-candidate
         params:
-          #file: release-candidate/*.zip
-          file: cnb-release-candidate/*.tgz
+          file: v2-release-candidate/*.zip
       - put: version
         resource: <%= language %>-cnb-version
         params: {file: version/number}
     ensure:
       in_parallel:
-#        - task: delete-cf-space
-#          file: buildpacks-ci/tasks/delete-cf-space/task.yml
-#          input_mapping:
-#            cf-space: cf-space-cflinuxfs3
+        - task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping:
+            cf-space: cf-space-cflinuxfs3
         - put: edge-environments
           params:
             release: edge-environments
@@ -160,10 +190,10 @@ jobs:
           - get: buildpack
             resource: repo
             passed:
-              - create-and-test-rc
+              - create-rc
           - get: cnb-release-candidate
             passed:
-              - create-and-test-rc
+              - create-rc
           - get: version
             resource: <%= language %>-cnb-version
             params:

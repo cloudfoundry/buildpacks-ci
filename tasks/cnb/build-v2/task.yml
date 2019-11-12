@@ -4,14 +4,14 @@ image_resource:
   type: docker-image
   source:
     repository: cfbuildpacks/ci
+
 inputs:
   - name: buildpacks-ci
-  - name: candidate
+  - name: cnb-tarball
+  - name: cnb2cf
   - name: version
 outputs:
-  - name: cnb-release-candidate
-params:
-  LANGUAGE:
+  - name: candidate
 
 run:
-  path: buildpacks-ci/tasks/promote-candidate-to-rc/run.sh
+  path: buildpacks-ci/tasks/cnb/build-v2/run.sh
