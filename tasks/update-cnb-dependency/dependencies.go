@@ -1,12 +1,12 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 	"sort"
 
 	"github.com/blang/semver"
+	"github.com/pkg/errors"
 )
 
 type Dependencies []Dependency
@@ -22,7 +22,18 @@ type Dependency struct {
 	Version      string   `toml:"version"`
 }
 
-func (deps Dependencies) MergeWith(newDeps Dependencies) (Dependencies, error) {
+func (deps Dependencies) Update(flags Flags, dep Dependency, depsToAdd Dependencies) (Dependencies, error) {
+	originalDeps := deps.ExpandByStack()
+	updatedDeps := originalDeps.MergeWith(depsToAdd)
+	updatedDeps, err := updatedDeps.RemoveOldDeps(dep.ID, flags.versionLine, flags.versionsToKeep)
+	if err != nil {
+		return Dependencies{}, errors.Wrap(err, "failed to remove old dependencies")
+	}
+
+	return updatedDeps.CollapseByStack(), nil
+}
+
+func (deps Dependencies) MergeWith(newDeps Dependencies) Dependencies {
 	depsMap := map[string]Dependency{}
 
 	for _, dep := range deps {
@@ -38,7 +49,7 @@ func (deps Dependencies) MergeWith(newDeps Dependencies) (Dependencies, error) {
 	}
 
 	sort.Slice(allDeps, allDeps.sortDependencies())
-	return allDeps, nil
+	return allDeps
 }
 
 func (deps Dependencies) RemoveOldDeps(depID, versionLine string, keepN int) (Dependencies, error) {
@@ -82,7 +93,8 @@ func (deps Dependencies) CollapseByStack() Dependencies {
 	for _, dep := range deps {
 		key := makeKeyWithoutStack(dep)
 		if mapDep, exists := depsMap[key]; exists {
-			mapDep.Stacks = combineStacks(mapDep.Stacks, dep.Stacks)
+			//Every dependency will be expanded, and will only have 1 stack
+			mapDep.Stacks = append(mapDep.Stacks, dep.Stacks[0])
 			depsMap[key] = mapDep
 		} else {
 			depsMap[key] = dep
@@ -162,26 +174,6 @@ func (deps Dependencies) findDependency(dep Dependency) (Dependency, bool) {
 		}
 	}
 	return Dependency{}, false
-}
-
-func combineStacks(a, b []string) []string {
-	stacksMap := map[string]bool{}
-
-	for _, stack := range a {
-		stacksMap[stack] = true
-	}
-
-	for _, stack := range b {
-		stacksMap[stack] = true
-	}
-
-	var allStacks []string
-	for stack, _ := range stacksMap {
-		allStacks = append(allStacks, stack)
-	}
-
-	sort.Strings(allStacks)
-	return allStacks
 }
 
 func makeKeyWithStack(dep Dependency) string { return dep.ID + dep.Version + dep.Stacks[0] }

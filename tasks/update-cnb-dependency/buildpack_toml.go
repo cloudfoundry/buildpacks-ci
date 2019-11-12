@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
+	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
 
@@ -23,12 +24,34 @@ type BuildpackTOML struct {
 type Metadata map[string]interface{}
 
 var (
-	IncludeFilesKey = "include_files"
-	PrePackageKey = "pre_package"
+	IncludeFilesKey     = "include_files"
+	PrePackageKey       = "pre_package"
 	DeprecationDatesKey = "dependency_deprecation_dates"
-	DependenciesKey = "dependencies"
-	DefaultVersionsKey = "default-versions"
+	DependenciesKey     = "dependencies"
+	DefaultVersionsKey  = "default-versions"
 )
+
+func (buildpackTOML BuildpackTOML) Dependencies() (Dependencies, error) {
+	var deps Dependencies
+	err := mapstructure.Decode(buildpackTOML.Metadata[DependenciesKey], &deps)
+	return deps, err
+}
+
+func (buildpackTOML *BuildpackTOML) SaveDependencies(deps Dependencies) {
+	buildpackTOML.Metadata[DependenciesKey] = deps
+}
+
+func (buildpackTOML BuildpackTOML) DeprecationDates() (DeprecationDates, error) {
+	var deprecationDates DeprecationDates
+	err := mapstructure.Decode(buildpackTOML.Metadata[DeprecationDatesKey], &deprecationDates)
+	return deprecationDates, err
+}
+
+func (buildpackTOML *BuildpackTOML) SaveDeprecationDates(dates DeprecationDates) {
+	if len(dates) > 0 {
+		buildpackTOML.Metadata[DeprecationDatesKey] = dates // Metadata is untyped so we can get empty values
+	}
+}
 
 func (buildpackTOML BuildpackTOML) WriteToFile(filepath string) error {
 	buildpackTOMLFile, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE, 0666)

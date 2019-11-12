@@ -27,8 +27,7 @@ func testDependencies(t *testing.T, when spec.G, it spec.S) {
 					{ID: "some-id-2", Stacks: []string{"some-stack-1"}, Version: "2.0.0"},
 				}
 
-				newDeps, err := existingDeps.MergeWith(depsToAdd)
-				require.NoError(t, err)
+				newDeps := existingDeps.MergeWith(depsToAdd)
 				assert.Equal(t, Dependencies{
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "2.0.0"},
@@ -49,8 +48,7 @@ func testDependencies(t *testing.T, when spec.G, it spec.S) {
 					{ID: "some-id-1", Stacks: []string{"some-stack-2"}, Version: "2.0.0"},
 				}
 
-				newDeps, err := existingDeps.MergeWith(depsToAdd)
-				require.NoError(t, err)
+				newDeps := existingDeps.MergeWith(depsToAdd)
 				assert.Equal(t, Dependencies{
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
 					{ID: "some-id-1", Stacks: []string{"some-stack-2"}, Version: "1.0.0"},
@@ -71,8 +69,7 @@ func testDependencies(t *testing.T, when spec.G, it spec.S) {
 					{ID: "some-id-1", Stacks: []string{"some-stack-2"}, Version: "2.0.0"},
 				}
 
-				newDeps, err := existingDeps.MergeWith(depsToAdd)
-				require.NoError(t, err)
+				newDeps := existingDeps.MergeWith(depsToAdd)
 				assert.Equal(t, Dependencies{
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
 					{ID: "some-id-1", Stacks: []string{"some-stack-2"}, Version: "1.0.0"},
@@ -93,8 +90,7 @@ func testDependencies(t *testing.T, when spec.G, it spec.S) {
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "2.0.0", SHA256: "some-new-sha"},
 				}
 
-				newDeps, err := existingDeps.MergeWith(depsToAdd)
-				require.NoError(t, err)
+				newDeps := existingDeps.MergeWith(depsToAdd)
 				assert.Equal(t, Dependencies{
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0", SHA256: "some-new-sha"},
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "2.0.0", SHA256: "some-new-sha"},
