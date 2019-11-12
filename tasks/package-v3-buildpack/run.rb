@@ -44,6 +44,15 @@ Dir.chdir('buildpack') do
   else
     puts stdout
   end
+
+  stdout, stderr, status = Open3.capture3("./scripts/package.sh -a -c -v #{version}")
+  if !status.success?
+    STDERR.puts stderr
+    exit status.exitstatus
+  else
+    puts stdout
+  end
+
   File.write(release_body_file, get_changes)
   File.write(release_body_file, `#{packager_path} -summary`, mode: 'a')
 end
