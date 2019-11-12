@@ -35,12 +35,15 @@ icu:
 node-engine:
   integration: true
   auto_release: true
+  build_cache: true
 nodejs-compat:
   integration: true
   auto_release: true
+  build_cache: true
 npm:
   integration: true
   auto_release: true
+  build_cache: true
 nginx:
   integration: true
   auto_release: true
@@ -72,3 +75,4 @@ ruby:
 yarn:
   integration: true
   auto_release: true
+  build_cache: true
