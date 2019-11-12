@@ -120,7 +120,7 @@ jobs:
           LANGUAGE: <%= language %>
       - put: cnb-release-candidate
         params:
-          file: cnb-release-candidate/*.tgz
+          file: release-candidate/*.tgz
       - put: version
         resource: <%= language %>-cnb-version
         params: {file: version/number}
@@ -167,7 +167,7 @@ jobs:
           LANGUAGE: <%= language %>
       - put: v2-release-candidate
         params:
-          file: v2-release-candidate/*.zip
+          file: release-candidate/*.zip
       - put: version
         resource: <%= language %>-cnb-version
         params: {file: version/number}

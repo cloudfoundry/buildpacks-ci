@@ -2,4 +2,4 @@
 
 set -exo pipefail
 
-mv candidate/*.zip "v2-release-candidate/${LANGUAGE}-v$(cat version/version).tgz"
+mv candidate/*.zip "release-candidate/${LANGUAGE}-v$(cat version/version).zip"

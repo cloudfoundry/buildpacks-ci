@@ -9,7 +9,7 @@ inputs:
   - name: candidate
   - name: version
 outputs:
-  - name: cnb-release-candidate
+  - name: release-candidate
 params:
   LANGUAGE:
 
