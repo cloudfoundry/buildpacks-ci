@@ -12,6 +12,8 @@ function main() {
   version=$( cut -d '-' -f 1 version/version )
 
   mkdir -p "${ROOT}/build"
+
+  # shellcheck disable=SC2086
   tar xzvf ${ROOT}/cnb-tarball/*.tgz -C "${ROOT}/build"
 
   pushd "${ROOT}/cnb2cf" > /dev/null || return
@@ -23,6 +25,7 @@ function main() {
       --version "${version}" --stack "cflinuxfs3"
   popd > /dev/null || return
 
+  # shellcheck disable=SC2086
   mv ${ROOT}/build/*-v${version}.zip "${ROOT}/candidate/candidate.zip"
 }
 
