@@ -2,6 +2,7 @@
   require 'yaml'
   config = YAML.load_file(File.join(__dir__, 'config', 'cnb-builders.yml'))
 
+  stacks = config['stacks']
   builders = config['builders']
   all_cnbs = config['cnbs']
   cnbs = all_cnbs.select{|cnb, data| data["public"]}
@@ -71,86 +72,77 @@ resources:
       access_token: {{buildpacks-github-token}}
 
   # Dockerfiles for cnb bionic stack images
-<% cnb_child_images.each do |image_type| %>
-  - name: cflinuxfs3-<%= image_type %>-cnb-dockerfile
+<% stacks.each do |stack, stack_data| %>
+    <% stack_data["images"].each do |image| %>
+  - name: <%= stack %>-<%= image %>-cnb-dockerfile
     type: git
     source:
       uri: https://github.com/cloudfoundry/stacks
       branch: master
-      paths: [ "cflinuxfs3/cnb/<%= image_type %>/**" ]
+      paths: [ "<%= stack %>/cnb/<%= image %>/**" ]
 
-  - name: bionic-<%= image_type %>-base-dockerfile
+      <% if stack_data["base"] %>
+  - name: <%= stack %>-<%= image %>-base-dockerfile
     type: git
     source:
       uri: https://github.com/cloudfoundry/stacks
       branch: master
-      paths: [ "bionic/base/<%= image_type %>/**" ]
-
-  - name: bionic-<%= image_type %>-cnb-dockerfile
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/stacks
-      branch: master
-      paths: [ "bionic/cnb/<%= image_type %>/**" ]
+      paths: [ "<%= stack %>/base/<%= image %>/**" ]
+      <% end %>
+    <% end %>
 <% end %>
 
-  - name: tiny-run-base-dockerfile
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/stacks
-      branch: master
-      paths: [ "tiny/base/*" ]
-
-  - name: tiny-run-cnb-dockerfile
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/stacks
-      branch: master
-      paths: [ "tiny/cnb/*" ]
-
 # Versions
-  - name: cflinuxfs3-version
+<% stacks.each do |stack, stack_data| %>
+  - name: <%= stack %>-version
     type: semver
     source:
       initial_version: 0.0.1
       bucket: cnb-versions
-      key: builder/cflinuxfs3
+      key: builder/<%= stack %>
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
-  - name: cflinuxfs3-piv-version
+  <% if stack_data["piv-version"] %>
+  - name: <%= stack %>-piv-version
     type: semver
     source:
       initial_version: 0.0.1
       bucket: cnb-versions
-      key: builder/cflinuxfs3-piv
+      key: builder/<%= stack %>-piv
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+  <% end %>
+
+  <% stack_data["images"].each do |image| %>
+  - name: <%= stack %>-<%= image %>-cnb-version
+    type: semver
+    source:
+      initial_version: 0.0.1
+      bucket: cnb-versions
+      key: builder/<%= stack %>-<%= image %>-cnb
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
-  - name: bionic-version
+    <% if stack_data["base"] %>
+  - name: <%= stack %>-<%= image %>-base-version
     type: semver
     source:
       initial_version: 0.0.1
       bucket: cnb-versions
-      key: builder/bionic
+      key: builder/<%= stack %>-<%= image %>-base
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+    <% end %>
+  <% end %>
+<% end %>
 
-  - name: bionic-piv-version
+  - name: tiny-build-cnb-version
     type: semver
     source:
       initial_version: 0.0.1
       bucket: cnb-versions
-      key: builder/bionic-piv
-      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
-
-  - name: tiny-version
-    type: semver
-    source:
-      initial_version: 0.0.1
-      bucket: cnb-versions
-      key: builder/tiny
+      key: builder/tiny-build-cnb
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
@@ -171,62 +163,29 @@ resources:
       password: {{gcp-service-account-key}}
 
 # CNB stack images
-<% cnb_child_images.each do |image_type| %>
-  - name: bionic-<%= image_type %>-base-image
+<% stacks.each do |stack, stack_data| %>
+  <% stack_data["images"].each do |image| %>
+  - name: <%= stack %>-<%= image %>-base-image
     type: docker-image
     source:
-      repository: cloudfoundry/<%= image_type %>
-      tag: base
+      repository: cloudfoundry/<%= image %>
+      tag: <%= stack_data["tag"] %>
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
 
-  - name: bionic-<%= image_type %>-cnb-image
+  - name: <%= stack %>-<%= image %>-cnb-image
     type: docker-image
     source:
-      repository: cloudfoundry/<%= image_type %>
-      tag: base-cnb
+      repository: cloudfoundry/<%= image %>
+      tag: <%= stack_data["tag"] %>-cnb
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
-
-  - name: cflinuxfs3-<%= image_type %>-base-image
-    type: docker-image
-    source:
-      repository: cloudfoundry/<%= image_type %>
-      tag: full
-      username: {{buildpacks-docker-username}}
-      password: {{buildpacks-docker-password}}
-      email: cf-buildpacks-eng@pivotal.io
-
-  - name: cflinuxfs3-<%= image_type %>-cnb-image
-    type: docker-image
-    source:
-      repository: cloudfoundry/<%= image_type %>
-      tag: full-cnb
-      email: {{buildpacks-docker-user-email}}
-      username: {{buildpacks-docker-username}}
-      password: {{buildpacks-docker-password}}
+  <% end %>
 <% end %>
 
-  - name: tiny-run-base-image
-    type: docker-image
-    source:
-      repository: cloudfoundry/run
-      tag: tiny
-      email: {{buildpacks-docker-user-email}}
-      username: {{buildpacks-docker-username}}
-      password: {{buildpacks-docker-password}}
-
-  - name: tiny-run-cnb-image
-    type: docker-image
-    source:
-      repository: cloudfoundry/run
-      tag: tiny-cnb
-      email: {{buildpacks-docker-user-email}}
-      username: {{buildpacks-docker-username}}
-      password: {{buildpacks-docker-password}}
-
+  # Tiny's build image is a re-tagged version of the bionic image (and not built from a dockerfile), so it is a special case
   - name: tiny-build-cnb-image
     type: docker-image
     source:
@@ -248,38 +207,6 @@ jobs:
         privileged: true
         file: buildpacks-ci/tasks/test-tiny-docker-image/task.yml
 
-  - name: update-tiny-base-image
-    public: true
-    plan:
-      - get: tiny-run-base-dockerfile
-        passed: [test-tiny]
-        trigger: true
-      - get: new-cves
-        passed: [test-tiny]
-        trigger: true
-      - put: tiny-run-base-image
-        params:
-          build: tiny-run-base-dockerfile/tiny/base/run
-          build_args:
-            squash: squash
-        attempts: 2
-
-  - name: update-tiny-run-cnb-image
-    public: true
-    plan:
-      - get: tiny-run-cnb-dockerfile
-        trigger: true
-      - get: tiny-run-base-image
-        passed: [ update-tiny-base-image ]
-        trigger: true
-      - put: tiny-run-cnb-image
-        params:
-          build: tiny-run-cnb-dockerfile/tiny/cnb/run
-          build_args:
-            base_image: "cloudfoundry/run:tiny"
-            squash: squash
-        attempts: 2
-
   - name: update-tiny-build-cnb-image
     public: true
     plan:
@@ -289,61 +216,90 @@ jobs:
         trigger: true
         passed:
           - update-bionic-build-base-image
+      - get: version
+        resource: tiny-build-cnb-version
+        params:
+          pre: tiny-cnb
+          pre_without_version: true
       - put: tiny-build-cnb-image
         params:
+          additional_tags: version/version
           build: bionic-build-cnb-dockerfile/bionic/cnb/build
           build_args:
             base_image: "cloudfoundry/build:base"
             stack_id: "org.cloudfoundry.stacks.tiny"
             squash: squash
         attempts: 2
-
-<% cnb_child_images.each do |image_type| %>
-  - name: update-cflinuxfs3-<%= image_type %>-cnb-image
-    public: true
-    plan:
-      - get: cflinuxfs3-<%= image_type %>-cnb-dockerfile
-        trigger: true
-      - get: cflinuxfs3-<%= image_type %>-base-image
-        trigger: true
-      - put: cflinuxfs3-<%= image_type %>-cnb-image
+      - put: version
+        resource: tiny-build-cnb-version
         params:
-          build: cflinuxfs3-<%= image_type %>-cnb-dockerfile/cflinuxfs3/cnb/<%= image_type %>
+          bump: patch
+
+<% stacks.each do |stack, stack_data| %>
+  <% stack_data["images"].each do |image| %>
+    <% if stack_data["base"] %>
+  - name: update-<%= stack %>-<%= image %>-base-image
+    public: true
+    plan:
+      - get: <%= stack %>-<%= image %>-base-dockerfile
+        trigger: true
+      <% if stack == "tiny" %>
+        passed: [test-tiny]
+      - get: new-cves
+        passed: [test-tiny]
+        trigger: true
+      <% end %>
+      - get: version
+        resource: <%= stack %>-<%= image %>-base-version
+        params:
+          pre: <%= stack_data["tag"] %>
+          pre_without_version: true
+      - put: <%= stack %>-<%= image %>-base-image
+        attempts: 2
+        params:
+          additional_tags: version/version
+          build: <%= stack %>-<%= image %>-base-dockerfile/<%= stack %>/base/<%= image %>
           build_args:
-            base_image: "cloudfoundry/<%= image_type %>:full"
             squash: squash
-        attempts: 2
+      - put: version
+        resource: <%= stack %>-<%= image %>-base-version
+        params:
+          bump: patch
+    <% end %>
 
-  - name: update-bionic-<%= image_type %>-base-image
+  - name: update-<%= stack %>-<%= image %>-cnb-image
     public: true
     plan:
-    - get: bionic-<%= image_type %>-base-dockerfile
-      trigger: true
-    - put: bionic-<%= image_type %>-base-image
-      params:
-        build: bionic-<%= image_type %>-base-dockerfile/bionic/base/<%= image_type %>
-        build_args:
-          squash: squash
+      - get: <%= stack %>-<%= image %>-cnb-dockerfile
+        trigger: true
+      - get: <%= stack %>-<%= image %>-base-image
+        trigger: true
+    <% if stack_data["base"] %>
+        passed: [ update-<%= stack %>-<%= image %>-base-image ]
+    <% end %>
+      - get: version
+        resource: <%= stack %>-<%= image %>-cnb-version
+        params:
+          pre: <%= stack_data["tag"] %>-cnb
+          pre_without_version: true
+      - put: <%= stack %>-<%= image %>-cnb-image
         attempts: 2
-
-  - name: update-bionic-<%= image_type %>-cnb-image
-    public: true
-    plan:
-    - get: bionic-<%= image_type %>-cnb-dockerfile
-      trigger: true
-    - get: bionic-<%= image_type %>-base-image
-      trigger: true
-      passed:
-        - update-bionic-<%= image_type %>-base-image
-    - put: bionic-<%= image_type %>-cnb-image
-      params:
-        build: bionic-<%= image_type %>-cnb-dockerfile/bionic/cnb/<%= image_type %>
-        build_args:
-          base_image: "cloudfoundry/<%= image_type %>:base"
-          squash: squash
-        attempts: 2
-        tag_as_latest: true
+        params:
+          additional_tags: version/version
+          build: <%= stack %>-<%= image %>-cnb-dockerfile/<%= stack %>/cnb/<%= image %>
+          build_args:
+            base_image: "cloudfoundry/<%= image %>:<%= stack_data["tag"] %>"
+            squash: squash
+    <% if stack_data["latest"] %>
+          tag_as_latest: true
+    <% end %>
+      - put: version
+        resource: <%= stack %>-<%= image %>-cnb-version
+        params:
+          bump: patch
+  <% end %>
 <% end %>
+
 
 <% builders.each do |builder_name, builder_data|
      all_cnb_hash = builder_data["private"] ? piv_cnbs : cnbs
