@@ -60,13 +60,13 @@ resources:
       key: cnb-versions/<%= language %>-family-version
       json_key: {{gcp-service-account-key}}
 
-  - name: edge-environments
-    type: pool
-    source:
-      branch: master
-      pool: edge-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+  # - name: edge-environments
+  #   type: pool
+  #   source:
+  #     branch: master
+  #     pool: edge-environments
+  #     private_key: {{public-buildpacks-ci-robots-private-key}}
+  #     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
   - name: env-repo
     type: git
@@ -95,7 +95,6 @@ jobs:
           repository: buildpack-artifacts
           rebase: true
 
-  # Create & Promote
   - name: create-rc
     serial: true
     public: true
@@ -108,12 +107,10 @@ jobs:
               pre: rc
           - get: repo
             trigger: true
-      - task: create-candidate
+          - get: cnb2cf
+          - get: env-repo
+      - task: create-cnb-candidate
         file: buildpacks-ci/tasks/cnb/build/task.yml
-#        TODO: actually run the tests
-#      - task: integration-test-using-candidate
-#        privileged: true
-#        file: buildpacks-ci/tasks/run-scripts-integration/task.yml
       - task: promote-candidate-to-rc
         file: buildpacks-ci/tasks/cnb/promote-candidate-to-rc/task.yml
         params:
@@ -121,46 +118,9 @@ jobs:
       - put: cnb-release-candidate
         params:
           file: release-candidate/*.tgz
-      - put: version
-        resource: <%= language %>-cnb-version
-        params: {file: version/number}
-
-  # Create, Test & Promote v2
-  - name: create-and-test-v2-rc
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-          - get: buildpacks-ci
-          - get: version
-            resource: <%= language %>-cnb-version
-            params:
-              pre: rc
-          - get: cnb-tarball
-            resource: cnb-release-candidate
-            passed: [create-rc]
-            trigger: true
-          - get: cnb2cf
-          - get: env-repo
-          - put: edge-environments
-            params:
-              acquire: true
-      - task: create-candidate
+      - task: create-v2-candidate
         file: buildpacks-ci/tasks/cnb/build-v2/task.yml
-      - task: create-cf-space
-        file: buildpacks-ci/tasks/create-cf-space/task.yml
-        output_mapping: {cf-space: cf-space-cflinuxfs3}
-        params:
-          ENV_POOL_RESOURCE: edge-environments
-          ENVS_DIR: env-repo
-          ORG: pivotal
-          SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
-          USERNAME: admin
-#      - task: integration-test-using-candidate
-#        privileged: true
-#        file: buildpacks-ci/tasks/run-scripts-integration/task.yml
-#        input_mapping:
-#          cf-space: cf-space-cflinuxfs3
+        input_mapping: {cnb-tarball: release-candidate}
       - task: promote-candidate-to-rc
         file: buildpacks-ci/tasks/cnb/promote-v2-to-rc/task.yml
         params:
@@ -171,15 +131,47 @@ jobs:
       - put: version
         resource: <%= language %>-cnb-version
         params: {file: version/number}
-    ensure:
-      in_parallel:
-        - task: delete-cf-space
-          file: buildpacks-ci/tasks/delete-cf-space/task.yml
-          input_mapping:
-            cf-space: cf-space-cflinuxfs3
-        - put: edge-environments
-          params:
-            release: edge-environments
+
+  # - name: test-rc
+  #   serial: true
+  #   public: true
+  #   plan:
+  #     - in_parallel:
+  #         - get: buildpacks-ci
+  #         - get: repo
+  #           passed: [create-rc]
+  #         - get: version
+  #           resource: <%= language %>-cnb-version
+  #           params:
+  #             pre: rc
+  #           passed: [create-rc]
+  #         - get: cnb-tarball
+  #           resource: cnb-release-candidate
+  #           passed: [create-rc]
+  #           trigger: true
+  #     - task: create-cf-space
+  #       file: buildpacks-ci/tasks/create-cf-space/task.yml
+  #       output_mapping: {cf-space: cf-space-cflinuxfs3}
+  #       params:
+  #         ENV_POOL_RESOURCE: edge-environments
+  #         ENVS_DIR: env-repo
+  #         ORG: pivotal
+  #         SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+  #         USERNAME: admin
+  #     - task: integration-test-using-candidate
+  #       privileged: true
+  #       file: buildpacks-ci/tasks/run-scripts-integration/task.yml
+  #       input_mapping:
+  #         cf-space: cf-space-cflinuxfs3
+  #   ensure:
+  #     in_parallel:
+  #       - task: delete-cf-space
+  #         file: buildpacks-ci/tasks/delete-cf-space/task.yml
+  #         input_mapping:
+  #           cf-space: cf-space-cflinuxfs3
+  #       - put: edge-environments
+  #         params:
+  #           release: edge-environments
 
   - name: ship-it
     serial: true
@@ -190,13 +182,13 @@ jobs:
           - get: buildpack
             resource: repo
             passed:
-              - create-and-test-v2-rc
+              - create-rc
           - get: cnb-release-candidate
             passed:
-              - create-and-test-v2-rc
+              - create-rc
           - get: v2-release-candidate
             passed:
-              - create-and-test-v2-rc
+              - create-rc
           - get: version
             resource: <%= language %>-cnb-version
             params:
