@@ -22,10 +22,10 @@ type Dependency struct {
 	Version      string   `toml:"version"`
 }
 
-func (deps Dependencies) Update(flags Flags, dep Dependency, depsToAdd Dependencies) (Dependencies, error) {
+func (deps Dependencies) Update(dep Dependency, depsToAdd Dependencies, versionLine string, versionsToKeep int) (Dependencies, error) {
 	originalDeps := deps.ExpandByStack()
 	updatedDeps := originalDeps.MergeWith(depsToAdd)
-	updatedDeps, err := updatedDeps.RemoveOldDeps(dep.ID, flags.versionLine, flags.versionsToKeep)
+	updatedDeps, err := updatedDeps.RemoveOldDeps(dep.ID, versionLine, versionsToKeep)
 	if err != nil {
 		return Dependencies{}, errors.Wrap(err, "failed to remove old dependencies")
 	}
