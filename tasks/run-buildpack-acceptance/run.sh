@@ -15,8 +15,10 @@ function main() {
   # fi
 
   local artifact_path version
-  artifact_path="${ROOT}/candidate/candidate.zip"
   version="$( cut -d '-' -f 1 version/version )"
+
+  # shellcheck disable=SC2086
+  artifact_path="$(ls ${ROOT}/candidate/*.zip | head -1)"
 
   pushd buildpack-acceptance-tests
     ./scripts/integration.sh \
