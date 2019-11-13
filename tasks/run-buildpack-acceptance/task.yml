@@ -9,10 +9,11 @@ inputs:
   - name: buildpacks-ci
   - name: buildpack-acceptance
   - name: version
+  - name: candidate
 run:
   path: buildpacks-ci/tasks/run-buildpack-acceptance/run.sh
 
 params:
-  BUILDPACK_ARTIFACT:
   LANGUAGE:
+  GIT_TOKEN:
   SKIP_DOCKER_START:
