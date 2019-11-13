@@ -1,5 +1,12 @@
 ---
 resources:
+  - name: buildpacks-acceptance
+    type: git
+    source:
+      uri: git@github.com/cloudfoundry/buildpack-acceptance-tests.git
+      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+      branch: master
+
   - name: buildpacks-ci
     type: git
     source:
@@ -100,6 +107,7 @@ jobs:
     public: true
     plan:
       - in_parallel:
+          - get: buildpack-acceptance
           - get: edge-environments
           - get: buildpacks-ci
           - get: version

@@ -2,21 +2,28 @@
 set -o errexit
 set -o nounset
 set -o pipefail
+set -x
 
 readonly ROOT="${PWD}"
 
 function main() {
   "./cf-space/login"
 
-  if [[ -z ${SKIP_DOCKER_START:-} ]]; then
-    echo "Start Docker"
-    ../buildpacks-ci/scripts/start-docker >/dev/null
-  fi
+  # if [[ -z ${SKIP_DOCKER_START:-} ]]; then
+  #   echo "Start Docker"
+  #   ../buildpacks-ci/scripts/start-docker >/dev/null
+  # fi
 
-  artifact_path="${ROOT}/catndidate/candidate.zip"
+  local artifact_path version
+  artifact_path="${ROOT}/candidate/candidate.zip"
+  version="$( cut -d '-' -f 1 version/version )"
 
   pushd buildpack-acceptance
-    ./scripts/integration.sh --language $LANGUAGE --buildpack "${artifact_path}" --buildpack-version $VERSION 
+    ./scripts/integration.sh \
+      --language "${LANGUAGE}" \
+      --buildpack "${artifact_path}" \
+      --buildpack-version "${version}"
   popd
-
 }
+
+main
