@@ -7,8 +7,9 @@ type Order struct {
 }
 
 type Group struct {
-	ID      string `toml:"id"`
-	Version string `toml:"version"`
+	ID       string `toml:"id"`
+	Version  string `toml:"version"`
+	Optional bool   `toml:"optional,omitempty"`
 }
 
 func (orders Orders) UpdateOrderDependencyVersion(dep Dependency) Orders {
