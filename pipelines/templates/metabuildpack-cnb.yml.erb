@@ -60,13 +60,13 @@ resources:
       key: cnb-versions/<%= language %>-family-version
       json_key: {{gcp-service-account-key}}
 
-  # - name: edge-environments
-  #   type: pool
-  #   source:
-  #     branch: master
-  #     pool: edge-environments
-  #     private_key: {{public-buildpacks-ci-robots-private-key}}
-  #     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+  - name: edge-environments
+    type: pool
+    source:
+      branch: master
+      pool: edge-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
   - name: env-repo
     type: git
@@ -100,6 +100,7 @@ jobs:
     public: true
     plan:
       - in_parallel:
+          - get: edge-environments
           - get: buildpacks-ci
           - get: version
             resource: <%= language %>-cnb-version
@@ -120,7 +121,23 @@ jobs:
           file: release-candidate/*.tgz
       - task: create-v2-candidate
         file: buildpacks-ci/tasks/cnb/build-v2/task.yml
-        input_mapping: {cnb-tarball: release-candidate}
+      - task: create-cf-space
+        file: buildpacks-ci/tasks/create-cf-space/task.yml
+        output_mapping: {cf-space: cf-space-cflinuxfs3}
+        params:
+          ENV_POOL_RESOURCE: edge-environments
+          ENVS_DIR: env-repo
+          ORG: pivotal
+          SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+          USERNAME: admin
+      - task: v2-candidate-acceptance
+        privileged: true
+        file: buildpacks-ci/tasks/run-buildpack-acceptance/task.yml
+        input_mapping:
+          cf-space: cf-space-cflinuxfs3
+        params:
+          BUILDPACK_ARTIFACT: release-candidate
+          LANGUAGE: <%= language %>
       - task: promote-candidate-to-rc
         file: buildpacks-ci/tasks/cnb/promote-v2-to-rc/task.yml
         params:
@@ -131,8 +148,17 @@ jobs:
       - put: version
         resource: <%= language %>-cnb-version
         params: {file: version/number}
+    ensure:
+      in_parallel:
+        - task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping:
+            cf-space: cf-space-cflinuxfs3
+        - put: edge-environments
+          params:
+            release: edge-environments
 
-  # - name: test-rc
+  # - name: test-shimmed-rc
   #   serial: true
   #   public: true
   #   plan:
