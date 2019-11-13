@@ -7,7 +7,7 @@ image_resource:
 inputs:
   - name: buildpack
   - name: buildpacks-ci
-  - name: cnb-release-candidate
+  - name: v2-release-candidate
   - name: version
 outputs:
   - name: buildpack-artifacts

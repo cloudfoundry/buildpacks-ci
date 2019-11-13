@@ -18,7 +18,7 @@ function main() {
   artifact_path="${ROOT}/candidate/candidate.zip"
   version="$( cut -d '-' -f 1 version/version )"
 
-  pushd buildpack-acceptance
+  pushd buildpack-acceptance-tests
     ./scripts/integration.sh \
       --language "${LANGUAGE}" \
       --buildpack "${artifact_path}" \

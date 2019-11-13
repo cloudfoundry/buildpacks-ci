@@ -1,10 +1,9 @@
 ---
 resources:
-  - name: buildpacks-acceptance
+  - name: buildpack-acceptance-tests
     type: git
     source:
-      uri: git@github.com/cloudfoundry/buildpack-acceptance-tests.git
-      private_key: {{cf-buildpacks-eng-github-ssh-key}}
+      uri: https://github.com/cloudfoundry/buildpack-acceptance-tests
       branch: master
 
   - name: buildpacks-ci
@@ -50,13 +49,13 @@ resources:
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
-  - name: cnb-release-candidate
-    type: s3
-    source:
-      bucket: {{buildpack-release-candidates-bucket}}
-      regexp: cnb/<%= language %>/<%= language %>-cnb-v(\d+\.\d+\.\d+-rc\.\d+).tgz
-      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+  # - name: cnb-release-candidate
+  #   type: s3
+  #   source:
+  #     bucket: {{buildpack-release-candidates-bucket}}
+  #     regexp: cnb/<%= language %>/<%= language %>-cnb-v(\d+\.\d+\.\d+-rc\.\d+).tgz
+  #     access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+  #     secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
   - name: <%= language %>-cnb-version
     type: semver
@@ -107,8 +106,6 @@ jobs:
     public: true
     plan:
       - in_parallel:
-          - get: buildpack-acceptance
-          - get: edge-environments
           - get: buildpacks-ci
           - get: version
             resource: <%= language %>-cnb-version
@@ -117,18 +114,47 @@ jobs:
           - get: repo
             trigger: true
           - get: cnb2cf
-          - get: env-repo
-      - task: create-cnb-candidate
-        file: buildpacks-ci/tasks/cnb/build/task.yml
-      - task: promote-candidate-to-rc
-        file: buildpacks-ci/tasks/cnb/promote-candidate-to-rc/task.yml
-        params:
-          LANGUAGE: <%= language %>
-      - put: cnb-release-candidate
-        params:
-          file: release-candidate/*.tgz
+      # - task: create-cnb-candidate
+      #   file: buildpacks-ci/tasks/cnb/build/task.yml
+      # - task: promote-candidate-to-rc
+      #   file: buildpacks-ci/tasks/cnb/promote-candidate-to-rc/task.yml
+      #   params:
+      #     LANGUAGE: <%= language %>
+      # - put: cnb-release-candidate
+      #   params:
+      #     file: release-candidate/*.tgz
       - task: create-v2-candidate
         file: buildpacks-ci/tasks/cnb/build-v2/task.yml
+      - task: promote-candidate-to-rc
+        file: buildpacks-ci/tasks/cnb/promote-v2-to-rc/task.yml
+        params:
+          LANGUAGE: <%= language %>
+      - put: v2-release-candidate
+        params:
+          file: release-candidate/*.zip
+      - put: version
+        resource: <%= language %>-cnb-version
+        params: {file: version/number}
+
+  - name: test-rc
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+          - get: buildpack-acceptance-tests
+          - get: edge-environments
+          - get: buildpacks-ci
+          - get: version
+            resource: <%= language %>-cnb-version
+            passed: [create-rc]
+            params:
+              pre: rc
+          - get: repo
+            passed: [create-rc]
+          - get: env-repo
+          - get: v2-release-candidate
+            trigger: true
+            passed: [create-rc]
       - task: create-cf-space
         file: buildpacks-ci/tasks/create-cf-space/task.yml
         output_mapping: {cf-space: cf-space-cflinuxfs3}
@@ -144,18 +170,9 @@ jobs:
         input_mapping:
           cf-space: cf-space-cflinuxfs3
         params:
+          GIT_TOKEN: {{buildpacks-github-token}}
           BUILDPACK_ARTIFACT: release-candidate
           LANGUAGE: <%= language %>
-      - task: promote-candidate-to-rc
-        file: buildpacks-ci/tasks/cnb/promote-v2-to-rc/task.yml
-        params:
-          LANGUAGE: <%= language %>
-      - put: v2-release-candidate
-        params:
-          file: release-candidate/*.zip
-      - put: version
-        resource: <%= language %>-cnb-version
-        params: {file: version/number}
     ensure:
       in_parallel:
         - task: delete-cf-space
@@ -166,47 +183,6 @@ jobs:
           params:
             release: edge-environments
 
-  # - name: test-shimmed-rc
-  #   serial: true
-  #   public: true
-  #   plan:
-  #     - in_parallel:
-  #         - get: buildpacks-ci
-  #         - get: repo
-  #           passed: [create-rc]
-  #         - get: version
-  #           resource: <%= language %>-cnb-version
-  #           params:
-  #             pre: rc
-  #           passed: [create-rc]
-  #         - get: cnb-tarball
-  #           resource: cnb-release-candidate
-  #           passed: [create-rc]
-  #           trigger: true
-  #     - task: create-cf-space
-  #       file: buildpacks-ci/tasks/create-cf-space/task.yml
-  #       output_mapping: {cf-space: cf-space-cflinuxfs3}
-  #       params:
-  #         ENV_POOL_RESOURCE: edge-environments
-  #         ENVS_DIR: env-repo
-  #         ORG: pivotal
-  #         SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
-  #         USERNAME: admin
-  #     - task: integration-test-using-candidate
-  #       privileged: true
-  #       file: buildpacks-ci/tasks/run-scripts-integration/task.yml
-  #       input_mapping:
-  #         cf-space: cf-space-cflinuxfs3
-  #   ensure:
-  #     in_parallel:
-  #       - task: delete-cf-space
-  #         file: buildpacks-ci/tasks/delete-cf-space/task.yml
-  #         input_mapping:
-  #           cf-space: cf-space-cflinuxfs3
-  #       - put: edge-environments
-  #         params:
-  #           release: edge-environments
-
   - name: ship-it
     serial: true
     public: true
@@ -216,13 +192,10 @@ jobs:
           - get: buildpack
             resource: repo
             passed:
-              - create-rc
-          - get: cnb-release-candidate
-            passed:
-              - create-rc
+              - test-rc
           - get: v2-release-candidate
             passed:
-              - create-rc
+              - test-rc
           - get: version
             resource: <%= language %>-cnb-version
             params:
@@ -241,7 +214,7 @@ jobs:
     plan:
       - in_parallel:
           - get: buildpacks-ci
-          - get: cnb-release-candidate
+          - get: v2-release-candidate
             passed:
               - ship-it
           - get: version
