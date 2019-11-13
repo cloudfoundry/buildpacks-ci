@@ -27,8 +27,7 @@ func testDependencies(t *testing.T, when spec.G, it spec.S) {
 					{ID: "some-id-2", Stacks: []string{"some-stack-1"}, Version: "2.0.0"},
 				}
 
-				newDeps, err := existingDeps.MergeWith(depsToAdd)
-				require.NoError(t, err)
+				newDeps := existingDeps.MergeWith(depsToAdd)
 				assert.Equal(t, Dependencies{
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "2.0.0"},
@@ -49,8 +48,7 @@ func testDependencies(t *testing.T, when spec.G, it spec.S) {
 					{ID: "some-id-1", Stacks: []string{"some-stack-2"}, Version: "2.0.0"},
 				}
 
-				newDeps, err := existingDeps.MergeWith(depsToAdd)
-				require.NoError(t, err)
+				newDeps := existingDeps.MergeWith(depsToAdd)
 				assert.Equal(t, Dependencies{
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
 					{ID: "some-id-1", Stacks: []string{"some-stack-2"}, Version: "1.0.0"},
@@ -71,8 +69,7 @@ func testDependencies(t *testing.T, when spec.G, it spec.S) {
 					{ID: "some-id-1", Stacks: []string{"some-stack-2"}, Version: "2.0.0"},
 				}
 
-				newDeps, err := existingDeps.MergeWith(depsToAdd)
-				require.NoError(t, err)
+				newDeps := existingDeps.MergeWith(depsToAdd)
 				assert.Equal(t, Dependencies{
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
 					{ID: "some-id-1", Stacks: []string{"some-stack-2"}, Version: "1.0.0"},
@@ -93,8 +90,7 @@ func testDependencies(t *testing.T, when spec.G, it spec.S) {
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "2.0.0", SHA256: "some-new-sha"},
 				}
 
-				newDeps, err := existingDeps.MergeWith(depsToAdd)
-				require.NoError(t, err)
+				newDeps := existingDeps.MergeWith(depsToAdd)
 				assert.Equal(t, Dependencies{
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0", SHA256: "some-new-sha"},
 					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "2.0.0", SHA256: "some-new-sha"},
@@ -205,6 +201,55 @@ func testDependencies(t *testing.T, when spec.G, it spec.S) {
 			deps := Dependencies{}
 			_, err := deps.RemoveOldDeps(id, "", 0)
 			assert.EqualError(t, err, `please specify a valid number of versions (>0) to retain`)
+		})
+	})
+
+	when("CollapseEqualDependencies", func() {
+		when("there are equal dependencies to be collapsed", func() {
+			it("combines equal dependencies, and leaves dependencies which aren't equal", func() {
+				originalDeps := Dependencies{
+					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
+					{ID: "some-id-1", Stacks: []string{"some-stack-2"}, Version: "1.0.0"},
+					{ID: "some-id-2", Stacks: []string{"some-stack-1"}, Version: "2.0.0"},
+					{ID: "some-id-2", Stacks: []string{"some-stack-2"}, Version: "2.0.0"},
+					{ID: "some-id-2", Stacks: []string{"some-stack-3"}, Version: "2.0.0"},
+					{ID: "some-id-3", Stacks: []string{"some-stack-2"}, Version: "3.0.0"},
+				}
+
+				collapsedDeps := Dependencies{
+					{ID: "some-id-1", Stacks: []string{"some-stack-1", "some-stack-2"}, Version: "1.0.0"},
+					{ID: "some-id-2", Stacks: []string{"some-stack-1", "some-stack-2", "some-stack-3"}, Version: "2.0.0"},
+					{ID: "some-id-3", Stacks: []string{"some-stack-2"}, Version: "3.0.0"},
+				}
+
+				newDeps := originalDeps.CollapseByStack()
+				assert.Equal(t, collapsedDeps, newDeps)
+			})
+		})
+
+		when("there are no equal dependencies to be collapsed", func() {
+			it("leaves the dependencies the same", func() {
+				originalDeps := Dependencies{
+					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
+					{ID: "some-id-2", Stacks: []string{"some-stack-2"}, Version: "1.0.0"},
+					{ID: "some-id-3", Stacks: []string{"some-stack-1"}, Version: "2.0.0"},
+					{ID: "some-id-4", Stacks: []string{"some-stack-2"}, Version: "2.0.0"},
+					{ID: "some-id-5", Stacks: []string{"some-stack-3"}, Version: "2.0.0"},
+					{ID: "some-id-6", Stacks: []string{"some-stack-2"}, Version: "3.0.0"},
+				}
+
+				collapsedDeps := Dependencies{
+					{ID: "some-id-1", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
+					{ID: "some-id-2", Stacks: []string{"some-stack-2"}, Version: "1.0.0"},
+					{ID: "some-id-3", Stacks: []string{"some-stack-1"}, Version: "2.0.0"},
+					{ID: "some-id-4", Stacks: []string{"some-stack-2"}, Version: "2.0.0"},
+					{ID: "some-id-5", Stacks: []string{"some-stack-3"}, Version: "2.0.0"},
+					{ID: "some-id-6", Stacks: []string{"some-stack-2"}, Version: "3.0.0"},
+				}
+
+				newDeps := originalDeps.CollapseByStack()
+				assert.Equal(t, collapsedDeps, newDeps)
+			})
 		})
 	})
 }

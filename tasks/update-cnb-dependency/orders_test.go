@@ -15,7 +15,7 @@ func TestOrders(t *testing.T) {
 }
 
 func testOrders(t *testing.T, when spec.G, it spec.S) {
-	when("UpdateOrderDependencyVersion", func() {
+	when("Update", func() {
 		dep := Dependency{
 			ID:      "dep",
 			Version: "1.2.3",
@@ -26,7 +26,7 @@ func testOrders(t *testing.T, when spec.G, it spec.S) {
 
 		when("order is empty", func() {
 			it("shouldn't do anything", func() {
-				assert.Equal(t, nilOrders.UpdateOrderDependencyVersion(dep), nilOrders)
+				assert.Equal(t, nilOrders.Update(dep), nilOrders)
 			})
 		})
 
@@ -44,7 +44,7 @@ func testOrders(t *testing.T, when spec.G, it spec.S) {
 						Version: "1.2.3",
 						Optional: true,
 					}}}}
-				updatedOrder := orders.UpdateOrderDependencyVersion(dep)
+				updatedOrder := orders.Update(dep)
 				assert.Equal(t, expectedOrders, updatedOrder)
 			})
 		})
@@ -56,7 +56,7 @@ func testOrders(t *testing.T, when spec.G, it spec.S) {
 						ID:      "dep",
 						Version: "1.2.2",
 					}}}}
-				updatedOrder := orders.UpdateOrderDependencyVersion(dep)
+				updatedOrder := orders.Update(dep)
 				assert.Equal(t, orders, updatedOrder)
 			})
 		})
@@ -67,7 +67,7 @@ func testOrders(t *testing.T, when spec.G, it spec.S) {
 					ID:      "dep",
 					Version: "1.2.2",
 				}}}}
-				updatedOrder := orders.UpdateOrderDependencyVersion(dep)
+				updatedOrder := orders.Update(dep)
 				expectedOrders := Orders{{Group: []Group{{
 					ID:      "dep",
 					Version: "1.2.3",
@@ -116,7 +116,7 @@ func testOrders(t *testing.T, when spec.G, it spec.S) {
 							ID:      "dep3",
 							Version: "1.2.2",
 						}}}}
-				updatedOrder := orders.UpdateOrderDependencyVersion(dep)
+				updatedOrder := orders.Update(dep)
 				assert.Equal(t, expectedOrders, updatedOrder)
 			})
 		})

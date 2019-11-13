@@ -12,7 +12,7 @@ type Group struct {
 	Optional bool   `toml:"optional,omitempty"`
 }
 
-func (orders Orders) UpdateOrderDependencyVersion(dep Dependency) Orders {
+func (orders Orders) Update(dep Dependency) Orders {
 	for i, order := range orders {
 		for j, group := range order.Group {
 			if group.ID == dep.ID {
