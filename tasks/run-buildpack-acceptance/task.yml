@@ -1,0 +1,18 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: cf-space
+  - name: buildpacks-ci
+  - name: buildpack-acceptance
+  - name: version
+run:
+  path: buildpacks-ci/tasks/run-buildpack-acceptance/run.sh
+
+params:
+  BUILDPACK_ARTIFACT:
+  LANGUAGE:
+  SKIP_DOCKER_START:
