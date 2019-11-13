@@ -115,7 +115,7 @@ resources:
 
 jobs:
 <% languages.each do |language| %>
-<% unless not_lts.include?(language) %>
+<% if !not_lts.include?(language) %>
   - name: brats-<%= language %>-lts
     serial: true
     public: true
@@ -182,7 +182,7 @@ jobs:
         - put: edge-environments
           params:
             acquire: true
-<% unless new_brats.include?(language) %>
+<% if !new_brats.include?(language) %>
         - put: cf-environments
           resource: edge-shared-environments
           params:
@@ -235,7 +235,7 @@ jobs:
               file: buildpacks-ci/tasks/delete-cf-space/task.yml
               input_mapping: {cf-space: cf-space-<%= stack %>}
 <% end %>
-<% unless new_brats.include?(language) %>
+<% if !new_brats.include?(language) %>
         ensure:
           put: edge-shared-environments
           params:
