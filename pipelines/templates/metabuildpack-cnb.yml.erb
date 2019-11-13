@@ -169,6 +169,7 @@ jobs:
         file: buildpacks-ci/tasks/run-buildpack-acceptance/task.yml
         input_mapping:
           cf-space: cf-space-cflinuxfs3
+          candidate: v2-release-candidate
         params:
           GIT_TOKEN: {{buildpacks-github-token}}
           BUILDPACK_ARTIFACT: release-candidate
