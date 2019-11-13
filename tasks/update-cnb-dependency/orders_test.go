@@ -36,11 +36,13 @@ func testOrders(t *testing.T, when spec.G, it spec.S) {
 					Group: []Group{{
 						ID:      "dep",
 						Version: "1.2.3",
+						Optional: true,
 					}}}}
 				expectedOrders := Orders{{
 					Group: []Group{{
 						ID:      "dep",
 						Version: "1.2.3",
+						Optional: true,
 					}}}}
 				updatedOrder := orders.UpdateOrderDependencyVersion(dep)
 				assert.Equal(t, expectedOrders, updatedOrder)

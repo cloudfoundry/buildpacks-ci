@@ -1,0 +1,38 @@
+api = "0.2"
+
+[buildpack]
+  id = "org.cloudfoundry.some-parent"
+  name = "Some Parent Buildpack"
+  version = "{{.Version}}"
+
+[metadata]
+  include_files = ["buildpack.toml"]
+
+  [[metadata.dependencies]]
+    id = "org.cloudfoundry.some-child"
+    sha256 = "sha256-for-binary-1.0.1"
+    source = "https://github.com/cloudfoundry/some-child-cnb/archive/v1.0.1.tar.gz"
+    source_sha256 = "sha256-for-source-1.0.1"
+    stacks = ["io.buildpacks.stacks.bionic"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz"
+    version = "1.0.1"
+
+  [[metadata.dependencies]]
+    id = "org.cloudfoundry.some-child"
+    sha256 = "sha256-for-binary-1.0.1"
+    source = "https://github.com/cloudfoundry/some-child-cnb/archive/v1.0.1.tar.gz"
+    source_sha256 = "sha256-for-source-1.0.1"
+    stacks = ["org.cloudfoundry.stacks.cflinuxfs3"]
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz"
+    version = "1.0.1"
+
+[[order]]
+
+  [[order.group]]
+    id = "org.cloudfoundry.some-child"
+    version = "1.0.1"
+    optional = true
+
+  [[order.group]]
+    id = "org.cloudfoundry.other-child"
+    version = "2.0.0"

@@ -1,13 +1,14 @@
 package main_test
 
 import (
-	"github.com/mitchellh/mapstructure"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/BurntSushi/toml"
 	. "github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency"
@@ -80,9 +81,9 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			var buildpackTOML BuildpackTOML
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackTOML)
 			require.NoError(t, err)
-			assert.Equal(t, "./scripts/build.sh", buildpackTOML.Metadata[PrePackageKey], )
-			assert.Equal(t, "random", buildpackTOML.Metadata["random"], )
-			assert.Equal(t, []interface{}{"bin/build", "bin/detect", "buildpack.toml"}, buildpackTOML.Metadata[IncludeFilesKey], )
+			assert.Equal(t, "./scripts/build.sh", buildpackTOML.Metadata[PrePackageKey])
+			assert.Equal(t, "random", buildpackTOML.Metadata["random"])
+			assert.Equal(t, []interface{}{"bin/build", "bin/detect", "buildpack.toml"}, buildpackTOML.Metadata[IncludeFilesKey])
 			assert.Equal(t, map[string]interface{}{
 				"some-dep": "2.x",
 			}, buildpackTOML.Metadata[DefaultVersionsKey])
@@ -247,6 +248,13 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 		})
 
 		it.After(func() {
+			expectedGoldenFile, err := ioutil.ReadFile("testdata/updating-parent-cnb/golden_buildpack.toml")
+			require.NoError(t, err)
+
+			actualBuildpackTOML,err := ioutil.ReadFile(filepath.Join(outputDir, "buildpack.toml"))
+			require.NoError(t, err)
+
+			assert.Equal(t, actualBuildpackTOML, expectedGoldenFile)
 			require.NoError(t, os.RemoveAll(outputDir))
 		})
 
@@ -292,8 +300,9 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 
 			assert.Equal(t, Orders{{Group: []Group{
 				{
-					ID:      "org.cloudfoundry.some-child",
-					Version: "1.0.1",
+					ID:       "org.cloudfoundry.some-child",
+					Version:  "1.0.1",
+					Optional: true,
 				},
 				{
 					ID:      "org.cloudfoundry.other-child",
