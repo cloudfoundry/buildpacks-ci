@@ -1,12 +1,12 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 	"sort"
 
 	"github.com/blang/semver"
+	"github.com/pkg/errors"
 )
 
 type Dependencies []Dependency
@@ -22,14 +22,25 @@ type Dependency struct {
 	Version      string   `toml:"version"`
 }
 
-func (deps Dependencies) MergeWith(newDeps Dependencies) (Dependencies, error) {
+func (deps Dependencies) Update(dep Dependency, depsToAdd Dependencies, versionLine string, versionsToKeep int) (Dependencies, error) {
+	originalDeps := deps.ExpandByStack()
+	updatedDeps := originalDeps.MergeWith(depsToAdd)
+	updatedDeps, err := updatedDeps.RemoveOldDeps(dep.ID, versionLine, versionsToKeep)
+	if err != nil {
+		return Dependencies{}, errors.Wrap(err, "failed to remove old dependencies")
+	}
+
+	return updatedDeps.CollapseByStack(), nil
+}
+
+func (deps Dependencies) MergeWith(newDeps Dependencies) Dependencies {
 	depsMap := map[string]Dependency{}
 
 	for _, dep := range deps {
-		depsMap[makeKey(dep)] = dep
+		depsMap[makeKeyWithStack(dep)] = dep
 	}
 	for _, dep := range newDeps {
-		depsMap[makeKey(dep)] = dep
+		depsMap[makeKeyWithStack(dep)] = dep
 	}
 
 	allDeps := Dependencies{}
@@ -38,7 +49,7 @@ func (deps Dependencies) MergeWith(newDeps Dependencies) (Dependencies, error) {
 	}
 
 	sort.Slice(allDeps, allDeps.sortDependencies())
-	return allDeps, nil
+	return allDeps
 }
 
 func (deps Dependencies) RemoveOldDeps(depID, versionLine string, keepN int) (Dependencies, error) {
@@ -77,21 +88,26 @@ func (deps Dependencies) RemoveOldDeps(depID, versionLine string, keepN int) (De
 	return retainedDeps, nil
 }
 
-func (deps Dependencies) sortDependencies() func(i, j int) bool {
-	return func(i, j int) bool {
-		if deps[i].ID != deps[j].ID {
-			return deps[i].ID < deps[j].ID
+func (deps Dependencies) CollapseByStack() Dependencies {
+	depsMap := map[string]Dependency{}
+	for _, dep := range deps {
+		key := makeKeyWithoutStack(dep)
+		if mapDep, exists := depsMap[key]; exists {
+			//Every dependency will be expanded, and will only have 1 stack
+			mapDep.Stacks = append(mapDep.Stacks, dep.Stacks[0])
+			depsMap[key] = mapDep
+		} else {
+			depsMap[key] = dep
 		}
-
-		firstVersion := semver.MustParse(deps[i].Version)
-		secondVersion := semver.MustParse(deps[j].Version)
-
-		if firstVersion.EQ(secondVersion) {
-			return deps[i].Stacks[0] < deps[j].Stacks[0]
-		}
-
-		return firstVersion.LT(secondVersion)
 	}
+
+	allDeps := Dependencies{}
+	for _, dep := range depsMap {
+		allDeps = append(allDeps, dep)
+	}
+
+	sort.Slice(allDeps, allDeps.sortDependencies())
+	return allDeps
 }
 
 func (deps Dependencies) ExpandByStack() Dependencies {
@@ -109,6 +125,23 @@ func (deps Dependencies) ExpandByStack() Dependencies {
 	}
 
 	return expandedDeps
+}
+
+func (deps Dependencies) sortDependencies() func(i, j int) bool {
+	return func(i, j int) bool {
+		if deps[i].ID != deps[j].ID {
+			return deps[i].ID < deps[j].ID
+		}
+
+		firstVersion := semver.MustParse(deps[i].Version)
+		secondVersion := semver.MustParse(deps[j].Version)
+
+		if firstVersion.EQ(secondVersion) {
+			return deps[i].Stacks[0] < deps[j].Stacks[0]
+		}
+
+		return firstVersion.LT(secondVersion)
+	}
 }
 
 func loadDependenciesFromBinaryBuilds(binaryBuildsPath string, dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
@@ -143,7 +176,11 @@ func (deps Dependencies) findDependency(dep Dependency) (Dependency, bool) {
 	return Dependency{}, false
 }
 
-func makeKey(dep Dependency) string { return dep.ID + dep.Version + dep.Stacks[0] }
+func makeKeyWithStack(dep Dependency) string { return dep.ID + dep.Version + dep.Stacks[0] }
+
+func makeKeyWithoutStack(dep Dependency) string {
+	return dep.ID + dep.Version + dep.URI + dep.SHA256 + dep.Source + dep.SourceSHA256
+}
 
 func constructDependenciesFromBuildMetadata(dep Dependency, buildMetadataPath string, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
 	var buildMetadata BuildMetadata

@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
 
@@ -49,51 +48,30 @@ func updateCNBDependencies() error {
 		return errors.Wrap(err, "failed to load task resources")
 	}
 
-	deprecationDate, err := NewDependencyDeprecationDate(flags.deprecationDate, flags.deprecationLink, config.Dep.ID, flags.versionLine, flags.deprecationMatch)
-	if err != nil {
-		return errors.Wrap(err, "failed to create deprecation date")
-	}
-
 	depsToAdd, err := loadDependenciesFromBinaryBuilds(flags.binaryBuildsPath, config.Dep, config.Orchestrator)
 	if err != nil {
 		return errors.Wrap(err, "failed to construct list of dependencies to add")
 	}
 
-	var deps Dependencies
-	err = mapstructure.Decode(config.BuildpackTOML.Metadata[DependenciesKey], &deps)
+	originalDeps, updatedDeps, err := config.BuildpackTOML.UpdateDependenciesWith(config.Dep, depsToAdd, flags.versionsToKeep)
 	if err != nil {
-		return errors.Wrap(err, "failed to decode dependencies")
-	}
-	originalDeps := deps.ExpandByStack()
-	updatedDeps, err := originalDeps.MergeWith(depsToAdd)
-	if err != nil {
-		return errors.Wrap(err, "failed to merge dependency lists")
+		return errors.Wrap(err, "failed to update the dependencies")
 	}
 
-	updatedDeps, err = updatedDeps.RemoveOldDeps(config.Dep.ID, flags.versionLine, flags.versionsToKeep)
+	deprecationDate, err := NewDependencyDeprecationDate(flags.deprecationDate, flags.deprecationLink, config.Dep.ID, flags.versionLine, flags.deprecationMatch)
 	if err != nil {
-		return errors.Wrap(err, "failed to remove old dependencies")
+		return errors.Wrap(err, "failed to create a deprecation date")
 	}
 
-	updatedOrder := config.BuildpackTOML.Orders.UpdateOrderDependencyVersion(config.Dep)
-
-	var deprecationDates DeprecationDates
-	err = mapstructure.Decode(config.BuildpackTOML.Metadata[DeprecationDatesKey], &deprecationDates)
+	err = config.BuildpackTOML.UpdateDeprecationDatesWith(deprecationDate)
 	if err != nil {
-		return errors.Wrap(err, "failed to decode deprecation dates")
-	}
-	updatedDeprecationDates, err := deprecationDates.Update(deprecationDate)
-	if err != nil {
-		return errors.Wrap(err, "failed to update deprecation dates")
+		return errors.Wrap(err, "failed to update the deprecation dates")
 	}
 
-	config.BuildpackTOML.Metadata[DependenciesKey] = updatedDeps
-	if len(updatedDeprecationDates) > 0 {
-		config.BuildpackTOML.Metadata[DeprecationDatesKey] = updatedDeprecationDates
-	}
-	// onfig.BuildpackTOML.Metadata = zeroMetadata(config.BuildpackTOML.Metadata => see comment below
+	config.BuildpackTOML.UpdateOrdersWith(config.Dep)
 
-	config.BuildpackTOML.Orders = updatedOrder
+	// Won't work until golang 1.13
+	//config.BuildpackTOML.RemoveEmptyMetadataFields()
 
 	if err := config.BuildpackTOML.WriteToFile(filepath.Join(flags.outputDir, "buildpack.toml")); err != nil {
 		return errors.Wrap(err, "failed to update buildpack toml")
@@ -106,14 +84,3 @@ func updateCNBDependencies() error {
 
 	return nil
 }
-
-// This wont work until golang 1.13
-//func zeroMetadata(metadata map[string]interface{}) map[string]interface{} {
-//	for k, v := range metadata {
-//		value := reflect.ValueOf(v)
-//		if value.IsZero(v) {
-//			delete(metadata, k)
-//		}
-//	}
-//	return metadata
-//}
