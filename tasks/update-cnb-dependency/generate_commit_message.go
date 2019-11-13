@@ -16,8 +16,7 @@ func GenerateCommitMessage(oldDeps, newDeps Dependencies, dep Dependency, storyI
 
 func findAddedDeps(dep Dependency, oldDeps, newDeps Dependencies) (bool, bool, map[string]bool) {
 	var added, rebuilt bool
-	// Use maps to ensure no duplicates
-	stacks := map[string]bool{}
+	uniqueStacks := map[string]bool{}
 
 	for _, newDep := range newDeps {
 		if newDep.ID != dep.ID || newDep.Version != dep.Version {
@@ -34,11 +33,11 @@ func findAddedDeps(dep Dependency, oldDeps, newDeps Dependencies) (bool, bool, m
 		}
 
 		for _, stack := range newDep.Stacks {
-			stacks[stack] = true
+			uniqueStacks[stack] = true
 		}
 	}
 
-	return added, rebuilt, stacks
+	return added, rebuilt, uniqueStacks
 }
 
 func findRemovedDeps(dep Dependency, oldDeps, newDeps Dependencies, stacks map[string]bool) (map[string]bool, map[string]bool) {

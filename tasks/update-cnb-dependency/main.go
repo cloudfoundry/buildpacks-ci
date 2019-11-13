@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Flags struct {
+var flags struct {
 	dependencyBuildsConfig string
 	buildpackTOML          string
 	sourceData             string
@@ -21,8 +21,6 @@ type Flags struct {
 	versionLine            string
 	versionsToKeep         int
 }
-
-var flags Flags
 
 func main() {
 	flag.StringVar(&flags.dependencyBuildsConfig, "dependency-builds-config", "", "config for dependency builds pipeline")
@@ -50,64 +48,39 @@ func updateCNBDependencies() error {
 		return errors.Wrap(err, "failed to load task resources")
 	}
 
-	// Load, update and save dependencies
 	depsToAdd, err := loadDependenciesFromBinaryBuilds(flags.binaryBuildsPath, config.Dep, config.Orchestrator)
 	if err != nil {
 		return errors.Wrap(err, "failed to construct list of dependencies to add")
 	}
 
-	deps, err := config.BuildpackTOML.Dependencies()
+	originalDeps, updatedDeps, err := config.BuildpackTOML.UpdateDependenciesWith(config.Dep, depsToAdd, flags.versionsToKeep)
 	if err != nil {
-		return errors.Wrap(err, "failed to decode dependencies")
+		return errors.Wrap(err, "failed to update the dependencies")
 	}
 
-	updatedDeps, err := deps.Update(flags, config.Dep, depsToAdd)
-	if err != nil {
-		return errors.Wrap(err, "failed to add new dependencies to the dependencies list")
-	}
-	config.BuildpackTOML.SaveDependencies(updatedDeps)
-
-	// Load and update Deprecation Dates
 	deprecationDate, err := NewDependencyDeprecationDate(flags.deprecationDate, flags.deprecationLink, config.Dep.ID, flags.versionLine, flags.deprecationMatch)
 	if err != nil {
-		return errors.Wrap(err, "failed to create deprecation date")
+		return errors.Wrap(err, "failed to create a deprecation date")
 	}
 
-	deprecationDates, err := config.BuildpackTOML.DeprecationDates()
+	err = config.BuildpackTOML.UpdateDeprecationDatesWith(deprecationDate)
 	if err != nil {
-		return errors.Wrap(err, "failed to decode deprecation dates")
+		return errors.Wrap(err, "failed to update the deprecation dates")
 	}
 
-	updatedDeprecationDates, err := deprecationDates.Update(deprecationDate)
-	if err != nil {
-		return errors.Wrap(err, "failed to update deprecation dates")
-	}
-	config.BuildpackTOML.SaveDeprecationDates(updatedDeprecationDates)
+	config.BuildpackTOML.UpdateOrdersWith(config.Dep)
 
-	// config.BuildpackTOML.Metadata = zeroMetadata(config.BuildpackTOML.Metadata => see comment below
-	// Update and save Order
-	updatedOrder := config.BuildpackTOML.Orders.Update(config.Dep)
-	config.BuildpackTOML.Orders = updatedOrder
+	// Won't work until golang 1.13
+	//config.BuildpackTOML.RemoveEmptyMetadataFields()
 
 	if err := config.BuildpackTOML.WriteToFile(filepath.Join(flags.outputDir, "buildpack.toml")); err != nil {
 		return errors.Wrap(err, "failed to update buildpack toml")
 	}
 
-	commitMessage := GenerateCommitMessage(deps, updatedDeps, config.Dep, config.BuildMetadata.TrackerStoryID)
+	commitMessage := GenerateCommitMessage(originalDeps, updatedDeps, config.Dep, config.BuildMetadata.TrackerStoryID)
 	if err := CommitArtifacts(commitMessage, flags.outputDir); err != nil {
 		return errors.Wrap(err, "failed to commit artifacts")
 	}
 
 	return nil
 }
-
-// This wont work until golang 1.13
-//func zeroMetadata(metadata map[string]interface{}) map[string]interface{} {
-//	for k, v := range metadata {
-//		value := reflect.ValueOf(v)
-//		if value.IsZero(v) {
-//			delete(metadata, k)
-//		}
-//	}
-//	return metadata
-//}
