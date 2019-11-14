@@ -207,3 +207,19 @@ jobs:
           bump: patch
   <% end %>
 <% end %>
+
+groups:
+<% stacks.each do |stack, stack_data| %>
+  - name: <%= stack %>
+    jobs:
+      <% if stack == "tiny" %>
+      - test-tiny
+      - update-tiny-build-cnb-image
+      <% end %>
+  <% stack_data["images"].each do |image| %>
+    <% if stack_data["base"] %>
+      - update-<%= stack %>-<%= image %>-base-image
+    <% end %>
+      -  update-<%= stack %>-<%= image %>-cnb-image
+  <% end %>
+<% end %>
