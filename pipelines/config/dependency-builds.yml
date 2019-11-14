@@ -801,6 +801,7 @@ include_tiny_in_any_stack:
   - org.cloudfoundry.go
   - org.cloudfoundry.go-compiler
   - org.cloudfoundr.go-mod
+  - org.cloudfoundry.dep
 
 #! only check deprecation dates for dotnet-runtime as they are redundant for sdk and aspnetcore
 skip_deprecation_check:
