@@ -74,6 +74,14 @@ resources:
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
+  - name: edge-buildpack-specs-pool
+    type: pool
+    source:
+      branch: master
+      pool: edge-shared-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+
   - name: env-repo
     type: git
     source:
@@ -142,7 +150,12 @@ jobs:
     plan:
       - in_parallel:
           - get: buildpack-acceptance-tests
-          - get: edge-environments
+          - put: edge-environments
+            params:
+              acquire: true
+          - put: edge-buildpack-specs-pool
+            params:
+              claim: <%= language %>
           - get: buildpacks-ci
           - get: version
             resource: <%= language %>-cnb-version
@@ -183,6 +196,9 @@ jobs:
         - put: edge-environments
           params:
             release: edge-environments
+        - put: edge-buildpack-specs-pool
+          params:
+            release: edge-buildpack-specs-pool
 
   - name: ship-it
     serial: true
@@ -192,13 +208,12 @@ jobs:
           - get: buildpacks-ci
           - get: buildpack
             resource: repo
-            passed:
-              - test-rc
+            passed: [ test-rc ]
           - get: v2-release-candidate
-            passed:
-              - test-rc
+            passed: [ test-rc ]
           - get: version
             resource: <%= language %>-cnb-version
+            passed: [ test-rc ]
             params:
               bump: final
       - task: check-tag-not-already-added
