@@ -76,7 +76,7 @@ func (buildpackTOML *BuildpackTOML) UpdateOrdersWith(dep Dependency) {
 //}
 
 func (buildpackTOML BuildpackTOML) WriteToFile(filepath string) error {
-	buildpackTOMLFile, err := os.OpenFile(filepath, os.O_RDWR|os.O_CREATE, 0666)
+	buildpackTOMLFile, err := os.Create(filepath)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("failed to open buildpack.toml at: %s", filepath))
 	}
