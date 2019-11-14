@@ -77,7 +77,7 @@ cnbs:
     private: true
     skip_stack:
       - "tiny"
-
+    all_commits: true
   python:
     git_repo: "https://github.com/cloudfoundry/python-cnb"
     public: true
@@ -85,11 +85,12 @@ cnbs:
     skip_stack:
       - "bionic"
       - "tiny"
+    all_commits: true
   go:
     git_repo: "https://github.com/cloudfoundry/go-cnb"
     public: true
     private: true
-
+    all_commits: true
   httpd:
     git_repo: "https://github.com/cloudfoundry/httpd-cnb"
     public: true
@@ -111,6 +112,7 @@ cnbs:
     skip_stack:
       - "bionic"
       - "tiny"
+    all_commits: true
   openjdk:
     git_repo: "https://github.com/cloudfoundry/openjdk-cnb"
     public: true
@@ -158,6 +160,7 @@ cnbs:
     skip_stack:
       - "bionic"
       - "tiny"
+    all_commits: true
   archiveexpanding:
     git_repo: "https://github.com/cloudfoundry/archive-expanding-cnb"
     public: true
