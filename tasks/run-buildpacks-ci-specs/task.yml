@@ -12,4 +12,4 @@ params:
   CI_PASSWORD:
   PIPELINE_URL:
 run:
-  path: scripts/unit-test.sh
+  path: buildpacks-ci/scripts/unit-test.sh
