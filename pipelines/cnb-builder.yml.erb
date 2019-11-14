@@ -7,7 +7,6 @@
   all_cnbs = config['cnbs']
   cnbs = all_cnbs.select{|cnb, data| data["public"]}
   piv_cnbs = all_cnbs.select{|cnb, data| data["private"]}
-  cnb_child_images = %w(run build)
 %>
 
 ---
@@ -42,14 +41,6 @@ resources:
       tag_filter: "v*"
 <% end %>
 
-  - name: new-cves
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-      branch: master
-      paths: [ new-cve-notifications/ubuntu18.04-tiny.yml ]
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-
   - name: packager
     type: git
     source:
@@ -71,80 +62,17 @@ resources:
       user: buildpack
       access_token: {{buildpacks-github-token}}
 
-  # Dockerfiles for cnb bionic stack images
-<% stacks.each do |stack, stack_data| %>
-    <% stack_data["images"].each do |image| %>
-  - name: <%= stack %>-<%= image %>-cnb-dockerfile
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/stacks
-      branch: master
-      paths: [ "<%= stack %>/cnb/<%= image %>/**" ]
-
-      <% if stack_data["base"] %>
-  - name: <%= stack %>-<%= image %>-base-dockerfile
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/stacks
-      branch: master
-      paths: [ "<%= stack %>/base/<%= image %>/**" ]
-      <% end %>
-    <% end %>
-<% end %>
-
 # Versions
-<% stacks.each do |stack, stack_data| %>
-  - name: <%= stack %>-version
+<% builders.each do |_, builder_data| %>
+  - name: <%= builder_data["version-key"] %>-version
     type: semver
     source:
       initial_version: 0.0.1
       bucket: cnb-versions
-      key: builder/<%= stack %>
+      key: builder/<%= builder_data["version-key"] %>
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
-
-  <% if stack_data["piv-version"] %>
-  - name: <%= stack %>-piv-version
-    type: semver
-    source:
-      initial_version: 0.0.1
-      bucket: cnb-versions
-      key: builder/<%= stack %>-piv
-      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
-  <% end %>
-
-  <% stack_data["images"].each do |image| %>
-  - name: <%= stack %>-<%= image %>-cnb-version
-    type: semver
-    source:
-      initial_version: 0.0.1
-      bucket: cnb-versions
-      key: builder/<%= stack %>-<%= image %>-cnb
-      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
-
-    <% if stack_data["base"] %>
-  - name: <%= stack %>-<%= image %>-base-version
-    type: semver
-    source:
-      initial_version: 0.0.1
-      bucket: cnb-versions
-      key: builder/<%= stack %>-<%= image %>-base
-      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
-    <% end %>
-  <% end %>
 <% end %>
-
-  - name: tiny-build-cnb-version
-    type: semver
-    source:
-      initial_version: 0.0.1
-      bucket: cnb-versions
-      key: builder/tiny-build-cnb
-      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
 # Docker Images
   - name: builder-image
@@ -162,145 +90,20 @@ resources:
       username: _json_key
       password: {{gcp-service-account-key}}
 
-# CNB stack images
-<% stacks.each do |stack, stack_data| %>
-  <% stack_data["images"].each do |image| %>
-  - name: <%= stack %>-<%= image %>-base-image
-    type: docker-image
-    source:
-      repository: cloudfoundry/<%= image %>
-      tag: <%= stack_data["tag"] %>
-      username: {{buildpacks-docker-username}}
-      password: {{buildpacks-docker-password}}
-      email: cf-buildpacks-eng@pivotal.io
-
+<% stacks.each do |stack, tag| %>
+  <% %w(build run).each do |image| %>
   - name: <%= stack %>-<%= image %>-cnb-image
     type: docker-image
     source:
       repository: cloudfoundry/<%= image %>
-      tag: <%= stack_data["tag"] %>-cnb
-      username: {{buildpacks-docker-username}}
-      password: {{buildpacks-docker-password}}
-      email: cf-buildpacks-eng@pivotal.io
-  <% end %>
-<% end %>
-
-  # Tiny's build image is a re-tagged version of the bionic image (and not built from a dockerfile), so it is a special case
-  - name: tiny-build-cnb-image
-    type: docker-image
-    source:
-      repository: cloudfoundry/build
-      tag: tiny-cnb
+      tag: <%= tag %>-cnb
       email: {{buildpacks-docker-user-email}}
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
-
-jobs:
-  - name: test-tiny
-    plan:
-      - get: tiny-run-base-dockerfile
-        trigger: true
-      - get: buildpacks-ci
-      - get: new-cves
-        trigger: true
-      - task: integration-test
-        privileged: true
-        file: buildpacks-ci/tasks/test-tiny-docker-image/task.yml
-
-  - name: update-tiny-build-cnb-image
-    public: true
-    plan:
-      - get: bionic-build-cnb-dockerfile
-        trigger: true
-      - get: bionic-build-base-image
-        trigger: true
-        passed:
-          - update-bionic-build-base-image
-      - get: version
-        resource: tiny-build-cnb-version
-        params:
-          pre: tiny-cnb
-          pre_without_version: true
-      - put: tiny-build-cnb-image
-        params:
-          additional_tags: version/version
-          build: bionic-build-cnb-dockerfile/bionic/cnb/build
-          build_args:
-            base_image: "cloudfoundry/build:base"
-            stack_id: "org.cloudfoundry.stacks.tiny"
-            squash: squash
-        attempts: 2
-      - put: version
-        resource: tiny-build-cnb-version
-        params:
-          bump: patch
-
-<% stacks.each do |stack, stack_data| %>
-  <% stack_data["images"].each do |image| %>
-    <% if stack_data["base"] %>
-  - name: update-<%= stack %>-<%= image %>-base-image
-    public: true
-    plan:
-      - get: <%= stack %>-<%= image %>-base-dockerfile
-        trigger: true
-      <% if stack == "tiny" %>
-        passed: [test-tiny]
-      - get: new-cves
-        passed: [test-tiny]
-        trigger: true
-      <% end %>
-      - get: version
-        resource: <%= stack %>-<%= image %>-base-version
-        params:
-          pre: <%= stack_data["tag"] %>
-          pre_without_version: true
-      - put: <%= stack %>-<%= image %>-base-image
-        attempts: 2
-        params:
-          additional_tags: version/version
-          build: <%= stack %>-<%= image %>-base-dockerfile/<%= stack %>/base/<%= image %>
-          build_args:
-            squash: squash
-      - put: version
-        resource: <%= stack %>-<%= image %>-base-version
-        params:
-          bump: patch
-    <% end %>
-
-  - name: update-<%= stack %>-<%= image %>-cnb-image
-    public: true
-    plan:
-      - get: <%= stack %>-<%= image %>-cnb-dockerfile
-        trigger: true
-      - get: <%= stack %>-<%= image %>-base-image
-        trigger: true
-    <% if stack_data["base"] %>
-        passed: [ update-<%= stack %>-<%= image %>-base-image ]
-    <% end %>
-      - get: version
-        resource: <%= stack %>-<%= image %>-cnb-version
-        params:
-          pre: <%= stack_data["tag"] %>-cnb
-          pre_without_version: true
-      - put: <%= stack %>-<%= image %>-cnb-image
-        attempts: 2
-        params:
-          additional_tags: version/version
-          build: <%= stack %>-<%= image %>-cnb-dockerfile/<%= stack %>/cnb/<%= image %>
-          build_args:
-            base_image: "cloudfoundry/<%= image %>:<%= stack_data["tag"] %>"
-            squash: squash
-    <% if stack_data["latest"] %>
-          tag_as_latest: true
-    <% end %>
-      - put: version
-        resource: <%= stack %>-<%= image %>-cnb-version
-        params:
-          bump: patch
   <% end %>
 <% end %>
 
-
+jobs:
 <% builders.each do |builder_name, builder_data|
      all_cnb_hash = builder_data["private"] ? piv_cnbs : cnbs
      cnb_hash = all_cnb_hash.reject{|cnb, data| data.fetch("skip_stack",[]).include? builder_data.fetch("stack")} %>
@@ -314,13 +117,9 @@ jobs:
           <% end %>
         - get: <%= builder_data["stack"] %>-build-cnb-image
           trigger: true
-          passed:
-            - update-<%= builder_data["stack"] %>-build-cnb-image
         - get: <%= builder_data["stack"] %>-run-cnb-image
           trigger: true
-          passed:
-            - update-<%= builder_data["stack"] %>-run-cnb-image
-        <% cnb_hash.each do |cnb_name, cnb_data| %>
+        <% cnb_hash.keys.each do |cnb_name| %>
         - get: <%= cnb_name %>-cnb
           resource: <%= cnb_name %>-cnb-release
           trigger: true
@@ -331,7 +130,7 @@ jobs:
         - get: buildpacks-ci
         - get: version
           params: {pre: "rc"}
-          resource: <%= builder_data["version-resource"] %>
+          resource: <%= builder_data["version-key"] %>-version
         - get: packager
         - get: lifecycle # use lifecycle version in order.toml instead?
           resource: cnb-lifecycle-release
@@ -378,12 +177,8 @@ jobs:
       - in_parallel:
         - get: <%= builder_data["stack"] %>-build-cnb-image
           trigger: true
-          passed:
-            - update-<%= builder_data["stack"] %>-build-cnb-image
         - get: <%= builder_data["stack"] %>-run-cnb-image
           trigger: true
-          passed:
-            - update-<%= builder_data["stack"] %>-run-cnb-image
         <% cnb_hash.keys.each do |cnb_name| %>
         - get: <%= cnb_name %>-cnb
           resource: <%= cnb_name %>-cnb-release
@@ -399,7 +194,7 @@ jobs:
         - get: buildpacks-ci
         - get: version
           params: {bump: "final"}
-          resource: <%= builder_data.fetch("version-resource") %>
+          resource: <%= builder_data.fetch("version-key") %>-version
         - get: lifecycle
           resource: cnb-lifecycle-release
       - task: get-cnb-sources
@@ -446,7 +241,7 @@ jobs:
           load_tag: <%= builder_data["stack"] %>
           tag_file: tag/name
           tag_as_latest: <%= builder_data["stack"] == "cflinuxfs3" %>
-      - put: <%= builder_data.fetch("version-resource") %>
+      - put: <%= builder_data.fetch("version-key") %>-version
         params:
           bump: patch
 <% end %>
