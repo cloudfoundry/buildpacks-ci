@@ -29,7 +29,7 @@ end
 
 # below path is needed for the shimmed buildpack
 # rc_path = Dir.glob(File.join("v2-release-candidate", "*-v*.zip")).first
-rc_path = Dir.glob(File.join("v2-release-candidate", "*-v*.tgz")).first
+rc_path = Dir.glob(File.join("v2-release-candidate", "*-v*.zip")).first
 absolute_rc_path = File.absolute_path(rc_path)
 
 current_manifest = ReleaseArtifacts.open_manifest_from_zip(absolute_rc_path)
@@ -39,17 +39,15 @@ version_diff = ReleaseArtifacts.find_version_diff(old_manifest_deps, current_man
 
 version = File.read(File.join("version", "version")).strip()
 tag = "v#{version}"
-release_notes = ReleaseArtifacts.compile_release_notes(repo, tag, cnb_version_diff)
-
-puts release_notes
+#release_notes = ReleaseArtifacts.compile_release_notes(repo, tag, version_diff)
 
 rc_shasum = Digest::SHA256.file(absolute_rc_path).hexdigest
 
 output_dir = File.absolute_path("buildpack-artifacts")
-cnb_name = "#{repo}-#{tag}.zip"
+bp_name = "#{repo}-#{tag}.zip"
 sha_file_name = "#{repo}-#{tag}.SHA256SUM.txt"
 
 File.write(File.join(output_dir, "tag"), tag)
-File.write(File.join(output_dir, "release_notes"), release_notes)
-FileUtils.mv(absolute_rc_path, File.join(output_dir, cnb_name))
+File.write(File.join(output_dir, "release_notes"), "")
+FileUtils.mv(absolute_rc_path, File.join(output_dir, bp_name ))
 File.write(File.join(output_dir, sha_file_name), rc_shasum)
