@@ -9,6 +9,7 @@ pushd dockerfiles/depwatcher
   crystal spec --no-debug
 popd
 
+./tasks/run-buildpacks-ci-specs/fly-login.sh "$CI_USERNAME" "$CI_PASSWORD"
 bundle exec rake
 
 go test -v ./...
