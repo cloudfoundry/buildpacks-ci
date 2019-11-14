@@ -29,12 +29,24 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			"HOME=" + os.Getenv("HOME"),
 			"PATH=" + os.Getenv("PATH"),
 		}
+		outputDir string
 	)
+
+	it.After(func() {
+		expectedGoldenFile, err := ioutil.ReadFile(filepath.Join(filepath.Dir(outputDir), "golden_buildpack.toml"))
+		require.NoError(t, err)
+
+		actualBuildpackTOML, err := ioutil.ReadFile(filepath.Join(outputDir, "buildpack.toml"))
+		require.NoError(t, err)
+
+		assert.Equal(t, string(expectedGoldenFile), string(actualBuildpackTOML))
+		require.NoError(t, os.RemoveAll(outputDir))
+	})
 
 	when("updating a child CNB", func() {
 		var (
-			binaryBuildsPath = "testdata/updating-child-cnb/binary-builds"
-			outputDir        = "testdata/updating-child-cnb/artifacts"
+			basePath         = "testdata/updating-child-cnb"
+			binaryBuildsPath = filepath.Join(basePath, "binary-builds")
 			versionLine      = "2.X.X"
 			versionsToKeep   = "2"
 			deprecationDate  = "2040-01-01"
@@ -42,17 +54,18 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 		)
 
 		it.Before(func() {
+			outputDir = filepath.Join(basePath, "artifacts")
 			require.NoError(t, os.RemoveAll(outputDir))
 			require.NoError(t, os.Mkdir(outputDir, 0755))
 			require.NoError(t, exec.Command("git", "-C", outputDir, "init").Run())
 
-			dependencyBuildsConfig, err := ioutil.ReadFile("testdata/updating-child-cnb/dependency-builds.yml")
+			dependencyBuildsConfig, err := ioutil.ReadFile(filepath.Join(basePath, "dependency-builds.yml"))
 			require.NoError(t, err)
 
-			sourceBuildpackTOML, err := ioutil.ReadFile("testdata/updating-child-cnb/buildpack.toml")
+			sourceBuildpackTOML, err := ioutil.ReadFile(filepath.Join(basePath, "buildpack.toml"))
 			require.NoError(t, err)
 
-			sourceData, err := ioutil.ReadFile("testdata/updating-child-cnb/data.json")
+			sourceData, err := ioutil.ReadFile(filepath.Join(basePath, "data.json"))
 			require.NoError(t, err)
 
 			taskCmd = exec.Command(
@@ -68,19 +81,13 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				"--deprecation-link", deprecationLink,
 			)
 			taskCmd.Env = append(taskCmd.Env, envVars...)
-		})
 
-		it.After(func() {
-			require.NoError(t, os.RemoveAll(outputDir))
+			taskOutput, err := taskCmd.CombinedOutput()
+			require.NoError(t, err, string(taskOutput))
 		})
 
 		it("updates the dep in the buildpack.toml deps and retains existing arbitrary metadata", func() {
-			taskOutput, err := taskCmd.CombinedOutput()
-			require.NoError(t, err, string(taskOutput))
-
-			var buildpackTOML BuildpackTOML
-			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackTOML)
-			require.NoError(t, err)
+			buildpackTOML := decodeBuildpackTOML(t, outputDir)
 			assert.Equal(t, "./scripts/build.sh", buildpackTOML.Metadata[PrePackageKey])
 			assert.Equal(t, "random", buildpackTOML.Metadata["random"])
 			assert.Equal(t, []interface{}{"bin/build", "bin/detect", "buildpack.toml"}, buildpackTOML.Metadata[IncludeFilesKey])
@@ -175,12 +182,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 		})
 
 		it("updates deprecation dates", func() {
-			taskOutput, err := taskCmd.CombinedOutput()
-			require.NoError(t, err, string(taskOutput))
-
-			var buildpackTOML BuildpackTOML
-			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackTOML)
-			require.NoError(t, err)
+			buildpackTOML := decodeBuildpackTOML(t, outputDir)
 
 			var deps DeprecationDates
 			require.NoError(t, mapstructure.Decode(buildpackTOML.Metadata["dependency_deprecation_dates"], &deps))
@@ -201,9 +203,6 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 		})
 
 		it("shows the added and removed dep versions in the commit message", func() {
-			taskOutput, err := taskCmd.CombinedOutput()
-			require.NoError(t, err, string(taskOutput))
-
 			cmd := exec.Command("git", "-C", outputDir, "log", "-1", "--format=%B")
 			latestCommitMessage, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(latestCommitMessage))
@@ -214,24 +213,25 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 
 	when("updating a parent CNB", func() {
 		var (
-			binaryBuildsPath = "testdata/updating-parent-cnb/binary-builds"
-			outputDir        = "testdata/updating-parent-cnb/artifacts"
+			basePath         = "testdata/updating-parent-cnb/"
+			binaryBuildsPath = filepath.Join(basePath, "binary-builds")
 			versionLine      = "latest"
 			versionsToKeep   = "1"
 		)
 
 		it.Before(func() {
+			outputDir = filepath.Join(basePath, "artifacts")
 			require.NoError(t, os.RemoveAll(outputDir))
 			require.NoError(t, os.Mkdir(outputDir, 0755))
 			require.NoError(t, exec.Command("git", "-C", outputDir, "init").Run())
 
-			dependencyBuildsConfig, err := ioutil.ReadFile("testdata/updating-parent-cnb/dependency-builds.yml")
+			dependencyBuildsConfig, err := ioutil.ReadFile(filepath.Join(basePath, "dependency-builds.yml"))
 			require.NoError(t, err)
 
-			buildpackTOML, err := ioutil.ReadFile("testdata/updating-parent-cnb/buildpack.toml")
+			buildpackTOML, err := ioutil.ReadFile(filepath.Join(basePath, "buildpack.toml"))
 			require.NoError(t, err)
 
-			sourceData, err := ioutil.ReadFile("testdata/updating-parent-cnb/data.json")
+			sourceData, err := ioutil.ReadFile(filepath.Join(basePath, "data.json"))
 			require.NoError(t, err)
 
 			taskCmd = exec.Command(
@@ -245,26 +245,12 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				"--versions-to-keep", versionsToKeep,
 			)
 			taskCmd.Env = append(taskCmd.Env, envVars...)
-		})
-
-		it.After(func() {
-			expectedGoldenFile, err := ioutil.ReadFile("testdata/updating-parent-cnb/golden_buildpack.toml")
-			require.NoError(t, err)
-
-			actualBuildpackTOML,err := ioutil.ReadFile(filepath.Join(outputDir, "buildpack.toml"))
-			require.NoError(t, err)
-
-			assert.Equal(t, actualBuildpackTOML, expectedGoldenFile)
-			require.NoError(t, os.RemoveAll(outputDir))
+			taskOutput, err := taskCmd.CombinedOutput()
+			require.NoError(t, err, string(taskOutput))
 		})
 
 		it("updates the child CNB in the buildpack.toml deps", func() {
-			taskOutput, err := taskCmd.CombinedOutput()
-			require.NoError(t, err, string(taskOutput))
-
-			var buildpackTOML BuildpackTOML
-			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackTOML)
-			require.NoError(t, err)
+			buildpackTOML := decodeBuildpackTOML(t, outputDir)
 
 			var deps Dependencies
 			require.NoError(t, mapstructure.Decode(buildpackTOML.Metadata["dependencies"], &deps))
@@ -282,12 +268,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 		})
 
 		it("updates versions in order", func() {
-			taskOutput, err := taskCmd.CombinedOutput()
-			require.NoError(t, err, string(taskOutput))
-
-			var buildpackTOML BuildpackTOML
-			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackTOML)
-			require.NoError(t, err)
+			buildpackTOML := decodeBuildpackTOML(t, outputDir)
 
 			assert.Equal(t, Orders{{Group: []Group{
 				{
@@ -303,9 +284,6 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 		})
 
 		it("shows the added and removed child CNB versions in the commit message", func() {
-			taskOutput, err := taskCmd.CombinedOutput()
-			require.NoError(t, err, string(taskOutput))
-
 			cmd := exec.Command("git", "-C", outputDir, "log", "-1", "--format=%B")
 			latestCommitMessage, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(latestCommitMessage))
@@ -316,24 +294,25 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 
 	when("updating a parent CNB with tiny included", func() {
 		var (
-			binaryBuildsPath = "testdata/updating-parent-cnb-with-tiny-stack/binary-builds"
-			outputDir        = "testdata/updating-parent-cnb-with-tiny-stack/artifacts"
+			basePath         = "testdata/updating-parent-cnb-with-tiny-stack"
+			binaryBuildsPath = filepath.Join(basePath, "binary-builds")
 			versionLine      = "latest"
 			versionsToKeep   = "1"
 		)
 
 		it.Before(func() {
+			outputDir = filepath.Join(basePath, "artifacts")
 			require.NoError(t, os.RemoveAll(outputDir))
 			require.NoError(t, os.Mkdir(outputDir, 0755))
 			require.NoError(t, exec.Command("git", "-C", outputDir, "init").Run())
 
-			dependencyBuildsConfig, err := ioutil.ReadFile("testdata/updating-parent-cnb-with-tiny-stack/dependency-builds.yml")
+			dependencyBuildsConfig, err := ioutil.ReadFile(filepath.Join(basePath, "dependency-builds.yml"))
 			require.NoError(t, err)
 
-			buildpackTOML, err := ioutil.ReadFile("testdata/updating-parent-cnb-with-tiny-stack/buildpack.toml")
+			buildpackTOML, err := ioutil.ReadFile(filepath.Join(basePath, "buildpack.toml"))
 			require.NoError(t, err)
 
-			sourceData, err := ioutil.ReadFile("testdata/updating-parent-cnb-with-tiny-stack/data.json")
+			sourceData, err := ioutil.ReadFile(filepath.Join(basePath, "data.json"))
 			require.NoError(t, err)
 
 			taskCmd = exec.Command(
@@ -347,16 +326,11 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				"--versions-to-keep", versionsToKeep,
 			)
 			taskCmd.Env = append(taskCmd.Env, envVars...)
-		})
-
-		it.After(func() {
-			require.NoError(t, os.RemoveAll(outputDir))
+			taskOutput, err := taskCmd.CombinedOutput()
+			require.NoError(t, err, string(taskOutput))
 		})
 
 		it("includes tiny stack in dependencies and commit message", func() {
-			taskOutput, err := taskCmd.CombinedOutput()
-			require.NoError(t, err, string(taskOutput))
-
 			cmd := exec.Command("git", "-C", outputDir, "log", "-1", "--format=%B")
 			latestCommitMessage, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(latestCommitMessage))
@@ -382,4 +356,11 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			}, deps)
 		})
 	})
+}
+
+func decodeBuildpackTOML(t *testing.T, outputDir string) BuildpackTOML {
+	var buildpackTOML BuildpackTOML
+	_, err := toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackTOML)
+	require.NoError(t, err)
+	return buildpackTOML
 }
