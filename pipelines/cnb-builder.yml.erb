@@ -39,9 +39,7 @@ resources:
     source:
       uri: <%= data['git_repo'] %>
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
-      <% unless data["all_commits"] %>
       tag_filter: "v*"
-      <% end %>
 <% end %>
 
   - name: new-cves
