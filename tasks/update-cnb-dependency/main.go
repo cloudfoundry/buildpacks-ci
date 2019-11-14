@@ -73,11 +73,13 @@ func updateCNBDependencies() error {
 	// Won't work until golang 1.13
 	//config.BuildpackTOML.RemoveEmptyMetadataFields()
 
+	log.Printf("\nWriting updated buildpack.toml to file: %v\n\n", config.BuildpackTOML)
 	if err := config.BuildpackTOML.WriteToFile(filepath.Join(flags.outputDir, "buildpack.toml")); err != nil {
 		return errors.Wrap(err, "failed to update buildpack toml")
 	}
 
 	commitMessage := GenerateCommitMessage(originalDeps, updatedDeps, config.Dep, config.BuildMetadata.TrackerStoryID)
+	log.Printf("\nCommitting with message: %s\n\n", commitMessage)
 	if err := CommitArtifacts(commitMessage, flags.outputDir); err != nil {
 		return errors.Wrap(err, "failed to commit artifacts")
 	}
