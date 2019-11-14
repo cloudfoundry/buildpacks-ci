@@ -1,29 +1,13 @@
 ---
 stacks:
-  cflinuxfs3:
-    images:
-      - build
-      - run
-    piv-version: true
-    tag: full
-  bionic:
-    images:
-      - build
-      - run
-    base: true
-    piv-version: true
-    tag: base
-    latest: true
-  tiny:
-    images:
-      - run
-    base: true
-    tag: tiny
+  cflinuxfs3: full
+  bionic: base
+  tiny: tiny
 builders:
   cf-builder-tiny:
     stack: tiny
     private: false
-    version-resource: tiny-version
+    version-key: tiny
     builder-image-params:
       REPO: cloudfoundry/cnb
       STACK: "org.cloudfoundry.stacks.tiny"
@@ -33,7 +17,7 @@ builders:
   cf-builder-bionic:
     stack: bionic
     private: false
-    version-resource: bionic-version
+    version-key: bionic
     builder-image-params:
       REPO: cloudfoundry/cnb
       STACK: "io.buildpacks.stacks.bionic"
@@ -43,7 +27,7 @@ builders:
   cf-builder-cflinuxfs3:
     stack: cflinuxfs3
     private: false
-    version-resource: cflinuxfs3-version
+    version-key: cflinuxfs3
     builder-image-params:
       REPO: cloudfoundry/cnb
       STACK: "org.cloudfoundry.stacks.cflinuxfs3"
@@ -53,7 +37,7 @@ builders:
   p-builder-bionic:
     stack: bionic
     private: true
-    version-resource: bionic-piv-version
+    version-key: bionic-piv
     builder-image-params:
       REPO: p-cnb-builder
       STACK: "io.buildpacks.stacks.bionic"
@@ -63,7 +47,7 @@ builders:
   p-builder-cflinuxfs3:
     stack: cflinuxfs3
     private: true
-    version-resource: cflinuxfs3-piv-version
+    version-key: cflinuxfs3-piv
     builder-image-params:
       REPO: p-cnb-builder
       STACK: "org.cloudfoundry.stacks.cflinuxfs3"
