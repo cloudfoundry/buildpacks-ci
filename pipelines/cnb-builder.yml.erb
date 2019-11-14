@@ -33,13 +33,15 @@ resources:
       branch: master
 
 <% all_cnbs.each do |cnb_name, data| %>
-  - name: <%= cnb_name %>-cnb-release # move this github release resource
+  - name: <%= cnb_name %>-cnb-release
     type: git
     check_every: 15m # to avoid thundering herd of cnb autobumping
     source:
       uri: <%= data['git_repo'] %>
       private_key: {{cf-buildpacks-eng-github-ssh-key}}
+      <% unless data["all_commits"] %>
       tag_filter: "v*"
+      <% end %>
 <% end %>
 
   - name: new-cves
