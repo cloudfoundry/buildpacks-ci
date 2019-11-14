@@ -12,16 +12,4 @@ params:
   CI_PASSWORD:
   PIPELINE_URL:
 run:
-  path: bash
-  args:
-    - "-cl"
-    - |
-      set -ex
-      cd buildpacks-ci
-      bundle exec rspec --tag ~fly
-      pushd dockerfiles/depwatcher
-        shards
-        crystal spec --no-debug
-      popd
-      ./tasks/run-buildpacks-ci-specs/fly-login.sh $CI_USERNAME $CI_PASSWORD
-      bundle exec rake
+  path: scripts/unit-test.sh
