@@ -167,8 +167,8 @@ ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 # Also install go 1.13 but don't use it by default
 RUN cd /usr/local \
-  && curl -L https://dl.google.com/go/go1.13.1.linux-amd64.tar.gz -o go.tar.gz \
-  && [ 94f874037b82ea5353f4061e543681a0e79657f787437974214629af8407d124 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
+  && curl -L https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz -o go.tar.gz \
+  && [ 692d17071736f74be04a72a06dab9cac1cd759377bd85316e52b2227604c004c = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && mkdir -p go1.13 \
   && tar xf go.tar.gz -C go1.13 --strip-components 1 \
   && rm go.tar.gz
