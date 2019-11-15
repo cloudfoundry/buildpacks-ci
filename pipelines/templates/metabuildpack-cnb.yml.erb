@@ -1,3 +1,10 @@
+<%
+  require 'yaml'
+  config = YAML.load_file(File.join(__dir__, 'config', 'cnb-builders.yml'))
+
+  stacks = config['stacks']
+  builders = config['builders']
+%>
 ---
 resources:
   - name: buildpack-acceptance-tests
@@ -48,6 +55,17 @@ resources:
       regexp: shims/<%= language %>/<%= language %>-buildpack-v(\d+\.\d+\.\d+-rc\.\d+).zip
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+
+<% stacks.each do |stack, stack_data| %>
+  - name: <%= stack %>-version
+    type: semver
+    source:
+      initial_version: 0.0.1
+      bucket: cnb-versions
+      key: builder/<%= stack %>
+      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
+      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+<% end %>
 
   # - name: cnb-release-candidate
   #   type: s3
@@ -108,6 +126,74 @@ jobs:
         params:
           repository: buildpack-artifacts
           rebase: true
+<% if language == "dotnet-core" %>
+<% builders.each do |builder_name, builder_data|%>
+  <% if builder_data['stack']!= tiny && !builder_data['private'] %>
+  - name: specs-integration-<%= builder_data['stack'] %>
+    plan:
+      - in_parallel:
+        - get: cnb-builder
+          trigger: true
+          resource: repo
+        - get: repo
+          trigger: true
+        - get: pack
+          resource: pack-release
+          trigger: true
+        - get: buildpacks-ci
+        - get: version
+          resource: <%= builder_data["version-resource"] %>
+        - get: packager
+        - get: lifecycle # use lifecycle version in order.toml instead?
+          resource: cnb-lifecycle-release
+          trigger: true
+      - task: get-cnb-sources
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
+          inputs:
+            - name: repo
+          outputs:
+            - name: sources
+          run:
+            path: bash
+            args:
+              - -cl
+              - |
+                cp -r repo sources/<%= language %>-cnb
+      - task: write-order-toml
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
+          inputs:
+            - name: repo
+          run:
+            path: bash
+            args:
+              - -cl
+              - |
+                echo '
+description = "test-builder for <%= language %>-cnb"
+[[order]]
+group = [
+  { id = "org.cloudfoundry.<%= language %>" },
+]' > repo/<%= builder_data['stack'] %>-order.toml
+      - task: create-builder-image
+        file: buildpacks-ci/tasks/create-builder/task.yml
+        privileged: true
+        params:
+          <% (builder_data['builder-image-params'] || []).each do |key, value| %>
+          <%= key %>: <%= value%>
+          <% end %>
+  <% end %>
+<% end %>
+<% end %>
 
   - name: create-rc
     serial: true

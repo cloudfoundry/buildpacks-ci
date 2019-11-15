@@ -1,0 +1,15 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: repo
+
+run:
+  path: buildpacks-ci/tasks/set-test-configuration/run.sh
+
+params:
+  STACK:
