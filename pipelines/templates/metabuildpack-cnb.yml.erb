@@ -208,12 +208,13 @@ jobs:
           <%= key %>: <%= value%>
           <% end %>
       - task: generate-test-config
-        file: tasks/set-test-configuration/task.yml
+        file: buildpacks-ci/tasks/set-test-configuration/task.yml
         params:
           STACK: <%= builder_data["stack"] %>
 
       - task: metabuildpack-integration
-        file: tasks/metabuildpack-integration/task.yml
+        file: buildpacks-ci/tasks/metabuildpack-integration/task.yml
+        privileged: true
     <% end %>
   <% end %>
 <% end %>

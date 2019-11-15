@@ -10,4 +10,4 @@ inputs:
   - name: repo
 
 run:
-  path: buildpacks-ci/tasks/test-builder/run.sh
+  path: buildpacks-ci/tasks/metabuildpack-integration/run.sh
