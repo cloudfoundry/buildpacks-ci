@@ -49,8 +49,10 @@ sanitize_cgroups() {
     fi
   done
 
-  mkdir /sys/fs/cgroup/systemd
-  mount -t cgroup -o none,name=systemd cgroup /sys/fs/cgroup/systemd
+  if ! test -e /sys/fs/cgroup/systemd; then
+    mkdir -p /sys/fs/cgroup/systemd
+    mount -t cgroup -o none,name=systemd cgroup /sys/fs/cgroup/systemd
+  fi
 }
 
 start_docker() {
