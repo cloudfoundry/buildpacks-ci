@@ -255,8 +255,8 @@ jobs:
           tag: buildpack-artifacts/tag
           body: buildpack-artifacts/release_notes
           globs:
-            - buildpack-artifacts/*-v*.tgz
-            - buildpack-artifacts/*-v*.tgz.SHA256SUM.txt
+            - buildpack-artifacts/*-v*.zip
+            - buildpack-artifacts/*-v*.SHA256SUM.txt
       - put: version
         resource: <%= language %>-cnb-version
         params:
