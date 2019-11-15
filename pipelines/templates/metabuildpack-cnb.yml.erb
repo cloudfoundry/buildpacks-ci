@@ -1,6 +1,6 @@
 <%
   require 'yaml'
-  config = YAML.load_file(File.join(__dir__, 'config', 'cnb-builders.yml'))
+  config = YAML.load_file(File.join(__dir__, '..', 'config', 'cnb-builders.yml'))
 
   stacks = config['stacks']
   builders = config['builders']
@@ -57,6 +57,7 @@ resources:
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
 <% stacks.each do |stack, stack_data| %>
+  <% if stack != "tiny" %>
   - name: <%= stack %>-version
     type: semver
     source:
@@ -65,6 +66,7 @@ resources:
       key: builder/<%= stack %>
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+  <% end %>
 <% end %>
 
   # - name: cnb-release-candidate
@@ -107,6 +109,27 @@ resources:
       branch: master
       private_key: {{buildpacks-envs-private-key}}
 
+  - name: packager
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/libcfbuildpack
+      branch: master
+
+  - name: cnb-lifecycle-release
+    type: github-release
+    source:
+      repository: lifecycle
+      user: buildpack
+      access_token: {{buildpacks-github-token}}
+
+  - name: pack-release
+    type: github-release
+    source:
+      user: buildpack
+      repository: pack
+      access_token: {{buildpacks-github-token}}
+      globs: ['*-linux.tgz']
+
 jobs:
   # Updates
   - name: update-cnb-tools
@@ -128,13 +151,10 @@ jobs:
           rebase: true
 <% if language == "dotnet-core" %>
 <% builders.each do |builder_name, builder_data|%>
-  <% if builder_data['stack']!= tiny && !builder_data['private'] %>
+  <% if builder_data['stack']!= "tiny" && !builder_data['private'] %>
   - name: specs-integration-<%= builder_data['stack'] %>
     plan:
       - in_parallel:
-        - get: cnb-builder
-          trigger: true
-          resource: repo
         - get: repo
           trigger: true
         - get: pack
@@ -142,7 +162,8 @@ jobs:
           trigger: true
         - get: buildpacks-ci
         - get: version
-          resource: <%= builder_data["version-resource"] %>
+          params: {pre: "rc"}
+          resource: <%= builder_data["version-key"] %>-version
         - get: packager
         - get: lifecycle # use lifecycle version in order.toml instead?
           resource: cnb-lifecycle-release
@@ -171,19 +192,14 @@ jobs:
             type: docker-image
             source:
               repository: cfbuildpacks/ci
-          inputs:
-            - name: repo
+          outputs:
+            - name: cnb-builder
           run:
             path: bash
             args:
               - -cl
               - |
-                echo '
-description = "test-builder for <%= language %>-cnb"
-[[order]]
-group = [
-  { id = "org.cloudfoundry.<%= language %>" },
-]' > repo/<%= builder_data['stack'] %>-order.toml
+                echo -e "\ndescription = 'test-builder for <%= language %>-cnb'\n[[order]]\ngroup = [{ id = 'org.cloudfoundry.<%= language %>' }]\n" > cnb-builder/<%= builder_data['stack'] %>-order.toml
       - task: create-builder-image
         file: buildpacks-ci/tasks/create-builder/task.yml
         privileged: true
@@ -191,9 +207,17 @@ group = [
           <% (builder_data['builder-image-params'] || []).each do |key, value| %>
           <%= key %>: <%= value%>
           <% end %>
+      - task: generate-test-config
+        file: tasks/set-test-configuration/task.yml
+        params:
+          STACK: <%= builder_data["stack"] %>
+
+      - task: metabuildpack-integration
+        file: tasks/metabuildpack-integration/task.yml
+    <% end %>
   <% end %>
 <% end %>
-<% end %>
+
 
   - name: create-rc
     serial: true
