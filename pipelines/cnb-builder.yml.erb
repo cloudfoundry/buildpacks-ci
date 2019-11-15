@@ -245,3 +245,19 @@ jobs:
         params:
           bump: patch
 <% end %>
+
+groups:
+  - name: all
+    jobs:
+<% builders.keys.each do |builder_name| %>
+      - smoke-test-<%= builder_name %>
+      - release-<%= builder_name %>
+<% end %>
+
+
+<% builders.keys.each do |builder_name| %>
+  - name: <%= builder_name %>
+    jobs:
+    - smoke-test-<%= builder_name %>
+    - release-<%= builder_name %>
+<% end %>
