@@ -1,0 +1,19 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: version
+    optional: true
+
+outputs:
+  - name: tags
+
+run:
+  path: buildpacks-ci/tasks/write-tags-list/run.sh
+
+params:
+  TAGS:
