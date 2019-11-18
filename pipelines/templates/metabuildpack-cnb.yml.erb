@@ -149,14 +149,17 @@ jobs:
         params:
           repository: buildpack-artifacts
           rebase: true
+<% tested_stacks = [] %>
 <% if language == "dotnet-core" %>
 <% builders.each do |builder_name, builder_data|%>
   <% if builder_data['stack']!= "tiny" && !builder_data['private'] %>
+    <% tested_stacks.push("specs-integration-#{builder_data['stack']}") %>
   - name: specs-integration-<%= builder_data['stack'] %>
     plan:
       - in_parallel:
         - get: repo
           trigger: true
+          passed: [create-rc]
         - get: pack
           resource: pack-release
           trigger: true
@@ -274,7 +277,11 @@ jobs:
             params:
               pre: rc
           - get: repo
+            <% if language == "dotnet-core" %>
+            passed: <%= tested_stacks %>
+            <% else %>
             passed: [create-rc]
+            <% end %>
           - get: env-repo
           - get: v2-release-candidate
             trigger: true
