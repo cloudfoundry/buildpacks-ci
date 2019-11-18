@@ -9,7 +9,8 @@ set -o pipefail
 set -x
 
 docker pull "$RUN_IMAGE"
-docker load -i builder-image/builder.tgz
+BUILDER="$(realpath "$(find builder-image -name "*\.t*")")"
+docker load -i "$BUILDER"
 
 pushd pack
     echo "Unpacking pack..."
