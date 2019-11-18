@@ -21,6 +21,14 @@ resources:
       paths: [ new-cve-notifications/ubuntu18.04-tiny.yml ]
       private_key: {{public-buildpacks-ci-robots-private-key}}
 
+  - name: cflinuxfs3-image
+    type: docker-image
+    source:
+      repository: cloudfoundry/cflinuxfs3
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+      email: cf-buildpacks-eng@pivotal.io
+
 <% stacks.each do |stack, stack_data| %>
   <% stack_data["images"].each do |image| %>
 # CNB stack images
@@ -50,7 +58,7 @@ resources:
       branch: master
       paths: [ "<%= stack %>/cnb/<%= image %>/**" ]
 
-    <% if stack_data["base"] %>
+    <% if stack_data["build-base"] %>
   - name: <%= stack %>-<%= image %>-base-dockerfile
     type: git
     source:
@@ -69,7 +77,6 @@ resources:
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
-    <% if stack_data["base"] %>
   - name: <%= stack %>-<%= image %>-base-version
     type: semver
     source:
@@ -78,7 +85,6 @@ resources:
       key: builder/<%= stack %>-<%= image %>-base
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
-    <% end %>
   <% end %>
 <% end %>
 
@@ -145,17 +151,23 @@ jobs:
 
 <% stacks.each do |stack, stack_data| %>
   <% stack_data["images"].each do |image| %>
-    <% if stack_data["base"] %>
   - name: update-<%= stack %>-<%= image %>-base-image
     public: true
     plan:
+      <% if stack != "cflinuxfs3" %>
       - get: <%= stack %>-<%= image %>-base-dockerfile
         trigger: true
-      <% if stack == "tiny" %>
+        <% if stack == "tiny" %>
         passed: [test-tiny]
       - get: new-cves
         passed: [test-tiny]
         trigger: true
+        <% end %>
+      <% else %>
+      - get: <%= stack %>-image
+        trigger: true
+        params:
+          save: true
       <% end %>
       - get: version
         resource: <%= stack %>-<%= image %>-base-version
@@ -166,14 +178,17 @@ jobs:
         attempts: 2
         params:
           additional_tags: version/version
+          <% if stack != "cflinuxfs3" %>
           build: <%= stack %>-<%= image %>-base-dockerfile/<%= stack %>/base/<%= image %>
           build_args:
             squash: squash
+          <% else %>
+          load: <%= stack %>-image
+        <% end %>
       - put: version
         resource: <%= stack %>-<%= image %>-base-version
         params:
           bump: patch
-    <% end %>
 
   - name: update-<%= stack %>-<%= image %>-cnb-image
     public: true
@@ -182,9 +197,7 @@ jobs:
         trigger: true
       - get: <%= stack %>-<%= image %>-base-image
         trigger: true
-    <% if stack_data["base"] %>
         passed: [ update-<%= stack %>-<%= image %>-base-image ]
-    <% end %>
       - get: version
         resource: <%= stack %>-<%= image %>-cnb-version
         params:
@@ -209,6 +222,17 @@ jobs:
 <% end %>
 
 groups:
+  - name: all
+    jobs:
+      - test-tiny
+      - update-tiny-build-cnb-image
+<% stacks.each do |stack, stack_data| %>
+  <% stack_data["images"].each do |image| %>
+      - update-<%= stack %>-<%= image %>-base-image
+      -  update-<%= stack %>-<%= image %>-cnb-image
+  <% end %>
+<% end %>
+
 <% stacks.each do |stack, stack_data| %>
   - name: <%= stack %>
     jobs:
@@ -217,9 +241,7 @@ groups:
       - update-tiny-build-cnb-image
       <% end %>
   <% stack_data["images"].each do |image| %>
-    <% if stack_data["base"] %>
       - update-<%= stack %>-<%= image %>-base-image
-    <% end %>
       -  update-<%= stack %>-<%= image %>-cnb-image
   <% end %>
 <% end %>
