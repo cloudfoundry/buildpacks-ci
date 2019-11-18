@@ -218,6 +218,9 @@ jobs:
       - task: metabuildpack-integration
         file: buildpacks-ci/tasks/metabuildpack-integration/task.yml
         privileged: true
+        params:
+          RUN_IMAGE: <%= builder_data['builder-image-params']['RUN_IMAGE'] %>
+          BUILD_IMAGE: <%= builder_data['builder-image-params']['BUILD_IMAGE'] %>
     <% end %>
   <% end %>
 <% end %>

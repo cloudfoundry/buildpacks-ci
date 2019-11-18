@@ -8,6 +8,8 @@ inputs:
   - name: buildpacks-ci
   - name: builder-image
   - name: repo
-
 run:
   path: buildpacks-ci/tasks/metabuildpack-integration/run.sh
+params:
+  BUILD_IMAGE:
+  RUN_IMAGE:
