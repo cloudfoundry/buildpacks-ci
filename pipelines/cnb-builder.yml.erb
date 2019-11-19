@@ -226,7 +226,7 @@ jobs:
       - put: <%= builder %>-builder-image
         params:
           additional_tags: tags/tags
-          image: <%= builder %>-rc-image
+          image: <%= builder %>-rc-image/image.tar
       - put: version
         resource: <%= builder_data.fetch("version-key") %>-version
         params:
