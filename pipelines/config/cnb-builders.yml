@@ -4,50 +4,57 @@ stacks:
   bionic: base
   tiny: tiny
 builders:
-  cf-builder-tiny:
+  tiny:
     stack: tiny
     private: false
     version-key: tiny
+    repository: cloudfoundry/cnb
     builder-image-params:
       REPO: cloudfoundry/cnb
       STACK: "org.cloudfoundry.stacks.tiny"
       BUILD_IMAGE: "cloudfoundry/build:tiny-cnb"
       RUN_IMAGE: "cloudfoundry/run:tiny-cnb"
       HOST: "hub.docker.com"
-  cf-builder-bionic:
+  bionic:
     stack: bionic
     private: false
     version-key: bionic
+    repository: cloudfoundry/cnb
     builder-image-params:
       REPO: cloudfoundry/cnb
       STACK: "io.buildpacks.stacks.bionic"
       BUILD_IMAGE: "cloudfoundry/build:base-cnb"
       RUN_IMAGE: "cloudfoundry/run:base-cnb"
       HOST: "hub.docker.com"
-  cf-builder-cflinuxfs3:
+  cflinuxfs3:
     stack: cflinuxfs3
     private: false
     version-key: cflinuxfs3
+    repository: cloudfoundry/cnb
+    latest: true
     builder-image-params:
       REPO: cloudfoundry/cnb
       STACK: "org.cloudfoundry.stacks.cflinuxfs3"
       BUILD_IMAGE: "cloudfoundry/build:full-cnb"
       RUN_IMAGE: "cloudfoundry/run:full-cnb"
       HOST: "hub.docker.com"
-  p-builder-bionic:
+  p-bionic:
     stack: bionic
     private: true
     version-key: bionic-piv
+    repository: gcr.io/cf-buildpacks/p-cnb-builder
     builder-image-params:
       REPO: p-cnb-builder
       STACK: "io.buildpacks.stacks.bionic"
       BUILD_IMAGE: "cloudfoundry/build:base-cnb"
       RUN_IMAGE: "cloudfoundry/run:base-cnb"
       ENTERPRISE: true
-  p-builder-cflinuxfs3:
+  p-cflinuxfs3:
     stack: cflinuxfs3
     private: true
     version-key: cflinuxfs3-piv
+    repository: gcr.io/cf-buildpacks/p-cnb-builder
+    latest: true
     builder-image-params:
       REPO: p-cnb-builder
       STACK: "org.cloudfoundry.stacks.cflinuxfs3"
