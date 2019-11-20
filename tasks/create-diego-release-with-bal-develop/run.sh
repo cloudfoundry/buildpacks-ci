@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-export GOROOT="/usr/local/go1.13"
+export GOROOT="/usr/local/go"
 export PATH="$GOROOT/bin:$PATH"
 
 version="0.$(date +%s)"
