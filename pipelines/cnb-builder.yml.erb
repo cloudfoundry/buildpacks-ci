@@ -118,6 +118,13 @@ resources:
   <% end %>
 <% end %>
 
+  - name: ci-image
+    type: registry-image
+    source:
+      repository: cfbuildpacks/ci
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+
 jobs:
 <% builders.each do |builder, builder_data| %>
   - name: create-<%= builder %>-builder-rc
@@ -147,12 +154,9 @@ jobs:
           params:
             pre: rc
       - task: get-cnb-sources
+        image: ci-image
         config:
           platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
           inputs:
   <% cnb_hash(builder_data).each do |cnb_name| %>
             - name: <%= cnb_name %>-cnb
@@ -168,6 +172,7 @@ jobs:
                 cp -r <%= cnb_name %>-cnb sources/<%= cnb_name %>-cnb
   <% end %>
       - task: create-builder-image
+        image: ci-image
         file: buildpacks-ci/tasks/create-builder/task.yml
         privileged: true
         params:
@@ -186,6 +191,7 @@ jobs:
   - name: test-<%= builder %>-builder-rc
     plan:
       - get: buildpacks-ci
+      - get: ci-image
       - get: builder-image
         resource: <%= builder %>-rc-image
         trigger: true
@@ -199,6 +205,7 @@ jobs:
         resource: p-cnb-builder
   <% end %>
       - task: smoke-test-builder
+        image: ci-image
         file: buildpacks-ci/tasks/test-builder/task.yml
         privileged: true
         params:
@@ -220,6 +227,7 @@ jobs:
           pre: <%= builder %>
           pre_without_version: true
       - task: write-tags-list
+        image: ci-image
         file: buildpacks-ci/tasks/write-tags-list/task.yml
         params:
           TAGS: <%= "#{builder_data['stack']} #{stacks[builder_data['stack']]} #{builder_data['latest']? 'latest' : ''}" %>
