@@ -154,24 +154,15 @@ RUN curl -L https://github.com/git-hooks/git-hooks/releases/download/v1.1.4/git-
 
 RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make install
 
-# Install go 1.12
 RUN cd /usr/local \
-  && curl -L https://dl.google.com/go/go1.12.10.linux-amd64.tar.gz -o go.tar.gz \
-  && [ aaa84147433aed24e70b31da369bb6ca2859464a45de47c2a5023d8573412f6b = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
+  && curl -L https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz -o go.tar.gz \
+  && [ 692d17071736f74be04a72a06dab9cac1cd759377bd85316e52b2227604c004c = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && tar xf go.tar.gz \
   && rm go.tar.gz
 
 ENV GOROOT=/usr/local/go
 ENV GOPATH=/go
 ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-
-# Also install go 1.13 but don't use it by default
-RUN cd /usr/local \
-  && curl -L https://dl.google.com/go/go1.13.4.linux-amd64.tar.gz -o go.tar.gz \
-  && [ 692d17071736f74be04a72a06dab9cac1cd759377bd85316e52b2227604c004c = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
-  && mkdir -p go1.13 \
-  && tar xf go.tar.gz -C go1.13 --strip-components 1 \
-  && rm go.tar.gz
 
 # Add git known host
 RUN mkdir -p /root/.ssh/ && echo github.com,192.30.252.131 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ== > /root/.ssh/known_hosts
