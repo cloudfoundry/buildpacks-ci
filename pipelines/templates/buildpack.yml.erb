@@ -356,6 +356,13 @@ resources: #####################################################################
       expression: 0 0 * * *
       location: {{current-timezone}}
 
+  - name: ci-image
+    type: registry-image
+    source:
+      repository: cfbuildpacks/ci
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
+
 jobs: ################################################################################################################
 <% if language == "php" %>
   - name: ensure-manifest-has-modules
@@ -378,6 +385,7 @@ jobs: ##########################################################################
       - do:
         - in_parallel:
           - get: buildpacks-ci
+          - get: ci-image
           - get: buildpack
             resource: buildpack-develop
 <% if language == "php" %>
@@ -386,6 +394,7 @@ jobs: ##########################################################################
             trigger: true
         - do:
           - task: ginkgo
+            image: ci-image
             file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
 <% if language == "php" %>
             privileged: true
@@ -700,6 +709,7 @@ jobs: ##########################################################################
           claim: <%= language %>
         timeout: 3h
       - get: buildpacks-ci
+     - get: ci-image
       - get: env-repo
       - get: buildpack
         resource: buildpack-v3
@@ -713,6 +723,7 @@ jobs: ##########################################################################
       %>
       - do:
         - task: create-cf-space
+          image: ci-image
           file: buildpacks-ci/tasks/create-cf-space/task.yml
           output_mapping: {cf-space: cf-space-<%= stack %>}
           params:
@@ -722,6 +733,7 @@ jobs: ##########################################################################
             SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
             USERNAME: admin
         - task: ginkgo-<%= stack %>
+          image: ci-image
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           input_mapping: {cf-space: cf-space-<%= stack %>}
           params:
@@ -771,6 +783,7 @@ jobs: ##########################################################################
             claim: <%= language %>
           timeout: 3h
         - get: buildpacks-ci
+        - get: ci-image
         - get: env-repo
         - get: buildpack
           resource: buildpack-develop
@@ -784,6 +797,7 @@ jobs: ##########################################################################
 <% relevant_stacks.each do |stack| %>
         - do:
           - task: create-cf-space
+            image: ci-image
             file: buildpacks-ci/tasks/create-cf-space/task.yml
             output_mapping: {cf-space: cf-space-<%= stack %>}
             params:
@@ -793,6 +807,7 @@ jobs: ##########################################################################
               SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
               USERNAME: admin
           - task: ginkgo-<%= stack %>
+            image: ci-image
             file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
             input_mapping: {cf-space: cf-space-<%= stack %>}
             params:
@@ -838,6 +853,7 @@ jobs: ##########################################################################
           params:
             acquire: true
         - get: buildpacks-ci
+        - get: ci-image
         - get: env-repo
         - get: buildpack
           resource: buildpack-develop
@@ -849,6 +865,7 @@ jobs: ##########################################################################
 <% relevant_stacks.each do |stack| %>
         - do:
           - task: create-cf-space
+            image: ci-image
             file: buildpacks-ci/tasks/create-cf-space/task.yml
             output_mapping: {cf-space: cf-space-<%= stack %>}
             params:
@@ -858,6 +875,7 @@ jobs: ##########################################################################
               SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
               USERNAME: admin
           - task: brats-<%= stack %>
+            image: ci-image
             file: buildpacks-ci/tasks/run-bp-brats/task.yml
             input_mapping: {cf-space: cf-space-<%= stack %>}
             params:
@@ -918,6 +936,7 @@ jobs: ##########################################################################
           tags:
           - buildpacks-eng-vsphere
         - get: buildpacks-ci
+        - get: ci-image
         - get: buildpack
           resource: buildpack-develop
           trigger: true
@@ -927,12 +946,14 @@ jobs: ##########################################################################
           resource: buildpack-develop
       - do:
         - task: create-cf-space
+          image: ci-image
           file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
           input_mapping:
             environment: smith-environments-<%= pas_versions['n-2'] %>
           params:
             ORG: pivotal
         - task: ginkgo-cflinuxfs3
+          image: ci-image
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           params:
             CF_STACK: cflinuxfs3
@@ -976,6 +997,7 @@ jobs: ##########################################################################
           tags:
           - buildpacks-eng-vsphere
         - get: buildpacks-ci
+        - get: ci-image
         - get: buildpack
           resource: buildpack-develop
           trigger: true
@@ -983,12 +1005,14 @@ jobs: ##########################################################################
           - specs-unit-develop
       - do:
         - task: create-cf-space
+          image: ci-image
           file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
           input_mapping:
             environment: smith-environments-<%= pas_versions['n-2'] %>
           params:
             ORG: pivotal
         - task: brats-cflinuxfs3
+          image: ci-image
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
           params:
             CF_STACK: cflinuxfs3

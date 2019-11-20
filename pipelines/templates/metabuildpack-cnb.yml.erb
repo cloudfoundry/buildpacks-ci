@@ -56,8 +56,9 @@ resources:
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
 
-<% stacks.each do |stack, stack_data| %>
-  <% if stack != "tiny" %>
+<% if language == "dotnet-core" %>
+  <% stacks.each do |stack, stack_data| %>
+    <% if stack != "tiny" %>
   - name: <%= stack %>-version
     type: semver
     source:
@@ -66,16 +67,31 @@ resources:
       key: builder/<%= stack %>
       access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+    <% end %>
   <% end %>
-<% end %>
 
-  # - name: cnb-release-candidate
-  #   type: s3
-  #   source:
-  #     bucket: {{buildpack-release-candidates-bucket}}
-  #     regexp: cnb/<%= language %>/<%= language %>-cnb-v(\d+\.\d+\.\d+-rc\.\d+).tgz
-  #     access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
-  #     secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+  - name: packager
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/libcfbuildpack
+      branch: master
+
+  - name: cnb-lifecycle-release
+    type: github-release
+    source:
+      repository: lifecycle
+      user: buildpack
+      access_token: {{buildpacks-github-token}}
+
+  - name: pack-release
+    type: github-release
+    source:
+      user: buildpack
+      repository: pack
+      access_token: {{buildpacks-github-token}}
+      globs: ['*-linux.tgz']
+
+<% end %>
 
   - name: <%= language %>-cnb-version
     type: semver
@@ -109,26 +125,12 @@ resources:
       branch: master
       private_key: {{buildpacks-envs-private-key}}
 
-  - name: packager
-    type: git
+  - name: ci-image
+    type: registry-image
     source:
-      uri: https://github.com/cloudfoundry/libcfbuildpack
-      branch: master
-
-  - name: cnb-lifecycle-release
-    type: github-release
-    source:
-      repository: lifecycle
-      user: buildpack
-      access_token: {{buildpacks-github-token}}
-
-  - name: pack-release
-    type: github-release
-    source:
-      user: buildpack
-      repository: pack
-      access_token: {{buildpacks-github-token}}
-      globs: ['*-linux.tgz']
+      repository: cfbuildpacks/ci
+      username: {{buildpacks-docker-username}}
+      password: {{buildpacks-docker-password}}
 
 jobs:
   # Updates
@@ -149,6 +151,7 @@ jobs:
         params:
           repository: buildpack-artifacts
           rebase: true
+
 <% tested_stacks = [] %>
 <% if language == "dotnet-core" %>
 <% builders.each do |builder_name, builder_data|%>
@@ -164,6 +167,7 @@ jobs:
           resource: pack-release
           trigger: true
         - get: buildpacks-ci
+        - get: ci-image
         - get: version
           params: {pre: "rc"}
           resource: <%= builder_data["version-key"] %>-version
@@ -172,12 +176,9 @@ jobs:
           resource: cnb-lifecycle-release
           trigger: true
       - task: get-cnb-sources
+        image: ci-image
         config:
           platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
           inputs:
             - name: repo
           outputs:
@@ -189,12 +190,9 @@ jobs:
               - |
                 cp -r repo sources/<%= language %>-cnb
       - task: write-order-toml
+        image: ci-image
         config:
           platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
           outputs:
             - name: cnb-builder
           run:
@@ -204,6 +202,7 @@ jobs:
               - |
                 echo -e "\ndescription = 'test-builder for <%= language %>-cnb'\n[[order]]\ngroup = [{ id = 'org.cloudfoundry.<%= language %>' }]\n" > cnb-builder/<%= builder_data['stack'] %>-order.toml
       - task: create-builder-image
+        image: ci-image
         file: buildpacks-ci/tasks/create-builder/task.yml
         privileged: true
         params:
@@ -211,11 +210,13 @@ jobs:
           <%= key %>: <%= value%>
           <% end %>
       - task: generate-test-config
+        image: ci-image
         file: buildpacks-ci/tasks/set-test-configuration/task.yml
         params:
           STACK: <%= builder_data["stack"] %>
 
       - task: metabuildpack-integration
+        image: ci-image
         file: buildpacks-ci/tasks/metabuildpack-integration/task.yml
         privileged: true
         params:
@@ -232,6 +233,7 @@ jobs:
     plan:
       - in_parallel:
           - get: buildpacks-ci
+          - get: ci-image
           - get: version
             resource: <%= language %>-cnb-version
             params:
@@ -249,8 +251,10 @@ jobs:
       #   params:
       #     file: release-candidate/*.tgz
       - task: create-v2-candidate
+        image: ci-image
         file: buildpacks-ci/tasks/cnb/build-v2/task.yml
       - task: promote-candidate-to-rc
+        image: ci-image
         file: buildpacks-ci/tasks/cnb/promote-v2-to-rc/task.yml
         params:
           LANGUAGE: <%= language %>
@@ -267,6 +271,7 @@ jobs:
     plan:
       - in_parallel:
           - get: buildpack-acceptance-tests
+          - get: ci-image
           - put: edge-environments
             params:
               acquire: true
@@ -290,6 +295,7 @@ jobs:
             trigger: true
             passed: [create-rc]
       - task: create-cf-space
+        image: ci-image
         file: buildpacks-ci/tasks/create-cf-space/task.yml
         output_mapping: {cf-space: cf-space-cflinuxfs3}
         params:
@@ -299,6 +305,7 @@ jobs:
           SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
           USERNAME: admin
       - task: v2-candidate-acceptance
+        image: ci-image
         privileged: true
         file: buildpacks-ci/tasks/run-buildpack-acceptance/task.yml
         input_mapping:
