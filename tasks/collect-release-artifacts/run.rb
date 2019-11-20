@@ -44,8 +44,11 @@ tag = "v#{version}"
 rc_shasum = Digest::SHA256.file(absolute_rc_path).hexdigest
 
 output_dir = File.absolute_path("buildpack-artifacts")
-bp_name = "#{repo}-#{tag}.zip"
-sha_file_name = "#{repo}-#{tag}.SHA256SUM.txt"
+
+bp_release_basename = repo.gsub("-cnb", "-shimmed-buildpack")
+
+bp_name = "#{bp_release_basename}-#{tag}.zip"
+sha_file_name = "#{bp_release_basename}-#{tag}.SHA256SUM.txt"
 
 File.write(File.join(output_dir, "tag"), tag)
 File.write(File.join(output_dir, "release_notes"), "")
