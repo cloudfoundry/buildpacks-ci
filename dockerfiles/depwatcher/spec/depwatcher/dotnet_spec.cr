@@ -25,7 +25,7 @@ Spec2.describe Depwatcher::DotnetBase do
     describe "#check" do
       it "returns dotnet sdk release versions sorted" do
         checked_deps = subject.check("2.1.7X")
-        expect(checked_deps.map(&.ref)).to eq ["2.1.701", "2.1.700"]
+        expect(checked_deps.map(&.ref)).to eq ["2.1.700", "2.1.701"]
       end
 
       context "when the version is latest" do
@@ -94,7 +94,7 @@ Spec2.describe Depwatcher::DotnetBase do
     describe "#check" do
       it "returns dotnet runtime release versions sorted" do
         checked_deps = subject.check("2.1.X")
-        expect(checked_deps.map(&.ref)).to eq ["2.1.13", "2.1.12", "2.1.11", "2.1.10", "2.1.9", "2.1.8", "2.1.7", "2.1.6", "2.1.5", "2.1.4", "2.1.3", "2.1.2", "2.1.1", "2.1.0"]
+        expect(checked_deps.map(&.ref)).to eq ["2.1.0", "2.1.1", "2.1.2", "2.1.3", "2.1.4", "2.1.5", "2.1.6", "2.1.7", "2.1.8", "2.1.9", "2.1.10", "2.1.11", "2.1.12", "2.1.13"]
       end
     end
 
@@ -143,7 +143,7 @@ Spec2.describe Depwatcher::DotnetBase do
     describe "#check" do
       it "returns dotnet sdk release versions sorted" do
         checked_deps = subject.check("2.1.X")
-        expect(checked_deps.map(&.ref)).to eq ["2.1.13", "2.1.12", "2.1.11", "2.1.10", "2.1.9", "2.1.8", "2.1.7", "2.1.6", "2.1.5", "2.1.4", "2.1.3", "2.1.2", "2.1.1", "2.1.0"]
+        expect(checked_deps.map(&.ref)).to eq ["2.1.0", "2.1.1", "2.1.2", "2.1.3", "2.1.4", "2.1.5", "2.1.6", "2.1.7", "2.1.8", "2.1.9", "2.1.10", "2.1.11", "2.1.12", "2.1.13"]
       end
     end
 

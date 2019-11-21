@@ -93,7 +93,7 @@ module Depwatcher
       releases = DotnetReleasesJSON.from_json(client.get(releases_url).body).releases
       get_versions(releases, version).select do |v|
         SemanticVersion.new(v).is_final_release?
-      end.uniq.map { |v| Internal.new(v) }
+      end.uniq.map { |v| Internal.new(v) }.reverse
     end
 
     def in(ref : String, output_dir : String) : DotnetRelease | Nil
