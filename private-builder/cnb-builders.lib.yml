@@ -1,0 +1,33 @@
+#@ load("@ytt:struct", "struct")
+
+#@ def _cnbs(builder):
+#@   return []
+#@ end
+
+#@
+#@ def make_builder(builder):
+#@   return struct.make_and_bind(builder,
+#@     cnbs=_cnbs,
+#@   )
+#@ end
+
+#@ def username(builder):
+#@ end
+#@ def password(builder):
+#@ end
+
+#!  cnbs = all_cnbs.select{|cnb, data| data["public"]}
+#!  piv_cnbs = all_cnbs.select{|cnb, data| data["private"]}
+
+#!  def cnb_hash(builder_data)
+#!    all_cnb_hash = builder_data["private"] ? piv_cnbs : cnbs
+#!    cnb_hash = all_cnb_hash.reject{|cnb, data| data.fetch("skip_stack",[]).include? builder_data.fetch("stack")}
+#!    cnb_hash.keys
+#!  end
+
+#@ def _source():
+repository: #@ builder.repository
+tag: #@ builder.stack
+username: #@ username(builder)
+password: #@ password(builder)
+#@
