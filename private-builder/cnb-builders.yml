@@ -5,12 +5,25 @@ stacks:
   bionic: base
   tiny: tiny
 builders:
+  - name: cflinuxfs3
+    stack: cflinuxfs3
+    private: false
+    version_key: cflinuxfs3
+    repository: cloudfoundry/cnb
+    latest: true
+    builder_image_params:
+      REPO: cloudfoundry/cnb
+      STACK: "org.cloudfoundry.stacks.cflinuxfs3"
+      BUILD_IMAGE: "cloudfoundry/build:full-cnb"
+      RUN_IMAGE: "cloudfoundry/run:full-cnb"
+      HOST: "hub.docker.com"
   - name: tiny
     stack: tiny
     private: false
     version_key: tiny
     repository: cloudfoundry/cnb
-    builder-image-params:
+    latest: false
+    builder_image_params:
       REPO: cloudfoundry/cnb
       STACK: "org.cloudfoundry.stacks.tiny"
       BUILD_IMAGE: "cloudfoundry/build:tiny-cnb"
@@ -21,30 +34,20 @@ builders:
     private: false
     version_key: bionic
     repository: cloudfoundry/cnb
-    builder-image-params:
+    latest: false
+    builder_image_params:
       REPO: cloudfoundry/cnb
       STACK: "io.buildpacks.stacks.bionic"
       BUILD_IMAGE: "cloudfoundry/build:base-cnb"
       RUN_IMAGE: "cloudfoundry/run:base-cnb"
-      HOST: "hub.docker.com"
-  - name: cflinuxfs3
-    stack: cflinuxfs3
-    private: false
-    version_key: cflinuxfs3
-    repository: cloudfoundry/cnb
-    latest: true
-    builder-image-params:
-      REPO: cloudfoundry/cnb
-      STACK: "org.cloudfoundry.stacks.cflinuxfs3"
-      BUILD_IMAGE: "cloudfoundry/build:full-cnb"
-      RUN_IMAGE: "cloudfoundry/run:full-cnb"
       HOST: "hub.docker.com"
   - name: p-bionic
     stack: bionic
     private: true
     version_key: bionic-piv
     repository: gcr.io/cf-buildpacks/p-cnb-builder
-    builder-image-params:
+    latest: false
+    builder_image_params:
       REPO: p-cnb-builder
       STACK: "io.buildpacks.stacks.bionic"
       BUILD_IMAGE: "cloudfoundry/build:base-cnb"
@@ -56,7 +59,7 @@ builders:
     version_key: cflinuxfs3-piv
     repository: gcr.io/cf-buildpacks/p-cnb-builder
     latest: true
-    builder-image-params:
+    builder_image_params:
       REPO: p-cnb-builder
       STACK: "org.cloudfoundry.stacks.cflinuxfs3"
       BUILD_IMAGE: "cloudfoundry/build:full-cnb"
