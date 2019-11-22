@@ -131,6 +131,7 @@ jobs:
     plan:
       - in_parallel:
         - get: buildpacks-ci
+        - get: ci-image
         - get: packager
         - get: pack
           resource: pack-release
