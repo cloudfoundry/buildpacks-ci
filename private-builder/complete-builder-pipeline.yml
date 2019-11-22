@@ -1,0 +1,1680 @@
+resource-types:
+- name: registry-image-resource
+  type: docker-image
+  source:
+    repository: concourse/registry-image-resource
+    tag: latest
+resources:
+- name: buildpacks-ci
+  type: git
+  source:
+    uri: ((buildpacks-ci-git-uri-public))
+    branch: master
+- name: cnb-builder
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/cnb-builder
+    branch: master
+- name: p-cnb-builder
+  type: git
+  source:
+    uri: git@github.com:pivotal-cf/p-cnb-builder
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    branch: master
+- name: nodejs-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/nodejs-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: python-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/python-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: go-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/go-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: httpd-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/httpd-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: nginx-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/nginx-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: php-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/php-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: openjdk-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/openjdk-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: buildsystem-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/build-system-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: jvmapplication-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/jvm-application-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: azureapplicationinsights-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/azure-application-insights-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: debug-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/debug-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: googlestackdriver-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/google-stackdriver-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: jmx-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/jmx-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: procfile-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/procfile-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: dotnet-core-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/dotnet-core-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: archiveexpanding-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/archive-expanding-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: tomcat-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/tomcat-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: jdbc-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/jdbc-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: springautoreconfiguration-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/spring-auto-reconfiguration-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: springboot-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/spring-boot-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: distzip-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: https://github.com/cloudfoundry/dist-zip-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-openjdk-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-openjdk-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-appdynamics-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-appdynamics-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-azureapplicationinsights-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-azure-application-insights-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-buildsystem-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-build-system-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-aspectj-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-aspectj-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-caintroscope-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-ca-introscope-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-clientcertificatemapper-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-client-certificate-mapper-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-containersecurityprovider-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-container-security-provider-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-debug-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-debug-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-googlestackdriver-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-google-stackdriver-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-groovy-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-groovy-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-jmx-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-jmx-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-procfile-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-procfile-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-archiveexpanding-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-archive-expanding-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-tomcat-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-tomcat-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-jdbc-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-jdbc-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-springautoreconfiguration-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-spring-auto-reconfiguration-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-distzip-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-dist-zip-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-elasticapm-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-elastic-apm-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-gemalto-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-gemalto-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-jacoco-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-jacoco-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-jprofiler-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-jprofiler-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-jrebel-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-jrebel-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-jvmapplication-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-jvm-application-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-newrelic-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-new-relic-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-overops-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-overops-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-riverbedappinternals-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-riverbed-appinternals-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-synopsys-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-synopsys-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-skywalking-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-skywalking-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-snyk-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-snyk-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-springboot-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-spring-boot-cnb
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-wso2-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-wso2-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: p-yourkit-cnb-release
+  type: git
+  check_every: 15m
+  source:
+    uri: git@github.com:pivotal-cf/p-yourkit-cnb.git
+    private_key: ((cf-buildpacks-eng-github-ssh-key))
+    tag_filter: v*
+- name: packager
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/libcfbuildpack
+    branch: master
+- name: pack-release
+  type: github-release
+  source:
+    user: buildpack
+    repository: pack
+    access_token: ((buildpacks-github-token))
+    globs:
+    - '*-linux.tgz'
+- name: cnb-lifecycle-release
+  type: github-release
+  source:
+    repository: lifecycle
+    user: buildpack
+    access_token: ((buildpacks-github-token))
+- name: cflinuxfs3-version
+  type: semver
+  source:
+    initial_version: 0.0.1
+    bucket: cnb-versions
+    key: builder/cflinuxfs3
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+- name: tiny-version
+  type: semver
+  source:
+    initial_version: 0.0.1
+    bucket: cnb-versions
+    key: builder/tiny
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+- name: bionic-version
+  type: semver
+  source:
+    initial_version: 0.0.1
+    bucket: cnb-versions
+    key: builder/bionic
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+- name: bionic-piv-version
+  type: semver
+  source:
+    initial_version: 0.0.1
+    bucket: cnb-versions
+    key: builder/bionic-piv
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+- name: cflinuxfs3-piv-version
+  type: semver
+  source:
+    initial_version: 0.0.1
+    bucket: cnb-versions
+    key: builder/cflinuxfs3-piv
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+- name: cflinuxfs3-builder-image
+  type: registry-image
+  source:
+    repository: cloudfoundry/cnb
+    tag: cflinuxfs3
+    username: ((buildpacks-docker-username))
+    password: ((buildpacks-docker-password))
+- name: cflinuxfs3-rc-image
+  type: registry-image
+  source:
+    repository: gcr.io/cf-buildpacks/builder-rcs
+    tag: cflinuxfs3 full latest
+    username: _json_key
+    password: ((gcp-service-account-key))
+- name: tiny-builder-image
+  type: registry-image
+  source:
+    repository: cloudfoundry/cnb
+    tag: tiny
+    username: ((buildpacks-docker-username))
+    password: ((buildpacks-docker-password))
+- name: tiny-rc-image
+  type: registry-image
+  source:
+    repository: gcr.io/cf-buildpacks/builder-rcs
+    tag: tiny
+    username: _json_key
+    password: ((gcp-service-account-key))
+- name: bionic-builder-image
+  type: registry-image
+  source:
+    repository: cloudfoundry/cnb
+    tag: bionic
+    username: ((buildpacks-docker-username))
+    password: ((buildpacks-docker-password))
+- name: bionic-rc-image
+  type: registry-image
+  source:
+    repository: gcr.io/cf-buildpacks/builder-rcs
+    tag: bionic base
+    username: _json_key
+    password: ((gcp-service-account-key))
+- name: p-bionic-builder-image
+  type: registry-image
+  source:
+    repository: gcr.io/cf-buildpacks/p-cnb-builder
+    tag: bionic
+    username: _json_key
+    password: ((gcp-service-account-key))
+- name: p-bionic-rc-image
+  type: registry-image
+  source:
+    repository: gcr.io/cf-buildpacks/builder-rcs
+    tag: bionic base
+    username: _json_key
+    password: ((gcp-service-account-key))
+- name: p-cflinuxfs3-builder-image
+  type: registry-image
+  source:
+    repository: gcr.io/cf-buildpacks/p-cnb-builder
+    tag: cflinuxfs3
+    username: _json_key
+    password: ((gcp-service-account-key))
+- name: p-cflinuxfs3-rc-image
+  type: registry-image
+  source:
+    repository: gcr.io/cf-buildpacks/builder-rcs
+    tag: cflinuxfs3 full latest
+    username: _json_key
+    password: ((gcp-service-account-key))
+- name: cflinuxfs3-build-cnb-image
+  type: registry-image
+  source:
+    repository: cloudfoundry/build
+    tag: full-cnb
+    username: ((buildpacks-docker-username))
+    password: ((buildpacks-docker-password))
+- name: cflinuxfs3-run-cnb-image
+  type: registry-image
+  source:
+    repository: cloudfoundry/run
+    tag: full-cnb
+    username: ((buildpacks-docker-username))
+    password: ((buildpacks-docker-password))
+- name: bionic-build-cnb-image
+  type: registry-image
+  source:
+    repository: cloudfoundry/build
+    tag: base-cnb
+    username: ((buildpacks-docker-username))
+    password: ((buildpacks-docker-password))
+- name: bionic-run-cnb-image
+  type: registry-image
+  source:
+    repository: cloudfoundry/run
+    tag: base-cnb
+    username: ((buildpacks-docker-username))
+    password: ((buildpacks-docker-password))
+- name: tiny-build-cnb-image
+  type: registry-image
+  source:
+    repository: cloudfoundry/build
+    tag: tiny-cnb
+    username: ((buildpacks-docker-username))
+    password: ((buildpacks-docker-password))
+- name: tiny-run-cnb-image
+  type: registry-image
+  source:
+    repository: cloudfoundry/run
+    tag: tiny-cnb
+    username: ((buildpacks-docker-username))
+    password: ((buildpacks-docker-password))
+- name: ci-image
+  type: registry-image
+  source:
+    repository: cfbuildpacks/ci
+    username: ((buildpacks-docker-username))
+    password: ((buildpacks-docker-password))
+jobs:
+- name: create-cflinuxfs3-builder-rc
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: ci-image
+    - get: packager
+    - get: pack
+      resource: pack-release
+      trigger: true
+    - get: lifecycle
+      resource: cnb-lifecycle-release
+    - get: cflinuxfs3-build-cnb-image
+      trigger: true
+    - get: cflinuxfs3-run-cnb-image
+      trigger: true
+    - get: nodejs-cnb
+      resource: nodejs-cnb-release
+    - get: python-cnb
+      resource: python-cnb-release
+    - get: go-cnb
+      resource: go-cnb-release
+    - get: httpd-cnb
+      resource: httpd-cnb-release
+    - get: nginx-cnb
+      resource: nginx-cnb-release
+    - get: php-cnb
+      resource: php-cnb-release
+    - get: openjdk-cnb
+      resource: openjdk-cnb-release
+    - get: buildsystem-cnb
+      resource: buildsystem-cnb-release
+    - get: jvmapplication-cnb
+      resource: jvmapplication-cnb-release
+    - get: azureapplicationinsights-cnb
+      resource: azureapplicationinsights-cnb-release
+    - get: debug-cnb
+      resource: debug-cnb-release
+    - get: googlestackdriver-cnb
+      resource: googlestackdriver-cnb-release
+    - get: jmx-cnb
+      resource: jmx-cnb-release
+    - get: procfile-cnb
+      resource: procfile-cnb-release
+    - get: dotnet-core-cnb
+      resource: dotnet-core-cnb-release
+    - get: archiveexpanding-cnb
+      resource: archiveexpanding-cnb-release
+    - get: tomcat-cnb
+      resource: tomcat-cnb-release
+    - get: jdbc-cnb
+      resource: jdbc-cnb-release
+    - get: springautoreconfiguration-cnb
+      resource: springautoreconfiguration-cnb-release
+    - get: springboot-cnb
+      resource: springboot-cnb-release
+    - get: distzip-cnb
+      resource: distzip-cnb-release
+    - get: cnb-builder
+    - get: version
+      resource: cflinuxfs3-version
+      params:
+        pre: rc
+  - task: get-cnb-sources
+    image: ci-image
+    config:
+      platform: linux
+      inputs:
+      - name: nodejs-cnb
+      - name: python-cnb
+      - name: go-cnb
+      - name: httpd-cnb
+      - name: nginx-cnb
+      - name: php-cnb
+      - name: openjdk-cnb
+      - name: buildsystem-cnb
+      - name: jvmapplication-cnb
+      - name: azureapplicationinsights-cnb
+      - name: debug-cnb
+      - name: googlestackdriver-cnb
+      - name: jmx-cnb
+      - name: procfile-cnb
+      - name: dotnet-core-cnb
+      - name: archiveexpanding-cnb
+      - name: tomcat-cnb
+      - name: jdbc-cnb
+      - name: springautoreconfiguration-cnb
+      - name: springboot-cnb
+      - name: distzip-cnb
+      outputs:
+      - name: sources
+      run:
+        path: bash
+        args:
+        - -cl
+        - |-
+          cp -r nodejs-cnb sources/nodejs-cnb
+
+          cp -r python-cnb sources/python-cnb
+
+          cp -r go-cnb sources/go-cnb
+
+          cp -r httpd-cnb sources/httpd-cnb
+
+          cp -r nginx-cnb sources/nginx-cnb
+
+          cp -r php-cnb sources/php-cnb
+
+          cp -r openjdk-cnb sources/openjdk-cnb
+
+          cp -r buildsystem-cnb sources/buildsystem-cnb
+
+          cp -r jvmapplication-cnb sources/jvmapplication-cnb
+
+          cp -r azureapplicationinsights-cnb sources/azureapplicationinsights-cnb
+
+          cp -r debug-cnb sources/debug-cnb
+
+          cp -r googlestackdriver-cnb sources/googlestackdriver-cnb
+
+          cp -r jmx-cnb sources/jmx-cnb
+
+          cp -r procfile-cnb sources/procfile-cnb
+
+          cp -r dotnet-core-cnb sources/dotnet-core-cnb
+
+          cp -r archiveexpanding-cnb sources/archiveexpanding-cnb
+
+          cp -r tomcat-cnb sources/tomcat-cnb
+
+          cp -r jdbc-cnb sources/jdbc-cnb
+
+          cp -r springautoreconfiguration-cnb sources/springautoreconfiguration-cnb
+
+          cp -r springboot-cnb sources/springboot-cnb
+
+          cp -r distzip-cnb sources/distzip-cnb
+  - task: create-builder-image
+    image: ci-image
+    file: buildpacks-ci/tasks/create-builder/task.yml
+    privileged: true
+    params:
+      REPO: cloudfoundry/cnb
+      STACK: org.cloudfoundry.stacks.cflinuxfs3
+      BUILD_IMAGE: cloudfoundry/build:full-cnb
+      RUN_IMAGE: cloudfoundry/run:full-cnb
+      HOST: hub.docker.com
+  - put: cflinuxfs3-rc-image
+    params:
+      additional_tags: tag/name
+      image: builder-image/builder.tgz
+  - put: version
+    resource: cflinuxfs3-version
+    params:
+      file: version/version
+- name: test-cflinuxfs3-builder-rc
+  plan:
+  - get: buildpacks-ci
+  - get: ci-image
+  - get: builder-image
+    resource: cflinuxfs3-rc-image
+    trigger: true
+    passed:
+    - create-cflinuxfs3-builder-rc
+    params:
+      format: oci
+  - get: pack
+    resource: pack-release
+  - get: cnb-builder
+  - task: smoke-test-builder
+    image: ci-image
+    file: buildpacks-ci/tasks/test-builder/task.yml
+    privileged: true
+    params:
+      STACK: cflinuxfs3
+      REPO: gcr.io/cf-buildpacks/builder-rcs
+      RUN_IMAGE: cloudfoundry/run:full-cnb
+- name: ship-cflinuxfs3-builder
+  plan:
+  - get: buildpacks-ci
+  - get: cflinuxfs3-rc-image
+    passed:
+    - test-cflinuxfs3-builder-rc
+    params:
+      format: oci
+  - get: version
+    resource: cflinuxfs3-version
+    params:
+      bump: final
+      pre: cflinuxfs3
+      pre_without_version: true
+  - task: write-tags-list
+    image: ci-image
+    file: buildpacks-ci/tasks/write-tags-list/task.yml
+    params:
+      TAGS: cflinuxfs3 full latest
+  - put: cflinuxfs3-builder-image
+    params:
+      additional_tags: tags/tags
+      image: cflinuxfs3-rc-image/image.tar
+  - put: version
+    resource: cflinuxfs3-version
+    params:
+      bump: patch
+- name: create-tiny-builder-rc
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: ci-image
+    - get: packager
+    - get: pack
+      resource: pack-release
+      trigger: true
+    - get: lifecycle
+      resource: cnb-lifecycle-release
+    - get: tiny-build-cnb-image
+      trigger: true
+    - get: tiny-run-cnb-image
+      trigger: true
+    - get: go-cnb
+      resource: go-cnb-release
+    - get: cnb-builder
+    - get: version
+      resource: tiny-version
+      params:
+        pre: rc
+  - task: get-cnb-sources
+    image: ci-image
+    config:
+      platform: linux
+      inputs:
+      - name: go-cnb
+      outputs:
+      - name: sources
+      run:
+        path: bash
+        args:
+        - -cl
+        - cp -r go-cnb sources/go-cnb
+  - task: create-builder-image
+    image: ci-image
+    file: buildpacks-ci/tasks/create-builder/task.yml
+    privileged: true
+    params:
+      REPO: cloudfoundry/cnb
+      STACK: org.cloudfoundry.stacks.tiny
+      BUILD_IMAGE: cloudfoundry/build:tiny-cnb
+      RUN_IMAGE: cloudfoundry/run:tiny-cnb
+      HOST: hub.docker.com
+  - put: tiny-rc-image
+    params:
+      additional_tags: tag/name
+      image: builder-image/builder.tgz
+  - put: version
+    resource: tiny-version
+    params:
+      file: version/version
+- name: test-tiny-builder-rc
+  plan:
+  - get: buildpacks-ci
+  - get: ci-image
+  - get: builder-image
+    resource: tiny-rc-image
+    trigger: true
+    passed:
+    - create-tiny-builder-rc
+    params:
+      format: oci
+  - get: pack
+    resource: pack-release
+  - get: cnb-builder
+  - task: smoke-test-builder
+    image: ci-image
+    file: buildpacks-ci/tasks/test-builder/task.yml
+    privileged: true
+    params:
+      STACK: tiny
+      REPO: gcr.io/cf-buildpacks/builder-rcs
+      RUN_IMAGE: cloudfoundry/run:tiny-cnb
+- name: ship-tiny-builder
+  plan:
+  - get: buildpacks-ci
+  - get: tiny-rc-image
+    passed:
+    - test-tiny-builder-rc
+    params:
+      format: oci
+  - get: version
+    resource: tiny-version
+    params:
+      bump: final
+      pre: tiny
+      pre_without_version: true
+  - task: write-tags-list
+    image: ci-image
+    file: buildpacks-ci/tasks/write-tags-list/task.yml
+    params:
+      TAGS: tiny
+  - put: tiny-builder-image
+    params:
+      additional_tags: tags/tags
+      image: tiny-rc-image/image.tar
+  - put: version
+    resource: tiny-version
+    params:
+      bump: patch
+- name: create-bionic-builder-rc
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: ci-image
+    - get: packager
+    - get: pack
+      resource: pack-release
+      trigger: true
+    - get: lifecycle
+      resource: cnb-lifecycle-release
+    - get: bionic-build-cnb-image
+      trigger: true
+    - get: bionic-run-cnb-image
+      trigger: true
+    - get: nodejs-cnb
+      resource: nodejs-cnb-release
+    - get: go-cnb
+      resource: go-cnb-release
+    - get: openjdk-cnb
+      resource: openjdk-cnb-release
+    - get: buildsystem-cnb
+      resource: buildsystem-cnb-release
+    - get: jvmapplication-cnb
+      resource: jvmapplication-cnb-release
+    - get: azureapplicationinsights-cnb
+      resource: azureapplicationinsights-cnb-release
+    - get: debug-cnb
+      resource: debug-cnb-release
+    - get: googlestackdriver-cnb
+      resource: googlestackdriver-cnb-release
+    - get: jmx-cnb
+      resource: jmx-cnb-release
+    - get: procfile-cnb
+      resource: procfile-cnb-release
+    - get: archiveexpanding-cnb
+      resource: archiveexpanding-cnb-release
+    - get: tomcat-cnb
+      resource: tomcat-cnb-release
+    - get: jdbc-cnb
+      resource: jdbc-cnb-release
+    - get: springautoreconfiguration-cnb
+      resource: springautoreconfiguration-cnb-release
+    - get: springboot-cnb
+      resource: springboot-cnb-release
+    - get: distzip-cnb
+      resource: distzip-cnb-release
+    - get: cnb-builder
+    - get: version
+      resource: bionic-version
+      params:
+        pre: rc
+  - task: get-cnb-sources
+    image: ci-image
+    config:
+      platform: linux
+      inputs:
+      - name: nodejs-cnb
+      - name: go-cnb
+      - name: openjdk-cnb
+      - name: buildsystem-cnb
+      - name: jvmapplication-cnb
+      - name: azureapplicationinsights-cnb
+      - name: debug-cnb
+      - name: googlestackdriver-cnb
+      - name: jmx-cnb
+      - name: procfile-cnb
+      - name: archiveexpanding-cnb
+      - name: tomcat-cnb
+      - name: jdbc-cnb
+      - name: springautoreconfiguration-cnb
+      - name: springboot-cnb
+      - name: distzip-cnb
+      outputs:
+      - name: sources
+      run:
+        path: bash
+        args:
+        - -cl
+        - |-
+          cp -r nodejs-cnb sources/nodejs-cnb
+
+          cp -r go-cnb sources/go-cnb
+
+          cp -r openjdk-cnb sources/openjdk-cnb
+
+          cp -r buildsystem-cnb sources/buildsystem-cnb
+
+          cp -r jvmapplication-cnb sources/jvmapplication-cnb
+
+          cp -r azureapplicationinsights-cnb sources/azureapplicationinsights-cnb
+
+          cp -r debug-cnb sources/debug-cnb
+
+          cp -r googlestackdriver-cnb sources/googlestackdriver-cnb
+
+          cp -r jmx-cnb sources/jmx-cnb
+
+          cp -r procfile-cnb sources/procfile-cnb
+
+          cp -r archiveexpanding-cnb sources/archiveexpanding-cnb
+
+          cp -r tomcat-cnb sources/tomcat-cnb
+
+          cp -r jdbc-cnb sources/jdbc-cnb
+
+          cp -r springautoreconfiguration-cnb sources/springautoreconfiguration-cnb
+
+          cp -r springboot-cnb sources/springboot-cnb
+
+          cp -r distzip-cnb sources/distzip-cnb
+  - task: create-builder-image
+    image: ci-image
+    file: buildpacks-ci/tasks/create-builder/task.yml
+    privileged: true
+    params:
+      REPO: cloudfoundry/cnb
+      STACK: io.buildpacks.stacks.bionic
+      BUILD_IMAGE: cloudfoundry/build:base-cnb
+      RUN_IMAGE: cloudfoundry/run:base-cnb
+      HOST: hub.docker.com
+  - put: bionic-rc-image
+    params:
+      additional_tags: tag/name
+      image: builder-image/builder.tgz
+  - put: version
+    resource: bionic-version
+    params:
+      file: version/version
+- name: test-bionic-builder-rc
+  plan:
+  - get: buildpacks-ci
+  - get: ci-image
+  - get: builder-image
+    resource: bionic-rc-image
+    trigger: true
+    passed:
+    - create-bionic-builder-rc
+    params:
+      format: oci
+  - get: pack
+    resource: pack-release
+  - get: cnb-builder
+  - task: smoke-test-builder
+    image: ci-image
+    file: buildpacks-ci/tasks/test-builder/task.yml
+    privileged: true
+    params:
+      STACK: bionic
+      REPO: gcr.io/cf-buildpacks/builder-rcs
+      RUN_IMAGE: cloudfoundry/run:base-cnb
+- name: ship-bionic-builder
+  plan:
+  - get: buildpacks-ci
+  - get: bionic-rc-image
+    passed:
+    - test-bionic-builder-rc
+    params:
+      format: oci
+  - get: version
+    resource: bionic-version
+    params:
+      bump: final
+      pre: bionic
+      pre_without_version: true
+  - task: write-tags-list
+    image: ci-image
+    file: buildpacks-ci/tasks/write-tags-list/task.yml
+    params:
+      TAGS: bionic base
+  - put: bionic-builder-image
+    params:
+      additional_tags: tags/tags
+      image: bionic-rc-image/image.tar
+  - put: version
+    resource: bionic-version
+    params:
+      bump: patch
+- name: create-p-bionic-builder-rc
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: ci-image
+    - get: packager
+    - get: pack
+      resource: pack-release
+      trigger: true
+    - get: lifecycle
+      resource: cnb-lifecycle-release
+    - get: bionic-build-cnb-image
+      trigger: true
+    - get: bionic-run-cnb-image
+      trigger: true
+    - get: nodejs-cnb
+      resource: nodejs-cnb-release
+    - get: go-cnb
+      resource: go-cnb-release
+    - get: p-openjdk-cnb
+      resource: p-openjdk-cnb-release
+    - get: p-appdynamics-cnb
+      resource: p-appdynamics-cnb-release
+    - get: p-azureapplicationinsights-cnb
+      resource: p-azureapplicationinsights-cnb-release
+    - get: p-buildsystem-cnb
+      resource: p-buildsystem-cnb-release
+    - get: p-aspectj-cnb
+      resource: p-aspectj-cnb-release
+    - get: p-caintroscope-cnb
+      resource: p-caintroscope-cnb-release
+    - get: p-clientcertificatemapper-cnb
+      resource: p-clientcertificatemapper-cnb-release
+    - get: p-containersecurityprovider-cnb
+      resource: p-containersecurityprovider-cnb-release
+    - get: p-debug-cnb
+      resource: p-debug-cnb-release
+    - get: p-googlestackdriver-cnb
+      resource: p-googlestackdriver-cnb-release
+    - get: p-groovy-cnb
+      resource: p-groovy-cnb-release
+    - get: p-jmx-cnb
+      resource: p-jmx-cnb-release
+    - get: p-procfile-cnb
+      resource: p-procfile-cnb-release
+    - get: p-archiveexpanding-cnb
+      resource: p-archiveexpanding-cnb-release
+    - get: p-tomcat-cnb
+      resource: p-tomcat-cnb-release
+    - get: p-jdbc-cnb
+      resource: p-jdbc-cnb-release
+    - get: p-springautoreconfiguration-cnb
+      resource: p-springautoreconfiguration-cnb-release
+    - get: p-distzip-cnb
+      resource: p-distzip-cnb-release
+    - get: p-elasticapm-cnb
+      resource: p-elasticapm-cnb-release
+    - get: p-gemalto-cnb
+      resource: p-gemalto-cnb-release
+    - get: p-jacoco-cnb
+      resource: p-jacoco-cnb-release
+    - get: p-jprofiler-cnb
+      resource: p-jprofiler-cnb-release
+    - get: p-jrebel-cnb
+      resource: p-jrebel-cnb-release
+    - get: p-jvmapplication-cnb
+      resource: p-jvmapplication-cnb-release
+    - get: p-newrelic-cnb
+      resource: p-newrelic-cnb-release
+    - get: p-overops-cnb
+      resource: p-overops-cnb-release
+    - get: p-riverbedappinternals-cnb
+      resource: p-riverbedappinternals-cnb-release
+    - get: p-synopsys-cnb
+      resource: p-synopsys-cnb-release
+    - get: p-skywalking-cnb
+      resource: p-skywalking-cnb-release
+    - get: p-snyk-cnb
+      resource: p-snyk-cnb-release
+    - get: p-springboot-cnb
+      resource: p-springboot-cnb-release
+    - get: p-wso2-cnb
+      resource: p-wso2-cnb-release
+    - get: p-yourkit-cnb
+      resource: p-yourkit-cnb-release
+    - get: cnb-builder
+      resource: p-cnb-builder
+    - get: version
+      resource: bionic-piv-version
+      params:
+        pre: rc
+  - task: get-cnb-sources
+    image: ci-image
+    config:
+      platform: linux
+      inputs:
+      - name: nodejs-cnb
+      - name: go-cnb
+      - name: p-openjdk-cnb
+      - name: p-appdynamics-cnb
+      - name: p-azureapplicationinsights-cnb
+      - name: p-buildsystem-cnb
+      - name: p-aspectj-cnb
+      - name: p-caintroscope-cnb
+      - name: p-clientcertificatemapper-cnb
+      - name: p-containersecurityprovider-cnb
+      - name: p-debug-cnb
+      - name: p-googlestackdriver-cnb
+      - name: p-groovy-cnb
+      - name: p-jmx-cnb
+      - name: p-procfile-cnb
+      - name: p-archiveexpanding-cnb
+      - name: p-tomcat-cnb
+      - name: p-jdbc-cnb
+      - name: p-springautoreconfiguration-cnb
+      - name: p-distzip-cnb
+      - name: p-elasticapm-cnb
+      - name: p-gemalto-cnb
+      - name: p-jacoco-cnb
+      - name: p-jprofiler-cnb
+      - name: p-jrebel-cnb
+      - name: p-jvmapplication-cnb
+      - name: p-newrelic-cnb
+      - name: p-overops-cnb
+      - name: p-riverbedappinternals-cnb
+      - name: p-synopsys-cnb
+      - name: p-skywalking-cnb
+      - name: p-snyk-cnb
+      - name: p-springboot-cnb
+      - name: p-wso2-cnb
+      - name: p-yourkit-cnb
+      outputs:
+      - name: sources
+      run:
+        path: bash
+        args:
+        - -cl
+        - |-
+          cp -r nodejs-cnb sources/nodejs-cnb
+
+          cp -r go-cnb sources/go-cnb
+
+          cp -r p-openjdk-cnb sources/p-openjdk-cnb
+
+          cp -r p-appdynamics-cnb sources/p-appdynamics-cnb
+
+          cp -r p-azureapplicationinsights-cnb sources/p-azureapplicationinsights-cnb
+
+          cp -r p-buildsystem-cnb sources/p-buildsystem-cnb
+
+          cp -r p-aspectj-cnb sources/p-aspectj-cnb
+
+          cp -r p-caintroscope-cnb sources/p-caintroscope-cnb
+
+          cp -r p-clientcertificatemapper-cnb sources/p-clientcertificatemapper-cnb
+
+          cp -r p-containersecurityprovider-cnb sources/p-containersecurityprovider-cnb
+
+          cp -r p-debug-cnb sources/p-debug-cnb
+
+          cp -r p-googlestackdriver-cnb sources/p-googlestackdriver-cnb
+
+          cp -r p-groovy-cnb sources/p-groovy-cnb
+
+          cp -r p-jmx-cnb sources/p-jmx-cnb
+
+          cp -r p-procfile-cnb sources/p-procfile-cnb
+
+          cp -r p-archiveexpanding-cnb sources/p-archiveexpanding-cnb
+
+          cp -r p-tomcat-cnb sources/p-tomcat-cnb
+
+          cp -r p-jdbc-cnb sources/p-jdbc-cnb
+
+          cp -r p-springautoreconfiguration-cnb sources/p-springautoreconfiguration-cnb
+
+          cp -r p-distzip-cnb sources/p-distzip-cnb
+
+          cp -r p-elasticapm-cnb sources/p-elasticapm-cnb
+
+          cp -r p-gemalto-cnb sources/p-gemalto-cnb
+
+          cp -r p-jacoco-cnb sources/p-jacoco-cnb
+
+          cp -r p-jprofiler-cnb sources/p-jprofiler-cnb
+
+          cp -r p-jrebel-cnb sources/p-jrebel-cnb
+
+          cp -r p-jvmapplication-cnb sources/p-jvmapplication-cnb
+
+          cp -r p-newrelic-cnb sources/p-newrelic-cnb
+
+          cp -r p-overops-cnb sources/p-overops-cnb
+
+          cp -r p-riverbedappinternals-cnb sources/p-riverbedappinternals-cnb
+
+          cp -r p-synopsys-cnb sources/p-synopsys-cnb
+
+          cp -r p-skywalking-cnb sources/p-skywalking-cnb
+
+          cp -r p-snyk-cnb sources/p-snyk-cnb
+
+          cp -r p-springboot-cnb sources/p-springboot-cnb
+
+          cp -r p-wso2-cnb sources/p-wso2-cnb
+
+          cp -r p-yourkit-cnb sources/p-yourkit-cnb
+  - task: create-builder-image
+    image: ci-image
+    file: buildpacks-ci/tasks/create-builder/task.yml
+    privileged: true
+    params:
+      REPO: p-cnb-builder
+      STACK: io.buildpacks.stacks.bionic
+      BUILD_IMAGE: cloudfoundry/build:base-cnb
+      RUN_IMAGE: cloudfoundry/run:base-cnb
+      ENTERPRISE: true
+  - put: p-bionic-rc-image
+    params:
+      additional_tags: tag/name
+      image: builder-image/builder.tgz
+  - put: version
+    resource: bionic-piv-version
+    params:
+      file: version/version
+- name: test-p-bionic-builder-rc
+  plan:
+  - get: buildpacks-ci
+  - get: ci-image
+  - get: builder-image
+    resource: p-bionic-rc-image
+    trigger: true
+    passed:
+    - create-p-bionic-builder-rc
+    params:
+      format: oci
+  - get: pack
+    resource: pack-release
+  - get: cnb-builder
+    resource: p-cnb-builder
+  - task: smoke-test-builder
+    image: ci-image
+    file: buildpacks-ci/tasks/test-builder/task.yml
+    privileged: true
+    params:
+      STACK: p-bionic
+      REPO: gcr.io/cf-buildpacks/builder-rcs
+      RUN_IMAGE: cloudfoundry/run:base-cnb
+- name: ship-p-bionic-builder
+  plan:
+  - get: buildpacks-ci
+  - get: p-bionic-rc-image
+    passed:
+    - test-p-bionic-builder-rc
+    params:
+      format: oci
+  - get: version
+    resource: bionic-piv-version
+    params:
+      bump: final
+      pre: p-bionic
+      pre_without_version: true
+  - task: write-tags-list
+    image: ci-image
+    file: buildpacks-ci/tasks/write-tags-list/task.yml
+    params:
+      TAGS: bionic base
+  - put: p-bionic-builder-image
+    params:
+      additional_tags: tags/tags
+      image: p-bionic-rc-image/image.tar
+  - put: version
+    resource: bionic-piv-version
+    params:
+      bump: patch
+- name: create-p-cflinuxfs3-builder-rc
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: ci-image
+    - get: packager
+    - get: pack
+      resource: pack-release
+      trigger: true
+    - get: lifecycle
+      resource: cnb-lifecycle-release
+    - get: cflinuxfs3-build-cnb-image
+      trigger: true
+    - get: cflinuxfs3-run-cnb-image
+      trigger: true
+    - get: nodejs-cnb
+      resource: nodejs-cnb-release
+    - get: python-cnb
+      resource: python-cnb-release
+    - get: go-cnb
+      resource: go-cnb-release
+    - get: httpd-cnb
+      resource: httpd-cnb-release
+    - get: nginx-cnb
+      resource: nginx-cnb-release
+    - get: php-cnb
+      resource: php-cnb-release
+    - get: dotnet-core-cnb
+      resource: dotnet-core-cnb-release
+    - get: p-openjdk-cnb
+      resource: p-openjdk-cnb-release
+    - get: p-appdynamics-cnb
+      resource: p-appdynamics-cnb-release
+    - get: p-azureapplicationinsights-cnb
+      resource: p-azureapplicationinsights-cnb-release
+    - get: p-buildsystem-cnb
+      resource: p-buildsystem-cnb-release
+    - get: p-aspectj-cnb
+      resource: p-aspectj-cnb-release
+    - get: p-caintroscope-cnb
+      resource: p-caintroscope-cnb-release
+    - get: p-clientcertificatemapper-cnb
+      resource: p-clientcertificatemapper-cnb-release
+    - get: p-containersecurityprovider-cnb
+      resource: p-containersecurityprovider-cnb-release
+    - get: p-debug-cnb
+      resource: p-debug-cnb-release
+    - get: p-googlestackdriver-cnb
+      resource: p-googlestackdriver-cnb-release
+    - get: p-groovy-cnb
+      resource: p-groovy-cnb-release
+    - get: p-jmx-cnb
+      resource: p-jmx-cnb-release
+    - get: p-procfile-cnb
+      resource: p-procfile-cnb-release
+    - get: p-archiveexpanding-cnb
+      resource: p-archiveexpanding-cnb-release
+    - get: p-tomcat-cnb
+      resource: p-tomcat-cnb-release
+    - get: p-jdbc-cnb
+      resource: p-jdbc-cnb-release
+    - get: p-springautoreconfiguration-cnb
+      resource: p-springautoreconfiguration-cnb-release
+    - get: p-distzip-cnb
+      resource: p-distzip-cnb-release
+    - get: p-elasticapm-cnb
+      resource: p-elasticapm-cnb-release
+    - get: p-gemalto-cnb
+      resource: p-gemalto-cnb-release
+    - get: p-jacoco-cnb
+      resource: p-jacoco-cnb-release
+    - get: p-jprofiler-cnb
+      resource: p-jprofiler-cnb-release
+    - get: p-jrebel-cnb
+      resource: p-jrebel-cnb-release
+    - get: p-jvmapplication-cnb
+      resource: p-jvmapplication-cnb-release
+    - get: p-newrelic-cnb
+      resource: p-newrelic-cnb-release
+    - get: p-overops-cnb
+      resource: p-overops-cnb-release
+    - get: p-riverbedappinternals-cnb
+      resource: p-riverbedappinternals-cnb-release
+    - get: p-synopsys-cnb
+      resource: p-synopsys-cnb-release
+    - get: p-skywalking-cnb
+      resource: p-skywalking-cnb-release
+    - get: p-snyk-cnb
+      resource: p-snyk-cnb-release
+    - get: p-springboot-cnb
+      resource: p-springboot-cnb-release
+    - get: p-wso2-cnb
+      resource: p-wso2-cnb-release
+    - get: p-yourkit-cnb
+      resource: p-yourkit-cnb-release
+    - get: cnb-builder
+      resource: p-cnb-builder
+    - get: version
+      resource: cflinuxfs3-piv-version
+      params:
+        pre: rc
+  - task: get-cnb-sources
+    image: ci-image
+    config:
+      platform: linux
+      inputs:
+      - name: nodejs-cnb
+      - name: python-cnb
+      - name: go-cnb
+      - name: httpd-cnb
+      - name: nginx-cnb
+      - name: php-cnb
+      - name: dotnet-core-cnb
+      - name: p-openjdk-cnb
+      - name: p-appdynamics-cnb
+      - name: p-azureapplicationinsights-cnb
+      - name: p-buildsystem-cnb
+      - name: p-aspectj-cnb
+      - name: p-caintroscope-cnb
+      - name: p-clientcertificatemapper-cnb
+      - name: p-containersecurityprovider-cnb
+      - name: p-debug-cnb
+      - name: p-googlestackdriver-cnb
+      - name: p-groovy-cnb
+      - name: p-jmx-cnb
+      - name: p-procfile-cnb
+      - name: p-archiveexpanding-cnb
+      - name: p-tomcat-cnb
+      - name: p-jdbc-cnb
+      - name: p-springautoreconfiguration-cnb
+      - name: p-distzip-cnb
+      - name: p-elasticapm-cnb
+      - name: p-gemalto-cnb
+      - name: p-jacoco-cnb
+      - name: p-jprofiler-cnb
+      - name: p-jrebel-cnb
+      - name: p-jvmapplication-cnb
+      - name: p-newrelic-cnb
+      - name: p-overops-cnb
+      - name: p-riverbedappinternals-cnb
+      - name: p-synopsys-cnb
+      - name: p-skywalking-cnb
+      - name: p-snyk-cnb
+      - name: p-springboot-cnb
+      - name: p-wso2-cnb
+      - name: p-yourkit-cnb
+      outputs:
+      - name: sources
+      run:
+        path: bash
+        args:
+        - -cl
+        - |-
+          cp -r nodejs-cnb sources/nodejs-cnb
+
+          cp -r python-cnb sources/python-cnb
+
+          cp -r go-cnb sources/go-cnb
+
+          cp -r httpd-cnb sources/httpd-cnb
+
+          cp -r nginx-cnb sources/nginx-cnb
+
+          cp -r php-cnb sources/php-cnb
+
+          cp -r dotnet-core-cnb sources/dotnet-core-cnb
+
+          cp -r p-openjdk-cnb sources/p-openjdk-cnb
+
+          cp -r p-appdynamics-cnb sources/p-appdynamics-cnb
+
+          cp -r p-azureapplicationinsights-cnb sources/p-azureapplicationinsights-cnb
+
+          cp -r p-buildsystem-cnb sources/p-buildsystem-cnb
+
+          cp -r p-aspectj-cnb sources/p-aspectj-cnb
+
+          cp -r p-caintroscope-cnb sources/p-caintroscope-cnb
+
+          cp -r p-clientcertificatemapper-cnb sources/p-clientcertificatemapper-cnb
+
+          cp -r p-containersecurityprovider-cnb sources/p-containersecurityprovider-cnb
+
+          cp -r p-debug-cnb sources/p-debug-cnb
+
+          cp -r p-googlestackdriver-cnb sources/p-googlestackdriver-cnb
+
+          cp -r p-groovy-cnb sources/p-groovy-cnb
+
+          cp -r p-jmx-cnb sources/p-jmx-cnb
+
+          cp -r p-procfile-cnb sources/p-procfile-cnb
+
+          cp -r p-archiveexpanding-cnb sources/p-archiveexpanding-cnb
+
+          cp -r p-tomcat-cnb sources/p-tomcat-cnb
+
+          cp -r p-jdbc-cnb sources/p-jdbc-cnb
+
+          cp -r p-springautoreconfiguration-cnb sources/p-springautoreconfiguration-cnb
+
+          cp -r p-distzip-cnb sources/p-distzip-cnb
+
+          cp -r p-elasticapm-cnb sources/p-elasticapm-cnb
+
+          cp -r p-gemalto-cnb sources/p-gemalto-cnb
+
+          cp -r p-jacoco-cnb sources/p-jacoco-cnb
+
+          cp -r p-jprofiler-cnb sources/p-jprofiler-cnb
+
+          cp -r p-jrebel-cnb sources/p-jrebel-cnb
+
+          cp -r p-jvmapplication-cnb sources/p-jvmapplication-cnb
+
+          cp -r p-newrelic-cnb sources/p-newrelic-cnb
+
+          cp -r p-overops-cnb sources/p-overops-cnb
+
+          cp -r p-riverbedappinternals-cnb sources/p-riverbedappinternals-cnb
+
+          cp -r p-synopsys-cnb sources/p-synopsys-cnb
+
+          cp -r p-skywalking-cnb sources/p-skywalking-cnb
+
+          cp -r p-snyk-cnb sources/p-snyk-cnb
+
+          cp -r p-springboot-cnb sources/p-springboot-cnb
+
+          cp -r p-wso2-cnb sources/p-wso2-cnb
+
+          cp -r p-yourkit-cnb sources/p-yourkit-cnb
+  - task: create-builder-image
+    image: ci-image
+    file: buildpacks-ci/tasks/create-builder/task.yml
+    privileged: true
+    params:
+      REPO: p-cnb-builder
+      STACK: org.cloudfoundry.stacks.cflinuxfs3
+      BUILD_IMAGE: cloudfoundry/build:full-cnb
+      RUN_IMAGE: cloudfoundry/run:full-cnb
+      ENTERPRISE: true
+  - put: p-cflinuxfs3-rc-image
+    params:
+      additional_tags: tag/name
+      image: builder-image/builder.tgz
+  - put: version
+    resource: cflinuxfs3-piv-version
+    params:
+      file: version/version
+- name: test-p-cflinuxfs3-builder-rc
+  plan:
+  - get: buildpacks-ci
+  - get: ci-image
+  - get: builder-image
+    resource: p-cflinuxfs3-rc-image
+    trigger: true
+    passed:
+    - create-p-cflinuxfs3-builder-rc
+    params:
+      format: oci
+  - get: pack
+    resource: pack-release
+  - get: cnb-builder
+    resource: p-cnb-builder
+  - task: smoke-test-builder
+    image: ci-image
+    file: buildpacks-ci/tasks/test-builder/task.yml
+    privileged: true
+    params:
+      STACK: p-cflinuxfs3
+      REPO: gcr.io/cf-buildpacks/builder-rcs
+      RUN_IMAGE: cloudfoundry/run:full-cnb
+- name: ship-p-cflinuxfs3-builder
+  plan:
+  - get: buildpacks-ci
+  - get: p-cflinuxfs3-rc-image
+    passed:
+    - test-p-cflinuxfs3-builder-rc
+    params:
+      format: oci
+  - get: version
+    resource: cflinuxfs3-piv-version
+    params:
+      bump: final
+      pre: p-cflinuxfs3
+      pre_without_version: true
+  - task: write-tags-list
+    image: ci-image
+    file: buildpacks-ci/tasks/write-tags-list/task.yml
+    params:
+      TAGS: cflinuxfs3 full latest
+  - put: p-cflinuxfs3-builder-image
+    params:
+      additional_tags: tags/tags
+      image: p-cflinuxfs3-rc-image/image.tar
+  - put: version
+    resource: cflinuxfs3-piv-version
+    params:
+      bump: patch
+groups:
+- name: all
+  jobs:
+  - create-cflinuxfs3-builder-rc
+  - test-cflinuxfs3-builder-rc
+  - ship-cflinuxfs3-builder
+  - create-tiny-builder-rc
+  - test-tiny-builder-rc
+  - ship-tiny-builder
+  - create-bionic-builder-rc
+  - test-bionic-builder-rc
+  - ship-bionic-builder
+  - create-p-bionic-builder-rc
+  - test-p-bionic-builder-rc
+  - ship-p-bionic-builder
+  - create-p-cflinuxfs3-builder-rc
+  - test-p-cflinuxfs3-builder-rc
+  - ship-p-cflinuxfs3-builder
+- name: cflinuxfs3-builder
+  jobs:
+  - create-cflinuxfs3-builder-rc
+  - test-cflinuxfs3-builder-rc
+  - ship-cflinuxfs3-builder
+- name: tiny-builder
+  jobs:
+  - create-tiny-builder-rc
+  - test-tiny-builder-rc
+  - ship-tiny-builder
+- name: bionic-builder
+  jobs:
+  - create-bionic-builder-rc
+  - test-bionic-builder-rc
+  - ship-bionic-builder
+- name: p-bionic-builder
+  jobs:
+  - create-p-bionic-builder-rc
+  - test-p-bionic-builder-rc
+  - ship-p-bionic-builder
+- name: p-cflinuxfs3-builder
+  jobs:
+  - create-p-cflinuxfs3-builder-rc
+  - test-p-cflinuxfs3-builder-rc
+  - ship-p-cflinuxfs3-builder

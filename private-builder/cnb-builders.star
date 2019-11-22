@@ -4,8 +4,8 @@ load("cnb-builders.lib.yml", "source")
 stacks = struct.decode(data.values.stacks)
 all_cnbs = struct.decode(data.values.cnbs)
 
-cnbs = {k:v for (k, v) in all_cnbs.items() if v.get("public")}
-p_cnbs = {k:v for (k, v) in all_cnbs.items() if v.get("private")}
+cnbs = [c for c in all_cnbs if c.get('public', False)]
+p_cnbs = [c for c in all_cnbs if c.get('private', False)]
 
 def make_builder(builder):
   return struct.make_and_bind(builder,
@@ -21,23 +21,17 @@ def make_builder(builder):
   )
 end
 
-def _cnbs(self):
-  cnb = p_cnbs if self.private else cnbs
-  val = [k for (k,v) in cnb.items() if self.stack in v.get("skip_stack")]
+def _cnbs(builder):
+  cnb = p_cnbs if builder.private else cnbs
+  val = ["{}-cnb".format(c['name']) for c in cnb if builder.stack not in c.get('skip_stack', [])]
   return val
 end
 
 def _tags(self):
-  tags = self.stack + " " + stacks.get(self.stack)
-  if self.latest:
-    tags += " latest"
-  end
-  return tags
+  new_name = [stacks.get(self.stack)]
+  tags = [self.stack]
+  tags += new_name if new_name[0] != self.stack else []
+  tags += ["latest"] if self.latest else []
+  
+  return " ".join(tags)
 end
-
-
-#!  def cnb_hash(builder_data)
-#!    all_cnb_hash = builder_data["private"] ? piv_cnbs : cnbs
-#!    cnb_hash = all_cnb_hash.reject{|cnb, data| data.fetch("skip_stack",[]).include? builder_data.fetch("stack")}
-#!    cnb_hash.keys
-#!  end

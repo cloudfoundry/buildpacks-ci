@@ -9,118 +9,119 @@
 
 ---
 
-#! resource-types:
-#!   - name: registry-image-resource
-#!     type: docker-image
-#!     source:
-#!       repository: concourse/registry-image-resource
-#!       tag: latest
-#!
+resource-types:
+  - name: registry-image-resource
+    type: docker-image
+    source:
+      repository: concourse/registry-image-resource
+      tag: latest
+
 resources:
 
-#!   #! Github Repos
-#!   - name: buildpacks-ci
-#!     type: git
-#!     source:
-#!       uri: ((buildpacks-ci-git-uri-public))
-#!       branch: master
-#!
-#!   - name: cnb-builder
-#!     type: git
-#!     source:
-#!       uri: https://github.com/cloudfoundry/cnb-builder
-#!       branch: master
-#!
-#!   - name: p-cnb-builder
-#!     type: git
-#!     source:
-#!       uri: git@github.com:pivotal-cf/p-cnb-builder
-#!       private_key: ((cf-buildpacks-eng-github-ssh-key))
-#!       branch: master
-#!
-#! #@ for cnb in all_cnbs:
-#!   - name: "(@= cnb @)-cnb-release"
-#!     type: git
-#!     check_every: 15m #! to avoid thundering herd of cnb autobumping
-#!     source:
-#!       uri: #@ all_cnbs[cnb]["git_repo"]
-#!       private_key: ((cf-buildpacks-eng-github-ssh-key))
-#!       tag_filter: "v*"
-#! #@ end
+#! Github Repos
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: ((buildpacks-ci-git-uri-public))
+      branch: master
 
-#!   - name: packager
-#!     type: git
-#!     source:
-#!       uri: https://github.com/cloudfoundry/libcfbuildpack
-#!       branch: master
-#!
-#!   - name: pack-release
-#!     type: github-release
-#!     source:
-#!       user: buildpack
-#!       repository: pack
-#!       access_token: ((buildpacks-github-token))
-#!       globs: ['*-linux.tgz']
-#!
-#!   - name: cnb-lifecycle-release
-#!     type: github-release
-#!     source:
-#!       repository: lifecycle
-#!       user: buildpack
-#!       access_token: ((buildpacks-github-token))
-#!
+  - name: cnb-builder
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cnb-builder
+      branch: master
+
+  - name: p-cnb-builder
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/p-cnb-builder
+      private_key: ((cf-buildpacks-eng-github-ssh-key))
+      branch: master
+
+#@ for cnb in all_cnbs:
+  - name: "(@= cnb['name'] @)-cnb-release"
+    type: git
+    check_every: 15m
+    source:
+      uri: #@ cnb["git_repo"]
+      private_key: ((cf-buildpacks-eng-github-ssh-key))
+      tag_filter: "v*"
+#@ end
+
+  - name: packager
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/libcfbuildpack
+      branch: master
+
+  - name: pack-release
+    type: github-release
+    source:
+      user: buildpack
+      repository: pack
+      access_token: ((buildpacks-github-token))
+      globs: ['*-linux.tgz']
+
+  - name: cnb-lifecycle-release
+    type: github-release
+    source:
+      repository: lifecycle
+      user: buildpack
+      access_token: ((buildpacks-github-token))
+
 #! Versions
-#! #@ for builder in builders:
-#!   - name: "(@= builder.version_key @)-version"
-#!     type: semver
-#!     source:
-#!       initial_version: 0.0.1
-#!       bucket: cnb-versions
-#!       key: "builder/(@= builder.version_key @)"
-#!       access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
-#!       secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
-#! #@ end
+#@ for builder in builders:
+  - name: "(@= builder.version_key @)-version"
+    type: semver
+    source:
+      initial_version: 0.0.1
+      bucket: cnb-versions
+      key: "builder/(@= builder.version_key @)"
+      access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+      secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+#@ end
 
 #! Docker Images
-#! #@ for builder in builders:
-#!   - name: "(@= builder.name @)-builder-image"
-#!     type: registry-image
-#!     source: #@ builder.source()
-#!
-#!   - name: "(@= builder.name @)-rc-image"
-#!     type: registry-image
-#!     source:
-#!       repository: gcr.io/cf-buildpacks/builder-rcs
-#!       tag: <%= builder %>
-#!       username: _json_key
-#!       password: ((gcp-service-account-key))
-#! #@ end
+#@ for builder in builders:
+  - name: "(@= builder.name @)-builder-image"
+    type: registry-image
+    source: #@ builder.source()
 
-#! #@ for (stack, tag) in struct.decode(stacks).items():
-#!   #@ for image in ["build", "run"]:
-#!   - name: "(@= stack @)-(@= image @)-cnb-image"
-#!     type: registry-image
-#!     source:
-#!       repository: "cloudfoundry/(@= image @)"
-#!       tag: "(@= tag @)-cnb"
-#!       username: ((buildpacks-docker-username))
-#!       password: ((buildpacks-docker-password))
-#!   #@ end
-#! #@ end
+  - name: "(@= builder.name @)-rc-image"
+    type: registry-image
+    source:
+      repository: gcr.io/cf-buildpacks/builder-rcs
+      tag: #@ builder.tags()
+      username: _json_key
+      password: ((gcp-service-account-key))
+#@ end
 
-#!   - name: ci-image
-#!     type: registry-image
-#!     source:
-#!       repository: cfbuildpacks/ci
-#!       username: ((buildpacks-docker-username))
-#!       password: ((buildpacks-docker-password))
-#!
+#@ for (stack, tag) in struct.decode(stacks).items():
+  #@ for image in ["build", "run"]:
+  - name: "(@= stack @)-(@= image @)-cnb-image"
+    type: registry-image
+    source:
+      repository: "cloudfoundry/(@= image @)"
+      tag: "(@= tag @)-cnb"
+      username: ((buildpacks-docker-username))
+      password: ((buildpacks-docker-password))
+  #@ end
+#@ end
+
+  - name: ci-image
+    type: registry-image
+    source:
+      repository: cfbuildpacks/ci
+      username: ((buildpacks-docker-username))
+      password: ((buildpacks-docker-password))
+
 jobs:
 #@ for builder in builders:
   - name: "create-(@= builder.name @)-builder-rc"
     plan:
       - in_parallel:
         - get: buildpacks-ci
+        - get: ci-image
         - get: packager
         - get: pack
           resource: pack-release
@@ -157,10 +158,8 @@ jobs:
             path: bash
             args:
               - -cl
-              - |
-  #@ for cnb in builder.cnbs():
-              - "cp -r (@= cnb @) sources/(@= cnb @)"
-  #@  end
+                #@ copies = ["cp -r {} sources/{}".format(c,c) for c in builder.cnbs()]
+              - #@ '{}'.format('\n\n'.join(copies))
       - task: create-builder-image
         image: ci-image
         file: buildpacks-ci/tasks/create-builder/task.yml
@@ -196,7 +195,7 @@ jobs:
         file: buildpacks-ci/tasks/test-builder/task.yml
         privileged: true
         params:
-          STACK: #@ builder.stack
+          STACK: #@ builder.name
           REPO: gcr.io/cf-buildpacks/builder-rcs
           RUN_IMAGE: #@ builder.image_params.RUN_IMAGE
 
@@ -211,7 +210,7 @@ jobs:
         resource: "(@= builder.version_key @)-version"
         params:
           bump: final
-          pre: #@ builder.stack
+          pre: #@ builder.name
           pre_without_version: true
       - task: write-tags-list
         image: ci-image
