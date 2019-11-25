@@ -79,12 +79,12 @@ resources: #####################################################################
       product_slug: 'buildpack-extensions'
       copy_metadata: true
 
-  - name: pcf-2-4-gcp-env
+  - name: pcf-lts-gcp-env
     type: pcf-pool
     source:
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
-      pool_name: us_2_4
+      pool_name: us_2_5
     tags: [buildpacks-eng-vsphere]
 
 jobs: ################################################################################################################
@@ -99,7 +99,7 @@ jobs: ##########################################################################
             acquire: true
         - get: stack-auditor
           trigger: true
-        - put: pcf-2-4-gcp-env
+        - put: pcf-lts-gcp-env
           params:
             action: claim
           tags: [buildpacks-eng-vsphere]
@@ -110,16 +110,16 @@ jobs: ##########################################################################
           params:
             ORG: pivotal
           input_mapping:
-            environment: pcf-2-4-gcp-env
+            environment: pcf-lts-gcp-env
         - task: test
           file: buildpacks-ci/tasks/run-plugin-tests/task.yml
         ensure:
           task: delete-cf-space
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
-      - put: pcf-2-4-gcp-env
+      - put: pcf-lts-gcp-env
         params:
           action: unclaim
-          env_file: pcf-2-4-gcp-env/metadata
+          env_file: pcf-lts-gcp-env/metadata
         tags: [buildpacks-eng-vsphere]
     ensure:
       put: plugin-environments
