@@ -11,6 +11,6 @@ if [ ! -z "$RUBYGEM_MIRROR" ]; then
 fi
 
 export BUNDLE_GEMFILE=$PWD/Gemfile
-bundle install --deployment
+bundle install
 bundle cache
 bundle exec rspec spec/
