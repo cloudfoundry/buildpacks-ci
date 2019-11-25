@@ -6,7 +6,6 @@ require 'net/http'
 require 'tmpdir'
 require_relative 'merge-extensions'
 
-
 module Runner
   def run(*args)
     system({ 'DEBIAN_FRONTEND' => 'noninteractive' }, *args)
@@ -379,7 +378,7 @@ end
 
 class Builder
 
-  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, skip_commit = false)
+  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, php_extensions_dir = __dir__, skip_commit = false)
     cnb_list = [
       'org.cloudfoundry.node-engine',
       'org.cloudfoundry.npm',
@@ -599,32 +598,37 @@ class Builder
         raise "Unexpected PHP version #{source_input.version}. Expected 7.X"
       end
 
-      base_extension_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php7-base-extensions.yml")
+      base_extension_file = File.join(php_extensions_dir, 'php7-base-extensions.yml')
       php_extensions = BaseExtensions.new(base_extension_file)
 
-      # figure out extensions file to use
       patch_file = nil
       if source_input.version.start_with?('7.1.')
-        patch_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php71-extensions-patch.yml")
+        patch_file = File.join(php_extensions_dir, 'php71-extensions-patch.yml')
       elsif source_input.version.start_with?('7.2.')
-        patch_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php72-extensions-patch.yml")
+        patch_file = File.join(php_extensions_dir, 'php72-extensions-patch.yml')
       elsif source_input.version.start_with?('7.3.')
-        patch_file = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php73-extensions-patch.yml")
+        patch_file = File.join(php_extensions_dir, 'php73-extensions-patch.yml')
       end
 
       php_extensions.patch!(patch_file) if patch_file
-      output_yml = File.join($buildpacks_ci_dir, 'tasks', 'build-binary-new', "php-final-extensions.yml")
+      output_yml = File.join(php_extensions_dir, 'php-final-extensions.yml')
       php_extensions.write_yml(output_yml)
 
       binary_builder.build(source_input, "--php-extensions-file=#{output_yml}")
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              "#{binary_builder.base_dir}/#{full_name}-#{source_input.version}-linux-x64.tgz",
-              "#{full_name}-#{source_input.version}-linux-x64-#{stack}",
-              'tgz'
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          "#{binary_builder.base_dir}/#{full_name}-#{source_input.version}-linux-x64.tgz",
+          "#{full_name}-#{source_input.version}-linux-x64-#{stack}",
+          'tgz'
+        )
       )
+
+      out_data[:sub_dependencies] = {}
+      extensions = [php_extensions.base_yml['native_modules'], php_extensions.base_yml['extensions']].flatten
+      extensions.sort_by { |e| e['name'].downcase }.each do |extension|
+        out_data[:sub_dependencies][extension['name'].to_sym] = { version: extension['version'] }
+      end
 
     when 'python'
       DependencyBuild.build_python(source_input, stack)

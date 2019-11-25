@@ -99,6 +99,83 @@ describe 'Builder' do
         end
       end
     end
+
+    context 'php' do
+      let(:source_input) { SourceInput.new('php', 'https://fake.com', '7.3.0', nil, 'fake-sha256') }
+      let(:php_extensions_dir) { Dir.mktmpdir('builder_php_extensions') }
+
+      before do
+        File.open(File.join(php_extensions_dir, 'php7-base-extensions.yml'), 'w') do |f|
+          f.puts 'native_modules:'
+          f.puts '- name: dep1'
+          f.puts '  version: 1.0.0'
+          f.puts '- name: bad-dep'
+          f.puts '  version: 1.0.0'
+          f.puts 'extensions:'
+          f.puts '- name: bad-dep'
+          f.puts '  version: 1.0.0'
+          f.puts '- name: dep2'
+          f.puts '  version: 2.0.0'
+        end
+        File.open(File.join(php_extensions_dir, 'php73-extensions-patch.yml'), 'w') do |f|
+          f.puts 'native_modules:'
+          f.puts '  exclusions:'
+          f.puts '  - name: bad-dep'
+          f.puts '  additions:'
+          f.puts '  - name: dep3'
+          f.puts '    version: 3.0.0'
+          f.puts 'extensions:'
+          f.puts '  exclusions:'
+          f.puts '  - name: bad-dep'
+          f.puts '  additions:'
+          f.puts '  - name: dep2'
+          f.puts '    version: 2.2.2'
+          f.puts '  - name: dep4'
+          f.puts '    version: 4.0.0'
+        end
+      end
+
+      after do
+        FileUtils.remove_dir(php_extensions_dir)
+      end
+
+      it 'should build correctly and include module names and versions' do
+        allow(binary_builder).to receive(:base_dir).and_return '/fake-binary-builder'
+        allow(binary_builder).to receive(:build)
+
+        allow(build_input).to receive(:copy_to_build_output)
+        allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
+
+        allow(build_output).to receive(:add_output)
+        allow(build_output).to receive(:commit_outputs)
+
+        allow(artifact_output).to receive(:move_dependency)
+          .and_return(sha256: 'fake-sha256', url: 'fake-url')
+
+        subject.execute(binary_builder, 'cflinuxfs3', source_input, build_input, build_output, artifact_output, php_extensions_dir)
+
+        expect(binary_builder).to have_received(:build).with(source_input, '--php-extensions-file=' + File.join(php_extensions_dir, 'php-final-extensions.yml'))
+
+        expect(artifact_output).to have_received(:move_dependency)
+          .with('php', '/fake-binary-builder/php7-7.3.0-linux-x64.tgz', 'php7-7.3.0-linux-x64-cflinuxfs3', 'tgz')
+
+        expect(build_output).to have_received(:add_output)
+          .with('7.3.0-cflinuxfs3.json',
+                tracker_story_id: 'fake-story-id',
+                version:          '7.3.0',
+                source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
+                sha256:           'fake-sha256',
+                url:              'fake-url',
+                sub_dependencies: {
+                  dep1: { version: '1.0.0' },
+                  dep2: { version: '2.2.2' },
+                  dep3: { version: '3.0.0' },
+                  dep4: { version: '4.0.0' }
+                })
+        expect(build_output).to have_received(:commit_outputs)
+          .with("Build #{source_input.name} - 7.3.0 - cflinuxfs3 [#fake-story-id]")
+      end
+    end
   end
 
   context 'when not using the old binary-builder' do
@@ -426,7 +503,7 @@ describe 'Builder' do
                        .with(source_input)
                        .and_return(['abc', 'fake-sha256'])
 
-      subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, true)
+      subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, '', true)
     end
   end
 end
