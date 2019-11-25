@@ -14,8 +14,7 @@ pushd repo-with-gemfile
   if [ ! -z "$RUBYGEM_MIRROR" ]; then
     bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
   fi
-  BUNDLE_GEMFILE="$GEMFILE_NAME" bundle install --jobs="$(nproc)" --deployment
-  bundle cache
+  BUNDLE_GEMFILE="$GEMFILE_NAME" bundle install --jobs="$(nproc)"
   git add "$GEMFILE_NAME" "$GEMFILE_NAME.lock"
 
   set +e
