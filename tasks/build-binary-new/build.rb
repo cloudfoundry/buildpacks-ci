@@ -25,6 +25,7 @@ def main
     build_input,
     build_output,
     artifact_output,
+    __dir__,
     skip_commit
   )
   p out_data

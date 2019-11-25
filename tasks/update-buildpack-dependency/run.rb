@@ -195,24 +195,35 @@ end
 
 #
 # Special PHP stuff
-# * Each php version in the manifest lists the modules it was built with.
+# * Each php version in the manifest lists the modules and versions it was built with.
 #   Get that list for this version of php.
 if manifest_name == 'php' && manifest['language'] == 'php'
   manifest['dependencies'].each do |dependency|
     if dependency.fetch('name') == 'php' && dependency.fetch('version') == resource_version
-      modules = Dir.mktmpdir do |dir|
+      sub_deps = (builds[total_stacks.last]['sub_dependencies'] || [])
+      modules = []
+      Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
           stack = dependency.fetch('cf_stacks').first
           url = builds[stack]['url']
           `wget --no-verbose #{url} && tar xzf #{File.basename(url)}`
-          Dir['php/lib/php/extensions/no-debug-non-zts-*/*.so'].collect do |file|
+
+          module_names = Dir['php/lib/php/extensions/no-debug-non-zts-*/*.so'].collect do |file|
             File.basename(file, '.so')
           end.sort.reject do |m|
             %w[odbc gnupg].include?(m)
           end
+
+          module_names.each do |module_name|
+            mod = { 'name' => module_name }
+            if sub_deps.fetch(module_name, {})['version'] != '' && sub_deps.fetch(module_name, {})['version'] != 'nil'
+              mod['version'] = sub_deps.fetch(module_name, {})['version']
+            end
+            modules << mod
+          end
         end
       end
-      dependency['modules'] = modules
+      dependency['dependencies'] = modules
     end
   end
 end
@@ -273,11 +284,12 @@ if manifest['language'].downcase == 'r'
         sub_deps = dep["dependencies"]
         (builds[stack]['sub_dependencies'] || []).map do |sub_dep_key, sub_dep_value |
           sub_dep = {
+            'name' => sub_dep_key,
             'version' => sub_dep_value['version'],
             'source' => sub_dep_value['source']['url'],
             'source_sha256' =>  sub_dep_value['source']['sha256']
           }
-          sub_deps.push(sub_dep_key => sub_dep)
+          sub_deps.push(sub_dep)
         end
       end
     end
