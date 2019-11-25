@@ -11,4 +11,4 @@ run:
   path: bash
   args:
     - -c
-    - "cd buildpack && ./bin/check-modules-in-manifest"
+    - "cd buildpack && ./scripts/check-sub-dependencies-in-manifest"
