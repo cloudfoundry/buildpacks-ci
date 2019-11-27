@@ -103,6 +103,7 @@ func (deps Dependencies) CollapseByStack() Dependencies {
 
 	allDeps := Dependencies{}
 	for _, dep := range depsMap {
+		sort.Strings(dep.Stacks)
 		allDeps = append(allDeps, dep)
 	}
 
@@ -137,11 +138,23 @@ func (deps Dependencies) sortDependencies() func(i, j int) bool {
 		secondVersion := semver.MustParse(deps[j].Version)
 
 		if firstVersion.EQ(secondVersion) {
-			return deps[i].Stacks[0] < deps[j].Stacks[0]
+			return compareStacks(deps[i].Stacks, deps[j].Stacks)
 		}
 
 		return firstVersion.LT(secondVersion)
 	}
+}
+
+func compareStacks(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return v < b[i]
+		}
+	}
+	return true
 }
 
 func loadDependenciesFromBinaryBuilds(binaryBuildsPath string, dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
@@ -168,8 +181,11 @@ func (deps Dependencies) containsDependency(dep Dependency) bool {
 }
 
 func (deps Dependencies) findDependency(dep Dependency) (Dependency, bool) {
+	sort.Strings(dep.Stacks)
 	for _, d := range deps {
-		if d.ID == dep.ID && d.Version == dep.Version && d.Stacks[0] == dep.Stacks[0] {
+		sort.Strings(d.Stacks)
+
+		if d.ID == dep.ID && d.Version == dep.Version && compareStacks(dep.Stacks, d.Stacks) {
 			return d, true
 		}
 	}
