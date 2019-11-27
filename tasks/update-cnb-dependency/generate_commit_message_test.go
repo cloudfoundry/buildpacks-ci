@@ -27,14 +27,12 @@ func testGenerateCommitMessage(t *testing.T, when spec.G, it spec.S) {
 			oldDeps := []Dependency{
 				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
 				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "1.0.0"},
-				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "2.0.0"},
-				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "2.0.0"},
+				{ID: "some-id", Stacks: []string{"some-stack-1", "some-stack-2"}, Version: "2.0.0"},
 			}
 			newDeps := []Dependency{
 				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
 				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "1.0.0"},
-				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "2.0.0"},
-				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "2.0.0"},
+				{ID: "some-id", Stacks: []string{"some-stack-2", "some-stack-1"}, Version: "2.0.0"},
 				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "3.0.0"},
 				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "3.0.0"},
 			}
@@ -55,12 +53,10 @@ for stack(s) some-stack-1, some-stack-2 [#123456789]`, commitMessage)
 			oldDeps := []Dependency{
 				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "1.0.0"},
 				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "1.0.0"},
-				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "2.0.0"},
-				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "2.0.0"},
+				{ID: "some-id", Stacks: []string{"some-stack-1", "some-stack-2"}, Version: "2.0.0"},
 			}
 			newDeps := []Dependency{
-				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "2.0.0"},
-				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "2.0.0"},
+				{ID: "some-id", Stacks: []string{"some-stack-2", "some-stack-1"}, Version: "2.0.0"},
 				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "3.0.0"},
 				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "3.0.0"},
 			}
