@@ -81,3 +81,17 @@ story = buildpack_project.create_story(
 )
 
 puts "Created tracker story #{story.id}"
+
+
+# Notes on depen version line additions:
+# General stucture of dependencies is `dep.buildpacks.[].lines[].`
+# eg.
+# ```
+# php:
+#     buildpacks:
+#       php:
+#         lines:
+# ```
+# php:
+# - Deprecations occur 3 years after the date the dep is released
+
