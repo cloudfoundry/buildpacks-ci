@@ -59,15 +59,6 @@ RUN apt-get -qqy update \
   && apt-get -qqy clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Install packages that are specific to ubuntu and not debian
-# Including libssl allows us to build php on this image
-#RUN wget http://cdn-fastly.deb.debian.org/debian/pool/main/i/icu/libicu52_52.1-8+deb8u7_amd64.deb \
-#  && dpkg -i libicu52_52.1-8+deb8u7_amd64.deb \
-#  && rm libicu52_52.1-8+deb8u7_amd64.deb \
-#  && wget http://mirror.nus.edu.sg/Debian/pool/main/o/openssl/libssl1.0.0_1.0.1t-1%2Bdeb8u8_amd64.deb   \
-#  && dpkg -i libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb \
-#	&& rm libssl1.0.0_1.0.1t-1+deb8u8_amd64.deb
-
 ARG RUBY_INSTALL_VERSION=0.7.0
 RUN wget -O ruby-install-$RUBY_INSTALL_VERSION.tar.gz https://github.com/postmodern/ruby-install/archive/v$RUBY_INSTALL_VERSION.tar.gz \
   && tar -xzvf ruby-install-$RUBY_INSTALL_VERSION.tar.gz \
