@@ -206,6 +206,10 @@ extensions:
     version: 5.0.0
     md5: 72a562882b6ea5e3bb25bd68c58707e3
     klass: TidewaysXhprofRecipe
+  - name: solr
+    version: 2.5.0
+    md5: 5034f5d274e2c80b8ac63f601d0beb01
+    klass: PeclRecipe
 
   #Oracle client stuff. Not included unless libs are present
   - name: oci8

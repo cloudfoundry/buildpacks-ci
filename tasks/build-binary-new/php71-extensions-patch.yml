@@ -2,12 +2,6 @@
 extensions:
   exclusions:
     - name: sodium
-  additions:
-    - name: solr
-      version: 2.5.0
-      md5: 5034f5d274e2c80b8ac63f601d0beb01
-      klass: PeclRecipe
-
 native_modules:
   exclusions:
     - name: libsodium

@@ -3,7 +3,6 @@ extensions:
   exclusions:
     - name: sodium
     - name: libz
-    - name: solr
     - name: yaf
     - name: amqp
     - name: tideways
