@@ -111,8 +111,8 @@ extensions:
     md5: 507c30184fde736e924cee20c56df061
     klass: PeclRecipe
   - name: xdebug
-    version: 2.7.2
-    md5: 5d1a8ca3101df93938d283933f256493
+    version: 2.8.1
+    md5: 4170605efa503e1f116db0ab7b020848
     klass: PeclRecipe
   - name: yaf
     version: 3.0.8
