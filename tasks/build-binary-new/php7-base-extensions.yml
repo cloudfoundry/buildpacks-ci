@@ -79,8 +79,8 @@ extensions:
     md5: 8ed9843595c3b183ee79fd76b3039384
     klass: PeclRecipe
   - name: oauth
-    version: 2.0.3
-    md5: 0f0b4756d1a91a062817f22efc4bed62
+    version: 2.0.4
+    md5: ade75f04c172f06d24f99d0b30bccf2c
     klass: PeclRecipe
   - name: odbc
     version: nil
