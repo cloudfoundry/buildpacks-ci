@@ -2,4 +2,7 @@
 extensions:
   exclusions:
     - name: sodium
+    - name: libz
+    - name: yaf
+    - name: amqp
     - name: cassandra
