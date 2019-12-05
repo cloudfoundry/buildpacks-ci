@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"flag"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -18,6 +19,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var update = flag.Bool("update", false, "updates golden files")
+
 func TestUpdateCNBDependencyTask(t *testing.T) {
 	spec.Run(t, "UpdateCNBDependencyTask", testUpdateCNBDependencyTask, spec.Report(report.Terminal{}))
 }
@@ -33,10 +36,15 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 	)
 
 	it.After(func() {
-		expectedGoldenFile, err := ioutil.ReadFile(filepath.Join(filepath.Dir(outputDir), "golden_buildpack.toml"))
+		goldenPath := filepath.Join(filepath.Dir(outputDir), "golden_buildpack.toml")
+		actualBuildpackTOML, err := ioutil.ReadFile(filepath.Join(outputDir, "buildpack.toml"))
 		require.NoError(t, err)
 
-		actualBuildpackTOML, err := ioutil.ReadFile(filepath.Join(outputDir, "buildpack.toml"))
+		if *update {
+			require.NoError(t, ioutil.WriteFile(goldenPath, actualBuildpackTOML, 0644))
+		}
+
+		expectedGoldenFile, err := ioutil.ReadFile(goldenPath)
 		require.NoError(t, err)
 
 		assert.Equal(t, string(expectedGoldenFile), string(actualBuildpackTOML))
@@ -153,20 +161,12 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 					Version:      "2.0.1",
 				},
 				{
-					ID:      "some-dep",
-					Name:    "Some Dep",
-					SHA256:  "sha256-for-bionic-binary-2.1.0",
-					Stacks:  []string{"io.buildpacks.stacks.bionic"},
-					URI:     "https://example.org/some-dep-2.1.0.tgz",
-					Version: "2.1.0",
-				},
-				{
 					ID:           "some-dep",
 					Name:         "Some Dep",
 					SHA256:       "sha256-for-cflinuxfs3-binary-2.1.0",
 					Source:       "https://example.org/some-dep-2.1.0-source.tgz",
 					SourceSHA256: "sha256-for-source-2.1.0",
-					Stacks:       []string{"org.cloudfoundry.stacks.cflinuxfs3"},
+					Stacks:       []string{"io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"},
 					URI:          "https://buildpacks.cloudfoundry.org/dependencies/some-dep/some-dep-2.1.0.linux-amd64-cflinuxfs3-eeeeeeee.tar.gz",
 					Version:      "2.1.0",
 				},
