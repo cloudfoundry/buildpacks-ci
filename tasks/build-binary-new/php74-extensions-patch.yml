@@ -1,0 +1,5 @@
+---
+extensions:
+  exclusions:
+    - name: sodium
+    - name: cassandra
