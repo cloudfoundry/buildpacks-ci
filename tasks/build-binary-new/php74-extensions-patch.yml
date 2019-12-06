@@ -9,3 +9,4 @@ extensions:
     - name: interbase
     - name: recode
     - name: wddx
+    - name: phalcon
