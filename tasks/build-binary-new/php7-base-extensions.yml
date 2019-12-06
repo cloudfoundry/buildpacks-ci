@@ -203,8 +203,8 @@ extensions:
     md5: 7ca0429d4465debb5dad4680825d22b8
     klass: TidewaysXhprofRecipe
   - name: tideways_xhprof
-    version: 5.0.0
-    md5: 72a562882b6ea5e3bb25bd68c58707e3
+    version: 5.0.2
+    md5: 374cf4ff7ba03401a279777abe94815d #curl -sL https://github.com/tideways/php-xhprof-extension/archive/v5.0.2.tar.gz  | md5sum | cut -d ' ' -f 1
     klass: TidewaysXhprofRecipe
   - name: solr
     version: 2.5.0
