@@ -6,3 +6,6 @@ extensions:
     - name: yaf
     - name: amqp
     - name: cassandra
+    - name: interbase
+    - name: recode
+    - name: wddx
