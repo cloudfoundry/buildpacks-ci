@@ -1,6 +1,6 @@
 <%
   require 'yaml'
-  config = YAML.load_file(File.join(__dir__, '..', 'config', 'cnb-builders.yml'))
+  config = YAML.load_file(File.join(__dir__, '..', 'config', 'cnb-builder.yml'))
 
   stacks = config['stacks']
   builders = config['builders']
@@ -172,6 +172,9 @@ jobs:
           params: {pre: "rc"}
           resource: <%= builder_data["version-key"] %>-version
         - get: packager
+        - get: v2-release-candidate
+          trigger: true
+          passed: [create-rc]
         - get: lifecycle # use lifecycle version in order.toml instead?
           resource: cnb-lifecycle-release
           trigger: true
@@ -292,8 +295,13 @@ jobs:
             <% end %>
           - get: env-repo
           - get: v2-release-candidate
+            <% if language == "dotnet-core" %>
+            passed: <%= tested_stacks %>
             trigger: true
+            <% else %>
             passed: [create-rc]
+            trigger: true
+            <% end %>
       - task: create-cf-space
         image: ci-image
         file: buildpacks-ci/tasks/create-cf-space/task.yml
