@@ -180,6 +180,8 @@ if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
     update_default = true
   when /^7.3/
     varname = 'PHP_73_LATEST'
+  when /^7.4/
+    varname = 'PHP_74_LATEST'
   else
     puts "Unexpected version #{resource_version} is not in known version lines."
     exit 1
