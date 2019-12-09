@@ -100,7 +100,6 @@ cnbs:
   dotnet-core:
     git_repo: "https://github.com/cloudfoundry/dotnet-core-cnb"
     skip_stack:
-      - "bionic"
       - "tiny"
   archiveexpanding:
     git_repo: "https://github.com/cloudfoundry/archive-expanding-cnb"
