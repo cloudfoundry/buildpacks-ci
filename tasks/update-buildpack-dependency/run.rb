@@ -50,7 +50,7 @@ builds = {}
 version = ''
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
-  if !deprecation_date && !deprecation_link && version_line != 'latest'
+  if deprecation_date && deprecation_link && version_line != 'latest'
     dependency_deprecation_date = {
       'version_line' => version_line.downcase,
       'name' => manifest_name,
