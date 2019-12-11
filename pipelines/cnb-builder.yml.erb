@@ -113,11 +113,19 @@ resources:
       username: ((buildpacks-docker-username))
       password: ((buildpacks-docker-password))
 
+  - name: sunday-night
+    type: cron
+    source:
+      expression: 0 18 * * 0
+      location: {{current-timezone}}
+
 jobs:
 <% builders.each do |builder, builder_data| %>
   - name: create-<%= builder %>-builder-rc
     plan:
       - in_parallel:
+        - get: sunday-night
+          trigger: true
         - get: buildpacks-ci
         - get: ci-image
         - get: packager
@@ -176,17 +184,21 @@ jobs:
 
   - name: test-<%= builder %>-builder-rc
     plan:
-      - get: buildpacks-ci
-      - get: ci-image
-      - get: builder-image
-        resource: <%= builder %>-rc-image
-        trigger: true
-        passed: [create-<%= builder %>-builder-rc]
-        params:
-          format: oci
-      - get: pack
-        resource: pack-release
-      - get: cnb-builder
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: ci-image
+        - get: version
+          resource: <%= builder_data['version-key'] %>-version
+          passed: [create-<%= builder %>-builder-rc]
+        - get: builder-image
+          resource: <%= builder %>-rc-image
+          trigger: true
+          passed: [create-<%= builder %>-builder-rc]
+          params:
+            format: oci
+        - get: pack
+          resource: pack-release
+        - get: cnb-builder
       - task: smoke-test-builder
         image: ci-image
         file: buildpacks-ci/tasks/test-builder/task.yml
@@ -195,6 +207,14 @@ jobs:
           STACK: <%= builder %>
           REPO: gcr.io/cf-buildpacks/builder-rcs
           RUN_IMAGE: <%= builder_data.fetch('builder-image-params', {}).fetch('RUN_IMAGE') %> # Why do we need this?
+      - task: builder-release-story
+        image: ci-image
+        file: buildpacks-ci/tasks/builder-release-story/task.yml
+        params:
+          GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+          TAG: <%= builder %>
+          TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
+          TRACKER_PROJECT_ID: ((cf-buildpacks-rel-eng-tracker-id))
 
   - name: ship-<%= builder %>-builder
     plan:
@@ -205,6 +225,7 @@ jobs:
           format: oci
       - get: version
         resource: <%= builder_data['version-key'] %>-version
+        passed: [test-<%= builder %>-builder-rc]
         params:
           bump: final
           pre: <%= builder %>
