@@ -11,12 +11,11 @@
   end
 %>
 ---
-resource-types:
-  - name: registry-image-resource
+resource_types:
+  - name: cron
     type: docker-image
     source:
-      repository: concourse/registry-image-resource
-      tag: latest
+      repository: cfbuildpacks/cron-resource
 
 resources:
   # Github Repos
