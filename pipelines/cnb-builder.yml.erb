@@ -218,6 +218,7 @@ jobs:
 
   - name: ship-<%= builder %>-builder
     plan:
+      - get: ci-image
       - get: buildpacks-ci
       - get: <%= builder %>-rc-image
         passed: [test-<%= builder %>-builder-rc]
