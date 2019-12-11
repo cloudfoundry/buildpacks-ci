@@ -12,15 +12,20 @@ generate_diff() {
   gcloud --no-user-output-enabled auth activate-service-account --key-file <(echo "$GCP_SERVICE_ACCOUNT_KEY")
   gcloud --no-user-output-enabled --quiet auth configure-docker
 
-  released_cnb_details="$(./pack/pack --no-color inspect-builder "cloudfoundry/cnb:$TAG" | grep -v 'Cannot connect to the Docker daemon')"
-  rc_cnb_details="$(./pack/pack --no-color inspect-builder "gcr.io/cf-buildpacks/builder-rcs:${version}-${TAG}" | grep -v 'Cannot connect to the Docker daemon')"
-
   set +e
-  diff="$(diff -u <(echo "$released_cnb_details") <(echo "$rc_cnb_details") | tail -n +3)"
+  diff="$(diff -u <(get_cnb_names "cloudfoundry/cnb:$TAG") <(get_cnb_names "gcr.io/cf-buildpacks/builder-rcs:${version}-${TAG}") | tail -n +3)"
   set -e
 
   >&2 echo -e "Diff:\n$diff"
   echo "$diff"
+}
+
+get_cnb_names() {
+  ./pack/pack --no-color \
+    inspect-builder "$1" \
+    | sed -n '/^Buildpacks:$/,/^$/p' \
+    | sed '1,2d;$d' \
+    | sort
 }
 
 create_or_get_story() {
