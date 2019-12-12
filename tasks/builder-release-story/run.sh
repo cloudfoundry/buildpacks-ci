@@ -17,7 +17,10 @@ generate_diff() {
   gcloud --no-user-output-enabled --quiet auth configure-docker
 
   set +e
-  diff="$(diff -u <(get_cnb_names "$last_released_builder") <(get_cnb_names "$release_candidate") | tail -n +3)"
+  buildpacks_diff="$(diff -u <(get_cnb_names "$last_released_builder") <(get_cnb_names "$release_candidate") | tail -n +3)"
+  groups_diff="$(diff -u <(get_detection_order "$last_released_builder") <(get_detection_order "$release_candidate") | tail -n +3)"
+
+  printf -v diff "%s\n%s" "$buildpacks_diff" "$groups_diff"
   if [[ -z $diff ]]; then
     diff="No changes. Nothing to do."
   fi
@@ -33,6 +36,13 @@ get_cnb_names() {
     | sed -n '/^Buildpacks:$/,/^$/p' \
     | sed '1,2d;$d' \
     | sort
+}
+
+get_detection_order() {
+  ./pack/pack --no-color \
+    inspect-builder "$1" \
+    | grep -v "ERROR: inspecting local image" \
+    | sed -n '/^Detection Order:$/,/^$/p'
 }
 
 create_or_get_story() {
