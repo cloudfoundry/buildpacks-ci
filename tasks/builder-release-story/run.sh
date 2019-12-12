@@ -3,9 +3,13 @@
 set -euo pipefail
 
 generate_diff() {
-  >&2 echo "Generating diff"
-
   version="$(cat version/number)"
+  last_released_builder="cloudfoundry/cnb:$TAG"
+  release_candidate="gcr.io/cf-buildpacks/builder-rcs:${version}-${TAG}"
+
+  >&2 echo "Generating diff"
+  >&2 echo "  Current: $last_released_builder"
+  >&2 echo "  RC: $release_candidate"
 
   tar xf pack/*-linux.tgz -C pack
 
@@ -13,7 +17,10 @@ generate_diff() {
   gcloud --no-user-output-enabled --quiet auth configure-docker
 
   set +e
-  diff="$(diff -u <(get_cnb_names "cloudfoundry/cnb:$TAG") <(get_cnb_names "gcr.io/cf-buildpacks/builder-rcs:${version}-${TAG}") | tail -n +3)"
+  diff="$(diff -u <(get_cnb_names "$last_released_builder") <(get_cnb_names "$release_candidate") | tail -n +3)"
+  if [[ -z $diff ]]; then
+    diff="No changes. Nothing to do."
+  fi
   set -e
 
   >&2 echo -e "Diff:\n$diff"
@@ -84,7 +91,9 @@ update_story() {
 
 main() {
   diff="$(generate_diff)"
+  printf "\n"
   story_id="$(create_or_get_story)"
+  printf "\n"
   update_story "$story_id" "$diff"
 }
 
