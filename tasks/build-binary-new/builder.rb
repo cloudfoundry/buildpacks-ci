@@ -285,7 +285,7 @@ module DependencyBuild
   end
 
   def build_dotnet_sdk(source_input)
-    prune_dotnet_files(source_input, ["./shared/*"])
+    prune_dotnet_files(source_input, ["./shared/*"], true)
   end
 
   def build_dotnet_runtime(source_input)
@@ -296,18 +296,30 @@ module DependencyBuild
     prune_dotnet_files(source_input, ["./dotnet", "./shared/Microsoft.NETCore.App"])
   end
 
-  def prune_dotnet_files(source_input, files_to_exclude)
+  def prune_dotnet_files(source_input, files_to_exclude, write_runtime = false)
     source_file = File.expand_path(Dir.glob('source/*.tar.gz').first)
     adjusted_file = "/tmp/#{source_input.name}.#{source_input.version}.linux-amd64.tar.xz"
     exclude_list = files_to_exclude.map{ |file| "--exclude=#{file}"}.join(" ")
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         `tar -xf #{source_file} #{exclude_list}`
+        write_runtime_version_file(dir) if write_runtime
         # Use xz to compress smaller than gzip
         `tar -Jcf #{adjusted_file} ./*`
       end
     end
     adjusted_file
+  end
+
+  def write_runtime_version_file(sdk_dir)
+    Dir.chdir(sdk_dir) do
+      runtime_glob = File.join("shared", "Microsoft.NETCore.App", "*")
+      version = Pathname.new(Dir[runtime_glob].last()).basename.to_s
+
+      File.open("RuntimeVersion.txt", "w") do |f|
+        f.write(version)
+      end
+    end
   end
 
   def build_openresty(source_input)
