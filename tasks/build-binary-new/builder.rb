@@ -304,7 +304,7 @@ module DependencyBuild
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         `tar -xf #{source_file} #{exclude_list}`
-        write_runtime_version_file(dir) if write_runtime
+        write_runtime_version_file(source_file, dir) if write_runtime
         # Use xz to compress smaller than gzip
         `tar -Jcf #{adjusted_file} ./*`
       end
@@ -312,12 +312,14 @@ module DependencyBuild
     adjusted_file
   end
 
-  def write_runtime_version_file(sdk_dir)
+  def write_runtime_version_file(source_file, sdk_dir)
     Dir.chdir(sdk_dir) do
-      runtime_glob = File.join("shared", "Microsoft.NETCore.App", "*")
-      version = Pathname.new(Dir[runtime_glob].last()).basename.to_s
+      runtime_glob = './shared/Microsoft.NETCore.App/'
+      output = `tar tf #{source_file} #{runtime_glob}`
+      files = output.split("\n").select {|line| line.end_with? '/' }
+      version = Pathname.new(files.last).basename.to_s
 
-      File.open("RuntimeVersion.txt", "w") do |f|
+      File.open('RuntimeVersion.txt', 'w') do |f|
         f.write(version)
       end
     end
