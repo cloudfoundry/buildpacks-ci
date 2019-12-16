@@ -21,7 +21,7 @@ generate_diff() {
   groups_diff="$(diff -u <(get_detection_order "$last_released_builder") <(get_detection_order "$release_candidate") | tail -n +3)"
 
   printf -v diff "%s\n%s" "$buildpacks_diff" "$groups_diff"
-  if [[ -z $diff ]]; then
+  if [[ -z $(echo "$diff" | tr -d '[:space:]' ) ]]; then
     diff="No changes. Nothing to do."
   fi
   set -e
