@@ -1,6 +1,7 @@
 require 'json'
 require 'yaml'
 require 'open-uri'
+require 'pathname'
 require 'digest'
 require 'net/http'
 require 'tmpdir'
