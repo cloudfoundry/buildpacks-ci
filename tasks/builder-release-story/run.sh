@@ -86,6 +86,7 @@ update_story() {
 
   >&2 echo "Converting description to JSON-wrapped markdown"
 
+  # shellcheck disable=SC2016
   markdown_description="$(printf '```diff\n%s\n```' "$description")"
   jq -n --arg description "$markdown_description" '{description: $description}' > story-data
 
