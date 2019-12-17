@@ -463,6 +463,9 @@ dependencies:
         shim: true
         lines:
           - line: latest
+      dotnet-core-cnb:
+        lines:
+          - line: latest
     source_type: github_releases
     source_params:
       - 'repo: cloudfoundry/node-engine-cnb'
