@@ -532,7 +532,7 @@ class Builder
           )
       )
 
-    when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower', 'lifecycle' # TODO : fix me to use artifact_output
+    when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower', 'icu', 'lifecycle'
       results = Sha.check_sha(source_input)
       ext = File.basename(source_input.url)[/\.((zip|tar\.gz|tar\.xz|tgz))$/, 1]
       File.write('artifacts/temp_file', results[0])

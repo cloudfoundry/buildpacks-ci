@@ -216,6 +216,17 @@ dependencies:
       - 'fetch_source: true'
     any_stack: true
     versions_to_keep: 2
+  icu:
+    buildpacks:
+      icu-cnb:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: unicode-org/icu'
+      - 'extension: -Ubuntu18.04-x64.tgz'
+    any_stack: true
+    versions_to_keep: 2
   jruby:
     buildpacks:
       ruby:
