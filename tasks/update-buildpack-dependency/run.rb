@@ -9,6 +9,10 @@ require_relative './php_manifest'
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
+def is_null(value)
+  value.nil? || value.empty? || value.downcase == 'null'
+end
+
 config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/config/dependency-builds.yml'))
 
 BUILD_STACKS = config['build_stacks']
@@ -50,7 +54,7 @@ builds = {}
 version = ''
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
-  if deprecation_date && deprecation_link && version_line != 'latest'
+  if !is_null(deprecation_date) && !is_null(deprecation_link) && version_line != 'latest'
     dependency_deprecation_date = {
       'version_line' => version_line.downcase,
       'name' => manifest_name,
@@ -58,7 +62,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
       'link' => deprecation_link,
     }
 
-    if deprecation_match.nil? && deprecation_match.empty? && deprecation_match.downcase == 'null'
+    if !is_null(deprecation_match)
       dependency_deprecation_date['match'] = deprecation_match
     end
 
