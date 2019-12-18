@@ -24,7 +24,7 @@ old_manifest_deps = {}
 latest_release_path = ReleaseArtifacts.download_latest_release(repo)
 if File.exist? latest_release_path
   old_manifest = ReleaseArtifacts.open_manifest_from_zip(latest_release_path)
-  old_manifest_deps = ReleaseArtifacts.reduce_manifest(old_manifest)
+  old_manifest_deps = ReleaseArtifacts.reduce_manifest(old_manifest) if old_manifest != ""
 end
 
 # below path is needed for the shimmed buildpack
