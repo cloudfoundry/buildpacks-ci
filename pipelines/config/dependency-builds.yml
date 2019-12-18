@@ -693,6 +693,13 @@ dependencies:
         removal_strategy: keep_latest_released
     source_type: php
     versions_to_keep: 2
+  pip:
+    buildpacks:
+      pip-cnb:
+        lines:
+          - line: latest
+    source_type: pypi
+    any_stack: true
   pipenv:
     buildpacks:
       python:
