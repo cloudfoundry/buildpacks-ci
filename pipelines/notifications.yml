@@ -267,6 +267,6 @@ jobs:
       - task: check-for-latest-php-module-versions
         file: buildpacks-ci/tasks/check-for-latest-php-module-versions/task.yml
         params:
-            TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
+            TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
