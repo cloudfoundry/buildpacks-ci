@@ -390,6 +390,28 @@ module Sha
   end
 end
 
+module Archive
+  def strip_top_level_directory_from_tar(filename)
+    Dir.mktmpdir do |dir|
+      Runner.run('tar', '-C', dir, '--strip-components', '1', '-xf', filename)
+      Runner.run('tar', '-C', dir, '-czf', filename, '.')
+    end
+  end
+
+  def strip_top_level_directory_from_zip(filename, destination)
+    Dir.mktmpdir do |dir|
+      Runner.run('unzip', '-d', dir, filename)
+
+      subdir = Dir.glob(File.join(dir, '*')).first
+      Dir.chdir(subdir) do
+        zipfile = File.join(destination, filename)
+        File.delete(zipfile)
+        Runner.run('zip', '-r', zipfile, '.')
+      end
+    end
+  end
+end
+
 
 class Builder
 
@@ -443,7 +465,6 @@ class Builder
               source_input.name,
               "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}.tgz",
               "#{source_input.name}-#{source_input.version}-#{stack}",
-              'tgz'
           )
       )
 
@@ -454,7 +475,6 @@ class Builder
               source_input.name,
               "#{binary_builder.base_dir}/hwc-#{source_input.version}-windows-amd64.zip",
               "hwc-#{source_input.version}-windows-amd64",
-              'zip'
           )
       )
 
@@ -465,41 +485,49 @@ class Builder
               source_input.name,
               "#{binary_builder.base_dir}/#{source_input.name}-v#{source_input.version}-linux-x64.tgz",
               "#{source_input.name}-v#{source_input.version}-linux-x64-#{stack}",
-              'tgz'
           )
       )
 
     when 'go'
       binary_builder.build(source_input)
+
+      filename = "#{binary_builder.base_dir}/go#{source_input.version}.linux-amd64.tar.gz"
+      Archive.strip_top_level_directory_from_tar(filename)
+
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
-              "#{binary_builder.base_dir}/go#{source_input.version}.linux-amd64.tar.gz",
+              filename,
               "go#{source_input.version}.linux-amd64-#{stack}",
-              'tar.gz'
           )
       )
 
     when 'node', 'httpd'
       binary_builder.build(source_input)
+
+      filename = "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}-linux-x64.tgz"
+      Archive.strip_top_level_directory_from_tar(filename)
+
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
-              "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}-linux-x64.tgz",
+              filename,
               "#{source_input.name}-#{source_input.version}-linux-x64-#{stack}",
-              'tgz'
           )
       )
 
     when 'nginx-static'
       source_pgp = 'not yet implemented'
       DependencyBuild.build_nginx(source_input, stack, true)
+
+      filename = "artifacts/nginx-#{source_input.version}.tgz"
+      Archive.strip_top_level_directory_from_tar(filename)
+
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
-              "artifacts/nginx-#{source_input.version}.tgz",
+              filename,
               "nginx-#{source_input.version}-linux-x64-#{stack}",
-              'tgz'
           )
       )
       out_data[:source_pgp] = source_pgp
@@ -528,21 +556,49 @@ class Builder
               source_input.name,
               "artifacts/#{source_input.name}.tgz",
               "#{source_input.name}-#{source_input.version}-#{stack}",
-              "tgz"
           )
       )
 
-    when 'setuptools', 'rubygems', 'yarn', 'pip', 'bower', 'icu', 'lifecycle'
+    when 'setuptools'
       results = Sha.check_sha(source_input)
-      ext = File.basename(source_input.url)[/\.((zip|tar\.gz|tar\.xz|tgz))$/, 1]
-      File.write('artifacts/temp_file', results[0])
+      filename = 'artifacts/temp_file.zip'
+      File.write(filename, results[0])
+
+      Archive.strip_top_level_directory_from_zip(filename, Dir.pwd)
 
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
-              'artifacts/temp_file',
+              filename,
               "#{source_input.name}-#{source_input.version}-#{stack}",
-              ext
+          )
+      )
+
+    when 'rubygems', 'yarn', 'pip', 'bower', 'icu'
+      results = Sha.check_sha(source_input)
+      filename = 'artifacts/temp_file.tgz'
+      File.write(filename, results[0])
+
+      Archive.strip_top_level_directory_from_tar(filename)
+
+      out_data.merge!(
+          artifact_output.move_dependency(
+              source_input.name,
+              filename,
+              "#{source_input.name}-#{source_input.version}-#{stack}",
+          )
+      )
+
+    when 'lifecycle'
+      results = Sha.check_sha(source_input)
+      filename = 'artifacts/temp_file.tgz'
+      File.write(filename, results[0])
+
+      out_data.merge!(
+          artifact_output.move_dependency(
+              source_input.name,
+              filename,
+              "#{source_input.name}-#{source_input.version}-#{stack}",
           )
       )
 
@@ -552,7 +608,6 @@ class Builder
               source_input.name,
               'source/composer.phar',
               "#{source_input.name}-#{source_input.version}",
-              'phar'
           )
       )
 
@@ -568,7 +623,6 @@ class Builder
               source_input.name,
               "#{binary_builder.base_dir}/ruby-#{source_input.version}-linux-x64.tgz",
               "#{source_input.name}-#{source_input.version}-linux-x64-#{stack}",
-              'tgz'
           )
       )
 
@@ -601,7 +655,6 @@ class Builder
               source_input.name,
               "#{binary_builder.base_dir}/#{source_input.name}-#{full_version}-linux-x64.tgz",
               "#{source_input.name}-#{full_version}-linux-x64-#{stack}",
-              'tgz'
           )
       )
 
@@ -632,12 +685,15 @@ class Builder
       php_extensions.write_yml(output_yml)
 
       binary_builder.build(source_input, "--php-extensions-file=#{output_yml}")
+
+      filename = "#{binary_builder.base_dir}/#{full_name}-#{source_input.version}-linux-x64.tgz"
+      Archive.strip_top_level_directory_from_tar(filename)
+
       out_data.merge!(
         artifact_output.move_dependency(
           source_input.name,
-          "#{binary_builder.base_dir}/#{full_name}-#{source_input.version}-linux-x64.tgz",
+          filename,
           "#{full_name}-#{source_input.version}-linux-x64-#{stack}",
-          'tgz'
         )
       )
 
@@ -654,7 +710,6 @@ class Builder
               'python',
               "artifacts/python-#{source_input.version}.tgz",
               "python-#{source_input.version}-linux-x64-#{stack}",
-              'tgz'
           )
       )
 
@@ -665,7 +720,6 @@ class Builder
               source_input.name,
               old_file_path,
               "#{source_input.name}-v#{source_input.version}-#{stack}",
-              'tgz'
           )
       )
 
@@ -676,7 +730,6 @@ class Builder
               source_input.name,
               old_file_path,
               "#{source_input.name}-#{source_input.version}-#{stack}",
-              'tar.gz'
           )
       )
 
@@ -687,7 +740,6 @@ class Builder
               source_input.name,
               old_file_path,
               "#{source_input.name}-#{source_input.version}-#{stack}",
-              'tar.gz'
           )
       )
 
@@ -704,7 +756,6 @@ class Builder
               source_input.name,
               "artifacts/#{source_input.name}-v#{source_input.version}.tgz",
               "#{source_input.name}-v#{source_input.version}-#{stack}",
-              'tgz'
           )
       )
       out_data[:git_commit_sha] = source_sha
@@ -717,12 +768,15 @@ class Builder
     when 'nginx'
       source_pgp = 'not yet implemented'
       DependencyBuild.build_nginx(source_input, stack, false)
+
+      filename = "artifacts/#{source_input.name}-#{source_input.version}.tgz"
+      Archive.strip_top_level_directory_from_tar(filename)
+
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
-              "artifacts/#{source_input.name}-#{source_input.version}.tgz",
+              filename,
               "#{source_input.name}-#{source_input.version}-linux-x64-#{stack}",
-              'tgz'
           )
       )
       out_data[:source_pgp] = source_pgp
@@ -734,7 +788,6 @@ class Builder
               source_input.name,
               old_file_path,
               "#{source_input.name}.#{source_input.version}.linux-amd64-#{stack}",
-              'tar.xz'
           )
       )
 
@@ -745,7 +798,6 @@ class Builder
               source_input.name,
               old_file_path,
               "#{source_input.name}.#{source_input.version}.linux-amd64-#{stack}",
-              'tar.xz'
           )
       )
 
@@ -756,7 +808,6 @@ class Builder
               source_input.name,
               old_file_path,
               "#{source_input.name}.#{source_input.version}.linux-amd64-#{stack}",
-              'tar.xz'
           )
       )
 
@@ -768,7 +819,6 @@ class Builder
               source_input.name,
               "artifacts/#{source_input.name}-#{source_input.version}.tgz",
               "#{source_input.name}-#{source_input.version}-linux-x64-#{stack}",
-              'tgz'
           )
       )
       out_data[:source_pgp] = source_pgp
