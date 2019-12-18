@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"sort"
 	"testing"
 
 	. "github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency"
@@ -249,6 +250,60 @@ func testDependencies(t *testing.T, when spec.G, it spec.S) {
 
 				newDeps := originalDeps.CollapseByStack()
 				assert.Equal(t, collapsedDeps, newDeps)
+			})
+		})
+	})
+
+	when.Focus("SortDependencies", func() {
+		it("sorts by name, then version, then stacks", func() {
+			deps := Dependencies{
+				{ID: "some-id-2", Version: "2.0.0", Stacks: []string{"some-stack-2"}},
+				{ID: "some-id-1", Version: "2.0.0", Stacks: []string{"some-stack-2"}},
+				{ID: "some-id-2", Version: "1.0.0", Stacks: []string{"some-stack-2"}},
+				{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-2"}},
+				{ID: "some-id-2", Version: "2.0.0", Stacks: []string{"some-stack-1"}},
+				{ID: "some-id-1", Version: "2.0.0", Stacks: []string{"some-stack-1"}},
+				{ID: "some-id-2", Version: "1.0.0", Stacks: []string{"some-stack-1"}},
+				{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-1"}},
+			}
+			sortedDeps := Dependencies{
+				{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-1"}},
+				{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-2"}},
+				{ID: "some-id-1", Version: "2.0.0", Stacks: []string{"some-stack-1"}},
+				{ID: "some-id-1", Version: "2.0.0", Stacks: []string{"some-stack-2"}},
+				{ID: "some-id-2", Version: "1.0.0", Stacks: []string{"some-stack-1"}},
+				{ID: "some-id-2", Version: "1.0.0", Stacks: []string{"some-stack-2"}},
+				{ID: "some-id-2", Version: "2.0.0", Stacks: []string{"some-stack-1"}},
+				{ID: "some-id-2", Version: "2.0.0", Stacks: []string{"some-stack-2"}},
+			}
+
+			sort.Slice(deps, deps.SortDependencies())
+
+			assert.Equal(t, sortedDeps, deps)
+		})
+
+		when("dependencies have multiple stacks", func() {
+			it("sorts stacks alphabetically, with fewer stacks being sorted first", func() {
+				deps := Dependencies{
+					{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-3"}},
+					{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-1", "some-stack-2", "some-stack-3"}},
+					{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-2"}},
+					{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-1", "some-stack-2"}},
+					{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-1", "some-stack-3"}},
+					{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-1"}},
+				}
+				sortedDeps := Dependencies{
+					{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-1"}},
+					{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-1", "some-stack-2"}},
+					{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-1", "some-stack-2", "some-stack-3"}},
+					{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-1", "some-stack-3"}},
+					{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-2"}},
+					{ID: "some-id-1", Version: "1.0.0", Stacks: []string{"some-stack-3"}},
+				}
+
+				sort.Slice(deps, deps.SortDependencies())
+
+				assert.Equal(t, sortedDeps, deps)
 			})
 		})
 	})
