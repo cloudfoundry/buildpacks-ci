@@ -72,6 +72,9 @@ describe 'Builder' do
           allow(Sha).to receive(:get_sha_from_text_file)
           expect(Sha).to receive(:get_sha).and_return('some-bogus-sha256').at_most(1).times
 
+          allow(Archive).to receive(:strip_top_level_directory_from_tar)
+          allow(Archive).to receive(:strip_top_level_directory_from_zip)
+
           allow(build_output).to receive(:add_output)
             .with("#{input.version}-bionic.json", any_args)
 
@@ -92,7 +95,7 @@ describe 'Builder' do
 
         it 'should build correctly' do
           expect(artifact_output).to receive(:move_dependency)
-            .with(input.dep, output.old_file_path, output.prefix, output.extension)
+            .with(input.dep, output.old_file_path, output.prefix)
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
@@ -152,12 +155,14 @@ describe 'Builder' do
         allow(artifact_output).to receive(:move_dependency)
           .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
+        allow(Archive).to receive(:strip_top_level_directory_from_tar)
+
         subject.execute(binary_builder, 'cflinuxfs3', source_input, build_input, build_output, artifact_output, php_extensions_dir)
 
         expect(binary_builder).to have_received(:build).with(source_input, '--php-extensions-file=' + File.join(php_extensions_dir, 'php-final-extensions.yml'))
 
         expect(artifact_output).to have_received(:move_dependency)
-          .with('php', '/fake-binary-builder/php7-7.3.0-linux-x64.tgz', 'php7-7.3.0-linux-x64-cflinuxfs3', 'tgz')
+          .with('php', '/fake-binary-builder/php7-7.3.0-linux-x64.tgz', 'php7-7.3.0-linux-x64-cflinuxfs3')
 
         expect(build_output).to have_received(:add_output)
           .with('7.3.0-cflinuxfs3.json',
@@ -174,6 +179,8 @@ describe 'Builder' do
                 })
         expect(build_output).to have_received(:commit_outputs)
           .with("Build #{source_input.name} - 7.3.0 - cflinuxfs3 [#fake-story-id]")
+
+        expect(Archive).to have_received(:strip_top_level_directory_from_tar).with('/fake-binary-builder/php7-7.3.0-linux-x64.tgz')
       end
     end
   end
@@ -241,8 +248,11 @@ describe 'Builder' do
             .and_return 'fake-source-sha-123'
 
           expect(artifact_output).to receive(:move_dependency)
-            .with('nginx', 'artifacts/nginx-1.0.2.tgz', 'nginx-1.0.2-linux-x64-cflinuxfs2', 'tgz')
+            .with('nginx', 'artifacts/nginx-1.0.2.tgz', 'nginx-1.0.2-linux-x64-cflinuxfs2')
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
+
+          expect(Archive).to receive(:strip_top_level_directory_from_tar)
+            .with('artifacts/nginx-1.0.2.tgz')
 
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
         end
@@ -257,8 +267,11 @@ describe 'Builder' do
                                          .and_return 'fake-source-sha-123'
 
           expect(artifact_output).to receive(:move_dependency)
-                                         .with('nginx-static', 'artifacts/nginx-1.0.2.tgz', 'nginx-1.0.2-linux-x64-cflinuxfs2', 'tgz')
+                                         .with('nginx-static', 'artifacts/nginx-1.0.2.tgz', 'nginx-1.0.2-linux-x64-cflinuxfs2')
                                          .and_return(sha256: 'fake-sha256', url: 'fake-url')
+
+          expect(Archive).to receive(:strip_top_level_directory_from_tar)
+            .with('artifacts/nginx-1.0.2.tgz')
 
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
         end
@@ -291,7 +304,7 @@ describe 'Builder' do
                                          .and_return 'fake-source-sha-123'
 
           expect(artifact_output).to receive(:move_dependency)
-                                         .with('python', 'artifacts/python-1.0.2.tgz', 'python-1.0.2-linux-x64-cflinuxfs3', 'tgz')
+                                         .with('python', 'artifacts/python-1.0.2.tgz', 'python-1.0.2-linux-x64-cflinuxfs3')
                                          .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
           subject.execute(binary_builder, 'cflinuxfs3', source_input, build_input, build_output, artifact_output)
@@ -320,7 +333,7 @@ describe 'Builder' do
 
         it 'should build correctly' do
           expect(artifact_output).to receive(:move_dependency)
-            .with('composer', 'source/composer.phar', 'composer-1.0.2', 'phar')
+            .with('composer', 'source/composer.phar', 'composer-1.0.2')
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
@@ -336,7 +349,7 @@ describe 'Builder' do
             .and_return '/build-dir/fake-pipenv-1234.tar.gz'
 
           expect(artifact_output).to receive(:move_dependency)
-            .with('pipenv', '/build-dir/fake-pipenv-1234.tar.gz', 'pipenv-v1.0.2-cflinuxfs2', 'tgz')
+            .with('pipenv', '/build-dir/fake-pipenv-1234.tar.gz', 'pipenv-v1.0.2-cflinuxfs2')
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
@@ -352,7 +365,7 @@ describe 'Builder' do
             .and_return '/build-dir/fake-libunwind-1234.tar.gz'
 
           expect(artifact_output).to receive(:move_dependency)
-            .with('libunwind', '/build-dir/fake-libunwind-1234.tar.gz', 'libunwind-1.0.2-cflinuxfs2', 'tar.gz')
+            .with('libunwind', '/build-dir/fake-libunwind-1234.tar.gz', 'libunwind-1.0.2-cflinuxfs2')
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
@@ -368,7 +381,7 @@ describe 'Builder' do
                                        .and_return '/tmp/dotnet-sdk.1.0.2.linux-amd64.tar.xz'
 
           expect(artifact_output).to receive(:move_dependency)
-                                       .with('dotnet-sdk', '/tmp/dotnet-sdk.1.0.2.linux-amd64.tar.xz', 'dotnet-sdk.1.0.2.linux-amd64-cflinuxfs2', 'tar.xz')
+                                       .with('dotnet-sdk', '/tmp/dotnet-sdk.1.0.2.linux-amd64.tar.xz', 'dotnet-sdk.1.0.2.linux-amd64-cflinuxfs2')
                                        .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
@@ -384,7 +397,7 @@ describe 'Builder' do
                                        .and_return '/tmp/dotnet-runtime.1.0.2.linux-amd64.tar.xz'
 
           expect(artifact_output).to receive(:move_dependency)
-                                       .with('dotnet-runtime', '/tmp/dotnet-runtime.1.0.2.linux-amd64.tar.xz', 'dotnet-runtime.1.0.2.linux-amd64-cflinuxfs2', 'tar.xz')
+                                       .with('dotnet-runtime', '/tmp/dotnet-runtime.1.0.2.linux-amd64.tar.xz', 'dotnet-runtime.1.0.2.linux-amd64-cflinuxfs2')
                                        .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
@@ -400,7 +413,7 @@ describe 'Builder' do
                                        .and_return '/tmp/dotnet-aspnetcore.1.0.2.linux-amd64.tar.xz'
 
           expect(artifact_output).to receive(:move_dependency)
-                                       .with('dotnet-aspnetcore', '/tmp/dotnet-aspnetcore.1.0.2.linux-amd64.tar.xz', 'dotnet-aspnetcore.1.0.2.linux-amd64-cflinuxfs2', 'tar.xz')
+                                       .with('dotnet-aspnetcore', '/tmp/dotnet-aspnetcore.1.0.2.linux-amd64.tar.xz', 'dotnet-aspnetcore.1.0.2.linux-amd64-cflinuxfs2')
                                        .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
           subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
@@ -471,7 +484,7 @@ describe 'Builder' do
             .and_return 'fake-source-sha-123'
 
           expect(artifact_output).to receive(:move_dependency)
-            .with('r', 'artifacts/r-v1.0.2.tgz', 'r-v1.0.2-cflinuxfs2', 'tgz')
+            .with('r', 'artifacts/r-v1.0.2.tgz', 'r-v1.0.2-cflinuxfs2')
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
           stub_request(:get, "https://fake.url.com").
