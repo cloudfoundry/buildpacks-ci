@@ -221,10 +221,7 @@ dependencies:
       icu-cnb:
         lines:
           - line: latest
-    source_type: github_releases
-    source_params:
-      - 'repo: unicode-org/icu'
-      - 'extension: -Ubuntu18.04-x64.tgz'
+    source_type: icu
     any_stack: true
     versions_to_keep: 2
   jruby:

@@ -63,6 +63,8 @@ when "plumber"
   versions = Depwatcher::CRAN.new.check("plumber")
 when "shiny"
   versions = Depwatcher::CRAN.new.check("shiny")
+when "icu"
+  versions = Depwatcher::Icu.new.check()
 else
   raise "Unkown type: #{source["type"]}"
 end
