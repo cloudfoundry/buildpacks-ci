@@ -11,7 +11,11 @@ module Depwatcher
       )
 
       def ref
-        tag_name.gsub(/^release-/, "").gsub(/-/, ".")
+        version = tag_name.gsub(/^release-/, "").gsub(/-/, ".")
+        if version =~ /^\d+\.\d+$/
+          version += ".0"
+        end
+        version
       end
     end
 

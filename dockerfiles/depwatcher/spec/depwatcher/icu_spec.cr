@@ -12,8 +12,8 @@ Spec2.describe Depwatcher::Icu do
   end
 
   describe "#check" do
-    it "returns real releases sorted" do
-      expect(subject.check().map(&.ref)).to eq ["64.2", "65.1"]
+    it "returns sorted versions as valid semvers" do
+      expect(subject.check().map(&.ref)).to eq ["4.8.2", "64.2.0", "65.1.0"]
     end
   end
 
@@ -30,14 +30,14 @@ Spec2.describe Depwatcher::Icu do
     end
 
     it "returns a release object for the version" do
-      obj = subject.in("65.1", dirname)
-      expect(obj.ref).to eq "65.1"
+      obj = subject.in("65.1.0", dirname)
+      expect(obj.ref).to eq "65.1.0"
       expect(obj.url).to eq "https://github.com/unicode-org/icu/releases/download/release-65-1/icu4c-65_1-Ubuntu18.04-x64.tgz"
       expect(obj.sha256).to eq "797bb0abff798d7200af7685dca7901edffc52bf26500d5bd97282658ee24152"
     end
 
     it "downloads the file" do
-      obj = subject.in("65.1", dirname)
+      obj = subject.in("65.1.0", dirname)
       hash = OpenSSL::Digest.new("SHA256")
       hash.update(File.read(File.join(dirname, "icu4c-65_1-Ubuntu18.04-x64.tgz")))
       expect(hash.hexdigest).to eq obj.sha256
