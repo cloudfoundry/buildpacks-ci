@@ -64,6 +64,8 @@ when "shiny"
   version = Depwatcher::CRAN.new.in("shiny", version["ref"].to_s)
 when "plumber"
   version = Depwatcher::CRAN.new.in("plumber", version["ref"].to_s)
+when "icu"
+  version = Depwatcher::Icu.new.in(version["ref"].to_s, dir)
 else
   raise "Unknown type: #{type}"
 end
