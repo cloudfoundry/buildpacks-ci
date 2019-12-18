@@ -23,13 +23,12 @@ type Dependency struct {
 }
 
 func (deps Dependencies) Update(dep Dependency, depsToAdd Dependencies, versionLine string, versionsToKeep int) (Dependencies, error) {
-	originalDeps := deps.ExpandByStack()
-	updatedDeps := originalDeps.MergeWith(depsToAdd)
-	updatedDeps, err := updatedDeps.RemoveOldDeps(dep.ID, versionLine, versionsToKeep)
+	expandedDeps := deps.ExpandByStack()
+	mergedDeps := expandedDeps.MergeWith(depsToAdd)
+	updatedDeps, err := mergedDeps.RemoveOldDeps(dep.ID, versionLine, versionsToKeep)
 	if err != nil {
 		return Dependencies{}, errors.Wrap(err, "failed to remove old dependencies")
 	}
-
 	return updatedDeps.CollapseByStack(), nil
 }
 
@@ -48,7 +47,7 @@ func (deps Dependencies) MergeWith(newDeps Dependencies) Dependencies {
 		allDeps = append(allDeps, dep)
 	}
 
-	sort.Slice(allDeps, allDeps.sortDependencies())
+	sort.Slice(allDeps, allDeps.SortDependencies())
 	return allDeps
 }
 
@@ -84,7 +83,7 @@ func (deps Dependencies) RemoveOldDeps(depID, versionLine string, keepN int) (De
 		}
 	}
 
-	sort.Slice(retainedDeps, retainedDeps.sortDependencies())
+	sort.Slice(retainedDeps, retainedDeps.SortDependencies())
 	return retainedDeps, nil
 }
 
@@ -107,7 +106,7 @@ func (deps Dependencies) CollapseByStack() Dependencies {
 		allDeps = append(allDeps, dep)
 	}
 
-	sort.Slice(allDeps, allDeps.sortDependencies())
+	sort.Slice(allDeps, allDeps.SortDependencies())
 	return allDeps
 }
 
@@ -128,7 +127,7 @@ func (deps Dependencies) ExpandByStack() Dependencies {
 	return expandedDeps
 }
 
-func (deps Dependencies) sortDependencies() func(i, j int) bool {
+func (deps Dependencies) SortDependencies() func(i, j int) bool {
 	return func(i, j int) bool {
 		if deps[i].ID != deps[j].ID {
 			return deps[i].ID < deps[j].ID
@@ -146,14 +145,16 @@ func (deps Dependencies) sortDependencies() func(i, j int) bool {
 }
 
 func compareStacks(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if v != b[i] {
-			return v < b[i]
+	for i, stack := range a {
+		if i >= len(b) {
+			return false
+		}
+
+		if stack != b[i] {
+			return stack < b[i]
 		}
 	}
+
 	return true
 }
 
