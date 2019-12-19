@@ -8,173 +8,176 @@ require 'tmpdir'
 require_relative 'merge-extensions'
 
 module Runner
-  def run(*args)
-    system({ 'DEBIAN_FRONTEND' => 'noninteractive' }, *args)
-    raise "Could not run #{args}" unless $?.success?
+  class << self
+    def run(*args)
+      system({ 'DEBIAN_FRONTEND' => 'noninteractive' }, *args)
+      raise "Could not run #{args}" unless $?.success?
+    end
   end
 end
 
 module DependencyBuild
-  def build_pipenv(source_input)
-    old_file_path = "/tmp/pipenv-v#{source_input.version}.tgz"
-    Runner.run('apt', 'update')
-    Runner.run('apt-get', 'install', '-y', 'python-pip', 'python-dev', 'build-essential')
-    Runner.run('pip', 'install', '--upgrade', 'pip')
-    Runner.run('pip', 'install', '--upgrade', 'setuptools')
-    Dir.mktmpdir do |dir|
-      Dir.chdir(dir) do
-        Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', "pipenv==#{source_input.version}")
-        if Digest::MD5.hexdigest(open("pipenv-#{source_input.version}.tar.gz").read) != source_input.md5
-          raise 'MD5 digest does not match version digest'
+  class << self
+    def build_pipenv(source_input)
+      old_file_path = "/tmp/pipenv-v#{source_input.version}.tgz"
+      Runner.run('apt', 'update')
+      Runner.run('apt-get', 'install', '-y', 'python-pip', 'python-dev', 'build-essential')
+      Runner.run('pip', 'install', '--upgrade', 'pip')
+      Runner.run('pip', 'install', '--upgrade', 'setuptools')
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', "pipenv==#{source_input.version}")
+          if Digest::MD5.hexdigest(open("pipenv-#{source_input.version}.tar.gz").read) != source_input.md5
+            raise 'MD5 digest does not match version digest'
+          end
+          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'pytest-runner')
+          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'setuptools_scm')
+          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'parver')
+          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'wheel')
+          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'invoke')
+          Runner.run('tar', 'zcvf', old_file_path, '.')
         end
-        Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'pytest-runner')
-        Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'setuptools_scm')
-        Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'parver')
-        Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'wheel')
-        Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'invoke')
-        Runner.run('tar', 'zcvf', old_file_path, '.')
       end
+      old_file_path
     end
-    old_file_path
-  end
 
-  def build_libunwind(source_input)
-    built_path = File.join(Dir.pwd, 'built')
-    Dir.mkdir(built_path)
+    def build_libunwind(source_input)
+      built_path = File.join(Dir.pwd, 'built')
+      Dir.mkdir(built_path)
 
-    Dir.chdir('source') do
-      # github-releases depwatcher has already downloaded .tar.gz
-      Runner.run('tar', 'zxf', "#{source_input.name}-#{source_input.version}.tar.gz")
+      Dir.chdir('source') do
+        # github-releases depwatcher has already downloaded .tar.gz
+        Runner.run('tar', 'zxf', "#{source_input.name}-#{source_input.version}.tar.gz")
+        Dir.chdir("#{source_input.name}-#{source_input.version}") do
+          Runner.run('./configure', "--prefix=#{built_path}")
+          Runner.run('make')
+          Runner.run('make install')
+        end
+      end
+      old_filename = "#{source_input.name}-#{source_input.version}.tgz"
+      Dir.chdir(built_path) do
+        Runner.run('tar', 'czf', old_filename, 'include', 'lib')
+      end
+      File.join(built_path, old_filename)
+    end
+
+    def build_libgdiplus(source_input)
+      Runner.run('apt', 'update')
+      Runner.run('apt-get', 'install', '-y', 'automake', 'libtool')
+
+      built_path = File.join(Dir.pwd, 'built')
+      Dir.mkdir(built_path)
+
+      Runner.run('wget', source_input.url, '-O', "#{source_input.version}.tar.gz")
+
+      Dir.mkdir("#{source_input.name}-#{source_input.version}")
+      Runner.run('tar', 'zxf', "#{source_input.version}.tar.gz", '-C', "#{source_input.name}-#{source_input.version}", '--strip-components', '1')
       Dir.chdir("#{source_input.name}-#{source_input.version}") do
-        Runner.run('./configure', "--prefix=#{built_path}")
+        Runner.run('./autogen.sh', "--prefix=#{built_path}")
         Runner.run('make')
         Runner.run('make install')
       end
-    end
-    old_filename = "#{source_input.name}-#{source_input.version}.tgz"
-    Dir.chdir(built_path) do
-      Runner.run('tar', 'czf', old_filename, 'include', 'lib')
-    end
-    File.join(built_path, old_filename)
-  end
 
-  def build_libgdiplus(source_input)
-    Runner.run('apt', 'update')
-    Runner.run('apt-get', 'install', '-y', 'automake', 'libtool')
-
-    built_path = File.join(Dir.pwd, 'built')
-    Dir.mkdir(built_path)
-
-    Runner.run('wget', source_input.url, '-O', "#{source_input.version}.tar.gz")
-
-    Dir.mkdir("#{source_input.name}-#{source_input.version}")
-    Runner.run('tar', 'zxf', "#{source_input.version}.tar.gz", '-C', "#{source_input.name}-#{source_input.version}", '--strip-components', '1')
-    Dir.chdir("#{source_input.name}-#{source_input.version}") do
-      Runner.run('./autogen.sh', "--prefix=#{built_path}")
-      Runner.run('make')
-      Runner.run('make install')
+      old_filename = "#{source_input.name}-#{source_input.version}.tgz"
+      Dir.chdir(built_path) do
+        Runner.run('tar', 'czf', old_filename, 'lib')
+      end
+      File.join(built_path, old_filename)
     end
 
-    old_filename = "#{source_input.name}-#{source_input.version}.tgz"
-    Dir.chdir(built_path) do
-      Runner.run('tar', 'czf', old_filename, 'lib')
-    end
-    File.join(built_path, old_filename)
-  end
+    def build_r(source_input, forecast_input, plumber_input, rserve_input, shiny_input)
+      artifacts = "#{Dir.pwd}/artifacts"
+      source_sha = ''
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          Runner.run('mkdir', '-p', '/usr/share/man/man1')
 
-  def build_r(source_input, forecast_input, plumber_input, rserve_input, shiny_input)
-    artifacts = "#{Dir.pwd}/artifacts"
-    source_sha = ''
-    Dir.mktmpdir do |dir|
-      Dir.chdir(dir) do
-        Runner.run('mkdir', '-p', '/usr/share/man/man1')
+          Runner.run('apt', 'update')
 
-        Runner.run('apt', 'update')
+          stack = ENV.fetch('STACK')
+          fs_specific_packages = stack == 'cflinuxfs2' ? ['libgfortran-4.8-dev'] : ['libgfortran-7-dev']
+          Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libcurl4-openssl-dev', 'default-jre', *fs_specific_packages)
 
-        stack = ENV.fetch('STACK')
-        fs_specific_packages = stack == 'cflinuxfs2' ? ['libgfortran-4.8-dev'] : ['libgfortran-7-dev']
-        Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libcurl4-openssl-dev', 'default-jre', *fs_specific_packages)
+          Runner.run('wget', source_input.url)
+          source_sha = Digest::SHA256.hexdigest(open("R-#{source_input.version}.tar.gz").read)
+          Runner.run('tar', 'xf', "R-#{source_input.version}.tar.gz")
 
-        Runner.run('wget', source_input.url)
-        source_sha = Digest::SHA256.hexdigest(open("R-#{source_input.version}.tar.gz").read)
-        Runner.run('tar', 'xf', "R-#{source_input.version}.tar.gz")
+          Dir.chdir("R-#{source_input.version}") do
+            Runner.run('./configure', '--with-readline=no', '--with-x=no', '--enable-R-shlib')
+            Runner.run('make')
+            Runner.run('make install')
 
-        Dir.chdir("R-#{source_input.version}") do
-          Runner.run('./configure', '--with-readline=no', '--with-x=no', '--enable-R-shlib')
-          Runner.run('make')
-          Runner.run('make install')
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "install.packages('devtools', repos='https://cran.r-project.org')")
 
-          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "install.packages('devtools', repos='https://cran.r-project.org')")
+            rserve_version = rserve_input.split(".")[0..1].join(".") + "-" + rserve_input.split(".")[2..-1].join(".")
 
-          rserve_version = rserve_input.split(".")[0..1].join(".") + "-" + rserve_input.split(".")[2..-1].join(".")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('Rserve', '#{rserve_version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('forecast', '#{forecast_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('shiny', '#{shiny_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('plumber', '#{plumber_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
 
-          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('Rserve', '#{rserve_version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
-          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('forecast', '#{forecast_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
-          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('shiny', '#{shiny_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
-          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('plumber', '#{plumber_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'remove.packages("devtools")')
 
-          Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'remove.packages("devtools")')
-
-          Dir.chdir('/usr/local/lib/R') do
-            case stack
-            when 'cflinuxfs2'
-              Runner.run('cp', '-L', '/usr/bin/gfortran-4.8', './bin/gfortran')
-              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/f951', './bin/f951')
-              Runner.run('ln', '-s', './gfortran', './bin/f95')
-              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libcaf_single.a', './lib')
-              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.a', './lib')
-              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.so', './lib')
-              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortranbegin.a', './lib')
-            when 'cflinuxfs3'
-              Runner.run('cp', '-L', '/usr/bin/x86_64-linux-gnu-gfortran-7', './bin/gfortran')
-              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/f951', './bin/f951')
-              Runner.run('ln', '-s', './gfortran', './bin/f95')
-              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libcaf_single.a', './lib')
-              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libgfortran.a', './lib')
-              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libgfortran.so', './lib')
+            Dir.chdir('/usr/local/lib/R') do
+              case stack
+              when 'cflinuxfs2'
+                Runner.run('cp', '-L', '/usr/bin/gfortran-4.8', './bin/gfortran')
+                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/f951', './bin/f951')
+                Runner.run('ln', '-s', './gfortran', './bin/f95')
+                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libcaf_single.a', './lib')
+                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.a', './lib')
+                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.so', './lib')
+                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortranbegin.a', './lib')
+              when 'cflinuxfs3'
+                Runner.run('cp', '-L', '/usr/bin/x86_64-linux-gnu-gfortran-7', './bin/gfortran')
+                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/f951', './bin/f951')
+                Runner.run('ln', '-s', './gfortran', './bin/f95')
+                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libcaf_single.a', './lib')
+                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libgfortran.a', './lib')
+                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libgfortran.so', './lib')
+              end
+              Runner.run('tar', 'zcvf', "#{artifacts}/r-v#{source_input.version}.tgz", '.')
             end
-            Runner.run('tar', 'zcvf', "#{artifacts}/r-v#{source_input.version}.tgz", '.')
           end
         end
       end
+      source_sha
     end
-    source_sha
-  end
 
-  def replace_openssl()
-    filebase = 'OpenSSL_1_1_0g'
-    filename = "#{filebase}.tar.gz"
-    openssltar = "https://github.com/openssl/openssl/archive/#{filename}"
+    def replace_openssl()
+      filebase = 'OpenSSL_1_1_0g'
+      filename = "#{filebase}.tar.gz"
+      openssltar = "https://github.com/openssl/openssl/archive/#{filename}"
 
-    Dir.mktmpdir do |dir|
-      Runner.run('wget', openssltar)
-      Runner.run('tar', 'xf', filename)
-      Dir.chdir("openssl-#{filebase}") do
-        Runner.run("./config",
-                   "--prefix=/usr",
-                   "--libdir=/lib/x86_64-linux-gnu",
-                   "--openssldir=/include/x86_64-linux-gnu/openssl")
-        Runner.run('make')
-        Runner.run('make', 'install_sw')
+      Dir.mktmpdir do |dir|
+        Runner.run('wget', openssltar)
+        Runner.run('tar', 'xf', filename)
+        Dir.chdir("openssl-#{filebase}") do
+          Runner.run("./config",
+                     "--prefix=/usr",
+                     "--libdir=/lib/x86_64-linux-gnu",
+                     "--openssldir=/include/x86_64-linux-gnu/openssl")
+          Runner.run('make')
+          Runner.run('make', 'install_sw')
+        end
       end
     end
-  end
 
-  def build_python(source_input, stack)
+    def build_python(source_input, stack)
 
-    artifacts = "#{Dir.pwd}/artifacts"
-    destdir = Dir.mktmpdir
-    Dir.mktmpdir do |dir|
-      Dir.chdir(dir) do
-        Runner.run('wget', source_input.url)
-        # TODO validate pgp
-        tar_name = source_input.name.capitalize
-        Runner.run('tar', 'xf', "#{tar_name}-#{source_input.version}.tgz")
+      artifacts = "#{Dir.pwd}/artifacts"
+      destdir = Dir.mktmpdir
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          Runner.run('wget', source_input.url)
+          # TODO validate pgp
+          tar_name = source_input.name.capitalize
+          Runner.run('tar', 'xf', "#{tar_name}-#{source_input.version}.tgz")
 
-        # Python specific configuration here
-        Dir.chdir("#{tar_name}-#{source_input.version}") do
+          # Python specific configuration here
+          Dir.chdir("#{tar_name}-#{source_input.version}") do
 
-          options = [
+            options = [
               './configure',
               '--enable-shared',
               '--with-ensurepip=yes',
@@ -183,56 +186,56 @@ module DependencyBuild
               '--with-tcltk-libs="-L/usr/lib/x86_64-linux-gnu -ltcl8.6 -L/usr/lib/x86_64-linux-gnu -ltk8.6"',
               "--prefix=#{destdir}",
               '--enable-unicode=ucs4'
-          ]
+            ]
 
-          Runner.run(*options)
-          packages = %w[libdb-dev libgdbm-dev tk8.6-dev]
-          # install apt packages
-          STDOUT.print "Running 'install dependencies' for #{@name} #{@version}... "
-          Runner.run("sudo apt-get update && sudo apt-get -y install " + packages.join(' '))
+            Runner.run(*options)
+            packages = %w[libdb-dev libgdbm-dev tk8.6-dev]
+            # install apt packages
+            STDOUT.print "Running 'install dependencies' for #{@name} #{@version}... "
+            Runner.run("sudo apt-get update && sudo apt-get -y install " + packages.join(' '))
 
-          Runner.run('apt-get -y --force-yes -d install --reinstall libtcl8.6 libtk8.6 libxss1')
+            Runner.run('apt-get -y --force-yes -d install --reinstall libtcl8.6 libtk8.6 libxss1')
 
-          FileUtils.mkdir_p destdir
-          Dir.glob('/var/cache/apt/archives/lib{tcl8.6,tk8.6,xss1}_*.deb').each do |path|
-            STDOUT.puts("dpkg -x #{path} #{destdir}")
-            Runner.run("dpkg -x #{path} #{destdir}")
-          end
+            FileUtils.mkdir_p destdir
+            Dir.glob('/var/cache/apt/archives/lib{tcl8.6,tk8.6,xss1}_*.deb').each do |path|
+              STDOUT.puts("dpkg -x #{path} #{destdir}")
+              Runner.run("dpkg -x #{path} #{destdir}")
+            end
 
-          # replace openssl if needed
-          major, minor, _ = source_input.version.split('.')
-          if major == '3' && minor == '4' && stack == 'cflinuxfs3'
-            Runner.run('apt', 'update')
-            Runner.run('apt-get', 'install', '-y', 'libssl1.0-dev')
-          elsif stack == 'cflinuxfs3' && major != '2'
-            DependencyBuild.replace_openssl
-          end
+            # replace openssl if needed
+            major, minor, _ = source_input.version.split('.')
+            if major == '3' && minor == '4' && stack == 'cflinuxfs3'
+              Runner.run('apt', 'update')
+              Runner.run('apt-get', 'install', '-y', 'libssl1.0-dev')
+            elsif stack == 'cflinuxfs3' && major != '2'
+              DependencyBuild.replace_openssl
+            end
 
-          Runner.run("make")
-          Runner.run("make install")
-          # create python symlink
-          unless File.exist?("#{destdir}/bin/python")
-            File.symlink('./python3', "#{destdir}/bin/python")
-          end
-          raise 'Could not run make install' unless $?.success?
-          Dir.chdir(destdir) do
-            Runner.run('tar', 'zcvf', "#{artifacts}/python-#{source_input.version}.tgz", '.', '--hard-dereference')
+            Runner.run("make")
+            Runner.run("make install")
+            # create python symlink
+            unless File.exist?("#{destdir}/bin/python")
+              File.symlink('./python3', "#{destdir}/bin/python")
+            end
+            raise 'Could not run make install' unless $?.success?
+            Dir.chdir(destdir) do
+              Runner.run('tar', 'zcvf', "#{artifacts}/python-#{source_input.version}.tgz", '.', '--hard-dereference')
+            end
           end
         end
       end
     end
-  end
 
-  def build_nginx(source_input, stack, static = false)
-    artifacts = "#{Dir.pwd}/artifacts"
-    source_pgp = 'not yet implemented'
-    destdir = Dir.mktmpdir
-    Dir.mktmpdir do |dir|
-      Dir.chdir(dir) do
-        Runner.run('wget', source_input.url)
-        # TODO validate pgp
-        Runner.run('tar', 'xf', "#{source_input.type}-#{source_input.version}.tar.gz")
-        base_nginx_options = [
+    def build_nginx(source_input, stack, static = false)
+      artifacts = "#{Dir.pwd}/artifacts"
+      source_pgp = 'not yet implemented'
+      destdir = Dir.mktmpdir
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          Runner.run('wget', source_input.url)
+          # TODO validate pgp
+          Runner.run('tar', 'xf', "#{source_input.type}-#{source_input.version}.tar.gz")
+          base_nginx_options = [
             '--prefix=/',
             '--error-log-path=stderr',
             '--with-http_ssl_module',
@@ -247,95 +250,95 @@ module DependencyBuild
             '--without-http_scgi_module',
             '--with-pcre',
             '--with-pcre-jit',
-        ]
+          ]
 
-        nginx_static_options = [
+          nginx_static_options = [
             '--with-cc-opt=-fPIE -pie',
             '--with-ld-opt=-fPIE -pie -z now',
-        ]
+          ]
 
-        nginx_options = [
+          nginx_options = [
             '--with-cc-opt=-fPIC -pie',
             '--with-ld-opt=-fPIC -pie -z now',
             '--with-compat',
             '--with-stream=dynamic',
             '--with-http_sub_module',
-        ]
+          ]
 
-        DependencyBuild.replace_openssl if stack == 'cflinuxfs3'
+          DependencyBuild.replace_openssl if stack == 'cflinuxfs3'
 
-        Dir.chdir("#{source_input.type}-#{source_input.version}") do
-          options = ['./configure'] + base_nginx_options + (static ? nginx_static_options : nginx_options)
-          Runner.run(*options)
-          Runner.run('make')
-          system({ 'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR' => "#{destdir}/nginx" }, 'make install')
-          raise 'Could not run make install' unless $?.success?
+          Dir.chdir("#{source_input.type}-#{source_input.version}") do
+            options = ['./configure'] + base_nginx_options + (static ? nginx_static_options : nginx_options)
+            Runner.run(*options)
+            Runner.run('make')
+            system({ 'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR' => "#{destdir}/nginx" }, 'make install')
+            raise 'Could not run make install' unless $?.success?
 
-          Dir.chdir(destdir) do
-            Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
-            Runner.run('mkdir', 'nginx/conf')
-            if static
-              Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", 'nginx')
-            else
-              Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", '.')
+            Dir.chdir(destdir) do
+              Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
+              Runner.run('mkdir', 'nginx/conf')
+              if static
+                Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", 'nginx')
+              else
+                Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", '.')
+              end
             end
           end
         end
       end
     end
-  end
 
-  def build_dotnet_sdk(source_input)
-    prune_dotnet_files(source_input, ["./shared/*"], true)
-  end
+    def build_dotnet_sdk(source_input)
+      prune_dotnet_files(source_input, ["./shared/*"], true)
+    end
 
-  def build_dotnet_runtime(source_input)
-    prune_dotnet_files(source_input, ["./dotnet"])
-  end
+    def build_dotnet_runtime(source_input)
+      prune_dotnet_files(source_input, ["./dotnet"])
+    end
 
-  def build_dotnet_aspnetcore(source_input)
-    prune_dotnet_files(source_input, ["./dotnet", "./shared/Microsoft.NETCore.App"])
-  end
+    def build_dotnet_aspnetcore(source_input)
+      prune_dotnet_files(source_input, ["./dotnet", "./shared/Microsoft.NETCore.App"])
+    end
 
-  def prune_dotnet_files(source_input, files_to_exclude, write_runtime = false)
-    source_file = File.expand_path(Dir.glob('source/*.tar.gz').first)
-    adjusted_file = "/tmp/#{source_input.name}.#{source_input.version}.linux-amd64.tar.xz"
-    exclude_list = files_to_exclude.map{ |file| "--exclude=#{file}"}.join(" ")
-    Dir.mktmpdir do |dir|
-      Dir.chdir(dir) do
-        `tar -xf #{source_file} #{exclude_list}`
-        write_runtime_version_file(source_file, dir) if write_runtime
-        # Use xz to compress smaller than gzip
-        `tar -Jcf #{adjusted_file} ./*`
+    def prune_dotnet_files(source_input, files_to_exclude, write_runtime = false)
+      source_file = File.expand_path(Dir.glob('source/*.tar.gz').first)
+      adjusted_file = "/tmp/#{source_input.name}.#{source_input.version}.linux-amd64.tar.xz"
+      exclude_list = files_to_exclude.map{ |file| "--exclude=#{file}"}.join(" ")
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          `tar -xf #{source_file} #{exclude_list}`
+          write_runtime_version_file(source_file, dir) if write_runtime
+          # Use xz to compress smaller than gzip
+          `tar -Jcf #{adjusted_file} ./*`
+        end
+      end
+      adjusted_file
+    end
+
+    def write_runtime_version_file(source_file, sdk_dir)
+      Dir.chdir(sdk_dir) do
+        runtime_glob = './shared/Microsoft.NETCore.App/'
+        output = `tar tf #{source_file} #{runtime_glob}`
+        files = output.split("\n").select {|line| line.end_with? '/' }
+        version = Pathname.new(files.last).basename.to_s
+
+        File.open('RuntimeVersion.txt', 'w') do |f|
+          f.write(version)
+        end
       end
     end
-    adjusted_file
-  end
 
-  def write_runtime_version_file(source_file, sdk_dir)
-    Dir.chdir(sdk_dir) do
-      runtime_glob = './shared/Microsoft.NETCore.App/'
-      output = `tar tf #{source_file} #{runtime_glob}`
-      files = output.split("\n").select {|line| line.end_with? '/' }
-      version = Pathname.new(files.last).basename.to_s
+    def build_openresty(source_input)
+      artifacts = "#{Dir.pwd}/artifacts"
+      destdir = Dir.mktmpdir
 
-      File.open('RuntimeVersion.txt', 'w') do |f|
-        f.write(version)
-      end
-    end
-  end
-
-  def build_openresty(source_input)
-    artifacts = "#{Dir.pwd}/artifacts"
-    destdir = Dir.mktmpdir
-
-    Dir.mktmpdir do |dir|
-      Dir.chdir(dir) do
-        Runner.run('wget', source_input.url)
-        # TODO validate pgp
-        Runner.run('tar', 'xf', "#{source_input.name}-#{source_input.version}.tar.gz")
-        Dir.chdir("#{source_input.name}-#{source_input.version}") do
-          Runner.run(
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          Runner.run('wget', source_input.url)
+          # TODO validate pgp
+          Runner.run('tar', 'xf', "#{source_input.name}-#{source_input.version}.tar.gz")
+          Dir.chdir("#{source_input.name}-#{source_input.version}") do
+            Runner.run(
               './configure',
               "--prefix=#{destdir}/openresty",
               '-j2',
@@ -356,16 +359,17 @@ module DependencyBuild
               '--with-ld-opt=-fPIC -pie -z now',
               '--with-compat',
               '--with-stream=dynamic',
-          )
-          Runner.run('make', '-j2')
-          system({ 'DEBIAN_FRONTEND' => 'noninteractive' }, 'make install')
-          raise 'Could not run make install' unless $?.success?
+            )
+            Runner.run('make', '-j2')
+            system({ 'DEBIAN_FRONTEND' => 'noninteractive' }, 'make install')
+            raise 'Could not run make install' unless $?.success?
 
-          Dir.chdir("#{destdir}/openresty") do
-            Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
-            Runner.run('mkdir', './nginx/conf')
-            Runner.run('rm', './bin/openresty')
-            Runner.run('tar', 'zcvf', "#{artifacts}/openresty-#{source_input.version}.tgz", '.')
+            Dir.chdir("#{destdir}/openresty") do
+              Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
+              Runner.run('mkdir', './nginx/conf')
+              Runner.run('rm', './bin/openresty')
+              Runner.run('tar', 'zcvf', "#{artifacts}/openresty-#{source_input.version}.tgz", '.')
+            end
           end
         end
       end
@@ -374,39 +378,43 @@ module DependencyBuild
 end
 
 module Sha
-  def get_sha(url)
-    Digest::SHA256.hexdigest(open(url).read)
-  end
-
-  def check_sha(source_input)
-    res = open(source_input.url).read
-    sha = get_sha(source_input.url)
-    if source_input.md5? && Digest::MD5.hexdigest(res) != source_input.md5
-      raise 'MD5 digest does not match version digest'
-    elsif source_input.sha256? && sha != source_input.sha256
-      raise 'SHA256 digest does not match version digest'
+  class << self
+    def get_sha(url)
+      Digest::SHA256.hexdigest(open(url).read)
     end
-    [res, sha]
+
+    def check_sha(source_input)
+      res = open(source_input.url).read
+      sha = get_sha(source_input.url)
+      if source_input.md5? && Digest::MD5.hexdigest(res) != source_input.md5
+        raise 'MD5 digest does not match version digest'
+      elsif source_input.sha256? && sha != source_input.sha256
+        raise 'SHA256 digest does not match version digest'
+      end
+      [res, sha]
+    end
   end
 end
 
 module Archive
-  def strip_top_level_directory_from_tar(filename)
-    Dir.mktmpdir do |dir|
-      Runner.run('tar', '-C', dir, '--strip-components', '1', '-xf', filename)
-      Runner.run('tar', '-C', dir, '-czf', filename, '.')
+  class << self
+    def strip_top_level_directory_from_tar(filename)
+      Dir.mktmpdir do |dir|
+        Runner.run('tar', '-C', dir, '--strip-components', '1', '-xf', filename)
+        Runner.run('tar', '-C', dir, '-czf', filename, '.')
+      end
     end
-  end
 
-  def strip_top_level_directory_from_zip(filename, destination)
-    Dir.mktmpdir do |dir|
-      Runner.run('unzip', '-d', dir, filename)
+    def strip_top_level_directory_from_zip(filename, destination)
+      Dir.mktmpdir do |dir|
+        Runner.run('unzip', '-d', dir, filename)
 
-      subdir = Dir.glob(File.join(dir, '*')).first
-      Dir.chdir(subdir) do
-        zipfile = File.join(destination, filename)
-        File.delete(zipfile)
-        Runner.run('zip', '-r', zipfile, '.')
+        subdir = Dir.glob(File.join(dir, '*')).first
+        Dir.chdir(subdir) do
+          zipfile = File.join(destination, filename)
+          File.delete(zipfile)
+          Runner.run('zip', '-r', zipfile, '.')
+        end
       end
     end
   end
@@ -414,7 +422,6 @@ end
 
 
 class Builder
-
   def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, php_extensions_dir = __dir__, skip_commit = false)
     cnb_list = [
       'org.cloudfoundry.node-engine',
@@ -834,4 +841,3 @@ class Builder
     out_data
   end
 end
-
