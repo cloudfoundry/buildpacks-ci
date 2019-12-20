@@ -50,7 +50,7 @@ resources:
   - name: pack-release
     type: github-release
     source:
-      user: buildpack
+      user: buildpacks
       repository: pack
       access_token: ((buildpacks-github-token))
       globs: ['*-linux.tgz']
@@ -59,7 +59,7 @@ resources:
     type: github-release
     source:
       repository: lifecycle
-      user: buildpack
+      user: buildpacks
       access_token: ((buildpacks-github-token))
 
   # Versions
