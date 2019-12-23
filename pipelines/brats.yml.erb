@@ -1,6 +1,4 @@
-<% new_brats = %w(apt binary dotnet-core go nodejs python ruby staticfile php nginx) %>
-<% languages = %w(java) + new_brats %>
-<% not_lts = %w(apt) %>
+<% languages = %w(apt binary dotnet-core go nodejs python ruby staticfile php nginx) %>
 <% stacks = {
 "apt" => %w(cflinuxfs3),
 "binary" => %w(cflinuxfs3 windows2012R2 windows),
@@ -13,12 +11,11 @@
 "python" => %w(cflinuxfs3),
 "ruby" => %w(cflinuxfs3),
 "staticfile" => %w(cflinuxfs3),
-"java" => %w(cflinuxfs3)
 } %>
 <% pas_versions = {
-  'latest' => '2_7',
-  'n-1' => '2_6',
-  'n-2' => '2_5',
+  'latest' => '2_8',
+  'n-1' => '2_7',
+  'n-2' => '2_6',
 } %>
 
 ---
@@ -64,14 +61,6 @@ resources:
       private_key: {{public-buildpacks-ci-robots-private-key}}
       uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
-  - name: edge-shared-environments
-    type: pool
-    source:
-      branch: master
-      pool: edge-shared-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-
   - name: lts-environments
     type: pool
     source:
@@ -103,7 +92,7 @@ resources:
     tags:
     - buildpacks-eng-vsphere
 
-<% new_brats.each do |language| %>
+<% languages.each do |language| %>
   - name: buildpack-<%= language %>
     type: git
     webhook_token: ob0aigh3
@@ -115,7 +104,6 @@ resources:
 
 jobs:
 <% languages.each do |language| %>
-<% if !not_lts.include?(language) %>
   - name: brats-<%= language %>-lts
     serial: true
     public: true
@@ -125,12 +113,8 @@ jobs:
           params:
             acquire: true
         - get: buildpacks-ci
-<% if new_brats.include?(language) %>
         - get: buildpack
           resource: buildpack-<%= language %>
-<% else %>
-        - get: brats
-<% end %>
         - get: nightly-trigger
           trigger: true
       - do:
@@ -145,7 +129,7 @@ jobs:
             environment: smith-environments-<%= pas_versions['n-2'] %>
           params:
             ORG: pivotal
-<% if new_brats.include?(language) %>
+
         - task: run-brats-cflinuxfs3
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
           attempts: <%= if language == "ruby" then 3 else 1 end %>
@@ -153,15 +137,6 @@ jobs:
             CF_STACK: cflinuxfs3
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 6
-<% else %>
-        - task: run-brats-cflinuxfs3
-          file: buildpacks-ci/tasks/run-shared-brats/task.yml
-          params:
-            STACK: cflinuxfs3
-            BUILDPACK_BRANCH: master
-            LANGUAGE: <%= language %>
-            RUBYGEM_MIRROR: {{rubygem-mirror}}
-<% end %>
         ensure:
           in_parallel:
           - put: smith-environments-<%= pas_versions['n-2'] %>
@@ -173,7 +148,6 @@ jobs:
           - put: lts-environments
             params:
               release: lts-environments
-<% end %>
   - name: brats-<%= language %>-edge
     serial: true
     public: true
@@ -182,21 +156,10 @@ jobs:
         - put: edge-environments
           params:
             acquire: true
-<% if !new_brats.include?(language) %>
-        - put: cf-environments
-          resource: edge-shared-environments
-          params:
-            claim: <%= language %>
-          timeout: 3h
-<% end %>
         - get: buildpacks-ci
         - get: env-repo
-<% if new_brats.include?(language) %>
         - get: buildpack
           resource: buildpack-<%= language %>
-<% else %>
-        - get: brats
-<% end %>
         - get: nightly-trigger
           trigger: true
       - in_parallel:
@@ -212,7 +175,6 @@ jobs:
               ORG: pivotal
               SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
               USERNAME: admin
-<% if new_brats.include?(language) %>
           - task: run-brats-<%= stack %>
             file: buildpacks-ci/tasks/run-bp-brats/task.yml
             input_mapping: {cf-space: cf-space-<%= stack %>}
@@ -220,26 +182,10 @@ jobs:
               CF_STACK: <%= stack %>
               GINKGO_ATTEMPTS: 4
               GINKGO_NODES: 6
-<% else %>
-          - task: run-brats-<%= stack %>
-            file: buildpacks-ci/tasks/run-shared-brats/task.yml
-            input_mapping: {cf-space: cf-space-<%= stack %>}
-            params:
-              STACK: <%= stack %>
-              BUILDPACK_BRANCH: master
-              LANGUAGE: <%= language %>
-              RUBYGEM_MIRROR: {{rubygem-mirror}}
-<% end %>
             ensure:
               task: delete-cf-space
               file: buildpacks-ci/tasks/delete-cf-space/task.yml
               input_mapping: {cf-space: cf-space-<%= stack %>}
-<% end %>
-<% if !new_brats.include?(language) %>
-        ensure:
-          put: edge-shared-environments
-          params:
-            release: cf-environments
 <% end %>
     ensure:
       put: edge-environments
