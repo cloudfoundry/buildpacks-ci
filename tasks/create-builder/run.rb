@@ -44,7 +44,7 @@ end
 puts 'Untarring pack'
 pack_tar = Dir["pack/*-linux.tgz"].first
 FileUtils.mkdir_p pack_path
-run 'tar', 'xvf' "#{Dir.pwd}/#{pack_tar}", "-C", pack_path
+run "tar xvf #{Dir.pwd}/#{pack_tar} -C #{pack_path}"
 
 puts 'Building cnb packager...'
 Dir.chdir 'packager' do
