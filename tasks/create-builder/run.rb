@@ -99,6 +99,7 @@ individual_buildpacks.select! { |i| i != nil  }
 
 puts "Loading #{stack}-order.toml"
 buildpacks = individual_buildpacks + child_buildpacks
+buildpacks.uniq! {|bp| bp['id'] }
 static_builder_file = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.toml"))
 order = static_builder_file['order']
 description = static_builder_file['description']
