@@ -34,13 +34,6 @@ resource_types:
       repository: cftoolsmiths/toolsmiths-envs-resource
 
 resources:
-  - name: brats
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/brats.git
-      private_key: {{brats-private-key}}
-      branch: master
-
   - name: nightly-trigger
     type: cron
     source:
@@ -75,13 +68,6 @@ resources:
       uri: git@github.com:cloudfoundry/buildpacks-envs
       branch: master
       private_key: {{buildpacks-envs-private-key}}
-
-  - name: buildpack-packager
-    type: github-release
-    source:
-      user: {{buildpacks-github-org}}
-      repository: buildpack-packager
-      access_token: {{buildpacks-github-token}}
 
   - name: smith-environments-<%= pas_versions['n-2'] %>
     type: pcf-pool
@@ -192,26 +178,3 @@ jobs:
       params:
         release: edge-environments
 <% end %>
-
-  - name: update-buildpack-packager
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: gem
-          resource: buildpack-packager
-          trigger: true
-        - get: repo-with-gemfile
-          resource: brats
-      - task: update-buildpack-packager
-        file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
-        params:
-          RUBYGEM_MIRROR: {{rubygem-mirror}}
-          GEM_NAME: buildpack-packager
-          GEM_GIT_REPOSITORY: {{buildpack-packager-git-uri-public}}
-          GEMFILE_NAME: Gemfile
-      - put: brats
-        params:
-          repository: repo-with-gemfile-artifacts
-          rebase: true
