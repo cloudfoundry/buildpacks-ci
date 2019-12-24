@@ -581,7 +581,7 @@ class Builder
           )
       )
 
-    when 'rubygems', 'yarn', 'pip', 'bower', 'icu'
+    when 'rubygems', 'yarn', 'pip', 'icu'
       results = Sha.check_sha(source_input)
       filename = 'artifacts/temp_file.tgz'
       File.write(filename, results[0])
@@ -596,7 +596,7 @@ class Builder
           )
       )
 
-    when 'lifecycle'
+    when 'bower', 'lifecycle'
       results = Sha.check_sha(source_input)
       filename = 'artifacts/temp_file.tgz'
       File.write(filename, results[0])
