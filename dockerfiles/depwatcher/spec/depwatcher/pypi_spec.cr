@@ -16,10 +16,10 @@ Spec2.describe Depwatcher::Pypi do
       ]
     end
 
-    it "returns final releases < 10.x sorted for pip" do
+    it "returns final releases including >= 10.x sorted for pip" do
       client.stub_get("https://pypi.org/pypi/pip/json", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/pip.json")))
       expect(subject.check("pip").map(&.ref)).to eq [
-        "8.0.1", "8.0.2", "8.0.3", "8.1.0", "8.1.1", "8.1.2", "9.0.0", "9.0.1", "9.0.2", "9.0.3"
+        "8.0.3", "8.1.0", "8.1.1", "8.1.2", "9.0.0", "9.0.1", "9.0.2", "9.0.3", "10.0.0", "10.0.1"
       ]
     end
   end
