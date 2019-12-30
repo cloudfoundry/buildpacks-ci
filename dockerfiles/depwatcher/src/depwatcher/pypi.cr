@@ -54,9 +54,6 @@ module Depwatcher
         .select do |v|
           semver = SemanticVersion.new(v)
           keep = semver.is_final_release?
-          if name == "pip" && semver.major > 9
-            keep = false
-          end
           keep
         end
     end
