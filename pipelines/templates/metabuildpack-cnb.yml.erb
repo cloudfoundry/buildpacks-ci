@@ -352,13 +352,14 @@ jobs:
             passed: [ test-rc ]
             params:
               bump: final
-      - task: check-tag-not-already-added
+      - task: check-tag-not-already-added 
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
       - put: repo
         params:
           repository: buildpack
           tag: version/version
           tag_prefix: v
+          only_tag: true
 
   - name: buildpack-to-github
     serial: true
