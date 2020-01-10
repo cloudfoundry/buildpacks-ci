@@ -400,7 +400,7 @@ module Archive
   class << self
     def strip_top_level_directory_from_tar(filename)
       Dir.mktmpdir do |dir|
-        Runner.run('tar', '-C', dir, '--transform', 's:\./::', '--strip-components', '1', '-xf', filename)
+        Runner.run('tar', '-C', dir, '--transform', 's:^\./::', '--strip-components', '1', '-xf', filename)
         Runner.run('tar', '-C', dir, '-czf', filename, '.')
       end
     end
