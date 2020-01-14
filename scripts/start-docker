@@ -121,9 +121,11 @@ start_docker() {
     echo "Allocating 10GB scratch filesystem for the docker daemon"
     permit_device_control
 
-    if [[ ! -e /dev/loop0 ]]; then
-      echo "Making /dev/loop0"
-      mknod /dev/loop0 b 7 0
+    local loopdevice
+    loopdevice="/dev/loop${RANDOM}"
+    if [[ ! -e "${loopdevice}" ]]; then
+      echo "Making ${loopdevice}"
+      mknod "${loopdevice}" b 7 0
       losetup -f
     fi
 
