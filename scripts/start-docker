@@ -120,14 +120,15 @@ start_docker() {
   if command -v mkfs.btrfs > /dev/null; then
     echo "Allocating 10GB scratch filesystem for the docker daemon"
     permit_device_control
-    dd if=/dev/zero of=/tmp/docker-root bs=1024 count=10485760
-    mkfs.btrfs /tmp/docker-root
 
     if [[ ! -e /dev/loop0 ]]; then
       echo "Making /dev/loop0"
       mknod /dev/loop0 b 7 0
+      losetup -f
     fi
 
+    dd if=/dev/zero of=/tmp/docker-root bs=1024 count=10485760
+    mkfs.btrfs /tmp/docker-root
     mount /tmp/docker-root /scratch/docker
     echo "Scratch filesystem mounted at /scratch/docker"
 
