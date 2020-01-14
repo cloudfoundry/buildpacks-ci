@@ -56,15 +56,19 @@ sanitize_cgroups() {
 }
 
 function permit_device_control() {
-  local devices_mount_info=$(cat /proc/self/cgroup | grep devices)
+  local devices_mount_info
+  devices_mount_info="$(grep devices < /proc/self/cgroup)"
 
   if [ -z "$devices_mount_info" ]; then
     # cgroups not set up; must not be in a container
     return
   fi
 
-  local devices_subsytems=$(echo $devices_mount_info | cut -d: -f2)
-  local devices_subdir=$(echo $devices_mount_info | cut -d: -f3)
+  local devices_subsystems
+  devices_subsystems="$(echo "$devices_mount_info" | cut -d: -f2)"
+
+  local devices_subdir
+  devices_subdir="$(echo "$devices_mount_info" | cut -d: -f3)"
 
   if [ "$devices_subdir" = "/" ]; then
     # we're in the root devices cgroup; must not be in a container
@@ -79,7 +83,7 @@ function permit_device_control() {
   fi
 
   if ! mountpoint -q ${cgroup_dir}; then
-    if ! mount -t cgroup -o $devices_subsytems none ${cgroup_dir}; then
+    if ! mount -t cgroup -o "$devices_subsystems" none ${cgroup_dir}; then
       return 1
     fi
   fi
@@ -87,7 +91,7 @@ function permit_device_control() {
   # permit our cgroup to do everything with all devices
   # ignore failure in case something has already done this; echo appears to
   # return EINVAL, possibly because devices this affects are already in use
-  echo a > ${cgroup_dir}${devices_subdir}/devices.allow || true
+  echo a > "${cgroup_dir}${devices_subdir}/devices.allow" || true
 }
 
 start_docker() {
@@ -116,9 +120,14 @@ start_docker() {
   mkdir -p /etc/docker
 
   echo "Allocating 10GB scratch filesystem for the docker daemon"
-  mknod /dev/loop0 b 7 0
   dd if=/dev/zero of=/tmp/docker-root bs=1024 count=10485760
   mkfs.btrfs /tmp/docker-root
+
+  if [[ ! -e /dev/loop0 ]]; then
+    echo "Making /dev/loop0"
+    mknod /dev/loop0 b 7 0
+  fi
+
   mount /tmp/docker-root /scratch/docker
   echo "Scratch filesystem mounted at /scratch/docker"
 
