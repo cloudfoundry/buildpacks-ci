@@ -164,6 +164,10 @@ extensions:
     version: nil
     md5: nil
     klass: FakePeclRecipe
+  - name: zip
+    version: nil
+    md5: nil
+    klass: FakePeclRecipe
 
   #non-standard
   - name: amqp
