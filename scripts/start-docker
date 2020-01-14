@@ -79,9 +79,12 @@ start_docker() {
   mkdir -p /scratch/docker
   mkdir -p /etc/docker
 
+  echo "Allocating 10GB scratch filesystem for the docker daemon"
   dd if=/dev/zero of=/tmp/docker-root bs=1024 count=10485760
   mkfs.btrfs /tmp/docker-root
   mount /tmp/docker-root /scratch/docker
+  echo "Scratch filesystem mounted at /scratch/docker"
+
   echo '{ "storage-driver": "btrfs" }' > /etc/docker/daemon.json
 
   # shellcheck disable=SC2086
