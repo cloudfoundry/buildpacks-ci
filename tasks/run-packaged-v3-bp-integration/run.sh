@@ -12,6 +12,6 @@ export GOBIN=$PWD/.bin
 export PATH=$GOBIN:$PATH
 
 echo "Start Docker"
-../buildpacks-ci/scripts/start-docker > /dev/null
+../buildpacks-ci/scripts/start-docker
 
 ./scripts/integration.sh
