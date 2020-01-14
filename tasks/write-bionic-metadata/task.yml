@@ -9,12 +9,10 @@ inputs:
 - name: source
 - name: builds
 outputs:
-- name: builds-artifacts
+- name: artifacts
+- name: builds
 run:
-  path: bash
-  args:
-  - -cl
-  - buildpacks-ci/tasks/write-bionic-metadata/run.rb
+  path: buildpacks-ci/tasks/write-bionic-metadata/run.sh
 params:
   STACK:
   STACK_ID:
