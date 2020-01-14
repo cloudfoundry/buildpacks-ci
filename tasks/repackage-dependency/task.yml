@@ -12,7 +12,7 @@ outputs:
 - name: artifacts
 - name: builds
 run:
-  path: buildpacks-ci/tasks/write-bionic-metadata/run.sh
+  path: buildpacks-ci/tasks/repackage-dependency/run.sh
 params:
   STACK:
   STACK_ID:
