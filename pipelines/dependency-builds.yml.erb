@@ -362,17 +362,19 @@ jobs:
       version: every
       passed: [ create-<%=dep_name%>-<%= line %>-story ]
     - get: builds
-  - do:
-    - task: write-bionic-metadata
-      file: buildpacks-ci/tasks/write-bionic-metadata/task.yml
-      params:
-        STACK: <%= stack %>
-        STACK_ID: <%= config.dig('v3_stacks', stack) %>
-    - put: bionic-builds-metadata
-      resource: builds
-      params:
-        repository: builds-artifacts
-        rebase: true
+  - task: repackage-dependency
+    file: buildpacks-ci/tasks/repackage-dependency/task.yml
+    params:
+      STACK: <%= stack %>
+      STACK_ID: <%= config.dig('v3_stacks', stack) %>
+  - put: buildpacks-bucket-<%= dep_name %>
+    params:
+      file: artifacts/<%= dep_name %>*
+  - put: bionic-builds-metadata
+    resource: builds
+    params:
+      repository: builds
+      rebase: true
   <% end %>
 
 - name: build-<%=dep_name%>-<%= line %>
