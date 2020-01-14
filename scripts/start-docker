@@ -128,7 +128,7 @@ start_docker() {
     if [[ ! -e "${loopdevice}" ]]; then
       echo "Allocating 10GB scratch filesystem for the docker daemon"
       dd if=/dev/zero of="${dockerroot}" bs=1024 count=10485760
-      mknod "${loopdevice}" b 7 0
+      mknod "${loopdevice}" b 7 "${rand}"
       losetup "${loopdevice}" "${dockerroot}"
     fi
 
