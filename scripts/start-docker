@@ -115,23 +115,25 @@ start_docker() {
   # shellcheck disable=SC2046,SC2155
   local server_args="--mtu 1200"
 
-  permit_device_control
   mkdir -p /scratch/docker
-  mkdir -p /etc/docker
 
-  echo "Allocating 10GB scratch filesystem for the docker daemon"
-  dd if=/dev/zero of=/tmp/docker-root bs=1024 count=10485760
-  mkfs.btrfs /tmp/docker-root
+  if command -v mkfs.btrfs > /dev/null; then
+    echo "Allocating 10GB scratch filesystem for the docker daemon"
+    permit_device_control
+    dd if=/dev/zero of=/tmp/docker-root bs=1024 count=10485760
+    mkfs.btrfs /tmp/docker-root
 
-  if [[ ! -e /dev/loop0 ]]; then
-    echo "Making /dev/loop0"
-    mknod /dev/loop0 b 7 0
+    if [[ ! -e /dev/loop0 ]]; then
+      echo "Making /dev/loop0"
+      mknod /dev/loop0 b 7 0
+    fi
+
+    mount /tmp/docker-root /scratch/docker
+    echo "Scratch filesystem mounted at /scratch/docker"
+
+    mkdir -p /etc/docker
+    echo '{ "storage-driver": "btrfs" }' > /etc/docker/daemon.json
   fi
-
-  mount /tmp/docker-root /scratch/docker
-  echo "Scratch filesystem mounted at /scratch/docker"
-
-  echo '{ "storage-driver": "btrfs" }' > /etc/docker/daemon.json
 
   # shellcheck disable=SC2086
   dockerd --data-root /scratch/docker ${server_args} >$LOG_FILE 2>&1 &
