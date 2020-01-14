@@ -11,3 +11,8 @@ extensions:
     - name: wddx
     - name: phalcon
     - name: tideways
+  additions:
+    - name: gd
+      version: nil
+      md5: nil
+      klass: Gd74FakePeclRecipe

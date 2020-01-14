@@ -6,3 +6,8 @@ extensions:
     - name: yaf
     - name: amqp
     - name: tideways
+  additions:
+    - name: gd
+      version: nil
+      md5: nil
+      klass: Gd72and73FakePeclRecipe
