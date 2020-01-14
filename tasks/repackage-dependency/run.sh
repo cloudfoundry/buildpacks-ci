@@ -14,7 +14,7 @@ case "$name" in
     source_url="https://dl.google.com/go/$path"
     ;;
   node)
-    path="node-v$version=linux-x64.tar.gz"
+    path="node-v$version-linux-x64.tar.gz"
     source_url="https://nodejs.org/dist/v$version/$path"
     ;;
   *)
