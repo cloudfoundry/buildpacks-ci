@@ -30,6 +30,7 @@ RUN curl -sL "https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master
 RUN apt-get -qqy update \
   && apt-get -qqy install \
     aufs-tools \
+    btrfs-progs \
     cf-cli \
     crystal \
     default-libmysqlclient-dev \
