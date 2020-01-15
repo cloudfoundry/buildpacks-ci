@@ -338,9 +338,6 @@ dependencies:
     buildpacks:
       nodejs:
         lines:
-          - line: 8.X.X
-            deprecation_date: 2019-12-01
-            link: https://github.com/nodejs/Release
           - line: 10.X.X
             deprecation_date: 2021-04-01
             link: https://github.com/nodejs/Release
@@ -363,9 +360,6 @@ dependencies:
             link: https://github.com/nodejs/Release
       node-engine-cnb:
         lines:
-          - line: 8.X.X
-            deprecation_date: 2019-12-01
-            link: https://github.com/nodejs/Release
           - line: 10.X.X
             deprecation_date: 2021-04-01
             link: https://github.com/nodejs/Release
