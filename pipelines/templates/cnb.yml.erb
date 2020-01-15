@@ -169,6 +169,8 @@ jobs: ##########################################################################
           - task: unit tests
             image: ci-image
             file: buildpacks-ci/tasks/run-scripts-unit/task.yml
+            params:
+              RUN_UNPRIVILEGED: true
 
 <% if buildpacks[language]['integration'] %>
   - name: specs-integration
