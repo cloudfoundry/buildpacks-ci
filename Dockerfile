@@ -11,6 +11,8 @@ RUN apt-get -qqy update \
   && apt-get -qqy clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN curl -q https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+
 COPY config/google-chrome-apt-key.pub /tmp/
 RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
   && apt-key add /tmp/google-chrome-apt-key.pub
