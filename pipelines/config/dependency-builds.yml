@@ -649,10 +649,6 @@ dependencies:
     buildpacks:
       php:
         lines:
-          - line: 7.1.X
-            match: 7.1.\d+
-            deprecation_date: 2019-12-01
-            link: http://php.net/supported-versions.php
           - line: 7.2.X
             match: 7.2.\d+
             deprecation_date: 2020-11-30
