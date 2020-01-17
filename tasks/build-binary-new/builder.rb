@@ -677,9 +677,7 @@ class Builder
       php_extensions = BaseExtensions.new(base_extension_file)
 
       patch_file = nil
-      if source_input.version.start_with?('7.1.')
-        patch_file = File.join(php_extensions_dir, 'php71-extensions-patch.yml')
-      elsif source_input.version.start_with?('7.2.')
+      if source_input.version.start_with?('7.2.')
         patch_file = File.join(php_extensions_dir, 'php72-extensions-patch.yml')
       elsif source_input.version.start_with?('7.3.')
         patch_file = File.join(php_extensions_dir, 'php73-extensions-patch.yml')
