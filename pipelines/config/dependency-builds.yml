@@ -30,15 +30,6 @@ dependencies:
     source_type: rubygems
     any_stack: true
     versions_to_keep: 2
-  CAAPM:
-    buildpacks:
-      php:
-        lines:
-          - line: latest
-    third_party_hosted: true
-    source_type: ca_apm_agent
-    any_stack: true
-    versions_to_keep: 2
   composer:
     buildpacks:
       php:
