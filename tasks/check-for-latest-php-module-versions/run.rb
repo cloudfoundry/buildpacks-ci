@@ -73,14 +73,14 @@ def url_for_type(name, type)
 end
 
 base_extensions = BaseExtensions.new('buildpacks-ci/tasks/build-binary-new/php7-base-extensions.yml')
-php71_extensions = base_extensions.patch('buildpacks-ci/tasks/build-binary-new/php71-extensions-patch.yml')
 php72_extensions = base_extensions.patch('buildpacks-ci/tasks/build-binary-new/php72-extensions-patch.yml')
 php73_extensions = base_extensions.patch('buildpacks-ci/tasks/build-binary-new/php73-extensions-patch.yml')
+php74_extensions = base_extensions.patch('buildpacks-ci/tasks/build-binary-new/php74-extensions-patch.yml')
 
 data = {
-  'PHP7.1' => php71_extensions.base_yml,
   'PHP7.2' => php72_extensions.base_yml,
   'PHP7.3' => php73_extensions.base_yml,
+  'PHP7.4' => php74_extensions.base_yml,
 }
 
 
@@ -102,7 +102,7 @@ Check that the PHP Module versions used in building PHP 7 are up to date. If the
 Reference the PHP7 recipes and module versions used in cooking these recipes in [binary-builder](https://github.com/cloudfoundry/binary-builder)
 DESCRIPTION
 
-description += "\n\n" + %w(Name Latest PHP7.1 PHP7.2 PHP7.3).join(' | ') + "\n"
+description += "\n\n" + %w(Name Latest PHP7.2 PHP7.3 PHP7.4).join(' | ') + "\n"
 description += '--- | --- | --- | --- | --- ' + "\n"
 extensions.keys.sort_by(&:name).each do |key|
   name = "#{key.name} (#{key.klass.gsub(/Recipe$/,'')})"
@@ -110,7 +110,7 @@ extensions.keys.sort_by(&:name).each do |key|
   latest = current_pecl_version(key.name) if key.klass =~ /PECL/i
   latest = current_github_version(url) if url =~ %r{^https://github.com}
   data = [url ? "[#{name}](#{url})" : name, latest]
-  %w(PHP7.1 PHP7.2 PHP7.3).each do |v|
+  %w(PHP7.2 PHP7.3 PHP7.4).each do |v|
     val = extensions[key][v]
     val = "**#{val}**" if val && val != latest
     data << val
