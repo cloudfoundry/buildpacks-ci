@@ -502,7 +502,6 @@ dependencies:
       - 'repo: cloudfoundry/python-runtime-cnb'
       - 'fetch_source: true'
       - 'prerelease: true'
-    any_stack: true
     versions_to_keep: 1
   org.cloudfoundry.pip:
     buildpacks:
@@ -526,7 +525,6 @@ dependencies:
       - 'repo: cloudfoundry/pipenv-cnb'
       - 'fetch_source: true'
       - 'prerelease: true'
-    any_stack: true
     versions_to_keep: 1
   org.cloudfoundry.conda:
     buildpacks:
