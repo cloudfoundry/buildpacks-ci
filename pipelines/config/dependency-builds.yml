@@ -692,9 +692,6 @@ dependencies:
     buildpacks:
       python:
         lines:  #! python 3 minor version EOLs are 5 years after their first final release
-          - line: 2.7.X
-            deprecation_date: 2020-01-01
-            link: https://www.python.org/dev/peps/pep-0373/
           - line: 3.5.X
             deprecation_date: 2020-09-13
             link: https://www.python.org/dev/peps/pep-0478/
@@ -710,9 +707,6 @@ dependencies:
         removal_strategy: keep_latest_released
       python-runtime-cnb:
         lines:
-          - line: 2.7.X
-            deprecation_date: 2020-01-01
-            link: https://www.python.org/dev/peps/pep-0373/
           - line: 3.5.X
             deprecation_date: 2020-09-13
             link: https://www.python.org/dev/peps/pep-0478/
