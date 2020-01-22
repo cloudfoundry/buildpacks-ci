@@ -460,7 +460,7 @@ jobs:
   - do:
    <% [
       { 'name' => 'update-buildpack-dependency', 'path' => 'buildpacks-ci/tasks/update-buildpack-dependency/task.yml', 'type' => Set['buildpack', 'shim'] },
-      { 'name' => 'update-cnb-dependency', 'path' => 'buildpacks-ci/tasks/update-cnb-dependency/task.yml', 'type' => Set['cnb'] }
+      { 'name' => 'update-cnb-dependency', 'path' => 'buildpacks-ci/tasks/cnb/update-cnb-dependency/task.yml', 'type' => Set['cnb'] }
     ].each do |task| %>
       <% is_v3 = bp_name.include?('cnb') %>
       <% should_do_shim = bp['shim'] && task['type'].include?('shim') %>
@@ -480,6 +480,12 @@ jobs:
       output_mapping:
         artifacts: buildpack
       <% end %>
+    <% end %>
+    <% if bp_name == 'dotnet-core-sdk-cnb' && dep_name == 'dotnet-sdk' %>
+    - task: update-dotnet-compatibility-table
+      file: buildpacks-ci/tasks/cnb/update-dotnet-compatibility-table/task.yml
+      output_mapping:
+        artifacts: buildpack
     <% end %>
     - put: <%= bp_name %>-buildpack<%= '-v3' if dep['branch'] == 'v3' %>
       params:

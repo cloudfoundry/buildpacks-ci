@@ -8,12 +8,6 @@ import (
 	"regexp"
 )
 
-type Stack struct {
-	ID string `toml:"id"`
-}
-
-type Stacks []Stack
-
 const AnyStack = "any-stack"
 const TinyStack = "tiny"
 

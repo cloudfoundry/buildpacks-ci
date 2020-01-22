@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/cloudfoundry/buildpacks-ci/tasks/cnb/helpers"
+
 	"gopkg.in/yaml.v2"
 
 	"github.com/BurntSushi/toml"
@@ -43,17 +45,11 @@ type DependencyOrchestratorConfig struct {
 	IncludeTiny      []string          `yaml:"include_tiny_in_any_stack"`
 }
 
-type EnvVars struct {
-	DeprecationDate DependencyDeprecationDate
-	VersionLine     string
-	VersionsToKeep  int
-}
-
 type UpdateConfig struct {
 	Orchestrator  DependencyOrchestratorConfig
 	BuildMetadata BuildMetadata
 	Dep           Dependency
-	BuildpackTOML BuildpackTOML
+	BuildpackTOML helpers.BuildpackTOML
 }
 
 func NewUpdateConfig(dependencyBuildsConfig, buildpackTOMLContents, sourceData, binaryBuildsPath string) (UpdateConfig, error) {
@@ -62,7 +58,7 @@ func NewUpdateConfig(dependencyBuildsConfig, buildpackTOMLContents, sourceData, 
 		return UpdateConfig{}, err
 	}
 
-	var buildpackTOML BuildpackTOML
+	var buildpackTOML helpers.BuildpackTOML
 	if _, err := toml.Decode(buildpackTOMLContents, &buildpackTOML); err != nil {
 		return UpdateConfig{}, err
 	}
@@ -92,20 +88,4 @@ func NewUpdateConfig(dependencyBuildsConfig, buildpackTOMLContents, sourceData, 
 		Dep:           dep,
 		BuildpackTOML: buildpackTOML,
 	}, nil
-}
-
-func loadJSON(path string, out interface{}) error {
-	contents, err := ioutil.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(contents, out)
-}
-
-func loadYAML(path string, out interface{}) error {
-	contents, err := ioutil.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	return yaml.Unmarshal(contents, out)
 }

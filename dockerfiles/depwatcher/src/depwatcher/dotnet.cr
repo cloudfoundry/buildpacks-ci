@@ -104,6 +104,8 @@ module Depwatcher
       if file
         file.hash = file.hash.downcase
         download_file(file.url, output_dir, file.hash)
+        version = get_runtime_version(releases, ref)
+        File.write("#{output_dir}/runtime_version", version)
         DotnetRelease.new(ref, file.url, file.hash)
       end
     end
@@ -134,6 +136,10 @@ module Depwatcher
     def get_newest_file(releases, version)
       releases.find { |r| !r.sdk.nil? && r.sdk.not_nil!.version == version }.not_nil!.sdk.not_nil!.files.find { |f| f.name == "dotnet-sdk-linux-x64.tar.gz" }
     end
+
+    def get_runtime_version(releases, version)
+      releases.find { |r| !r.sdk.nil? && r.sdk.not_nil!.version == version }.not_nil!.runtime.not_nil!.version
+    end
   end
 
   class DotnetRuntime < DotnetBase
@@ -144,6 +150,10 @@ module Depwatcher
     def get_newest_file(releases, version)
       releases.find { |r| !r.runtime.nil? && r.runtime.not_nil!.version == version }.not_nil!.runtime.not_nil!.files.find { |f| f.name == "dotnet-runtime-linux-x64.tar.gz" }
     end
+
+    def get_runtime_version(releases, version)
+      version
+    end
   end
 
   class AspnetcoreRuntime < DotnetBase
@@ -153,6 +163,10 @@ module Depwatcher
 
     def get_newest_file(releases, version)
       releases.find { |r| !r.aspnetcore_runtime.nil? && r.aspnetcore_runtime.not_nil!.version == version }.not_nil!.aspnetcore_runtime.not_nil!.files.find { |f| f.name == "aspnetcore-runtime-linux-x64.tar.gz" }
+    end
+
+    def get_runtime_version(releases, version)
+      version
     end
   end
 end

@@ -3,11 +3,10 @@ package main_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
-	. "github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency"
+	. "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-cnb-dependency"
 	"github.com/sclevine/spec"
 	"github.com/sclevine/spec/report"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCommitArtifacts(t *testing.T) {

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
 	"sort"
 
@@ -200,8 +202,12 @@ func makeKeyWithoutStack(dep Dependency) string {
 }
 
 func constructDependenciesFromBuildMetadata(dep Dependency, buildMetadataPath string, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
+	contents, err := ioutil.ReadFile(buildMetadataPath)
+	if err != nil {
+		return nil, err
+	}
 	var buildMetadata BuildMetadata
-	if err := loadJSON(buildMetadataPath, &buildMetadata); err != nil {
+	if err := json.Unmarshal(contents, &buildMetadata); err != nil {
 		return nil, err
 	}
 

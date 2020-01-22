@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mitchellh/mapstructure"
-
 	"github.com/BurntSushi/toml"
-	. "github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency"
+	"github.com/cloudfoundry/buildpacks-ci/tasks/cnb/helpers"
+	. "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-cnb-dependency"
+	"github.com/mitchellh/mapstructure"
 	"github.com/sclevine/spec"
 	"github.com/sclevine/spec/report"
 	"github.com/stretchr/testify/assert"
@@ -77,7 +77,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			require.NoError(t, err)
 
 			taskCmd = exec.Command(
-				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency",
+				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-cnb-dependency",
 				"--dependency-builds-config", string(dependencyBuildsConfig),
 				"--buildpack-toml", string(sourceBuildpackTOML),
 				"--source-data", string(sourceData),
@@ -96,12 +96,12 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 
 		it("updates the dep in the buildpack.toml deps and retains existing arbitrary metadata", func() {
 			buildpackTOML := decodeBuildpackTOML(t, outputDir)
-			assert.Equal(t, "./scripts/build.sh", buildpackTOML.Metadata[PrePackageKey])
+			assert.Equal(t, "./scripts/build.sh", buildpackTOML.Metadata[helpers.PrePackageKey])
 			assert.Equal(t, "random", buildpackTOML.Metadata["random"])
-			assert.Equal(t, []interface{}{"bin/build", "bin/detect", "buildpack.toml"}, buildpackTOML.Metadata[IncludeFilesKey])
+			assert.Equal(t, []interface{}{"bin/build", "bin/detect", "buildpack.toml"}, buildpackTOML.Metadata[helpers.IncludeFilesKey])
 			assert.Equal(t, map[string]interface{}{
 				"some-dep": "2.x",
-			}, buildpackTOML.Metadata[DefaultVersionsKey])
+			}, buildpackTOML.Metadata[helpers.DefaultVersionsKey])
 
 			var deps Dependencies
 			require.NoError(t, mapstructure.Decode(buildpackTOML.Metadata["dependencies"], &deps))
@@ -235,7 +235,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			require.NoError(t, err)
 
 			taskCmd = exec.Command(
-				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency",
+				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-cnb-dependency",
 				"--dependency-builds-config", string(dependencyBuildsConfig),
 				"--buildpack-toml", string(buildpackTOML),
 				"--source-data", string(sourceData),
@@ -270,7 +270,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 		it("updates versions in order", func() {
 			buildpackTOML := decodeBuildpackTOML(t, outputDir)
 
-			assert.Equal(t, Orders{{Group: []Group{
+			assert.Equal(t, []helpers.Order{{Group: []helpers.Group{
 				{
 					ID:       "org.cloudfoundry.some-child",
 					Version:  "1.0.1",
@@ -316,7 +316,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			require.NoError(t, err)
 
 			taskCmd = exec.Command(
-				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency",
+				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-cnb-dependency",
 				"--dependency-builds-config", string(dependencyBuildsConfig),
 				"--buildpack-toml", string(buildpackTOML),
 				"--source-data", string(sourceData),
@@ -337,7 +337,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			assert.Contains(t, string(latestCommitMessage), "Add org.cloudfoundry.some-child 1.0.1, remove org.cloudfoundry.some-child 1.0.0")
 			assert.Contains(t, string(latestCommitMessage), "for stack(s) io.buildpacks.stacks.bionic, org.cloudfoundry.stacks.cflinuxfs3, org.cloudfoundry.stacks.tiny [#111111111]")
 
-			var buildpackTOML BuildpackTOML
+			var buildpackTOML helpers.BuildpackTOML
 			_, err = toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackTOML)
 			require.NoError(t, err)
 
@@ -358,8 +358,8 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 	})
 }
 
-func decodeBuildpackTOML(t *testing.T, outputDir string) BuildpackTOML {
-	var buildpackTOML BuildpackTOML
+func decodeBuildpackTOML(t *testing.T, outputDir string) helpers.BuildpackTOML {
+	var buildpackTOML helpers.BuildpackTOML
 	_, err := toml.DecodeFile(filepath.Join(outputDir, "buildpack.toml"), &buildpackTOML)
 	require.NoError(t, err)
 	return buildpackTOML

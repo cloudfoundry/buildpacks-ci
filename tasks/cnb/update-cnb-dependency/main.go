@@ -53,7 +53,7 @@ func updateCNBDependencies() error {
 		return errors.Wrap(err, "failed to construct list of dependencies to add")
 	}
 
-	originalDeps, updatedDeps, err := config.BuildpackTOML.UpdateDependenciesWith(config.Dep, depsToAdd, flags.versionsToKeep)
+	originalDeps, updatedDeps, err := UpdateDependenciesWith(config.BuildpackTOML, config.Dep, depsToAdd, flags.versionsToKeep)
 	if err != nil {
 		return errors.Wrap(err, "failed to update the dependencies")
 	}
@@ -63,12 +63,12 @@ func updateCNBDependencies() error {
 		return errors.Wrap(err, "failed to create a deprecation date")
 	}
 
-	err = config.BuildpackTOML.UpdateDeprecationDatesWith(deprecationDate)
+	err = UpdateDeprecationDatesWith(config.BuildpackTOML, deprecationDate)
 	if err != nil {
 		return errors.Wrap(err, "failed to update the deprecation dates")
 	}
 
-	config.BuildpackTOML.UpdateOrdersWith(config.Dep)
+	config.BuildpackTOML.Orders = UpdateOrders(config.BuildpackTOML.Orders, config.Dep)
 
 	// Won't work until golang 1.13
 	//config.BuildpackTOML.RemoveEmptyMetadataFields()
