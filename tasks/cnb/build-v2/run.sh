@@ -6,8 +6,13 @@ set -o pipefail
 readonly ROOT="${PWD}"
 
 function main() {
-  local version
+  local version cached_flag
   version="$( cut -d '-' -f 1 version/version )"
+
+  cached_flag=""
+  if [[ -n "${CACHED}" ]]; then
+    cached_flag="--cached"
+  fi
 
   mkdir -p "${ROOT}/build"
 
@@ -19,7 +24,7 @@ function main() {
 
   pushd "${ROOT}/build" > /dev/null || return
     "${ROOT}/cnb2cf/build/cnb2cf" package \
-      --version "${version}" --stack "cflinuxfs3"
+      --version "${version}" --stack "cflinuxfs3" "${cached_flag}"
   popd > /dev/null || return
 
   # shellcheck disable=SC2086
