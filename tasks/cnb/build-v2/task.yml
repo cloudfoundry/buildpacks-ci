@@ -13,5 +13,9 @@ inputs:
 outputs:
   - name: candidate
 
+params:
+  CACHED:
+  GIT_TOKEN:
+
 run:
   path: buildpacks-ci/tasks/cnb/build-v2/run.sh
