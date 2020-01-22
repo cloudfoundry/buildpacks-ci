@@ -5,7 +5,7 @@ set -euo pipefail
 cp -r buildpack/. artifacts
 
 buildpack_toml="$(cat "$PWD/buildpack/buildpack.toml")"
-sdk_version="$(cat "$PWD/source/data.json" | jq -r .version.ref)"
+sdk_version="$(jq -r .version.ref "$PWD/source/data.json")"
 output_dir="$PWD/artifacts"
 runtime_version="$(cat "$PWD/source/runtime_version")"
 
