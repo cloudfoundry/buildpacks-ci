@@ -4,9 +4,9 @@ set -euo pipefail
 
 cp -r buildpack/. artifacts
 
-dependency_builds_config="$(cat "$PWD/go/src/github.com/cloudfoundry/buildpacks-ci/pipelines/config/dependency-builds.yml")"
-buildpack_toml="$(cat "$PWD/buildpack/buildpack.toml")"
-source_data="$(cat "$PWD/source/data.json")"
+dependency_builds_config="$(cat "buildpacks-ci/pipelines/config/dependency-builds.yml")"
+buildpack_toml="$(cat "buildpack/buildpack.toml")"
+source_data="$(cat "source/data.json")"
 binary_builds_path="$PWD/builds/binary-builds-new"
 output_dir="$PWD/artifacts"
 
