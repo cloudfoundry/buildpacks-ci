@@ -65,6 +65,12 @@ Spec2.describe Depwatcher::DotnetBase do
         expect(obj.sha512).to eq "238b5049593ae6aa9a5f34473ad890b84487ae1cd2129a9878e074b0217f1ebe7b849d7e3376a437941437b918ab3990cea5fe3fb0305e9e76bc5da0e33aafac"
       end
 
+      it "writes the runtime version to a file" do
+        subject.in("2.1.701", dirname)
+        runtime_version = File.read(File.join(dirname, "runtime_version"))
+        expect(runtime_version).to eq "2.1.12"
+      end
+
       it "downloads the file" do
         obj = subject.in("2.1.701", dirname).not_nil!
         hash = OpenSSL::Digest.new("SHA512")
@@ -114,6 +120,12 @@ Spec2.describe Depwatcher::DotnetBase do
         expect(obj.sha512).to eq "cbf2e9d45ae7f275e3b75091f36a95411129d703df856c17f9758673e04a6282eae8dfacea5cc55ab718eb63a8f467c9e3c4ca6c6277a1a3bbddf00b63cebb6c"
       end
 
+      it "writes the runtime version to a file" do
+        subject.in("2.1.12", dirname)
+        runtime_version = File.read(File.join(dirname, "runtime_version"))
+        expect(runtime_version).to eq "2.1.12"
+      end
+
       it "downloads the file" do
         obj = subject.in("2.1.12", dirname).not_nil!
         hash = OpenSSL::Digest.new("SHA512")
@@ -161,6 +173,12 @@ Spec2.describe Depwatcher::DotnetBase do
         expect(obj.ref).to eq "2.1.12"
         expect(obj.url).to eq "https://download.visualstudio.microsoft.com/download/pr/c1b620fe-7d8e-4685-b6ae-82b444dbc7a7/3d5610f0607da49ee014c61c6cd4e9af/aspnetcore-runtime-2.1.12-linux-x64.tar.gz"
         expect(obj.sha512).to eq "138bbc69b94303fa2f151b32ef60873917090949a8e70bcf538765bb813fa015aadf7ef8c59f708166bb812e0e05fc64c73a70885a7cae7a0c1182e50c896f9b"
+      end
+
+      it "writes the runtime version to a file" do
+        subject.in("2.1.12", dirname)
+        runtime_version = File.read(File.join(dirname, "runtime_version"))
+        expect(runtime_version).to eq "2.1.12"
       end
 
       it "downloads the file" do

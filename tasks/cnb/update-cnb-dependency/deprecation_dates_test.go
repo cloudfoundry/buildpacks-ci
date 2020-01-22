@@ -4,12 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
-	. "github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency"
+	. "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-cnb-dependency"
 	"github.com/sclevine/spec"
 	"github.com/sclevine/spec/report"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUpdateDeprecationDates(t *testing.T) {

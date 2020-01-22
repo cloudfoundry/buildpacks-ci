@@ -10,9 +10,7 @@ source_data="$(cat "$PWD/source/data.json")"
 binary_builds_path="$PWD/builds/binary-builds-new"
 output_dir="$PWD/artifacts"
 
-export GOPATH="$PWD/go"
-
-pushd "$GOPATH/src/github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency" > /dev/null
+pushd "buildpacks-ci/tasks/cnb/update-cnb-dependency" > /dev/null
   go run . \
     --dependency-builds-config "$dependency_builds_config" \
     --buildpack-toml "$buildpack_toml" \

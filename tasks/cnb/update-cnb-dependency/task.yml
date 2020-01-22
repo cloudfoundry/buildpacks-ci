@@ -7,7 +7,6 @@ image_resource:
 inputs:
   - name: buildpack
   - name: buildpacks-ci
-    path: go/src/github.com/cloudfoundry/buildpacks-ci
   - name: source
   - name: builds
 outputs:
@@ -19,4 +18,4 @@ params:
   VERSION_LINE:
   VERSIONS_TO_KEEP:
 run:
-  path: go/src/github.com/cloudfoundry/buildpacks-ci/tasks/update-cnb-dependency/run.sh
+  path: buildpacks-ci/tasks/cnb/update-cnb-dependency/run.sh

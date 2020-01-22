@@ -1,6 +1,6 @@
 module github.com/cloudfoundry/buildpacks-ci
 
-go 1.12
+go 1.13
 
 require (
 	cloud.google.com/go/bigquery v1.3.0 // indirect
