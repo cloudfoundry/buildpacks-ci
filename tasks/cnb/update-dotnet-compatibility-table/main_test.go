@@ -32,7 +32,38 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			"HOME=" + os.Getenv("HOME"),
 			"PATH=" + os.Getenv("PATH"),
 		}
-		outputDir string
+		outputDir    string
+		releasesJSON = `{
+  "channel-version": "2.1",
+  "eol-date": "2099-08-21",
+	"latest-runtime": "2.1.15",
+  "releases": [
+    {
+      "release-version": "2.1.15",
+      "runtime": { "version": "2.1.15" },
+      "sdk": { "version": "2.1.803" },
+      "aspnetcore-runtime": { "version": "2.1.15" }
+    },
+    {
+      "release-version": "2.1.14",
+      "runtime": { "version": "2.1.14" },
+      "sdk": { "version": "2.1.607" },
+      "aspnetcore-runtime": { "version": "2.1.14" }
+    },
+    {
+      "release-version": "2.1.802",
+      "runtime": { "version": "2.1.13" },
+      "sdk": { "version": "2.1.802" },
+      "aspnetcore-runtime": { "version": "2.1.13" }
+    },
+    {
+      "release-version": "2.1.13",
+      "runtime": { "version": "2.1.13" },
+      "sdk": { "version": "2.1.801" },
+      "aspnetcore-runtime": { "version": "2.1.13" }
+    }
+  ]
+}`
 	)
 	when("with empty buildpack.toml", func() {
 		it("add version of sdk dependency", func() {
@@ -48,9 +79,10 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			taskCmd := exec.Command(
 				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-dotnet-compatibility-table",
 				"--buildpack-toml", buildpackTOMLContents,
-				"--sdk-version", "2.1.102",
+				"--sdk-version", "2.1.803",
 				"--output-dir", outputDir,
-				"--runtime-version", "2.1.1",
+				"--runtime-version", "2.1.15",
+				"--releases-json", releasesJSON,
 			)
 			taskCmd.Env = append(taskCmd.Env, envVars...)
 
@@ -64,8 +96,8 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 
 			assert.Equal(t, []RuntimeToSDK{
 				{
-					RuntimeVersion: "2.1.1",
-					SDKs:           []string{"2.1.102"},
+					RuntimeVersion: "2.1.15",
+					SDKs:           []string{"2.1.803"},
 				},
 			}, compatibilityTable)
 
@@ -81,15 +113,16 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 
 			buildpackTOMLContents := `
   [[metadata.runtime-to-sdks]]
-    runtime-version = "2.1.12"
-    sdks = ["2.1.801"]`
+    runtime-version = "2.1.14"
+    sdks = ["2.1.607"]`
 
 			taskCmd := exec.Command(
 				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-dotnet-compatibility-table",
 				"--buildpack-toml", buildpackTOMLContents,
-				"--sdk-version", "2.1.802",
+				"--sdk-version", "2.1.803",
 				"--output-dir", outputDir,
-				"--runtime-version", "2.1.13",
+				"--runtime-version", "2.1.15",
+				"--releases-json", releasesJSON,
 			)
 			taskCmd.Env = append(taskCmd.Env, envVars...)
 
@@ -103,18 +136,83 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 
 			assert.Equal(t, []RuntimeToSDK{
 				{
-					RuntimeVersion: "2.1.12",
-					SDKs:           []string{"2.1.801"},
+					RuntimeVersion: "2.1.14",
+					SDKs:           []string{"2.1.607"},
 				},
 				{
-					RuntimeVersion: "2.1.13",
-					SDKs:           []string{"2.1.802"},
+					RuntimeVersion: "2.1.15",
+					SDKs:           []string{"2.1.803"},
 				},
 			}, compatibilityTable)
 		})
+		it("correctly sorts by runtime version", func() {
+			outputDir = filepath.Join(testdataPath, "artifacts")
+			require.NoError(t, os.RemoveAll(outputDir))
+			require.NoError(t, os.Mkdir(outputDir, 0755))
+			require.NoError(t, exec.Command("git", "-C", outputDir, "init").Run())
+
+			buildpackTOMLContents := `
+  [[metadata.runtime-to-sdks]]
+    runtime-version = "2.1.15"
+    sdks = ["2.1.607"]`
+
+			taskCmd := exec.Command(
+				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-dotnet-compatibility-table",
+				"--buildpack-toml", buildpackTOMLContents,
+				"--sdk-version", "2.1.803",
+				"--output-dir", outputDir,
+				"--runtime-version", "2.1.14",
+				"--releases-json", releasesJSON,
+			)
+			taskCmd.Env = append(taskCmd.Env, envVars...)
+
+			taskOutput, err := taskCmd.CombinedOutput()
+			require.NoError(t, err, string(taskOutput))
+
+			outputBuildpackToml := decodeBuildpackTOML(t, outputDir)
+
+			var compatibilityTable []RuntimeToSDK
+			require.NoError(t, mapstructure.Decode(outputBuildpackToml.Metadata["runtime-to-sdks"], &compatibilityTable))
+
+			assert.Equal(t, []RuntimeToSDK{
+				{
+					RuntimeVersion: "2.1.14",
+					SDKs:           []string{"2.1.803"},
+				},
+				{
+					RuntimeVersion: "2.1.15",
+					SDKs:           []string{"2.1.607"},
+				},
+			}, compatibilityTable)
+		})
+		when("the runtime version is not one of the two latest supported versions", func() {
+			it("does not add to the compatibility table", func() {
+				outputDir = filepath.Join(testdataPath, "artifacts")
+				require.NoError(t, os.RemoveAll(outputDir))
+				require.NoError(t, os.Mkdir(outputDir, 0755))
+				require.NoError(t, exec.Command("git", "-C", outputDir, "init").Run())
+
+				buildpackTOMLContents := ""
+
+				taskCmd := exec.Command(
+					"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-dotnet-compatibility-table",
+					"--buildpack-toml", buildpackTOMLContents,
+					"--sdk-version", "2.1.801",
+					"--output-dir", outputDir,
+					"--runtime-version", "2.1.13",
+					"--releases-json", releasesJSON,
+				)
+				taskCmd.Env = append(taskCmd.Env, envVars...)
+
+				taskOutput, err := taskCmd.CombinedOutput()
+				require.NoError(t, err, string(taskOutput))
+
+				assert.Contains(t, string(taskOutput), "this runtime patch version is not supported. only the two latest versions are supported")
+			})
+		})
 	})
 
-	when("with runtime version present in buildpack.toml", func() {
+	when("runtime version is present in buildpack.toml", func() {
 		it("include only one latest version of sdk dependency", func() {
 			outputDir = filepath.Join(testdataPath, "artifacts")
 			require.NoError(t, os.RemoveAll(outputDir))
@@ -126,15 +224,16 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
     runtime-version = "1.1.13"
     sdks = ["1.1.801"]
 	[[metadata.runtime-to-sdks]]
-    runtime-version = "2.1.13"
-    sdks = ["2.1.801"]`
+    runtime-version = "2.1.14"
+    sdks = ["2.1.606"]`
 
 			taskCmd := exec.Command(
 				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-dotnet-compatibility-table",
 				"--buildpack-toml", buildpackTOMLContents,
-				"--sdk-version", "2.1.906",
+				"--sdk-version", "2.1.607",
 				"--output-dir", outputDir,
-				"--runtime-version", "2.1.13",
+				"--runtime-version", "2.1.14",
+				"--releases-json", releasesJSON,
 			)
 			taskCmd.Env = append(taskCmd.Env, envVars...)
 
@@ -153,8 +252,8 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 					SDKs:           []string{"1.1.801"},
 				},
 				{
-					RuntimeVersion: "2.1.13",
-					SDKs:           []string{"2.1.906"},
+					RuntimeVersion: "2.1.14",
+					SDKs:           []string{"2.1.607"},
 				},
 			}, compatibilityTable)
 
@@ -170,15 +269,16 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 
 			buildpackTOMLContents := `
   [[metadata.runtime-to-sdks]]
-    runtime-version = "2.1.13"
-    sdks = ["2.1.801"]`
+    runtime-version = "2.1.14"
+    sdks = ["2.1.607"]`
 
 			taskCmd := exec.Command(
 				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-dotnet-compatibility-table",
 				"--buildpack-toml", buildpackTOMLContents,
 				"--sdk-version", "2.1.606",
 				"--output-dir", outputDir,
-				"--runtime-version", "2.1.13",
+				"--runtime-version", "2.1.14",
+				"--releases-json", releasesJSON,
 			)
 			taskCmd.Env = append(taskCmd.Env, envVars...)
 
@@ -193,8 +293,8 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 
 			assert.Equal(t, []RuntimeToSDK{
 				{
-					RuntimeVersion: "2.1.13",
-					SDKs:           []string{"2.1.801"},
+					RuntimeVersion: "2.1.14",
+					SDKs:           []string{"2.1.607"},
 				},
 			}, compatibilityTable)
 		})
@@ -219,29 +319,29 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 
   [[metadata.dependencies]]
     id = "dotnet-sdk"
-    sha256 = "2f4cbb9d93e79fcd330d81bde9fa471e33e3ed7a7b8cf57c897d9ca8588a8160"
-    source = "https://download.visualstudio.microsoft.com/download/pr/d731f991-8e68-4c7c-8ea0-fad5605b077a/49497b5420eecbd905158d86d738af64/dotnet-sdk-3.1.100-linux-x64.tar.gz"
-    source_sha256 = "3687b2a150cd5fef6d60a4693b4166994f32499c507cd04f346b6dda38ecdc46"
+    sha256 = "505ee870eb9a6a8563d1c94866e80ddf48ee9d10f85277093ec657fd6c012098"
+    source = "https://download.visualstudio.microsoft.com/download/pr/39e68289-0364-4173-a12b-c6234e94c527/92f3eb83bfca8b7cd360868996763125/dotnet-sdk-2.1.607-linux-x64.tar.gz"
+    source_sha256 = "f38a08584fff6014beb8f6729bcda22040fae40c8bce21a38ec2249823cd173b"
     stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-sdk/dotnet-sdk.3.1.100.linux-amd64-any-stack-2f4cbb9d.tar.xz"
-    version = "3.1.100"
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-sdk/dotnet-sdk.2.1.607.linux-amd64-cflinuxfs3-505ee870.tar.xz"
+    version = "2.1.607"
 
   [[metadata.dependencies]]
     id = "dotnet-sdk"
-    sha256 = "670669f5823be815cd278ec11621ce00ca671027bc6038d665516bb6b14c871b"
-    source = "https://download.visualstudio.microsoft.com/download/pr/c4b503d6-2f41-4908-b634-270a0a1dcfca/c5a20e42868a48a2cd1ae27cf038044c/dotnet-sdk-3.1.101-linux-x64.tar.gz"
-    source_sha256 = "a1060891482267f4b36a877b547396d7838bc36c65ef16db192344fd9b29211d"
+    sha256 = "761e82b26e016bc45bf8c90a122b2342f0ec55313e449d1766aa6f16cb4679d3"
+    source = "https://download.visualstudio.microsoft.com/download/pr/701502b0-f9a2-464f-9832-4e6ca3126a2a/62655f151db917025e9be8cc4b7c1ed9/dotnet-sdk-2.1.802-linux-x64.tar.gz"
+    source_sha256 = "fcb46a4a0c99bf82b591bca2cd276e2d73b65e199f0d14c9cc48dcdf5fb2ffb0"
     stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3"]
-    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-sdk/dotnet-sdk.3.1.101.linux-amd64-any-stack-670669f5.tar.xz"
-    version = "3.1.101"
+    uri = "https://buildpacks.cloudfoundry.org/dependencies/dotnet-sdk/dotnet-sdk.2.1.802.linux-amd64-any-stack-761e82b2.tar.xz"
+    version = "2.1.802"
 
   [[metadata.runtime-to-sdks]]
-    runtime-version = "3.1.0"
-    sdks = ["3.1.100"]
+    runtime-version = "2.1.14"
+    sdks = ["2.1.607"]
 
   [[metadata.runtime-to-sdks]]
-    runtime-version = "3.1.1"
-    sdks = ["3.1.101"]
+    runtime-version = "2.1.15"
+    sdks = ["2.1.802"]
 
 [[stacks]]
   id = "org.cloudfoundry.stacks.cflinuxfs3"
@@ -253,9 +353,10 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 		taskCmd := exec.Command(
 			"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-dotnet-compatibility-table",
 			"--buildpack-toml", buildpackTOMLContents,
-			"--sdk-version", "3.1.201",
+			"--sdk-version", "2.1.803",
 			"--output-dir", outputDir,
-			"--runtime-version", "3.1.1",
+			"--runtime-version", "2.1.15",
+			"--releases-json", releasesJSON,
 		)
 		taskCmd.Env = append(taskCmd.Env, envVars...)
 
@@ -264,9 +365,47 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 
 		outputBuildpackToml, _ := ioutil.ReadFile(filepath.Join(outputDir, "buildpack.toml"))
 
-		expectedBuildpackToml := strings.Replace(buildpackTOMLContents, `["3.1.101"]`, `["3.1.201"]`, 1)
+		expectedBuildpackToml := strings.Replace(buildpackTOMLContents, `["2.1.802"]`, `["2.1.803"]`, 1)
 
-		assert.Equal(t, expectedBuildpackToml, string(outputBuildpackToml))
+		assert.Equal(t, string(outputBuildpackToml), expectedBuildpackToml)
+	})
+
+	when("dotnet runtime is deprecated", func() {
+		it("doesn't add to the table", func() {
+			outputDir = filepath.Join(testdataPath, "artifacts")
+			require.NoError(t, os.RemoveAll(outputDir))
+			require.NoError(t, os.Mkdir(outputDir, 0755))
+			require.NoError(t, exec.Command("git", "-C", outputDir, "init").Run())
+
+			buildpackTOMLContents := ""
+			deprecatedReleasesJSON := `{
+  "channel-version": "2.1",
+  "eol-date": "2000-08-21",
+  "releases": [
+    {
+      "release-version": "2.1.15",
+      "runtime": { "version": "2.1.15" },
+      "sdk": { "version": "2.1.803" },
+      "aspnetcore-runtime": { "version": "2.1.15" }
+    }
+  ]
+}`
+
+			taskCmd := exec.Command(
+				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-dotnet-compatibility-table",
+				"--buildpack-toml", buildpackTOMLContents,
+				"--sdk-version", "2.1.803",
+				"--output-dir", outputDir,
+				"--runtime-version", "2.1.15",
+				"--releases-json", deprecatedReleasesJSON,
+			)
+			taskCmd.Env = append(taskCmd.Env, envVars...)
+
+			taskOutput, err := taskCmd.CombinedOutput()
+			require.NoError(t, err, string(taskOutput))
+
+			assert.Contains(t, string(taskOutput), "this runtime version is end of life")
+		})
 	})
 }
 
