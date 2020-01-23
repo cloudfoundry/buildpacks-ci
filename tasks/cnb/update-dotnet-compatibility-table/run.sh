@@ -11,13 +11,13 @@ output_dir="$PWD/artifacts"
 
 minor_version="$(echo "$runtime_version" | cut -d '.' -f1-2)"
 
-releases_json="$(curl -s "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/$minor_version/releases.json")"
-
 pushd "buildpacks-ci/tasks/cnb/update-dotnet-compatibility-table" > /dev/null
+  curl -s -O "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/$minor_version/releases.json"
+
   go run . \
     --buildpack-toml "$buildpack_toml" \
     --sdk-version "$sdk_version" \
     --output-dir "$output_dir"\
     --runtime-version "$runtime_version" \
-    --releases-json "$releases_json"
+    --releases-json-path "releases.json"
 popd > /dev/null

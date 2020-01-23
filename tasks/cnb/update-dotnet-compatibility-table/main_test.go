@@ -33,37 +33,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			"PATH=" + os.Getenv("PATH"),
 		}
 		outputDir    string
-		releasesJSON = `{
-  "channel-version": "2.1",
-  "eol-date": "2099-08-21",
-	"latest-runtime": "2.1.15",
-  "releases": [
-    {
-      "release-version": "2.1.15",
-      "runtime": { "version": "2.1.15" },
-      "sdk": { "version": "2.1.803" },
-      "aspnetcore-runtime": { "version": "2.1.15" }
-    },
-    {
-      "release-version": "2.1.14",
-      "runtime": { "version": "2.1.14" },
-      "sdk": { "version": "2.1.607" },
-      "aspnetcore-runtime": { "version": "2.1.14" }
-    },
-    {
-      "release-version": "2.1.802",
-      "runtime": { "version": "2.1.13" },
-      "sdk": { "version": "2.1.802" },
-      "aspnetcore-runtime": { "version": "2.1.13" }
-    },
-    {
-      "release-version": "2.1.13",
-      "runtime": { "version": "2.1.13" },
-      "sdk": { "version": "2.1.801" },
-      "aspnetcore-runtime": { "version": "2.1.13" }
-    }
-  ]
-}`
+		releasesJSON = filepath.Join(testdataPath, "releases.json")
 	)
 	when("with empty buildpack.toml", func() {
 		it("add version of sdk dependency", func() {
@@ -82,7 +52,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				"--sdk-version", "2.1.803",
 				"--output-dir", outputDir,
 				"--runtime-version", "2.1.15",
-				"--releases-json", releasesJSON,
+				"--releases-json-path", releasesJSON,
 			)
 			taskCmd.Env = append(taskCmd.Env, envVars...)
 
@@ -122,7 +92,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				"--sdk-version", "2.1.803",
 				"--output-dir", outputDir,
 				"--runtime-version", "2.1.15",
-				"--releases-json", releasesJSON,
+				"--releases-json-path", releasesJSON,
 			)
 			taskCmd.Env = append(taskCmd.Env, envVars...)
 
@@ -162,7 +132,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				"--sdk-version", "2.1.803",
 				"--output-dir", outputDir,
 				"--runtime-version", "2.1.14",
-				"--releases-json", releasesJSON,
+				"--releases-json-path", releasesJSON,
 			)
 			taskCmd.Env = append(taskCmd.Env, envVars...)
 
@@ -200,7 +170,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 					"--sdk-version", "2.1.801",
 					"--output-dir", outputDir,
 					"--runtime-version", "2.1.13",
-					"--releases-json", releasesJSON,
+					"--releases-json-path", releasesJSON,
 				)
 				taskCmd.Env = append(taskCmd.Env, envVars...)
 
@@ -233,7 +203,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				"--sdk-version", "2.1.607",
 				"--output-dir", outputDir,
 				"--runtime-version", "2.1.14",
-				"--releases-json", releasesJSON,
+				"--releases-json-path", releasesJSON,
 			)
 			taskCmd.Env = append(taskCmd.Env, envVars...)
 
@@ -278,7 +248,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				"--sdk-version", "2.1.606",
 				"--output-dir", outputDir,
 				"--runtime-version", "2.1.14",
-				"--releases-json", releasesJSON,
+				"--releases-json-path", releasesJSON,
 			)
 			taskCmd.Env = append(taskCmd.Env, envVars...)
 
@@ -356,7 +326,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			"--sdk-version", "2.1.803",
 			"--output-dir", outputDir,
 			"--runtime-version", "2.1.15",
-			"--releases-json", releasesJSON,
+			"--releases-json-path", releasesJSON,
 		)
 		taskCmd.Env = append(taskCmd.Env, envVars...)
 
@@ -378,18 +348,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			require.NoError(t, exec.Command("git", "-C", outputDir, "init").Run())
 
 			buildpackTOMLContents := ""
-			deprecatedReleasesJSON := `{
-  "channel-version": "2.1",
-  "eol-date": "2000-08-21",
-  "releases": [
-    {
-      "release-version": "2.1.15",
-      "runtime": { "version": "2.1.15" },
-      "sdk": { "version": "2.1.803" },
-      "aspnetcore-runtime": { "version": "2.1.15" }
-    }
-  ]
-}`
+			deprecatedReleasesJSON := filepath.Join(testdataPath, "deprecated-releases.json")
 
 			taskCmd := exec.Command(
 				"go", "run", "github.com/cloudfoundry/buildpacks-ci/tasks/cnb/update-dotnet-compatibility-table",
@@ -397,7 +356,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				"--sdk-version", "2.1.803",
 				"--output-dir", outputDir,
 				"--runtime-version", "2.1.15",
-				"--releases-json", deprecatedReleasesJSON,
+				"--releases-json-path", deprecatedReleasesJSON,
 			)
 			taskCmd.Env = append(taskCmd.Env, envVars...)
 
