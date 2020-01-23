@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -21,11 +22,11 @@ import (
 )
 
 var flags struct {
-	buildpackTOML  string
-	runtimeVersion string
-	outputDir      string
-	sdkVersion     string
-	releasesJSON   string
+	buildpackTOML    string
+	runtimeVersion   string
+	outputDir        string
+	sdkVersion       string
+	releasesJSONPath string
 }
 
 type RuntimeToSDK struct {
@@ -53,7 +54,7 @@ func main() {
 	flag.StringVar(&flags.runtimeVersion, "runtime-version", "", "runtime version")
 	flag.StringVar(&flags.outputDir, "output-dir", "", "directory to write buildpack.toml to")
 	flag.StringVar(&flags.sdkVersion, "sdk-version", "", "version of sdk")
-	flag.StringVar(&flags.releasesJSON, "releases-json", "", "contents of dotnet releases.json")
+	flag.StringVar(&flags.releasesJSONPath, "releases-json-path", "", "path to dotnet releases.json")
 	flag.Parse()
 
 	message, err := checkIfSupported()
@@ -160,8 +161,12 @@ func commitArtifacts(sdkVersion, runtimeVersion, outputDir string) error {
 }
 
 func checkIfSupported() (string, error) {
+	releasesJSON, err := ioutil.ReadFile(flags.releasesJSONPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read releases.json: %w", err)
+	}
 	var channel Channel
-	if err := json.Unmarshal([]byte(flags.releasesJSON), &channel); err != nil {
+	if err := json.Unmarshal(releasesJSON, &channel); err != nil {
 		return "", fmt.Errorf("failed to unmarshal releases.json: %w", err)
 	}
 
