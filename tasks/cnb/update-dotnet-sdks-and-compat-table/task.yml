@@ -11,4 +11,4 @@ inputs:
 outputs:
   - name: artifacts
 run:
-  path: buildpacks-ci/tasks/cnb/update-dotnet-compatibility-table/run.sh
+  path: buildpacks-ci/tasks/cnb/update-dotnet-sdks-and-compat-table/run.sh

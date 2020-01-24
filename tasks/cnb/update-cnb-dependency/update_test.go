@@ -16,7 +16,7 @@ func TestUpdate(t *testing.T) {
 
 func testUpdate(t *testing.T, when spec.G, it spec.S) {
 	when("UpdateOrders", func() {
-		dep := Dependency{
+		dep := helpers.Dependency{
 			ID:      "dep",
 			Version: "1.2.3",
 		}
