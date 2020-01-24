@@ -21,6 +21,13 @@ function main() {
     new_version="$(join . "${ADDR[@]}")-rc.1"
     echo -n "$new_version" > version/version
     echo "incremented version to $new_version"
+  else
+    local version_base rc_num next_rc_num
+    version_base="$( cut -d '-' -f 1 version/version )"
+    rc_num="$( cut -d '.' -f 4 version/version )"
+    next_rc_num=$((rc_num+1))
+
+    echo -n "$version_base-rc.$next_rc_num" > version/version
   fi
 }
 
