@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/cloudfoundry/buildpacks-ci/tasks/cnb/helpers"
 )
 
-func GenerateCommitMessage(oldDeps, newDeps Dependencies, dep Dependency, storyID int) string {
+func GenerateCommitMessage(oldDeps, newDeps Dependencies, dep helpers.Dependency, storyID int) string {
 	added, rebuilt, stacks := findAddedDeps(dep, oldDeps, newDeps)
 
 	removedDeps, stacks := findRemovedDeps(dep, oldDeps, newDeps, stacks)
@@ -14,7 +16,7 @@ func GenerateCommitMessage(oldDeps, newDeps Dependencies, dep Dependency, storyI
 	return formCommitMessage(dep, added, rebuilt, removedDeps, stacks, storyID)
 }
 
-func findAddedDeps(dep Dependency, oldDeps, newDeps Dependencies) (bool, bool, map[string]bool) {
+func findAddedDeps(dep helpers.Dependency, oldDeps, newDeps Dependencies) (bool, bool, map[string]bool) {
 	var added, rebuilt bool
 	uniqueStacks := map[string]bool{}
 
@@ -40,7 +42,7 @@ func findAddedDeps(dep Dependency, oldDeps, newDeps Dependencies) (bool, bool, m
 	return added, rebuilt, uniqueStacks
 }
 
-func findRemovedDeps(dep Dependency, oldDeps, newDeps Dependencies, stacks map[string]bool) (map[string]bool, map[string]bool) {
+func findRemovedDeps(dep helpers.Dependency, oldDeps, newDeps Dependencies, stacks map[string]bool) (map[string]bool, map[string]bool) {
 	removedDeps := map[string]bool{}
 
 	for _, oldDep := range oldDeps {
@@ -59,7 +61,7 @@ func findRemovedDeps(dep Dependency, oldDeps, newDeps Dependencies, stacks map[s
 	return removedDeps, stacks
 }
 
-func formCommitMessage(dep Dependency, added, rebuilt bool, removedDeps, stacks map[string]bool, storyID int) string {
+func formCommitMessage(dep helpers.Dependency, added, rebuilt bool, removedDeps, stacks map[string]bool, storyID int) string {
 	if noChanges(added, rebuilt, removedDeps) {
 		return ""
 	}
@@ -84,7 +86,7 @@ func noChanges(added, rebuilt bool, removedDeps map[string]bool) bool {
 	return !added && !rebuilt && len(removedDeps) == 0
 }
 
-func rebuild(dep, newDep Dependency) bool {
+func rebuild(dep, newDep helpers.Dependency) bool {
 	return dep.SHA256 != newDep.SHA256 || dep.URI != newDep.URI
 }
 

@@ -6,12 +6,14 @@ import (
 	"log"
 	"path/filepath"
 	"regexp"
+
+	"github.com/cloudfoundry/buildpacks-ci/tasks/cnb/helpers"
 )
 
 const AnyStack = "any-stack"
 const TinyStack = "tiny"
 
-func determineStacks(buildMetadataPath string, dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig) ([]string, error) {
+func determineStacks(buildMetadataPath string, dep helpers.Dependency, depOrchestratorConfig DependencyOrchestratorConfig) ([]string, error) {
 	stackRegexp := regexp.MustCompile(`\/(?:\.|\d)*-(.*)\.json$`)
 	matches := stackRegexp.FindStringSubmatch(buildMetadataPath)
 	if len(matches) != 2 {
@@ -34,7 +36,7 @@ func determineStacks(buildMetadataPath string, dep Dependency, depOrchestratorCo
 	return nil, nil
 }
 
-func handleAnyStack(dep Dependency, config DependencyOrchestratorConfig) ([]string, error) {
+func handleAnyStack(dep helpers.Dependency, config DependencyOrchestratorConfig) ([]string, error) {
 	var stacks []string
 	for stack, stackID := range config.V3Stacks {
 		if stack == TinyStack && !includeTiny(dep.ID, config.IncludeTiny) {

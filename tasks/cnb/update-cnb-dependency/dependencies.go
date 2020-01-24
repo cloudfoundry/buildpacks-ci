@@ -8,23 +8,13 @@ import (
 	"sort"
 
 	"github.com/blang/semver"
+	"github.com/cloudfoundry/buildpacks-ci/tasks/cnb/helpers"
 	"github.com/pkg/errors"
 )
 
-type Dependencies []Dependency
+type Dependencies []helpers.Dependency
 
-type Dependency struct {
-	ID           string   `toml:"id"`
-	Name         string   `toml:"name,omitempty"`
-	SHA256       string   `toml:"sha256"`
-	Source       string   `toml:"source,omitempty"`
-	SourceSHA256 string   `mapstructure:"source_sha256" toml:"source_sha256,omitempty"`
-	Stacks       []string `toml:"stacks"`
-	URI          string   `toml:"uri"`
-	Version      string   `toml:"version"`
-}
-
-func (deps Dependencies) Update(dep Dependency, depsToAdd Dependencies, versionLine string, versionsToKeep int) (Dependencies, error) {
+func (deps Dependencies) Update(dep helpers.Dependency, depsToAdd Dependencies, versionLine string, versionsToKeep int) (Dependencies, error) {
 	expandedDeps := deps.ExpandByStack()
 	mergedDeps := expandedDeps.MergeWith(depsToAdd)
 	updatedDeps, err := mergedDeps.RemoveOldDeps(dep.ID, versionLine, versionsToKeep)
@@ -35,7 +25,7 @@ func (deps Dependencies) Update(dep Dependency, depsToAdd Dependencies, versionL
 }
 
 func (deps Dependencies) MergeWith(newDeps Dependencies) Dependencies {
-	depsMap := map[string]Dependency{}
+	depsMap := map[string]helpers.Dependency{}
 
 	for _, dep := range deps {
 		depsMap[makeKeyWithStack(dep)] = dep
@@ -90,7 +80,7 @@ func (deps Dependencies) RemoveOldDeps(depID, versionLine string, keepN int) (De
 }
 
 func (deps Dependencies) CollapseByStack() Dependencies {
-	depsMap := map[string]Dependency{}
+	depsMap := map[string]helpers.Dependency{}
 	for _, dep := range deps {
 		key := makeKeyWithoutStack(dep)
 		if mapDep, exists := depsMap[key]; exists {
@@ -160,7 +150,7 @@ func compareStacks(a, b []string) bool {
 	return true
 }
 
-func loadDependenciesFromBinaryBuilds(binaryBuildsPath string, dep Dependency, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
+func loadDependenciesFromBinaryBuilds(binaryBuildsPath string, dep helpers.Dependency, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
 	var depsToAdd Dependencies
 
 	buildMetadataPaths, err := filepath.Glob(filepath.Join(binaryBuildsPath, dep.ID, fmt.Sprintf("%s-*.json", dep.Version)))
@@ -178,12 +168,12 @@ func loadDependenciesFromBinaryBuilds(binaryBuildsPath string, dep Dependency, d
 	return depsToAdd, nil
 }
 
-func (deps Dependencies) containsDependency(dep Dependency) bool {
+func (deps Dependencies) containsDependency(dep helpers.Dependency) bool {
 	_, exists := deps.findDependency(dep)
 	return exists
 }
 
-func (deps Dependencies) findDependency(dep Dependency) (Dependency, bool) {
+func (deps Dependencies) findDependency(dep helpers.Dependency) (helpers.Dependency, bool) {
 	sort.Strings(dep.Stacks)
 	for _, d := range deps {
 		sort.Strings(d.Stacks)
@@ -192,16 +182,16 @@ func (deps Dependencies) findDependency(dep Dependency) (Dependency, bool) {
 			return d, true
 		}
 	}
-	return Dependency{}, false
+	return helpers.Dependency{}, false
 }
 
-func makeKeyWithStack(dep Dependency) string { return dep.ID + dep.Version + dep.Stacks[0] }
+func makeKeyWithStack(dep helpers.Dependency) string { return dep.ID + dep.Version + dep.Stacks[0] }
 
-func makeKeyWithoutStack(dep Dependency) string {
+func makeKeyWithoutStack(dep helpers.Dependency) string {
 	return dep.ID + dep.Version + dep.URI + dep.SHA256 + dep.Source + dep.SourceSHA256
 }
 
-func constructDependenciesFromBuildMetadata(dep Dependency, buildMetadataPath string, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
+func constructDependenciesFromBuildMetadata(dep helpers.Dependency, buildMetadataPath string, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
 	contents, err := ioutil.ReadFile(buildMetadataPath)
 	if err != nil {
 		return nil, err
@@ -218,7 +208,7 @@ func constructDependenciesFromBuildMetadata(dep Dependency, buildMetadataPath st
 
 	var deps Dependencies
 	for _, stack := range stacks {
-		deps = append(deps, Dependency{
+		deps = append(deps, helpers.Dependency{
 			ID:           dep.ID,
 			Name:         depOrchestratorConfig.V3DepNames[dep.ID],
 			SHA256:       buildMetadata.SHA256,

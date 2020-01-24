@@ -11,7 +11,7 @@ output_dir="$PWD/artifacts"
 
 minor_version="$(echo "$runtime_version" | cut -d '.' -f1-2)"
 
-pushd "buildpacks-ci/tasks/cnb/update-dotnet-compatibility-table" > /dev/null
+pushd "buildpacks-ci/tasks/cnb/update-dotnet-sdks-and-compat-table" > /dev/null
   curl -s -O "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/$minor_version/releases.json"
 
   go run . \

@@ -5,11 +5,9 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/cloudfoundry/buildpacks-ci/tasks/cnb/helpers"
-
-	"gopkg.in/yaml.v2"
-
 	"github.com/BurntSushi/toml"
+	"github.com/cloudfoundry/buildpacks-ci/tasks/cnb/helpers"
+	"gopkg.in/yaml.v2"
 )
 
 type DependencyMetadata struct {
@@ -48,7 +46,7 @@ type DependencyOrchestratorConfig struct {
 type UpdateConfig struct {
 	Orchestrator  DependencyOrchestratorConfig
 	BuildMetadata BuildMetadata
-	Dep           Dependency
+	Dep           helpers.Dependency
 	BuildpackTOML helpers.BuildpackTOML
 }
 
@@ -67,7 +65,7 @@ func NewUpdateConfig(dependencyBuildsConfig, buildpackTOMLContents, sourceData, 
 	if err := json.Unmarshal([]byte(sourceData), &depMetadata); err != nil {
 		return UpdateConfig{}, err
 	}
-	dep := Dependency{
+	dep := helpers.Dependency{
 		ID:      depMetadata.Source.Name,
 		Version: depMetadata.Version.Ref,
 	}

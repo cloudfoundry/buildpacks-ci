@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func UpdateOrders(orders []helpers.Order, dep Dependency) []helpers.Order {
+func UpdateOrders(orders []helpers.Order, dep helpers.Dependency) []helpers.Order {
 	for i, order := range orders {
 		for j, group := range order.Group {
 			if group.ID == dep.ID {
@@ -18,7 +18,7 @@ func UpdateOrders(orders []helpers.Order, dep Dependency) []helpers.Order {
 	return orders
 }
 
-func UpdateDependenciesWith(buildpackTOML helpers.BuildpackTOML, dep Dependency, newDeps Dependencies, versionsToKeep int) (Dependencies, Dependencies, error) {
+func UpdateDependenciesWith(buildpackTOML helpers.BuildpackTOML, dep helpers.Dependency, newDeps Dependencies, versionsToKeep int) (Dependencies, Dependencies, error) {
 	var deps Dependencies
 	err := mapstructure.Decode(buildpackTOML.Metadata[helpers.DependenciesKey], &deps)
 	if err != nil {
