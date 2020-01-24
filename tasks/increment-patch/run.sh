@@ -18,7 +18,7 @@ function main() {
     IFS=' '
 
     ((ADDR[2]=ADDR[2]+1))
-    new_version=$(join . "${ADDR[@]}")
+    new_version="$(join . "${ADDR[@]}")-rc.1"
     echo -n "$new_version" > version/version
     echo "incremented version to $new_version"
   fi
