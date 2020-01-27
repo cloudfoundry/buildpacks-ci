@@ -10,6 +10,7 @@ export PATH=$GOBIN:$PATH
 
 if [[ "${RUN_UNPRIVILEGED}" == "true" ]]; then
   export GOCACHE=/home/testuser/.cache/go-build
+  export GOPATH=/home/testuser/.go-path
 
   mkdir -p "${GOCACHE}"
   chown -R testuser:testuser /home/testuser
