@@ -209,7 +209,7 @@ if manifest_name == 'php' && manifest['language'] == 'php'
           url = builds[stack]['url']
           `wget --no-verbose #{url} && tar xzf #{File.basename(url)}`
 
-          module_names = Dir['php/lib/php/extensions/no-debug-non-zts-*/*.so'].collect do |file|
+          module_names = Dir['lib/php/extensions/no-debug-non-zts-*/*.so'].collect do |file|
             File.basename(file, '.so')
           end.sort.reject do |m|
             %w[odbc gnupg].include?(m)
