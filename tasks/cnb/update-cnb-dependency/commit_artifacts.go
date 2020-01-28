@@ -6,12 +6,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-func CommitArtifacts(commitMessage, outputDir string) error {
+func CommitArtifacts(commitMessage, outputDir, buildpackTOMLOutputPath string) error {
 	if commitMessage == "" {
 		return nil
 	}
 
-	output, err := exec.Command("git", "-C", outputDir, "add", "buildpack.toml").CombinedOutput()
+	output, err := exec.Command("git", "-C", outputDir, "add", buildpackTOMLOutputPath).CombinedOutput()
 	if err != nil {
 		return errors.Wrapf(err, "failed to add artifacts: %s", string(output))
 	}

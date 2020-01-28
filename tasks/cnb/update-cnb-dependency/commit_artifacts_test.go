@@ -16,7 +16,7 @@ func TestCommitArtifacts(t *testing.T) {
 func testCommitArtifacts(t *testing.T, when spec.G, it spec.S) {
 	when("commit message is empty", func() {
 		it("shouldn't add or commit anything", func() {
-			assert.Nil(t, CommitArtifacts("", ""))
+			assert.Nil(t, CommitArtifacts("", "", ""))
 		})
 	})
 }

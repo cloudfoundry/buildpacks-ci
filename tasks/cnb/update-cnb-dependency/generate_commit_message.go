@@ -8,12 +8,12 @@ import (
 	"github.com/cloudfoundry/buildpacks-ci/tasks/cnb/helpers"
 )
 
-func GenerateCommitMessage(oldDeps, newDeps Dependencies, dep helpers.Dependency, storyID int) string {
+func GenerateCommitMessage(oldDeps, newDeps Dependencies, dep helpers.Dependency, buildpackTOMLOutputPath string, storyID int) string {
 	added, rebuilt, stacks := findAddedDeps(dep, oldDeps, newDeps)
 
 	removedDeps, stacks := findRemovedDeps(dep, oldDeps, newDeps, stacks)
 
-	return formCommitMessage(dep, added, rebuilt, removedDeps, stacks, storyID)
+	return formCommitMessage(dep, added, rebuilt, removedDeps, stacks, buildpackTOMLOutputPath, storyID)
 }
 
 func findAddedDeps(dep helpers.Dependency, oldDeps, newDeps Dependencies) (bool, bool, map[string]bool) {
@@ -61,7 +61,7 @@ func findRemovedDeps(dep helpers.Dependency, oldDeps, newDeps Dependencies, stac
 	return removedDeps, stacks
 }
 
-func formCommitMessage(dep helpers.Dependency, added, rebuilt bool, removedDeps, stacks map[string]bool, storyID int) string {
+func formCommitMessage(dep helpers.Dependency, added, rebuilt bool, removedDeps, stacks map[string]bool, buildpackTOMLOutputPath string, storyID int) string {
 	if noChanges(added, rebuilt, removedDeps) {
 		return ""
 	}
@@ -77,6 +77,7 @@ func formCommitMessage(dep helpers.Dependency, added, rebuilt bool, removedDeps,
 		commitMessage += fmt.Sprintf(", remove %s", joinMap(removedDeps))
 	}
 
+	commitMessage += fmt.Sprintf(" in %s", buildpackTOMLOutputPath)
 	commitMessage += fmt.Sprintf("\n\nfor stack(s) %s [#%d]", joinMap(stacks), storyID)
 
 	return commitMessage

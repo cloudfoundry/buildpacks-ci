@@ -42,8 +42,8 @@ func testGenerateCommitMessage(t *testing.T, when spec.G, it spec.S) {
 				Version: "3.0.0",
 			}
 
-			commitMessage := GenerateCommitMessage(oldDeps, newDeps, depAdded, 123456789)
-			assert.Equal(t, `Add some-id 3.0.0
+			commitMessage := GenerateCommitMessage(oldDeps, newDeps, depAdded, "path-to-buildpack-toml", 123456789)
+			assert.Equal(t, `Add some-id 3.0.0 in path-to-buildpack-toml
 
 for stack(s) some-stack-1, some-stack-2 [#123456789]`, commitMessage)
 		})
@@ -62,8 +62,8 @@ for stack(s) some-stack-1, some-stack-2 [#123456789]`, commitMessage)
 				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "3.0.0"},
 			}
 
-			commitMessage := GenerateCommitMessage(oldDeps, newDeps, depAdded, 123456789)
-			assert.Equal(t, `Add some-id 3.0.0, remove some-id 1.0.0
+			commitMessage := GenerateCommitMessage(oldDeps, newDeps, depAdded, "path-to-buildpack-toml", 123456789)
+			assert.Equal(t, `Add some-id 3.0.0, remove some-id 1.0.0 in path-to-buildpack-toml
 
 for stack(s) some-stack-1, some-stack-2 [#123456789]`, commitMessage)
 		})
@@ -84,8 +84,8 @@ for stack(s) some-stack-1, some-stack-2 [#123456789]`, commitMessage)
 				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "3.0.0", SHA256: "some-new-sha"},
 			}
 
-			commitMessage := GenerateCommitMessage(oldDeps, newDeps, depAdded, 123456789)
-			assert.Equal(t, `Rebuild some-id 3.0.0
+			commitMessage := GenerateCommitMessage(oldDeps, newDeps, depAdded, "path-to-buildpack-toml", 123456789)
+			assert.Equal(t, `Rebuild some-id 3.0.0 in path-to-buildpack-toml
 
 for stack(s) some-stack-1, some-stack-2 [#123456789]`, commitMessage)
 		})
@@ -104,8 +104,8 @@ for stack(s) some-stack-1, some-stack-2 [#123456789]`, commitMessage)
 				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "3.0.0", SHA256: "some-new-sha"},
 			}
 
-			commitMessage := GenerateCommitMessage(oldDeps, newDeps, depAdded, 123456789)
-			assert.Equal(t, `Rebuild some-id 3.0.0, remove some-id 1.0.0
+			commitMessage := GenerateCommitMessage(oldDeps, newDeps, depAdded, "path-to-buildpack-toml", 123456789)
+			assert.Equal(t, `Rebuild some-id 3.0.0, remove some-id 1.0.0 in path-to-buildpack-toml
 
 for stack(s) some-stack-1, some-stack-2 [#123456789]`, commitMessage)
 		})
@@ -119,7 +119,7 @@ for stack(s) some-stack-1, some-stack-2 [#123456789]`, commitMessage)
 				{ID: "some-id", Stacks: []string{"some-stack-1"}, Version: "3.0.0"},
 				{ID: "some-id", Stacks: []string{"some-stack-2"}, Version: "3.0.0"},
 			}
-			commitMessage := GenerateCommitMessage(deps, deps, depAdded, 123456789)
+			commitMessage := GenerateCommitMessage(deps, deps, depAdded, "path-to-buildpack-toml", 123456789)
 			assert.Empty(t, commitMessage)
 		})
 	})
