@@ -13,5 +13,6 @@ params:
   TAG:
   TRACKER_API_TOKEN:
   TRACKER_PROJECT_ID:
+  BEFORE_STORY_ID: 170428386
 run:
   path: buildpacks-ci/tasks/builder-release-story/run.sh
