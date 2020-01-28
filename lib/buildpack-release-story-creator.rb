@@ -56,7 +56,7 @@ class BuildpackReleaseStoryCreator
   end
 
   def most_recent_release_story_id
-    story = buildpack_project.stories(filter: "label:release AND label:#{buildpack_name} AND -state:unscheduled").last
+    story = buildpack_project.stories(filter: "label:release AND label:#{buildpack_name} AND -state:unscheduled").sort_by(&:id).last
     story.id if story
   end
 

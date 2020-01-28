@@ -46,7 +46,7 @@ describe BuildpackReleaseStoryCreator do
   end
 
   context 'previous release stories exist' do
-    let(:release_stories) { [double(id: 110), double(id: 221)] }
+    let(:release_stories) { [double(id: 110), double(id: 221), double(id: 100)] }
     it 'finds all the stories tagged buildpack_name or all that are lower in the backlog than the last release' do
       expect(buildpack_project).to receive(:create_story).
         with(hash_including(description: <<~DESCRIPTION,
