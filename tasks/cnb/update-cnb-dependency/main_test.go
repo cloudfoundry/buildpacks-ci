@@ -83,6 +83,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				"--source-data", string(sourceData),
 				"--binary-builds-path", binaryBuildsPath,
 				"--output-dir", outputDir,
+				"--buildpack-toml-output-path", "buildpack.toml",
 				"--version-line", versionLine,
 				"--versions-to-keep", versionsToKeep,
 				"--deprecation-date", deprecationDate,
@@ -241,6 +242,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				"--source-data", string(sourceData),
 				"--binary-builds-path", binaryBuildsPath,
 				"--output-dir", outputDir,
+				"--buildpack-toml-output-path", "buildpack.toml",
 				"--version-line", versionLine,
 				"--versions-to-keep", versionsToKeep,
 			)
@@ -322,6 +324,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 				"--source-data", string(sourceData),
 				"--binary-builds-path", binaryBuildsPath,
 				"--output-dir", outputDir,
+				"--buildpack-toml-output-path", "buildpack.toml",
 				"--version-line", versionLine,
 				"--versions-to-keep", versionsToKeep,
 			)

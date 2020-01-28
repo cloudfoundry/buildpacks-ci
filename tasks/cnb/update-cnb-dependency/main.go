@@ -10,16 +10,17 @@ import (
 )
 
 var flags struct {
-	dependencyBuildsConfig string
-	buildpackTOML          string
-	sourceData             string
-	binaryBuildsPath       string
-	outputDir              string
-	deprecationDate        string
-	deprecationLink        string
-	deprecationMatch       string
-	versionLine            string
-	versionsToKeep         int
+	dependencyBuildsConfig  string
+	buildpackTOML           string
+	sourceData              string
+	binaryBuildsPath        string
+	outputDir               string
+	buildpackTOMLOutputPath string
+	deprecationDate         string
+	deprecationLink         string
+	deprecationMatch        string
+	versionLine             string
+	versionsToKeep          int
 }
 
 func main() {
@@ -28,6 +29,7 @@ func main() {
 	flag.StringVar(&flags.sourceData, "source-data", "", "data from source of version bump")
 	flag.StringVar(&flags.binaryBuildsPath, "binary-builds-path", "", "path to metadata for built binaries")
 	flag.StringVar(&flags.outputDir, "output-dir", "", "directory to write buildpack.toml to")
+	flag.StringVar(&flags.buildpackTOMLOutputPath, "buildpack-toml-output-path", "", "path to write new contents of buildpack.toml")
 	flag.StringVar(&flags.deprecationDate, "deprecation-date", "", "deprecation date for version line")
 	flag.StringVar(&flags.deprecationLink, "deprecation-link", "", "deprecation link for version line")
 	flag.StringVar(&flags.deprecationMatch, "deprecation-match", "", "")
@@ -73,14 +75,14 @@ func updateCNBDependencies() error {
 	// Won't work until golang 1.13
 	//config.BuildpackTOML.RemoveEmptyMetadataFields()
 
-	log.Printf("\nWriting updated buildpack.toml to file: %v\n\n", config.BuildpackTOML)
-	if err := config.BuildpackTOML.WriteToFile(filepath.Join(flags.outputDir, "buildpack.toml")); err != nil {
+	log.Printf("\nWriting to %s: %v\n\n", flags.buildpackTOMLOutputPath, config.BuildpackTOML)
+	if err := config.BuildpackTOML.WriteToFile(filepath.Join(flags.outputDir, flags.buildpackTOMLOutputPath)); err != nil {
 		return errors.Wrap(err, "failed to update buildpack toml")
 	}
 
-	commitMessage := GenerateCommitMessage(originalDeps, updatedDeps, config.Dep, config.BuildMetadata.TrackerStoryID)
+	commitMessage := GenerateCommitMessage(originalDeps, updatedDeps, config.Dep, flags.buildpackTOMLOutputPath, config.BuildMetadata.TrackerStoryID)
 	log.Printf("\nCommitting with message: %s\n\n", commitMessage)
-	if err := CommitArtifacts(commitMessage, flags.outputDir); err != nil {
+	if err := CommitArtifacts(commitMessage, flags.outputDir, flags.buildpackTOMLOutputPath); err != nil {
 		return errors.Wrap(err, "failed to commit artifacts")
 	}
 
