@@ -2,13 +2,14 @@
 require 'tracker_api'
 
 class DeprecationNotifier
-  attr_reader :buildpack_name, :manifest, :date, :tracker_requester_id, :buildpack_project
+  attr_reader :buildpack_name, :manifest, :date, :tracker_requester_id, :buildpack_project, :before_story_id
 
-  def initialize(buildpack_name:, manifest:, date:, tracker_project_id:, tracker_requester_id:, tracker_api_token:)
+  def initialize(buildpack_name:, manifest:, date:, tracker_project_id:, tracker_requester_id:, tracker_api_token:, before_story_id:)
     @buildpack_name = buildpack_name
     @manifest = manifest
     @date = date
     @tracker_requester_id = tracker_requester_id
+    @before_story_id = before_story_id
     @buildpack_project = TrackerApi::Client.new(token: tracker_api_token).project(tracker_project_id)
   end
 
@@ -36,7 +37,8 @@ class DeprecationNotifier
           description: story_description,
           estimate: 1,
           labels: labels,
-          requested_by_id: tracker_requester_id
+          requested_by_id: tracker_requester_id,
+          before_id: before_story_id
       )
       story.save
     end
