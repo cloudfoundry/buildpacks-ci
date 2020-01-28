@@ -61,7 +61,7 @@ create_or_get_story() {
       -H "X-TrackerToken: $TRACKER_API_TOKEN" \
       -H "Accept: application/json" \
       -H "Content-Type: application/json" \
-      -d "{\"name\": \"Release builder $TAG\", \"labels\": [\"$TAG\", \"builder-release\"]}" \
+      -d "{\"name\": \"Release builder $TAG\",\"before_id\":$BEFORE_STORY_ID , \"labels\": [\"$TAG\", \"builder-release\"]}" \
       "https://www.pivotaltracker.com/services/v5/projects/$TRACKER_PROJECT_ID/stories"
     )"
 
