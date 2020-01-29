@@ -477,6 +477,7 @@ jobs:
         DEPRECATION_MATCH: <%= line_hash['match'] %>
         VERSION_LINE: <%= line_hash['line'] %>
         VERSIONS_TO_KEEP: <%= dep['versions_to_keep'] %>
+        COMPAT_ONLY: <%= bp['compat_only'] %>
       output_mapping:
         artifacts: buildpack
       <% end %>
