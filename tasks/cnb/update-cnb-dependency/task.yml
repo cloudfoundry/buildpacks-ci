@@ -17,5 +17,6 @@ params:
   DEPRECATION_MATCH:
   VERSION_LINE:
   VERSIONS_TO_KEEP:
+  COMPAT_ONLY:
 run:
   path: buildpacks-ci/tasks/cnb/update-cnb-dependency/run.sh

@@ -483,6 +483,7 @@ dependencies:
     buildpacks:
       nodejs-cnb:
         shim: true
+        compat_only: true
         lines:
         - line: latest
     source_type: github_releases

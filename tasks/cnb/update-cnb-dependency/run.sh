@@ -29,10 +29,12 @@ update_buildpack_toml() {
   popd > /dev/null
 }
 
-buildpack_toml="$(cat "buildpack/buildpack.toml")"
-buildpack_toml_path="buildpack.toml"
+if [[ "$COMPAT_ONLY" != "true" ]]; then
+  buildpack_toml="$(cat "buildpack/buildpack.toml")"
+  buildpack_toml_path="buildpack.toml"
 
-update_buildpack_toml "$buildpack_toml" "$buildpack_toml_path"
+  update_buildpack_toml "$buildpack_toml" "$buildpack_toml_path"
+fi
 
 if [[ -f buildpack/compat/buildpack.toml ]]; then
   buildpack_toml="$(cat "buildpack/compat/buildpack.toml")"
