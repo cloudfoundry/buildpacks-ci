@@ -457,43 +457,43 @@ jobs:
       passed: [<%= "build-#{dep_name}-#{line_hash['line']}" %>]
     <% end %>
     - get: builds
-  - do:
-   <% [
-      { 'name' => 'update-buildpack-dependency', 'path' => 'buildpacks-ci/tasks/update-buildpack-dependency/task.yml', 'type' => Set['buildpack', 'shim'] },
-      { 'name' => 'update-cnb-dependency', 'path' => 'buildpacks-ci/tasks/cnb/update-cnb-dependency/task.yml', 'type' => Set['cnb'] }
-    ].each do |task| %>
-      <% is_v3 = bp_name.include?('cnb') %>
-      <% should_do_shim = bp['shim'] && task['type'].include?('shim') %>
-      <% should_do_cnb = is_v3 && task['type'].include?('cnb') && !dep_name.include?('compat') %>
-      <% should_do_reg = !is_v3 && task['type'].include?('buildpack') %>
-      <% if should_do_cnb || should_do_reg || should_do_shim  %>
-    - task: <%= task['name'] %>
-      file: <%= task['path'] %>
-      params:
-        VERSION_LINE_TYPE: <%= if dep_name == 'nginx' && bp_name == 'nginx' then 'nginx' else get_version_line_type(bp['lines']) end %>
-        REMOVAL_STRATEGY: <%= bp.fetch('removal_strategy', 'remove_all') %>
-        DEPRECATION_DATE: <%= line_hash['deprecation_date'] %>
-        DEPRECATION_LINK: <%= line_hash['link'] %>
-        DEPRECATION_MATCH: <%= line_hash['match'] %>
-        VERSION_LINE: <%= line_hash['line'] %>
-        VERSIONS_TO_KEEP: <%= dep['versions_to_keep'] %>
-        COMPAT_ONLY: <%= bp['compat_only'] %>
-      output_mapping:
-        artifacts: buildpack
-      <% end %>
+    <% if bp_name.end_with?('cnb') %>
+  - task: update-cnb-dependency
+    file: buildpacks-ci/tasks/cnb/update-cnb-dependency/task.yml
+    params:
+      VERSION_LINE: <%= line_hash['line'] %>
+      VERSIONS_TO_KEEP: <%= dep['versions_to_keep'] %>
+      COMPAT_ONLY: <%= bp['compat_only'] %>
+      DEPRECATION_DATE: <%= line_hash['deprecation_date'] %>
+      DEPRECATION_LINK: <%= line_hash['link'] %>
+      DEPRECATION_MATCH: <%= line_hash['match'] %>
+    output_mapping:
+      artifacts: buildpack
+    <% else %>
+  - task: update-buildpack-dependency
+    file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
+    params:
+      VERSION_LINE: <%= line_hash['line'] %>
+      VERSION_LINE_TYPE: <%= if dep_name == 'nginx' && bp_name == 'nginx' then 'nginx' else get_version_line_type(bp['lines']) end %>
+      REMOVAL_STRATEGY: <%= bp.fetch('removal_strategy', 'remove_all') %>
+      DEPRECATION_DATE: <%= line_hash['deprecation_date'] %>
+      DEPRECATION_LINK: <%= line_hash['link'] %>
+      DEPRECATION_MATCH: <%= line_hash['match'] %>
+    output_mapping:
+      artifacts: buildpack
     <% end %>
     <% if bp_name == 'dotnet-core-sdk-cnb' && dep_name == 'dotnet-sdk' %>
-    - task: update-dotnet-sdks-and-compat-table
-      file: buildpacks-ci/tasks/cnb/update-dotnet-sdks-and-compat-table/task.yml
-      output_mapping:
-        artifacts: buildpack
+  - task: update-dotnet-sdks-and-compat-table
+    file: buildpacks-ci/tasks/cnb/update-dotnet-sdks-and-compat-table/task.yml
+    output_mapping:
+      artifacts: buildpack
     <% end %>
-    - put: <%= bp_name %>-buildpack<%= '-v3' if dep['branch'] == 'v3' %>
-      params:
-        repository: buildpack
-        rebase: true
+  - put: <%= bp_name %>-buildpack<%= '-v3' if dep['branch'] == 'v3' %>
+    params:
+      repository: buildpack
+      rebase: true
   <% end %>
-  <% end %>
+<% end %>
 <% end %>
 
 groups:
