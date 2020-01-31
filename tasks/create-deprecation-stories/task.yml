@@ -21,4 +21,4 @@ params:
   TRACKER_PROJECT_ID:
   TRACKER_REQUESTER_ID:
   TRACKER_API_TOKEN:
-  BEFORE_STORY_ID: 170527760
+  BEFORE_STORY_ID: {{deprecation_release_marker_story_number}}
