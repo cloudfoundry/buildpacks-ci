@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 
@@ -34,6 +35,7 @@ type RuntimeToSDK struct {
 type Channel struct {
 	Releases      []Release `json:"releases"`
 	LatestRuntime string    `json:"latest-runtime"`
+	ChannelVersion string   `json:"channel-version"`
 }
 
 type Release struct {
@@ -95,13 +97,18 @@ func updateCompatibilityTable() error {
 }
 
 func checkIfSupportedPatchVersion() (bool, error) {
-	releasesJSON, err := ioutil.ReadFile(flags.releasesJSONPath)
+	latestRuntime, secondLatestRuntime, err := getLatestTwoSupportedRuntimeVersions()
 	if err != nil {
-		return false, fmt.Errorf("failed to read releases.json: %w", err)
+		return false, fmt.Errorf("failed to get two supported versions of runtime: %w", err)
 	}
-	var channel Channel
-	if err := json.Unmarshal(releasesJSON, &channel); err != nil {
-		return false, fmt.Errorf("failed to unmarshal releases.json: %w", err)
+
+	return flags.runtimeVersion == latestRuntime || flags.runtimeVersion == secondLatestRuntime, nil
+}
+
+func getLatestTwoSupportedRuntimeVersions() (string, string, error){
+	channel, err := getReleaseChannel()
+	if err != nil {
+		return "", "", fmt.Errorf("failed to read channel content: %w", err)
 	}
 
 	latestRuntime := channel.LatestRuntime
@@ -112,7 +119,54 @@ func checkIfSupportedPatchVersion() (bool, error) {
 			break
 		}
 	}
-	return flags.runtimeVersion == latestRuntime || flags.runtimeVersion == secondLatestRuntime, nil
+	return latestRuntime, secondLatestRuntime, nil
+}
+
+func getReleaseChannel() (Channel, error) {
+	releasesJSON, err := ioutil.ReadFile(flags.releasesJSONPath)
+	if err != nil {
+		return Channel{}, fmt.Errorf("failed to read releases.json: %w", err)
+	}
+	var channel Channel
+	if err := json.Unmarshal(releasesJSON, &channel); err != nil {
+		return Channel{}, fmt.Errorf("failed to unmarshal releases.json: %w", err)
+	}
+	return channel, nil
+}
+
+
+func removeUnsupportedRuntime(inputs []RuntimeToSDK) (string, []RuntimeToSDK, error) {
+
+	latestRuntime, secondLatestRuntime, err := getLatestTwoSupportedRuntimeVersions()
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to get two supported versions of runtime: %w", err)
+	}
+
+	channel, err := getReleaseChannel()
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to read channel content: %w", err)
+	}
+
+	channelVersion := channel.ChannelVersion
+	var inputWithoutUnsupportedRuntime []RuntimeToSDK
+	var sdkVersionToRemove string
+
+	for _, runtimeToSDK := range inputs {
+		if isSupportedRuntime(runtimeToSDK, channelVersion, latestRuntime, secondLatestRuntime) {
+			inputWithoutUnsupportedRuntime = append(inputWithoutUnsupportedRuntime, runtimeToSDK)
+		} else {
+			sdkVersionToRemove = runtimeToSDK.SDKs[0]
+		}
+
+	}
+
+	return sdkVersionToRemove, inputWithoutUnsupportedRuntime, nil
+}
+
+func isSupportedRuntime(runtimeToSDK RuntimeToSDK, channelVersion string, latestRuntime string, secondLatestRuntime string) bool {
+	return !(strings.Contains(runtimeToSDK.RuntimeVersion, channelVersion) &&
+		runtimeToSDK.RuntimeVersion != latestRuntime &&
+		runtimeToSDK.RuntimeVersion != secondLatestRuntime)
 }
 
 func addSDKToRuntime(buildpackTOML helpers.BuildpackTOML, sdkVersion, runtimeVersion string) (string, error) {
@@ -121,7 +175,12 @@ func addSDKToRuntime(buildpackTOML helpers.BuildpackTOML, sdkVersion, runtimeVer
 
 	err := mapstructure.Decode(buildpackTOML.Metadata[helpers.RuntimeToSDKsKey], &inputs)
 	if err != nil {
-		return "", err
+		return "cannot decode runtime to sdk keys from buildpacks TOML", err
+	}
+
+	versionToRemove, inputs, err = removeUnsupportedRuntime(inputs)
+	if err != nil {
+		return "cannot remove unsupported runtime from buildpacks TOML", err
 	}
 
 	runtimeExists := false

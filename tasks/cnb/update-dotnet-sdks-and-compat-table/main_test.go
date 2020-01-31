@@ -181,6 +181,48 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 		})
 	})
 
+	when("runtime version is not present in buildpack.toml", func() {
+		it("include only two latest versions of runtime dependency", func() {
+			buildpackTOML := helpers.BuildpackTOML{
+				Metadata: helpers.Metadata{
+					helpers.DependenciesKey: []helpers.Dependency{
+						{ID: "dotnet-sdk", Version: "2.1.605"},
+						{ID: "dotnet-sdk", Version: "2.1.606"},
+						{ID: "dotnet-sdk", Version: "2.1.801"},
+					},
+					helpers.RuntimeToSDKsKey: []RuntimeToSDK{
+						{RuntimeVersion: "2.1.13", SDKs: []string{"2.1.605"}},
+						{RuntimeVersion: "2.1.14", SDKs: []string{"2.1.606"}},
+					},
+				},
+			}
+
+			runTask(t, buildpackTOML, releasesJSON, "2.1.801", "2.1.15", outputDir)
+
+			outputBuildpackToml := decodeBuildpackTOML(t, outputDir)
+
+			var compatibilityTable []RuntimeToSDK
+			require.NoError(t, mapstructure.Decode(outputBuildpackToml.Metadata["runtime-to-sdks"], &compatibilityTable))
+			assert.Equal(t, []RuntimeToSDK{
+				{
+					RuntimeVersion: "2.1.14",
+					SDKs:           []string{"2.1.606"},
+				},
+				{
+					RuntimeVersion: "2.1.15",
+					SDKs:           []string{"2.1.801"},
+				},
+			}, compatibilityTable)
+
+			var dependencies []helpers.Dependency
+			require.NoError(t, mapstructure.Decode(outputBuildpackToml.Metadata["dependencies"], &dependencies))
+			assert.Equal(t, []helpers.Dependency{
+				{ID: "dotnet-sdk", Version: "2.1.606"},
+				{ID: "dotnet-sdk", Version: "2.1.801"},
+			}, dependencies)
+		})
+	})
+
 	when("dotnet runtime already has latest sdk depedency", func() {
 		when("the sdk is not the latest version", func() {
 			it("includes the existing sdk dependency and ignores given new dependency", func() {
