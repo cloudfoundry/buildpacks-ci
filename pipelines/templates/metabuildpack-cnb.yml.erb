@@ -266,7 +266,6 @@ jobs:
           file: release-candidate/*.zip
       - put: version
         resource: <%= language %>-cnb-version
-        params: {file: version/number}
 
   - name: test-rc
     serial: true
