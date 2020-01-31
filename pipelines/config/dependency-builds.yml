@@ -121,8 +121,7 @@ dependencies:
           - line: 3.1.X
             deprecation_date: 2022-12-04
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-        removal_strategy: keep_all
-    versions_to_keep: 99
+    versions_to_keep: 2
     any_stack: true
   dotnet-aspnetcore:
     buildpacks:
