@@ -191,8 +191,8 @@ extensions:
     md5: 67a861965b30d045bf29a2126bcc05ed
     klass: LibMaxMindRecipe
   - name: phalcon
-    version: 4.0.2
-    md5: a2d518210fe53f0f6d96361eee5c37a9
+    version: 3.4.4
+    md5: 6f8c8d5a752f953491bd0f4f5c63adbf
     klass: PhalconRecipe
   - name: phpiredis
     version: 1.0.0
