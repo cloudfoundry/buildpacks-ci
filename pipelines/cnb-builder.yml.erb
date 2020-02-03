@@ -214,6 +214,7 @@ jobs:
           TAG: <%= builder %>
           TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
           TRACKER_PROJECT_ID: ((cf-buildpacks-rel-eng-tracker-id))
+          BEFORE_STORY_ID: {{builder_release_marker_story_number}}
 
   - name: ship-<%= builder %>-builder
     plan:
