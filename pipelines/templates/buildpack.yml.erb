@@ -440,6 +440,7 @@ jobs: ##########################################################################
             TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
             TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            BEFORE_STORY_ID: {{deprecation_release_marker_story_number}}
 
   - name: detect-new-version-and-upload-artifacts
     serial: true
