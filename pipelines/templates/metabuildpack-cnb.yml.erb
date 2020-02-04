@@ -266,6 +266,8 @@ jobs:
           file: release-candidate/*.zip
       - put: version
         resource: <%= language %>-cnb-version
+        params:
+          file: version/version
 
   - name: test-rc
     serial: true
@@ -397,3 +399,4 @@ jobs:
         resource: <%= language %>-cnb-version
         params:
           bump: patch
+          file: version/version
