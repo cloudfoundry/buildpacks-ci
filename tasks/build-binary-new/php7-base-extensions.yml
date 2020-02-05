@@ -202,10 +202,6 @@ extensions:
     version: 0.12.4
     md5: 77a77a429af4a5ff97778ccafeffa43a
     klass: PHPProtobufPeclRecipe
-  - name: tideways
-    version: 5.0.2
-    md5: 374cf4ff7ba03401a279777abe94815d
-    klass: TidewaysXhprofRecipe
   - name: tideways_xhprof
     version: 5.0.2
     md5: 374cf4ff7ba03401a279777abe94815d #curl -sL https://github.com/tideways/php-xhprof-extension/archive/v5.0.2.tar.gz  | md5sum | cut -d ' ' -f 1
