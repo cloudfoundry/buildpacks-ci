@@ -209,8 +209,8 @@ describe 'Builder' do
           .with("Build #{source_input.name} - 1.0.2 - cflinuxfs2 [#fake-story-id]")
       end
 
-      describe 'appdynamics, minconda2&3' do
-        let(:source_input) { SourceInput.new('appdynamics', 'fake-url', '1.0.2', nil, 'fake-sha256') }
+      describe 'CAAPM, appdynamics, minconda2&3' do
+        let(:source_input) { SourceInput.new('CAAPM', 'fake-url', '1.0.2', nil, 'fake-sha256') }
 
         it 'should build correctly' do
           expect(Sha).to receive(:check_sha)
@@ -503,7 +503,7 @@ describe 'Builder' do
   end
 
   context 'when skip-commit is true' do
-    let(:source_input) { SourceInput.new('appdynamics', 'fake-url', '1.0.2', nil, 'fake-sha256') }
+    let(:source_input) { SourceInput.new('CAAPM', 'fake-url', '1.0.2', nil, 'fake-sha256') }
 
     before do
       allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
