@@ -539,7 +539,7 @@ class Builder
       )
       out_data[:source_pgp] = source_pgp
 
-    when 'appdynamics'
+    when 'CAAPM', 'appdynamics'
       results = Sha.check_sha(source_input)
       out_data[:sha256] = results[1]
       out_data[:url] = source_input.url

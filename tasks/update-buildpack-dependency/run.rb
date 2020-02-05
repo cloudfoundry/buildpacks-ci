@@ -95,6 +95,9 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   if source_name == 'appdynamics'
     source_type = 'osl'
     source_url = 'https://docs.appdynamics.com/display/DASH/Legal+Notices'
+  elsif source_name == 'CAAPM'
+    source_type = 'osl'
+    source_url = 'https://docops.ca.com/ca-apm/10-5/en/ca-apm-release-notes/third-party-software-acknowledgments/php-agents-third-party-software-acknowledgments'
   elsif source_name.include? 'miniconda'
     source_url = "https://github.com/conda/conda/archive/#{version}.tar.gz"
   end
