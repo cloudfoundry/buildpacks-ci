@@ -29,6 +29,12 @@ resources:
       password: {{buildpacks-docker-password}}
       email: cf-buildpacks-eng@pivotal.io
 
+  - name: bionic-image
+    type: docker-image
+    source:
+      repository: ubuntu
+      tag: bionic
+
 <% stacks.each do |stack, stack_data| %>
   <% stack_data["images"].each do |image| %>
 # CNB stack images
@@ -169,6 +175,8 @@ jobs:
         params:
           save: true
       <% end %>
+      - get: bionic-image
+        trigger: true
       - get: version
         resource: <%= stack %>-<%= image %>-base-version
         params:
