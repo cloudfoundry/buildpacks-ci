@@ -114,8 +114,8 @@ RUN curl -L https://github.com/cloudfoundry-incubator/credhub-cli/releases/downl
   && chmod +x /usr/local/bin/credhub
 
 # Ensure Concourse Filter binary is present
-RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.1.0/concourse-filter' \
-  && [ d1e11efa7158bf3eac1f8453ea99ad6973bb6d46b56863c4f3bf35f7c47321d4 = $(shasum -a 256 concourse-filter | cut -d' ' -f1) ] \
+RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.1.1/concourse-filter' \
+  && [ 1d5a90493d4722ca1ed2fce63bc519ec0fb5de736209585ddf91b30d08bab911 = $(shasum -a 256 concourse-filter | cut -d' ' -f1) ] \
   && mv concourse-filter /usr/local/bin \
   && chmod +x /usr/local/bin/concourse-filter
 
