@@ -102,6 +102,10 @@ extensions:
     version: 5.1.1
     md5: 9221394dbf3d80c43be9e5ad51c1f9fd
     klass: RedisPeclRecipe
+  - name: ssh2
+    version: 1.2
+    md5: ae62ba2d4a7bbd5eff34daa8ed9f6ed6
+    klass: PeclRecipe
   - name: sqlsrv
     version: 5.6.1
     md5: c7b66e343d4ae0760a658964552966b4
