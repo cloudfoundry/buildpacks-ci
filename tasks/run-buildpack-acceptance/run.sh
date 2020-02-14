@@ -11,7 +11,11 @@ function main() {
 
   if [[ -z ${SKIP_DOCKER_START:-} ]]; then
     echo "Start Docker"
-    "${ROOT}/buildpacks-ci/scripts/start-docker" >/dev/null
+
+    #shellcheck source=../../scripts/start-docker
+    source "${ROOT}/buildpacks-ci/scripts/start-docker"
+    util::docker::start
+    trap util::docker::stop EXIT
   fi
 
   local artifact_path version cached_flag
@@ -29,7 +33,6 @@ function main() {
       --buildpack "${artifact_path}" \
       --buildpack-version "${version}" \
       "${cached_flag}"
-
   popd
 }
 

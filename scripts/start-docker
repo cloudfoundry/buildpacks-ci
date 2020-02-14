@@ -8,7 +8,7 @@ set -o pipefail
 LOG_FILE=${LOG_FILE:-/tmp/docker.log}
 SKIP_PRIVILEGED=${SKIP_PRIVILEGED:-false}
 
-sanitize_cgroups() {
+function util::docker::cgroups::sanitize() {
   mkdir -p /sys/fs/cgroup
   mountpoint -q /sys/fs/cgroup || \
     mount -t tmpfs -o uid=0,gid=0,mode=0755 cgroup /sys/fs/cgroup
@@ -55,7 +55,7 @@ sanitize_cgroups() {
   fi
 }
 
-function permit_device_control() {
+function util::docker::devicecontrol::permit() {
   local devices_mount_info
   devices_mount_info="$(grep devices < /proc/self/cgroup)"
 
@@ -94,7 +94,8 @@ function permit_device_control() {
   echo a > "${cgroup_dir}${devices_subdir}/devices.allow" || true
 }
 
-start_docker() {
+function util::docker::start() {
+  echo "starting docker..."
   if docker info >/dev/null 2>&1; then
     echo 'docker is already started'
     exit 0
@@ -104,7 +105,7 @@ start_docker() {
   mkdir -p /var/run
 
   if [ "$SKIP_PRIVILEGED" = "false" ]; then
-    sanitize_cgroups
+    util::docker::cgroups::sanitize
 
     # check for /proc/sys being mounted readonly, as systemd does
     if grep '/proc/sys\s\+\w\+\s\+ro,' /proc/mounts >/dev/null; then
@@ -118,7 +119,7 @@ start_docker() {
   mkdir -p /scratch/docker
 
   if command -v mkfs.btrfs > /dev/null; then
-    permit_device_control
+    util::docker::devicecontrol::permit
 
     local loopdevice dockerroot
     rand="${RANDOM}"
@@ -153,7 +154,8 @@ start_docker() {
   done
 }
 
-function teardown() {
+function util::docker::stop() {
+  echo "stopping docker..."
   kill -9 "$(cat /tmp/docker.pid)"
 
   mount -l | grep /scratch/docker | awk '{print $1}' | xargs -n1 umount
@@ -162,7 +164,3 @@ function teardown() {
 
   rm /tmp/docker-root-*
 }
-
-trap "teardown" EXIT
-
-start_docker

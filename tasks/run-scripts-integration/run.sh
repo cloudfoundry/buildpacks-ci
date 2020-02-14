@@ -15,7 +15,10 @@ cd repo
 
 if [[ -z ${SKIP_DOCKER_START:-} ]]; then
   echo "Start Docker"
-  ../buildpacks-ci/scripts/start-docker >/dev/null
+  #shellcheck source=../../scripts/start-docker
+  source ../buildpacks-ci/scripts/start-docker
+  util::docker::start
+  trap util::docker::stop EXIT
 fi
 
 ./scripts/integration.sh

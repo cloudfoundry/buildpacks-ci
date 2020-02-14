@@ -18,7 +18,7 @@ outputs:
   - name: release-tag
 
 run:
-  path: buildpacks-ci/tasks/create-builder/run.rb
+  path: buildpacks-ci/tasks/create-builder/run.sh
 
 params:
   REPO:

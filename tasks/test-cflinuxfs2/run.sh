@@ -6,7 +6,10 @@ set -o pipefail
 
 set -x
 
-buildpacks-ci/scripts/start-docker
+#shellcheck source=../../scripts/start-docker
+source ./buildpacks-ci/scripts/start-docker
+util::docker::start
+trap util::docker::start EXIT
 
 pushd cflinuxfs2
   cp ../cflinuxfs2-artifacts/"$STACK"-*.tar.gz "$STACK.tar.gz"
