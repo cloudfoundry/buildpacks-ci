@@ -34,7 +34,8 @@ end
 estimate = is_child_cnb ? 0 : 1
 story_params = {
     name: "Build and/or Include new releases: #{name} #{version}",
-    description: "```\n#{data.to_yaml}\n```\n",
+    description: "If this is a RC dependency, figure out if this is actually needed. "+
+    "One way to remove this dependency (if not needed) is to disable the resource in CI and re-trigger the pipeline.\n```\n#{data.to_yaml}\n```\n",
     estimate: estimate,
     labels: (['deps', name] + BUILDPACKS).uniq,
     requested_by_id: ENV['TRACKER_REQUESTER_ID'].to_i,
