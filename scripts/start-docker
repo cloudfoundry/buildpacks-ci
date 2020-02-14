@@ -158,7 +158,22 @@ function util::docker::stop() {
   echo "stopping docker..."
   kill "$(cat /tmp/docker.pid)"
 
-  mount -l | grep /scratch/docker | awk '{print $1}' | xargs -n1 umount
+  local volume count
+  count=0
+  while [[ "$(grep /scratch/docker < /proc/mounts| awk '{print $1}')" != "" ]]; do
+    volume="$(grep /scratch/docker < /proc/mounts | awk '{print $1}')"
+    ((count++))
+    if [[ "${count}" == "20" ]]; then
+      echo "failed to unmount loopback device"
+      exit 1
+    fi
+
+    set +e
+    echo "attempting to unmount ${volume}"
+    umount "${volume}"
+    sleep 0.1
+    set -e
+  done
 
   for device in /dev/loop*; do
     echo "${device}" | grep "loop[[:digit:]]" | xargs -n1 rm
