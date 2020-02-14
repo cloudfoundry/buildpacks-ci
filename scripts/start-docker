@@ -127,7 +127,7 @@ function util::docker::start() {
     dockerroot="/tmp/docker-root-${rand}"
 
     if [[ ! -e "${loopdevice}" ]]; then
-      echo "Allocating 10GB scratch filesystem for the docker daemon"
+      echo "Allocating 15GB scratch filesystem for the docker daemon"
       dd if=/dev/zero of="${dockerroot}" bs=1024 count=15728640
       mknod "${loopdevice}" b 7 "${rand}"
       losetup "${loopdevice}" "${dockerroot}"
@@ -156,7 +156,7 @@ function util::docker::start() {
 
 function util::docker::stop() {
   echo "stopping docker..."
-  kill -9 "$(cat /tmp/docker.pid)"
+  kill "$(cat /tmp/docker.pid)"
 
   mount -l | grep /scratch/docker | awk '{print $1}' | xargs -n1 umount
 
