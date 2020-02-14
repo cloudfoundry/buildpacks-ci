@@ -160,7 +160,9 @@ function util::docker::stop() {
 
   mount -l | grep /scratch/docker | awk '{print $1}' | xargs -n1 umount
 
-  ls /dev/ | grep "loop[[:digit:]]" | xargs -n1 -I{} rm "/dev/{}"
+  for device in /dev/loop*; do
+    echo "${device}" | grep "loop[[:digit:]]" | xargs -n1 rm
+  done
 
   rm /tmp/docker-root-*
 }
