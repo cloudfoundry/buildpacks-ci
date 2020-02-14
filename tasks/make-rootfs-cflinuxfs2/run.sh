@@ -8,7 +8,10 @@ set -x
 
 SUFFIX="${STACKS_SUFFIX-}"
 
-buildpacks-ci/scripts/start-docker
+#shellcheck source=../../scripts/start-docker
+source ./buildpacks-ci/scripts/start-docker
+util::docker::start
+trap util::docker::stop EXIT
 
 pushd cflinuxfs2
   make

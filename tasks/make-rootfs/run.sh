@@ -6,7 +6,10 @@ set -o pipefail
 
 set -x
 
-buildpacks-ci/scripts/start-docker
+#shellcheck source=../../scripts/start-docker
+source ./buildpacks-ci/scripts/start-docker
+util::docker::start
+trap util::docker::stop EXIT
 
 pushd rootfs
   old_receipt_copy="receipt.${STACK}.x86_64.copy"

@@ -123,9 +123,6 @@ File.write(builder_config_file, builder_config)
 puts "**************builder.toml**************"
 puts builder_config
 
-puts "Starting docker daemon"
-run 'buildpacks-ci/scripts/start-docker'
-
 repository_host = "localhost"
 repository_port = "5000"
 
