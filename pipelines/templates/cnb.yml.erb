@@ -78,14 +78,6 @@ resources: #####################################################################
       secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
   <% end %>
 
-# Images
-  - name: ci-image
-    type: registry-image
-    source:
-      repository: cfbuildpacks/ci
-      username: {{buildpacks-docker-username}}
-      password: {{buildpacks-docker-password}}
-
 jobs: ################################################################################################################
 
   - name: update-cnb-tools
@@ -95,13 +87,11 @@ jobs: ##########################################################################
     plan:
     - in_parallel:
       - get: buildpacks-ci
-      - get: ci-image
       - get: cnb-tools-git
         trigger: true
       - get: buildpack
         resource: buildpack-git
     - task: update-cnb-tools
-      image: ci-image
       file: buildpacks-ci/tasks/update-cnb-tools/task.yml
     - put: buildpack-git
       params:
@@ -158,19 +148,15 @@ jobs: ##########################################################################
     public: true
     serial: true
     plan:
-      - do:
-        - in_parallel:
-          - get: buildpacks-ci
-          - get: ci-image
-          - get: repo
-            resource: buildpack-git
-            trigger: true
-        - do:
-          - task: unit tests
-            image: ci-image
-            file: buildpacks-ci/tasks/run-scripts-unit/task.yml
-            params:
-              RUN_UNPRIVILEGED: true
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: repo
+          resource: buildpack-git
+          trigger: true
+      - task: unit tests
+        file: buildpacks-ci/tasks/run-scripts-unit/task.yml
+        params:
+          RUN_UNPRIVILEGED: true
 
 <% if buildpacks[language]['integration'] %>
   - name: specs-integration
@@ -204,7 +190,6 @@ jobs: ##########################################################################
             params:
               bump: patch
           - get: buildpacks-ci
-          - get: ci-image
           - get: packager
             resource: libcfbuildpack
           - get: buildpack
@@ -217,7 +202,6 @@ jobs: ##########################################################################
               - specs-unit
               <% end %>
       - task: package-buildpack
-        image: ci-image
         file: buildpacks-ci/tasks/package-v3-buildpack/task.yml
         params:
           LANGUAGE: <%= language %>
