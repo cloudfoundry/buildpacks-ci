@@ -179,7 +179,6 @@ jobs: ##########################################################################
     plan:
       - in_parallel:
           - get: buildpacks-ci
-          - get: ci-image
           - get: packager
             resource: libcfbuildpack
           - get: pack
@@ -189,7 +188,6 @@ jobs: ##########################################################################
             passed:
               - specs-unit
       - task: integration-tests
-        image: ci-image
         file: buildpacks-ci/tasks/run-packaged-v3-bp-integration/task.yml
         privileged: true
         params:
