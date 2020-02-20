@@ -1,7 +1,5 @@
 ---
 extensions:
-  exclusions:
-    - name: sodium
   additions:
     - name: gd
       version: nil

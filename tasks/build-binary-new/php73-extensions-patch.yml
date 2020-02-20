@@ -1,11 +1,7 @@
 ---
 extensions:
   exclusions:
-    - name: sodium
     - name: libz
-    - name: yaf
-    - name: amqp
-    - name: tideways
   additions:
     - name: gd
       version: nil
