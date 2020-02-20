@@ -224,6 +224,7 @@ jobs:
         params:
           CNB_RUN_IMAGE: <%= builder_data['builder-image-params']['RUN_IMAGE'] %>
           CNB_BUILD_IMAGE: <%= builder_data['builder-image-params']['BUILD_IMAGE'] %>
+          GIT_TOKEN: {{buildpacks-github-token}}
     <% end %>
   <% end %>
 <% end %>
