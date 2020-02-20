@@ -10,7 +10,6 @@ extensions:
     - name: recode
     - name: wddx
     - name: phalcon
-    - name: tideways
   additions:
     - name: gd
       version: nil
