@@ -19,9 +19,11 @@ module Depwatcher
       response = client.get("https://secure.php.net/downloads.php").body
       doc = XML.parse_html(response)
       links = doc.xpath_nodes("//h3[starts-with(@id,'v')]/@id")
-      links.map { |e| e.content }.map { |v|
+      versions = links.map { |e| e.content }.map { |v|
         Internal.new(v[1..-1])
-      }.sort_by { |i| SemanticVersion.new(i.ref) }
+      }
+      versions += old_versions()
+      versions.sort_by { |i| SemanticVersion.new(i.ref) }
     end
 
     def in(ref : String) : Release
@@ -39,6 +41,15 @@ module Depwatcher
       response = client.get("https://secure.php.net/releases/").body
       doc = XML.parse_html(response)
       doc.xpath_nodes("//a[text()=\"PHP #{ref} (tar.gz)\"]/following-sibling::span[@class='sha256sum']")
+    end
+
+    def old_versions() : Array(Internal)
+      response = client.get("https://secure.php.net/releases/").body
+      doc = XML.parse_html(response)
+      links = doc.xpath_nodes("//h2[starts-with(text(),\"7.\")]")
+      links.map { |e| e.content }.map { |v|
+        Internal.new(v)
+      }
     end
   end
 end
