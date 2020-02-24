@@ -1014,6 +1014,14 @@ jobs: ##########################################################################
           trigger: true
           passed:
           - specs-unit-develop
+      <% if buildpacks[language]['compute_instance_count'] %>
+      - task: scale-up-compute
+        file: buildpacks-ci/tasks/scale-up-compute/task.yml
+        input_mapping:
+          environment: smith-environments-<%= pas_versions['n-2'] %>
+        params:
+          INSTANCE_COUNT: <%= buildpacks[language]['compute_instance_count'] %>
+      <% end %>
       - do:
         - task: create-cf-space
           image: ci-image
