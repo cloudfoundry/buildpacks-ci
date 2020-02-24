@@ -719,14 +719,6 @@ jobs: ##########################################################################
         trigger: true
       - get: repo
         resource: buildpack-v3
-    <% if buildpacks[language]['compute_instance_count'] %>
-    - task: scale-up-compute
-      file: buildpacks-ci/tasks/scale-up-compute/task.yml
-      input_mapping:
-        edge-environments: environment
-      params:
-        INSTANCE_COUNT: <% buildpacks[language]['compute_instance_count'] %>
-    <% end %>
     - in_parallel:
       <%
       #buildpacks[language]['stacks'].each do |stack| #use this when cnb buildpack github releases support cflinuxfs2
@@ -955,6 +947,14 @@ jobs: ##########################################################################
           - specs-unit-develop
         - get: repo
           resource: buildpack-develop
+      <% if buildpacks[language]['compute_instance_count'] %>
+      - task: scale-up-compute
+        file: buildpacks-ci/tasks/scale-up-compute/task.yml
+        input_mapping:
+          environment: smith-environments-<%= pas_versions['n-2'] %>
+        params:
+          INSTANCE_COUNT: <%= buildpacks[language]['compute_instance_count'] %>
+      <% end %>
       - do:
         - task: create-cf-space
           image: ci-image
