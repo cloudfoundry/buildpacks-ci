@@ -725,7 +725,7 @@ jobs: ##########################################################################
       input_mapping:
         edge-environments: environment
       params:
-        INSTANCE_COUNT: <% if buildpacks[language]['compute_instance_count'] %>
+        INSTANCE_COUNT: <% buildpacks[language]['compute_instance_count'] %>
     <% end %>
     - in_parallel:
       <%
