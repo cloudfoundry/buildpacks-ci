@@ -1,4 +1,4 @@
-FROM crystallang/crystal:latest
+FROM crystallang/crystal:0.32.1
 
 ADD . /src
 WORKDIR /src
