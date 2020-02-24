@@ -63,6 +63,7 @@
     'stacks' => %w(cflinuxfs3),
     'product_slug' => 'ruby-buildpack',
     'non_lts_pivnet' => true,
+    'compute_instance_count' => 3,
   },
   'staticfile' => {
     'stacks' => %w(cflinuxfs3),
@@ -711,13 +712,21 @@ jobs: ##########################################################################
           claim: <%= language %>
         timeout: 3h
       - get: buildpacks-ci
-     - get: ci-image
+      - get: ci-image
       - get: env-repo
       - get: buildpack
         resource: buildpack-v3
         trigger: true
       - get: repo
         resource: buildpack-v3
+    <% if buildpacks[language]['compute_instance_count'] %>
+    - task: scale-up-compute
+      file: buildpacks-ci/tasks/scale-up-compute/task.yml
+      input_mapping:
+        edge-environments: environment
+      params:
+        INSTANCE_COUNT: <% if buildpacks[language]['compute_instance_count'] %>
+    <% end %>
     - in_parallel:
       <%
       #buildpacks[language]['stacks'].each do |stack| #use this when cnb buildpack github releases support cflinuxfs2
