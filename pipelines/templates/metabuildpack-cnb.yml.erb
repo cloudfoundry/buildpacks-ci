@@ -244,15 +244,6 @@ jobs:
           - get: repo
             trigger: true
           - get: cnb2cf
-      # - task: create-cnb-candidate
-      #   file: buildpacks-ci/tasks/cnb/build/task.yml
-      # - task: promote-candidate-to-rc
-      #   file: buildpacks-ci/tasks/cnb/promote-candidate-to-rc/task.yml
-      #   params:
-      #     LANGUAGE: <%= language %>
-      # - put: cnb-release-candidate
-      #   params:
-      #     file: release-candidate/*.tgz
       - task: create-v2-candidate
         image: ci-image
         file: buildpacks-ci/tasks/cnb/build-v2/task.yml
