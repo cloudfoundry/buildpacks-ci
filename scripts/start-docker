@@ -166,10 +166,10 @@ function util::docker::stop() {
   done
 
   shopt -s nullglob
-  for device in /dev/loop*; do
-    echo "${device}" | grep "loop[[:digit:]]" | xargs -n1 rm
-  done
+    for device in /dev/loop*; do
+      echo "${device}" | grep "loop[[:digit:]]" | xargs -n1 rm
+    done
   shopt -u nullglob
 
-  rm /tmp/docker-root-*
+  find /tmp -type f -name 'docker-root-*' -delete
 }
