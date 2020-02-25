@@ -165,9 +165,11 @@ function util::docker::stop() {
     set -e
   done
 
+  shopt -s nullglob
   for device in /dev/loop*; do
     echo "${device}" | grep "loop[[:digit:]]" | xargs -n1 rm
   done
+  shopt -u nullglob
 
   rm /tmp/docker-root-*
 }
