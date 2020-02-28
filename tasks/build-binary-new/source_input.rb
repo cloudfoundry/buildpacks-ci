@@ -17,16 +17,26 @@ class SourceInput
 
   def self.from_file(source_file)
     data = JSON.parse(open(source_file).read)
-    SourceInput.new(
-      data.dig('source', 'name') || '',
-      data.dig('version', 'url') || '',
-      data.dig('version', 'ref') || '',
-      data.dig('version', 'md5_digest'),
-      data.dig('version', 'sha256'),
-      data.dig('version', 'git_commit_sha'),
-      data.dig('source', 'repo') || '',
-      data.dig('source', 'type') || '',
-    )
+    if data.dig('name')
+      SourceInput.new(
+        data.dig('name') || '',
+        data.dig('source_uri') || '',
+        data.dig('version') || '',
+        nil,
+        data.dig('source_sha') || '',
+      )
+    else
+      SourceInput.new(
+        data.dig('source', 'name') || '',
+        data.dig('version', 'url') || '',
+        data.dig('version', 'ref') || '',
+        data.dig('version', 'md5_digest'),
+        data.dig('version', 'sha256'),
+        data.dig('version', 'git_commit_sha'),
+        data.dig('source', 'repo') || '',
+        data.dig('source', 'type') || '',
+      )
+    end
   end
 
   def sha_from_url()
