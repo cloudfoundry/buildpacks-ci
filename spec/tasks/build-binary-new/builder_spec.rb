@@ -6,6 +6,7 @@ require_relative '../../../tasks/build-binary-new/source_input'
 require_relative '../../../tasks/build-binary-new/build_input'
 require_relative '../../../tasks/build-binary-new/build_output'
 require_relative '../../../tasks/build-binary-new/artifact_output'
+require_relative '../../../tasks/build-binary-new/dep_metadata_output'
 require_relative '../../../tasks/build-binary-new/binary_builder_wrapper'
 
 TableTestInput = Struct.new(:dep, :version) do
@@ -37,6 +38,7 @@ describe 'Builder' do
   let(:build_input) { double(BuildInput) }
   let(:build_output) { double(BuildOutput) }
   let(:artifact_output) { double(ArtifactOutput) }
+  let(:dep_metadata_output) { double(DepMetadataOutput) }
 
   context 'when using the old binary-builder' do
     {
@@ -65,6 +67,9 @@ describe 'Builder' do
             full_version = "#{source_input.version}_ruby-2.5"
             expect(binary_builder).to receive(:build) {|src| expect(src.version).to eq(full_version)}
           end
+
+          expect(dep_metadata_output).to receive(:write_metadata)
+            .with('fake-url', any_args)
 
           allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
           expect(build_input).to receive(:copy_to_build_output)
@@ -98,7 +103,7 @@ describe 'Builder' do
             .with(input.dep, output.old_file_path, output.prefix)
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
-          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, dep_metadata_output)
         end
       end
     end
@@ -157,7 +162,10 @@ describe 'Builder' do
 
         allow(Archive).to receive(:strip_top_level_directory_from_tar)
 
-        subject.execute(binary_builder, 'cflinuxfs3', source_input, build_input, build_output, artifact_output, php_extensions_dir)
+        allow(dep_metadata_output).to receive(:write_metadata)
+          .with('fake-url', any_args)
+
+        subject.execute(binary_builder, 'cflinuxfs3', source_input, build_input, build_output, artifact_output, dep_metadata_output, php_extensions_dir)
 
         expect(binary_builder).to have_received(:build).with(source_input, '--php-extensions-file=' + File.join(php_extensions_dir, 'php-final-extensions.yml'))
 
@@ -191,6 +199,9 @@ describe 'Builder' do
 
       allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
       expect(build_input).to receive(:copy_to_build_output)
+
+      expect(dep_metadata_output).to receive(:write_metadata)
+        .with('fake-url', any_args)
     end
 
     context 'third party-hosted deps' do
@@ -217,7 +228,7 @@ describe 'Builder' do
             .with(source_input)
             .and_return(['abc', 'fake-sha256'])
 
-          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, dep_metadata_output)
         end
       end
     end
@@ -254,7 +265,7 @@ describe 'Builder' do
           expect(Archive).to receive(:strip_top_level_directory_from_tar)
             .with('artifacts/nginx-1.0.2.tgz')
 
-          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, dep_metadata_output)
         end
       end
 
@@ -273,7 +284,7 @@ describe 'Builder' do
           expect(Archive).to receive(:strip_top_level_directory_from_tar)
             .with('artifacts/nginx-1.0.2.tgz')
 
-          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, dep_metadata_output)
         end
       end
     end
@@ -307,7 +318,7 @@ describe 'Builder' do
                                          .with('python', 'artifacts/python-1.0.2.tgz', 'python-1.0.2-linux-x64-cflinuxfs3')
                                          .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
-          subject.execute(binary_builder, 'cflinuxfs3', source_input, build_input, build_output, artifact_output)
+          subject.execute(binary_builder, 'cflinuxfs3', source_input, build_input, build_output, artifact_output, dep_metadata_output)
         end
       end
     end
@@ -336,7 +347,7 @@ describe 'Builder' do
             .with('composer', 'source/composer.phar', 'composer-1.0.2')
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
-          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, dep_metadata_output)
         end
       end
 
@@ -352,7 +363,7 @@ describe 'Builder' do
             .with('pipenv', '/build-dir/fake-pipenv-1234.tar.gz', 'pipenv-v1.0.2-cflinuxfs2')
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
-          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, dep_metadata_output)
         end
       end
 
@@ -368,7 +379,7 @@ describe 'Builder' do
             .with('libunwind', '/build-dir/fake-libunwind-1234.tar.gz', 'libunwind-1.0.2-cflinuxfs2')
             .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
-          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, dep_metadata_output)
         end
       end
 
@@ -384,7 +395,7 @@ describe 'Builder' do
                                        .with('dotnet-sdk', '/tmp/dotnet-sdk.1.0.2.linux-amd64.tar.xz', 'dotnet-sdk.1.0.2.linux-amd64-cflinuxfs2')
                                        .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
-          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, dep_metadata_output)
         end
       end
 
@@ -400,7 +411,7 @@ describe 'Builder' do
                                        .with('dotnet-runtime', '/tmp/dotnet-runtime.1.0.2.linux-amd64.tar.xz', 'dotnet-runtime.1.0.2.linux-amd64-cflinuxfs2')
                                        .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
-          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, dep_metadata_output)
         end
       end
 
@@ -416,7 +427,7 @@ describe 'Builder' do
                                        .with('dotnet-aspnetcore', '/tmp/dotnet-aspnetcore.1.0.2.linux-amd64.tar.xz', 'dotnet-aspnetcore.1.0.2.linux-amd64-cflinuxfs2')
                                        .and_return(sha256: 'fake-sha256', url: 'fake-url')
 
-          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, dep_metadata_output)
         end
       end
     end
@@ -495,7 +506,7 @@ describe 'Builder' do
               'User-Agent'=>'Ruby'
             }).to_return(status: 200, body: "", headers: {}).times(4)
 
-          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output)
+          subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, dep_metadata_output)
         end
 
       end
@@ -509,6 +520,9 @@ describe 'Builder' do
       allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
       expect(build_output).not_to receive(:add_output)
       expect(build_output).not_to receive(:commit_outputs)
+
+      expect(dep_metadata_output).to receive(:write_metadata)
+        .with('fake-url', any_args)
     end
 
     it 'does not write any build metadata' do
@@ -516,7 +530,7 @@ describe 'Builder' do
                        .with(source_input)
                        .and_return(['abc', 'fake-sha256'])
 
-      subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, '', true)
+      subject.execute(binary_builder, 'cflinuxfs2', source_input, build_input, build_output, artifact_output, dep_metadata_output, '', true)
     end
   end
 end

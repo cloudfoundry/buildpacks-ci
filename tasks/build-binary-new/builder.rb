@@ -422,7 +422,7 @@ end
 
 
 class Builder
-  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, php_extensions_dir = __dir__, skip_commit = false)
+  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, php_extensions_dir = __dir__, skip_commit = false)
     cnb_list = [
       'org.cloudfoundry.node-engine',
       'org.cloudfoundry.npm',
@@ -835,6 +835,8 @@ class Builder
       build_output.add_output("#{source_input.version}-#{stack}.json", out_data)
       build_output.commit_outputs("Build #{source_input.name} - #{source_input.version} - #{stack} [##{build_input.tracker_story_id}]")
     end
+
+    dep_metadata_output.write_metadata(out_data[:url], out_data)
 
     out_data
   end
