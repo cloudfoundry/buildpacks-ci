@@ -5,6 +5,7 @@ require_relative 'source_input'
 require_relative 'build_input'
 require_relative 'build_output'
 require_relative 'artifact_output'
+require_relative 'dep_metadata_output'
 
 include Runner
 include Sha
@@ -18,6 +19,7 @@ def main
   build_input     = skip_commit ? BuildInput.new(nil, nil) : BuildInput.from_file("builds/binary-builds-new/#{source_input.name}/#{source_input.version}.json")
   build_output    = BuildOutput.new(source_input.name)
   artifact_output = ArtifactOutput.new(File.join(Dir.pwd, 'artifacts'))
+  dep_metadata_output = DepMetadataOutput.new(File.join(Dir.pwd, 'dep-metadata'))
   out_data = Builder.new.execute(
     binary_builder,
     stack,
@@ -25,6 +27,7 @@ def main
     build_input,
     build_output,
     artifact_output,
+    dep_metadata_output,
     __dir__,
     skip_commit
   )

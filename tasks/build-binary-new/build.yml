@@ -20,6 +20,7 @@ inputs:
 outputs:
   - name: artifacts
   - name: builds-artifacts
+  - name: dep-metadata
 run:
   path: bash
   args:
