@@ -37,23 +37,23 @@ type Stack struct {
 }
 
 type Dependency struct {
-	ID           string   `toml:"id"`
-	Name         string   `toml:"name,omitempty"`
-	SHA256       string   `toml:"sha256"`
-	Source       string   `toml:"source,omitempty"`
-	SourceSHA256 string   `mapstructure:"source_sha256" toml:"source_sha256,omitempty"`
-	Stacks       []string `toml:"stacks"`
-	URI          string   `toml:"uri"`
-	Version      string   `toml:"version"`
+	DeprecationDate string   `mapstructure:"deprecation_date" toml:"deprecation_date,omitempty"`
+	ID              string   `toml:"id"`
+	Name            string   `toml:"name,omitempty"`
+	SHA256          string   `toml:"sha256"`
+	Source          string   `toml:"source,omitempty"`
+	SourceSHA256    string   `mapstructure:"source_sha256" toml:"source_sha256,omitempty"`
+	Stacks          []string `toml:"stacks"`
+	URI             string   `toml:"uri"`
+	Version         string   `toml:"version"`
 }
 
 const (
-	IncludeFilesKey     = "include_files"
-	PrePackageKey       = "pre_package"
-	DeprecationDatesKey = "dependency_deprecation_dates"
-	DependenciesKey     = "dependencies"
-	DefaultVersionsKey  = "default-versions"
-	RuntimeToSDKsKey    = "runtime-to-sdks"
+	IncludeFilesKey    = "include_files"
+	PrePackageKey      = "pre_package"
+	DependenciesKey    = "dependencies"
+	DefaultVersionsKey = "default-versions"
+	RuntimeToSDKsKey   = "runtime-to-sdks"
 )
 
 // This wont work until golang 1.13

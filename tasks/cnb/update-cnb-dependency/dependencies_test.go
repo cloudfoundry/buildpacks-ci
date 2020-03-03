@@ -254,7 +254,7 @@ func testDependencies(t *testing.T, when spec.G, it spec.S) {
 		})
 	})
 
-	when.Focus("SortDependencies", func() {
+	when("SortDependencies", func() {
 		it("sorts by name, then version, then stacks", func() {
 			deps := Dependencies{
 				{ID: "some-id-2", Version: "2.0.0", Stacks: []string{"some-stack-2"}},

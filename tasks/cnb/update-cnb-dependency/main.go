@@ -50,7 +50,7 @@ func updateCNBDependencies() error {
 		return errors.Wrap(err, "failed to load task resources")
 	}
 
-	depsToAdd, err := loadDependenciesFromBinaryBuilds(flags.binaryBuildsPath, config.Dep, config.Orchestrator)
+	depsToAdd, err := loadDependenciesFromBinaryBuilds(flags.binaryBuildsPath, config.Dep, config.Orchestrator, flags.deprecationDate)
 	if err != nil {
 		return errors.Wrap(err, "failed to construct list of dependencies to add")
 	}
@@ -58,16 +58,6 @@ func updateCNBDependencies() error {
 	originalDeps, updatedDeps, err := UpdateDependenciesWith(config.BuildpackTOML, config.Dep, depsToAdd, flags.versionsToKeep)
 	if err != nil {
 		return errors.Wrap(err, "failed to update the dependencies")
-	}
-
-	deprecationDate, err := NewDependencyDeprecationDate(flags.deprecationDate, flags.deprecationLink, config.Dep.ID, flags.versionLine, flags.deprecationMatch)
-	if err != nil {
-		return errors.Wrap(err, "failed to create a deprecation date")
-	}
-
-	err = UpdateDeprecationDatesWith(config.BuildpackTOML, deprecationDate)
-	if err != nil {
-		return errors.Wrap(err, "failed to update the deprecation dates")
 	}
 
 	config.BuildpackTOML.Orders = UpdateOrders(config.BuildpackTOML.Orders, config.Dep)

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"sort"
+	"time"
 
 	"github.com/blang/semver"
 	"github.com/cloudfoundry/buildpacks-ci/tasks/cnb/helpers"
@@ -26,14 +27,12 @@ func (deps Dependencies) Update(dep helpers.Dependency, depsToAdd Dependencies, 
 
 func (deps Dependencies) MergeWith(newDeps Dependencies) Dependencies {
 	depsMap := map[string]helpers.Dependency{}
-
 	for _, dep := range deps {
 		depsMap[makeKeyWithStack(dep)] = dep
 	}
 	for _, dep := range newDeps {
 		depsMap[makeKeyWithStack(dep)] = dep
 	}
-
 	allDeps := Dependencies{}
 	for _, dep := range depsMap {
 		allDeps = append(allDeps, dep)
@@ -150,7 +149,7 @@ func compareStacks(a, b []string) bool {
 	return true
 }
 
-func loadDependenciesFromBinaryBuilds(binaryBuildsPath string, dep helpers.Dependency, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
+func loadDependenciesFromBinaryBuilds(binaryBuildsPath string, dep helpers.Dependency, depOrchestratorConfig DependencyOrchestratorConfig, deprecationDate string) (Dependencies, error) {
 	var depsToAdd Dependencies
 
 	buildMetadataPaths, err := filepath.Glob(filepath.Join(binaryBuildsPath, dep.ID, fmt.Sprintf("%s-*.json", dep.Version)))
@@ -159,7 +158,7 @@ func loadDependenciesFromBinaryBuilds(binaryBuildsPath string, dep helpers.Depen
 	}
 
 	for _, buildMetadataPath := range buildMetadataPaths {
-		deps, err := constructDependenciesFromBuildMetadata(dep, buildMetadataPath, depOrchestratorConfig)
+		deps, err := constructDependenciesFromBuildMetadata(dep, buildMetadataPath, depOrchestratorConfig, deprecationDate)
 		if err != nil {
 			return depsToAdd, err
 		}
@@ -191,11 +190,23 @@ func makeKeyWithoutStack(dep helpers.Dependency) string {
 	return dep.ID + dep.Version + dep.URI + dep.SHA256 + dep.Source + dep.SourceSHA256
 }
 
-func constructDependenciesFromBuildMetadata(dep helpers.Dependency, buildMetadataPath string, depOrchestratorConfig DependencyOrchestratorConfig) (Dependencies, error) {
+func constructDependenciesFromBuildMetadata(dep helpers.Dependency, buildMetadataPath string, depOrchestratorConfig DependencyOrchestratorConfig, deprecationDate string) (Dependencies, error) {
+	var formattedDeprecationDate string
+
+	if deprecationDate != "" {
+		d, err := time.Parse("2006-01-02", deprecationDate)
+		if err != nil {
+			return nil, err
+		}
+
+		formattedDeprecationDate = d.Format(time.RFC3339)
+	}
+
 	contents, err := ioutil.ReadFile(buildMetadataPath)
 	if err != nil {
 		return nil, err
 	}
+
 	var buildMetadata BuildMetadata
 	if err := json.Unmarshal(contents, &buildMetadata); err != nil {
 		return nil, err
@@ -209,14 +220,15 @@ func constructDependenciesFromBuildMetadata(dep helpers.Dependency, buildMetadat
 	var deps Dependencies
 	for _, stack := range stacks {
 		deps = append(deps, helpers.Dependency{
-			ID:           dep.ID,
-			Name:         depOrchestratorConfig.V3DepNames[dep.ID],
-			SHA256:       buildMetadata.SHA256,
-			Source:       buildMetadata.Source.URL,
-			SourceSHA256: buildMetadata.Source.SHA256,
-			Stacks:       []string{stack},
-			URI:          buildMetadata.URL,
-			Version:      dep.Version,
+			DeprecationDate: formattedDeprecationDate,
+			ID:              dep.ID,
+			Name:            depOrchestratorConfig.V3DepNames[dep.ID],
+			SHA256:          buildMetadata.SHA256,
+			Source:          buildMetadata.Source.URL,
+			SourceSHA256:    buildMetadata.Source.SHA256,
+			Stacks:          []string{stack},
+			URI:             buildMetadata.URL,
+			Version:         dep.Version,
 		})
 	}
 	return deps, nil
