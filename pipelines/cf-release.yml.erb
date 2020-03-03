@@ -421,9 +421,6 @@ jobs:
         - get: buildpacks-ci
         - get: release
           resource: <%= language %>-buildpack-bosh-release
-        - get: releng-kiln-concourse-tasks
-        - get: p-runtime
-          params: { submodules: none }
         <% stacks[language].each_with_index do |stack, i| %>
         - get: buildpack-zip-stack<%= i %>
           passed: [ <%= language.include?('java') ? 'ship-it-java' : 'ship-it' %> ]
@@ -453,13 +450,6 @@ jobs:
           params:
             name: version/version
             tag: version/version
-        - task: upload-release
-          file: releng-kiln-concourse-tasks/tasks/upload-release/task.yml
-          input_mapping:
-            release-tarball-directory: release-tarball
-          params:
-            AWS_ACCESS_KEY_ID: ((pas-releng-fetch-releases.username))
-            AWS_SECRET_ACCESS_KEY: ((pas-releng-fetch-releases.password))
         on_failure:
           put: failure-alert
           params:
@@ -476,6 +466,9 @@ jobs:
     plan:
       - in_parallel:
         - get: buildpacks-ci
+        - get: releng-kiln-concourse-tasks
+        - get: p-runtime
+          params: { submodules: none }
         <% if language == 'java' %>
         - get: pivnet-production
           resource: java-pivnet-production
@@ -519,6 +512,13 @@ jobs:
           params:
             name: version/version
             tag: version/version
+        - task: upload-release
+          file: releng-kiln-concourse-tasks/tasks/upload-release/task.yml
+          input_mapping:
+            release-tarball-directory: release-tarball
+          params:
+            AWS_ACCESS_KEY_ID: ((pas-releng-fetch-releases.username))
+            AWS_SECRET_ACCESS_KEY: ((pas-releng-fetch-releases.password))
         on_failure:
           put: failure-alert
           params:
