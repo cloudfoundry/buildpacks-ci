@@ -15,6 +15,7 @@ random = "random"
 some-dep = "2.x"
 
 [[metadata.dependencies]]
+deprecation_date = "2020-01-01T00:00:00Z"
 id = "some-dep"
 name = "Some Dep"
 sha256 = "sha256-for-bionic-binary-1.0.0"
@@ -23,6 +24,7 @@ uri = "https://example.org/some-dep-1.0.0.tgz"
 version = "1.0.0"
 
 [[metadata.dependencies]]
+deprecation_date = "2020-01-01T00:00:00Z"
 id = "some-dep"
 name = "Some Dep"
 sha256 = "sha256-for-cflinuxfs3-binary-1.0.0"
@@ -33,6 +35,7 @@ uri = "https://buildpacks.cloudfoundry.org/dependencies/some-dep/some-dep-1.0.0.
 version = "1.0.0"
 
 [[metadata.dependencies]]
+deprecation_date = "2020-01-01T00:00:00Z"
 id = "some-dep"
 name = "Some Dep"
 sha256 = "sha256-for-bionic-binary-1.0.1"
@@ -41,6 +44,7 @@ uri = "https://example.org/some-dep-1.0.1.tgz"
 version = "1.0.1"
 
 [[metadata.dependencies]]
+deprecation_date = "2020-01-01T00:00:00Z"
 id = "some-dep"
 name = "Some Dep"
 sha256 = "sha256-for-cflinuxfs3-binary-1.0.1"
@@ -51,6 +55,7 @@ uri = "https://buildpacks.cloudfoundry.org/dependencies/some-dep/some-dep-1.0.1.
 version = "1.0.1"
 
 [[metadata.dependencies]]
+deprecation_date = "2030-01-01T00:00:00Z"
 id = "some-dep"
 name = "Some Dep"
 sha256 = "sha256-for-bionic-binary-2.0.0"
@@ -59,6 +64,7 @@ uri = "https://example.org/some-dep-2.0.0.tgz"
 version = "2.0.0"
 
 [[metadata.dependencies]]
+deprecation_date = "2030-01-01T00:00:00Z"
 id = "some-dep"
 name = "Some Dep"
 sha256 = "sha256-for-cflinuxfs3-binary-2.0.0"
@@ -69,6 +75,7 @@ uri = "https://buildpacks.cloudfoundry.org/dependencies/some-dep/some-dep-2.0.0.
 version = "2.0.0"
 
 [[metadata.dependencies]]
+deprecation_date = "2030-01-01T00:00:00Z"
 id = "some-dep"
 name = "Some Dep"
 sha256 = "sha256-for-bionic-binary-2.0.1"
@@ -77,6 +84,7 @@ uri = "https://example.org/some-dep-2.0.1.tgz"
 version = "2.0.1"
 
 [[metadata.dependencies]]
+deprecation_date = "2030-01-01T00:00:00Z"
 id = "some-dep"
 name = "Some Dep"
 sha256 = "sha256-for-cflinuxfs3-binary-2.0.1"
@@ -87,6 +95,7 @@ uri = "https://buildpacks.cloudfoundry.org/dependencies/some-dep/some-dep-2.0.1.
 version = "2.0.1"
 
 [[metadata.dependencies]]
+deprecation_date = "2030-01-01T00:00:00Z"
 id = "some-dep"
 name = "Some Dep"
 sha256 = "sha256-for-cflinuxfs3-binary-2.1.0"
@@ -95,18 +104,6 @@ source_sha256 = "sha256-for-source-2.1.0"
 stacks = ["org.cloudfoundry.stacks.cflinuxfs3","io.buildpacks.stacks.bionic"]
 uri = "https://buildpacks.cloudfoundry.org/dependencies/some-dep/some-dep-2.1.0.linux-amd64-cflinuxfs3-dddddddd.tar.gz"
 version = "2.1.0"
-
-[[metadata.dependency_deprecation_dates]]
-date = 2020-01-01T00:00:00Z
-link = "some-deprecation-link"
-name = "some-dep"
-version_line = "1.x.x"
-
-[[metadata.dependency_deprecation_dates]]
-date = 2030-01-01T00:00:00Z
-link = "some-deprecation-link"
-name = "some-dep"
-version_line = "2.x.x"
 
 [[stacks]]
 id = "org.cloudfoundry.stacks.cflinuxfs3"

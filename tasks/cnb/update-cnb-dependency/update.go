@@ -33,20 +33,3 @@ func UpdateDependenciesWith(buildpackTOML helpers.BuildpackTOML, dep helpers.Dep
 
 	return deps, updatedDeps, nil
 }
-
-func UpdateDeprecationDatesWith(buildpackTOML helpers.BuildpackTOML, date DependencyDeprecationDate) error {
-	var deprecationDates DeprecationDates
-	err := mapstructure.Decode(buildpackTOML.Metadata[helpers.DeprecationDatesKey], &deprecationDates)
-	if err != nil {
-		return errors.Wrap(err, "failed to decode deprecation dates")
-	}
-
-	updatedDeprecationDates, err := deprecationDates.Update(date)
-	if err != nil {
-		return errors.Wrap(err, "failed to update deprecation dates")
-	}
-	if len(updatedDeprecationDates) > 0 {
-		buildpackTOML.Metadata[helpers.DeprecationDatesKey] = updatedDeprecationDates
-	}
-	return nil
-}
