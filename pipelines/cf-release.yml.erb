@@ -453,7 +453,7 @@ jobs:
           params:
             name: version/version
             tag: version/version
-        - name: upload-release
+        - task: upload-release
           file: releng-kiln-concourse-tasks/tasks/upload-release/task.yml
           input_mapping:
             release-tarball-directory: release-tarball
