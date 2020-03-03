@@ -5,12 +5,13 @@ require_relative '../../lib/git-client'
 
 
 class BuildpackBOSHReleaseUpdater
-  def initialize(version, access_key_id, secret_access_key, language, release_name)
+  def initialize(version, access_key_id, secret_access_key, language, release_name, release_tarball_dir)
     @version = version
     @access_key_id = access_key_id
     @secret_access_key = secret_access_key
     @language = language
     @release_name = release_name
+    @release_tarball_dir = release_tarball_dir
   end
 
   def run!
@@ -58,7 +59,7 @@ class BuildpackBOSHReleaseUpdater
   end
 
   def create_release
-    system "bosh2 -n create-release --final --version #{@version} --name #{@release_name} --force" or exit 1
+    system "bosh2 -n create-release --final --version #{@version} --name #{@release_name} --tarball #{File.join(@release_tarball_dir, 'release.tgz')} --force" or exit 1
 
     GitClient.add_file("releases/**/*-#{@version}.yml")
     GitClient.add_file("releases/**/index.yml")

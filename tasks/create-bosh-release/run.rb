@@ -16,6 +16,7 @@ access_key_id = ENV.fetch('ACCESS_KEY_ID', false)
 secret_access_key = ENV.fetch('SECRET_ACCESS_KEY', false)
 language = ENV.fetch('LANGUAGE')
 release_name = ENV.fetch('RELEASE_NAME')
+release_tarball_dir = File.join(Dir.pwd, 'release-tarball')
 
 Dir.chdir(ENV.fetch('RELEASE_DIR')) do
   release_tags = `git tag`.split("\n")
@@ -31,7 +32,8 @@ Dir.chdir(ENV.fetch('RELEASE_DIR')) do
     access_key_id,
     secret_access_key,
     language,
-    release_name)
+    release_name,
+    release_tarball_dir)
 
   updater.run!
 end

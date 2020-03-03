@@ -75,6 +75,19 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/cf-deployment
       branch: release-candidate
+  - name: releng-kiln-concourse-tasks
+    type: git
+    source:
+      uri: git@github.com:pivotal/releng-kiln-concourse-tasks.git
+      private_key: ((releng-kiln-concourse-tasks-deploy-key.private_key))
+  - name: p-runtime
+    type: git
+    source:
+      uri: git@github.com:pivotal-cf/p-runtime.git
+      branch: master
+      private_key: ((p-runtime-deploy-key.private_key))
+      paths:
+        - Kilnfile
   - name: gcp-stemcell
     type: bosh-io-stemcell
     source:
@@ -408,6 +421,9 @@ jobs:
         - get: buildpacks-ci
         - get: release
           resource: <%= language %>-buildpack-bosh-release
+        - get: releng-kiln-concourse-tasks
+        - get: p-runtime
+          params: { submodules: none }
         <% stacks[language].each_with_index do |stack, i| %>
         - get: buildpack-zip-stack<%= i %>
           passed: [ <%= language.include?('java') ? 'ship-it-java' : 'ship-it' %> ]
@@ -437,6 +453,13 @@ jobs:
           params:
             name: version/version
             tag: version/version
+        - name: upload-release
+          file: releng-kiln-concourse-tasks/tasks/upload-release/task.yml
+          input_mapping:
+            release-tarball-directory: release-tarball
+          params:
+            AWS_ACCESS_KEY_ID: ((pas-releng-fetch-releases.username))
+            AWS_SECRET_ACCESS_KEY: ((pas-releng-fetch-releases.password))
         on_failure:
           put: failure-alert
           params:
