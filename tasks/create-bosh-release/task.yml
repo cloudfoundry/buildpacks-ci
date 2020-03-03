@@ -19,6 +19,7 @@ inputs:
     optional: true
 outputs:
   - name: release-artifacts
+  - name: release-tarball
   - name: version
 params:
   LANGUAGE:
