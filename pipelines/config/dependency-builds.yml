@@ -138,7 +138,7 @@ dependencies:
           - line: 2.2.X
           - line: 3.1.X
         removal_strategy: keep_all
-    versions_to_keep: 99
+    versions_to_keep: 2
     any_stack: true
   glide:
     buildpacks:
