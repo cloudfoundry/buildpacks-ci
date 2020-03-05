@@ -28,22 +28,6 @@ resources:
       username: {{buildpacks-docker-user-username}}
       password: {{buildpacks-docker-user-password}}
 
-  - name: depwatcher-dockerfile
-    type: git
-    check_every: 15s
-    source:
-      uri: {{buildpacks-ci-git-uri}}
-      paths: [ dockerfiles/depwatcher/ ]
-      private_key: {{buildpacks-ci-private-key}}
-
-  - name: depwatcher-image
-    type: docker-image
-    source:
-      repository: {{buildpacks-docker-depwatcher-repo}}
-      email: {{buildpacks-docker-user-email}}
-      username: {{buildpacks-docker-user-username}}
-      password: {{buildpacks-docker-user-password}}
-
   - name: failure-alert
     type: slack-notification
     source:
@@ -59,26 +43,6 @@ jobs:
       - put: buildpacks-ci-image
         params:
           build: buildpacks-ci-dockerfile
-          build_args:
-            squash: squash
-        attempts: 2
-        on_failure:
-          put: failure-alert
-          params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-
-  - name: update-depwatcher-image
-    serial: true
-    public: true
-    plan:
-      - get: depwatcher-dockerfile
-        trigger: true
-      - put: depwatcher-image
-        params:
-          build: depwatcher-dockerfile/dockerfiles/depwatcher
           build_args:
             squash: squash
         attempts: 2
