@@ -6,6 +6,8 @@ require 'json' # One to bring them all
 require 'net/http' # And in the darkness bind them
 require 'fileutils'
 require 'open3'
+require 'net/http'
+require 'uri'
 
 def run(*cmd)
     puts *cmd.join(" ")
@@ -64,7 +66,23 @@ Dir.glob('sources/*/').each do |dir|
       next unless dep['stacks'].include? cnb_stack
       bp_location = File.absolute_path(File.join(dir, dep['id']))
 
-      res = Net::HTTP.get_response(URI(dep['uri']))
+      google_credential_json = ENV["GOOGLE_APPLICATION_CREDENTIALS_JSON"]
+
+      File.open("creds", "w+") { |file| file.write(google_credential_json) }
+      output, err, status = Open3.capture3('GOOGLE_APPLICATION_CREDENTIALS=creds gcloud auth application-default print-access-token')
+
+      uri = URI.parse(dep['uri'])
+      request = Net::HTTP::Get.new(uri)
+      request["Authorization"] = "Bearer #{output.strip}"
+
+      req_options = {
+        use_ssl: uri.scheme == "https",
+      }
+
+      res = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
+        http.request(request)
+      end
+
       File.open(bp_location, "wb") do |file|
         file.write res.body
       end
