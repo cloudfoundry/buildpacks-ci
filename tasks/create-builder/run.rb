@@ -66,7 +66,7 @@ Dir.glob('sources/*/').each do |dir|
       next unless dep['stacks'].include? cnb_stack
       bp_location = File.absolute_path(File.join(dir, dep['id']))
 
-      google_credential_json = ENV["GOOGLE_APPLICATION_CREDENTIALS_JSON"]
+      google_credential_json = ENV["GOOGLE_APPLICATION_CREDENTIALS"]
 
       File.open("creds", "w+") { |file| file.write(google_credential_json) }
       output, err, status = Open3.capture3('GOOGLE_APPLICATION_CREDENTIALS=creds gcloud auth application-default print-access-token')
