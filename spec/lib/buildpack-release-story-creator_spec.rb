@@ -108,6 +108,85 @@ describe BuildpackReleaseStoryCreator do
       expect(new_story).to receive(:description=).
          with(anything())
       expect(new_story).to receive(:save)
+      subject.run!
+    end
+  end
+
+  context 'the buildpack is r' do
+    let(:buildpack_name) { 'r' }
+    let(:release_stories) { [] }
+    let(:old_manifest) do
+      <<-MANIFEST
+        dependencies:
+        - name: r
+          version: 1
+        - name: r
+          version: 2
+          dependencies:
+          - {name: subDepA, version: 2.0}
+        - name: r
+          version: 3
+          dependencies:
+          - {name: subDepA, version: 3.0}
+          - {name: subDepB, version: 3.0}
+      MANIFEST
+    end
+    let(:new_manifest) do
+      <<-MANIFEST
+        dependencies:
+        - name: r
+          version: 2
+          dependencies:
+          - {name: subDepA, version: 2.0}
+        - name: r
+          version: 3
+          dependencies:
+          - {name: subDepA, version: 3.1}
+          - {name: subDepB, version: 3.1}
+        - name: r
+          version: 4
+      MANIFEST
+    end
+
+    before do
+      allow(buildpack_project).to receive(:stories).with({filter: "label:release AND label:r AND -state:unscheduled"}).and_return(release_stories)
+      allow(buildpack_project).to receive(:stories).with({filter: "(label:r OR label:r-buildpack) AND (accepted_after:09/24/2015 OR -state:accepted) AND (-label:deps)", limit: 1000, auto_paginate: true}).and_return(all_buildpacks_stories)
+      allow(buildpack_releng_project).to receive(:stories).with({filter: "(label:r OR label:r-buildpack) AND (accepted_after:09/24/2015 OR -state:accepted) AND (-label:deps)", limit: 1000, auto_paginate: true}).and_return(all_buildpacks_releng_stories)
+    end
+
+    it 'shows sub-dependency changes' do
+      expect(buildpack_project).to receive(:create_story).
+        with(hash_including(description: <<~DESCRIPTION,
+          **Stories:**
+
+          #110 - Older Release
+          #111 - Elixir should be faster
+          #221 - Latest Release
+          #222 - Buildpack should tweet on stage
+          #333 - All buildpacks should be awesome
+
+          **Dependency Changes:**
+
+          ```diff
+          r:
+          - 1
+          + 4
+
+          r 3:
+            subDepA:
+          -   3.0
+          +   3.1
+            subDepB:
+          -   3.0
+          +   3.1
+          ```
+
+          Refer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).
+          DESCRIPTION
+        )).and_return(new_story)
+      expect(new_story).to receive(:description=).
+         with(anything())
+      expect(new_story).to receive(:save)
 
       subject.run!
     end
