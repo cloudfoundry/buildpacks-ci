@@ -6,6 +6,12 @@
   builders = config['builders']
 %>
 ---
+resource_types:
+  - name: cron
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cron-resource
+
 resources:
   - name: buildpack-acceptance-tests
     type: git
@@ -131,7 +137,38 @@ resources:
       username: {{buildpacks-docker-username}}
       password: {{buildpacks-docker-password}}
 
+
+  - name: sunday-night
+    type: cron
+    source:
+      expression: 0 18 * * 0
+      location: {{current-timezone}}
+
+  - name: feller
+    type: git
+    source:
+      uri: git@github.com:pivotal/feller
+      branch: master
+      private_key: {{feller-deploy-key}}
+
 jobs:
+  - name: create-<%= language %>-release-story
+    public: true
+    serial: true
+    plan:
+      - get: sunday-night
+        trigger: true
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: feller
+      - task: create-<%= language %>-release-story
+        file: buildpacks-ci/tasks/metabuildpack-release-story/task.yml
+        params:
+          LANGUAGE: <%= language %>
+          TRACKER_PROJECT_ID: {{cf-buildpacks-public-tracker-id}}
+          TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+          GITHUB_TOKEN: {{buildpacks-github-token}}
+
   # Updates
   - name: update-cnb-tools
     public: true
