@@ -1,0 +1,18 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: cfbuildpacks/feature-eng-ci
+    tag: go
+inputs:
+  - name: buildpacks-ci
+  - name: feller
+params:
+  LANGUAGE:
+  TRACKER_API_TOKEN:
+  TRACKER_PROJECT_ID:
+  GITHUB_TOKEN:
+run:
+  path: buildpacks-ci/tasks/metabuildpack-release-story/run.sh
