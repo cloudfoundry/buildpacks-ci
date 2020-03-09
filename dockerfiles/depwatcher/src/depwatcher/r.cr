@@ -30,7 +30,7 @@ module Depwatcher
 
     def in(ref : String) : Release
       major = ref.split(".")[0]
-      url = "https://cran.cnr.berkeley.edu/src/base/R-#{major}/R-#{ref}.tar.gz"
+      url = "https://cran.r-project.org/src/base/R-#{major}/R-#{ref}.tar.gz"
       Release.new(ref, url, get_sha256(url))
     end
   end
