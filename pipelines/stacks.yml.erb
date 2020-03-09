@@ -70,7 +70,7 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/stacks
       branch: master
-      paths: [ "<%= stack %>/base/<%= image %>/**" ]
+      paths: [ "<%= stack %>/dockerfile/<%= image %>/**" ]
     <% end %>
 
 # Versions
@@ -145,7 +145,7 @@ jobs:
         attempts: 2
         params:
           additional_tags: version/version
-          build: bionic-build-cnb-dockerfile/bionic/cnb/build
+          build: bionic-build-cnb-dockerfile/base/cnb/build
           build_args:
             base_image: "cloudfoundry/build:base"
             stack_id: "org.cloudfoundry.stacks.tiny"
@@ -187,7 +187,7 @@ jobs:
         params:
           additional_tags: version/version
           <% if stack != "cflinuxfs3" %>
-          build: <%= stack %>-<%= image %>-base-dockerfile/<%= stack %>/base/<%= image %>
+          build: <%= stack %>-<%= image %>-base-dockerfile/<%= stack_data["tag"] %>/dockerfile/<%= image %>
           build_args:
             squash: squash
           <% else %>
@@ -215,7 +215,7 @@ jobs:
         attempts: 2
         params:
           additional_tags: version/version
-          build: <%= stack %>-<%= image %>-cnb-dockerfile/<%= stack %>/cnb/<%= image %>
+          build: <%= stack %>-<%= image %>-cnb-dockerfile/<%= stack_data["tag"] %>/cnb/<%= image %>
           build_args:
             base_image: "cloudfoundry/<%= image %>:<%= stack_data["tag"] %>"
             squash: squash

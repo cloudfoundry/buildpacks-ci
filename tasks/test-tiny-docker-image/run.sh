@@ -10,6 +10,6 @@ unzip master.zip
 rm -f master.zip
 bash bats-core-master/install.sh /usr/local
 
-cd tiny-run-base-dockerfile/tiny/base/run
+cd tiny-run-base-dockerfile/tiny/dockerfile/run
 docker build -t tiny .
 bats -t ./tests/test.bats && bats -t ./tests/testapp.bats
