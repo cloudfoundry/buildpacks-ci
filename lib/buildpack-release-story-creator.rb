@@ -74,27 +74,27 @@ class BuildpackReleaseStoryCreator
     ((old_deps[name] || []) - (new_deps[name] || [])).collect{|i| i.to_s}.uniq.sort
   end
 
+  def create_dependency_version_mapping(dep_array)
+    dep_array.each_with_object({}) do |dep, h|
+      if h.key?(dep['name'])
+        h[dep['name']].push(dep['version'])
+      else
+        h[dep['name']] = [dep['version']]
+      end
+    end
+  end
+
   def generate_dependency_changes
-    new_dependencies = YAML.load(@new_manifest)['dependencies'].each_with_object({}) do |dep, h|
-      if h.key?(dep['name'])
-        h[dep['name']].push(dep['version'])
-      else
-        h[dep['name']] = [dep['version']]
-      end
-    end
-    old_dependencies = YAML.load(@old_manifest)['dependencies'].each_with_object({}) do |dep, h|
-      if h.key?(dep['name'])
-        h[dep['name']].push(dep['version'])
-      else
-        h[dep['name']] = [dep['version']]
-      end
-    end
+    old_dependencies = YAML.safe_load(@old_manifest)['dependencies']
+    new_dependencies = YAML.safe_load(@new_manifest)['dependencies']
+    old_deps_map = create_dependency_version_mapping(old_dependencies)
+    new_deps_map = create_dependency_version_mapping(new_dependencies)
 
-    description = ""
+    description = ''
 
-    new_dependencies.each_key do |name|
-      added_versions = get_added_versions(new_dependencies, old_dependencies, name)
-      removed_versions = get_removed_versions(new_dependencies, old_dependencies, name)
+    new_deps_map.each_key do |name|
+      added_versions = get_added_versions(new_deps_map, old_deps_map, name)
+      removed_versions = get_removed_versions(new_deps_map, old_deps_map, name)
       if !added_versions.empty? && !removed_versions.empty?
         description += "\n#{name}:\n"
         description += "- #{removed_versions.join("\n- ")}\n"
@@ -102,24 +102,47 @@ class BuildpackReleaseStoryCreator
       end
     end
     description += "\n"
-    new_dependencies.each_key do |name|
-      added_versions = get_added_versions(new_dependencies, old_dependencies, name)
-      removed_versions = get_removed_versions(new_dependencies, old_dependencies, name)
+    new_deps_map.each_key do |name|
+      added_versions = get_added_versions(new_deps_map, old_deps_map, name)
+      removed_versions = get_removed_versions(new_deps_map, old_deps_map, name)
       if !added_versions.empty? && removed_versions.empty?
         description += "+ Added #{name} at version(s): #{added_versions.join(', ')}\n"
       end
     end
-    old_dependencies.each_key do |name|
-      added_versions = get_added_versions(new_dependencies, old_dependencies, name)
-      removed_versions = get_removed_versions(new_dependencies, old_dependencies, name)
+    old_deps_map.each_key do |name|
+      added_versions = get_added_versions(new_deps_map, old_deps_map, name)
+      removed_versions = get_removed_versions(new_deps_map, old_deps_map, name)
       if added_versions.empty? && !removed_versions.empty?
         description += "- Removed #{name} at version(s): #{removed_versions.join(', ')}\n"
       end
     end
 
-    if description == "\n"
-      description="\nNo dependency changes\n"
+    if @buildpack_name == 'r'
+      shared_r_versions = old_deps_map['r'] & new_deps_map['r']
+
+      shared_r_versions.each do |version|
+        old_sub_deps = create_dependency_version_mapping(old_dependencies.find { |dep| dep['version'] == version }.fetch('dependencies', []))
+        new_sub_deps = create_dependency_version_mapping(new_dependencies.find { |dep| dep['version'] == version }.fetch('dependencies', []))
+
+        if new_sub_deps != old_sub_deps
+          description += "r #{version}:\n"
+          new_sub_deps.each_key do |name|
+            added_versions = get_added_versions(new_sub_deps, old_sub_deps, name)
+            removed_versions = get_removed_versions(new_sub_deps, old_sub_deps, name)
+            if !added_versions.empty? && !removed_versions.empty?
+              description += "  #{name}:\n"
+              description += "-   #{removed_versions.join("\n-   ")}\n"
+              description += "+   #{added_versions.join("\n+   ")}\n"
+            end
+          end
+        end
+      end
     end
-      "```diff#{description}```\n"
+
+    if description == "\n"
+      description = "\nNo dependency changes\n"
+    end
+
+    "```diff#{description}```\n"
   end
 end
