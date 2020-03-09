@@ -70,7 +70,7 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/stacks
       branch: master
-      paths: [ "<%= stack %>/dockerfile/<%= image %>/**" ]
+      paths: [ "<%= stack_data["tag"] %>/dockerfile/<%= image %>/**" ]
     <% end %>
 
 # Versions
