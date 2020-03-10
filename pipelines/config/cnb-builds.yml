@@ -72,7 +72,7 @@ python-compat:
   auto_release: true
 ruby:
   auto_release: true
-yarn:
+yarn-install:
   integration: true
   auto_release: true
   build_cache: true
