@@ -538,6 +538,19 @@ dependencies:
       - 'prerelease: true'
     any_stack: true
     versions_to_keep: 1
+  org.cloudfoundry.php-compat:
+    buildpacks:
+      php-cnb:
+        compat_only: true
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/php-compat-cnb'
+      - 'fetch_source: true'
+      - 'prerelease: true'
+    any_stack: true
+    versions_to_keep: 1
   org.cloudfoundry.php-dist:
     buildpacks:
       php-cnb:
