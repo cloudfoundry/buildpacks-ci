@@ -467,14 +467,14 @@ dependencies:
       - 'prerelease: true'
     any_stack: true
     versions_to_keep: 1
-  org.cloudfoundry.yarn:
+  org.cloudfoundry.yarn-install:
     buildpacks:
       nodejs-cnb:
         lines:
         - line: latest
     source_type: github_releases
     source_params:
-      - 'repo: cloudfoundry/yarn-cnb'
+      - 'repo: cloudfoundry/yarn-install-cnb'
       - 'fetch_source: true'
       - 'prerelease: true'
     any_stack: true
@@ -780,7 +780,7 @@ dependencies:
       ruby:
         lines:
           - line: latest
-      yarn-cnb:
+      yarn-install-cnb:
         lines:
           - line: latest
     source_type: github_releases

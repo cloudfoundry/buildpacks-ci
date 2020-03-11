@@ -426,7 +426,7 @@ class Builder
     cnb_list = [
       'org.cloudfoundry.node-engine',
       'org.cloudfoundry.npm',
-      'org.cloudfoundry.yarn',
+      'org.cloudfoundry.yarn-install',
       'org.cloudfoundry.nodejs-compat',
       'org.cloudfoundry.dotnet-core-runtime',
       'org.cloudfoundry.dotnet-core-aspnet',
