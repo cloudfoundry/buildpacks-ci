@@ -438,6 +438,7 @@ class Builder
       'org.cloudfoundry.conda',
       'org.cloudfoundry.php-dist',
       'org.cloudfoundry.php-composer',
+      'org.cloudfoundry.php-compat',
       'org.cloudfoundry.httpd',
       'org.cloudfoundry.nginx',
       'org.cloudfoundry.php-web',
