@@ -85,8 +85,8 @@ class BuildpackReleaseStoryCreator
   end
 
   def generate_dependency_changes
-    old_dependencies = YAML.safe_load(@old_manifest)['dependencies']
-    new_dependencies = YAML.safe_load(@new_manifest)['dependencies']
+    old_dependencies = YAML.safe_load(@old_manifest, permitted_classes: [Date])['dependencies']
+    new_dependencies = YAML.safe_load(@new_manifest, permitted_classes: [Date])['dependencies']
     old_deps_map = create_dependency_version_mapping(old_dependencies)
     new_deps_map = create_dependency_version_mapping(new_dependencies)
 
