@@ -465,6 +465,8 @@ class Builder
       out_data[:source][:sha256] = Sha::get_sha(source_input.url)
     end
 
+    filename_prefix = "#{source_input.name}_#{source_input.version}"
+
     case source_input.name
     when 'bundler'
       binary_builder.build(source_input)
@@ -472,7 +474,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}.tgz",
-              "#{source_input.name}-#{source_input.version}-#{stack}",
+              "#{filename_prefix}_linux_noarch_#{stack}",
           )
       )
 
@@ -482,7 +484,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               "#{binary_builder.base_dir}/hwc-#{source_input.version}-windows-amd64.zip",
-              "hwc-#{source_input.version}-windows-amd64",
+              "#{filename_prefix}_windows_x64_any-stack",
           )
       )
 
@@ -492,7 +494,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               "#{binary_builder.base_dir}/#{source_input.name}-v#{source_input.version}-linux-x64.tgz",
-              "#{source_input.name}-v#{source_input.version}-linux-x64-#{stack}",
+              "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
 
@@ -506,7 +508,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               filename,
-              "go#{source_input.version}.linux-amd64-#{stack}",
+              "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
 
@@ -520,7 +522,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               filename,
-              "#{source_input.name}-#{source_input.version}-linux-x64-#{stack}",
+              "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
 
@@ -535,7 +537,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               filename,
-              "nginx-#{source_input.version}-linux-x64-#{stack}",
+              "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
       out_data[:source_pgp] = source_pgp
@@ -563,7 +565,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               "artifacts/#{source_input.name}.tgz",
-              "#{source_input.name}-#{source_input.version}-#{stack}",
+              "#{filename_prefix}_linux_noarch_#{stack}",
           )
       )
 
@@ -578,7 +580,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               filename,
-              "#{source_input.name}-#{source_input.version}-#{stack}",
+              "#{filename_prefix}_linux_noarch_#{stack}",
           )
       )
 
@@ -593,7 +595,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               filename,
-              "#{source_input.name}-#{source_input.version}-#{stack}",
+              "#{filename_prefix}_linux_noarch_#{stack}",
           )
       )
 
@@ -606,7 +608,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               filename,
-              "#{source_input.name}-#{source_input.version}-#{stack}",
+              "#{filename_prefix}_linux_noarch_#{stack}",
           )
       )
 
@@ -615,7 +617,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               'source/composer.phar',
-              "#{source_input.name}-#{source_input.version}",
+              "#{filename_prefix}_linux_noarch_any-stack",
           )
       )
 
@@ -630,7 +632,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               "#{binary_builder.base_dir}/ruby-#{source_input.version}-linux-x64.tgz",
-              "#{source_input.name}-#{source_input.version}-linux-x64-#{stack}",
+              "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
 
@@ -646,7 +648,7 @@ class Builder
       end
 
       # Create a copy of the source_input to prevent mutating version for later use
-      full_version = "#{source_input.version}_ruby-#{ruby_version}"
+      full_version = "#{source_input.version}-ruby-#{ruby_version}"
       binary_builder.build(
           SourceInput.new(
               source_input.name,
@@ -662,7 +664,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               "#{binary_builder.base_dir}/#{source_input.name}-#{full_version}-linux-x64.tgz",
-              "#{source_input.name}-#{full_version}-linux-x64-#{stack}",
+              "#{source_input.name}_#{full_version}_linux_x64_#{stack}",
           )
       )
 
@@ -699,7 +701,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           filename,
-          "#{full_name}-#{source_input.version}-linux-x64-#{stack}",
+          "#{full_name}_#{source_input.version}_linux_x64_#{stack}",
         )
       )
 
@@ -715,7 +717,7 @@ class Builder
           artifact_output.move_dependency(
               'python',
               "artifacts/python-#{source_input.version}.tgz",
-              "python-#{source_input.version}-linux-x64-#{stack}",
+              "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
 
@@ -725,7 +727,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               old_file_path,
-              "#{source_input.name}-v#{source_input.version}-#{stack}",
+              "#{filename_prefix}_linux_noarch_#{stack}",
           )
       )
 
@@ -735,7 +737,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               old_file_path,
-              "#{source_input.name}-#{source_input.version}-#{stack}",
+              "#{filename_prefix}_linux_noarch_#{stack}",
           )
       )
 
@@ -745,7 +747,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               old_file_path,
-              "#{source_input.name}-#{source_input.version}-#{stack}",
+              "#{filename_prefix}_linux_noarch_#{stack}",
           )
       )
 
@@ -761,7 +763,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               "artifacts/#{source_input.name}-v#{source_input.version}.tgz",
-              "#{source_input.name}-v#{source_input.version}-#{stack}",
+              "#{filename_prefix}_linux_noarch_#{stack}",
           )
       )
       out_data[:git_commit_sha] = source_sha
@@ -782,7 +784,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               filename,
-              "#{source_input.name}-#{source_input.version}-linux-x64-#{stack}",
+              "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
       out_data[:source_pgp] = source_pgp
@@ -793,7 +795,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               old_file_path,
-              "#{source_input.name}.#{source_input.version}.linux-amd64-#{stack}",
+              "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
 
@@ -803,7 +805,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               old_file_path,
-              "#{source_input.name}.#{source_input.version}.linux-amd64-#{stack}",
+              "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
 
@@ -813,7 +815,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               old_file_path,
-              "#{source_input.name}.#{source_input.version}.linux-amd64-#{stack}",
+              "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
 
@@ -824,7 +826,7 @@ class Builder
           artifact_output.move_dependency(
               source_input.name,
               "artifacts/#{source_input.name}-#{source_input.version}.tgz",
-              "#{source_input.name}-#{source_input.version}-linux-x64-#{stack}",
+              "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
       out_data[:source_pgp] = source_pgp

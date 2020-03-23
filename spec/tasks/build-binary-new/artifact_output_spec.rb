@@ -12,10 +12,10 @@ describe 'ArtifactOutput' do
     end
 
     it 'should rename the dep and move it into the artifact directory' do
-      result = subject.move_dependency('fake-dep', old_file_path, 'fake_dep-1.0.1')
+      result = subject.move_dependency('fake-dep', old_file_path, 'fake-dep_1.0.1')
       expect(result[:sha256]).to eq 'f70c5e847d0ea29088216d81d628df4b4f68f3ccabb2e4031c09cc4d129ae216'
-      expect(result[:url]).to eq 'https://buildpacks.cloudfoundry.org/dependencies/fake-dep/fake_dep-1.0.1-f70c5e84.tgz'
-      expect(File.file?(File.join(subject.base_dir, 'fake_dep-1.0.1-f70c5e84.tgz'))).to be true
+      expect(result[:url]).to eq 'https://buildpacks.cloudfoundry.org/dependencies/fake-dep/fake-dep_1.0.1_f70c5e84.tgz'
+      expect(File.file?(File.join(subject.base_dir, 'fake-dep_1.0.1_f70c5e84.tgz'))).to be true
     end
   end
 
@@ -27,10 +27,10 @@ describe 'ArtifactOutput' do
     end
 
     it 'should rename the dep to use .tgz and move it into the artifact directory' do
-      result = subject.move_dependency('fake-dep', old_file_path, 'fake_dep-1.0.1')
+      result = subject.move_dependency('fake-dep', old_file_path, 'fake-dep_1.0.1')
       expect(result[:sha256]).to eq 'f70c5e847d0ea29088216d81d628df4b4f68f3ccabb2e4031c09cc4d129ae216'
-      expect(result[:url]).to eq 'https://buildpacks.cloudfoundry.org/dependencies/fake-dep/fake_dep-1.0.1-f70c5e84.tgz'
-      expect(File.file?(File.join(subject.base_dir, 'fake_dep-1.0.1-f70c5e84.tgz'))).to be true
+      expect(result[:url]).to eq 'https://buildpacks.cloudfoundry.org/dependencies/fake-dep/fake-dep_1.0.1_f70c5e84.tgz'
+      expect(File.file?(File.join(subject.base_dir, 'fake-dep_1.0.1_f70c5e84.tgz'))).to be true
     end
   end
 end
