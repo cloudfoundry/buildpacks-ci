@@ -1,7 +1,7 @@
 class PHPManifest
-  def self.update_defaults(manifest, resource_version)
+  def self.update_defaults(manifest, source_name, resource_version)
     manifest['default_versions'].map do |default|
-      if default['name'] == 'php'
+      if default['name'] == source_name
         default['version'] = resource_version
       end
       default

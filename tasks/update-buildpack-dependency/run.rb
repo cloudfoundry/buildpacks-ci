@@ -171,6 +171,14 @@ end
 
 #
 # Special PHP stuff
+# Updates default versions for PHP dependencies
+# manifest_name will be the name of the dependency, not PHP
+if !rebuilt && manifest_name != 'php' && manifest['language'] == 'php' && manifest['default_versions']
+  manifest['default_versions'] = PHPManifest.update_defaults(manifest, source_name, resource_version)
+end
+
+#
+# Special PHP stuff
 # * The defaults/options.json file contains default version numbers to use for each PHP line.
 #   Update the default version for the relevant line to this version of PHP (if !rebuilt)
 php_defaults = nil
@@ -193,7 +201,7 @@ if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
   php_defaults[varname] = resource_version
   if update_default
     php_defaults['PHP_DEFAULT'] = resource_version
-    manifest['default_versions'] = PHPManifest.update_defaults(manifest, resource_version)
+    manifest['default_versions'] = PHPManifest.update_defaults(manifest, source_name, resource_version)
   end
 end
 
