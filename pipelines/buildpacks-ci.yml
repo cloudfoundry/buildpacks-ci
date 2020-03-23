@@ -20,6 +20,13 @@ resources:
       paths: [ "Dockerfile", "build/*", "Gemfile", "Gemfile.lock"]
       private_key: {{buildpacks-ci-private-key}}
 
+  - name: bp-envs
+    type: git
+    source:
+      uri: git@github.com:pivotal/bp-envs.git
+      branch: master
+      private_key: ((bp-envs-deploy-key.private_key))
+
   - name: buildpacks-ci-image
     type: docker-image
     source:
@@ -32,6 +39,14 @@ resources:
     type: slack-notification
     source:
       url: {{concourse-job-failure-notifications-slack-webhook}}
+
+  - name: saturday-morning
+    type: time
+    source:
+      start: 7AM
+      stop: 8AM
+      days: [Saturday]
+      location: America/New_York
 
 jobs:
   - name: update-buildpacks-ci-image
@@ -85,3 +100,16 @@ jobs:
         file: ci-master/tasks/run-shellcheck/task.yml
         params:
           DIRECTORY_TO_CHECK: ci-master
+
+  - name: recreate-workers
+    serial: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+          resource: ci-master
+        - get: bp-envs
+        - get: saturday-morning
+          trigger: true
+      - task: recreate-workers
+        file: ci-master/tasks/recreate-workers/task.yml
+        tags: [buildpacks-eng-vsphere]
