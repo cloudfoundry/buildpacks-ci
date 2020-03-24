@@ -547,7 +547,7 @@ class Builder
       out_data[:sha256] = results[1]
       out_data[:url] = source_input.url
 
-    when 'miniconda2', 'miniconda3'
+    when -> (elem) { elem.start_with?('miniconda') }
       out_data[:url] = "https://github.com/conda/conda/archive/#{source_input.version}.tar.gz"
       results = Sha.check_sha(out_data[:url])
       out_data[:sha256] = results[1]
