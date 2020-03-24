@@ -9,5 +9,5 @@ tracker_story_id = build.dig('tracker_story_id') or raise 'tracker_story_id not 
 tracker_client = TrackerApi::Client.new(token: ENV['TRACKER_API_TOKEN'])
 project = tracker_client.project(ENV['TRACKER_PROJECT_ID'])
 story = project.story(tracker_story_id)
-story.current_state = 'finished'
+story.current_state = 'accepted'
 story.save
