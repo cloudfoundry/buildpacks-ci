@@ -7,5 +7,8 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: bp-envs
+params:
+  CI_USERNAME:
+  CI_PASSWORD:
 run:
   path: buildpacks-ci/tasks/recreate-workers/run.sh
