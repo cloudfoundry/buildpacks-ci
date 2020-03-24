@@ -18,7 +18,7 @@ when "github_tags"
 when "jruby"
   versions = Depwatcher::JRuby.new.check()
 when "miniconda"
-  versions = Depwatcher::Miniconda.new.check(source["generation"].to_s)
+  versions = Depwatcher::Miniconda.new.check(source["python_version"].to_s)
 when "rubygems"
   versions = Depwatcher::Rubygems.new.check(source["name"].to_s)
 when "rubygems_cli"

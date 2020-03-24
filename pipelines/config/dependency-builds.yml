@@ -258,18 +258,7 @@ dependencies:
       - 'extension: .tgz'
     any_stack: true
     versions_to_keep: 1
-  miniconda2:
-    buildpacks:
-      python:
-        lines:
-          - line: latest
-    third_party_hosted: true
-    source_type: miniconda
-    source_params:
-      - 'generation: 2'
-    any_stack: true
-    versions_to_keep: 2
-  miniconda3:
+  miniconda37:
     buildpacks:
       python:
         lines:
@@ -280,7 +269,21 @@ dependencies:
     third_party_hosted: true
     source_type: miniconda
     source_params:
-      - 'generation: 3'
+      - 'python_version: 3.7'
+    any_stack: true
+    versions_to_keep: 2
+  miniconda38:
+    buildpacks:
+      python:
+        lines:
+          - line: latest
+      conda-cnb:
+        lines:
+          - line: latest
+    third_party_hosted: true
+    source_type: miniconda
+    source_params:
+      - 'python_version: 3.8'
     any_stack: true
     versions_to_keep: 2
   nginx:
@@ -820,7 +823,8 @@ v3_dep_names:
   dep: Dep
   nginx: Nginx Server
   pipenv: Pipenv
-  miniconda3: Miniconda
+  miniconda37: 'Miniconda for Python 3.7'
+  miniconda38: 'Miniconda for Python 3.8'
   bundler: Bundler
   ruby: Ruby
 include_tiny_in_any_stack:
