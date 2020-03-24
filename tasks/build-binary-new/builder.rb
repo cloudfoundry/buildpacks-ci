@@ -549,7 +549,7 @@ class Builder
 
     when -> (elem) { elem.start_with?('miniconda') }
       out_data[:url] = "https://github.com/conda/conda/archive/#{source_input.version}.tar.gz"
-      results = Sha.check_sha(out_data[:url])
+      results = Sha.check_sha(source_input)
       out_data[:sha256] = results[1]
 
     when -> (elem) { cnb_list.include?(elem) }
