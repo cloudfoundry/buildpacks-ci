@@ -5,15 +5,16 @@ require 'tmpdir'
 require_relative '../../../tasks/create-bosh-release/buildpack-bosh-release-updater'
 
 describe BuildpackBOSHReleaseUpdater do
-  let(:version)           { '3.3.3' }
-  let(:access_key_id)     {'username'}
-  let(:secret_access_key) {'password'}
-  let(:test_dir)          {Dir.mktmpdir}
-  let(:release_dir)       {File.join(test_dir, 'bosh-release')}
-  let(:buildpack_dir)     {File.join(test_dir, 'buildpack-zip-stack0')}
-  let(:version_dir)       {File.join(test_dir, 'version')}
-  let!(:language)         {'test'}
-  let(:release_name)      {'test-buildpack'}
+  let(:version)             { '3.3.3' }
+  let(:access_key_id)       { 'username' }
+  let(:secret_access_key)   { 'password' }
+  let(:test_dir)            { Dir.mktmpdir }
+  let(:release_dir)         { File.join(test_dir, 'bosh-release') }
+  let(:buildpack_dir)       { File.join(test_dir, 'buildpack-zip-stack0') }
+  let(:version_dir)         { File.join(test_dir, 'version') }
+  let(:release_tarball_dir) { File.join(test_dir, 'release-tarball') }
+  let!(:language)           { 'test' }
+  let(:release_name)        { 'test-buildpack' }
   let(:old_blobs) do
     <<~BLOBS
        ---
@@ -47,7 +48,9 @@ describe BuildpackBOSHReleaseUpdater do
       access_key_id,
       secret_access_key,
       language,
-      release_name)
+      release_name,
+      release_tarball_dir
+    )
   }
 
   before do
@@ -118,7 +121,7 @@ describe BuildpackBOSHReleaseUpdater do
 
     describe '#create_release' do
       it 'creates the release and commits the generated files' do
-        expect(subject).to receive(:system).with "bosh2 -n create-release --final --version 3.3.3 --name test-buildpack --force"
+        expect(subject).to receive(:system).with "bosh2 -n create-release --final --version 3.3.3 --name test-buildpack --tarball #{release_tarball_dir}/release.tgz --force"
 
         expect(GitClient).to receive(:add_file).with "releases/**/*-3.3.3.yml"
         expect(GitClient).to receive(:add_file).with "releases/**/index.yml"
