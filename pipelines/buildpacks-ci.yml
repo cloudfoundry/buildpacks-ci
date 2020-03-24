@@ -113,3 +113,6 @@ jobs:
       - task: recreate-workers
         file: buildpacks-ci/tasks/recreate-workers/task.yml
         tags: [buildpacks-eng-vsphere]
+        params:
+          CI_USERNAME: buildpacks
+          CI_PASSWORD: ((concourse_basic_auth_password))
