@@ -314,7 +314,7 @@ jobs:
       username: concourse
 
   <% if !is_child_cnb(dep_name) %>
-- name: finish-<%=dep_name%>-<%= line %>-story
+- name: accept-<%=dep_name%>-<%= line %>-story
   serial: true
   public: true
   plan:
@@ -343,8 +343,8 @@ jobs:
     <% end %>
     - get: builds
   - do:
-    - task: finish-<%=dep_name%>-<%= line %>-story
-      file: buildpacks-ci/tasks/build-binary-new/finish.yml
+    - task: accept-<%=dep_name%>-<%= line %>-story
+      file: buildpacks-ci/tasks/build-binary-new/accept.yml
       params:
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
@@ -513,7 +513,7 @@ groups:
     <% version_lines.each do |line| %>
     - create-<%=dep_name%>-<%= line %>-story
     <% if !is_child_cnb(dep_name) %>
-    - finish-<%=dep_name%>-<%= line %>-story
+    - accept-<%=dep_name%>-<%= line %>-story
     <% end %>
     <% dep['copy-stacks']&.each do |stack| %>
     - copy-<%=dep_name%>-<%= line %>-<%= stack %>
@@ -537,7 +537,7 @@ groups:
     <% version_lines.each do |line| %>
     - create-<%=dep_name%>-<%= line %>-story
     <% if !is_child_cnb(dep_name) %>
-    - finish-<%=dep_name%>-<%= line %>-story
+    - accept-<%=dep_name%>-<%= line %>-story
     <% end %>
     <% dep['copy-stacks']&.each do |stack| %>
     - copy-<%=dep_name%>-<%= line %>-<%= stack %>

@@ -12,7 +12,7 @@ run:
   path: bash
   args:
     - -cl
-    - gem install tracker_api && buildpacks-ci/tasks/build-binary-new/finish.rb
+    - gem install tracker_api && buildpacks-ci/tasks/build-binary-new/accept.rb
 params:
   TRACKER_API_TOKEN:
   TRACKER_PROJECT_ID:
