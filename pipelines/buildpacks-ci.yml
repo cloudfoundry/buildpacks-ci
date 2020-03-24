@@ -111,5 +111,5 @@ jobs:
         - get: saturday-morning
           trigger: true
       - task: recreate-workers
-        file: ci-master/tasks/recreate-workers/task.yml
+        file: buildpacks-ci/tasks/recreate-workers/task.yml
         tags: [buildpacks-eng-vsphere]
