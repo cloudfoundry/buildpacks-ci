@@ -13,6 +13,7 @@ module Depwatcher
       class DotnetReleases
         JSON.mapping(
           channel_version: { type: String, key: "channel-version" },
+          support_phase: { type: String, key: "support-phase" },
         )
       end
     end
@@ -25,6 +26,7 @@ module Depwatcher
       class Release
         JSON.mapping(
           sdk: { type: Sdk, nilable: true },
+          sdks: { type: Array(Sdk), nilable: true },
           runtime: { type: Runtime, nilable: true },
           aspnetcore_runtime: { type: Aspnetcore, nilable: true, key: "aspnetcore-runtime" },
         )
@@ -113,7 +115,7 @@ module Depwatcher
     private def get_latest_version() : String
       releases_url = "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json"
       releases = DotnetReleasesIndex.from_json(client.get(releases_url).body).releases_index
-      releases[0].channel_version
+      releases.reject { |r| r.support_phase == "preview" }.[0].channel_version
     end
 
     private def download_file(download_url : String, dest_dir : String, expected_hash : String) : Nil
@@ -130,7 +132,8 @@ module Depwatcher
   class DotnetSdk < DotnetBase
     def get_versions(releases, version_filter)
       version_filter = version_filter.chomp("X")
-      releases.reject { |r| r.sdk.nil? }.map { |r| r.sdk.not_nil!.version }.select { |version| version.starts_with? version_filter }
+      versions = releases.reject { |r| r.sdks.nil? }.map { |r| r.sdks.not_nil!.map { |sdk| sdk.not_nil!.version } }.flatten.select { |version| version.starts_with? version_filter }
+      versions += releases.reject { |r| !r.sdks.nil? || r.sdk.nil? }.map { |r| r.sdk.not_nil!.version }.select { |version| version.starts_with? version_filter }
     end
 
     def get_newest_file(releases, version)
