@@ -336,8 +336,7 @@ resources: #####################################################################
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
       pool_name: us_<%= pas_versions['n-2'] %>
-    tags:
-    - buildpacks-eng-vsphere
+    tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
 <% end %>
 
   ## Alerts ##
@@ -937,8 +936,7 @@ jobs: ##########################################################################
         - put: smith-environments-<%= pas_versions['n-2'] %>
           params:
             action: claim
-          tags:
-          - buildpacks-eng-vsphere
+          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
         - get: buildpacks-ci
         - get: ci-image
         - get: buildpack
@@ -995,8 +993,7 @@ jobs: ##########################################################################
       params:
         action: unclaim
         env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
-      tags:
-      - buildpacks-eng-vsphere
+      tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
 <% unless buildpacks[language]['skip_brats'] %>
   - name: specs-lts-brats-develop
     serial: true
@@ -1006,8 +1003,7 @@ jobs: ##########################################################################
         - put: smith-environments-<%= pas_versions['n-2'] %>
           params:
             action: claim
-          tags:
-          - buildpacks-eng-vsphere
+          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
         - get: buildpacks-ci
         - get: ci-image
         - get: buildpack
@@ -1046,8 +1042,7 @@ jobs: ##########################################################################
       params:
         action: unclaim
         env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
-      tags:
-      - buildpacks-eng-vsphere
+      tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
     on_failure:
       put: failure-alert
       params:

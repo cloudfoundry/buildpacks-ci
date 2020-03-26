@@ -388,7 +388,7 @@ jobs: ##########################################################################
         - get: once-a-week-timer
           trigger: true
       - task: renew-toolsmiths-env
-        tags: [buildpacks-eng-vsphere]
+        tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
         file: buildpacks-ci/tasks/renew-toolsmiths-env/task.yml
         params:
           ENV_ID: <%= id %>
