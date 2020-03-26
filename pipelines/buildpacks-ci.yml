@@ -112,7 +112,7 @@ jobs:
           trigger: true
       - task: recreate-workers
         file: buildpacks-ci/tasks/recreate-workers/task.yml
-        tags: [buildpacks-eng-vsphere]
+        tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
         params:
           CI_USERNAME: buildpacks
           CI_PASSWORD: ((concourse_basic_auth_password))

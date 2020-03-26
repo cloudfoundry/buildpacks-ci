@@ -85,7 +85,7 @@ resources: #####################################################################
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
       pool_name: us_2_5
-    tags: [buildpacks-eng-vsphere]
+    tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
 
 jobs: ################################################################################################################
   - name: test-stack-auditor
@@ -102,7 +102,7 @@ jobs: ##########################################################################
         - put: pcf-lts-gcp-env
           params:
             action: claim
-          tags: [buildpacks-eng-vsphere]
+          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
       - do:
         - task: create-cf-space
           attempts: 3
@@ -120,7 +120,7 @@ jobs: ##########################################################################
         params:
           action: unclaim
           env_file: pcf-lts-gcp-env/metadata
-        tags: [buildpacks-eng-vsphere]
+        tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
     ensure:
       put: plugin-environments
       params:

@@ -75,8 +75,7 @@ resources:
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
       pool_name: us_<%= pas_versions['n-2'] %>
-    tags:
-    - buildpacks-eng-vsphere
+    tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
 
 <% languages.each do |language| %>
   - name: buildpack-<%= language %>
@@ -107,8 +106,7 @@ jobs:
         - put: smith-environments-<%= pas_versions['n-2'] %>
           params:
             action: claim
-          tags:
-          - buildpacks-eng-vsphere
+          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
         - task: create-cf-space
           file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
           input_mapping:
@@ -129,8 +127,7 @@ jobs:
             params:
               action: unclaim
               env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
-            tags:
-            - buildpacks-eng-vsphere
+            tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
           - put: lts-environments
             params:
               release: lts-environments
