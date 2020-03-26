@@ -26,7 +26,6 @@ module Depwatcher
       class Release
         JSON.mapping(
           sdk: { type: Sdk, nilable: true },
-          sdks: { type: Array(Sdk), nilable: true },
           runtime: { type: Runtime, nilable: true },
           aspnetcore_runtime: { type: Aspnetcore, nilable: true, key: "aspnetcore-runtime" },
         )
@@ -132,8 +131,7 @@ module Depwatcher
   class DotnetSdk < DotnetBase
     def get_versions(releases, version_filter)
       version_filter = version_filter.chomp("X")
-      versions = releases.reject { |r| r.sdks.nil? }.map { |r| r.sdks.not_nil!.map { |sdk| sdk.not_nil!.version } }.flatten.select { |version| version.starts_with? version_filter }
-      versions += releases.reject { |r| !r.sdks.nil? || r.sdk.nil? }.map { |r| r.sdk.not_nil!.version }.select { |version| version.starts_with? version_filter }
+      releases.reject { |r| r.sdk.nil? }.map { |r| r.sdk.not_nil!.version }.select { |version| version.starts_with? version_filter }
     end
 
     def get_newest_file(releases, version)

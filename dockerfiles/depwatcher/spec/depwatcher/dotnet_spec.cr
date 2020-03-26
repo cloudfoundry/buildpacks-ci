@@ -64,26 +64,7 @@ Spec2.describe Depwatcher::DotnetBase do
 
         it "uses the latest version" do
           checked_deps = subject.check("latest")
-          expect(checked_deps.map(&.ref)).to eq ["3.1.100", "3.1.101", "3.1.102", "3.1.200", "3.1.103", "3.1.201"]
-        end
-      end
-
-      context "when there are multiple sdks for a release" do
-        before do
-          client.stub_get(
-            "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json",
-            nil,
-            HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet-releases-index-with-preview.json"))
-          )
-          client.stub_get(
-            "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/3.1/releases.json",
-            nil,
-            HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet-3.1_releases.json"))
-          )
-        end
-        it "finds all relevant sdks" do
-          checked_deps = subject.check("3.1.1X")
-          expect(checked_deps.map(&.ref)).to eq ["3.1.100", "3.1.101", "3.1.102", "3.1.103"]
+          expect(checked_deps.map(&.ref)).to eq ["3.1.100", "3.1.101", "3.1.200", "3.1.201"]
         end
       end
     end
