@@ -252,6 +252,7 @@ dependencies:
   lifecycle:
     buildpacks:
       nodejs-cnb:
+        compat_only: true
         lines:
           - line: latest
     source_type: github_releases
