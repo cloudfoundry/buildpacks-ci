@@ -9,6 +9,7 @@ inputs:
   - name: buildpacks-ci
   - name: source
   - name: builds
+    optional: true
   - name: source-forecast-latest
     optional: true
   - name: source-rserve-latest
@@ -28,3 +29,4 @@ run:
     - buildpacks-ci/tasks/build-binary-new/build.rb
 params:
   STACK:
+  SKIP_COMMIT:
