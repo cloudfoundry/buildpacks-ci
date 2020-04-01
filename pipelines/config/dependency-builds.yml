@@ -157,9 +157,6 @@ dependencies:
       go:
         lines:
           #! go deprecation dates are on the 1st day 12 months after their release
-          - line: 1.12.X
-            deprecation_date: 2020-02-01
-            link: https://golang.org/doc/devel/release.html
           - line: 1.13.X
             deprecation_date: 2020-09-03
             link: https://golang.org/doc/devel/release.html
@@ -169,9 +166,6 @@ dependencies:
         removal_strategy: keep_latest_released
       go-compiler-cnb:
         lines:
-          - line: 1.12.X
-            deprecation_date: 2020-02-01
-            link: https://golang.org/doc/devel/release.html
           - line: 1.13.X
             deprecation_date: 2020-09-03
             link: https://golang.org/doc/devel/release.html
