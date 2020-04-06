@@ -405,6 +405,15 @@ module Archive
       end
     end
 
+    def strip_incorrect_words_yaml_from_tar(filename)
+      Dir.mktmpdir do |dir|
+        Runner.run('tar', '-C', dir, '-xf', filename)
+        Runner.run('rm', '-f', dir + '/lib/ruby/gems/2.4.0/gems/did_you_mean-1.1.0/evaluation/incorrect_words.yaml')
+        Runner.run('rm', '-f', dir + '/lib/ruby/gems/2.5.0/gems/did_you_mean-1.2.0/evaluation/incorrect_words.yaml')
+        Runner.run('tar', '-C', dir, '-czf', filename, '.')
+      end
+    end
+
     def strip_top_level_directory_from_zip(filename, destination)
       Dir.mktmpdir do |dir|
         Runner.run('unzip', '-d', dir, filename)
@@ -627,11 +636,15 @@ class Builder
         Runner.run('apt', 'update')
         Runner.run('apt-get', 'install', '-y', 'libssl1.0-dev')
       end
+
+      filename = "#{binary_builder.base_dir}/ruby-#{source_input.version}-linux-x64.tgz"
+      Archive.strip_incorrect_words_yaml_from_tar(filename)
+
       binary_builder.build(source_input)
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
-              "#{binary_builder.base_dir}/ruby-#{source_input.version}-linux-x64.tgz",
+              filename,
               "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
