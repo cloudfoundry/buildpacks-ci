@@ -65,6 +65,7 @@ Dir.glob('sources/*/').each do |dir|
       next if dep['id'] == "lifecycle"
       next unless dep['stacks'].include? cnb_stack
       bp_location = File.absolute_path(File.join(dir, dep['id']))
+      bp_location = bp_location.gsub('/','_')
 
       google_credential_json = ENV["GOOGLE_APPLICATION_CREDENTIALS"]
 
