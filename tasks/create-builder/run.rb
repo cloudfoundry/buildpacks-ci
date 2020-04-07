@@ -25,7 +25,6 @@ repo = ENV.fetch("REPO")
 build_image = ENV.fetch("BUILD_IMAGE")
 run_image = ENV.fetch("RUN_IMAGE")
 cnb_stack = ENV.fetch("STACK")
-host = ENV.fetch("HOST")
 enterprise = ENV.fetch("ENTERPRISE") == 'true'
 stack = cnb_stack.split('.').last
 tag = "#{version}-#{stack}"
@@ -36,8 +35,8 @@ ci_path = File.absolute_path('buildpacks-ci')
 lifecycle_version = File.read(File.join("lifecycle", "version")).strip()
 
 if !enterprise # not in a public repo
-  json_resp = JSON.load(Net::HTTP.get(URI("https://#{host}/v2/repositories/#{repo}/tags/?page_size=100")))
-  if json_resp['results'].any? { |r| r['name'] == tag }
+  json_resp = JSON.load(Net::HTTP.get(URI("https://gcr.io/v2/#{repo}/tags/list?page_size=100")))
+  if json_resp['tags'].any? { |r| r == tag }
     puts "Image already exists with immutable tag: #{tag}"
     exit 1
   end
