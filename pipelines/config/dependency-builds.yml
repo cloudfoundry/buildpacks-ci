@@ -752,21 +752,19 @@ dependencies:
     buildpacks:
       ruby:
         lines:
-          - line: 2.4.X
-            deprecation_date: 2020-04-01
-            link: https://www.ruby-lang.org/en/news/2019/04/01/ruby-2-4-6-released/
           - line: 2.5.X
           - line: 2.6.X
           - line: 2.7.X
+            deprecation_date: 2023-04-01
+            link: https://www.ruby-lang.org/en/news/2020/03/31/ruby-2-7-1-released/
         removal_strategy: keep_latest_released
       ruby-cnb:
         lines:
-          - line: 2.4.X
-            deprecation_date: 2020-04-01
-            link: https://www.ruby-lang.org/en/news/2019/04/01/ruby-2-4-6-released/
           - line: 2.5.X
           - line: 2.6.X
           - line: 2.7.X
+            deprecation_date: 2023-04-01
+            link: https://www.ruby-lang.org/en/news/2020/03/31/ruby-2-7-1-released/
         removal_strategy: keep_latest_released
     versions_to_keep: 2
   rubygems:
