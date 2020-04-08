@@ -36,7 +36,7 @@ lifecycle_version = File.read(File.join("lifecycle", "version")).strip()
 
 if !enterprise # not in a public repo
   json_resp = JSON.load(Net::HTTP.get(URI("https://gcr.io/v2/#{repo}/tags/list?page_size=100")))
-  if json_resp['tags'].any? { |r| r == tag }
+  if json_resp['tags']&.any? { |r| r == tag }
     puts "Image already exists with immutable tag: #{tag}"
     exit 1
   end
@@ -63,8 +63,7 @@ Dir.glob('sources/*/').each do |dir|
     buildpack_toml_data.dig('metadata','dependencies').each do |dep|
       next if dep['id'] == "lifecycle"
       next unless dep['stacks'].include? cnb_stack
-      bp_location = File.absolute_path(File.join(dir, dep['id']))
-      bp_location = bp_location.gsub('/','_')
+      bp_location = File.absolute_path(File.join(dir, dep['id'].gsub('/','_')))
 
       google_credential_json = ENV["GOOGLE_APPLICATION_CREDENTIALS"]
 
