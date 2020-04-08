@@ -234,7 +234,7 @@ module DependencyBuild
         Dir.chdir(dir) do
           Runner.run('wget', source_input.url)
           # TODO validate pgp
-          Runner.run('tar', 'xf', "#{source_input.type}-#{source_input.version}.tar.gz")
+          Runner.run('tar', 'xf', "nginx-#{source_input.version}.tar.gz")
           base_nginx_options = [
             '--prefix=/',
             '--error-log-path=stderr',
@@ -267,7 +267,7 @@ module DependencyBuild
 
           DependencyBuild.replace_openssl if stack == 'cflinuxfs3'
 
-          Dir.chdir("#{source_input.type}-#{source_input.version}") do
+          Dir.chdir("nginx-#{source_input.version}") do
             options = ['./configure'] + base_nginx_options + (static ? nginx_static_options : nginx_options)
             Runner.run(*options)
             Runner.run('make')
