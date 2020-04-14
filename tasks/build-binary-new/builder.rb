@@ -654,10 +654,11 @@ class Builder
         Runner.run('apt-get', 'install', '-y', 'libssl1.0-dev')
       end
 
+      binary_builder.build(source_input)
+
       filename = "#{binary_builder.base_dir}/ruby-#{source_input.version}-linux-x64.tgz"
       Archive.strip_incorrect_words_yaml_from_tar(filename)
 
-      binary_builder.build(source_input)
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
