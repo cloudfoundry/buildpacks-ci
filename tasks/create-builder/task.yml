@@ -7,6 +7,7 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: sources
+  - name: published-sources
   - name: version
   - name: pack
   - name: cnb-builder
