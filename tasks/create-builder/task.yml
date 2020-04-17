@@ -8,6 +8,7 @@ inputs:
   - name: buildpacks-ci
   - name: sources
   - name: published-sources
+    optional: true
   - name: version
   - name: pack
   - name: cnb-builder
