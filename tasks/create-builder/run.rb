@@ -54,7 +54,7 @@ end
 
 child_buildpacks = []
 
-Dir.glob('sources/*/').each do |dir|
+Dir.glob('sources/*-cnb/').each do |dir|
   buildpack_toml_file = 'buildpack.toml'
   buildpack_toml_data = Tomlrb.load_file(File.join(dir, buildpack_toml_file))
   is_metabuildpack = buildpack_toml_data['order']
@@ -114,8 +114,22 @@ individual_buildpacks = Dir.glob('sources/*/').map do |dir|
 end || []
 individual_buildpacks.select! { |i| i != nil  }
 
+
+published_buildpacks = Dir.glob('published-sources/*/').map do |dir|
+  buildpack_toml_file =  File.join(dir, 'rootfs/cnb/buildpacks/*/*/buildpack.toml')
+  version = Tomlrb.load_file(Dir.glob(buildpack_toml_file).first).dig('buildpack','version')
+  id = Tomlrb.load_file(Dir.glob(buildpack_toml_file).first).dig('buildpack','id')
+
+  bp_location = File.absolute_path(dir)
+  {
+    "image" => "gcr.io/#{id}:#{version}"
+  }
+end || []
+published_buildpacks.select! { |i| i != nil  }
+
+
 puts "Loading #{stack}-order.toml"
-buildpacks = individual_buildpacks + child_buildpacks
+buildpacks = individual_buildpacks + child_buildpacks + published_buildpacks
 static_builder_file = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.toml"))
 order = static_builder_file['order']
 description = static_builder_file['description']
