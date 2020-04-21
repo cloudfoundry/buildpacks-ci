@@ -7,7 +7,7 @@ Spec2.describe Depwatcher::Ruby do
   subject { described_class.new.tap { |s| s.client = client } }
   before do
     client.stub_get("https://api.github.com/repos/ruby/ruby/tags?per_page=1000", nil, HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/github_ruby.json")))
-    client.stub_get("https://www.ruby-lang.org/en/downloads/", nil, HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/ruby.html")))
+    client.stub_get("https://cache.ruby-lang.org/pub/ruby/index.txt", nil, HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/ruby_index.txt")))
   end
 
   describe "#check" do
@@ -30,6 +30,19 @@ Spec2.describe Depwatcher::Ruby do
       else
         expect(false).to be_true
       end
+    end
+
+    describe "#in2" do
+       it "returns real releases when 2.5.7" do
+         obj = subject.in("2.5.7")
+         if obj
+           expect(obj.ref).to eq "2.5.7"
+           expect(obj.url).to eq "https://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.7.tar.gz"
+           expect(obj.sha256).to eq "0b2d0d5e3451b6ab454f81b1bfca007407c0548dea403f1eba2e429da4add6d4"
+         else
+           expect(false).to be_true
+         end
+       end
     end
   end
 end
