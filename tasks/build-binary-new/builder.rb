@@ -552,9 +552,21 @@ class Builder
       out_data[:source_pgp] = source_pgp
 
     when 'appdynamics'
-      results = Sha.check_sha(source_input)
-      out_data[:sha256] = results[1]
-      out_data[:url] = source_input.url
+      filename = "source/appdynamics-php-agent-#{source_input.version}_linux.tar.gz"
+
+      if File.exist?(filename)
+        out_data.merge!(
+          artifact_output.move_dependency(
+            source_input.name,
+            filename,
+            "#{filename_prefix}_linux_x64_#{stack}"
+          )
+        )
+      else
+        results = Sha.check_sha(source_input)
+        out_data[:sha256] = results[1]
+        out_data[:url] = source_input.url
+      end
 
     when 'CAAPM'
       filename = "source/CA-APM-PHPAgent-#{source_input.version}_linux.tar.gz"
