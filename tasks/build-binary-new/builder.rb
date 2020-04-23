@@ -552,7 +552,7 @@ class Builder
       out_data[:source_pgp] = source_pgp
 
     when 'appdynamics'
-      filename = "source/appdynamics-php-agent-linux_x64-#{source_input.version}_linux.tar.bz2"
+      filename = "source/appdynamics-php-agent-linux_x64-#{source_input.version}.tar.bz2"
 
       if File.exist?(filename)
         out_data.merge!(
