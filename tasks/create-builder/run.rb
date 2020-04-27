@@ -26,6 +26,7 @@ build_image = ENV.fetch("BUILD_IMAGE")
 run_image = ENV.fetch("RUN_IMAGE")
 cnb_stack = ENV.fetch("STACK")
 enterprise = ENV.fetch("ENTERPRISE") == 'true'
+registry_password = ENV.fetch("REGISTRY_PASSWORD")
 stack = cnb_stack.split('.').last
 tag = "#{version}-#{stack}"
 builder_config_file = File.absolute_path("builder.toml")
@@ -39,6 +40,16 @@ if !enterprise # not in a public repo
   if json_resp['tags']&.any? { |r| r == tag }
     puts "Image already exists with immutable tag: #{tag}"
     exit 1
+  end
+end
+
+if enterprise
+  output, err, status = Open3.capture3("echo '#{registry_password}' | docker login -u _json_key --password-stdin https://gcr.io/tanzu-buildpacks")
+  if !status.success?
+    STDERR.puts "\n\nERROR: #{err}\n\n\n OUTPUT: #{output}\n\n"
+    exit status.exitstatus
+  else
+    puts output
   end
 end
 
