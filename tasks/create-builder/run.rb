@@ -127,11 +127,18 @@ individual_buildpacks.select! { |i| i != nil  }
 
 
 published_buildpacks = Dir.glob('published-sources/*/').map do |dir|
-  buildpack_toml_file =  File.join(dir, 'rootfs/cnb/buildpacks/*/*/buildpack.toml')
-  version = Tomlrb.load_file(Dir.glob(buildpack_toml_file).first).dig('buildpack','version')
-  id = Tomlrb.load_file(Dir.glob(buildpack_toml_file).first).dig('buildpack','id')
+  image_tar = File.join(dir, 'image.tar')
+  run "tar xf #{image_tar} -C #{dir}"
 
-  bp_location = File.absolute_path(dir)
+  manifest_json = JSON.parse(File.read(File.join(dir, 'manifest.json')))
+  config_file_name = manifest_json[0]['Config']
+  config_json = JSON.parse(File.read(File.join(dir, config_file_name)))
+  metadata = config_json['config']['Labels']['io.buildpacks.buildpackage.metadata']
+  metadata_json = JSON.parse(metadata)
+
+  id = metadata_json['id']
+  version = metadata_json['version']
+
   {
     "image" => "gcr.io/#{id}:#{version}"
   }
