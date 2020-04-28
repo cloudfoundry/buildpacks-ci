@@ -651,13 +651,21 @@ class Builder
       )
 
     when 'composer'
-      out_data.merge!(
+    filename = "source/composer.phar"
+      if File.exist?(filename)
+        out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
-              'source/composer.phar',
+              filename,
               "#{filename_prefix}_linux_noarch_any-stack",
           )
-      )
+        )
+      else
+        results = Sha.check_sha(source_input)
+        out_data[:sha256] = results[1]
+        out_data[:url] = source_input.url
+      end
+
 
     when 'ruby'
       major, minor, _ = source_input.version.split('.')
