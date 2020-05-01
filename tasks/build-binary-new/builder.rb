@@ -718,9 +718,6 @@ class Builder
       # Create a copy of the source_input to prevent mutating version for later use
       full_version = "#{source_input.version}-ruby-#{ruby_version}"
 
-      filename = "#{binary_builder.base_dir}/#{source_input_name}-#{full_version}-linux-x64.tgz"
-      Archive.strip_incorrect_words_yaml_from_tar(filename)
-
       binary_builder.build(
           SourceInput.new(
               source_input.name,
@@ -731,6 +728,9 @@ class Builder
               source_input.git_commit_sha
           )
       )
+
+      filename = "#{binary_builder.base_dir}/#{source_input.name}-#{full_version}-linux-x64.tgz"
+      Archive.strip_incorrect_words_yaml_from_tar(filename)
 
       out_data.merge!(
           artifact_output.move_dependency(
