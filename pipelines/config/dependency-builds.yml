@@ -327,10 +327,16 @@ dependencies:
           - line: 1.17.X
             deprecation_date: 2020-05-01
             link: https://nginx.org/
+          - line: 1.18.X
+            deprecation_date: 2021-05-01
+            link: https://nginx.org/
       staticfile:
         lines:
           - line: 1.17.X
             deprecation_date: 2020-05-01
+            link: https://nginx.org/
+          - line: 1.18.X
+            deprecation_date: 2021-05-01
             link: https://nginx.org/
     source_type: nginx
     versions_to_keep: 2
