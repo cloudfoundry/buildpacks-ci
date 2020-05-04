@@ -294,6 +294,9 @@ dependencies:
           - line: 1.17.X
             deprecation_date: 2020-05-01
             link: https://nginx.org/
+          - line: 1.18.X
+            deprecation_date: 2021-05-01
+            link: https://nginx.org/
       nginx-cnb:
         lines:
           #! nginx deprecation dates are 1 year after the mainline release date
@@ -302,6 +305,9 @@ dependencies:
             link: https://nginx.org/
           - line: 1.17.X
             deprecation_date: 2020-05-01
+            link: https://nginx.org/
+          - line: 1.18.X
+            deprecation_date: 2021-05-01
             link: https://nginx.org/
     versions_to_keep: 2
   openresty:
