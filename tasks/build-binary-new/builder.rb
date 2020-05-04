@@ -96,7 +96,7 @@ module DependencyBuild
 
           stack = ENV.fetch('STACK')
           fs_specific_packages = stack == 'cflinuxfs2' ? ['libgfortran-4.8-dev'] : ['libgfortran-7-dev']
-          Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libcurl4-openssl-dev', 'default-jre', *fs_specific_packages)
+          Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libpcre2-dev', 'libcurl4-openssl-dev', 'default-jre', *fs_specific_packages)
 
           Runner.run('wget', source_input.url)
           source_sha = Digest::SHA256.hexdigest(open("R-#{source_input.version}.tar.gz").read)
