@@ -419,7 +419,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/create-buildpack-release-tracker-story/task.yml
           params:
             BUILDPACK_NAME: <%= language %>
-            TRACKER_PROJECT_ID: '{{cf-buildpacks-public-tracker-id}}'
+            TRACKER_PROJECT_ID: '{{cf-buildpacks-private-tracker-id}}'
             RELENG_TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
             TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
