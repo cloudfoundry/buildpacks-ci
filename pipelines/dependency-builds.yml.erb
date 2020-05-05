@@ -108,6 +108,14 @@ def get_git_uri(buildpack)
   end
 end
 
+def get_git_repo(buildpack)
+  if buildpack.include? '-cnb'
+    return "cloudfoundry/#{buildpack}"
+  else
+    bp_uri = "cloudfoundry/#{buildpack}-buildpack"
+  end
+end
+
 def is_child_cnb(dep_name)
   dep_name.start_with?('org.cloudfoundry')
 end
@@ -122,6 +130,10 @@ resource_types:
   type: docker-image
   source:
     repository: cfcommunity/slack-notification-resource
+- name: create-pull-request-resource
+  type: docker-image
+  source:
+    repository: cfbuildpacks/create-pull-request-resource
 
 resources:
 - name: binary-builder
@@ -179,6 +191,11 @@ end
     <% if buildpack.include? '-cnb' %>
     tag_filter: v*
     <% end %>
+- name: <%= buildpack %>-pull-request
+  type: create-pull-request-resource
+  source:
+    remote_repository: <%= get_git_repo(buildpack) %>
+    github_token: ((buildpacks-github-token))
 <% end %>
 
 <% dependencies.each do |dep_name, dep| %>
@@ -496,10 +513,13 @@ jobs:
     output_mapping:
       artifacts: buildpack
     <% end %>
-  - put: <%= bp_name %>-buildpack<%= '-v3' if dep['branch'] == 'v3' %>
+  - put: <%= bp_name %>-pull-request
     params:
-      repository: buildpack
-      rebase: true
+      repo_location: buildpack
+      title: <%= "Updating version for #{dep_name} for #{line_hash['line']} " %>
+      description: "This PR is made automatically by release engineering bot. It will be automatically merged to master."
+      branch_prefix: "pr-by-releng-bot"
+      auto_merge: true
   <% end %>
 <% end %>
 <% end %>
