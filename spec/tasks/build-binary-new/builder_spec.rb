@@ -43,7 +43,7 @@ describe 'Builder' do
   context 'when using the old binary-builder' do
     {
       TableTestInput.new('bundler', '2.7.14')     => TableTestOutput.new('/fake-binary-builder/bundler-2.7.14.tgz', 'bundler_2.7.14_linux_noarch_cflinuxfs2', 'tgz'),
-      TableTestInput.new('hwc', '2.7.14')         => TableTestOutput.new('/fake-binary-builder/hwc-2.7.14-windows-amd64.zip', 'hwc_2.7.14_windows_x64_any-stack', 'zip'),
+      TableTestInput.new('hwc', '2.7.14')         => TableTestOutput.new('/fake-binary-builder/hwc-2.7.14-windows-x86-64.zip', 'hwc_2.7.14_windows_x86-64_any-stack', 'zip'),
       TableTestInput.new('dep', '2.7.14')         => TableTestOutput.new('/fake-binary-builder/dep-v2.7.14-linux-x64.tgz', 'dep_2.7.14_linux_x64_cflinuxfs2', 'tgz'),
       TableTestInput.new('glide', '2.7.14')       => TableTestOutput.new('/fake-binary-builder/glide-v2.7.14-linux-x64.tgz', 'glide_2.7.14_linux_x64_cflinuxfs2', 'tgz'),
       TableTestInput.new('godep', '2.7.14')       => TableTestOutput.new('/fake-binary-builder/godep-v2.7.14-linux-x64.tgz', 'godep_2.7.14_linux_x64_cflinuxfs2', 'tgz'),
