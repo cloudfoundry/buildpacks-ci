@@ -492,8 +492,8 @@ class Builder
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
-              "#{binary_builder.base_dir}/hwc-#{source_input.version}-windows-amd64.zip",
-              "#{filename_prefix}_windows_x64_any-stack",
+              "#{binary_builder.base_dir}/hwc-#{source_input.version}-windows-x86-64.zip",
+              "#{filename_prefix}_windows_x86-64_any-stack",
           )
       )
 
