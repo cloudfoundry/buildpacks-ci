@@ -239,6 +239,7 @@ module DependencyBuild
             '--prefix=/',
             '--error-log-path=stderr',
             '--with-http_ssl_module',
+            '--with-http_v2_module',
             '--with-http_realip_module',
             '--with-http_gunzip_module',
             '--with-http_gzip_static_module',
