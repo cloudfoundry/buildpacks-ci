@@ -195,7 +195,11 @@ end
   type: create-pull-request-resource
   source:
     remote_repository: <%= get_git_repo(buildpack) %>
+  <% if buildpack.include? '-cnb' %>
+    github_token: ((paketo-buildpacks-github-token))
+  <% else %>
     github_token: ((buildpacks-github-token))
+  <% end %>
 <% end %>
 
 <% dependencies.each do |dep_name, dep| %>
@@ -517,9 +521,15 @@ jobs:
     params:
       repo_location: buildpack
       title: <%= "Updating version for #{dep_name} for #{line_hash['line']} " %>
-      description: "This PR is made automatically by release engineering bot. It will be automatically merged to master."
+      description: "This PR is made automatically by release engineering bot."
       branch_prefix: "pr-by-releng-bot"
+    <% if bp_name.include? '-cnb' %>
+      auto_merge: false
+      base: master
+    <% else %>
       auto_merge: true
+      base: develop
+    <% end %>
   <% end %>
 <% end %>
 <% end %>
