@@ -6,7 +6,7 @@
     'non_lts' => true,
   },
   'binary' => {
-    'stacks' => %w(cflinuxfs3 windows2012R2 windows2016 windows),
+    'stacks' => %w(cflinuxfs3 windows2016 windows),
     'product_slug' => 'binary-buildpack',
     'skip_docker_start' => true,
     'non_lts_pivnet' => true,
@@ -23,7 +23,7 @@
     'compute_instance_count' => 3,
   },
   'hwc' => {
-    'stacks' => %w(windows2012R2 windows2016 windows),
+    'stacks' => %w(windows2016 windows),
     'skip_brats' => true,
     'product_slug' => 'hwc-buildpack',
     'non_lts' => true,
@@ -553,7 +553,7 @@ jobs: ##########################################################################
     plan:
       - in_parallel:
         - get: buildpacks-ci
-        <% pws_stacks = buildpacks[language]['stacks'] - ['windows2012R2']
+        <% pws_stacks = buildpacks[language]['stacks']
            pws_stacks.each do |stack| %>
         - get: pivotal-buildpack-cached-<%= stack %>
           passed: [ ship-it ]
