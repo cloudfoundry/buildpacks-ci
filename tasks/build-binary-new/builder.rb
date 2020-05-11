@@ -522,7 +522,7 @@ class Builder
           )
       )
 
-    when 'node'
+    when 'node', 'httpd'
       binary_builder.build(source_input)
 
       filename = "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}-linux-x64.tgz"
@@ -535,23 +535,7 @@ class Builder
               "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
-
-    when 'httpd'
-    filename = "source/httpd-#{source_input.version}.tar.bz2"
-      if File.exist?(filename)
-        out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              filename,
-              "#{filename_prefix}_linux_x64_#{stack}",
-          )
-        )
-      else
-        results = Sha.check_sha(source_input)
-        out_data[:sha256] = results[1]
-        out_data[:url] = source_input.url
-      end
-
+      
     when 'nginx-static'
       source_pgp = 'not yet implemented'
       DependencyBuild.build_nginx(source_input, stack, true)
