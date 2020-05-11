@@ -1,9 +1,7 @@
 <% environments = ['verge', 'frontier', 'limit']
    locks_per_environment = 4
    opsfiles = [
-     '../cf-deployment/operations/windows1803-cell.yml',
      '../cf-deployment/operations/use-latest-stemcell.yml',
-     '../cf-deployment/operations/use-latest-windows1803-stemcell.yml',
      '../cf-deployment/operations/experimental/enable-traffic-to-internal-networks.yml',
      '../cf-deployment/operations/experimental/disable-interpolate-service-bindings.yml',
      'deployments/operations/no-canaries.yml',
@@ -227,7 +225,6 @@ jobs: ##########################################################################
             params:
               BBL_STATE_DIR: <%= env %>
               MANIFEST_FILE: cf-deployment.yml
-              OPS_FILES: "../cf-deployment/operations/windows1803-cell.yml"
           - task: upload-bosh-release
             file: buildpacks-ci/tasks/upload-bosh-release/task.yml
             input_mapping:
