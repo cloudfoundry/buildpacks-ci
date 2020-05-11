@@ -217,12 +217,6 @@ jobs: ##########################################################################
               claim: <%= env %><%= lock_num %>
           <% end %>
         - in_parallel:
-          - task: bosh-upload-all-stemcells
-            file: cf-deployment-concourse-tasks/bosh-upload-stemcells/task.yml
-            params:
-              BBL_STATE_DIR: <%= env %>
-              MANIFEST_FILE: cf-deployment.yml
-              OPS_FILES: "../cf-deployment/operations/windows2019-cell.yml"
           - task: upload-bosh-release
             file: buildpacks-ci/tasks/upload-bosh-release/task.yml
             input_mapping:
