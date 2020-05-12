@@ -34,7 +34,8 @@ class BuildpackToMaster
       Octokit.update_branch(
         @github_repo,
         'master',
-        @sha
+        @sha,
+        false
       )
     else
       raise "Unsafe file changes"
