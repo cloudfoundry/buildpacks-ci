@@ -409,8 +409,7 @@ module Archive
     def strip_incorrect_words_yaml_from_tar(filename)
       Dir.mktmpdir do |dir|
         Runner.run('tar', '-C', dir, '-xf', filename)
-        Runner.run('rm', '-f', dir + '/lib/ruby/gems/2.4.0/gems/did_you_mean-1.1.0/evaluation/incorrect_words.yaml')
-        Runner.run('rm', '-f', dir + '/lib/ruby/gems/2.5.0/gems/did_you_mean-1.2.0/evaluation/incorrect_words.yaml')
+        Runner.run('find', dir, '-type', 'f', '-name', 'incorrect_words.yaml', '-delete')
         Runner.run('tar', '-C', dir, '-czf', filename, '.')
       end
     end
