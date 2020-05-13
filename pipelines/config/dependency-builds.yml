@@ -8,6 +8,8 @@ dependencies:
     third_party_hosted: true
     source_type: appd_agent
     any_stack: true
+    copy-stacks:
+      - bionic
     versions_to_keep: 2
   bower:
     buildpacks:
@@ -38,6 +40,8 @@ dependencies:
     third_party_hosted: true
     source_type: ca_apm_agent
     any_stack: true
+    copy-stacks:
+      - bionic
     versions_to_keep: 2
   composer:
     buildpacks:
@@ -52,6 +56,8 @@ dependencies:
       - 'repo: composer/composer'
       - 'extension: .phar'
     any_stack: true
+    copy-stacks:
+      - bionic
     versions_to_keep: 2
   dep:
     buildpacks:
@@ -196,6 +202,8 @@ dependencies:
         lines:
           - line: latest
     versions_to_keep: 2
+    copy-stacks:
+      - bionic
   hwc:
     buildpacks:
       hwc:
@@ -310,6 +318,8 @@ dependencies:
             deprecation_date: 2021-05-01
             link: https://nginx.org/
     versions_to_keep: 2
+    copy-stacks:
+      - bionic
   openresty:
     buildpacks:
       nginx:
@@ -698,6 +708,8 @@ dependencies:
         removal_strategy: keep_latest_released
     source_type: php
     versions_to_keep: 2
+    copy-stacks:
+      - bionic
   pip:
     buildpacks:
       pip-cnb:
@@ -821,6 +833,8 @@ dependencies:
       - 'extension: .tar.gz'
     any_stack: true
     versions_to_keep: 2
+    copy-stacks:
+      - bionic
 build_stacks: ['cflinuxfs3']
 copy_stacks: ['bionic']
 windows_stacks: ['windows2012R2', 'windows2016', 'windows']
