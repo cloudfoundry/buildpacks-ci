@@ -4,6 +4,8 @@ set -euo pipefail
 
 name="$(jq -r .source.name source/data.json)"
 version="$(jq -r .version.ref source/data.json)"
+tracker_story_id="$(jq -r .tracker_story_id "builds/binary-builds-new/$name/$version.json")"
+
 metadata_file_path="builds/binary-builds-new/$name/$version-cflinuxfs3.json"
 git_filename="binary-builds-new/$name/$version-$STACK_ID.json"
 full_filename="builds/$git_filename"
