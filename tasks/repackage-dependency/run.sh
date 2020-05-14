@@ -6,7 +6,12 @@ name="$(jq -r .source.name source/data.json)"
 version="$(jq -r .version.ref source/data.json)"
 tracker_story_id="$(jq -r .tracker_story_id "builds/binary-builds-new/$name/$version.json")"
 
-metadata_file_path="builds/binary-builds-new/$name/$version-cflinuxfs3.json"
+if [ "${ANY_STACK}" == "true" ]; then
+  metadata_file_path="builds/binary-builds-new/$name/$version-any-stack.json"
+else
+  metadata_file_path="builds/binary-builds-new/$name/$version-cflinuxfs3.json"
+fi
+
 git_filename="binary-builds-new/$name/$version-$STACK.json"
 full_filename="builds/$git_filename"
 cp "${metadata_file_path}" "${full_filename}"
