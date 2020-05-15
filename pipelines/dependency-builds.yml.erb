@@ -389,6 +389,7 @@ jobs:
     file: buildpacks-ci/tasks/repackage-dependency/task.yml
     params:
       STACK: <%= stack %>
+      ANY_STACK: <%= dep['any_stack'] %>
   - put: bionic-builds-metadata
     resource: builds
     params:
