@@ -13,7 +13,7 @@ api = "0.2"
     sha256 = "sha256-for-binary-1.0.1"
     source = "https://github.com/cloudfoundry/some-child-cnb/archive/v1.0.1.tar.gz"
     source_sha256 = "sha256-for-source-1.0.1"
-    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3", "org.cloudfoundry.stacks.tiny"]
+    stacks = ["io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3", "io.buildpacks.stacks.tiny"]
     uri = "https://buildpacks.cloudfoundry.org/dependencies/org.cloudfoundry.some-child/org.cloudfoundry.some-child-1.0.1-any-stack-bbbbbbbb.tgz"
     version = "1.0.1"
 

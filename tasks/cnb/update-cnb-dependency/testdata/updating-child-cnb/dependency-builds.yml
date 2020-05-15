@@ -3,7 +3,7 @@ deprecated_stacks: ['deprecatedstack']
 v3_stacks:
   bionic: 'io.buildpacks.stacks.bionic'
   cflinuxfs3: 'org.cloudfoundry.stacks.cflinuxfs3'
-  tiny: 'org.cloudfoundry.stacks.tiny'
+  tiny: 'io.buildpacks.stacks.tiny'
 v3_dep_ids: {}
 v3_dep_names:
   some-dep: Some Dep

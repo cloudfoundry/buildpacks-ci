@@ -185,7 +185,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 					ID:              "some-dep",
 					Name:            "Some Dep",
 					SHA256:          "sha256-for-tiny-binary-2.1.0",
-					Stacks:          []string{"org.cloudfoundry.stacks.tiny"},
+					Stacks:          []string{"io.buildpacks.stacks.tiny"},
 					URI:             "https://example.org/some-dep-2.1.0.tgz",
 					Version:         "2.1.0",
 					DeprecationDate: deprecationDate2040,
@@ -198,7 +198,7 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			latestCommitMessage, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(latestCommitMessage))
 			assert.Contains(t, string(latestCommitMessage), "Add some-dep 2.1.0, remove some-dep 2.0.0")
-			assert.Contains(t, string(latestCommitMessage), "for stack(s) io.buildpacks.stacks.bionic, org.cloudfoundry.stacks.cflinuxfs3, org.cloudfoundry.stacks.tiny [#111111111]")
+			assert.Contains(t, string(latestCommitMessage), "for stack(s) io.buildpacks.stacks.bionic, org.cloudfoundry.stacks.cflinuxfs3, io.buildpacks.stacks.tiny [#111111111]")
 		})
 	})
 
