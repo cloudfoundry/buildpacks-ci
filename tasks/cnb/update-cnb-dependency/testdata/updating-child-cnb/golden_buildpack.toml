@@ -88,7 +88,7 @@ api = "0.2"
     id = "some-dep"
     name = "Some Dep"
     sha256 = "sha256-for-tiny-binary-2.1.0"
-    stacks = ["org.cloudfoundry.stacks.tiny"]
+    stacks = ["io.buildpacks.stacks.tiny"]
     uri = "https://example.org/some-dep-2.1.0.tgz"
     version = "2.1.0"
 
