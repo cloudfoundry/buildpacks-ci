@@ -135,6 +135,7 @@ module DependencyBuild
                 Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libcaf_single.a', './lib')
                 Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libgfortran.a', './lib')
                 Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/libgfortran.so', './lib')
+                Runner.run('cp', '-L', '/usr/lib/x86_64-linux-gnu/libpcre2-8.so.0', './lib')
               end
               Runner.run('tar', 'zcvf', "#{artifacts}/r-v#{source_input.version}.tgz", '.')
             end
