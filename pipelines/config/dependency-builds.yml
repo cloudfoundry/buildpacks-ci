@@ -840,7 +840,7 @@ copy_stacks: ['bionic']
 windows_stacks: ['windows2012R2', 'windows2016', 'windows']
 deprecated_stacks: ['cflinuxfs2']
 v3_stacks:
-  tiny: 'io.buildpacks.stacks.tiny'
+  tiny: 'org.cloudfoundry.stacks.tiny'
   bionic: 'io.buildpacks.stacks.bionic'
   cflinuxfs3: 'org.cloudfoundry.stacks.cflinuxfs3'
 v3_dep_names:
