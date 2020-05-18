@@ -20,7 +20,11 @@ class UsnReleaseNotes
   private
 
   def usn_url
-    "https://usn.ubuntu.com/#{@usn_id.gsub(/^USN-/, '')}/"
+    if @usn_id.match(/^LSN-/)
+      "https://usn.ubuntu.com/lsn/#{@usn_id.gsub(/^LSN-/, '')}/"
+    else
+      "https://usn.ubuntu.com/#{@usn_id.gsub(/^USN-/, '')}/"
+    end
   end
 
   def release_note_text
