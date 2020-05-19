@@ -4,6 +4,7 @@ api = "0.2"
   id = "org.cloudfoundry.some-parent"
   name = "Some Parent Buildpack"
   version = "{{.Version}}"
+  homepage = "https://some-website.com/some-org/some-repo"
 
 [metadata]
   include_files = ["buildpack.toml"]

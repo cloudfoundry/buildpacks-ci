@@ -193,6 +193,14 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			}, deps)
 		})
 
+		it("retains existing buildpack info", func() {
+			buildpackTOML := decodeBuildpackTOML(t, outputDir)
+			assert.Equal(t, "org.cloudfoundry.some-child", buildpackTOML.Buildpack.ID)
+			assert.Equal(t, "Some Child Buildpack", buildpackTOML.Buildpack.Name)
+			assert.Equal(t, "{{.Version}}", buildpackTOML.Buildpack.Version)
+			assert.Equal(t, "https://some-website.com/some-org/some-repo", buildpackTOML.Buildpack.Homepage)
+		})
+
 		it("shows the added and removed dep versions in the commit message", func() {
 			cmd := exec.Command("git", "-C", outputDir, "log", "-1", "--format=%B")
 			latestCommitMessage, err := cmd.CombinedOutput()
@@ -281,6 +289,14 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			require.NoError(t, err, string(latestCommitMessage))
 			assert.Contains(t, string(latestCommitMessage), "Add org.cloudfoundry.some-child 1.0.1, remove org.cloudfoundry.some-child 1.0.0")
 			assert.Contains(t, string(latestCommitMessage), "for stack(s) io.buildpacks.stacks.bionic, org.cloudfoundry.stacks.cflinuxfs3 [#111111111]")
+		})
+
+		it("retains existing buildpack info", func() {
+			buildpackTOML := decodeBuildpackTOML(t, outputDir)
+			assert.Equal(t, "org.cloudfoundry.some-parent", buildpackTOML.Buildpack.ID)
+			assert.Equal(t, "Some Parent Buildpack", buildpackTOML.Buildpack.Name)
+			assert.Equal(t, "{{.Version}}", buildpackTOML.Buildpack.Version)
+			assert.Equal(t, "https://some-website.com/some-org/some-repo", buildpackTOML.Buildpack.Homepage)
 		})
 	})
 

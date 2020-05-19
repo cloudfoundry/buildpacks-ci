@@ -11,9 +11,10 @@ import (
 type BuildpackTOML struct {
 	API       string `toml:"api"`
 	Buildpack struct {
-		ID      string `toml:"id"`
-		Name    string `toml:"name"`
-		Version string `toml:"version"`
+		ID       string `toml:"id"`
+		Name     string `toml:"name"`
+		Version  string `toml:"version"`
+		Homepage string `toml:"homepage,omitempty"`
 	} `toml:"buildpack"`
 	Metadata Metadata `toml:"metadata"`
 	Orders   []Order  `toml:"order"`
