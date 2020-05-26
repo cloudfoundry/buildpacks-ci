@@ -432,6 +432,15 @@ dependencies:
     versions_to_keep: 2
     copy-stacks:
       - bionic
+    mixins:
+      'io.buildpacks.stacks.bionic':
+        - libargon2-0
+        - libcurl4
+        - libgd3
+        - libmagickwand-6.q16-3
+        - libonig4
+        - libxml2
+        - libyaml-0-2
   pip:
     buildpacks:
       pip-cnb:

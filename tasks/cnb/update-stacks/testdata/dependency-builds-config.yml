@@ -1,0 +1,12 @@
+dependencies:
+  some-dep:
+    mixins:
+      'io.buildpacks.stacks.some-stack':
+        - 'some-mixin'
+        - 'some-new-mixin'
+  some-other-dep:
+    mixins:
+      'io.buildpacks.stacks.some-stack':
+        - 'some-other-mixin'
+      'io.buildpacks.stacks.some-other-stack':
+        - 'some-other-mixin'

@@ -495,6 +495,8 @@ jobs:
       <% end %>
     output_mapping:
       artifacts: buildpack
+  - task: update-cnb-stacks
+    file: buildpacks-ci/tasks/cnb/update-stacks/task.yml
     <% else %>
   - task: update-buildpack-dependency
     file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
