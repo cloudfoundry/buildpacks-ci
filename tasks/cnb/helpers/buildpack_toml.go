@@ -34,7 +34,8 @@ type Group struct {
 }
 
 type Stack struct {
-	ID string `toml:"id"`
+	ID     string   `toml:"id"`
+	Mixins []string `toml:"mixins,omitempty"`
 }
 
 type Dependency struct {
