@@ -182,6 +182,7 @@ dependencies:
     copy-stacks:
       - bionic
       - tiny
+      - old-tiny
     versions_to_keep: 2
   godep:
     buildpacks:
@@ -575,7 +576,8 @@ copy_stacks: ['bionic']
 windows_stacks: ['windows2012R2', 'windows2016', 'windows']
 deprecated_stacks: ['cflinuxfs2']
 v3_stacks:
-  tiny: 'org.cloudfoundry.stacks.tiny'
+  tiny: 'io.paketo.stacks.tiny'
+  old-tiny: 'org.cloudfoundry.stacks.tiny'
   bionic: 'io.buildpacks.stacks.bionic'
   cflinuxfs3: 'org.cloudfoundry.stacks.cflinuxfs3'
 v3_dep_names:
