@@ -411,6 +411,8 @@ module Archive
       Dir.mktmpdir do |dir|
         Runner.run('tar', '-C', dir, '-xf', filename)
         Runner.run('find', dir, '-type', 'f', '-name', 'incorrect_words.yaml', '-delete')
+        # Add recursive search and destroy in all jar files"
+        Runner.run('bash', '-c', 'find . -name "*.jar" -exec grep -l incorrect_words.yaml {} \; | xargs -I {} zip -q -d {} "*incorrect_words.yaml"')
         Runner.run('tar', '-C', dir, '-czf', filename, '.')
       end
     end
