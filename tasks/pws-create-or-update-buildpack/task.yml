@@ -10,8 +10,6 @@ inputs:
     optional: true
   - name: pivotal-buildpack-cached-cflinuxfs3
     optional: true
-  - name: pivotal-buildpack-cached-windows2012R2
-    optional: true
   - name: pivotal-buildpack-cached-windows2016
     optional: true
   - name: pivotal-buildpack-cached-windows

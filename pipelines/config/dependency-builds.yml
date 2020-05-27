@@ -573,7 +573,7 @@ dependencies:
       - bionic
 build_stacks: ['cflinuxfs3']
 copy_stacks: ['bionic']
-windows_stacks: ['windows2012R2', 'windows2016', 'windows']
+windows_stacks: ['windows2016', 'windows']
 deprecated_stacks: ['cflinuxfs2']
 v3_stacks:
   tiny: 'io.paketo.stacks.tiny'
