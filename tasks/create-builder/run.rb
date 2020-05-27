@@ -91,6 +91,12 @@ Dir.glob('sources/*-cnb/').each do |dir|
 
       res = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
         http.request(request)
+      case res
+      when Net::HTTPSuccess     then res
+      when Net::HTTPRedirection then fetch(res['location'], limit - 1)
+      else
+        response.error!
+      end
       end
 
       File.open(bp_location, "wb") do |file|
