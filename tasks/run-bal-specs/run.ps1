@@ -15,11 +15,6 @@ push-location $buildDir
 
   echo "Running tests..."
   $(& "c:\var\vcap\packages\ginkgo\bin\ginkgo.exe" -r -race; $ExitCode="$LastExitCode")
-  if ($ExitCode) {
-    echo "Running tests for windows2012R2 tag..."
-    $env:TAR_URL="https://s3.amazonaws.com/bosh-windows-dependencies/tar-1503683828.exe"
-    $(& "c:\var\vcap\packages\ginkgo\bin\ginkgo.exe" -tags windows2012R2 -r; $ExitCode="$LastExitCode")
-  }
 pop-location
 
 cmd.exe /c rd /q /s $env:GOPATH

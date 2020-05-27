@@ -95,11 +95,6 @@ resources:
     source:
       name: bosh-google-kvm-ubuntu-xenial-go_agent
 
-  - name: windows2012-stemcell
-    type: bosh-io-stemcell
-    source:
-      name: bosh-google-kvm-windows2012R2-go_agent
-
   - name: windows2019-stemcell
     type: bosh-io-stemcell
     source:
@@ -188,7 +183,6 @@ jobs:
             trigger: true
           - get: diego-release
           - get: cf-deployment
-          - get: windows2012-stemcell
           - get: windows2019-stemcell
           - get: bbl-state
           - get: gcp-stemcell
@@ -215,16 +209,13 @@ jobs:
               - diego-release-artifacts/dev_releases/diego/*.tgz
             stemcells:
               - gcp-stemcell/*.tgz
-              - windows2012-stemcell/*.tgz
               - windows2019-stemcell/*.tgz
             ops_files:
             - diego-release-artifacts/use-diego-dev-release.yml
             - buildpacks-ci/deployments/operations/no-canaries.yml
             - cf-deployment/operations/scale-to-one-az.yml
-            - cf-deployment/operations/windows2012R2-cell.yml
             - cf-deployment/operations/windows2019-cell.yml
             - cf-deployment/operations/use-latest-windows2019-stemcell.yml
-            - cf-deployment/operations/use-latest-windows2012R2-stemcell.yml
             - cf-deployment/operations/use-latest-stemcell.yml
             - cf-deployment/operations/use-online-windows2019fs.yml
             vars:
@@ -282,21 +273,6 @@ jobs:
           file: buildpacks-ci/tasks/get-cf-creds/task.yml
           params:
             ENV_NAME: bal
-        - task: write-cats-config-for-windows2012R2
-          file: buildpacks-ci/tasks/write-cats-config/task.yml
-          params:
-            APPS_DOMAIN: bal.buildpacks-gcp.ci.cf-app.com
-            DIEGO_DOCKER_ON: true
-            CREDHUB_MODE: assisted
-            WINDOWS_STACK: windows2012R2
-            ENV_NAME: bal
-        - task: cats-for-windows2012R2
-          attempts: 3
-          file: cf-deployment-concourse-tasks/run-cats/task.yml
-          params:
-            NODES: 12
-            CONFIG_FILE_PATH: integration_config.json
-            FLAKE_ATTEMPTS: 3
         - task: write-cats-config-for-windows
           file: buildpacks-ci/tasks/write-cats-config/task.yml
           params:
