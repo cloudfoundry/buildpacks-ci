@@ -95,7 +95,7 @@ Dir.glob('sources/*-cnb/').each do |dir|
       when Net::HTTPSuccess     then res
       when Net::HTTPRedirection then fetch(res['location'], limit - 1)
       else
-        res.error!
+        STDERR.puts "\n\nERROR: Bad response\n\n\n OUTPUT: #{res}\n\n"
       end
       end
 
