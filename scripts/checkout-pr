@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+git config --add remote.origin.fetch '+refs/pull/*/head:refs/remotes/origin/pr/*'
+git fetch
+git checkout "${1}"
