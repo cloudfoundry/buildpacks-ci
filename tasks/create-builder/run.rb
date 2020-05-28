@@ -19,7 +19,27 @@ def run(*cmd)
       puts output
     end
 end
+def http_fetch(uri_str, output, limit = 10)
+  raise ArgumentError, 'Too many HTTP redirects' if limit == 0
 
+  uri = URI.parse(uri_str)
+
+  request = Net::HTTP::Get.new(uri)
+  request["Authorization"] = "Bearer #{output.strip}"
+
+  req_options = {
+    use_ssl: uri.scheme == "https",
+  }
+  res = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
+    http.request(request)
+  end
+  case res
+  when Net::HTTPSuccess     then res
+  when Net::HTTPRedirection then http_fetch(res['location'], output, limit - 1)
+  else
+     STDERR.puts "\n\nERROR: HTTP Request failed \n\n\n Response: #{res}\n\n"
+  end
+end
 version = File.read(File.join("version", "version")).strip()
 repo = ENV.fetch("REPO")
 build_image = ENV.fetch("BUILD_IMAGE")
@@ -81,23 +101,8 @@ Dir.glob('sources/*-cnb/').each do |dir|
       File.open("creds", "w+") { |file| file.write(google_credential_json) }
       output, err, status = Open3.capture3('GOOGLE_APPLICATION_CREDENTIALS=creds gcloud auth application-default print-access-token')
 
-      uri = URI.parse(dep['uri'])
-      request = Net::HTTP::Get.new(uri)
-      request["Authorization"] = "Bearer #{output.strip}"
-
-      req_options = {
-        use_ssl: uri.scheme == "https",
-      }
-
-      res = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
-        http.request(request)
-      case res
-      when Net::HTTPSuccess     then res
-      when Net::HTTPRedirection then fetch(res['location'], limit - 1)
-      else
-        STDERR.puts "\n\nERROR: Bad response\n\n\n OUTPUT: #{res}\n\n"
-      end
-      end
+      uri_str = dep['uri']
+      res = http_fetch(uri_str, output)
 
       File.open(bp_location, "wb") do |file|
         file.write res.body
