@@ -460,6 +460,8 @@ dependencies:
           - line: latest
     source_type: pypi
     versions_to_keep: 2
+    copy-stacks:
+      - bionic
   python:
     buildpacks:
       python:
