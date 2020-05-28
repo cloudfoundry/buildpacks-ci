@@ -12,6 +12,7 @@ import (
 
 const AnyStack = "any-stack"
 const TinyStack = "tiny"
+const OldTinyStack = "old-tiny"
 
 func determineStacks(buildMetadataPath string, dep helpers.Dependency, depOrchestratorConfig DependencyOrchestratorConfig) ([]string, error) {
 	stackRegexp := regexp.MustCompile(`\/(?:\.|\d)*-(.*)\.json$`)
@@ -39,7 +40,7 @@ func determineStacks(buildMetadataPath string, dep helpers.Dependency, depOrches
 func handleAnyStack(dep helpers.Dependency, config DependencyOrchestratorConfig) ([]string, error) {
 	var stacks []string
 	for stack, stackID := range config.V3Stacks {
-		if stack == TinyStack && !includeTiny(dep.ID, config.IncludeTiny) {
+		if (stack == TinyStack || stack == OldTinyStack) && !includeTiny(dep.ID, config.IncludeTiny) {
 			continue
 		}
 		stacks = append(stacks, stackID)
