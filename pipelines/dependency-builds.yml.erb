@@ -116,6 +116,14 @@ def get_git_repo(buildpack)
   end
 end
 
+def is_cloudfoundry_cnb(buildpack)
+  if !buildpack.include? '-cnb'
+    return true
+  else
+    return buildpack.include?('pip') || buildpack.include?('python')
+  end
+end
+
 def is_child_cnb(dep_name)
   dep_name.start_with?('org.cloudfoundry')
 end
@@ -195,7 +203,7 @@ end
   type: create-pull-request-resource
   source:
     remote_repository: <%= get_git_repo(buildpack) %>
-  <% if buildpack.include? '-cnb' %>
+  <% if !is_cloudfoundry_cnb(buildpack) %>
     github_token: ((paketo-buildpacks-github-token))
   <% else %>
     github_token: ((buildpacks-github-token))
