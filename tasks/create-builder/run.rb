@@ -23,10 +23,10 @@ def http_fetch(uri_str, output, limit = 10)
   raise ArgumentError, 'Too many HTTP redirects' if limit == 0
 
   uri = URI.parse(uri_str)
-
   request = Net::HTTP::Get.new(uri)
+  if limit == 10
   request["Authorization"] = "Bearer #{output.strip}"
-
+  end
   req_options = {
     use_ssl: uri.scheme == "https",
   }
