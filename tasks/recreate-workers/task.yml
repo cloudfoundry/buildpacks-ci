@@ -8,8 +8,6 @@ inputs:
   - name: buildpacks-ci
   - name: bp-envs
 params:
-  CI_USERNAME:
-  CI_PASSWORD:
   CI_INSTANCE:
 run:
   path: buildpacks-ci/tasks/recreate-workers/run.sh
