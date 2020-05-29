@@ -16,6 +16,3 @@ fi
 source "${login_script}"
 
 bosh -n -d concourse recreate --skip-drain worker
-
-fly -t buildpacks login -c "${ci_url}" -u "${CI_USERNAME}" -p "${CI_PASSWORD}"
-fly -t buildpacks prune-worker --all-stalled

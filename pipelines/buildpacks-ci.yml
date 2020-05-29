@@ -114,6 +114,4 @@ jobs:
         file: buildpacks-ci/tasks/recreate-workers/task.yml
         tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
         params:
-          CI_USERNAME: buildpacks
-          CI_PASSWORD: ((concourse_basic_auth_password))
           CI_INSTANCE: public
