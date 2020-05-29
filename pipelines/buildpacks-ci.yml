@@ -116,3 +116,4 @@ jobs:
         params:
           CI_USERNAME: buildpacks
           CI_PASSWORD: ((concourse_basic_auth_password))
+          CI_INSTANCE: public
