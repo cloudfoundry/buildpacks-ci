@@ -22,7 +22,7 @@ module Depwatcher
       lis.map do |a|
         v = a.text.gsub(/^\s*Python\s*/, "")
         Internal.new(v)
-      end.first(10).reverse
+      end.first(50).reverse
     end
 
     def in(ref : String) : Release
