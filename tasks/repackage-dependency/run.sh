@@ -17,7 +17,7 @@ full_filename="builds/$git_filename"
 cp "${metadata_file_path}" "${full_filename}"
 git config --global user.email "cf-buildpacks-eng@pivotal.io"
 git config --global user.name "CF Buildpacks Team CI Server"
-if [[ -n "$(git status --porcelain)" ]]; then
+if [[ -n "$(git -C builds status --porcelain)" ]]; then
   git -C builds add "$git_filename"
   git -C builds commit -m "Build $name - $version - $STACK [#$tracker_story_id]"
 fi
