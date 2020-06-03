@@ -8,6 +8,8 @@ require 'fileutils'
 require 'open3'
 require 'net/http'
 require 'uri'
+require 'rubygems/package'
+require 'zlib'
 
 def run(*cmd)
     puts *cmd.join(" ")
@@ -85,7 +87,7 @@ end
 
 child_buildpacks = []
 
-Dir.glob('sources/*-cnb/').each do |dir|
+Dir.glob('git-sources/*-cnb/').each do |dir|
   buildpack_toml_file = 'buildpack.toml'
   buildpack_toml_data = Tomlrb.load_file(File.join(dir, buildpack_toml_file))
   is_metabuildpack = buildpack_toml_data['order']
@@ -115,7 +117,7 @@ Dir.glob('sources/*-cnb/').each do |dir|
   end
 end
 
-individual_buildpacks = Dir.glob('sources/*/').map do |dir|
+individual_buildpacks = Dir.glob('git-sources/*/').map do |dir|
   buildpack_toml_file = 'buildpack.toml'
   id = Tomlrb.load_file(File.join(dir, buildpack_toml_file)).dig('buildpack','id')
   bp_location = File.absolute_path(File.join(dir, id))
@@ -134,6 +136,25 @@ individual_buildpacks = Dir.glob('sources/*/').map do |dir|
     "uri" => bp_location,
   }
 end || []
+
+individual_buildpacks += Dir.glob('github-sources/*/').map do |dir|
+  id = ''
+  bp_location = Dir.glob(File.join(dir, '*.tgz')).first
+  buildpack_tarball = Gem::Package::TarReader.new(Zlib::GzipReader.open(bp_location))
+  buildpack_tarball.each do |file|
+    if file.full_name == 'buildpack.toml'
+      id = Tomlrb.parse(file.read)['buildpack']['id']
+    end
+  end
+  buildpack_tarball.close
+  if id != ''
+    {
+      "id" => id,
+      "uri" => bp_location,
+    }
+  end
+end || []
+
 individual_buildpacks.select! { |i| i != nil  }
 
 
