@@ -49,6 +49,7 @@ run_image = ENV.fetch("RUN_IMAGE")
 cnb_stack = ENV.fetch("STACK")
 enterprise = ENV.fetch("ENTERPRISE") == 'true'
 registry_password = ENV.fetch("REGISTRY_PASSWORD")
+description = ENV.fetch("DESCRIPTION")
 stack = cnb_stack.split('.').last
 tag = "#{version}-#{stack}"
 builder_config_file = File.absolute_path("builder.toml")
@@ -86,6 +87,7 @@ Dir.chdir 'packager' do
 end
 
 child_buildpacks = []
+order = []
 
 Dir.glob('git-sources/*-cnb/').each do |dir|
   buildpack_toml_file = 'buildpack.toml'
@@ -109,10 +111,9 @@ Dir.glob('git-sources/*-cnb/').each do |dir|
       File.open(bp_location, "wb") do |file|
         file.write res.body
       end
-      child_buildpacks.push(
-        "id" => dep['id'],
-        "uri" => bp_location,
-      )
+
+      order.push({"group": [{"id" => dep['id'], "version" => dep['version']}]})
+      child_buildpacks.push("id" => dep['id'], "uri" => bp_location, "version" => dep['version'])
     end
   end
 end
@@ -131,27 +132,27 @@ individual_buildpacks = Dir.glob('git-sources/*/').map do |dir|
     run 'cp', packager_path, local_packager # We have to do this b/c cnb packager uses arg[0] to find the buildpack.toml
     run *args, bp_location
   end
-  {
-    "id" => id,
-    "uri" => bp_location,
-  }
+
+  order.push({"group": [{"id" => dep['id'], "version" => version}]})
+  {"id" => id, "uri" => bp_location, "version" => version}
 end || []
 
 individual_buildpacks += Dir.glob('github-sources/*/').map do |dir|
   id = ''
+  version = ''
   bp_location = Dir.glob(File.join(dir, '*.tgz')).first
   buildpack_tarball = Gem::Package::TarReader.new(Zlib::GzipReader.open(bp_location))
   buildpack_tarball.each do |file|
     if file.full_name == 'buildpack.toml'
-      id = Tomlrb.parse(file.read)['buildpack']['id']
+      buildpack_toml = Tomlrb.parse(file.read)
+      id = buildpack_toml['buildpack']['id']
+      version = buildpack_toml['buildpack']['version']
     end
   end
   buildpack_tarball.close
   if id != ''
-    {
-      "id" => id,
-      "uri" => bp_location,
-    }
+    order.push({"group": [{"id" => id, "version" => version}]})
+    {"id" => id, "uri" => bp_location, "version" => version}
   end
 end || []
 
@@ -170,26 +171,23 @@ published_buildpacks = Dir.glob('published-sources/*/').map do |dir|
 
   id = metadata_json['id']
   version = metadata_json['version']
+  version_tag = metadata_json['version']
 
   # java version tags do not start with 'v', others do. e.g.
   # gcr.io/paketo-buildpacks/java:1.11.2
   # gcr.io/paketo-buildpacks/go:v0.0.7
   if id != 'paketo-buildpacks/java'
-    version = "v#{version}"
+    version_tag = "v#{version}"
   end
 
-  {
-    "image" => "gcr.io/#{id}:#{version}"
-  }
+  order.push({"group": [{"id" => id, "version" => version}]})
+  {"image" => "gcr.io/#{id}:#{version_tag}", "version" => version}
 end || []
 published_buildpacks.select! { |i| i != nil  }
 
 
 puts "Loading #{stack}-order.toml"
 buildpacks = individual_buildpacks + child_buildpacks + published_buildpacks
-static_builder_file = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.toml"))
-order = static_builder_file['order']
-description = static_builder_file['description']
 
 config_hash = {
   "description" => description,
