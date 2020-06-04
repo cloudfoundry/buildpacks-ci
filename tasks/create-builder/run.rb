@@ -126,14 +126,15 @@ individual_buildpacks = Dir.glob('git-sources/*/').map do |dir|
   local_packager = './packager-cli'
   args = [local_packager, '-uncached']
   args.pop if enterprise
+
+  version = File.read(File.join(dir, ".git", "ref")).chomp
+  args.push("-version", version)
   Dir.chdir dir do
-    version = File.read(File.join(".git", "ref")).chomp
-    args.push("-version", version)
     run 'cp', packager_path, local_packager # We have to do this b/c cnb packager uses arg[0] to find the buildpack.toml
     run *args, bp_location
   end
 
-  order.push({"group": [{"id" => dep['id'], "version" => version}]})
+  order.push({"group": [{"id" => id, "version" => version}]})
   {"id" => id, "uri" => bp_location, "version" => version}
 end || []
 
