@@ -172,12 +172,12 @@ published_buildpacks = Dir.glob('published-sources/*/').map do |dir|
 
   id = metadata_json['id']
   version = metadata_json['version']
-  version_tag = metadata_json['version']
 
   # java version tags do not start with 'v', others do. e.g.
   # gcr.io/paketo-buildpacks/java:1.11.2
   # gcr.io/paketo-buildpacks/go:v0.0.7
-  if id != 'paketo-buildpacks/java'
+  version_tag = metadata_json['version']
+  if ! id.end_with? '/java'
     version_tag = "v#{version}"
   end
 
