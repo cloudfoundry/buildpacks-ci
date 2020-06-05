@@ -12,6 +12,7 @@ inputs:
     optional: true
   - name: version
   - name: pack
+  - name: cnb-builder
   - name: packager
   - name: lifecycle
 outputs:
@@ -30,4 +31,3 @@ params:
   FINAL:
   ENTERPRISE:
   REGISTRY_PASSWORD:
-  DESCRIPTION:

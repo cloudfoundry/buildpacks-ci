@@ -49,7 +49,6 @@ run_image = ENV.fetch("RUN_IMAGE")
 cnb_stack = ENV.fetch("STACK")
 enterprise = ENV.fetch("ENTERPRISE") == 'true'
 registry_password = ENV.fetch("REGISTRY_PASSWORD")
-description = ENV.fetch("DESCRIPTION")
 stack = cnb_stack.split('.').last
 tag = "#{version}-#{stack}"
 builder_config_file = File.absolute_path("builder.toml")
@@ -87,7 +86,6 @@ Dir.chdir 'packager' do
 end
 
 child_buildpacks = []
-order = []
 
 Dir.glob('git-sources/*-cnb/').each do |dir|
   buildpack_toml_file = 'buildpack.toml'
@@ -112,7 +110,6 @@ Dir.glob('git-sources/*-cnb/').each do |dir|
         file.write res.body
       end
 
-      order.push({"group": [{"id" => dep['id'], "version" => dep['version']}]})
       child_buildpacks.push("id" => dep['id'], "uri" => bp_location, "version" => dep['version'])
     end
   end
@@ -134,7 +131,6 @@ individual_buildpacks = Dir.glob('git-sources/*/').map do |dir|
     run *args, bp_location
   end
 
-  order.push({"group": [{"id" => id, "version" => version}]})
   {"id" => id, "uri" => bp_location, "version" => version}
 end || []
 
@@ -152,7 +148,6 @@ individual_buildpacks += Dir.glob('github-sources/*/').map do |dir|
   end
   buildpack_tarball.close
   if id != ''
-    order.push({"group": [{"id" => id, "version" => version}]})
     {"id" => id, "uri" => bp_location, "version" => version}
   end
 end || []
@@ -181,7 +176,6 @@ published_buildpacks = Dir.glob('published-sources/*/').map do |dir|
     version_tag = "v#{version}"
   end
 
-  order.push({"group": [{"id" => id, "version" => version}]})
   {"image" => "gcr.io/#{id}:#{version_tag}", "version" => version}
 end || []
 published_buildpacks.select! { |i| i != nil  }
@@ -189,6 +183,9 @@ published_buildpacks.select! { |i| i != nil  }
 
 puts "Loading #{stack}-order.toml"
 buildpacks = individual_buildpacks + child_buildpacks + published_buildpacks
+static_builder_file = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.toml"))
+order = static_builder_file['order']
+description = static_builder_file['description']
 
 config_hash = {
   "description" => description,
