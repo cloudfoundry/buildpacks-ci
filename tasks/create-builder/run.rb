@@ -21,6 +21,7 @@ def run(*cmd)
       puts output
     end
 end
+
 def http_fetch(uri_str, output, limit = 10)
   raise ArgumentError, 'Too many HTTP redirects' if limit == 0
 
@@ -42,6 +43,17 @@ def http_fetch(uri_str, output, limit = 10)
      STDERR.puts "\n\nERROR: HTTP Request failed \n\n\n Response: #{res}\n\n"
   end
 end
+
+def set_version_in_order(order, id, version)
+  order.each do |o|
+    o['group'].each do |buildpack|
+      if buildpack['id'] == id
+        buildpack['version'] = version
+      end
+    end
+  end
+end
+
 version = File.read(File.join("version", "version")).strip()
 repo = ENV.fetch("REPO")
 build_image = ENV.fetch("BUILD_IMAGE")
@@ -85,6 +97,11 @@ Dir.chdir 'packager' do
   run 'go', 'build', '-o', packager_path, 'packager/main.go'
 end
 
+
+static_builder_file = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.toml"))
+order = static_builder_file['order']
+description = static_builder_file['description']
+
 child_buildpacks = []
 
 Dir.glob('git-sources/*-cnb/').each do |dir|
@@ -110,6 +127,7 @@ Dir.glob('git-sources/*-cnb/').each do |dir|
         file.write res.body
       end
 
+      set_version_in_order(order, dep['id'], dep['version'])
       child_buildpacks.push("id" => dep['id'], "uri" => bp_location, "version" => dep['version'])
     end
   end
@@ -131,6 +149,7 @@ individual_buildpacks = Dir.glob('git-sources/*/').map do |dir|
     run *args, bp_location
   end
 
+  set_version_in_order(order, id, version)
   {"id" => id, "uri" => bp_location, "version" => version}
 end || []
 
@@ -148,6 +167,7 @@ individual_buildpacks += Dir.glob('github-sources/*/').map do |dir|
   end
   buildpack_tarball.close
   if id != ''
+    set_version_in_order(order, id, version)
     {"id" => id, "uri" => bp_location, "version" => version}
   end
 end || []
@@ -176,16 +196,13 @@ published_buildpacks = Dir.glob('published-sources/*/').map do |dir|
     version_tag = "v#{version}"
   end
 
+  set_version_in_order(order, id, version)
   {"image" => "gcr.io/#{id}:#{version_tag}", "version" => version}
 end || []
 published_buildpacks.select! { |i| i != nil  }
 
 
-puts "Loading #{stack}-order.toml"
 buildpacks = individual_buildpacks + child_buildpacks + published_buildpacks
-static_builder_file = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.toml"))
-order = static_builder_file['order']
-description = static_builder_file['description']
 
 config_hash = {
   "description" => description,
