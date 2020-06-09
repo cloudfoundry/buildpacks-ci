@@ -21,9 +21,18 @@ api = "0.2"
 
   [[metadata.dependencies]]
     deprecation_date = "2020-01-01T00:00:00Z"
+    id = "some-dep"
+    name = "Some Dep"
+    sha256 = "bbbbbbbb"
+    stacks = ["io.buildpacks.stacks.some-stack", "io.buildpacks.stacks.some-stack-without-mixins"]
+    uri = "https://example.org/some-dep-2.0.0.tgz"
+    version = "2.0.0"
+
+  [[metadata.dependencies]]
+    deprecation_date = "2020-01-01T00:00:00Z"
     id = "some-other-dep"
     name = "Some Other Dep"
-    sha256 = "bbbbbbbb"
+    sha256 = "cccccccc"
     stacks = ["io.buildpacks.stacks.some-stack", "io.buildpacks.stacks.some-other-stack"]
     uri = "https://example.org/some-dep-1.0.0.tgz"
     version = "1.0.0"
