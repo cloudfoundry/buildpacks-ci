@@ -58,6 +58,7 @@ version = File.read(File.join("version", "version")).strip()
 repo = ENV.fetch("REPO")
 build_image = ENV.fetch("BUILD_IMAGE")
 run_image = ENV.fetch("RUN_IMAGE")
+run_image_mirrors = ENV.fetch("RUN_IMAGE_MIRRORS")
 cnb_stack = ENV.fetch("STACK")
 enterprise = ENV.fetch("ENTERPRISE") == 'true'
 registry_password = ENV.fetch("REGISTRY_PASSWORD")
@@ -209,6 +210,9 @@ config_hash = {
     "version" => lifecycle_version
   }
 }
+if !run_image_mirrors.empty?
+  config_hash["stack"]["run-image-mirrors"] = run_image_mirrors.split(",")
+end
 
 builder_config = TOML::Generator.new(config_hash).body
 File.write(builder_config_file, builder_config)
