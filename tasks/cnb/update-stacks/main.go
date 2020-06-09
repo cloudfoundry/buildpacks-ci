@@ -3,14 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"github.com/cloudfoundry/buildpacks-ci/tasks/cnb/helpers"
-	"github.com/mitchellh/mapstructure"
-	"gopkg.in/yaml.v2"
 	"log"
 	"os/exec"
 	"path/filepath"
 	"sort"
+
+	"github.com/BurntSushi/toml"
+	"github.com/cloudfoundry/buildpacks-ci/tasks/cnb/helpers"
+	"github.com/mitchellh/mapstructure"
+	"gopkg.in/yaml.v2"
 )
 
 var flags struct {
@@ -113,13 +114,13 @@ func getMixinsForStacks(buildpackTOML helpers.BuildpackTOML, dependencyBuildsCon
 	}
 
 	for stack := range allMixins {
-		sortAndUnique(allMixins[stack])
+		allMixins[stack] = sortAndUnique(allMixins[stack])
 	}
 
 	return allMixins, nil
 }
 
-func sortAndUnique(strings []string) {
+func sortAndUnique(strings []string) []string {
 	uniqueStringsMap := map[string]bool{}
 	for _, s := range strings {
 		uniqueStringsMap[s] = true
@@ -131,6 +132,7 @@ func sortAndUnique(strings []string) {
 	}
 
 	sort.Strings(uniqueStrings)
+	return uniqueStrings
 }
 
 func commitBuildpackTOML(outputDir, buildpackTOMLOutputPath string) error {
