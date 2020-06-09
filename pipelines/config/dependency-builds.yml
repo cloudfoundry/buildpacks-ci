@@ -204,6 +204,9 @@ dependencies:
     versions_to_keep: 2
     copy-stacks:
       - bionic
+    mixins:
+      'io.buildpacks.stacks.bionic':
+        - libexpat1
   hwc:
     buildpacks:
       hwc:
