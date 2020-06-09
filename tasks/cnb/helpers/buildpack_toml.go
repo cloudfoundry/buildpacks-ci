@@ -13,7 +13,7 @@ type BuildpackTOML struct {
 	Buildpack struct {
 		ID       string `toml:"id"`
 		Name     string `toml:"name"`
-		Version  string `toml:"version"`
+		Version  string `toml:"version,omitempty"`
 		Homepage string `toml:"homepage,omitempty"`
 	} `toml:"buildpack"`
 	Metadata Metadata `toml:"metadata"`
