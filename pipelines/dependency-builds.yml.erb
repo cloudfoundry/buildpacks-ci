@@ -119,8 +119,6 @@ end
 def is_cloudfoundry_cnb(buildpack)
   if !buildpack.include? '-cnb'
     return true
-  else
-    return buildpack.include?('pip')
   end
 end
 
