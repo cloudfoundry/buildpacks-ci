@@ -256,18 +256,6 @@ dependencies:
       - 'repo: mono/libgdiplus'
       - 'tag_regex: ^[0-9]+\.[0-9]+$'
     versions_to_keep: 2
-  lifecycle:
-    buildpacks:
-      nodejs-cnb:
-        compat_only: true
-        lines:
-          - line: latest
-    source_type: github_releases
-    source_params:
-      - 'repo: buildpack/lifecycle'
-      - 'extension: .tgz'
-    any_stack: true
-    versions_to_keep: 1
   miniconda37:
     buildpacks:
       python:
