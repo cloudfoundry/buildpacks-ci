@@ -8,6 +8,7 @@ Spec2.describe Depwatcher::GithubReleases do
   subject { described_class.new.tap { |s| s.client = client } }
   before do
     client.stub_get("https://api.github.com/repos/yarnpkg/yarn/releases", nil, HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/gh_yarn.json")))
+    client.stub_get("https://api.github.com/repos/composer/composer/releases", nil, HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/gh_composer.json")))
     client.stub_get("https://github.com/yarnpkg/yarn/releases/download/v1.5.1/yarn-v1.5.1.tar.gz", HTTP::Headers{"Accept" => "application/octet-stream"}, HTTP::Client::Response.new(200, body: "dummy data"))
     client.stub_get("https://github.com/yarnpkg/yarn/archive/v1.5.1.tar.gz", HTTP::Headers{"Accept" => "application/octet-stream"}, HTTP::Client::Response.new(200, body: "different dummy data"))
   end
@@ -19,6 +20,10 @@ Spec2.describe Depwatcher::GithubReleases do
 
     it "returns pre-releases and real releases sorted" do
       expect(subject.check("yarnpkg/yarn", true).map(&.ref)).to eq ["0.0.1", "1.5.1", "1.6.0"]
+    end
+
+    it "doesn't return alpha and rc releases" do
+      expect(subject.check("composer/composer", true).map(&.ref)).to eq ["1.10.6", "1.10.7", "1.10.8"]
     end
   end
 
