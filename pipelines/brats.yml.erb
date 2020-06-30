@@ -13,9 +13,9 @@
 "staticfile" => %w(cflinuxfs3),
 } %>
 <% pas_versions = {
-  'latest' => '2_8',
-  'n-1' => '2_7',
-  'n-2' => '2_6',
+  'latest' => '2_9',
+  'n-1' => '2_8',
+  'n-2' => '2_7',
 } %>
 
 ---
@@ -28,7 +28,8 @@ resource_types:
     type: docker-image
     source:
       repository: cfbuildpacks/cf-space-resource
-  - name: pcf-pool
+
+  - name: cf-pool
     type: docker-image
     source:
       repository: cftoolsmiths/toolsmiths-envs-resource
@@ -46,21 +47,12 @@ resources:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
-  - name: edge-environments
-    type: pool
+  - name: feature-eng-ci
+    type: git
+    icon: github-circle
     source:
+      uri: https://github.com/cloudfoundry/buildpacks-feature-eng-ci
       branch: master
-      pool: edge-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-
-  - name: lts-environments
-    type: pool
-    source:
-      branch: master
-      pool: lts-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
 
   - name: env-repo
     type: git
@@ -70,12 +62,20 @@ resources:
       private_key: {{buildpacks-envs-private-key}}
 
   - name: smith-environments-<%= pas_versions['n-2'] %>
-    type: pcf-pool
+    type: cf-pool
     source:
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
       pool_name: us_<%= pas_versions['n-2'] %>
     tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+
+  - name: cf-toolsmiths-environment
+    type: cf-pool
+    source:
+      api_token: {{toolsmiths-api-token}}
+      hostname: environments.toolsmiths.cf-app.com
+      pool_name: cf-deployment
+      tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
 
 <% languages.each do |language| %>
   - name: buildpack-<%= language %>
@@ -88,15 +88,12 @@ resources:
 <% end %>
 
 jobs:
-<% languages.each do |language| %>
+  <% languages.each do |language| %>
   - name: brats-<%= language %>-lts
     serial: true
     public: true
     plan:
       - in_parallel:
-        - put: lts-environments
-          params:
-            acquire: true
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-<%= language %>
@@ -128,50 +125,46 @@ jobs:
               action: unclaim
               env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
             tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
-          - put: lts-environments
-            params:
-              release: lts-environments
   - name: brats-<%= language %>-edge
     serial: true
     public: true
     plan:
-      - in_parallel:
-        - put: edge-environments
+      - do:
+        - put: cf-toolsmiths-environment
+          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
           params:
-            acquire: true
-        - get: buildpacks-ci
-        - get: env-repo
-        - get: buildpack
-          resource: buildpack-<%= language %>
-        - get: nightly-trigger
-          trigger: true
-      - in_parallel:
+            action: claim
+        - in_parallel:
+          - get: buildpacks-ci
+          - get: env-repo
+          - get: feature-eng-ci
+          - get: buildpack
+            resource: buildpack-<%= language %>
+          - get: nightly-trigger
+            trigger: true
+        - in_parallel:
 <% stacks[language].each do |stack| %>
-        - do:
-          - task: create-cf-space
-            attempts: 3
-            file: buildpacks-ci/tasks/create-cf-space/task.yml
-            output_mapping: {cf-space: cf-space-<%= stack %>}
-            params:
-              ENV_POOL_RESOURCE: edge-environments
-              ENVS_DIR: env-repo
-              ORG: pivotal
-              SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
-              USERNAME: admin
-          - task: run-brats-<%= stack %>
-            file: buildpacks-ci/tasks/run-bp-brats/task.yml
-            input_mapping: {cf-space: cf-space-<%= stack %>}
-            params:
-              CF_STACK: <%= stack %>
-              GINKGO_ATTEMPTS: 4
-              GINKGO_NODES: 6
-            ensure:
-              task: delete-cf-space
-              file: buildpacks-ci/tasks/delete-cf-space/task.yml
-              input_mapping: {cf-space: cf-space-<%= stack %>}
+          - do:
+            - task: create-cf-space
+              file: feature-eng-ci/tasks/cf/create-space/task.yml
+              params:
+                DOMAIN: cf-app.com
+                ORG: pivotal
+              input_mapping:
+                ci: feature-eng-ci
+                lock: cf-toolsmiths-environment
+            - task: run-brats-<%= stack %>
+              file: buildpacks-ci/tasks/run-bp-brats/task.yml
+              input_mapping: {cf-space: space}
+              params:
+                CF_STACK: <%= stack %>
+                GINKGO_ATTEMPTS: 4
+                GINKGO_NODES: 6
 <% end %>
-    ensure:
-      put: edge-environments
-      params:
-        release: edge-environments
+        ensure:
+          put: cf-toolsmiths-environment
+          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+          params:
+            action: unclaim
+            env_file: cf-toolsmiths-environment/metadata
 <% end %>
