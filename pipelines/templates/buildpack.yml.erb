@@ -101,6 +101,11 @@ resource_types:
     type: docker-image
     source:
       repository: cftoolsmiths/toolsmiths-envs-resource
+  - name: pool
+    type: registry-image
+    source:
+      repository: concourse/pool-resource
+      tag: 1.1.3
 
 resources: ############################################################################################################
 ## Git ##
@@ -122,6 +127,16 @@ resources: #####################################################################
       ignore_paths:
         - VERSION
         - CHANGELOG
+
+  <% if buildpacks[language]['stacks'].include?('windows')%>
+  - name: windows-environments
+    type: pool
+    source:
+      branch: master
+      pool: edge-environments
+      private_key: {{public-buildpacks-ci-robots-private-key}}
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+  <% end %>
 
   - name: buildpack-develop-with-version-and-changelog
     type: git
@@ -219,7 +234,6 @@ resources: #####################################################################
       private_key: {{<%= language %>-offline-buildpack-bosh-release-private-key}}
       branch: master
 <% end %>
-
   - name: env-repo
     type: git
     source:
@@ -321,6 +335,7 @@ resources: #####################################################################
 
   ## Resource Pools ##
 
+  <% if not buildpacks[language]['stacks'].include?('windows')%>
   - name: cf-toolsmiths-environment
     type: cf-pool
     source:
@@ -328,6 +343,7 @@ resources: #####################################################################
       hostname: environments.toolsmiths.cf-app.com
       pool_name: cf-deployment
     tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+  <% end %>
 
 
 <% unless buildpacks[language]['non_lts'] %>
@@ -404,7 +420,6 @@ jobs: ##########################################################################
             params:
               DOCKER_START: true
 <% end %>
-
   - name: create-buildpack-release-story
     serial: true
     public: true
@@ -698,17 +713,24 @@ jobs: ##########################################################################
         s3_filepath_prefix: product-files/buildpacks
         metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
-
 <% if buildpacks[language]['v3'] %>
   - name: specs-edge-integration-v3
     serial: true
     public: true
     plan:
     - in_parallel:
-      - put: cf-toolsmiths-environment
+  <% if buildpacks[language]['stacks'].include?('windows')%>
+      - put: environment
+        resource: windows-environments
+        params:
+          acquire: true
+  <% else %>
+      - put: environment
+        resource: cf-toolsmiths-environment
         tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
         params:
           action: claim
+  <% end %>
       - get: feature-eng-ci
       - get: buildpacks-ci
       - get: ci-image
@@ -725,13 +747,26 @@ jobs: ##########################################################################
     %>
       - do:
         - task: create-cf-space
+          <% if (stack.include? 'windows') %>
+          attempts: 3
+          file: buildpacks-ci/tasks/create-cf-space/task.yml
+          output_mapping: {cf-space: space}
+          input_mapping: {edge-environments: environment}
+          params:
+            ENV_POOL_RESOURCE: edge-environments
+            ENVS_DIR: env-repo
+            ORG: pivotal
+            SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+            USERNAME: admin
+          <% else %>
           file: feature-eng-ci/tasks/cf/create-space/task.yml
           input_mapping:
             ci: feature-eng-ci
-            lock: cf-toolsmiths-environment
+            lock: environment
           params:
-            DOMAIN: cf-app.com
+            DOMAIN: 'cf-app.com'
             ORG: pivotal
+        <% end %>
         - task: ginkgo-<%= stack %>
           image: ci-image
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
@@ -739,7 +774,7 @@ jobs: ##########################################################################
           params:
             CF_STACK: <%= stack %>
             GINKGO_ATTEMPTS: 4
-            GINKGO_NODES: 6
+            GINKGO_NODES: 3
             <% if language == 'php' %>
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             <% end %>
@@ -748,6 +783,12 @@ jobs: ##########################################################################
           <% else %>
           privileged: true
         <% end %>
+<% if (stack.include? 'windows') %>
+      ensure:
+        task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: space}
+<% end %>
           <% end %>
     on_failure:
       put: failure-alert
@@ -758,11 +799,19 @@ jobs: ##########################################################################
         icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
     ensure:
       in_parallel:
-      - put: cf-toolsmiths-environment
+  <% if buildpacks[language]['stacks'].include?('windows')%>
+      - put: environment
+        resource: windows-environments
+        params:
+          release: environment
+  <% else %>
+      - put: environment
+        resource: cf-toolsmiths-environment
         tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
         params:
           action: unclaim
-          env_file: cf-toolsmiths-environment/metadata
+          env_file: environment/metadata
+  <% end %>
 <% end %>
 
   - name: specs-edge-integration-develop
@@ -770,10 +819,18 @@ jobs: ##########################################################################
     public: true
     plan:
       - in_parallel:
-        - put: cf-toolsmiths-environment
+  <% if buildpacks[language]['stacks'].include?('windows')%>
+        - put: environment
+          resource: windows-environments
+          params:
+            acquire: true
+  <% else %>
+        - put: environment
+          resource: cf-toolsmiths-environment
           params:
             action: claim
           tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+  <% end %>
         - get: buildpacks-ci
         - get: feature-eng-ci
         - get: ci-image
@@ -789,14 +846,28 @@ jobs: ##########################################################################
 <% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2']%>
 <% relevant_stacks.each do |stack| %>
         - do:
+<% if (stack.include? 'windows') %>
+          - task: create-cf-space
+            attempts: 3
+            file: buildpacks-ci/tasks/create-cf-space/task.yml
+            output_mapping: {cf-space: space}
+            input_mapping: {edge-environments: environment}
+            params:
+              ENV_POOL_RESOURCE: edge-environments
+              ENVS_DIR: env-repo
+              ORG: pivotal
+              SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+              USERNAME: admin
+<% else %>
           - task: create-cf-space
             file: feature-eng-ci/tasks/cf/create-space/task.yml
             input_mapping:
               ci: feature-eng-ci
-              lock: cf-toolsmiths-environment
+              lock: environment
             params:
-              DOMAIN: cf-app.com
+              DOMAIN: 'cf-app.com'
               ORG: pivotal
+            <% end %>
           - task: ginkgo-<%= stack %>
             image: ci-image
             file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
@@ -804,7 +875,7 @@ jobs: ##########################################################################
             params:
               CF_STACK: <%= stack %>
               GINKGO_ATTEMPTS: 4
-              GINKGO_NODES: 6
+              GINKGO_NODES: 3
               <% if language == 'php' %>
               COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
               <% end %>
@@ -812,6 +883,12 @@ jobs: ##########################################################################
               SKIP_DOCKER_START: true
 <% else %>
             privileged: true
+<% end %>
+<% if (stack.include? 'windows') %>
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task.yml
+            input_mapping: {cf-space: space}
 <% end %>
 <% end %>
     on_failure:
@@ -823,11 +900,19 @@ jobs: ##########################################################################
         icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
     ensure:
       in_parallel:
-      - put: cf-toolsmiths-environment
+<% if buildpacks[language]['stacks'].include?('windows')%>
+      - put: environment
+        resource: windows-environments
+        params:
+          release: environment
+<% else %>
+      - put: environment
+        resource: cf-toolsmiths-environment
         tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
         params:
           action: unclaim
-          env_file: cf-toolsmiths-environment/metadata
+          env_file: environment/metadata
+<% end %>
 
 <% unless buildpacks[language]['skip_brats'] %>
   - name: specs-edge-brats-develop
@@ -835,10 +920,18 @@ jobs: ##########################################################################
     public: true
     plan:
       - in_parallel:
-        - put: cf-toolsmiths-environment
+<% if buildpacks[language]['stacks'].include?('windows')%>
+        - put: environment
+          resource: windows-environments
+          params:
+            acquire: true
+<% else %>
+        - put: environment
+          resource: cf-toolsmiths-environment
           tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
           params:
             action: claim
+<% end %>
         - get: buildpacks-ci
         - get: feature-eng-ci
         - get: ci-image
@@ -853,13 +946,26 @@ jobs: ##########################################################################
 <% relevant_stacks.each do |stack| %>
         - do:
           - task: create-cf-space
+            <% if (stack.include? 'windows') %>
+            attempts: 3
+            file: buildpacks-ci/tasks/create-cf-space/task.yml
+            output_mapping: {cf-space: space}
+            input_mapping: {edge-environments: environment}
+            params:
+              ENV_POOL_RESOURCE: edge-environments
+              ENVS_DIR: env-repo
+              ORG: pivotal
+              SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
+              USERNAME: admin
+            <% else %>
             file: feature-eng-ci/tasks/cf/create-space/task.yml
             params:
-              DOMAIN: cf-app.com
+              DOMAIN: 'cf-app.com'
               ORG: pivotal
             input_mapping:
               ci: feature-eng-ci
-              lock: cf-toolsmiths-environment
+              lock: environment
+            <% end %>
           - task: brats-<%= stack %>
             image: ci-image
             file: buildpacks-ci/tasks/run-bp-brats/task.yml
@@ -867,7 +973,14 @@ jobs: ##########################################################################
             params:
               CF_STACK: <%= stack %>
               GINKGO_ATTEMPTS: 4
-              GINKGO_NODES: 6
+              GINKGO_NODES: 3
+
+<% if (stack.include? 'windows') %>
+          ensure:
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task.yml
+            input_mapping: {cf-space: space}
+<% end %>
 <% end %>
     on_failure:
       put: failure-alert
@@ -877,11 +990,20 @@ jobs: ##########################################################################
         username: concourse
         icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
     ensure:
-      put: cf-toolsmiths-environment
+<% if buildpacks[language]['stacks'].include?('windows')%>
+      put: environment
+      resource: windows-environments
+      params:
+        release: windows-environments
+<% else %>
+      put: environment
+      resource: cf-toolsmiths-environment
       tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
       params:
         action: unclaim
-        env_file: cf-toolsmiths-environment/metadata
+        env_file: environment/metadata
+
+<% end %>
 <% end %>
 
   - name: specs-edge-shared-develop
@@ -949,7 +1071,7 @@ jobs: ##########################################################################
           params:
             CF_STACK: cflinuxfs3
             GINKGO_ATTEMPTS: <%= language.to_s == 'php' ? 10 : 4 %>
-            GINKGO_NODES: <%= low_nodes_lts.include?(language.to_s) ? 2 : 6 %>
+            GINKGO_NODES: <%= low_nodes_lts.include?(language.to_s) ? 2 : 3 %>
             SKIP_WINDOWS_TESTS: true
             <% if language == 'php' %>
             COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
@@ -1014,7 +1136,7 @@ jobs: ##########################################################################
           params:
             CF_STACK: cflinuxfs3
             GINKGO_ATTEMPTS: <%= language.to_s == 'php' ? 10 : 4 %>
-            GINKGO_NODES: 6
+            GINKGO_NODES: 3
         ensure:
           task: delete-cf-space-cflinuxfs3
           file: buildpacks-ci/tasks/delete-cf-space/task.yml

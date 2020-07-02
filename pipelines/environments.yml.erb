@@ -30,6 +30,10 @@ resource_types: ################################################################
     source:
       repository: cloudfoundry/bosh-deployment-resource
 
+  - name: pool
+    type: registry-image
+    source: {repository: concourse/pool-resource, tag: 1.1.3}
+
 resources: #############################################################################################################
 
   ## Git Repos ##
