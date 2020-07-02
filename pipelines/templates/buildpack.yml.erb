@@ -342,7 +342,7 @@ resources: #####################################################################
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
       pool_name: cf-deployment
-    tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+    tags: [buildpacks-eng-vsphere]
   <% end %>
 
 
@@ -353,7 +353,7 @@ resources: #####################################################################
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
       pool_name: us_<%= pas_versions['n-2'] %>
-    tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+    tags: [buildpacks-eng-vsphere]
 <% end %>
 
   ## Alerts ##
@@ -374,13 +374,6 @@ resources: #####################################################################
     source:
       expression: 0 0 * * *
       location: {{current-timezone}}
-
-  - name: ci-image
-    type: registry-image
-    source:
-      repository: cfbuildpacks/ci
-      username: {{buildpacks-docker-username}}
-      password: {{buildpacks-docker-password}}
 
 jobs: ################################################################################################################
 <% if language == "php" %>
@@ -404,7 +397,6 @@ jobs: ##########################################################################
       - do:
         - in_parallel:
           - get: buildpacks-ci
-          - get: ci-image
           - get: buildpack
             resource: buildpack-develop
 <% if language == "php" %>
@@ -413,7 +405,6 @@ jobs: ##########################################################################
             trigger: true
         - do:
           - task: ginkgo
-            image: ci-image
             file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
 <% if language == "php" %>
             privileged: true
@@ -727,13 +718,12 @@ jobs: ##########################################################################
   <% else %>
       - put: environment
         resource: cf-toolsmiths-environment
-        tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+        tags: [buildpacks-eng-vsphere]
         params:
           action: claim
   <% end %>
       - get: feature-eng-ci
       - get: buildpacks-ci
-      - get: ci-image
       - get: env-repo
       - get: buildpack
         resource: buildpack-v3
@@ -768,7 +758,6 @@ jobs: ##########################################################################
             ORG: pivotal
         <% end %>
         - task: ginkgo-<%= stack %>
-          image: ci-image
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           input_mapping: {cf-space: space}
           params:
@@ -807,7 +796,7 @@ jobs: ##########################################################################
   <% else %>
       - put: environment
         resource: cf-toolsmiths-environment
-        tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+        tags: [buildpacks-eng-vsphere]
         params:
           action: unclaim
           env_file: environment/metadata
@@ -829,11 +818,10 @@ jobs: ##########################################################################
           resource: cf-toolsmiths-environment
           params:
             action: claim
-          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+          tags: [buildpacks-eng-vsphere]
   <% end %>
         - get: buildpacks-ci
         - get: feature-eng-ci
-        - get: ci-image
         - get: env-repo
         - get: buildpack
           resource: buildpack-develop
@@ -869,7 +857,6 @@ jobs: ##########################################################################
               ORG: pivotal
             <% end %>
           - task: ginkgo-<%= stack %>
-            image: ci-image
             file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
             input_mapping: {cf-space: space}
             params:
@@ -908,7 +895,7 @@ jobs: ##########################################################################
 <% else %>
       - put: environment
         resource: cf-toolsmiths-environment
-        tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+        tags: [buildpacks-eng-vsphere]
         params:
           action: unclaim
           env_file: environment/metadata
@@ -928,13 +915,12 @@ jobs: ##########################################################################
 <% else %>
         - put: environment
           resource: cf-toolsmiths-environment
-          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+          tags: [buildpacks-eng-vsphere]
           params:
             action: claim
 <% end %>
         - get: buildpacks-ci
         - get: feature-eng-ci
-        - get: ci-image
         - get: env-repo
         - get: buildpack
           resource: buildpack-develop
@@ -967,7 +953,6 @@ jobs: ##########################################################################
               lock: environment
             <% end %>
           - task: brats-<%= stack %>
-            image: ci-image
             file: buildpacks-ci/tasks/run-bp-brats/task.yml
             input_mapping: {cf-space: space}
             params:
@@ -998,7 +983,7 @@ jobs: ##########################################################################
 <% else %>
       put: environment
       resource: cf-toolsmiths-environment
-      tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+      tags: [buildpacks-eng-vsphere]
       params:
         action: unclaim
         env_file: environment/metadata
@@ -1039,9 +1024,8 @@ jobs: ##########################################################################
         - put: smith-environments-<%= pas_versions['n-2'] %>
           params:
             action: claim
-          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+          tags: [buildpacks-eng-vsphere]
         - get: buildpacks-ci
-        - get: ci-image
         - get: buildpack
           resource: buildpack-develop
           trigger: true
@@ -1059,14 +1043,12 @@ jobs: ##########################################################################
       <% end %>
       - do:
         - task: create-cf-space
-          image: ci-image
           file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
           input_mapping:
             environment: smith-environments-<%= pas_versions['n-2'] %>
           params:
             ORG: pivotal
         - task: ginkgo-cflinuxfs3
-          image: ci-image
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           params:
             CF_STACK: cflinuxfs3
@@ -1096,7 +1078,7 @@ jobs: ##########################################################################
       params:
         action: unclaim
         env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
-      tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+      tags: [buildpacks-eng-vsphere]
 <% unless buildpacks[language]['skip_brats'] %>
   - name: specs-lts-brats-develop
     serial: true
@@ -1106,9 +1088,8 @@ jobs: ##########################################################################
         - put: smith-environments-<%= pas_versions['n-2'] %>
           params:
             action: claim
-          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+          tags: [buildpacks-eng-vsphere]
         - get: buildpacks-ci
-        - get: ci-image
         - get: buildpack
           resource: buildpack-develop
           trigger: true
@@ -1124,14 +1105,12 @@ jobs: ##########################################################################
       <% end %>
       - do:
         - task: create-cf-space
-          image: ci-image
           file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
           input_mapping:
             environment: smith-environments-<%= pas_versions['n-2'] %>
           params:
             ORG: pivotal
         - task: brats-cflinuxfs3
-          image: ci-image
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
           params:
             CF_STACK: cflinuxfs3
@@ -1145,7 +1124,7 @@ jobs: ##########################################################################
       params:
         action: unclaim
         env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
-      tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+      tags: [buildpacks-eng-vsphere]
     on_failure:
       put: failure-alert
       params:
