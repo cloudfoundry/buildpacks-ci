@@ -754,8 +754,8 @@ jobs: ##########################################################################
             SKIP_DOCKER_START: true
           <% else %>
           privileged: true
-        <% end %>
           <% end %>
+        <% end %>
     on_failure:
       put: failure-alert
       params:
@@ -822,12 +822,12 @@ jobs: ##########################################################################
               <% if language == 'php' %>
               COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
               <% end %>
-            <% end %>
-<% if buildpacks[language]['skip_docker_start'] %>
+              <% if buildpacks[language]['skip_docker_start'] %>
               SKIP_DOCKER_START: true
-<% else %>
+              <% else %>
             privileged: true
-<% end %>
+              <% end %>
+            <% end %>
     on_failure:
       put: failure-alert
       params:
