@@ -129,13 +129,10 @@ resources: #####################################################################
         - CHANGELOG
 
   <% if buildpacks[language]['stacks'].include?('windows')%>
-  - name: windows-environments
-    type: pool
+  - name: cf-deployment
+    type: git
     source:
-      branch: master
-      pool: edge-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      uri: https://github.com/cloudfoundry/cf-deployment
   <% end %>
 
   - name: buildpack-develop-with-version-and-changelog
@@ -335,7 +332,6 @@ resources: #####################################################################
 
   ## Resource Pools ##
 
-  <% if not buildpacks[language]['stacks'].include?('windows')%>
   - name: cf-toolsmiths-environment
     type: cf-pool
     source:
@@ -343,7 +339,6 @@ resources: #####################################################################
       hostname: environments.toolsmiths.cf-app.com
       pool_name: cf-deployment
     tags: [buildpacks-eng-vsphere]
-  <% end %>
 
 
 <% unless buildpacks[language]['non_lts'] %>
@@ -808,18 +803,11 @@ jobs: ##########################################################################
     public: true
     plan:
       - in_parallel:
-  <% if buildpacks[language]['stacks'].include?('windows')%>
-        - put: environment
-          resource: windows-environments
-          params:
-            acquire: true
-  <% else %>
         - put: environment
           resource: cf-toolsmiths-environment
           params:
             action: claim
           tags: [buildpacks-eng-vsphere]
-  <% end %>
         - get: buildpacks-ci
         - get: feature-eng-ci
         - get: env-repo
@@ -830,23 +818,18 @@ jobs: ##########################################################################
           - specs-unit-develop
         - get: repo
           resource: buildpack-develop
+<% if buildpacks[language]['stacks'].include?('windows')%>
+        - get: cf-deployment
+      - task: deploy-windows-cell
+        file: feature-eng-ci/tasks/cf/deploy-windows-cell/task.yml
+        input_mapping:
+          ci: feature-eng-ci
+          lock: environment
+<% end %>
       - in_parallel:
 <% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2']%>
 <% relevant_stacks.each do |stack| %>
         - do:
-<% if (stack.include? 'windows') %>
-          - task: create-cf-space
-            attempts: 3
-            file: buildpacks-ci/tasks/create-cf-space/task.yml
-            output_mapping: {cf-space: space}
-            input_mapping: {edge-environments: environment}
-            params:
-              ENV_POOL_RESOURCE: edge-environments
-              ENVS_DIR: env-repo
-              ORG: pivotal
-              SYSTEM_DOMAIN: buildpacks-gcp.ci.cf-app.com
-              USERNAME: admin
-<% else %>
           - task: create-cf-space
             file: feature-eng-ci/tasks/cf/create-space/task.yml
             input_mapping:
@@ -855,7 +838,6 @@ jobs: ##########################################################################
             params:
               DOMAIN: 'cf-app.com'
               ORG: pivotal
-            <% end %>
           - task: ginkgo-<%= stack %>
             file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
             input_mapping: {cf-space: space}
@@ -866,17 +848,11 @@ jobs: ##########################################################################
               <% if language == 'php' %>
               COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
               <% end %>
+            <% end %>
 <% if buildpacks[language]['skip_docker_start'] %>
               SKIP_DOCKER_START: true
 <% else %>
             privileged: true
-<% end %>
-<% if (stack.include? 'windows') %>
-          ensure:
-            task: delete-cf-space
-            file: buildpacks-ci/tasks/delete-cf-space/task.yml
-            input_mapping: {cf-space: space}
-<% end %>
 <% end %>
     on_failure:
       put: failure-alert
@@ -887,19 +863,12 @@ jobs: ##########################################################################
         icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
     ensure:
       in_parallel:
-<% if buildpacks[language]['stacks'].include?('windows')%>
-      - put: environment
-        resource: windows-environments
-        params:
-          release: environment
-<% else %>
       - put: environment
         resource: cf-toolsmiths-environment
         tags: [buildpacks-eng-vsphere]
         params:
           action: unclaim
           env_file: environment/metadata
-<% end %>
 
 <% unless buildpacks[language]['skip_brats'] %>
   - name: specs-edge-brats-develop
