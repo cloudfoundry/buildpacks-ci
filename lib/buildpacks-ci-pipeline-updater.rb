@@ -48,44 +48,6 @@ class BuildpacksCIPipelineUpdater
     end
   end
 
-  def update_cnb_buildpack_pipelines(options)
-    header('For CNB buildpack pipelines')
-
-    buildpacks_configuration = BuildpacksCIConfiguration.new
-    concourse_target_name = buildpacks_configuration.concourse_target_name
-    organization = buildpacks_configuration.organization
-
-
-    Dir['config/buildpack/v3/*.yml'].each do |pipeline_variables_filename|
-      next if options.has_key?(:template) && !pipeline_variables_filename.include?(options[:template])
-
-      language = File.basename(pipeline_variables_filename, '.yml')
-
-      BuildpacksCIPipelineUpdateCommand.new.run!(
-        concourse_target_name: concourse_target_name,
-        pipeline_name: "#{language}-cnb",
-        config_generation_command: "erb language=#{language} organization=#{organization} pipelines/templates/cnb.yml.erb",
-        pipeline_variable_filename: pipeline_variables_filename,
-        options: options
-      )
-    end
-
-    Dir['config/buildpack/v3metabuildpack/*.yml'].each do |pipeline_variables_filename|
-      next if options.has_key?(:template) && !pipeline_variables_filename.include?(options[:template])
-
-      language = File.basename(pipeline_variables_filename, '.yml')
-
-      BuildpacksCIPipelineUpdateCommand.new.run!(
-        concourse_target_name: concourse_target_name,
-        pipeline_name: "#{language}-cnb",
-        config_generation_command: "erb language=#{language} organization=#{organization} pipelines/templates/metabuildpack-cnb.yml.erb",
-        pipeline_variable_filename: pipeline_variables_filename,
-        options: options
-      )
-    end
-
-  end
-
   def update_rootfs_pipelines(options)
     header('For rootfs pipelines')
 
@@ -114,9 +76,8 @@ class BuildpacksCIPipelineUpdater
 
     update_standard_pipelines(options) unless options.has_key?(:template)
     update_buildpack_pipelines(options)
-    update_cnb_buildpack_pipelines(options)
     update_rootfs_pipelines(options)
-    
+
     puts 'Thanks, The Buildpacks Team'
   end
 
