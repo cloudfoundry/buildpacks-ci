@@ -1,60 +1,100 @@
-#!/usr/bin/env ruby
-require 'yaml'
-require 'open3'
+#!/usr/bin/env bash
 
-name = `hostname`.chomp
-credhub_envs = ['verge', 'frontier', 'limit', 'bal', 'cf-release', 'cflinuxfs2', 'cflinuxfs3']
+set -euo pipefail
+env_name=
+gcp=
 
-def env_login(env)
-  system('cf', 'api', "api.#{env}.buildpacks-gcp.ci.cf-app.com", '--skip-ssl-validation') or raise 'Could not connect'
-  system('cf', 'auth', 'admin', admin_password(env)) or raise 'Could not auth'
-end
+readonly PROGDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-def err_handle(err)
-    if !err.empty?
-      STDERR.puts "ERROR: #{err}"
-      exit(false)
-    end
-end
+function main() {
+  local token
+  parse_arguments "$@"
 
-def admin_password(env_name)
-  env_home = "#{ENV['HOME']}/workspace/buildpacks-envs/#{env_name}"
-  vars_store = "#{env_home}/vars-store.yml"
+  source ~/workspace/bp-envs/scripts/login_credhub_public
 
-  if File.file?(vars_store)
-    puts "Using vars-store for: #{env_name}"
-    cfg = YAML.load_file(vars_store)
-    return cfg['cf_admin_password']
-  else
-    puts "Logging into credhub for: #{env_name}"
-    bbl_env, err = Open3.capture3("bbl --state-dir #{env_home} print-env")
-    err_handle(err)
-    cf_pass, err, status = Open3.capture3("eval \"#{bbl_env}\" && credhub get -n /bosh-#{env_name}/cf/cf_admin_password -j | jq -r .value")
-    err_handle(err)
+  local token
+  token="$(credhub get -n /concourse/main/toolsmiths-api-token -q)"
 
-    return cf_pass.strip
-  end
-end
+  if [[ -z "${env_name}" && -z "${gcp}" ]]; then
+    env_name=$(curl -s -XPOST "https://environments.toolsmiths.cf-app.com/pooled_gcp_engineering_environments/claim?api_token=$token&pool_name=cf-deployment" | jq -r .name)
+    get_metada_file "${token}" "${env_name}"
+    echo "claimed: ${env_name}"
 
-system('cf', 'logout') or raise 'Could not logout'
+  elif [[ -n "${env_name}" && -z "${gcp}" ]]; then
+    echo "using: ${env_name}"
 
-case ARGV[0]
-  when *credhub_envs
-    env_login(ARGV[0])
-  when 'lts'
-    raise 'We no longer maintain LTS environments, use `smith claim` and `smith cf-login` instead'
-  when 'pws'
-    cfg = YAML.load(`lpass show --notes "Shared-CF Buildpacks/concourse-private.yml"`)
-    system('cf', 'api', 'api.run.pivotal.io') or raise 'Could not connect'
-    system('cf', 'auth', cfg['pws_buildpacks_cf_client'], cfg['pws_buildpacks_cf_secret'], '--client-credentials') or raise 'Could not connect'
-    system('cf', 'target', '-o', 'cf-buildpacks', '-s', 'development') or raise 'Could not connect'
-  else
-    puts "Usage: #{$0} <#{credhub_envs.join('|')}|pws>"
-    exit 1
-end
+  elif [[ "${gcp}" -eq 1 ]]; then
+    get_metadata_file_gcp "${token}" "${env_name}"
+    env_name=$(cat /tmp/output/name)
+    rm -rf /tmp/output
+    echo "claimed: ${env_name}"
+  fi
 
-if ARGV[0] != 'pws'
-  system('cf', 'create-org', name)
-  system('cf', 'create-space', name, '-o', name)
-  system('cf', 'target', '-o', name, '-s', name) or raise "Could not target #{name}"
-end
+  login_to_existing_env "${env_name}"
+}
+
+parse_arguments() {
+  local OPTIND
+  while getopts "e:g" opt; do
+    case "${opt}" in
+      e)
+        env_name="${OPTARG}"
+        ;;
+      g)
+        gcp=1
+        ;;
+      *)
+        echo "Usage: $0 [-e <name of environment to log into> || -g <use if running off of the vpn>]"
+        exit 1
+        ;;
+    esac
+  done
+}
+
+function get_metadata_file() {
+  token=$1
+  env_name=$2
+
+  echo "getting metadata file for ${env_name}...."
+  curl -s -XGET \
+    "https://environments.toolsmiths.cf-app.com/pooled_gcp_engineering_environments/claim?api_token=$token&environment_name=$env_name" \
+    > "/tmp/$env_name.json"
+}
+
+function login_to_existing_env(){
+  env_name=$1
+  echo "loggining into ${env_name}...."
+
+  eval "$(bbl print-env --metadata-file "/tmp/$env_name.json")"
+
+  export CF_USERNAME=admin
+  export CF_PASSWORD=$(credhub get -n "/bosh-${env_name}/cf/cf_admin_password" -q)
+
+  cf api "api.${env_name}.cf-app.com" --skip-ssl-validation
+  cf auth
+  cf target -o system
+  cf create-space my-space
+  cf target -s my-space
+
+  echo "logged into ${env_name}"
+}
+
+function get_metadata_file_gcp(){
+  local token name
+  token=$1
+  name=$2
+
+  fly -t buildpacks status || fly -t buildpacks login
+
+  mkdir -p /tmp/output
+
+  TOOLSMITHS_API_TOKEN="${token}" ENV_NAME="${name}" \
+      fly -t buildpacks execute -c "${PROGDIR}/get-env-gcp/task.yml" \
+          --tag=buildpacks-eng-vsphere \
+          -i script="${PROGDIR}/get-env-gcp" \
+          -o metadata=/tmp/output
+
+  mv /tmp/output/*.json /tmp/
+}
+
+main "$@"
