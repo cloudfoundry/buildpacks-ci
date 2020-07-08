@@ -48,14 +48,6 @@ resources: #####################################################################
       branch: master
       private_key: {{buildpacks-envs-private-key}}
 
-  - name: plugin-environments
-    type: pool
-    source:
-      branch: master
-      pool: plugin-environments
-      private_key: {{public-buildpacks-ci-robots-private-key}}
-      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-
   - name: version
     type: semver
     source:
@@ -94,9 +86,6 @@ jobs: ##########################################################################
       - in_parallel:
         - get: buildpacks-ci
         - get: env-repo
-        - put: plugin-environments
-          params:
-            acquire: true
         - get: stack-auditor
           trigger: true
         - put: pcf-lts-gcp-env
@@ -121,10 +110,6 @@ jobs: ##########################################################################
           action: unclaim
           env_file: pcf-lts-gcp-env/metadata
         tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
-    ensure:
-      put: plugin-environments
-      params:
-        release: plugin-environments
 
   - name: ship-it
     serial: true
