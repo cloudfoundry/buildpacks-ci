@@ -77,6 +77,11 @@ resources:
       pool_name: cf-deployment
       tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
 
+  - name: cf-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-deployment
+
 <% languages.each do |language| %>
   - name: buildpack-<%= language %>
     type: git
@@ -142,6 +147,14 @@ jobs:
             resource: buildpack-<%= language %>
           - get: nightly-trigger
             trigger: true
+<% if stacks[language].include?('windows')%>
+          - get: cf-deployment
+        - task: deploy-windows-cell
+          file: feature-eng-ci/tasks/cf/deploy-windows-cell/task.yml
+          input_mapping:
+            ci: feature-eng-ci
+            lock: cf-toolsmiths-environment
+<% end %>
         - in_parallel:
 <% stacks[language].each do |stack| %>
           - do:
