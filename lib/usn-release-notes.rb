@@ -23,7 +23,7 @@ class UsnReleaseNotes
     if @usn_id.match(/^LSN-/)
       "https://usn.ubuntu.com/lsn/#{@usn_id.gsub(/^LSN-/, '')}/"
     else
-      "https://usn.ubuntu.com/#{@usn_id.gsub(/^USN-/, '')}/"
+      "https://ubuntu.com/security/notices/#{@usn_id}/"
     end
   end
 
