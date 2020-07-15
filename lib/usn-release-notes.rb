@@ -28,16 +28,23 @@ class UsnReleaseNotes
   end
 
   def release_note_text
-    cves = @doc.css('#references + ul > li > a[href*="cve/CVE"]')
-    lps  = @doc.css('#references + ul > li > a[href*="launchpad"]')
+    cves = []
+    lps = []
+    open(usn_url).each_line do |line|
+      if cve = line.match(/.*href="(?<uri>.*cve\/CVE.*)">(?<text>.*)<\/a.*/)
+        cves << cve
+      elsif lp = line.match(/.*href="(?<uri>.*launchpad\.net\/bugs.*)">(?<text>.*)<\/li/)
+        lps << lp
+      end
+    end
 
     raise 'Could not find CVE or LP references for release notes' if (cves.empty? && lps.empty?)
 
     notes = "[#{usn_id}](#{usn_url}) #{usn_title}:\n"
 
     cves.each do |cve|
-      cve_id          = cve.text
-      cve_uri         = cve['href']
+      cve_id          = cve['text']
+      cve_uri         = cve['uri']
       cve_description = ''
       begin
         cve_description_element = Nokogiri::HTML(open(cve_uri, :allow_redirections => :safe).read).css('#container div.item > div:contains("Description")').first.next_element
@@ -52,8 +59,8 @@ class UsnReleaseNotes
     end
 
     lps.each do |lp|
-      lp_id          = lp.text
-      lp_uri         = lp['href']
+      lp_id          = lp['text']
+      lp_uri         = lp['uri']
       lp_description = ''
 
       begin
