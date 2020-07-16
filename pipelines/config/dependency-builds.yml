@@ -325,6 +325,7 @@ dependencies:
         lines:
           - line: 1.13.X
           - line: 1.15.X
+          - line: 1.17.X
     versions_to_keep: 2
   nginx-static:
     buildpacks:
