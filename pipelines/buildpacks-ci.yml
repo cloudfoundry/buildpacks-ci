@@ -24,7 +24,6 @@ resources:
     type: git
     source:
       uri: git@github.com:pivotal/bp-envs.git
-      branch: master
       private_key: ((bp-envs-deploy-key.private_key))
 
   - name: buildpacks-ci-image
