@@ -53,7 +53,7 @@ module Depwatcher
 
         a = tr.xpath(".//a")
         raise "Could not parse golang release (a) website" unless a.is_a?(XML::NodeSet)
-        url = a.first["href"].to_s
+        url = "https://dl.google.com/go/" + a.first.text
 
         # Extract versions from Stable and Archived versions; ignore Unstable
         if h3.text().starts_with?("Stable versions")
