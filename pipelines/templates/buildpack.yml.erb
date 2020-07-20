@@ -128,7 +128,7 @@ resources: #####################################################################
         - VERSION
         - CHANGELOG
 
-  <% if buildpacks[language]['stacks'].include?('windows')%>
+  <% if buildpacks[language]['stacks'].include?('windows') or language == "python" %>
   - name: cf-deployment
     type: git
     source:
@@ -791,6 +791,14 @@ jobs: ##########################################################################
           - specs-unit-develop
         - get: repo
           resource: buildpack-develop
+<% if language == "python" %>
+        - get: cf-deployment
+      - task: scale-up-api-and-diego-cell
+        file: feature-eng-ci/tasks/cf/scale-up-api-and-diego-cell/task.yml
+        input_mapping:
+          ci: feature-eng-ci
+          lock: environment
+<% end %>
 <% if buildpacks[language]['stacks'].include?('windows')%>
         - get: cf-deployment
       - task: deploy-windows-cell
