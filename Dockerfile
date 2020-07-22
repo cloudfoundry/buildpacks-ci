@@ -33,7 +33,7 @@ RUN apt-get -qqy update \
   && apt-get -qqy install \
     aufs-tools \
     btrfs-progs \
-    cf-cli \
+    cf7-cli \
     crystal \
     default-libmysqlclient-dev \
     expect \
