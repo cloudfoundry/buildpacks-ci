@@ -1,0 +1,24 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: new-cves
+  - name: buildpacks-ci
+  - name: stack-receipt
+outputs:
+  - name: new-cves
+run:
+  path: bash
+  args:
+    - -c
+    - |
+      set -e
+
+      cd buildpacks-ci && bundle exec ./tasks/check-for-new-paketo-stack-cves/run.rb
+
+params:
+  STACK:
+  IMAGE:
