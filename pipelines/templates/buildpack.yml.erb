@@ -337,7 +337,7 @@ resources: #####################################################################
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
       pool_name: cf-deployment
-    tags: [buildpacks-eng-vsphere]
+    tags: [buildpacks-eng-shared-vsphere]
 
 
 <% unless buildpacks[language]['non_lts'] %>
@@ -347,7 +347,7 @@ resources: #####################################################################
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
       pool_name: us_<%= pas_versions['n-2'] %>
-    tags: [buildpacks-eng-vsphere]
+    tags: [buildpacks-eng-shared-vsphere]
 <% end %>
 
   ## Alerts ##
@@ -706,7 +706,7 @@ jobs: ##########################################################################
     - in_parallel:
       - put: environment
         resource: cf-toolsmiths-environment
-        tags: [buildpacks-eng-vsphere]
+        tags: [buildpacks-eng-shared-vsphere]
         params:
           action: claim
       - get: feature-eng-ci
@@ -765,7 +765,7 @@ jobs: ##########################################################################
     on_success:
       put: environment
       resource: cf-toolsmiths-environment
-      tags: [buildpacks-eng-vsphere]
+      tags: [buildpacks-eng-shared-vsphere]
       params:
         action: unclaim
         env_file: environment/metadata
@@ -780,7 +780,7 @@ jobs: ##########################################################################
           resource: cf-toolsmiths-environment
           params:
             action: claim
-          tags: [buildpacks-eng-vsphere]
+          tags: [buildpacks-eng-shared-vsphere]
         - get: buildpacks-ci
         - get: feature-eng-ci
         - get: env-repo
@@ -845,7 +845,7 @@ jobs: ##########################################################################
     on_success:
       put: environment
       resource: cf-toolsmiths-environment
-      tags: [buildpacks-eng-vsphere]
+      tags: [buildpacks-eng-shared-vsphere]
       params:
         action: unclaim
         env_file: environment/metadata
@@ -858,7 +858,7 @@ jobs: ##########################################################################
       - in_parallel:
         - put: environment
           resource: cf-toolsmiths-environment
-          tags: [buildpacks-eng-vsphere]
+          tags: [buildpacks-eng-shared-vsphere]
           params:
             action: claim
         - get: buildpacks-ci
@@ -907,7 +907,7 @@ jobs: ##########################################################################
     on_success:
       put: environment
       resource: cf-toolsmiths-environment
-      tags: [buildpacks-eng-vsphere]
+      tags: [buildpacks-eng-shared-vsphere]
       params:
         action: unclaim
         env_file: environment/metadata
@@ -946,7 +946,7 @@ jobs: ##########################################################################
         - put: smith-environments-<%= pas_versions['n-2'] %>
           params:
             action: claim
-          tags: [buildpacks-eng-vsphere]
+          tags: [buildpacks-eng-shared-vsphere]
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-develop
@@ -1000,7 +1000,7 @@ jobs: ##########################################################################
       params:
         action: unclaim
         env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
-      tags: [buildpacks-eng-vsphere]
+      tags: [buildpacks-eng-shared-vsphere]
 <% unless buildpacks[language]['skip_brats'] %>
   - name: specs-lts-brats-develop
     serial: true
@@ -1010,7 +1010,7 @@ jobs: ##########################################################################
         - put: smith-environments-<%= pas_versions['n-2'] %>
           params:
             action: claim
-          tags: [buildpacks-eng-vsphere]
+          tags: [buildpacks-eng-shared-vsphere]
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-develop
@@ -1046,7 +1046,7 @@ jobs: ##########################################################################
       params:
         action: unclaim
         env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
-      tags: [buildpacks-eng-vsphere]
+      tags: [buildpacks-eng-shared-vsphere]
     on_failure:
       put: failure-alert
       params:
