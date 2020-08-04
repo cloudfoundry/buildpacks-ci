@@ -5,11 +5,11 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
 inputs:
-  - name: new-cves
+  - name: new-usns
   - name: buildpacks-ci
   - name: stack-image-receipt
 outputs:
-  - name: new-cves
+  - name: new-usns
 run:
   path: bash
   args:
@@ -17,7 +17,7 @@ run:
     - |
       set -e
 
-      cd buildpacks-ci && bundle exec ./tasks/check-for-new-paketo-stack-cves/run.rb
+      cd buildpacks-ci && bundle exec ./tasks/check-for-new-paketo-stack-usns/run.rb
 
 params:
   STACK:

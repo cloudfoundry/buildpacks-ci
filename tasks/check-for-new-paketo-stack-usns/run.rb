@@ -6,8 +6,8 @@ image = ENV['IMAGE']
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 stacks_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'stack-image-receipt'))
-cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'new-cves', 'new-paketo-stack-cve-notifications', stack, image))
+usns_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'new-usns', 'new-paketo-stack-usns', stack, image))
 
 require "#{buildpacks_ci_dir}/lib/rootfs-cve-notifier"
 
-RootFSCVENotifier.new(cves_dir, stacks_dir).run!(stack, 'Ubuntu 18.04', 'ubuntu18.04', [])
+RootFSCVENotifier.new(usns_dir, stacks_dir).run!(stack, 'Ubuntu 18.04', 'ubuntu18.04', [])
