@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/blang/semver"
@@ -59,7 +60,14 @@ func (deps Dependencies) RemoveOldDeps(depID, versionLine string, keepN int) (De
 		dep := deps[i]
 		depVersion, err := semver.Parse(dep.Version)
 		if err != nil {
-			return nil, err
+			if strings.Count(dep.Version, ".") < 2 {
+				depVersion, err = semver.Parse(fmt.Sprintf("%s.0", dep.Version))
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				return nil, err
+			}
 		}
 
 		differentDep := dep.ID != depID
@@ -124,8 +132,23 @@ func (deps Dependencies) SortDependencies() func(i, j int) bool {
 			return deps[i].ID < deps[j].ID
 		}
 
-		firstVersion := semver.MustParse(deps[i].Version)
-		secondVersion := semver.MustParse(deps[j].Version)
+		firstVersion, err := semver.Parse(deps[i].Version)
+		if err != nil {
+			if strings.Count(deps[i].Version, ".") < 2 {
+				firstVersion = semver.MustParse(fmt.Sprintf("%s.0", deps[i].Version))
+			} else {
+				panic(err)
+			}
+		}
+
+		secondVersion, err := semver.Parse(deps[j].Version)
+		if err != nil {
+			if strings.Count(deps[j].Version, ".") < 2 {
+				secondVersion = semver.MustParse(fmt.Sprintf("%s.0", deps[j].Version))
+			} else {
+				panic(err)
+			}
+		}
 
 		if firstVersion.EQ(secondVersion) {
 			return compareStacks(deps[i].Stacks, deps[j].Stacks)
