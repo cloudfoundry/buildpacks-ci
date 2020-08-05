@@ -178,7 +178,7 @@ resources:
 branch = 'develop'
 private_key = '{{cf-buildpacks-eng-github-ssh-key}}'
 if buildpack.include? '-cnb'
-  branch = 'master'
+  branch = 'main'
   private_key = '{{paketo-bot-github-ssh-key}}'
 end
 %>
@@ -193,9 +193,11 @@ end
   source:
     uri: <%= get_git_uri(buildpack) %>
     private_key: <%= private_key %>
-    branch: master
     <% if buildpack.include? '-cnb' %>
+    branch: main
     tag_filter: v*
+    <% else %>
+    branch: master
     <% end %>
 - name: <%= buildpack %>-pull-request
   type: create-pull-request-resource
