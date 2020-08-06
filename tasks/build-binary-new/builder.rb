@@ -626,10 +626,28 @@ class Builder
           )
       )
 
-    when 'rubygems', 'yarn', 'pip', 'icu'
+    when 'rubygems', 'yarn', 'pip'
       results = Sha.check_sha(source_input)
       filename = 'artifacts/temp_file.tgz'
       File.write(filename, results[0])
+
+      Archive.strip_top_level_directory_from_tar(filename)
+
+      out_data.merge!(
+          artifact_output.move_dependency(
+              source_input.name,
+              filename,
+              "#{filename_prefix}_linux_noarch_#{stack}",
+          )
+      )
+
+    when 'icu'
+      filename = Dir.glob("source/icu4c-*-Ubuntu18.04-x64.tgz").first
+
+      if !filename
+        results = Sha.check_sha(source_input)
+        File.write(filename, results[0])
+      end
 
       Archive.strip_top_level_directory_from_tar(filename)
 
