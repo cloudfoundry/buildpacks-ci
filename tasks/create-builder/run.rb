@@ -103,80 +103,7 @@ static_builder_file = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.
 order = static_builder_file['order']
 description = static_builder_file['description']
 
-child_buildpacks = []
-
-Dir.glob('git-sources/*-cnb/').each do |dir|
-  buildpack_toml_file = 'buildpack.toml'
-  buildpack_toml_data = Tomlrb.load_file(File.join(dir, buildpack_toml_file))
-  is_metabuildpack = buildpack_toml_data['order']
-
-  if is_metabuildpack
-    buildpack_toml_data.dig('metadata','dependencies').each do |dep|
-      next if dep['id'] == "lifecycle"
-      next unless dep['stacks'].include? cnb_stack
-      bp_location = File.absolute_path(File.join(dir, dep['id'].gsub('/','_')))
-
-      google_credential_json = ENV["GOOGLE_APPLICATION_CREDENTIALS"]
-
-      File.open("creds", "w+") { |file| file.write(google_credential_json) }
-      output, err, status = Open3.capture3('GOOGLE_APPLICATION_CREDENTIALS=creds gcloud auth application-default print-access-token')
-
-      uri_str = dep['uri']
-      res = http_fetch(uri_str, output)
-
-      File.open(bp_location, "wb") do |file|
-        file.write res.body
-      end
-
-      set_version_in_order(order, dep['id'], dep['version'])
-      child_buildpacks.push("id" => dep['id'], "uri" => bp_location, "version" => dep['version'])
-    end
-  end
-end
-
-individual_buildpacks = Dir.glob('git-sources/*/').map do |dir|
-  buildpack_toml_file = 'buildpack.toml'
-  id = Tomlrb.load_file(File.join(dir, buildpack_toml_file)).dig('buildpack','id')
-  bp_location = File.absolute_path(File.join(dir, id))
-  next if child_buildpacks.map { |buildpack_ids| buildpack_ids['id'] }.include?(id)
-  local_packager = './packager-cli'
-  args = [local_packager, '-uncached']
-  args.pop if enterprise
-
-  version = File.read(File.join(dir, ".git", "ref")).chomp
-  args.push("-version", version)
-  Dir.chdir dir do
-    run 'cp', packager_path, local_packager # We have to do this b/c cnb packager uses arg[0] to find the buildpack.toml
-    run *args, bp_location
-  end
-
-  set_version_in_order(order, id, version)
-  {"id" => id, "uri" => bp_location, "version" => version}
-end || []
-
-individual_buildpacks += Dir.glob('github-sources/*/').map do |dir|
-  id = ''
-  version = ''
-  bp_location = Dir.glob(File.join(dir, '*.tgz')).first
-  buildpack_tarball = Gem::Package::TarReader.new(Zlib::GzipReader.open(bp_location))
-  buildpack_tarball.each do |file|
-    if file.full_name == 'buildpack.toml'
-      buildpack_toml = Tomlrb.parse(file.read)
-      id = buildpack_toml['buildpack']['id']
-      version = buildpack_toml['buildpack']['version']
-    end
-  end
-  buildpack_tarball.close
-  if id != ''
-    set_version_in_order(order, id, version)
-    {"id" => id, "uri" => bp_location, "version" => version}
-  end
-end || []
-
-individual_buildpacks.select! { |i| i != nil  }
-
-
-published_buildpacks = Dir.glob('published-sources/*/').map do |dir|
+buildpacks = Dir.glob('published-sources/*/').map do |dir|
   image_tar = File.join(dir, 'image.tar')
   run "tar xf #{image_tar} -C #{dir}"
 
@@ -192,10 +119,7 @@ published_buildpacks = Dir.glob('published-sources/*/').map do |dir|
   set_version_in_order(order, id, version)
   {"image" => "gcr.io/#{id}:#{version}", "version" => version}
 end || []
-published_buildpacks.select! { |i| i != nil  }
-
-
-buildpacks = individual_buildpacks + child_buildpacks + published_buildpacks
+buildpacks.select! { |i| i != nil  }
 
 config_hash = {
   "description" => description,
