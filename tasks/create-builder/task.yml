@@ -6,10 +6,7 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
-  - name: git-sources
-  - name: github-sources
   - name: published-sources
-    optional: true
   - name: version
   - name: pack
   - name: cnb-builder
