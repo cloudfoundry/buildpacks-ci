@@ -656,6 +656,7 @@ class Builder
 
       if !filename
         results = Sha.check_sha(source_input)
+        filename = 'artifacts/temp_file.tgz'
         File.write(filename, results[0])
       end
 
@@ -674,6 +675,7 @@ class Builder
 
       if !filename
         results = Sha.check_sha(source_input)
+        filename = 'artifacts/temp_file.tgz'
         File.write(filename, results[0])
       end
 
