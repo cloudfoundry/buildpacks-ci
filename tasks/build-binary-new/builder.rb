@@ -174,13 +174,11 @@ module DependencyBuild
     end
 
     def build_python(source_input, stack)
-
       artifacts = "#{Dir.pwd}/artifacts"
+      tar_path = "#{Dir.pwd}/source/Python-#{source_input.version}.tgz"
       destdir = Dir.mktmpdir
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
-          tar_path = "source/Python-#{source_input.version}.tgz"
-
           unless File.exist?(tar_path)
             Runner.run('wget', source_input.url)
             tar_path = "Python-#{source_input.version}.tgz"
