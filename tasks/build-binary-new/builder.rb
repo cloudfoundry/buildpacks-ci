@@ -28,10 +28,14 @@ module DependencyBuild
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
           Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', "pipenv==#{source_input.version}")
-          if source_input.md5? && Digest::MD5.hexdigest(open("pipenv-#{source_input.version}.tar.gz").read) != source_input.md5
-            raise 'MD5 digest does not match version digest'
-          elsif source_input.sha256? && Digest::SHA256.hexdigest(open("pipenv-#{source_input.version}.tar.gz").read) != source_input.sha256
-            raise 'SHA256 digest does not match version digest'
+          if source_input.md5?
+            if Digest::MD5.hexdigest(open("pipenv-#{source_input.version}.tar.gz").read) != source_input.md5
+              raise 'MD5 digest does not match version digest'
+            end
+          elsif source_input.sha256?
+            if Digest::SHA256.hexdigest(open("pipenv-#{source_input.version}.tar.gz").read) != source_input.sha256
+              raise 'SHA256 digest does not match version digest'
+            end
           else
             raise 'No digest specified for source'
           end
