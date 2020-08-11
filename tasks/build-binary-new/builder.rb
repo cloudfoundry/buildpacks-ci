@@ -28,8 +28,12 @@ module DependencyBuild
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
           Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', "pipenv==#{source_input.version}")
-          if Digest::MD5.hexdigest(open("pipenv-#{source_input.version}.tar.gz").read) != source_input.md5
+          if source_input.md5? && Digest::MD5.hexdigest(open("pipenv-#{source_input.version}.tar.gz").read) != source_input.md5
             raise 'MD5 digest does not match version digest'
+          elsif source_input.sha256? && Digest::SHA256.hexdigest(open("pipenv-#{source_input.version}.tar.gz").read) != source_input.sha256
+            raise 'SHA256 digest does not match version digest'
+          else
+            raise 'No digest specified for source'
           end
           Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'pytest-runner')
           Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'setuptools_scm')
@@ -171,13 +175,18 @@ module DependencyBuild
       destdir = Dir.mktmpdir
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
-          Runner.run('wget', source_input.url)
-          # TODO validate pgp
-          tar_name = source_input.name.capitalize
-          Runner.run('tar', 'xf', "#{tar_name}-#{source_input.version}.tgz")
+          tar_path = "source/Python-#{source_input.version}.tgz"
+
+          unless File.exist?(tar_path)
+            Runner.run('wget', source_input.url)
+            tar_path = "Python-#{source_input.version}.tgz"
+            # TODO validate pgp
+          end
+
+          Runner.run('tar', 'xf', tar_path)
 
           # Python specific configuration here
-          Dir.chdir("#{tar_name}-#{source_input.version}") do
+          Dir.chdir("Python-#{source_input.version}") do
 
             options = [
               './configure',
@@ -627,10 +636,28 @@ class Builder
           )
       )
 
-    when 'rubygems', 'yarn', 'pip'
+    when 'rubygems', 'yarn'
       results = Sha.check_sha(source_input)
       filename = 'artifacts/temp_file.tgz'
       File.write(filename, results[0])
+
+      Archive.strip_top_level_directory_from_tar(filename)
+
+      out_data.merge!(
+          artifact_output.move_dependency(
+              source_input.name,
+              filename,
+              "#{filename_prefix}_linux_noarch_#{stack}",
+          )
+      )
+
+    when 'pip'
+      filename = Dir.glob("source/pip-*.tar.gz").first
+
+      if !filename
+        results = Sha.check_sha(source_input)
+        File.write(filename, results[0])
+      end
 
       Archive.strip_top_level_directory_from_tar(filename)
 
