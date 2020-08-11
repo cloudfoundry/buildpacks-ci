@@ -20,6 +20,7 @@ module DependencyBuild
   class << self
     def build_pipenv(source_input)
       old_file_path = "/tmp/pipenv-v#{source_input.version}.tgz"
+      ENV['LC_CTYPE'] = 'en_US.UTF-8'
       Runner.run('apt', 'update')
       Runner.run('apt-get', 'install', '-y', 'python-pip', 'python-dev', 'build-essential')
       Runner.run('pip', 'install', '--upgrade', 'pip')
