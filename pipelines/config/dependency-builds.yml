@@ -89,6 +89,7 @@ dependencies:
           - line: 3.1.1X
           - line: 3.1.2X
           - line: 3.1.3X
+          - line: 3.1.4X
         removal_strategy: keep_all
       dotnet-core-sdk-cnb:
         lines:
@@ -104,6 +105,7 @@ dependencies:
           - line: 3.1.1X
           - line: 3.1.2X
           - line: 3.1.3X
+          - line: 3.1.4X
         removal_strategy: keep_all
     versions_to_keep: 99
     any_stack: true
