@@ -3,7 +3,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: concourse/docker-image-resource
+    repository: coredeps/core-deps-ci
 inputs:
   - name: tiny-run-base-dockerfile
   - name: buildpacks-ci
