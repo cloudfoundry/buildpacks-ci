@@ -1,9 +1,9 @@
 #!/bin/bash -l
 
 set -eux -o pipefail
-source /buildpacks-ci/scripts/start-docker
-sanitize_cgroups
-start_docker 3 3 "" ""
+source ../../scripts/start-docker
+util::docker::cgroups::sanitize
+util::docker::start 3 3 "" ""
 
 wget https://github.com/bats-core/bats-core/archive/master.zip
 unzip master.zip
