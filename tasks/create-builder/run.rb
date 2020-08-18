@@ -151,7 +151,7 @@ puts "Starting local docker registry"
 run 'docker', 'run', '-d', '-p', "#{repository_port}:#{repository_port}", '--restart=always', '--name', 'local_registry', 'registry:2'
 
 puts "Creating the builder and publishing it to a local registry"
-run "#{pack_path}/pack", 'create-builder', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", '--builder-config', "#{builder_config_file}", '--publish'
+run "#{pack_path}/pack", 'create-builder', "#{repository_host}:#{repository_port}/#{repo}:#{stack}", '--config', "#{builder_config_file}", '--publish'
 
 puts "Pulling images from local registry"
 run 'docker', 'pull', "#{repository_host}:#{repository_port}/#{repo}:#{stack}"
