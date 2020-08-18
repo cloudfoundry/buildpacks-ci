@@ -5,7 +5,7 @@ source buildpacks-ci/scripts/start-docker
 util::docker::cgroups::sanitize
 util::docker::start 3 3 "" ""
 
-wget https://github.com/bats-core/bats-core/archive/master.zip
+curl -L https://github.com/bats-core/bats-core/archive/master.zip --output master.zip
 unzip master.zip
 rm -f master.zip
 bash bats-core-master/install.sh /usr/local
