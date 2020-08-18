@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 set -eux -o pipefail
-source ../../scripts/start-docker
+source buildpacks-ci/scripts/start-docker
 util::docker::cgroups::sanitize
 util::docker::start 3 3 "" ""
 
