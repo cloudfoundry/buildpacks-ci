@@ -17,7 +17,7 @@ function main() {
 
   if [[ -z "${env_name}" && -z "${gcp}" ]]; then
     env_name=$(curl -s -XPOST "https://environments.toolsmiths.cf-app.com/pooled_gcp_engineering_environments/claim?api_token=$token&pool_name=cf-deployment" | jq -r .name)
-    get_metada_file "${token}" "${env_name}"
+    get_metadata_file "${token}" "${env_name}"
     echo "claimed: ${env_name}"
 
   elif [[ -n "${env_name}" && -z "${gcp}" ]]; then
