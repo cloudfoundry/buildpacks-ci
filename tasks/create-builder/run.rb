@@ -63,6 +63,7 @@ cnb_stack = ENV.fetch("STACK")
 enterprise = ENV.fetch("ENTERPRISE") == 'true'
 registry_password = ENV.fetch("REGISTRY_PASSWORD")
 stack = cnb_stack.split('.').last
+stack_name = ENV.fetch("STACK_NAME")
 tag = "#{version}-#{stack}"
 builder_config_file = File.absolute_path("builder.toml")
 pack_path = File.absolute_path('pack-cli')
@@ -99,7 +100,7 @@ Dir.chdir 'packager' do
 end
 
 
-static_builder_file = Tomlrb.load_file(File.join("cnb-builder", "#{stack}-order.toml"))
+static_builder_file = Tomlrb.load_file(File.join("cnb-builder", "#{stack_name}-order.toml"))
 order = static_builder_file['order']
 description = static_builder_file['description']
 
