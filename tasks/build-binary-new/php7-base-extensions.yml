@@ -20,8 +20,8 @@ native_modules:
     md5: b3958716b4e53ddc5992e6c49d97e819
     klass: LibmemcachedRecipe
   - name: librdkafka
-    version: 1.1.0
-    md5: 95a8a8432b8b66325dbb6ce89369e183
+    version: 1.5.0
+    md5: 451dbf0516e3a8ed4b9bc6296ceb78cf
     klass: LibRdKafkaRecipe
   - name: cassandracppdriver
     version: 2.9.0
@@ -51,8 +51,8 @@ extensions:
     md5: 4f5f4b8a41a5802de6591c79b85cc838
     klass: GeoipRecipe
   - name: igbinary
-    version: 3.1.1
-    md5: 14b42bb2b16d0de71439d51811399566
+    version: 3.1.5
+    md5: 2cf0e230a43ca2f5a750b118e9f77ff2
     klass: PeclRecipe
   - name: gnupg
     version: 1.4.0
@@ -63,24 +63,24 @@ extensions:
     md5: 6d3a7048ab73b0fab931f28c484dbf76
     klass: PeclRecipe
   - name: LZF
-    version: 1.6.7
-    md5: 3c5db2561efaad9f3d81fa9427139ba3
+    version: 1.6.8
+    md5: 0677fba342c89795de6c694f3e72ba1d
     klass: PeclRecipe
   - name: mailparse
-    version: 3.0.4
-    md5: d65ee713b8a45e49cae502ae9666dee3
+    version: 3.1.1
+    md5: 17d77e3c03c25acaf51926a9020a4596
     klass: PeclRecipe
   - name: mongodb
-    version: 1.6.1
-    md5: 123e48da2f674de6d567b0bebbe049ac
+    version: 1.8.0
+    md5: ea1b3198a1de04d26d1975a948b3f3a9
     klass: PeclRecipe
   - name: msgpack
-    version: 2.0.3
-    md5: 8ed9843595c3b183ee79fd76b3039384
+    version: 2.1.1
+    md5: f378b5031916d006a043b024e1bfca18
     klass: PeclRecipe
   - name: oauth
-    version: 2.0.4
-    md5: ade75f04c172f06d24f99d0b30bccf2c
+    version: 2.0.7
+    md5: 8ea6eb5ac6de8a4ed399980848c04c0c
     klass: PeclRecipe
   - name: odbc
     version: nil
@@ -91,40 +91,40 @@ extensions:
     md5: nil
     klass: PdoOdbcRecipe
   - name: pdo_sqlsrv
-    version: 5.6.1
-    md5: fa932e2d60e9c3782f30ba0b0ab77516
+    version: 5.8.1
+    md5: e687989a47cefd6cf9005e1f41637289
     klass: PeclRecipe
   - name: rdkafka
-    version: 3.1.2
-    md5: 5a42df2c7c54ac53f6d73900dcd551cf
+    version: 4.0.3
+    md5: 766efc78dd01a4a65c8200e4abee957d
     klass: PeclRecipe
   - name: redis
-    version: 5.1.1
-    md5: 9221394dbf3d80c43be9e5ad51c1f9fd
+    version: 5.3.1
+    md5: 5a90747eea1268dd2f7f5ebe8c7ff013
     klass: RedisPeclRecipe
   - name: ssh2
     version: 1.2
     md5: ae62ba2d4a7bbd5eff34daa8ed9f6ed6
     klass: PeclRecipe
   - name: sqlsrv
-    version: 5.6.1
-    md5: c7b66e343d4ae0760a658964552966b4
+    version: 5.8.1
+    md5: 1a237f847d4466a85f7bfdb6b2fd5ecd
     klass: PeclRecipe
   - name: stomp
     version: 2.0.2
     md5: 507c30184fde736e924cee20c56df061
     klass: PeclRecipe
   - name: xdebug
-    version: 2.9.1
-    md5: 1bf3bde9e23b9877570559ab09815037
+    version: 2.9.8
+    md5: a2b5199f11457099d5c81d02ababb87e
     klass: PeclRecipe
   - name: yaf
-    version: 3.0.9
-    md5: ac897a6743d0242b03e43f65441bb30c
+    version: 3.2.5
+    md5: 8cd86db117f65131d212cac1c60065a3
     klass: PeclRecipe
   - name: yaml
-    version: 2.0.4
-    md5: 4f2c2620fb18db8ef6a1d5727f57d945
+    version: 2.1.0
+    md5: f93f4d03968c0ceb33c9b62dcb41d6b4
     klass: PeclRecipe
   - name: memcached
     version: 3.1.5
@@ -175,16 +175,16 @@ extensions:
 
   #non-standard
   - name: amqp
-    version: 1.9.4
-    md5: d45a7137edd361998494a8894fe50888
+    version: 1.10.2
+    md5: 1163a52a495cab5210a6a2c8deb60064
     klass: AmqpPeclRecipe
   - name: ioncube
     version: 10.3.8
     md5: 5d65b82946f773b496716ebd988bf926
     klass: IonCubeRecipe
   - name: lua
-    version: 2.0.6
-    md5: 421acf9ca1a6e30d65fc9af1709ece36
+    version: 2.0.7
+    md5: a37402f8b10753a80db56b61e2e70c29
     klass: LuaPeclRecipe
   - name: maxmind
     version: 1.4.1
@@ -195,8 +195,8 @@ extensions:
     md5: 67a861965b30d045bf29a2126bcc05ed
     klass: LibMaxMindRecipe
   - name: phalcon
-    version: 3.4.4
-    md5: 6f8c8d5a752f953491bd0f4f5c63adbf
+    version: 4.0.6
+    md5: 685ae43102c20af17caaa64ce2f68e27
     klass: PhalconRecipe
   - name: phpiredis
     version: 1.0.0
@@ -211,8 +211,8 @@ extensions:
     md5: 374cf4ff7ba03401a279777abe94815d #curl -sL https://github.com/tideways/php-xhprof-extension/archive/v5.0.2.tar.gz  | md5sum | cut -d ' ' -f 1
     klass: TidewaysXhprofRecipe
   - name: solr
-    version: 2.5.0
-    md5: 5034f5d274e2c80b8ac63f601d0beb01
+    version: 2.5.1
+    md5: 29fc866198d61bccdbc4c4f53fb7ef06
     klass: PeclRecipe
 
   #Oracle client stuff. Not included unless libs are present
