@@ -12,7 +12,10 @@ params:
   SPEC_TO_RUN:
   RUN_ORACLE_PHP_TESTS: false
   RUBYGEM_MIRROR:
-  AWS_ACCESS_KEY:
+  AWS_DEFAULT_REGION:
+  AWS_ACCESS_KEY_ID:
   AWS_SECRET_ACCESS_KEY:
+  ORACLE_LIBS_AWS_BUCKET:
+  ORACLE_LIBS_FILENAME:
 run:
   path: buildpacks-ci/tasks/run-binary-builder-integration-specs/run.sh
