@@ -51,8 +51,8 @@ type Dependency struct {
 }
 
 const (
-	IncludeFilesKey    = "include_files"
-	PrePackageKey      = "pre_package"
+	IncludeFilesKey    = "include-files"
+	PrePackageKey      = "pre-package"
 	DependenciesKey    = "dependencies"
 	DefaultVersionsKey = "default-versions"
 	RuntimeToSDKsKey   = "runtime-to-sdks"
