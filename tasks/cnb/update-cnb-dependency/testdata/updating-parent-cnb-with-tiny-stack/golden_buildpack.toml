@@ -6,7 +6,7 @@ api = "0.2"
   version = "{{.Version}}"
 
 [metadata]
-  include_files = ["buildpack.toml"]
+  include-files = ["buildpack.toml"]
 
   [[metadata.dependencies]]
     id = "org.cloudfoundry.some-child"
