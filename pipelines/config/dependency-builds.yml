@@ -380,6 +380,9 @@ dependencies:
           - line: 14.X.X
             deprecation_date: 2023-04-30
             link: https://github.com/nodejs/Release
+          - line: 15.X.X
+            deprecation_date: 2021-06-01
+            link: https://github.com/nodejs/Release
         removal_strategy: keep_latest_released
       ruby:
         lines:
@@ -404,6 +407,9 @@ dependencies:
             link: https://github.com/nodejs/Release
           - line: 14.X.X
             deprecation_date: 2023-04-30
+            link: https://github.com/nodejs/Release
+          - line: 15.X.X
+            deprecation_date: 2021-06-01
             link: https://github.com/nodejs/Release
         removal_strategy: keep_latest_released
     source_type: node
