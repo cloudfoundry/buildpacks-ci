@@ -7,8 +7,8 @@ version = "{{.Version}}"
 homepage = "https://some-website.com/some-org/some-repo"
 
 [metadata]
-include_files = ["bin/build", "bin/detect", "buildpack.toml"]
-pre_package = "./scripts/build.sh"
+include-files = ["bin/build", "bin/detect", "buildpack.toml"]
+pre-package = "./scripts/build.sh"
 random = "random"
 
 

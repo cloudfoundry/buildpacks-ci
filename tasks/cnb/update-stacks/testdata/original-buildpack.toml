@@ -7,8 +7,8 @@ api = "0.2"
   homepage = "https://some-website.com/some-org/some-repo"
 
 [metadata]
-  include_files = ["bin/run", "bin/build", "bin/detect", "buildpack.toml", "go.mod", "go.sum"]
-  pre_package = "./scripts/build.sh"
+  include-files = ["bin/run", "bin/build", "bin/detect", "buildpack.toml", "go.mod", "go.sum"]
+  pre-package = "./scripts/build.sh"
 
   [[metadata.dependencies]]
     deprecation_date = "2020-01-01T00:00:00Z"
