@@ -6,6 +6,7 @@ config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds.yml'))
 dependencies = config['dependencies']
 stacks = config['build_stacks']
 skip_deprecation_check = config['skip_deprecation_check']
+cnb_uris = config['cnb_uris']
 
 def common_prefix(stringA, stringB)
   max_len = 0
@@ -100,19 +101,28 @@ def bp_uses_line?(bp_data, line)
   !lines_present && get_version_lines(bp_data['lines']).include?(line)
 end
 
-def get_git_uri(buildpack)
-  if buildpack.include? '-cnb'
-    return "git@github.com:cloudfoundry/#{buildpack}.git"
+def get_git_uri(buildpack, cnb_uris)
+  if cnb_uris.key? buildpack
+    return cnb_uris[buildpack]
   else
-    bp_uri = "git@github.com:cloudfoundry/#{buildpack}-buildpack.git"
+    if buildpack.include? '-cnb'
+      return "git@github.com:cloudfoundry/#{buildpack}.git"
+    else
+      bp_uri = "git@github.com:cloudfoundry/#{buildpack}-buildpack.git"
+    end
   end
 end
 
-def get_git_repo(buildpack)
-  if buildpack.include? '-cnb'
-    return "cloudfoundry/#{buildpack}"
+def get_git_repo(buildpack, cnb_uris)
+  if cnb_uris.key? buildpack
+    uri = cnb_uris[buildpack]
+    return uri.slice((uri.index(':') + 1)..).delete_suffix('.git')
   else
-    bp_uri = "cloudfoundry/#{buildpack}-buildpack"
+    if buildpack.include? '-cnb'
+      return "cloudfoundry/#{buildpack}"
+    else
+      bp_uri = "cloudfoundry/#{buildpack}-buildpack"
+    end
   end
 end
 
@@ -169,7 +179,7 @@ resources:
 - name: <%= buildpack %>-buildpack-v3
   type: git
   source:
-    uri: <%= get_git_uri(buildpack) %>
+    uri: <%= get_git_uri(buildpack, cnb_uris) %>
     private_key: {{cf-buildpacks-eng-github-ssh-key}}
     branch: v3
 <% end %>
@@ -185,13 +195,13 @@ end
 - name: <%= buildpack %>-buildpack
   type: git
   source:
-    uri: <%= get_git_uri(buildpack) %>
+    uri: <%= get_git_uri(buildpack, cnb_uris) %>
     private_key: <%= private_key %>
     branch: <%= branch %>
 - name: <%= buildpack %>-buildpack-latest-released
   type: git
   source:
-    uri: <%= get_git_uri(buildpack) %>
+    uri: <%= get_git_uri(buildpack, cnb_uris) %>
     private_key: <%= private_key %>
     <% if buildpack.include? '-cnb' %>
     branch: main
@@ -202,7 +212,7 @@ end
 - name: <%= buildpack %>-pull-request
   type: create-pull-request-resource
   source:
-    remote_repository: <%= get_git_repo(buildpack) %>
+    remote_repository: <%= get_git_repo(buildpack, cnb_uris) %>
   <% if !is_cloudfoundry_cnb(buildpack) %>
     github_token: ((paketo-buildpacks-github-token))
   <% else %>
