@@ -588,7 +588,7 @@ dependencies:
       ruby:
         lines:
           - line: latest
-      yarn-install-cnb:
+      yarn-cnb:
         lines:
           - line: latest
     source_type: github_releases
@@ -637,3 +637,6 @@ skip_deprecation_check:
   - openresty  #! depends on nginx and lua deprecation
   - php  #! complicated
   - ruby  #! doesn't publish EOL schedule
+
+cnb_uris:
+  yarn-cnb: git@github.com:paketo-buildpacks/yarn.git
