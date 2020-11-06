@@ -28,7 +28,7 @@ module Depwatcher
 
     def in(ref : String, dir : String) : Release
       repo = "unicode-org/icu"
-      ext = "-Ubuntu18.04-x64.tgz"
+      ext = "-src.tgz"
       super(repo, ext, ref, dir)
     end
 
