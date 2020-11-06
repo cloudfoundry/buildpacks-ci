@@ -27,7 +27,6 @@ module Depwatcher
       result = Release.new("","","")
       allReleases = [] of Release
       response = client.get("https://cache.ruby-lang.org/pub/ruby/index.txt").body
-      STDERR.puts "*******RESPONSE:********" + response
 
       response.each_line do |line|
         releaseArray = [] of String

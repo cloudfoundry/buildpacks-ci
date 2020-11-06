@@ -388,6 +388,26 @@ module DependencyBuild
         end
       end
     end
+
+    def build_icu(source_input)
+      built_path = File.join(Dir.pwd, 'built')
+      Dir.mkdir(built_path)
+
+      Dir.chdir('source') do
+        filename = Dir.glob('icu4c-*-src.tgz').first
+        Runner.run('tar', 'zxf', filename)
+        Dir.chdir('icu/source') do
+          Runner.run('./runConfigureICU', 'Linux', "--prefix=#{built_path}/usr/local")
+          Runner.run('make')
+          Runner.run('make install')
+        end
+      end
+      old_filename = "#{source_input.name}-#{source_input.version}.tgz"
+      Dir.chdir(built_path) do
+        Runner.run('tar', 'czf', old_filename, './usr')
+      end
+      File.join(built_path, old_filename)
+    end
   end
 end
 
@@ -673,20 +693,11 @@ class Builder
       )
 
     when 'icu'
-      filename = Dir.glob("source/icu4c-*-Ubuntu18.04-x64.tgz").first
-
-      if !filename
-        results = Sha.check_sha(source_input)
-        filename = 'artifacts/temp_file.tgz'
-        File.write(filename, results[0])
-      end
-
-      Archive.strip_top_level_directory_from_tar(filename)
-
+      old_file_path = DependencyBuild.build_icu source_input
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
-              filename,
+              old_file_path,
               "#{filename_prefix}_linux_noarch_#{stack}",
           )
       )
