@@ -263,11 +263,6 @@ end
 <% end %>
   ## Alerts ##
 
-- name: failure-alert
-  type: slack-notification
-  source:
-    url: {{dependency-notifier-slack-webhook}}
-
 jobs:
 <% dependencies.each do |dep_name, dep| %>
 <% version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} %>
@@ -347,12 +342,6 @@ jobs:
       params:
         repository: builds-artifacts
         rebase: true
-  on_failure:
-    put: failure-alert
-    params:
-      channel: {{dependency-notifier-slack-channel}}
-      text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-      username: concourse
 
   <% if !is_child_cnb(dep_name) %>
 - name: accept-<%=dep_name%>-<%= line %>-story
