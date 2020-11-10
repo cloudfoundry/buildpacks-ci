@@ -90,6 +90,7 @@ dependencies:
           - line: 3.1.2X
           - line: 3.1.3X
           - line: 3.1.4X
+          - line: 5.0.1X
         removal_strategy: keep_all
       dotnet-core-sdk-cnb:
         lines:
@@ -106,6 +107,7 @@ dependencies:
           - line: 3.1.2X
           - line: 3.1.3X
           - line: 3.1.4X
+          - line: 5.0.1X
         removal_strategy: keep_all
     versions_to_keep: 99
     any_stack: true
@@ -122,6 +124,9 @@ dependencies:
           - line: 3.1.X
             deprecation_date: 2022-12-04
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+          - line: 5.0.X
+            deprecation_date: ""
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: keep_all
       dotnet-core-runtime-cnb:
         lines:
@@ -134,6 +139,9 @@ dependencies:
           - line: 3.1.X
             deprecation_date: 2022-12-04
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+          - line: 5.0.X
+            deprecation_date: ""
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
     versions_to_keep: 2
     any_stack: true
   dotnet-aspnetcore:
@@ -143,12 +151,14 @@ dependencies:
           - line: 2.1.X
           - line: 2.2.X
           - line: 3.1.X
+          - line: 5.0.X
         removal_strategy: keep_all
       dotnet-core-aspnet-cnb:
         lines:
           - line: 2.1.X
           - line: 2.2.X
           - line: 3.1.X
+          - line: 5.0.X
         removal_strategy: keep_all
     versions_to_keep: 2
     any_stack: true
@@ -334,6 +344,7 @@ dependencies:
           - line: 1.13.X
           - line: 1.15.X
           - line: 1.17.X
+          - line: 1.19.X
     versions_to_keep: 2
   nginx-static:
     buildpacks:
