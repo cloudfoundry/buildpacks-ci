@@ -59,13 +59,15 @@ module DependencyBuild
         url = "#{source_input.url}"
         file_path = url.slice((url.rindex('/')+1)..(url.length))
         Runner.run('tar', 'zxf', "#{file_path}")
-        Dir.chdir("#{source_input.name}-#{source_input.version}") do
+
+        dir = file_path.delete_suffix(".tar.gz")
+        Dir.chdir("#{dir}") do
           Runner.run('./configure', "--prefix=#{built_path}")
           Runner.run('make')
           Runner.run('make install')
         end
       end
-      old_filename = "#{source_input.name}-#{source_input.version}.tgz"
+      old_filename = "#{dir}.tgz"
       Dir.chdir(built_path) do
         Runner.run('tar', 'czf', old_filename, 'include', 'lib')
       end
