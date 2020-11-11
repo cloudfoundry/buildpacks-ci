@@ -56,7 +56,9 @@ module DependencyBuild
 
       Dir.chdir('source') do
         # github-releases depwatcher has already downloaded .tar.gz
-        Runner.run('tar', 'zxf', "#{source_input.name}-#{source_input.version}.tar.gz")
+        url = "#{source_input.url}"
+        file_path = url.slice((url.rindex('/')+1)..(url.length))
+        Runner.run('tar', 'zxf', "#{file_path}")
         Dir.chdir("#{source_input.name}-#{source_input.version}") do
           Runner.run('./configure', "--prefix=#{built_path}")
           Runner.run('make')
