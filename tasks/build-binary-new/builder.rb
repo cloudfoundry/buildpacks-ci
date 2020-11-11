@@ -54,13 +54,13 @@ module DependencyBuild
       built_path = File.join(Dir.pwd, 'built')
       Dir.mkdir(built_path)
 
+      url = "#{source_input.url}"
+      file_path = url.slice((url.rindex('/')+1)..(url.length))
+      dir = file_path.delete_suffix(".tar.gz")
+
       Dir.chdir('source') do
         # github-releases depwatcher has already downloaded .tar.gz
-        url = "#{source_input.url}"
-        file_path = url.slice((url.rindex('/')+1)..(url.length))
         Runner.run('tar', 'zxf', "#{file_path}")
-
-        dir = file_path.delete_suffix(".tar.gz")
         Dir.chdir("#{dir}") do
           Runner.run('./configure', "--prefix=#{built_path}")
           Runner.run('make')
