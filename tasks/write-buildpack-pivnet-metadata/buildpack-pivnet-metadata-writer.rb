@@ -85,7 +85,7 @@ def release_type
 end
 
 def eula_slug
-  "pivotal_software_eula"
+  "vmware_eula"
 end
 
 def release_notes_url
