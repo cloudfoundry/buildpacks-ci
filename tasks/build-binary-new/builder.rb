@@ -505,10 +505,12 @@ class Builder
     out_data = {
         tracker_story_id: build_input.tracker_story_id,
         version: source_input.version,
-        source: { url: source_input.url }
+        source: {
+          url: source_input.url,
+          md5: source_input.md5,
+          sha256: source_input.sha256
+        }
     }
-    out_data[:source][:md5] = source_input.md5
-    out_data[:source][:sha256] = source_input.sha256
 
     unless out_data[:source][:sha256]
       out_data[:source][:sha256] = Sha::get_sha(source_input.url)
@@ -626,8 +628,8 @@ class Builder
       end
 
     when -> (elem) { elem.start_with?('miniconda') }
-      out_data[:url] = "https://github.com/conda/conda/archive/#{source_input.version}.tar.gz"
       results = Sha.check_sha(source_input)
+      out_data[:url] = source_input.url
       out_data[:sha256] = results[1]
 
     when -> (elem) { cnb_list.include?(elem) }
