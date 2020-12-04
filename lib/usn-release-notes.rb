@@ -31,9 +31,9 @@ class UsnReleaseNotes
     cves = []
     lps = []
     open(usn_url).each_line do |line|
-      if cve = line.match(/.*href="(?<uri>.*cve\/CVE.*)">(?<text>.*)<\/a.*/)
+      if (cve = line.match(%r{.*href="(?<uri>.*cve/CVE.*)">(?<text>.*)</a.*}))
         cves << cve
-      elsif lp = line.match(/.*href="(?<uri>.*launchpad\.net\/bugs.*)">(?<text>.*)<\/li/)
+      elsif (lp = line.match(%r{.*href="(?<uri>.*launchpad\.net/bugs.*)">(?<text>.*)</li}))
         lps << lp
       end
     end
@@ -43,17 +43,19 @@ class UsnReleaseNotes
     notes = "[#{usn_id}](#{usn_url}) #{usn_title}:\n"
 
     cves.each do |cve|
-      cve_id          = cve['text']
-      cve_uri         = cve['uri']
-      cve_description = ''
-      begin
-        cve_description_element = Nokogiri::HTML(open(cve_uri, :allow_redirections => :safe).read).css('#container div.item > div:contains("Description")').first.next_element
-        cve_description = cve_description_element.text
-      rescue NoMethodError
-        cve_description = 'Nothing found in description'
-      rescue
-        cve_description = 'Unable to get description'
-      end
+      cve_id = cve['text']
+      cve_uri = cve['uri']
+
+      cve_body = open(cve_uri, allow_redirections: :safe).read
+        .gsub("\n", ' ')
+        .gsub('<br />', ' ')
+        .gsub('<br>', ' ')
+        .gsub('</br>', ' ')
+      cve_description = if (match = cve_body.match(%r{Published: <strong.*?<p>(?<description>.*?)</p>}))
+                          match['description']
+                        else
+                          'Nothing found in description'
+                        end
 
       notes += "* [#{cve_id}](#{cve_uri}): #{cve_description}\n"
     end

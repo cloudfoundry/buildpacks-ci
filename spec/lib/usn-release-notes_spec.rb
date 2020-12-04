@@ -7,7 +7,7 @@ require_relative '../../lib/usn-release-notes'
 # should be useful if getting release notes break again. 
 
 describe UsnReleaseNotes do
-  let(:usn_id) {'3806-1'}
+  let(:usn_id) {'USN-3806-1'}
   before(:all){
     WebMock.allow_net_connect!
   }
