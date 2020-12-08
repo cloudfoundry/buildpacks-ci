@@ -3,7 +3,6 @@ extensions:
   exclusions:
     - name: libz
     - name: yaf
-    - name: amqp
     - name: cassandra
     - name: interbase
     - name: recode
