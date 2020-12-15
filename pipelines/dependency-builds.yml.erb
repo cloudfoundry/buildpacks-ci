@@ -227,7 +227,7 @@ end
   lines.each do |line|
 %>
 
-- name: source-<%=dep_name%>-<%= line %>
+- name: source-<%= dep_name.downcase %>-<%= line.downcase %>
   type: depwatcher
   check_every: 1h
   source:
@@ -242,7 +242,7 @@ end
 <% end %>
 
 <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
-- name: source-<%= monitored_dep_name %>-latest
+- name: source-<%= monitored_dep_name.downcase %>-latest
   type: depwatcher
   check_every: 1h
   source:
@@ -251,7 +251,7 @@ end
 <% end %>
 
 <% if !dep['third_party_hosted'] %>
-- name: buildpacks-bucket-<%=dep_name%>
+- name: buildpacks-bucket-<%= dep_name %>
   type: s3
   source:
     bucket: {{buildpacks-binaries-s3-bucket}}
@@ -267,14 +267,14 @@ jobs:
 <% dependencies.each do |dep_name, dep| %>
 <% version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} %>
 <% if is_multiline?(dep) %>
-- name: create-<%= dep_name %>-new-line-story
+- name: create-<%= dep_name.downcase %>-new-line-story
   serial: true
   public: true
   plan:
   - in_parallel:
     - get: buildpacks-ci
     - get: source
-      resource: source-<%= dep_name %>-latest
+      resource: source-<%= dep_name.downcase %>-latest
       trigger: true
       version: every
   - do:
@@ -289,19 +289,19 @@ jobs:
 <% end %>
 
 <% version_lines.each do |line| %>
-- name: create-<%=dep_name%>-<%= line %>-story
+- name: create-<%= dep_name.downcase %>-<%= line.downcase %>-story
   serial: true
   public: true
   plan:
   - in_parallel:
     - get: buildpacks-ci
     - get: source
-      resource: source-<%=dep_name%>-<%= line %>
+      resource: source-<%= dep_name.downcase %>-<%= line.downcase %>
       trigger: true
       version: every
   <% dep.fetch('monitored_deps', []).each_with_index do |monitored_dep_name, index| %>
     - get: monitored-dep-<%= index %>
-      resource: source-<%=monitored_dep_name%>-latest
+      resource: source-<%= monitored_dep_name.downcase %>-latest
       trigger: true
       version: every
   <% end %>
@@ -344,36 +344,36 @@ jobs:
         rebase: true
 
   <% if !is_child_cnb(dep_name) %>
-- name: accept-<%=dep_name%>-<%= line %>-story
+- name: accept-<%= dep_name.downcase %>-<%= line.downcase %>-story
   serial: true
   public: true
   plan:
   - in_parallel:
     - get: buildpacks-ci
     - get: source
-      resource: source-<%=dep_name%>-<%= line %>
+      resource: source-<%= dep_name.downcase %>-<%= line.downcase %>
       trigger: true
       version: every
       passed:
     <% dep['buildpacks'].each do |bp_name, bp_data| %>
       <% if bp_uses_line?(bp_data, line) %>
-        - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
+        - update-<%= dep_name.downcase %>-<%= line.downcase %>-<%= bp_name.downcase %>
       <% end %>
     <% end %>
     <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
-    - get: source-<%=monitored_dep_name%>-latest
+    - get: source-<%= monitored_dep_name.downcase %>-latest
       trigger: true
       version: every
       passed:
       <% dep['buildpacks'].each do |bp_name, bp_data| %>
         <% if bp_uses_line?(bp_data, line) %>
-        - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
+        - update-<%= dep_name.downcase %>-<%= line.downcase %>-<%= bp_name.downcase %>
         <% end %>
       <% end %>
     <% end %>
     - get: builds
   - do:
-    - task: accept-<%=dep_name%>-<%= line %>-story
+    - task: accept-<%= dep_name.downcase %>-<%= line.downcase %>-story
       file: buildpacks-ci/tasks/build-binary-new/accept.yml
       params:
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
@@ -382,15 +382,15 @@ jobs:
 
 
   <% dep['copy-stacks']&.each do |stack| %>
-- name: copy-<%=dep_name%>-<%= line %>-<%= stack %>
+- name: copy-<%= dep_name.downcase %>-<%= line.downcase %>-<%= stack.downcase %>
   plan:
   - in_parallel:
     - get: buildpacks-ci
     - get: source
-      resource: source-<%=dep_name%>-<%= line %>
+      resource: source-<%= dep_name.downcase %>-<%= line.downcase %>
       trigger: true
       version: every
-      passed: [ build-<%=dep_name%>-<%= line %> ]
+      passed: [ build-<%= dep_name.downcase %>-<%= line.downcase %> ]
     - get: builds
   - task: repackage-dependency
     file: buildpacks-ci/tasks/repackage-dependency/task.yml
@@ -404,7 +404,7 @@ jobs:
       rebase: true
   <% end %>
 
-- name: build-<%=dep_name%>-<%= line %>
+- name: build-<%= dep_name.downcase %>-<%= line.downcase %>
   serial: true
   public: true
   plan:
@@ -412,15 +412,15 @@ jobs:
     - get: buildpacks-ci
     - get: binary-builder
     - get: source
-      resource: source-<%=dep_name%>-<%= line %>
+      resource: source-<%= dep_name.downcase %>-<%= line.downcase %>
       trigger: true
       version: every
-      passed: [ create-<%=dep_name%>-<%= line %>-story ]
+      passed: [ create-<%= dep_name.downcase %>-<%= line.downcase %>-story ]
   <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
-    - get: source-<%=monitored_dep_name%>-latest
+    - get: source-<%= monitored_dep_name.downcase %>-latest
       trigger: true
       version: every
-      passed: [ create-<%=dep_name%>-<%= line %>-story ]
+      passed: [ create-<%= dep_name.downcase %>-<%= line.downcase %>-story ]
   <% end %>
   <% stacks.each do |stack| %>
     - get: <%= stack %>-image
@@ -453,7 +453,7 @@ jobs:
 
 <% dep['buildpacks'].each do |bp_name, bp| %>
   <% bp.fetch('lines', []).each do |line_hash| %>
-- name: update-<%=dep_name%>-<%= line_hash['line'] %>-<%= bp_name %>
+- name: update-<%= dep_name.downcase %>-<%= line_hash['line'].downcase %>-<%= bp_name.downcase %>
   serial: true
   public: true
   plan:
@@ -471,22 +471,22 @@ jobs:
     <% end %>
     - get: buildpacks-ci
     - get: source
-      resource: source-<%=dep_name%>-<%= line_hash['line'] %>
+      resource: source-<%= dep_name.downcase %>-<%= line_hash['line'].downcase %>
       passed:
     <% if dep['copy-stacks'] %>
       <% dep['copy-stacks'].each do |copy_stack| %>
-      - copy-<%=dep_name%>-<%=line_hash['line']%>-<%=copy_stack%>
+      - copy-<%= dep_name.downcase %>-<%= line_hash['line'].downcase %>-<%= copy_stack.downcase %>
       <% end %>
     <% else %>
-      - build-<%=dep_name%>-<%=line_hash['line']%>
+      - build-<%= dep_name.downcase %>-<%= line_hash['line'].downcase %>
     <% end %>
       version: every
       trigger: true
     <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
-    - get: source-<%=monitored_dep_name%>-latest
+    - get: source-<%= monitored_dep_name.downcase %>-latest
       trigger: true
       version: every
-      passed: [<%= "build-#{dep_name}-#{line_hash['line']}" %>]
+      passed: [<%= "build-#{dep_name.downcase}-#{line_hash['line'].downcase}" %>]
     <% end %>
     - get: builds
     <% if bp_name.end_with?('cnb') %>
@@ -551,45 +551,45 @@ groups:
 <% dependencies.each do |dep_name, dep| %>
 <% version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} %>
     <% if is_multiline?(dep) %>
-    - create-<%= dep_name %>-new-line-story
+    - create-<%= dep_name.downcase %>-new-line-story
     <% end %>
     <% version_lines.each do |line| %>
-    - create-<%=dep_name%>-<%= line %>-story
+    - create-<%= dep_name.downcase %>-<%= line.downcase %>-story
     <% if !is_child_cnb(dep_name) %>
-    - accept-<%=dep_name%>-<%= line %>-story
+    - accept-<%= dep_name.downcase %>-<%= line.downcase %>-story
     <% end %>
     <% dep['copy-stacks']&.each do |stack| %>
-    - copy-<%=dep_name%>-<%= line %>-<%= stack %>
+    - copy-<%= dep_name.downcase %>-<%= line.downcase %>-<%= stack.downcase %>
     <% end %>
-    - build-<%=dep_name%>-<%= line %>
+    - build-<%= dep_name.downcase %>-<%= line.downcase %>
     <% end %>
     <% dep['buildpacks'].each do |bp_name, bp| %>
     <% get_version_lines(bp['lines'], ['latest']).each do |line| %>
-    - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
+    - update-<%= dep_name.downcase %>-<%= line.downcase %>-<%= bp_name.downcase %>
     <% end %>
 <% end %>
 <% end %>
 
 <% dependencies.each do |dep_name, dep| %>
 <% version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} %>
-  - name: <%= dep_name %>
+  - name: <%= dep_name.downcase %>
     jobs:
     <% if is_multiline?(dep) %>
-    - create-<%= dep_name %>-new-line-story
+    - create-<%= dep_name.downcase %>-new-line-story
     <% end %>
     <% version_lines.each do |line| %>
-    - create-<%=dep_name%>-<%= line %>-story
+    - create-<%= dep_name.downcase %>-<%= line.downcase %>-story
     <% if !is_child_cnb(dep_name) %>
-    - accept-<%=dep_name%>-<%= line %>-story
+    - accept-<%= dep_name.downcase %>-<%= line.downcase %>-story
     <% end %>
     <% dep['copy-stacks']&.each do |stack| %>
-    - copy-<%=dep_name%>-<%= line %>-<%= stack %>
+    - copy-<%= dep_name.downcase %>-<%= line.downcase %>-<%= stack.downcase %>
     <% end %>
-    - build-<%=dep_name%>-<%= line %>
+    - build-<%= dep_name.downcase %>-<%= line.downcase %>
     <% end %>
     <% dep['buildpacks'].each do |bp_name, bp| %>
     <% get_version_lines(bp['lines'], ['latest']).each do |line| %>
-    - update-<%=dep_name%>-<%= line %>-<%= bp_name %>
+    - update-<%= dep_name.downcase %>-<%= line.downcase %>-<%= bp_name.downcase %>
     <% end %>
     <% end %>
 <% end %>
