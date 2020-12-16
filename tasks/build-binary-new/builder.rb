@@ -831,20 +831,19 @@ class Builder
       )
 
     when 'php'
-      full_name = source_input.name
+      base_extension_file = ''
       if source_input.version.start_with?('7')
-        full_name = 'php7'
-      elsif !source_input.version.start_with?('7')
-        raise "Unexpected PHP version #{source_input.version}. Expected 7.X"
+        base_extension_file = File.join(php_extensions_dir, 'php7-base-extensions.yml')
+      elsif source_input.version.start_with?('8')
+        base_extension_file = File.join(php_extensions_dir, 'php8-base-extensions.yml')
+      else
+        raise "Unexpected PHP version #{source_input.version}. Expected 7.X or 8.X"
       end
 
-      base_extension_file = File.join(php_extensions_dir, 'php7-base-extensions.yml')
       php_extensions = BaseExtensions.new(base_extension_file)
 
       patch_file = nil
-      if source_input.version.start_with?('7.2.')
-        patch_file = File.join(php_extensions_dir, 'php72-extensions-patch.yml')
-      elsif source_input.version.start_with?('7.3.')
+      if source_input.version.start_with?('7.3.')
         patch_file = File.join(php_extensions_dir, 'php73-extensions-patch.yml')
       elsif source_input.version.start_with?('7.4.')
         patch_file = File.join(php_extensions_dir, 'php74-extensions-patch.yml')
@@ -856,14 +855,14 @@ class Builder
 
       binary_builder.build(source_input, "--php-extensions-file=#{output_yml}")
 
-      filename = "#{binary_builder.base_dir}/#{full_name}-#{source_input.version}-linux-x64.tgz"
+      filename = "#{binary_builder.base_dir}/php-#{source_input.version}-linux-x64.tgz"
       Archive.strip_top_level_directory_from_tar(filename)
 
       out_data.merge!(
         artifact_output.move_dependency(
           source_input.name,
           filename,
-          "#{full_name}_#{source_input.version}_linux_x64_#{stack}",
+          "php_#{source_input.version}_linux_x64_#{stack}",
         )
       )
 

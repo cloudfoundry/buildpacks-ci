@@ -1,7 +1,0 @@
----
-extensions:
-  exclusions:
-    - name: sodium
-native_modules:
-  exclusions:
-    - name: libsodium
