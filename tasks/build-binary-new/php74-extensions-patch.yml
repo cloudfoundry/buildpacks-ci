@@ -1,13 +1,16 @@
 ---
+native_modules:
+  exclusions:
+    - name: cassandracppdriver
+    - name: libmemcached
+    - name: unixodbc
 extensions:
   exclusions:
-    - name: libz
-    - name: yaf
     - name: cassandra
     - name: interbase
     - name: recode
     - name: wddx
-    - name: phalcon
+    - name: geoip
   additions:
     - name: gd
       version: nil

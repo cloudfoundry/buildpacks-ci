@@ -1,7 +1,5 @@
 ---
 extensions:
-  exclusions:
-    - name: libz
   additions:
     - name: gd
       version: nil
