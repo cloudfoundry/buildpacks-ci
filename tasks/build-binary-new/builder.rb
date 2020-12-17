@@ -412,6 +412,23 @@ module DependencyBuild
       end
       File.join(built_path, old_filename)
     end
+
+    def build_curl(source_input)
+      built_path = File.join(Dir.pwd, 'built')
+      Dir.mkdir(built_path)
+
+      Dir.chdir('source') do
+        Runner.run('tar', 'zxf', "curl-#{source_input.version}.tar.gz")
+        Dir.chdir("curl-#{source_input.version}") do
+          Runner.run('./configure', "--prefix=#{built_path}")
+          Runner.run('make')
+          Runner.run('make install')
+        end
+      end
+      old_filename = "#{source_input.name}-#{source_input.version}.tgz"
+      Runner.run('tar', '-C', built_path, '-czf', old_filename, '.')
+      File.join(Dir.pwd, old_filename)
+    end
   end
 end
 
@@ -957,6 +974,15 @@ class Builder
           )
       )
       out_data[:source_pgp] = source_pgp
+    when 'curl'
+      old_file_path = DependencyBuild.build_curl source_input
+      out_data.merge!(
+          artifact_output.move_dependency(
+              source_input.name,
+              old_file_path,
+              "#{filename_prefix}_linux_noarch_#{stack}",
+          )
+      )
     else
       raise("Dependency: #{source_input.name} is not currently supported")
     end
