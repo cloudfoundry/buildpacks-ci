@@ -429,6 +429,24 @@ module DependencyBuild
       Runner.run('tar', '-C', built_path, '-czf', old_filename, '.')
       File.join(Dir.pwd, old_filename)
     end
+
+    def build_tini(source_input)
+      built_path = File.join(Dir.pwd, 'built')
+      Dir.mkdir(built_path)
+      Dir.mkdir(File.join(built_path, 'bin'))
+
+      Dir.chdir('source') do
+        Runner.run('tar', 'zxf', source_input.version)
+        Dir.chdir(Dir.glob('krallin-tini-*').first) do
+          Runner.run('cmake .')
+          Runner.run('make')
+          Runner.run("mv tini #{built_path}/bin")
+        end
+      end
+      old_filename = "#{source_input.name}-#{source_input.version}.tgz"
+      Runner.run('tar', '-C', built_path, '-czf', old_filename, 'bin')
+      File.join(Dir.pwd, old_filename)
+    end
   end
 end
 
@@ -976,6 +994,15 @@ class Builder
       out_data[:source_pgp] = source_pgp
     when 'curl'
       old_file_path = DependencyBuild.build_curl source_input
+      out_data.merge!(
+          artifact_output.move_dependency(
+              source_input.name,
+              old_file_path,
+              "#{filename_prefix}_linux_noarch_#{stack}",
+          )
+      )
+    when 'tini'
+      old_file_path = DependencyBuild.build_tini source_input
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
