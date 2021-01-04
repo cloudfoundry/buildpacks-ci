@@ -431,10 +431,6 @@ dependencies:
     buildpacks:
       php:
         lines:
-          - line: 7.2.X
-            match: 7.2.\d+
-            deprecation_date: 2020-11-30
-            link: http://php.net/supported-versions.php
           - line: 7.3.X
             match: 7.3.\d+
             deprecation_date: 2021-12-06
@@ -446,10 +442,6 @@ dependencies:
         removal_strategy: keep_latest_released
       php-dist-cnb:
         lines:
-          - line: 7.2.X
-            match: 7.2.\d+
-            deprecation_date: 2020-11-30
-            link: http://php.net/supported-versions.php
           - line: 7.3.X
             match: 7.3.\d+
             deprecation_date: 2021-12-06

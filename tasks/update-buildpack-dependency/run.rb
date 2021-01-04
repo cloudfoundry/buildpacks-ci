@@ -183,11 +183,7 @@ end
 #   Update the default version for the relevant line to this version of PHP (if !rebuilt)
 php_defaults = nil
 if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
-  update_default = false
   case resource_version
-  when /^7.2/
-    varname = 'PHP_72_LATEST'
-    update_default = true
   when /^7.3/
     varname = 'PHP_73_LATEST'
   when /^7.4/
@@ -199,10 +195,6 @@ if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
 
   php_defaults = JSON.parse(open('buildpack/defaults/options.json').read)
   php_defaults[varname] = resource_version
-  if update_default
-    php_defaults['PHP_DEFAULT'] = resource_version
-    manifest['default_versions'] = PHPManifest.update_defaults(manifest, source_name, resource_version)
-  end
 end
 
 #
