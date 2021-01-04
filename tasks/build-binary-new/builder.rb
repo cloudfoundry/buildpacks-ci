@@ -686,10 +686,14 @@ class Builder
 
     when 'setuptools'
       results = Sha.check_sha(source_input)
-      filename = 'artifacts/temp_file.zip'
+      filename = 'artifacts/temp_' + "#{source_input.url}".split('/').last
       File.write(filename, results[0])
 
-      Archive.strip_top_level_directory_from_zip(filename, Dir.pwd)
+      if "#{source_input.url}".end_with?(".tar.gz", ".tgz")
+        Archive.strip_top_level_directory_from_tar(filename)
+      else
+        Archive.strip_top_level_directory_from_zip(filename, Dir.pwd)
+      end
 
       out_data.merge!(
           artifact_output.move_dependency(
