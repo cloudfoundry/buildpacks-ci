@@ -1,7 +1,7 @@
 require "openssl"
 require "http/client"
 require "./base"
-require "./semantic_version"
+require "./semver"
 
 module Depwatcher
   class GithubReleases < Base
@@ -41,7 +41,7 @@ module Depwatcher
         (r.prerelease && !allow_prerelease) || r.draft || r.ref.match /[a-zA-Z]+.*$/
       end.map do |r|
         Internal.new(r.ref) if r.ref != ""
-      end.compact.sort_by { |i| SemanticVersion.new(i.ref) }
+      end.compact.sort_by { |i| Semver.new(i.ref) }
     end
 
     def in(repo : String, ext : String, ref : String, dir : String) : Release

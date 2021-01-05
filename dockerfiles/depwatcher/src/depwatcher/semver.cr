@@ -1,4 +1,4 @@
-class SemanticVersion
+class Semver
   include Comparable(self)
 
   getter original : String
@@ -36,11 +36,11 @@ class SemanticVersion
 end
 
 # NOTE: Keep in sync with 'tasks/build-binary-new/create-new-version-line-story.rb'!
-class SemanticVersionFilter
+class SemverFilter
   def initialize(@filter_string : String)
   end
 
-  def match(semver : SemanticVersion) : Bool
+  def match(semver : Semver) : Bool
     semver_string : String = "#{semver.major}.#{semver.minor}.#{semver.patch}"
     first_x_idx = @filter_string.index("X")
     if first_x_idx.nil?

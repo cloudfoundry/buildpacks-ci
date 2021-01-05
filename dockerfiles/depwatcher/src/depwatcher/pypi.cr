@@ -1,5 +1,5 @@
 require "./base"
-require "./semantic_version"
+require "./semver"
 
 module Depwatcher
   class Pypi < Base
@@ -35,7 +35,7 @@ module Depwatcher
     def check(name : String) : Array(Internal)
       releases(name).map do |version, _|
         Internal.new(version)
-      end.sort_by { |i| SemanticVersion.new(i.ref) }.last(10)
+      end.sort_by { |i| Semver.new(i.ref) }.last(10)
     end
 
     def in(name : String, ref : String) : Release
@@ -52,7 +52,7 @@ module Depwatcher
       response = client.get("https://pypi.org/pypi/#{name}/json").body
       External.from_json(response).releases
         .select do |v|
-          semver = SemanticVersion.new(v)
+          semver = Semver.new(v)
           keep = semver.is_final_release?
           keep
         end

@@ -1,5 +1,5 @@
 require "./base"
-require "./semantic_version"
+require "./semver"
 require "xml"
 require "http/request"
 
@@ -26,7 +26,7 @@ module Depwatcher
         m = href.match(/^CURRENT-IS-([\d\.]+)/)
         version = m[1] if m
         Internal.new(version) if version
-      end.compact.sort_by { |i| SemanticVersion.new(i.ref) }.last(10)
+      end.compact.sort_by { |i| Semver.new(i.ref) }.last(10)
     end
 
     def in(ref : String) : Release

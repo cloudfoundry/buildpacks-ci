@@ -10,11 +10,11 @@ targets:
   in:
     main: src/in.cr
 
-crystal: 0.23.1
+crystal: 0.32.1
 
 license: MIT
 
 dependencies:
   spec2:
     github: waterlink/spec2.cr
-    version: ~> 0.9
+    version: ~> 0.11

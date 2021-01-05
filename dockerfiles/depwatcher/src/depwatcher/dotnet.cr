@@ -1,5 +1,5 @@
 require "./base"
-require "./semantic_version"
+require "./semver"
 require "./github_releases"
 require "./github_tags"
 
@@ -93,7 +93,7 @@ module Depwatcher
       releases_url = "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/#{channel_version}/releases.json"
       releases = DotnetReleasesJSON.from_json(client.get(releases_url).body).releases
       get_versions(releases, version).select do |v|
-        SemanticVersion.new(v).is_final_release?
+        Semver.new(v).is_final_release?
       end.uniq.map { |v| Internal.new(v) }.reverse
     end
 

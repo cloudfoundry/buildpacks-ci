@@ -1,5 +1,5 @@
 require "./base"
-require "./semantic_version"
+require "./semver"
 require "xml"
 require "http/request"
 
@@ -30,7 +30,7 @@ module Depwatcher
     def check() : Array(Internal)
       get_versions.map { |v|
         Internal.new(v)
-      }.sort_by { |i| SemanticVersion.new(i.ref) }
+      }.sort_by { |i| Semver.new(i.ref) }
     end
 
     def in(ref : String) : Release

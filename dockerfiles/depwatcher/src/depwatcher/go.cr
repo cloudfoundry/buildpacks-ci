@@ -19,7 +19,7 @@ module Depwatcher
     def check() : Array(Internal)
       releases.map do |r|
         Internal.new(r.ref)
-      end.sort_by { |i| SemanticVersion.new(i.ref) }
+      end.sort_by { |i| Semver.new(i.ref) }
     end
 
     def in(ref : String) : Release

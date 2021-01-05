@@ -1,5 +1,5 @@
 require "./base"
-require "./semantic_version"
+require "./semver"
 require "json"
 require "http/request"
 
