@@ -20,8 +20,8 @@ native_modules:
   #   md5: b3958716b4e53ddc5992e6c49d97e819
   #   klass: LibmemcachedRecipe
   - name: librdkafka
-    version: 1.5.0
-    md5: 451dbf0516e3a8ed4b9bc6296ceb78cf
+    version: 1.5.2
+    md5: f5272e30ab6556967ed82a58d2ad35e1
     klass: LibRdKafkaRecipe
   - name: cassandracppdriver
     version: 2.15.3
@@ -39,8 +39,8 @@ native_modules:
 extensions:
   #standard pecl
   - name: apcu
-    version: 5.1.18
-    md5: bcd59a2be0489c75d975e015bd32fc21
+    version: 5.1.19
+    md5: a868ee0b4179fb240cf6eb7e49723794
     klass: PeclRecipe
   - name: cassandra
     version: 1.3.2
@@ -51,8 +51,8 @@ extensions:
   #   md5: 4f5f4b8a41a5802de6591c79b85cc838
   #   klass: GeoipRecipe
   - name: igbinary
-    version: 3.1.5
-    md5: 2cf0e230a43ca2f5a750b118e9f77ff2
+    version: 3.1.6
+    md5: 9d1e0530025c7f129f46c81f7581af98
     klass: PeclRecipe
   - name: gnupg
     version: 1.4.0
@@ -71,12 +71,12 @@ extensions:
     md5: 17d77e3c03c25acaf51926a9020a4596
     klass: PeclRecipe
   - name: mongodb
-    version: 1.8.0
-    md5: ea1b3198a1de04d26d1975a948b3f3a9
+    version: 1.9.0
+    md5: 780f206f6a9399b5a4cabfd304f6ecff
     klass: PeclRecipe
   - name: msgpack
-    version: 2.1.1
-    md5: f378b5031916d006a043b024e1bfca18
+    version: 2.1.2
+    md5: 9bcaad416fc2b3c6ffd6966e0ae30313
     klass: PeclRecipe
   - name: oauth
     version: 2.0.7
@@ -95,12 +95,12 @@ extensions:
     md5: e687989a47cefd6cf9005e1f41637289
     klass: PeclRecipe
   - name: rdkafka
-    version: 4.0.3
-    md5: 766efc78dd01a4a65c8200e4abee957d
+    version: 4.1.1
+    md5: f4b39d7f6b4c489bfb4c5532f71046c2
     klass: PeclRecipe
   - name: redis
-    version: 5.3.1
-    md5: 5a90747eea1268dd2f7f5ebe8c7ff013
+    version: 5.3.2
+    md5: 8531a792d43a60dd03f87eec7b65b381
     klass: RedisPeclRecipe
   - name: ssh2
     version: 1.2
@@ -115,16 +115,16 @@ extensions:
     md5: 507c30184fde736e924cee20c56df061
     klass: PeclRecipe
   - name: xdebug
-    version: 2.9.8
-    md5: a2b5199f11457099d5c81d02ababb87e
+    version: 3.0.1
+    md5: 52891d89de6829fa8dba1132b8c66f75
     klass: PeclRecipe
   - name: yaf
     version: 3.2.5
     md5: 8cd86db117f65131d212cac1c60065a3
     klass: PeclRecipe
   - name: yaml
-    version: 2.1.0
-    md5: f93f4d03968c0ceb33c9b62dcb41d6b4
+    version: 2.2.0
+    md5: cd8d34b87d9e147691d66590c403ba46
     klass: PeclRecipe
   - name: memcached
     version: 3.1.5
