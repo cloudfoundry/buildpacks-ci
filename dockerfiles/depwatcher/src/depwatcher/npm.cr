@@ -1,5 +1,5 @@
 require "./base"
-require "./semantic_version"
+require "./semver"
 
 module Depwatcher
   class Npm < Base
@@ -34,7 +34,7 @@ module Depwatcher
     def check(name : String) : Array(Internal)
       releases(name).map do |_, r|
         Internal.new(r.version)
-      end.sort_by { |i| SemanticVersion.new(i.ref) }.last(10)
+      end.sort_by { |i| Semver.new(i.ref) }.last(10)
     end
 
     def in(name : String, ref : String) : Release

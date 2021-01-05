@@ -20,7 +20,7 @@ module Depwatcher
       regexp = "^release\-\\d+\.\\d+\.\\d+$"
       GithubTags.new(client).matched_tags(name, regexp).map do |r|
         Internal.new(r.name.gsub(/^release\-/, ""))
-      end.sort_by { |i| SemanticVersion.new(i.ref) }
+      end.sort_by { |i| Semver.new(i.ref) }
     end
 
     def in(ref : String) : Release

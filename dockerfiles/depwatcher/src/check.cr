@@ -72,18 +72,18 @@ end
 # Filter out irrelevant versions
 version_filter = source["version_filter"]?
 if version_filter
-  filter = SemanticVersionFilter.new(version_filter.to_s)
+  filter = SemverFilter.new(version_filter.to_s)
   versions.select! do |v|
-    filter.match(SemanticVersion.new(v.ref))
+    filter.match(Semver.new(v.ref))
   end
 end
 
 # Filter out versions concourse already knows about
 version = data["version"]?
 if version
-  ref = SemanticVersion.new(version["ref"].to_s) rescue nil
+  ref = Semver.new(version["ref"].to_s) rescue nil
   versions.reject! do |v|
-    SemanticVersion.new(v.ref) < ref
+    Semver.new(v.ref) < ref
   end if ref
 end
 

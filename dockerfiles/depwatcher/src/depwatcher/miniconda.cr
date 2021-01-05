@@ -1,5 +1,5 @@
 require "./base"
-require "./semantic_version"
+require "./semver"
 require "xml"
 require "http/request"
 
@@ -18,7 +18,7 @@ module Depwatcher
 
     def check(python_version : String) : Array(Internal)
       generation = python_version.split(".")[0]
-      releases(generation, python_version) { |m, _| Internal.new(m[1]) }.sort_by { |i| SemanticVersion.new(i.ref) }
+      releases(generation, python_version) { |m, _| Internal.new(m[1]) }.sort_by { |i| Semver.new(i.ref) }
     end
 
     def in(python_version : String, ref : String) : Release

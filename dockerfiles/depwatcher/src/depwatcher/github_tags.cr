@@ -1,5 +1,5 @@
 require "./base"
-require "./semantic_version"
+require "./semver"
 
 module Depwatcher
   class GithubTags < Base
@@ -36,7 +36,7 @@ module Depwatcher
     def check(repo : String, tag_regex : String) : Array(Internal)
       matched_tags(repo, tag_regex)
       .map { |t| Internal.new(t.name) }
-      .sort_by { |i| SemanticVersion.new(i.ref) }
+      .sort_by { |i| Semver.new(i.ref) }
     end
 
     def in(repo : String, ref : String) : Tag
