@@ -46,10 +46,9 @@ module Depwatcher
     def old_versions() : Array(Internal)
       response = client.get("https://secure.php.net/releases/").body
       doc = XML.parse_html(response)
-      links = doc.xpath_nodes("//h2[starts-with(text(),\"7.\")]")
-      links.map { |e| e.content }.map { |v|
-        Internal.new(v)
-      }
+      php7_versions = doc.xpath_nodes("//h2[starts-with(text(),\"7.\")]").map { |e| Internal.new(e.content) }
+      php8_versions = doc.xpath_nodes("//h2[starts-with(text(),\"8.\")]").map { |e| Internal.new(e.content) }
+      [php7_versions, php8_versions].flatten
     end
   end
 end

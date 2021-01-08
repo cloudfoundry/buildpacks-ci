@@ -3,45 +3,46 @@
 <head>
 
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>PHP: Downloads</title>
 
- <link rel="shortcut icon" href="https://php.net/favicon.ico">
+ <link rel="shortcut icon" href="https://www.php.net/favicon.ico">
  <link rel="search" type="application/opensearchdescription+xml" href="http://php.net/phpnetimprovedsearch.src" title="Add PHP.net search">
- <link rel="alternate" type="application/atom+xml" href="https://php.net/releases/feed.php" title="PHP Release feed">
- <link rel="alternate" type="application/atom+xml" href="https://php.net/feed.atom" title="PHP: Hypertext Preprocessor">
+ <link rel="alternate" type="application/atom+xml" href="https://www.php.net/releases/feed.php" title="PHP Release feed">
+ <link rel="alternate" type="application/atom+xml" href="https://www.php.net/feed.atom" title="PHP: Hypertext Preprocessor">
 
- <link rel="canonical" href="http://php.net/downloads.php">
- <link rel="shorturl" href="http://php.net/downloads">
- <link rel="alternate" href="http://php.net/downloads" hreflang="x-default">
+ <link rel="canonical" href="https://www.php.net/downloads.php">
+ <link rel="shorturl" href="https://www.php.net/downloads">
+ <link rel="alternate" href="https://www.php.net/downloads" hreflang="x-default">
 
 
 
-<link rel="stylesheet" type="text/css" href="https://php.net/cached.php?t=1421837618&amp;f=/fonts/Fira/fira.css" media="screen">
-<link rel="stylesheet" type="text/css" href="https://php.net/cached.php?t=1421837618&amp;f=/fonts/Font-Awesome/css/fontello.css" media="screen">
-<link rel="stylesheet" type="text/css" href="https://php.net/cached.php?t=1478800802&amp;f=/styles/theme-base.css" media="screen">
-<link rel="stylesheet" type="text/css" href="https://php.net/cached.php?t=1521070803&amp;f=/styles/theme-medium.css" media="screen">
+<link rel="stylesheet" type="text/css" href="/cached.php?t=1539771603&amp;f=/fonts/Fira/fira.css" media="screen">
+<link rel="stylesheet" type="text/css" href="/cached.php?t=1539765004&amp;f=/fonts/Font-Awesome/css/fontello.css" media="screen">
+<link rel="stylesheet" type="text/css" href="/cached.php?t=1606338002&amp;f=/styles/theme-base.css" media="screen">
+<link rel="stylesheet" type="text/css" href="/cached.php?t=1540425603&amp;f=/styles/theme-medium.css" media="screen">
 
  <!--[if lte IE 7]>
- <link rel="stylesheet" type="text/css" href="https://php.net/styles/workarounds.ie7.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="https://www.php.net/styles/workarounds.ie7.css" media="screen">
  <![endif]-->
 
  <!--[if lte IE 8]>
- <script type="text/javascript">
+ <script>
   window.brokenIE = true;
  </script>
  <![endif]-->
 
  <!--[if lte IE 9]>
- <link rel="stylesheet" type="text/css" href="https://php.net/styles/workarounds.ie9.css" media="screen">
+ <link rel="stylesheet" type="text/css" href="https://www.php.net/styles/workarounds.ie9.css" media="screen">
  <![endif]-->
 
  <!--[if IE]>
- <script type="text/javascript" src="https://php.net/js/ext/html5.js"></script>
+ <script src="https://www.php.net/js/ext/html5.js"></script>
  <![endif]-->
 
- <base href="https://php.net/downloads.php">
+ <base href="https://www.php.net/downloads.php">
+
 
 </head>
 <body class="downloads ">
@@ -56,6 +57,11 @@
       <li class=""><a href="/docs.php">Documentation</a></li>
       <li class=""><a href="/get-involved" >Get Involved</a></li>
       <li class=""><a href="/support">Help</a></li>
+      <li class="">
+        <a href="/releases/8.0/index.php">
+          <img src="/images/php8/logo_php8.svg" alt="php8" height="22" width="60">
+        </a>
+      </li>
     </ul>
     <form class="navbar-search" id="topsearch" action="/search.php">
       <input type="hidden" name="show" value="quickref">
@@ -64,7 +70,7 @@
   </div>
   <div id="flash-message"></div>
 </nav>
-<div class="headsup"><a href='/index.php#id2018-06-25-1'>PHP 7.1.19 Released</a></div>
+<div class="headsup"><a href='/index.php#id2021-01-07-3'>PHP 8.0.1 Released!</a></div>
 <nav id="trick"><div><dl>
 <dt><a href='/manual/en/getting-started.php'>Getting Started</a></dt>
 	<dd><a href='/manual/en/introduction.php'>Introduction</a></dd>
@@ -83,6 +89,7 @@
 	<dd><a href='/manual/en/language.errors.php'>Errors</a></dd>
 	<dd><a href='/manual/en/language.exceptions.php'>Exceptions</a></dd>
 	<dd><a href='/manual/en/language.generators.php'>Generators</a></dd>
+	<dd><a href='/manual/en/language.attributes.php'>Attributes</a></dd>
 	<dd><a href='/manual/en/language.references.php'>References Explained</a></dd>
 	<dd><a href='/manual/en/reserved.variables.php'>Predefined Variables</a></dd>
 	<dd><a href='/manual/en/reserved.exceptions.php'>Predefined Exceptions</a></dd>
@@ -114,7 +121,6 @@
 	<dd><a href='/manual/en/features.remote-files.php'>Using remote files</a></dd>
 	<dd><a href='/manual/en/features.connection-handling.php'>Connection handling</a></dd>
 	<dd><a href='/manual/en/features.persistent-connections.php'>Persistent Database Connections</a></dd>
-	<dd><a href='/manual/en/features.safe-mode.php'>Safe Mode</a></dd>
 	<dd><a href='/manual/en/features.commandline.php'>Command line usage</a></dd>
 	<dd><a href='/manual/en/features.gc.php'>Garbage Collection</a></dd>
 	<dd><a href='/manual/en/features.dtrace.php'>DTrace Dynamic Tracing</a></dd>
@@ -126,7 +132,6 @@
 	<dd><a href='/manual/en/refs.remote.auth.php'>Authentication Services</a></dd>
 	<dd><a href='/manual/en/refs.utilspec.cmdline.php'>Command Line Specific Extensions</a></dd>
 	<dd><a href='/manual/en/refs.compression.php'>Compression and Archive Extensions</a></dd>
-	<dd><a href='/manual/en/refs.creditcard.php'>Credit Card Processing</a></dd>
 	<dd><a href='/manual/en/refs.crypto.php'>Cryptography Extensions</a></dd>
 	<dd><a href='/manual/en/refs.database.php'>Database Extensions</a></dd>
 	<dd><a href='/manual/en/refs.calendar.php'>Date and Time Related Extensions</a></dd>
@@ -184,111 +189,85 @@
 
 <div id="layout" class="clearfix">
   <section id="layout-content">
+<a id="v8"></a>
+    
+  <h3 id="v8.0.1" class="title">
+    <span class="release-state">Current Stable</span>
+    PHP 8.0.1    (<a href="/ChangeLog-8.php#8.0.1" class="changelog">Changelog</a>)
+  </h3>
+  <div class="content-box">
+
+    <ul>
+              <li>
+          <a href="/distributions/php-8.0.1.tar.gz">php-8.0.1.tar.gz</a> <a href="/distributions/php-8.0.1.tar.gz.asc">(sig)</a> [15,709Kb]          <span class="releasedate">07 Jan 2021</span>
+          <span class="sha256">f1fee0429aa2cce6bc5df5d7e65386e266b0aab8a5fad7882d10eb833d2f5376</span>                  </li>
+              <li>
+          <a href="/distributions/php-8.0.1.tar.bz2">php-8.0.1.tar.bz2</a> <a href="/distributions/php-8.0.1.tar.bz2.asc">(sig)</a> [12,635Kb]          <span class="releasedate">07 Jan 2021</span>
+          <span class="sha256">c44e76af40d133de64564f9caf5daec52bbe84c1ccb4e4500a62233d614ebdee</span>                  </li>
+              <li>
+          <a href="/distributions/php-8.0.1.tar.xz">php-8.0.1.tar.xz</a> <a href="/distributions/php-8.0.1.tar.xz.asc">(sig)</a> [10,393Kb]          <span class="releasedate">07 Jan 2021</span>
+          <span class="sha256">208b3330af881b44a6a8c6858d569c72db78dab97810332978cc65206b0ec2dc</span>                  </li>
+            <li>
+        <a href="https://windows.php.net/download#php-8.0">
+          Windows downloads
+        </a>
+      </li>
+    </ul>
+
+    <a href="#gpg-8.0">GPG Keys for PHP 8.0</a>
+  </div>
 <a id="v7"></a>
     
-  <h3 id="v7.2.7" class="title">
+  <h3 id="v7.4.14" class="title">
     <span class="release-state">Current Stable</span>
-    PHP 7.2.7    (<a href="/ChangeLog-7.php#7.2.7" class="changelog">Changelog</a>)
+    PHP 7.4.14    (<a href="/ChangeLog-7.php#7.4.14" class="changelog">Changelog</a>)
   </h3>
   <div class="content-box">
 
     <ul>
               <li>
-          <a href="/get/php-7.2.7.tar.bz2/from/a/mirror">php-7.2.7.tar.bz2</a> <a href="/get/php-7.2.7.tar.bz2.asc/from/a/mirror">(sig)</a> [14,698Kb]          <span class="releasedate">21 Jun 2018</span>
-          <span class="sha256">cc81675a96af4dd18d8ffc02f26a36c622abadf86af7ecfea7bcde8d3c96d5a3</span>                  </li>
+          <a href="/distributions/php-7.4.14.tar.gz">php-7.4.14.tar.gz</a> <a href="/distributions/php-7.4.14.tar.gz.asc">(sig)</a> [16,189Kb]          <span class="releasedate">07 Jan 2021</span>
+          <span class="sha256">d359183e2436f4ab30b70d4fbd881b5705a46b2e68cc6069fe91cd63d6e98e13</span>                  </li>
               <li>
-          <a href="/get/php-7.2.7.tar.gz/from/a/mirror">php-7.2.7.tar.gz</a> <a href="/get/php-7.2.7.tar.gz.asc/from/a/mirror">(sig)</a> [19,153Kb]          <span class="releasedate">21 Jun 2018</span>
-          <span class="sha256">014f0560cfa22e6301b0024a6fd888c3612a0dc102ff355fa2b49544d16d43b1</span>                  </li>
+          <a href="/distributions/php-7.4.14.tar.bz2">php-7.4.14.tar.bz2</a> <a href="/distributions/php-7.4.14.tar.bz2.asc">(sig)</a> [12,469Kb]          <span class="releasedate">07 Jan 2021</span>
+          <span class="sha256">6889ca0605adee3aa7077508cd79fcef1dbd88461cdf25e7c1a86997b8d0a1f6</span>                  </li>
               <li>
-          <a href="/get/php-7.2.7.tar.xz/from/a/mirror">php-7.2.7.tar.xz</a> <a href="/get/php-7.2.7.tar.xz.asc/from/a/mirror">(sig)</a> [11,831Kb]          <span class="releasedate">21 Jun 2018</span>
-          <span class="sha256">eb01c0153b3baf1f64b8b044013ce414b52fede222df3f509e8ff209478f31f0</span>                  </li>
+          <a href="/distributions/php-7.4.14.tar.xz">php-7.4.14.tar.xz</a> <a href="/distributions/php-7.4.14.tar.xz.asc">(sig)</a> [10,085Kb]          <span class="releasedate">07 Jan 2021</span>
+          <span class="sha256">f9f3c37969fcd9006c1dbb1dd76ab53f28c698a1646fa2dde8547c3f45e02886</span>                  </li>
             <li>
-        <a href="http://windows.php.net/download#php-7.2">
+        <a href="https://windows.php.net/download#php-7.4">
           Windows downloads
         </a>
       </li>
     </ul>
 
-    <a href="#gpg-7.2">GPG Keys for PHP 7.2</a>
+    <a href="#gpg-7.4">GPG Keys for PHP 7.4</a>
   </div>
     
-  <h3 id="v7.1.19" class="title">
+  <h3 id="v7.3.26" class="title">
     <span class="release-state">Old Stable</span>
-    PHP 7.1.19    (<a href="/ChangeLog-7.php#7.1.19" class="changelog">Changelog</a>)
+    PHP 7.3.26    (<a href="/ChangeLog-7.php#7.3.26" class="changelog">Changelog</a>)
   </h3>
   <div class="content-box">
 
     <ul>
               <li>
-          <a href="/get/php-7.1.19.tar.bz2/from/a/mirror">php-7.1.19.tar.bz2</a> <a href="/get/php-7.1.19.tar.bz2.asc/from/a/mirror">(sig)</a> [14,792Kb]          <span class="releasedate">21 Jun 2018</span>
-          <span class="sha256">13c43e7be3040ad53f192b0770c7ed99e5b3e348dfc6674666179d557fd770f3</span>                  </li>
+          <a href="/distributions/php-7.3.26.tar.gz">php-7.3.26.tar.gz</a> <a href="/distributions/php-7.3.26.tar.gz.asc">(sig)</a> [19,214Kb]          <span class="releasedate">07 Dec 2021</span>
+          <span class="sha256">2b55c2a54d1825e7c3feaf44cf42cdf782b8d5c611314172fbf8e234960b6a99</span>                  </li>
               <li>
-          <a href="/get/php-7.1.19.tar.gz/from/a/mirror">php-7.1.19.tar.gz</a> <a href="/get/php-7.1.19.tar.gz.asc/from/a/mirror">(sig)</a> [19,021Kb]          <span class="releasedate">21 Jun 2018</span>
-          <span class="sha256">e1ae477b72bed02cdcb04f0157b8f8767bd4f6030416ae06408b4f6d85ee66a1</span>                  </li>
+          <a href="/distributions/php-7.3.26.tar.bz2">php-7.3.26.tar.bz2</a> <a href="/distributions/php-7.3.26.tar.bz2.asc">(sig)</a> [14,791Kb]          <span class="releasedate">07 Dec 2021</span>
+          <span class="sha256">371e5a7c8154fd3c52b14baace5f7d04c4bbb8e841d356c54a2b6a688db39d4e</span>                  </li>
               <li>
-          <a href="/get/php-7.1.19.tar.xz/from/a/mirror">php-7.1.19.tar.xz</a> <a href="/get/php-7.1.19.tar.xz.asc/from/a/mirror">(sig)</a> [11,929Kb]          <span class="releasedate">21 Jun 2018</span>
-          <span class="sha256">7cab88f269b90a8a38dbcccf3ec0d5c6eba86122431a53eaa94405bbb60370a8</span>                  </li>
+          <a href="/distributions/php-7.3.26.tar.xz">php-7.3.26.tar.xz</a> <a href="/distributions/php-7.3.26.tar.xz.asc">(sig)</a> [11,854Kb]          <span class="releasedate">07 Dec 2021</span>
+          <span class="sha256">d93052f4cb2882090b6a37fd1e0c764be1605a2461152b7f6b8f04fa48875208</span>                  </li>
             <li>
-        <a href="http://windows.php.net/download#php-7.1">
+        <a href="https://windows.php.net/download#php-7.3">
           Windows downloads
         </a>
       </li>
     </ul>
 
-    <a href="#gpg-7.1">GPG Keys for PHP 7.1</a>
-  </div>
-    
-  <h3 id="v7.0.30" class="title">
-    <span class="release-state">Old Stable</span>
-    PHP 7.0.30    (<a href="/ChangeLog-7.php#7.0.30" class="changelog">Changelog</a>)
-  </h3>
-  <div class="content-box">
-
-    <ul>
-              <li>
-          <a href="/get/php-7.0.30.tar.bz2/from/a/mirror">php-7.0.30.tar.bz2</a> <a href="/get/php-7.0.30.tar.bz2.asc/from/a/mirror">(sig)</a> [14,298Kb]          <span class="releasedate">26 Apr 2018</span>
-          <span class="sha256">213f38400c239b8fab2f6f59d6f4d4bd463d0a75bd4edf723dd4d5fea8850b50</span>                  </li>
-              <li>
-          <a href="/get/php-7.0.30.tar.gz/from/a/mirror">php-7.0.30.tar.gz</a> <a href="/get/php-7.0.30.tar.gz.asc/from/a/mirror">(sig)</a> [18,378Kb]          <span class="releasedate">26 Apr 2018</span>
-          <span class="sha256">54e7615205123b940b996300bf99c707c2317b6b78388061a204b23ab3388a26</span>                  </li>
-              <li>
-          <a href="/get/php-7.0.30.tar.xz/from/a/mirror">php-7.0.30.tar.xz</a> <a href="/get/php-7.0.30.tar.xz.asc/from/a/mirror">(sig)</a> [11,748Kb]          <span class="releasedate">26 Apr 2018</span>
-          <span class="sha256">c90892fb68ab9b8476519658d3f78f6388f2609ae1309bdc2a2e1cc9f92dd686</span>                  </li>
-            <li>
-        <a href="http://windows.php.net/download#php-7.0">
-          Windows downloads
-        </a>
-      </li>
-    </ul>
-
-    <a href="#gpg-7.0">GPG Keys for PHP 7.0</a>
-  </div>
-<a id="v5"></a>
-    
-  <h3 id="v5.6.36" class="title">
-    <span class="release-state">Current Stable</span>
-    PHP 5.6.36    (<a href="/ChangeLog-5.php#5.6.36" class="changelog">Changelog</a>)
-  </h3>
-  <div class="content-box">
-
-    <ul>
-              <li>
-          <a href="/get/php-5.6.36.tar.bz2/from/a/mirror">php-5.6.36.tar.bz2</a> <a href="/get/php-5.6.36.tar.bz2.asc/from/a/mirror">(sig)</a> [14,705Kb]          <span class="releasedate">26 Apr 2018</span>
-          <span class="sha256">626a0e3f5d8a0e686a2b930f0dd3a0601fe3dcb5e43dd0e8c3fab631e64e172a</span>                  </li>
-              <li>
-          <a href="/get/php-5.6.36.tar.gz/from/a/mirror">php-5.6.36.tar.gz</a> <a href="/get/php-5.6.36.tar.gz.asc/from/a/mirror">(sig)</a> [18,849Kb]          <span class="releasedate">26 Apr 2018</span>
-          <span class="sha256">06086a8b6a9964ef8009c4d9176b4eeb0c564ea39c1213f015e24f3466d2d69f</span>                  </li>
-              <li>
-          <a href="/get/php-5.6.36.tar.xz/from/a/mirror">php-5.6.36.tar.xz</a> <a href="/get/php-5.6.36.tar.xz.asc/from/a/mirror">(sig)</a> [12,175Kb]          <span class="releasedate">26 Apr 2018</span>
-          <span class="sha256">18f536bf548e909b4e980379d0c4e56d024b2b1eb1c9768fd169360491f1d6dd</span>                  </li>
-            <li>
-        <a href="http://windows.php.net/download#php-5.6">
-          Windows downloads
-        </a>
-      </li>
-    </ul>
-
-    <a href="#gpg-5.6">GPG Keys for PHP 5.6</a>
+    <a href="#gpg-7.3">GPG Keys for PHP 7.3</a>
   </div>
 
 <hr>
@@ -299,56 +278,46 @@ The following official GnuPG keys of the current PHP Release Manager can be used
 to verify the tags:
 </p>
 
-        <h3 id="gpg-7.2" class="content-header">PHP 7.2</h3>
+        <h3 id="gpg-8.0" class="content-header">PHP 8.0</h3>
     <div class="content-box">
       <pre>
 pub   4096R/70D12172 2017-04-14 [expires: 2024-04-21]
       Key fingerprint = 1729 F839 38DA 44E2 7BA0  F4D3 DBDB 3974 70D1 2172
 uid                  Sara Golemon &lt;pollita@php.net&gt;
 
-pub   4096R/EE5AF27F 2017-05-24 [expires: 2024-05-22]
-      Key fingerprint = B1B4 4D8F 021E 4E2D 6021  E995 DC9F F8D3 EE5A F27F
-uid                  Remi Collet &lt;remi@php.net&gt;      </pre>
+pub   rsa4096 2020-05-09 [SC] [expires: 2024-05-08]
+      BFDD D286 4282 4F81 18EF  7790 9B67 A5C1 2229 118F
+uid           [ultimate] Gabriel Caruso (Release Manager) &lt;carusogabriel@php.net&gt;
+sub   rsa4096 2020-05-09 [E] [expires: 2024-05-08]      </pre>
     </div>
-          <h3 id="gpg-7.1" class="content-header">PHP 7.1</h3>
+          <h3 id="gpg-7.4" class="content-header">PHP 7.4</h3>
     <div class="content-box">
       <pre>
-pub   4096R/7BD5DCD0 2016-05-07
-      Key fingerprint = A917 B1EC DA84 AEC2 B568 FED6 F50A BC80 7BD5 DCD0
-uid                  Davey Shafik &lt;davey@php.net&gt;
+sec   rsa4096 2019-06-11 [SC] [expires: 2029-06-08]
+      5A52880781F755608BF815FC910DEB46F53EA312
+uid           [ultimate] Derick Rethans &lt;gpg@derickrethans.nl&gt;
+uid           [ultimate] Derick Rethans &lt;derick@derickrethans.nl&gt;
+uid           [ultimate] Derick Rethans (GitHub) &lt;github@derickrethans.nl&gt;
+uid           [ultimate] Derick Rethans (PHP) &lt;derick@php.net&gt;
+ssb   rsa4096 2019-06-11 [E] [expires: 2029-06-08]
 
-pub   2048R/31CBD89E 2016-12-08
-      Key fingerprint = 5289 95BF EDFB A719 1D46  839E F9BA 0ADA 31CB D89E
-uid                  Joe Watkins &lt;krakjoe@php.net&gt;
-
-pub   4096R/70D12172 2017-04-14 [expires: 2024-04-21]
-      Key fingerprint = 1729 F839 38DA 44E2 7BA0  F4D3 DBDB 3974 70D1 2172
-uid                  Sara Golemon &lt;pollita@php.net&gt;
-      </pre>
+pub   rsa4096 2019-05-29 [SC] [expires: 2021-05-28]
+      4267 0A7F E4D0 441C 8E46  3234 9E4F DC07 4A4E F02D
+uid           [ultimate] Peter Kokot &lt;petk@php.net&gt;
+sub   rsa4096 2019-05-29 [E] [expires: 2021-05-28]      </pre>
     </div>
-          <h3 id="gpg-7.0" class="content-header">PHP 7.0</h3>
+          <h3 id="gpg-7.3" class="content-header">PHP 7.3</h3>
     <div class="content-box">
       <pre>
-pub   2048R/9C0D5763 2015-06-09 [expires: 2024-06-06]
-      Key fingerprint = 1A4E 8B72 77C4 2E53 DBA9  C7B9 BCAA 30EA 9C0D 5763
-uid                  Anatol Belski &lt;ab@php.net&gt;
+pub   rsa4096/118BCCB6 2018-06-05 [SC] [expires: 2022-06-04]
+      Key fingerprint = CBAF 69F1 73A0 FEA4 B537  F470 D66C 9593 118B CCB6
+uid                  Christoph M. Becker &lt;cmb@php.net&gt;
 
-pub   2048R/33CFC8B3 2014-01-14 [expires: 2020-01-13]
-      Key fingerprint = 6E4F 6AB3 21FD C07F 2C33  2E3A C2BF 0BC4 33CF C8B3
-uid                  Ferenc Kovacs &lt;tyrael@php.net&gt;
-      </pre>
-    </div>
-          <h3 id="gpg-5.6" class="content-header">PHP 5.6</h3>
-    <div class="content-box">
-      <pre>
-pub   2048R/33CFC8B3 2014-01-14 [expires: 2020-01-13]
-      Key fingerprint = 6E4F 6AB3 21FD C07F 2C33  2E3A C2BF 0BC4 33CF C8B3
-uid                  Ferenc Kovacs &lt;tyrael@php.net&gt;
-
-pub   2048R/90D90EC1 2013-07-18 [expire : 2016-07-17]
-      Key fingerprint = 0BD7 8B5F 9750 0D45 0838  F95D FE85 7D9A 90D9 0EC1
-uid                  Julien Pauli &lt;jpauli@php.net&gt;
-      </pre>
+pub   2048D/5DA04B5D 2012-03-19
+      Key fingerprint = F382 5282 6ACD 957E F380  D39F 2F79 56BC 5DA0 4B5D
+uid                  Stanislav Malyshev (PHP key) &lt;smalyshev@gmail.com&gt;
+uid                  Stanislav Malyshev (PHP key) &lt;stas@php.net&gt;
+uid                  Stanislav Malyshev (PHP key) &lt;smalyshev@sugarcrm.com&gt;      </pre>
     </div>
   
 <p>
@@ -379,16 +348,15 @@ uid                  Julien Pauli &lt;jpauli@php.net&gt;
 </aside>
 
   </div><!-- layout -->
-         
+
   <footer>
     <div class="container footer-content">
       <div class="row-fluid">
       <ul class="footmenu">
-        <li><a href="/copyright.php">Copyright &copy; 2001-2018 The PHP Group</a></li>
+        <li><a href="/copyright.php">Copyright &copy; 2001-2021 The PHP Group</a></li>
         <li><a href="/my.php">My PHP.net</a></li>
         <li><a href="/contact.php">Contact</a></li>
         <li><a href="/sites.php">Other PHP.net sites</a></li>
-        <li><a href="/mirrors.php">Mirror sites</a></li>
         <li><a href="/privacy.php">Privacy policy</a></li>
       </ul>
       </div>
@@ -397,16 +365,15 @@ uid                  Julien Pauli &lt;jpauli@php.net&gt;
 
     
  <!-- External and third party libraries. -->
- <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script type="text/javascript" src="https://php.net/cached.php?t=1421837618&amp;f=/js/ext/modernizr.js"></script>
-<script type="text/javascript" src="https://php.net/cached.php?t=1421837618&amp;f=/js/ext/hogan-2.0.0.min.js"></script>
-<script type="text/javascript" src="https://php.net/cached.php?t=1421837618&amp;f=/js/ext/typeahead.min.js"></script>
-<script type="text/javascript" src="https://php.net/cached.php?t=1421837618&amp;f=/js/ext/mousetrap.min.js"></script>
-<script type="text/javascript" src="https://php.net/cached.php?t=1421837618&amp;f=/js/search.js"></script>
-<script type="text/javascript" src="https://php.net/cached.php?t=1516300802&amp;f=/js/common.js"></script>
+ <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="/cached.php?t=1421837618&amp;f=/js/ext/modernizr.js"></script>
+<script src="/cached.php?t=1421837618&amp;f=/js/ext/hogan-2.0.0.min.js"></script>
+<script src="/cached.php?t=1421837618&amp;f=/js/ext/typeahead.min.js"></script>
+<script src="/cached.php?t=1421837618&amp;f=/js/ext/mousetrap.min.js"></script>
+<script src="/cached.php?t=1421837618&amp;f=/js/search.js"></script>
+<script src="/cached.php?t=1607972402&amp;f=/js/common.js"></script>
 
 <a id="toTop" href="javascript:;"><span id="toTopHover"></span><img width="40" height="40" alt="To Top" src="/images/to-top@2x.png"></a>
 
 </body>
 </html>
-
