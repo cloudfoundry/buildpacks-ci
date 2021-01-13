@@ -1,0 +1,19 @@
+# accept user's username as input (e.g. frankieg)
+
+# deploy the buildpacks team OVF template with the svc.buildpacks service account
+date_time=$(date +%s)
+ssh_command="USER=svc.buildpacks nimbus deploy ovf --queue --wait-scheduler buildpacks-concourse-worker-$date_time  NIMBUS_OVF_BASE/svc.buildpacks/buildpacks-concourse-worker/buildpacks-concourse-worker-ovf.ovf"
+ssh ${user_name}@nimbus-gateway bash -c "'$ssh_command'"
+
+# get IP address from output
+ip_json=$(ssh ${user_name}@nimbus-gateway bash -c "'USER=svc.buildpacks nimbus-ctl --outputFormat=json ip svc.buildpacks-buildpacks-concourse-worker-$date_time | grep json_info'")
+ip=$(echo $ip_json | jq '.json_info[]."svc.buildpacks-buildpacks-concourse-worker"')
+# ssh onto the machine and add the worker private key
+
+# get the ATC public key with ssh-keyscan
+
+# (maybe) modify the concourse.service file (e.g. to change the name)
+
+# start the concourse process
+
+# check that the worker has come online
