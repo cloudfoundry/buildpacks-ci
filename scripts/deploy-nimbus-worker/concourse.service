@@ -1,0 +1,17 @@
+[Unit]
+Description=Concourse Worker
+[Service]
+ExecStart=/usr/local/bin/concourse worker \
+  --tag nimbus-worker \
+  --tag buildpacks-eng-vsphere \
+  --tag buildpacks-eng-shared-vsphere \
+  --work-dir /opt/concourse/worker \
+  --tsa-host buildpacks.ci.cf-app.com:2222 \
+  --tsa-public-key /home/worker/host.pub \
+  --tsa-worker-private-key /home/worker/worker.pem \
+  --garden-config /home/worker/config.ini \
+  --name nimbus-worker-datetime
+Restart=on-abort
+Type=idle
+[Install]
+WantedBy=multi-user.target
