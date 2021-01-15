@@ -5,6 +5,7 @@ ExecStart=/usr/local/bin/concourse worker \
   --tag nimbus-worker \
   --tag buildpacks-eng-vsphere \
   --tag buildpacks-eng-shared-vsphere \
+  --tag "environments.toolsmiths.cf-app.com-shared-vsphere-worker" \
   --work-dir /opt/concourse/worker \
   --tsa-host buildpacks.ci.cf-app.com:2222 \
   --tsa-public-key /home/worker/host.pub \
