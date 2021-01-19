@@ -33,6 +33,7 @@ resource_types:
     type: docker-image
     source:
       repository: harbor-repo.vmware.com/dockerhub-proxy-cache/cftoolsmiths/toolsmiths-envs-resource
+    tags: [nimbus-worker, buildpacks-eng-vsphere, buildpacks-eng-shared-vsphere, environments.toolsmiths.cf-app.com-shared-vsphere-worker]
 
 resources:
   - name: nightly-trigger
