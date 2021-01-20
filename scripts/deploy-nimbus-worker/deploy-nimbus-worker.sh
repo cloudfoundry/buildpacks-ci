@@ -105,7 +105,7 @@ function deploy_nimbus_worker(){
   printf "    'User svc.buildpacks cannot provision additional resources due to: X is using 100 percent CPU provisioned quota'\n"
   printf "    If this is the case, the deployment is 'scheduled' and will automatically resume when resources become available\n\n"
 
-  ssh_command="USER=svc.buildpacks nimbus deploy ovf --queue --wait-scheduler ${vm_name}  NIMBUS_OVF_BASE/svc.buildpacks/buildpacks-concourse-worker/buildpacks-concourse-worker-ovf.ovf"
+  ssh_command="USER=svc.buildpacks nimbus deploy ovf --lease=7.0 --queue --wait-scheduler ${vm_name}  NIMBUS_OVF_BASE/svc.buildpacks/buildpacks-concourse-worker/buildpacks-concourse-worker-ovf.ovf"
   ssh ${username}@nimbus-gateway bash -c "'$ssh_command'"
 
   # nimbus prefixes VM names with the user who creates them
@@ -132,7 +132,7 @@ function deploy_nimbus_worker(){
       ;;
 
     "private")
-      echo $(ssh-keyscan -p 2222 buildpacks-private.ci.cf-app.com 2> /dev/null) | sed -e "s/^\[buildpacks\-private\.ci\.cf\-app\.com\]\:2222 //" > /tmp/deleteme-atc-public-key
+      echo $(ssh-keyscan -p 2222 buildpacks-private.ci.cf-app.com 2> /dev/null) | sed -e "s/^\[buildpacks\-private\.ci\.cf\-app\.com\]\:2222 //" > ${temp_file}
       ;;
 
     *)
