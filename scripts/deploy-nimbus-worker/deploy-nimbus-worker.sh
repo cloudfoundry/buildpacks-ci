@@ -160,9 +160,7 @@ function deploy_nimbus_worker(){
   # check that the worker has come online
   ssh worker@${ip} bash -c "'sudo mv ~/concourse.service.new /etc/systemd/system/concourse.service && sudo systemctl daemon-reload && sudo systemctl restart concourse && sudo systemctl status concourse --no-pager --full'"
 
-  sleep 5
-  echo "Worker should be available:"
-  fly -t buildpacks workers | grep ${date_time}
+  echo "Worker should be available, run 'fly -t <buildpacks|buildpacks-private> workers' to check"
 
   echo "Cleaning up ssh-key from nimbus-gateway and worker"
   ssh ${username}@nimbus-gateway bash -c "'rm -rf .ssh'"
