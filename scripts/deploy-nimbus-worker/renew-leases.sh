@@ -59,8 +59,7 @@ function renew_lease(){
   echo "Setting up nimbus login. Please save new key to ~/.ssh/id_rsa"
 
   ssh-keygen -t rsa
-  ssh ${username}@nimbus-gateway mkdir -p .ssh
-  cat ~/.ssh/id_rsa.pub | ssh ${username}@nimbus-gateway 'cat >> .ssh/authorized_keys && chmod 700 .ssh'
+  cat ~/.ssh/id_rsa.pub | ssh ${username}@nimbus-gateway 'mkdir -p .ssh && cat >> .ssh/authorized_keys && chmod 700 .ssh'
 
   echo "Logging into the nimbus-gateway"
   vm_json=$(ssh ${username}@nimbus-gateway bash -c "'USER=svc.buildpacks nimbus-ctl --outputFormat=json list | grep json_info'")

@@ -100,6 +100,10 @@ function deploy_nimbus_worker(){
     exit 1
   fi
 
+  echo "Setting up nimbus login. Please save new key to ~/.ssh/id_rsa"
+  ssh-keygen -t rsa
+  cat ~/.ssh/id_rsa.pub | ssh ${username}@nimbus-gateway 'mkdir -p .ssh && cat >> .ssh/authorized_keys && chmod 700 .ssh'
+
   printf "\nLogging in as: %s\n" ${username}
   printf "    Deploying a nimbus ovf template. This takes a few minutes...\n If the script hangs for more than a few minutes check the logs for the following:\n"
   printf "    'User svc.buildpacks cannot provision additional resources due to: X is using 100 percent CPU provisioned quota'\n"
@@ -116,10 +120,13 @@ function deploy_nimbus_worker(){
   ip=$(echo ${ip_json} | jq -r '.json_info[]."'${vm_name}'"')
 
 
+
   echo "Accessing Concourse Credhub..."
   source ${login_file}
 
-  echo "Setting up credentials for worker..."
+  echo "Setting up worker login with ssh-keys"
+  cat ~/.ssh/id_rsa.pub | ssh worker@${ip} 'mkdir -p .ssh && cat >> .ssh/authorized_keys && chmod 700 .ssh'
+
   temp_file="/tmp/deleteme-nimbus-deploy"
   credhub get -n /bosh-buildpacks-${deployment}/concourse/nimbus_worker_private_key -q > ${temp_file}
   scp ${temp_file} worker@${ip}:~/worker.pem
@@ -156,6 +163,10 @@ function deploy_nimbus_worker(){
   sleep 5
   echo "Worker should be available:"
   fly -t buildpacks workers | grep ${date_time}
+
+  echo "Cleaning up ssh-key from nimbus-gateway and worker"
+  ssh ${username}@nimbus-gateway bash -c "'rm -rf .ssh'"
+  ssh worker@${ip} bash -c "'rm -rf .ssh'"
 }
 
 main "${@:-}"
