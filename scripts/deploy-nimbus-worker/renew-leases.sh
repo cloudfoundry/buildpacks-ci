@@ -70,8 +70,7 @@ function renew_lease(){
   for worker in ${vms}
     do
       echo Renewing "$worker" lease
-      # ssh ${username}@nimbus-gateway bash -c "'USER=svc.buildpacks nimbus-ctl --lease=7 extend_lease ${worker}'"
-      ssh ${username}@nimbus-gateway bash -c "'USER=svc.buildpacks nimbus-ctl ip ${worker}'"
+      ssh ${username}@nimbus-gateway bash -c "'USER=svc.buildpacks nimbus-ctl --lease=7 extend_lease ${worker}'"
     done
 
   echo "All leases renewed"
