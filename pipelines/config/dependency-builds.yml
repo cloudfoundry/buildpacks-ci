@@ -203,16 +203,6 @@ dependencies:
       - bionic
       - tiny
     versions_to_keep: 2
-  godep:
-    buildpacks:
-      go:
-        lines:
-          - line: latest
-    source_type: github_releases
-    source_params:
-      - 'repo: tools/godep'
-      - 'fetch_source: true'
-    versions_to_keep: 2
   httpd:
     buildpacks:
       php:
