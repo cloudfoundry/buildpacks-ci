@@ -585,6 +585,7 @@ class Builder
       )
 
     when 'go'
+      source_input.version = source_input.version.delete_prefix('go')
       binary_builder.build(source_input)
 
       filename = "#{binary_builder.base_dir}/go#{source_input.version}.linux-amd64.tar.gz"
@@ -599,6 +600,7 @@ class Builder
       )
 
     when 'node', 'httpd'
+      source_input.version = source_input.version.delete_prefix('v') if source_input.name == 'node'
       binary_builder.build(source_input)
 
       filename = "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}-linux-x64.tgz"
@@ -611,7 +613,7 @@ class Builder
               "#{filename_prefix}_linux_x64_#{stack}",
           )
       )
-      
+
     when 'nginx-static'
       source_pgp = 'not yet implemented'
       DependencyBuild.build_nginx(source_input, stack, true)
@@ -704,6 +706,7 @@ class Builder
       )
 
     when 'rubygems', 'yarn'
+      source_input.version = source_input.version.delete_prefix('v') if source_input.name == 'yarn'
       results = Sha.check_sha(source_input)
       filename = 'artifacts/temp_file.tgz'
       File.write(filename, results[0])
