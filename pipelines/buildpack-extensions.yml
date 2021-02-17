@@ -12,8 +12,7 @@ resource_types:
   - name: pcf-pool
     type: docker-image
     source:
-      repository: harbor-repo.vmware.com/dockerhub-proxy-cache/cftoolsmiths/toolsmiths-envs-resource
-    tags: [nimbus-worker, buildpacks-eng-vsphere, buildpacks-eng-shared-vsphere, environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+      repository: cftoolsmiths/toolsmiths-envs-resource
 
 resources: ############################################################################################################
   - name: buildpack-packager
@@ -78,7 +77,6 @@ resources: #####################################################################
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
       pool_name: us_2_5
-    tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
 
 jobs: ################################################################################################################
   - name: test-stack-auditor
@@ -92,7 +90,6 @@ jobs: ##########################################################################
         - put: pcf-lts-gcp-env
           params:
             action: claim
-          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
       - do:
         - task: create-cf-space
           attempts: 3
@@ -110,7 +107,6 @@ jobs: ##########################################################################
         params:
           action: unclaim
           env_file: pcf-lts-gcp-env/metadata
-        tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
 
   - name: ship-it
     serial: true
