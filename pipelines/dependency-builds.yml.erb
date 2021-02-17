@@ -257,8 +257,8 @@ end
     bucket: {{buildpacks-binaries-s3-bucket}}
     access_key_id: {{pivotal-buildpacks-s3-access-key}}
     secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
-    # pip has some versions of the form 'v1.2'; everyone else uses 'v1.2.3'
-    regexp: dependencies/<%=dep_name%>/<%=dep_name == 'nginx-static' ? 'nginx' : dep_name %>.*?<%= dep_name == 'pip' ? '(\d+\.\d+(?:\.\d+)?)' : '(\d+\.\d+\.\d+)' %>(.*)
+    # pip and go have some versions of the form 'v1.2'; everyone else uses 'v1.2.3'
+    regexp: dependencies/<%=dep_name%>/<%=dep_name == 'nginx-static' ? 'nginx' : dep_name %>.*?<%= (dep_name == 'pip' || dep_name == 'go') ? '(\d+\.\d+(?:\.\d+)?)' : '(\d+\.\d+\.\d+)' %>(.*)
 <% end %>
 <% end %>
   ## Alerts ##
