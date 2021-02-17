@@ -24,6 +24,7 @@ resource_types:
     type: docker-image
     source:
       repository: cfbuildpacks/cron-resource
+
   - name: cf-space-resource
     type: docker-image
     source:
@@ -32,8 +33,7 @@ resource_types:
   - name: cf-pool
     type: docker-image
     source:
-      repository: harbor-repo.vmware.com/dockerhub-proxy-cache/cftoolsmiths/toolsmiths-envs-resource
-    tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
+      repository: cftoolsmiths/toolsmiths-envs-resource
 
 resources:
   - name: nightly-trigger
@@ -68,7 +68,6 @@ resources:
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
       pool_name: us_<%= pas_versions['n-2'] %>
-    tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
 
   - name: cf-toolsmiths-environment
     type: cf-pool
@@ -76,7 +75,6 @@ resources:
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
       pool_name: cf-deployment
-    tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
 
   - name: cf-deployment
     type: git
@@ -109,7 +107,6 @@ jobs:
         - put: smith-environments-<%= pas_versions['n-2'] %>
           params:
             action: claim
-          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
         - task: create-cf-space
           file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
           input_mapping:
@@ -130,14 +127,12 @@ jobs:
             params:
               action: unclaim
               env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
-            tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
   - name: brats-<%= language %>-edge
     serial: true
     public: true
     plan:
       - do:
         - put: cf-toolsmiths-environment
-          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
           params:
             action: claim
         - in_parallel:
@@ -177,7 +172,6 @@ jobs:
 <% end %>
         ensure:
           put: cf-toolsmiths-environment
-          tags: [environments.toolsmiths.cf-app.com-shared-vsphere-worker]
           params:
             action: unclaim
             env_file: cf-toolsmiths-environment/metadata
