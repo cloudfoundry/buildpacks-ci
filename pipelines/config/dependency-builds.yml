@@ -472,9 +472,9 @@ dependencies:
       ruby:
         lines:
           - line: 2.5.X
+            deprecation_date: 2021-03-31
           - line: 2.6.X
           - line: 2.7.X
-            deprecation_date: 2023-04-01
             link: https://www.ruby-lang.org/en/news/2020/03/31/ruby-2-7-1-released/
           - line: 3.0.X
             link: https://www.ruby-lang.org/en/news/2020/12/25/ruby-3-0-0-released/
