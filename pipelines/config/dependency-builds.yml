@@ -59,53 +59,17 @@ dependencies:
     copy-stacks:
       - bionic
     versions_to_keep: 2
-  dep:
-    buildpacks:
-      go:
-        lines:
-          - line: latest
-      dep-cnb:
-        lines:
-          - line: latest
-    source_type: github_releases
-    source_params:
-      - 'repo: golang/dep'
-      - 'fetch_source: true'
-    copy-stacks:
-    versions_to_keep: 2
   dotnet-sdk:
     buildpacks:
       dotnet-core:
         lines:
-          - line: 2.1.4X
-          - line: 2.1.5X
-          - line: 2.1.6X
-          - line: 2.1.7X
           - line: 2.1.8X
-          - line: 2.2.1X
-          - line: 2.2.2X
-          - line: 2.2.3X
-          - line: 2.2.4X
-          - line: 3.1.1X
-          - line: 3.1.2X
-          - line: 3.1.3X
           - line: 3.1.4X
           - line: 5.0.1X
         removal_strategy: keep_all
       dotnet-core-sdk-cnb:
         lines:
-          - line: 2.1.4X
-          - line: 2.1.5X
-          - line: 2.1.6X
-          - line: 2.1.7X
           - line: 2.1.8X
-          - line: 2.2.1X
-          - line: 2.2.2X
-          - line: 2.2.3X
-          - line: 2.2.4X
-          - line: 3.1.1X
-          - line: 3.1.2X
-          - line: 3.1.3X
           - line: 3.1.4X
           - line: 5.0.1X
         removal_strategy: keep_all
@@ -118,9 +82,6 @@ dependencies:
           - line: 2.1.X
             deprecation_date: 2021-08-21 #!link says supported at least this long
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-          - line: 2.2.X
-            deprecation_date: 2019-12-23
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 3.1.X
             deprecation_date: 2022-12-04
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
@@ -132,9 +93,6 @@ dependencies:
         lines:
           - line: 2.1.X
             deprecation_date: 2021-08-21 #!link says supported at least this long
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-          - line: 2.2.X
-            deprecation_date: 2019-12-23
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 3.1.X
             deprecation_date: 2022-12-04
@@ -149,14 +107,12 @@ dependencies:
       dotnet-core:
         lines:
           - line: 2.1.X
-          - line: 2.2.X
           - line: 3.1.X
           - line: 5.0.X
         removal_strategy: keep_all
       dotnet-core-aspnet-cnb:
         lines:
           - line: 2.1.X
-          - line: 2.2.X
           - line: 3.1.X
           - line: 5.0.X
         removal_strategy: keep_all
@@ -177,9 +133,6 @@ dependencies:
       go:
         lines:
           #! go deprecation dates are on the 1st day 12 months after their release
-          - line: 1.13.X
-            deprecation_date: 2020-09-03
-            link: https://golang.org/doc/devel/release.html
           - line: 1.14.X
             deprecation_date: 2021-02-25
             link: https://golang.org/doc/devel/release.html
@@ -192,9 +145,6 @@ dependencies:
         removal_strategy: keep_latest_released
       go-compiler-cnb:
         lines:
-          - line: 1.13.X
-            deprecation_date: 2020-09-03
-            link: https://golang.org/doc/devel/release.html
           - line: 1.14.X
             deprecation_date: 2021-02-25
             link: https://golang.org/doc/devel/release.html
@@ -303,12 +253,6 @@ dependencies:
       nginx:
         lines:
           #! nginx deprecation dates are 1 year after the mainline release date
-          - line: 1.16.X
-            deprecation_date: 2020-04-01
-            link: https://nginx.org/
-          - line: 1.17.X
-            deprecation_date: 2020-05-01
-            link: https://nginx.org/
           - line: 1.18.X
             deprecation_date: 2021-05-01
             link: https://nginx.org/
@@ -318,12 +262,6 @@ dependencies:
       nginx-cnb:
         lines:
           #! nginx deprecation dates are 1 year after the mainline release date
-          - line: 1.16.X
-            deprecation_date: 2020-04-01
-            link: https://nginx.org/
-          - line: 1.17.X
-            deprecation_date: 2020-05-01
-            link: https://nginx.org/
           - line: 1.18.X
             deprecation_date: 2021-05-01
             link: https://nginx.org/
@@ -346,12 +284,6 @@ dependencies:
     buildpacks:
       php:
         lines:
-          - line: 1.16.X
-            deprecation_date: 2020-04-01
-            link: https://nginx.org/
-          - line: 1.17.X
-            deprecation_date: 2020-05-01
-            link: https://nginx.org/
           - line: 1.18.X
             deprecation_date: 2021-05-01
             link: https://nginx.org/
@@ -360,9 +292,6 @@ dependencies:
             link: https://nginx.org/
       staticfile:
         lines:
-          - line: 1.17.X
-            deprecation_date: 2020-05-01
-            link: https://nginx.org/
           - line: 1.18.X
             deprecation_date: 2021-05-01
             link: https://nginx.org/
@@ -380,9 +309,6 @@ dependencies:
             link: https://github.com/nodejs/Release
           - line: 12.X.X
             deprecation_date: 2022-04-01
-            link: https://github.com/nodejs/Release
-          - line: 13.X.X
-            deprecation_date: 2020-06-01
             link: https://github.com/nodejs/Release
           - line: 14.X.X
             deprecation_date: 2023-04-30
@@ -408,9 +334,6 @@ dependencies:
             link: https://github.com/nodejs/Release
           - line: 12.X.X
             deprecation_date: 2022-04-01
-            link: https://github.com/nodejs/Release
-          - line: 13.X.X
-            deprecation_date: 2020-06-01
             link: https://github.com/nodejs/Release
           - line: 14.X.X
             deprecation_date: 2023-04-30
@@ -493,9 +416,6 @@ dependencies:
     buildpacks:
       python:
         lines:  #! python 3 minor version EOLs are 5 years after their first final release
-          - line: 3.5.X
-            deprecation_date: 2020-09-13
-            link: https://www.python.org/dev/peps/pep-0478/
           - line: 3.6.X
             deprecation_date: 2021-12-23
             link: https://www.python.org/dev/peps/pep-0494/
@@ -511,9 +431,6 @@ dependencies:
         removal_strategy: keep_latest_released
       python-runtime-cnb:
         lines:
-          - line: 3.5.X
-            deprecation_date: 2020-09-13
-            link: https://www.python.org/dev/peps/pep-0478/
           - line: 3.6.X
             deprecation_date: 2021-12-23
             link: https://www.python.org/dev/peps/pep-0494/
