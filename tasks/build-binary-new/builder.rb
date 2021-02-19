@@ -436,7 +436,7 @@ module DependencyBuild
       Dir.mkdir(File.join(built_path, 'bin'))
 
       Dir.chdir('source') do
-        Runner.run('tar', 'zxf', "v#{source_input.version}")
+        Runner.run('tar', 'zxf', "#{source_input.version}")
         Dir.chdir(Dir.glob('krallin-tini-*').first) do
           Runner.run('cmake .')
           Runner.run('make')
