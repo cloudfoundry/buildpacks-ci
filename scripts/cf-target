@@ -90,7 +90,6 @@ function get_metadata_file_gcp(){
 
   TOOLSMITHS_API_TOKEN="${token}" ENV_NAME="${name}" \
       fly -t buildpacks execute -c "${PROGDIR}/get-env-gcp/task.yml" \
-          --tag=buildpacks-eng-vsphere \
           -i script="${PROGDIR}/get-env-gcp" \
           -o metadata=/tmp/output
 
