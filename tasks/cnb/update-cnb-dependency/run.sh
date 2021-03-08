@@ -4,6 +4,9 @@ set -euo pipefail
 
 cp -r buildpack/. artifacts
 
+git config user.email "paketobuildpacks@gmail.com"
+git config user.name "paketo-bot"
+
 update_buildpack_toml() {
   buildpack_toml=$1
   buildpack_toml_path=$2
