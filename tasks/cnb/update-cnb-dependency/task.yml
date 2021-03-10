@@ -18,5 +18,7 @@ params:
   VERSION_LINE:
   VERSIONS_TO_KEEP:
   COMPAT_ONLY:
+  GPG_SIGNING_KEY_ID:
+  GPG_SIGNING_KEY:
 run:
   path: buildpacks-ci/tasks/cnb/update-cnb-dependency/run.sh

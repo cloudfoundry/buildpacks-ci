@@ -505,6 +505,8 @@ jobs:
       <% if line_hash['match'] %>
       DEPRECATION_MATCH: <%= line_hash['match'] %>
       <% end %>
+      GPG_SIGNING_KEY_ID: ((paketo-bot-gpg-key-id))
+      GPG_SIGNING_KEY: ((paketo-bot-gpg-key))
     output_mapping:
       artifacts: buildpack
   - task: update-cnb-stacks

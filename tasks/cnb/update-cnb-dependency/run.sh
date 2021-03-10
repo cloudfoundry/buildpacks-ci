@@ -7,6 +7,14 @@ cp -r buildpack/. artifacts
 git config --global user.email "paketobuildpacks@gmail.com"
 git config --global user.name "paketo-bot"
 
+mkdir -p ~/.gnupg/
+printf "quiet" > ~/.gnupg/options
+printf "%s" "$GPG_SIGNING_KEY" | base64 -d > ~/.gnupg/private.key
+gpg --options ~/.gnupg/options --import ~/.gnupg/private.key
+
+git config --global user.signingkey "$GPG_SIGNING_KEY_ID"
+git config --global commit.gpgsign true
+
 update_buildpack_toml() {
   buildpack_toml=$1
   buildpack_toml_path=$2
