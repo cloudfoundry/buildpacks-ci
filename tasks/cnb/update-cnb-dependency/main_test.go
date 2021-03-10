@@ -201,12 +201,13 @@ func testUpdateCNBDependencyTask(t *testing.T, when spec.G, it spec.S) {
 			assert.Equal(t, "https://some-website.com/some-org/some-repo", buildpackTOML.Buildpack.Homepage)
 		})
 
-		it("shows the added and removed dep versions in the commit message", func() {
+		it("shows the added and removed dep versions in the commit message and signs the commit", func() {
 			cmd := exec.Command("git", "-C", outputDir, "log", "-1", "--format=%B")
 			latestCommitMessage, err := cmd.CombinedOutput()
 			require.NoError(t, err, string(latestCommitMessage))
 			assert.Contains(t, string(latestCommitMessage), "Add some-dep 2.1.0, remove some-dep 2.0.0")
 			assert.Contains(t, string(latestCommitMessage), "for stack(s) io.buildpacks.stacks.bionic, org.cloudfoundry.stacks.cflinuxfs3, org.cloudfoundry.stacks.tiny [#111111111]")
+			assert.Contains(t, string(latestCommitMessage), "Signed-off-by:")
 		})
 	})
 
