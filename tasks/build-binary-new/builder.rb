@@ -447,6 +447,33 @@ module DependencyBuild
       Runner.run('tar', '-C', built_path, '-czf', old_filename, 'bin')
       File.join(Dir.pwd, old_filename)
     end
+
+    def build_rust(source_input)
+      built_path = File.join(Dir.pwd, 'built')
+      Dir.mkdir(built_path)
+      Dir.mkdir(File.join(built_path, 'bin'))
+
+      Dir.chdir('source') do
+        Runner.run('tar', 'zxf', "rustc-#{source_input.version}-src.tar.gz")
+        Dir.chdir("rustc-#{source_input.version}-src") do
+          File.open('config.toml', 'w') do |f|
+            f << "[rust]\n"
+            f << "channel = 'stable'\n"
+            f << "[build]\n"
+            f << "docs = false\n"
+            f << "compiler-docs = false\n"
+            f << "extended = true\n"
+            f << "tools = ['cargo', 'rust-analyzer']\n"
+            f << "[install]\n"
+            f << "prefix = '#{built_path}'\n"
+          end
+          Runner.run('./x.py build && ./x.py install')
+        end
+      end
+      old_filename = "#{source_input.name}-#{source_input.version}.tgz"
+      Runner.run('tar', '-C', built_path, '-czf', old_filename, '.')
+      File.join(Dir.pwd, old_filename)
+    end
   end
 end
 
@@ -1016,6 +1043,19 @@ class Builder
               "#{filename_prefix}_linux_noarch_#{stack}",
           )
       )
+
+    when 'rust'
+      Runner.run('apt', 'update')
+      Runner.run('apt-get', 'install', '-y', 'ninja-build')
+      old_file_path = DependencyBuild.build_rust source_input
+      out_data.merge!(
+          artifact_output.move_dependency(
+              source_input.name,
+              old_file_path,
+              "#{filename_prefix}_linux_noarch_#{stack}",
+          )
+      )
+
     else
       raise("Dependency: #{source_input.name} is not currently supported")
     end
