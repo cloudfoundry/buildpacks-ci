@@ -467,7 +467,7 @@ module DependencyBuild
             f << "[install]\n"
             f << "prefix = '#{built_path}'\n"
           end
-          Runner.run('./x.py build && ./x.py install')
+          Runner.run('./x.py build --stage 2 && ./x.py install')
         end
       end
       old_filename = "#{source_input.name}-#{source_input.version}.tgz"
