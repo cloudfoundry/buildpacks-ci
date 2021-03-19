@@ -352,8 +352,9 @@ resources: #####################################################################
 
   - name: failure-alert
     type: slack-notification
+    icon: slack
     source:
-      url: {{concourse-job-failure-notifications-slack-webhook}}
+      url: {{buildpacks-ci-slack-url}}
 
   - name: sunday-night
     type: cron
@@ -403,6 +404,12 @@ jobs: ##########################################################################
             params:
               DOCKER_START: true
 <% end %>
+        on_failure:
+          put: failure-alert
+          params:
+            text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: "#buildpacks-ci"
+
   - name: create-buildpack-release-story
     serial: true
     public: true
@@ -487,9 +494,7 @@ jobs: ##########################################################################
           put: failure-alert
           params:
             text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+            channel: "#buildpacks-ci"
   - name: ship-it
     serial: true
     public: true
@@ -755,10 +760,8 @@ jobs: ##########################################################################
     on_failure:
       put: failure-alert
       params:
-        text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-        channel: {{concourse-job-failure-notifications-slack-channel}}
-        username: concourse
-        icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+        text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        channel: "#buildpacks-ci"
     on_success:
       put: environment
       resource: cf-toolsmiths-environment
@@ -833,10 +836,8 @@ jobs: ##########################################################################
     on_failure:
       put: failure-alert
       params:
-        text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-        channel: {{concourse-job-failure-notifications-slack-channel}}
-        username: concourse
-        icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+        text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        channel: "#buildpacks-ci"
     on_success:
       put: environment
       resource: cf-toolsmiths-environment
@@ -893,10 +894,8 @@ jobs: ##########################################################################
     on_failure:
       put: failure-alert
       params:
-        text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-        channel: {{concourse-job-failure-notifications-slack-channel}}
-        username: concourse
-        icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+        text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        channel: "#buildpacks-ci"
     on_success:
       put: environment
       resource: cf-toolsmiths-environment
@@ -982,10 +981,8 @@ jobs: ##########################################################################
     on_failure:
       put: failure-alert
       params:
-        text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-        channel: {{concourse-job-failure-notifications-slack-channel}}
-        username: concourse
-        icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+        text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        channel: "#buildpacks-ci"
     ensure:
       put: smith-environments-<%= pas_versions['n-2'] %>
       params:
@@ -1038,10 +1035,8 @@ jobs: ##########################################################################
     on_failure:
       put: failure-alert
       params:
-        text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-        channel: {{concourse-job-failure-notifications-slack-channel}}
-        username: concourse
-        icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+        text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        channel: "#buildpacks-ci"
 <% end %>
   - name: specs-lts-gcp-develop
     serial: true
@@ -1228,10 +1223,8 @@ jobs: ##########################################################################
         on_failure:
           put: failure-alert
           params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+            text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: "#buildpacks-ci"
   - name: update-offline-buildpack-bosh-release
     serial: true
     public: true
@@ -1269,8 +1262,6 @@ jobs: ##########################################################################
         on_failure:
           put: failure-alert
           params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+            text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            channel: "#buildpacks-ci"
 <% end %>
