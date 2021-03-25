@@ -11,16 +11,14 @@ end
 cves_dir = File.expand_path(File.join(buildpacks_ci_dir, '..', 'output-new-cves', 'new-cve-notifications'))
 
 require "#{buildpacks_ci_dir}/lib/rootfs-cve-notifier"
-require "#{buildpacks_ci_dir}/lib/notifiers/cve-slack-notifier"
 
-notifiers = [CVESlackNotifier]
 cve_notifier = RootFSCVENotifier.new(cves_dir, stacks_dir)
 
 case stack
 when 'cflinuxfs2'
   cve_notifier.run!(stack, 'Ubuntu 14.04', 'ubuntu14.04', [])
 when 'cflinuxfs3'
-  cve_notifier.run!(stack, 'Ubuntu 18.04', 'ubuntu18.04', notifiers)
+  cve_notifier.run!(stack, 'Ubuntu 18.04', 'ubuntu18.04', [])
 when 'tiny'
   cve_notifier.run!(stack, 'Ubuntu 18.04', 'ubuntu18.04-tiny', [])
 else
