@@ -1,0 +1,19 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: buildpack-develop
+
+run:
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/generate-buildpack-release-github-issue/run.rb
+
+params:
+  GITHUB_ACCESS_TOKEN:
+  BUILDPACK_NAME:
