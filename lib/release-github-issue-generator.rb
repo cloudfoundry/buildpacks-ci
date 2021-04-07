@@ -1,4 +1,5 @@
 require 'yaml'
+require 'octokit'
 
 class ReleaseGithubIssueGenerator
   def initialize(octokit_client)
