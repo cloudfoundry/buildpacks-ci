@@ -14,14 +14,8 @@ new_manifest = File.read('buildpack-develop/manifest.yml')
 
 client = Octokit::Client.new :access_token => github_token
 
-release_github_issue_creator = ReleaseGithubIssueGenerator.new(
-  client: client,
-  buildpack_name: buildpack_name,
-  previous_buildpack_version: previous_buildpack_version,
-  old_manifest:               old_manifest,
-  new_manifest:               new_manifest
-
-)
+release_github_issue_creator = ReleaseGithubIssueGenerator.new(client: client)
 puts "Running ReleaseGithubIssueGenerator for #{buildpack_name}"
 
-release_github_issue_creator.run!
+# release_github_issue_creator.run!
+release_github_issue_creator.run(buildpack_name, previous_buildpack_version, old_manifest, new_manifest)
