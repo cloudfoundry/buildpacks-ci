@@ -22,7 +22,7 @@ class ReleaseGithubIssueGenerator
   end
 
   def create_issues(title, description, buildpack)
-    issue = @client.create_issue("cloudfoundry/#{buildpack}", title, description)
+    issue = @client.create_issue("cloudfoundry/#{buildpack}-buildpack", title, description)
     @client.create_project_card(13320470, content_id: issue.id, content_type: 'Issue', mediaType: {
     previews: [
       'inertia'
