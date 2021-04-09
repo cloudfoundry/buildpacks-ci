@@ -1,34 +1,33 @@
 require 'yaml'
+require 'octokit'
 
 class ReleaseGithubIssueGenerator
-  attr_reader :buildpack_name, :previous_buildpack_version, :old_manifest, :new_manifest
-
-  def initialize(octokit_client, buildpack_name:, previous_buildpack_version:,
-                old_manifest:, new_manifest:)
+  def initialize(octokit_client)
     @client = octokit_client
-    @buildpack_name = buildpack_name
-    @previous_buildpack_version = previous_buildpack_version
-
-    @old_manifest = old_manifest
-    @new_manifest = new_manifest
   end
 
-  def run!
-    # description = File.read(description_file_path).strip
+  def run(buildpack_name, previous_buildpack_version, old_manifest, new_manifest)
+    @previous_buildpack_version = previous_buildpack_version
+    @old_manifest = old_manifest
+    @new_manifest = new_manifest
     issue_name = "**Release:** #{buildpack_name}-buildpack #{new_release_version}"
 
-    issue_description = "**Check the buildpack's develop branch for feature changes"
-    issue_description += "\n**Dependency Changes:**\n\n"
+    issue_description = "\n**Dependency Changes:**\n\n"
     issue_description += generate_dependency_changes
+    issue_description += "\n**New Commits on Develop**:\n\n"
+    issue_description += get_git_log
     issue_description += "\nRefer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).\n"
-
-    repos = File.read(repos_file_path).strip.split("\n")
 
     create_issues(issue_name, issue_description, buildpack_name)
   end
 
   def create_issues(title, description, buildpack)
-      @client.create_issue("cloudfoundry/#{buildpack}", title, description)
+    issue = @client.create_issue("cloudfoundry/#{buildpack}", title, description)
+    @client.create_project_card(13320470, content_id: issue.id, content_type: 'Issue', mediaType: {
+    previews: [
+      'inertia'
+    ]
+  })
   end
 
   def new_release_version
@@ -106,6 +105,7 @@ class ReleaseGithubIssueGenerator
               description += "+   #{added_versions.join("\n+   ")}\n"
             end
           end
+
         end
       end
     end
@@ -115,5 +115,16 @@ class ReleaseGithubIssueGenerator
     end
 
     "```diff#{description}```\n"
+  end
+
+  def get_git_log
+    description = ''
+    description += `git log origin/master..origin/develop  --pretty=oneline --abbrev-commit`
+
+    if description == ""
+      description = "None\n"
+    end
+
+    "#{description}"
   end
 end
