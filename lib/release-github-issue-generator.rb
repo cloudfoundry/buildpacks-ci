@@ -121,10 +121,6 @@ class ReleaseGithubIssueGenerator
     description = ''
     description += `git log origin/master..origin/develop  --pretty=oneline --abbrev-commit`
 
-    if description == ""
-      description = "None\n"
-    end
-
     "#{description}"
   end
 end
