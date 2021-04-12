@@ -119,7 +119,7 @@ class ReleaseGithubIssueGenerator
 
   def get_git_log
     description = ''
-    description += `git log v#{@previous_buildpack_version}..HEAD --pretty=oneline --abbrev-commit`
+    description += `git -C buildpack-develop log v#{@previous_buildpack_version}..HEAD --pretty=oneline --abbrev-commit`
 
     if description == ""
       description = "None\n"
