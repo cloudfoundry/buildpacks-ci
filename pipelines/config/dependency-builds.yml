@@ -255,20 +255,32 @@ dependencies:
       nginx:
         lines:
           #! nginx deprecation dates are 1 year after the mainline release date
+          #! each odd version line (ex. 1.19) is the "mainline"
+          #! the even numbered version line that precedes the mainline is the associated stable version line.
           - line: 1.18.X
             deprecation_date: 2021-05-01
             link: https://nginx.org/
           - line: 1.19.X
             deprecation_date: 2021-05-01
+            link: https://nginx.org/
+            #! TODO: update deprecation date when 1.21.X comes out
+          - line: 1.20.X
+            deprecation_date: ""
             link: https://nginx.org/
       nginx-cnb:
         lines:
           #! nginx deprecation dates are 1 year after the mainline release date
+          #! each odd version line (ex. 1.19) is the "mainline"
+          #! the even numbered version line that precedes the mainline is the associated stable version line.
           - line: 1.18.X
             deprecation_date: 2021-05-01
             link: https://nginx.org/
           - line: 1.19.X
             deprecation_date: 2021-05-01
+            link: https://nginx.org/
+            #! TODO: update deprecation date when 1.21.X comes out
+          - line: 1.20.X
+            deprecation_date: ""
             link: https://nginx.org/
     versions_to_keep: 2
     copy-stacks:
