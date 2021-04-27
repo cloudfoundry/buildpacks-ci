@@ -188,6 +188,7 @@ resources: #####################################################################
       private_key: {{pivotal-cf-buildpacks-ci-robots}}
       uri: git@github.com:pivotal-cf/buildpacks-ci-robots.git # pivotal-cf because pivnet is not foundation's
       paths: [ pivnet-metadata/<%= language %>-lts.yml ]
+      branch: main
 <% end %>
   - name: pivnet-buildpack-metadata
     type: git
