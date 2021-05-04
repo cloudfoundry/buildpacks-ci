@@ -329,9 +329,6 @@ dependencies:
     buildpacks:
       nodejs:
         lines:
-          - line: 10.X.X
-            deprecation_date: 2021-04-01
-            link: https://github.com/nodejs/Release
           - line: 12.X.X
             deprecation_date: 2022-04-01
             link: https://github.com/nodejs/Release
@@ -347,19 +344,16 @@ dependencies:
         removal_strategy: keep_latest_released
       ruby:
         lines:
-          - line: 10.X.X
-            deprecation_date: 2021-04-01
+          - line: 14.X.X
+            deprecation_date: 2023-04-30
             link: https://github.com/nodejs/Release
       dotnet-core:
         lines:
-          - line: 10.X.X
-            deprecation_date: 2021-04-01
+          - line: 14.X.X
+            deprecation_date: 2023-04-30
             link: https://github.com/nodejs/Release
       node-engine-cnb:
         lines:
-          - line: 10.X.X
-            deprecation_date: 2021-04-01
-            link: https://github.com/nodejs/Release
           - line: 12.X.X
             deprecation_date: 2022-04-01
             link: https://github.com/nodejs/Release
