@@ -19,21 +19,33 @@ end
 module DependencyBuild
   class << self
     def bundle_pip_dependencies(source_input)
-      pip_src_file = "source/pip-#{source_input.version}.tar.gz"
-      old_file_path = File.expand_path(File.dirname(pip_src_file))+'/'+File.basename(pip_src_file)
+      # final resting place for pip source and dependencies
+      file_path = "/tmp/pip-#{source_input.version}.tgz"
       ENV['LC_CTYPE'] = 'en_US.UTF-8'
       Runner.run('apt', 'update')
       Runner.run('apt-get', 'install', '-y', 'python-pip')
       Runner.run('pip', 'install', '--upgrade', 'pip')
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
-          Runner.run('cp', old_file_path, ".")
+          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', "pip==#{source_input.version}")
+          if source_input.md5?
+            if Digest::MD5.hexdigest(open("pip-#{source_input.version}.tar.gz").read) != source_input.md5
+              raise 'MD5 digest does not match version digest'
+            end
+          elsif source_input.sha256?
+            if Digest::SHA256.hexdigest(open("pip-#{source_input.version}.tar.gz").read) != source_input.sha256
+              raise 'SHA256 digest does not match version digest'
+            end
+          else
+            raise 'No digest specified for source'
+          end
+          Archive.strip_top_level_directory_from_tar("pip-#{source_input.version}.tar.gz")
           Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'setuptools')
           Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'wheel')
-          Runner.run('tar', 'zcvf', old_file_path, '.')
+          Runner.run('tar', 'zcvf', file_path, '.')
         end
       end
-      old_file_path
+      file_path
     end
 
     def build_pipenv(source_input)
