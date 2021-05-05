@@ -18,6 +18,24 @@ end
 
 module DependencyBuild
   class << self
+    def bundle_pip_dependencies(source_input)
+      pip_src_file = "source/pip-#{source_input.version}.tar.gz"
+      old_file_path = File.expand_path(File.dirname(pip_src_file))+'/'+File.basename(pip_src_file)
+      ENV['LC_CTYPE'] = 'en_US.UTF-8'
+      Runner.run('apt', 'update')
+      Runner.run('apt-get', 'install', '-y', 'python-pip')
+      Runner.run('pip', 'install', '--upgrade', 'pip')
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          Runner.run('cp', old_file_path, ".")
+          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'setuptools')
+          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'wheel')
+          Runner.run('tar', 'zcvf', old_file_path, '.')
+        end
+      end
+      old_file_path
+    end
+
     def build_pipenv(source_input)
       old_file_path = "/tmp/pipenv-v#{source_input.version}.tgz"
       ENV['LC_CTYPE'] = 'en_US.UTF-8'
@@ -748,25 +766,6 @@ class Builder
           )
       )
 
-    when 'pip'
-      filename = Dir.glob("source/pip-*.tar.gz").first
-
-      if !filename
-        results = Sha.check_sha(source_input)
-        filename = 'artifacts/temp_file.tgz'
-        File.write(filename, results[0])
-      end
-
-      Archive.strip_top_level_directory_from_tar(filename)
-
-      out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              filename,
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
-      )
-
     when 'icu'
       old_file_path = DependencyBuild.build_icu source_input
       out_data.merge!(
@@ -918,6 +917,16 @@ class Builder
 
     when 'pipenv'
       old_file_path = DependencyBuild.build_pipenv source_input
+      out_data.merge!(
+          artifact_output.move_dependency(
+              source_input.name,
+              old_file_path,
+              "#{filename_prefix}_linux_noarch_#{stack}",
+          )
+      )
+
+    when 'pip'
+      old_file_path = DependencyBuild.bundle_pip_dependencies source_input
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
