@@ -25,6 +25,7 @@ module DependencyBuild
       Runner.run('apt', 'update')
       Runner.run('apt-get', 'install', '-y', 'python3-pip')
       Runner.run('pip3', 'install', '--upgrade', 'pip')
+      Runner.run('pip3', 'install', '--upgrade', 'setuptools')
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
           Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', "pip==#{source_input.version}")
