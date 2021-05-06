@@ -23,11 +23,11 @@ module DependencyBuild
       file_path = "/tmp/pip-#{source_input.version}.tgz"
       ENV['LC_CTYPE'] = 'en_US.UTF-8'
       Runner.run('apt', 'update')
-      Runner.run('apt-get', 'install', '-y', 'python-pip')
-      Runner.run('pip', 'install', '--upgrade', 'pip')
+      Runner.run('apt-get', 'install', '-y', 'python3-pip')
+      Runner.run('pip3', 'install', '--upgrade', 'pip')
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
-          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', "pip==#{source_input.version}")
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', "pip==#{source_input.version}")
           if source_input.md5?
             if Digest::MD5.hexdigest(open("pip-#{source_input.version}.tar.gz").read) != source_input.md5
               raise 'MD5 digest does not match version digest'
@@ -40,8 +40,8 @@ module DependencyBuild
             raise 'No digest specified for source'
           end
           Archive.strip_top_level_directory_from_tar("pip-#{source_input.version}.tar.gz")
-          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'setuptools')
-          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'wheel')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
           Runner.run('tar', 'zcvf', file_path, '.')
         end
       end
