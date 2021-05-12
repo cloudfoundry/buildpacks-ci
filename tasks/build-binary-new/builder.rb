@@ -1070,6 +1070,13 @@ class Builder
     when 'rust'
       Runner.run('apt', 'update')
       Runner.run('apt-get', 'install', '-y', 'ninja-build')
+
+      # Rust requires CMake version 3.13.4 or later and the latest available on
+      # apt-get is 3.10.2
+      Runner.run('apt-get', 'remove', '-y', 'cmake')
+      Runner.run('wget', 'https://github.com/Kitware/CMake/releases/download/v3.20.2/cmake-3.20.2-linux-x86_64.tar.gz')
+      Runner.run('tar', '-xzf', 'cmake-3.20.2-linux-x86_64.tar.gz', '-C', '/usr/local', '--strip-components=1')
+
       old_file_path = DependencyBuild.build_rust source_input
       out_data.merge!(
           artifact_output.move_dependency(
