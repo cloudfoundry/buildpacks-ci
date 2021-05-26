@@ -452,7 +452,7 @@ module DependencyBuild
       Dir.chdir('source') do
         Runner.run('tar', 'zxf', "curl-#{source_input.version}.tar.gz")
         Dir.chdir("curl-#{source_input.version}") do
-          Runner.run('./configure', "--prefix=#{built_path}")
+          Runner.run('./configure', "--prefix=#{built_path}", "--with-openssl")
           Runner.run('make')
           Runner.run('make install')
         end
