@@ -455,6 +455,11 @@ jobs: ##########################################################################
             TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
             BEFORE_STORY_ID: {{deprecation_release_marker_story_number}}
+        - task: create-deprecation-github-issues
+          file: buildpacks-ci/tasks/generate-dependency-deprecation-github-issue/task.yml
+          params:
+            BUILDPACK_NAME: <%= language %>
+            GITHUB_TOKEN: {{buildpacks-github-token}}
 
   - name: detect-new-version-and-upload-artifacts
     serial: true
