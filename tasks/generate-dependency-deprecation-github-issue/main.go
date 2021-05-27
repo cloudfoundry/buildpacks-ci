@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/google/go-github/github"
@@ -27,7 +28,7 @@ type DeprecationDate struct {
 }
 
 func main() {
-	fmt.Printf("Creating Github issues to deprecate dependencies for %s...\n", os.Getenv("BUILDPACK_NAME"))
+	fmt.Printf("Creating Github issues to deprecate dependencies for %s...\n", strings.Join([]string{os.Getenv("BUILDPACK_NAME"), "buildpack"}, "-"))
 	var manifest Manifest
 
 	// relies on relative locations of buildpack and buildpack-ci directories in
@@ -61,7 +62,7 @@ func main() {
 			log.Fatal(err)
 		}
 		if time.Now().After(date.Add(-45 * 24 * time.Hour)) {
-			issue, err := createDeprecationIssue(ctx, client, "cloudfoundry", os.Getenv("BUILDPACK_NAME"), deprecation)
+			issue, err := createDeprecationIssue(ctx, client, "cloudfoundry", strings.Join([]string{os.Getenv("BUILDPACK_NAME"), "buildpack"}, "-"), deprecation)
 			if err != nil {
 				log.Fatal(err)
 			}
