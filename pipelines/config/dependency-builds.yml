@@ -476,9 +476,6 @@ dependencies:
     buildpacks:
       r:
         lines: #! final release for each minor version is every spring ( just before next minor version release )
-          - line: 3.5.X
-            deprecation_date: 2019-03-11
-            link: https://developer.r-project.org/
           - line: 3.6.X
             deprecation_date: 2020-03-01 #!Estimate make sure 3.7 is out before deprecating
             link: https://developer.r-project.org/
