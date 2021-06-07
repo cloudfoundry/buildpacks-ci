@@ -352,21 +352,6 @@ dependencies:
           - line: 14.X.X
             deprecation_date: 2023-04-30
             link: https://github.com/nodejs/Release
-      node-engine-cnb:
-        lines:
-          - line: 12.X.X
-            deprecation_date: 2022-04-01
-            link: https://github.com/nodejs/Release
-          - line: 14.X.X
-            deprecation_date: 2023-04-30
-            link: https://github.com/nodejs/Release
-          - line: 15.X.X
-            deprecation_date: 2021-06-01
-            link: https://github.com/nodejs/Release
-          - line: 16.X.X
-            deprecation_date: 2024-04-30
-            link: https://github.com/nodejs/Release
-        removal_strategy: keep_latest_released
     source_type: node
     copy-stacks:
       - bionic
@@ -536,9 +521,6 @@ dependencies:
         lines:
           - line: latest
       ruby:
-        lines:
-          - line: latest
-      yarn-cnb:
         lines:
           - line: latest
     source_type: github_releases
