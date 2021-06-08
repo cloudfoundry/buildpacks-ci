@@ -17,7 +17,7 @@ fi
 pushd buildpack
   source .envrc
 
-  go get github.com/cloudfoundry/libbuildpack
+  go get -u github.com/cloudfoundry/libbuildpack
   go get github.com/golang/mock/gomock
   go get -u github.com/onsi/ginkgo/ginkgo
   go install github.com/golang/mock/mockgen
