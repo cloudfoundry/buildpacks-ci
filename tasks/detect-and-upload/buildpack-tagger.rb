@@ -49,7 +49,7 @@ class BuildpackTagger
                   EOF
         elsif File.exists?('./scripts/.util/tools.sh')
           system(<<~EOF)
-                  source ./scripts/.util/tools.sh
+                  . ./scripts/.util/tools.sh
                   util::tools::buildpack-packager::install --directory .bin
                   ./.bin/buildpack-packager build --cached=false #{stack_flag}
                   ./.bin/buildpack-packager build --cached=true #{stack_flag}
