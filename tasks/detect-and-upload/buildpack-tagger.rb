@@ -48,7 +48,7 @@ class BuildpackTagger
                   bundle exec buildpack-packager --cached #{stack_flag}
                   EOF
         elsif File.exists?('./scripts/.util/tools.sh')
-          system(<<~EOF)
+          system("bash", "-c", <<~EOF)
                   . ./scripts/.util/tools.sh
                   util::tools::buildpack-packager::install --directory "${PWD}/.bin"
                   ./.bin/buildpack-packager build --cached=false #{stack_flag}
