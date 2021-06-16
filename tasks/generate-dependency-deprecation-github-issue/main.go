@@ -142,7 +142,7 @@ func exists(ctx context.Context, client *github.Client, org string, repo string,
 
 func createProjectCardFromIssueURL(ctx context.Context, client *github.Client, url string) error {
 	cardOpts := github.ProjectCardOptions{
-		Note: "See Runbook guidance here: https://docs.google.com/document/d/1KKO77BtCnxAA5o8Sw1PCvKDnXL9-9MRSnvA7-wwZ3LY/ \n\nIssue: " + url,
+		Note: "For more information, see the team's Index of Responsibilities\n\nIssue: " + url,
 	}
 
 	projectCard, response, err := client.Projects.CreateProjectCard(ctx, lightsOnColumnID, &cardOpts)
