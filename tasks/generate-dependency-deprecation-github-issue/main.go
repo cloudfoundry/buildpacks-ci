@@ -77,8 +77,15 @@ func main() {
 }
 
 func createDeprecationIssue(ctx context.Context, client *github.Client, org string, repo string, deprecation DeprecationDate) (github.Issue, error) {
-	titleString := fmt.Sprintf("Dependency Deprecation: %s %s", deprecation.Name, deprecation.VersionLine)
-	bodyString := fmt.Sprintf("Deprecation date: %s\nLink: %s", deprecation.DateString, deprecation.Link)
+	titleString := fmt.Sprintf("Deprecation notice required: [%s] %s version %s***",
+		strings.Join([]string{os.Getenv("BUILDPACK_NAME"), "buildpack"}, "-"),
+		deprecation.Name,
+		deprecation.VersionLine)
+
+	bodyString := fmt.Sprintf("Acceptance Criteria:\n\nConfirm deprecation date is valid. If invalid, attempt to identify the best next opportunity to check for deprecation again. Modify the deprecation date on the buildpack with that new date.\n\nDeprecation date: %s\nLink: %s",
+		deprecation.DateString,
+		deprecation.Link)
+
 	labels := []string{"deprecation-alert"}
 
 	issueRequest := github.IssueRequest{
@@ -135,7 +142,7 @@ func exists(ctx context.Context, client *github.Client, org string, repo string,
 
 func createProjectCardFromIssueURL(ctx context.Context, client *github.Client, url string) error {
 	cardOpts := github.ProjectCardOptions{
-		Note: url,
+		Note: "See Runbook guidance here: https://docs.google.com/document/d/1KKO77BtCnxAA5o8Sw1PCvKDnXL9-9MRSnvA7-wwZ3LY/ \n\nIssue: " + url,
 	}
 
 	projectCard, response, err := client.Projects.CreateProjectCard(ctx, lightsOnColumnID, &cardOpts)
