@@ -14,7 +14,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const lightsOnColumnID int64 = 14349149
+const lightsOnColumnID int64 = 14580131 // "Grooming" Column
 
 type Manifest struct {
 	DeprecationDates []DeprecationDate `yaml:"dependency_deprecation_dates"`
