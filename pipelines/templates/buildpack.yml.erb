@@ -225,12 +225,6 @@ resources: #####################################################################
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack-release.git
       private_key: {{<%= language %>-buildpack-bosh-release-private-key}}
       branch: master
-  - name: offline-buildpack-bosh-release
-    type: git
-    source:
-      uri: git@github.com:pivotal-cf/<%= language %>-offline-buildpack-release.git
-      private_key: {{<%= language %>-offline-buildpack-bosh-release-private-key}}
-      branch: master
 <% end %>
   - name: env-repo
     type: git
@@ -255,12 +249,6 @@ resources: #####################################################################
     source:
       user: {{buildpacks-github-org}}
       repository: <%= language %>-buildpack-release
-      access_token: {{buildpacks-github-token}}
-  - name: offline-buildpack-bosh-release-github-release
-    type: github-release
-    source:
-      user: pivotal-cf
-      repository: <%= language %>-offline-buildpack-release
       access_token: {{buildpacks-github-token}}
 <% end %>
 
@@ -1228,45 +1216,6 @@ jobs: ##########################################################################
             rebase: true
             tag: version/version
         - put: buildpack-bosh-release-github-release
-          params:
-            name: version/version
-            tag: version/version
-        on_failure:
-          put: failure-alert
-          params:
-            text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: "#buildpacks-ci"
-  - name: update-offline-buildpack-bosh-release
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: release
-          resource: offline-buildpack-bosh-release
-        <% all_stacks = buildpacks[language]['stacks'] %>
-        <% all_stacks += ['any'] if language.to_s == 'hwc' || language.to_s == 'binary' %>
-        <% all_stacks.each_with_index do |stack, i| %>
-        - get: buildpack-zip-stack<%= i %>
-          resource: pivotal-buildpack-cached-<%= stack %>
-          trigger: true
-          passed: [ ship-it ]
-        <% end %>
-      - do:
-        - task: create-offline-bosh-release
-          file: buildpacks-ci/tasks/create-bosh-release/task.yml
-          params:
-            ACCESS_KEY_ID: {{pivotal-offline-buildpacks-s3-access-key}}
-            SECRET_ACCESS_KEY: {{pivotal-offline-buildpacks-s3-secret-key}}
-            LANGUAGE: "hwc"
-            RELEASE_NAME: hwc-offline-buildpack
-            RELEASE_DIR: release
-        - put: offline-buildpack-bosh-release
-          params:
-            repository: release-artifacts
-            rebase: true
-            tag: version/version
-        - put: offline-buildpack-bosh-release-github-release
           params:
             name: version/version
             tag: version/version
