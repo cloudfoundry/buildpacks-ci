@@ -88,7 +88,7 @@ puts "Created tracker story #{story.id}"
 client = Octokit::Client.new :access_token => ENV.fetch('GITHUB_ACCESS_TOKEN')
 
 title = "Add new version line in dependency-builds: #{name} #{version}"
-description = "```\n#{data.to_yaml}\n```\n\nPlease edit the dependency-builds pipeline to add the new version line to the relevant dependency/buildpack.",
+description = "```\n#{data.to_yaml}\n```\n\nPlease edit the dependency-builds pipeline to add the new version line to the relevant dependency/buildpack."
 description += "\n\nCheck [this runbook](https://docs.google.com/document/d/19q5wuEImr2nPIaoKL6hcEyG2WwWFLqR8KIiLhPxKXUM/edit) for instructions on adding a new version line to the dependency-builds pipeline.\n"
 description += "\n**Relevant buildpacks:**\n"
 
