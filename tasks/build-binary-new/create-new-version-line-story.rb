@@ -98,8 +98,7 @@ end
 
 issue = client.create_issue(ENV.fetch('PROJECT_REPO'), title, description)
 
-projectGroomingColumn = 14580131
-client.create_project_card(projectGroomingColumn, content_id: issue.id, content_type: 'Issue', mediaType: {
+client.create_project_card(ENV.fetch('PROJECT_COLUMN'), content_id: issue.id, content_type: 'Issue', mediaType: {
   previews: [
     'inertia'
   ]
