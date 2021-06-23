@@ -286,6 +286,9 @@ jobs:
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         BUILDPACKS: <%= dep['buildpacks'].keys.join(' ') %>
         EXISTING_VERSION_LINES: <%= version_lines.join(' ') %>
+        PROJECT_REPO: "pivotal-cf/tanzu-buildpacks"
+        GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+        PROJECT_COLUMN: 14580131
 <% end %>
 
 <% version_lines.each do |line| %>
