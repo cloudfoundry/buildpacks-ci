@@ -260,12 +260,6 @@ dependencies:
           #! each odd version line (ex. 1.19) is the "mainline"
           #! the even numbered version line that precedes the mainline is the associated stable version line.
           #! See explanation of release cadence: https://www.nginx.com/blog/nginx-1-18-1-19-released/
-          - line: 1.18.X
-            deprecation_date: 2021-05-01
-            link: https://nginx.org/
-          - line: 1.19.X
-            deprecation_date: 2021-05-01
-            link: https://nginx.org/
           - line: 1.20.X
             deprecation_date: 2022-05-25
             link: https://nginx.org/
@@ -277,12 +271,6 @@ dependencies:
           #! nginx deprecation dates are 1 year after the mainline release date
           #! each odd version line (ex. 1.19) is the "mainline"
           #! the even numbered version line that precedes the mainline is the associated stable version line.
-          - line: 1.18.X
-            deprecation_date: 2021-05-01
-            link: https://nginx.org/
-          - line: 1.19.X
-            deprecation_date: 2021-05-01
-            link: https://nginx.org/
           - line: 1.20.X
             deprecation_date: 2022-05-25
             link: https://nginx.org/
@@ -308,12 +296,6 @@ dependencies:
           #! nginx deprecation dates are 1 year after the mainline release date
           #! each odd version line (ex. 1.19) is the "mainline"
           #! the even numbered version line that precedes the mainline is the associated stable version line.
-          - line: 1.18.X
-            deprecation_date: 2021-05-01
-            link: https://nginx.org/
-          - line: 1.19.X
-            deprecation_date: 2021-05-01
-            link: https://nginx.org/
           - line: 1.20.X
             deprecation_date: 2022-05-25
             link: https://nginx.org/
@@ -322,12 +304,6 @@ dependencies:
             link: https://nginx.org/
       staticfile:
         lines:
-          - line: 1.18.X
-            deprecation_date: 2021-05-01
-            link: https://nginx.org/
-          - line: 1.19.X
-            deprecation_date: 2021-05-01
-            link: https://nginx.org/
           - line: 1.20.X
             deprecation_date: 2022-05-25
             link: https://nginx.org/
