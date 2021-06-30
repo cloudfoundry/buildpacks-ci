@@ -949,8 +949,6 @@ jobs: ##########################################################################
       <% if buildpacks[language]['compute_instance_count'] %>
       - task: scale-up-compute
         file: buildpacks-ci/tasks/scale-up-compute/task.yml
-        input_mapping:
-          environment: smith-environments-<%= pas_versions['n-2'] %>
         params:
           INSTANCE_COUNT: <%= buildpacks[language]['compute_instance_count'] %>
       <% end %>
@@ -987,10 +985,10 @@ jobs: ##########################################################################
         text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
         channel: "#buildpacks-ci"
     ensure:
-      put: smith-environments-<%= pas_versions['n-2'] %>
+      put: environment
       params:
         action: unclaim
-        env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
+        env_file: environment/metadata
 <% unless buildpacks[language]['skip_brats'] %>
   - name: specs-lts-brats-develop
     serial: true
@@ -1011,8 +1009,6 @@ jobs: ##########################################################################
       <% if buildpacks[language]['compute_instance_count'] %>
       - task: scale-up-compute
         file: buildpacks-ci/tasks/scale-up-compute/task.yml
-        input_mapping:
-          environment: smith-environments-<%= pas_versions['n-2'] %>
         params:
           INSTANCE_COUNT: <%= buildpacks[language]['compute_instance_count'] %>
       <% end %>
@@ -1035,10 +1031,10 @@ jobs: ##########################################################################
           task: delete-cf-space-cflinuxfs3
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
     ensure:
-      put: smith-environments-<%= pas_versions['n-2'] %>
+      put: environment
       params:
         action: unclaim
-        env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
+        env_file: environment/metadata
     on_failure:
       put: failure-alert
       params:
