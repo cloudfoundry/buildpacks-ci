@@ -933,10 +933,12 @@ jobs: ##########################################################################
     public: true
     plan:
       - in_parallel:
-        - put: smith-environments-<%= pas_versions['n-2'] %>
+        - put: environment
+          resource: smith-environments-<%= pas_versions['n-2'] %>
           params:
             action: claim
         - get: buildpacks-ci
+        - get: feature-eng-ci
         - get: buildpack
           resource: buildpack-develop
           trigger: true
@@ -954,11 +956,13 @@ jobs: ##########################################################################
       <% end %>
       - do:
         - task: create-cf-space
-          file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
-          input_mapping:
-            environment: smith-environments-<%= pas_versions['n-2'] %>
+          file: feature-eng-ci/tasks/cf/create-space/task.yml
           params:
+            DOMAIN: 'cf-app.com'
             ORG: pivotal
+          input_mapping:
+            ci: feature-eng-ci
+            lock: environment
         - task: ginkgo-cflinuxfs3
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           params:
@@ -993,10 +997,12 @@ jobs: ##########################################################################
     public: true
     plan:
       - in_parallel:
-        - put: smith-environments-<%= pas_versions['n-2'] %>
+        - put: environment
+          resource: smith-environments-<%= pas_versions['n-2'] %>
           params:
             action: claim
         - get: buildpacks-ci
+        - get: feature-eng-ci
         - get: buildpack
           resource: buildpack-develop
           trigger: true
@@ -1012,11 +1018,13 @@ jobs: ##########################################################################
       <% end %>
       - do:
         - task: create-cf-space
-          file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
-          input_mapping:
-            environment: smith-environments-<%= pas_versions['n-2'] %>
+          file: feature-eng-ci/tasks/cf/create-space/task.yml
           params:
+            DOMAIN: 'cf-app.com'
             ORG: pivotal
+          input_mapping:
+            ci: feature-eng-ci
+            lock: environment
         - task: brats-cflinuxfs3
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
           params:
