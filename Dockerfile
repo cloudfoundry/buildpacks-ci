@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:bionic
 
 ENV LANG="C.UTF-8"
 ENV DEBIAN_FRONTEND noninteractive
@@ -62,7 +62,7 @@ RUN apt-get -qqy update \
   && apt-get -qqy clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ARG RUBY_INSTALL_VERSION=0.7.0
+ARG RUBY_INSTALL_VERSION=0.8.1
 RUN wget -O ruby-install-$RUBY_INSTALL_VERSION.tar.gz https://github.com/postmodern/ruby-install/archive/v$RUBY_INSTALL_VERSION.tar.gz \
   && tar -xzvf ruby-install-$RUBY_INSTALL_VERSION.tar.gz \
   && cd ruby-install-$RUBY_INSTALL_VERSION/ \
@@ -70,7 +70,7 @@ RUN wget -O ruby-install-$RUBY_INSTALL_VERSION.tar.gz https://github.com/postmod
   && rm -rf ruby-install-$RUBY_INSTALL_VERSION*
 
 RUN apt-get -qqy update \
-  && ruby-install ruby \
+  && ruby-install ruby 2.7.3 \
   && ln -s /opt/rubies/$(ls /opt/rubies | head -1) /opt/rubies/latest \
   && apt-get -qqy clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
