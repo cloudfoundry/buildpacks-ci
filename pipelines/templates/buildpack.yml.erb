@@ -74,9 +74,9 @@
 } %>
 <%
 pas_versions = {
-  'latest' => '2_9',
-  'n-1' => '2_8',
-  'n-2' => '2_7',
+  'latest' => '2.9',
+  'n-1' => '2.8',
+  'n-2' => '2.7',
 }
 %>
 <% cnb_images = %w(run build) %>
@@ -334,7 +334,7 @@ resources: #####################################################################
     source:
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
-      pool_name: us_<%= pas_versions['n-2'] %>
+      pool_name: us_<%= pas_versions['n-2'].gsub('.', '_') %>
 <% end %>
 
   ## Alerts ##
@@ -516,7 +516,7 @@ jobs: ##########################################################################
           passed:
             - detect-new-version-and-upload-artifacts
           resource: buildpack-master
-      - task: check tag not already added
+      - task: check-tag-not-already-added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
       - put: buildpack-master
         params:
@@ -986,6 +986,7 @@ jobs: ##########################################################################
         channel: "#buildpacks-ci"
     ensure:
       put: environment
+      resource: smith-environments-<%= pas_versions['n-2'] %>
       params:
         action: unclaim
         env_file: environment/metadata
@@ -1032,6 +1033,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
     ensure:
       put: environment
+      resource: smith-environments-<%= pas_versions['n-2'] %>
       params:
         action: unclaim
         env_file: environment/metadata
