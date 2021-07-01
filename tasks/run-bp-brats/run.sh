@@ -11,9 +11,12 @@ pushd buildpack > /dev/null
   export PATH=$GOBIN:$PATH
 popd > /dev/null
 
-# shellcheck disable=SC1091
-source "${PWD}/buildpack/scripts/.util/tools.sh"
-util::tools::cf::install --directory "${PWD}/buildpack/.bin"
+if [[ -e "${PWD}/buildpack/scripts/.util/tools.sh" ]]; then
+  # shellcheck disable=SC1091
+  source "${PWD}/buildpack/scripts/.util/tools.sh"
+  util::tools::cf::install --directory "${PWD}/buildpack/.bin"
+fi
+
 "./cf-space/login"
 
 pushd buildpack > /dev/null
