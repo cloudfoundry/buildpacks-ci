@@ -3,9 +3,12 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-# shellcheck disable=SC1091
-source "${PWD}/buildpack/scripts/.util/tools.sh"
-util::tools::cf::install --directory "${PWD}/buildpack/.bin"
+if [[ -e "${PWD}/buildpack/scripts/.util/tools.sh" ]]; then
+  # shellcheck disable=SC1091
+  source "${PWD}/buildpack/scripts/.util/tools.sh"
+  util::tools::cf::install --directory "${PWD}/buildpack/.bin"
+fi
+
 "./cf-space/login"
 
  if [[ -d "uncached-buildpack" ]]; then
