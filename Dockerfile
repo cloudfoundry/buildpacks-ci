@@ -66,7 +66,7 @@ RUN wget -O ruby-install-$RUBY_INSTALL_VERSION.tar.gz https://github.com/postmod
   && rm -rf ruby-install-$RUBY_INSTALL_VERSION*
 
 RUN apt-get -qqy update \
-  && ruby-install ruby 2.7.3 \
+  && ruby-install ruby 2.7.0 \
   && ln -s /opt/rubies/$(ls /opt/rubies | head -1) /opt/rubies/latest \
   && apt-get -qqy clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
