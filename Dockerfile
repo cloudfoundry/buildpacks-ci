@@ -23,9 +23,6 @@ RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee 
 RUN curl -sL "https://keybase.io/crystal/pgp_keys.asc" | apt-key add - \
     && echo "deb https://dist.crystal-lang.org/apt crystal main" | tee /etc/apt/sources.list.d/crystal.list
 
-RUN curl -sL "https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key" | apt-key add - \
-  && echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list
-
 RUN curl -sL "https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key" | apt-key add - \
   && echo "deb http://apt.starkandwayne.com stable main" |  tee /etc/apt/sources.list.d/starkandwayne.list
 
@@ -33,7 +30,6 @@ RUN apt-get -qqy update \
   && apt-get -qqy install \
     aufs-tools \
     btrfs-progs \
-    cf7-cli \
     crystal \
     default-libmysqlclient-dev \
     expect \
@@ -112,6 +108,12 @@ RUN curl -L https://github.com/cloudfoundry-incubator/credhub-cli/releases/downl
   && tar -zxf credhub.tgz --to-stdout > /usr/local/bin/credhub \
   && rm credhub.tgz \
   && chmod +x /usr/local/bin/credhub
+
+# download CF cli
+RUN curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github&version=v6" -o cf.tgz \
+  && tar -zxf cf.tgz cf --to-stdout > /usr/local/bin/cf \
+  && rm cf.tgz \
+  && chmod +x /usr/local/bin/cf
 
 # Ensure Concourse Filter binary is present
 RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.1.2/concourse-filter' \
