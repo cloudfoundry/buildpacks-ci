@@ -451,9 +451,6 @@ dependencies:
           - line: 3.6.X
             deprecation_date: 2020-03-01 #!Estimate make sure 3.7 is out before deprecating
             link: https://developer.r-project.org/
-          - line: 4.0.X
-            deprecation_date: 2021-03-01 #!Estimate make sure 4.1 is out before deprecating
-            link: https://developer.r-project.org/
           - line: 4.1.X
             deprecation_date: 2022-05-01 #!Estimate make sure 4.2 is out before deprecating
             link: https://developer.r-project.org/
