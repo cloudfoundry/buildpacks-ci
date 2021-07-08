@@ -38,7 +38,9 @@ class BuildpackFinalizer
     Dir.chdir(@buildpack_repo_dir) do
       go_mod_file = File.file?("go.mod")
       if go_mod_file
-          `go install github.com/cloudfoundry/libbuildpack/packager/buildpack-packager`
+        Dir.chdir("/tmp") do
+          `go install github.com/cloudfoundry/libbuildpack/packager/buildpack-packager@latest`
+        end
         File.write(@recent_changes_file, `buildpack-packager summary`, mode: 'a')
       else
         num_cores = `nproc`
