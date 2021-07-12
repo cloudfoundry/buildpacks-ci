@@ -20,7 +20,9 @@ pushd buildpack
   go get -u github.com/cloudfoundry/libbuildpack
   go get github.com/golang/mock/gomock
   go get -u github.com/onsi/ginkgo/ginkgo
-  go install github.com/golang/mock/mockgen
+  pushd /tmp
+    go install github.com/golang/mock/mockgen@latest
+  popd
   go mod tidy
   if [[ "$LANGUAGE" != "php" || "$SHIM" == "true" ]]; then
     go mod vendor
