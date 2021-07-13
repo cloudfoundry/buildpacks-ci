@@ -345,12 +345,6 @@ resources: #####################################################################
     source:
       url: {{buildpacks-ci-slack-url}}
 
-  - name: sunday-night
-    type: cron
-    source:
-      expression: 0 18 * * 0
-      location: {{current-timezone}}
-
   - name: daily-midnight
     type: cron
     source:
@@ -403,8 +397,6 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
-      - get: sunday-night
-        trigger: true
       - in_parallel:
         - get: buildpacks-ci
         - get: buildpack-develop
