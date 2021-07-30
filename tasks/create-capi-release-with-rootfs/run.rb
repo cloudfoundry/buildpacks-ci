@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 require 'yaml'
+require 'fileutils'
 stack = ENV.fetch('STACK')
 
 puts "Creating BOSH release capi with #{stack}"
