@@ -116,7 +116,7 @@ end
 def get_git_repo(buildpack, cnb_uris)
   if cnb_uris.key? buildpack
     uri = cnb_uris[buildpack]
-    return uri.slice((uri.index(':') + 1)..).delete_suffix('.git')
+    return uri.slice((uri.index(':') + 1)).delete_suffix('.git')
   else
     if buildpack.include? '-cnb'
       return "cloudfoundry/#{buildpack}"
