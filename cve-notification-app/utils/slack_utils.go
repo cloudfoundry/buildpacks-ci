@@ -1,0 +1,150 @@
+package utils
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"time"
+)
+
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . SlackUtilsInterface
+type SlackUtilsInterface interface {
+	SendNewCVENotification(product, cveId, description, severity string) error
+}
+
+type SlackUtils struct {
+	WebhookUrl string
+	Client     http.Client
+}
+
+type Payload struct {
+	Blocks []Block `json:"blocks,omitempty"`
+}
+
+type Text struct {
+	Type  string `json:"type,omitempty"`
+	Text  string `json:"text,omitempty"`
+	Emoji bool   `json:"emoji,omitempty"`
+}
+
+type Block struct {
+	Type string `json:"type,omitempty"`
+	Text *Text  `json:"text,omitempty"`
+}
+
+func NewSlackUtils(webhookUrl string) SlackUtils {
+	return SlackUtils{
+		WebhookUrl: webhookUrl,
+		Client:     http.Client{Timeout: 10 * time.Second},
+	}
+}
+
+func (s SlackUtils) SendNewCVENotification(product, cveId, description, severity string) error {
+	payload := buildSlackMessage(product, cveId, description, severity)
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("error marshaling slack payload\n%w", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, s.WebhookUrl, bytes.NewBuffer(body))
+	if err != nil {
+		return fmt.Errorf("error creating slack webhook request\n%w", err)
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := s.Client.Do(req)
+	if err != nil {
+		return fmt.Errorf("error sending slack webhook request\n%w", err)
+	}
+
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("error reading slack webhook response\n%w", err)
+	}
+
+	if string(responseBody) != "ok" {
+		return fmt.Errorf("non-ok response returned from Slack")
+	}
+
+	return nil
+}
+
+func buildSlackMessage(product, id, description, severity string) Payload {
+	payload := Payload{
+		Blocks: []Block{
+			{
+				Type: "header",
+				Text: &Text{
+					Type:  "plain_text",
+					Text:  fmt.Sprintf(":bell: New CVE in %s :bell:", product),
+					Emoji: true,
+				},
+			},
+			{
+				Type: "divider",
+			},
+			{
+				Type: "section",
+				Text: &Text{
+					Type: "mrkdwn",
+					Text: fmt.Sprintf("Hey @buildpacks there is a new CVE affecting *%s*", product),
+				},
+			},
+			{
+				Type: "section",
+				Text: &Text{
+					Type: "mrkdwn",
+					Text: fmt.Sprintf("*ID*: %s", id),
+				},
+			},
+			{
+				Type: "section",
+				Text: &Text{
+					Type: "mrkdwn",
+					Text: formatSeverity(severity),
+				},
+			},
+			{
+				Type: "section",
+				Text: &Text{
+					Type: "mrkdwn",
+					Text: fmt.Sprintf("*DESCRIPTION*: %s", description),
+				},
+			},
+			{
+				Type: "section",
+				Text: &Text{
+					Type: "mrkdwn",
+					Text: fmt.Sprintf("*<%s|LINK>*", generateLink(id)),
+				},
+			},
+		},
+	}
+
+	return payload
+}
+
+func generateLink(id string) string {
+	return fmt.Sprintf("https://nvd.nist.gov/vuln/detail/%s", id)
+}
+
+func formatSeverity(severity string) string {
+	switch severity {
+	case "NONE":
+		return fmt.Sprintf("*SEVERITY*: :large_green_circle: %s :large_green_circle:", severity)
+	case "LOW":
+		return fmt.Sprintf("*SEVERITY*: :large_yellow_circle: %s :large_yellow_circle:", severity)
+	case "MEDIUM":
+		return fmt.Sprintf("*SEVERITY*: :large_orange_circle: %s :large_orange_circle:", severity)
+	case "HIGH":
+		return fmt.Sprintf("*SEVERITY*: :red_circle: %s :red_circle:", severity)
+	case "CRITICAL":
+		return fmt.Sprintf("*SEVERITY*: :warning: %s :warning:", severity)
+	}
+
+	return "*SEVERITY*: NOT-FOUND"
+}
