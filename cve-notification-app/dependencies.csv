@@ -1,0 +1,41 @@
+Dependency,Source,Example URI,Generation,Vendor,Product
+appdynamics,https://packages.appdynamics.com/php/20.4.0.3759/appdynamics-php-agent-linux_x64-20.4.0.3759.tar.bz2,https://packages.appdynamics.com/php/20.4.0.3759/appdynamics-php-agent-linux_x64-20.4.0.3759.tar.bz2,2,cisco,appdynamics_app_iq
+bower,https://registry.npmjs.org/bower/-/bower-1.8.12.tgz,https://buildpacks.cloudfoundry.org/dependencies/bower/bower_1.8.12_linux_noarch_any-stack_a191031f.tgz,2,bower,bower
+bundler,https://github.com/rubygems/rubygems/tree/v2.2.24,https://buildpacks.cloudfoundry.org/dependencies/bundler/bundler_2.2.24_linux_noarch_any-stack_9d9ec740.tgz,"2, 3",bundler,bundler
+CAAPM,https://packages.broadcom.com/artifactory/apm-agents/CA-APM-PHPAgent-20.11.0_linux.tar.gz,https://packages.broadcom.com/artifactory/apm-agents/CA-APM-PHPAgent-20.11.0_linux.tar.gz,2,broadcom,ca_performance_management
+composer,https://github.com/composer/composer/releases/download/2.1.3/composer.phar,https://buildpacks.cloudfoundry.org/dependencies/composer/composer_2.1.3_linux_noarch_any-stack_f8a72e98.phar,"2, 3",getcomposer,composer
+curl,https://curl.haxx.se/download/curl-7.71.1.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/curl/curl-7.71.1.tgz,3,haxx,curl
+dep,https://github.com/golang/dep/archive/v0.5.4.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/dep/dep-v0.5.4-linux-x64-cflinuxfs3-79b3ab9e.tgz,"2, 3",,
+dotnet-aspnetcore,https://download.visualstudio.microsoft.com/download/pr/d6be94b3-458f-43c4-8bb5-9ba261de8c9c/bbe13b54208d088b5fdf428759b5bc0a/aspnetcore-runtime-5.0.7-linux-x64.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/dotnet-aspnetcore/dotnet-aspnetcore_5.0.7_linux_x64_any-stack_3b214b55.tar.xz,"2, 3",microsoft,aspnetcore
+dotnet-runtime,https://download.visualstudio.microsoft.com/download/pr/f7eb39c4-484d-4e01-bd41-b4fe6794cd82/ff5c2799f30ea6dd19964c5c90780dba/dotnet-runtime-2.1.27-linux-x64.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/dotnet-runtime/dotnet-runtime_2.1.27_linux_x64_any-stack_7f732294.tar.xz,"2, 3",microsoft,.net
+,,,,microsoft,.net_core
+dotnet-sdk,https://download.visualstudio.microsoft.com/download/pr/ef13f9da-46dc-4de9-a05e-5a4c20574189/be95913ebf1fb6c66833ca40060d3f65/dotnet-sdk-5.0.203-linux-x64.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/dotnet-sdk/dotnet-sdk_5.0.203_linux_x64_any-stack_6016e188.tar.xz,"2, 3",,
+,,,,,
+glide,https://github.com/Masterminds/glide/archive/v0.13.3.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/glide/glide-v0.13.3-linux-x64-cflinuxfs3-ef07acb5.tgz,2,,
+godep,https://github.com/tools/godep/archive/v80.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/godep/godep-v80-linux-x64-cflinuxfs3-b60ac947.tgz,2,,
+go,https://dl.google.com/go/go1.16.6.src.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/go/go_1.16.6_linux_x64_cflinuxfs3_7f9ac238.tgz,"2, 3",golang,go
+httpd,http://archive.apache.org/dist/httpd/httpd-2.4.48.tar.bz2,https://buildpacks.cloudfoundry.org/dependencies/httpd/httpd_2.4.48_linux_x64_cflinuxfs3_b86339e2.tgz,"2, 3",apache,http_server
+hwc,https://github.com/cloudfoundry/hwc/archive/20.0.0.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/hwc/hwc_20.0.0_windows_x86-64_any-stack_ef69ecbb.zip,2,,
+icu,https://github.com/unicode-org/icu/releases/download/release-69-1/icu4c-69_1-src.tgz,https://buildpacks.cloudfoundry.org/dependencies/icu/icu_69.1.0_linux_noarch_any-stack_3f89e61d.tgz,3,icu-project,international_components_for_unicode
+jruby,https://s3.amazonaws.com/jruby.org/downloads/9.2.19.0/jruby-src-9.2.19.0.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/jruby/jruby_9.2.19.0-ruby-2.5_linux_x64_cflinuxfs3_9aedf2ee.tgz,2,jruby,jruby
+libffi,https://sourceware.org/ftp/libffi/libffi-3.2.1.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/python/libffi-3.2.1-linux-x64-5f5bf32c.tgz,2,,
+libgdiplus,https://github.com/mono/libgdiplus/archive/93f43204a94ac75f468c58334ad07726958f4f26.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/libgdiplus/libgdiplus-6.0-cflinuxfs3-559895ae.tar.gz,2,mono-project,libgdiplus
+libmemcache,https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/python/libmemcache-1.0.18-linux-x64-6d33aa02.tgz,2,,
+libunwind,https://github.com/libunwind/libunwind/releases/download/v1.5/libunwind-1.5.0.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/libunwind/libunwind_1.5_linux_noarch_cflinuxfs3_6a1dd8f2.tgz,2,libunwind_project,libunwind
+miniconda3,https://github.com/conda/conda/archive/4.9.2.tar.gz,https://repo.anaconda.com/miniconda/Miniconda3-py39_4.9.2-Linux-x86_64.sh,"2, 3",,
+newrelic,https://download.newrelic.com/php_agent/archive/9.14.0.290/newrelic-php5-9.14.0.290-linux.tar.gz,https://download.newrelic.com/php_agent/archive/9.14.0.290/newrelic-php5-9.14.0.290-linux.tar.gz,2,,
+nginx,http://nginx.org/download/nginx-1.21.1.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/nginx-static/nginx-static_1.21.1_linux_x64_cflinuxfs3_80fcf0ac.tgz,"2, 3",nginx,nginx
+node,https://nodejs.org/dist/v16.5.0/node-v16.5.0.tar.gz,https://deps.paketo.io/node/node_v16.5.0_linux_x64_bionic_d4f42169.tgz,"2, 3",nodejs,node.js
+openjdk1.8-latest,https://java-buildpack.cloudfoundry.org/openjdk-jdk/trusty/x86_64/openjdk-jdk-1.8.0_212-trusty.tar.gz,https://java-buildpack.cloudfoundry.org/openjdk-jdk/trusty/x86_64/openjdk-jdk-1.8.0_212-trusty.tar.gz,2,oracle,openjdk
+openresty,http://openresty.org/download/openresty-1.19.3.2.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/openresty/openresty_1.19.3.2_linux_x64_cflinuxfs3_acefa176.tgz,2,openresty,openresty
+php,https://php.net/distributions/php-8.0.8.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/php/php_8.0.8_linux_x64_cflinuxfs3_33e14443.tgz,"2, 3",php,php
+pipenv,https://files.pythonhosted.org/packages/be/c5/a7c300c4589e898db8cfcf26f7065c24e2f5abacaea196a7f80e6695344d/pipenv-2021.5.29.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/pipenv/pipenv_2021.5.29_linux_noarch_cflinuxfs3_b26dc44f.tgz,"2, 3",,
+pip,https://files.pythonhosted.org/packages/b1/44/6e26d5296b83c6aac166e48470d57a00d3ed1f642e89adc4a4e412a01643/pip-21.1.2.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/pip/pip_21.1.2_linux_noarch_any-stack_4780d550.tgz,3,pypa,pip
+pip-pop,https://github.com/cloudfoundry/pip-pop/archive/v0.1.5.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/manual-binaries/pip-pop/pip-pop-0.1.5-b32efe86.tar.gz,2,,
+python,https://www.python.org/ftp/python/3.9.6/Python-3.9.6.tgz,https://buildpacks.cloudfoundry.org/dependencies/python/python_3.9.6_linux_x64_cflinuxfs3_caec8bfa.tgz,"2, 3",python,python
+r,https://cran.r-project.org/src/base/R-4/R-4.1.0.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/r/r_4.1.0_linux_noarch_cflinuxfs3_812dddaa.tgz,2,r_project,r
+rubygems,https://rubygems.org/rubygems/rubygems-3.2.22.tgz,https://buildpacks.cloudfoundry.org/dependencies/rubygems/rubygems_3.2.22_linux_noarch_any-stack_bba519d8.tgz,2,rubygems,rubygems
+ruby,https://cache.ruby-lang.org/pub/ruby/3.0/ruby-3.0.2.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/ruby/ruby_3.0.2_linux_x64_cflinuxfs3_34708973.tgz,"2, 3",ruby-lang,ruby
+rust,https://static.rust-lang.org/dist/rustc-1.53.0-src.tar.gz,https://deps.paketo.io/rust/rust_1.53.0_linux_noarch_bionic_0d951e38.tgz,3,rust-lang,rust
+setuptools,https://files.pythonhosted.org/packages/cf/79/1a19c2f792da00cbead7b6caa176afdddf517522cb9163ce39576025b050/setuptools-57.1.0.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/setuptools/setuptools_57.1.0_linux_noarch_any-stack_89567225.tgz,2,python,setuptools
+yarn,https://github.com/yarnpkg/yarn/releases/download/v1.22.10/yarn-v1.22.10.tar.gz,https://buildpacks.cloudfoundry.org/dependencies/yarn/yarn_1.22.10_linux_noarch_any-stack_0057c1c9.tgz,"2, 3",yarnpkg,yarn
