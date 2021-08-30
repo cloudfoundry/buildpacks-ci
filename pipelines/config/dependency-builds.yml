@@ -92,14 +92,6 @@ dependencies:
             deprecation_date: ""
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: keep_all
-      dotnet-core-runtime-cnb:
-        lines:
-          - line: 3.1.X
-            deprecation_date: 2022-12-04
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-          - line: 5.0.X
-            deprecation_date: ""
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
     versions_to_keep: 2
     any_stack: true
   dotnet-aspnetcore:
