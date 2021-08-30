@@ -102,12 +102,6 @@ dependencies:
           - line: 3.1.X
           - line: 5.0.X
         removal_strategy: keep_all
-      dotnet-core-aspnet-cnb:
-        lines:
-          - line: 2.1.X
-          - line: 3.1.X
-          - line: 5.0.X
-        removal_strategy: keep_all
     versions_to_keep: 2
     any_stack: true
   glide:
