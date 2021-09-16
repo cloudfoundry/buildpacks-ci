@@ -11,8 +11,8 @@ inputs:
   - name: environment
 
 run:
-  path: buildpacks-ci/tasks/scale-up-compute/run.sh
+  path: buildpacks-ci/tasks/configure-pas/run.sh
 
 params:
-  INSTANCE_COUNT: 1
+  COMPUTE_INSTANCE_COUNT: 1
 
