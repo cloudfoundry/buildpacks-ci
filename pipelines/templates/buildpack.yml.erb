@@ -20,7 +20,7 @@
     'stacks' => %w(cflinuxfs3),
     'product_slug' => 'go-buildpack',
     'non_lts_pivnet' => true,
-    'compute_instance_count' => 3,
+    'compute_instance_count' => 3
   },
   'hwc' => {
     'stacks' => %w(windows2016 windows),
@@ -64,7 +64,7 @@
     'stacks' => %w(cflinuxfs3),
     'product_slug' => 'ruby-buildpack',
     'non_lts_pivnet' => true,
-    'compute_instance_count' => 3,
+    'compute_instance_count' => 3
   },
   'staticfile' => {
     'stacks' => %w(cflinuxfs3),
@@ -72,14 +72,7 @@
     'non_lts_pivnet' => true,
   }
 } %>
-<%
-pas_versions = {
-  'latest' => '2.11',
-  'n-1' => '2.10',
-  'n-2' => '2.9',
-}
-%>
-<% cnb_images = %w(run build) %>
+<% pas_version = '2.10' %>
 <% low_nodes_lts = ['ruby', 'python', 'dotnet-core', 'php'] %>
 ---
 resource_types:
@@ -329,12 +322,12 @@ resources: #####################################################################
       pool_name: cf-deployment
 
 <% unless buildpacks[language]['non_lts'] %>
-  - name: smith-environments-<%= pas_versions['n-2'] %>
+  - name: smith-environments-<%= pas_version %>
     type: cf-pool
     source:
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
-      pool_name: us_<%= pas_versions['n-2'].gsub('.', '_') %>
+      pool_name: us_<%= pas_version.gsub('.', '_') %>
 <% end %>
 
   ## Alerts ##
@@ -926,7 +919,7 @@ jobs: ##########################################################################
     plan:
       - in_parallel:
         - put: environment
-          resource: smith-environments-<%= pas_versions['n-2'] %>
+          resource: smith-environments-<%= pas_version %>
           params:
             action: claim
         - get: buildpacks-ci
@@ -937,11 +930,11 @@ jobs: ##########################################################################
           - specs-unit-develop
         - get: repo
           resource: buildpack-develop
+      - task: configure-pas
+        file: buildpacks-ci/tasks/configure-pas/task.yml
       <% if buildpacks[language]['compute_instance_count'] %>
-      - task: scale-up-compute
-        file: buildpacks-ci/tasks/scale-up-compute/task.yml
         params:
-          INSTANCE_COUNT: <%= buildpacks[language]['compute_instance_count'] %>
+          COMPUTE_INSTANCE_COUNT: <%= buildpacks[language]['compute_instance_count'] %>
       <% end %>
       - do:
         - task: create-cf-space
@@ -973,7 +966,7 @@ jobs: ##########################################################################
         channel: "#buildpacks-ci"
     ensure:
       put: environment
-      resource: smith-environments-<%= pas_versions['n-2'] %>
+      resource: smith-environments-<%= pas_version %>
       params:
         action: unclaim
         env_file: environment/metadata
@@ -984,7 +977,7 @@ jobs: ##########################################################################
     plan:
       - in_parallel:
         - put: environment
-          resource: smith-environments-<%= pas_versions['n-2'] %>
+          resource: smith-environments-<%= pas_version %>
           params:
             action: claim
         - get: buildpacks-ci
@@ -993,11 +986,11 @@ jobs: ##########################################################################
           trigger: true
           passed:
           - specs-unit-develop
+      - task: configure-pas
+        file: buildpacks-ci/tasks/configure-pas/task.yml
       <% if buildpacks[language]['compute_instance_count'] %>
-      - task: scale-up-compute
-        file: buildpacks-ci/tasks/scale-up-compute/task.yml
         params:
-          INSTANCE_COUNT: <%= buildpacks[language]['compute_instance_count'] %>
+          COMPUTE_INSTANCE_COUNT: <%= buildpacks[language]['compute_instance_count'] %>
       <% end %>
       - do:
         - task: create-cf-space
@@ -1015,7 +1008,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
     ensure:
       put: environment
-      resource: smith-environments-<%= pas_versions['n-2'] %>
+      resource: smith-environments-<%= pas_version %>
       params:
         action: unclaim
         env_file: environment/metadata
