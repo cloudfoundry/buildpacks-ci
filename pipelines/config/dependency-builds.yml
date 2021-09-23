@@ -25,10 +25,6 @@ dependencies:
         lines:
           - line: 1.X.X
           - line: 2.X.X
-      bundler-cnb:
-        lines:
-          - line: 1.X.X
-          - line: 2.X.X
     source_type: rubygems
     any_stack: true
     versions_to_keep: 2
