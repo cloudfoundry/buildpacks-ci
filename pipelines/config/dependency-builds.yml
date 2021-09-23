@@ -48,9 +48,6 @@ dependencies:
       php:
         lines:
           - line: latest
-      php-composer-cnb:
-        lines:
-          - line: latest
     source_type: github_releases
     source_params:
       - 'repo: composer/composer'
