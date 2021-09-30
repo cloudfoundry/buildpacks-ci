@@ -61,7 +61,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		if time.Now().After(date.Add(-45 * 24 * time.Hour)) {
+		if time.Now().After(date.Add(-30 * 24 * time.Hour)) {
 			issue, err := createDeprecationIssue(ctx, client, "cloudfoundry", strings.Join([]string{os.Getenv("BUILDPACK_NAME"), "buildpack"}, "-"), deprecation)
 			if err != nil {
 				log.Fatal(err)
@@ -77,12 +77,22 @@ func main() {
 }
 
 func createDeprecationIssue(ctx context.Context, client *github.Client, org string, repo string, deprecation DeprecationDate) (github.Issue, error) {
-	titleString := fmt.Sprintf("Deprecation notice required: [%s] %s version %s***",
+	titleString := fmt.Sprintf("Deprecation: [%s] %s version %s after %s",
 		strings.Join([]string{os.Getenv("BUILDPACK_NAME"), "buildpack"}, "-"),
 		deprecation.Name,
-		deprecation.VersionLine)
+		deprecation.VersionLine,
+		deprecation.DateString)
 
-	bodyString := fmt.Sprintf("Acceptance Criteria:\n\nConfirm deprecation date is valid. If invalid, attempt to identify the best next opportunity to check for deprecation again. Modify the deprecation date on the buildpack with that new date.\n\nDeprecation date: %s\nLink: %s",
+	bodyString := fmt.Sprintf("The %s %s dependency is scheduled to be deprecated on: %s.\n\n"+
+		"Confirm this deprecation date is valid, and do one of the following:\n"+
+		"- [ ] If the deprecation date is valid, check this box. Keep this issue open and "+
+		"remove the version line on or after the given deprecation date. Additionally, open issues as needed on the respective paketo buildpack repos.\n"+
+		"- [ ] If the deprecation date is **not** valid, "+
+		"please update it accordingly in the [dependency-builds](https://github.com/cloudfoundry/buildpacks-ci/blob/master/pipelines/config/dependency-builds.yml) configuration, "+
+		"and close this issue with a link to the commit.\n\n"+
+		"See the following documentation for more information: %s",
+		deprecation.Name,
+		deprecation.VersionLine,
 		deprecation.DateString,
 		deprecation.Link)
 
