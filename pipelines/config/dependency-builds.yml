@@ -151,6 +151,7 @@ dependencies:
         lines:
           - line: 9.1.X
           - line: 9.2.X
+          - line: 9.3.X
     source_type: jruby
     versions_to_keep: 2
   libunwind:
