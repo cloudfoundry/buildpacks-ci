@@ -328,6 +328,14 @@ dependencies:
         - libonig4
         - libxml2
         - libyaml-0-2
+  pip:
+    buildpacks:
+      python:
+        lines:
+          - line: latest
+    source_type: pypi
+    any_stack: true
+    versions_to_keep: 2
   pipenv:
     buildpacks:
       python:
