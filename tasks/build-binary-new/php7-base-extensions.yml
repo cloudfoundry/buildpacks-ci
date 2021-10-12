@@ -1,15 +1,15 @@
 native_modules:
   - name: rabbitmq
-    version: 0.10.0
-    md5: 6f09f0cb07cea221657a768bd9c7dff7
+    version: 0.11.0
+    md5: e7d9896577aea6351811d7c1d7f0a68a
     klass: RabbitMQRecipe
   - name: lua
-    version: 5.4.0
-    md5: dbf155764e5d433fc55ae80ea7060b60
+    version: 5.4.3
+    md5: ef63ed2ecfb713646a7fcc583cf5f352
     klass: LuaRecipe
   - name: hiredis
-    version: 1.0.0
-    md5: 209ae570cdee65a5143ea6db8ac07fe3
+    version: 1.0.2
+    md5: 58e8313188f66ed1be1c220d14a7752e
     klass: HiredisRecipe
   - name: snmp
     version: nil
@@ -20,8 +20,8 @@ native_modules:
   #   md5: b3958716b4e53ddc5992e6c49d97e819
   #   klass: LibmemcachedRecipe
   - name: librdkafka
-    version: 1.5.2
-    md5: f5272e30ab6556967ed82a58d2ad35e1
+    version: 1.8.0
+    md5: f31bd3b7a91a486d65b740a720b925dc
     klass: LibRdKafkaRecipe
   - name: cassandracppdriver
     version: 2.15.3
@@ -39,8 +39,8 @@ native_modules:
 extensions:
   #standard pecl
   - name: apcu
-    version: 5.1.19
-    md5: a868ee0b4179fb240cf6eb7e49723794
+    version: 5.1.21
+    md5: 7f675ceba180cd6688d09100badbcdda
     klass: PeclRecipe
   - name: cassandra
     version: 1.3.2
@@ -51,28 +51,28 @@ extensions:
   #   md5: 4f5f4b8a41a5802de6591c79b85cc838
   #   klass: GeoipRecipe
   - name: igbinary
-    version: 3.1.6
-    md5: 9d1e0530025c7f129f46c81f7581af98
+    version: 3.2.6
+    md5: 6970abb34217faff470767c2b84ea2da
     klass: PeclRecipe
   - name: gnupg
-    version: 1.4.0
-    md5: 2354cb56168d8ea0f643e548e139d013
+    version: 1.5.0
+    md5: 700850591953a378e9e24730fba5d7b3
     klass: PeclRecipe
   - name: imagick
-    version: 3.4.4
-    md5: 6d3a7048ab73b0fab931f28c484dbf76
+    version: 3.5.1
+    md5: c1385a8dabdf3aa3245f09580583dbd2
     klass: PeclRecipe
   - name: LZF
     version: 1.6.8
     md5: 0677fba342c89795de6c694f3e72ba1d
     klass: PeclRecipe
   - name: mailparse
-    version: 3.1.1
-    md5: 17d77e3c03c25acaf51926a9020a4596
+    version: 3.1.2
+    md5: 83379012e18396f626e9d4185afd3e4c
     klass: PeclRecipe
   - name: mongodb
-    version: 1.9.0
-    md5: 780f206f6a9399b5a4cabfd304f6ecff
+    version: 1.10.0
+    md5: 9429d0fbf1796fbbb1a7496261d008ea
     klass: PeclRecipe
   - name: msgpack
     version: 2.1.2
@@ -91,40 +91,40 @@ extensions:
     md5: nil
     klass: PdoOdbcRecipe
   - name: pdo_sqlsrv
-    version: 5.8.1
-    md5: e687989a47cefd6cf9005e1f41637289
+    version: 5.9.0
+    md5: cbc6c8c73f8be01a7a411e45cccd16e4
     klass: PeclRecipe
   - name: rdkafka
-    version: 4.1.1
-    md5: f4b39d7f6b4c489bfb4c5532f71046c2
+    version: 5.0.0
+    md5: f1fd466c1775eb4288077654c1fe49cb
     klass: PeclRecipe
   - name: redis
-    version: 5.3.2
-    md5: 8531a792d43a60dd03f87eec7b65b381
+    version: 5.3.4
+    md5: 50c14e284683d474cfa44147a28384c1
     klass: RedisPeclRecipe
   - name: ssh2
-    version: 1.2
-    md5: ae62ba2d4a7bbd5eff34daa8ed9f6ed6
+    version: 1.3.1
+    md5: aa29046de73f1036aea66b4a70f6f598
     klass: PeclRecipe
   - name: sqlsrv
-    version: 5.8.1
-    md5: 1a237f847d4466a85f7bfdb6b2fd5ecd
+    version: 5.9.0
+    md5: cb7b7f78dfa9486b01219e883586e712
     klass: PeclRecipe
   - name: stomp
     version: 2.0.2
     md5: 507c30184fde736e924cee20c56df061
     klass: PeclRecipe
   - name: xdebug
-    version: 3.0.1
-    md5: 52891d89de6829fa8dba1132b8c66f75
+    version: 3.1.0
+    md5: e553f62de992d543e3ef115ad528144d
     klass: PeclRecipe
   - name: yaf
-    version: 3.2.5
-    md5: 8cd86db117f65131d212cac1c60065a3
+    version: 3.3.3
+    md5: 1cbe18bab6597907e1b20268b79ef30d
     klass: PeclRecipe
   - name: yaml
-    version: 2.2.0
-    md5: cd8d34b87d9e147691d66590c403ba46
+    version: 2.2.1
+    md5: a461559696284e2c038d3ce267da1427
     klass: PeclRecipe
   - name: memcached
     version: 3.1.5
@@ -179,24 +179,24 @@ extensions:
     md5: 1163a52a495cab5210a6a2c8deb60064
     klass: AmqpPeclRecipe
   - name: ioncube
-    version: 10.4.4
-    md5: 1e6b0d8a8db6c5536c99bd7e67eb6a4f
+    version: 10.4.5
+    md5: d0363758fbebb738b34cf16d3c1421db
     klass: IonCubeRecipe
   - name: lua
     version: 2.0.7
     md5: a37402f8b10753a80db56b61e2e70c29
     klass: LuaPeclRecipe
   - name: maxminddb
-    version: 1.8.0
-    md5: ed95e0d8914ff5dd340fa6cf47b2b921
+    version: 1.10.1
+    md5: db72cb1764fb297f6510d698c6b15b8c
     klass: MaxMindRecipe
   - name: psr
-    version: 1.0.1
-    md5: 9e44b2f2e271bf57c5dbf6b6b07a8acf
+    version: 1.1.0
+    md5: a6c2cab57bcb3499b5c2d2b1ff66615e
     klass: PeclRecipe
   - name: phalcon
-    version: 4.1.0
-    md5: c13b72a724820027ec9889f0dca0670d
+    version: 4.1.2
+    md5: 11e374828d4a664debf8e161dd2993dd
     klass: PeclRecipe
   - name: phpiredis
     version: 1.0.1
@@ -207,8 +207,8 @@ extensions:
     md5: 77a77a429af4a5ff97778ccafeffa43a
     klass: PHPProtobufPeclRecipe
   - name: tideways_xhprof
-    version: 5.0.2
-    md5: 374cf4ff7ba03401a279777abe94815d #curl -sL https://github.com/tideways/php-xhprof-extension/archive/v5.0.2.tar.gz  | md5sum | cut -d ' ' -f 1
+    version: 5.0.4
+    md5: 0c8b3dfcc3a551210207180ce8d07ad0
     klass: TidewaysXhprofRecipe
   - name: solr
     version: 2.5.1
@@ -217,8 +217,8 @@ extensions:
 
   #Oracle client stuff. Not included unless libs are present
   - name: oci8
-    version: 2.2.0
-    md5: 678d2a647881cd8e5b458c669dcce215
+    version: 3.0.1
+    md5: 641ebceb483fa2d95e79aea99b1350de
     klass: OraclePeclRecipe
   - name: pdo_oci
     version: nil
