@@ -25,7 +25,7 @@ native_modules:
     klass: LibRdKafkaRecipe
   - name: cassandracppdriver
     version: 2.16.0
-    md5: 2ae85b545be01e23065eb3cdace14b79  # recipe uses: https://github.com/datastax/cpp-driver/archive/<version>.tar.gz
+    md5: 1f63ed30d72702a97e6512884346a62a
     klass: CassandraCppDriverRecipe
   # - name: unixodbc
   #   version: 2.3.9
@@ -72,7 +72,7 @@ extensions:
     klass: PeclRecipe
   - name: mongodb
     version: 1.10.0
-    md5: 9429d0fbf1796fbbb1a7496261d008ea
+    md5: 9254e8b6eff6269c0b4781fa64896791
     klass: PeclRecipe
   - name: msgpack
     version: 2.1.2
