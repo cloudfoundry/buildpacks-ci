@@ -73,7 +73,7 @@ extensions:
   ###### Enabled Extensions ########
   - name: tideways_xhprof
     version: 5.0.4
-    md5: 0c8b3dfcc3a551210207180ce8d07ad0
+    md5: 68b68cd9410e62b8481445e0d89220c0  # recipe uses: https://github.com/tideways/php-xhprof-extension/archive/v<version>.tar.gz
     klass: TidewaysXhprofRecipe
   - name: ssh2
     version: 1.3.1
@@ -105,7 +105,7 @@ extensions:
     klass: PeclRecipe
   - name: mailparse
     version: 3.1.2
-    md5: 83379012e18396f626e9d4185afd3e4c
+    md5: abd0de5a1958d29609de430032dc9108
     klass: PeclRecipe
   - name: mongodb
     version: 1.10.0
