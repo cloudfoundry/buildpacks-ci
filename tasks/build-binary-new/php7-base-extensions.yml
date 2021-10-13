@@ -24,8 +24,8 @@ native_modules:
     md5: f31bd3b7a91a486d65b740a720b925dc
     klass: LibRdKafkaRecipe
   - name: cassandracppdriver
-    version: 2.15.3
-    md5: 2ae85b545be01e23065eb3cdace14b79
+    version: 2.16.0
+    md5: 2ae85b545be01e23065eb3cdace14b79  # recipe uses: https://github.com/datastax/cpp-driver/archive/<version>.tar.gz
     klass: CassandraCppDriverRecipe
   # - name: unixodbc
   #   version: 2.3.9
