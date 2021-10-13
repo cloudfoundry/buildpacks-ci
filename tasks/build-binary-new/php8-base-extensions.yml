@@ -109,7 +109,7 @@ extensions:
     klass: PeclRecipe
   - name: mongodb
     version: 1.10.0
-    md5: 9429d0fbf1796fbbb1a7496261d008ea
+    md5: 9254e8b6eff6269c0b4781fa64896791
     klass: PeclRecipe
   - name: msgpack
     version: 2.1.2
