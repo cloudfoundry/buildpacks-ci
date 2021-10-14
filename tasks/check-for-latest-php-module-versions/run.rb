@@ -46,7 +46,7 @@ def url_for_type(name, type)
   when 'XcachePecl'
     'https://xcache.lighttpd.net/wiki/ReleaseArchive'
   when 'CassandraCppDriver'
-    'http://downloads.datastax.com/cpp-driver/ubuntu/14.04/cassandra/'
+    'http://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/'
   when 'Hiredis'
     'https://github.com/redis/hiredis/releases'
   when 'IonCube'
