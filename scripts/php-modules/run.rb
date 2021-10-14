@@ -32,7 +32,6 @@ end
     native_modules = data["native_modules"]
 
     extensions.each {|ext| update_ext(ext)}
-    extensions
     native_modules.each {|ext| update_ext(ext)}
 
     data["extensions"] = extensions
