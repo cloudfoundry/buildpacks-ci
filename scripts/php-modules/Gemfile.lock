@@ -1,0 +1,23 @@
+GIT
+  remote: https://github.com/cf-buildpacks-eng/mini_portile
+  revision: fddb4245149a746794dfc183653c5e664814d1c1
+  specs:
+    mini_portile (0.7.0.rc4)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    open-uri (0.1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  mini_portile!
+  open-uri
+
+RUBY VERSION
+   ruby 2.6.3p62
+
+BUNDLED WITH
+   2.1.4
