@@ -12,6 +12,10 @@ native_modules:
   version: nil
   md5: nil
   klass: SnmpRecipe
+- name: librdkafka
+  version: 1.8.0
+  md5: f31bd3b7a91a486d65b740a720b925dc
+  klass: LibRdKafkaRecipe
 - name: libsodium
   version: 1.0.18
   md5: 3ca9ebc13b6b4735acae0a6a4c4f9a95
