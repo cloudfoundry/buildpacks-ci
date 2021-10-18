@@ -299,21 +299,6 @@ dependencies:
             deprecation_date: 2023-11-26
             link: http://php.net/supported-versions.php
         removal_strategy: keep_latest_released
-      php-dist-cnb:
-        lines:
-          - line: 7.3.X
-            match: 7.3.\d+
-            deprecation_date: 2021-12-06
-            link: http://php.net/supported-versions.php
-          - line: 7.4.X
-            match: 7.4.\d+
-            deprecation_date: 2022-11-28
-            link: http://php.net/supported-versions.php
-          - line: 8.0.X
-            match: 8.0.\d+
-            deprecation_date: 2023-11-26
-            link: http://php.net/supported-versions.php
-        removal_strategy: keep_latest_released
     source_type: php
     versions_to_keep: 2
     copy-stacks:
