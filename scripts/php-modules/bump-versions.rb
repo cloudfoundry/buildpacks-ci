@@ -11,7 +11,7 @@ def bump_version(mod)
     latest = current_github_version(url, ENV['GITHUB_TOKEN']) if url =~ %r{^https://github.com}
 
     if !latest || latest == 'Unknown'
-        puts "    > WARNING! Could not determine latest version of '#{mod['name']}'. Manual check required."
+        puts "    > WARNING! Could not determine latest version of '#{mod['name']}'. Manual check required (URL: #{url})."
         return
     end
 
