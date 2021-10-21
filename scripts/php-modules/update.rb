@@ -1,6 +1,7 @@
 require 'yaml'
 
 def update_modules(&f)
+    cache = {}
     [
         "php7-base-extensions.yml",
         "php73-extensions-patch.yml",
@@ -20,8 +21,8 @@ def update_modules(&f)
             native_modules_ref = native_modules_ref.append('additions')
         end
 
-        (data.dig(*extensions_ref) || []).each(&f)
-        (data.dig(*native_modules_ref) || []).each(&f)
+        (data.dig(*extensions_ref) || []).each { |mod| f.call(mod, cache) }
+        (data.dig(*native_modules_ref) || []).each { |mod| f.call(mod, cache) }
 
         File.write(path, data.to_yaml)
     end

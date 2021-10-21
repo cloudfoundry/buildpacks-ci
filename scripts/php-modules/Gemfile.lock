@@ -28,8 +28,5 @@ DEPENDENCIES
   open-uri
   pry
 
-RUBY VERSION
-   ruby 2.6.3p62
-
 BUNDLED WITH
-   2.1.4
+   2.2.29
