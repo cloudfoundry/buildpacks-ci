@@ -26,18 +26,21 @@ def bump_version(mod, cache)
         return
     end
 
+    puts "    > Getting latest version of #{name} (#{klass})..."
     url = url_for_type(name, klass)
     latest = get_latest(name, klass, url, cache)
 
     if !latest || latest == 'Unknown'
-        puts "    > WARNING! Could not determine latest version of #{name}. Manual check required (URL: #{url || '<none>'})."
+        puts "      WARNING! Could not determine latest version of #{name}. Manual check required (URL: #{url || '<none>'})."
         return
     end
 
     if version != latest
-        puts "    > Bumping #{name}: #{version} -> #{latest}"
+        puts "      Bumped #{name}: #{version} -> #{latest}"
         mod['version'] = latest
         mod['md5'] = nil
+    else
+        puts "      No bump required (current version: #{version})"
     end
 end
 
