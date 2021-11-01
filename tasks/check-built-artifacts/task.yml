@@ -1,0 +1,11 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: pivotal-buildpack
+  - name: pivotal-buildpack-cached
+run:
+  path: buildpacks-ci/tasks/check-built-artifacts/run.sh

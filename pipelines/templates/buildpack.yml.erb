@@ -459,6 +459,11 @@ jobs: ##########################################################################
                 pivotal-buildpack-cached: pivotal-buildpack-cached-<%= stack %>
               output_mapping:
                 buildpack-artifacts: buildpack-artifacts-<%= stack %>
+            - task: check-built-artifacts
+              file: buildpacks-ci/tasks/check-built-artifacts/task.yml
+              input_mapping:
+                pivotal-buildpack: pivotal-buildpack-<%= stack %>
+                pivotal-buildpack-cached: pivotal-buildpack-cached-<%= stack %>
             - put: pivotal-buildpack-<%= stack %>
               params:
                 file: buildpack-artifacts-<%= stack %>/uncached/*_buildpack*-v*.zip
