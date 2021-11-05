@@ -113,11 +113,8 @@ module DependencyBuild
       built_path = File.join(Dir.pwd, 'built')
       Dir.mkdir(built_path)
 
-      Runner.run('wget', source_input.url, '-O', "#{source_input.version}.tar.gz")
-
-      Runner.run('git', 'clone', '--no-checkout', '--single-branch', '--branch', "#{source_input.version}",
-                 "https://github.com/#{source_input.repo}", "#{source_input.name}-#{source_input.version}")
-      Runner.run('tar', 'zxf', "#{source_input.version}.tar.gz", '-C', "#{source_input.name}-#{source_input.version}", '--strip-components', '1')
+      Runner.run('git', 'clone', '--single-branch', '--branch', "#{source_input.version}", "https://github.com/#{source_input.repo}",
+                 "#{source_input.name}-#{source_input.version}")
       Dir.chdir("#{source_input.name}-#{source_input.version}") do
         Runner.run('./autogen.sh', "--prefix=#{built_path}")
         Runner.run('make')
