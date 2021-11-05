@@ -31,7 +31,7 @@ class UsnReleaseNotes
     cves = []
     lps = []
     open(usn_url).each_line do |line|
-      if (cve = line.match(%r{.*href="(?<uri>.*cve/CVE.*)">(?<text>.*)</a.*}))
+      if (cve = line.match(%r{.*href="(?<uri>/security/CVE.*)">(?<text>.*)</a.*}))
         cves << cve
       elsif (lp = line.match(%r{.*href="(?<uri>.*launchpad\.net/bugs.*)">(?<text>.*)</li}))
         lps << lp
@@ -44,7 +44,7 @@ class UsnReleaseNotes
 
     cves.each do |cve|
       cve_id = cve['text']
-      cve_uri = cve['uri']
+      cve_uri = "https://ubuntu.com/#{cve['uri']}"
 
       cve_body = open(cve_uri, allow_redirections: :safe).read
         .gsub("\n", ' ')
