@@ -54,12 +54,11 @@ module DependencyBuild
       old_file_path = "/tmp/pipenv-v#{source_input.version}.tgz"
       ENV['LC_CTYPE'] = 'en_US.UTF-8'
       Runner.run('apt', 'update')
-      Runner.run('apt-get', 'install', '-y', 'python-pip', 'python-dev', 'build-essential')
-      Runner.run('pip', 'install', '--upgrade', 'pip')
-      Runner.run('pip', 'install', '--upgrade', 'setuptools')
+      Runner.run('apt-get', 'install', '-y', 'python3', 'python3-pip')
+      Runner.run('python3', '-m', 'pip', 'install', '--upgrade', 'pip', 'setuptools')
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
-          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', "pipenv==#{source_input.version}")
+          Runner.run('python3', '-m', 'pip', 'download', '--no-binary', ':all:', "pipenv==#{source_input.version}")
           if source_input.md5?
             if Digest::MD5.hexdigest(open("pipenv-#{source_input.version}.tar.gz").read) != source_input.md5
               raise 'MD5 digest does not match version digest'
@@ -71,11 +70,11 @@ module DependencyBuild
           else
             raise 'No digest specified for source'
           end
-          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'pytest-runner')
-          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'setuptools_scm')
-          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'parver')
-          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'wheel')
-          Runner.run('/usr/local/bin/pip', 'download', '--no-binary', ':all:', 'invoke')
+          Runner.run('python3', '-m', 'pip', 'download', '--no-binary', ':all:', 'pytest-runner')
+          Runner.run('python3', '-m', 'pip', 'download', '--no-binary', ':all:', 'setuptools_scm')
+          Runner.run('python3', '-m', 'pip', 'download', '--no-binary', ':all:', 'parver')
+          Runner.run('python3', '-m', 'pip', 'download', '--no-binary', ':all:', 'wheel')
+          Runner.run('python3', '-m', 'pip', 'download', '--no-binary', ':all:', 'invoke')
           Runner.run('tar', 'zcvf', old_file_path, '.')
         end
       end
