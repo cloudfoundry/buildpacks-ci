@@ -2,7 +2,6 @@
   'apt' => {
     'stacks' => %w(cflinuxfs3),
     'skip_pivnet_publish' => true,
-    'skip_pws_publish' => true,
     'non_lts' => true,
   },
   'binary' => {
@@ -31,14 +30,12 @@
   'nginx' => {
     'stacks' => %w(cflinuxfs3),
     'product_slug' => 'nginx-buildpack',
-    'skip_pws_publish' => true,
     'non_lts_pivnet' => true,
   },
   'nodejs' => {
     'stacks' => %w(cflinuxfs3),
     'product_slug' => 'nodejs-buildpack',
     'non_lts_pivnet' => true,
-    'skip_pws_publish' => true,
   },
   'php' => {
     'stacks' => %w(cflinuxfs3),
@@ -57,7 +54,6 @@
     'skip_brats' => true,
     'non_lts' => true,
     'non_lts_pivnet' => true,
-    'skip_pws_publish' => true,
     'skip_docker_start' => true,
   },
   'ruby' => {
@@ -525,32 +521,6 @@ jobs: ##########################################################################
           globs:
             - buildpack-artifacts/*-buildpack*-v*.zip
             - buildpack-artifacts/*-buildpack*-v*.zip.SHA256SUM.txt
-
-<% if !buildpacks[language]['skip_pws_publish'] %>
-  - name: buildpack-to-pws
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        <% pws_stacks = buildpacks[language]['stacks']
-           pws_stacks.each do |stack| %>
-        - get: pivotal-buildpack-cached-<%= stack %>
-          passed: [ ship-it ]
-        <% end %>
-        - get: buildpack
-          resource: buildpack-master
-          passed: [ ship-it ]
-          trigger: true
-      - task: create-or-update-buildpack
-        file: buildpacks-ci/tasks/pws-create-or-update-buildpack/task.yml
-        params:
-          CF_API: https://api.run.pivotal.io
-          USERNAME: {{pws_buildpacks_cf_admin_client}}
-          PASSWORD: {{pws_buildpacks_cf_admin_secret}}
-          BUILDPACK_NAME: <%= language %>
-          STACKS: <%= pws_stacks.join(' ') %>
-<% end %>
 
 ##################################################################################
 #
