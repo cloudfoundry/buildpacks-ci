@@ -26,4 +26,3 @@ public-buildpacks-ci-robots-git-uri-public: https://github.com/cloudfoundry/publ
 run-oracle-php-tests: true
 cached-cnb-bucket: cached-cnbs
 builder_release_marker_story_number: 170428386
-deprecation_release_marker_story_number: 172662355

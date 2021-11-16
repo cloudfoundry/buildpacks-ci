@@ -399,11 +399,6 @@ jobs: ##########################################################################
             RELENG_TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
             TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
             TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-        - task: create-buildpack-release-github-issue
-          file: buildpacks-ci/tasks/generate-buildpack-release-github-issue/task.yml
-          params:
-            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-            BUILDPACK_NAME: <%= language %>
 
   - name: create-deprecation-stories
     serial: true
@@ -416,11 +411,14 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-develop
       - do:
-        - task: create-deprecation-github-issues
-          file: buildpacks-ci/tasks/generate-dependency-deprecation-github-issue/task.yml
+        - task: create-deprecation-stories
+          file: buildpacks-ci/tasks/create-deprecation-stories/task.yml
           params:
             BUILDPACK_NAME: <%= language %>
-            GITHUB_TOKEN: {{buildpacks-github-token}}
+            TRACKER_PROJECT_ID: '{{cf-buildpacks-private-tracker-id}}'
+            TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
+            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+            BEFORE_STORY_ID: '{{cf-buildpacks-deprecation-release-marker-story-id}}'
 
   - name: detect-new-version-and-upload-artifacts
     serial: true
