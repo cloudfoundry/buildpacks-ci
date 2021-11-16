@@ -380,7 +380,7 @@ jobs: ##########################################################################
           put: failure-alert
           params:
             text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: "#buildpacks-ci"
+            channel: {{buildpacks-ci-slack-channel}}
 
   - name: create-buildpack-release-story
     serial: true
@@ -466,7 +466,7 @@ jobs: ##########################################################################
           put: failure-alert
           params:
             text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: "#buildpacks-ci"
+            channel: {{buildpacks-ci-slack-channel}}
   - name: ship-it
     serial: true
     public: true
@@ -707,7 +707,7 @@ jobs: ##########################################################################
       put: failure-alert
       params:
         text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-        channel: "#buildpacks-ci"
+        channel: {{buildpacks-ci-slack-channel}}
     on_success:
       put: environment
       resource: cf-toolsmiths-environment
@@ -783,7 +783,7 @@ jobs: ##########################################################################
       put: failure-alert
       params:
         text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-        channel: "#buildpacks-ci"
+        channel: {{buildpacks-ci-slack-channel}}
     on_success:
       put: environment
       resource: cf-toolsmiths-environment
@@ -841,7 +841,7 @@ jobs: ##########################################################################
       put: failure-alert
       params:
         text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-        channel: "#buildpacks-ci"
+        channel: {{buildpacks-ci-slack-channel}}
     on_success:
       put: environment
       resource: cf-toolsmiths-environment
@@ -925,7 +925,7 @@ jobs: ##########################################################################
       put: failure-alert
       params:
         text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-        channel: "#buildpacks-ci"
+        channel: {{buildpacks-ci-slack-channel}}
     ensure:
       put: environment
       resource: smith-environments-<%= pas_version %>
@@ -978,7 +978,7 @@ jobs: ##########################################################################
       put: failure-alert
       params:
         text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-        channel: "#buildpacks-ci"
+        channel: {{buildpacks-ci-slack-channel}}
 <% end %>
   - name: specs-lts-gcp-develop
     serial: true
@@ -1166,5 +1166,5 @@ jobs: ##########################################################################
           put: failure-alert
           params:
             text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: "#buildpacks-ci"
+            channel: {{buildpacks-ci-slack-channel}}
 <% end %>
