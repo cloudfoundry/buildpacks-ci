@@ -114,7 +114,7 @@ resources:
   - name: failure-alert
     type: slack-notification
     source:
-      url: {{concourse-job-failure-notifications-slack-webhook}}
+      url: {{buildpacks-ci-slack-url}}
 
 jobs:
   - name: unit-specs-linux
@@ -258,9 +258,7 @@ jobs:
           put: failure-alert
           params:
             text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+            channel: {{buildpacks-ci-slack-channel}}
 
   - name: cats
     serial: true
@@ -303,9 +301,7 @@ jobs:
           put: failure-alert
           params:
             text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-            channel: {{concourse-job-failure-notifications-slack-channel}}
-            username: concourse
-            icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+            channel: {{buildpacks-ci-slack-channel}}
 
   - name: set-github-status
     serial: true
