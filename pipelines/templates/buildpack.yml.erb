@@ -379,7 +379,7 @@ jobs: ##########################################################################
         on_failure:
           put: failure-alert
           params:
-            text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            text: {{buildpacks-ci-failure-slack-message}}
             channel: {{buildpacks-ci-slack-channel}}
 
   - name: create-buildpack-release-story
@@ -465,7 +465,7 @@ jobs: ##########################################################################
         on_failure:
           put: failure-alert
           params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            text: {{buildpacks-ci-failure-slack-message}}
             channel: {{buildpacks-ci-slack-channel}}
   - name: ship-it
     serial: true
@@ -706,7 +706,7 @@ jobs: ##########################################################################
     on_failure:
       put: failure-alert
       params:
-        text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        text: {{buildpacks-ci-failure-slack-message}}
         channel: {{buildpacks-ci-slack-channel}}
     on_success:
       put: environment
@@ -782,7 +782,7 @@ jobs: ##########################################################################
     on_failure:
       put: failure-alert
       params:
-        text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        text: {{buildpacks-ci-failure-slack-message}}
         channel: {{buildpacks-ci-slack-channel}}
     on_success:
       put: environment
@@ -840,7 +840,7 @@ jobs: ##########################################################################
     on_failure:
       put: failure-alert
       params:
-        text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        text: {{buildpacks-ci-failure-slack-message}}
         channel: {{buildpacks-ci-slack-channel}}
     on_success:
       put: environment
@@ -924,7 +924,7 @@ jobs: ##########################################################################
     on_failure:
       put: failure-alert
       params:
-        text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        text: {{buildpacks-ci-failure-slack-message}}
         channel: {{buildpacks-ci-slack-channel}}
     ensure:
       put: environment
@@ -977,7 +977,7 @@ jobs: ##########################################################################
     on_failure:
       put: failure-alert
       params:
-        text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+        text: {{buildpacks-ci-failure-slack-message}}
         channel: {{buildpacks-ci-slack-channel}}
 <% end %>
   - name: specs-lts-gcp-develop
@@ -1165,6 +1165,6 @@ jobs: ##########################################################################
         on_failure:
           put: failure-alert
           params:
-            text: ":concourse-failed: $BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n :ghost: Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            text: {{buildpacks-ci-failure-slack-message}}
             channel: {{buildpacks-ci-slack-channel}}
 <% end %>
