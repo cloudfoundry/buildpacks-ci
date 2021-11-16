@@ -66,5 +66,5 @@ jobs:
         on_failure:
           put: failure-alert
           params:
-            text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
+            text: {{buildpacks-ci-failure-slack-message}}
             channel: {{buildpacks-ci-slack-channel}}
