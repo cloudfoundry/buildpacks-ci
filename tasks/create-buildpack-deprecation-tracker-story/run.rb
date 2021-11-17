@@ -4,7 +4,7 @@
 
 require 'yaml'
 require 'date'
-require_relative 'deprecation-notifier'
+require_relative '../../lib/buildpack-deprecation-story-creator'
 
 buildpack_name = ENV.fetch('BUILDPACK_NAME')
 manifest = YAML.load_file(File.join('buildpack', 'manifest.yml'))
@@ -14,7 +14,7 @@ tracker_requester_id = ENV.fetch('TRACKER_REQUESTER_ID').to_i
 before_story_id = ENV.fetch('BEFORE_STORY_ID').to_i
 tracker_api_token = ENV.fetch('TRACKER_API_TOKEN')
 
-notifier = DeprecationNotifier.new(
+notifier = BuildpackDeprecationStoryCreator.new(
     buildpack_name: buildpack_name,
     manifest: manifest,
     date: date,
