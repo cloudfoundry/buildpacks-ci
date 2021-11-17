@@ -14,7 +14,7 @@ run:
   path: bash
   args:
     - -cl
-    - buildpacks-ci/tasks/create-deprecation-stories/run.rb
+    - buildpacks-ci/tasks/create-buildpack-deprecation-tracker-story/run.rb
 
 params:
   BUILDPACK_NAME:
