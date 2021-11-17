@@ -413,7 +413,7 @@ jobs: ##########################################################################
           resource: buildpack-develop
       - do:
         - task: create-deprecation-stories
-          file: buildpacks-ci/tasks/create-deprecation-stories/task.yml
+          file: buildpacks-ci/tasks/create-buildpack-deprecation-tracker-story/task.yml
           params:
             BUILDPACK_NAME: <%= language %>
             TRACKER_PROJECT_ID: '{{cf-buildpacks-private-tracker-id}}'
