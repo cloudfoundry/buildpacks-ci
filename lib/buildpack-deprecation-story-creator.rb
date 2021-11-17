@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'tracker_api'
 
-class DeprecationNotifier
+class BuildpackDeprecationStoryCreator
   attr_reader :buildpack_name, :manifest, :date, :tracker_requester_id, :buildpack_project, :before_story_id
 
   def initialize(buildpack_name:, manifest:, date:, tracker_project_id:, tracker_requester_id:, tracker_api_token:, before_story_id:)
