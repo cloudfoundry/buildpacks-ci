@@ -77,7 +77,7 @@ story = buildpack_project.create_story(
   estimate: 1,
   labels: (['deps', name] + BUILDPACKS).uniq,
   requested_by_id: ENV['TRACKER_REQUESTER_ID'].to_i,
-  owner_ids: [ENV['TRACKER_REQUESTER_ID'].to_i]
+  owner_ids: [ENV['TRACKER_REQUESTER_ID'].to_i],
   before_id: ENV['TRACKER_BEFORE_ID'].to_i
 )
 
