@@ -3,7 +3,6 @@ require 'fileutils'
 require 'json'
 require 'yaml'
 require 'tracker_api'
-require 'octokit'
 
 class SemanticVersion
   attr_reader :major
@@ -79,32 +78,10 @@ story = buildpack_project.create_story(
   labels: (['deps', name] + BUILDPACKS).uniq,
   requested_by_id: ENV['TRACKER_REQUESTER_ID'].to_i,
   owner_ids: [ENV['TRACKER_REQUESTER_ID'].to_i]
+  before_id: ENV['TRACKER_BEFORE_ID'].to_i
 )
 
 puts "Created tracker story #{story.id}"
-
-
-# Create an issue in the {PROJECT_REPO}
-client = Octokit::Client.new :access_token => ENV.fetch('GITHUB_ACCESS_TOKEN')
-
-title = "Add new version line in dependency-builds: #{name} #{version}"
-description = "```\n#{data.to_yaml}\n```\n\nPlease edit the dependency-builds pipeline to add the new version line to the relevant dependency/buildpack."
-description += "\n\nCheck [this runbook](https://docs.google.com/document/d/19q5wuEImr2nPIaoKL6hcEyG2WwWFLqR8KIiLhPxKXUM/edit) for instructions on adding a new version line to the dependency-builds pipeline.\n"
-description += "\n**Relevant buildpacks:**\n"
-
-BUILDPACKS.each do |bp|
-  description += "\n* #{bp}"
-end
-
-issue = client.create_issue(ENV.fetch('PROJECT_REPO'), title, description)
-
-client.create_project_card(ENV.fetch('PROJECT_COLUMN'), content_id: issue.id, content_type: 'Issue', mediaType: {
-  previews: [
-    'inertia'
-  ]
-})
-
-
 # Notes on depen version line additions:
 # General stucture of dependencies is `dep.buildpacks.[].lines[].`
 # eg.

@@ -281,14 +281,12 @@ jobs:
     - task: create-new-version-line-story
       file: buildpacks-ci/tasks/build-binary-new/create-new-version-line-story.yml
       params:
-        TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
+        TRACKER_PROJECT_ID: '{{cf-buildpacks-private-tracker-id}}'
         TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         BUILDPACKS: <%= dep['buildpacks'].keys.join(' ') %>
         EXISTING_VERSION_LINES: <%= version_lines.join(' ') %>
-        PROJECT_REPO: "pivotal-cf/tanzu-buildpacks"
-        GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
-        PROJECT_COLUMN: 14580131
+        TRACKER_BEFORE_ID: '{{cf-buildpacks-new-version-line-release-marker-story-id}}'
 <% end %>
 
 <% version_lines.each do |line| %>

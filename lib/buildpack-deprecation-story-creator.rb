@@ -57,6 +57,6 @@ def find_dates(manifest, today)
   end
 
   return manifest['dependency_deprecation_dates']
-             .select {|d| d['date'] <= today + 45}
+             .select {|d| d['date'] <= today + 30}
              .map {|d| d['date'] = d['date'].to_s; d}
 end
