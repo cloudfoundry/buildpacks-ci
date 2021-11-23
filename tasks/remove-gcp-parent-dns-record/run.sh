@@ -20,6 +20,7 @@ NAMESERVERS=$(gcloud dns record-sets list -z buildpacks | grep "$ENV_NAME" | awk
 if [ -z "$NAMESERVERS" ]; then
   echo "There are no record sets matching ${ENV_NAME}"
   echo "Skipping..."
+  exit 0
 fi
 
 # remove the parent zone (buildpacks zone) subdomain NS records
