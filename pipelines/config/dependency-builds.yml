@@ -326,6 +326,7 @@ dependencies:
     buildpacks:
       python:
         lines:  #! python 3 minor version EOLs are 5 years after their first final release
+          #! https://devguide.python.org/#status-of-python-branches
           - line: 3.6.X
             deprecation_date: 2021-12-23
             link: https://www.python.org/dev/peps/pep-0494/
@@ -338,6 +339,9 @@ dependencies:
           - line: 3.9.X
             deprecation_date: 2025-10-05
             link: https://www.python.org/dev/peps/pep-0596/
+          - line: 3.10.X
+            deprecation_date: 2026-10-04
+            link: https://www.python.org/dev/peps/pep-0619/
         removal_strategy: keep_latest_released
     versions_to_keep: 2
     copy-stacks:
