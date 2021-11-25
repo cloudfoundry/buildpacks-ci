@@ -57,11 +57,23 @@ dependencies:
       dotnet-core:
         lines:
           - line: 2.1.8X
+            deprecation_date: 2021-08-21
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 3.1.4X
+            deprecation_date: 2022-12-03
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 5.0.1X
+            deprecation_date: 2022-05-08
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 5.0.2X
+            deprecation_date: 2022-05-08
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 5.0.3X
+            deprecation_date: 2022-05-08
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 5.0.4X
+            deprecation_date: 2022-05-08
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: keep_all
     versions_to_keep: 99
     any_stack: true
@@ -70,10 +82,10 @@ dependencies:
       dotnet-core:
         lines:
           - line: 3.1.X
-            deprecation_date: 2022-12-04
+            deprecation_date: 2022-12-03
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 5.0.X
-            deprecation_date: ""
+            deprecation_date: 2022-05-08
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: keep_all
     versions_to_keep: 2
@@ -83,8 +95,14 @@ dependencies:
       dotnet-core:
         lines:
           - line: 2.1.X
+            deprecation_date: 2021-08-21
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 3.1.X
+            deprecation_date: 2022-12-03
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 5.0.X
+            deprecation_date: 2022-05-08
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: keep_all
     versions_to_keep: 2
     any_stack: true
@@ -365,10 +383,15 @@ dependencies:
         lines:
           - line: 2.5.X
             deprecation_date: 2021-03-31
+            link: https://www.ruby-lang.org/en/downloads/branches/
           - line: 2.6.X
+            deprecation_date: 2022-03-31
+            link: https://www.ruby-lang.org/en/downloads/branches/
           - line: 2.7.X
+            deprecation_date: 2023-03-31
             link: https://www.ruby-lang.org/en/news/2020/03/31/ruby-2-7-1-released/
           - line: 3.0.X
+            deprecation_date: 2024-03-31
             link: https://www.ruby-lang.org/en/news/2020/12/25/ruby-3-0-0-released/
         removal_strategy: keep_latest_released
     versions_to_keep: 2
