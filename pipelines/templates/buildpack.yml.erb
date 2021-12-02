@@ -340,6 +340,12 @@ resources: #####################################################################
       expression: 0 0 * * *
       location: {{current-timezone}}
 
+  - name: first-of-month
+    type: cron
+    source:
+      expression: 0 0 1 * *
+      location: {{current-timezone}}
+
 jobs: ################################################################################################################
 <% if language == "php" %>
   - name: ensure-manifest-has-modules
@@ -386,6 +392,8 @@ jobs: ##########################################################################
     serial: true
     public: true
     plan:
+      - get: first-of-month
+        trigger: true
       - in_parallel:
         - get: buildpacks-ci
         - get: buildpack-develop
