@@ -184,34 +184,6 @@ dependencies:
       - 'repo: mono/libgdiplus'
       - 'tag_regex: ^[0-9]+\.[0-9]+$'
     versions_to_keep: 2
-  miniconda37:
-    buildpacks:
-      python:
-        lines:
-          - line: latest
-      conda-cnb:
-        lines:
-          - line: latest
-    third_party_hosted: true
-    source_type: miniconda
-    source_params:
-      - 'python_version: 3.7'
-    any_stack: true
-    versions_to_keep: 2
-  miniconda38:
-    buildpacks:
-      python:
-        lines:
-          - line: latest
-      conda-cnb:
-        lines:
-          - line: latest
-    third_party_hosted: true
-    source_type: miniconda
-    source_params:
-      - 'python_version: 3.8'
-    any_stack: true
-    versions_to_keep: 2
   nginx:
     buildpacks:
       nginx:
