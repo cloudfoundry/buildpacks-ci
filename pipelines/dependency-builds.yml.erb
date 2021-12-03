@@ -131,10 +131,6 @@ def is_cloudfoundry_cnb(buildpack)
     return true
   end
 end
-
-def is_child_cnb(dep_name)
-  dep_name.start_with?('org.cloudfoundry')
-end
 %>
 
 resource_types:
@@ -338,13 +334,11 @@ jobs:
         TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         BUILDPACKS: <%= dep['buildpacks'].select{ |_, bp_data| bp_uses_line?(bp_data,line) }.keys.join(' ') %>
-        CHILD_CNB: <%= is_child_cnb(dep_name) %>
     - put: builds
       params:
         repository: builds-artifacts
         rebase: true
 
-  <% if !is_child_cnb(dep_name) %>
 - name: accept-<%= dep_name.downcase %>-<%= line.downcase %>-story
   serial: true
   public: true
@@ -379,8 +373,6 @@ jobs:
       params:
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
-  <% end %>
-
 
   <% dep['copy-stacks']&.each do |stack| %>
 - name: copy-<%= dep_name.downcase %>-<%= line.downcase %>-<%= stack.downcase %>
@@ -558,9 +550,7 @@ groups:
     <% end %>
     <% version_lines.each do |line| %>
     - create-<%= dep_name.downcase %>-<%= line.downcase %>-story
-    <% if !is_child_cnb(dep_name) %>
     - accept-<%= dep_name.downcase %>-<%= line.downcase %>-story
-    <% end %>
     <% dep['copy-stacks']&.each do |stack| %>
     - copy-<%= dep_name.downcase %>-<%= line.downcase %>-<%= stack.downcase %>
     <% end %>
@@ -582,9 +572,7 @@ groups:
     <% end %>
     <% version_lines.each do |line| %>
     - create-<%= dep_name.downcase %>-<%= line.downcase %>-story
-    <% if !is_child_cnb(dep_name) %>
     - accept-<%= dep_name.downcase %>-<%= line.downcase %>-story
-    <% end %>
     <% dep['copy-stacks']&.each do |stack| %>
     - copy-<%= dep_name.downcase %>-<%= line.downcase %>-<%= stack.downcase %>
     <% end %>

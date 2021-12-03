@@ -21,7 +21,6 @@ require_relative "#{buildpacks_ci_dir}/lib/git-client"
 data = JSON.parse(open('source/data.json').read)
 name = data.dig('source', 'name')
 version = data.dig('version', 'ref')
-is_child_cnb = ENV['CHILD_CNB'] == 'true'
 
 tracker_client = TrackerApi::Client.new(token: ENV['TRACKER_API_TOKEN'])
 buildpack_project = tracker_client.project(ENV['TRACKER_PROJECT_ID'])
@@ -31,18 +30,15 @@ if File.file?('all-monitored-deps/data.json')
   data['packages'] = all_monitored_deps
 end
 
-estimate = is_child_cnb ? 0 : 1
 story_params = {
     name: "Build and/or Include new releases: #{name} #{version}",
     description: "If this is a RC dependency, figure out if this is actually needed. "+
     "One way to remove this dependency (if not needed) is to disable the resource in CI and manually reverting the commit that introduced this dependency.\n```\n#{data.to_yaml}\n```\n",
-    estimate: estimate,
+    estimate: 0,
     labels: (['deps', name] + BUILDPACKS).uniq,
     requested_by_id: ENV['TRACKER_REQUESTER_ID'].to_i,
     owner_ids: [ENV['TRACKER_REQUESTER_ID'].to_i]
 }
-
-story_params[:current_state] = 'accepted' if is_child_cnb
 
 story = buildpack_project.create_story(story_params)
 
