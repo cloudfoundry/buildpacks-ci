@@ -23,7 +23,7 @@ module Depwatcher
 
     def in(python_version : String, ref : String) : Release
       generation = python_version.split(".")[0]
-      url = "https://repo.continuum.io/miniconda/Miniconda#{generation}-py#{python_version.delete(".")}_#{ref}-Linux-x86_64.sh"
+      url = "https://repo.anaconda.com/miniconda/Miniconda#{generation}-py#{python_version.delete(".")}_#{ref}-Linux-x86_64.sh"
       (releases(generation, python_version) { |m, e|
         if m[1] == ref
           Release.new(ref, url, e.children[7].text, get_sha256(url))
@@ -32,7 +32,7 @@ module Depwatcher
     end
 
     private def releases(generation : String, python_version : String, &block) : Array
-      response = client.get("https://repo.continuum.io/miniconda/").body
+      response = client.get("https://repo.anaconda.com/miniconda/").body
       doc = XML.parse_html(response)
       elements = doc.xpath_nodes("//tr[td[a[starts-with(@href,'Miniconda#{generation}-py#{python_version.delete(".")}')]]]")
       elements.map do |e|
