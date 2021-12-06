@@ -234,6 +234,10 @@ module DependencyBuild
               '--enable-unicode=ucs4'
             ]
 
+            semver=source_input.version.split('.')
+            if semver[0] == '3' && semver[1].to_i >= 10
+                options.append('--with-openssl=/usr/lib/ssl')
+            end
             Runner.run(*options)
             packages = %w[libdb-dev libgdbm-dev tk8.6-dev]
             # install apt packages
