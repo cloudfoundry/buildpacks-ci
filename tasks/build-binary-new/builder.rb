@@ -234,10 +234,6 @@ module DependencyBuild
               '--enable-unicode=ucs4'
             ]
 
-            semver=source_input.version.split('.')
-            if semver[0] == '3' && semver[1].to_i >= 10
-                options.append('--with-openssl=/usr/lib/ssl')
-            end
             Runner.run(*options)
             packages = %w[libdb-dev libgdbm-dev tk8.6-dev]
             # install apt packages
@@ -254,10 +250,7 @@ module DependencyBuild
 
             # replace openssl if needed
             major, minor, _ = source_input.version.split('.')
-            if major == '3' && minor == '4' && stack == 'cflinuxfs3'
-              Runner.run('apt', 'update')
-              Runner.run('apt-get', 'install', '-y', 'libssl1.0-dev')
-            elsif stack == 'cflinuxfs3' && major != '2'
+            if stack == 'cflinuxfs3' && major == '3' && minor.to_i < 10
               DependencyBuild.replace_openssl
             end
 
