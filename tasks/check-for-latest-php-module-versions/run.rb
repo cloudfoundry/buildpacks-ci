@@ -6,11 +6,9 @@ require_relative '../../lib/tracker-client'
 require_relative '../../tasks/build-binary-new/merge-extensions'
 
 base_extensions = BaseExtensions.new('buildpacks-ci/tasks/build-binary-new/php7-base-extensions.yml')
-php73_extensions = base_extensions.patch('buildpacks-ci/tasks/build-binary-new/php73-extensions-patch.yml')
 php74_extensions = base_extensions.patch('buildpacks-ci/tasks/build-binary-new/php74-extensions-patch.yml')
 
 data = {
-  'PHP7.3' => php73_extensions.base_yml,
   'PHP7.4' => php74_extensions.base_yml,
 }
 
@@ -33,15 +31,15 @@ Check that the PHP Module versions used in building PHP 7 are up to date. If the
 Reference the PHP7 recipes and module versions used in cooking these recipes in [binary-builder](https://github.com/cloudfoundry/binary-builder)
 DESCRIPTION
 
-description += "\n\n" + %w(Name Latest PHP7.3 PHP7.4).join(' | ') + "\n"
-description += '--- | --- | --- | --- | --- ' + "\n"
+description += "\n\n" + %w(Name Latest PHP7.4).join(' | ') + "\n"
+description += '--- | --- | --- | --- ' + "\n"
 extensions.keys.sort_by(&:name).each do |key|
   name = "#{key.name} (#{key.klass.gsub(/Recipe$/,'')})"
   url = url_for_type(key.name, key.klass)
   latest = current_pecl_version(key.name) if key.klass =~ /PECL/i
   latest = current_github_version(url) if url =~ %r{^https://github.com}
   data = [url ? "[#{name}](#{url})" : name, latest]
-  %w(PHP7.3 PHP7.4).each do |v|
+  %w(PHP7.4).each do |v|
     val = extensions[key][v]
     val = "**#{val}**" if val && val != latest
     data << val

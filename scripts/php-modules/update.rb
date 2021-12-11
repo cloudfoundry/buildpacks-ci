@@ -4,7 +4,6 @@ def update_modules(&f)
     cache = {}
     [
         "php7-base-extensions.yml",
-        "php73-extensions-patch.yml",
         "php74-extensions-patch.yml",
         "php8-base-extensions.yml",
     ].each do |ext_file|
