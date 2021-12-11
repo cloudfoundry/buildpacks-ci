@@ -26,9 +26,8 @@ data.each do |name, hash|
 end
 
 description = <<-DESCRIPTION
-Check that the PHP Module versions used in building PHP 7 are up to date. If there are new, compatible versions, update them and build new PHP binaries.
-
-Reference the PHP7 recipes and module versions used in cooking these recipes in [binary-builder](https://github.com/cloudfoundry/binary-builder)
+Run the [helper scripts](https://github.com/cloudfoundry/buildpacks-ci/tree/master/scripts/php-modules) which can bump modules (mostly) automatically.
+These scripts bump as many modules as they can, but the results should still be checked manually before committing. Some must be bumped manually, and it's still important to check if a module supports a new version of PHP which it didn't previously support (in which case it should be added manually).
 DESCRIPTION
 
 description += "\n\n" + %w(Name Latest PHP7.4).join(' | ') + "\n"
@@ -48,8 +47,6 @@ extensions.keys.sort_by(&:name).each do |key|
 end
 
 description += <<-DESCRIPTION
-
-Run the [helper scripts](https://github.com/cloudfoundry/buildpacks-ci/tree/master/scripts/php-modules) which can bump modules (mostly) automatically.
 
 If you're updating cassandra modules (including datastax/cpp-driver) please do so in individual commits, then rebuild appropriate php versions, so integration tests can run in CI with only cassandra changes.
 This will help isolate the php cassandra module change(s) if the changes cause problems.
