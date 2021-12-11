@@ -53,6 +53,7 @@ module Depwatcher
 
   class Entry
     JSON.mapping(
+      filetype: String,
       os: String,
       bit: {type: String, nilable: true},
       extension: String,
