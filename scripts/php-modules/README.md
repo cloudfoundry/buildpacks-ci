@@ -3,7 +3,6 @@
 Updating PHP modules entails two main steps: determining which modules to update, then updating hashes for bumped modules. The following scripts help with each step. They operate on the following module configuration files:
 
 - `tasks/build-binary-new/php7-base-extensions.yml`
-- `tasks/build-binary-new/php73-extensions-patch.yml` (`additions` array)
 - `tasks/build-binary-new/php74-extensions-patch.yml` (`additions` array)
 - `tasks/build-binary-new/php8-base-extensions.yml`
 
