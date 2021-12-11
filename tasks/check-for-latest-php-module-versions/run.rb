@@ -49,6 +49,8 @@ end
 
 description += <<-DESCRIPTION
 
+Run the [helper scripts](https://github.com/cloudfoundry/buildpacks-ci/tree/master/scripts/php-modules) which can bump modules (mostly) automatically.
+
 If you're updating cassandra modules (including datastax/cpp-driver) please do so in individual commits, then rebuild appropriate php versions, so integration tests can run in CI with only cassandra changes.
 This will help isolate the php cassandra module change(s) if the changes cause problems.
 
