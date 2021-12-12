@@ -30,25 +30,19 @@ module Depwatcher
     end
 
     private def releases()
-      response = client.get("https://download.appdynamics.com/download/downloadfilelatest?format=json").body
-      Entries.from_json(response).results.map do |entry|
+      response = client.get("https://download.appdynamics.com/download/downloadfilelatest/?format=json").body
+      Array(Entry).from_json(response).map do |entry|
         if (entry.filetype == "php-tar" && entry.os == "linux" && entry.bit == "64" && entry.extension == "tar.bz2" && !entry.is_beta)
           Release.new(
             entry.version,
             "https://packages.appdynamics.com/php/#{entry.version}/appdynamics-php-agent-linux_x64-#{entry.version}.tar.bz2",
-            entry.sha256_checksum
+            entry.sha256_checksum || ""
           )
         else
           nil
         end
       end.compact.sort_by { |r| Version.new(r.ref) }.last(10)
     end
-  end
-
-  class Entries
-    JSON.mapping(
-      results: Array(Entry)
-    )
   end
 
   class Entry
@@ -59,7 +53,7 @@ module Depwatcher
       extension: String,
       is_beta: Bool,
       version: String,
-      sha256_checksum: String
+      sha256_checksum: {type: String, nilable: true}
     )
   end
 
