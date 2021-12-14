@@ -67,6 +67,7 @@ tracker_client = TrackerClient.new(
 )
 tracker_client.post_to_tracker(
   name: 'Build and/or Include new releases: PHP Modules',
+  estimate: 1,
   description: description,
   tasks: [
     'Check each PHP module for updates and update extension configs (in `buildpacks-ci`)',
