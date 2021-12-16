@@ -30,7 +30,7 @@ class BuildpackReleaseStoryCreator
 
     story_description += "\n**Dependency Changes:**\n\n"
     story_description += generate_dependency_changes
-    story_description += "\nRefer to [release instructions](https://docs.cloudfoundry.org/buildpacks/releasing_a_new_buildpack_version.html).\n"
+    story_description += "\nRefer to [release instructions](https://github.com/pivotal-cf/tanzu-buildpacks/wiki/Releasing-CF-Buildpacks).\n"
 
     story = buildpack_project.create_story(
       name: story_name,
