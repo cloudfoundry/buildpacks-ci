@@ -25,8 +25,8 @@ native_modules:
   md5: 1f63ed30d72702a97e6512884346a62a
   klass: CassandraCppDriverRecipe
 - name: libsodium
-  version: 1.0.18-stable
-  md5: 45e032b22eaf2679546b8853fe1aa0a0
+  version: 1.0.18
+  md5: 3ca9ebc13b6b4735acae0a6a4c4f9a95
   klass: LibSodiumRecipe
 extensions:
 - name: apcu
@@ -42,8 +42,8 @@ extensions:
   md5: 6970abb34217faff470767c2b84ea2da
   klass: PeclRecipe
 - name: gnupg
-  version: 1.5.0
-  md5: 700850591953a378e9e24730fba5d7b3
+  version: 1.5.1
+  md5: c48f5de2f96ffebe2e18eaefff4917f9
   klass: PeclRecipe
 - name: imagick
   version: 3.6.0
