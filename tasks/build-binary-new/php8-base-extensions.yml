@@ -17,9 +17,13 @@ native_modules:
   md5: 0abec0888d10c9553cdcbcbf9172d558
   klass: LibRdKafkaRecipe
 - name: libsodium
-  version: 1.0.18-stable
-  md5: 45e032b22eaf2679546b8853fe1aa0a0
+  version: 1.0.18
+  md5: 3ca9ebc13b6b4735acae0a6a4c4f9a95
   klass: LibSodiumRecipe
+- name: amqp
+  version: 1.11.0
+  md5: 3a0638223e320fc21f3b079198c24f12
+  klass: AmqpPeclRecipe
 extensions:
 - name: tideways_xhprof
   version: 5.0.4
@@ -38,8 +42,8 @@ extensions:
   md5: f7b5e9b23fb844e5eb035203d316bc63
   klass: PeclRecipe
 - name: gnupg
-  version: 1.5.0
-  md5: 700850591953a378e9e24730fba5d7b3
+  version: 1.5.1
+  md5: c48f5de2f96ffebe2e18eaefff4917f9
   klass: PeclRecipe
 - name: apcu
   version: 5.1.21
