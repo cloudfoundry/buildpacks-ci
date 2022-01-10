@@ -75,6 +75,7 @@ module DependencyBuild
           Runner.run('python3', '-m', 'pip', 'download', '--no-binary', ':all:', 'parver')
           Runner.run('python3', '-m', 'pip', 'download', '--no-binary', ':all:', 'wheel')
           Runner.run('python3', '-m', 'pip', 'download', '--no-binary', ':all:', 'invoke')
+          Runner.run('python3', '-m', 'pip', 'download', '--no-binary', ':all:', 'flit_core')
           Runner.run('tar', 'zcvf', old_file_path, '.')
         end
       end
