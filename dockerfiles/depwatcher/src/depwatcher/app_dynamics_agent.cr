@@ -35,7 +35,7 @@ module Depwatcher
         if (entry.filetype == "php-tar" && entry.os == "linux" && entry.bit == "64" && entry.extension == "tar.bz2" && !entry.is_beta)
           Release.new(
             entry.version,
-            "https://packages.appdynamics.com/php/#{entry.version}/appdynamics-php-agent-linux_x64-#{entry.version}.tar.bz2",
+            "https://download.appdynamics.com/download/prox/download-file/php-tar/#{entry.version}/appdynamics-php-agent-x64-linux-#{entry.version}.tar.bz2",
             entry.sha256_checksum || ""
           )
         else

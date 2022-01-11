@@ -19,7 +19,7 @@ Spec2.describe Depwatcher::AppDynamicsAgent do
     it "returns final releases sorted" do
       obj = subject.in("4.4.2.849")
       expect(obj.ref).to eq "4.4.2.849"
-      expect(obj.url).to eq "https://packages.appdynamics.com/php/4.4.2.849/appdynamics-php-agent-linux_x64-4.4.2.849.tar.bz2"
+      expect(obj.url).to eq "https://download.appdynamics.com/download/prox/download-file/php-tar/4.4.2.849/appdynamics-php-agent-x64-linux-4.4.2.849.tar.bz2"
       expect(obj.sha256).to eq "4b8baaf13a2c91c5a06f82e65d997b568f63c97c9e59901cb2f2d67800976c5f"
     end
   end
