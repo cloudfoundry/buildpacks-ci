@@ -1,5 +1,9 @@
 ---
 native_modules:
+- name: rabbitmq
+  version: 0.11.0
+  md5: e7d9896577aea6351811d7c1d7f0a68a
+  klass: RabbitMQRecipe
 - name: lua
   version: 5.4.3
   md5: ef63ed2ecfb713646a7fcc583cf5f352
@@ -20,10 +24,6 @@ native_modules:
   version: 1.0.18
   md5: 3ca9ebc13b6b4735acae0a6a4c4f9a95
   klass: LibSodiumRecipe
-- name: amqp
-  version: 1.11.0
-  md5: 3a0638223e320fc21f3b079198c24f12
-  klass: AmqpPeclRecipe
 extensions:
 - name: tideways_xhprof
   version: 5.0.4
@@ -161,3 +161,7 @@ extensions:
   version: nil
   md5: nil
   klass: OraclePdoRecipe
+- name: amqp
+  version: 1.11.0
+  md5: 3a0638223e320fc21f3b079198c24f12
+  klass: AmqpPeclRecipe
