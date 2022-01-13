@@ -35,7 +35,7 @@ module Depwatcher
       response = client.get("https://download.run.pivotal.io/appdynamics-php/index.yml").body
       response.each_line do |appdVersion|
         splitArray = appdVersion.split(": ")
-        version = splitArray[0].sub("_", ".")
+        version = splitArray[0].sub("_", "-")
         url = splitArray[1]
         File.write("#{version}.tar.bz2", client.get(url).body)
         sha256 = OpenSSL::Digest.new("sha256").file("#{version}.tar.bz2").hexdigest
@@ -67,8 +67,14 @@ module Depwatcher
     getter patch : Int32
     getter metadata : Int32
 
+    # AppDynamics uses a different versioning scheme than SemVer. They use calendar versioning (ref https://community.appdynamics.com/t5/Knowledge-Base/New-in-March-2020-AppDynamics-is-switching-to-calendar/ta-p/38364)
+    # So every new release will follow the same pattern: YY.M.P-X  (YY = year, M = month, P = patch, X = metadata). Example: 22.1.0-14
     def initialize(@original : String)
-      @major, @minor, @patch, @metadata = @original.split(".").map(&.to_i)
+      splitVersion = @original.split(".")
+      @major = splitVersion[0].to_i
+      @minor = splitVersion[1].to_i
+      @patch = splitVersion[2].split("-")[0].to_i
+      @metadata = splitVersion[2].split("-")[1].to_i
     end
 
     def <=>(other : self) : Int32

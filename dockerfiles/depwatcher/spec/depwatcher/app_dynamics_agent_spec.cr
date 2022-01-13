@@ -16,14 +16,14 @@ Spec2.describe Depwatcher::AppDynamicsAgent do
 
   describe "#check" do
     it "returns final releases sorted" do
-      expect(subject.check.map(&.ref)).to eq ["1.1.1.2", "1.1.1.3", "2.1.1.1", "3.1.1.14"]
+      expect(subject.check.map(&.ref)).to eq ["1.1.1-2", "1.1.1-3", "2.1.1-1", "3.1.1-14"]
     end
   end
 
   describe "#in" do
     it "returns final releases sorted" do
-      obj = subject.in("3.1.1.14")
-      expect(obj.ref).to eq "3.1.1.14"
+      obj = subject.in("3.1.1-14")
+      expect(obj.ref).to eq "3.1.1-14"
       expect(obj.url).to eq "https://download.run.pivotal.io/appdynamics-php/appdynamics-3.1.1-14.tar.bz2"
       expect(obj.sha256).to eq OpenSSL::Digest.new("sha256").update("some-content-4").hexdigest
     end
