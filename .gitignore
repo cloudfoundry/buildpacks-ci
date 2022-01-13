@@ -18,3 +18,4 @@ tasks/cnb/update-cnb-dependency/testdata/updating-parent-cnb-with-tiny-stack/art
 tasks/cnb/update-dotnet-sdks-and-compat-table/testdata/artifacts
 cve-notification-app/actions/**/entrypoint/entrypoint
 **cves.json
+.vscode/

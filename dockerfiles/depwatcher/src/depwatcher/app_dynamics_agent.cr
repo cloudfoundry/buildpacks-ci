@@ -11,6 +11,7 @@ module Depwatcher
         url: String,
         sha256: String
       )
+
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
@@ -30,18 +31,18 @@ module Depwatcher
     end
 
     private def releases()
-      response = client.get("https://download.appdynamics.com/download/downloadfilelatest/?format=json").body
-      Array(Entry).from_json(response).map do |entry|
-        if (entry.filetype == "php-tar" && entry.os == "linux" && entry.bit == "64" && entry.extension == "tar.bz2" && !entry.is_beta)
-          Release.new(
-            entry.version,
-            "https://packages.appdynamics.com/php/#{entry.version}/appdynamics-php-agent-linux_x64-#{entry.version}.tar.bz2",
-            entry.sha256_checksum || ""
-          )
-        else
-          nil
-        end
-      end.compact.sort_by { |r| Version.new(r.ref) }.last(10)
+      allReleases = Array(Release).new
+      response = client.get("https://download.run.pivotal.io/appdynamics-php/index.yml").body
+      response.each_line do |appdVersion|
+        splitArray = appdVersion.split(": ")
+        version = splitArray[0].sub("_", "-")
+        url = splitArray[1]
+        File.write("#{version}", client.get(url).body)
+        sha256 = OpenSSL::Digest.new("sha256").file("#{version}").hexdigest
+        File.delete("#{version}")
+        allReleases.push(Release.new(version, url, sha256))
+      end
+      return allReleases.sort_by { |r| Version.new(r.ref) }.last(10)
     end
   end
 
@@ -66,8 +67,15 @@ module Depwatcher
     getter patch : Int32
     getter metadata : Int32
 
+    # AppDynamics uses a different versioning scheme than SemVer. They use calendar versioning (ref https://community.appdynamics.com/t5/Knowledge-Base/New-in-March-2020-AppDynamics-is-switching-to-calendar/ta-p/38364)
+    # So every new release will follow the same pattern: YY.M.P-X  (YY = year, M = month, P = patch, X = metadata). Example: 22.1.0-14
     def initialize(@original : String)
-      @major, @minor, @patch, @metadata = @original.split(".").map(&.to_i)
+      splitVersion = @original.split(".")
+      @major = splitVersion[0].to_i
+      @minor = splitVersion[1].to_i
+      splitPatch = splitVersion[2].split("-")
+      @patch = splitPatch[0].to_i
+      @metadata = splitPatch[1].to_i
     end
 
     def <=>(other : self) : Int32
