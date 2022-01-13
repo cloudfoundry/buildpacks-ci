@@ -6,21 +6,26 @@ Spec2.describe Depwatcher::AppDynamicsAgent do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://download.appdynamics.com/download/downloadfilelatest/?format=json", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/appd_agent.json")))
+    client.stub_get("https://download.run.pivotal.io/appdynamics-php/index.yml", nil, HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/appd_agent.yml")))
+
+    client.stub_get("https://download.run.pivotal.io/appdynamics-php/appdynamics-1.1.1-2.tar.bz2", nil, HTTP::Client::Response.new(200,  "some-content-1"))
+    client.stub_get("https://download.run.pivotal.io/appdynamics-php/appdynamics-1.1.1-3.tar.bz2", nil, HTTP::Client::Response.new(200,  "some-content-2"))
+    client.stub_get("https://download.run.pivotal.io/appdynamics-php/appdynamics-2.1.1-1.tar.bz2", nil, HTTP::Client::Response.new(200,  "some-content-3"))
+    client.stub_get("https://download.run.pivotal.io/appdynamics-php/appdynamics-3.1.1-14.tar.bz2", nil, HTTP::Client::Response.new(200,  "some-content-4"))
   end
 
   describe "#check" do
     it "returns final releases sorted" do
-      expect(subject.check.map(&.ref)).to eq ["4.3.3.100", "4.4.2.849", "4.4.2.850"]
+      expect(subject.check.map(&.ref)).to eq ["1.1.1.2", "1.1.1.3", "2.1.1.1", "3.1.1.14"]
     end
   end
 
   describe "#in" do
     it "returns final releases sorted" do
-      obj = subject.in("4.4.2.849")
-      expect(obj.ref).to eq "4.4.2.849"
-      expect(obj.url).to eq "https://packages.appdynamics.com/php/4.4.2.849/appdynamics-php-agent-linux_x64-4.4.2.849.tar.bz2"
-      expect(obj.sha256).to eq "4b8baaf13a2c91c5a06f82e65d997b568f63c97c9e59901cb2f2d67800976c5f"
+      obj = subject.in("3.1.1.14")
+      expect(obj.ref).to eq "3.1.1.14"
+      expect(obj.url).to eq "https://download.run.pivotal.io/appdynamics-php/appdynamics-3.1.1-14.tar.bz2"
+      expect(obj.sha256).to eq OpenSSL::Digest.new("sha256").update("some-content-4").hexdigest
     end
   end
 end

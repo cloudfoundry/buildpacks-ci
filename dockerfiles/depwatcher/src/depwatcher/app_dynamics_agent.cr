@@ -11,6 +11,7 @@ module Depwatcher
         url: String,
         sha256: String
       )
+
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
@@ -30,18 +31,18 @@ module Depwatcher
     end
 
     private def releases()
-      response = client.get("https://download.appdynamics.com/download/downloadfilelatest/?format=json").body
-      Array(Entry).from_json(response).map do |entry|
-        if (entry.filetype == "php-tar" && entry.os == "linux" && entry.bit == "64" && entry.extension == "tar.bz2" && !entry.is_beta)
-          Release.new(
-            entry.version,
-            "https://packages.appdynamics.com/php/#{entry.version}/appdynamics-php-agent-linux_x64-#{entry.version}.tar.bz2",
-            entry.sha256_checksum || ""
-          )
-        else
-          nil
-        end
-      end.compact.sort_by { |r| Version.new(r.ref) }.last(10)
+      allReleases = Array(Release).new
+      response = client.get("https://download.run.pivotal.io/appdynamics-php/index.yml").body
+      response.each_line do |appdVersion|
+        splitArray = appdVersion.split(": ")
+        version = splitArray[0].sub("_", ".")
+        url = splitArray[1]
+        File.write("#{version}.tar.bz2", client.get(url).body)
+        sha256 = OpenSSL::Digest.new("sha256").file("#{version}.tar.bz2").hexdigest
+        File.delete("#{version}.tar.bz2")
+        allReleases.push(Release.new(version, url, sha256))
+      end
+      return allReleases.sort_by { |r| Version.new(r.ref) }.last(10)
     end
   end
 
