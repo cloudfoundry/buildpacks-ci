@@ -37,9 +37,9 @@ module Depwatcher
         splitArray = appdVersion.split(": ")
         version = splitArray[0].sub("_", "-")
         url = splitArray[1]
-        File.write("#{version}.tar.bz2", client.get(url).body)
-        sha256 = OpenSSL::Digest.new("sha256").file("#{version}.tar.bz2").hexdigest
-        File.delete("#{version}.tar.bz2")
+        File.write("#{version}", client.get(url).body)
+        sha256 = OpenSSL::Digest.new("sha256").file("#{version}").hexdigest
+        File.delete("#{version}")
         allReleases.push(Release.new(version, url, sha256))
       end
       return allReleases.sort_by { |r| Version.new(r.ref) }.last(10)
@@ -73,8 +73,9 @@ module Depwatcher
       splitVersion = @original.split(".")
       @major = splitVersion[0].to_i
       @minor = splitVersion[1].to_i
-      @patch = splitVersion[2].split("-")[0].to_i
-      @metadata = splitVersion[2].split("-")[1].to_i
+      splitPatch = splitVersion[2].split("-")
+      @patch = splitPatch[0].to_i
+      @metadata = splitPatch[1].to_i
     end
 
     def <=>(other : self) : Int32
