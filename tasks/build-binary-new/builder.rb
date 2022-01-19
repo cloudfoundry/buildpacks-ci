@@ -890,6 +890,8 @@ class Builder
       patch_file = nil
       if source_input.version.start_with?('7.4.')
         patch_file = File.join(php_extensions_dir, 'php74-extensions-patch.yml')
+      elsif source_input.version.start_with?('8.1.')
+        patch_file = File.join(php_extensions_dir, 'php81-extensions-patch.yml')
       end
 
       php_extensions.patch!(patch_file) if patch_file
