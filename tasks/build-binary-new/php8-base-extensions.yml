@@ -154,8 +154,8 @@ extensions:
   md5: 29fc866198d61bccdbc4c4f53fb7ef06
   klass: PeclRecipe
 - name: oci8
-  version: 3.2.1
-  md5: 309190ef3ede2779a617c9375d32ea7a
+  version: 3.0.1
+  md5: 641ebceb483fa2d95e79aea99b1350de
   klass: OraclePeclRecipe
 - name: pdo_oci
   version: nil
