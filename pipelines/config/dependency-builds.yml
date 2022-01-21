@@ -336,9 +336,6 @@ dependencies:
       python:
         lines:  #! python 3 minor version EOLs are 5 years after their first final release
           #! https://devguide.python.org/#status-of-python-branches
-          - line: 3.6.X
-            deprecation_date: 2021-12-23
-            link: https://www.python.org/dev/peps/pep-0494/
           - line: 3.7.X
             deprecation_date: 2023-06-27
             link: https://www.python.org/dev/peps/pep-0537/
