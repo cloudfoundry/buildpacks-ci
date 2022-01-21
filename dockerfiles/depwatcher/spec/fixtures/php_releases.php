@@ -18,10 +18,10 @@
 
 
 
-<link rel="stylesheet" type="text/css" href="/cached.php?t=1539771603&amp;f=/fonts/Fira/fira.css" media="screen">
+<link rel="stylesheet" type="text/css" href="/cached.php?t=1639034403&amp;f=/fonts/Fira/fira.css" media="screen">
 <link rel="stylesheet" type="text/css" href="/cached.php?t=1539765004&amp;f=/fonts/Font-Awesome/css/fontello.css" media="screen">
 <link rel="stylesheet" type="text/css" href="/cached.php?t=1606338002&amp;f=/styles/theme-base.css" media="screen">
-<link rel="stylesheet" type="text/css" href="/cached.php?t=1540425603&amp;f=/styles/theme-medium.css" media="screen">
+<link rel="stylesheet" type="text/css" href="/cached.php?t=1627831203&amp;f=/styles/theme-medium.css" media="screen">
 <link rel="stylesheet" type="text/css" href="/cached.php?t=1421837618&amp;f=/styles/releases.css" media="screen">
 
  <!--[if lte IE 7]>
@@ -59,8 +59,8 @@
       <li class=""><a href="/get-involved" >Get Involved</a></li>
       <li class=""><a href="/support">Help</a></li>
       <li class="">
-        <a href="/releases/8.0/index.php">
-          <img src="/images/php8/logo_php8.svg" alt="php8" height="22" width="60">
+        <a href="/releases/8.1/index.php">
+          <img src="/images/php8/logo_php8_1.svg" alt="php8.1" height="22" width="60">
         </a>
       </li>
     </ul>
@@ -71,7 +71,7 @@
   </div>
   <div id="flash-message"></div>
 </nav>
-<div class="headsup"><a href='/index.php#id2021-01-07-3'>PHP 8.0.1 Released!</a></div>
+<div class="headsup"><a href='/index.php#id2022-01-21-1'>PHP 8.1.2 Released!</a></div>
 <nav id="trick"><div><dl>
 <dt><a href='/manual/en/getting-started.php'>Getting Started</a></dt>
 	<dd><a href='/manual/en/introduction.php'>Introduction</a></dd>
@@ -87,8 +87,10 @@
 	<dd><a href='/manual/en/language.functions.php'>Functions</a></dd>
 	<dd><a href='/manual/en/language.oop5.php'>Classes and Objects</a></dd>
 	<dd><a href='/manual/en/language.namespaces.php'>Namespaces</a></dd>
+	<dd><a href='/manual/en/language.enumerations.php'>Enumerations</a></dd>
 	<dd><a href='/manual/en/language.errors.php'>Errors</a></dd>
 	<dd><a href='/manual/en/language.exceptions.php'>Exceptions</a></dd>
+	<dd><a href='/manual/en/language.fibers.php'>Fibers</a></dd>
 	<dd><a href='/manual/en/language.generators.php'>Generators</a></dd>
 	<dd><a href='/manual/en/language.attributes.php'>Attributes</a></dd>
 	<dd><a href='/manual/en/language.references.php'>References Explained</a></dd>
@@ -108,9 +110,7 @@
 	<dd><a href='/manual/en/security.filesystem.php'>Filesystem Security</a></dd>
 	<dd><a href='/manual/en/security.database.php'>Database Security</a></dd>
 	<dd><a href='/manual/en/security.errors.php'>Error Reporting</a></dd>
-	<dd><a href='/manual/en/security.globals.php'>Using Register Globals</a></dd>
 	<dd><a href='/manual/en/security.variables.php'>User Submitted Data</a></dd>
-	<dd><a href='/manual/en/security.magicquotes.php'>Magic Quotes</a></dd>
 	<dd><a href='/manual/en/security.hiding.php'>Hiding PHP</a></dd>
 	<dd><a href='/manual/en/security.current.php'>Keeping Current</a></dd>
 <dt><a href='/manual/en/features.php'>Features</a></dt>
@@ -199,7 +199,367 @@
  <em>older releases are listed for archival purposes only, and
  they are no longer supported</em>.
 </p>
-<a id="v8"></a><a id="8.0.0"></a>
+<a id="v8"></a><a id="8.1.1"></a>
+<h2>8.1.1</h2>
+<ul>
+ <li>Released: 16 Dec 2021</li>
+ <li>Announcement: <a href="/releases/8_1_1.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.1.1">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.1.1.tar.gz">PHP 8.1.1 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 4e4cf3f843a5111f6c55cd21de8f26834ea3cd4a5be77c88357cbcec4a2d671d</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.1.1.tar.bz2">PHP 8.1.1 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 8f8bc9cad6cd124edc111f7db0a109745e2f638770a101b3c22a2953f7a9b40e</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.1.1.tar.xz">PHP 8.1.1 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 33c09d76d0a8bbb5dd930d9dd32e6bfd44e9efcf867563759eb5492c3aff8856</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.14"></a>
+<h2>8.0.14</h2>
+<ul>
+ <li>Released: 16 Dec 2021</li>
+ <li>Announcement: <a href="/releases/8_0_14.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.0.14">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.0.14.tar.gz">PHP 8.0.14 (tar.gz)</a><br>
+<span class="sha256sum">sha256: e67ebd8c4c77247ad1fa88829e5b95d51a19edf3d87814434de261e20a63ea20</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.14.tar.bz2">PHP 8.0.14 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: bb381fdf4817ad7c24c23ea7f77cad68dceb86eb3ac1a37acedadf8ad0a0cd4b</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.14.tar.xz">PHP 8.0.14 (tar.xz)</a><br>
+<span class="sha256sum">sha256: fbde8247ac200e4de73449d9fefc8b495d323b5be9c10cdb645fb431c91156e3</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.1.0"></a>
+<h2>8.1.0</h2>
+<ul>
+ <li>Released: 25 Nov 2021</li>
+ <li>Announcement: <a href="/releases/8_1_0.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.1.0">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.1.0.tar.gz">PHP 8.1.0 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 848705043ea4a6e022246ae12a1bff6afcf5c73ea98c6ac4d2108d6028c5c125</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.1.0.tar.bz2">PHP 8.1.0 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 0725ed2baea125496a898455d501a77460218b2a0cfad773fa9322f491b82b61</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.1.0.tar.xz">PHP 8.1.0 (tar.xz)</a><br>
+<span class="sha256sum">sha256: a1317eff0723a2b3d3122bbfe107a1158570ea2822dc35a5fb360086db0f6bbc</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.13"></a>
+<h2>8.0.13</h2>
+<ul>
+ <li>Released: 18 Nov 2021</li>
+ <li>Announcement: <a href="/releases/8_0_13.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.0.13">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.0.13.tar.gz">PHP 8.0.13 (tar.gz)</a><br>
+<span class="sha256sum">sha256: b4c2d27c954e1b0d84fd4bfef4d252e154ba479e7db11abd89358f2164ee7cc8</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.13.tar.bz2">PHP 8.0.13 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: c2419d7ba4395f44747043f4e6f5b47fa08125705fb9f88377e453068a815836</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.13.tar.xz">PHP 8.0.13 (tar.xz)</a><br>
+<span class="sha256sum">sha256: cd976805ec2e9198417651027dfe16854ba2c2c388151ab9d4d268513d52ed52</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.12"></a>
+<h2>8.0.12</h2>
+<ul>
+ <li>Released: 21 Oct 2021</li>
+ <li>Announcement: <a href="/releases/8_0_12.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.0.12">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.0.12.tar.gz">PHP 8.0.12 (tar.gz)</a><br>
+<span class="sha256sum">sha256: a5b78f04a89d3b401465febf449c7ea9de48681f92803dd8dc2bf922812d572b</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.12.tar.bz2">PHP 8.0.12 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: b4886db1df322dc8fb128d8b34ae7e94f6fc682ecb29ff4f5a591d4de9feadbf</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.12.tar.xz">PHP 8.0.12 (tar.xz)</a><br>
+<span class="sha256sum">sha256: a501017b3b0fd3023223ea25d98e87369b782f8a82310c4033d7ea6a989fea0a</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.11"></a>
+<h2>8.0.11</h2>
+<ul>
+ <li>Released: 23 Sep 2021</li>
+ <li>Announcement: <a href="/releases/8_0_11.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.0.11">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.0.11.tar.gz">PHP 8.0.11 (tar.gz)</a><br>
+<span class="sha256sum">sha256: c6a461f57b4bcb46cd4dec443253b1e2e8e981466f1280093322b7864afe8be7</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.11.tar.bz2">PHP 8.0.11 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 70ed874285e4010c1e2e8937bfb56b13b9ed1b3789dcaf274b793b00c1f4403a</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.11.tar.xz">PHP 8.0.11 (tar.xz)</a><br>
+<span class="sha256sum">sha256: e3e5f764ae57b31eb65244a45512f0b22d7bef05f2052b23989c053901552e16</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.10"></a>
+<h2>8.0.10</h2>
+<ul>
+ <li>Released: 26 Aug 2021</li>
+ <li>Announcement: <a href="/releases/8_0_10.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.0.10">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.0.10.tar.gz">PHP 8.0.10 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 4612dca9afe8148801648839175ab588097ace66658c6859e9f283ecdeaf84b3</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.10.tar.bz2">PHP 8.0.10 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: c94547271410900845b084ec2bcb3466af363eeca92cb24bd611dcbdc26f1587</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.10.tar.xz">PHP 8.0.10 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 66dc4d1bc86d9c1bc255b51b79d337ed1a7a035cf71230daabbf9a4ca35795eb</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.9"></a>
+<h2>8.0.9</h2>
+<ul>
+ <li>Released: 29 Jul 2021</li>
+ <li>Announcement: <a href="/releases/8_0_9.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.0.9">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.0.9.tar.gz">PHP 8.0.9 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 1f0d72e90ab6ad0ae13329a96b281f71bc592563ce4e3a4c816b8da4b5854fb4</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.9.tar.bz2">PHP 8.0.9 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 6ac8edebd295ddc43fb010653c43ccf203cd7cdc40981b210ed5275994040806</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.9.tar.xz">PHP 8.0.9 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 71a01b2b56544e20e28696ad5b366e431a0984eaa39aa5e35426a4843e172010</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.8"></a>
+<h2>8.0.8</h2>
+<ul>
+ <li>Released: 01 Jul 2021</li>
+ <li>Announcement: <a href="/releases/8_0_8.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.0.8">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.0.8.tar.gz">PHP 8.0.8 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 084a1e8020e86fb99b663d195fd9ac98a9f37dfcb9ecb5c159054cdb8f388945</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.8.tar.bz2">PHP 8.0.8 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 14bd77d71a98943e14b324da83e31b572781df583cda9650a184fae3214cd16f</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.8.tar.xz">PHP 8.0.8 (tar.xz)</a><br>
+<span class="sha256sum">sha256: dc1668d324232dec1d05175ec752dade92d29bb3004275118bc3f7fc7cbfbb1c</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.7"></a>
+<h2>8.0.7</h2>
+<ul>
+ <li>Released: 03 Jun 2021</li>
+ <li>Announcement: <a href="/releases/8_0_7.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.0.7">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.0.7.tar.gz">PHP 8.0.7 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 1e7462455bec8062ef3fc7c74f1f496417cb80aa374ce11edb35015de248c3c1</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.7.tar.bz2">PHP 8.0.7 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 72b2f2c96f35748b1d6e8a71af4ead439b17129aefe611eb0baf1bd313635f79</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.7.tar.xz">PHP 8.0.7 (tar.xz)</a><br>
+<span class="sha256sum">sha256: d5fc2e4fc780a32404d88c360e3e0009bc725d936459668e9c2ac992f2d83654</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.6"></a>
+<h2>8.0.6</h2>
+<ul>
+ <li>Released: 06 May 2021</li>
+ <li>Announcement: <a href="/releases/8_0_6.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.0.6">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.0.6.tar.gz">PHP 8.0.6 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 51a3dcea6deb8ab82ad035d15baa7f5398980f576ac1968313ef149f7cf20100</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.6.tar.bz2">PHP 8.0.6 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 26a8a9dad66012039deb0bcf151c6e22ab1e4b6a91508383ff705da41289526e</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.6.tar.xz">PHP 8.0.6 (tar.xz)</a><br>
+<span class="sha256sum">sha256: e9871d3b6c391fe9e89f86f6334852dcc10eeaaa8d5565beb8436e7f0cf30e20</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.5"></a>
+<h2>8.0.5</h2>
+<ul>
+ <li>Released: 29 Apr 2021</li>
+ <li>Announcement: <a href="/releases/8_0_5.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.0.5">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.0.5.tar.gz">PHP 8.0.5 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 50aeac6fe9c2b5577d534369392ebb89c3e7a342b20ef538832b1df996cccb2a</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.5.tar.bz2">PHP 8.0.5 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 195d934febefaac3b19ac586679149759324a434411ae8aca6f7d87553ef08e0</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.5.tar.xz">PHP 8.0.5 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 5dd358b35ecd5890a4f09fb68035a72fe6b45d3ead6999ea95981a107fd1f2ab</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.3"></a>
+<h2>8.0.3</h2>
+<ul>
+ <li>Released: 4 Mar 2021</li>
+ <li>Announcement: <a href="/releases/8_0_3.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.0.3">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.0.3.tar.gz">PHP 8.0.3 (tar.gz)</a><br>
+<span class="sha256sum">sha256: e7ecfee901e0843377b64b2d8124132eae75bdb71a2675ba7c5c038d6592383d</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.3.tar.bz2">PHP 8.0.3 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 95f8621d9e34f822d2583564c358598dff7346241f839bfa319bbf65bf2eb012</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.3.tar.xz">PHP 8.0.3 (tar.xz)</a><br>
+<span class="sha256sum">sha256: c9816aa9745a9695672951eaff3a35ca5eddcb9cacf87a4f04b9fb1169010251</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.2"></a>
+<h2>8.0.2</h2>
+<ul>
+ <li>Released: 04 Feb 2021</li>
+ <li>Announcement: <a href="/releases/8_0_2.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.0.2">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.0.2.tar.gz">PHP 8.0.2 (tar.gz)</a><br>
+<span class="sha256sum">sha256: cc17a32f76beb5f405da39a548218b3b6736710884fcd761838098553df149da</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.2.tar.bz2">PHP 8.0.2 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 000fa89e3eae317c0b17ee048229cd68a38a3b0fef72c558681fd004057ba3e6</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.2.tar.xz">PHP 8.0.2 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 84dd6e36f48c3a71ff5dceba375c1f6b34b71d4fa9e06b720780127176468ccc</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.1"></a>
+<h2>8.0.1</h2>
+<ul>
+ <li>Released: 07 Jan 2021</li>
+ <li>Announcement: <a href="/releases/8_0_1.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.0.1">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.0.1.tar.gz">PHP 8.0.1 (tar.gz)</a><br>
+<span class="sha256sum">sha256: f1fee0429aa2cce6bc5df5d7e65386e266b0aab8a5fad7882d10eb833d2f5376</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.1.tar.bz2">PHP 8.0.1 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: c44e76af40d133de64564f9caf5daec52bbe84c1ccb4e4500a62233d614ebdee</span>
+ </li>
+ <li>
+<a href="/distributions/php-8.0.1.tar.xz">PHP 8.0.1 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 208b3330af881b44a6a8c6858d569c72db78dab97810332978cc65206b0ec2dc</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.0.0"></a>
 <h2>8.0.0</h2>
 <ul>
  <li>Released: 26 Nov 2020</li>
@@ -223,7 +583,487 @@
 </ul>
 </li>
 </ul>
-<a id="v7"></a><a id="7.3.25"></a>
+<a id="v7"></a><a id="7.4.26"></a>
+<h2>7.4.26</h2>
+<ul>
+ <li>Released: 18 Nov 2021</li>
+ <li>Announcement: <a href="/releases/7_4_26.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.4.26">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.4.26.tar.gz">PHP 7.4.26 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 890a7e730f96708a68a77b19fd57fec33cc81573f7249111c870edac42b91a72</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.26.tar.bz2">PHP 7.4.26 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: d68b88a8f8a437648affcc7793e5e062fa0ec5171f7fd0af385b12c78b1c004d</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.26.tar.xz">PHP 7.4.26 (tar.xz)</a><br>
+<span class="sha256sum">sha256: e305b3aafdc85fa73a81c53d3ce30578bc94d1633ec376add193a1e85e0f0ef8</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.3.33"></a>
+<h2>7.3.33</h2>
+<ul>
+ <li>Released: 18 Nov 2021</li>
+ <li>Announcement: <a href="/releases/7_3_33.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.3.33">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.3.33.tar.gz">PHP 7.3.33 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 9a369c32c6f52036b0a890f290327f148a1904ee66aa56e2c9a7546da6525ec8</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.33.tar.bz2">PHP 7.3.33 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: f412487d7d953437e7978a0d7b6ec99bf4a85cf3378014438a8577b89535451a</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.33.tar.xz">PHP 7.3.33 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 166eaccde933381da9516a2b70ad0f447d7cec4b603d07b9a916032b215b90cc</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.3.32"></a>
+<h2>7.3.32</h2>
+<ul>
+ <li>Released: 28 Oct 2021</li>
+ <li>Announcement: <a href="/releases/7_3_32.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.3.32">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.3.32.tar.gz">PHP 7.3.32 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 4739160cbd8f5d4529429ac01e181cba9705a515666002e76e4e34891c034fcb</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.32.tar.bz2">PHP 7.3.32 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 7c158b306e53434f1e0a88647aa561814308aaff8713ed7d237ed8f1399c216f</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.32.tar.xz">PHP 7.3.32 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 94effa250b80f031e77fbd98b6950c441157a2a8f9e076ee68e02f5b0b7a3fd9</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.4.25"></a>
+<h2>7.4.25</h2>
+<ul>
+ <li>Released: 21 Oct 2021</li>
+ <li>Announcement: <a href="/releases/7_4_25.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.4.25">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.4.25.tar.gz">PHP 7.4.25 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 3b2632252c933cac489a20f68b8f4ab769e5a0a3bf22b6ef47427aff6922e31f</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.25.tar.bz2">PHP 7.4.25 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 27992570caf3e2e5323ab7b37853c44c1529b1d31ea94d9776efa91d5a781313</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.25.tar.xz">PHP 7.4.25 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 12a758f1d7fee544387a28d3cf73226f47e3a52fb3049f07fcc37d156d393c0a</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.3.31"></a>
+<h2>7.3.31</h2>
+<ul>
+ <li>Released: 23 Sep 2021</li>
+ <li>Announcement: <a href="/releases/7_3_31.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.3.31">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.3.31.tar.gz">PHP 7.3.31 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 57ca37b08d3eed4cadc3976e78b0f51d0305bb6e60333f6e8c76e8aee07c3f0f</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.31.tar.bz2">PHP 7.3.31 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 6951f78524684f439186fe039ab14fb2459cea8f47ac829a159724a283f7f32b</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.31.tar.xz">PHP 7.3.31 (tar.xz)</a><br>
+<span class="sha256sum">sha256: d1aa8f44595d01ac061ff340354d95e146d6152f70e799b44d6b8654fb45cbcc</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.4.24"></a>
+<h2>7.4.24</h2>
+<ul>
+ <li>Released: 23 Sep 2021</li>
+ <li>Announcement: <a href="/releases/7_4_24.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.4.24">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.4.24.tar.gz">PHP 7.4.24 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 8cc1758cf7ff45428c17641b1be84cd917a2909ba40c770f06a814d8b7f36333</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.24.tar.bz2">PHP 7.4.24 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: f50e32b788864349041f19e31dcc65b1fcc65bc19122918f607526432edf2f32</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.24.tar.xz">PHP 7.4.24 (tar.xz)</a><br>
+<span class="sha256sum">sha256: ff7658ee2f6d8af05b48c21146af5f502e121def4e76e862df5ec9fa06e98734</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.4.23"></a>
+<h2>7.4.23</h2>
+<ul>
+ <li>Released: 26 Aug 2021</li>
+ <li>Announcement: <a href="/releases/7_4_23.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.4.23">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.4.23.tar.gz">PHP 7.4.23 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 2aaa481678ad4d2992e7bcf161e0e98c7268f4979f7ca8b3d97dd6de19c205d6</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.23.tar.bz2">PHP 7.4.23 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: d1e094fe6e4f832e0a64be9c69464ba5d593fb216f914efa8bbb084e0a7a5727</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.23.tar.xz">PHP 7.4.23 (tar.xz)</a><br>
+<span class="sha256sum">sha256: cea52313fcffe56343bcd3c66dbb23cd5507dc559cc2e3547cf8f5452e88a05d</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.3.30"></a>
+<h2>7.3.30</h2>
+<ul>
+ <li>Released: 26 Aug 2021</li>
+ <li>Announcement: <a href="/releases/7_3_30.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.3.30">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.3.30.tar.gz">PHP 7.3.30 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 3810a9b631eb7f236ecf02b9a78bab8d957b6cfdb1646a29e3b34e01d36c0510</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.30.tar.bz2">PHP 7.3.30 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: ccc532e660761df9b5509b9b913d2dc049b0a9954108fe212aeeb8bc2556b502</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.30.tar.xz">PHP 7.3.30 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 0ebfd656df0f3b1ea37ff2887f8f2d1a71cd160fb0292547c0ee0a99e58ffd1b</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.4.22"></a>
+<h2>7.4.22</h2>
+<ul>
+ <li>Released: 29 Jul 2021</li>
+ <li>Announcement: <a href="/releases/7_4_22.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.4.22">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.4.22.tar.gz">PHP 7.4.22 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 4ca2642b99a822237d7f84dc19682be702ad0e2d5d282f7646d84b746d454e34</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.22.tar.bz2">PHP 7.4.22 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 5022bbca661bc1ab5dfaee72873bcd0f0980d9dd34f980a682029496f51caae1</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.22.tar.xz">PHP 7.4.22 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 8e078cd7d2f49ac3fcff902490a5bb1addc885e7e3b0d8dd068f42c68297bde8</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.3.29"></a>
+<h2>7.3.29</h2>
+<ul>
+ <li>Released: 01 Jul 2021</li>
+ <li>Announcement: <a href="/releases/7_3_29.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.3.29">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.3.29.tar.gz">PHP 7.3.29 (tar.gz)</a><br>
+<span class="sha256sum">sha256: ba4de3955b0cbd33baee55a83568acc4347605e210a54b5654e4c1e09b544659</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.29.tar.bz2">PHP 7.3.29 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: a83a2878140bd86935f0046bbfe92672c8ab688fbe4ccf9704add6b9605ee4d0</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.29.tar.xz">PHP 7.3.29 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 7db2834511f3d86272dca3daee3f395a5a4afce359b8342aa6edad80e12eb4d0</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.4.21"></a>
+<h2>7.4.21</h2>
+<ul>
+ <li>Released: 01 Jul 2021</li>
+ <li>Announcement: <a href="/releases/7_4_21.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.4.21">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.4.21.tar.gz">PHP 7.4.21 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 4b9623accbe4b8923a801212f371f784069535009185e7bf7e4dec66bbea61db</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.21.tar.bz2">PHP 7.4.21 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 36ec6102e757e2c2b7742057a700bbff77c76fa0ccbe9c860398c3d24e32822a</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.21.tar.xz">PHP 7.4.21 (tar.xz)</a><br>
+<span class="sha256sum">sha256: cf43384a7806241bc2ff22022619baa4abb9710f12ec1656d0173de992e32a90</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.4.20"></a>
+<h2>7.4.20</h2>
+<ul>
+ <li>Released: 03 Jun 2021</li>
+ <li>Announcement: <a href="/releases/7_4_20.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.4.20">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.4.20.tar.gz">PHP 7.4.20 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 84b09e4617e960b36dfa15fdbf2e3cd7141a2e877216ea29391b12ae86963cf4</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.20.tar.bz2">PHP 7.4.20 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 0ada6bc635e530fa7a4eb55e639dc070077108e5c9885f750b47007fd267b634</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.20.tar.xz">PHP 7.4.20 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 1fa46ca6790d780bf2cb48961df65f0ca3640c4533f0bca743cd61b71cb66335</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.3.28"></a>
+<h2>7.3.28</h2>
+<ul>
+ <li>Released: 29 Apr 2021</li>
+ <li>Announcement: <a href="/releases/7_3_28.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.3.28">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.3.28.tar.gz">PHP 7.3.28 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 1f0d9b94e1b11518ffabd19b646c2fee95ea42ca9cd8d337f8d07986fdceede1</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.28.tar.bz2">PHP 7.3.28 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 8f636e644594388436ea05ff34c9eb135e6dc119c1130199e9488d5795439964</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.28.tar.xz">PHP 7.3.28 (tar.xz)</a><br>
+<span class="sha256sum">sha256: a2a84dbec8c1eee3f46c5f249eaaa2ecb3f9e7a6f5d0604d2df44ff8d4904dbe</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.4.19"></a>
+<h2>7.4.19</h2>
+<ul>
+ <li>Released: 06 May 2021</li>
+ <li>Announcement: <a href="/releases/7_4_19.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.4.19">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.4.19.tar.gz">PHP 7.4.19 (tar.gz)</a><br>
+<span class="sha256sum">sha256: d7062457ba9f8334ab8ae7e4fea8efe27e2506763551b25db9e6ab9beea8ed6f</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.19.tar.bz2">PHP 7.4.19 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 25d09b8145b284d870431c1b40aba7944e4bf1836278538f8e29780e7f85ddea</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.19.tar.xz">PHP 7.4.19 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 6c17172c4a411ccb694d9752de899bb63c72a0a3ebe5089116bc13658a1467b2</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.4.18"></a>
+<h2>7.4.18</h2>
+<ul>
+ <li>Released: 29 Apr 2021</li>
+ <li>Announcement: <a href="/releases/7_4_18.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.4.18">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.4.18.tar.gz">PHP 7.4.18 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 31a8a4a6e7d641f014749cef21421a6d1c9aaba6dce884e181a3370a8e69a04d</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.18.tar.bz2">PHP 7.4.18 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 2e455932e9c6f5889b1dc879f36fdd5744eaf1ff572b1b778958cbb8f5c1842f</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.18.tar.xz">PHP 7.4.18 (tar.xz)</a><br>
+<span class="sha256sum">sha256: ab97f22b128d21dcbc009b50a37aaea0051b2721cbcd122d9e00e6ffc3c4b7e1</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.4.16"></a>
+<h2>7.4.16</h2>
+<ul>
+ <li>Released: 04 Mar 2021</li>
+ <li>Announcement: <a href="/releases/7_4_16.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.4.16">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.4.16.tar.gz">PHP 7.4.16 (tar.gz)</a><br>
+<span class="sha256sum">sha256: ef2d2b463fc3444895ec599337b663a8832c6ade148d9832417e59aa2b9e93da</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.16.tar.bz2">PHP 7.4.16 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 85710f007cfd0fae94e13a02a3a036f4e81ef43693260cae8a2e1ca93659ce3e</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.16.tar.xz">PHP 7.4.16 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 1c16cefaf88ded4c92eed6a8a41eb682bb2ef42429deb55f1c4ba159053fb98b</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.3.27"></a>
+<h2>7.3.27</h2>
+<ul>
+ <li>Released: 04 Feb 2021</li>
+ <li>Announcement: <a href="/releases/7_3_27.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.3.27">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.3.27.tar.gz">PHP 7.3.27 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 4b7b9bd0526ad3f2c8d6fd950ea7b0ab2478b5b09755c6a620a4f3bcfbf59154</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.27.tar.bz2">PHP 7.3.27 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 9d2006f5e835acf5e408e34d8050a4935f2121ab18bda42775a27ed59bdae003</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.27.tar.xz">PHP 7.3.27 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 65f616e2d5b6faacedf62830fa047951b0136d5da34ae59e6744cbaf5dca148d</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.4.15"></a>
+<h2>7.4.15</h2>
+<ul>
+ <li>Released: 04 Feb 2021</li>
+ <li>Announcement: <a href="/releases/7_4_15.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.4.15">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.4.15.tar.gz">PHP 7.4.15 (tar.gz)</a><br>
+<span class="sha256sum">sha256: c7403988b69212335dec79e869abe9dbb23d60ea7f6eb16fd6ff99ed6b5f1c87</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.15.tar.bz2">PHP 7.4.15 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 1bd7be0293446c3d3cbe3c9fae6045119af0798fb0869db61932796dc23a7757</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.15.tar.xz">PHP 7.4.15 (tar.xz)</a><br>
+<span class="sha256sum">sha256: 9b859c65f0cf7b3eff9d4a28cfab719fb3d36a1db3c20d874a79b5ec44d43cb8</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.4.14"></a>
+<h2>7.4.14</h2>
+<ul>
+ <li>Released: 07 Jan 2021</li>
+ <li>Announcement: <a href="/releases/7_4_14.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.4.14">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.4.14.tar.gz">PHP 7.4.14 (tar.gz)</a><br>
+<span class="sha256sum">sha256: d359183e2436f4ab30b70d4fbd881b5705a46b2e68cc6069fe91cd63d6e98e13</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.14.tar.bz2">PHP 7.4.14 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 6889ca0605adee3aa7077508cd79fcef1dbd88461cdf25e7c1a86997b8d0a1f6</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.4.14.tar.xz">PHP 7.4.14 (tar.xz)</a><br>
+<span class="sha256sum">sha256: f9f3c37969fcd9006c1dbb1dd76ab53f28c698a1646fa2dde8547c3f45e02886</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.3.26"></a>
+<h2>7.3.26</h2>
+<ul>
+ <li>Released: 07 Jan 2021</li>
+ <li>Announcement: <a href="/releases/7_3_26.php">English</a> </li>
+ <li><a href="/ChangeLog-7.php#7.3.26">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-7.3.26.tar.gz">PHP 7.3.26 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 2b55c2a54d1825e7c3feaf44cf42cdf782b8d5c611314172fbf8e234960b6a99</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.26.tar.bz2">PHP 7.3.26 (tar.bz2)</a><br>
+<span class="sha256sum">sha256: 371e5a7c8154fd3c52b14baace5f7d04c4bbb8e841d356c54a2b6a688db39d4e</span>
+ </li>
+ <li>
+<a href="/distributions/php-7.3.26.tar.xz">PHP 7.3.26 (tar.xz)</a><br>
+<span class="sha256sum">sha256: d93052f4cb2882090b6a37fd1e0c764be1605a2461152b7f6b8f04fa48875208</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="7.3.25"></a>
 <h2>7.3.25</h2>
 <ul>
  <li>Released: 26 Nov 2020</li>
@@ -7509,7 +8349,7 @@
   <a class="headline" href="/eol.php">End of Life Dates</a>
   <div class="body">
     <p>The most recent branches to reach end of life status are:</p>
-    <ul><li>7.2: 1 Oct 2020</li><li>7.1: 24 Oct 2019</li></ul>
+    <ul><li>7.3: 18 Nov 2021</li><li>7.2: 1 Oct 2020</li></ul>
   </div>
 </div>
 
@@ -7557,11 +8397,12 @@
     <div class="container footer-content">
       <div class="row-fluid">
       <ul class="footmenu">
-        <li><a href="/copyright.php">Copyright &copy; 2001-2021 The PHP Group</a></li>
+        <li><a href="/copyright.php">Copyright &copy; 2001-2022 The PHP Group</a></li>
         <li><a href="/my.php">My PHP.net</a></li>
         <li><a href="/contact.php">Contact</a></li>
         <li><a href="/sites.php">Other PHP.net sites</a></li>
         <li><a href="/privacy.php">Privacy policy</a></li>
+        <li><a href="https://github.com/php/web-php/blob/master/releases%2Findex.php">View Source</a></li>
       </ul>
       </div>
     </div>
@@ -7569,13 +8410,13 @@
 
     
  <!-- External and third party libraries. -->
- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" integrity="sha384-aBL3Lzi6c9LNDGvpHkZrrm3ZVsIwohDD7CDozL0pk8FwCrfmV7H9w8j3L7ikEv6h" crossorigin="anonymous"></script>
 <script src="/cached.php?t=1421837618&amp;f=/js/ext/modernizr.js"></script>
 <script src="/cached.php?t=1421837618&amp;f=/js/ext/hogan-2.0.0.min.js"></script>
 <script src="/cached.php?t=1421837618&amp;f=/js/ext/typeahead.min.js"></script>
 <script src="/cached.php?t=1421837618&amp;f=/js/ext/mousetrap.min.js"></script>
 <script src="/cached.php?t=1421837618&amp;f=/js/search.js"></script>
-<script src="/cached.php?t=1607972402&amp;f=/js/common.js"></script>
+<script src="/cached.php?t=1637324403&amp;f=/js/common.js"></script>
 
 <a id="toTop" href="javascript:;"><span id="toTopHover"></span><img width="40" height="40" alt="To Top" src="/images/to-top@2x.png"></a>
 
