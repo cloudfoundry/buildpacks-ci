@@ -6,6 +6,7 @@ def update_modules(&f)
         "php7-base-extensions.yml",
         "php74-extensions-patch.yml",
         "php8-base-extensions.yml",
+        "php81-extensions-patch.yml",
     ].each do |ext_file|
         path = File.expand_path("../../tasks/build-binary-new/#{ext_file}")
 

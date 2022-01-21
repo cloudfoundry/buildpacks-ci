@@ -5,6 +5,7 @@ Updating PHP modules entails two main steps: determining which modules to update
 - `tasks/build-binary-new/php7-base-extensions.yml`
 - `tasks/build-binary-new/php74-extensions-patch.yml` (`additions` array)
 - `tasks/build-binary-new/php8-base-extensions.yml`
+- `tasks/build-binary-new/php81-extensions-patch.yml` (`additions` array)
 
 ## Bump Module Versions
 
