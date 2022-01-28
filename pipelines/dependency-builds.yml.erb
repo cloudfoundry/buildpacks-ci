@@ -527,7 +527,8 @@ jobs:
     params:
       repo_location: buildpack
       title: <%= "Updating version for #{dep_name} for #{line_hash['line']} " %>
-      description: "This PR is made automatically by release engineering bot."
+      <%# Adding a tracker story id because we have have configured cfgitbot to ignore such PRs %>
+      description: "This PR is made automatically by release engineering bot. [#181074448]"
       branch_prefix: "pr-by-releng-bot"
     <% if bp_name.include? '-cnb' %>
       auto_merge: false
