@@ -31,6 +31,15 @@ source_name = data.dig('source', 'name')
 resource_version = data.dig('version', 'ref')
 manifest_name = source_name == 'nginx-static' ? 'nginx' : source_name
 
+# Dont include non-lts node versions in Ruby or .NetCore builpac
+if manifest_name == 'node' && ( manifest.dig('language') == 'ruby' || manifest.dig('language') == 'dotnet-core' )
+    if resource_version.split('.')[0].to_i % 2 != 0
+        puts "Skipping #{manifest_name} #{resource_version} for #{manifest.dig('language')} buildpack because it is not an LTS version"
+        exit 0
+    end
+end
+
+
 # create story is one-per-version; it creates the json file with the tracker ID
 story_id = JSON.parse(open("builds/binary-builds-new/#{source_name}/#{resource_version}.json").read)['tracker_story_id']
 
