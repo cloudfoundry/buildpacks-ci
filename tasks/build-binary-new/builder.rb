@@ -22,8 +22,14 @@ module DependencyBuild
       # final resting place for pip source and dependencies
       file_path = "/tmp/pip-#{source_input.version}.tgz"
       ENV['LC_CTYPE'] = 'en_US.UTF-8'
+
+      # For the latest version of pip, it requires python version >= 3.7 (ref: https://github.com/pypa/pip/pull/10641),
+      # so we need to install python >= 3.7 first.
+
       Runner.run('apt', 'update')
-      Runner.run('apt-get', 'install', '-y', 'python3-pip')
+      Runner.run('apt', 'install', '-y', 'curl', 'python3.7', 'python3.7-distutils')
+      Runner.run('curl', '-L', 'https://bootstrap.pypa.io/get-pip.py', '-o', 'get-pip.py')
+      Runner.run('python3.7', 'get-pip.py')
       Runner.run('pip3', 'install', '--upgrade', 'pip')
       Runner.run('pip3', 'install', '--upgrade', 'setuptools')
       Dir.mktmpdir do |dir|
