@@ -271,11 +271,17 @@ dependencies:
         removal_strategy: keep_latest_released
       ruby:
         lines:
+          - line: 14.X.X
+            deprecation_date: 2023-04-30
+            link: https://github.com/nodejs/Release
           - line: 16.X.X
             deprecation_date: 2024-04-30
             link: https://github.com/nodejs/Release
       dotnet-core:
         lines:
+          - line: 14.X.X
+            deprecation_date: 2023-04-30
+            link: https://github.com/nodejs/Release
           - line: 16.X.X
             deprecation_date: 2024-04-30
             link: https://github.com/nodejs/Release
