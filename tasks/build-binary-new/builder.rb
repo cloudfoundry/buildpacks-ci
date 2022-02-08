@@ -88,6 +88,32 @@ module DependencyBuild
       old_file_path
     end
 
+    def build_poetry(source_input)
+      old_file_path = "/tmp/poetry-v#{source_input.version}.tgz"
+      ENV['LC_CTYPE'] = 'en_US.UTF-8'
+      Runner.run('apt', 'update')
+      Runner.run('apt-get', 'install', '-y', 'python3', 'python3-pip')
+      Runner.run('python3', '-m', 'pip', 'install', '--upgrade', 'pip', 'setuptools')
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          Runner.run('python3', '-m', 'pip', 'download', '--no-binary', ':all:', "poetry==#{source_input.version}")
+          if source_input.md5?
+            if Digest::MD5.hexdigest(open("poetry-#{source_input.version}.tar.gz").read) != source_input.md5
+              raise 'MD5 digest does not match version digest'
+            end
+          elsif source_input.sha256?
+            if Digest::SHA256.hexdigest(open("poetry-#{source_input.version}.tar.gz").read) != source_input.sha256
+              raise 'SHA256 digest does not match version digest'
+            end
+          else
+            raise 'No digest specified for source'
+          end
+          Runner.run('tar', 'zcvf', old_file_path, '.')
+        end
+      end
+      old_file_path
+    end
+
     def build_libunwind(source_input)
       built_path = File.join(Dir.pwd, 'built')
       Dir.mkdir(built_path)
@@ -935,6 +961,16 @@ class Builder
 
     when 'pipenv'
       old_file_path = DependencyBuild.build_pipenv source_input
+      out_data.merge!(
+          artifact_output.move_dependency(
+              source_input.name,
+              old_file_path,
+              "#{filename_prefix}_linux_noarch_#{stack}",
+          )
+      )
+
+    when 'poetry'
+      old_file_path = DependencyBuild.build_poetry source_input
       out_data.merge!(
           artifact_output.move_dependency(
               source_input.name,
