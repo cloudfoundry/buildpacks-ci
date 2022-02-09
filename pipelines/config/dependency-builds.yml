@@ -367,9 +367,6 @@ dependencies:
     buildpacks:
       ruby:
         lines:
-          - line: 2.5.X
-            deprecation_date: 2021-03-31
-            link: https://www.ruby-lang.org/en/downloads/branches/
           - line: 2.6.X
             deprecation_date: 2022-03-31
             link: https://www.ruby-lang.org/en/downloads/branches/
@@ -379,6 +376,9 @@ dependencies:
           - line: 3.0.X
             deprecation_date: 2024-03-31
             link: https://www.ruby-lang.org/en/news/2020/12/25/ruby-3-0-0-released/
+          - line: 3.1.X
+            deprecation_date: 2025-03-31
+            link: https://www.ruby-lang.org/en/news/2021/12/25/ruby-3-1-0-released/
         removal_strategy: keep_latest_released
     versions_to_keep: 2
     copy-stacks:
@@ -415,10 +415,10 @@ dependencies:
     versions_to_keep: 2
     copy-stacks:
       - bionic
-build_stacks: ['cflinuxfs3']
-copy_stacks: ['bionic']
-windows_stacks: ['windows2016', 'windows']
-deprecated_stacks: ['cflinuxfs2']
+build_stacks: [ 'cflinuxfs3' ]
+copy_stacks: [ 'bionic' ]
+windows_stacks: [ 'windows2016', 'windows' ]
+deprecated_stacks: [ 'cflinuxfs2' ]
 v3_stacks:
   tiny: 'io.paketo.stacks.tiny'
   bionic: 'io.buildpacks.stacks.bionic'
