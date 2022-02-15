@@ -256,9 +256,6 @@ dependencies:
           - line: 14.X.X
             deprecation_date: 2023-04-30
             link: https://github.com/nodejs/Release
-          - line: 15.X.X
-            deprecation_date: 2021-06-01
-            link: https://github.com/nodejs/Release
           - line: 16.X.X
             deprecation_date: 2024-04-30
             link: https://github.com/nodejs/Release
