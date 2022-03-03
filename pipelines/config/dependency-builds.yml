@@ -74,6 +74,9 @@ dependencies:
           - line: 6.0.1X
             deprecation_date: 2024-11-08
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+          - line: 6.0.2X
+            deprecation_date: 2024-11-08
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: keep_all
     versions_to_keep: 99
     any_stack: true
