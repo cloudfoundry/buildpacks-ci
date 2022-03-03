@@ -5,8 +5,8 @@ native_modules:
   md5: e7d9896577aea6351811d7c1d7f0a68a
   klass: RabbitMQRecipe
 - name: lua
-  version: 5.4.3
-  md5: ef63ed2ecfb713646a7fcc583cf5f352
+  version: 5.4.4
+  md5: bd8ce7069ff99a400efd14cf339a727b
   klass: LuaRecipe
 - name: hiredis
   version: 1.0.2
@@ -38,28 +38,28 @@ extensions:
   md5: ebeeffa834e8428c9105a45fe89344aa
   klass: PeclRecipe
 - name: igbinary
-  version: 3.2.6
-  md5: 6970abb34217faff470767c2b84ea2da
+  version: 3.2.7
+  md5: 927f6cff8e74287453fe327d3893aaa3
   klass: PeclRecipe
 - name: gnupg
   version: 1.5.1
   md5: c48f5de2f96ffebe2e18eaefff4917f9
   klass: PeclRecipe
 - name: imagick
-  version: 3.6.0
-  md5: f7b5e9b23fb844e5eb035203d316bc63
+  version: 3.7.0
+  md5: '0687774a6126467d4e5ede02171e981d'
   klass: PeclRecipe
 - name: LZF
-  version: 1.6.8
-  md5: 0677fba342c89795de6c694f3e72ba1d
+  version: 1.7.0
+  md5: e242c66e53c0d155982713cd78b3d480
   klass: PeclRecipe
 - name: mailparse
-  version: 3.1.2
-  md5: abd0de5a1958d29609de430032dc9108
+  version: 3.1.3
+  md5: 64be25ebcb8b792219c14d05038396bc
   klass: PeclRecipe
 - name: mongodb
-  version: 1.12.0
-  md5: f88bb3ab2ec98fb60108bac5fa20a681
+  version: 1.12.1
+  md5: e2189daff3340e02d17f9b556b1f3ab2
   klass: PeclRecipe
 - name: msgpack
   version: 2.1.2
@@ -78,32 +78,32 @@ extensions:
   md5: nil
   klass: PdoOdbcRecipe
 - name: pdo_sqlsrv
-  version: 5.9.0
-  md5: dab2d904d807ea9c74da56d361dcb1cd
+  version: 5.10.0
+  md5: fddd14205fbc97190b4c5079e0fd2975
   klass: PeclRecipe
 - name: rdkafka
-  version: 5.0.2
-  md5: cec8123060a40a05e66aab4caaf8a399
+  version: 6.0.1
+  md5: dc6125dbfd9ff8adf0f1e428b3449184
   klass: PeclRecipe
 - name: redis
-  version: 5.3.5
-  md5: bfb358fb6f53568c3ec38efe76727ece
+  version: 5.3.7
+  md5: 1ed6793902214cc02467666ba69dd2be
   klass: RedisPeclRecipe
 - name: ssh2
   version: 1.3.1
   md5: aa29046de73f1036aea66b4a70f6f598
   klass: PeclRecipe
 - name: sqlsrv
-  version: 5.9.0
-  md5: 9e359cce3c795335fc4529d98ac27553
+  version: 5.10.0
+  md5: 95fa783fa7d83dc059076a8b1788b21a
   klass: PeclRecipe
 - name: stomp
   version: 2.0.2
   md5: 507c30184fde736e924cee20c56df061
   klass: PeclRecipe
 - name: xdebug
-  version: 3.1.2
-  md5: 7284980644f4355cba41045203c50faf
+  version: 3.1.3
+  md5: 8bb9d5ef9f8b008dc94b768a5f45ab41
   klass: PeclRecipe
 - name: yaf
   version: 3.3.4
@@ -163,7 +163,7 @@ extensions:
   klass: AmqpPeclRecipe
 - name: ioncube
   version: 11.0.0
-  md5: 8efd75dcedc26430c3544f47b2852e92
+  md5: acedc07e7ef586747db579deea287000
   klass: IonCubeRecipe
 - name: lua
   version: 2.0.7
