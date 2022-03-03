@@ -187,7 +187,7 @@ dependencies:
       - 'repo: mono/libgdiplus'
       - 'tag_regex: ^[0-9]+\.[0-9]+$'
     versions_to_keep: 2
-  miniconda3:
+  miniconda3-py39:
     buildpacks:
       python:
         lines:
