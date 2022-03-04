@@ -21,7 +21,7 @@ module DependencyBuild
 
     def setup_python
       Runner.run('apt', 'update')
-      Runner.run('apt', 'install', '-y', 'curl', 'python3.7', 'python3.7-distutils')
+      Runner.run('apt', 'install', '-y', 'curl', 'python3.7', 'python3.7-distutils', 'python3.7-dev')
       Runner.run('curl', '-L', 'https://bootstrap.pypa.io/get-pip.py', '-o', 'get-pip.py')
       Runner.run('python3.7', 'get-pip.py')
       Runner.run('pip3', 'install', '--upgrade', 'pip', 'setuptools')
