@@ -58,8 +58,8 @@ extensions:
   md5: 64be25ebcb8b792219c14d05038396bc
   klass: PeclRecipe
 - name: mongodb
-  version: 1.12.1
-  md5: e2189daff3340e02d17f9b556b1f3ab2
+  version: 1.13.0
+  md5: ebe9b977f272f509ae1d0d12c100a1af
   klass: PeclRecipe
 - name: msgpack
   version: 2.1.2
@@ -102,8 +102,8 @@ extensions:
   md5: 507c30184fde736e924cee20c56df061
   klass: PeclRecipe
 - name: xdebug
-  version: 3.1.3
-  md5: 8bb9d5ef9f8b008dc94b768a5f45ab41
+  version: 3.1.4
+  md5: 72b546c0482773bb0bd42a44a594755d
   klass: PeclRecipe
 - name: yaf
   version: 3.3.4
@@ -114,8 +114,8 @@ extensions:
   md5: 22678c1238f2c6848ff7d74b780a8307
   klass: PeclRecipe
 - name: memcached
-  version: 3.1.5
-  md5: eb535a7551aad6bff0d836a4dec9c4fa
+  version: 3.2.0
+  md5: acc58fea7b7f456408a25ac927846ad0
   klass: MemcachedPeclRecipe
 - name: sodium
   version: nil
