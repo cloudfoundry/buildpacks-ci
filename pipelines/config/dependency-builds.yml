@@ -355,9 +355,6 @@ dependencies:
     buildpacks:
       ruby:
         lines:
-          - line: 2.6.X
-            deprecation_date: 2022-03-31
-            link: https://www.ruby-lang.org/en/downloads/branches/
           - line: 2.7.X
             deprecation_date: 2023-03-31
             link: https://www.ruby-lang.org/en/news/2020/03/31/ruby-2-7-1-released/
