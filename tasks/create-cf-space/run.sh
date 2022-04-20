@@ -32,7 +32,18 @@ set -x
 
 SPACE=$(openssl rand -base64 32 | base64 | head -c 8 | awk '{print tolower($0)}')
 cf create-org "$ORG"
-cf create-space "$SPACE" -o "$ORG" || (sleep 4 && cf create-space "$SPACE" -o "$ORG")
+
+retries=0
+while ! cf create-space "$SPACE" -o "$ORG" && [ $retries -lt 4 ]; do
+  echo "Failed to create space $SPACE in org $ORG, retrying..."
+  retries=$((retries + 1))
+  sleep 5
+done
+
+if [ $retries -eq 4 ]; then
+  echo "Failed to create space $SPACE in org $ORG after $retries retries"
+  exit 1
+fi
 
 set +x
 
