@@ -1,0 +1,26 @@
+- type: replace
+  path: /addons/name=metrics-discovery-registrar?
+  value:
+    name: metrics-discovery-registrar
+    exclude:
+      jobs:
+      - name: smoke_tests
+        release: cf-smoke-tests
+    include:
+      stemcell:
+      - os: ubuntu-xenial
+      - os: ubuntu-bionic
+      - os: ubuntu-jammy
+    jobs:
+    - name: metrics-discovery-registrar
+      properties:
+        metrics:
+          ca_cert: "((metrics_discovery_metrics_tls.ca))"
+          cert: "((metrics_discovery_metrics_tls.certificate))"
+          key: "((metrics_discovery_metrics_tls.private_key))"
+          server_name: metrics_discovery_metrics
+        nats_client:
+          cert: "((nats_client_cert.certificate))"
+          key: "((nats_client_cert.private_key))"
+        nats_instance_group: nats
+      release: metrics-discovery
