@@ -153,7 +153,6 @@ dependencies:
     buildpacks:
       ruby:
         lines:
-          - line: 9.1.X
           - line: 9.2.X
           - line: 9.3.X
     source_type: jruby
