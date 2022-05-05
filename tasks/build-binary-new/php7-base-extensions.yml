@@ -162,8 +162,8 @@ extensions:
   md5: 3a0638223e320fc21f3b079198c24f12
   klass: AmqpPeclRecipe
 - name: ioncube
-  version: 11.0.0
-  md5: acedc07e7ef586747db579deea287000
+  version: 11.0.1
+  md5: 824c56a47b7fb3c85e41c2fbc55b6908
   klass: IonCubeRecipe
 - name: lua
   version: 2.0.7
