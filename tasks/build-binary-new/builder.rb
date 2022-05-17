@@ -24,7 +24,7 @@ module DependencyBuild
       Runner.run('apt', 'install', '-y', 'curl', 'python3.7', 'python3.7-distutils', 'python3.7-dev')
       Runner.run('curl', '-L', 'https://bootstrap.pypa.io/get-pip.py', '-o', 'get-pip.py')
       Runner.run('python3.7', 'get-pip.py')
-      Runner.run('pip3', 'install', '--upgrade', 'pip==22.0.4', 'setuptools')
+      Runner.run('pip3', 'install', '--upgrade', 'pip==22.0.4', 'setuptools==62.1.0')
       Runner.run('rm', '-f', 'get-pip.py')
     end
 
@@ -53,7 +53,7 @@ module DependencyBuild
           end
           Archive.strip_top_level_directory_from_tar("pip-#{source_input.version}.tar.gz")
           Runner.run('tar', 'zxf', "pip-#{source_input.version}.tar.gz")
-          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools==62.1.0')
           Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
           Runner.run('tar', 'zcvf', file_path, '.')
         end
