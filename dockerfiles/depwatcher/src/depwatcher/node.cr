@@ -59,7 +59,12 @@ module Depwatcher
         child.type().element_node?
        }.map() { |c| c["href"] }.select() { |link|
         link.starts_with?("v") && link.ends_with?("/")
-       }.map() { |link| link.[1...-1] }
+       }.map() { |link| link.[1...-1] 
+       }.select() { |v|
+       semver = Semver.new(v)
+       # Filter out non LTS versions and old versions (older than 12)
+       semver.major %2 == 0 && semver.major >= 12
+      }
     end
   end
 end
