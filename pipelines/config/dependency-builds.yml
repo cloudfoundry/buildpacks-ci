@@ -244,9 +244,13 @@ dependencies:
       ruby:
         lines:
           - line: latest
+            deprecation_date: ""
+            link: https://github.com/nodejs/Release
       dotnet-core:
         lines:
           - line: latest
+            deprecation_date: ""
+            link: https://github.com/nodejs/Release
     source_type: node
     copy-stacks:
       - bionic
