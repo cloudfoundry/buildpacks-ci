@@ -243,14 +243,10 @@ dependencies:
         removal_strategy: keep_latest_released
       ruby:
         lines:
-          - line: 16.X.X
-            deprecation_date: 2024-04-30
-            link: https://github.com/nodejs/Release
+          - line: latest
       dotnet-core:
         lines:
-          - line: 16.X.X
-            deprecation_date: 2024-04-30
-            link: https://github.com/nodejs/Release
+          - line: latest
     source_type: node
     copy-stacks:
       - bionic
