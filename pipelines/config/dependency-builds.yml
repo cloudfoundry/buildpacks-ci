@@ -243,12 +243,12 @@ dependencies:
         removal_strategy: keep_latest_released
       ruby:
         lines:
-          - line: latest
+          - line: node-lts
             deprecation_date: ""
             link: https://github.com/nodejs/Release
       dotnet-core:
         lines:
-          - line: latest
+          - line: node-lts
             deprecation_date: ""
             link: https://github.com/nodejs/Release
     source_type: node

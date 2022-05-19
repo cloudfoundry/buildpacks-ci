@@ -39,6 +39,8 @@ when "npm"
   versions = Depwatcher::Npm.new.check(source["name"].to_s)
 when "node"
   versions = Depwatcher::Node.new.check
+when "node-lts"
+  versions = Depwatcher::NodeLTS.new.check
 when "nginx"
   versions = Depwatcher::Nginx.new.check
 when "openresty"
