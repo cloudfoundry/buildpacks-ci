@@ -14,6 +14,8 @@ cve_notifier = RootFSCVENotifier.new(cves_dir, stacks_dir)
 case stack
 when 'cflinuxfs3'
   cve_notifier.run!(stack, 'Ubuntu 18.04', 'ubuntu18.04', [])
+when 'cflinuxfs4'
+  cve_notifier.run!(stack, 'Ubuntu 22.04', 'ubuntu22.04', [])
 else
   raise "Unsupported stack: #{stack}"
 end
