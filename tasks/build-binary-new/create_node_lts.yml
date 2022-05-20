@@ -1,0 +1,24 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: source
+  - name: builds
+  - name: all-monitored-deps
+    optional: true
+outputs:
+  - name: builds-artifacts
+run:
+  path: bash
+  args:
+    - -cl
+    - gem install tracker_api && buildpacks-ci/tasks/build-binary-new/create_node_lts.rb
+params:
+  TRACKER_API_TOKEN:
+  TRACKER_PROJECT_ID:
+  TRACKER_REQUESTER_ID:
+  BUILDPACKS:
