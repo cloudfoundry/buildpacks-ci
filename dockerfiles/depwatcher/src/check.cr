@@ -16,7 +16,7 @@ when "github_releases"
 when "github_tags"
   versions = Depwatcher::GithubTags.new.check(source["repo"].to_s, source["tag_regex"].to_s)
 when "jruby"
-  versions = Depwatcher::JRuby.new.check()
+  versions = Depwatcher::JRuby.new.check
 when "miniconda"
   versions = Depwatcher::Miniconda.new.check(source["python_version"].to_s)
 when "rubygems"
@@ -38,9 +38,12 @@ when "r"
 when "npm"
   versions = Depwatcher::Npm.new.check(source["name"].to_s)
 when "node"
-  versions = Depwatcher::Node.new.check
-when "node-lts"
-  versions = Depwatcher::NodeLTS.new.check
+  version_filter = source["version_filter"]?
+  if version_filter && source["version_filter"].to_s == "node-lts"
+    versions = Depwatcher::NodeLTS.new.check
+  else
+    versions = Depwatcher::Node.new.check
+  end
 when "nginx"
   versions = Depwatcher::Nginx.new.check
 when "openresty"
@@ -66,14 +69,14 @@ when "plumber"
 when "shiny"
   versions = Depwatcher::CRAN.new.check("shiny")
 when "icu"
-  versions = Depwatcher::Icu.new.check()
+  versions = Depwatcher::Icu.new.check
 else
   raise "Unkown type: #{source["type"]}"
 end
 
 # Filter out irrelevant versions
 version_filter = source["version_filter"]?
-if version_filter
+if version_filter && source["version_filter"].to_s != "node-lts"
   filter = SemverFilter.new(version_filter.to_s)
   versions.select! do |v|
     filter.match(Semver.new(v.ref))
