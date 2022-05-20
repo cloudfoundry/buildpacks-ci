@@ -327,6 +327,15 @@ jobs:
         outputs:
           - name: all-monitored-deps
   <% end %>
+  <% if dep_name.downcase == 'node' && line.downcase == 'node-lts' %>
+    - task: create-tracker-story
+      file: buildpacks-ci/tasks/build-binary-new/create_node_lts.yml
+      params:
+        TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
+        TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
+        TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
+        BUILDPACKS: <%= dep['buildpacks'].select{ |_, bp_data| bp_uses_line?(bp_data,line) }.keys.join(' ') %>
+  <% else %>
     - task: create-tracker-story
       file: buildpacks-ci/tasks/build-binary-new/create.yml
       params:
@@ -334,6 +343,7 @@ jobs:
         TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
         TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
         BUILDPACKS: <%= dep['buildpacks'].select{ |_, bp_data| bp_uses_line?(bp_data,line) }.keys.join(' ') %>
+  <% end %>
     - put: builds
       params:
         repository: builds-artifacts
