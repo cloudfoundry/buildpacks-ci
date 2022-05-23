@@ -7,7 +7,7 @@ image_resource:
 inputs:
   - name: new-cves
   - name: buildpacks-ci
-  - name: cflinuxfs3
+  - name: cflinuxfs4
 outputs:
   - name: output-new-cves
 run:
@@ -18,7 +18,7 @@ run:
       set -e
       rsync -a new-cves/ output-new-cves
 
-      cd buildpacks-ci && bundle exec ./tasks/check-for-new-rootfs-cves/run.rb
+      cd buildpacks-ci && bundle exec ./tasks/check-for-new-rootfs-cves-cflinuxfs4/run.rb
 
 params:
   SLACK_CHANNEL:
