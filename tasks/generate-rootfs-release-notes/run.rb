@@ -10,14 +10,21 @@ previous_version = File.read('previous-rootfs-release/.git/ref').strip
 new_version = File.read('version/number').strip
 stack = ENV.fetch('STACK')
 ubuntu_version = {
-  'cflinuxfs2' => '14.04',
   'cflinuxfs3' => '18.04',
+  'cflinuxfs4' => '22.04',
 }.fetch(stack) or raise "Unsupported stack: #{stack}"
 
-receipt_file_name = stack == 'cflinuxfs2' ? "#{stack}_receipt" : "receipt.#{stack}.x86_64"
-receipt_file_dest = stack == 'cflinuxfs2' ? "#{stack}/#{receipt_file_name}" : receipt_file_name
+receipt_file_name = "receipt.#{stack}.x86_64"
 
-old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/#{stack}/#{previous_version}/#{receipt_file_dest}"
+old_receipt_uri = ""
+
+case stack
+when 'cflinuxfs3'
+  old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/#{stack}/#{previous_version}/#{receipt_file_name}"
+when 'cflinuxfs4'
+  old_receipt_uri = "https://raw.githubusercontent.com/cf-buildpacks-eng/#{stack}/#{previous_version}/#{receipt_file_name}"
+end
+
 cve_yaml_file = "new-cves/new-cve-notifications/ubuntu#{ubuntu_version}.yml"
 cves_dir = 'new-cve-notifications'
 
