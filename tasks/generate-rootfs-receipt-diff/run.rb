@@ -17,6 +17,7 @@ when "cflinuxfs3"
     old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/#{stack}/#{previous_version}/#{receipt_file_name}"
 when "cflinuxfs4"
     old_receipt_uri = "https://raw.githubusercontent.com/cf-buildpacks-eng/#{stack}/#{previous_version}/#{receipt_file_name}"
+end
 
 receipt_diff_file = File.join('receipt-diffs', "#{stack}-diff")
 
