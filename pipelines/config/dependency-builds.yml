@@ -236,6 +236,9 @@ dependencies:
           - line: 16.X.X
             deprecation_date: 2024-04-30
             link: https://github.com/nodejs/Release
+          - line: 18.X.X
+            deprecation_date: 2025-04-30
+            link: https://github.com/nodejs/Release
         removal_strategy: keep_latest_released
       ruby:
         lines:
