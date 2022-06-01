@@ -73,7 +73,7 @@ buildpack_project = tracker_client.project(ENV['TRACKER_PROJECT_ID'])
 
 story = buildpack_project.create_story(
   name: "Add new version line in dependency-builds: #{name} #{version}",
-  description: "```\n#{data.to_yaml}\n```\n\nPlease edit the dependency-builds pipeline to add the new version line to the relevant dependency/buildpack.",
+  description: "```\n#{data.to_yaml}\n```\n\nPlease edit the dependency-builds pipeline to add the new version line to the relevant dependency/buildpack.\n\nFor nginx/nginx-static: Also remove older mainline/stable version.\nE.g. If you are adding nginx 1.22, you will remove 1.20. If you are adding 1.23, you will remove 1.21",
   estimate: 1,
   labels: (['deps', name] + BUILDPACKS).uniq,
   requested_by_id: ENV['TRACKER_REQUESTER_ID'].to_i,
