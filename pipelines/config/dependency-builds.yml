@@ -190,6 +190,8 @@ dependencies:
             link: https://nginx.org/
           - line: 1.21.X
             link: https://nginx.org/
+          - line: 1.22.X
+            link: https://nginx.org/
     versions_to_keep: 2
     copy-stacks:
       - bionic
@@ -213,13 +215,15 @@ dependencies:
             link: https://nginx.org/
           - line: 1.21.X
             link: https://nginx.org/
+          - line: 1.22.X
+            link: https://nginx.org/
       staticfile:
         lines:
           - line: 1.20.X
-            deprecation_date: 2022-05-25
             link: https://nginx.org/
           - line: 1.21.X
-            deprecation_date: 2022-05-25
+            link: https://nginx.org/
+          - line: 1.22.X
             link: https://nginx.org/
     source_type: nginx
     versions_to_keep: 2
