@@ -203,6 +203,7 @@ dependencies:
           - line: 1.15.X
           - line: 1.17.X
           - line: 1.19.X
+          - line: 1.21.X
     versions_to_keep: 2
   nginx-static:
     buildpacks:
