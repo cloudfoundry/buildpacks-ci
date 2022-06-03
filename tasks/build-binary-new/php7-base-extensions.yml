@@ -78,8 +78,8 @@ extensions:
   md5: nil
   klass: PdoOdbcRecipe
 - name: pdo_sqlsrv
-  version: 5.10.0
-  md5: fddd14205fbc97190b4c5079e0fd2975
+  version: 5.10.1
+  md5: 7db86f687b7b69326c7931a31e7a49c3
   klass: PeclRecipe
 - name: rdkafka
   version: 6.0.1
@@ -94,20 +94,20 @@ extensions:
   md5: aa29046de73f1036aea66b4a70f6f598
   klass: PeclRecipe
 - name: sqlsrv
-  version: 5.10.0
-  md5: 95fa783fa7d83dc059076a8b1788b21a
+  version: 5.10.1
+  md5: f60a5eb24c1bba21d78cbbef05efe73d
   klass: PeclRecipe
 - name: stomp
-  version: 2.0.2
-  md5: 507c30184fde736e924cee20c56df061
+  version: 2.0.3
+  md5: 30de4089ae5c17f32617cef35dbe53e5
   klass: PeclRecipe
 - name: xdebug
   version: 3.1.4
   md5: 72b546c0482773bb0bd42a44a594755d
   klass: PeclRecipe
 - name: yaf
-  version: 3.3.4
-  md5: 98154cdf6cb355d85f4b91d2abf25d08
+  version: 3.3.5
+  md5: 128ecf6c84dd71d59c12d826cc51f0c4
   klass: PeclRecipe
 - name: yaml
   version: 2.2.2
