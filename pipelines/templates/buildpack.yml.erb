@@ -118,12 +118,10 @@ resources: #####################################################################
         - VERSION
         - CHANGELOG
 
-  <% if buildpacks[language]['stacks'].include?('windows') or language == "python" %>
   - name: cf-deployment
     type: git
     source:
       uri: https://github.com/cloudfoundry/cf-deployment
-  <% end %>
 
   - name: buildpack-develop-with-version-and-changelog
     type: git
@@ -672,13 +670,15 @@ jobs: ##########################################################################
         trigger: true
       - get: repo
         resource: buildpack-v3
-<% if buildpacks[language]['stacks'].include?('windows')%>
       - get: cf-deployment
-    - task: deploy-windows-cell
-      file: feature-eng-ci/tasks/cf/deploy-windows-cell/task.yml
+    - task: redeploy
+      file: feature-eng-ci/tasks/cf/redeploy/task.yml
       input_mapping:
         ci: feature-eng-ci
         lock: environment
+<% if buildpacks[language]['stacks'].include?('windows')%>
+      params:
+        DEPLOY_WINDOWS_CELL: true
 <% end %>
     - in_parallel:
       <%
@@ -742,21 +742,19 @@ jobs: ##########################################################################
           - specs-unit-develop
         - get: repo
           resource: buildpack-develop
-<% if language == "python" %>
         - get: cf-deployment
-      - task: scale-up-api-and-diego-cell
-        file: feature-eng-ci/tasks/cf/scale-up-api-and-diego-cell/task.yml
+      - task: redeploy
+        file: feature-eng-ci/tasks/cf/redeploy/task.yml
         input_mapping:
           ci: feature-eng-ci
           lock: environment
+<% if language == "python" %>
+        params:
+          SCALE_DIEGO_CELLS: true
 <% end %>
 <% if buildpacks[language]['stacks'].include?('windows')%>
-        - get: cf-deployment
-      - task: deploy-windows-cell
-        file: feature-eng-ci/tasks/cf/deploy-windows-cell/task.yml
-        input_mapping:
-          ci: feature-eng-ci
-          lock: environment
+        params:
+          DEPLOY_WINDOWS_CELL: true
 <% end %>
       - in_parallel:
 <% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2']%>
@@ -816,13 +814,15 @@ jobs: ##########################################################################
           trigger: true
           passed:
           - specs-unit-develop
-<% if buildpacks[language]['stacks'].include?('windows')%>
         - get: cf-deployment
-      - task: deploy-windows-cell
-        file: feature-eng-ci/tasks/cf/deploy-windows-cell/task.yml
+      - task: redeploy
+        file: feature-eng-ci/tasks/cf/redeploy/task.yml
         input_mapping:
           ci: feature-eng-ci
           lock: environment
+<% if buildpacks[language]['stacks'].include?('windows')%>
+        params:
+          DEPLOY_WINDOWS_CELL: true
 <% end %>
       - in_parallel:
 <% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2'] %>
