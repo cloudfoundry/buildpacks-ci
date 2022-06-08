@@ -145,11 +145,13 @@ jobs:
             trigger: true
 <% if stacks[language].include?('windows')%>
           - get: cf-deployment
-        - task: deploy-windows-cell
-          file: feature-eng-ci/tasks/cf/deploy-windows-cell/task.yml
+        - task: redeploy
+          file: feature-eng-ci/tasks/cf/redeploy/task.yml
           input_mapping:
             ci: feature-eng-ci
             lock: cf-toolsmiths-environment
+          params:
+            DEPLOY_WINDOWS_CELL: true
 <% end %>
         - in_parallel:
 <% stacks[language].each do |stack| %>
