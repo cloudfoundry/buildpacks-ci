@@ -1,7 +1,0 @@
----
-- type: replace
-  path: /instance_groups/name=diego-cell/jobs/name=cflinuxfs4-rootfs-setup/properties/cflinuxfs4-rootfs/trusted_certs
-  value:
-    - ((application_ca.certificate))
-    - ((credhub_ca.certificate))
-    - ((uaa_ca.certificate))
