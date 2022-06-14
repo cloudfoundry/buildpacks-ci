@@ -334,6 +334,7 @@ module DependencyBuild
             '--without-http_scgi_module',
             '--with-pcre',
             '--with-pcre-jit',
+            '--with-debug',
           ]
 
           nginx_static_options = [
