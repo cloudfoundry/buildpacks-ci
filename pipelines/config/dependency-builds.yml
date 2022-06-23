@@ -326,11 +326,7 @@ dependencies:
       r:
         lines: #! final release for each minor version is every spring ( just before next minor version release )
           - line: 3.6.X
-            deprecation_date: 2020-03-01 #!Estimate make sure 3.7 is out before deprecating
-            link: https://developer.r-project.org/
           - line: 4.2.X
-            deprecation_date: 2023-04-01 #!Estimate make sure 4.3 is out before deprecating
-            link: https://developer.r-project.org/
         removal_strategy: keep_latest_released
     monitored_deps:
       - rserve
@@ -427,6 +423,7 @@ skip_deprecation_check:
   - openresty  #! depends on nginx and lua deprecation
   - php  #! complicated
   - ruby  #! doesn't publish EOL schedule
+  - r  #! doesn't publish EOL schedule
 
 cnb_uris:
   yarn-cnb: git@github.com:paketo-buildpacks/yarn.git
