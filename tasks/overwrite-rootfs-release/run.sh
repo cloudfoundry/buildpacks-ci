@@ -8,6 +8,10 @@ echo "Overwriting BOSH release $STACK"
 
 release_dir=rootfs-release
 version="212.0.$(date +"%s")"
+ubuntu_yymm="18.04"
+if [ "${STACK}" = "cflinuxfs4" ]; then
+  ubuntu_yymm="22.04"
+fi
 
 pushd $release_dir
   for name in $( bosh2 blobs | grep -- "rootfs/$STACK-*" | awk '{print $1}' ); do
@@ -35,7 +39,7 @@ cat <<EOF > ${release_dir}/use-dev-release-opsfile.yml
   path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/stacks
   value:
     - name: $STACK
-      description: Cloud Foundry Linux-based filesystem (Ubuntu 18.04)
+      description: Cloud Foundry Linux-based filesystem (Ubuntu ${ubuntu_yymm})
 - type: replace
   path: /instance_groups/name=diego-cell/jobs/name=rep/properties/diego/rep/preloaded_rootfses
   value:
