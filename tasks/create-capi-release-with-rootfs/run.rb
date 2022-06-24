@@ -7,6 +7,11 @@ stack = ENV.fetch('STACK')
 puts "Creating BOSH release capi with #{stack}"
 version = "212.0.#{Time.now.strftime('%s')}"
 
+ubuntu_yymm = "18.04"
+if stack == "cflinuxfs4"
+  ubuntu_yymm = "22.04"
+end
+
 %w[cc_deployment_updater cloud_controller_clock cloud_controller_ng cloud_controller_worker].each do |job|
   puts "handling #{job}"
   specfile = "../capi-release/jobs/#{job}/spec"
@@ -40,7 +45,7 @@ Dir.chdir('../capi-release-artifacts') do
   path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/stacks?
   value:
   - name: #{stack}
-    description: Cloud Foundry Linux-based filesystem (Ubuntu 18.04)
+    description: Cloud Foundry Linux-based filesystem (Ubuntu #{ubuntu_yymm})
 - type: replace
   path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/default_stack?
   value: #{stack}
