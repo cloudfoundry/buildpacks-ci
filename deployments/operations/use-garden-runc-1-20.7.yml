@@ -1,0 +1,10 @@
+---
+# Remove this file once garden-runc 1.20.7 is live on cf-deployment main
+# Because we need https://github.com/cloudfoundry/garden-runc-release/pull/229
+- type: replace
+  path: /releases/name=garden-runc
+  value:
+    name: garden-runc
+    url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.20.7
+    sha1: 59eaee8f0d40125b08047a0905567e9b8e6d736c
+    version: 1.20.7
