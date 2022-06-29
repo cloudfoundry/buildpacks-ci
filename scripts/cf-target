@@ -16,7 +16,12 @@ function main() {
   token="$(credhub get -n /concourse/main/toolsmiths-api-token -q)"
 
   if [[ -z "${env_name}" && -z "${gcp}" ]]; then
-    env_name=$(curl -s -XPOST "https://environments.toolsmiths.cf-app.com/pooled_gcp_engineering_environments/claim?api_token=$token&pool_name=cf-deployment" | jq -r .name)
+    environment_available=$(curl -sS -XPOST "https://environments.toolsmiths.cf-app.com/pooled_gcp_engineering_environments/claim?api_token=$token&pool_name=cf-deployment")
+    if [[ $(echo "$environment_available" | sed 's/[][]//g' | sed 's/\"//g') == "No unclaimed environments available" ]]; then
+      echo "No unclaimed environments available, please try again later or contact #cf-toolsmiths on Slack"
+      exit 1
+    fi
+    env_name=$(echo $environment_available | jq -r .name)
     get_metadata_file "${token}" "${env_name}"
     echo "claimed: ${env_name}"
 
@@ -37,16 +42,16 @@ parse_arguments() {
   local OPTIND
   while getopts "e:g" opt; do
     case "${opt}" in
-      e)
-        env_name="${OPTARG}"
-        ;;
-      g)
-        gcp=1
-        ;;
-      *)
-        echo "Usage: $0 [-e <name of environment to log into> || -g <use if running off of the vpn>]"
-        exit 1
-        ;;
+    e)
+      env_name="${OPTARG}"
+      ;;
+    g)
+      gcp=1
+      ;;
+    *)
+      echo "Usage: $0 [-e <name of environment to log into> || -g <use if running off of the vpn>]"
+      exit 1
+      ;;
     esac
   done
 }
@@ -58,10 +63,10 @@ function get_metadata_file() {
   echo "getting metadata file for ${env_name}...."
   curl -s -XGET \
     "https://environments.toolsmiths.cf-app.com/pooled_gcp_engineering_environments/claim?api_token=$token&environment_name=$env_name" \
-    > "/tmp/$env_name.json"
+    >"/tmp/$env_name.json"
 }
 
-function login_to_existing_env(){
+function login_to_existing_env() {
   env_name=$1
   echo "loggining into ${env_name}...."
 
@@ -79,7 +84,7 @@ function login_to_existing_env(){
   echo "logged into ${env_name}"
 }
 
-function get_metadata_file_gcp(){
+function get_metadata_file_gcp() {
   local token name
   token=$1
   name=$2
@@ -89,9 +94,9 @@ function get_metadata_file_gcp(){
   mkdir -p /tmp/output
 
   TOOLSMITHS_API_TOKEN="${token}" ENV_NAME="${name}" \
-      fly -t buildpacks execute -c "${PROGDIR}/get-env-gcp/task.yml" \
-          -i script="${PROGDIR}/get-env-gcp" \
-          -o metadata=/tmp/output
+    fly -t buildpacks execute -c "${PROGDIR}/get-env-gcp/task.yml" \
+    -i script="${PROGDIR}/get-env-gcp" \
+    -o metadata=/tmp/output
 
   mv /tmp/output/*.json /tmp/
 }
