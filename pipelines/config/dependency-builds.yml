@@ -192,7 +192,7 @@ dependencies:
             link: https://nginx.org/
           - line: 1.23.X
             link: https://nginx.org/
-    versions_to_keep: 2
+    versions_to_keep: 3
     copy-stacks:
       - bionic
   openresty:
@@ -227,7 +227,7 @@ dependencies:
           - line: 1.23.X
             link: https://nginx.org/
     source_type: nginx
-    versions_to_keep: 2
+    versions_to_keep: 3
   node:
     buildpacks:
       nodejs:
