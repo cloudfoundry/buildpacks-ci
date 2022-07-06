@@ -190,6 +190,8 @@ dependencies:
             link: https://nginx.org/
           - line: 1.22.X
             link: https://nginx.org/
+          - line: 1.23.X
+            link: https://nginx.org/
     versions_to_keep: 2
     copy-stacks:
       - bionic
@@ -214,13 +216,15 @@ dependencies:
             link: https://nginx.org/
           - line: 1.22.X
             link: https://nginx.org/
+          - line: 1.23.X
+            link: https://nginx.org/
       staticfile:
         lines:
-          - line: 1.20.X
-            link: https://nginx.org/
           - line: 1.21.X
             link: https://nginx.org/
           - line: 1.22.X
+            link: https://nginx.org/
+          - line: 1.23.X
             link: https://nginx.org/
     source_type: nginx
     versions_to_keep: 2
