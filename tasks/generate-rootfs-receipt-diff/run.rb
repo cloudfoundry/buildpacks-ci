@@ -10,14 +10,7 @@ stack = ENV.fetch('STACK')
 previous_version = File.read("previous-rootfs-release/.git/ref").strip
 
 receipt_file_name = "receipt.#{stack}.x86_64"
-
-old_receipt_uri = ""
-case stack
-when "cflinuxfs3"
-    old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/#{stack}/#{previous_version}/#{receipt_file_name}"
-when "cflinuxfs4"
-    old_receipt_uri = "https://raw.githubusercontent.com/cf-buildpacks-eng/#{stack}/#{previous_version}/#{receipt_file_name}"
-end
+old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/#{stack}/#{previous_version}/#{receipt_file_name}"
 
 receipt_diff_file = File.join('receipt-diffs', "#{stack}-diff")
 
