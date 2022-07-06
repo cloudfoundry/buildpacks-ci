@@ -15,15 +15,7 @@ ubuntu_version = {
 }.fetch(stack) or raise "Unsupported stack: #{stack}"
 
 receipt_file_name = "receipt.#{stack}.x86_64"
-
-old_receipt_uri = ""
-
-case stack
-when 'cflinuxfs3'
-  old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/#{stack}/#{previous_version}/#{receipt_file_name}"
-when 'cflinuxfs4'
-  old_receipt_uri = "https://raw.githubusercontent.com/cf-buildpacks-eng/#{stack}/#{previous_version}/#{receipt_file_name}"
-end
+old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/#{stack}/#{previous_version}/#{receipt_file_name}"
 
 cve_yaml_file = "new-cves/new-cve-notifications/ubuntu#{ubuntu_version}.yml"
 cves_dir = 'new-cve-notifications'
