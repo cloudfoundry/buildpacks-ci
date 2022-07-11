@@ -66,7 +66,6 @@ module DependencyBuild
       ENV['LC_CTYPE'] = 'en_US.UTF-8'
 
       setup_python
-      Runner.run('/usr/local/bin/pip3', 'cache', 'purge')
 
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
