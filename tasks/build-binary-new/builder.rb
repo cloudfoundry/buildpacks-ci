@@ -21,11 +21,10 @@ module DependencyBuild
 
     def setup_python
       Runner.run('apt', 'update')
-      Runner.run('apt', 'install', '-y', 'curl', 'python3.7', 'python3.7-distutils', 'python3.7-dev')
+      Runner.run('apt', 'install', '-y', 'curl', 'python3.8', 'python3.8-distutils', 'python3.8-dev')
       Runner.run('curl', '-L', 'https://bootstrap.pypa.io/get-pip.py', '-o', 'get-pip.py')
-      Runner.run('mkdir', '/tmp/pip-cache/')
-      Runner.run('python3.7', 'get-pip.py')
-      Runner.run('pip3', '--cache-dir=/tmp/pip-cache/', 'install', '--upgrade', 'pip==22.0.4', 'setuptools==62.1.0')
+      Runner.run('python3.8', 'get-pip.py')
+      Runner.run('/usr/local/bin/pip3', 'install', '--upgrade', 'pip', 'setuptools')
       Runner.run('rm', '-f', 'get-pip.py')
     end
 
@@ -40,7 +39,7 @@ module DependencyBuild
 
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
-          Runner.run('/usr/local/bin/pip3', '--cache-dir=/tmp/pip-cache/', 'download', '--no-binary', ':all:', "pip==#{source_input.version}")
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', "pip==#{source_input.version}")
           if source_input.md5?
             if Digest::MD5.hexdigest(open("pip-#{source_input.version}.tar.gz").read) != source_input.md5
               raise 'MD5 digest does not match version digest'
@@ -54,8 +53,8 @@ module DependencyBuild
           end
           Archive.strip_top_level_directory_from_tar("pip-#{source_input.version}.tar.gz")
           Runner.run('tar', 'zxf', "pip-#{source_input.version}.tar.gz")
-          Runner.run('/usr/local/bin/pip3', '--cache-dir=/tmp/pip-cache/', 'download', '--no-binary', ':all:', 'setuptools==62.1.0')
-          Runner.run('/usr/local/bin/pip3', '--cache-dir=/tmp/pip-cache/', 'download', '--no-binary', ':all:', 'wheel')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools==62.1.0')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
           Runner.run('tar', 'zcvf', file_path, '.')
         end
       end
@@ -67,10 +66,11 @@ module DependencyBuild
       ENV['LC_CTYPE'] = 'en_US.UTF-8'
 
       setup_python
+      Runner.run('/usr/local/bin/pip3', 'cache', 'purge')
 
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
-          Runner.run('pip3', '--cache-dir=/tmp/pip-cache/', 'download', '--no-binary', ':all:', "pipenv==#{source_input.version}")
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-cache-dir', '--no-binary', ':all:', "pipenv==#{source_input.version}")
           if source_input.md5?
             if Digest::MD5.hexdigest(open("pipenv-#{source_input.version}.tar.gz").read) != source_input.md5
               raise 'MD5 digest does not match version digest'
@@ -82,13 +82,13 @@ module DependencyBuild
           else
             raise 'No digest specified for source'
           end
-          Runner.run('pip3', '--cache-dir=/tmp/pip-cache/', 'download', '--no-binary', ':all:', 'pytest-runner')
-          Runner.run('pip3', '--cache-dir=/tmp/pip-cache/', 'download', '--no-binary', ':all:', 'setuptools_scm')
-          Runner.run('pip3', '--cache-dir=/tmp/pip-cache/', 'download', '--no-binary', ':all:', 'parver')
-          Runner.run('pip3', '--cache-dir=/tmp/pip-cache/', 'download', '--no-binary', ':all:', 'wheel')
-          Runner.run('pip3', '--cache-dir=/tmp/pip-cache/', 'download', '--no-binary', ':all:', 'invoke')
-          Runner.run('pip3', '--cache-dir=/tmp/pip-cache/', 'download', '--no-binary', ':all:', 'flit_core')
-          Runner.run('pip3', '--cache-dir=/tmp/pip-cache/', 'download', '--no-binary', ':all:', 'hatch-vcs')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'pytest-runner')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools_scm')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'parver')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'invoke')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'flit_core')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'hatch-vcs')
           Runner.run('tar', 'zcvf', old_file_path, '.')
         end
       end
@@ -103,7 +103,7 @@ module DependencyBuild
 
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
-          Runner.run('pip3', '--cache-dir=/tmp/pip-cache/', 'download', '--no-binary', ':all:', "poetry==#{source_input.version}")
+          Runner.run('pip3', 'download', '--no-binary', ':all:', "poetry==#{source_input.version}")
           if source_input.md5?
             if Digest::MD5.hexdigest(open("poetry-#{source_input.version}.tar.gz").read) != source_input.md5
               raise 'MD5 digest does not match version digest'
