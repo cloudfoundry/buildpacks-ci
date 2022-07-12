@@ -34,12 +34,12 @@ manifest_name = source_name == 'nginx-static' ? 'nginx' : source_name
 # create story is one-per-version; it creates the json file with the tracker ID
 story_id = JSON.parse(open("builds/binary-builds-new/#{source_name}/#{resource_version}.json").read)['tracker_story_id']
 
-removal_strategy   = ENV['REMOVAL_STRATEGY']
-version_line       = ENV['VERSION_LINE']
-version_line_type  = ENV['VERSION_LINE_TYPE']
-deprecation_date   = ENV['DEPRECATION_DATE']
-deprecation_link   = ENV['DEPRECATION_LINK']
-deprecation_match  = ENV['DEPRECATION_MATCH']
+removal_strategy = ENV['REMOVAL_STRATEGY']
+version_line = ENV['VERSION_LINE']
+version_line_type = ENV['VERSION_LINE_TYPE']
+deprecation_date = ENV['DEPRECATION_DATE']
+deprecation_link = ENV['DEPRECATION_LINK']
+deprecation_match = ENV['DEPRECATION_MATCH']
 
 system('rsync -a buildpack/ artifacts/')
 raise 'Could not copy buildpack to artifacts' unless $?.success?
@@ -68,9 +68,9 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
     deprecation_dates = manifest.fetch('dependency_deprecation_dates', [])
     deprecation_dates = deprecation_dates
-                          .reject{ |d| d['version_line'] == version_line.downcase and d['name'] == manifest_name}
+                          .reject { |d| d['version_line'] == version_line.downcase and d['name'] == manifest_name }
                           .push(dependency_deprecation_date)
-                          .sort_by {|d| [d['name'], d['version_line']]}
+                          .sort_by { |d| [d['name'], d['version_line']] }
     manifest['dependency_deprecation_dates'] = deprecation_dates
   end
 
@@ -113,15 +113,15 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   }
 
   old_versions = manifest['dependencies']
-                 .select { |d| d['name'] == manifest_name }
-                 .map {|d| d['version']}
+                   .select { |d| d['name'] == manifest_name }
+                   .map { |d| d['version'] }
 
   manifest['dependencies'] = Dependencies.new(
-      dep,
-      version_line_type,
-      removal_strategy,
-      manifest['dependencies'],
-      manifest_latest_released['dependencies']
+    dep,
+    version_line_type,
+    removal_strategy,
+    manifest['dependencies'],
+    manifest_latest_released['dependencies']
   ).switch
 
   new_versions = manifest['dependencies']
@@ -161,7 +161,8 @@ if !rebuilt && manifest_name == 'nginx' && manifest['language'] == 'nginx'
   if data.dig('source', 'version_filter')
     if v.segments[1].even? # 1.12.X is stable
       manifest['version_lines']['stable'] = data['source']['version_filter'].downcase
-    else # 1.13.X is mainline
+    else
+      # 1.13.X is mainline
       manifest['version_lines']['mainline'] = data['source']['version_filter'].downcase
     end
   else
@@ -277,7 +278,7 @@ end
 
 if manifest['language'].downcase == 'r'
   total_stacks.each do |stack|
-    version_messages = (builds[stack]['sub_dependencies'] || []).map do |sub_dep_key, sub_dep_value |
+    version_messages = (builds[stack]['sub_dependencies'] || []).map do |sub_dep_key, sub_dep_value|
       "#{sub_dep_key} #{sub_dep_value['version'].to_s}"
     end.join(", ")
 
@@ -290,12 +291,12 @@ if manifest['language'].downcase == 'r'
       if dep["version"] == version
         dep["dependencies"] = []
         sub_deps = dep["dependencies"]
-        (builds[stack]['sub_dependencies'] || []).map do |sub_dep_key, sub_dep_value |
+        (builds[stack]['sub_dependencies'] || []).map do |sub_dep_key, sub_dep_value|
           sub_dep = {
             'name' => sub_dep_key,
             'version' => sub_dep_value['version'],
             'source' => sub_dep_value['source']['url'],
-            'source_sha256' =>  sub_dep_value['source']['sha256']
+            'source_sha256' => sub_dep_value['source']['sha256']
           }
           sub_deps.push(sub_dep)
         end
@@ -304,6 +305,39 @@ if manifest['language'].downcase == 'r'
   end
 end
 
+#
+# Special Dotnet Stuff
+# * The .NET Core buildpack has a .NET Core dependency in the manifest.
+#   Replace the version with the one in the manifest.
+if !rebuilt && manifest['language'].downcase == 'dotnet-core'
+  runtime_3_version = ""
+  sdk_3_version = ""
+  runtime_6_version = ""
+  sdk_6_version = ""
+  manifest["dependencies"].map do |dep|
+    case dep["name"]
+    when "dotnet-runtime"
+      if dep["version"].start_with?("3.")
+        runtime_3_version = dep["version"]
+      elsif dep["version"].start_with?("6.")
+        runtime_6_version = dep["version"]
+      end
+    when "dotnet-sdk"
+      if dep["version"].start_with?("3.")
+        sdk_3_version = dep["version"]
+      elsif dep["version"].start_with?("6.")
+        sdk_6_version = dep["version"]
+      end
+    end
+  end
+  # Update the 3.X runtime version
+  manifest['runtime_to_sdks'][0]["runtime_version"] = runtime_3_version
+  manifest['runtime_to_sdks'][0]["sdks"] = [sdk_3_version]
+
+  # Update the 6.X runtime version
+  manifest['runtime_to_sdks'][1]["runtime_version"] = runtime_6_version
+  manifest['runtime_to_sdks'][1]["sdks"] = [sdk_6_version]
+end
 
 Dir.chdir('artifacts') do
   GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')

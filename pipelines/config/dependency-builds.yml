@@ -62,7 +62,7 @@ dependencies:
           - line: 6.0.X
             deprecation_date: 2024-11-08
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-        removal_strategy: keep_latest_released
+        removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
   dotnet-runtime:
@@ -75,7 +75,7 @@ dependencies:
           - line: 6.0.X
             deprecation_date: 2024-11-08
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-        removal_strategy: keep_latest_released
+        removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
   dotnet-aspnetcore:
@@ -88,7 +88,7 @@ dependencies:
           - line: 6.0.X
             deprecation_date: 2024-11-08
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-        removal_strategy: keep_latest_released
+        removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
   glide:
