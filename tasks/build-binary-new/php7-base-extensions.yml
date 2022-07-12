@@ -17,8 +17,8 @@ native_modules:
   md5: nil
   klass: SnmpRecipe
 - name: librdkafka
-  version: 1.8.2
-  md5: 0abec0888d10c9553cdcbcbf9172d558
+  version: 1.9.1
+  md5: 8364a513957fc847cbe8f5758087e35d
   klass: LibRdKafkaRecipe
 - name: cassandracppdriver
   version: 2.16.0
@@ -82,8 +82,8 @@ extensions:
   md5: 7db86f687b7b69326c7931a31e7a49c3
   klass: PeclRecipe
 - name: rdkafka
-  version: 6.0.1
-  md5: dc6125dbfd9ff8adf0f1e428b3449184
+  version: 6.0.3
+  md5: fd10faec0c599e34837a9482d3c6c801
   klass: PeclRecipe
 - name: redis
   version: 5.3.7
@@ -102,8 +102,8 @@ extensions:
   md5: 30de4089ae5c17f32617cef35dbe53e5
   klass: PeclRecipe
 - name: xdebug
-  version: 3.1.4
-  md5: 72b546c0482773bb0bd42a44a594755d
+  version: 3.1.5
+  md5: fe2b85050c8ac6ddba6ae431f5c6dade
   klass: PeclRecipe
 - name: yaf
   version: 3.3.5
