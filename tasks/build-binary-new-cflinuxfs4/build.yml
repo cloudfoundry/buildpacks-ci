@@ -1,0 +1,32 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/cflinuxfs4
+inputs:
+  - name: binary-builder
+  - name: buildpacks-ci
+  - name: source
+  - name: builds
+    optional: true
+  - name: source-forecast-latest
+    optional: true
+  - name: source-rserve-latest
+    optional: true
+  - name: source-plumber-latest
+    optional: true
+  - name: source-shiny-latest
+    optional: true
+outputs:
+  - name: artifacts
+  - name: builds-artifacts
+  - name: dep-metadata
+run:
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/build-binary-new-cflinuxfs4/build.rb
+params:
+  STACK:
+  SKIP_COMMIT:

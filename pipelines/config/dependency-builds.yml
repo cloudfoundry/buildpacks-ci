@@ -249,6 +249,7 @@ dependencies:
     source_type: node
     copy-stacks:
       - bionic
+      - jammy
     versions_to_keep: 2
   php:
     buildpacks:
@@ -381,8 +382,9 @@ dependencies:
     versions_to_keep: 2
     copy-stacks:
       - bionic
-build_stacks: [ 'cflinuxfs3' ]
-copy_stacks: [ 'bionic' ]
+cflinuxfs4_dependencies: [ 'node' ]
+build_stacks: [ 'cflinuxfs4' , 'cflinuxfs3' ]
+copy_stacks: [ 'jammy', 'bionic' ]
 windows_stacks: [ 'windows2016', 'windows' ]
 deprecated_stacks: [ 'cflinuxfs2' ]
 v3_stacks:

@@ -1,0 +1,104 @@
+---
+dependencies:
+  bower:
+    buildpacks:
+      dotnet-core:
+        lines:
+          - line: latest
+    source_type: npm
+    any_stack: true
+    versions_to_keep: 2
+  dotnet-sdk:
+    buildpacks:
+      dotnet-core:
+        lines:
+          - line: 3.1.X
+            deprecation_date: 2022-12-03
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+          - line: 6.0.X
+            deprecation_date: 2024-11-08
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+        removal_strategy: remove_all
+    versions_to_keep: 1
+    any_stack: true
+  dotnet-runtime:
+    buildpacks:
+      dotnet-core:
+        lines:
+          - line: 3.1.X
+            deprecation_date: 2022-12-03
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+          - line: 6.0.X
+            deprecation_date: 2024-11-08
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+        removal_strategy: remove_all
+    versions_to_keep: 1
+    any_stack: true
+  dotnet-aspnetcore:
+    buildpacks:
+      dotnet-core:
+        lines:
+          - line: 3.1.X
+            deprecation_date: 2022-12-03
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+          - line: 6.0.X
+            deprecation_date: 2024-11-08
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+        removal_strategy: remove_all
+    versions_to_keep: 1
+    any_stack: true
+  node:
+    buildpacks:
+      dotnet-core:
+        lines:
+          - line: node-lts
+            deprecation_date: ""
+            link: https://github.com/nodejs/Release
+    source_type: node
+    copy-stacks:
+      - jammy
+    versions_to_keep: 2
+build_stacks: [ 'cflinuxfs4' ]
+copy_stacks: [ 'jammy', 'bionic' ]
+windows_stacks: [ 'windows2016', 'windows' ]
+deprecated_stacks: [ 'cflinuxfs2' ]
+v3_stacks:
+  tiny: 'io.paketo.stacks.tiny'
+  bionic: 'io.buildpacks.stacks.bionic'
+  cflinuxfs4: 'org.cloudfoundry.stacks.cflinuxfs4'
+v3_dep_names:
+  node: Node Engine
+  yarn: Yarn
+  python: Python
+  php: PHP
+  httpd: Apache HTTP Server
+  go: Go
+  dep: Dep
+  nginx: Nginx Server
+  pipenv: Pipenv
+  miniconda37: 'Miniconda for Python 3.7'
+  miniconda38: 'Miniconda for Python 3.8'
+  bundler: Bundler
+  ruby: Ruby
+include_tiny_in_any_stack:
+  - dep
+  - org.cloudfoundry.go
+  - org.cloudfoundry.go-compiler
+  - org.cloudfoundry.go-mod
+  - org.cloudfoundry.dep
+
+#! only check deprecation dates for dotnet-runtime as they are redundant for sdk and aspnetcore
+skip_deprecation_check:
+  - bundler  #! doesn't publish EOL schedule
+  - dotnet-sdk  #! same as dotnet-runtime
+  - dotnet-aspnetcore  #! same as dotnet-runtime
+  - jruby  #! tied to ruby, ruby doesn't publish EOL schedule
+  - nginx  #! doesn't publish EOL schedule
+  - nginx-static  #! same as nginx
+  - openresty  #! depends on nginx and lua deprecation
+  - php  #! complicated
+  - ruby  #! doesn't publish EOL schedule
+  - r  #! doesn't publish EOL schedule
+
+cnb_uris:
+  yarn-cnb: git@github.com:paketo-buildpacks/yarn.git

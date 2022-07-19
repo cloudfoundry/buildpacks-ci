@@ -1,7 +1,7 @@
 class BinaryBuilderWrapper
   attr_reader :base_dir
 
-  def initialize(runner, base_dir = 'binary-builder')
+  def initialize(runner, base_dir = File.join('binary-builder', 'cflinuxfs4'))
     @runner = runner
     @base_dir = base_dir
   end

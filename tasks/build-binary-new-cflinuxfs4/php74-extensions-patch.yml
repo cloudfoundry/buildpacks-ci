@@ -1,0 +1,18 @@
+---
+native_modules:
+  exclusions:
+  - name: cassandracppdriver
+  - name: libmemcached
+  - name: unixodbc
+extensions:
+  exclusions:
+  - name: cassandra
+  - name: interbase
+  - name: recode
+  - name: wddx
+  - name: geoip
+  additions:
+  - name: gd
+    version: nil
+    md5: nil
+    klass: Gd74FakePeclRecipe

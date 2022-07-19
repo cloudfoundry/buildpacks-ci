@@ -4,6 +4,7 @@ require 'set'
 config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds.yml'))
 
 dependencies = config['dependencies']
+cflinuxfs4_dependencies = config['cflinuxfs4_dependencies']
 stacks = config['build_stacks']
 skip_deprecation_check = config['skip_deprecation_check']
 cnb_uris = config['cnb_uris']
@@ -168,6 +169,9 @@ resources:
 <% stacks.each do |stack| %>
 - name: <%= stack %>-image
   type: docker-image
+  <% if stack == 'cflinuxfs4' %>
+  source: {repository: cfbuildpacks/<%= stack %>}
+  <% end %>
   source: {repository: cloudfoundry/<%= stack %>}
 <% end %>
 
@@ -275,7 +279,7 @@ jobs:
       version: every
   - do:
     - task: create-new-version-line-story
-      file: buildpacks-ci/tasks/build-binary-new/create-new-version-line-story.yml
+      file: buildpacks-ci/tasks/create-new-version-line-story/create-new-version-line-story.yml
       params:
         TRACKER_PROJECT_ID: '{{cf-buildpacks-private-tracker-id}}'
         TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
@@ -329,7 +333,7 @@ jobs:
   <% end %>
   <% if dep_name.downcase == 'node' && line.downcase == 'node-lts' %>
     - task: create-tracker-story
-      file: buildpacks-ci/tasks/build-binary-new/create_node_lts.yml
+      file: buildpacks-ci/tasks/create-new-version-line-story/create_node_lts.yml
       params:
         TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
         TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
@@ -407,6 +411,7 @@ jobs:
       rebase: true
   <% end %>
 
+  <% specific_stack = cflinuxfs4_dependencies.include?(dep_name.downcase) ? stacks : [stacks.last] %>
 - name: build-<%= dep_name.downcase %>-<%= line.downcase %>
   serial: true
   public: true
@@ -425,17 +430,17 @@ jobs:
       version: every
       passed: [ create-<%= dep_name.downcase %>-<%= line.downcase %>-story ]
   <% end %>
-  <% stacks.each do |stack| %>
+  <% specific_stack.each do |stack| %>
     - get: <%= stack %>-image
   <% end %>
     - get: builds
   - in_parallel:
-  <% build_stacks = dep['any_stack'] ? ['any-stack'] : stacks %>
+  <% build_stacks = dep['any_stack'] ? ['any-stack'] : specific_stack %>
   <% build_stacks.each do |stack| %>
     - do:
       - task: build-binary-<%= stack %>
         image: <%= stack == 'any-stack' ? stacks.last : stack %>-image
-        file: buildpacks-ci/tasks/build-binary-new/build.yml
+        file: buildpacks-ci/tasks/build-binary-new<%= stack == 'cflinuxfs4' ? '-cfllinuxfs4' : '' %>/build.yml
         output_mapping: {artifacts: <%= stack %>-artifacts, builds-artifacts: <%= stack %>-builds-metadata}
         params:
           STACK: <%= stack %>

@@ -16,7 +16,7 @@ run:
   path: bash
   args:
     - -cl
-    - gem install tracker_api && buildpacks-ci/tasks/build-binary-new/create_node_lts.rb
+    - gem install tracker_api && buildpacks-ci/tasks/create-new-version-line-story/create_node_lts.rb
 params:
   TRACKER_API_TOKEN:
   TRACKER_PROJECT_ID:
