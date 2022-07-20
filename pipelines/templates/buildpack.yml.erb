@@ -68,7 +68,7 @@
     'non_lts_pivnet' => true,
   }
 } %>
-<% pas_version = '2.10' %>
+<% pas_version = '2.11' %>
 <% low_nodes_lts = ['ruby', 'python', 'dotnet-core', 'php'] %>
 ---
 resource_types:
@@ -321,7 +321,7 @@ resources: #####################################################################
     source:
       api_token: {{toolsmiths-api-token}}
       hostname: environments.toolsmiths.cf-app.com
-      pool_name: us_<%= pas_version.gsub('.', '_') %>
+      pool_name: us_<%= pas_version.gsub('.', '_') + "_lts2" %>
 <% end %>
 
   ## Alerts ##
