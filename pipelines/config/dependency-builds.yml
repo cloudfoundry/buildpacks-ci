@@ -8,8 +8,6 @@ dependencies:
     third_party_hosted: true
     source_type: appd_agent
     any_stack: true
-    copy-stacks:
-      - bionic
     versions_to_keep: 2
   bower:
     buildpacks:
@@ -36,8 +34,6 @@ dependencies:
     third_party_hosted: true
     source_type: ca_apm_agent
     any_stack: true
-    copy-stacks:
-      - bionic
     versions_to_keep: 2
   composer:
     buildpacks:
@@ -49,8 +45,6 @@ dependencies:
       - 'repo: composer/composer'
       - 'extension: .phar'
     any_stack: true
-    copy-stacks:
-      - bionic
     versions_to_keep: 2
   dotnet-sdk:
     buildpacks:
@@ -65,6 +59,7 @@ dependencies:
         removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
+    skip_lines_cfllinuxfs4: ['3.1.X']
   dotnet-runtime:
     buildpacks:
       dotnet-core:
@@ -78,6 +73,7 @@ dependencies:
         removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
+    skip_lines_cfllinuxfs4: ['3.1.X']
   dotnet-aspnetcore:
     buildpacks:
       dotnet-core:
@@ -91,6 +87,7 @@ dependencies:
         removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
+    skip_lines_cfllinuxfs4: ['3.1.X']
   glide:
     buildpacks:
       go:
@@ -114,9 +111,6 @@ dependencies:
             deprecation_date: ""
             link: https://golang.org/doc/devel/release.html
         removal_strategy: keep_latest_released
-    copy-stacks:
-      - bionic
-      - tiny
     versions_to_keep: 2
   httpd:
     buildpacks:
@@ -124,8 +118,6 @@ dependencies:
         lines:
           - line: latest
     versions_to_keep: 2
-    copy-stacks:
-      - bionic
     mixins:
       'io.buildpacks.stacks.bionic':
         - libexpat1
@@ -191,8 +183,6 @@ dependencies:
           - line: 1.23.X
             link: https://nginx.org/
     versions_to_keep: 2
-    copy-stacks:
-      - bionic
   openresty:
     buildpacks:
       nginx:
@@ -247,9 +237,6 @@ dependencies:
             deprecation_date: ""
             link: https://github.com/nodejs/Release
     source_type: node
-    copy-stacks:
-      - bionic
-      - jammy
     versions_to_keep: 2
   php:
     buildpacks:
@@ -270,8 +257,6 @@ dependencies:
         removal_strategy: keep_latest_released
     source_type: php
     versions_to_keep: 2
-    copy-stacks:
-      - bionic
     mixins:
       'io.buildpacks.stacks.bionic':
         - libargon2-0
@@ -297,8 +282,6 @@ dependencies:
           - line: latest
     source_type: pypi
     versions_to_keep: 2
-    copy-stacks:
-      - bionic
   python:
     buildpacks:
       python:
@@ -318,8 +301,6 @@ dependencies:
             link: https://www.python.org/dev/peps/pep-0619/
         removal_strategy: keep_latest_released
     versions_to_keep: 2
-    copy-stacks:
-      - bionic
   r:
     buildpacks:
       r:
@@ -348,8 +329,6 @@ dependencies:
             link: https://www.ruby-lang.org/en/news/2021/12/25/ruby-3-1-0-released/
         removal_strategy: keep_latest_released
     versions_to_keep: 2
-    copy-stacks:
-      - bionic
   rubygems:
     buildpacks:
       ruby:
@@ -380,17 +359,15 @@ dependencies:
       - 'extension: .tar.gz'
     any_stack: true
     versions_to_keep: 2
-    copy-stacks:
-      - bionic
-cflinuxfs4_dependencies: [ 'node' ]
+cflinuxfs4_dependencies: [ 'node', 'libunwind', 'libgdiplus' ]
 build_stacks: [ 'cflinuxfs4' , 'cflinuxfs3' ]
-copy_stacks: [ 'jammy', 'bionic' ]
 windows_stacks: [ 'windows2016', 'windows' ]
 deprecated_stacks: [ 'cflinuxfs2' ]
 v3_stacks:
   tiny: 'io.paketo.stacks.tiny'
   bionic: 'io.buildpacks.stacks.bionic'
   cflinuxfs3: 'org.cloudfoundry.stacks.cflinuxfs3'
+  cflinuxfs4: 'org.cloudfoundry.stacks.cflinuxfs4'
 v3_dep_names:
   node: Node Engine
   yarn: Yarn
