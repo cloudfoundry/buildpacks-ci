@@ -196,7 +196,7 @@ class DependencyBuild
     merge_out_data(old_file_path, filename_prefix)
   end
 
-  def build_libdigiplus
+  def build_libgdiplus
     Runner.run('apt', 'update')
     Runner.run('apt-get', 'install', '-y', 'automake', 'libtool')
 
