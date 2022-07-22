@@ -206,6 +206,8 @@ class DependencyBuild
     Runner.run('git', 'clone', '--single-branch', '--branch', "#{@source_input.version}", "https://github.com/#{@source_input.repo}",
                "#{@source_input.name}-#{@source_input.version}")
     Dir.chdir("#{@source_input.name}-#{@source_input.version}") do
+      ENV['CXXFLAGS'] = "-g -Wno-maybe-uninitialized"
+      ENV['CFLAGS'] = "-g -Wno-maybe-uninitialized"
       Runner.run('./autogen.sh', "--prefix=#{built_path}")
       Runner.run('make')
       Runner.run('make install')
