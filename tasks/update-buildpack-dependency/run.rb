@@ -80,7 +80,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   end
 
   stack = %r{#{resource_version}-(.*)\.json$}.match(stack_dependency_build)[1]
-  next unless all_stacks.include?(stack) # make sure we not pulling something thats not a stack eg 'preview
+  next unless all_stacks.include?(stack) # make sure we not pulling something that's not a stack eg 'preview
 
   stacks = (stack == 'any-stack') ? BUILD_STACKS : [stack]
   stacks = WINDOWS_STACKS if source_name == 'hwc'
