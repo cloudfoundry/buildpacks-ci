@@ -55,10 +55,29 @@ builds = {}
 version = ''
 
 # TODO: This should be removed when all the dependencies are built using cflinuxfs4. Right now it only uses the dependencies included in buildpacks-ci/pipelines/config/dependency-builds.yml --> cflinuxfs4_dependencies:
+# TODO: This also includes logic to skip certain version lines based on the skip_lines_cflinuxfs4 array in the config file.
+def cflinuxfs4_skip_line(skip_lines, version_line)
+  skip = false
+  skip_lines.each do |line|
+    major, minor, patch = line.split('.').map(&:to_s)
+    if minor == 'x'
+      if version_line.start_with?("#{major}.")
+        skip = true
+        break
+      end
+    elsif patch == 'x'
+      if version_line.start_with?("#{major}.#{minor}.")
+        skip = true
+        break
+      end
+    end
+  end
+  skip
+end
 
 def cflinuxfs4_constraints(all_stacks, version_line, config, cflinuxfs4_dependencies, source_name)
   skip_lines_cflinuxfs4 = config['dependencies'][source_name].key?('skip_lines_cflinuxfs4') ? config['dependencies'][source_name]['skip_lines_cflinuxfs4'] : []
-  if !cflinuxfs4_dependencies.include?(source_name) || skip_lines_cflinuxfs4.include?(version_line)
+  if !cflinuxfs4_dependencies.include?(source_name) || cflinuxfs4_skip_line(skip_lines_cflinuxfs4, version_line)
     all_stacks - ['cflinuxfs4']
   else
     all_stacks

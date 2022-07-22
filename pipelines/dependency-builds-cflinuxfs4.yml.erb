@@ -152,12 +152,11 @@ resources:
   type: git
   source:
     uri: {{binary-builder-git-uri}}
-    branch: binary-builder-refactor
 - name: buildpacks-ci
   type: git
   source:
     uri: {{buildpacks-ci-git-uri-public}}
-    branch: cflinuxfs4-dep-builds
+    branch: {{buildpacks-ci-git-uri-public-branch}}
 - name: builds
   type: git
   source:
