@@ -59,7 +59,7 @@ dependencies:
         removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
-    skip_lines_cfllinuxfs4: ['3.1.X']
+    skip_lines_cflinuxfs4: ['3.1.X']
   dotnet-runtime:
     buildpacks:
       dotnet-core:
@@ -73,7 +73,7 @@ dependencies:
         removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
-    skip_lines_cfllinuxfs4: ['3.1.X']
+    skip_lines_cflinuxfs4: ['3.1.X']
   dotnet-aspnetcore:
     buildpacks:
       dotnet-core:
@@ -87,7 +87,7 @@ dependencies:
         removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
-    skip_lines_cfllinuxfs4: ['3.1.X']
+    skip_lines_cflinuxfs4: ['3.1.X']
   glide:
     buildpacks:
       go:

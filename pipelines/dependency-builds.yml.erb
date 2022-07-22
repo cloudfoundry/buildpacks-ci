@@ -267,7 +267,7 @@ end
 jobs:
 <% dependencies.each do |dep_name, dep| %>
 <%
-skipped_version_lines = dep['skip_lines_cfllinuxfs4'] ? dep['skip_lines_cfllinuxfs4'] : []
+skipped_version_lines = dep['skip_lines_cflinuxfs4'] ? dep['skip_lines_cflinuxfs4'] : []
 version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])}
 %>
 <% if is_multiline?(dep) %>
@@ -449,7 +449,7 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
     - do:
       - task: build-binary-<%= stack %>
         image: <%= stack == 'any-stack' ? stacks.last : stack %>-image
-        file: buildpacks-ci/tasks/build-binary-new<%= stack == 'cflinuxfs4' ? '-cfllinuxfs4' : '' %>/build.yml
+        file: buildpacks-ci/tasks/build-binary-new<%= stack == 'cflinuxfs4' ? '-cflinuxfs4' : '' %>/build.yml
         output_mapping: {artifacts: <%= stack %>-artifacts, builds-artifacts: <%= stack %>-builds-metadata}
         params:
           STACK: <%= stack %>
