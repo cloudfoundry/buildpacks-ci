@@ -54,38 +54,6 @@ builds = {}
 
 version = ''
 
-# TODO: This should be removed when all the dependencies are built using cflinuxfs4. Right now it only uses the dependencies included in buildpacks-ci/pipelines/config/dependency-builds.yml --> cflinuxfs4_dependencies:
-# TODO: This also includes logic to skip certain version lines based on the skip_lines_cflinuxfs4 array in the config file.
-def cflinuxfs4_skip_line(skip_lines, version_line)
-  skip = false
-  skip_lines.each do |line|
-    major, minor, patch = line.split('.').map(&:to_s)
-    if minor == 'x'
-      if version_line.start_with?("#{major}.")
-        skip = true
-        break
-      end
-    elsif patch == 'x'
-      if version_line.start_with?("#{major}.#{minor}.")
-        skip = true
-        break
-      end
-    end
-  end
-  skip
-end
-
-def cflinuxfs4_constraints(all_stacks, version_line, config, cflinuxfs4_dependencies, source_name)
-  skip_lines_cflinuxfs4 = config['dependencies'][source_name].key?('skip_lines_cflinuxfs4') ? config['dependencies'][source_name]['skip_lines_cflinuxfs4'] : []
-  if !cflinuxfs4_dependencies.include?(source_name) || cflinuxfs4_skip_line(skip_lines_cflinuxfs4, version_line)
-    all_stacks - ['cflinuxfs4']
-  else
-    all_stacks
-  end
-end
-
-all_stacks = cflinuxfs4_constraints(all_stacks, version_line, config, cflinuxfs4_dependencies, source_name)
-
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
   if !is_null(deprecation_date) && !is_null(deprecation_link) && version_line != 'latest'
     dependency_deprecation_date = {
@@ -111,6 +79,14 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   next unless all_stacks.include?(stack) # make sure we not pulling something that's not a stack eg 'preview
 
   stacks = (stack == 'any-stack') ? BUILD_STACKS : [stack]
+
+  # TODO: This should be removed when all the dependencies are built using cflinuxfs4. Right now it only uses the dependencies included in buildpacks-ci/pipelines/config/dependency-builds.yml --> cflinuxfs4_dependencies:
+  # TODO: This also includes logic to skip certain version lines based on the skip_lines_cflinuxfs4 array in the config file.
+  skip_lines_cflinuxfs4 = config['dependencies'][source_name].key?('skip_lines_cflinuxfs4') ? config['dependencies'][source_name]['skip_lines_cflinuxfs4'].map(&:downcase) : []
+  if !cflinuxfs4_dependencies.include?(source_name) || skip_lines_cflinuxfs4.include?(version_line.downcase)
+    stacks - ['cflinuxfs4']
+  end
+
   stacks = WINDOWS_STACKS if source_name == 'hwc'
   total_stacks = total_stacks | stacks
 
