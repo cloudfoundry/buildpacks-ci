@@ -13,7 +13,7 @@ run:
   path: bash
   args:
     - -cl
-    - gem install tracker_api && buildpacks-ci/tasks/build-binary-new/create-new-version-line-story.rb
+    - gem install tracker_api && buildpacks-ci/tasks/create-new-version-line-story/create-new-version-line-story.rb
 params:
   TRACKER_API_TOKEN:
   TRACKER_PROJECT_ID:
