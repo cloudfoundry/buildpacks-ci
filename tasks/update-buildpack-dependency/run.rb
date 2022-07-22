@@ -17,9 +17,10 @@ config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/config/dependenc
 
 BUILD_STACKS = config['build_stacks']
 WINDOWS_STACKS = config['windows_stacks']
-all_stacks =  BUILD_STACKS + WINDOWS_STACKS + ["any-stack"]
 DEPRECATED_STACKS = config['deprecated_stacks']
-CFLINUXFS4_DEPENDENCIES = config['cflinuxfs4_dependencies']
+
+all_stacks = BUILD_STACKS + WINDOWS_STACKS + ["any-stack"]
+cflinuxfs4_dependencies = config['cflinuxfs4_dependencies']
 
 # Stacks we dont want to process (most likely V3 stacks)
 
@@ -54,9 +55,17 @@ builds = {}
 version = ''
 
 # TODO: This should be removed when all the dependencies are built using cflinuxfs4. Right now it only uses the dependencies included in buildpacks-ci/pipelines/config/dependency-builds.yml --> cflinuxfs4_dependencies:
-unless CFLINUXFS4_DEPENDENCIES.include?(source_name)
-  all_stacks = all_stacks - ['cflinuxfs4']
+
+def cflinuxfs4_constraints(all_stacks, version_line, config, cflinuxfs4_dependencies, source_name)
+  skip_lines_cflinuxfs4 = config['dependencies'][source_name].key?('skip_lines_cflinuxfs4') ? config['dependencies'][source_name]['skip_lines_cflinuxfs4'] : []
+  if !cflinuxfs4_dependencies.include?(source_name) || skip_lines_cflinuxfs4.include?(version_line)
+    all_stacks - ['cflinuxfs4']
+  else
+    all_stacks
+  end
 end
+
+all_stacks = cflinuxfs4_constraints(all_stacks, version_line, config, cflinuxfs4_dependencies, source_name)
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
   if !is_null(deprecation_date) && !is_null(deprecation_link) && version_line != 'latest'
