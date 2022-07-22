@@ -84,7 +84,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   # TODO: This also includes logic to skip certain version lines based on the skip_lines_cflinuxfs4 array in the config file.
   skip_lines_cflinuxfs4 = config['dependencies'][source_name].key?('skip_lines_cflinuxfs4') ? config['dependencies'][source_name]['skip_lines_cflinuxfs4'].map(&:downcase) : []
   if !cflinuxfs4_dependencies.include?(source_name) || skip_lines_cflinuxfs4.include?(version_line.downcase)
-    stacks - ['cflinuxfs4']
+    stacks = stacks - ['cflinuxfs4']
   end
 
   stacks = WINDOWS_STACKS if source_name == 'hwc'
