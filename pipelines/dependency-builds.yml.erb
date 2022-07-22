@@ -4,6 +4,7 @@ require 'set'
 config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds.yml'))
 
 dependencies = config['dependencies']
+cflinuxfs4_dependencies = config['cflinuxfs4_dependencies']
 stacks = config['build_stacks']
 skip_deprecation_check = config['skip_deprecation_check']
 cnb_uris = config['cnb_uris']
@@ -168,7 +169,11 @@ resources:
 <% stacks.each do |stack| %>
 - name: <%= stack %>-image
   type: docker-image
+  <% if stack == 'cflinuxfs4' %>
+  source: {repository: cfbuildpacks/<%= stack %>}
+  <% else %>
   source: {repository: cloudfoundry/<%= stack %>}
+  <% end %>
 <% end %>
 
 <% dependencies.values.select{|dep| dep.fetch('branch', 'develop') == 'v3' }.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack| %>
@@ -261,7 +266,10 @@ end
 
 jobs:
 <% dependencies.each do |dep_name, dep| %>
-<% version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} %>
+<%
+skipped_version_lines = dep['skip_lines_cfllinuxfs4'] ? dep['skip_lines_cfllinuxfs4'] : []
+version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])}
+%>
 <% if is_multiline?(dep) %>
 - name: create-<%= dep_name.downcase %>-new-line-story
   serial: true
@@ -275,7 +283,7 @@ jobs:
       version: every
   - do:
     - task: create-new-version-line-story
-      file: buildpacks-ci/tasks/build-binary-new/create-new-version-line-story.yml
+      file: buildpacks-ci/tasks/create-new-version-line-story/create-new-version-line-story.yml
       params:
         TRACKER_PROJECT_ID: '{{cf-buildpacks-private-tracker-id}}'
         TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
@@ -329,7 +337,7 @@ jobs:
   <% end %>
   <% if dep_name.downcase == 'node' && line.downcase == 'node-lts' %>
     - task: create-tracker-story
-      file: buildpacks-ci/tasks/build-binary-new/create_node_lts.yml
+      file: buildpacks-ci/tasks/create-new-version-line-story/create_node_lts.yml
       params:
         TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
         TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
@@ -407,6 +415,9 @@ jobs:
       rebase: true
   <% end %>
 
+  <%
+  specific_stack = cflinuxfs4_dependencies.include?(dep_name.downcase) ? stacks : [stacks.last]
+  %>
 - name: build-<%= dep_name.downcase %>-<%= line.downcase %>
   serial: true
   public: true
@@ -425,17 +436,20 @@ jobs:
       version: every
       passed: [ create-<%= dep_name.downcase %>-<%= line.downcase %>-story ]
   <% end %>
-  <% stacks.each do |stack| %>
+  <% specific_stack.each do |stack| %>
     - get: <%= stack %>-image
   <% end %>
     - get: builds
   - in_parallel:
-  <% build_stacks = dep['any_stack'] ? ['any-stack'] : stacks %>
+  <%
+  build_stacks = dep['any_stack'] ? ['any-stack'] : specific_stack
+  build_stacks - ['cflinuxfs4'] unless skipped_version_lines.include?(line.downcase)
+  %>
   <% build_stacks.each do |stack| %>
     - do:
       - task: build-binary-<%= stack %>
         image: <%= stack == 'any-stack' ? stacks.last : stack %>-image
-        file: buildpacks-ci/tasks/build-binary-new/build.yml
+        file: buildpacks-ci/tasks/build-binary-new<%= stack == 'cflinuxfs4' ? '-cfllinuxfs4' : '' %>/build.yml
         output_mapping: {artifacts: <%= stack %>-artifacts, builds-artifacts: <%= stack %>-builds-metadata}
         params:
           STACK: <%= stack %>
@@ -555,43 +569,43 @@ groups:
   - name: all
     jobs:
 <% dependencies.each do |dep_name, dep| %>
-<% version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} %>
-    <% if is_multiline?(dep) %>
+  <% version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} %>
+  <% if is_multiline?(dep) %>
     - create-<%= dep_name.downcase %>-new-line-story
-    <% end %>
-    <% version_lines.each do |line| %>
+  <% end %>
+  <% version_lines.each do |line| %>
     - create-<%= dep_name.downcase %>-<%= line.downcase %>-story
     - accept-<%= dep_name.downcase %>-<%= line.downcase %>-story
-    <% dep['copy-stacks']&.each do |stack| %>
+      <% dep['copy-stacks']&.each do |stack| %>
     - copy-<%= dep_name.downcase %>-<%= line.downcase %>-<%= stack.downcase %>
-    <% end %>
+      <% end %>
     - build-<%= dep_name.downcase %>-<%= line.downcase %>
-    <% end %>
+  <% end %>
     <% dep['buildpacks'].each do |bp_name, bp| %>
-    <% get_version_lines(bp['lines'], ['latest']).each do |line| %>
+      <% get_version_lines(bp['lines'], ['latest']).each do |line| %>
     - update-<%= dep_name.downcase %>-<%= line.downcase %>-<%= bp_name.downcase %>
-    <% end %>
-<% end %>
+     <% end %>
+  <% end %>
 <% end %>
 
 <% dependencies.each do |dep_name, dep| %>
-<% version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} %>
+  <%version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])}%>
   - name: <%= dep_name.downcase %>
     jobs:
-    <% if is_multiline?(dep) %>
+  <% if is_multiline?(dep) %>
     - create-<%= dep_name.downcase %>-new-line-story
-    <% end %>
-    <% version_lines.each do |line| %>
+  <% end %>
+  <% version_lines.each do |line| %>
     - create-<%= dep_name.downcase %>-<%= line.downcase %>-story
     - accept-<%= dep_name.downcase %>-<%= line.downcase %>-story
     <% dep['copy-stacks']&.each do |stack| %>
     - copy-<%= dep_name.downcase %>-<%= line.downcase %>-<%= stack.downcase %>
     <% end %>
     - build-<%= dep_name.downcase %>-<%= line.downcase %>
-    <% end %>
-    <% dep['buildpacks'].each do |bp_name, bp| %>
+  <% end %>
+  <% dep['buildpacks'].each do |bp_name, bp| %>
     <% get_version_lines(bp['lines'], ['latest']).each do |line| %>
     - update-<%= dep_name.downcase %>-<%= line.downcase %>-<%= bp_name.downcase %>
     <% end %>
-    <% end %>
+  <% end %>
 <% end %>

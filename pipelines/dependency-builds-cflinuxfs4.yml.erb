@@ -1,0 +1,285 @@
+<%
+require 'yaml'
+require 'set'
+config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds-cflinuxfs4.yml'))
+
+dependencies = config['dependencies']
+stacks = config['build_stacks']
+skip_deprecation_check = config['skip_deprecation_check']
+cnb_uris = config['cnb_uris']
+
+def common_prefix(stringA, stringB)
+  max_len = 0
+  (0..[stringA.size, stringB.size].min).each do |idx|
+    if stringA[idx] == stringB[idx]
+      max_len = idx+1
+    else
+      break
+    end
+  end
+  stringA.slice(0,max_len)
+end
+
+def check_for_lines_overlap(lines_array)
+  partition_hash = {}
+  lines_array.each do|i|
+    x_count = i.count('X')
+    if partition_hash[x_count]
+      partition_hash[x_count] += [i]
+    else
+      partition_hash[x_count] = [i]
+    end
+  end
+  pairs = partition_hash.keys.combination(2).to_a.each do |p1, p2|
+    partition_hash[p1].product(partition_hash[p2]).each do |strA, strB|
+      return true if common_prefix(strA,strB) != ''
+    end
+  end
+  false
+end
+
+
+def validate_dependencies(deps, skip_deprecation_check)
+  deps.each do |dep_name, dep|
+    if !(dep['buildpacks'].values.all? {|bp| bp['lines'].nil? } || dep['buildpacks'].values.all? {|bp| bp['lines'] })
+      raise "For #{dep_name}, mixing buildpacks that specify version lines and ones that do not is NOT currently supported"
+    end
+
+  if check_for_lines_overlap(dep['buildpacks'].values.flat_map { |bp| get_version_lines(bp['lines'])})
+      raise "For #{dep_name}, overlapping version lines are not supported (e.g. 1.X.X and 1.2.X)"
+    end
+
+  # validate dep dates -  if dep is not in skip_deprecation it must have deprecation dates for all version lines
+    if is_multiline?(dep) && !(skip_deprecation_check.include?(dep_name))
+      lines_missing = get_all_lines_missing_deprecation_dates(dep)
+      if lines_missing.any?
+        raise "For #{dep_name}, there are missing deprecation dates for these version lines: #{lines_missing}"
+      end
+    end
+
+  end
+end
+
+def get_all_lines_missing_deprecation_dates(dep)
+  # return an array of hashes which are lines missing deprecation dates across all relevant buildpacks for given dep
+  dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_lines_missing_deprecation_dates(bp['lines'])}
+end
+
+def get_lines_missing_deprecation_dates(bp_lines)
+  # return only the hashes missing deprecation dates from an array of hashes
+  bp_lines&.select{|line_hash| line_hash['deprecation_date'].nil?}.map{|line_hash| line_hash['line']}
+end
+
+def get_version_lines(bp_lines, default_return = [])
+  bp_lines&.map { |ln| ln['line']} || default_return
+end
+
+def is_multiline?(dep)
+  dep['buildpacks'].values.map{ |ln| get_version_lines(ln['lines']).select {|ver| ver != 'latest'} }.flatten.any?
+end
+
+validate_dependencies(dependencies, skip_deprecation_check)
+
+def get_version_line_type(lines)
+  return nil if lines.nil?
+
+  line = lines.first['line']
+  x_idx = line.to_s.downcase.index('x')
+  return nil unless x_idx
+  case line.to_s[0, x_idx].count('.')
+  when 1
+    'major'
+  when 2
+    'minor'
+  else
+    nil
+  end
+end
+
+def bp_uses_line?(bp_data, line)
+  lines_present = get_version_lines(bp_data['lines']).nil?
+  !lines_present && get_version_lines(bp_data['lines']).include?(line)
+end
+
+def get_git_uri(buildpack, cnb_uris)
+  if cnb_uris.key? buildpack
+    return cnb_uris[buildpack]
+  else
+    if buildpack.include? '-cnb'
+      return "git@github.com:cloudfoundry/#{buildpack}.git"
+    else
+      bp_uri = "git@github.com:cloudfoundry/#{buildpack}-buildpack.git"
+    end
+  end
+end
+
+def get_git_repo(buildpack, cnb_uris)
+  if cnb_uris.key? buildpack
+    uri = cnb_uris[buildpack]
+    return uri.slice((uri.index(':') + 1)).delete_suffix('.git')
+  else
+    if buildpack.include? '-cnb'
+      return "cloudfoundry/#{buildpack}"
+    else
+      bp_uri = "cloudfoundry/#{buildpack}-buildpack"
+    end
+  end
+end
+
+def is_cloudfoundry_cnb(buildpack)
+  if !buildpack.include? '-cnb'
+    return true
+  end
+end
+%>
+
+resource_types:
+- name: depwatcher
+  type: docker-image
+  source:
+    repository: cfbuildpacks/depwatcher
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+- name: create-pull-request-resource
+  type: docker-image
+  source:
+    repository: cfbuildpacks/create-pull-request-resource
+
+resources:
+- name: binary-builder
+  type: git
+  source:
+    uri: {{binary-builder-git-uri}}
+    branch: binary-builder-refactor
+- name: buildpacks-ci
+  type: git
+  source:
+    uri: {{buildpacks-ci-git-uri-public}}
+    branch: cflinuxfs4-dep-builds
+- name: builds
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+    branch: main
+    paths: [ binary-builds-new/ ]
+    private_key: {{public-buildpacks-ci-robots-private-key}}
+
+<% stacks.each do |stack| %>
+- name: <%= stack %>-image
+  type: docker-image
+  source: {repository: cfbuildpacks/<%= stack %>}
+<% end %>
+
+<% dependencies.values.select{|dep| dep.fetch('branch', 'develop') == 'v3' }.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack| %>
+- name: <%= buildpack %>-buildpack-v3
+  type: git
+  source:
+    uri: <%= get_git_uri(buildpack, cnb_uris) %>
+    private_key: {{cf-buildpacks-eng-github-ssh-key}}
+    branch: v3
+<% end %>
+
+<% dependencies.each do |dep_name, dep| %>
+<%
+  skipped_version_lines = dep['skip_lines_cfllinuxfs4'] ? dep['skip_lines_cfllinuxfs4'] : []
+  lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'])}
+  lines.push('latest') unless lines.include?('latest') || dep_name.include?('dotnet') || dep_name.include?('node')
+  lines = lines - skipped_version_lines
+  lines.each do |line|
+%>
+
+- name: source-<%= dep_name.downcase %>-<%= line.downcase %>
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: <%= dep['source_type'] || dep_name %>
+    name: <%= dep_name %>
+    <% if line != 'latest' %>
+    version_filter: <%= line %>
+    <% end %>
+    <% (dep['source_params'] || []).each do |param| %>
+    <%= param %>
+    <% end %>
+<% end %>
+
+<% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
+- name: source-<%= monitored_dep_name.downcase %>-latest
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: <%= monitored_dep_name %>
+    name: <%= monitored_dep_name %>
+<% end %>
+<% end %>
+  ## Alerts ##
+
+jobs:
+<% dependencies.each do |dep_name, dep| %>
+  <%
+  skipped_version_lines = dep['skip_lines_cfllinuxfs4'] ? dep['skip_lines_cfllinuxfs4'] : []
+  version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} - skipped_version_lines
+  %>
+
+  <% version_lines.each do |line| %>
+- name: build-<%= dep_name.downcase %>-<%= line.downcase %>
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: source
+      resource: source-<%= dep_name.downcase %>-<%= line.downcase %>
+      trigger: true
+      version: every
+  <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
+    - get: source-<%= monitored_dep_name.downcase %>-latest
+      trigger: true
+      version: every
+  <% end %>
+  <% stacks.each do |stack| %>
+    - get: <%= stack %>-image
+  <% end %>
+    - get: builds
+  - in_parallel:
+  <% build_stacks = dep['any_stack'] ? ['any-stack'] : stacks %>
+  <% build_stacks.each do |stack| %>
+    - do:
+      - task: build-binary-<%= stack %>
+#        image: <%#= stack == 'any-stack' ? stacks.last : stack %>-image
+        image: cflinuxfs4-image
+        file: buildpacks-ci/tasks/build-binary-new-cflinuxfs4/build.yml
+        output_mapping: {artifacts: <%= stack %>-artifacts, builds-artifacts: <%= stack %>-builds-metadata}
+        params:
+          STACK: <%= stack %>
+          SKIP_COMMIT: true
+  <% end %>
+<% end %>
+<% end %>
+
+groups:
+  - name: all
+    jobs:
+<% dependencies.each do |dep_name, dep| %>
+  <%
+  skipped_version_lines = dep['skip_lines_cfllinuxfs4'] ? dep['skip_lines_cfllinuxfs4'] : []
+  version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} - skipped_version_lines
+  %>
+  <% version_lines.each do |line| %>
+    - build-<%= dep_name.downcase %>-<%= line.downcase %>
+  <% end %>
+<% end %>
+
+<% dependencies.each do |dep_name, dep| %>
+  <%
+  skipped_version_lines = dep['skip_lines_cfllinuxfs4'] ? dep['skip_lines_cfllinuxfs4'] : []
+  version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} - skipped_version_lines
+  %>
+  - name: <%= dep_name.downcase %>
+    jobs:
+    <% version_lines.each do |line| %>
+    - build-<%= dep_name.downcase %>-<%= line.downcase %>
+    <% end %>
+<% end %>
