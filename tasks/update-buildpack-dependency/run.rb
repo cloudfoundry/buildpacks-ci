@@ -17,8 +17,7 @@ config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/config/dependenc
 
 BUILD_STACKS = config['build_stacks']
 WINDOWS_STACKS = config['windows_stacks']
-IGNORED_STACKS = config['copy_stacks']
-ALL_STACKS = IGNORED_STACKS + BUILD_STACKS + WINDOWS_STACKS + ["any-stack"]
+all_stacks =  BUILD_STACKS + WINDOWS_STACKS + ["any-stack"]
 DEPRECATED_STACKS = config['deprecated_stacks']
 CFLINUXFS4_DEPENDENCIES = config['cflinuxfs4_dependencies']
 
@@ -56,7 +55,7 @@ version = ''
 
 # TODO: This should be removed when all the dependencies are built using cflinuxfs4. Right now it only uses the dependencies included in buildpacks-ci/pipelines/config/dependency-builds.yml --> cflinuxfs4_dependencies:
 unless CFLINUXFS4_DEPENDENCIES.include?(source_name)
-  ALL_STACKS = ALL_STACKS - ['cflinuxfs4', 'jammy']
+  all_stacks = all_stacks - ['cflinuxfs4']
 end
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
@@ -81,8 +80,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   end
 
   stack = %r{#{resource_version}-(.*)\.json$}.match(stack_dependency_build)[1]
-  next unless ALL_STACKS.include?(stack) # make sure we not pulling something thats not a stack eg 'preview'
-  next if IGNORED_STACKS.include?(stack) || DEPRECATED_STACKS.include?(stack)
+  next unless all_stacks.include?(stack) # make sure we not pulling something thats not a stack eg 'preview
 
   stacks = (stack == 'any-stack') ? BUILD_STACKS : [stack]
   stacks = WINDOWS_STACKS if source_name == 'hwc'
