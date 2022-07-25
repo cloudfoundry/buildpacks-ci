@@ -53,7 +53,7 @@ module DependencyBuild
           end
           Archive.strip_top_level_directory_from_tar("pip-#{source_input.version}.tar.gz")
           Runner.run('tar', 'zxf', "pip-#{source_input.version}.tar.gz")
-          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools==62.1.0')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools')
           Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
           Runner.run('tar', 'zcvf', file_path, '.')
         end
