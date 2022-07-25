@@ -59,7 +59,7 @@ dependencies:
         removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
-    skip_lines_cflinuxfs4: ['3.1.X']
+    skip_lines_cflinuxfs4: [ '3.1.X' ]
   dotnet-runtime:
     buildpacks:
       dotnet-core:
@@ -73,7 +73,7 @@ dependencies:
         removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
-    skip_lines_cflinuxfs4: ['3.1.X']
+    skip_lines_cflinuxfs4: [ '3.1.X' ]
   dotnet-aspnetcore:
     buildpacks:
       dotnet-core:
@@ -87,7 +87,7 @@ dependencies:
         removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
-    skip_lines_cflinuxfs4: ['3.1.X']
+    skip_lines_cflinuxfs4: [ '3.1.X' ]
   glide:
     buildpacks:
       go:
@@ -359,7 +359,8 @@ dependencies:
       - 'extension: .tar.gz'
     any_stack: true
     versions_to_keep: 2
-cflinuxfs4_dependencies: [ 'node', 'libunwind', 'libgdiplus' ]
+cflinuxfs4_build_dependencies: [ 'node', 'libunwind', 'libgdiplus' ]
+cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore' ]
 build_stacks: [ 'cflinuxfs4' , 'cflinuxfs3' ]
 windows_stacks: [ 'windows2016', 'windows' ]
 deprecated_stacks: [ 'cflinuxfs2' ]

@@ -4,7 +4,7 @@ require 'set'
 config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds.yml'))
 
 dependencies = config['dependencies']
-cflinuxfs4_dependencies = config['cflinuxfs4_dependencies']
+cflinuxfs4_build_dependencies = config['cflinuxfs4_build_dependencies']
 stacks = config['build_stacks']
 skip_deprecation_check = config['skip_deprecation_check']
 cnb_uris = config['cnb_uris']
@@ -416,7 +416,7 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
   <% end %>
 
   <%
-  specific_stack = cflinuxfs4_dependencies.include?(dep_name.downcase) ? stacks : [stacks.last]
+  specific_stack = cflinuxfs4_build_dependencies.include?(dep_name.downcase) ? stacks : [stacks.last]
   %>
 - name: build-<%= dep_name.downcase %>-<%= line.downcase %>
   serial: true
