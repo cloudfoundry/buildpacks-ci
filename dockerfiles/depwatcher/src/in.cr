@@ -23,7 +23,7 @@ when "miniconda"
 when "rubygems"
   version = Depwatcher::Rubygems.new.in(source["name"].to_s, version["ref"].to_s)
 when "rubygems_cli"
-  version = Depwatcher::RubygemsCli.new.in(version["ref"].to_s)
+  version = Depwatcher::RubygemsCli.new.in(version["ref"].to_s, dir)
 when "pypi"
   version = Depwatcher::Pypi.new.in(source["name"].to_s, version["ref"].to_s)
 when "ruby"
