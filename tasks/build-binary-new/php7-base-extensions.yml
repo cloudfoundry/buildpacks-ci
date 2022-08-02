@@ -17,8 +17,8 @@ native_modules:
   md5: nil
   klass: SnmpRecipe
 - name: librdkafka
-  version: 1.9.1
-  md5: 8364a513957fc847cbe8f5758087e35d
+  version: 1.9.2
+  md5: fe9624e905abbf8324b0f6be520d9c24
   klass: LibRdKafkaRecipe
 - name: cassandracppdriver
   version: 2.16.0
@@ -58,8 +58,8 @@ extensions:
   md5: 64be25ebcb8b792219c14d05038396bc
   klass: PeclRecipe
 - name: mongodb
-  version: 1.13.0
-  md5: ebe9b977f272f509ae1d0d12c100a1af
+  version: 1.14.0
+  md5: ddb27894784aee3e8f9acfa8ec826cc8
   klass: PeclRecipe
 - name: msgpack
   version: 2.1.2
