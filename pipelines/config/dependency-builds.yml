@@ -361,6 +361,7 @@ dependencies:
     versions_to_keep: 2
 cflinuxfs4_build_dependencies: [ 'node', 'libunwind', 'libgdiplus' ]
 cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore' ]
+cflinuxfs4_buildpacks: [ 'dotnet-core' ]
 build_stacks: [ 'cflinuxfs4' , 'cflinuxfs3' ]
 windows_stacks: [ 'windows2016', 'windows' ]
 deprecated_stacks: [ 'cflinuxfs2' ]

@@ -21,6 +21,7 @@ DEPRECATED_STACKS = config['deprecated_stacks']
 
 all_stacks = BUILD_STACKS + WINDOWS_STACKS + ["any-stack"]
 cflinuxfs4_dependencies = config['cflinuxfs4_dependencies']
+cflinuxfs4_buildpacks = config['cflinuxfs4_buildpacks']
 
 # Stacks we dont want to process (most likely V3 stacks)
 
@@ -31,6 +32,7 @@ data = JSON.parse(open('source/data.json').read)
 source_name = data.dig('source', 'name')
 resource_version = data.dig('version', 'ref')
 manifest_name = source_name == 'nginx-static' ? 'nginx' : source_name
+buildpack_name = manifest['language'].downcase
 
 # create story is one-per-version; it creates the json file with the tracker ID
 story_id = JSON.parse(open("builds/binary-builds-new/#{source_name}/#{resource_version}.json").read)['tracker_story_id']
@@ -84,6 +86,11 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   # TODO: This also includes logic to skip certain version lines based on the skip_lines_cflinuxfs4 array in the config file.
   skip_lines_cflinuxfs4 = config['dependencies'][source_name].key?('skip_lines_cflinuxfs4') ? config['dependencies'][source_name]['skip_lines_cflinuxfs4'].map(&:downcase) : []
   if !cflinuxfs4_dependencies.include?(source_name) || skip_lines_cflinuxfs4.include?(version_line.downcase)
+    stacks = stacks - ['cflinuxfs4']
+  end
+
+  ## TODO: This should be removed when all the buildpacks are built using cflinuxfs4. Right now it only uses the buildpacks included in buildpacks-ci/pipelines/config/dependency-builds.yml --> cflinuxfs4_buildpacks:
+  if !cflinuxfs4_buildpacks.include?(buildpack_name)
     stacks = stacks - ['cflinuxfs4']
   end
 
@@ -164,7 +171,7 @@ commit_message = commit_message + "\n\nfor stack(s) #{total_stacks.join(', ')}"
 # Special Nginx stuff (for Nginx buildpack)
 # * There are two version lines, stable & mainline
 #   when we add a new minor line, we should update the version line regex
-if !rebuilt && manifest_name == 'nginx' && manifest['language'] == 'nginx'
+if !rebuilt && manifest_name == 'nginx' && buildpack_name == 'nginx'
   v = Gem::Version.new(resource_version)
   if data.dig('source', 'version_filter')
     if v.segments[1].even? # 1.12.X is stable
@@ -182,7 +189,7 @@ end
 # Special PHP stuff
 # Updates default versions for PHP dependencies
 # manifest_name will be the name of the dependency, not PHP
-if !rebuilt && manifest_name != 'php' && manifest['language'] == 'php' && manifest['default_versions']
+if !rebuilt && manifest_name != 'php' && buildpack_name == 'php' && manifest['default_versions']
   manifest['default_versions'] = PHPManifest.update_defaults(manifest, source_name, resource_version)
 end
 
@@ -191,7 +198,7 @@ end
 # * The defaults/options.json file contains default version numbers to use for each PHP line.
 #   Update the default version for the relevant line to this version of PHP (if !rebuilt)
 php_defaults = nil
-if !rebuilt && manifest_name == 'php' && manifest['language'] == 'php'
+if !rebuilt && manifest_name == 'php' && buildpack_name == 'php'
   case resource_version
   when /^7.3/
     varname = 'PHP_73_LATEST'
@@ -214,7 +221,7 @@ end
 # Special PHP stuff
 # * Each php version in the manifest lists the modules and versions it was built with.
 #   Get that list for this version of php.
-if manifest_name == 'php' && manifest['language'] == 'php'
+if manifest_name == 'php' && buildpack_name == 'php'
   manifest['dependencies'].each do |dependency|
     if dependency.fetch('name') == 'php' && dependency.fetch('version') == resource_version
       sub_deps = (builds[total_stacks.last]['sub_dependencies'] || [])
@@ -251,7 +258,7 @@ end
 #   Replace the old version number with the new version we're adding. (if !rebuilt)
 path_to_extensions = 'extensions/appdynamics/extension.py'
 write_extensions = ''
-if !rebuilt && manifest_name == 'appdynamics' && manifest['language'] == 'php'
+if !rebuilt && manifest_name == 'appdynamics' && buildpack_name == 'php'
   # TODO: does this change with multiple stacks?
   if removed.length == 1 && added.length == 1
     text = File.read('buildpack/' + path_to_extensions)
@@ -268,7 +275,7 @@ end
 # * There are two Gemfiles in fixtures which depend on the latest JRuby in the 9.2.X.X line.
 #   Replace their jruby engine version with the one in the manifest.
 ruby_files_to_edit = { 'fixtures/sinatra_jruby/Gemfile' => nil, 'fixtures/jruby_start_command/Gemfile' => nil }
-if !rebuilt && manifest_name == 'jruby' && manifest['language'] == 'ruby'
+if !rebuilt && manifest_name == 'jruby' && buildpack_name == 'ruby'
   version_number = /(9.2.\d+.\d+)/.match(version)
   if version_number
     jruby_version = version_number[0]
@@ -284,7 +291,7 @@ end
 # * For the manifest there will be a sub-dependency section for R, as all the dependencies are compiled within
 #   for all stacks we have the same sub-dependency(forecast, plumber,...)
 
-if manifest['language'].downcase == 'r'
+if buildpack_name == 'r'
   total_stacks.each do |stack|
     version_messages = (builds[stack]['sub_dependencies'] || []).map do |sub_dep_key, sub_dep_value|
       "#{sub_dep_key} #{sub_dep_value['version'].to_s}"
@@ -317,7 +324,7 @@ end
 # Special Dotnet Stuff
 # * The .NET Core buildpack has a .NET Core dependency in the manifest.
 #   Replace the version with the one in the manifest.
-if !rebuilt && manifest['language'].downcase == 'dotnet-core'
+if !rebuilt && buildpack_name == 'dotnet-core'
   runtime_3_version = ""
   sdk_3_version = ""
   runtime_6_version = ""
