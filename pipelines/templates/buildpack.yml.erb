@@ -11,7 +11,7 @@
     'non_lts_pivnet' => true,
   },
   'dotnet-core' => {
-    'stacks' => %w(cflinuxfs3),
+    'stacks' => %w(cflinuxfs3 cflinuxfs4),
     'product_slug' => 'dotnet-core-buildpack',
     'non_lts_pivnet' => true,
   },
@@ -752,38 +752,66 @@ jobs: ##########################################################################
         params:
           SCALE_DIEGO_CELLS: true
 <% end %>
+<% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
+        params:
+          ADD_CFLINUXFS4_STACK: true
+<% end %>
 <% if buildpacks[language]['stacks'].include?('windows')%>
         params:
           DEPLOY_WINDOWS_CELL: true
 <% end %>
-      - in_parallel:
 <% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2']%>
 <% relevant_stacks.each do |stack| %>
-        - do:
-          - task: create-cf-space
-            file: feature-eng-ci/tasks/cf/create-space/task.yml
-            input_mapping:
-              ci: feature-eng-ci
-              lock: environment
-            params:
-              DOMAIN: 'cf-app.com'
-              ORG: pivotal
-          - task: ginkgo-<%= stack %>
-            file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
-            input_mapping: {cf-space: space}
-            params:
-              CF_STACK: <%= stack %>
-              GINKGO_ATTEMPTS: 4
-              GINKGO_NODES: 3
-              <% if language == 'php' %>
-              COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-              <% end %>
-              <% if buildpacks[language]['skip_docker_start'] %>
-              SKIP_DOCKER_START: true
-              <% else %>
-            privileged: true
-              <% end %>
+      - do:
+        - task: create-cf-space
+          file: feature-eng-ci/tasks/cf/create-space/task.yml
+          input_mapping:
+            ci: feature-eng-ci
+            lock: environment
+          params:
+            DOMAIN: 'cf-app.com'
+            ORG: pivotal
+<% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
+        - task: configure-test
+          config:
+            platform: linux
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
+            inputs:
+            - name: buildpack
+            outputs:
+            - name: buildpack
+            run:
+              dir: ""
+              path: bash
+              args:
+              - -c
+              - |
+                #!/bin/bash
+                set -e
+                cd buildpack
+                contents="$(jq '.stack = "<%= stack %>"' config.json)"
+                echo -E "${contents}" > config.json
+                echo -e "config.json modified to:\n $(cat config.json)"
+<% end %>
+        - task: ginkgo-<%= stack %>
+          file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+          input_mapping: {cf-space: space}
+          params:
+            CF_STACK: <%= stack %>
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 3
+            <% if language == 'php' %>
+            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
             <% end %>
+            <% if buildpacks[language]['skip_docker_start'] %>
+            SKIP_DOCKER_START: true
+            <% else %>
+          privileged: true
+            <% end %>
+          <% end %>
     on_failure:
       put: failure-alert
       params:
@@ -820,29 +848,57 @@ jobs: ##########################################################################
         input_mapping:
           ci: feature-eng-ci
           lock: environment
+<% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
+        params:
+          ADD_CFLINUXFS4_STACK: true
+<% end %>
 <% if buildpacks[language]['stacks'].include?('windows')%>
         params:
           DEPLOY_WINDOWS_CELL: true
 <% end %>
-      - in_parallel:
 <% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2'] %>
 <% relevant_stacks.each do |stack| %>
-        - do:
-          - task: create-cf-space
-            file: feature-eng-ci/tasks/cf/create-space/task.yml
-            params:
-              DOMAIN: 'cf-app.com'
-              ORG: pivotal
-            input_mapping:
-              ci: feature-eng-ci
-              lock: environment
-          - task: brats-<%= stack %>
-            file: buildpacks-ci/tasks/run-bp-brats/task.yml
-            input_mapping: {cf-space: space}
-            params:
-              CF_STACK: <%= stack %>
-              GINKGO_ATTEMPTS: 4
-              GINKGO_NODES: 3
+      - do:
+        - task: create-cf-space
+          file: feature-eng-ci/tasks/cf/create-space/task.yml
+          params:
+            DOMAIN: 'cf-app.com'
+            ORG: pivotal
+          input_mapping:
+            ci: feature-eng-ci
+            lock: environment
+<% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
+        - task: configure-test
+          config:
+            platform: linux
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
+            inputs:
+            - name: buildpack
+            outputs:
+            - name: buildpack
+            run:
+              dir: ""
+              path: bash
+              args:
+              - -c
+              - |
+                #!/bin/bash
+                set -e
+                cd buildpack
+                contents="$(jq '.stack = "<%= stack %>"' config.json)"
+                echo -E "${contents}" > config.json
+                echo -e "config.json modified to:\n $(cat config.json)"
+<% end %>
+        - task: brats-<%= stack %>
+          file: buildpacks-ci/tasks/run-bp-brats/task.yml
+          input_mapping: {cf-space: space}
+          params:
+            CF_STACK: <%= stack %>
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 3
 <% end %>
     on_failure:
       put: failure-alert
