@@ -1,0 +1,15 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: buildpacks-ci
+  - name: version
+outputs:
+  - name: release-body
+run:
+  path: buildpacks-ci/tasks/get-buildpack-github-release-notes/run.sh
+params:
+  BUILDPACK_REPO:
