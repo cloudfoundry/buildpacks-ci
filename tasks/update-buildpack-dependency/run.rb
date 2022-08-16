@@ -80,17 +80,15 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   stack = %r{#{resource_version}-(.*)\.json$}.match(stack_dependency_build)[1]
   next unless all_stacks.include?(stack) # make sure we not pulling something that's not a stack eg 'preview
 
+  ## TODO: This should be removed when all the buildpacks are built using cflinuxfs4. Right now it only uses the buildpacks included in buildpacks-ci/pipelines/config/dependency-builds.yml --> cflinuxfs4_buildpacks:
+  next if !cflinuxfs4_buildpacks.include?(buildpack_name) && stack == 'cflinuxfs4'
+
   stacks = (stack == 'any-stack') ? BUILD_STACKS : [stack]
 
   # TODO: This should be removed when all the dependencies are built using cflinuxfs4. Right now it only uses the dependencies included in buildpacks-ci/pipelines/config/dependency-builds.yml --> cflinuxfs4_dependencies:
   # TODO: This also includes logic to skip certain version lines based on the skip_lines_cflinuxfs4 array in the config file.
   skip_lines_cflinuxfs4 = config['dependencies'][source_name].key?('skip_lines_cflinuxfs4') ? config['dependencies'][source_name]['skip_lines_cflinuxfs4'].map(&:downcase) : []
   if !cflinuxfs4_dependencies.include?(source_name) || skip_lines_cflinuxfs4.include?(version_line.downcase)
-    stacks = stacks - ['cflinuxfs4']
-  end
-
-  ## TODO: This should be removed when all the buildpacks are built using cflinuxfs4. Right now it only uses the buildpacks included in buildpacks-ci/pipelines/config/dependency-builds.yml --> cflinuxfs4_buildpacks:
-  if !cflinuxfs4_buildpacks.include?(buildpack_name)
     stacks = stacks - ['cflinuxfs4']
   end
 
