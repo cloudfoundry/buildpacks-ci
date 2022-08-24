@@ -11,18 +11,34 @@ require_relative 'binary_builder_wrapper'
 
 module HTTPHelper
   class << self
+    def download_with_follow_redirects(uri)
+      uri = URI(uri)
+      Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') do |httpRequest|
+        response = httpRequest.request_get(uri)
+        if response.is_a?(Net::HTTPRedirection)
+          download_with_follow_redirects(response['location'])
+        else
+          response
+        end
+      end
+    end
+
     def download(source_input, filename)
       uri = URI.parse(source_input.url)
-      response = Net::HTTP.get_response(uri)
+      puts "Downloading #{uri} to #{filename}"
+      response = download_with_follow_redirects(uri)
       if response.code == '200'
         Sha.verify_digest(response.body, source_input)
         File.write(filename, response.body)
+      else
+        str = "Failed to download #{uri} with code #{response.code} error: \n#{response.body}"
+        raise str
       end
     end
 
     def download_url(url, source_input, filename)
       uri = URI.parse(url)
-      response = Net::HTTP.get_response(uri)
+      response = download_with_follow_redirects(uri)
       if response.code == '200'
         Sha.verify_digest(response.body, source_input)
         File.write(filename, response.body)
@@ -269,6 +285,19 @@ class DependencyBuild
     sha256 = Sha.get_digest(content, 'sha256')
     @out_data[:url] = @source_input.url
     @out_data[:sha256] = sha256
+  end
+
+  def build_yarn
+    @source_input.version = @source_input.version.delete_prefix('v')
+
+    old_filepath = 'artifacts/temp_file.tgz'
+    HTTPHelper.download(@source_input, old_filepath)
+
+    Archive.strip_top_level_directory_from_tar(old_filepath)
+
+    filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
+
+    merge_out_data(old_filepath, filename_prefix)
   end
 
   def bundle_pip_dependencies
