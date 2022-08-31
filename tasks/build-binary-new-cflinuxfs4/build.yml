@@ -3,7 +3,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: cfbuildpacks/cflinuxfs4
+    repository: cloudfoundry/cflinuxfs4
 inputs:
   - name: binary-builder
   - name: buildpacks-ci
