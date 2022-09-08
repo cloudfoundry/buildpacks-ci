@@ -14,24 +14,22 @@ Dir.chdir("#{stack}-release") do
 end
 
 tracker_client = TrackerClient.new(
-    tracker_api_token,
-    tracker_project_id,
-    tracker_requester_id.to_i
+  tracker_api_token,
+  tracker_project_id,
+  tracker_requester_id.to_i
 )
 
-receipt_file_glob = stack == 'cflinuxfs2' ?
-                   File.join('*p-cflinuxfs2-*', 'cflinuxfs2', 'cflinuxfs2_receipt') :
-                   File.join("cloudfoundry-#{stack}-*", "receipt.#{stack}.x86_64")
+receipt_file_glob = File.join("cloudfoundry-#{stack}-*", "receipt.#{stack}.x86_64")
 
 receipt_path = Dir.glob(File.join(
-    "#{stack}-release",
-    'source',
-    receipt_file_glob,
+  "#{stack}-release",
+  'source',
+  receipt_file_glob,
 )).first
 
 CategorizeSecurityNotices.new(
-    tracker_client,
-    'davos-cve-stories/data',
-    receipt_path,
-    stack
+  tracker_client,
+  'davos-cve-stories/data',
+  receipt_path,
+  stack
 ).run
