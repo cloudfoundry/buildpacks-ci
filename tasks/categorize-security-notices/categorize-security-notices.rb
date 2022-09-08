@@ -35,14 +35,14 @@ class CategorizeSecurityNotices
 
   def get_story_packages(story)
     exp =
-        case @stack
-        when 'cflinuxfs2'
-          Regexp.new('\*\*14.04 Packages:\*\*\n(.*?)((\n\*\*.*Packages)|\Z)', Regexp::MULTILINE)
-        when 'cflinuxfs3'
-          Regexp.new('\*\*18.04 Packages:\*\*\n(.*?)\Z', Regexp::MULTILINE)
-        else
-          raise "Unsupported stack: #{stack}"
-        end
+      case @stack
+      when 'cflinuxfs3'
+        Regexp.new('\*\*18.04 Packages:\*\*\n(.*?)\Z', Regexp::MULTILINE)
+      when 'cflinuxfs4'
+        Regexp.new('\*\*22.04 Packages:\*\*\n(.*?)\Z', Regexp::MULTILINE)
+      else
+        raise "Unsupported stack: #{stack}"
+      end
 
     package_list = exp.match(story['description'])[1].split("\n")
     package_list.map { |package| package.lstrip }
