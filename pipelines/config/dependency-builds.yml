@@ -363,7 +363,7 @@ dependencies:
     any_stack: true
     versions_to_keep: 2
 cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pipenv', 'python' ]
-cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'yarn', 'pip', 'setutools', 'miniconda3-py39' ]
+cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'pip', 'setutools', 'miniconda3-py39' ]
 cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python' ]
 build_stacks: [ 'cflinuxfs4' , 'cflinuxfs3' ]
 windows_stacks: [ 'windows2016', 'windows' ]
