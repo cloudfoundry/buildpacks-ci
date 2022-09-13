@@ -184,6 +184,34 @@ class DependencyBuild
     merge_out_data(old_filepath, filename_prefix)
   end
 
+  def build_dotnet_sdk
+    old_filepath = Utils.prune_dotnet_files(@source_input, ['./shared/*'], true)
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+    merge_out_data(old_filepath, filename_prefix)
+  end
+
+  def build_dotnet_runtime
+    old_filepath = Utils.prune_dotnet_files(@source_input, ['./dotnet'])
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+    merge_out_data(old_filepath, filename_prefix)
+  end
+
+  def build_dotnet_aspnetcore
+    old_filepath = Utils.prune_dotnet_files(@source_input, %w[./dotnet ./shared/Microsoft.NETCore.App])
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+    merge_out_data(old_filepath, filename_prefix)
+  end
+
+  def build_httpd
+    @binary_builder.build(@source_input)
+
+    old_file_path = "#{@binary_builder.base_dir}/#{@source_input.name}-#{@source_input.version}-linux-x64.tgz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+    Archive.strip_top_level_directory_from_tar(old_file_path)
+
+    merge_out_data(old_file_path, filename_prefix)
+  end
+
   def build_libunwind
     built_path = File.join(Dir.pwd, 'built')
     Dir.mkdir(built_path)
@@ -240,6 +268,14 @@ class DependencyBuild
     merge_out_data(old_file_path, filename_prefix)
   end
 
+  def build_miniconda
+    content = HTTPHelper.read_file(@source_input.url)
+    Sha.verify_digest(content, @source_input)
+    sha256 = Sha.get_digest(content, 'sha256')
+    @out_data[:url] = @source_input.url
+    @out_data[:sha256] = sha256
+  end
+
   def build_node
     @source_input.version = @source_input.version.delete_prefix('v')
     @binary_builder.build(@source_input)
@@ -251,40 +287,138 @@ class DependencyBuild
     merge_out_data(old_filepath, filename_prefix)
   end
 
-  def build_dotnet_sdk
-    old_filepath = Utils.prune_dotnet_files(@source_input, ['./shared/*'], true)
-    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+  def build_pip
+    # final resting place for pip source and dependencies
+    old_filepath = "/tmp/pip-#{@source_input.version}.tgz"
+    ENV['LC_CTYPE'] = 'en_US.UTF-8'
+
+    Utils.setup_pip 'python3'
+
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', "pip==#{@source_input.version}")
+        HTTPHelper.download(@source_input, old_filepath)
+
+        Archive.strip_top_level_directory_from_tar("pip-#{@source_input.version}.tar.gz")
+        Runner.run('tar', 'zxf', "pip-#{@source_input.version}.tar.gz")
+        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools==62.1.0')
+        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
+        Runner.run('tar', 'zcvf', old_filepath, '.')
+      end
+    end
+
+    filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
+
     merge_out_data(old_filepath, filename_prefix)
   end
 
-  def build_dotnet_runtime
-    old_filepath = Utils.prune_dotnet_files(@source_input, ['./dotnet'])
-    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
-    merge_out_data(old_filepath, filename_prefix)
-  end
+  def build_pipenv
+    old_file_path = "/tmp/pipenv-v#{@source_input.version}.tgz"
+    ENV['LC_CTYPE'] = 'en_US.UTF-8'
 
-  def build_dotnet_aspnetcore
-    old_filepath = Utils.prune_dotnet_files(@source_input, %w[./dotnet ./shared/Microsoft.NETCore.App])
-    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
-    merge_out_data(old_filepath, filename_prefix)
-  end
+    Utils.setup_pip 'python3'
 
-  def build_httpd
-    @binary_builder.build(@source_input)
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        Runner.run('/usr/local/bin/pip3', 'download', '--no-cache-dir', '--no-binary', ':all:', "pipenv==#{@source_input.version}")
+        old_filepath = "pipenv-#{@source_input.version}.tar.gz"
+        HTTPHelper.download(@source_input, old_filepath)
 
-    old_file_path = "#{@binary_builder.base_dir}/#{@source_input.name}-#{@source_input.version}-linux-x64.tgz"
-    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
-    Archive.strip_top_level_directory_from_tar(old_file_path)
+        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'pytest-runner')
+        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools_scm')
+        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'parver')
+        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
+        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'invoke')
+        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'flit_core')
+        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'hatch-vcs')
+        Runner.run('tar', 'zcvf', old_file_path, '.')
+      end
+    end
 
+    filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
     merge_out_data(old_file_path, filename_prefix)
   end
 
-  def build_miniconda
-    content = HTTPHelper.read_file(@source_input.url)
-    Sha.verify_digest(content, @source_input)
-    sha256 = Sha.get_digest(content, 'sha256')
-    @out_data[:url] = @source_input.url
-    @out_data[:sha256] = sha256
+  def build_python
+    artifacts = "#{Dir.pwd}/artifacts"
+    tar_path = "#{Dir.pwd}/source/Python-#{@source_input.version}.tgz"
+    destdir = Dir.mktmpdir
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        unless File.exist?(tar_path)
+          download_path = "#{Dir.pwd}/Python-#{@source_input.version}.tgz"
+          HTTPHelper.download(@source_input, download_path)
+          tar_path = "Python-#{@source_input.version}.tgz"
+        end
+
+        Runner.run('tar', 'xf', tar_path)
+
+        # Python specific configuration here
+        Dir.chdir("Python-#{@source_input.version}") do
+
+          options = [
+            './configure',
+            '--enable-shared',
+            '--with-ensurepip=yes',
+            '--with-dbmliborder=bdb:gdbm',
+            '--with-tcltk-includes="-I/usr/include/tcl8.6"',
+            '--with-tcltk-libs="-L/usr/lib/x86_64-linux-gnu -ltcl8.6 -L/usr/lib/x86_64-linux-gnu -ltk8.6"',
+            "--prefix=#{destdir}",
+            '--enable-unicode=ucs4'
+          ]
+
+          Runner.run(*options)
+          packages = %w[libdb-dev libgdbm-dev tk8.6-dev]
+          # install apt packages
+          STDOUT.print "Running 'install dependencies' for #{@name} #{@version}... "
+          Runner.run("sudo apt-get update && sudo apt-get -y install " + packages.join(' '))
+
+          Runner.run('apt-get -y --force-yes -d install --reinstall libtcl8.6 libtk8.6 libxss1')
+
+          FileUtils.mkdir_p destdir
+          Dir.glob('/var/cache/apt/archives/lib{tcl8.6,tk8.6,xss1}_*.deb').each do |path|
+            STDOUT.puts("dpkg -x #{path} #{destdir}")
+            Runner.run("dpkg -x #{path} #{destdir}")
+          end
+
+          # replace openssl if needed
+          major, minor, _ = @source_input.version.split('.')
+          if @stack == 'cflinuxfs3' && major == '3' && minor.to_i < 10
+            DependencyBuild.replace_openssl
+          end
+
+          Runner.run("make")
+          Runner.run("make install")
+          # create python symlink
+          unless File.exist?("#{destdir}/bin/python")
+            File.symlink('./python3', "#{destdir}/bin/python")
+          end
+          raise 'Could not run make install' unless $CHILD_STATUS.success?
+          Dir.chdir(destdir) do
+            Runner.run('tar', 'zcvf', "#{artifacts}/python-#{@source_input.version}.tgz", '.', '--hard-dereference')
+          end
+        end
+      end
+    end
+
+    old_file_path = "artifacts/python-#{@source_input.version}.tgz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+    merge_out_data(old_file_path, filename_prefix)
+  end
+
+  def build_setuptools
+    old_filepath = 'artifacts/temp_' + "#{@source_input.url}".split('/').last
+    HTTPHelper.download(@source_input, old_filepath)
+
+    if "#{@source_input.url}".end_with?(".tar.gz", ".tgz")
+      Archive.strip_top_level_directory_from_tar(old_filepath)
+    else
+      Archive.strip_top_level_directory_from_zip(old_filepath, Dir.pwd)
+    end
+
+    filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
+
+    merge_out_data(old_filepath, filename_prefix)
   end
 
   def build_yarn
@@ -300,38 +434,17 @@ class DependencyBuild
     merge_out_data(old_filepath, filename_prefix)
   end
 
-  def bundle_pip_dependencies
-    # final resting place for pip source and dependencies
-    old_filepath = "/tmp/pip-#{@source_input.version}.tgz"
-    ENV['LC_CTYPE'] = 'en_US.UTF-8'
+  class Utils
 
-    # For the latest version of pip, it requires python version >= 3.7 (ref: https://github.com/pypa/pip/pull/10641),
-    # so we need to install python >= 3.7 first.
-    Utils.setup_pip
-
-    Dir.mktmpdir do |dir|
-      Dir.chdir(dir) do
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', "pip==#{@source_input.version}")
-        content = File.open.read
-        Sha.verify_digest(content, @source_input)
-
-        Archive.strip_top_level_directory_from_tar("pip-#{@source_input.version}.tar.gz")
-        Runner.run('tar', 'zxf', "pip-#{@source_input.version}.tar.gz")
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools==62.1.0')
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
-        Runner.run('tar', 'zcvf', old_filepath, '.')
-      end
+    def self.setup_python
+      Runner.run('apt', 'update')
+      Runner.run('apt', 'install', '-y', 'python3.8', 'python3.8-distutils', 'python3.8-dev')
+      setup_pip 'python3.8'
     end
 
-    filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
-
-    merge_out_data(old_filepath, filename_prefix)
-  end
-
-  class Utils
-    def self.setup_pip
+    def self.setup_pip(python_version)
       Runner.run('curl', '-L', 'https://bootstrap.pypa.io/get-pip.py', '-o', 'get-pip.py')
-      Runner.run('python3', 'get-pip.py')
+      Runner.run("#{python_version}", 'get-pip.py')
       Runner.run('/usr/local/bin/pip3', 'install', '--upgrade', 'pip', 'setuptools')
       Runner.run('rm', '-f', 'get-pip.py')
     end
