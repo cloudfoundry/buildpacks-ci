@@ -155,6 +155,8 @@ class GitClient
 
   def self.set_gpg_config
     if ENV['GPG_SIGNING_KEY_ID'] != nil && ENV['GPG_SIGNING_KEY'] != nil
+      system("mkdir -p ~/.gnupg")
+      system("printf \"quiet\" > ~/.gnupg/options")
       system("printf \"%s\" \"#{ENV['GPG_SIGNING_KEY']}\" | base64 -d > ~/.gnupg/private.key")
       system("gpg --options ~/.gnupg/options --import ~/.gnupg/private.key")
       self.set_global_config('user.signingkey', ENV['GPG_SIGNING_KEY_ID'])
