@@ -357,41 +357,6 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
         repository: builds-artifacts
         rebase: true
 
-- name: accept-<%= dep_name.downcase %>-<%= line.downcase %>-story
-  serial: true
-  public: true
-  plan:
-  - in_parallel:
-    - get: buildpacks-ci
-    - get: source
-      resource: source-<%= dep_name.downcase %>-<%= line.downcase %>
-      trigger: true
-      version: every
-      passed:
-    <% dep['buildpacks'].each do |bp_name, bp_data| %>
-      <% if bp_uses_line?(bp_data, line) %>
-        - update-<%= dep_name.downcase %>-<%= line.downcase %>-<%= bp_name.downcase %>
-      <% end %>
-    <% end %>
-    <% dep.fetch('monitored_deps', []).each do |monitored_dep_name| %>
-    - get: source-<%= monitored_dep_name.downcase %>-latest
-      trigger: true
-      version: every
-      passed:
-      <% dep['buildpacks'].each do |bp_name, bp_data| %>
-        <% if bp_uses_line?(bp_data, line) %>
-        - update-<%= dep_name.downcase %>-<%= line.downcase %>-<%= bp_name.downcase %>
-        <% end %>
-      <% end %>
-    <% end %>
-    - get: builds
-  - do:
-    - task: accept-<%= dep_name.downcase %>-<%= line.downcase %>-story
-      file: buildpacks-ci/tasks/build-binary-new/accept.yml
-      params:
-        TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-        TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
-
   <% dep['copy-stacks']&.each do |stack| %>
 - name: copy-<%= dep_name.downcase %>-<%= line.downcase %>-<%= stack.downcase %>
   plan:
@@ -532,6 +497,8 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
   - task: update-buildpack-dependency
     file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
     params:
+      GPG_SIGNING_KEY_ID: ((cf-buildpacks-eng-gpg-key-id))
+      GPG_SIGNING_KEY: ((cf-buildpacks-eng-gpg-key))
       VERSION_LINE: <%= line_hash['line'] %>
       VERSION_LINE_TYPE: <%= if dep_name == 'nginx' && bp_name == 'nginx' then 'nginx' else get_version_line_type(bp['lines']) end %>
       REMOVAL_STRATEGY: <%= bp.fetch('removal_strategy', 'remove_all') %>
@@ -554,11 +521,10 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
       <%# Adding a tracker story id because we have have configured cfgitbot to ignore such PRs %>
       description: "This PR is made automatically by release engineering bot. [#181074448]"
       branch_prefix: "pr-by-releng-bot"
-    <% if bp_name.include? '-cnb' %>
       auto_merge: false
+    <% if bp_name.include? '-cnb' %>
       base: main
     <% else %>
-      auto_merge: true
       base: develop
     <% end %>
   <% end %>
@@ -575,7 +541,6 @@ groups:
   <% end %>
   <% version_lines.each do |line| %>
     - create-<%= dep_name.downcase %>-<%= line.downcase %>-story
-    - accept-<%= dep_name.downcase %>-<%= line.downcase %>-story
       <% dep['copy-stacks']&.each do |stack| %>
     - copy-<%= dep_name.downcase %>-<%= line.downcase %>-<%= stack.downcase %>
       <% end %>
@@ -597,7 +562,6 @@ groups:
   <% end %>
   <% version_lines.each do |line| %>
     - create-<%= dep_name.downcase %>-<%= line.downcase %>-story
-    - accept-<%= dep_name.downcase %>-<%= line.downcase %>-story
     <% dep['copy-stacks']&.each do |stack| %>
     - copy-<%= dep_name.downcase %>-<%= line.downcase %>-<%= stack.downcase %>
     <% end %>

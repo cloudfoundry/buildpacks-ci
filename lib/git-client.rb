@@ -1,7 +1,7 @@
 require 'open3'
 
 class GitClient
-  class GitError < StandardError;end
+  class GitError < StandardError; end
 
   def self.update_submodule_to_latest(source_dir, dir_to_update)
     latest_ref = GitClient.get_commit_sha(source_dir, 0)
@@ -150,6 +150,15 @@ class GitClient
   def self.fetch(dir)
     Dir.chdir(dir) do
       raise GitError.new('Could not fetch') unless system('git fetch')
+    end
+  end
+
+  def self.set_gpg_config
+    if ENV['GPG_SIGNING_KEY_ID'] != nil && ENV['GPG_SIGNING_KEY'] != nil
+      system("printf \"%s\" \"#{ENV['GPG_SIGNING_KEY']}\" | base64 -d > ~/.gnupg/private.key")
+      system("gpg --options ~/.gnupg/options --import ~/.gnupg/private.key")
+      self.set_global_config('user.signingkey', ENV['GPG_SIGNING_KEY_ID'])
+      self.set_global_config('commit.gpgsign', 'true')
     end
   end
 end
