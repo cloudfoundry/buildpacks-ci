@@ -356,6 +356,9 @@ Dir.chdir('artifacts') do
   GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
   GitClient.set_global_config('user.name', 'CF Buildpacks Team CI Server')
 
+  # Set GPG config
+  GitClient.set_gpg_config
+
   File.write('manifest.yml', manifest.to_yaml)
   GitClient.add_file('manifest.yml')
 
