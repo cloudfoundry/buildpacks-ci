@@ -18,6 +18,16 @@ module Depwatcher
       )
     end
 
+    class NodeVersionInfo
+      JSON.mapping(
+        start: String,
+        lts: {type: String, nilable: true},
+        maintenance: {type: String, nilable: true},
+        end: String,
+        codename: {type: String, nilable: true},
+      )
+    end
+
     class External
       JSON.mapping(
         versions: Hash(String, Version),
@@ -46,13 +56,30 @@ module Depwatcher
     end
 
     private def getLTSLine : String
-      response = HTTP::Client.get("https://nodejs.org/en/about/releases/")
-      doc = XML.parse_html(response.body)
-      list = doc.xpath_nodes("//table[@class='release-schedule']")[0].children[3]
-      lts_version = list.children
-        .select() { |item| item.children && item.children.size > 3 && item.children[3].text == "Active LTS" }
-        .map() { |item| item.children[1].text }[0]
-      return lts_version.sub(/^v/, "")
+      # Get JSON from github https://raw.githubusercontent.com/nodejs/Release/main/schedule.json
+
+      response = HTTP::Client.get("https://raw.githubusercontent.com/nodejs/Release/main/schedule.json")
+      if response.status_code != 200
+        raise "Failed to get nodejs LTS schedule"
+      end
+
+      latest_lts = ""
+      actual_date = Time.local
+      actual_year = actual_date.year
+      actual_month = actual_date.month
+      actual_day = actual_date.day
+      Hash(String, NodeVersionInfo).from_json(response.body).map do |version|
+        if version[1].lts != nil && version[1].lts != ""
+          lts_date = version[1].lts.as(String)
+          lts_year = lts_date.split("-")[0].to_i
+          lts_month = lts_date.split("-")[1].to_i
+          lts_day = lts_date.split("-")[2].to_i
+          if lts_year < actual_year || (lts_year == actual_year && lts_month < actual_month) || (lts_year == actual_year && lts_month == actual_month && lts_day <= actual_day)
+            latest_lts = version[0].as(String).sub("v","")
+          end
+        end
+        end
+      return latest_lts
     end
 
     private def url(version : String) : String
