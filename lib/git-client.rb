@@ -77,6 +77,11 @@ class GitClient
     raise GitError.new("Could not tag #{commit_sha} with #{tag}") unless system("git tag -a #{tag} #{commit_sha}")
   end
 
+  def self.create_branch(prefix)
+    branch = "#{prefix}/#{Time.now.strftime('%Y-%m-%d-%H-%M-%S')}"
+    raise GitError.new("Could not create branch: #{branch}") unless system("git checkout -b #{branch}")
+  end
+
   def self.safe_commit(message)
     changes_staged_for_commit = !system('git diff --cached --exit-code')
 
