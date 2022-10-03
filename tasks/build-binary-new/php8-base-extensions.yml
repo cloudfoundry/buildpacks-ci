@@ -46,8 +46,8 @@ extensions:
   md5: c48f5de2f96ffebe2e18eaefff4917f9
   klass: PeclRecipe
 - name: apcu
-  version: 5.1.21
-  md5: 7f675ceba180cd6688d09100badbcdda
+  version: 5.1.22
+  md5: 2e1fb1f09725ada616e873c4e4012ff6
   klass: PeclRecipe
 - name: igbinary
   version: 3.2.7
@@ -58,12 +58,12 @@ extensions:
   md5: e242c66e53c0d155982713cd78b3d480
   klass: PeclRecipe
 - name: mailparse
-  version: 3.1.3
-  md5: 64be25ebcb8b792219c14d05038396bc
+  version: 3.1.4
+  md5: 1ab8d517fcfad5624e6fc4de71e24b47
   klass: PeclRecipe
 - name: mongodb
-  version: 1.14.0
-  md5: ddb27894784aee3e8f9acfa8ec826cc8
+  version: 1.14.1
+  md5: 6289847be4b34a5c4561317b02b5e254
   klass: PeclRecipe
 - name: msgpack
   version: 2.1.2
