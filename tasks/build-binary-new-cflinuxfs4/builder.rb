@@ -184,6 +184,15 @@ class DependencyBuild
     merge_out_data(old_filepath, filename_prefix)
   end
 
+  def build_dep
+    @binary_builder.build(@source_input)
+
+    old_filepath = "#{@binary_builder.base_dir}/#{@source_input.name}-v#{@source_input.version}-linux-x64.tgz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+
+    merge_out_data(old_filepath, filename_prefix)
+  end
+
   def build_dotnet_sdk
     old_filepath = Utils.prune_dotnet_files(@source_input, ['./shared/*'], true)
     filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
@@ -199,6 +208,35 @@ class DependencyBuild
   def build_dotnet_aspnetcore
     old_filepath = Utils.prune_dotnet_files(@source_input, %w[./dotnet ./shared/Microsoft.NETCore.App])
     filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+    merge_out_data(old_filepath, filename_prefix)
+  end
+
+  def build_glide
+    @binary_builder.build(@source_input)
+
+    old_filepath = "#{@binary_builder.base_dir}/#{@source_input.name}-v#{@source_input.version}-linux-x64.tgz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+
+    merge_out_data(old_filepath, filename_prefix)
+  end
+
+  def build_go
+    @source_input.version = @source_input.version.delete_prefix('go')
+    @binary_builder.build(@source_input)
+
+    old_filepath = "#{@binary_builder.base_dir}/go#{@source_input.version}.linux-amd64.tar.gz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+    Archive.strip_top_level_directory_from_tar(old_filepath)
+
+    merge_out_data(old_filepath, filename_prefix)
+  end
+
+  def build_godep
+    @binary_builder.build(@source_input)
+
+    old_filepath = "#{@binary_builder.base_dir}/#{@source_input.name}-v#{@source_input.version}-linux-x64.tgz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+
     merge_out_data(old_filepath, filename_prefix)
   end
 
