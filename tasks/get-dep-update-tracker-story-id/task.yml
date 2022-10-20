@@ -1,0 +1,17 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+inputs:
+  - name: source
+  - name: builds
+  - name: buildpacks-ci
+outputs:
+  - name: tracker-story-id
+run:
+  path: bash
+  args:
+    - -cl
+    - buildpacks-ci/tasks/get-dep-update-tracker-story-id/run.rb

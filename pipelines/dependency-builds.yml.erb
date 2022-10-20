@@ -132,6 +132,12 @@ def is_cloudfoundry_cnb(buildpack)
     return true
   end
 end
+
+def read_tracker_story_id(tracker_story_dir)
+  Dir.glob("#{tracker_story_dir}/id").first do |file|
+    return File.read(file).strip
+  end
+end
 %>
 
 resource_types:
@@ -514,12 +520,14 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
     output_mapping:
       artifacts: buildpack
     <% end %>
+  - task: get-tracker-story-id
+    file: buildpacks-ci/tasks/get-dep-update-tracker-story-id/task.yml
   - put: <%= bp_name %>-pull-request
     params:
       repo_location: buildpack
+      tracker_story_id_location: tracker-story-id
       title: <%= "Updating version for #{dep_name} for #{line_hash['line']} " %>
       <%# Adding a tracker story id because we have have configured cfgitbot to ignore such PRs %>
-      description: "This PR is made automatically by release engineering bot. [#181074448]"
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
     <% if bp_name.include? '-cnb' %>
