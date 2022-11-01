@@ -289,6 +289,9 @@ dependencies:
           - line: 3.10.X
             deprecation_date: 2026-10-04
             link: https://www.python.org/dev/peps/pep-0619/
+          - line: 3.11.X
+            deprecation_date: 2027-10-24
+            link: https://www.python.org/dev/peps/pep-0664/
         removal_strategy: remove_all
     versions_to_keep: 1
   r:
