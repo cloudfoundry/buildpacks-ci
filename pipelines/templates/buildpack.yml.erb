@@ -723,7 +723,9 @@ jobs: ##########################################################################
         env_file: environment/metadata
 <% end %>
 
-  - name: specs-edge-integration-develop
+<% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2']%>
+<% relevant_stacks.each do |stack| %>
+  - name: specs-edge-integration-develop-<%= stack %>
     serial: true
     public: true
     plan:
@@ -748,22 +750,17 @@ jobs: ##########################################################################
         input_mapping:
           ci: feature-eng-ci
           lock: environment
-<% if language == "python" %>
         params:
           SCALE_DIEGO_CELLS: true
-<% end %>
-<% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
-        params:
+<% if stack == "cflinuxfs4" %>
           ADD_CFLINUXFS4_STACK: true
 <% end %>
 <% if buildpacks[language]['stacks'].include?('windows')%>
-        params:
           DEPLOY_WINDOWS_CELL: true
 <% end %>
-<% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2']%>
-<% relevant_stacks.each do |stack| %>
       - do:
         - task: create-cf-space
+          attempts: 5
           file: feature-eng-ci/tasks/cf/create-space/task.yml
           input_mapping:
             ci: feature-eng-ci
@@ -771,31 +768,6 @@ jobs: ##########################################################################
           params:
             DOMAIN: 'cf-app.com'
             ORG: pivotal
-<% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
-        - task: configure-test
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: cfbuildpacks/ci
-            inputs:
-            - name: buildpack
-            outputs:
-            - name: buildpack
-            run:
-              dir: ""
-              path: bash
-              args:
-              - -c
-              - |
-                #!/bin/bash
-                set -e
-                cd buildpack
-                contents="$(jq '.stack = "<%= stack %>"' config.json)"
-                echo -E "${contents}" > config.json
-                echo -e "config.json modified to:\n $(cat config.json)"
-<% end %>
         - task: ginkgo-<%= stack %>
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           input_mapping: {cf-space: space}
@@ -811,7 +783,6 @@ jobs: ##########################################################################
             <% else %>
           privileged: true
             <% end %>
-          <% end %>
     on_failure:
       put: failure-alert
       params:
@@ -823,6 +794,7 @@ jobs: ##########################################################################
       params:
         action: unclaim
         env_file: environment/metadata
+<% end %>
 
 <% unless buildpacks[language]['skip_brats'] %>
   - name: specs-edge-brats-develop
@@ -848,12 +820,11 @@ jobs: ##########################################################################
         input_mapping:
           ci: feature-eng-ci
           lock: environment
-<% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
         params:
+<% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
           ADD_CFLINUXFS4_STACK: true
 <% end %>
 <% if buildpacks[language]['stacks'].include?('windows')%>
-        params:
           DEPLOY_WINDOWS_CELL: true
 <% end %>
 <% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2'] %>
@@ -926,7 +897,10 @@ jobs: ##########################################################################
 <% unless buildpacks[language]['skip_brats'] %>
           - specs-edge-brats-develop
 <% end %>
-          - specs-edge-integration-develop
+<% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2']%>
+<% relevant_stacks.each do |stack| %>
+          - specs-edge-integration-develop-<%= stack %>
+<% end %>
         on_success:
           task: github-set-status-success
           file: buildpacks-ci/tasks/set-status-success/task.yml
