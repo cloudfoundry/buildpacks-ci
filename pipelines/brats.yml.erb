@@ -108,6 +108,7 @@ jobs:
           params:
             action: claim
         - task: create-cf-space
+          attempts: 5
           file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
           input_mapping:
             environment: smith-environments-<%= pas_versions['n-2'] %>
@@ -157,6 +158,7 @@ jobs:
 <% stacks[language].each do |stack| %>
           - do:
             - task: create-cf-space
+              attempts: 5
               file: feature-eng-ci/tasks/cf/create-space/task.yml
               params:
                 DOMAIN: cf-app.com
