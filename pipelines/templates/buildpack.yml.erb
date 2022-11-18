@@ -831,6 +831,7 @@ jobs: ##########################################################################
 <% relevant_stacks.each do |stack| %>
       - do:
         - task: create-cf-space
+          attempts: 5
           file: feature-eng-ci/tasks/cf/create-space/task.yml
           params:
             DOMAIN: 'cf-app.com'
