@@ -1,8 +1,6 @@
 ---
 extensions:
   exclusions:
-  - name: pdo_sqlsrv
-  - name: sqlsrv
   additions:
   - name: oci8
     version: 3.2.1
