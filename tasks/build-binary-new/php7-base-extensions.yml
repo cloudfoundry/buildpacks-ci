@@ -9,8 +9,8 @@ native_modules:
   md5: bd8ce7069ff99a400efd14cf339a727b
   klass: LuaRecipe
 - name: hiredis
-  version: 1.0.2
-  md5: 58e8313188f66ed1be1c220d14a7752e
+  version: 1.1.0
+  md5: 699faede056b6d5aea1c3f41f832e172
   klass: HiredisRecipe
 - name: snmp
   version: nil
@@ -38,8 +38,8 @@ extensions:
   md5: ebeeffa834e8428c9105a45fe89344aa
   klass: PeclRecipe
 - name: igbinary
-  version: 3.2.7
-  md5: 927f6cff8e74287453fe327d3893aaa3
+  version: 3.2.12
+  md5: 6853055f4fb7d6e9e0089245372dbb7f
   klass: PeclRecipe
 - name: gnupg
   version: 1.5.1
@@ -58,8 +58,8 @@ extensions:
   md5: 1ab8d517fcfad5624e6fc4de71e24b47
   klass: PeclRecipe
 - name: mongodb
-  version: 1.14.1
-  md5: 6289847be4b34a5c4561317b02b5e254
+  version: 1.15.0
+  md5: e42cef3737fbd20ba3dd4dc9b7a427f2
   klass: PeclRecipe
 - name: msgpack
   version: 2.1.2
@@ -102,8 +102,8 @@ extensions:
   md5: 30de4089ae5c17f32617cef35dbe53e5
   klass: PeclRecipe
 - name: xdebug
-  version: 3.1.5
-  md5: fe2b85050c8ac6ddba6ae431f5c6dade
+  version: 3.1.6
+  md5: 5b204d4a02f3723a87e2b9dec0046b22
   klass: PeclRecipe
 - name: yaf
   version: 3.3.5
@@ -178,8 +178,8 @@ extensions:
   md5: '07695da8376002babbce528205decf07'
   klass: PeclRecipe
 - name: phalcon
-  version: 5.0.2
-  md5: 204b477d3ce0d77cf84a8210d8ca15c0
+  version: 5.1.1
+  md5: a9a528931f7a7ca054af0102bfb467b6
   klass: PeclRecipe
 - name: phpiredis
   version: 1.0.1
@@ -194,12 +194,12 @@ extensions:
   md5: 68b68cd9410e62b8481445e0d89220c0
   klass: TidewaysXhprofRecipe
 - name: solr
-  version: 2.5.1
-  md5: 29fc866198d61bccdbc4c4f53fb7ef06
+  version: 2.6.0
+  md5: ac5e1e1fbf28e0c543a52c533c967634
   klass: PeclRecipe
 - name: oci8
-  version: 2.2.0
-  md5: 678d2a647881cd8e5b458c669dcce215
+  version: 3.2.1
+  md5: 309190ef3ede2779a617c9375d32ea7a
   klass: OraclePeclRecipe
 - name: pdo_oci
   version: nil
