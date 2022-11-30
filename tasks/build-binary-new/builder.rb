@@ -875,15 +875,15 @@ class Builder
       )
 
     when 'jruby'
-      if /9.1.*/ =~ source_input.version
-        # jruby 9.1.X.X will implement ruby 2.3.X
-        ruby_version = '2.3'
-      elsif /9.2.*/ =~ source_input.version
+      if /9.2.*/ =~ source_input.version
         # jruby 9.2.X.X will implement ruby 2.5.X
         ruby_version = '2.5'
       elsif /9.3.*/ =~ source_input.version
         # jruby 9.3.X.X will implement ruby 2.6.X
         ruby_version = '2.6'
+      elsif /9.4.*/ =~ source_input.version
+        # jruby 9.4.X.X will implement ruby 3.1.X
+        ruby_version = '3.1'
       else
         raise "Unsupported jruby version line #{source_input.version}"
       end
