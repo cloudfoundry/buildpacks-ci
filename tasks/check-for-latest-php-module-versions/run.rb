@@ -32,7 +32,7 @@ Run the [helper scripts](https://github.com/cloudfoundry/buildpacks-ci/tree/mast
 These scripts bump as many modules as they can, but the results should still be checked manually before committing. Some must be bumped manually, and it's still important to check if a module supports a new version of PHP which it didn't previously support (in which case it should be added manually).
 DESCRIPTION
 
-description += "\n\n" + %w(Name PHP8.0 PHP8.1).join(' | ') + " | Changes description" + "\n"
+description += "\n\n" + %w(Name Latest PHP8.0 PHP8.1).join(' | ') + " | Changes description" + "\n"
 description += '--- | --- | --- | --- | --- | ---' + "\n"
 extensions.keys.sort_by(&:name).each do |key|
   name = "#{key.name} (#{key.klass.gsub(/Recipe$/,'')})"
