@@ -8,5 +8,5 @@ extensions:
     klass: OraclePeclRecipe
   - name: ioncube
     version: 12.0.3
-    md5:
+    md5: ffd527c90e14bdf57a723f7a34a325e5
     klass: IonCubeRecipe
