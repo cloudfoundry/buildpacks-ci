@@ -14,7 +14,6 @@ data = {
   'PHP8.1' => php81_extensions.base_yml,
 }
 
-
 Tuple = Struct.new(:name, :klass)
 extensions = {}
 data.each do |name, hash|
@@ -35,7 +34,7 @@ DESCRIPTION
 description += "\n\n" + %w(Name Latest PHP8.0 PHP8.1).join(' | ') + " | Changes description" + "\n"
 description += '--- | --- | --- | --- | --- | ---' + "\n"
 extensions.keys.sort_by(&:name).each do |key|
-  name = "#{key.name} (#{key.klass.gsub(/Recipe$/,'')})"
+  name = "#{key.name} (#{key.klass.gsub(/Recipe$/, '')})"
   url = url_for_type(key.name, key.klass)
   latest = current_pecl_version(key.name) if key.klass =~ /PECL/i
   latest = current_github_version(url) if url =~ %r{^https://github.com}
@@ -45,13 +44,16 @@ extensions.keys.sort_by(&:name).each do |key|
     val = "**#{val}**" if val && val != latest
     data << val
   end
-  description += data.join(' | ') + " | " + "\n" unless data[2,3].all?(&:nil?)
+  description += data.join(' | ') + " | " + "\n" unless data[2, 3].all?(&:nil?)
 end
 
 description += <<-DESCRIPTION
 
 If you're updating cassandra modules (including datastax/cpp-driver) please do so in individual commits, then rebuild appropriate php versions, so integration tests can run in CI with only cassandra changes.
 This will help isolate the php cassandra module change(s) if the changes cause problems.
+
+If the module release is compatible with all of 8.0, 8.1...8.N, update the php[|8]-base-extensions.yml file. Otherwise, update the respective patch file (php[|8|8.1|..8.N]-extensions-patch.yml)
+
 
 DESCRIPTION
 
