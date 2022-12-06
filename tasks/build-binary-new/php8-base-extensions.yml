@@ -25,26 +25,6 @@ native_modules:
   md5: 3ca9ebc13b6b4735acae0a6a4c4f9a95
   klass: LibSodiumRecipe
 extensions:
-- name: tideways_xhprof
-  version: 5.0.4
-  md5: 68b68cd9410e62b8481445e0d89220c0
-  klass: TidewaysXhprofRecipe
-- name: ssh2
-  version: 1.3.1
-  md5: aa29046de73f1036aea66b4a70f6f598
-  klass: PeclRecipe
-- name: rdkafka
-  version: 6.0.3
-  md5: fd10faec0c599e34837a9482d3c6c801
-  klass: PeclRecipe
-- name: imagick
-  version: 3.7.0
-  md5: '0687774a6126467d4e5ede02171e981d'
-  klass: PeclRecipe
-- name: gnupg
-  version: 1.5.1
-  md5: c48f5de2f96ffebe2e18eaefff4917f9
-  klass: PeclRecipe
 - name: apcu
   version: 5.1.22
   md5: 2e1fb1f09725ada616e873c4e4012ff6
@@ -52,6 +32,14 @@ extensions:
 - name: igbinary
   version: 3.2.12
   md5: 6853055f4fb7d6e9e0089245372dbb7f
+  klass: PeclRecipe
+- name: gnupg
+  version: 1.5.1
+  md5: c48f5de2f96ffebe2e18eaefff4917f9
+  klass: PeclRecipe
+- name: imagick
+  version: 3.7.0
+  md5: '0687774a6126467d4e5ede02171e981d'
   klass: PeclRecipe
 - name: LZF
   version: 1.7.0
@@ -73,13 +61,37 @@ extensions:
   version: 2.0.7
   md5: 8ea6eb5ac6de8a4ed399980848c04c0c
   klass: PeclRecipe
+- name: odbc
+  version: nil
+  md5: nil
+  klass: OdbcRecipe
+- name: pdo_odbc
+  version: nil
+  md5: nil
+  klass: PdoOdbcRecipe
 - name: pdo_sqlsrv
   version: 5.10.1
   md5: 7db86f687b7b69326c7931a31e7a49c3
   klass: PeclRecipe
+- name: rdkafka
+  version: 6.0.3
+  md5: fd10faec0c599e34837a9482d3c6c801
+  klass: PeclRecipe
+- name: redis
+  version: 5.3.7
+  md5: 1ed6793902214cc02467666ba69dd2be
+  klass: RedisPeclRecipe
+- name: ssh2
+  version: 1.3.1
+  md5: aa29046de73f1036aea66b4a70f6f598
+  klass: PeclRecipe
 - name: sqlsrv
   version: 5.10.1
   md5: f60a5eb24c1bba21d78cbbef05efe73d
+  klass: PeclRecipe
+- name: stomp
+  version: 2.0.3
+  md5: 30de4089ae5c17f32617cef35dbe53e5
   klass: PeclRecipe
 - name: xdebug
   version: 3.1.6
@@ -93,10 +105,14 @@ extensions:
   version: 2.2.2
   md5: 22678c1238f2c6848ff7d74b780a8307
   klass: PeclRecipe
-- name: psr
-  version: 1.2.0
-  md5: '07695da8376002babbce528205decf07'
-  klass: PeclRecipe
+- name: memcached
+  version: 3.2.0
+  md5: acc58fea7b7f456408a25ac927846ad0
+  klass: MemcachedPeclRecipe
+- name: sodium
+  version: nil
+  md5: nil
+  klass: SodiumRecipe
 - name: tidy
   version: nil
   md5: nil
@@ -117,38 +133,30 @@ extensions:
   version: nil
   md5: nil
   klass: FakePeclRecipe
-- name: gd
-  version: nil
-  md5: nil
-  klass: Gd74FakePeclRecipe
+- name: amqp
+  version: 1.11.0
+  md5: 3a0638223e320fc21f3b079198c24f12
+  klass: AmqpPeclRecipe
 - name: maxminddb
   version: 1.11.0
   md5: 5feec07108cf7898bd0591ee54b572cd
   klass: MaxMindRecipe
-- name: odbc
-  version: nil
-  md5: nil
-  klass: OdbcRecipe
-- name: pdo_odbc
-  version: nil
-  md5: nil
-  klass: PdoOdbcRecipe
-- name: redis
-  version: 5.3.7
-  md5: 1ed6793902214cc02467666ba69dd2be
-  klass: RedisPeclRecipe
-- name: memcached
-  version: 3.2.0
-  md5: acc58fea7b7f456408a25ac927846ad0
-  klass: MemcachedPeclRecipe
-- name: sodium
-  version: nil
-  md5: nil
-  klass: SodiumRecipe
+- name: psr
+  version: 1.2.0
+  md5: '07695da8376002babbce528205decf07'
+  klass: PeclRecipe
+- name: phalcon
+  version: 5.1.2
+  md5: 00f120d9f6f8dbf6e2618e1b0cfd9dfc
+  klass: PeclRecipe
 - name: phpiredis
   version: 1.0.1
   md5: '09a9bdb347c70832d3e034655b604064'
   klass: PHPIRedisRecipe
+- name: tideways_xhprof
+  version: 5.0.4
+  md5: 68b68cd9410e62b8481445e0d89220c0
+  klass: TidewaysXhprofRecipe
 - name: solr
   version: 2.6.0
   md5: ac5e1e1fbf28e0c543a52c533c967634
@@ -161,7 +169,7 @@ extensions:
   version: nil
   md5: nil
   klass: OraclePdoRecipe
-- name: amqp
-  version: 1.11.0
-  md5: 3a0638223e320fc21f3b079198c24f12
-  klass: AmqpPeclRecipe
+- name: gd
+  version: nil
+  md5: nil
+  klass: Gd74FakePeclRecipe

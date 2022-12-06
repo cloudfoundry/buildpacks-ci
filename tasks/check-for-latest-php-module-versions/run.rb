@@ -5,19 +5,14 @@ require_relative('common.rb')
 require_relative '../../lib/tracker-client'
 require_relative '../../tasks/build-binary-new/merge-extensions'
 
-base_extensions_7 = BaseExtensions.new('buildpacks-ci/tasks/build-binary-new/php7-base-extensions.yml')
-php74_extensions = base_extensions_7.patch('buildpacks-ci/tasks/build-binary-new/php74-extensions-patch.yml')
-
 base_extensions_8 = BaseExtensions.new('buildpacks-ci/tasks/build-binary-new/php8-base-extensions.yml')
 php80_extensions = base_extensions_8
 php81_extensions = base_extensions_8.patch('buildpacks-ci/tasks/build-binary-new/php81-extensions-patch.yml')
 
 data = {
-  'PHP7.4' => php74_extensions.base_yml,
   'PHP8.0' => php80_extensions.base_yml,
   'PHP8.1' => php81_extensions.base_yml,
 }
-
 
 Tuple = Struct.new(:name, :klass)
 extensions = {}
@@ -36,20 +31,20 @@ Run the [helper scripts](https://github.com/cloudfoundry/buildpacks-ci/tree/mast
 These scripts bump as many modules as they can, but the results should still be checked manually before committing. Some must be bumped manually, and it's still important to check if a module supports a new version of PHP which it didn't previously support (in which case it should be added manually).
 DESCRIPTION
 
-description += "\n\n" + %w(Name Latest PHP7.4 PHP8.0 PHP8.1).join(' | ') + " | Changes description" + "\n"
-description += '--- | --- | --- | --- | --- | --- | ---' + "\n"
+description += "\n\n" + %w(Name Latest PHP8.0 PHP8.1).join(' | ') + " | Changes description" + "\n"
+description += '--- | --- | --- | --- | --- | ---' + "\n"
 extensions.keys.sort_by(&:name).each do |key|
-  name = "#{key.name} (#{key.klass.gsub(/Recipe$/,'')})"
+  name = "#{key.name} (#{key.klass.gsub(/Recipe$/, '')})"
   url = url_for_type(key.name, key.klass)
   latest = current_pecl_version(key.name) if key.klass =~ /PECL/i
   latest = current_github_version(url) if url =~ %r{^https://github.com}
   data = [url ? "[#{name}](#{url})" : name, latest]
-  %w(PHP7.4 PHP8.0 PHP8.1).each do |v|
+  %w(PHP8.0 PHP8.1).each do |v|
     val = extensions[key][v]
     val = "**#{val}**" if val && val != latest
     data << val
   end
-  description += data.join(' | ') + " | " + "\n" unless data[2,3].all?(&:nil?)
+  description += data.join(' | ') + " | " + "\n" unless data[2, 3].all?(&:nil?)
 end
 
 description += <<-DESCRIPTION
@@ -57,8 +52,8 @@ description += <<-DESCRIPTION
 If you're updating cassandra modules (including datastax/cpp-driver) please do so in individual commits, then rebuild appropriate php versions, so integration tests can run in CI with only cassandra changes.
 This will help isolate the php cassandra module change(s) if the changes cause problems.
 
-If the release is compatible with all versions update the php[7|8]-base-extensions.yml file. Otherwise,
-update the respective patch file.
+If the module release is compatible with all of 8.0, 8.1...8.N, update the php[|8]-base-extensions.yml file. Otherwise, update the respective patch file (php[|8|8.1|..8.N]-extensions-patch.yml)
+
 
 DESCRIPTION
 
