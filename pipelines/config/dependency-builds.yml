@@ -49,9 +49,6 @@ dependencies:
     buildpacks:
       dotnet-core:
         lines:
-          - line: 3.1.X
-            deprecation_date: 2022-12-03
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 6.0.X
             deprecation_date: 2024-11-08
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
@@ -66,9 +63,6 @@ dependencies:
     buildpacks:
       dotnet-core:
         lines:
-          - line: 3.1.X
-            deprecation_date: 2022-12-03
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 6.0.X
             deprecation_date: 2024-11-08
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
@@ -83,9 +77,6 @@ dependencies:
     buildpacks:
       dotnet-core:
         lines:
-          - line: 3.1.X
-            deprecation_date: 2022-12-03
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 6.0.X
             deprecation_date: 2024-11-08
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
