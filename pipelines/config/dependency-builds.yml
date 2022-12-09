@@ -21,7 +21,6 @@ dependencies:
     buildpacks:
       ruby:
         lines:
-          - line: 1.X.X
           - line: 2.X.X
     source_type: rubygems
     any_stack: true
@@ -135,7 +134,6 @@ dependencies:
     buildpacks:
       ruby:
         lines:
-          - line: 9.2.X
           - line: 9.3.X
           - line: 9.4.X
     source_type: jruby
@@ -328,6 +326,9 @@ dependencies:
             link: https://www.ruby-lang.org/en/news/2021/12/25/ruby-3-1-0-released/
         removal_strategy: keep_latest_released
     versions_to_keep: 2
+    #! Older ruby versions aren't compatible with openssl 3 of jammy
+    #! There may be workarounds but decided not to support these versions.
+    skip_lines_cflinuxfs4: ['2.7.X', '3.0.X']
   rubygems:
     buildpacks:
       ruby:
@@ -358,9 +359,9 @@ dependencies:
       - 'extension: .tar.gz'
     any_stack: true
     versions_to_keep: 2
-cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep' ]
-cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'pip', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep' ]
-cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go' ]
+cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby' ]
+cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'pip', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems' ]
+cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go', 'ruby' ]
 build_stacks: [ 'cflinuxfs4' , 'cflinuxfs3' ]
 windows_stacks: [ 'windows2016', 'windows' ]
 deprecated_stacks: [ 'cflinuxfs2' ]

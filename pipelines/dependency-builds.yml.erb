@@ -414,7 +414,7 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
   - in_parallel:
   <%
   build_stacks = dep['any_stack'] ? ['any-stack'] : specific_stack
-  build_stacks - ['cflinuxfs4'] unless skipped_version_lines.include?(line.downcase)
+  build_stacks = build_stacks - ['cflinuxfs4'] if skipped_version_lines.map(&:downcase).include?(line.downcase)
   %>
   <% build_stacks.each do |stack| %>
     - do:
