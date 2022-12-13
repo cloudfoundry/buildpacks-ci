@@ -175,11 +175,7 @@ resources:
 <% stacks.each do |stack| %>
 - name: <%= stack %>-image
   type: docker-image
-  <% if stack == 'cflinuxfs4' %>
-  source: {repository: cfbuildpacks/<%= stack %>}
-  <% else %>
   source: {repository: cloudfoundry/<%= stack %>}
-  <% end %>
 <% end %>
 
 <% dependencies.values.select{|dep| dep.fetch('branch', 'develop') == 'v3' }.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack| %>
