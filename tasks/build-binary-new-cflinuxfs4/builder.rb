@@ -184,6 +184,15 @@ class DependencyBuild
     merge_out_data(old_filepath, filename_prefix)
   end
 
+  def build_bundler
+    @binary_builder.build(@source_input)
+
+    old_filepath = "#{@binary_builder.base_dir}/#{@source_input.name}-#{@source_input.version}.tgz"
+    filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
+
+    merge_out_data(old_filepath, filename_prefix)
+  end
+
   def build_dep
     @binary_builder.build(@source_input)
 
@@ -248,6 +257,36 @@ class DependencyBuild
     Archive.strip_top_level_directory_from_tar(old_file_path)
 
     merge_out_data(old_file_path, filename_prefix)
+  end
+
+  def build_jruby
+    if /9.3.*/ =~ @source_input.version
+      # jruby 9.3.X.X will implement ruby 2.6.X
+      ruby_version = '2.6'
+    elsif /9.4.*/ =~ @source_input.version
+      # jruby 9.4.X.X will implement ruby 3.1.X
+      ruby_version = '3.1'
+    else
+      raise "Unsupported jruby version line #{@source_input.version}"
+    end
+
+    full_version = "#{@source_input.version}-ruby-#{ruby_version}"
+    @binary_builder.build(
+          SourceInput.new(
+              @source_input.name,
+              @source_input.url,
+              full_version,
+              @source_input.md5,
+              @source_input.sha256,
+              @source_input.git_commit_sha
+          )
+      )
+
+    old_filepath = "#{@binary_builder.base_dir}/#{@source_input.name}-#{full_version}-linux-x64.tgz"
+    filename_prefix = "#{@source_input.name}_#{full_version}_linux_x64_#{@stack}"
+    Archive.strip_top_level_directory_from_tar(old_filepath)
+
+    merge_out_data(old_filepath, filename_prefix)
   end
 
   def build_libunwind
@@ -442,6 +481,27 @@ class DependencyBuild
     old_file_path = "artifacts/python-#{@source_input.version}.tgz"
     filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
     merge_out_data(old_file_path, filename_prefix)
+  end
+
+  def build_ruby
+    @binary_builder.build(@source_input)
+
+    old_filepath = "#{@binary_builder.base_dir}/ruby-#{@source_input.version}-linux-x64.tgz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+    Archive.strip_top_level_directory_from_tar(old_filepath)
+
+    merge_out_data(old_filepath, filename_prefix)
+  end
+
+  def build_rubygems
+    old_filepath = 'artifacts/temp_file.tgz'
+    HTTPHelper.download(@source_input, old_filepath)
+
+    Archive.strip_top_level_directory_from_tar(old_filepath)
+
+    filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
+
+    merge_out_data(old_filepath, filename_prefix)
   end
 
   def build_setuptools
