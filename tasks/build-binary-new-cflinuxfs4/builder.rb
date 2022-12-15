@@ -284,7 +284,7 @@ class DependencyBuild
 
     old_filepath = "#{@binary_builder.base_dir}/#{@source_input.name}-#{full_version}-linux-x64.tgz"
     filename_prefix = "#{@source_input.name}_#{full_version}_linux_x64_#{@stack}"
-    Archive.strip_top_level_directory_from_tar(old_filepath)
+    Archive.strip_incorrect_words_yaml_from_tar(old_filepath)
 
     merge_out_data(old_filepath, filename_prefix)
   end
@@ -488,7 +488,7 @@ class DependencyBuild
 
     old_filepath = "#{@binary_builder.base_dir}/ruby-#{@source_input.version}-linux-x64.tgz"
     filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
-    Archive.strip_top_level_directory_from_tar(old_filepath)
+    Archive.strip_incorrect_words_yaml_from_tar(old_filepath)
 
     merge_out_data(old_filepath, filename_prefix)
   end
