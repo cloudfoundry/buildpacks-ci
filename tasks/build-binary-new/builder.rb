@@ -916,21 +916,19 @@ class Builder
 
     when 'php'
       base_extension_file = ''
-      if source_input.version.start_with?('7')
-        base_extension_file = File.join(php_extensions_dir, 'php7-base-extensions.yml')
-      elsif source_input.version.start_with?('8')
+      if source_input.version.start_with?('8')
         base_extension_file = File.join(php_extensions_dir, 'php8-base-extensions.yml')
       else
-        raise "Unexpected PHP version #{source_input.version}. Expected 7.X or 8.X"
+        raise "Unexpected PHP version #{source_input.version}. Expected 8.X"
       end
 
       php_extensions = BaseExtensions.new(base_extension_file)
 
       patch_file = nil
-      if source_input.version.start_with?('7.4.')
-        patch_file = File.join(php_extensions_dir, 'php74-extensions-patch.yml')
-      elsif source_input.version.start_with?('8.1.')
+      if source_input.version.start_with?('8.1.')
         patch_file = File.join(php_extensions_dir, 'php81-extensions-patch.yml')
+      elsif source_input.version.start_with?('8.2.')
+        patch_file = File.join(php_extensions_dir, 'php82-extensions-patch.yml')
       end
 
       php_extensions.patch!(patch_file) if patch_file
