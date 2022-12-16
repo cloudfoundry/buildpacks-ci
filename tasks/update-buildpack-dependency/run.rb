@@ -198,14 +198,12 @@ end
 php_defaults = nil
 if !rebuilt && manifest_name == 'php' && buildpack_name == 'php'
   case resource_version
-  when /^7.3/
-    varname = 'PHP_73_LATEST'
-  when /^7.4/
-    varname = 'PHP_74_LATEST'
   when /^8.0/
     varname = 'PHP_80_LATEST'
   when /^8.1/
     varname = 'PHP_81_LATEST'
+  when /^8.2/
+    varname = 'PHP_82_LATEST'
   else
     puts "Unexpected version #{resource_version} is not in known version lines."
     exit 1
