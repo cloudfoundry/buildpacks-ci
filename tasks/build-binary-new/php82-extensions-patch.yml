@@ -5,4 +5,8 @@ extensions:
     version: 3.3.5
     md5: 128ecf6c84dd71d59c12d826cc51f0c4
     klass: PeclRecipe
+  - name: phalcon
+    version: 5.1.2
+    md5: 00f120d9f6f8dbf6e2618e1b0cfd9dfc
+    klass: PeclRecipe
   additions:
