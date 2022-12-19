@@ -162,8 +162,8 @@ extensions:
   md5: ac5e1e1fbf28e0c543a52c533c967634
   klass: PeclRecipe
 - name: oci8
-  version: 3.2.1
-  md5: 309190ef3ede2779a617c9375d32ea7a
+  version: 3.0.1 # PHP 8.0 requires oci8-3.0.1
+  md5: 641ebceb483fa2d95e79aea99b1350de
   klass: OraclePeclRecipe
 - name: pdo_oci
   version: nil
