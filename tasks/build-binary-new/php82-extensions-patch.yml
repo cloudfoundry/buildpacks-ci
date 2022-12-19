@@ -10,3 +10,7 @@ extensions:
     md5: 00f120d9f6f8dbf6e2618e1b0cfd9dfc
     klass: PeclRecipe
   additions:
+  - name: oci8
+    version: 3.2.1
+    md5: 309190ef3ede2779a617c9375d32ea7a
+    klass: OraclePeclRecipe
