@@ -19,6 +19,13 @@ end
 module DependencyBuild
   class << self
 
+    def setup_ruby
+      Runner.run('apt', 'update')
+      Runner.run('apt', 'install', '-y', 'software-properties-common')
+      Runner.run('apt-add-repository', '-y', 'ppa:brightbox/ruby-ng')
+      Runner.run('apt', 'update')
+      Runner.run('apt', 'install', '-y', 'ruby2.7', 'ruby2.7-dev')
+    end
     def setup_python
       Runner.run('apt', 'update')
       Runner.run('apt', 'install', '-y', 'curl', 'python3.8', 'python3.8-distutils', 'python3.8-dev')
@@ -648,6 +655,7 @@ class Builder
 
     case source_input.name
     when 'bundler'
+      DependencyBuild.setup_ruby
       binary_builder.build(source_input)
       out_data.merge!(
           artifact_output.move_dependency(
