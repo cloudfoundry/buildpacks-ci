@@ -179,6 +179,7 @@ dependencies:
           - line: 1.19.X
           - line: 1.21.X
     versions_to_keep: 2
+    skip_lines_cflinuxfs4: [ '1.13.X' ]
   nginx-static:
     buildpacks:
       php:
