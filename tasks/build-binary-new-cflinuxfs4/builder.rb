@@ -127,6 +127,41 @@ module Archive
   end
 end
 
+module DependencyBuildHelper
+  class << self
+    def build_nginx_helper(source_input, custom_options, static=false)
+      artifacts = "#{Dir.pwd}/artifacts"
+      destdir = Dir.mktmpdir
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          Runner.run('wget', source_input.url)
+          # TODO validate pgp
+          Runner.run('tar', 'xf', "nginx-#{source_input.version}.tar.gz")
+          base_nginx_options = %w[--prefix=/ --error-log-path=stderr --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_auth_request_module --with-http_random_index_module --with-http_secure_link_module --with-http_stub_status_module --without-http_uwsgi_module --without-http_scgi_module --with-pcre --with-pcre-jit --with-debug]
+
+          Dir.chdir("nginx-#{source_input.version}") do
+            options = ['./configure'] + base_nginx_options + custom_options
+            Runner.run(*options)
+            Runner.run('make')
+            system({ 'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR' => "#{destdir}/nginx" }, 'make install')
+            raise 'Could not run make install' unless $CHILD_STATUS.success?
+
+            Dir.chdir(destdir) do
+              Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
+              Runner.run('mkdir', 'nginx/conf')
+              if static
+                Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", 'nginx')
+              else
+                Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", '.')
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+end
+
 class DependencyBuild
   ## Constructor ##
   def initialize(source_input, out_data, binary_builder, artifact_output, stack)
@@ -542,7 +577,7 @@ class DependencyBuild
       '--with-http_sub_module',
     ]
 
-    build_nginx_helper(nginx_options)
+    DependencyBuildHelper.build_nginx_helper(@source_input, nginx_options)
 
     old_filepath = "artifacts/#{@source_input.name}-#{@source_input.version}.tgz"
     Archive.strip_top_level_directory_from_tar(old_filepath)
@@ -557,44 +592,13 @@ class DependencyBuild
       '--with-ld-opt=-fPIE -pie -z now',
     ]
 
-    build_nginx_helper(nginx_static_options, true)
+    DependencyBuildHelper.build_nginx_helper(@source_input, nginx_static_options, true)
 
     old_filepath = "artifacts/nginx-#{@source_input.version}.tgz"
     Archive.strip_top_level_directory_from_tar(old_filepath)
     filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
     merge_out_data(old_filepath, filename_prefix)
 
-  end
-
-  def build_nginx_helper(custom_options, static=false)
-    artifacts = "#{Dir.pwd}/artifacts"
-    destdir = Dir.mktmpdir
-    Dir.mktmpdir do |dir|
-      Dir.chdir(dir) do
-        Runner.run('wget', @source_input.url)
-        # TODO validate pgp
-        Runner.run('tar', 'xf', "nginx-#{@source_input.version}.tar.gz")
-        base_nginx_options = %w[--prefix=/ --error-log-path=stderr --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_auth_request_module --with-http_random_index_module --with-http_secure_link_module --with-http_stub_status_module --without-http_uwsgi_module --without-http_scgi_module --with-pcre --with-pcre-jit --with-debug]
-
-        Dir.chdir("nginx-#{@source_input.version}") do
-          options = ['./configure'] + base_nginx_options + custom_options
-          Runner.run(*options)
-          Runner.run('make')
-          system({ 'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR' => "#{destdir}/nginx" }, 'make install')
-          raise 'Could not run make install' unless $CHILD_STATUS.success?
-
-          Dir.chdir(destdir) do
-            Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
-            Runner.run('mkdir', 'nginx/conf')
-            if static
-              Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{@source_input.version}.tgz", 'nginx')
-            else
-              Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{@source_input.version}.tgz", '.')
-            end
-          end
-        end
-      end
-    end
   end
 
   def build_openresty
