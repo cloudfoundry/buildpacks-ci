@@ -605,7 +605,6 @@ module Archive
   end
 end
 
-
 class Builder
   def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, php_extensions_dir = __dir__, skip_commit = false)
     cnb_list = [

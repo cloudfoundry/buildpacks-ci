@@ -130,32 +130,64 @@ end
 module DependencyBuildHelper
   class << self
     def build_nginx_helper(source_input, custom_options, static=false)
+      public_gpg_key_urls = %w[http://nginx.org/keys/nginx_signing.key http://nginx.org/keys/mdounin.key http://nginx.org/keys/maxim.key http://nginx.org/keys/sb.key http://nginx.org/keys/thresh.key]
+      GPGHelper.verify_gpg_signature(source_input.url, "#{source_input.url}.asc", public_gpg_key_urls)
+
       artifacts = "#{Dir.pwd}/artifacts"
       destdir = Dir.mktmpdir
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
-          Runner.run('wget', source_input.url)
-          # TODO validate pgp
-          Runner.run('tar', 'xf', "nginx-#{source_input.version}.tar.gz")
-          base_nginx_options = %w[--prefix=/ --error-log-path=stderr --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_auth_request_module --with-http_random_index_module --with-http_secure_link_module --with-http_stub_status_module --without-http_uwsgi_module --without-http_scgi_module --with-pcre --with-pcre-jit --with-debug]
+            Runner.run('wget', source_input.url)
+            Runner.run('tar', 'xf', "nginx-#{source_input.version}.tar.gz")
+            base_nginx_options = %w[--prefix=/ --error-log-path=stderr --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_auth_request_module --with-http_random_index_module --with-http_secure_link_module --with-http_stub_status_module --without-http_uwsgi_module --without-http_scgi_module --with-pcre --with-pcre-jit --with-debug]
 
-          Dir.chdir("nginx-#{source_input.version}") do
-            options = ['./configure'] + base_nginx_options + custom_options
-            Runner.run(*options)
-            Runner.run('make')
-            system({ 'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR' => "#{destdir}/nginx" }, 'make install')
-            raise 'Could not run make install' unless $CHILD_STATUS.success?
+            Dir.chdir("nginx-#{source_input.version}") do
+              options = ['./configure'] + base_nginx_options + custom_options
+              Runner.run(*options)
+              Runner.run('make')
+              system({ 'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR' => "#{destdir}/nginx" }, 'make install')
+              raise 'Could not run make install' unless $CHILD_STATUS.success?
 
-            Dir.chdir(destdir) do
-              Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
-              Runner.run('mkdir', 'nginx/conf')
-              if static
-                Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", 'nginx')
-              else
-                Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", '.')
+              Dir.chdir(destdir) do
+                Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
+                Runner.run('mkdir', 'nginx/conf')
+                if static
+                  Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", 'nginx')
+                else
+                  Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", '.')
+                end
               end
             end
+        end
+      end
+    end
+  end
+end
+
+module GPGHelper
+  class << self
+    def verify_gpg_signature(file_url, signature_url, public_key_url)
+
+      ## Check if gpg package is installed
+      unless system('which gpg > /dev/null')
+        Runner.run('apt-get', 'update')
+        Runner.run('apt-get', 'install', '-y', 'gpg')
+      end
+
+      ## Verify gpg signature
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          if public_key_url.is_a?(Array)
+            public_key_url.each do |key_url|
+              Runner.run('wget', key_url)
+              Runner.run('gpg', '--import', File.basename(key_url))
+            end
+          else
+            Runner.run('wget', public_key_url)
           end
+          Runner.run('wget', file_url)
+          Runner.run('wget', signature_url)
+          Runner.run('gpg', '--verify', File.basename(signature_url), File.basename(file_url))
         end
       end
     end
