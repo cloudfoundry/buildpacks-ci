@@ -173,9 +173,6 @@ dependencies:
     buildpacks:
       nginx:
         lines:
-          - line: 1.13.X
-          - line: 1.15.X
-          - line: 1.17.X
           - line: 1.19.X
           - line: 1.21.X
     versions_to_keep: 2
@@ -354,9 +351,9 @@ dependencies:
       - 'extension: .tar.gz'
     any_stack: true
     versions_to_keep: 2
-cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby' ]
-cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'pip', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems' ]
-cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go', 'ruby' ]
+cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty' ]
+cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'pip', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems', 'nginx', 'nginx-static', 'openresty' ]
+cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go', 'ruby', 'nginx' ]
 build_stacks: [ 'cflinuxfs4' , 'cflinuxfs3' ]
 windows_stacks: [ 'windows2016', 'windows' ]
 deprecated_stacks: [ 'cflinuxfs2' ]
