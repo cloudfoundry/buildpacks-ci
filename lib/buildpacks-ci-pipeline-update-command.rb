@@ -29,7 +29,6 @@ class BuildpacksCIPipelineUpdateCommand
       buildpacks_configuration.bosh_release_private_keys_filename,
       buildpacks_configuration.bosh_release_private_keys_filename_2,
       buildpacks_configuration.bosh_release_private_keys_filename_lts,
-      buildpacks_configuration.dockerhub_cflinuxfs_credentials_filename
     ].map { |name| "lpass show #{name} --notes"}.join(' && ')
 
     pipeline_specific_config = ""
