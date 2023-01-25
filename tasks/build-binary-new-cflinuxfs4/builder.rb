@@ -161,6 +161,54 @@ module DependencyBuildHelper
         end
       end
     end
+
+    def build_r_helper(source_input, forecast_input, plumber_input, rserve_input, shiny_input)
+      artifacts = "#{Dir.pwd}/artifacts"
+      source_sha = ''
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          Runner.run('mkdir', '-p', '/usr/share/man/man1')
+
+          Runner.run('apt', 'update')
+
+          stack = ENV.fetch('STACK')
+          Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libpcre2-dev', 'libcurl4-openssl-dev', 'libsodium-dev', 'libharfbuzz-dev', 'libfribidi-dev', 'default-jre', 'libgfortran-12-dev')
+
+          Runner.run('wget', source_input.url)
+          source_sha = Digest::SHA256.hexdigest(open("R-#{source_input.version}.tar.gz").read)
+          Runner.run('tar', 'xf', "R-#{source_input.version}.tar.gz")
+
+          Dir.chdir("R-#{source_input.version}") do
+            Runner.run('./configure', '--with-readline=no', '--with-x=no', '--enable-R-shlib')
+            Runner.run('make')
+            Runner.run('make install')
+
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "install.packages('devtools', repos='https://cran.r-project.org')")
+
+            rserve_version = rserve_input.split(".")[0..1].join(".") + "-" + rserve_input.split(".")[2..-1].join(".")
+
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('Rserve', '#{rserve_version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('forecast', '#{forecast_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('shiny', '#{shiny_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); install_version('plumber', '#{plumber_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'remove.packages("devtools")')
+
+            Dir.chdir('/usr/local/lib/R') do
+              Runner.run('cp', '-L', '/usr/bin/x86_64-linux-gnu-gfortran-11', './bin/gfortran')
+              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/11/f951', './bin/f951')
+              Runner.run('ln', '-s', './gfortran', './bin/f95')
+              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/11/libcaf_single.a', './lib')
+              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/11/libgfortran.a', './lib')
+              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/11/libgfortran.so', './lib')
+              Runner.run('cp', '-L', '/usr/lib/x86_64-linux-gnu/libpcre2-8.so.0', './lib')
+              Runner.run('tar', 'zcvf', "#{artifacts}/r-v#{source_input.version}.tgz", '.')
+            end
+          end
+        end
+      end
+      source_sha
+    end
   end
 end
 
@@ -548,6 +596,26 @@ class DependencyBuild
     old_file_path = "artifacts/python-#{@source_input.version}.tgz"
     filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
     merge_out_data(old_file_path, filename_prefix)
+  end
+
+  def build_r
+    forecast_input = SourceInput.from_file("#{Dir.pwd}/source-forecast-latest/data.json")
+    plumber_input = SourceInput.from_file("#{Dir.pwd}/source-plumber-latest/data.json")
+    rserve_input = SourceInput.from_file("#{Dir.pwd}/source-rserve-latest/data.json")
+    shiny_input = SourceInput.from_file("#{Dir.pwd}/source-shiny-latest/data.json")
+
+    source_sha = DependencyBuildHelper.build_r_helper(@source_input, forecast_input.version, plumber_input.version, rserve_input.version, shiny_input.version)
+
+    old_filepath = "artifacts/#{@source_input.name}-v#{@source_input.version}.tgz"
+    filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
+    merge_out_data(old_filepath, filename_prefix)
+
+    @out_data[:git_commit_sha] = source_sha
+
+    @out_data[:sub_dependencies] = {}
+    [forecast_input, plumber_input, rserve_input, shiny_input].each do |sub_dep|
+      @out_data[:sub_dependencies][sub_dep.name.to_sym] = { source: { url: sub_dep.url, sha256: sub_dep.sha_from_url() }, version: sub_dep.version }
+    end
   end
 
   def build_ruby

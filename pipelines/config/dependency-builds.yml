@@ -300,6 +300,8 @@ dependencies:
       - shiny
       - plumber
     versions_to_keep: 2
+    #! R doesn't publish EOL dates but 3.6 hasn’t made a release in 3 years and community feedback suggests 3.x contains known security issues
+    skip_lines_cflinuxfs4: ['3.6.X']
   ruby:
     buildpacks:
       ruby:
@@ -351,9 +353,9 @@ dependencies:
       - 'extension: .tar.gz'
     any_stack: true
     versions_to_keep: 2
-cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty' ]
-cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'pip', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems', 'nginx', 'nginx-static', 'openresty' ]
-cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go', 'ruby', 'nginx' ]
+cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty', 'r' ]
+cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'pip', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems', 'nginx', 'nginx-static', 'openresty', 'r' ]
+cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go', 'ruby', 'nginx', 'r' ]
 build_stacks: [ 'cflinuxfs4' , 'cflinuxfs3' ]
 windows_stacks: [ 'windows2016', 'windows' ]
 deprecated_stacks: [ 'cflinuxfs2' ]
