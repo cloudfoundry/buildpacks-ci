@@ -1,12 +1,11 @@
 <%
 require 'yaml'
 require 'set'
-config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds-cflinuxfs4.yml'))
+config = YAML.load_file(File.join(__dir__, 'config', 'test-bed-dependency-builds-fs4.yml'))
 
 dependencies = config['dependencies']
 stacks = config['build_stacks']
 skip_deprecation_check = config['skip_deprecation_check']
-cnb_uris = config['cnb_uris']
 
 def common_prefix(stringA, stringB)
   max_len = 0
@@ -101,29 +100,8 @@ def bp_uses_line?(bp_data, line)
   !lines_present && get_version_lines(bp_data['lines']).include?(line)
 end
 
-def get_git_uri(buildpack, cnb_uris)
-  if cnb_uris.key? buildpack
-    return cnb_uris[buildpack]
-  else
-    if buildpack.include? '-cnb'
-      return "git@github.com:cloudfoundry/#{buildpack}.git"
-    else
-      bp_uri = "git@github.com:cloudfoundry/#{buildpack}-buildpack.git"
-    end
-  end
-end
-
-def get_git_repo(buildpack, cnb_uris)
-  if cnb_uris.key? buildpack
-    uri = cnb_uris[buildpack]
-    return uri.slice((uri.index(':') + 1)).delete_suffix('.git')
-  else
-    if buildpack.include? '-cnb'
-      return "cloudfoundry/#{buildpack}"
-    else
-      bp_uri = "cloudfoundry/#{buildpack}-buildpack"
-    end
-  end
+def get_git_uri(buildpack)
+  bp_uri = "git@github.com:cloudfoundry/#{buildpack}-buildpack.git"
 end
 
 def is_cloudfoundry_cnb(buildpack)
@@ -175,14 +153,14 @@ resources:
 - name: <%= buildpack %>-buildpack-v3
   type: git
   source:
-    uri: <%= get_git_uri(buildpack, cnb_uris) %>
+    uri: <%= get_git_uri(buildpack) %>
     private_key: {{cf-buildpacks-eng-github-ssh-key}}
     branch: v3
 <% end %>
 
 <% dependencies.each do |dep_name, dep| %>
 <%
-  skipped_version_lines = dep['skip_lines_cfllinuxfs4'] ? dep['skip_lines_cfllinuxfs4'] : []
+  skipped_version_lines = dep['skip_lines_cflinuxfs4'] ? dep['skip_lines_cflinuxfs4'] : []
   lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'])}
   lines.push('latest') unless lines.include?('latest') || dep_name.include?('r')
   lines = lines - skipped_version_lines
@@ -217,7 +195,7 @@ resources:
 jobs:
 <% dependencies.each do |dep_name, dep| %>
   <%
-  skipped_version_lines = dep['skip_lines_cfllinuxfs4'] ? dep['skip_lines_cfllinuxfs4'] : []
+  skipped_version_lines = dep['skip_lines_cflinuxfs4'] ? dep['skip_lines_cflinuxfs4'] : []
   version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} - skipped_version_lines
   %>
 
@@ -263,7 +241,7 @@ groups:
     jobs:
 <% dependencies.each do |dep_name, dep| %>
   <%
-  skipped_version_lines = dep['skip_lines_cfllinuxfs4'] ? dep['skip_lines_cfllinuxfs4'] : []
+  skipped_version_lines = dep['skip_lines_cflinuxfs4'] ? dep['skip_lines_cflinuxfs4'] : []
   version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} - skipped_version_lines
   %>
   <% version_lines.each do |line| %>
@@ -273,7 +251,7 @@ groups:
 
 <% dependencies.each do |dep_name, dep| %>
   <%
-  skipped_version_lines = dep['skip_lines_cfllinuxfs4'] ? dep['skip_lines_cfllinuxfs4'] : []
+  skipped_version_lines = dep['skip_lines_cflinuxfs4'] ? dep['skip_lines_cflinuxfs4'] : []
   version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])} - skipped_version_lines
   %>
   - name: <%= dep_name.downcase %>
