@@ -1,67 +1,20 @@
 ---
 dependencies:
-  bower:
+  r:
     buildpacks:
-      dotnet-core:
-        lines:
-          - line: latest
-    source_type: npm
-    any_stack: true
+      r:
+        lines: #! final release for each minor version is every spring ( just before next minor version release )
+          - line: 3.6.X
+          - line: 4.2.X
+        removal_strategy: keep_latest_released
+    monitored_deps:
+      - rserve
+      - forecast
+      - shiny
+      - plumber
     versions_to_keep: 2
-  dotnet-sdk:
-    buildpacks:
-      dotnet-core:
-        lines:
-          - line: 3.1.X
-            deprecation_date: 2022-12-03
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-          - line: 6.0.X
-            deprecation_date: 2024-11-08
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-        removal_strategy: remove_all
-    versions_to_keep: 1
-    any_stack: true
-    skip_lines_cfllinuxfs4: ['3.1.X']
-  dotnet-runtime:
-    buildpacks:
-      dotnet-core:
-        lines:
-          - line: 3.1.X
-            deprecation_date: 2022-12-03
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-            skip_stacks: ['cflinuxfs4']
-          - line: 6.0.X
-            deprecation_date: 2024-11-08
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-        removal_strategy: remove_all
-    versions_to_keep: 1
-    any_stack: true
-    skip_lines_cfllinuxfs4: ['3.1.X']
-  dotnet-aspnetcore:
-    buildpacks:
-      dotnet-core:
-        lines:
-          - line: 3.1.X
-            deprecation_date: 2022-12-03
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-            skip_stacks: ['cflinuxfs4']
-          - line: 6.0.X
-            deprecation_date: 2024-11-08
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-        removal_strategy: remove_all
-    versions_to_keep: 1
-    any_stack: true
-    skip_lines_cfllinuxfs4: ['3.1.X']
-  node:
-    buildpacks:
-      dotnet-core:
-        lines:
-          - line: node-lts
-            deprecation_date: ""
-            link: https://github.com/nodejs/Release
-    source_type: node
-    versions_to_keep: 2
-cflinuxfs4_dependencies: [ 'node', 'libunwind', 'libgdiplus' ]
+
+cflinuxfs4_dependencies: [ 'r']
 build_stacks: [ 'cflinuxfs4' ]
 windows_stacks: [ 'windows2016', 'windows' ]
 deprecated_stacks: [ 'cflinuxfs2' ]
