@@ -308,6 +308,15 @@ class DependencyBuild
     merge_out_data(old_filepath, filename_prefix)
   end
 
+  def build_composer
+    old_filepath = "source/composer.phar"
+    filename_prefix = "#{@filename_prefix}_linux_noarch_any-stack"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    end
+  end
+
   def build_dep
     @binary_builder.build(@source_input)
 
