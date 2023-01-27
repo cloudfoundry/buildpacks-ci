@@ -1,0 +1,16 @@
+---
+extensions:
+  exclusions:
+  - name: yaf
+    version: 3.3.5
+    md5: 128ecf6c84dd71d59c12d826cc51f0c4
+    klass: PeclRecipe
+  - name: phalcon
+    version: 5.1.4
+    md5: 58e484f3e211242b3302a44a80aff1df
+    klass: PeclRecipe
+  additions:
+  - name: oci8
+    version: 3.2.1
+    md5: 309190ef3ede2779a617c9375d32ea7a
+    klass: OraclePeclRecipe
