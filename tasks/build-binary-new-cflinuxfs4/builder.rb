@@ -162,6 +162,31 @@ module DependencyBuildHelper
       end
     end
 
+    # handle PHP extension file logic
+    def php_extension_helper(source_input, php_extensions_dir)
+      base_extension_file = ''
+      if source_input.version.start_with?('8')
+        base_extension_file = File.join(php_extensions_dir, 'php8-base-extensions.yml')
+      else
+        raise "Unexpected PHP version #{source_input.version}. Expected 8.X"
+      end
+
+      php_extensions = BaseExtensions.new(base_extension_file)
+
+      patch_file = nil
+      if source_input.version.start_with?('8.1.')
+        patch_file = File.join(php_extensions_dir, 'php81-extensions-patch.yml')
+      elsif source_input.version.start_with?('8.2.')
+        patch_file = File.join(php_extensions_dir, 'php82-extensions-patch.yml')
+      end
+
+      php_extensions.patch!(patch_file) if patch_file
+      output_yml = File.join(php_extensions_dir, 'php-final-extensions.yml')
+      php_extensions.write_yml(output_yml)
+
+      return output_yml, php_extensions
+    end
+
     def build_r_helper(source_input, forecast_input, plumber_input, rserve_input, shiny_input)
       artifacts = "#{Dir.pwd}/artifacts"
       source_sha = ''
@@ -244,13 +269,14 @@ end
 
 class DependencyBuild
   ## Constructor ##
-  def initialize(source_input, out_data, binary_builder, artifact_output, stack)
+  def initialize(source_input, out_data, binary_builder, artifact_output, stack, php_extensions_dir = nil)
     @source_input = source_input
     @out_data = out_data
     @binary_builder = binary_builder
     @artifact_output = artifact_output
     @stack = stack
     @filename_prefix = "#{@source_input.name}_#{@source_input.version}"
+    @php_extensions_dir = php_extensions_dir
   end
 
   def build
@@ -490,6 +516,23 @@ class DependencyBuild
     Archive.strip_top_level_directory_from_tar(old_filepath)
 
     merge_out_data(old_filepath, filename_prefix)
+  end
+
+  def build_php
+    extensionsFile, php_extensions = DependencyBuildHelper.php_extension_helper(@source_input, @php_extensions_dir)
+    @binary_builder.build(@source_input, "--php-extensions-file=#{extensionsFile}")
+
+    old_filepath = "#{@binary_builder.base_dir}/php-#{@source_input.version}-linux-x64.tgz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+
+    Archive.strip_top_level_directory_from_tar(old_filepath)
+    merge_out_data(old_filepath, filename_prefix)
+
+    @out_data[:sub_dependencies] = {}
+    extensions = [php_extensions.base_yml['native_modules'], php_extensions.base_yml['extensions']].flatten
+    extensions.sort_by { |e| e['name'].downcase }.each do |extension|
+      @out_data[:sub_dependencies][extension['name'].to_sym] = { version: extension['version'] }
+    end
   end
 
   def build_pip
@@ -812,7 +855,7 @@ class DependencyBuild
 end
 
 class Builder
-  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, _php_extensions_dir = __dir__, skip_commit = false)
+  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, php_extensions_dir = __dir__, skip_commit = false)
     cnb_list = [
       'org.cloudfoundry.node-engine',
       'org.cloudfoundry.npm',
@@ -860,7 +903,7 @@ class Builder
     if cnb_list.include?(source_input.name)
       DependencyBuild.new(source_input, out_data, binary_builder, artifact_output, stack).build_cnb
     else
-      DependencyBuild.new(source_input, out_data, binary_builder, artifact_output, stack).build
+      DependencyBuild.new(source_input, out_data, binary_builder, artifact_output, stack, php_extensions_dir).build
     end
 
     unless skip_commit
