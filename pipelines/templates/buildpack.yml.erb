@@ -312,7 +312,7 @@ resources: #####################################################################
   - name: cf-toolsmiths-environment
     type: cf-pool
     source:
-      api_token: {{toolsmiths-api-token}}
+      api_token: ((toolsmiths-api-token))
       hostname: environments.toolsmiths.cf-app.com
       pool_name: cf-deployment
 
@@ -320,7 +320,7 @@ resources: #####################################################################
   - name: smith-environments-<%= pas_version %>
     type: cf-pool
     source:
-      api_token: {{toolsmiths-api-token}}
+      api_token: ((toolsmiths-api-token))
       hostname: environments.toolsmiths.cf-app.com
       pool_name: us_<%= pas_version.gsub('.', '_') + "_lts2" %>
 <% end %>

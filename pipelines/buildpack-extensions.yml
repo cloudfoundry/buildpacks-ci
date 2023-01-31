@@ -74,7 +74,7 @@ resources: #####################################################################
   - name: pcf-lts-gcp-env
     type: pcf-pool
     source:
-      api_token: {{toolsmiths-api-token}}
+      api_token: ((toolsmiths-api-token))
       hostname: environments.toolsmiths.cf-app.com
       pool_name: us_2_5
 

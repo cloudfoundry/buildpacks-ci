@@ -65,14 +65,14 @@ resources:
   - name: smith-environments-<%= pas_versions['n-2'] %>
     type: cf-pool
     source:
-      api_token: {{toolsmiths-api-token}}
+      api_token: ((toolsmiths-api-token))
       hostname: environments.toolsmiths.cf-app.com
       pool_name: us_<%= pas_versions['n-2'] %>
 
   - name: cf-toolsmiths-environment
     type: cf-pool
     source:
-      api_token: {{toolsmiths-api-token}}
+      api_token: ((toolsmiths-api-token))
       hostname: environments.toolsmiths.cf-app.com
       pool_name: cf-deployment
 
