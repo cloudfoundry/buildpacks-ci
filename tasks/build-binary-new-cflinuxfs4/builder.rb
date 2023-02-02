@@ -6,7 +6,7 @@ require 'digest'
 require 'net/http'
 require 'tmpdir'
 require 'English'
-require_relative 'merge_extensions'
+require_relative 'php_extensions/extensions_helper'
 require_relative 'binary_builder_wrapper'
 
 module HTTPHelper
@@ -163,28 +163,27 @@ module DependencyBuildHelper
     end
 
     # handle PHP extension file logic
-    def php_extension_helper(source_input, php_extensions_dir)
-      base_extension_file = ''
-      if source_input.version.start_with?('8')
-        base_extension_file = File.join(php_extensions_dir, 'php8-base-extensions.yml')
-      else
-        raise "Unexpected PHP version #{source_input.version}. Expected 8.X"
+    # returns the path to the final extension file and an instance of PHPExtensionsHelper
+    def get_php_extensions(source_input, php_extensions_dir)
+      major_version, minor_version, patch_version = source_input.version.split(".")
+      base_extensions_file = File.join(php_extensions_dir, "php#{major_version}-base-extensions.yml")
+
+      if !File.exist?(base_extensions_file)
+        raise "No base extension file named #{base_extensions_file}, you may need to add a new file for the major version #{major_version}"
       end
 
-      php_extensions = BaseExtensions.new(base_extension_file)
+      php_extensions_helper = PHPExtensionsHelper.new(base_extensions_file)
 
-      patch_file = nil
-      if source_input.version.start_with?('8.1.')
-        patch_file = File.join(php_extensions_dir, 'php81-extensions-patch.yml')
-      elsif source_input.version.start_with?('8.2.')
-        patch_file = File.join(php_extensions_dir, 'php82-extensions-patch.yml')
+      patch_file = File.join(php_extensions_dir, "php#{major_version}#{minor_version}-extensions-patch.yml")
+      if !File.exist?(patch_file)
+        raise "No patch extension file named #{patch_file}, you may need to add a new file for the version line #{major_version}.#{minor_version}"
       end
 
-      php_extensions.patch!(patch_file) if patch_file
+      php_extensions_helper.patch!(patch_file)
       output_yml = File.join(php_extensions_dir, 'php-final-extensions.yml')
-      php_extensions.write_yml(output_yml)
+      php_extensions_helper.write_yml(output_yml)
 
-      return output_yml, php_extensions
+      return output_yml, php_extensions_helper
     end
 
     def build_r_helper(source_input, forecast_input, plumber_input, rserve_input, shiny_input)
@@ -535,7 +534,7 @@ class DependencyBuild
   end
 
   def build_php
-    extensionsFile, php_extensions = DependencyBuildHelper.php_extension_helper(@source_input, @php_extensions_dir)
+    extensionsFile, php_extensions_helper = DependencyBuildHelper.get_php_extensions(@source_input, @php_extensions_dir)
     @binary_builder.build(@source_input, "--php-extensions-file=#{extensionsFile}")
 
     old_filepath = "#{@binary_builder.base_dir}/php-#{@source_input.version}-linux-x64.tgz"
@@ -545,7 +544,7 @@ class DependencyBuild
     merge_out_data(old_filepath, filename_prefix)
 
     @out_data[:sub_dependencies] = {}
-    extensions = [php_extensions.base_yml['native_modules'], php_extensions.base_yml['extensions']].flatten
+    extensions = [php_extensions_helper.base_yml['native_modules'], php_extensions_helper.base_yml['extensions']].flatten
     extensions.sort_by { |e| e['name'].downcase }.each do |extension|
       @out_data[:sub_dependencies][extension['name'].to_sym] = { version: extension['version'] }
     end
@@ -871,7 +870,7 @@ class DependencyBuild
 end
 
 class Builder
-  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, php_extensions_dir = __dir__, skip_commit = false)
+  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, php_extensions_dir, skip_commit = false)
     cnb_list = [
       'org.cloudfoundry.node-engine',
       'org.cloudfoundry.npm',
