@@ -317,6 +317,9 @@ class DependencyBuild
   ## Dependency builders ##
   #########################
 
+  # this code is doing nothing except generating a buildpacks-ci-robot metadata
+  # entry so our buildpacks get auto-updated.
+  # TODO: check how we should handle agent dependencies in general (appdynamics vs newrelic)
   def build_appdynamics
     old_filepath = "source/appdynamics-php-agent-linux_x64-#{@source_input.version}.tar.bz2"
     filename_prefix = "#{@filename_prefix}_linux_noarch_any-stack"
