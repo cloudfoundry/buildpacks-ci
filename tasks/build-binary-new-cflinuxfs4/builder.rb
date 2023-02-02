@@ -317,6 +317,19 @@ class DependencyBuild
   ## Dependency builders ##
   #########################
 
+  def build_appdynamics
+    old_filepath = "source/appdynamics-php-agent-linux_x64-#{@source_input.version}.tar.bz2"
+    filename_prefix = "#{@filename_prefix}_linux_noarch_any-stack"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      @out_data[:sha256] = Sha.get_digest(old_filepath, "sha256")
+      @out_data[:url] = @source_input.url
+    end
+  end
+
   def build_bower
     old_filepath = 'artifacts/temp_file.tgz'
     filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
@@ -342,8 +355,8 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      out_data[:sha256] = Sha.get_digest(old_filepath, "sha256")
-      out_data[:url] = @source_input.url
+      @out_data[:sha256] = Sha.get_digest(old_filepath, "sha256")
+      @out_data[:url] = @source_input.url
     end
   end
 
