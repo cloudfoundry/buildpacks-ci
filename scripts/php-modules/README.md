@@ -1,11 +1,11 @@
 # PHP Module Helper Scripts
 
-Updating PHP modules entails two main steps: determining which modules to update, then updating hashes for bumped modules. The following scripts help with each step. They operate on the following module configuration files:
+Updating PHP modules entails two main steps: determining which modules to update, then updating hashes for bumped modules. The following scripts help with each step.
 
-- `tasks/build-binary-new/php7-base-extensions.yml`
-- `tasks/build-binary-new/php74-extensions-patch.yml` (`additions` array)
-- `tasks/build-binary-new/php8-base-extensions.yml`
-- `tasks/build-binary-new/php81-extensions-patch.yml` (`additions` array)
+They operate on extension config files like the following:
+
+- `tasks/build-binary-new[-cflinuxfs4]/php_extensions/php8-base-extensions.yml`
+- `tasks/build-binary-new[-cflinuxfs4]/php_extensions/php81-extensions-patch.yml` (`additions` array)
 
 ## Bump Module Versions
 
@@ -38,3 +38,33 @@ To update hashes, run:
 - If you run into rate limits for GitHub, try setting the `GITHUB_TOKEN` environment variable before running the scripts (the token only needs the `public_repo` scope). Authenticated requests have a much higher limit.
 
 - Modules with empty or `nil` versions will not be processed.
+
+## Pre-buildpack-release task
+
+Except for Out-of-band releases, before every release of the [PHP buildpack](https://github.com/cloudfoundry/php-buildpack),
+make sure modules are bumped to latest compatible versions and built into the
+buildpack dependencies.
+
+Run the helper scripts mentioned above which can bump modules (mostly)
+automatically. These scripts bump as many modules as they can, but the results
+should still be checked manually before committing.
+Some must be bumped manually, and it's still important to check if a module
+supports a new version of PHP which it didn't previously support (in which case
+it should be added manually).
+
+If the module release is compatible with all of 8.0, 8.1...8.N, update the
+`php8-base-extensions.yml` file. Otherwise, update the respective patch file(s)
+(e.g. `php8.N-extensions-patch.yml`)
+
+*[Cassandra]* If you're updating cassandra modules (including
+datastax/cpp-driver) it's advisable to do so in individual commits, then
+rebuild appropriate php versions, so integration tests can run in CI with only
+cassandra changes. This will help isolate the php cassandra module change(s) if
+the changes cause problems.
+
+You can use the following task-list to help this operation:
+
+* [ ] Make sure any newly available versions of PHP are pulled into the buildpack
+* [ ] Check each PHP module for updates and update extension configs
+* [ ] Rebuild PHP versions if any module updates ([pipeline](https://buildpacks.ci.cf-app.com/teams/main/pipelines/dependency-builds?group=php))
+* [ ] Make sure newly built dependency is merged into the buildpack
