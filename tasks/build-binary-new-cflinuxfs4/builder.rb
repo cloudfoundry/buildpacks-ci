@@ -6,7 +6,7 @@ require 'digest'
 require 'net/http'
 require 'tmpdir'
 require 'English'
-require_relative 'merge_extensions'
+require_relative 'php_extensions/extensions_helper'
 require_relative 'binary_builder_wrapper'
 
 module HTTPHelper
@@ -162,6 +162,30 @@ module DependencyBuildHelper
       end
     end
 
+    # handle PHP extension file logic
+    # returns the path to the final extension file and an instance of PHPExtensionsHelper
+    def get_php_extensions(source_input, php_extensions_dir)
+      major_version, minor_version, patch_version = source_input.version.split(".")
+      base_extensions_file = File.join(php_extensions_dir, "php#{major_version}-base-extensions.yml")
+
+      if !File.exist?(base_extensions_file)
+        raise "No base extension file named #{base_extensions_file}, you may need to add a new file for the major version #{major_version}"
+      end
+
+      php_extensions_helper = PHPExtensionsHelper.new(base_extensions_file)
+
+      patch_file = File.join(php_extensions_dir, "php#{major_version}#{minor_version}-extensions-patch.yml")
+      if !File.exist?(patch_file)
+        raise "No patch extension file named #{patch_file}, you may need to add a new file for the version line #{major_version}.#{minor_version}"
+      end
+
+      php_extensions_helper.patch!(patch_file)
+      output_yml = File.join(php_extensions_dir, 'php-final-extensions.yml')
+      php_extensions_helper.write_yml(output_yml)
+
+      return output_yml, php_extensions_helper
+    end
+
     def build_r_helper(source_input, forecast_input, plumber_input, rserve_input, shiny_input)
       artifacts = "#{Dir.pwd}/artifacts"
       source_sha = ''
@@ -244,13 +268,14 @@ end
 
 class DependencyBuild
   ## Constructor ##
-  def initialize(source_input, out_data, binary_builder, artifact_output, stack)
+  def initialize(source_input, out_data, binary_builder, artifact_output, stack, php_extensions_dir = nil)
     @source_input = source_input
     @out_data = out_data
     @binary_builder = binary_builder
     @artifact_output = artifact_output
     @stack = stack
     @filename_prefix = "#{@source_input.name}_#{@source_input.version}"
+    @php_extensions_dir = php_extensions_dir
   end
 
   def build
@@ -291,6 +316,22 @@ class DependencyBuild
   ## Dependency builders ##
   #########################
 
+  # this code is doing nothing except generating a buildpacks-ci-robot metadata
+  # entry so our buildpacks get auto-updated.
+  # TODO: check how we should handle agent dependencies in general (appdynamics vs newrelic)
+  def build_appdynamics
+    old_filepath = "source/appdynamics-php-agent-linux_x64-#{@source_input.version}.tar.bz2"
+    filename_prefix = "#{@filename_prefix}_linux_noarch_any-stack"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      @out_data[:sha256] = Sha.get_digest(old_filepath, "sha256")
+      @out_data[:url] = @source_input.url
+    end
+  end
+
   def build_bower
     old_filepath = 'artifacts/temp_file.tgz'
     filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
@@ -306,6 +347,19 @@ class DependencyBuild
     filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
 
     merge_out_data(old_filepath, filename_prefix)
+  end
+
+  def build_composer
+    old_filepath = "source/composer.phar"
+    filename_prefix = "#{@filename_prefix}_linux_noarch_any-stack"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      @out_data[:sha256] = Sha.get_digest(old_filepath, "sha256")
+      @out_data[:url] = @source_input.url
+    end
   end
 
   def build_dep
@@ -477,6 +531,23 @@ class DependencyBuild
     Archive.strip_top_level_directory_from_tar(old_filepath)
 
     merge_out_data(old_filepath, filename_prefix)
+  end
+
+  def build_php
+    extensionsFile, php_extensions_helper = DependencyBuildHelper.get_php_extensions(@source_input, @php_extensions_dir)
+    @binary_builder.build(@source_input, "--php-extensions-file=#{extensionsFile}")
+
+    old_filepath = "#{@binary_builder.base_dir}/php-#{@source_input.version}-linux-x64.tgz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+
+    Archive.strip_top_level_directory_from_tar(old_filepath)
+    merge_out_data(old_filepath, filename_prefix)
+
+    @out_data[:sub_dependencies] = {}
+    extensions = [php_extensions_helper.base_yml['native_modules'], php_extensions_helper.base_yml['extensions']].flatten
+    extensions.sort_by { |e| e['name'].downcase }.each do |extension|
+      @out_data[:sub_dependencies][extension['name'].to_sym] = { version: extension['version'] }
+    end
   end
 
   def build_pip
@@ -799,7 +870,7 @@ class DependencyBuild
 end
 
 class Builder
-  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, _php_extensions_dir = __dir__, skip_commit = false)
+  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, php_extensions_dir, skip_commit = false)
     cnb_list = [
       'org.cloudfoundry.node-engine',
       'org.cloudfoundry.npm',
@@ -847,7 +918,7 @@ class Builder
     if cnb_list.include?(source_input.name)
       DependencyBuild.new(source_input, out_data, binary_builder, artifact_output, stack).build_cnb
     else
-      DependencyBuild.new(source_input, out_data, binary_builder, artifact_output, stack).build
+      DependencyBuild.new(source_input, out_data, binary_builder, artifact_output, stack, php_extensions_dir).build
     end
 
     unless skip_commit

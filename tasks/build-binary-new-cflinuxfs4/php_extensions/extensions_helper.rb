@@ -1,6 +1,6 @@
 require 'yaml'
 
-class BaseExtensions
+class PHPExtensionsHelper
   attr_accessor :base_path, :base_yml
 
   def initialize(path)

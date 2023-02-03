@@ -29,7 +29,7 @@ def main
     build_output,
     artifact_output,
     dep_metadata_output,
-    __dir__,
+    "#{__dir__}/php_extensions",
     skip_commit
   )
   p out_data
