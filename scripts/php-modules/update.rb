@@ -2,7 +2,7 @@ require 'yaml'
 
 def process_extension_file(cache, data, ext_file, dependency_type, f)
   (data.dig(*dependency_type) || []).each do |dependency|
-    unless dependency['name'] == 'oci8' && ext_file.include?('php8-base-extensions.yml')
+    unless (dependency['name'] == 'oci8' && ext_file.include?('php8-base-extensions.yml')) || dependency['name'] == 'rabbitmq'
       f.call(dependency, cache)
     end
   end
