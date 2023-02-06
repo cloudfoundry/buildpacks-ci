@@ -17,8 +17,8 @@ native_modules:
   md5: nil
   klass: SnmpRecipe
 - name: librdkafka
-  version: 1.9.2
-  md5: fe9624e905abbf8324b0f6be520d9c24
+  version: 2.0.2
+  md5: c0120dc32acc129bfb4656fe17568da1
   klass: LibRdKafkaRecipe
 - name: libsodium
   version: 1.0.18
@@ -30,8 +30,8 @@ extensions:
   md5: 2e1fb1f09725ada616e873c4e4012ff6
   klass: PeclRecipe
 - name: igbinary
-  version: 3.2.12
-  md5: 6853055f4fb7d6e9e0089245372dbb7f
+  version: 3.2.13
+  md5: 21bb3903319e966ce61cb4f69539aaa3
   klass: PeclRecipe
 - name: gnupg
   version: 1.5.1

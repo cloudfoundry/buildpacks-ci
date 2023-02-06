@@ -8,10 +8,12 @@ require_relative '../../tasks/build-binary-new/merge-extensions'
 base_extensions_8 = BaseExtensions.new('buildpacks-ci/tasks/build-binary-new/php8-base-extensions.yml')
 php80_extensions = base_extensions_8
 php81_extensions = base_extensions_8.patch('buildpacks-ci/tasks/build-binary-new/php81-extensions-patch.yml')
+php82_extensions = base_extensions_8.patch('buildpacks-ci/tasks/build-binary-new/php82-extensions-patch.yml')
 
 data = {
   'PHP8.0' => php80_extensions.base_yml,
   'PHP8.1' => php81_extensions.base_yml,
+  'PHP8.2' => php82_extensions.base_yml,
 }
 
 Tuple = Struct.new(:name, :klass)
@@ -31,15 +33,15 @@ Run the [helper scripts](https://github.com/cloudfoundry/buildpacks-ci/tree/mast
 These scripts bump as many modules as they can, but the results should still be checked manually before committing. Some must be bumped manually, and it's still important to check if a module supports a new version of PHP which it didn't previously support (in which case it should be added manually).
 DESCRIPTION
 
-description += "\n\n" + %w(Name Latest PHP8.0 PHP8.1).join(' | ') + " | Changes description" + "\n"
-description += '--- | --- | --- | --- | --- | ---' + "\n"
+description += "\n\n" + %w(Name Latest PHP8.0 PHP8.1 PHP8.2).join(' | ') + " | Changes description" + "\n"
+description += '--- | --- | --- | --- | --- | --- | ---' + "\n"
 extensions.keys.sort_by(&:name).each do |key|
   name = "#{key.name} (#{key.klass.gsub(/Recipe$/, '')})"
   url = url_for_type(key.name, key.klass)
   latest = current_pecl_version(key.name) if key.klass =~ /PECL/i
   latest = current_github_version(url) if url =~ %r{^https://github.com}
   data = [url ? "[#{name}](#{url})" : name, latest]
-  %w(PHP8.0 PHP8.1).each do |v|
+  %w(PHP8.0 PHP8.1 PHP8.2).each do |v|
     val = extensions[key][v]
     val = "**#{val}**" if val && val != latest
     data << val
