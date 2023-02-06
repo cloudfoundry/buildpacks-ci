@@ -21,11 +21,11 @@ def get_hash(name, version, klass, cache)
   cache[key]
 end
 
-def update_hash(mod, cache)
-  name = mod['name']
-  version = mod['version']
-  klass = mod['klass']
-  md5 = mod['md5']
+def update_hash(dependency, cache)
+  name = dependency['name']
+  version = dependency['version']
+  klass = dependency['klass']
+  md5 = dependency['md5']
 
   if !version || version == 'nil'
     return
@@ -33,8 +33,8 @@ def update_hash(mod, cache)
 
   if !md5 || md5 == 'nil'
     puts "    > Computing hash for #{name} @ #{version}..."
-    mod['md5'] = get_hash(name, version, klass, cache)
-    puts "      Updated #{name} md5 to #{mod['md5']}"
+    dependency['md5'] = get_hash(name, version, klass, cache)
+    puts "      Updated #{name} md5 to #{dependency['md5']}"
   end
 end
 
