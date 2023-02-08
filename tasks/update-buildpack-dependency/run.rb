@@ -321,29 +321,29 @@ end
 # * The .NET Core buildpack has a .NET Core dependency in the manifest.
 #   Replace the version with the one in the manifest.
 if !rebuilt && buildpack_name == 'dotnet-core'
-  runtime_3_version = ""
-  sdk_3_version = ""
+  runtime_7_version = ""
+  sdk_7_version = ""
   runtime_6_version = ""
   sdk_6_version = ""
   manifest["dependencies"].map do |dep|
     case dep["name"]
     when "dotnet-runtime"
-      if dep["version"].start_with?("3.")
-        runtime_3_version = dep["version"]
+      if dep["version"].start_with?("7.")
+        runtime_7_version = dep["version"]
       elsif dep["version"].start_with?("6.")
         runtime_6_version = dep["version"]
       end
     when "dotnet-sdk"
-      if dep["version"].start_with?("3.")
-        sdk_3_version = dep["version"]
+      if dep["version"].start_with?("7.")
+        sdk_7_version = dep["version"]
       elsif dep["version"].start_with?("6.")
         sdk_6_version = dep["version"]
       end
     end
   end
   # Update the 3.X runtime version
-  manifest['runtime_to_sdks'][0]["runtime_version"] = runtime_3_version
-  manifest['runtime_to_sdks'][0]["sdks"] = [sdk_3_version]
+  manifest['runtime_to_sdks'][0]["runtime_version"] = runtime_7_version
+  manifest['runtime_to_sdks'][0]["sdks"] = [sdk_7_version]
 
   # Update the 6.X runtime version
   manifest['runtime_to_sdks'][1]["runtime_version"] = runtime_6_version
