@@ -98,13 +98,13 @@ RUN curl -L https://github.com/cloudfoundry/bosh-cli/releases/download/v5.5.1/bo
   && ln -s /usr/local/bin/bosh2 /usr/local/bin/bosh
 
 # download bbl
-RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v7.6.0/bbl-v7.6.0_linux_x86-64' \
-  && [ 2e81f0560310791d604145b39f0b0c21cfd50d2c314fcd58059ff7a006cf12ca = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
+RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.4.111/bbl-v8.4.111_linux_x86-64' \
+  && [ 5e8e87c2ae5562b9b592122661c0c4a1fe3066facdb9783a07229926845227bb = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bbl
 
 # download credhub cli
-RUN curl -L https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/2.4.0/credhub-linux-2.4.0.tgz -o credhub.tgz \
-  && [ 73edaf1ee47323c4f0aa455bcc17303a73c0cf2a6d9156542f1f6b7b1b1aa3db = $(shasum -a 256 credhub.tgz | cut -d' ' -f1) ] \
+RUN curl -L https://github.com/cloudfoundry/credhub-cli/releases/download/2.9.10/credhub-linux-2.9.10.tgz -o credhub.tgz \
+  && [ e1719d406f947f29b150b73db508c96afffb3b95f01f5031140c705b885b8a38 = $(shasum -a 256 credhub.tgz | cut -d' ' -f1) ] \
   && tar -zxf credhub.tgz --to-stdout > /usr/local/bin/credhub \
   && rm credhub.tgz \
   && chmod +x /usr/local/bin/credhub
