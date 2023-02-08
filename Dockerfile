@@ -23,9 +23,6 @@ RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee 
 RUN curl -sL "https://keybase.io/crystal/pgp_keys.asc" | apt-key add - \
     && echo "deb https://dist.crystal-lang.org/apt crystal main" | tee /etc/apt/sources.list.d/crystal.list
 
-RUN curl -sL "https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key" | apt-key add - \
-  && echo "deb http://apt.starkandwayne.com stable main" |  tee /etc/apt/sources.list.d/starkandwayne.list
-
 RUN apt-get -qqy update \
   && apt-get -qqy install \
     aufs-tools \
@@ -44,7 +41,6 @@ RUN apt-get -qqy update \
     libxml2-dev \
     lsb-release \
     multiarch-support \
-    om \
     php7.0 \
     pkgconf \
     python-dev \
@@ -81,11 +77,16 @@ RUN git config --global user.email "cf-buildpacks-eng@pivotal.io"
 RUN git config --global user.name "CF Buildpacks Team CI Server"
 RUN git config --global core.pager cat
 
+# download om from pivotal-cf/om
+RUN wget -O /usr/local/bin/om 'https://github.com/pivotal-cf/om/releases/download/7.8.2/om-linux-amd64-7.8.2' \
+  && [ 68d2cbff67e699168ba16c84dc75e0ff40fcb6024f53f53579b7227b793df158 = $(shasum -a 256 /usr/local/bin/om | cut -d' ' -f1) ] \
+  && chmod +x /usr/local/bin/om
+
 # download and install chromedriver
- RUN wget -O chromedriver.zip 'https://chromedriver.storage.googleapis.com/2.34/chromedriver_linux64.zip' \
-   && [ e42a55f9e28c3b545ef7c7727a2b4218c37489b4282e88903e4470e92bc1d967 = $(shasum -a 256 chromedriver.zip | cut -d' ' -f1) ] \
-   && unzip chromedriver.zip -d /usr/local/bin/ \
-   && rm chromedriver.zip
+RUN wget -O chromedriver.zip 'https://chromedriver.storage.googleapis.com/2.34/chromedriver_linux64.zip' \
+  && [ e42a55f9e28c3b545ef7c7727a2b4218c37489b4282e88903e4470e92bc1d967 = $(shasum -a 256 chromedriver.zip | cut -d' ' -f1) ] \
+  && unzip chromedriver.zip -d /usr/local/bin/ \
+  && rm chromedriver.zip
 
 # composer is a package manager for PHP apps
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
