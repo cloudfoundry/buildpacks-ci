@@ -23,9 +23,6 @@ RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee 
 RUN curl -sL "https://keybase.io/crystal/pgp_keys.asc" | apt-key add - \
     && echo "deb https://dist.crystal-lang.org/apt crystal main" | tee /etc/apt/sources.list.d/crystal.list
 
-RUN curl -sL "https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key" | apt-key add - \
-  && echo "deb http://apt.starkandwayne.com stable main" |  tee /etc/apt/sources.list.d/starkandwayne.list
-
 RUN apt-get -qqy update \
   && apt-get -qqy install \
     aufs-tools \
@@ -44,7 +41,6 @@ RUN apt-get -qqy update \
     libxml2-dev \
     lsb-release \
     multiarch-support \
-    om \
     php7.0 \
     pkgconf \
     python-dev \
@@ -114,6 +110,14 @@ RUN curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&sou
   && tar -zxf cf.tgz cf --to-stdout > /usr/local/bin/cf \
   && rm cf.tgz \
   && chmod +x /usr/local/bin/cf
+
+# download om CLI
+RUN curl -L "https://github.com/pivotal-cf/om/releases/download/7.8.2/om-linux-amd64-7.8.2.tar.gz" -o om.tgz \
+  && [ 4a9492d2812a777146318008f1cebf4ef6348a108b35868636e608a4ab2f2a51 = $(shasum -a 256 om.tgz | cut -d' ' -f1) ] \
+  && tar -zxf om.tgz --to-stdout > /usr/local/bin/om \
+  && rm om.tgz \
+  && chmod +x /usr/local/bin/om
+
 
 # Ensure Concourse Filter binary is present
 RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.1.2/concourse-filter' \
