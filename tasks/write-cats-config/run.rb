@@ -15,8 +15,7 @@ apps_domain = ENV.fetch('APPS_DOMAIN')
 diego_docker_on = ENV.fetch('DIEGO_DOCKER_ON')
 credhub_mode = ENV.fetch('CREDHUB_MODE')
 windows_stack = ENV.fetch('WINDOWS_STACK')
-stacks = ENV.fetch('STACKS','')
-
+stacks = ENV.fetch('STACKS', '')
 
 cats_config = {
   "admin_password" => admin_password,
@@ -30,6 +29,7 @@ cats_config = {
   "cf_push_timeout" => 600,
   "default_timeout" => 240,
   "include_apps" => true,
+  "include_app_syslog_tcp" => false,
   "include_app" => true,
   "include_backend_compatibility" => true,
   "include_detect" => true,
@@ -54,15 +54,15 @@ cats_config = {
 
 if stacks != ''
   cats_config.merge!({
-    "stacks" => stacks.split(' '),
-  })
+                       "stacks" => stacks.split(' '),
+                     })
 end
 
 if windows_stack != '' && windows_stack != nil
   cats_config.merge!({ "include_windows" => true,
-    "num_windows_cells" => 1,
-    "windows_stack" => windows_stack,
-  })
+                       "num_windows_cells" => 1,
+                       "windows_stack" => windows_stack,
+                     })
 end
 
 if diego_docker_on == 'true'
