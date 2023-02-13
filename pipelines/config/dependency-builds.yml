@@ -203,7 +203,7 @@ dependencies:
             deprecation_date: 2023-04-30
             link: https://github.com/nodejs/Release
           - line: 16.X.X
-            deprecation_date: 2024-04-30
+            deprecation_date: 2023-09-11
             link: https://github.com/nodejs/Release
           - line: 18.X.X
             deprecation_date: 2025-04-30
