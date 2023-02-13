@@ -271,13 +271,13 @@ end
 # * There are two Gemfiles in fixtures which depend on the latest JRuby in the 9.2.X.X line.
 #   Replace their jruby engine version with the one in the manifest.
 ruby_files_to_edit = { 'fixtures/sinatra_jruby/Gemfile' => nil, 'fixtures/jruby_start_command/Gemfile' => nil }
-if !rebuilt && manifest_name == 'jruby' && buildpack_name == 'ruby'
-  version_number = /(9.2.\d+.\d+)/.match(version)
+if !rebuilt && manifest_name == 'jruby' && manifest['language'] == 'ruby'
+  version_number = /(9.4.\d+.\d+)/.match(version)
   if version_number
     jruby_version = version_number[0]
     ruby_files_to_edit.each_key do |path|
       text = File.read(File.join('buildpack', path))
-      ruby_files_to_edit[path] = text.gsub(/=> '(9.2.\d+.\d+)'/, "=> '#{jruby_version}'")
+      ruby_files_to_edit[path] = text.gsub(/=> '(9.4.\d+.\d+)'/, "=> '#{jruby_version}'")
     end
   end
 end
