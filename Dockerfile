@@ -23,9 +23,6 @@ RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee 
 RUN curl -sL "https://keybase.io/crystal/pgp_keys.asc" | apt-key add - \
     && echo "deb https://dist.crystal-lang.org/apt crystal main" | tee /etc/apt/sources.list.d/crystal.list
 
-RUN curl -sL "https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key" | apt-key add - \
-  && echo "deb http://apt.starkandwayne.com stable main" |  tee /etc/apt/sources.list.d/starkandwayne.list
-
 RUN apt-get -qqy update \
   && apt-get -qqy install \
     aufs-tools \
@@ -44,7 +41,6 @@ RUN apt-get -qqy update \
     libxml2-dev \
     lsb-release \
     multiarch-support \
-    om \
     php7.0 \
     pkgconf \
     python-dev \
@@ -81,30 +77,35 @@ RUN git config --global user.email "cf-buildpacks-eng@pivotal.io"
 RUN git config --global user.name "CF Buildpacks Team CI Server"
 RUN git config --global core.pager cat
 
+# download om from pivotal-cf/om
+RUN wget -O /usr/local/bin/om 'https://github.com/pivotal-cf/om/releases/download/7.8.2/om-linux-amd64-7.8.2' \
+  && [ 68d2cbff67e699168ba16c84dc75e0ff40fcb6024f53f53579b7227b793df158 = $(shasum -a 256 /usr/local/bin/om | cut -d' ' -f1) ] \
+  && chmod +x /usr/local/bin/om
+
 # download and install chromedriver
- RUN wget -O chromedriver.zip 'https://chromedriver.storage.googleapis.com/2.34/chromedriver_linux64.zip' \
-   && [ e42a55f9e28c3b545ef7c7727a2b4218c37489b4282e88903e4470e92bc1d967 = $(shasum -a 256 chromedriver.zip | cut -d' ' -f1) ] \
-   && unzip chromedriver.zip -d /usr/local/bin/ \
-   && rm chromedriver.zip
+RUN wget -O chromedriver.zip 'https://chromedriver.storage.googleapis.com/2.34/chromedriver_linux64.zip' \
+  && [ e42a55f9e28c3b545ef7c7727a2b4218c37489b4282e88903e4470e92bc1d967 = $(shasum -a 256 chromedriver.zip | cut -d' ' -f1) ] \
+  && unzip chromedriver.zip -d /usr/local/bin/ \
+  && rm chromedriver.zip
 
 # composer is a package manager for PHP apps
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the bosh2 CLI
-RUN curl -L https://github.com/cloudfoundry/bosh-cli/releases/download/v5.5.1/bosh-cli-5.5.1-linux-amd64 -o /usr/local/bin/bosh2 \
-  && [ 34e9898c244655ccbce2dc657b7d1df52e487cfd = $(shasum -a 1 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
+RUN curl -L https://github.com/cloudfoundry/bosh-cli/releases/download/v7.1.3/bosh-cli-7.1.3-linux-amd64 -o /usr/local/bin/bosh2 \
+  && [ 901f5fedf406c063be521660ae5f7ccd34e034d3f734e0522138bc5bf71f4e80 = $(shasum -a 256 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bosh2 \
   && ln -s /usr/local/bin/bosh2 /usr/local/bin/bosh
 
 # download bbl
-RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v7.6.0/bbl-v7.6.0_linux_x86-64' \
-  && [ 2e81f0560310791d604145b39f0b0c21cfd50d2c314fcd58059ff7a006cf12ca = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
+RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.4.111/bbl-v8.4.111_linux_x86-64' \
+  && [ 5e8e87c2ae5562b9b592122661c0c4a1fe3066facdb9783a07229926845227bb = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bbl
 
 # download credhub cli
-RUN curl -L https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/2.4.0/credhub-linux-2.4.0.tgz -o credhub.tgz \
-  && [ 73edaf1ee47323c4f0aa455bcc17303a73c0cf2a6d9156542f1f6b7b1b1aa3db = $(shasum -a 256 credhub.tgz | cut -d' ' -f1) ] \
+RUN curl -L https://github.com/cloudfoundry/credhub-cli/releases/download/2.9.10/credhub-linux-2.9.10.tgz -o credhub.tgz \
+  && [ e1719d406f947f29b150b73db508c96afffb3b95f01f5031140c705b885b8a38 = $(shasum -a 256 credhub.tgz | cut -d' ' -f1) ] \
   && tar -zxf credhub.tgz --to-stdout > /usr/local/bin/credhub \
   && rm credhub.tgz \
   && chmod +x /usr/local/bin/credhub

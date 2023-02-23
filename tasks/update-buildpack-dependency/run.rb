@@ -271,13 +271,13 @@ end
 # * There are two Gemfiles in fixtures which depend on the latest JRuby in the 9.2.X.X line.
 #   Replace their jruby engine version with the one in the manifest.
 ruby_files_to_edit = { 'fixtures/sinatra_jruby/Gemfile' => nil, 'fixtures/jruby_start_command/Gemfile' => nil }
-if !rebuilt && manifest_name == 'jruby' && buildpack_name == 'ruby'
-  version_number = /(9.2.\d+.\d+)/.match(version)
+if !rebuilt && manifest_name == 'jruby' && manifest['language'] == 'ruby'
+  version_number = /(9.4.\d+.\d+)/.match(version)
   if version_number
     jruby_version = version_number[0]
     ruby_files_to_edit.each_key do |path|
       text = File.read(File.join('buildpack', path))
-      ruby_files_to_edit[path] = text.gsub(/=> '(9.2.\d+.\d+)'/, "=> '#{jruby_version}'")
+      ruby_files_to_edit[path] = text.gsub(/=> '(9.4.\d+.\d+)'/, "=> '#{jruby_version}'")
     end
   end
 end
@@ -314,40 +314,6 @@ if buildpack_name == 'r'
       end
     end
   end
-end
-
-#
-# Special Dotnet Stuff
-# * The .NET Core buildpack has a .NET Core dependency in the manifest.
-#   Replace the version with the one in the manifest.
-if !rebuilt && buildpack_name == 'dotnet-core'
-  runtime_3_version = ""
-  sdk_3_version = ""
-  runtime_6_version = ""
-  sdk_6_version = ""
-  manifest["dependencies"].map do |dep|
-    case dep["name"]
-    when "dotnet-runtime"
-      if dep["version"].start_with?("3.")
-        runtime_3_version = dep["version"]
-      elsif dep["version"].start_with?("6.")
-        runtime_6_version = dep["version"]
-      end
-    when "dotnet-sdk"
-      if dep["version"].start_with?("3.")
-        sdk_3_version = dep["version"]
-      elsif dep["version"].start_with?("6.")
-        sdk_6_version = dep["version"]
-      end
-    end
-  end
-  # Update the 3.X runtime version
-  manifest['runtime_to_sdks'][0]["runtime_version"] = runtime_3_version
-  manifest['runtime_to_sdks'][0]["sdks"] = [sdk_3_version]
-
-  # Update the 6.X runtime version
-  manifest['runtime_to_sdks'][1]["runtime_version"] = runtime_6_version
-  manifest['runtime_to_sdks'][1]["sdks"] = [sdk_6_version]
 end
 
 Dir.chdir('artifacts') do

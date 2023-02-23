@@ -17,10 +17,10 @@ def get_latest(name, klass, url, cache)
   cache[key]
 end
 
-def bump_version(mod, cache)
-  name = mod['name']
-  version = mod['version']
-  klass = mod['klass']
+def bump_version(dependency, cache)
+  name = dependency['name']
+  version = dependency['version']
+  klass = dependency['klass']
 
   if !version || version == 'nil'
     return
@@ -37,8 +37,8 @@ def bump_version(mod, cache)
 
   if version != latest
     puts "      Bumped #{name}: #{version} -> #{latest}"
-    mod['version'] = latest
-    mod['md5'] = nil
+    dependency['version'] = latest
+    dependency['md5'] = nil
   else
     puts "      No bump required (current version: #{version})"
   end
