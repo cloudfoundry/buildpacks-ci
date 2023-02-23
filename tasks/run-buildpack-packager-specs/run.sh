@@ -6,6 +6,9 @@ set -o pipefail
 
 cd buildpack-packager
 
+apt-get update
+apt-get install -y zip git
+
 if [ ! -z "$RUBYGEM_MIRROR" ]; then
   bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
 fi
