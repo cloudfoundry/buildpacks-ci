@@ -60,7 +60,7 @@ RUN curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&sou
   && rm cf.tgz \
   && chmod +x /usr/local/bin/cf
 
-Ensure Concourse Filter binary is present
+# Ensure Concourse Filter binary is present
 RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.1.2/concourse-filter' \
   && [ d0282138e9da80cc1e528dfaf1f95963908b9334ef1d27e461fc8cbbedc4c601 = $(shasum -a 256 concourse-filter | cut -d' ' -f1) ] \
   && mv concourse-filter /usr/local/bin \
