@@ -30,8 +30,8 @@ extensions:
   md5: 2e1fb1f09725ada616e873c4e4012ff6
   klass: PeclRecipe
 - name: igbinary
-  version: 3.2.13
-  md5: 21bb3903319e966ce61cb4f69539aaa3
+  version: 3.2.14
+  md5: eccbabb49090caf8c3c19dc64f16ce87
   klass: PeclRecipe
 - name: gnupg
   version: 1.5.1
@@ -50,8 +50,8 @@ extensions:
   md5: 1ab8d517fcfad5624e6fc4de71e24b47
   klass: PeclRecipe
 - name: mongodb
-  version: 1.15.0
-  md5: e42cef3737fbd20ba3dd4dc9b7a427f2
+  version: 1.15.1
+  md5: 885483aa6a4fa7fbd723daefece974ec
   klass: PeclRecipe
 - name: msgpack
   version: 2.1.2
@@ -146,8 +146,8 @@ extensions:
   md5: '07695da8376002babbce528205decf07'
   klass: PeclRecipe
 - name: phalcon
-  version: 5.1.4
-  md5: 58e484f3e211242b3302a44a80aff1df
+  version: 5.2.1
+  md5: 9cd7861e2d0c6171c82e5c882a3e1ff4
   klass: PeclRecipe
 - name: phpiredis
   version: 1.0.1
