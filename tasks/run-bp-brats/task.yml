@@ -3,7 +3,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: swigmore/jammy-test-image
+    repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
   - name: buildpack
