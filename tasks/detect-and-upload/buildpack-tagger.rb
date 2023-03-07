@@ -10,7 +10,6 @@ class BuildpackTagger
     @git_repo_org = git_repo_org
   end
 
-
   def run!
     Dir.chdir(buildpack_dir) do
       tag_to_add = "v#{File.read('VERSION')}".strip
@@ -38,28 +37,37 @@ class BuildpackTagger
         puts `git tag #{tag_to_add}`
         if File.exists?('compile-extensions')
           system(<<~EOF)
-                  export BUNDLE_GEMFILE=cf.Gemfile
-                  if [ ! -z "$RUBYGEM_MIRROR" ]; then
-                    bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
-                  fi
-                  bundle install --deployment
-                  bundle cache
-                  bundle exec buildpack-packager --uncached #{stack_flag}
-                  bundle exec buildpack-packager --cached #{stack_flag}
-                  EOF
+            export BUNDLE_GEMFILE=cf.Gemfile
+            if [ ! -z "$RUBYGEM_MIRROR" ]; then
+              bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
+            fi
+            # Write a new Gemfile and Gemfile.lock to the buildpack directory
+            # so that the buildpack-packager can use the correct versions of
+            # the buildpack dependencies
+
+            rm -rf cf.Gemfile
+            rm -rf cf.Gemfile.lock
+
+            wget https://github.com/cloudfoundry/php-buildpack/raw/v4.5.3/cf.Gemfile
+            wget https://github.com/cloudfoundry/php-buildpack/raw/v4.5.3/cf.Gemfile.lock
+            bundle install --deployment
+            bundle cache
+            bundle exec buildpack-packager --uncached #{stack_flag}
+            bundle exec buildpack-packager --cached #{stack_flag}
+          EOF
         elsif File.exists?('./scripts/.util/tools.sh')
           system("bash", "-c", <<~EOF)
-                  . ./scripts/.util/tools.sh
-                  util::tools::buildpack-packager::install --directory "${PWD}/.bin"
-                  ./.bin/buildpack-packager build --cached=false #{stack_flag}
-                  ./.bin/buildpack-packager build --cached=true #{stack_flag}
-                  EOF
+            . ./scripts/.util/tools.sh
+            util::tools::buildpack-packager::install --directory "${PWD}/.bin"
+            ./.bin/buildpack-packager build --cached=false #{stack_flag}
+            ./.bin/buildpack-packager build --cached=true #{stack_flag}
+          EOF
         else
           system(<<~EOF)
-                  ./scripts/install_tools.sh
-                  ./.bin/buildpack-packager build --cached=false #{stack_flag}
-                  ./.bin/buildpack-packager build --cached=true #{stack_flag}
-                  EOF
+            ./scripts/install_tools.sh
+            ./.bin/buildpack-packager build --cached=false #{stack_flag}
+            ./.bin/buildpack-packager build --cached=true #{stack_flag}
+          EOF
         end
 
         timestamp = `date +%s`.strip
