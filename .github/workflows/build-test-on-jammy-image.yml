@@ -31,3 +31,4 @@ jobs:
         with:
           push: true
           tags: cfbuildpacks/test-on-jammy
+          file: dockerfiles/test-on-jammy.Dockerfile
