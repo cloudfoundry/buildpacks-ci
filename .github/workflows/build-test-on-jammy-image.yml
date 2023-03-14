@@ -27,8 +27,9 @@ jobs:
           password: ${{ secrets.CF_BUILDPACKS_DOCKERHUB_TOKEN }}
 
       - name: Build and push
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
+          context: .
           push: true
           tags: cfbuildpacks/test-on-jammy
           file: dockerfiles/test-on-jammy.Dockerfile
