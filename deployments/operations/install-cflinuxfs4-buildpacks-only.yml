@@ -1,0 +1,63 @@
+---
+# This replaces cflinuxfs3 based buildpacks with cflinuxfs4 buildpacks
+# for cc pre-installation during deploy.
+# To be used when you want an env with cflinxufs4 based buildpacks only.
+# For buildpacks based on both stacks, use cf-deployment/operations/experimental/add-cflinuxfs4.yml
+- type: remove
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks
+
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks?/-
+  value:
+    name: staticfile_buildpack
+    package: staticfile-buildpack-cflinuxfs4
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks?/-
+  value:
+    name: java_buildpack
+    package: java-buildpack-cflinuxfs4
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks?/-
+  value:
+    name: ruby_buildpack
+    package: ruby-buildpack-cflinuxfs4
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks?/-
+  value:
+    name: dotnet_core_buildpack
+    package: dotnet-core-buildpack-cflinuxfs4
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks?/-
+  value:
+    name: nodejs_buildpack
+    package: nodejs-buildpack-cflinuxfs4
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks?/-
+  value:
+    name: go_buildpack
+    package: go-buildpack-cflinuxfs4
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks?/-
+  value:
+    name: python_buildpack
+    package: python-buildpack-cflinuxfs4
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks?/-
+  value:
+    name: php_buildpack
+    package: php-buildpack-cflinuxfs4
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks?/-
+  value:
+    name: nginx_buildpack
+    package: nginx-buildpack-cflinuxfs4
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks?/-
+  value:
+    name: r_buildpack
+    package: r-buildpack-cflinuxfs4
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/install_buildpacks?/-
+  value:
+    name: binary_buildpack
+    package: binary-buildpack-cflinuxfs4
