@@ -23,10 +23,7 @@ outputs:
   - name: builds-artifacts
   - name: dep-metadata
 run:
-  path: bash
-  args:
-    - -cl
-    - buildpacks-ci/tasks/build-binary-new-cflinuxfs4/build.rb
+  path: buildpacks-ci/tasks/build-binary-new-cflinuxfs4/build.sh
 params:
   STACK:
   SKIP_COMMIT:
