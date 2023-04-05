@@ -35,6 +35,8 @@ class UsnReleaseNotes
         cves << cve
       elsif (lp = line.match(%r{.*href="(?<uri>.*launchpad\.net/bugs.*)">(?<text>.*)</li}))
         lps << lp
+      elsif (lp = line.match(%r{.*href="(?<uri>.*bugs\.launchpad\.net/.*)">(?<text>.*)</li}))
+        lps << lp
       end
     end
 
