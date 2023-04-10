@@ -46,7 +46,7 @@ class Dependencies
   # [1,2,3], [1,2,3] => true
   # [1], [1,2] => true
   def dep_includes_at_least_these_stacks?(manifest_stacks)
-    (manifest_stacks - @dep['cf_stacks']).empty?
+    manifest_stacks.nil? or (manifest_stacks - @dep['cf_stacks']).empty?
   end
 
   def same_dependency_line?(stacks, version, dep_name)
