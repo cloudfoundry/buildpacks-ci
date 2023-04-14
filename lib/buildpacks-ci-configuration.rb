@@ -3,10 +3,6 @@ class BuildpacksCIConfiguration
     ENV.fetch('LPASS_CONCOURSE_PRIVATE_FILE', 'Shared-CF\ Buildpacks/concourse-private.yml')
   end
 
-  def deployments_buildpacks_filename
-    ENV.fetch('LPASS_DEPLOYMENTS_BUILDPACKS_FILE',  'Shared-CF\ Buildpacks/deployments-buildpacks.yml')
-  end
-
   def repos_private_keys_filename
     ENV.fetch('LPASS_REPOS_PRIVATE_KEYS_FILE', 'Shared-CF\ Buildpacks/buildpack-repos-private-keys.yml')
   end
