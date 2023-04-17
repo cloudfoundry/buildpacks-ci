@@ -63,6 +63,7 @@ module DependencyBuild
           Runner.run('tar', 'zxf', "pip-#{source_input.version}.tar.gz")
           Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools')
           Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
+          Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'flit_core')
           Runner.run('tar', 'zcvf', file_path, '.')
         end
       end
