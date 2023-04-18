@@ -25,28 +25,6 @@ describe BuildpacksCIConfiguration do
     end
   end
 
-  describe '#deployments_buildpacks_filename' do
-    subject { BuildpacksCIConfiguration.new.deployments_buildpacks_filename }
-
-    context 'configured by env variable' do
-      it 'returns the value of the env var' do
-        allow(ENV).to receive(:fetch).with('LPASS_DEPLOYMENTS_BUILDPACKS_FILE', anything).and_return('deployment.yml')
-
-        expect(subject).to eq('deployment.yml')
-      end
-
-      it 'asks ENV for the value' do
-        expect(ENV).to receive(:fetch).with('LPASS_DEPLOYMENTS_BUILDPACKS_FILE', anything)
-
-        subject
-      end
-    end
-
-    it 'has a default value' do
-      expect(subject).to include('deployments-buildpacks.yml')
-    end
-  end
-
   describe '#repos_private_keys_filename' do
     subject { BuildpacksCIConfiguration.new.repos_private_keys_filename }
 
@@ -88,28 +66,6 @@ describe BuildpacksCIConfiguration do
 
     it 'has a default value' do
       expect(subject).to include('git-repos-private-keys.yml')
-    end
-  end
-
-  describe '#git_repos_private_keys_two_filename' do
-    subject { BuildpacksCIConfiguration.new.git_repos_private_keys_two_filename }
-
-    context 'configured by env variable' do
-      it 'returns the value of the env var' do
-        allow(ENV).to receive(:fetch).with('LPASS_GIT_REPOS_PRIVATE_KEYS_TWO_FILE', anything).and_return('keys.yml')
-
-        expect(subject).to eq('keys.yml')
-      end
-
-      it 'asks ENV for the value' do
-        expect(ENV).to receive(:fetch).with('LPASS_GIT_REPOS_PRIVATE_KEYS_TWO_FILE', anything)
-
-        subject
-      end
-    end
-
-    it 'has a default value' do
-      expect(subject).to include('git-repos-private-keys-two.yml')
     end
   end
 
