@@ -154,7 +154,7 @@ resources:
   type: git
   source:
     uri: <%= get_git_uri(buildpack) %>
-    private_key: {{cf-buildpacks-eng-github-ssh-key}}
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
     branch: v3
 <% end %>
 
