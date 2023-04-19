@@ -170,7 +170,7 @@ resources:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
     branch: main
     paths: [ binary-builds-new/ ]
-    private_key: {{public-buildpacks-ci-robots-private-key}}
+    private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
 
 <% stacks.each do |stack| %>
 - name: <%= stack %>-image
@@ -183,13 +183,13 @@ resources:
   type: git
   source:
     uri: <%= get_git_uri(buildpack, cnb_uris) %>
-    private_key: {{cf-buildpacks-eng-github-ssh-key}}
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
     branch: v3
 <% end %>
 
 <% dependencies.values.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack|
 branch = 'develop'
-private_key = '{{cf-buildpacks-eng-github-ssh-key}}'
+private_key = '((cf-buildpacks-eng-github-ssh-key.private_key))'
 %>
 - name: <%= buildpack %>-buildpack
   type: git
