@@ -170,7 +170,7 @@ resources:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
     branch: main
     paths: [ binary-builds-new/ ]
-    private_key: {{public-buildpacks-ci-robots-private-key}}
+    private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
 
 <% stacks.each do |stack| %>
 - name: <%= stack %>-image
