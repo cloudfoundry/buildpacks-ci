@@ -24,10 +24,6 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
       paths: [ binary-verification-whitelist/* ]
-  - name: failure-alert
-    type: slack-notification
-    source:
-      url: {{buildpacks-ci-slack-url}}
   - name: hwc-buildpack
     type: git
     source:
@@ -63,8 +59,3 @@ jobs:
         - task: verify-buildpack-binaries
           file: buildpacks-ci/tasks/verify-buildpack-binaries/task.yml
           timeout: 1h30m
-        on_failure:
-          put: failure-alert
-          params:
-            text: {{buildpacks-ci-failure-slack-message}}
-            channel: {{buildpacks-ci-slack-channel}}

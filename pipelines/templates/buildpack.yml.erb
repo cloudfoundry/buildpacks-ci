@@ -327,12 +327,6 @@ resources: #####################################################################
 
   ## Alerts ##
 
-  - name: failure-alert
-    type: slack-notification
-    icon: slack
-    source:
-      url: {{buildpacks-ci-slack-url}}
-
   - name: daily-midnight
     type: cron
     source:
@@ -381,11 +375,6 @@ jobs: ##########################################################################
             params:
               DOCKER_START: true
 <% end %>
-        on_failure:
-          put: failure-alert
-          params:
-            text: {{buildpacks-ci-failure-slack-message}}
-            channel: {{buildpacks-ci-slack-channel}}
 
   - name: create-buildpack-release-story
     serial: true
@@ -468,11 +457,6 @@ jobs: ##########################################################################
               params:
                 file: buildpack-artifacts-<%= stack %>/cached/*_buildpack-cached*-v*.zip
 <% end %>
-        on_failure:
-          put: failure-alert
-          params:
-            text: {{buildpacks-ci-failure-slack-message}}
-            channel: {{buildpacks-ci-slack-channel}}
   - name: ship-it
     serial: true
     public: true
@@ -711,11 +695,6 @@ jobs: ##########################################################################
           privileged: true
           <% end %>
         <% end %>
-    on_failure:
-      put: failure-alert
-      params:
-        text: {{buildpacks-ci-failure-slack-message}}
-        channel: {{buildpacks-ci-slack-channel}}
     on_success:
       put: environment
       resource: cf-toolsmiths-environment
@@ -784,11 +763,6 @@ jobs: ##########################################################################
             <% else %>
           privileged: true
             <% end %>
-    on_failure:
-      put: failure-alert
-      params:
-        text: {{buildpacks-ci-failure-slack-message}}
-        channel: {{buildpacks-ci-slack-channel}}
     on_success:
       put: environment
       resource: cf-toolsmiths-environment
@@ -873,11 +847,6 @@ jobs: ##########################################################################
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 3
 <% end %>
-    on_failure:
-      put: failure-alert
-      params:
-        text: {{buildpacks-ci-failure-slack-message}}
-        channel: {{buildpacks-ci-slack-channel}}
     on_success:
       put: environment
       resource: cf-toolsmiths-environment
@@ -960,11 +929,6 @@ jobs: ##########################################################################
         ensure:
           task: delete-cf-space
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
-    on_failure:
-      put: failure-alert
-      params:
-        text: {{buildpacks-ci-failure-slack-message}}
-        channel: {{buildpacks-ci-slack-channel}}
     ensure:
       put: environment
       resource: smith-environments-<%= pas_version %>
@@ -1013,11 +977,6 @@ jobs: ##########################################################################
       params:
         action: unclaim
         env_file: environment/metadata
-    on_failure:
-      put: failure-alert
-      params:
-        text: {{buildpacks-ci-failure-slack-message}}
-        channel: {{buildpacks-ci-slack-channel}}
 <% end %>
   - name: specs-lts-gcp-develop
     serial: true
@@ -1201,9 +1160,4 @@ jobs: ##########################################################################
           params:
             name: version/version
             tag: version/version
-        on_failure:
-          put: failure-alert
-          params:
-            text: {{buildpacks-ci-failure-slack-message}}
-            channel: {{buildpacks-ci-slack-channel}}
 <% end %>
