@@ -190,10 +190,6 @@ resources:
 <% dependencies.values.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack|
 branch = 'develop'
 private_key = '{{cf-buildpacks-eng-github-ssh-key}}'
-if buildpack.include? '-cnb'
-  branch = 'main'
-  private_key = '{{paketo-bot-github-ssh-key}}'
-end
 %>
 - name: <%= buildpack %>-buildpack
   type: git
