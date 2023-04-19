@@ -36,6 +36,15 @@ module DependencyBuild
       Runner.run('rm', '-f', 'get-pip.py')
     end
 
+    def setup_gcc11
+      Runner.run('apt', 'update')
+      Runner.run('apt', 'install', '-y', 'software-properties-common')
+      Runner.run('add-apt-repository', '-y', 'ppa:ubuntu-toolchain-r/test')
+      Runner.run('apt', 'update')
+      Runner.run('apt', 'install', '-y', 'gcc-8', 'g++-8')
+      Runner.run('update-alternatives', '--install', '/usr/bin/gcc', 'gcc', '/usr/bin/gcc-8', '60', '--slave', '/usr/bin/g++', 'g++', '/usr/bin/g++-8')
+    end
+
     def bundle_pip_dependencies(source_input)
       # final resting place for pip source and dependencies
       file_path = "/tmp/pip-#{source_input.version}.tgz"
@@ -134,7 +143,7 @@ module DependencyBuild
       Dir.mkdir(built_path)
 
       url = "#{source_input.url}"
-      file_path = url.slice((url.rindex('/')+1)..(url.length))
+      file_path = url.slice((url.rindex('/') + 1)..(url.length))
       dir = file_path.delete_suffix(".tar.gz")
 
       Dir.chdir('source') do
@@ -396,7 +405,7 @@ module DependencyBuild
     def prune_dotnet_files(source_input, files_to_exclude, write_runtime = false)
       source_file = File.expand_path(Dir.glob('source/*.tar.gz').first)
       adjusted_file = "/tmp/#{source_input.name}.#{source_input.version}.linux-amd64.tar.xz"
-      exclude_list = files_to_exclude.map{ |file| "--exclude=#{file}"}.join(" ")
+      exclude_list = files_to_exclude.map { |file| "--exclude=#{file}" }.join(" ")
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
           `tar -xf #{source_file} #{exclude_list}`
@@ -412,7 +421,7 @@ module DependencyBuild
       Dir.chdir(sdk_dir) do
         runtime_glob = './shared/Microsoft.NETCore.App/'
         output = `tar tf #{source_file} #{runtime_glob}`
-        files = output.split("\n").select {|line| line.end_with? '/' }
+        files = output.split("\n").select { |line| line.end_with? '/' }
         version = Pathname.new(files.last).basename.to_s
 
         File.open('RuntimeVersion.txt', 'w') do |f|
@@ -639,13 +648,13 @@ class Builder
     end
 
     out_data = {
-        tracker_story_id: build_input.tracker_story_id,
-        version: source_input.version,
-        source: {
-          url: source_input.url,
-          md5: source_input.md5,
-          sha256: source_input.sha256
-        }
+      tracker_story_id: build_input.tracker_story_id,
+      version: source_input.version,
+      source: {
+        url: source_input.url,
+        md5: source_input.md5,
+        sha256: source_input.sha256
+      }
     }
 
     unless out_data[:source][:sha256]
@@ -660,31 +669,31 @@ class Builder
     when 'bundler'
       binary_builder.build(source_input)
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}.tgz",
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}.tgz",
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
 
     when 'hwc'
       binary_builder.build(source_input)
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              "#{binary_builder.base_dir}/hwc-#{source_input.version}-windows-x86-64.zip",
-              "#{filename_prefix}_windows_x86-64_any-stack",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          "#{binary_builder.base_dir}/hwc-#{source_input.version}-windows-x86-64.zip",
+          "#{filename_prefix}_windows_x86-64_any-stack",
+        )
       )
 
     when 'dep', 'glide', 'godep'
       binary_builder.build(source_input)
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              "#{binary_builder.base_dir}/#{source_input.name}-v#{source_input.version}-linux-x64.tgz",
-              "#{filename_prefix}_linux_x64_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          "#{binary_builder.base_dir}/#{source_input.name}-v#{source_input.version}-linux-x64.tgz",
+          "#{filename_prefix}_linux_x64_#{stack}",
+        )
       )
 
     when 'go'
@@ -695,14 +704,16 @@ class Builder
       Archive.strip_top_level_directory_from_tar(filename)
 
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              filename,
-              "#{filename_prefix}_linux_x64_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          filename,
+          "#{filename_prefix}_linux_x64_#{stack}",
+        )
       )
 
     when 'node', 'httpd'
+      DependencyBuild.setup_gcc11
+
       source_input.version = source_input.version.delete_prefix('v') if source_input.name == 'node'
       binary_builder.build(source_input)
 
@@ -710,11 +721,11 @@ class Builder
       Archive.strip_top_level_directory_from_tar(filename)
 
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              filename,
-              "#{filename_prefix}_linux_x64_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          filename,
+          "#{filename_prefix}_linux_x64_#{stack}",
+        )
       )
 
     when 'nginx-static'
@@ -725,11 +736,11 @@ class Builder
       Archive.strip_top_level_directory_from_tar(filename)
 
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              filename,
-              "#{filename_prefix}_linux_x64_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          filename,
+          "#{filename_prefix}_linux_x64_#{stack}",
+        )
       )
       out_data[:source_pgp] = source_pgp
 
@@ -782,11 +793,11 @@ class Builder
       IO.copy_stream(download, "artifacts/#{source_input.name}.tgz")
 
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              "artifacts/#{source_input.name}.tgz",
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          "artifacts/#{source_input.name}.tgz",
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
 
     when 'setuptools'
@@ -801,11 +812,11 @@ class Builder
       end
 
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              filename,
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          filename,
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
 
     when 'rubygems', 'yarn'
@@ -817,21 +828,21 @@ class Builder
       Archive.strip_top_level_directory_from_tar(filename)
 
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              filename,
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          filename,
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
 
     when 'icu'
       old_file_path = DependencyBuild.build_icu source_input
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              old_file_path,
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          old_file_path,
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
 
     when 'bower', 'lifecycle'
@@ -840,21 +851,21 @@ class Builder
       File.write(filename, results[0])
 
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              filename,
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          filename,
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
 
     when 'composer'
-    filename = "source/composer.phar"
+      filename = "source/composer.phar"
       if File.exist?(filename)
         out_data.merge!(
           artifact_output.move_dependency(
-              source_input.name,
-              filename,
-              "#{filename_prefix}_linux_noarch_any-stack",
+            source_input.name,
+            filename,
+            "#{filename_prefix}_linux_noarch_any-stack",
           )
         )
       else
@@ -862,7 +873,6 @@ class Builder
         out_data[:sha256] = results[1]
         out_data[:url] = source_input.url
       end
-
 
     when 'ruby'
       major, minor, _ = source_input.version.split('.')
@@ -877,11 +887,11 @@ class Builder
       Archive.strip_incorrect_words_yaml_from_tar(filename)
 
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              filename,
-              "#{filename_prefix}_linux_x64_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          filename,
+          "#{filename_prefix}_linux_x64_#{stack}",
+        )
       )
 
     when 'jruby'
@@ -898,30 +908,29 @@ class Builder
         raise "Unsupported jruby version line #{source_input.version}"
       end
 
-
       # Create a copy of the source_input to prevent mutating version for later use
       full_version = "#{source_input.version}-ruby-#{ruby_version}"
 
       binary_builder.build(
-          SourceInput.new(
-              source_input.name,
-              source_input.url,
-              full_version,
-              source_input.md5,
-              source_input.sha256,
-              source_input.git_commit_sha
-          )
+        SourceInput.new(
+          source_input.name,
+          source_input.url,
+          full_version,
+          source_input.md5,
+          source_input.sha256,
+          source_input.git_commit_sha
+        )
       )
 
       filename = "#{binary_builder.base_dir}/#{source_input.name}-#{full_version}-linux-x64.tgz"
       Archive.strip_incorrect_words_yaml_from_tar(filename)
 
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              filename,
-              "#{source_input.name}_#{full_version}_linux_x64_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          filename,
+          "#{source_input.name}_#{full_version}_linux_x64_#{stack}",
+        )
       )
 
     when 'php'
@@ -967,61 +976,61 @@ class Builder
     when 'python'
       DependencyBuild.build_python(source_input, stack)
       out_data.merge!(
-          artifact_output.move_dependency(
-              'python',
-              "artifacts/python-#{source_input.version}.tgz",
-              "#{filename_prefix}_linux_x64_#{stack}",
-          )
+        artifact_output.move_dependency(
+          'python',
+          "artifacts/python-#{source_input.version}.tgz",
+          "#{filename_prefix}_linux_x64_#{stack}",
+        )
       )
 
     when 'pipenv'
       old_file_path = DependencyBuild.build_pipenv source_input
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              old_file_path,
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          old_file_path,
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
 
     when 'poetry'
       old_file_path = DependencyBuild.build_poetry source_input
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              old_file_path,
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          old_file_path,
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
 
     when 'pip'
       old_file_path = DependencyBuild.bundle_pip_dependencies source_input
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              old_file_path,
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          old_file_path,
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
 
     when 'libunwind'
       old_file_path = DependencyBuild.build_libunwind source_input
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              old_file_path,
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          old_file_path,
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
 
     when 'libgdiplus'
       old_file_path = DependencyBuild.build_libgdiplus source_input
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              old_file_path,
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          old_file_path,
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
 
     when 'r'
@@ -1033,11 +1042,11 @@ class Builder
       source_sha = DependencyBuild.build_r(source_input, forecast_input.version, plumber_input.version, rserve_input.version, shiny_input.version)
 
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              "artifacts/#{source_input.name}-v#{source_input.version}.tgz",
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          "artifacts/#{source_input.name}-v#{source_input.version}.tgz",
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
       out_data[:git_commit_sha] = source_sha
 
@@ -1054,72 +1063,72 @@ class Builder
       Archive.strip_top_level_directory_from_tar(filename)
 
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              filename,
-              "#{filename_prefix}_linux_x64_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          filename,
+          "#{filename_prefix}_linux_x64_#{stack}",
+        )
       )
       out_data[:source_pgp] = source_pgp
 
     when 'dotnet-sdk'
       old_file_path = DependencyBuild.build_dotnet_sdk source_input
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              old_file_path,
-              "#{filename_prefix}_linux_x64_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          old_file_path,
+          "#{filename_prefix}_linux_x64_#{stack}",
+        )
       )
 
     when 'dotnet-runtime'
       old_file_path = DependencyBuild.build_dotnet_runtime source_input
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              old_file_path,
-              "#{filename_prefix}_linux_x64_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          old_file_path,
+          "#{filename_prefix}_linux_x64_#{stack}",
+        )
       )
 
     when 'dotnet-aspnetcore'
       old_file_path = DependencyBuild.build_dotnet_aspnetcore source_input
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              old_file_path,
-              "#{filename_prefix}_linux_x64_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          old_file_path,
+          "#{filename_prefix}_linux_x64_#{stack}",
+        )
       )
 
     when 'openresty'
       source_pgp = 'not yet implemented'
       DependencyBuild.build_openresty source_input
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              "artifacts/#{source_input.name}-#{source_input.version}.tgz",
-              "#{filename_prefix}_linux_x64_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          "artifacts/#{source_input.name}-#{source_input.version}.tgz",
+          "#{filename_prefix}_linux_x64_#{stack}",
+        )
       )
       out_data[:source_pgp] = source_pgp
     when 'curl'
       old_file_path = DependencyBuild.build_curl source_input
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              old_file_path,
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          old_file_path,
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
     when 'tini'
       old_file_path = DependencyBuild.build_tini source_input
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              old_file_path,
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          old_file_path,
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
 
     when 'rust'
@@ -1134,11 +1143,11 @@ class Builder
 
       old_file_path = DependencyBuild.build_rust source_input
       out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              old_file_path,
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
+        artifact_output.move_dependency(
+          source_input.name,
+          old_file_path,
+          "#{filename_prefix}_linux_noarch_#{stack}",
+        )
       )
 
     else
