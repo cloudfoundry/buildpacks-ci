@@ -608,31 +608,6 @@ end
 
 class Builder
   def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, php_extensions_dir = __dir__, skip_commit = false)
-    cnb_list = [
-      'org.cloudfoundry.node-engine',
-      'org.cloudfoundry.npm',
-      'org.cloudfoundry.yarn-install',
-      'org.cloudfoundry.nodejs-compat',
-      'org.cloudfoundry.dotnet-core-runtime',
-      'org.cloudfoundry.dotnet-core-aspnet',
-      'org.cloudfoundry.dotnet-core-sdk',
-      'org.cloudfoundry.dotnet-core-conf',
-      'org.cloudfoundry.python-runtime',
-      'org.cloudfoundry.pip',
-      'org.cloudfoundry.pipenv',
-      'org.cloudfoundry.conda',
-      'org.cloudfoundry.php-dist',
-      'org.cloudfoundry.php-composer',
-      'org.cloudfoundry.php-compat',
-      'org.cloudfoundry.httpd',
-      'org.cloudfoundry.nginx',
-      'org.cloudfoundry.php-web',
-      'org.cloudfoundry.dotnet-core-build',
-      'org.cloudfoundry.go-compiler',
-      'org.cloudfoundry.go-mod',
-      'org.cloudfoundry.dep',
-      'org.cloudfoundry.icu',
-    ]
 
     unless skip_commit
       build_input.copy_to_build_output
@@ -771,23 +746,6 @@ class Builder
       results = Sha.check_sha(source_input)
       out_data[:url] = source_input.url
       out_data[:sha256] = results[1]
-
-    when -> (elem) { cnb_list.include?(elem) }
-      results = Sha.check_sha(source_input)
-      File.write('artifacts/temp_file', results[0])
-
-      cnbName = source_input.repo.split("/").last
-      uri = "https://github.com/#{source_input.repo}/releases/download/v#{source_input.version}/#{cnbName}-#{source_input.version}.tgz"
-      download = open(uri)
-      IO.copy_stream(download, "artifacts/#{source_input.name}.tgz")
-
-      out_data.merge!(
-          artifact_output.move_dependency(
-              source_input.name,
-              "artifacts/#{source_input.name}.tgz",
-              "#{filename_prefix}_linux_noarch_#{stack}",
-          )
-      )
 
     when 'setuptools'
       results = Sha.check_sha(source_input)

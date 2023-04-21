@@ -23,8 +23,6 @@ all_stacks = BUILD_STACKS + WINDOWS_STACKS + ["any-stack"]
 cflinuxfs4_dependencies = config['cflinuxfs4_dependencies']
 cflinuxfs4_buildpacks = config['cflinuxfs4_buildpacks']
 
-# Stacks we dont want to process (most likely V3 stacks)
-
 manifest = YAML.load_file('buildpack/manifest.yml')
 manifest_latest_released = YAML.load_file('buildpack-latest-released/manifest.yml') # rescue { 'dependencies' => [] }
 

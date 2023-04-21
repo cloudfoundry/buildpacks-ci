@@ -103,12 +103,6 @@ end
 def get_git_uri(buildpack)
   bp_uri = "git@github.com:cloudfoundry/#{buildpack}-buildpack.git"
 end
-
-def is_cloudfoundry_cnb(buildpack)
-  if !buildpack.include? '-cnb'
-    return true
-  end
-end
 %>
 
 resource_types:
@@ -147,15 +141,6 @@ resources:
 - name: <%= stack %>-image
   type: docker-image
   source: {repository: cfbuildpacks/<%= stack %>}
-<% end %>
-
-<% dependencies.values.select{|dep| dep.fetch('branch', 'develop') == 'v3' }.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack| %>
-- name: <%= buildpack %>-buildpack-v3
-  type: git
-  source:
-    uri: <%= get_git_uri(buildpack) %>
-    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: v3
 <% end %>
 
 <% dependencies.each do |dep_name, dep| %>

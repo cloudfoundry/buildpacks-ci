@@ -6,9 +6,7 @@ set -o pipefail
 
 set -x
 
-if [ "$LANGUAGE" = "multi" ]; then
-  update_dir="src/compile"
-elif [ "$LANGUAGE" = "dotnet-core" ]; then
+if [ "$LANGUAGE" = "dotnet-core" ]; then
   update_dir="src/dotnetcore"
 else
   update_dir="src/$LANGUAGE"

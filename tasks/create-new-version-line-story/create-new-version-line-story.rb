@@ -44,13 +44,7 @@ end
 BUILDPACKS = ENV['BUILDPACKS']
                  .split(' ')
                  .compact
-                 .map {|bp|
-                   if bp.include? "-cnb"
-                     bp
-                   else
-                     "#{bp}-buildpack"
-                   end
-                 }
+                 .map {|bp| "#{bp}-buildpack" }
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
