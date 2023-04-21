@@ -185,7 +185,7 @@ module DependencyBuild
           Runner.run('apt', 'update')
 
           stack = ENV.fetch('STACK')
-          fs_specific_packages = stack == 'cflinuxfs2' ? ['libgfortran-4.8-dev'] : ['libgfortran-7-dev']
+          fs_specific_packages = ['libgfortran-7-dev']
           Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libpcre2-dev', 'libcurl4-openssl-dev', 'libsodium-dev', 'libharfbuzz-dev', 'libfribidi-dev', 'default-jre', *fs_specific_packages)
 
           Runner.run('wget', source_input.url)
@@ -210,14 +210,6 @@ module DependencyBuild
 
             Dir.chdir('/usr/local/lib/R') do
               case stack
-              when 'cflinuxfs2'
-                Runner.run('cp', '-L', '/usr/bin/gfortran-4.8', './bin/gfortran')
-                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/f951', './bin/f951')
-                Runner.run('ln', '-s', './gfortran', './bin/f95')
-                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libcaf_single.a', './lib')
-                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.a', './lib')
-                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.so', './lib')
-                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortranbegin.a', './lib')
               when 'cflinuxfs3'
                 Runner.run('cp', '-L', '/usr/bin/x86_64-linux-gnu-gfortran-7', './bin/gfortran')
                 Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/f951', './bin/f951')

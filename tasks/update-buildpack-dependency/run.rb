@@ -17,7 +17,6 @@ config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/config/dependenc
 
 BUILD_STACKS = config['build_stacks']
 WINDOWS_STACKS = config['windows_stacks']
-DEPRECATED_STACKS = config['deprecated_stacks']
 
 all_stacks = BUILD_STACKS + WINDOWS_STACKS + ["any-stack"]
 cflinuxfs4_dependencies = config['cflinuxfs4_dependencies']

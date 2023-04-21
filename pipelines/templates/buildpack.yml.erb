@@ -516,8 +516,6 @@ jobs: ##########################################################################
         <% pivnet_stacks = []
           if language.to_s == 'hwc' || language.to_s == 'binary'
             pivnet_stacks = pivnet_stacks + ['any']
-          else
-            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to buildpacks[language]['stacks'] when removing any_stack
           end
           pivnet_stacks.each_with_index do |stack, ndx| %>
         - get: pivotal-buildpacks-stack<%= ndx %>
@@ -554,8 +552,6 @@ jobs: ##########################################################################
         <% pivnet_stacks = []
           if language.to_s == 'hwc' || language.to_s == 'binary'
             pivnet_stacks = pivnet_stacks + ['any']
-          else
-            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to buildpacks[language]['stacks'] when removing any_stack
           end
           pivnet_stacks.each_with_index do |stack, ndx| %>
         - get: pivotal-buildpacks-stack<%= ndx %>
@@ -618,7 +614,7 @@ jobs: ##########################################################################
         metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
 
-<% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2']%>
+<% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
   - name: specs-edge-integration-develop-<%= stack %>
     serial: true
@@ -717,7 +713,7 @@ jobs: ##########################################################################
 <% if buildpacks[language]['stacks'].include?('windows')%>
           DEPLOY_WINDOWS_CELL: true
 <% end %>
-<% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2'] %>
+<% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
       - do:
         - task: create-cf-space
@@ -783,7 +779,7 @@ jobs: ##########################################################################
 <% unless buildpacks[language]['skip_brats'] %>
           - specs-edge-brats-develop
 <% end %>
-<% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2']%>
+<% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
           - specs-edge-integration-develop-<%= stack %>
 <% end %>
