@@ -1,0 +1,22 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: cfbuildpacks/ci
+    tag: latest
+
+inputs:
+- name: ci
+- name: lock
+
+outputs:
+- name: space
+
+run:
+  path: ci/tasks/cf/create-space/task.sh
+
+params:
+  DOMAIN:
+  ORG:

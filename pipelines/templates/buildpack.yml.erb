@@ -101,13 +101,6 @@ resource_types:
 resources: ############################################################################################################
 ## Git ##
 
-  - name: feature-eng-ci
-    type: git
-    #icon: github-circle
-    source:
-      uri: https://github.com/cloudfoundry/buildpacks-feature-eng-ci
-      branch: master
-
   - name: buildpack-develop
     type: git
     webhook_token: ob0aigh3
@@ -626,7 +619,6 @@ jobs: ##########################################################################
           params:
             action: claim
         - get: buildpacks-ci
-        - get: feature-eng-ci
         - get: env-repo
         - get: buildpack
           resource: buildpack-develop
@@ -637,9 +629,9 @@ jobs: ##########################################################################
           resource: buildpack-develop
         - get: cf-deployment
       - task: redeploy
-        file: feature-eng-ci/tasks/cf/redeploy/task.yml
+        file: buildpacks-ci/tasks/cf/redeploy/task.yml
         input_mapping:
-          ci: feature-eng-ci
+          ci: buildpacks-ci
           lock: environment
         params:
           SCALE_DIEGO_CELLS: true
@@ -652,9 +644,9 @@ jobs: ##########################################################################
       - do:
         - task: create-cf-space
           attempts: 5
-          file: feature-eng-ci/tasks/cf/create-space/task.yml
+          file: buildpacks-ci/tasks/cf/create-space/task.yml
           input_mapping:
-            ci: feature-eng-ci
+            ci: buildpacks-ci
             lock: environment
           params:
             DOMAIN: 'cf-app.com'
@@ -693,7 +685,6 @@ jobs: ##########################################################################
           params:
             action: claim
         - get: buildpacks-ci
-        - get: feature-eng-ci
         - get: env-repo
         - get: buildpack
           resource: buildpack-develop
@@ -702,9 +693,9 @@ jobs: ##########################################################################
           - specs-unit-develop
         - get: cf-deployment
       - task: redeploy
-        file: feature-eng-ci/tasks/cf/redeploy/task.yml
+        file: buildpacks-ci/tasks/cf/redeploy/task.yml
         input_mapping:
-          ci: feature-eng-ci
+          ci: buildpacks-ci
           lock: environment
         params:
 <% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
@@ -718,12 +709,12 @@ jobs: ##########################################################################
       - do:
         - task: create-cf-space
           attempts: 5
-          file: feature-eng-ci/tasks/cf/create-space/task.yml
+          file: buildpacks-ci/tasks/cf/create-space/task.yml
           params:
             DOMAIN: 'cf-app.com'
             ORG: pivotal
           input_mapping:
-            ci: feature-eng-ci
+            ci: buildpacks-ci
             lock: environment
 <% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
         - task: configure-test

@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: cfbuildpacks/ci
+    tag: latest
+
+inputs:
+  - name: ci
+  - name: cf-deployment
+  - name: lock
+
+run:
+  path: ci/tasks/cf/redeploy/task.sh
+
+params:
+  DEPLOY_WINDOWS_CELL:
+  SCALE_DIEGO_CELLS:
+  ADD_CFLINUXFS4_STACK:

@@ -1,0 +1,167 @@
+---
+resources:
+- name: ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/cloudfoundry/buildpacks-ci
+    branch: master
+
+- name: ubuntu-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: ubuntu
+    tag: bionic
+
+- name: minimal-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: cfbuildpacks/feature-eng-ci
+    tag: minimal
+    username: ((dockerhub-account.username))
+    password: ((dockerhub-account.password))
+
+- name: gcloud-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: cfbuildpacks/feature-eng-ci
+    tag: gcloud
+    username: ((dockerhub-account.username))
+    password: ((dockerhub-account.password))
+
+- name: go-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: cfbuildpacks/feature-eng-ci
+    tag: go
+    username: ((dockerhub-account.username))
+    password: ((dockerhub-account.password))
+
+- name: docker-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: cfbuildpacks/feature-eng-ci
+    tag: docker
+    username: ((dockerhub-account.username))
+    password: ((dockerhub-account.password))
+
+- name: minimal-dockerfile
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/cloudfoundry/buildpacks-ci
+    branch: master
+    paths:
+    - dockerfiles/minimal.Dockerfile
+
+- name: go-dockerfile
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/cloudfoundry/buildpacks-ci
+    branch: master
+    paths:
+    - dockerfiles/go.Dockerfile
+
+- name: docker-dockerfile
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/cloudfoundry/buildpacks-ci
+    branch: master
+    paths:
+    - dockerfiles/docker.Dockerfile
+
+- name: gcloud-dockerfile
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/cloudfoundry/buildpacks-ci
+    branch: master
+    paths:
+    - dockerfiles/gcloud.Dockerfile
+
+jobs:
+- name: build-minimal-image
+  plan:
+  - in_parallel:
+    - get: ci
+    - get: ubuntu-image
+      trigger: true
+    - get: minimal-dockerfile
+      trigger: true
+  - task: build
+    file: ci/tasks/build-image/task.yml
+    privileged: true
+    input_mapping:
+      source: minimal-dockerfile
+    params:
+      DOCKERFILE: source/dockerfiles/minimal.Dockerfile
+  - put: minimal-image
+    params:
+      image: image/image.tar
+
+- name: build-go-image
+  plan:
+  - in_parallel:
+    - get: ci
+    - get: minimal-image
+      trigger: true
+      passed: [build-minimal-image]
+    - get: go-dockerfile
+      trigger: true
+  - task: build
+    file: ci/tasks/build-image/task.yml
+    privileged: true
+    input_mapping:
+      source: go-dockerfile
+    params:
+      DOCKERFILE: source/dockerfiles/go.Dockerfile
+  - put: go-image
+    params:
+      image: image/image.tar
+
+- name: build-docker-image
+  plan:
+  - in_parallel:
+    - get: ci
+    - get: minimal-image
+      trigger: true
+      passed: [build-minimal-image]
+    - get: docker-dockerfile
+      trigger: true
+  - task: build
+    file: ci/tasks/build-image/task.yml
+    privileged: true
+    input_mapping:
+      source: docker-dockerfile
+    params:
+      DOCKERFILE: source/dockerfiles/docker.Dockerfile
+  - put: docker-image
+    params:
+      image: image/image.tar
+
+- name: build-gcloud-image
+  plan:
+  - in_parallel:
+    - get: ci
+    - get: minimal-image
+      trigger: true
+      passed: [build-minimal-image]
+    - get: gcloud-dockerfile
+      trigger: true
+  - task: build
+    file: ci/tasks/build-image/task.yml
+    privileged: true
+    input_mapping:
+      source: gcloud-dockerfile
+    params:
+      DOCKERFILE: source/dockerfiles/gcloud.Dockerfile
+  - put: gcloud-image
+    params:
+      image: image/image.tar
