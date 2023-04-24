@@ -40,7 +40,7 @@ extensions:
 - name: imagick
   version: 3.7.0
   md5: '0687774a6126467d4e5ede02171e981d'
-  klass: PeclRecipe
+  klass: ImagickRecipe
 - name: LZF
   version: 1.7.0
   md5: e242c66e53c0d155982713cd78b3d480
