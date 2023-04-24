@@ -7,7 +7,6 @@ dependencies = config['dependencies']
 cflinuxfs4_build_dependencies = config['cflinuxfs4_build_dependencies']
 stacks = config['build_stacks']
 skip_deprecation_check = config['skip_deprecation_check']
-cnb_uris = config['cnb_uris']
 
 def common_prefix(stringA, stringB)
   max_len = 0
@@ -102,35 +101,12 @@ def bp_uses_line?(bp_data, line)
   !lines_present && get_version_lines(bp_data['lines']).include?(line)
 end
 
-def get_git_uri(buildpack, cnb_uris)
-  if cnb_uris.key? buildpack
-    return cnb_uris[buildpack]
-  else
-    if buildpack.include? '-cnb'
-      return "git@github.com:cloudfoundry/#{buildpack}.git"
-    else
-      bp_uri = "git@github.com:cloudfoundry/#{buildpack}-buildpack.git"
-    end
-  end
+def get_git_uri(buildpack)
+  bp_uri = "git@github.com:cloudfoundry/#{buildpack}-buildpack.git"
 end
 
-def get_git_repo(buildpack, cnb_uris)
-  if cnb_uris.key? buildpack
-    uri = cnb_uris[buildpack]
-    return uri.slice((uri.index(':') + 1)).delete_suffix('.git')
-  else
-    if buildpack.include? '-cnb'
-      return "cloudfoundry/#{buildpack}"
-    else
-      bp_uri = "cloudfoundry/#{buildpack}-buildpack"
-    end
-  end
-end
-
-def is_cloudfoundry_cnb(buildpack)
-  if !buildpack.include? '-cnb'
-    return true
-  end
+def get_git_repo(buildpack)
+  bp_uri = "cloudfoundry/#{buildpack}-buildpack"
 end
 
 def read_tracker_story_id(tracker_story_dir)
@@ -178,15 +154,6 @@ resources:
   source: {repository: cloudfoundry/<%= stack %>}
 <% end %>
 
-<% dependencies.values.select{|dep| dep.fetch('branch', 'develop') == 'v3' }.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack| %>
-- name: <%= buildpack %>-buildpack-v3
-  type: git
-  source:
-    uri: <%= get_git_uri(buildpack, cnb_uris) %>
-    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: v3
-<% end %>
-
 <% dependencies.values.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack|
 branch = 'develop'
 private_key = '((cf-buildpacks-eng-github-ssh-key.private_key))'
@@ -194,29 +161,20 @@ private_key = '((cf-buildpacks-eng-github-ssh-key.private_key))'
 - name: <%= buildpack %>-buildpack
   type: git
   source:
-    uri: <%= get_git_uri(buildpack, cnb_uris) %>
+    uri: <%= get_git_uri(buildpack) %>
     private_key: <%= private_key %>
     branch: <%= branch %>
 - name: <%= buildpack %>-buildpack-latest-released
   type: git
   source:
-    uri: <%= get_git_uri(buildpack, cnb_uris) %>
+    uri: <%= get_git_uri(buildpack) %>
     private_key: <%= private_key %>
-    <% if buildpack.include? '-cnb' %>
-    branch: main
-    tag_filter: v*
-    <% else %>
     branch: master
-    <% end %>
 - name: <%= buildpack %>-pull-request
   type: create-pull-request-resource
   source:
-    remote_repository: <%= get_git_repo(buildpack, cnb_uris) %>
-  <% if !is_cloudfoundry_cnb(buildpack) %>
-    github_token: ((paketo-buildpacks-github-token))
-  <% else %>
+    remote_repository: <%= get_git_repo(buildpack) %>
     github_token: ((buildpacks-github-token))
-  <% end %>
 <% end %>
 
 <% dependencies.each do |dep_name, dep| %>
@@ -438,17 +396,10 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
   public: true
   plan:
   - in_parallel:
-    <% if dep['branch'] == 'v3' %>
-    - get: buildpack
-      resource: <%= bp_name %>-buildpack-v3
-    - get: buildpack-latest-released
-      resource: <%= bp_name %>-buildpack-v3
-    <% else %>
     - get: buildpack
       resource: <%= bp_name %>-buildpack
     - get: buildpack-latest-released
       resource: <%= bp_name %>-buildpack-latest-released
-    <% end %>
     - get: buildpacks-ci
     - get: source
       resource: source-<%= dep_name.downcase %>-<%= line_hash['line'].downcase %>
@@ -469,29 +420,6 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
       passed: [<%= "build-#{dep_name.downcase}-#{line_hash['line'].downcase}" %>]
     <% end %>
     - get: builds
-    <% if bp_name.end_with?('cnb') %>
-  - task: update-cnb-dependency
-    file: buildpacks-ci/tasks/cnb/update-cnb-dependency/task.yml
-    params:
-      VERSION_LINE: <%= line_hash['line'] %>
-      VERSIONS_TO_KEEP: <%= dep['versions_to_keep'] %>
-      COMPAT_ONLY: <%= bp['compat_only'] %>
-      <% if line_hash['deprecation_date'] %>
-      DEPRECATION_DATE: <%= line_hash['deprecation_date'] %>
-      <% end %>
-      <% if line_hash['link'] %>
-      DEPRECATION_LINK: <%= line_hash['link'] %>
-      <% end %>
-      <% if line_hash['match'] %>
-      DEPRECATION_MATCH: <%= line_hash['match'] %>
-      <% end %>
-      GPG_SIGNING_KEY_ID: ((paketo-bot-gpg-key-id))
-      GPG_SIGNING_KEY: ((paketo-bot-gpg-key))
-    output_mapping:
-      artifacts: buildpack
-  - task: update-cnb-stacks
-    file: buildpacks-ci/tasks/cnb/update-stacks/task.yml
-    <% else %>
   - task: update-buildpack-dependency
     file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
     params:
@@ -505,13 +433,6 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
       DEPRECATION_MATCH: <%= line_hash['match'] %>
     output_mapping:
       artifacts: buildpack
-    <% end %>
-    <% if bp_name == 'dotnet-core-sdk-cnb' && dep_name == 'dotnet-sdk' %>
-  - task: update-dotnet-sdks-and-compat-table
-    file: buildpacks-ci/tasks/cnb/update-dotnet-sdks-and-compat-table/task.yml
-    output_mapping:
-      artifacts: buildpack
-    <% end %>
   - task: get-tracker-story-id
     file: buildpacks-ci/tasks/get-dep-update-tracker-story-id/task.yml
   - put: <%= bp_name %>-pull-request
@@ -522,11 +443,7 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
       <%# Adding a tracker story id because we have have configured cfgitbot to ignore such PRs %>
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-    <% if bp_name.include? '-cnb' %>
-      base: main
-    <% else %>
       base: develop
-    <% end %>
   <% end %>
 <% end %>
 <% end %>

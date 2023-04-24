@@ -11,7 +11,6 @@ This contains the configuration for the Cloud Foundry Buildpacks team [Concourse
 * [buildpacks-ci](pipelines/buildpacks-ci.yml): testing tasks for correct usage, rebuild CI docker images
 * [cf-release](pipelines/cf-release.yml.erb): deployment of latest buildpacks to cf-release develop
 * [notifications](pipelines/notifications.yml): monitor upstream sources for changes and notify on Slack
-* [cflinuxfs2](pipelines/cflinuxfs2.yml): test and release Cloud Foundry [cflinuxfs2](https://github.com/cloudfoundry/cflinuxfs2)
 
 # Concourse State
 
@@ -141,14 +140,12 @@ Our release branch is `master`. This is stable and only updated with new buildpa
 * [compile-extensions](https://github.com/cloudfoundry/compile-extensions) Suite of utility scripts used in buildpacks at runtime
 * [libbuildpack](https://github.com/cloudfoundry/libbuildpack) Library used for writing buildpacks in Golang
 * [binary-builder](https://github.com/cloudfoundry/binary-builder)           Builds binaries against specified rootfs
-* [cflinuxfs2](https://github.com/cloudfoundry/cflinuxfs2) Tooling to build cflinuxfs2 root file system ("rootfs") for CF
 * [brats](https://github.com/cloudfoundry/brats) Buildpack Runtime Acceptance Test Suite, a collection of smoke tests
 
 ## BOSH Releases
 
 BOSH releases are used in the assembly of [`cf-release`](https://github.com/cloudfoundry/cf-release).
 
-* [cflinuxfs2-release](https://github.com/cloudfoundry/cflinuxfs2-release)
 * [go-buildpack-release](https://github.com/cloudfoundry/go-buildpack-release)
 * [ruby-buildpack-release](https://github.com/cloudfoundry/ruby-buildpack-release)
 * [python-buildpack-release](https://github.com/cloudfoundry/python-buildpack-release)
@@ -180,6 +177,4 @@ Some repositories are private for historical or security reasons. We list them f
 
 * [deployments-buildpacks](https://github.com/pivotal-cf/deployments-buildpacks) See repository README.
 * [buildpacks-ci-robots](https://github.com/pivotal-cf/buildpacks-ci-robots) See repository README.
-* [cflinuxfs2-nc](https://github.com/pivotal-cf/cflinuxfs2-nc) See repository README.
-* [cflinuxfs2-nc-release](https://github.com/pivotal-cf/cflinuxfs2-nc-release) See repository README.
 

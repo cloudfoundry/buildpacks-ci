@@ -132,19 +132,6 @@ resources: #####################################################################
       private_key: {{<%= language %>-buildpack-private-key}}
       branch: develop
 
-<% if buildpacks[language]['v3'] %>
-  - name: buildpack-v3
-    type: git
-    webhook_token: ob0aigh3
-    source:
-      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: {{<%= language %>-buildpack-private-key}}
-      branch: v3
-      ignore_paths:
-      - VERSION
-      - CHANGELOG
-<% end %>
-
   - name: buildpack-new-version
     type: git
     source:
@@ -197,13 +184,6 @@ resources: #####################################################################
     type: git
     source:
       uri: https://github.com/cloudfoundry/compile-extensions.git
-<% end %>
-
-<% if language == 'multi' %>
-  - name: buildpackapplifecycle
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/buildpackapplifecycle.git
 <% end %>
 
 <% if language == 'hwc' %>
@@ -536,8 +516,6 @@ jobs: ##########################################################################
         <% pivnet_stacks = []
           if language.to_s == 'hwc' || language.to_s == 'binary'
             pivnet_stacks = pivnet_stacks + ['any']
-          else
-            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to buildpacks[language]['stacks'] when removing any_stack
           end
           pivnet_stacks.each_with_index do |stack, ndx| %>
         - get: pivotal-buildpacks-stack<%= ndx %>
@@ -574,8 +552,6 @@ jobs: ##########################################################################
         <% pivnet_stacks = []
           if language.to_s == 'hwc' || language.to_s == 'binary'
             pivnet_stacks = pivnet_stacks + ['any']
-          else
-            pivnet_stacks = ['cflinuxfs2'] # TODO: Set ['cflinuxfs2'] to buildpacks[language]['stacks'] when removing any_stack
           end
           pivnet_stacks.each_with_index do |stack, ndx| %>
         - get: pivotal-buildpacks-stack<%= ndx %>
@@ -637,73 +613,8 @@ jobs: ##########################################################################
         s3_filepath_prefix: product-files/buildpacks
         metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
 <% end %>
-<% if buildpacks[language]['v3'] %>
-  - name: specs-edge-integration-v3
-    serial: true
-    public: true
-    plan:
-    - in_parallel:
-      - put: environment
-        resource: cf-toolsmiths-environment
-        params:
-          action: claim
-      - get: feature-eng-ci
-      - get: buildpacks-ci
-      - get: env-repo
-      - get: buildpack
-        resource: buildpack-v3
-        trigger: true
-      - get: repo
-        resource: buildpack-v3
-      - get: cf-deployment
-    - task: redeploy
-      file: feature-eng-ci/tasks/cf/redeploy/task.yml
-      input_mapping:
-        ci: feature-eng-ci
-        lock: environment
-<% if buildpacks[language]['stacks'].include?('windows')%>
-      params:
-        DEPLOY_WINDOWS_CELL: true
-<% end %>
-    - in_parallel:
-      <%
-      #buildpacks[language]['stacks'].each do |stack| #use this when cnb buildpack github releases support cflinuxfs2
-      ['cflinuxfs3'].each do |stack|
-    %>
-      - do:
-        - task: create-cf-space
-          file: feature-eng-ci/tasks/cf/create-space/task.yml
-          input_mapping:
-            ci: feature-eng-ci
-            lock: environment
-          params:
-            DOMAIN: 'cf-app.com'
-            ORG: pivotal
-        - task: ginkgo-<%= stack %>
-          file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
-          input_mapping: {cf-space: space}
-          params:
-            CF_STACK: <%= stack %>
-            GINKGO_ATTEMPTS: 4
-            GINKGO_NODES: 3
-            <% if language == 'php' %>
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
-            <% end %>
-          <% if buildpacks[language]['skip_docker_start'] %>
-            SKIP_DOCKER_START: true
-          <% else %>
-          privileged: true
-          <% end %>
-        <% end %>
-    on_success:
-      put: environment
-      resource: cf-toolsmiths-environment
-      params:
-        action: unclaim
-        env_file: environment/metadata
-<% end %>
 
-<% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2']%>
+<% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
   - name: specs-edge-integration-develop-<%= stack %>
     serial: true
@@ -802,7 +713,7 @@ jobs: ##########################################################################
 <% if buildpacks[language]['stacks'].include?('windows')%>
           DEPLOY_WINDOWS_CELL: true
 <% end %>
-<% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2'] %>
+<% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
       - do:
         - task: create-cf-space
@@ -868,7 +779,7 @@ jobs: ##########################################################################
 <% unless buildpacks[language]['skip_brats'] %>
           - specs-edge-brats-develop
 <% end %>
-<% relevant_stacks = buildpacks[language]['stacks'] - ['cflinuxfs2']%>
+<% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
           - specs-edge-integration-develop-<%= stack %>
 <% end %>
@@ -1020,27 +931,6 @@ jobs: ##########################################################################
           GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI develop specs passed'
           PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
-<% if buildpacks[language]['v3'] %>
-  - name: update-libbuildpack-v3-branch
-    serial: true
-    public: true
-    plan:
-    - in_parallel:
-      - get: buildpacks-ci
-      - get: libbuildpack
-        trigger: true
-      - get: buildpack
-        resource: buildpack-v3
-    - task: update-libbuildpack
-      file: buildpacks-ci/tasks/update-libbuildpack/task.yml
-      params:
-        LANGUAGE: <%= language %>
-    - put: buildpack-v3
-      params:
-        repository: buildpack
-        rebase: true
-<% end %>
-
   - name: update-libbuildpack
     serial: true
     public: true
@@ -1104,26 +994,6 @@ jobs: ##########################################################################
       - put: buildpack-develop
         params:
           repository: repo-with-gemfile-artifacts
-          rebase: true
-<% end %>
-<% if language == 'multi' %>
-  - name: update-buildpackapplifecycle
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: buildpackapplifecycle
-          trigger: true
-        - get: buildpack
-          resource: buildpack-develop
-      - task: update-buildpackapplifecycle
-        file: buildpacks-ci/tasks/update-buildpackapplifecycle/task.yml
-        params:
-          LANGUAGE: <%= language %>
-      - put: buildpack-develop
-        params:
-          repository: buildpack-artifacts
           rebase: true
 <% end %>
 
