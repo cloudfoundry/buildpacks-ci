@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: vito/oci-build-task
+
+inputs:
+- name: source
+
+outputs:
+- name: image
+
+params:
+  CONTEXT:
+  DOCKERFILE:
+
+run:
+  path: build
