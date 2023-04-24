@@ -47,13 +47,6 @@ resources:
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
-  - name: feature-eng-ci
-    type: git
-    icon: github-circle
-    source:
-      uri: https://github.com/cloudfoundry/buildpacks-feature-eng-ci
-      branch: master
-
   - name: env-repo
     type: git
     source:
@@ -138,7 +131,6 @@ jobs:
         - in_parallel:
           - get: buildpacks-ci
           - get: env-repo
-          - get: feature-eng-ci
           - get: buildpack
             resource: buildpack-<%= language %>
           - get: nightly-trigger
@@ -146,9 +138,9 @@ jobs:
 <% if stacks[language].include?('windows')%>
           - get: cf-deployment
         - task: redeploy
-          file: feature-eng-ci/tasks/cf/redeploy/task.yml
+          file: buildpacks-ci/tasks/cf/redeploy/task.yml
           input_mapping:
-            ci: feature-eng-ci
+            ci: buildpacks-ci
             lock: cf-toolsmiths-environment
           params:
             DEPLOY_WINDOWS_CELL: true
@@ -158,12 +150,12 @@ jobs:
           - do:
             - task: create-cf-space
               attempts: 5
-              file: feature-eng-ci/tasks/cf/create-space/task.yml
+              file: buildpacks-ci/tasks/cf/create-space/task.yml
               params:
                 DOMAIN: cf-app.com
                 ORG: pivotal
               input_mapping:
-                ci: feature-eng-ci
+                ci: buildpacks-ci
                 lock: cf-toolsmiths-environment
             - task: run-brats-<%= stack %>
               file: buildpacks-ci/tasks/run-bp-brats/task.yml
