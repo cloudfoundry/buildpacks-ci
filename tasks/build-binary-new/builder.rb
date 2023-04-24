@@ -194,7 +194,7 @@ module DependencyBuild
           Runner.run('apt', 'update')
 
           stack = ENV.fetch('STACK')
-          fs_specific_packages = stack == 'cflinuxfs2' ? ['libgfortran-4.8-dev'] : ['libgfortran-7-dev']
+          fs_specific_packages = ['libgfortran-7-dev']
           Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libpcre2-dev', 'libcurl4-openssl-dev', 'libsodium-dev', 'libharfbuzz-dev', 'libfribidi-dev', 'default-jre', *fs_specific_packages)
 
           Runner.run('wget', source_input.url)
@@ -219,14 +219,6 @@ module DependencyBuild
 
             Dir.chdir('/usr/local/lib/R') do
               case stack
-              when 'cflinuxfs2'
-                Runner.run('cp', '-L', '/usr/bin/gfortran-4.8', './bin/gfortran')
-                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/f951', './bin/f951')
-                Runner.run('ln', '-s', './gfortran', './bin/f95')
-                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libcaf_single.a', './lib')
-                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.a', './lib')
-                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortran.so', './lib')
-                Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/4.8/libgfortranbegin.a', './lib')
               when 'cflinuxfs3'
                 Runner.run('cp', '-L', '/usr/bin/x86_64-linux-gnu-gfortran-7', './bin/gfortran')
                 Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/7/f951', './bin/f951')
@@ -617,31 +609,6 @@ end
 
 class Builder
   def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, php_extensions_dir = __dir__, skip_commit = false)
-    cnb_list = [
-      'org.cloudfoundry.node-engine',
-      'org.cloudfoundry.npm',
-      'org.cloudfoundry.yarn-install',
-      'org.cloudfoundry.nodejs-compat',
-      'org.cloudfoundry.dotnet-core-runtime',
-      'org.cloudfoundry.dotnet-core-aspnet',
-      'org.cloudfoundry.dotnet-core-sdk',
-      'org.cloudfoundry.dotnet-core-conf',
-      'org.cloudfoundry.python-runtime',
-      'org.cloudfoundry.pip',
-      'org.cloudfoundry.pipenv',
-      'org.cloudfoundry.conda',
-      'org.cloudfoundry.php-dist',
-      'org.cloudfoundry.php-composer',
-      'org.cloudfoundry.php-compat',
-      'org.cloudfoundry.httpd',
-      'org.cloudfoundry.nginx',
-      'org.cloudfoundry.php-web',
-      'org.cloudfoundry.dotnet-core-build',
-      'org.cloudfoundry.go-compiler',
-      'org.cloudfoundry.go-mod',
-      'org.cloudfoundry.dep',
-      'org.cloudfoundry.icu',
-    ]
 
     unless skip_commit
       build_input.copy_to_build_output
@@ -782,23 +749,6 @@ class Builder
       results = Sha.check_sha(source_input)
       out_data[:url] = source_input.url
       out_data[:sha256] = results[1]
-
-    when -> (elem) { cnb_list.include?(elem) }
-      results = Sha.check_sha(source_input)
-      File.write('artifacts/temp_file', results[0])
-
-      cnbName = source_input.repo.split("/").last
-      uri = "https://github.com/#{source_input.repo}/releases/download/v#{source_input.version}/#{cnbName}-#{source_input.version}.tgz"
-      download = open(uri)
-      IO.copy_stream(download, "artifacts/#{source_input.name}.tgz")
-
-      out_data.merge!(
-        artifact_output.move_dependency(
-          source_input.name,
-          "artifacts/#{source_input.name}.tgz",
-          "#{filename_prefix}_linux_noarch_#{stack}",
-        )
-      )
 
     when 'setuptools'
       results = Sha.check_sha(source_input)

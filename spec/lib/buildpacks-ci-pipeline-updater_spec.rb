@@ -314,7 +314,6 @@ describe BuildpacksCIPipelineUpdater do
       allow(buildpacks_ci_pipeline_updater).to receive(:check_if_lastpass_installed)
       allow(buildpacks_ci_pipeline_updater).to receive(:update_buildpack_pipelines)
       allow(buildpacks_ci_pipeline_updater).to receive(:update_standard_pipelines)
-      allow(buildpacks_ci_pipeline_updater).to receive(:update_cnb_buildpack_pipelines)
       allow(buildpacks_ci_pipeline_updater).to receive(:update_rootfs_pipelines)
     end
 
@@ -336,12 +335,6 @@ describe BuildpacksCIPipelineUpdater do
 
     it 'updates standard pipelines' do
       expect(buildpacks_ci_pipeline_updater).to receive(:update_standard_pipelines).with({})
-
-      subject
-    end
-
-    it 'updates the cnb buildpacks pipelines' do
-      expect(buildpacks_ci_pipeline_updater).to receive(:update_cnb_buildpack_pipelines).with({})
 
       subject
     end
