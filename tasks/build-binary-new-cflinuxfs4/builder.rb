@@ -129,7 +129,7 @@ end
 
 module DependencyBuildHelper
   class << self
-    def build_nginx_helper(source_input, custom_options, static=false)
+    def build_nginx_helper(source_input, custom_options, static = false)
       public_gpg_key_urls = %w[http://nginx.org/keys/nginx_signing.key http://nginx.org/keys/mdounin.key http://nginx.org/keys/maxim.key http://nginx.org/keys/sb.key http://nginx.org/keys/thresh.key]
       GPGHelper.verify_gpg_signature(source_input.url, "#{source_input.url}.asc", public_gpg_key_urls)
 
@@ -137,27 +137,27 @@ module DependencyBuildHelper
       destdir = Dir.mktmpdir
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
-            Runner.run('wget', source_input.url)
-            Runner.run('tar', 'xf', "nginx-#{source_input.version}.tar.gz")
-            base_nginx_options = %w[--prefix=/ --error-log-path=stderr --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_auth_request_module --with-http_random_index_module --with-http_secure_link_module --with-http_stub_status_module --without-http_uwsgi_module --without-http_scgi_module --with-pcre --with-pcre-jit --with-debug]
+          Runner.run('wget', source_input.url)
+          Runner.run('tar', 'xf', "nginx-#{source_input.version}.tar.gz")
+          base_nginx_options = %w[--prefix=/ --error-log-path=stderr --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_auth_request_module --with-http_random_index_module --with-http_secure_link_module --with-http_stub_status_module --without-http_uwsgi_module --without-http_scgi_module --with-pcre --with-pcre-jit --with-debug]
 
-            Dir.chdir("nginx-#{source_input.version}") do
-              options = ['./configure'] + base_nginx_options + custom_options
-              Runner.run(*options)
-              Runner.run('make')
-              system({ 'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR' => "#{destdir}/nginx" }, 'make install')
-              raise 'Could not run make install' unless $CHILD_STATUS.success?
+          Dir.chdir("nginx-#{source_input.version}") do
+            options = ['./configure'] + base_nginx_options + custom_options
+            Runner.run(*options)
+            Runner.run('make')
+            system({ 'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR' => "#{destdir}/nginx" }, 'make install')
+            raise 'Could not run make install' unless $CHILD_STATUS.success?
 
-              Dir.chdir(destdir) do
-                Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
-                Runner.run('mkdir', 'nginx/conf')
-                if static
-                  Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", 'nginx')
-                else
-                  Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", '.')
-                end
+            Dir.chdir(destdir) do
+              Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
+              Runner.run('mkdir', 'nginx/conf')
+              if static
+                Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", 'nginx')
+              else
+                Runner.run('tar', 'zcvf', "#{artifacts}/nginx-#{source_input.version}.tgz", '.')
               end
             end
+          end
         end
       end
     end
@@ -431,15 +431,15 @@ class DependencyBuild
 
     full_version = "#{@source_input.version}-ruby-#{ruby_version}"
     @binary_builder.build(
-          SourceInput.new(
-              @source_input.name,
-              @source_input.url,
-              full_version,
-              @source_input.md5,
-              @source_input.sha256,
-              @source_input.git_commit_sha
-          )
+      SourceInput.new(
+        @source_input.name,
+        @source_input.url,
+        full_version,
+        @source_input.md5,
+        @source_input.sha256,
+        @source_input.git_commit_sha
       )
+    )
 
     old_filepath = "#{@binary_builder.base_dir}/#{@source_input.name}-#{full_version}-linux-x64.tgz"
     filename_prefix = "#{@source_input.name}_#{full_version}_linux_x64_#{@stack}"
@@ -545,17 +545,17 @@ class DependencyBuild
     old_filepath = "/tmp/pip-#{@source_input.version}.tgz"
     ENV['LC_CTYPE'] = 'en_US.UTF-8'
 
-    Utils.setup_pip 'python3'
+    Utils.setup_python_and_pip
 
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', "pip==#{@source_input.version}")
+        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', "pip==#{@source_input.version}")
         HTTPHelper.download(@source_input, old_filepath)
 
         Archive.strip_top_level_directory_from_tar("pip-#{@source_input.version}.tar.gz")
         Runner.run('tar', 'zxf', "pip-#{@source_input.version}.tar.gz")
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools==62.1.0')
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
+        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools==62.1.0')
+        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
         Runner.run('tar', 'zcvf', old_filepath, '.')
       end
     end
@@ -569,21 +569,21 @@ class DependencyBuild
     old_file_path = "/tmp/pipenv-v#{@source_input.version}.tgz"
     ENV['LC_CTYPE'] = 'en_US.UTF-8'
 
-    Utils.setup_pip 'python3'
+    Utils.setup_python_and_pip
 
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-cache-dir', '--no-binary', ':all:', "pipenv==#{@source_input.version}")
+        Runner.run('/usr/bin/pip3', 'download', '--no-cache-dir', '--no-binary', ':all:', "pipenv==#{@source_input.version}")
         old_filepath = "pipenv-#{@source_input.version}.tar.gz"
         HTTPHelper.download(@source_input, old_filepath)
 
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'pytest-runner')
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools_scm')
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'parver')
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'invoke')
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'flit_core')
-        Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', 'hatch-vcs')
+        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'pytest-runner')
+        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools_scm')
+        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'parver')
+        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
+        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'invoke')
+        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'flit_core')
+        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'hatch-vcs')
         Runner.run('tar', 'zcvf', old_file_path, '.')
       end
     end
@@ -766,7 +766,6 @@ class DependencyBuild
     artifacts = "#{Dir.pwd}/artifacts"
     destdir = Dir.mktmpdir
 
-
     Dir.mktmpdir do |dir|
       Dir.chdir(dir) do
         Runner.run('wget', @source_input.url)
@@ -794,7 +793,7 @@ class DependencyBuild
             '--with-ld-opt=-fPIC -pie -z now',
             '--with-compat',
             '--with-stream=dynamic',
-            )
+          )
           Runner.run('make', '-j2')
           system({ 'DEBIAN_FRONTEND' => 'noninteractive' }, 'make install')
           raise 'Could not run make install' unless $CHILD_STATUS.success?
@@ -816,17 +815,9 @@ class DependencyBuild
 
   class Utils
 
-    def self.setup_python
+    def self.setup_python_and_pip
       Runner.run('apt', 'update')
-      Runner.run('apt', 'install', '-y', 'python3.8', 'python3.8-distutils', 'python3.8-dev')
-      setup_pip 'python3.8'
-    end
-
-    def self.setup_pip(python_version)
-      Runner.run('curl', '-L', 'https://bootstrap.pypa.io/get-pip.py', '-o', 'get-pip.py')
-      Runner.run("#{python_version}", 'get-pip.py')
-      Runner.run('/usr/local/bin/pip3', 'install', '--upgrade', 'pip', 'setuptools')
-      Runner.run('rm', '-f', 'get-pip.py')
+      Runner.run('apt', 'install', '-y', 'python3', 'python3-pip')
     end
 
     def self.prune_dotnet_files(source_input, files_to_exclude, write_runtime = false)
