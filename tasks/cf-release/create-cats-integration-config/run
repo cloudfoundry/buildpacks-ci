@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source cf-deployment-concourse-tasks/shared-functions
+setup_bosh_env_vars
+
+api="$(jq -r .cf.api_url toolsmiths-env/metadata)"
+apps_domain="${api#api.}"
+admin_password="$(get_password_from_credhub cf_admin_password)"
+credhub_secret="$(get_password_from_credhub credhub_admin_client_secret)"
+
+cat >cats-integration-config/integration-config.json <<-EOF
+{
+  "api": "${api}",
+  "apps_domain": "${apps_domain}",
+  "admin_user": "admin",
+  "admin_password": "${admin_password}",
+  "credhub_client": "credhub_admin_client",
+  "credhub_secret": "${credhub_secret}",
+  "credhub_mode" : "assisted",
+  "artifacts_directory": "logs",
+  "skip_ssl_validation": true,
+  "timeout_scale": 2,
+  "default_timeout": 300,
+  "async_service_operation_timeout": 1200,
+  "cf_push_timeout": 600,
+  "broker_start_timeout": 600,
+  "use_http": true,
+  "use_log_cache": false,
+  "include_apps": true,
+  "include_backend_compatibility": true,
+  "include_capi_no_bridge": true,
+  "include_container_networking": true,
+  "include_credhub": true,
+  "include_detect": true,
+  "include_docker": false,
+  "include_internet_dependent": true,
+  "include_internetless": false,
+  "include_isolation_segments": false,
+  "include_private_docker_registry": false,
+  "include_route_services": false,
+  "include_routing": false,
+  "include_routing_isolation_segments": false,
+  "include_security_groups": false,
+  "include_service_discovery": false,
+  "include_service_instance_sharing": false,
+  "include_services": false,
+  "include_ssh": true,
+  "include_sso": true,
+  "include_tasks": true,
+  "include_tcp_routing": true,
+  "include_v3": false,
+  "include_volume_services": false,
+  "include_zipkin": false,
+  "stacks": ["cflinuxfs3"]
+}
+EOF
