@@ -1,0 +1,15 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/ci
+    tag: latest
+inputs:
+  - name: core-deps-ci
+  - name: cf-deployment-concourse-tasks
+  - name: toolsmiths-env
+outputs:
+  - name: cats-integration-config
+run:
+  path: core-deps-ci/tasks/cf-release/create-cats-integration-config/run

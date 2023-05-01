@@ -1,0 +1,16 @@
+#@data/values
+---
+integration_spec_names:
+- bundler
+- glide
+- go
+- godep
+- dep
+- httpd
+- hwc
+- jruby
+- nodejs
+- php7_with_oracle
+- ruby
+- url_output
+- yaml_flag

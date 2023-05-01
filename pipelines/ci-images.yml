@@ -50,6 +50,14 @@ resources:
     username: ((dockerhub-account.username))
     password: ((dockerhub-account.password))
 
+- name: core-deps-ci-image
+  type: docker-image
+  icon: docker
+  source:
+    repository: coredeps/core-deps-ci
+    username: ((coredeps-dockerhub-user.username))
+    password: ((coredeps-dockerhub-user.password))
+
 - name: minimal-dockerfile
   type: git
   icon: github
@@ -85,6 +93,15 @@ resources:
     branch: master
     paths:
     - dockerfiles/gcloud.Dockerfile
+
+- name: core-deps-ci-dockerfile
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/cloudfoundry/buildpacks-ci
+    branch: master
+    paths:
+    - dockerfiles/core-deps-ci.Dockerfile
 
 jobs:
 - name: build-minimal-image
@@ -163,5 +180,22 @@ jobs:
     params:
       DOCKERFILE: source/dockerfiles/gcloud.Dockerfile
   - put: gcloud-image
+    params:
+      image: image/image.tar
+
+- name: build-core-deps-ci-image
+  plan:
+  - in_parallel:
+    - get: ci
+    - get: core-deps-ci-dockerfile
+      trigger: true
+  - task: build
+    file: ci/tasks/build-image/task.yml
+    privileged: true
+    input_mapping:
+      source: core-deps-ci-dockerfile
+    params:
+      DOCKERFILE: source/dockerfiles/core-deps-ci.Dockerfile
+  - put: core-deps-ci-image
     params:
       image: image/image.tar

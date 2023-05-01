@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+get_version() {
+  version="$(tar -xf buildpack-release-tarball/*.tgz -O release.MF | yj -yj | jq -r .version | cut -d'-' -f1)"
+  echo "${version}" > version/version
+  echo "${version}"
+}
+
+
+get_name() {
+  tar -xf buildpack-release-tarball/*.tgz -O release.MF | yj -yj | jq -r .name
+}
+
+release_version_exists() {
+  local version=$1
+
+  if [[ -n "$(git -C release tag --list "${version}")" ]]; then
+    return 0
+  fi
+  return 1
+}
+
+write_private_yml() {
+  cat >release/config/private.yml <<-EOF
+---
+blobstore:
+  options:
+    access_key_id: ${AWS_ACCESS_KEY_ID}
+    secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+EOF
+}
+
+
+finalize_release() {
+  local version=$1
+
+  bosh finalize-release --dir release --version "${version}" buildpack-release-tarball/*.tgz
+}
+
+commit_changes() {
+  local name=$1
+  local version=$2
+
+  git -C release add config/blobs.yml
+  git -C release add releases/**/*-"${version}".yml
+  git -C release add releases/**/index.yml
+  git -C release add .final_builds/**/index.yml
+  git -C release add .final_builds/**/**/index.yml
+  git -C release commit -m "Final release for ${name} at ${version}"
+}
+
+create_final_tarball() {
+  local name=$1
+  local version=$2
+
+  bosh cr "release/releases/${name}/${name}-${version}.yml" --dir release --tarball "release-tarball/${name}-${version}.tgz"
+}
+
+main() {
+  local name
+  local version
+  name="$(get_name)"
+  version="$(get_version)"
+  write_private_yml
+
+  if release_version_exists "${version}"; then
+    echo "Version ${version} is already released"
+  else
+    finalize_release "${version}"
+    commit_changes "${name}" "${version}"
+  fi
+
+  create_final_tarball "${name}" "${version}"
+}
+
+main "$@"

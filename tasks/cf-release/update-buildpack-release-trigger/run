@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+buildpack_name="$(tar -xf buildpack-release-tarball/*.tgz -O release.MF | yj -yj | jq -r .name)"
+old_version="$(cat "buildpack-release-trigger/${buildpack_name}")"
+new_version="$(tar -xf buildpack-release-tarball/*.tgz -O release.MF | yj -yj | jq -r .version | cut -d'-' -f1)"
+
+if [[ "${old_version}" != "${new_version}" ]]; then
+  echo "Updating trigger to ${new_version}"
+  echo -n "${new_version}" | aws s3 cp - "s3://${BUCKET}/${buildpack_name}"
+else
+  echo "Version ${new_version} is already released"
+fi

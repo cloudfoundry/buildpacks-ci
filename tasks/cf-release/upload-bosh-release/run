@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source cf-deployment-concourse-tasks/shared-functions
+setup_bosh_env_vars
+
+bosh -n upload-release release-tarball/*.tgz

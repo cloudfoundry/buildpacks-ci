@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+buildpack_name="$(tar -xf buildpack-release-tarball/*.tgz -O release.MF | yj -yj | jq -r .name)"
+version="$(tar -xf buildpack-release-tarball/*.tgz -O release.MF | yj -yj | jq -r .version)"
+
+cat >>"ops-file/bump-${buildpack_name}.yml" <<-EOF
+- path: /releases/name=${buildpack_name}
+  type: replace
+  value:
+    name: "${buildpack_name}"
+    version: "${version}"
+EOF
