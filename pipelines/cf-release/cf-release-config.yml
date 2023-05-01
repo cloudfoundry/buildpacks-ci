@@ -1,0 +1,48 @@
+#@data/values
+---
+#@ default_stacks = ['cflinuxfs3']
+
+supported_languages:
+- name: binary
+  stacks: #@ default_stacks + ["cflinuxfs4", "windows2016", "windows"]
+- name: dotnet-core
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: go
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: java
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: nginx
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: nodejs
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: php
+  stacks: #@ default_stacks + ["cflinuxfs4"] 
+- name: python
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: r
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: ruby
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: staticfile
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+supported_languages_without_java:
+- name: binary
+  stacks: #@ default_stacks + ["cflinuxfs4", "windows2016", "windows"]
+- name: dotnet-core
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: go
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: nginx
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: nodejs
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: php
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: python
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: r
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: ruby
+  stacks: #@ default_stacks + ["cflinuxfs4"]
+- name: staticfile
+  stacks: #@ default_stacks + ["cflinuxfs4"]

@@ -1,0 +1,12 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: coredeps/core-deps-ci
+inputs:
+- name: core-deps-ci
+run:
+  path: core-deps-ci/tasks/cf-release/write-buildpack-release-trigger-file/run
+outputs:
+- name: buildpack-release-trigger-file

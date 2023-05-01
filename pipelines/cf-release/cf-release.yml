@@ -1,0 +1,431 @@
+#@ load("@ytt:data", "data")
+#@yaml/text-templated-strings
+
+---
+resource_types:
+- name: pivnet
+  type: docker-image
+  source:
+    repository: pivotalcf/pivnet-resource
+    tag: latest-final
+
+- name: toolsmiths-envs
+  type: docker-image
+  source:
+    repository: cftoolsmiths/toolsmiths-envs-resource
+
+
+resources:
+- name: core-deps-ci
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/core-deps-ci.git
+    private_key: ((core-deps-ci-deploy-key.private_key))
+
+- name: cf-deployment-concourse-tasks
+  type: git
+  source:
+    branch: main
+    uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks
+
+- name: cf-deployment
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/cf-deployment
+    branch: main
+
+- name: cf-acceptance-tests
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/cf-acceptance-tests
+    branch: main
+
+- name: cf-deployment-env
+  type: toolsmiths-envs
+  source:
+    api_token: ((toolsmiths-api-token))
+    hostname: environments.toolsmiths.cf-app.com
+    pool_name: cf-deployment
+
+- name: java-pivnet-production
+  type: pivnet
+  source:
+    api_token: ((pivnet-refresh-token))
+    product_slug: java-buildpack
+
+#@ for language in data.values.supported_languages_without_java:
+  #@ for stack in language.stacks:
+- name: #@ language.name + "-buildpack-"+ stack
+  type: s3
+  source:
+    bucket: buildpack-release-candidates
+    regexp: #@  "{}/{}_buildpack-{}-v(.*).zip".format(language.name, language.name, stack)
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+  #@ end
+#@ end
+
+#@ for language in data.values.supported_languages:
+- name: #@ language.name + "-buildpack-release"
+  type: git
+  source:
+    uri: #@ "git@github.com:cloudfoundry/" + language.name + "-buildpack-release.git"
+    private_key: #@ "((" + language.name + "-buildpack-release-deploy-key.private_key))"
+    branch: master
+
+- name: #@ language.name + "-buildpack-release-github-release"
+  type: github-release
+  source:
+    user: cloudfoundry
+    repository: #@ language.name + "-buildpack-release"
+    access_token: ((buildpacks-github-token))
+
+- name: #@ language.name + "-buildpack-release-rc"
+  type: s3
+  source:
+    bucket: buildpack-release-rcs
+    regexp: #@  "{}/{}-buildpack-release-(.*).tgz".format(language.name, language.name)
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+
+- name: #@ language.name + "-buildpack-release-trigger"
+  type: s3
+  source:
+    bucket: buildpack-release-triggers
+    versioned_file: #@ language.name + "-buildpack"
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+#@ end
+
+- name: weekday-mornings
+  type: time
+  source:
+    start: 3AM
+    stop: 4AM
+    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
+    location: America/New_York
+
+- name: shared-buildpack-release-trigger
+  type: s3
+  source:
+    bucket: shared-buildpack-release-triggers
+    versioned_file: non-java
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+
+- name: shared-java-buildpack-release-trigger
+  type: s3
+  source:
+    bucket: shared-buildpack-release-triggers
+    versioned_file: java
+    access_key_id: ((pivotal-offline-buildpacks-s3-access-key))
+    secret_access_key: ((pivotal-offline-buildpacks-s3-secret-key))
+
+
+jobs:
+- name: claim-cf-deployment-env
+  public: true
+  serial: true
+  plan:
+  - get: weekday-mornings
+    trigger: true
+  - put: cf-deployment-env
+    params:
+      action: claim
+
+#@ for language in data.values.supported_languages:
+- name: #@ "create-" + language.name + "-buildpack-dev-release"
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: core-deps-ci
+    - get: cf-deployment-env
+      trigger: true
+      passed: [claim-cf-deployment-env]
+    - get: release
+      resource: #@ language.name + "-buildpack-release"
+  #@ if language.name == "java":
+    - get: buildpack-stack0
+      resource: java-pivnet-production
+      params:
+        globs:
+        - java-buildpack-v*.zip
+  #@ else:
+    #@ for stack in language.stacks:
+    - get: #@ "buildpack-stack" + str(language.stacks.index(stack))
+      resource: #@ language.name + "-buildpack-" + stack
+    #@ end
+  #@ end
+  - task: create-buildpack-dev-release
+    file: core-deps-ci/tasks/cf-release/create-buildpack-dev-release/task.yml
+    params:
+      AWS_ACCESS_KEY_ID: ((pivotal-buildpacks-s3-access-key))
+      AWS_SECRET_ACCESS_KEY: ((pivotal-buildpacks-s3-secret-key))
+  - put: #@ language.name + "-buildpack-release"
+    params:
+      repository: release
+      rebase: true
+  - put: #@ language.name + "-buildpack-release-rc"
+    params:
+      file: release-tarball/*
+#@ end
+
+- name: deploy
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: core-deps-ci
+    - get: cf-deployment-concourse-tasks
+    - get: cf-deployment
+    - get: cf-deployment-env
+      trigger: true
+      passed:
+#@ for language in data.values.supported_languages:
+      - #@ "create-" + language.name + "-buildpack-dev-release"
+#@ end
+#@ for language in data.values.supported_languages:
+    - get: #@ language.name + "-buildpack-release-rc"
+      passed:
+      - #@ "create-" + language.name + "-buildpack-dev-release"
+#@ end
+  - in_parallel:
+#@ for language in data.values.supported_languages:
+    - task: #@ "create-" + language.name + "-buildpack-release-ops-file"
+      file: core-deps-ci/tasks/cf-release/create-buildpack-release-ops-file/task.yml
+      input_mapping:
+        buildpack-release-tarball: #@ language.name + "-buildpack-release-rc"
+      output_mapping:
+        ops-file: #@ language.name + "-buildpack-ops-file"
+    - task: #@ "upload-" + language.name + "-buildpack-release"
+      file: core-deps-ci/tasks/cf-release/upload-bosh-release/task.yml
+      input_mapping:
+        release-tarball: #@ language.name + "-buildpack-release-rc"
+        toolsmiths-env: cf-deployment-env
+#@ end
+  - task: checkout-same-cf-deployment-as-env
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: coredeps/core-deps-ci
+      inputs:
+      - name: cf-deployment
+      - name: cf-deployment-env
+      outputs:
+      - name: cf-deployment
+      run:
+        dir: ""
+        path: bash
+        args:
+        - -c
+        - |
+          #!/bin/bash
+          version="$(jq -r '.["cf-deployment_version"]' < cf-deployment-env/metadata)"
+          echo "Toolsmith env is on cf-deployment version ${version}"
+          pushd cf-deployment
+            echo "Checking out cf-deployment version ${version}"
+            git checkout "${version}"
+          popd
+  - task: get-cf-deployment-ops-files
+    file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
+    input_mapping:
+      base-ops-files: cf-deployment
+      new-ops-files: cf-deployment
+    params:
+      BASE_OPS_FILE_DIR: operations
+#@ for language in data.values.supported_languages:
+  - task: #@ "add-" + language.name + "-buildpack-release-ops-file"
+    file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
+    input_mapping:
+      base-ops-files: collected-ops-files
+      new-ops-files: #@ language.name + "-buildpack-ops-file"
+    params:
+      BASE_OPS_FILE_DIR: operations
+      NEW_OPS_FILES: #@ "bump-" + language.name + "-buildpack.yml"
+#@ end
+#@ buildpack_ops_file_paths = []
+#@ for language in data.values.supported_languages:
+#@   buildpack_ops_file_paths.append("operations/bump-" + language.name + "-buildpack.yml")
+#@ end
+  - task: bosh-deploy
+    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    input_mapping:
+      toolsmiths-env: cf-deployment-env
+      ops-files: collected-ops-files
+    params:
+      OPS_FILES: |
+        operations/experimental/fast-deploy-with-downtime-and-danger.yml
+        operations/use-compiled-releases.yml
+        operations/scale-to-one-az.yml
+        operations/test/scale-to-one-az-addon-parallel-cats.yml
+        (@= "\n".join(buildpack_ops_file_paths) @)
+  - task: open-asgs-for-credhub
+    file: cf-deployment-concourse-tasks/open-asgs-for-bosh-instance-group/task.yml
+    attempts: 10
+    input_mapping:
+      toolsmiths-env: cf-deployment-env
+    params:
+      INSTANCE_GROUP_NAME: credhub
+      SECURITY_GROUP_NAME: credhub
+  - task: open-asgs-for-uaa
+    file: cf-deployment-concourse-tasks/open-asgs-for-bosh-instance-group/task.yml
+    input_mapping:
+      toolsmiths-env: cf-deployment-env
+    params:
+      INSTANCE_GROUP_NAME: uaa
+      SECURITY_GROUP_NAME: uaa
+  - task: enable-docker-and-tasks
+    file: cf-deployment-concourse-tasks/set-feature-flags/task.yml
+    input_mapping:
+      toolsmiths-env: cf-deployment-env
+    params:
+      ENABLED_FEATURE_FLAGS: |
+        diego_docker
+        task_creation
+        service_instance_sharing
+
+- name: cats
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: core-deps-ci
+    - get: cf-deployment-concourse-tasks
+    - get: cf-acceptance-tests
+    - get: cf-deployment-env
+      passed: [deploy]
+      trigger: true
+#@ for language in data.values.supported_languages:
+    - get: #@ language.name + "-buildpack-release-rc"
+      passed: [deploy]
+#@ end
+  - task: create-cats-integration-config
+    file: core-deps-ci/tasks/cf-release/create-cats-integration-config/task.yml
+    input_mapping:
+      toolsmiths-env: cf-deployment-env
+  - task: run-cats
+    file: cf-deployment-concourse-tasks/run-cats/task.yml
+    attempts: 3
+    input_mapping:
+      integration-config: cats-integration-config
+      toolsmiths-env: cf-deployment-env
+    params:
+      CONFIG_FILE_PATH: integration-config.json
+
+- name: unclaim-cf-deployment-env
+  public: true
+  serial: true
+  plan:
+  - get: cf-deployment-env
+    passed: [cats]
+    trigger: true
+  - put: cf-deployment-env
+    params:
+      action: unclaim
+      env_file: cf-deployment-env/metadata
+
+- name: ship-it
+  public: true
+  serial: true
+  plan:
+  - get: core-deps-ci
+  - task: write-buildpack-release-trigger-file
+    file: core-deps-ci/tasks/cf-release/write-buildpack-release-trigger-file/task.yml
+  - put: shared-buildpack-release-trigger
+    params:
+      file: buildpack-release-trigger-file/file
+
+- name: ship-it-java
+  public: true
+  serial: true
+  plan:
+  - get: core-deps-ci
+  - task: write-buildpack-release-trigger-file
+    file: core-deps-ci/tasks/cf-release/write-buildpack-release-trigger-file/task.yml
+  - put: shared-java-buildpack-release-trigger
+    params:
+      file: buildpack-release-trigger-file/file
+
+#@ for language in data.values.supported_languages:
+- name: #@ "update-" + language.name + "-buildpack-release-trigger"
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: core-deps-ci
+    - get: buildpack-release-tarball
+      resource: #@ language.name + "-buildpack-release-rc"
+      passed: [cats]
+    - get: buildpack-release-trigger
+      resource: #@ language.name + "-buildpack-release-trigger"
+  #@ if language.name == "java":
+    - get: shared-java-buildpack-release-trigger
+      trigger: true
+  #@ else:
+    - get: shared-buildpack-release-trigger
+      trigger: true
+  #@ end
+  - task: update-buildpack-release-trigger
+    file: core-deps-ci/tasks/cf-release/update-buildpack-release-trigger/task.yml
+    params:
+      AWS_ACCESS_KEY_ID: ((pivotal-offline-buildpacks-s3-access-key))
+      AWS_SECRET_ACCESS_KEY: ((pivotal-offline-buildpacks-s3-secret-key))
+      BUCKET: buildpack-release-triggers
+
+- name: #@ "publish-" + language.name + "-buildpack-release"
+  old_name: #@ "update-" + language.name + "-buildpack-bosh-release"
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: core-deps-ci
+    - get: release
+      resource: #@ language.name + "-buildpack-release"
+    - get: buildpack-release-tarball
+      resource: #@ language.name + "-buildpack-release-rc"
+      passed:
+      - #@ "update-" + language.name + "-buildpack-release-trigger"
+    - get: #@ language.name + "-buildpack-release-trigger"
+      trigger: true
+  - task: finalize-release
+    file: core-deps-ci/tasks/cf-release/finalize-buildpack-release/task.yml
+    params:
+      AWS_ACCESS_KEY_ID: ((pivotal-buildpacks-s3-access-key))
+      AWS_SECRET_ACCESS_KEY: ((pivotal-buildpacks-s3-secret-key))
+  - put: #@ language.name + "-buildpack-release"
+    params:
+      repository: release
+      rebase: true
+      tag: version/version
+  - put: #@ language.name + "-buildpack-release-github-release"
+    params:
+      name: version/version
+      tag: version/version
+#@ end
+
+
+groups:
+- name: test
+  jobs:
+  - claim-cf-deployment-env
+#@ for language in data.values.supported_languages:
+  - #@ "create-" + language.name + "-buildpack-dev-release"
+#@ end
+  - deploy
+  - cats
+  - unclaim-cf-deployment-env
+
+- name: ship-it
+  jobs:
+  - ship-it
+  - ship-it-java
+
+- name: publish
+  jobs:
+#@ for language in data.values.supported_languages:
+  - #@ "update-" + language.name + "-buildpack-release-trigger"
+  - #@ "publish-" + language.name + "-buildpack-release"
+#@ end

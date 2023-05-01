@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "$0")" && cd .. && pwd)"
+target="buildpacks"
+filter=
+
+login() {
+  fly -t "$target" login -n main -b
+}
+
+check_login_status() {
+  current_team="$(yq r ~/.flyrc targets.buildpacks.team)"
+  if [[ "${current_team}" != "main" ]]; then
+    login
+  fi
+
+  fly -t "$target" status >/dev/null 2>&1 || login
+}
+
+set_pipelines() {
+  for pipeline_dir in "$REPO_ROOT"/pipelines/*; do
+    pipeline_name="$(basename "${pipeline_dir%.yml}")"
+    if [[ $filter != "" ]] && [[ ! $pipeline_name =~ $filter ]]; then
+      continue
+    fi
+
+    echo "Setting $pipeline_name"
+    pipeline_config="$(ytt -f "$pipeline_dir")"
+    fly -t "$target" set-pipeline -p "$pipeline_name" -c <(echo "$pipeline_config")
+  done
+}
+
+main() {
+  if [ "$#" -eq 1 ]; then
+    filter="$1"
+  fi
+
+  check_login_status
+  set_pipelines
+}
+
+main "$@"

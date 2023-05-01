@@ -1,0 +1,209 @@
+---
+resource_types:
+  - name: cf-tracker-resource
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cf-tracker-resource
+      tag: latest
+  - name: email-sender
+    type: docker-image
+    source:
+      repository: pcfseceng/email-resource
+  - name: cron
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cron-resource
+
+resources:
+  - name: davos-cve-stories-cflinuxfs3
+    type: cf-tracker-resource
+    source:
+      project_id: 2537714
+      token: ((pivotal-tracker-api-token))
+      labels:
+        - cflinuxfs3
+        - security-notice
+
+  - name: davos-cve-stories-cflinuxfs4
+    type: cf-tracker-resource
+    source:
+      project_id: 2537714
+      token: ((pivotal-tracker-api-token))
+      labels:
+        - cflinuxfs4
+        - security-notice
+
+  - name: first-of-month
+    type: cron
+    check_every: 15m
+    source:
+      expression: 15 0 1 * *
+      location: America/New_York
+
+  - name: last-week-of-month
+    type: cron
+    check_every: 1h
+    source:
+      expression: 0 0 25 * *
+      location: America/New_York
+
+  - name: check-interval
+    type: cron
+    source:
+      expression: "0 * * * *"
+      location: America/New_York
+
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/buildpacks-ci
+      branch: master
+
+  - name: new-cves
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+      branch: main
+      paths: [ new-cve-notifications/* ]
+      private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
+
+  - name: cflinuxfs3
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cflinuxfs3
+
+  - name: cflinuxfs3-release
+    type: github-release
+    source:
+      owner: cloudfoundry
+      repository: cflinuxfs3
+      access_token: ((buildpacks-github-token))
+
+  - name: cflinuxfs4
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cflinuxfs4
+
+  - name: cflinuxfs4-release
+    type: github-release
+    source:
+      owner: cloudfoundry
+      repository: cflinuxfs4
+      access_token: ((buildpacks-github-token))
+
+jobs:
+  - name: categorize-security-notices-cflinuxfs3
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+          - get: davos-cve-stories
+            resource: davos-cve-stories-cflinuxfs3
+            trigger: true
+          - get: buildpacks-ci
+          - get: cflinuxfs3-release
+            params:
+              include_source_tarball: true
+      - in_parallel:
+          - task: categorize-security-notices-cflinuxfs3
+            file: buildpacks-ci/tasks/categorize-security-notices/task.yml
+            params:
+              TRACKER_PROJECT_ID: 2537714
+              TRACKER_PROJECT_REQUESTER: 1431988
+              TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
+              STACK: cflinuxfs3
+
+  - name: new-rootfs-cves-cflinuxfs3
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+          - get: buildpacks-ci
+          - get: new-cves
+          - get: cflinuxfs3
+          - get: check-interval
+            trigger: true
+      - in_parallel:
+          - do:
+              - task: check-for-new-cflinuxfs3-cves
+                file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
+                output_mapping:
+                  output-new-cves: output-new-cves-cflinuxfs3
+              - put: new-cves-cflinuxfs3
+                resource: new-cves
+                params:
+                  repository: output-new-cves-cflinuxfs3
+                  rebase: true
+
+  - name: categorize-security-notices-cflinuxfs4
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+          - get: davos-cve-stories
+            resource: davos-cve-stories-cflinuxfs4
+            trigger: true
+          - get: buildpacks-ci
+          - get: cflinuxfs4-release
+            params:
+              include_source_tarball: true
+      - in_parallel:
+          - task: categorize-security-notices-cflinuxfs4
+            file: buildpacks-ci/tasks/categorize-security-notices/task.yml
+            params:
+              TRACKER_PROJECT_ID: 2537714
+              TRACKER_PROJECT_REQUESTER: 1431988
+              TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
+              STACK: cflinuxfs4
+
+  - name: new-rootfs-cves-cflinuxfs4
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+          - get: buildpacks-ci
+          - get: new-cves
+          - get: cflinuxfs4
+          - get: check-interval
+            trigger: true
+      - in_parallel:
+          - do:
+              - task: check-for-new-cflinuxfs4-cves
+                file: buildpacks-ci/tasks/check-for-new-rootfs-cves-cflinuxfs4/task.yml
+                output_mapping:
+                  output-new-cves: output-new-cves-cflinuxfs4
+              - put: new-cves-cflinuxfs4
+                resource: new-cves
+                params:
+                  repository: output-new-cves-cflinuxfs4
+                  rebase: true
+
+  - name: php-module-checker
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+          - get: last-week-of-month
+            trigger: true
+          - get: buildpacks-ci
+      - task: check-for-latest-php-module-versions
+        file: buildpacks-ci/tasks/check-for-latest-php-module-versions/task.yml
+        params:
+          TRACKER_PROJECT_ID: 2537714
+          TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
+          TRACKER_REQUESTER_ID: 1431988
+
+  - name: bosh-release-reminder
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+          - get: first-of-month
+            trigger: true
+          - get: buildpacks-ci
+      - task: create-reminder-story
+        file: buildpacks-ci/tasks/create-bosh-release-reminder-story/task.yml
+        params:
+          TRACKER_PROJECT_ID: 2537714
+          TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
+          TRACKER_RELEASE_REMINDER_MARKER_STORY: 180346921
