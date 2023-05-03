@@ -5,9 +5,9 @@ image_resource:
   source:
     repository: coredeps/core-deps-ci
 inputs:
-- name: core-deps-ci
+- name: buildpacks-ci
 - name: buildpack-release-tarball
 outputs:
 - name: ops-file
 run:
-  path: core-deps-ci/tasks/cf-release/create-buildpack-release-ops-file/run
+  path: buildpacks-ci/tasks/cf-release/create-buildpack-release-ops-file/run

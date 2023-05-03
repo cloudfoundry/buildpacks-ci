@@ -3,9 +3,9 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: coredeps/core-deps-ci
+    repository: coredeps/buildpacks-ci
 inputs:
-- name: core-deps-ci
+- name: buildpacks-ci
 - name: release
 - name: buildpack-stack0
   optional: true
@@ -24,4 +24,4 @@ params:
   AWS_ACCESS_KEY_ID:
   AWS_SECRET_ACCESS_KEY:
 run:
-  path: core-deps-ci/tasks/cf-release/create-buildpack-dev-release/run
+  path: buildpacks-ci/tasks/cf-release/create-buildpack-dev-release/run
