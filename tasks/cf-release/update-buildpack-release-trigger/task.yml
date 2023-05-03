@@ -5,7 +5,7 @@ image_resource:
   source:
     repository: coredeps/core-deps-ci
 inputs:
-- name: core-deps-ci
+- name: buildpacks-ci
 - name: buildpack-release-tarball
 - name: buildpack-release-trigger
 params:
@@ -13,4 +13,4 @@ params:
   AWS_SECRET_ACCESS_KEY:
   BUCKET:
 run:
-  path: core-deps-ci/tasks/cf-release/update-buildpack-release-trigger/run
+  path: buildpacks-ci/tasks/cf-release/update-buildpack-release-trigger/run

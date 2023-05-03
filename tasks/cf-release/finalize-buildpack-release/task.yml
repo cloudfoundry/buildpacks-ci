@@ -5,7 +5,7 @@ image_resource:
   source:
     repository: coredeps/core-deps-ci
 inputs:
-- name: core-deps-ci
+- name: buildpacks-ci
 - name: release
 - name: buildpack-release-tarball
 outputs:
@@ -16,4 +16,4 @@ params:
   AWS_ACCESS_KEY_ID:
   AWS_SECRET_ACCESS_KEY:
 run:
-  path: core-deps-ci/tasks/cf-release/finalize-buildpack-release/run
+  path: buildpacks-ci/tasks/cf-release/finalize-buildpack-release/run

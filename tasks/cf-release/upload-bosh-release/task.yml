@@ -6,7 +6,7 @@ image_resource:
     repository: cfbuildpacks/ci
     tag: latest
 inputs:
-- name: core-deps-ci
+- name: buildpacks-ci
 - name: cf-deployment-concourse-tasks
 - name: bbl-state
   optional: true
@@ -14,7 +14,7 @@ inputs:
   optional: true
 - name: release-tarball
 run:
-  path: core-deps-ci/tasks/cf-release/upload-bosh-release/run
+  path: buildpacks-ci/tasks/cf-release/upload-bosh-release/run
 
 params:
   BBL_STATE_DIR: bbl-state

@@ -6,10 +6,10 @@ image_resource:
     repository: cfbuildpacks/ci
     tag: latest
 inputs:
-  - name: core-deps-ci
+  - name: buildpacks-ci
   - name: cf-deployment-concourse-tasks
   - name: toolsmiths-env
 outputs:
   - name: cats-integration-config
 run:
-  path: core-deps-ci/tasks/cf-release/create-cats-integration-config/run
+  path: buildpacks-ci/tasks/cf-release/create-cats-integration-config/run
