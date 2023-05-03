@@ -5,8 +5,8 @@ image_resource:
   source:
     repository: coredeps/core-deps-ci
 inputs:
-- name: core-deps-ci
+- name: buildpacks-ci
 run:
-  path: core-deps-ci/tasks/cf-release/write-buildpack-release-trigger-file/run
+  path: buildpacks-ci/tasks/cf-release/write-buildpack-release-trigger-file/run
 outputs:
 - name: buildpack-release-trigger-file
