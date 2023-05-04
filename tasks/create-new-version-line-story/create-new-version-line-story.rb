@@ -2,7 +2,7 @@
 require 'fileutils'
 require 'json'
 require 'yaml'
-require 'tracker_api'
+require_relative './dispatch.rb'
 
 class SemanticVersion
   attr_reader :major
@@ -62,20 +62,9 @@ ENV['EXISTING_VERSION_LINES'].split(' ').each do |line|
   end
 end
 
-tracker_client = TrackerApi::Client.new(token: ENV['TRACKER_API_TOKEN'])
-buildpack_project = tracker_client.project(ENV['TRACKER_PROJECT_ID'])
+puts "Sending dispatch to create github issue..."
+send_dispatch(name, version, data, ENV['GITHUB_TOKEN'])
 
-story = buildpack_project.create_story(
-  name: "Add new version line in dependency-builds: #{name} #{version}",
-  description: "```\n#{data.to_yaml}\n```\n\nPlease edit the dependency-builds pipeline to add the new version line to the relevant dependency/buildpack.\n\nFor nginx/nginx-static: Also remove older mainline/stable version.\nE.g. If you are adding nginx 1.22, you will remove 1.20. If you are adding 1.23, you will remove 1.21",
-  estimate: 1,
-  labels: (['deps', name] + BUILDPACKS).uniq,
-  requested_by_id: ENV['TRACKER_REQUESTER_ID'].to_i,
-  owner_ids: [ENV['TRACKER_REQUESTER_ID'].to_i],
-  before_id: ENV['TRACKER_BEFORE_ID'].to_i
-)
-
-puts "Created tracker story #{story.id}"
 # Notes on depen version line additions:
 # General stucture of dependencies is `dep.buildpacks.[].lines[].`
 # eg.
