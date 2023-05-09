@@ -734,6 +734,8 @@ class DependencyBuild
       '--with-cc-opt=-fPIC -pie',
       '--with-ld-opt=-fPIC -pie -z now',
       '--with-compat',
+      '--with-mail=dynamic',
+      '--with-mail_ssl_module',
       '--with-stream=dynamic',
       '--with-http_sub_module',
     ]
@@ -792,6 +794,8 @@ class DependencyBuild
             '--with-cc-opt=-fPIC -pie',
             '--with-ld-opt=-fPIC -pie -z now',
             '--with-compat',
+            '--with-mail=dynamic',
+            '--with-mail_ssl_module',
             '--with-stream=dynamic',
           )
           Runner.run('make', '-j2')
