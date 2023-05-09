@@ -202,9 +202,6 @@ dependencies:
     buildpacks:
       nodejs:
         lines:
-          - line: 14.X.X
-            deprecation_date: 2023-04-30
-            link: https://github.com/nodejs/Release
           - line: 16.X.X
             deprecation_date: 2023-09-11
             link: https://github.com/nodejs/Release
