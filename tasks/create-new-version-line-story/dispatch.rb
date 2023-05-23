@@ -5,7 +5,7 @@ require 'uri'
 require 'json'
 
 def send_dispatch(name, version, jsonData, token)
-  jsonStr = JSON.generate(jsonData)
+  jsonStr = JSON.generate(jsonData).gsub('"', '\"')
   uri = URI.parse("https://api.github.com/repos/cloudfoundry/buildpacks-github-config/dispatches")
   request = Net::HTTP::Post.new(uri)
   request["Authorization"] = "token #{token}"
@@ -14,7 +14,7 @@ def send_dispatch(name, version, jsonData, token)
                 \"client_payload\":{
                   \"Name\": \"#{name}\",
                   \"Version\": \"#{version}\",
-                  \"DependencyJSON\": #{jsonStr}
+                  \"DependencyJSON\": \"#{jsonStr}\"
                 }
               }"
   req_options = {
