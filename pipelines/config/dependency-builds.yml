@@ -167,9 +167,9 @@ dependencies:
           #! each odd version line (ex. 1.19) is the "mainline"
           #! the even numbered version line that precedes the mainline is the associated stable version line.
           #! See explanation of release cadence: https://www.nginx.com/blog/nginx-1-18-1-19-released/
-          - line: 1.22.X
+          - line: 1.24.X
             link: https://nginx.org/
-          - line: 1.23.X
+          - line: 1.25.X
             link: https://nginx.org/
     versions_to_keep: 2
   openresty:
@@ -186,15 +186,15 @@ dependencies:
           #! nginx deprecation dates are 1 year after the mainline release date
           #! each odd version line (ex. 1.19) is the "mainline"
           #! the even numbered version line that precedes the mainline is the associated stable version line.
-          - line: 1.22.X
+          - line: 1.24.X
             link: https://nginx.org/
-          - line: 1.23.X
+          - line: 1.25.X
             link: https://nginx.org/
       staticfile:
         lines:
-          - line: 1.22.X
+          - line: 1.24.X
             link: https://nginx.org/
-          - line: 1.23.X
+          - line: 1.25.X
             link: https://nginx.org/
     source_type: nginx
     versions_to_keep: 2
