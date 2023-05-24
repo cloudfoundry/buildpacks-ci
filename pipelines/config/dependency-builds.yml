@@ -208,6 +208,9 @@ dependencies:
           - line: 18.X.X
             deprecation_date: 2025-04-30
             link: https://github.com/nodejs/Release
+          - line: 20.X.X
+            deprecation_date: 2026-04-30
+            link: https://github.com/nodejs/Release
         removal_strategy: keep_latest_released
       ruby:
         lines:
@@ -302,7 +305,7 @@ dependencies:
       - plumber
     versions_to_keep: 2
     #! R doesn't publish EOL dates but 3.6 hasn’t made a release in 3 years and community feedback suggests 3.x contains known security issues
-    skip_lines_cflinuxfs4: ['3.6.X']
+    skip_lines_cflinuxfs4: [ '3.6.X' ]
   ruby:
     buildpacks:
       ruby:
@@ -323,7 +326,7 @@ dependencies:
     versions_to_keep: 2
     #! Older ruby versions aren't compatible with openssl 3 of jammy
     #! There may be workarounds but decided not to support these versions.
-    skip_lines_cflinuxfs4: ['2.7.X', '3.0.X']
+    skip_lines_cflinuxfs4: [ '2.7.X', '3.0.X' ]
   rubygems:
     buildpacks:
       ruby:
@@ -354,9 +357,9 @@ dependencies:
       - 'extension: .tar.gz'
     any_stack: true
     versions_to_keep: 2
-cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty', 'r' , 'httpd', 'php']
-cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'pip', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems', 'nginx', 'nginx-static', 'openresty', 'r', 'appdynamics', 'composer', 'httpd', 'php']
-cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go', 'ruby', 'nginx', 'r', 'php', 'staticfile']
+cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty', 'r' , 'httpd', 'php' ]
+cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'pip', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems', 'nginx', 'nginx-static', 'openresty', 'r', 'appdynamics', 'composer', 'httpd', 'php' ]
+cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go', 'ruby', 'nginx', 'r', 'php', 'staticfile' ]
 build_stacks: [ 'cflinuxfs4' , 'cflinuxfs3' ]
 windows_stacks: [ 'windows2016', 'windows' ]
 
