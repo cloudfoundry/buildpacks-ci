@@ -18,11 +18,11 @@ Spec2.describe Depwatcher::NodeLTS do
       )
     end
     it "returns the right number of releases" do
-      expect(subject.check.size).to eq 26
+      expect(subject.check.size).to eq 3
     end
 
     it "returns real releases sorted" do
-      expect(subject.check.map(&.ref)).to eq ["16.0.0", "16.1.0", "16.2.0", "16.3.0", "16.4.0", "16.4.1", "16.4.2", "16.5.0", "16.6.0", "16.6.1", "16.6.2", "16.7.0", "16.8.0", "16.9.0", "16.9.1", "16.10.0", "16.11.0", "16.11.1", "16.12.0", "16.13.0", "16.13.1", "16.13.2", "16.14.0", "16.14.1", "16.14.2", "16.15.0"]
+      expect(subject.check.map(&.ref)).to eq  ["18.0.0", "18.1.0", "18.2.0"]
     end
   end
 
