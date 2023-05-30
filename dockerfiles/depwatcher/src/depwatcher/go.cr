@@ -33,42 +33,17 @@ module Depwatcher
     private def releases() : Array(Release)
       response = client.get("https://go.dev/dl/").body
       doc = XML.parse_html(response)
-      tds = doc.xpath("//td[contains(text(),'Source')]")
-      raise "Could not parse golang release (td) website" unless tds.is_a?(XML::NodeSet)
-      tds.map do |td|
-        # Get last preceding h2 category header (Stable versions, Unstable verions, Archived versions)
-        div = td.xpath("./ancestor::div")
-        raise "Could not parse golang release (div) website" unless div.is_a?(XML::NodeSet)
-        div = div.skip(div.size - 1).first
-        h2 = div.xpath("../preceding-sibling::h2")
-        raise "Could not parse golang release (h2) website" unless h2.is_a?(XML::NodeSet)
-        h2 = h2.skip(h2.size - 1).first
-
-        # Get entire row, in order to get sha and url
-        tr = td.xpath("./ancestor::tr")
-        raise "Could not parse golang release (tr) website" unless tr.is_a?(XML::NodeSet)
-        tr = tr.first
-        sha = tr.xpath("./td[position()=6]")
-        raise "Could not parse golang release (sha256) website" unless sha.is_a?(XML::NodeSet)
-
-        a = tr.xpath(".//a")
-        raise "Could not parse golang release (a) website" unless a.is_a?(XML::NodeSet)
-        url = "https://dl.google.com/go/" + a.first.text
-
-        # Extract versions from Stable and Archived versions; ignore Unstable
-        if h2.text().starts_with?("Stable versions")
-          v = url.match(/\/go([\d\.]*)\.src/)
-          raise "Could not match version in url #{url}" if v.nil?
-          Release.new(v[1], url, sha.first.text.to_s)
-        elsif h2.text().starts_with?("Archived versions")
-          v = url.match(/\/go([\d\.]*)\.src/)
-          if v.nil? # Ignore unmatched archived versions (e.g. alpha, beta, rc)
-            nil
-          else
-            Release.new(v[1], url, sha.first.text.to_s)
-          end
-        else
+      trs = doc.xpath("//tr[td[contains(text(),'Source')]]")
+      raise "Could not parse golang release (td) website" unless trs.is_a?(XML::NodeSet)
+      trs.map do |tr|  
+        release_name = tr.xpath("./td[1]/a/text()").to_s
+        version = release_name.match(/go([\d\.]*)\.src/)
+        url = "https://dl.google.com/go/#{release_name}"
+        sha = tr.xpath("./td[6]/tt/text()").to_s
+        if version.nil?
           nil
+        else
+          Release.new(version[1], url, sha)
         end
       end.compact
     end
