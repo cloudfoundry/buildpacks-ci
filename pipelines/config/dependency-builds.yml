@@ -309,7 +309,7 @@ dependencies:
       - forecast
       - shiny
       - plumber
-    versions_to_keep: 2
+    versions_to_keep: 1
     #! R doesn't publish EOL dates but 3.6 hasn’t made a release in 3 years and community feedback suggests 3.x contains known security issues
     skip_lines_cflinuxfs4: [ '3.6.X' ]
   ruby:
