@@ -152,8 +152,8 @@ RUN curl -L https://github.com/git-hooks/git-hooks/releases/download/v1.1.4/git-
 RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make install
 
 RUN cd /usr/local \
-  && curl -L https://dl.google.com/go/go1.19.3.linux-amd64.tar.gz -o go.tar.gz \
-  && [ 74b9640724fd4e6bb0ed2a1bc44ae813a03f1e72a4c76253e2d5c015494430ba = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
+  && curl -L https://go.dev/dl/go1.20.6.linux-amd64.tar.gz -o go.tar.gz \
+  && [ b945ae2bb5db01a0fb4786afde64e6fbab50b67f6fa0eb6cfa4924f16a7ff1eb = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && tar xf go.tar.gz \
   && rm go.tar.gz
 
