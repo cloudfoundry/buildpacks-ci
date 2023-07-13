@@ -14,8 +14,8 @@ RUN mkdir -p /home/testuser \
     -c "Docker image test user" \
     testuser
 
-ARG GO_VERSION=1.14
-RUN curl "https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz" \
+ARG GO_VERSION=1.20
+RUN curl "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" \
     --silent \
     --location \
     --output "/usr/local/go${GO_VERSION}.tar.gz" \
