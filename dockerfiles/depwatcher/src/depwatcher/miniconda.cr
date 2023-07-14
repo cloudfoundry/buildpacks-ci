@@ -9,10 +9,9 @@ module Depwatcher
       JSON.mapping(
         ref: String,
         url: String,
-        md5: String,
         sha256: String
       )
-      def initialize(@ref : String, @url : String, @md5 : String, @sha256 : String)
+      def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
 
@@ -23,10 +22,12 @@ module Depwatcher
 
     def in(python_version : String, ref : String) : Release
       generation = python_version.split(".")[0]
-      url = "https://repo.anaconda.com/miniconda/Miniconda#{generation}-py#{python_version.delete(".")}_#{ref}-Linux-x86_64.sh"
       (releases(generation, python_version) { |m, e|
         if m[1] == ref
-          Release.new(ref, url, e.children[7].text, get_sha256(url))
+          build_num = m[2]
+          url = "https://repo.anaconda.com/miniconda/Miniconda#{generation}-py#{python_version.delete(".")}_#{ref}-#{build_num}-Linux-x86_64.sh"
+          shasum = e.children[7].text
+          Release.new(ref, url, shasum)
         end
       }).first
     end
@@ -36,7 +37,7 @@ module Depwatcher
       doc = XML.parse_html(response)
       elements = doc.xpath_nodes("//tr[td[a[starts-with(@href,'Miniconda#{generation}-py#{python_version.delete(".")}')]]]")
       elements.map do |e|
-        m = /Miniconda#{generation}-py#{python_version.delete(".")}_([\d\.]+)-Linux-x86_64.sh/.match(e.text)
+        m = /Miniconda#{generation}-py#{python_version.delete(".")}_([\d\.]+)-([\d]+)-Linux-x86_64.sh/.match(e.text)
         if !m.nil?
           yield m, e
         end
