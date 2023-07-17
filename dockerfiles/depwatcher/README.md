@@ -17,9 +17,12 @@ The various depwatchers in this resource (in `src`) are written in Crystal, as a
 
 ## Building/Pushing
 
-`docker build -t cfbuildpacks/depwatcher .`
+To build locally:
+`docker build -t mydepwatcherresource .`
 
-`docker push cfbuildpacks/depwatcher`
+The
+[resources/build-and-push-depwatcher](https://buildpacks.ci.cf-app.com/teams/core-deps/pipelines/resources)
+is responsible for building and pushing the production-level image to `index.docker.io/coredeps/depwatcher`
 
 ## Example run
 
