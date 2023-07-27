@@ -7,6 +7,6 @@ extensions:
     klass: PeclRecipe
   additions:
   - name: oci8
-    version: 3.2.1
-    md5: 309190ef3ede2779a617c9375d32ea7a
+    version: 3.3.0
+    md5: bbbbb26f1791d1f27ffc05289abee2f3
     klass: OraclePeclRecipe
