@@ -148,6 +148,11 @@ resources:
   source: {repository: cloudfoundry/<%= stack %>}
 <% end %>
 
+- name: cflinuxfs3-dev-image
+  type: docker-image
+  source:
+    repository: cfbuildpacks/cflinuxfs3-dev
+
 <% dependencies.values.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack|
 branch = 'develop'
 private_key = '((cf-buildpacks-eng-github-ssh-key.private_key))'
@@ -328,6 +333,9 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
 
   <%
   specific_stack = cflinuxfs4_build_dependencies.include?(dep_name.downcase) ? stacks : [stacks.last]
+  if dep_name.downcase == 'php'
+    specific_stack = specific_stack - ['cflinuxfs3'] + ['cflinuxfs3-dev']
+  end
   %>
 - name: build-<%= dep_name.downcase %>-<%= line.downcase %>
   serial: true
@@ -365,7 +373,7 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
         params:
           STACK: <%= stack %>
       - in_parallel:
-    <% if !dep['third_party_hosted'] %>
+    <% unless dep['third_party_hosted'] %>
         - put: buildpacks-bucket-<%= dep_name %>-<%= stack %>
           resource: buildpacks-bucket-<%= dep_name %>
           params:
