@@ -1,15 +1,15 @@
 <% languages = %w(apt binary dotnet-core go nodejs python ruby staticfile php nginx) %>
 <% stacks = {
-"apt" => %w(cflinuxfs3),
-"binary" => %w(cflinuxfs3 windows),
-"dotnet-core" => %w(cflinuxfs3),
-"go" => %w(cflinuxfs3),
-"nginx" => %w(cflinuxfs3),
-"nodejs" => %w(cflinuxfs3),
-"php" => %w(cflinuxfs3),
-"python" => %w(cflinuxfs3),
-"ruby" => %w(cflinuxfs3),
-"staticfile" => %w(cflinuxfs3),
+"apt" => %w(cflinuxfs4),
+"binary" => %w(cflinuxfs4 windows),
+"dotnet-core" => %w(cflinuxfs4),
+"go" => %w(cflinuxfs4),
+"nginx" => %w(cflinuxfs4),
+"nodejs" => %w(cflinuxfs4),
+"php" => %w(cflinuxfs4),
+"python" => %w(cflinuxfs4),
+"ruby" => %w(cflinuxfs4),
+"staticfile" => %w(cflinuxfs4),
 } %>
 <% pas_versions = {
   'latest' => '2_13',
@@ -107,11 +107,11 @@ jobs:
           params:
             ORG: pivotal
 
-        - task: run-brats-cflinuxfs3
+        - task: run-brats-cflinuxfs4
           file: buildpacks-ci/tasks/run-bp-brats/task.yml
           attempts: <%= if language == "ruby" then 3 else 1 end %>
           params:
-            CF_STACK: cflinuxfs3
+            CF_STACK: cflinuxfs4
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 6
         ensure:
