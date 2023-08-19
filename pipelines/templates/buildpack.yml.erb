@@ -635,8 +635,8 @@ jobs: ##########################################################################
           lock: environment
         params:
           SCALE_DIEGO_CELLS: true
-<% if stack == "cflinuxfs4" %>
-          ADD_CFLINUXFS4_STACK: true
+<% if stack == "cflinuxfs3" %>
+          ADD_CFLINUXFS3_STACK: true
 <% end %>
 <% if buildpacks[language]['stacks'].include?('windows')%>
           DEPLOY_WINDOWS_CELL: true
@@ -698,8 +698,8 @@ jobs: ##########################################################################
           ci: buildpacks-ci
           lock: environment
         params:
-<% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
-          ADD_CFLINUXFS4_STACK: true
+<% if buildpacks[language]['stacks'].include?('cflinuxfs3')%>
+          ADD_CFLINUXFS3_STACK: true
 <% end %>
 <% if buildpacks[language]['stacks'].include?('windows')%>
           DEPLOY_WINDOWS_CELL: true

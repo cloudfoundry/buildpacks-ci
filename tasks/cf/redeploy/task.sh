@@ -51,11 +51,12 @@ function releases::windows::upload() {
     return
   fi
 
-	util::print::info "[task] * uploading uncompiled releases for windows vms"
+	util::print::info "[task] * uploading compiled releases for windows vms"
+
 	grep url "${PWD}/cf-deployment/operations/experimental/use-compiled-releases-windows.yml" \
     | xargs -I{} echo {} \
     | cut -d" " -f2 \
-    | xargs -I{} bosh upload-release {} --fix
+    | xargs -I{} bosh upload-release {}
 }
 
 function cf::deploy() {
@@ -73,11 +74,15 @@ function cf::deploy() {
       "${PWD}/operations/disable-dynamic-asgs.yml" \
     )
 
-    if [[ -n "${ADD_CFLINUXFS4_STACK}" ]]; then
+    if [[ -n "${ADD_CFLINUXFS3_STACK}" ]]; then
+      bosh upload-release https://bosh.io/d/github.com/cloudfoundry/cflinuxfs3-release
+      util::print::info "[task] * uploaded cflinuxfs3 release from bosh.io"
+
       operations+=(
-        "${PWD}/operations/experimental/add-cflinuxfs4.yml"
+        "${TASKDIR}/operations/add-cflinuxfs3-to-current.yml" \
+        "${TASKDIR}/operations/cflinuxfs3-rootfs-certs.yml" \
       )
-      util::print::info "[task] * added cflinuxfs4 opsfiles to deploy command"
+      util::print::info "[task] * added cflinuxfs3 opsfiles to deploy command"
     fi
 
     if [[ -n "${DEPLOY_WINDOWS_CELL}" ]]; then
