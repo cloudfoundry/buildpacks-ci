@@ -75,6 +75,9 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   end
 
   stack = %r{#{resource_version}-(.*)\.json$}.match(stack_dependency_build)[1]
+
+  # See github.com/cloudfoundry/buildpacks-ci/pull/300 - the build process may create temp stacks like cflinuxfs3-dev
+  stack = stack.end_with?("-dev") ? stack.chomp("-dev") : stack
   next unless all_stacks.include?(stack) # make sure we not pulling something that's not a stack eg 'preview
 
   ## TODO: This should be removed when all the buildpacks are built using cflinuxfs4. Right now it only uses the buildpacks included in buildpacks-ci/pipelines/config/dependency-builds.yml --> cflinuxfs4_buildpacks:
