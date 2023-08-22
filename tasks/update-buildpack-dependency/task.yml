@@ -13,9 +13,8 @@ inputs:
 outputs:
   - name: artifacts
 run:
-  path: bash
+  path: ruby
   args:
-    - -cl
     - buildpacks-ci/tasks/update-buildpack-dependency/run.rb
 params:
   GPG_SIGNING_KEY_ID:
