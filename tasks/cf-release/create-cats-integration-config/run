@@ -53,6 +53,7 @@ cat >cats-integration-config/integration-config.json <<-EOF
   "include_v3": false,
   "include_volume_services": false,
   "include_zipkin": false,
+  "readiness_health_checks_enabled": false,
   "stacks": ["cflinuxfs4"]
 }
 EOF
