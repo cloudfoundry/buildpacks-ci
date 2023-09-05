@@ -46,12 +46,12 @@ extensions:
   md5: e242c66e53c0d155982713cd78b3d480
   klass: PeclRecipe
 - name: mailparse
-  version: 3.1.5
-  md5: 71761daf7773a568cb99fa85242b2384
+  version: 3.1.6
+  md5: e3a71b27439ee08dd63272d7d290d136
   klass: PeclRecipe
 - name: mongodb
-  version: 1.16.1
-  md5: 0f8ca3d21f6beef65b31d2db3aefa7fc
+  version: 1.16.2
+  md5: 838608c31a410db3cc61bd089a1a40a3
   klass: PeclRecipe
 - name: msgpack
   version: 2.2.0
@@ -134,8 +134,8 @@ extensions:
   md5: nil
   klass: FakePeclRecipe
 - name: amqp
-  version: 1.11.0
-  md5: 3a0638223e320fc21f3b079198c24f12
+  version: 2.0.0
+  md5: ed2b08564cf50be44029c9e647448e54
   klass: AmqpPeclRecipe
 - name: maxminddb
   version: 1.11.0
@@ -146,8 +146,8 @@ extensions:
   md5: '07695da8376002babbce528205decf07'
   klass: PeclRecipe
 - name: phalcon
-  version: 5.2.3
-  md5: 2a5eb828cea71ae146dbb41da3989da3
+  version: 5.3.0
+  md5: ddb4445ae329c4143a815b3cc92c302f
   klass: PeclRecipe
 - name: phpiredis
   version: 1.0.1
