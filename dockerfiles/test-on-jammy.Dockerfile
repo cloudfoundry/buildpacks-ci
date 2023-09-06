@@ -73,8 +73,8 @@ COPY build/*.sh /etc/profile.d/
 ENV BASH_ENV /etc/profile.d/filter.sh
 
 RUN cd /usr/local \
-  && curl -L https://go.dev/dl/go1.20.6.linux-amd64.tar.gz -o go.tar.gz \
-  && [ b945ae2bb5db01a0fb4786afde64e6fbab50b67f6fa0eb6cfa4924f16a7ff1eb = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
+  && curl -L https://go.dev/dl/go1.20.8.linux-amd64.tar.gz -o go.tar.gz \
+  && [ cc97c28d9c252fbf28f91950d830201aa403836cbed702a05932e63f7f0c7bc4 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
   && tar xf go.tar.gz \
   && rm go.tar.gz
 
