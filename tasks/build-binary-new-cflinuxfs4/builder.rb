@@ -822,6 +822,7 @@ class DependencyBuild
     def self.setup_python_and_pip
       Runner.run('apt', 'update')
       Runner.run('apt', 'install', '-y', 'python3', 'python3-pip')
+      Runner.run('pip3', 'install', '--upgrade', 'pip', 'setuptools')
     end
 
     def self.prune_dotnet_files(source_input, files_to_exclude, write_runtime = false)
