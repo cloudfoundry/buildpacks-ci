@@ -11,11 +11,11 @@
 "ruby" => %w(cflinuxfs4),
 "staticfile" => %w(cflinuxfs4),
 } %>
-<% pas_versions = {
-  'latest' => '2_13',
-  'n-1' => '2_12',
-  'n-2' => '2_11_lts2',
-} %>
+
+# The intention of this pipeline is to test against the latest LTS platform.
+# This is to make sure that even if a buildpack hasn't had changes/released in
+# a while, it stills works well with the latest platform out there.
+<% tas_version =  '4.0' %>
 
 ---
 resource_types:
@@ -54,12 +54,12 @@ resources:
       branch: master
       private_key: {{buildpacks-envs-private-key}}
 
-  - name: smith-environments-<%= pas_versions['n-2'] %>
+  - name: smith-environments-<%= tas_version %>
     type: cf-pool
     source:
       api_token: ((toolsmiths-api-token))
       hostname: environments.toolsmiths.cf-app.com
-      pool_name: us_<%= pas_versions['n-2'] %>
+      pool_name: us_<%= tas_version.gsub('.', '_') %>
 
   - name: cf-toolsmiths-environment
     type: cf-pool
@@ -96,14 +96,14 @@ jobs:
         - get: nightly-trigger
           trigger: true
       - do:
-        - put: smith-environments-<%= pas_versions['n-2'] %>
+        - put: smith-environments-<%= tas_version %>
           params:
             action: claim
         - task: create-cf-space
           attempts: 5
           file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
           input_mapping:
-            environment: smith-environments-<%= pas_versions['n-2'] %>
+            environment: smith-environments-<%= tas_version %>
           params:
             ORG: pivotal
 
@@ -116,10 +116,10 @@ jobs:
             GINKGO_NODES: 6
         ensure:
           in_parallel:
-          - put: smith-environments-<%= pas_versions['n-2'] %>
+          - put: smith-environments-<%= tas_version %>
             params:
               action: unclaim
-              env_file: smith-environments-<%= pas_versions['n-2'] %>/metadata
+              env_file: smith-environments-<%= tas_version %>/metadata
   - name: brats-<%= language %>-edge
     serial: true
     public: true
