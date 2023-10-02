@@ -352,9 +352,6 @@ jobs:
           STACK: cflinuxfs4
       - task: use-new-buildpack-bosh-releases
         file: buildpacks-ci/tasks/use-new-buildpack-bosh-releases/task.yml
-        params:
-          ACCESS_KEY_ID: ((pivotal-offline-buildpacks-s3-access-key))
-          SECRET_ACCESS_KEY: ((pivotal-offline-buildpacks-s3-secret-key))
     - put: cflinuxfs4-rootfs-smoke-test-deployment
       params:
         source_file: deployment-source-config/source_file.yml
