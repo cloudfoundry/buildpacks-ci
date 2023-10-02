@@ -15,8 +15,9 @@ resources:
     type: s3
     source:
       bucket: buildpacks-site
-      access_key_id: {{pivotal-offline-buildpacks-s3-access-key}}
-      secret_access_key: {{pivotal-offline-buildpacks-s3-secret-key}}
+      access_key_id: ((svc-buildpacks-aws-bp-ci-access-key))
+      secret_access_key: ((svc-buildpacks-aws-bp-ci-secret-key))
+      aws_role_arn: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
       versioned_file: buildpacks.json
 <% buildpacks.each do |language| %>
   - name: <%= language %>_buildpack
