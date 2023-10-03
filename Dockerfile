@@ -93,8 +93,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
 
 # download the bosh2 CLI
-RUN curl -L https://github.com/cloudfoundry/bosh-cli/releases/download/v7.1.3/bosh-cli-7.1.3-linux-amd64 -o /usr/local/bin/bosh2 \
-  && [ 901f5fedf406c063be521660ae5f7ccd34e034d3f734e0522138bc5bf71f4e80 = $(shasum -a 256 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
+RUN curl -L https://github.com/cloudfoundry/bosh-cli/releases/download/v7.4.0/bosh-cli-7.4.0-linux-amd64 -o /usr/local/bin/bosh2 \
+  && [ 98705c704beedb08621db48ab2f4cad42704b85aba36cc99f3a9dc2738ebc226 = $(shasum -a 256 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/bosh2 \
   && ln -s /usr/local/bin/bosh2 /usr/local/bin/bosh
 
