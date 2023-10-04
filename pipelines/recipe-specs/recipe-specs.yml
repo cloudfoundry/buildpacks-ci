@@ -84,8 +84,9 @@ jobs:
               SPEC_TO_RUN: #@ spec_name
               RUBYGEM_MIRROR: https://rubygems.org
               RUN_ORACLE_PHP_TESTS: true
-              AWS_ACCESS_KEY_ID: ((oracle-client-library-s3-download-access-key))
-              AWS_SECRET_ACCESS_KEY: ((oracle-client-library-s3-download-secret-key))
+              AWS_ACCESS_KEY_ID: ((svc-buildpacks-aws-ocldr-access-key))
+              AWS_SECRET_ACCESS_KEY: ((svc-buildpacks-aws-ocldr-secret-key))
+              AWS_ASSUME_ROLE_ARN: ((svc-buildpacks-aws-ocldr-assume-role-arn))
               AWS_DEFAULT_REGION: us-east-1
               ORACLE_LIBS_AWS_BUCKET: buildpacks-oracle-client-libs
               ORACLE_LIBS_FILENAME: oracle_client_libs.tgz
