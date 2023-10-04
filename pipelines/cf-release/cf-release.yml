@@ -165,6 +165,7 @@ jobs:
   - task: create-buildpack-dev-release
     file: buildpacks-ci/tasks/cf-release/create-buildpack-dev-release/task.yml
     params:
+      #!# TODO pass in the role ARN when this AWS account access is moved to cloudgate-based service user
       AWS_ACCESS_KEY_ID: ((pivotal-buildpacks-s3-access-key))
       AWS_SECRET_ACCESS_KEY: ((pivotal-buildpacks-s3-secret-key))
   - put: #@ language.name + "-buildpack-release"
