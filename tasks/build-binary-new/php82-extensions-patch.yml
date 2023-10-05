@@ -11,6 +11,6 @@ extensions:
     md5: bbbbb26f1791d1f27ffc05289abee2f3
     klass: OraclePeclRecipe
   - name: ioncube
-    version: 13.0.1
-    md5: 97e5be83bb3d9608b6e3c2207dbea0b5
+    version: 13.0.2
+    md5: 0526cd3702ef25de119e4724d603d773
     klass: IonCubeRecipe
