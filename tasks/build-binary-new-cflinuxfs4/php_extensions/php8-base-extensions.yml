@@ -21,8 +21,8 @@ native_modules:
   md5: 02a54449e5ae1c7a7414fb09c2f94aaa
   klass: LibRdKafkaRecipe
 - name: libsodium
-  version: 1.0.18
-  md5: 3ca9ebc13b6b4735acae0a6a4c4f9a95
+  version: 1.0.19
+  md5: 0d8e2233fc41be6d4c7ee36d5dfe9416
   klass: LibSodiumRecipe
 extensions:
 - name: apcu
@@ -70,24 +70,24 @@ extensions:
   md5: nil
   klass: PdoOdbcRecipe
 - name: pdo_sqlsrv
-  version: 5.11.0
-  md5: b982cecb57852e83d4662c78aed7b0b5
+  version: 5.11.1
+  md5: 5bbc5b7918d50dae918410ded7cb2b4d
   klass: PeclRecipe
 - name: rdkafka
   version: 6.0.3
   md5: fd10faec0c599e34837a9482d3c6c801
   klass: PeclRecipe
 - name: redis
-  version: 5.3.7
-  md5: 1ed6793902214cc02467666ba69dd2be
+  version: 6.0.1
+  md5: 77380f030761b81499fbec8bdaf0cdf9
   klass: RedisPeclRecipe
 - name: ssh2
   version: '1.4'
   md5: d4ff155a741fcc33c4439a6e20323afd
   klass: PeclRecipe
 - name: sqlsrv
-  version: 5.11.0
-  md5: 9f7bfb088cc2ec2b2ff37e9edef63920
+  version: 5.11.1
+  md5: b1423068e9084200fb58d44505bfb4ac
   klass: PeclRecipe
 - name: stomp
   version: 2.0.3
@@ -134,8 +134,8 @@ extensions:
   md5: nil
   klass: FakePeclRecipe
 - name: amqp
-  version: 2.0.0
-  md5: ed2b08564cf50be44029c9e647448e54
+  version: 2.1.0
+  md5: 399a0ddef685157c7d4e3003f1ac531c
   klass: AmqpPeclRecipe
 - name: maxminddb
   version: 1.11.0
@@ -146,8 +146,8 @@ extensions:
   md5: '07695da8376002babbce528205decf07'
   klass: PeclRecipe
 - name: phalcon
-  version: 5.3.0
-  md5: ddb4445ae329c4143a815b3cc92c302f
+  version: 5.3.1
+  md5: 81dee3b82cbd3c99d0f9bb6e91407902
   klass: PeclRecipe
 - name: phpiredis
   version: 1.0.1
