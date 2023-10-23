@@ -1011,8 +1011,9 @@ jobs: ##########################################################################
         - task: create-bosh-release
           file: buildpacks-ci/tasks/create-bosh-release/task.yml
           params:
-            ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
-            SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
+            ACCESS_KEY_ID: ((svc-buildpacks-aws-team-access-key))
+            SECRET_ACCESS_KEY: ((svc-buildpacks-aws-team-secret-key))
+            AWS_ASSUME_ROLE_ARN: ((svc-buildpacks-aws-team-assume-role-arn))
             LANGUAGE: "hwc"
             RELEASE_NAME: hwc-buildpack
             RELEASE_DIR: release

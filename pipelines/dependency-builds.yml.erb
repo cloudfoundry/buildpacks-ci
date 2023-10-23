@@ -211,8 +211,9 @@ private_key = '((cf-buildpacks-eng-github-ssh-key.private_key))'
   type: s3
   source:
     bucket: {{buildpacks-binaries-s3-bucket}}
-    access_key_id: {{pivotal-buildpacks-s3-access-key}}
-    secret_access_key: {{pivotal-buildpacks-s3-secret-key}}
+    access_key_id: ((svc-buildpacks-aws-team-access-key))
+    secret_access_key: ((svc-buildpacks-aws-team-secret-key))
+    aws_role_arn: ((svc-buildpacks-aws-team-assume-role-arn))
     # pip, go and libgdiplus have some versions of the form 'v1.2'; everyone else uses 'v1.2.3'
     regexp: dependencies/<%=dep_name%>/<%=dep_name == 'nginx-static' ? 'nginx' : dep_name %>.*?<%= (dep_name == 'pip' || dep_name == 'go' || dep_name == 'libgdiplus') ? '(\d+\.\d+(?:\.\d+)?)' : '(\d+\.\d+\.\d+)' %>(.*)
 <% end %>

@@ -40,6 +40,8 @@ jobs:
         file: buildpacks-ci/tasks/build-and-publish/task.yml
         attempts: 2
         params:
+          #!# Intentionally not migrated to cloudgate service-user based access because this
+          #!# buildpacks-site is most probably not used anymore and a candidate for deletion
           AWS_ACCESS_KEY_ID: {{pivotal-buildpacks-s3-access-key}}
           AWS_SECRET_ACCESS_KEY: {{pivotal-buildpacks-s3-secret-key}}
           AWS_BUCKET: pivotal-buildpacks
