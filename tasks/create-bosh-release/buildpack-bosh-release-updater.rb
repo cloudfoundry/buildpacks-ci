@@ -5,10 +5,11 @@ require_relative '../../lib/git-client'
 
 
 class BuildpackBOSHReleaseUpdater
-  def initialize(version, access_key_id, secret_access_key, language, release_name, release_tarball_dir)
+  def initialize(version, access_key_id, secret_access_key, assume_role_arn, language, release_name, release_tarball_dir)
     @version = version
     @access_key_id = access_key_id
     @secret_access_key = secret_access_key
+    @assume_role_arn = assume_role_arn
     @language = language
     @release_name = release_name
     @release_tarball_dir = release_tarball_dir
@@ -25,6 +26,16 @@ class BuildpackBOSHReleaseUpdater
   def write_private_yml
     puts "creating private.yml"
 
+    if @assume_role_arn && !@assume_role_arn.empty?
+    private_yml = <<~YAML
+                     ---
+                     blobstore:
+                       options:
+                         access_key_id: #{@access_key_id}
+                         secret_access_key: #{@secret_access_key}
+                         assume_role_arn: #{@assume_role_arn}
+                     YAML
+    else
     private_yml = <<~YAML
                      ---
                      blobstore:
@@ -32,6 +43,7 @@ class BuildpackBOSHReleaseUpdater
                          access_key_id: #{@access_key_id}
                          secret_access_key: #{@secret_access_key}
                      YAML
+    end
 
     File.write('config/private.yml', private_yml)
   end

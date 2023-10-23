@@ -30,6 +30,12 @@ blobstore:
     access_key_id: ${AWS_ACCESS_KEY_ID}
     secret_access_key: ${AWS_SECRET_ACCESS_KEY}
 EOF
+
+if [ -n "${AWS_ASSUME_ROLE_ARN:-}" ]; then
+  cat >>release/config/private.yml <<-EOF
+    assume_role_arn: ${AWS_ASSUME_ROLE_ARN}
+EOF
+fi
 }
 
 

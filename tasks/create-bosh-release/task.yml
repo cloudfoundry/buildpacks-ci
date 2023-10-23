@@ -27,5 +27,6 @@ params:
   RELEASE_DIR:
   ACCESS_KEY_ID:
   SECRET_ACCESS_KEY:
+  AWS_ASSUME_ROLE_ARN:
 run:
   path: buildpacks-ci/tasks/create-bosh-release/run.rb
