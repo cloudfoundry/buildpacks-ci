@@ -13,3 +13,4 @@ run:
   path: buildpacks-ci/tasks/get-buildpack-github-release-notes/run.sh
 params:
   BUILDPACK_REPO:
+  GITHUB_ACCESS_TOKEN:

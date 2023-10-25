@@ -14,12 +14,29 @@ if [ -z "${version}" ]; then
   exit 1
 fi
 
-release_body=$(
-  curl "https://api.github.com/repos/${BUILDPACK_REPO}/releases/tags/v${version}" \
-    --silent \
-    --location \
-  | jq -r '.body'
-)
+pushd buildpack
+
+while IFS= read -r line
+do
+   offline_release=$(
+     curl "https://api.github.com/repos/${BUILDPACK_REPO}/releases/tags/v${line}" \
+     --header "Authorization: Bearer GITHUB_ACCESS_TOKEN" \
+     | jq -r .
+   )
+
+  if [[ "${offline_release}" == "null" ]]; then
+    release_body+=$(
+      curl "https://api.github.com/repos/${BUILDPACK_REPO}/releases/tags/v${line}" \
+        --silent \
+        --location \
+      | jq -r '.body'
+    )
+  else
+     break
+  fi
+done < <(git tag -l --sort=-version:refname "v*")
+
+popd
 
 if [[ "${release_body}" == "null" ]]; then
   echo "task error: Error retrieving release notes from github.com/${BUILDPACK_REPO}" >&2
