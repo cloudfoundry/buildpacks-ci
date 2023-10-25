@@ -21,6 +21,14 @@ resource_types:
   source:
     repository: cloudfoundry/bosh-deployment-resource
 
+#!# Overriding the default resource-type because default (older) version
+#!# of this resource do not have the ability to assume an AWS role.
+- name: semver-latest
+  type: docker-image
+  source:
+    repository: concourse/semver-resource
+    tag: latest
+
 resources:
 #@ for buildpack in buildpacks:
 - name: #@ buildpack + "-buildpack-release"
@@ -194,13 +202,13 @@ resources:
     access_token: ((buildpacks-github-token))
 
 - name: version
-  type: semver
+  type: semver-latest
   source:
     bucket: pivotal-buildpacks
     key: versions/stack-cflinuxfs4
     access_key_id: ((svc-buildpacks-aws-team-access-key))
     secret_access_key: ((svc-buildpacks-aws-team-secret-key))
-    aws_role_arn: ((svc-buildpacks-aws-team-assume-role-arn))
+    assume_role_arn: ((svc-buildpacks-aws-team-assume-role-arn))
 
 - name: failure-alert
   type: slack-notification
