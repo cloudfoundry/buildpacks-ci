@@ -1,8 +1,13 @@
 FROM cloudfoundry/cflinuxfs3
 
-RUN apt update
+# Note: If this list starts to get long, we should consider using an external file to store the list of packages to remove.
 
-# Remove ESM packages required for dependenciees
-
-## PHP
-RUN apt remove libonig4 libwebp6 -y
+RUN apt update && apt remove -y \
+    libonig4 \
+    libwebp6 \
+    libruby2.5 \
+    ruby \
+    ruby2.5 \
+    libldap2-dev \
+    libssl-dev \
+    libcurl4-openssl-dev \
