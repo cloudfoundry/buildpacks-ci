@@ -6,6 +6,7 @@ image_resource:
     repository: cfbuildpacks/ci
 inputs:
   - name: buildpacks-ci
+  - name: buildpack
   - name: version
 outputs:
   - name: release-body
@@ -13,3 +14,5 @@ run:
   path: buildpacks-ci/tasks/get-buildpack-github-release-notes/run.sh
 params:
   BUILDPACK_REPO:
+  OFFLINE_RELEASE:
+  GITHUB_ACCESS_TOKEN:
