@@ -54,6 +54,9 @@ builds = {}
 version = ''
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
+  # See github.com/cloudfoundry/buildpacks-ci/pull/300 - we don't want to process the *cflinuxfs3.json files (they are replaced by *cflinuxfs3-dev.json files)
+  next if source_name == 'php' && stack_dependency_build.include?('cflinuxfs3.json')
+
   if !is_null(deprecation_date) && !is_null(deprecation_link) && version_line != 'latest'
     dependency_deprecation_date = {
       'version_line' => version_line.downcase,
