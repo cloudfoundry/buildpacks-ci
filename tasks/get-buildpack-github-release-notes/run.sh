@@ -60,7 +60,7 @@ do
       | jq -r '.body' | sed '/^Packaged binaries:$/,$d'
     )
 
-    if [[ "${changelog}" == "null" ]]; then
+    if [[ "${missed_changelog}" == "null" ]]; then
       echo "task error: Error retrieving release notes from github.com/${BUILDPACK_REPO}" >&2
       exit 1
     fi
