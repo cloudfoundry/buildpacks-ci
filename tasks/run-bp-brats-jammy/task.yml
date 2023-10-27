@@ -1,0 +1,17 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: cfbuildpacks/test-on-jammy
+inputs:
+  - name: buildpacks-ci
+  - name: buildpack
+  - name: cf-space
+
+run:
+  path: buildpacks-ci/tasks/run-bp-brats/run.sh
+params:
+  CF_STACK:
+  GINKGO_ATTEMPTS:
+  GINKGO_NODES:
