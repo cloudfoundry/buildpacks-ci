@@ -66,6 +66,11 @@ module Depwatcher
       Array(GithubRelease).from_json(res)
     end
 
+    def matched_releases(repo : String, release_tag_regex : String) : Array(GithubRelease)
+      releases(repo)
+        .select { |t| /#{release_tag_regex}/.match(t.ref) }
+    end
+
     def find_github_release(repo : String, ref : String)
       github_release = releases(repo).find do |r|
         r.ref == ref
