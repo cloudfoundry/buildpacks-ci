@@ -7,9 +7,9 @@ Spec2.describe Depwatcher::NodeLTS do
 
   describe "#check" do
     before do
-      client.stub_get("https://nodejs.org/en/about/releases/",
+      client.stub_get("https://raw.githubusercontent.com/nodejs/Release/main/schedule.json",
         nil,
-        HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_lts_info_page.html"))
+        HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_lts_releases.json"))
       )
 
       client.stub_get("https://nodejs.org/dist/",
@@ -22,7 +22,7 @@ Spec2.describe Depwatcher::NodeLTS do
     end
 
     it "returns real releases sorted" do
-      expect(subject.check.map(&.ref)).to eq  ["18.0.0", "18.1.0", "18.2.0"]
+      expect(subject.check.map(&.ref)).to eq  ["20.0.0", "20.8.0", "20.9.0"]
     end
   end
 
