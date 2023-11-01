@@ -136,6 +136,23 @@ resources:
     uri: git@github.com:cloudfoundry/cflinuxfs4-release.git
     private_key: ((cflinuxfs4-release-deploy-key.private_key))
 
+- name: cflinuxfs4-release-golang-update-trigger
+  type: git
+  source:
+    branch: main
+    uri: git@github.com:cloudfoundry/cflinuxfs4-release.git
+    private_key: ((cflinuxfs4-release-deploy-key.private_key))
+    paths:
+      - packages/golang-1-linux/spec.lock
+
+- name: bosh-package-golang-release-trigger
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/bosh-package-golang-release.git
+    branch: main
+    paths:
+      - packages/golang-1-linux/version
+
 - name: capi-release
   type: git
   source:
@@ -216,6 +233,36 @@ resources:
     url: ((concourse-job-failure-notifications-slack-webhook))
 
 jobs:
+- name: bump-golang-package
+  serial: true
+  public: true
+  plan:
+    - in_parallel:
+        - get: cflinuxfs4-release
+        - get: bosh-package-golang-release-trigger
+          trigger: true
+    - task: bump-golang-package
+      file: bosh-package-golang-release-trigger/ci/tasks/shared/bump-golang-package.yml
+      input_mapping:
+        golang-release: bosh-package-golang-release-trigger
+        input_repo: cflinuxfs4-release
+      output_mapping:
+        output_repo: golang-bumped-cflinuxfs4-release
+      params:
+        GIT_USER_NAME: cf-buildpacks-eng
+        GIT_USER_EMAIL: cf-buildpacks-eng@pivotal.io
+        PACKAGES: [golang-1-linux]
+        PRIVATE_YML: |
+          ---
+          blobstore:
+            options:
+              access_key_id: ((cloudfoundry-s3-access-key))
+              secret_access_key: ((cloudfoundry-s3-secret-key))
+    - put: cflinuxfs4-release
+      params:
+        repository: golang-bumped-cflinuxfs4-release
+        rebase: true
+
 - name: build-rootfs
   serial: true
   serial_groups: [ cflinuxfs4 ]
@@ -230,6 +277,8 @@ jobs:
     - get: rootfs
       resource: cflinuxfs4
     - get: cflinuxfs4-build-trigger
+      trigger: true
+    - get: cflinuxfs4-release-golang-update-trigger
       trigger: true
     - get: version
       params: { pre: rc }
