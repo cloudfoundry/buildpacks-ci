@@ -37,6 +37,8 @@ response=$(
 changelog=$( echo "$response" | jq -r '.body' | sed '/^Packaged binaries:$/,$d')
 release_body_suffix=$(echo "$response" | jq -r '.body' | sed '1,/^Packaged binaries:$/d')
 
+git fetch origin 'refs/tags/*:refs/tags/*'
+
 while IFS= read -r line
 do
   if [[ $new_version == "${line/v/}" ]]; then
