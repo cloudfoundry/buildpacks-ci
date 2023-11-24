@@ -29,10 +29,11 @@ resource_types:
     source:
       repository: cfbuildpacks/cf-space-resource
 
-  - name: cf-pool
-    type: docker-image
+  - name: shepherd
+    type: registry-image
     source:
-      repository: cftoolsmiths/toolsmiths-envs-resource
+      repository: us-west2-docker.pkg.dev/shepherd-268822/shepherd2/concourse-resource
+      tag: v1
 
 resources:
   - name: nightly-trigger
@@ -54,19 +55,29 @@ resources:
       branch: master
       private_key: {{buildpacks-envs-private-key}}
 
-  - name: smith-environments-<%= tas_version %>
-    type: cf-pool
+  - name: shepherd-tas-<%= tas_version %>-environment
+    type: shepherd
     source:
-      api_token: ((toolsmiths-api-token))
-      hostname: environments.toolsmiths.cf-app.com
-      pool_name: us_<%= tas_version.gsub('.', '_') %>
+      url: https://v2.shepherd.run
+      service-account-key: ((shepherd-buildpacks-service-account-key))
+      lease:
+        namespace: buildpacks
+        pool:
+          namespace: official
+          name: airgap-tas-<%= tas_version.gsub('.', '_') %>
+      compatibility-mode: environments-app
 
-  - name: cf-toolsmiths-environment
-    type: cf-pool
+  - name: shepherd-cf-environment
+    type: shepherd
     source:
-      api_token: ((toolsmiths-api-token))
-      hostname: environments.toolsmiths.cf-app.com
-      pool_name: cf-deployment
+      url: https://v2.shepherd.run
+      service-account-key: ((shepherd-buildpacks-service-account-key))
+      lease:
+        namespace: buildpacks
+        pool:
+          namespace: official
+          name: cfd
+      compatibility-mode: environments-app
 
   - name: cf-deployment
     type: git
@@ -96,19 +107,21 @@ jobs:
         - get: nightly-trigger
           trigger: true
       - do:
-        - put: smith-environments-<%= tas_version %>
+        - put: shepherd-tas-<%= tas_version %>-environment
           params:
-            action: claim
+            action: create
+            duration: 6h
+            resource: shepherd-tas-<%= tas_version %>-environment
         - task: create-cf-space
           attempts: 5
           file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
           input_mapping:
-            environment: smith-environments-<%= tas_version %>
+            environment: shepherd-tas-<%= tas_version %>-environment
           params:
             ORG: pivotal
 
         - task: run-brats-cflinuxfs4
-          file: buildpacks-ci/tasks/run-bp-brats/task.yml
+          file: buildpacks-ci/tasks/<%= language.to_s == 'php' ? 'run-bp-brats-jammy' : 'run-bp-brats' %>/task.yml
           attempts: <%= if language == "ruby" then 3 else 1 end %>
           params:
             CF_STACK: cflinuxfs4
@@ -116,18 +129,21 @@ jobs:
             GINKGO_NODES: 6
         ensure:
           in_parallel:
-          - put: smith-environments-<%= tas_version %>
+          - put: shepherd-tas-<%= tas_version %>-environment
             params:
-              action: unclaim
-              env_file: smith-environments-<%= tas_version %>/metadata
+              action: release
+              resource: shepherd-tas-<%= tas_version %>-environment
   - name: brats-<%= language %>-edge
     serial: true
     public: true
     plan:
       - do:
-        - put: cf-toolsmiths-environment
+        - put: shepherd-cf-environment
           params:
-            action: claim
+            action: create
+            duration: 6h
+            resource: shepherd-cf-environment
+          timeout: 6h
         - in_parallel:
           - get: buildpacks-ci
           - get: env-repo
@@ -141,7 +157,7 @@ jobs:
           file: buildpacks-ci/tasks/cf/redeploy/task.yml
           input_mapping:
             ci: buildpacks-ci
-            lock: cf-toolsmiths-environment
+            lock: shepherd-cf-environment
           params:
             DEPLOY_WINDOWS_CELL: true
 <% end %>
@@ -156,9 +172,9 @@ jobs:
                 ORG: pivotal
               input_mapping:
                 ci: buildpacks-ci
-                lock: cf-toolsmiths-environment
+                lock: shepherd-cf-environment
             - task: run-brats-<%= stack %>
-              file: buildpacks-ci/tasks/run-bp-brats/task.yml
+              file: buildpacks-ci/tasks/<%= language.to_s == 'php' ? 'run-bp-brats-jammy' : 'run-bp-brats' %>/task.yml
               input_mapping: {cf-space: space}
               params:
                 CF_STACK: <%= stack %>
@@ -166,8 +182,8 @@ jobs:
                 GINKGO_NODES: 6
 <% end %>
         ensure:
-          put: cf-toolsmiths-environment
+          put: shepherd-cf-environment
           params:
-            action: unclaim
-            env_file: cf-toolsmiths-environment/metadata
+            action: release
+            resource: shepherd-cf-environment
 <% end %>

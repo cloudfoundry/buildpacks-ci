@@ -87,10 +87,11 @@ resource_types:
     source:
       repository: cfbuildpacks/cron-resource
 
-  - name: cf-pool
-    type: docker-image
+  - name: shepherd
+    type: registry-image
     source:
-      repository: cftoolsmiths/toolsmiths-envs-resource
+      repository: us-west2-docker.pkg.dev/shepherd-268822/shepherd2/concourse-resource
+      tag: v1
 
   - name: pool
     type: registry-image
@@ -286,20 +287,30 @@ resources: #####################################################################
 
   ## Resource Pools ##
 
-  - name: cf-toolsmiths-environment
-    type: cf-pool
+  - name: shepherd-cf-environment
+    type: shepherd
     source:
-      api_token: ((toolsmiths-api-token))
-      hostname: environments.toolsmiths.cf-app.com
-      pool_name: cf-deployment
+      url: https://v2.shepherd.run
+      service-account-key: ((shepherd-buildpacks-service-account-key))
+      lease:
+        namespace: buildpacks
+        pool:
+          namespace: official
+          name: cfd
+      compatibility-mode: environments-app
 
 <% unless buildpacks[language]['non_lts'] %>
-  - name: smith-environments-<%= pas_version %>
-    type: cf-pool
+  - name: shepherd-pas-<%= pas_version %>-environment
+    type: shepherd
     source:
-      api_token: ((toolsmiths-api-token))
-      hostname: environments.toolsmiths.cf-app.com
-      pool_name: us_<%= pas_version.gsub('.', '_') + "_lts2" %>
+      url: https://v2.shepherd.run
+      service-account-key: ((shepherd-buildpacks-service-account-key))
+      lease:
+        namespace: buildpacks
+        pool:
+          namespace: official
+          name: tas-<%= pas_version.gsub('.', '_') %>
+      compatibility-mode: environments-app
 <% end %>
 
   ## Alerts ##
@@ -619,9 +630,14 @@ jobs: ##########################################################################
     plan:
       - in_parallel:
         - put: environment
-          resource: cf-toolsmiths-environment
+          resource: shepherd-cf-environment
           params:
-            action: claim
+            action: create
+            duration: 6h
+            resource: shepherd-cf-environment
+            description: |
+              Running <%= language %>-buildpack specs-edge-integration-develop-<%= stack %> job.
+          timeout: 6h
         - get: buildpacks-ci
         - get: env-repo
         - get: buildpack
@@ -672,10 +688,10 @@ jobs: ##########################################################################
             <% end %>
     on_success:
       put: environment
-      resource: cf-toolsmiths-environment
+      resource: shepherd-cf-environment
       params:
-        action: unclaim
-        env_file: environment/metadata
+        action: release
+        resource: environment
 <% end %>
 
 <% unless buildpacks[language]['skip_brats'] %>
@@ -685,9 +701,14 @@ jobs: ##########################################################################
     plan:
       - in_parallel:
         - put: environment
-          resource: cf-toolsmiths-environment
+          resource: shepherd-cf-environment
           params:
-            action: claim
+            action: create
+            duration: 6h
+            resource: shepherd-cf-environment
+            description: |
+              Running <%= language %>-buildpack specs-edge-brats-develop job.
+          timeout: 6h
         - get: buildpacks-ci
         - get: env-repo
         - get: buildpack
@@ -755,10 +776,10 @@ jobs: ##########################################################################
 <% end %>
     on_success:
       put: environment
-      resource: cf-toolsmiths-environment
+      resource: shepherd-cf-environment
       params:
-        action: unclaim
-        env_file: environment/metadata
+        action: release
+        resource: environment
 <% end %>
 
   - name: specs-edge-shared-develop
@@ -795,9 +816,14 @@ jobs: ##########################################################################
     plan:
       - in_parallel:
         - put: environment
-          resource: smith-environments-<%= pas_version %>
+          resource: shepherd-pas-<%= pas_version %>-environment
           params:
-            action: claim
+            action: create
+            duration: 6h
+            resource: shepherd-pas-<%= pas_version %>-environment
+            description: |
+              Running <%= language %>-buildpack specs-lts-integration-develop job.
+          timeout: 6h
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-develop
@@ -837,10 +863,10 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
     ensure:
       put: environment
-      resource: smith-environments-<%= pas_version %>
+      resource: shepherd-pas-<%= pas_version %>-environment
       params:
-        action: unclaim
-        env_file: environment/metadata
+        action: release
+        resource: environment
 <% unless buildpacks[language]['skip_brats'] %>
   - name: specs-lts-brats-develop
     serial: true
@@ -848,9 +874,14 @@ jobs: ##########################################################################
     plan:
       - in_parallel:
         - put: environment
-          resource: smith-environments-<%= pas_version %>
+          resource: shepherd-pas-<%= pas_version %>-environment
           params:
-            action: claim
+            action: create
+            duration: 6h
+            resource: shepherd-pas-<%= pas_version %>-environment
+            description: |
+              Running <%= language %>-buildpack specs-lts-brats-develop job.
+          timeout: 6h
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-develop
@@ -879,10 +910,10 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
     ensure:
       put: environment
-      resource: smith-environments-<%= pas_version %>
+      resource: shepherd-pas-<%= pas_version %>-environment
       params:
-        action: unclaim
-        env_file: environment/metadata
+        action: release
+        resource: environment
 <% end %>
   - name: specs-lts-gcp-develop
     serial: true
