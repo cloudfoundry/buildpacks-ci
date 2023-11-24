@@ -7,6 +7,8 @@ TASKDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly TASKDIR
 TMPDIR=$(mktemp -d)
 
+readonly LOCK_DIR="${PWD}/lock"
+
 #shellcheck source=../../../util/print.sh
 source "${PWD}/ci/util/print.sh"
 
@@ -27,7 +29,12 @@ function cfd::checkout() {
 
 	pushd "${PWD}/cf-deployment" > /dev/null
 		echo "Checking out cf-deployment version ${version}"
-		git checkout "${version}"
+		# Check if version contains the "v" prefix
+		if [[ "${version}" =~ ^v ]]; then
+      git checkout "${version}"
+    else
+      git checkout "v${version}"
+    fi
 	popd > /dev/null
 }
 
@@ -63,7 +70,7 @@ function cf::deploy() {
 	util::print::info "[task] * deploying"
 
 	local name
-	name="$(cat "${PWD}/lock/name")"
+	name="$(jq -r .name "${LOCK_DIR}/metadata")"
 
 	pushd "${PWD}/cf-deployment" > /dev/null
     local operations arguments

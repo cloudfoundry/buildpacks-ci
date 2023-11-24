@@ -30,9 +30,8 @@ LOGIN
 function cf::authenticate() {
   util::print::info "[task] * authenticating with CF environment"
 
-  local lock name target
-  lock="$(cat "${LOCK_DIR}/name")"
-  name="${lock//[[:digit:]]/}"
+  local name target
+  name="$(jq -r .name "${LOCK_DIR}/metadata")"
   target="api.${name}.${DOMAIN}"
 
   cf api "${target}" --skip-ssl-validation
