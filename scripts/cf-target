@@ -1,76 +1,103 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-env_name=
-gcp=
 
 readonly PROGDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+lease_id=
 
-function main() {
-  local token
+main() {
+  configure_shepherd
+
   parse_arguments "$@"
 
-  source ~/workspace/bp-envs/scripts/login_credhub_public
-
-  local token
-  token="$(credhub get -n /concourse/main/toolsmiths-api-token -q)"
-
-  if [[ -z "${env_name}" && -z "${gcp}" ]]; then
-    environment_available=$(curl -sS -XPOST "https://environments.toolsmiths.cf-app.com/pooled_gcp_engineering_environments/claim?api_token=$token&pool_name=cf-deployment")
-    if [[ $(echo "$environment_available" | sed 's/[][]//g' | sed 's/\"//g') == "No unclaimed environments available" ]]; then
-      echo "No unclaimed environments available, please try again later or contact #cf-toolsmiths on Slack"
-      exit 1
-    fi
-    env_name=$(echo $environment_available | jq -r .name)
-    get_metadata_file "${token}" "${env_name}"
-    echo "claimed: ${env_name}"
-
-  elif [[ -n "${env_name}" && -z "${gcp}" ]]; then
-    echo "using: ${env_name}"
-
-  elif [[ "${gcp}" -eq 1 ]]; then
-    get_metadata_file_gcp "${token}" "${env_name}"
-    env_name=$(cat /tmp/output/name)
-    rm -rf /tmp/output
-    echo "claimed: ${env_name}"
+  if [[ -z "${lease_id}" ]]; then
+    util::print::title "No lease provided. Claiming a new environment"
+    claim_environment
+  elif [[ -n "${lease_id}" ]]; then
+    util::print::title "Using lease ${lease_id}"
+    get_metadata_file "${lease_id}"
   fi
 
-  login_to_existing_env "${env_name}"
+  login_to_existing_env "${lease_id}"
 }
 
-parse_arguments() {
+function configure_shepherd() {
+  if ! command -v shepherd &> /dev/null; then
+    util::print::error "shepherd CLI is not installed. Please install it from https://gitlab.eng.vmware.com/shepherd/shepherd2/-/blob/main/USERGUIDE.md#1-install-the-shepherd2-cli"
+  fi
+
+  util::print::info "Configuring shepherd CLI"
+
+  shepherd config location https://v2.shepherd.run > /dev/null
+
+  source "${HOME}/workspace/bp-envs/scripts/login_credhub_public"
+
+  local token
+
+  token="$(credhub get -n /concourse/main/shepherd-buildpacks-service-account-key -q)"
+  shepherd login service-account "${token}" > /dev/null
+  if [[ $? -ne 0 ]]; then
+    util::print::error "Failed to login to shepherd, please check your credentials"
+  fi
+
+  shepherd config namespace buildpacks > /dev/null
+  if [[ $? -ne 0 ]]; then
+    util::print::error "Failed to set namespace to buildpacks, please check your credentials"
+  fi
+}
+
+function parse_arguments() {
   local OPTIND
-  while getopts "e:g" opt; do
+  while getopts "l:" opt; do
     case "${opt}" in
-    e)
-      env_name="${OPTARG}"
-      ;;
-    g)
-      gcp=1
+    l)
+      lease_id="${OPTARG}"
       ;;
     *)
-      echo "Usage: $0 [-e <name of environment to log into> || -g <use if running off of the vpn>]"
+      util::print::error "Usage: $0 [-l <lease id from Shepherd>]"
       exit 1
       ;;
     esac
   done
 }
 
-function get_metadata_file() {
-  token=$1
-  env_name=$2
+function claim_environment() {
 
-  echo "getting metadata file for ${env_name}...."
-  curl -s -XGET \
-    "https://environments.toolsmiths.cf-app.com/pooled_gcp_engineering_environments/claim?api_token=$token&environment_name=$env_name" \
-    >"/tmp/$env_name.json"
+  local claimer output env_name lease_id
+  claimer="$(whoami)"
+
+  output=$(shepherd create lease --pool cfd --pool-namespace official --duration 4h --description "Claimed by ${claimer} from Buildpacks team" --json)
+  if [[ $? -ne 0 ]]; then
+    util::print::error "Failed to claim an environment ${output}"
+  fi
+
+  lease_id=$(echo "${output}" | jq -r .id)
+  util::print::success "Claimed: ${lease_id} for 4 hours. If you need more time, please run 'shepherd set-duration lease ${lease_id} --extend-by <duration in seconds>'"
+
+  get_metadata_file "${lease_id}"
+}
+
+function get_metadata_file() {
+  local lease_id="$1"
+
+  util::print::info "Getting metadata file for lease ${lease_id}...."
+
+  output=$(shepherd get lease "${lease_id}" --json)
+  if [[ $? -ne 0 ]]; then
+    util::print::error "Failed to get metadata file for lease ${lease_id} from Shepherd: ${output}"
+  fi
+
+  echo "${output}" | jq -r .output > "/tmp/${lease_id}.json"
 }
 
 function login_to_existing_env() {
-  env_name=$1
-  echo "loggining into ${env_name}...."
+  local lease_id="$1"
+  local env_name
 
-  eval "$(bbl print-env --metadata-file "/tmp/$env_name.json")"
+  env_name="$(jq -r .name "/tmp/${lease_id}.json")"
+  util::print::info "Logging into environment ${env_name} from lease ${lease_id}...."
+
+  eval "$(bbl print-env --metadata-file "/tmp/${lease_id}.json")"
 
   export CF_USERNAME=admin
   export CF_PASSWORD=$(credhub get -n "/bosh-${env_name}/cf/cf_admin_password" -q)
@@ -81,24 +108,42 @@ function login_to_existing_env() {
   cf create-space my-space
   cf target -s my-space
 
-  echo "logged into ${env_name}"
+  util::print::success "Logged into ${env_name}"
 }
 
-function get_metadata_file_gcp() {
-  local token name
-  token=$1
-  name=$2
+function util::print::title() {
+  local blue reset message
+  blue="\033[0;34m"
+  reset="\033[0;39m"
+  message="${1}"
 
-  fly -t buildpacks status || fly -t buildpacks login
+  echo -e "\n${blue}${message}${reset}" >&2
+}
 
-  mkdir -p /tmp/output
+function util::print::info() {
+  local message
+  message="${1}"
 
-  TOOLSMITHS_API_TOKEN="${token}" ENV_NAME="${name}" \
-    fly -t buildpacks execute -c "${PROGDIR}/get-env-gcp/task.yml" \
-    -i script="${PROGDIR}/get-env-gcp" \
-    -o metadata=/tmp/output
+  echo -e "${message}" >&2
+}
 
-  mv /tmp/output/*.json /tmp/
+function util::print::error() {
+  local message red reset
+  message="${1}"
+  red="\033[0;31m"
+  reset="\033[0;39m"
+
+  echo -e "${red}${message}${reset}" >&2
+  exit 1
+}
+
+function util::print::success() {
+  local message green reset
+  message="${1}"
+  green="\033[0;32m"
+  reset="\033[0;39m"
+
+  echo -e "${green}${message}${reset}" >&2
 }
 
 main "$@"
