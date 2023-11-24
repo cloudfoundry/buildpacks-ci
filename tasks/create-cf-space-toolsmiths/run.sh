@@ -7,11 +7,11 @@ set -x
 OUTPUT=cf-space
 
 set +x
-env_name="$(cat environment/name)"
 
-ops_manager_username="pivotalcf"
-ops_manager_password="$(jq -r .ops_manager.password environment/metadata )"
-ops_manager_url="https://pcf.$env_name.cf-app.com"
+env_name="$(jq -r .name environment/metadata)"
+ops_manager_username="$(jq -r .ops_manager.username environment/metadata)"
+ops_manager_password="$(jq -r .ops_manager.password environment/metadata)"
+ops_manager_url="$(jq -r .ops_manager.url environment/metadata)"
 
 TARGET="api.sys.$env_name.cf-app.com"
 USERNAME="admin"
