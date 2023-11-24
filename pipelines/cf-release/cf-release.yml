@@ -9,11 +9,11 @@ resource_types:
     repository: pivotalcf/pivnet-resource
     tag: latest-final
 
-- name: toolsmiths-envs
-  type: docker-image
+- name: shepherd
+  type: registry-image
   source:
-    repository: cftoolsmiths/toolsmiths-envs-resource
-
+    repository: us-west2-docker.pkg.dev/shepherd-268822/shepherd2/concourse-resource
+    tag: v1
 
 resources:
 - name: buildpacks-ci
@@ -41,11 +41,16 @@ resources:
     branch: main
 
 - name: cf-deployment-env
-  type: toolsmiths-envs
+  type: shepherd
   source:
-    api_token: ((toolsmiths-api-token))
-    hostname: environments.toolsmiths.cf-app.com
-    pool_name: cf-deployment
+    url: https://v2.shepherd.run
+    service-account-key: ((shepherd-buildpacks-service-account-key))
+    lease:
+      namespace: buildpacks
+      pool:
+        namespace: official
+        name: cfd
+    compatibility-mode: environments-app
 
 - name: java-pivnet-production
   type: pivnet
@@ -136,7 +141,10 @@ jobs:
     trigger: true
   - put: cf-deployment-env
     params:
-      action: claim
+      action: create
+      duration: 1h
+      resource: cf-deployment-env
+    timeout: 2h
 
 #@ for language in data.values.supported_languages:
 - name: #@ "create-" + language.name + "-buildpack-dev-release"
@@ -146,6 +154,8 @@ jobs:
   - in_parallel:
     - get: buildpacks-ci
     - get: cf-deployment-env
+      params:
+        resource: cf-deployment-env
       trigger: true
       passed: [claim-cf-deployment-env]
     - get: release
@@ -186,6 +196,8 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
     - get: cf-deployment-env
+      params:
+        resource: cf-deployment-env
       trigger: true
       passed:
 #@ for language in data.values.supported_languages:
@@ -302,6 +314,8 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: cf-acceptance-tests
     - get: cf-deployment-env
+      params:
+        resource: cf-deployment-env
       passed: [deploy]
       trigger: true
 #@ for language in data.values.supported_languages:
@@ -326,12 +340,14 @@ jobs:
   serial: true
   plan:
   - get: cf-deployment-env
+    params:
+      resource: cf-deployment-env
     passed: [cats]
     trigger: true
   - put: cf-deployment-env
     params:
-      action: unclaim
-      env_file: cf-deployment-env/metadata
+      action: release
+      resource: cf-deployment-env
 
 - name: ship-it
   public: true
