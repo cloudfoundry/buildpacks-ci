@@ -70,6 +70,7 @@
   }
 } %>
 <% pas_version = '2.11' %>
+<% pas_pool_name = 'tas-2_11' %>
 <% low_nodes_lts = ['ruby', 'python', 'dotnet-core', 'php'] %>
 ---
 resource_types:
@@ -309,7 +310,7 @@ resources: #####################################################################
         namespace: buildpacks
         pool:
           namespace: official
-          name: tas-<%= pas_version.gsub('.', '_') %>
+          name: <%= pas_pool_name %>
       compatibility-mode: environments-app
 <% end %>
 
