@@ -16,6 +16,7 @@
 # This is to make sure that even if a buildpack hasn't had changes/released in
 # a while, it stills works well with the latest platform out there.
 <% tas_version =  '4.0' %>
+<% tas_pool_name = 'tas_four' %>
 
 ---
 resource_types:
@@ -64,7 +65,7 @@ resources:
         namespace: buildpacks
         pool:
           namespace: official
-          name: airgap-tas-<%= tas_version.gsub('.', '_') %>
+          name: <%= tas_pool_name %>
       compatibility-mode: environments-app
 
   - name: shepherd-cf-environment
