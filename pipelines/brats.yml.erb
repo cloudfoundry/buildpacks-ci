@@ -113,6 +113,8 @@ jobs:
             action: create
             duration: 6h
             resource: shepherd-tas-<%= tas_version %>-environment
+            description: |
+              Running <%= language %>-buildpack brats-lts job.
         - task: create-cf-space
           attempts: 5
           file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
@@ -144,6 +146,8 @@ jobs:
             action: create
             duration: 6h
             resource: shepherd-cf-environment
+            description: |
+              Running <%= language %>-buildpack brats-edge job.
           timeout: 6h
         - in_parallel:
           - get: buildpacks-ci
