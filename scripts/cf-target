@@ -17,8 +17,6 @@ main() {
     util::print::title "Using lease ${lease_id}"
     get_metadata_file "${lease_id}"
   fi
-
-  login_to_existing_env "${lease_id}"
 }
 
 function configure_shepherd() {
@@ -72,9 +70,41 @@ function claim_environment() {
   fi
 
   lease_id=$(echo "${output}" | jq -r .id)
+
+  check_lease_is_ready "${lease_id}"
+
   util::print::success "Claimed: ${lease_id} for 4 hours. If you need more time, please run 'shepherd set-duration lease ${lease_id} --extend-by <duration in seconds>'"
 
   get_metadata_file "${lease_id}"
+}
+
+function check_lease_is_ready() {
+  local lease_id="$1"
+
+  util::print::info "Checking if lease ${lease_id} is ready to be used...."
+
+  max_retries=10
+
+  while [[ ${max_retries} -gt 0 ]]; do
+    output=$(shepherd get lease "${lease_id}" --json)
+    if [[ $? -ne 0 ]]; then
+      util::print::error "Failed to get lease ${lease_id} from Shepherd: ${output}"
+    fi
+
+    status=$(echo "${output}" | jq -r .status)
+    status_message=$(echo "${output}" | jq -r .status_message)
+
+    if [[ "${status}" == "LEASED" && "${status_message}" == "Ready to use" ]]; then
+      util::print::success "Lease ${lease_id} is ready to be used"
+      return
+    fi
+
+    util::print::info "Lease ${lease_id} is not ready yet. Retrying in 5 seconds...."
+    sleep 5
+    max_retries=$((max_retries - 1))
+  done
+
+  util::print::error "Lease ${lease_id} is not ready to be used. Please check the status in Shepherd or claim another lease"
 }
 
 function get_metadata_file() {
@@ -88,6 +118,8 @@ function get_metadata_file() {
   fi
 
   echo "${output}" | jq -r .output > "/tmp/${lease_id}.json"
+
+  login_to_existing_env "${lease_id}"
 }
 
 function login_to_existing_env() {
