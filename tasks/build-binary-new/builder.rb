@@ -902,6 +902,8 @@ class Builder
         patch_file = File.join(php_extensions_dir, 'php81-extensions-patch.yml')
       elsif source_input.version.start_with?('8.2.')
         patch_file = File.join(php_extensions_dir, 'php82-extensions-patch.yml')
+      elsif source_input.version.start_with?('8.3.')
+        patch_file = File.join(php_extensions_dir, 'php83-extensions-patch.yml')
       end
 
       php_extensions.patch!(patch_file) if patch_file
