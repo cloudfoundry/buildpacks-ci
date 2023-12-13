@@ -30,8 +30,8 @@ extensions:
   md5: c6ed350a587cf2b376c1efeb31f68907
   klass: PeclRecipe
 - name: igbinary
-  version: 3.2.14
-  md5: eccbabb49090caf8c3c19dc64f16ce87
+  version: 3.2.15
+  md5: de81e2f54bfbe741a7f2453bccf970e9
   klass: PeclRecipe
 - name: gnupg
   version: 1.5.1
@@ -50,8 +50,8 @@ extensions:
   md5: e3a71b27439ee08dd63272d7d290d136
   klass: PeclRecipe
 - name: mongodb
-  version: 1.17.0
-  md5: adcfeab0e1654c7387aaf70fe219920f
+  version: 1.17.1
+  md5: c6ea209008fc16408f4bf66fdd44a3ac
   klass: PeclRecipe
 - name: msgpack
   version: 2.2.0
@@ -94,8 +94,8 @@ extensions:
   md5: 30de4089ae5c17f32617cef35dbe53e5
   klass: PeclRecipe
 - name: xdebug
-  version: 3.2.2
-  md5: c44132e5f49e3b65dfef506b4c6ed2f7
+  version: 3.3.0
+  md5: 7ef76d54a09e9e5a6ac95419c953902d
   klass: PeclRecipe
 - name: yaf
   version: 3.3.5
@@ -138,8 +138,8 @@ extensions:
   md5: 909f71e8997a4a4d7bab1fe782f270b2
   klass: AmqpPeclRecipe
 - name: maxminddb
-  version: 1.11.0
-  md5: 5feec07108cf7898bd0591ee54b572cd
+  version: 1.11.1
+  md5: 1e020b49b8c320b43ebfee1f31d0017b
   klass: MaxMindRecipe
 - name: psr
   version: 1.2.0
