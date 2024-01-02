@@ -30,21 +30,22 @@ LOGIN
 function cf::authenticate() {
   util::print::info "[task] * authenticating with CF environment"
 
-  local name target
+  local name
   name="$(jq -r .name "${LOCK_DIR}/metadata")"
-  target="api.${name}.${DOMAIN}"
-
-  cf api "${target}" --skip-ssl-validation
-
-  echo "cf api \"${target}\" --skip-ssl-validation" >> "${SPACE_DIR}/login"
 
   local password
   eval "$(bbl print-env --metadata-file "lock/metadata")"
   password="$(credhub get --name "/bosh-${name}/cf/cf_admin_password" --output-json | jq -r .value)"
 
+  api_url="$(jq -r .cf.api_url "${LOCK_DIR}/metadata")"
+
+  cf api "$api_url" --skip-ssl-validation
+
+  echo "cf api \"${api_url}\" --skip-ssl-validation" >> "${SPACE_DIR}/login"
+
   cf auth admin "${password}"
 
-  echo "echo \"Logging in to ${target}\"" >> "${SPACE_DIR}/login"
+  echo "echo \"Logging in to ${api_url}\"" >> "${SPACE_DIR}/login"
   echo "cf auth admin \"${password}\"" >> "${SPACE_DIR}/login"
 }
 
