@@ -127,14 +127,15 @@ function login_to_existing_env() {
   local env_name
 
   env_name="$(jq -r .name "/tmp/${lease_id}.json")"
-  util::print::info "Logging into environment ${env_name} from lease ${lease_id}...."
+  api_url="$(jq -r .cf.api_url "/tmp/${lease_id}.json")"
+  util::print::info "Logging into environment ${env_name} (api: ${api_url}), from lease ${lease_id}...."
 
   eval "$(bbl print-env --metadata-file "/tmp/${lease_id}.json")"
 
   export CF_USERNAME=admin
   export CF_PASSWORD=$(credhub get -n "/bosh-${env_name}/cf/cf_admin_password" -q)
 
-  cf api "api.${env_name}.cf-app.com" --skip-ssl-validation
+  cf api "${api_url}" --skip-ssl-validation
   cf auth
   cf target -o system
   cf create-space my-space
