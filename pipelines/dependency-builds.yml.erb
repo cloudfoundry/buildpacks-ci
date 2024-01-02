@@ -336,6 +336,8 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
   specific_stack = cflinuxfs4_build_dependencies.include?(dep_name.downcase) ? stacks : [stacks.last]
   if dep_name.downcase == 'php'
     specific_stack = specific_stack - ['cflinuxfs3'] + ['cflinuxfs3-dev']
+  elsif dep_name.downcase == 'bundler'
+    specific_stack = ['cflinuxfs4']
   end
   %>
 - name: build-<%= dep_name.downcase %>-<%= line.downcase %>
@@ -368,8 +370,8 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
   <% build_stacks.each do |stack| %>
     - do:
       - task: build-binary-<%= stack %>
-        image: <%= stack == 'any-stack' ? stacks.last : stack %>-image
-        file: buildpacks-ci/tasks/build-binary-new<%= stack == 'cflinuxfs4' ? '-cflinuxfs4' : '' %>/build.yml
+        image: <%= stack == 'any-stack' ? (dep_name == 'bundler' ? 'cflinuxfs4' : 'cflinuxfs3') : stack %>-image
+        file: buildpacks-ci/tasks/build-binary-new<%= (stack == 'cflinuxfs4' || (stack == 'any-stack' && dep_name == 'bundler')) ? '-cflinuxfs4' : '' %>/build.yml
         output_mapping: {artifacts: <%= stack %>-artifacts, builds-artifacts: <%= stack %>-builds-metadata}
         params:
           STACK: <%= stack %>
