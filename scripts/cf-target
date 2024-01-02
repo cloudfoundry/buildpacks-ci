@@ -124,7 +124,7 @@ function get_metadata_file() {
 
 function login_to_existing_env() {
   local lease_id="$1"
-  local env_name
+  local env_name api_url
 
   env_name="$(jq -r .name "/tmp/${lease_id}.json")"
   api_url="$(jq -r .cf.api_url "/tmp/${lease_id}.json")"
