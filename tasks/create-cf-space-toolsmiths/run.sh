@@ -13,7 +13,7 @@ ops_manager_username="$(jq -r .ops_manager.username environment/metadata)"
 ops_manager_password="$(jq -r .ops_manager.password environment/metadata)"
 ops_manager_url="$(jq -r .ops_manager.url environment/metadata)"
 
-TARGET="api.sys.$env_name.cf-app.com"
+TARGET="$(jq -r .cf.api_url environment/metadata)"
 USERNAME="admin"
 PASSWORD="$(om \
   --target "$ops_manager_url" \
