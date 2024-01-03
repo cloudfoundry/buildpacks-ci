@@ -112,9 +112,11 @@ function cf::deploy() {
       arguments+=(-o "${operation}")
     done
 
+    sys_domain="$(jq -r .cf.api_url "${LOCK_DIR}/metadata" | sed 's|api\.||')"
+
     util::print::info "[task] * starting deploy command"
 		bosh -n -d cf deploy "${PWD}/cf-deployment.yml" \
-			-v system_domain="${name}.cf-app.com" \
+			-v system_domain="${sys_domain}" \
       "${arguments[@]}"
     util::print::info "[task] * deploy successful"
 	popd > /dev/null
