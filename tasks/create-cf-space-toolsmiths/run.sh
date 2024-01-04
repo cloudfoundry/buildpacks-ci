@@ -14,6 +14,15 @@ ops_manager_password="$(jq -r .ops_manager.password environment/metadata)"
 ops_manager_url="$(jq -r .ops_manager.url environment/metadata)"
 
 TARGET="$(jq -r .cf.api_url environment/metadata)"
+# .cf may not be available on non-cfd envs
+if [ -z "${TARGET}" ] || [ "${TARGET}" == "null" ]; then
+  TARGET="$(jq -r .sys_domain environment/metadata | sed 's/sys\./api\./')"
+fi
+if [ -z "${TARGET}" ] || [ "${TARGET}" == "null" ]; then
+  echo "api url could not be calculated from .cf or .sys_domain from the metadata"
+  exit 1
+fi
+
 USERNAME="admin"
 PASSWORD="$(om \
   --target "$ops_manager_url" \
