@@ -182,8 +182,8 @@ dependencies:
     buildpacks:
       nginx:
         lines:
-          - line: 1.19.X
           - line: 1.21.X
+          - line: 1.25.X
     versions_to_keep: 2
   nginx-static:
     buildpacks:
