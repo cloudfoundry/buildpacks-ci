@@ -71,7 +71,7 @@ do
   else
      break
   fi
-done < <(git tag -l --sort=-version:refname "v*")
+done < <(git tag -l --sort=-version:refname 'v[0-9]*.[0-9]*.[0-9]*')
 
 release_body="$changelog$release_body_suffix"
 popd
