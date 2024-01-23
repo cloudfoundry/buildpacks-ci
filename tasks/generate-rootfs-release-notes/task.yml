@@ -20,5 +20,5 @@ run:
     - "buildpacks-ci/tasks/generate-rootfs-release-notes/run.rb"
 params:
   STACK:
-  GITHUB_USERNAME:
-  GITHUB_PASSWORD:
+  STACK_REPO:
+  GITHUB_ACCESS_TOKEN:
