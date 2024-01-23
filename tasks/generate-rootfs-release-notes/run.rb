@@ -14,19 +14,39 @@ ubuntu_version = {
   'cflinuxfs4' => '22.04',
 }.fetch(stack) or raise "Unsupported stack: #{stack}"
 
+stack_repo = ENV['STACK_REPO']
+if stack_repo.nil? || stack_repo.empty?
+  stack_repo = "cloudfoundry/#{stack}"
+end
+puts "Genreating release notes for repo: #{stack_repo}"
+
 receipt_file_name = "receipt.#{stack}.x86_64"
-old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/#{stack}/#{previous_version}/#{receipt_file_name}"
+gh_token = ENV['GITHUB_ACCESS_TOKEN']
+if gh_token.nil? || gh_token.empty?
+  old_receipt_uri = "https://raw.githubusercontent.com/#{stack_repo}/#{previous_version}/#{receipt_file_name}"
+  old_receipt_contents = open(old_receipt_uri).read
+else
+  puts "Using GitHub token to fetch receipt..."
+  begin
+    client = Octokit::Client.new(access_token: gh_token)
+    encoded_contents = client.contents("#{stack_repo}", path: "#{receipt_file_name}", tag: "#{previous_version}")
+    old_receipt_contents = Base64.decode64(encoded_contents.content)
+  rescue Octokit::Error => e
+    puts "Error fetching receipt: #{e.message}"
+  end
+end
+
+old_receipt = Tempfile.new('old-receipt')
+File.write(old_receipt.path, old_receipt_contents)
 
 cve_yaml_file = "new-cves/new-cve-notifications/ubuntu#{ubuntu_version}.yml"
 cves_dir = 'new-cve-notifications'
 
 new_receipt_file = "rootfs/#{receipt_file_name}"
-old_receipt = Tempfile.new('old-receipt')
-File.write(old_receipt.path, open(old_receipt_uri).read)
-
-body_file = 'release-body/body'
 notes = RootfsReleaseNotesCreator.new(cve_yaml_file, old_receipt.path, new_receipt_file).release_notes
 puts notes
+
+body_file = 'release-body/body'
 File.write(body_file, notes)
 old_receipt.unlink
 
