@@ -70,8 +70,8 @@ extensions:
   md5: nil
   klass: PdoOdbcRecipe
 - name: pdo_sqlsrv
-  version: 5.11.1
-  md5: 5bbc5b7918d50dae918410ded7cb2b4d
+  version: 5.12.0
+  md5: 0c06402f30a7f6f0b758ad55277ad950
   klass: PeclRecipe
 - name: rdkafka
   version: 6.0.3
@@ -82,12 +82,12 @@ extensions:
   md5: 29f1f0ba367aef7e0313cd75aa1ea83f
   klass: RedisPeclRecipe
 - name: ssh2
-  version: '1.4'
-  md5: d4ff155a741fcc33c4439a6e20323afd
+  version: 1.4.1
+  md5: 9d655fb9e83aec24fcd6f943ddf94000
   klass: PeclRecipe
 - name: sqlsrv
-  version: 5.11.1
-  md5: b1423068e9084200fb58d44505bfb4ac
+  version: 5.12.0
+  md5: e62485cbbcb564f4a55ab8eae40df6a6
   klass: PeclRecipe
 - name: stomp
   version: 2.0.3
@@ -134,8 +134,8 @@ extensions:
   md5: nil
   klass: FakePeclRecipe
 - name: amqp
-  version: 2.1.1
-  md5: 909f71e8997a4a4d7bab1fe782f270b2
+  version: 2.1.2
+  md5: addd05de32a74af7d3d332b5f58b8414
   klass: AmqpPeclRecipe
 - name: maxminddb
   version: 1.11.1
@@ -146,8 +146,8 @@ extensions:
   md5: '07695da8376002babbce528205decf07'
   klass: PeclRecipe
 - name: phalcon
-  version: 5.5.0
-  md5: b16b6c679f5195203daa83d54722a4d9
+  version: 5.6.1
+  md5: 9e4a07943ab33d05ff20f809539f7d88
   klass: PeclRecipe
 - name: phpiredis
   version: 1.0.1
@@ -158,8 +158,8 @@ extensions:
   md5: 68b68cd9410e62b8481445e0d89220c0
   klass: TidewaysXhprofRecipe
 - name: solr
-  version: 2.6.0
-  md5: ac5e1e1fbf28e0c543a52c533c967634
+  version: 2.7.0
+  md5: 3e9df94b06f8a026e33b3a8a3f02921b
   klass: PeclRecipe
 - name: oci8
   version: 3.0.1
