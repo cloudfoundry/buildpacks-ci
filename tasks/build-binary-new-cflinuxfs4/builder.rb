@@ -6,6 +6,7 @@ require 'digest'
 require 'net/http'
 require 'tmpdir'
 require 'English'
+require 'open3'
 require_relative 'php_extensions/extensions_helper'
 require_relative 'binary_builder_wrapper'
 
@@ -259,7 +260,20 @@ module GPGHelper
           end
           Runner.run('wget', file_url)
           Runner.run('wget', signature_url)
-          Runner.run('gpg', '--verify', File.basename(signature_url), File.basename(file_url))
+
+          # Capture output and status of the gpg command
+          _, stdout_err, status = Open3.capture3('gpg', '--verify', File.basename(signature_url), File.basename(file_url))
+
+          # Check if the command failed
+          unless status.success?
+            # If the error is because there are no public keys, just ignore it, sometimes Nginx takes some time to update the keys after a new release
+            if stdout_err.include?("gpg: Can't check signature: No public key")
+              puts "Warning: No public key found, signature verification skipped."
+            else
+              # Otherwise, raise an error
+              raise StandardError, "Error verifying GPG signature: \n#{stdout_err}"
+            end
+          end
         end
       end
     end
