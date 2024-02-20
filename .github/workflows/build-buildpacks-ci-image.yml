@@ -3,7 +3,7 @@ name: Build buildpacks-ci docker image
 on:
   workflow_dispatch: { }
   schedule:
-    - cron: "0 1 * * 1"
+    - cron: "0 1 * * 4"
   push:
     branches: [ master ]
     paths: [ Dockerfile, config/**, build/** , Gemfile, Gemfile.lock ]
