@@ -54,18 +54,13 @@ RUN apt-get -qqy update \
   && apt-get -qqy clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ARG RUBY_INSTALL_VERSION=0.8.1
-RUN wget -O ruby-install-$RUBY_INSTALL_VERSION.tar.gz https://github.com/postmodern/ruby-install/archive/v$RUBY_INSTALL_VERSION.tar.gz \
-  && tar -xzvf ruby-install-$RUBY_INSTALL_VERSION.tar.gz \
-  && cd ruby-install-$RUBY_INSTALL_VERSION/ \
-  && make install \
-  && rm -rf ruby-install-$RUBY_INSTALL_VERSION*
-
-RUN apt-get -qqy update \
-  && ruby-install ruby 2.7.0 \
-  && ln -s /opt/rubies/$(ls /opt/rubies | head -1) /opt/rubies/latest \
-  && apt-get -qqy clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt update \
+    && apt install -y software-properties-common \
+    &&  apt-add-repository -y ppa:brightbox/ruby-ng \
+    &&  apt update \
+    &&  apt install -y ruby2.7 ruby2.7-dev \
+    &&  apt-get -qqy clean \
+    &&  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV GEM_HOME $HOME/.gem
 ENV GEM_PATH $HOME/.gem
@@ -134,8 +129,8 @@ ENV BASH_ENV /etc/profile.d/filter.sh
 # install buildpacks-ci Gemfile
 COPY Gemfile /tmp/Gemfile
 COPY Gemfile.lock /tmp/Gemfile.lock
-RUN /bin/bash -l -c "gem update --no-document --system \
-  && gem install bundler -v 2.0.1 \
+RUN /bin/bash -l -c "gem update --system 3.4.22 --no-document \
+  && gem install bundler -v 2.4.22 \
   && cd /tmp && bundle install && bundle binstub bundler --force"
 
 #install fly-cli
