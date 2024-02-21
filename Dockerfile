@@ -152,6 +152,10 @@ RUN cd /usr/local \
   && tar xf go.tar.gz \
   && rm go.tar.gz
 
+RUN export GO_VERSION=$(wget -qO- https://golang.org/dl/?mode=json | grep -oP '"version": "\K([^"]+)' | head -n 1) && \
+    wget -q https://golang.org/dl/go$GO_VERSION.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
+
 ENV GOROOT=/usr/local/go
 ENV GOPATH=/go
 ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
