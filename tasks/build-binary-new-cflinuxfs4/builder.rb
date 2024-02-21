@@ -131,7 +131,14 @@ end
 module DependencyBuildHelper
   class << self
     def build_nginx_helper(source_input, custom_options, static = false)
-      public_gpg_key_urls = %w[http://nginx.org/keys/nginx_signing.key http://nginx.org/keys/mdounin.key http://nginx.org/keys/maxim.key http://nginx.org/keys/sb.key http://nginx.org/keys/thresh.key]
+      public_gpg_key_urls = [
+        "http://nginx.org/keys/mdounin.key", # Maxim Dounin’s PGP public key
+        "http://nginx.org/keys/maxim.key", # Maxim Konovalov’s PGP public key
+        "https://nginx.org/keys/pluknet.key", # Sergey Kandaurov’s PGP public key
+        "http://nginx.org/keys/sb.key", # Sergey Budnevitch’s PGP public key
+        "http://nginx.org/keys/thresh.key", # Konstantin Pavlov’s PGP public key
+        "https://nginx.org/keys/nginx_signing.key", # nginx public key
+      ]
       GPGHelper.verify_gpg_signature(source_input.url, "#{source_input.url}.asc", public_gpg_key_urls)
 
       artifacts = "#{Dir.pwd}/artifacts"
@@ -260,20 +267,7 @@ module GPGHelper
           end
           Runner.run('wget', file_url)
           Runner.run('wget', signature_url)
-
-          # Capture output and status of the gpg command
-          _, stdout_err, status = Open3.capture3('gpg', '--verify', File.basename(signature_url), File.basename(file_url))
-
-          # Check if the command failed
-          unless status.success?
-            # If the error is because there are no public keys, just ignore it, sometimes Nginx takes some time to update the keys after a new release
-            if stdout_err.include?("gpg: Can't check signature: No public key")
-              puts "Warning: No public key found, signature verification skipped."
-            else
-              # Otherwise, raise an error
-              raise StandardError, "Error verifying GPG signature: \n#{stdout_err}"
-            end
-          end
+          Runner.run('gpg', '--verify', File.basename(signature_url), File.basename(file_url))
         end
       end
     end
