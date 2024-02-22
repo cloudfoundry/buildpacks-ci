@@ -131,7 +131,6 @@ dependencies:
     buildpacks:
       ruby:
         lines:
-          - line: 9.3.X
           - line: 9.4.X
     source_type: jruby
     versions_to_keep: 2
