@@ -29,7 +29,7 @@ else
   puts "Using GitHub token to fetch receipt..."
   begin
     client = Octokit::Client.new(access_token: gh_token)
-    encoded_contents = client.contents("#{stack_repo}", path: "#{receipt_file_name}", tag: "#{previous_version}")
+    encoded_contents = client.contents("#{stack_repo}", path: "#{receipt_file_name}", query: { ref: "#{previous_version}" })
     old_receipt_contents = Base64.decode64(encoded_contents.content)
   rescue Octokit::Error => e
     puts "Error fetching receipt: #{e.message}"
