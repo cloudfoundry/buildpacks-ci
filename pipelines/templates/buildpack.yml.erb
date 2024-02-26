@@ -69,8 +69,8 @@
     'non_lts_pivnet' => true,
   }
 } %>
-<% pas_version = '2.11' %>
-<% pas_pool_name = 'tas-2_11' %>
+<% tas_version =  '4.0' %>
+<% tas_pool_name = 'tas_four' %>
 <% low_nodes_lts = ['ruby', 'python', 'dotnet-core', 'php'] %>
 ---
 resource_types:
@@ -301,7 +301,7 @@ resources: #####################################################################
       compatibility-mode: environments-app
 
 <% unless buildpacks[language]['non_lts'] %>
-  - name: shepherd-pas-<%= pas_version %>-environment
+  - name: shepherd-tas-<%= tas_version %>-environment
     type: shepherd
     source:
       url: https://v2.shepherd.run
@@ -310,7 +310,7 @@ resources: #####################################################################
         namespace: buildpacks
         pool:
           namespace: official
-          name: <%= pas_pool_name %>
+          name: <%= tas_pool_name %>
       compatibility-mode: environments-app
 <% end %>
 
@@ -817,11 +817,11 @@ jobs: ##########################################################################
     plan:
       - in_parallel:
         - put: environment
-          resource: shepherd-pas-<%= pas_version %>-environment
+          resource: shepherd-tas-<%= tas_version %>-environment
           params:
             action: create
             duration: 6h
-            resource: shepherd-pas-<%= pas_version %>-environment
+            resource: shepherd-tas-<%= tas_version %>-environment
             description: |
               Running <%= language %>-buildpack specs-lts-integration-develop job.
           timeout: 6h
@@ -864,7 +864,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
     ensure:
       put: environment
-      resource: shepherd-pas-<%= pas_version %>-environment
+      resource: shepherd-tas-<%= tas_version %>-environment
       params:
         action: release
         resource: environment
@@ -875,11 +875,11 @@ jobs: ##########################################################################
     plan:
       - in_parallel:
         - put: environment
-          resource: shepherd-pas-<%= pas_version %>-environment
+          resource: shepherd-tas-<%= tas_version %>-environment
           params:
             action: create
             duration: 6h
-            resource: shepherd-pas-<%= pas_version %>-environment
+            resource: shepherd-tas-<%= tas_version %>-environment
             description: |
               Running <%= language %>-buildpack specs-lts-brats-develop job.
           timeout: 6h
@@ -911,7 +911,7 @@ jobs: ##########################################################################
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
     ensure:
       put: environment
-      resource: shepherd-pas-<%= pas_version %>-environment
+      resource: shepherd-tas-<%= tas_version %>-environment
       params:
         action: release
         resource: environment
