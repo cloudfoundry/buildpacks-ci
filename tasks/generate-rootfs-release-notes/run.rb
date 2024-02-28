@@ -14,7 +14,7 @@ ubuntu_version = {
 }.fetch(stack) { raise "Unsupported stack: #{stack}" }
 
 stack_repo = ENV['STACK_REPO']
-stack_repo ||= "cloudfoundry/#{stack}"
+stack_repo = stack_repo.nil? || stack_repo.empty? ? "cloudfoundry/#{stack}" : stack_repo
 
 puts "Generating release notes for repo: #{stack_repo}"
 
