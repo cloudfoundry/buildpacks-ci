@@ -5,31 +5,30 @@ require 'open-uri'
 require_relative '../../lib/release-notes-creator'
 require_relative '../../lib/git-client'
 
-
 previous_version = File.read('previous-rootfs-release/.git/ref').strip
 new_version = File.read('version/number').strip
 stack = ENV.fetch('STACK')
 ubuntu_version = {
   'cflinuxfs3' => '18.04',
   'cflinuxfs4' => '22.04',
-}.fetch(stack) or raise "Unsupported stack: #{stack}"
+}.fetch(stack) { raise "Unsupported stack: #{stack}" }
 
 stack_repo = ENV['STACK_REPO']
-if stack_repo.nil? || stack_repo.empty?
-  stack_repo = "cloudfoundry/#{stack}"
-end
-puts "Genreating release notes for repo: #{stack_repo}"
+stack_repo ||= "cloudfoundry/#{stack}"
+
+puts "Generating release notes for repo: #{stack_repo}"
 
 receipt_file_name = "receipt.#{stack}.x86_64"
 gh_token = ENV['GITHUB_ACCESS_TOKEN']
+
 if gh_token.nil? || gh_token.empty?
   old_receipt_uri = "https://raw.githubusercontent.com/#{stack_repo}/#{previous_version}/#{receipt_file_name}"
-  old_receipt_contents = open(old_receipt_uri).read
+  old_receipt_contents = URI.open(old_receipt_uri).read
 else
   puts "Using GitHub token to fetch receipt..."
   begin
     client = Octokit::Client.new(access_token: gh_token)
-    encoded_contents = client.contents("#{stack_repo}", path: "#{receipt_file_name}", query: { ref: "#{previous_version}" })
+    encoded_contents = client.contents(stack_repo, path: receipt_file_name, ref: previous_version)
     old_receipt_contents = Base64.decode64(encoded_contents.content)
   rescue Octokit::Error => e
     puts "Error fetching receipt: #{e.message}"
@@ -53,14 +52,11 @@ old_receipt.unlink
 cves = YAML.load_file(cve_yaml_file)
 
 updated_cves = cves.map do |cve|
-  if cve['stack_release'] == 'unreleased'
-    cve['stack_release'] = new_version
-  end
+  cve['stack_release'] = new_version if cve['stack_release'] == 'unreleased'
   cve
 end
 
 File.write(cve_yaml_file, updated_cves.to_yaml)
-
 
 robots_cve_dir = File.join('new-cves', cves_dir)
 Dir.chdir(robots_cve_dir) do

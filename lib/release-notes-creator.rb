@@ -1,10 +1,8 @@
 require 'yaml'
 require 'diffy'
-
 require_relative 'usn-release-notes'
 
 class RootfsReleaseNotesCreator
-
   def initialize(cves_yaml_file, old_receipt_file, new_receipt_file)
     @cves_yaml_file = cves_yaml_file
     @old_receipt_file = old_receipt_file
@@ -17,94 +15,69 @@ class RootfsReleaseNotesCreator
 
   def release_notes
     text = ""
-    text += usn_release_notes_section + "\n" unless unreleased_usns.count == 0
+    text += usn_release_notes_section + "\n" unless unreleased_usns.empty?
     text += receipt_diff_section
     text
   end
 
   def usn_release_notes_section
     text = ""
-    text = "Notably, this release addresses:\n\n" unless unreleased_usns.count == 0
-
+    text += "Notably, this release addresses:\n\n" unless unreleased_usns.empty?
     unreleased_usns.each do |usn|
-      text += UsnReleaseNotes.new(usn).text + "\n\n"
+      begin
+        text += detailed_cve_information(usn) + "\n\n"
+      rescue Exception => e
+        puts "Error fetching USN detailed information #{usn}: #{e.message}"
+        text += simple_cve_information(usn) + "\n\n"
+      end
     end
     text
   end
 
+  def detailed_cve_information(usn)
+    UsnReleaseNotes.new(usn).text
+  end
+
+  def simple_cve_information(usn)
+    "* [#{usn}](https://ubuntu.com/security/notices/#{usn}/)"
+  end
+
   def unreleased_usns
-    cves.select do |cve|
-      cve['stack_release'] == 'unreleased'
-    end.map do |cve|
-      cve['title'].split(':').first
-    end
+    cves.select { |cve| cve['stack_release'] == 'unreleased' }
+        .map { |cve| cve['title'].split(':').first }
   end
 
   def receipt_diff_section
     diffy = Diffy::Diff.new(@old_receipt_file, @new_receipt_file, source: 'files', diff: '-b') or raise 'Could not create Diffy::Diff'
-    receipt_diff_array = diffy.map do |line|
-      line.split(/\s+/, 6).map(&:strip)
-    end.select do |arr|
-      arr.length == 6
-    end.map do |arr|
-      if arr[0] == "<"
-        arr[1] = "-#{arr[1]}"
-      elsif arr[0] == ">">
-        arr[1] = "+#{arr[1]}"
-      end
-      arr.shift
-      arr
-    end
-
-    receipt_diff = ""
-
-    if !receipt_diff_array.empty?
-      format = format_string(receipt_diff_array)
-
-      receipt_diff_array.each do |line|
-        receipt_diff += (format % line).strip + "\n"
-      end
-    end
-
-    <<~MARKDOWN
-    ```
-    #{receipt_diff}```
-    MARKDOWN
+    receipt_diff_array = parse_diffy_output(diffy)
+    receipt_diff = format_diff(receipt_diff_array) unless receipt_diff_array.empty?
+    "```\n#{receipt_diff}```\n" if receipt_diff
   end
 
   def new_packages?
-    return receipt_diff_section != "```\n```\n"
+    !receipt_diff_section.nil?
   end
 
   private
 
-  def format_string(table)
+  def parse_diffy_output(diffy)
+    diffy.map { |line| line.split(/\s+/, 6).map(&:strip) }
+         .select { |arr| arr.length == 6 }
+         .map do |arr|
+      arr[0] == "<" ? arr[1] = "-#{arr[1]}" : arr[0] == ">" ? arr[1] = "+#{arr[1]}" : nil
+      arr.shift
+      arr
+    end
+  end
+
+  def format_diff(table)
+    format_string = calculate_format_string(table)
+    table.map { |line| (format_string % line).strip }.join("\n")
+  end
+
+  def calculate_format_string(table)
     num_columns = table.first.length
-    format_string = ""
-
-    max_lengths = (0...num_columns).map { 0 }
-    min_lengths = (0...num_columns).map { 999 }
-
-    table.each do |row|
-      (0...num_columns).each do |i|
-        if(row[i].length) > max_lengths[i]
-          max_lengths[i] = row[i].length
-        end
-
-        if(row[i].length) < min_lengths[i]
-          min_lengths[i] = row[i].length
-        end
-      end
-    end
-
-    (0...num_columns).each do |i|
-      if max_lengths[i] == min_lengths[i]
-        format_string += "%-#{max_lengths[i] + 2}s"
-      else
-        format_string += "%-#{max_lengths[i] + 1}s"
-      end
-    end
-
-    format_string
+    max_lengths = (0...num_columns).map { |i| table.map { |row| row[i].length }.max }
+    max_lengths.map { |length| length == max_lengths.min ? "%-#{length + 2}s" : "%-#{length + 1}s" }.join
   end
 end
