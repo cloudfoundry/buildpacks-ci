@@ -1,16 +1,16 @@
-require 'nokogiri'
+require 'json'
 require 'open-uri'
-require 'open_uri_redirections'
+require 'uri'
 
 class UsnReleaseNotes
-
-  attr_reader :usn_id, :usn_title
+  attr_reader :usn_id, :usn_title, :usn_url
 
   def initialize(usn_id)
-    @usn_id    = usn_id.upcase
-    @contents  = open(usn_url).read
-    @doc       = Nokogiri::HTML(@contents)
-    @usn_title = @doc.css('#main-content h1').first.text
+    @usn_id = usn_id.upcase
+    @usn_url = "https://ubuntu.com/security/notices/#{@usn_id}"
+    @usn_api_url = "https://ubuntu.com/security/notices/#{@usn_id}.json"
+    @usn_data = fetch_usn_data
+    @usn_title = @usn_data['title']
   end
 
   def text
@@ -19,65 +19,31 @@ class UsnReleaseNotes
 
   private
 
-  def usn_url
-    if @usn_id.match(/^LSN-/)
-      "https://usn.ubuntu.com/lsn/#{@usn_id.gsub(/^LSN-/, '')}/"
-    else
-      "https://ubuntu.com/security/notices/#{@usn_id}/"
-    end
+  def fetch_usn_data
+    JSON.parse(URI.open(@usn_api_url).read)
   end
 
   def release_note_text
-    cves = []
-    lps = []
-    open(usn_url).each_line do |line|
-      if (cve = line.match(%r{.*href="(?<uri>/security/CVE.*)">(?<text>.*)</a.*}))
-        cves << cve
-      elsif (lp = line.match(%r{.*href="(?<uri>.*launchpad\.net/bugs.*)">(?<text>.*)</li}))
-        lps << lp
-      elsif (lp = line.match(%r{.*href="(?<uri>.*bugs\.launchpad\.net/.*)">(?<text>.*)</li}))
-        lps << lp
-      end
-    end
+    cves = @usn_data['cves'] || []
+    lps = @usn_data['lps'] || []
 
-    raise "Could not find CVE or LP references for release notes (usn url: #{usn_url})" if (cves.empty? && lps.empty?)
+    raise "Could not find CVE or LP references for release notes (usn url: #{@usn_url})" if (cves.empty? && lps.empty?)
 
-    notes = "[#{usn_id}](#{usn_url}) #{usn_title}:\n"
+    notes = "[#{@usn_id}](#{@usn_url}) #{@usn_title}:\n"
 
     cves.each do |cve|
-      cve_id = cve['text']
-      cve_uri = "https://ubuntu.com/#{cve['uri']}"
+      cve_id = cve['id']
+      cve_description = cve['description'] || 'Nothing found in description'
+      cve_url = "https://ubuntu.com/security/#{cve_id}"
 
-      cve_body = open(cve_uri, allow_redirections: :safe).read
-        .gsub("\n", ' ')
-        .gsub('<br />', ' ')
-        .gsub('<br>', ' ')
-        .gsub('</br>', ' ')
-      cve_description = if (match = cve_body.match(%r{Published: <strong.*?<p>(?<description>.*?)</p>}))
-                          match['description']
-                        else
-                          'Nothing found in description'
-                        end
-
-      notes += "* [#{cve_id}](#{cve_uri}): #{cve_description}\n"
+      notes += "* [#{cve_id}](#{cve_url}): #{cve_description}\n"
     end
 
     lps.each do |lp|
-      lp_id          = lp['text']
-      lp_uri         = lp['uri']
-      lp_description = ''
+      lp_id = lp['id']
+      lp_description = lp['description'] || 'Could not get description'
 
-      begin
-        lp_element = Nokogiri::HTML(open(lp_uri, :allow_redirections => :safe).read).css('#edit-title > span').first
-
-        lp_description = lp_element.children.map do |child|
-          child.text.strip if child.text?
-        end.compact.join(" ")
-      rescue
-        lp_description = 'Could not get description'
-      end
-
-      notes += "* [#{lp_id}](#{lp_uri}): #{lp_description}\n"
+      notes += "* [#{lp_id}](#{lp['url']}): #{lp_description}\n"
     end
 
     notes
