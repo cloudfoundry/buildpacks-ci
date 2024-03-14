@@ -26,8 +26,12 @@ jobs:
           username: ${{ secrets.CF_BUILDPACKS_DOCKERHUB_USERNAME }}
           password: ${{ secrets.CF_BUILDPACKS_DOCKERHUB_TOKEN }}
 
+      - name: Get current date
+        id: get-date
+        run: echo "::set-output name=date::$(date +'%Y.%m.%d')"
+
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: cfbuildpacks/ci
+          tags: cfbuildpacks/ci:latest, cfbuildpacks/ci:${{ steps.get-date.outputs.date }}
