@@ -72,11 +72,9 @@ COPY build/*.sh /etc/profile.d/
 # Ensure that Concourse filtering is on for non-interactive shells
 ENV BASH_ENV /etc/profile.d/filter.sh
 
-RUN cd /usr/local \
-  && curl -L https://go.dev/dl/go1.20.8.linux-amd64.tar.gz -o go.tar.gz \
-  && [ cc97c28d9c252fbf28f91950d830201aa403836cbed702a05932e63f7f0c7bc4 = $(shasum -a 256 go.tar.gz | cut -d' ' -f1) ] \
-  && tar xf go.tar.gz \
-  && rm go.tar.gz
+RUN export GO_VERSION=$(wget -qO- https://golang.org/dl/\?mode\=json | jq -r '.[0].version' | sed 's/go//') && \
+    wget -q https://golang.org/dl/go$GO_VERSION.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
 
 ENV GOROOT=/usr/local/go
 ENV GOPATH=/go
