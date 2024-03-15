@@ -50,8 +50,8 @@ extensions:
   md5: e3a71b27439ee08dd63272d7d290d136
   klass: PeclRecipe
 - name: mongodb
-  version: 1.17.2
-  md5: 86830c7b1a2bc0a88aea8d969bb82d18
+  version: 1.17.3
+  md5: f1b657f784ad44297bdeb8774af8b1d2
   klass: PeclRecipe
 - name: msgpack
   version: 2.2.0
@@ -146,8 +146,8 @@ extensions:
   md5: '07695da8376002babbce528205decf07'
   klass: PeclRecipe
 - name: phalcon
-  version: 5.6.1
-  md5: 9e4a07943ab33d05ff20f809539f7d88
+  version: 5.6.2
+  md5: 806c25f017c0842798d937caaecbc994
   klass: PeclRecipe
 - name: phpiredis
   version: 1.0.1
