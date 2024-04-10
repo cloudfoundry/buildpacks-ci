@@ -1,5 +1,6 @@
 require "./base"
 require "./semver"
+require "./github_tags"
 require "xml"
 require "http/request"
 
@@ -16,23 +17,17 @@ module Depwatcher
     end
 
     def check() : Array(Internal)
-      response = client.get("http://archive.apache.org/dist/httpd/").body
-      doc = XML.parse_html(response)
-      links = doc.xpath("//a[starts-with(@href, 'CURRENT')]")
-      raise "Could not parse apache httpd website" unless links.is_a?(XML::NodeSet)
-
-      links.map do |link|
-        href = link["href"].to_s
-        m = href.match(/^CURRENT-IS-([\d\.]+)/)
-        version = m[1] if m
-        Internal.new(version) if version
-      end.compact.sort_by { |i| Semver.new(i.ref) }.last(10)
+      repo = "apache/httpd"
+      regexp = "^\\d+\.\\d+\.\\d+$"
+      GithubTags.new(client).matched_tags(repo, regexp).map do |r|
+        Internal.new(r.name)
+      end.sort_by { |i| Semver.new(i.ref) }
     end
 
     def in(ref : String) : Release
-      res = HTTP::Client.get("http://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2.sha256").body
-      sha256 = res.split(" ").first
-      Release.new(ref, "http://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2", sha256)
+      sha_response = HTTP::Client.get("https://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2.sha256").body
+      sha256 = sha_response.split(" ")[0]
+      Release.new(ref, "https://dlcdn.apache.org/httpd/httpd-#{ref}.tar.bz2", sha256)
     end
   end
 end
