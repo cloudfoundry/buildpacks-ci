@@ -1,4 +1,8 @@
 ---
 extensions:
   exclusions:
+    - name: yaf
+      version: 3.3.5
+      md5: 128ecf6c84dd71d59c12d826cc51f0c4
+      klass: PeclRecipe
   additions:
