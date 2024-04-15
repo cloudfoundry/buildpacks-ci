@@ -50,8 +50,8 @@ extensions:
   md5: e3a71b27439ee08dd63272d7d290d136
   klass: PeclRecipe
 - name: mongodb
-  version: 1.17.3
-  md5: f1b657f784ad44297bdeb8774af8b1d2
+  version: 1.18.1
+  md5: 8939b5f966fa3ba6bb8e25206b9dae0f
   klass: PeclRecipe
 - name: msgpack
   version: 2.2.0
@@ -94,8 +94,8 @@ extensions:
   md5: 30de4089ae5c17f32617cef35dbe53e5
   klass: PeclRecipe
 - name: xdebug
-  version: 3.3.1
-  md5: e279224d363bb95eab0d3775fae0a08f
+  version: 3.3.2
+  md5: 3c5bca14b7c638893383646565d78e9b
   klass: PeclRecipe
 - name: yaf
   version: 3.3.5
@@ -162,8 +162,8 @@ extensions:
   md5: 3e9df94b06f8a026e33b3a8a3f02921b
   klass: PeclRecipe
 - name: oci8
-  version: 3.0.1
-  md5: 641ebceb483fa2d95e79aea99b1350de
+  version: 3.3.0
+  md5: bbbbb26f1791d1f27ffc05289abee2f3
   klass: OraclePeclRecipe
 - name: pdo_oci
   version: nil
@@ -173,3 +173,7 @@ extensions:
   version: nil
   md5: nil
   klass: Gd74FakePeclRecipe
+- name: ioncube
+  version: 13.0.2
+  md5: 0526cd3702ef25de119e4724d603d773
+  klass: IonCubeRecipe

@@ -1,12 +1,8 @@
 ---
 extensions:
-  exclusions: 
+  exclusions:
   additions:
   - name: oci8
     version: 3.2.1
     md5: 309190ef3ede2779a617c9375d32ea7a
     klass: OraclePeclRecipe
-  - name: ioncube
-    version: 13.0.2
-    md5: 0526cd3702ef25de119e4724d603d773
-    klass: IonCubeRecipe
