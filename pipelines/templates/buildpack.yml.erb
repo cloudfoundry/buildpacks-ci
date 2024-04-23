@@ -70,7 +70,7 @@
   }
 } %>
 <% tas_version =  '4.0' %>
-<% tas_pool_name = 'tas_four' %>
+<% tas_pool_name = 'tas_4' %>
 <% low_nodes_lts = ['ruby', 'python', 'dotnet-core', 'php'] %>
 ---
 resource_types:
@@ -309,7 +309,7 @@ resources: #####################################################################
       lease:
         namespace: buildpacks
         pool:
-          namespace: official
+          namespace: buildpacks
           name: <%= tas_pool_name %>
       compatibility-mode: environments-app
 <% end %>

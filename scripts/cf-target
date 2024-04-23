@@ -64,7 +64,7 @@ function claim_environment() {
   local claimer output env_name lease_id
   claimer="$(whoami)"
 
-  output=$(shepherd create lease --pool cfd --pool-namespace official --duration 4h --description "Claimed by ${claimer} from Buildpacks team" --json)
+  output=$(shepherd create lease --pool cfd --pool-namespace buildpacks --duration 4h --description "Claimed by ${claimer} from Buildpacks team" --json)
   if [[ $? -ne 0 ]]; then
     util::print::error "Failed to claim an environment ${output}"
   fi
