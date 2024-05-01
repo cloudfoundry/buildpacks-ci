@@ -172,7 +172,7 @@ dependencies:
           #! each odd version line (ex. 1.19) is the "mainline"
           #! the even numbered version line that precedes the mainline is the associated stable version line.
           #! See explanation of release cadence: https://www.nginx.com/blog/nginx-1-18-1-19-released/
-          - line: 1.24.X
+          - line: 1.26.X
             link: https://nginx.org/
           - line: 1.25.X
             link: https://nginx.org/
@@ -191,13 +191,13 @@ dependencies:
           #! nginx deprecation dates are 1 year after the mainline release date
           #! each odd version line (ex. 1.19) is the "mainline"
           #! the even numbered version line that precedes the mainline is the associated stable version line.
-          - line: 1.24.X
+          - line: 1.26.X
             link: https://nginx.org/
           - line: 1.25.X
             link: https://nginx.org/
       staticfile:
         lines:
-          - line: 1.24.X
+          - line: 1.26.X
             link: https://nginx.org/
           - line: 1.25.X
             link: https://nginx.org/
