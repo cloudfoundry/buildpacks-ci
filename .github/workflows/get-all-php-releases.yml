@@ -1,0 +1,31 @@
+name: Get PHP Releases
+on:
+  workflow_dispatch: { }
+  schedule:
+    - cron: 0 * * * *
+
+jobs:
+  get-new-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Get PHP Versions
+        run: |
+          curl --silent --show-error --fail https://www.php.net/releases/index.php?json --http2 | jq . > "php-releases/releases.json"
+
+      - name: Commit
+        id: commit
+        uses: paketo-buildpacks/github-config/actions/pull-request/create-commit@main
+        with:
+          message: "Update PHP releases"
+          pathspec: "php-releases/releases.json"
+          committer_name: "Cloud Foundry Buildpacks Team Robot"
+          committer_email: "tanzu-buildpacks.pdl@broadcom.com"
+
+      - name: Push Branch
+        if: ${{ steps.commit.outputs.commit_sha != '' }}
+        uses: paketo-buildpacks/github-config/actions/pull-request/push-branch@main
+        with:
+          branch: master

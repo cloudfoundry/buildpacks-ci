@@ -1,0 +1,20 @@
+{
+  "3.0.x (latest)": {
+    "date": "20 Oct 2000",
+    "source": [
+      {
+        "filename": "php-3.0.18.tar.gz",
+        "name": "PHP 3.0.18 Source Code",
+        "md5": "b4b8f7f1151ce66d5f3910a066651133"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-3.0.17-win32.zip",
+        "name": "PHP 3.0.17 Windows binary",
+        "md5": "29029ac1c3c2075dce38bbd804c42f72"
+      }
+    ],
+    "museum": true
+  }
+}
