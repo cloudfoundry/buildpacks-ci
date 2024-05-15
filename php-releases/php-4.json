@@ -1,0 +1,893 @@
+{
+  "4.4.9": {
+    "announcement": {
+      "English": "/releases/4_4_9.php"
+    },
+    "source": [
+      {
+        "filename": "php-4.4.9.tar.bz2",
+        "name": "PHP 4.4.9 (tar.bz2)",
+        "md5": "2e3b2a0e27f10cb84fd00e5ecd7a1880",
+        "date": "07 August 2008"
+      },
+      {
+        "filename": "php-4.4.9.tar.gz",
+        "name": "PHP 4.4.9 (tar.gz)",
+        "md5": "9bcc1aba50be0dfeeea551d018375548",
+        "date": "07 August 2008"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.4.9-Win32.zip",
+        "name": "PHP 4.4.9 zip package",
+        "md5": "7395068d5489a9f8abf50c6e4b48622f",
+        "date": "07 August 2008"
+      }
+    ],
+    "date": "07 August 2008",
+    "museum": true
+  },
+  "4.4.8": {
+    "announcement": {
+      "English": "/releases/4_4_8.php"
+    },
+    "source": [
+      {
+        "filename": "php-4.4.8.tar.bz2",
+        "name": "PHP 4.4.8 (tar.bz2)",
+        "md5": "ed31e77414e0331e787487b53732dbca",
+        "date": "03 January 2008"
+      },
+      {
+        "filename": "php-4.4.8.tar.gz",
+        "name": "PHP 4.4.8 (tar.gz)",
+        "md5": "8ad5d1ca793d55b24cd82e591248c04e",
+        "date": "03 January 2008"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.4.8-Win32.zip",
+        "name": "PHP 4.4.8 zip package",
+        "md5": "09ffff4b1a54bbadb8fee6acd85a2c1f",
+        "date": "12 Feb 2008"
+      }
+    ],
+    "date": "03 January 2008",
+    "museum": true
+  },
+  "4.4.7": {
+    "announcement": {
+      "English": "/releases/4_4_7.php"
+    },
+    "source": [
+      {
+        "filename": "php-4.4.7.tar.bz2",
+        "name": "PHP 4.4.7 (tar.bz2)",
+        "md5": "3f21b44d37a57ca3876d3aea713c700d",
+        "date": "03 May 2007"
+      },
+      {
+        "filename": "php-4.4.7.tar.gz",
+        "name": "PHP 4.4.7 (tar.gz)",
+        "md5": "2669d2049822ac14abb263703d24f643",
+        "date": "03 May 2007"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.4.7-Win32.zip",
+        "name": "PHP 4.4.7 zip package",
+        "md5": "065e867fa3cfa75cba8271dde9b10cee",
+        "date": "04 May 2007",
+        "note": "This package was updated due to faulty Apache2 module shipped with the orginal.<br> (CGI binary plus server API versions for Apache, Apache2 (experimental), ISAPI, NSAPI, Servlet and Pi3Web. MySQL support built-in, many extensions included, packaged as zip)<br>"
+      }
+    ],
+    "date": "03 May 2007",
+    "museum": true
+  },
+  "4.4.6": {
+    "date": "01 Mar 2007",
+    "source": [
+      {
+        "filename": "php-4.4.6.tar.bz2",
+        "name": "Source (tar.bz2)",
+        "md5": "5db283824310c87efb18c76b4735c4bd"
+      },
+      {
+        "filename": "php-4.4.6.tar.gz",
+        "name": "Source (tar.gz)",
+        "md5": "07c607fcf12435f0078d72fe0de4e3c0"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.4.6-Win32.zip",
+        "name": "Windows binary",
+        "md5": "486764cefb5f7bde39e95c49b2e38635"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_4_6.php"
+    },
+    "museum": true
+  },
+  "4.4.5": {
+    "date": "14 Feb 2007",
+    "source": [
+      {
+        "filename": "php-4.4.5.tar.bz2",
+        "name": "Source (tar.bz2)"
+      },
+      {
+        "filename": "php-4.4.5.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.4.5-Win32.zip",
+        "name": "Windows binary"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_4_5.php"
+    },
+    "museum": true
+  },
+  "4.4.4": {
+    "date": "17 Aug 2006",
+    "source": [
+      {
+        "filename": "php-4.4.4.tar.bz2",
+        "name": "Source (tar.bz2)"
+      },
+      {
+        "filename": "php-4.4.4.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.4.4-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.4.4-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_4_4.php"
+    },
+    "museum": true
+  },
+  "4.4.3": {
+    "date": "03 Aug 2006",
+    "source": [
+      {
+        "filename": "php-4.4.3.tar.bz2",
+        "name": "Source (tar.bz2)"
+      },
+      {
+        "filename": "php-4.4.3.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.4.3-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.4.3-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_4_3.php"
+    },
+    "museum": true
+  },
+  "4.4.2": {
+    "date": "13 Jan 2006",
+    "source": [
+      {
+        "filename": "php-4.4.2.tar.gz",
+        "name": "Source (tar.gz)"
+      },
+      {
+        "filename": "php-4.4.2.tar.bz2",
+        "name": "Source (tar.bz2)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.4.2-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.4.2-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_4_2.php"
+    },
+    "museum": true
+  },
+  "4.4.1": {
+    "date": "31 Oct 2005",
+    "source": [
+      {
+        "filename": "php-4.4.1.tar.gz",
+        "name": "Source (tar.gz)"
+      },
+      {
+        "filename": "php-4.4.1.tar.bz2",
+        "name": "Source (tar.bz2)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.4.1-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.4.1-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_4_1.php"
+    },
+    "museum": true
+  },
+  "4.4.0": {
+    "date": "11 Jul 2005",
+    "source": [
+      {
+        "filename": "php-4.4.0.tar.gz",
+        "name": "Source (tar.gz)"
+      },
+      {
+        "filename": "php-4.4.0.tar.bz2",
+        "name": "Source (tar.bz2)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.4.0-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.4.0-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_4_0.php"
+    },
+    "museum": true
+  },
+  "4.3.11": {
+    "date": "31 Mar 2005",
+    "source": [
+      {
+        "filename": "php-4.3.11.tar.gz",
+        "name": "Source (tar.gz)"
+      },
+      {
+        "filename": "php-4.3.11.tar.bz2",
+        "name": "Source (tar.bz2)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.3.11-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.3.11-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_3_11.php",
+      "French": "/releases/4_3_11_fr.php"
+    },
+    "museum": true
+  },
+  "4.3.10": {
+    "date": "15 Dec 2004",
+    "source": [
+      {
+        "filename": "php-4.3.10.tar.gz",
+        "name": "Source (tar.gz)"
+      },
+      {
+        "filename": "php-4.3.10.tar.bz2",
+        "name": "Source (tar.bz2)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.3.10-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.3.10-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_3_10.php",
+      "French": "/releases/4_3_10_fr.php"
+    },
+    "museum": true
+  },
+  "4.3.9": {
+    "date": "22 Sep 2004",
+    "source": [
+      {
+        "filename": "php-4.3.9.tar.gz",
+        "name": "Source (tar.gz)"
+      },
+      {
+        "filename": "php-4.3.9.tar.bz2",
+        "name": "Source (tar.bz2)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.3.9-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.3.9-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_3_9.php",
+      "French": "/releases/4_3_9_fr.php"
+    },
+    "museum": true
+  },
+  "4.3.8": {
+    "date": "13 July 2004",
+    "source": [
+      {
+        "filename": "php-4.3.8.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.3.8-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.3.8-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_3_8.php"
+    },
+    "museum": true
+  },
+  "4.3.7": {
+    "date": "03 June 2004",
+    "source": [
+      {
+        "filename": "php-4.3.7.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.3.7-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.3.7-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_3_7.php",
+      "French": "/releases/4_3_7_fr.php"
+    },
+    "museum": true
+  },
+  "4.3.6": {
+    "date": "15 April 2004",
+    "source": [
+      {
+        "filename": "php-4.3.6.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.3.6-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.3.6-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_3_6.php",
+      "French": "/releases/4_3_6_fr.php"
+    },
+    "museum": true
+  },
+  "4.3.5": {
+    "date": "26 March 2004",
+    "source": [
+      {
+        "filename": "php-4.3.5.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.3.5-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.3.5-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_3_5.php",
+      "French": "/releases/4_3_5_fr.php"
+    },
+    "museum": true
+  },
+  "4.3.4": {
+    "date": "03 November 2003",
+    "source": [
+      {
+        "filename": "php-4.3.4.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.3.4-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.3.4-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_3_4.php",
+      "French": "/releases/4_3_4_fr.php"
+    },
+    "museum": true
+  },
+  "4.3.3": {
+    "date": "25 August 2003",
+    "source": [
+      {
+        "filename": "php-4.3.3.tar.gz",
+        "name": "Source (tar.gz)"
+      },
+      {
+        "filename": "php-4.3.3.tar.bz2",
+        "name": "Source (tar.bz2)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.3.3-Win32.zip",
+        "name": "Windows binary"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_3_3.php",
+      "French": "/releases/4_3_3_fr.php"
+    },
+    "museum": true
+  },
+  "4.3.2": {
+    "date": "29 May 2003",
+    "source": [
+      {
+        "filename": "php-4.3.2.tar.gz",
+        "name": "Source (tar.gz)"
+      },
+      {
+        "filename": "php-4.3.2.tar.bz2",
+        "name": "Source (tar.bz2)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.3.2-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.3.2-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_3_2.php",
+      "French": "/releases/4_3_2_fr.php"
+    },
+    "museum": true
+  },
+  "4.3.1": {
+    "date": "17 February 2003",
+    "source": [
+      {
+        "filename": "php-4.3.1.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.3.1-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.3.1-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_3_1.php"
+    },
+    "museum": true
+  },
+  "4.3.0": {
+    "date": "27 December 2002",
+    "source": [
+      {
+        "filename": "php-4.3.0.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.3.0-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.3.0-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_3_0.php",
+      "French": "/releases/4_3_0_fr.php"
+    },
+    "museum": true
+  },
+  "4.2.3": {
+    "date": "6 September 2002",
+    "source": [
+      {
+        "filename": "php-4.2.3.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.2.3-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.2.3-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "http://news.php.net/php.announce/37"
+    },
+    "museum": true
+  },
+  "4.2.2": {
+    "date": "22 July 2002",
+    "source": [
+      {
+        "filename": "php-4.2.2.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.2.2-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.2.2-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_2_2.php",
+      "French": "/releases/4_2_2_fr.php"
+    },
+    "museum": true
+  },
+  "4.2.1": {
+    "date": "13 May 2002",
+    "source": [
+      {
+        "filename": "php-4.2.1.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.2.1-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.2.1-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_2_1.php",
+      "French": "/releases/4_2_1_fr.php"
+    },
+    "museum": true
+  },
+  "4.2.0": {
+    "date": "22 April 2002",
+    "source": [
+      {
+        "filename": "php-4.2.0.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.2.0-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.2.0-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_2_0.php",
+      "French": "/releases/4_2_0_fr.php"
+    },
+    "museum": true
+  },
+  "4.1.2": {
+    "date": "12 March 2002",
+    "source": [
+      {
+        "filename": "php-4.1.2.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.1.2-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.1.2-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_1_2_win32.php"
+    },
+    "museum": true
+  },
+  "4.1.1": {
+    "date": "26 Dec 2001",
+    "source": [
+      {
+        "filename": "php-4.1.1.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.1.1-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.1.1-installer.exe",
+        "name": "Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_1_1.php"
+    },
+    "museum": true
+  },
+  "4.1.0": {
+    "date": "10 Dec 2001",
+    "source": [
+      {
+        "filename": "php-4.1.0.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.1.0-Win32.zip",
+        "name": "Windows binary"
+      }
+    ],
+    "announcement": {
+      "English": "/releases/4_1_0.php",
+      "French": "/releases/4_1_0_fr.php"
+    },
+    "museum": true
+  },
+  "4.0.6": {
+    "date": "23 June 2001",
+    "source": [
+      {
+        "filename": "php-4.0.6.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.0.6-Win32.zip",
+        "name": "Windows binary"
+      }
+    ],
+    "museum": true
+  },
+  "4.0.5": {
+    "date": "30 April 2001",
+    "source": [
+      {
+        "filename": "php-4.0.5.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.0.5-Win32.zip",
+        "name": "Windows binary"
+      }
+    ],
+    "museum": true
+  },
+  "4.0.4": {
+    "date": "19 December 2000",
+    "source": [
+      {
+        "filename": "php-4.0.4.tar.gz",
+        "name": "Source (tar.gz)"
+      },
+      {
+        "filename": "php-4.0.4pl1.tar.gz",
+        "name": "4.0.4pl1 Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.0.4-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.0.4-installer.zip",
+        "name": "Windows installer"
+      },
+      {
+        "filename": "php-4.0.4pl1-Win32.zip",
+        "name": "4.0.4pl1 Windows binary"
+      }
+    ],
+    "announcement": {
+      "English": "http://news.php.net/php.announce/28"
+    },
+    "museum": true
+  },
+  "4.0.3": {
+    "date": "11 October 2000",
+    "source": [
+      {
+        "filename": "php-4.0.3.tar.gz",
+        "name": "Source (tar.gz)"
+      },
+      {
+        "filename": "php-4.0.3pl1.tar.gz",
+        "name": "4.0.3pl1 Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.0.3-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.0.3pl1-installer.exe",
+        "name": "4.0.3pl1 Windows installer"
+      }
+    ],
+    "announcement": {
+      "English": "http://news.php.net/php.announce/26",
+      "English (pl1)": "http://news.php.net/php.announce/27"
+    },
+    "museum": true
+  },
+  "4.0.2": {
+    "date": "29 August 2000",
+    "source": [
+      {
+        "filename": "php-4.0.2.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.0.2-Win32.zip",
+        "name": "Windows binary"
+      }
+    ],
+    "announcement": {
+      "English": "http://news.php.net/php.announce/24"
+    },
+    "museum": true
+  },
+  "4.0.1": {
+    "date": "28 June 2000",
+    "source": [
+      {
+        "filename": "php-4.0.1.tar.gz",
+        "name": "Source (tar.gz)"
+      },
+      {
+        "filename": "php-4.0.1pl2.tar.gz",
+        "name": "4.0.1pl2 Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.0.1-Win32.zip",
+        "name": "Windows binary"
+      },
+      {
+        "filename": "php-4.0.1pl1-Win32.zip",
+        "name": "4.0.1pl1 Windows binary"
+      }
+    ],
+    "announcement": {
+      "English": "http://news.php.net/php.announce/23"
+    },
+    "museum": true
+  },
+  "4.0.0": {
+    "date": "22 May 2000",
+    "source": [
+      {
+        "filename": "php-4.0.0.tar.gz",
+        "name": "Source (tar.gz)"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.0.0-Win32.zip",
+        "name": "Windows binary"
+      }
+    ],
+    "announcement": {
+      "English": "http://news.php.net/php.announce/22"
+    },
+    "museum": true
+  }
+}

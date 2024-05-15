@@ -1,0 +1,41 @@
+name: Get PHP Releases for each version
+on:
+  workflow_dispatch: { }
+  schedule:
+    - cron: 0 * * * *
+  push:
+    branches:
+      - main
+    paths:
+      - releases.json
+
+jobs:
+  get-new-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Get PHP Versions
+        run: |
+          versions=($(jq -r 'keys | .[]' releases.json))
+          echo "versions: ${versions[*]}"
+          for version in "${versions[@]}"; do
+            curl --silent --show-error --fail --http2 "https://www.php.net/releases/index.php?json&version=$version&max=1000" |
+              jq . > "php-releases/php-$version.json"
+          done
+
+      - name: Commit
+        id: commit
+        uses: paketo-buildpacks/github-config/actions/pull-request/create-commit@main
+        with:
+          message: "PHP Releases for each version"
+          pathspec: "php-releases/php-*.json"
+          committer_name: "Cloud Foundry Buildpacks Team Robot"
+          committer_email: "tanzu-buildpacks.pdl@broadcom.com"
+
+      - name: Push Branch
+        if: ${{ steps.commit.outputs.commit_sha != '' }}
+        uses: paketo-buildpacks/github-config/actions/pull-request/push-branch@main
+        with:
+          branch: master
