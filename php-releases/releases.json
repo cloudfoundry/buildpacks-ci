@@ -1,0 +1,145 @@
+{
+  "8": {
+    "announcement": true,
+    "tags": [],
+    "date": "09 May 2024",
+    "source": [
+      {
+        "filename": "php-8.3.7.tar.gz",
+        "name": "PHP 8.3.7 (tar.gz)",
+        "sha256": "2e11d10b651459a8767401e66b5d70e3b048e446579fcdeb0b69bcba789af8c4",
+        "date": "09 May 2024"
+      },
+      {
+        "filename": "php-8.3.7.tar.bz2",
+        "name": "PHP 8.3.7 (tar.bz2)",
+        "sha256": "01c20cde1c5a5696651875ed22f507849679fba740f8c421616b7d43d7f797da",
+        "date": "09 May 2024"
+      },
+      {
+        "filename": "php-8.3.7.tar.xz",
+        "name": "PHP 8.3.7 (tar.xz)",
+        "sha256": "d53433c1ca6b2c8741afa7c524272e6806c1e895e5912a058494fea89988570a",
+        "date": "09 May 2024"
+      }
+    ],
+    "version": "8.3.7",
+    "supported_versions": [
+      "8.1",
+      "8.2",
+      "8.3"
+    ]
+  },
+  "7": {
+    "announcement": {
+      "English": "/releases/7_4_33.php"
+    },
+    "tags": [
+      "security"
+    ],
+    "date": "03 Nov 2022",
+    "source": [
+      {
+        "filename": "php-7.4.33.tar.gz",
+        "name": "PHP 7.4.33 (tar.gz)",
+        "sha256": "5a2337996f07c8a097e03d46263b5c98d2c8e355227756351421003bea8f463e",
+        "date": "03 Nov 2022"
+      },
+      {
+        "filename": "php-7.4.33.tar.bz2",
+        "name": "PHP 7.4.33 (tar.bz2)",
+        "sha256": "4e8117458fe5a475bf203128726b71bcbba61c42ad463dffadee5667a198a98a",
+        "date": "03 Nov 2022"
+      },
+      {
+        "filename": "php-7.4.33.tar.xz",
+        "name": "PHP 7.4.33 (tar.xz)",
+        "sha256": "924846abf93bc613815c55dd3f5809377813ac62a9ec4eb3778675b82a27b927",
+        "date": "03 Nov 2022"
+      }
+    ],
+    "museum": false,
+    "version": "7.4.33",
+    "supported_versions": []
+  },
+  "5": {
+    "announcement": {
+      "English": "/releases/5_6_40.php"
+    },
+    "source": [
+      {
+        "filename": "php-5.6.40.tar.bz2",
+        "name": "PHP 5.6.40 (tar.bz2)",
+        "sha256": "ffd025d34623553ab2f7fd8fb21d0c9e6f9fa30dc565ca03a1d7b763023fba00",
+        "date": "10 Jan 2019"
+      },
+      {
+        "filename": "php-5.6.40.tar.gz",
+        "name": "PHP 5.6.40 (tar.gz)",
+        "sha256": "56fb9878d12fdd921f6a0897e919f4e980d930160e154cbde2cc6d9206a27cac",
+        "date": "10 Jan 2019"
+      },
+      {
+        "filename": "php-5.6.40.tar.xz",
+        "name": "PHP 5.6.40 (tar.xz)",
+        "sha256": "1369a51eee3995d7fbd1c5342e5cc917760e276d561595b6052b21ace2656d1c",
+        "date": "10 Jan 2019"
+      }
+    ],
+    "date": "10 Jan 2019",
+    "museum": false,
+    "version": "5.6.40",
+    "supported_versions": []
+  },
+  "4": {
+    "announcement": {
+      "English": "/releases/4_4_9.php"
+    },
+    "source": [
+      {
+        "filename": "php-4.4.9.tar.bz2",
+        "name": "PHP 4.4.9 (tar.bz2)",
+        "md5": "2e3b2a0e27f10cb84fd00e5ecd7a1880",
+        "date": "07 August 2008"
+      },
+      {
+        "filename": "php-4.4.9.tar.gz",
+        "name": "PHP 4.4.9 (tar.gz)",
+        "md5": "9bcc1aba50be0dfeeea551d018375548",
+        "date": "07 August 2008"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-4.4.9-Win32.zip",
+        "name": "PHP 4.4.9 zip package",
+        "md5": "7395068d5489a9f8abf50c6e4b48622f",
+        "date": "07 August 2008"
+      }
+    ],
+    "date": "07 August 2008",
+    "museum": true,
+    "version": "4.4.9",
+    "supported_versions": []
+  },
+  "3": {
+    "date": "20 Oct 2000",
+    "source": [
+      {
+        "filename": "php-3.0.18.tar.gz",
+        "name": "PHP 3.0.18 Source Code",
+        "md5": "b4b8f7f1151ce66d5f3910a066651133"
+      }
+    ],
+    "windows": [
+      {
+        "filename": "php-3.0.17-win32.zip",
+        "name": "PHP 3.0.17 Windows binary",
+        "md5": "29029ac1c3c2075dce38bbd804c42f72"
+      }
+    ],
+    "museum": true,
+    "version": "3.0.x (latest)",
+    "supported_versions": []
+  }
+}
