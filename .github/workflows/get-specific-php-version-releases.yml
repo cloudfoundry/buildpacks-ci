@@ -7,7 +7,7 @@ on:
     branches:
       - main
     paths:
-      - releases.json
+      - php-releases/releases.json
 
 jobs:
   get-new-versions:
@@ -18,7 +18,7 @@ jobs:
 
       - name: Get PHP Versions
         run: |
-          versions=($(jq -r 'keys | .[]' releases.json))
+          versions=($(jq -r 'keys | .[]' php-releases/releases.json))
           echo "versions: ${versions[*]}"
           for version in "${versions[@]}"; do
             curl --silent --show-error --fail --http2 "https://www.php.net/releases/index.php?json&version=$version&max=1000" |
