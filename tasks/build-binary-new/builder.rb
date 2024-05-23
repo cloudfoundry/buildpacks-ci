@@ -41,8 +41,8 @@ module DependencyBuild
       Runner.run('apt', 'install', '-y', 'software-properties-common')
       Runner.run('add-apt-repository', '-y', 'ppa:ubuntu-toolchain-r/test')
       Runner.run('apt', 'update')
-      Runner.run('apt', 'install', '-y', 'gcc-8', 'g++-8')
-      Runner.run('update-alternatives', '--install', '/usr/bin/gcc', 'gcc', '/usr/bin/gcc-8', '60', '--slave', '/usr/bin/g++', 'g++', '/usr/bin/g++-8')
+      Runner.run('apt', 'install', '-y', 'gcc-11', 'g++-11')
+      Runner.run('update-alternatives', '--install', '/usr/bin/gcc', 'gcc', '/usr/bin/gcc-11', '60', '--slave', '/usr/bin/g++', 'g++', '/usr/bin/g++-11')
     end
 
     def bundle_pip_dependencies(source_input)
@@ -683,6 +683,7 @@ class Builder
       )
 
     when 'node', 'httpd'
+      DependencyBuild.setup_python
       DependencyBuild.setup_gcc11
 
       source_input.version = source_input.version.delete_prefix('v') if source_input.name == 'node'
