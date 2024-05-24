@@ -350,6 +350,9 @@ jobs:
       LB_DOMAIN: cflinuxfs4.buildpacks-gcp.ci.cf-app.com
       BBL_ENV_NAME: cflinuxfs4
       BBL_STATE_DIR: cflinuxfs4
+      GIT_COMMIT_EMAIL: "tanzu-buildpacks.pdl@broadcom.com"
+      GIT_COMMIT_USERNAME: "CF Buildapcks Eng Bot"
+      GIT_COMMIT_MESSAGE: "Update bbl state dir"
     input_mapping:
       ops-files: bosh-deployment
     ensure:
@@ -573,6 +576,8 @@ jobs:
       BBL_STATE_DIR: cflinuxfs4
       BBL_GCP_PROJECT_ID: cf-buildpacks
       BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+      GIT_COMMIT_EMAIL: "tanzu-buildpacks.pdl@broadcom.com"
+      GIT_COMMIT_USERNAME: "CF Buildapcks Eng Bot"
     ensure:
       put: bbl-state
       params:
