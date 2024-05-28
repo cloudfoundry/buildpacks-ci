@@ -95,6 +95,12 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
     stacks = stacks - ['cflinuxfs4']
   end
 
+  # Logic to skip certain version lines that are not supported in cflinuxfs3
+  skip_lines_cflinuxfs3 = config['dependencies'][source_name].key?('skip_lines_cflinuxfs3') ? config['dependencies'][source_name]['skip_lines_cflinuxfs3'].map(&:downcase) : []
+  if skip_lines_cflinuxfs3.include?(version_line.downcase)
+    stacks = stacks - ['cflinuxfs3']
+  end
+
   stacks = WINDOWS_STACKS if source_name == 'hwc'
   total_stacks = total_stacks | stacks
 
