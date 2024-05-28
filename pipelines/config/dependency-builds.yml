@@ -52,9 +52,6 @@ dependencies:
           - line: 6.0.X
             deprecation_date: 2024-11-08
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-          - line: 7.0.X
-            deprecation_date: 2024-05-14
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 8.0.X
             deprecation_date: 2026-11-10
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
@@ -68,9 +65,6 @@ dependencies:
           - line: 6.0.X
             deprecation_date: 2024-11-08
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-          - line: 7.0.X
-            deprecation_date: 2024-05-14
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 8.0.X
             deprecation_date: 2026-11-10
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
@@ -83,9 +77,6 @@ dependencies:
         lines:
           - line: 6.0.X
             deprecation_date: 2024-11-08
-            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
-          - line: 7.0.X
-            deprecation_date: 2024-05-14
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 8.0.X
             deprecation_date: 2026-11-10
