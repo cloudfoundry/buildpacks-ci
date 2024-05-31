@@ -17,12 +17,12 @@ native_modules:
   md5: nil
   klass: SnmpRecipe
 - name: librdkafka
-  version: 2.3.0
-  md5: afb9d41c50535ba0aa5025ea81d39617
+  version: 2.4.0
+  md5: 60a275ced5c23308e16347c0a3b941f0
   klass: LibRdKafkaRecipe
 - name: libsodium
-  version: 1.0.19
-  md5: 0d8e2233fc41be6d4c7ee36d5dfe9416
+  version: 1.0.20
+  md5: 597f2c7811f84e63e45e2277dfb5da46
   klass: LibSodiumRecipe
 extensions:
 - name: apcu
@@ -50,8 +50,8 @@ extensions:
   md5: e3a71b27439ee08dd63272d7d290d136
   klass: PeclRecipe
 - name: mongodb
-  version: 1.18.1
-  md5: 8939b5f966fa3ba6bb8e25206b9dae0f
+  version: 1.19.1
+  md5: 98917d8ad26b74144ab9b2d2db313c9b
   klass: PeclRecipe
 - name: msgpack
   version: 2.2.0
@@ -146,8 +146,8 @@ extensions:
   md5: '07695da8376002babbce528205decf07'
   klass: PeclRecipe
 - name: phalcon
-  version: 5.6.2
-  md5: 806c25f017c0842798d937caaecbc994
+  version: 5.7.0
+  md5: d3684a5858d7c48a030efdc85d6f1ccc
   klass: PeclRecipe
 - name: phpiredis
   version: 1.0.1
@@ -174,6 +174,6 @@ extensions:
   md5: nil
   klass: Gd74FakePeclRecipe
 - name: ioncube
-  version: 13.0.2
-  md5: 0526cd3702ef25de119e4724d603d773
+  version: 13.0.3
+  md5: 18a76c468b8b618f55e9e883d653a437
   klass: IonCubeRecipe
