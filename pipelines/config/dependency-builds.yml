@@ -165,7 +165,7 @@ dependencies:
           #! See explanation of release cadence: https://www.nginx.com/blog/nginx-1-18-1-19-released/
           - line: 1.26.X
             link: https://nginx.org/
-          - line: 1.25.X
+          - line: 1.27.X
             link: https://nginx.org/
     versions_to_keep: 2
   openresty:
@@ -184,13 +184,13 @@ dependencies:
           #! the even numbered version line that precedes the mainline is the associated stable version line.
           - line: 1.26.X
             link: https://nginx.org/
-          - line: 1.25.X
+          - line: 1.27.X
             link: https://nginx.org/
       staticfile:
         lines:
           - line: 1.26.X
             link: https://nginx.org/
-          - line: 1.25.X
+          - line: 1.27.X
             link: https://nginx.org/
     source_type: nginx
     versions_to_keep: 2
