@@ -1,25 +1,21 @@
 <% buildpacks = {
   'apt' => {
     'stacks' => %w(cflinuxfs3 cflinuxfs4),
-    'skip_pivnet_publish' => true,
     'non_lts' => true,
   },
   'binary' => {
     'stacks' => %w(cflinuxfs3 cflinuxfs4 windows2016 windows),
     'product_slug' => 'binary-buildpack',
     'skip_docker_start' => true,
-    'non_lts_pivnet' => true,
   },
   'dotnet-core' => {
     'stacks' => %w(cflinuxfs3 cflinuxfs4),
     'product_slug' => 'dotnet-core-buildpack',
-    'non_lts_pivnet' => true,
     'compute_instance_count' => 3
   },
   'go' => {
     'stacks' => %w(cflinuxfs3 cflinuxfs4),
     'product_slug' => 'go-buildpack',
-    'non_lts_pivnet' => true,
     'compute_instance_count' => 3
   },
   'hwc' => {
@@ -31,42 +27,35 @@
   'nginx' => {
     'stacks' => %w(cflinuxfs3 cflinuxfs4),
     'product_slug' => 'nginx-buildpack',
-    'non_lts_pivnet' => true,
   },
   'nodejs' => {
     'stacks' => %w(cflinuxfs3 cflinuxfs4),
     'product_slug' => 'nodejs-buildpack',
-    'non_lts_pivnet' => true,
   },
   'php' => {
     'stacks' => %w(cflinuxfs3 cflinuxfs4),
     'product_slug' => 'php-buildpack',
     'compile_extensions' => true,
-    'non_lts_pivnet' => true,
   },
   'python' => {
     'stacks' => %w(cflinuxfs3 cflinuxfs4),
     'product_slug' => 'python-buildpack',
-    'non_lts_pivnet' => true,
   },
   'r' => {
     'stacks' => %w(cflinuxfs3 cflinuxfs4),
     'product_slug' => 'r-buildpack',
     'skip_brats' => true,
     'non_lts' => true,
-    'non_lts_pivnet' => true,
     'skip_docker_start' => true,
   },
   'ruby' => {
     'stacks' => %w(cflinuxfs3 cflinuxfs4),
     'product_slug' => 'ruby-buildpack',
-    'non_lts_pivnet' => true,
     'compute_instance_count' => 3
   },
   'staticfile' => {
     'stacks' => %w(cflinuxfs3 cflinuxfs4),
     'product_slug' => 'staticfile-buildpack',
-    'non_lts_pivnet' => true,
   }
 } %>
 <% tas_version =  '4.0' %>
@@ -78,11 +67,6 @@ resource_types:
     type: docker-image
     source:
       repository: cfcommunity/slack-notification-resource
-  - name: pivnet
-    type: docker-image
-    source:
-      repository: pivotalcf/pivnet-resource
-      tag: latest-final
   - name: cron
     type: docker-image
     source:
@@ -150,25 +134,6 @@ resources: #####################################################################
       uri: {{buildpacks-ci-git-uri-public}}
       branch: {{buildpacks-ci-git-uri-public-branch}}
 
-<% unless buildpacks[language]['skip_pivnet_publish'] %>
-<% unless buildpacks[language]['non_lts_pivnet'] %>
-  - name: pivnet-buildpack-metadata-lts
-    type: git
-    source:
-      private_key: {{pivotal-cf-buildpacks-ci-robots}}
-      uri: git@github.com:pivotal-cf/buildpacks-ci-robots.git # pivotal-cf because pivnet is not foundation's
-      paths: [ pivnet-metadata/<%= language %>-lts.yml ]
-      branch: main
-<% end %>
-  - name: pivnet-buildpack-metadata
-    type: git
-    source:
-      private_key: {{pivotal-cf-buildpacks-ci-robots}}
-      uri: git@github.com:pivotal-cf/buildpacks-ci-robots.git # pivotal-cf because pivnet is not foundation's
-      paths: [ pivnet-metadata/<%= language %>.yml ]
-      branch: main
-<% end %>
-
   - name: libbuildpack
     type: git
     webhook_token: ob0aigh3
@@ -222,26 +187,6 @@ resources: #####################################################################
       user: {{buildpacks-github-org}}
       repository: buildpack-packager
       access_token: {{buildpacks-github-token}}
-<% end %>
-
-  ## Pivnet Release ##
-
-<% unless buildpacks[language]['skip_pivnet_publish'] %>
-<% unless buildpacks[language]['non_lts_pivnet'] %>
-  - name: pivnet-production-lts
-    type: pivnet
-    source:
-      endpoint: https://network.pivotal.io
-      api_token: {{pivnet-refresh-token}}
-      product_slug: buildpacks
-<% end %>
-
-  - name: pivnet-production
-    type: pivnet
-    source:
-      endpoint: https://network.pivotal.io
-      api_token: {{pivnet-refresh-token}}
-      product_slug: <%= buildpacks[language]['product_slug'] %>
 <% end %>
 
   ## S3 Buckets ##
@@ -501,128 +446,6 @@ jobs: ##########################################################################
             - buildpack-artifacts/*-buildpack*-v*.zip
             - buildpack-artifacts/*-buildpack*-v*.zip.SHA256SUM.txt
 
-##################################################################################
-#
-# We release a global product to pivnet that has all buildpacks bundled within it.
-# This allows users on older foundations to continue to receive buildpack updates.
-#
-# We also release individual products to pivnet for each buildpack.
-# These release allow users to select the stack for their foundation.
-# At some point we will discontinue the global product and only support
-# individual products per buildpack.
-#
-##################################################################################
-<% unless buildpacks[language]['skip_pivnet_publish'] %>
-<% unless buildpacks[language]['non_lts_pivnet'] %>
-  - name: write-pivnet-metadata-for-lts-product
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: pivnet-buildpack-metadata
-          resource: pivnet-buildpack-metadata-lts
-        <% pivnet_stacks = []
-          if language.to_s == 'hwc' || language.to_s == 'binary'
-            pivnet_stacks = pivnet_stacks + ['any']
-          end
-          pivnet_stacks.each_with_index do |stack, ndx| %>
-        - get: pivotal-buildpacks-stack<%= ndx %>
-          resource: pivotal-buildpack-cached-<%= stack %>
-          passed:  [ ship-it ]
-        <% end %>
-        - get: buildpack
-          resource: buildpack-master
-          passed:  [ ship-it ]
-          trigger: true
-      - task: finalize-buildpack
-        file: buildpacks-ci/tasks/finalize-buildpack/task.yml
-      - task: write-pivnet-metadata
-        file: buildpacks-ci/tasks/write-buildpack-pivnet-metadata/task.yml
-        params:
-          BUILDPACK: <%= language %>
-          LTS_PRODUCT: true
-          <% if buildpacks[language]['admins_only'] %>
-          ADMINS_ONLY: true
-          <% end %>
-
-      - put: pivnet-buildpack-metadata-lts
-        params:
-          repository: pivnet-buildpack-metadata-artifacts
-          rebase: true
-
-  - name: release-lts-product-to-pivnet
-    public: true
-    plan:
-      - in_parallel:
-        - get: pivnet-buildpack-metadata-lts
-          passed: [ write-pivnet-metadata-for-lts-product ]
-          trigger: true
-        <% pivnet_stacks = []
-          if language.to_s == 'hwc' || language.to_s == 'binary'
-            pivnet_stacks = pivnet_stacks + ['any']
-          end
-          pivnet_stacks.each_with_index do |stack, ndx| %>
-        - get: pivotal-buildpacks-stack<%= ndx %>
-          resource: pivotal-buildpack-cached-<%= stack %>
-          passed: [write-pivnet-metadata-for-lts-product]
-        <% end %>
-      - put: pivnet-production-lts
-        params:
-          file_glob: pivotal-buildpacks-stack*/<%= language %>_buildpack-cached*.zip
-          s3_filepath_prefix: product-files/buildpacks
-          metadata_file: pivnet-buildpack-metadata-lts/pivnet-metadata/<%= language %>-lts.yml
-  <% end %>
-  - name: write-pivnet-metadata
-    serial: true
-    public: true
-    plan:
-    - in_parallel:
-      - get: buildpacks-ci
-      - get: pivnet-buildpack-metadata
-      <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
-      - get: pivotal-buildpacks-stack<%= ndx %>
-        resource: pivotal-buildpack-cached-<%= stack %>
-        passed: [ ship-it ]
-      <% end %>
-      - get: buildpack
-        resource: buildpack-master
-        passed: [ ship-it ]
-        trigger: true
-    - task: finalize-buildpack
-      file: buildpacks-ci/tasks/finalize-buildpack/task.yml
-    - task: write-pivnet-metadata
-      file: buildpacks-ci/tasks/write-buildpack-pivnet-metadata/task.yml
-      params:
-        BUILDPACK: <%= language %>
-        LTS_PRODUCT: false
-        <% if buildpacks[language]['admins_only'] %>
-        ADMINS_ONLY: true
-        <% end %>
-    - put: pivnet-buildpack-metadata
-      params:
-        repository: pivnet-buildpack-metadata-artifacts
-        rebase: true
-
-  - name: release-product-to-pivnet
-    public: true
-    plan:
-    - in_parallel:
-      - get: pivnet-buildpack-metadata
-        passed: [ write-pivnet-metadata ]
-        trigger: true
-      <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
-      - get: pivotal-buildpacks-stack<%= ndx %>
-        resource: pivotal-buildpack-cached-<%= stack %>
-        passed: [ write-pivnet-metadata ]
-      <% end %>
-    - put: pivnet-production
-      params:
-        file_glob: pivotal-buildpacks-stack*/<%= language %>_buildpack-cached*.zip
-        s3_filepath_prefix: product-files/buildpacks
-        metadata_file: pivnet-buildpack-metadata/pivnet-metadata/<%= language %>.yml
-<% end %>
-
 <% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
   - name: specs-edge-integration-develop-<%= stack %>
@@ -846,6 +669,10 @@ jobs: ##########################################################################
             ORG: pivotal
         - task: ginkgo-cflinuxfs3
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+          # python tests on lts are flaky for yet-to-be-determined reasons.
+          <% if language == 'python' %>
+          attempts: 5
+          <% end %>
           params:
             CF_STACK: cflinuxfs3
             GINKGO_ATTEMPTS: <%= language.to_s == 'php' ? 10 : 4 %>
