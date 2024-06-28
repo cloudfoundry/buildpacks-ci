@@ -296,13 +296,6 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
         BUILDPACKS: <%= dep['buildpacks'].select{ |_, bp_data| bp_uses_line?(bp_data,line) }.keys.join(' ') %>
         GITHUB_TOKEN: ((buildpacks-github-token))
   <% else %>
-    - task: create-tracker-story
-      file: buildpacks-ci/tasks/build-binary-new/create.yml
-      params:
-        TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
-        TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
-        TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-        BUILDPACKS: <%= dep['buildpacks'].select{ |_, bp_data| bp_uses_line?(bp_data,line) }.keys.join(' ') %>
     - put: builds
       params:
         repository: builds-artifacts

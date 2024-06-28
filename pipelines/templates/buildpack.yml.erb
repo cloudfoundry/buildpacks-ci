@@ -103,14 +103,6 @@ resources: #####################################################################
     source:
       uri: https://github.com/cloudfoundry/cf-deployment
 
-  - name: buildpack-develop-with-version-and-changelog
-    type: git
-    webhook_token: ob0aigh3
-    source:
-      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: {{<%= language %>-buildpack-private-key}}
-      branch: develop
-
   - name: buildpack-new-version
     type: git
     source:
@@ -259,20 +251,6 @@ resources: #####################################################################
       compatibility-mode: environments-app
 <% end %>
 
-  ## Alerts ##
-
-  - name: daily-midnight
-    type: cron
-    source:
-      expression: 0 0 * * *
-      location: {{current-timezone}}
-
-  - name: first-of-month
-    type: cron
-    source:
-      expression: 0 0 1 * *
-      location: {{current-timezone}}
-
 jobs: ################################################################################################################
 <% if language == "php" %>
   - name: ensure-manifest-has-modules
@@ -309,47 +287,6 @@ jobs: ##########################################################################
             params:
               DOCKER_START: true
 <% end %>
-
-  - name: create-buildpack-release-story
-    serial: true
-    public: true
-    plan:
-      - get: first-of-month
-        trigger: true
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: buildpack-develop
-          resource: buildpack-develop-with-version-and-changelog
-      - do:
-        - task: create-buildpack-release-story
-          file: buildpacks-ci/tasks/create-buildpack-release-tracker-story/task.yml
-          params:
-            BUILDPACK_NAME: <%= language %>
-            TRACKER_PROJECT_ID: '{{cf-buildpacks-private-tracker-id}}'
-            RELENG_TRACKER_PROJECT_ID: '{{cf-buildpacks-rel-eng-tracker-id}}'
-            TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            BEFORE_STORY_ID: '{{cf-buildpacks-buildpack-release-marker-story-id}}'
-
-  - name: create-deprecation-stories
-    serial: true
-    public: true
-    plan:
-      - get: daily-midnight
-        trigger: true
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: buildpack
-          resource: buildpack-develop
-      - do:
-        - task: create-deprecation-stories
-          file: buildpacks-ci/tasks/create-buildpack-deprecation-tracker-story/task.yml
-          params:
-            BUILDPACK_NAME: <%= language %>
-            TRACKER_PROJECT_ID: '{{cf-buildpacks-private-tracker-id}}'
-            TRACKER_REQUESTER_ID: '{{cf-buildpacks-requester-id}}'
-            TRACKER_API_TOKEN: {{pivotal-tracker-api-token}}
-            BEFORE_STORY_ID: '{{cf-buildpacks-deprecation-release-marker-story-id}}'
 
   - name: detect-new-version-and-upload-artifacts
     serial: true

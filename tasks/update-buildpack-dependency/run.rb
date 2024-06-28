@@ -31,9 +31,6 @@ resource_version = data.dig('version', 'ref')
 manifest_name = source_name == 'nginx-static' ? 'nginx' : source_name
 buildpack_name = manifest['language'].downcase
 
-# create story is one-per-version; it creates the json file with the tracker ID
-story_id = JSON.parse(open("builds/binary-builds-new/#{source_name}/#{resource_version}.json").read)['tracker_story_id']
-
 removal_strategy = ENV['REMOVAL_STRATEGY']
 version_line = ENV['VERSION_LINE']
 version_line_type = ENV['VERSION_LINE_TYPE']
@@ -352,5 +349,5 @@ Dir.chdir('artifacts') do
     GitClient.add_file(path_to_extensions)
   end
 
-  GitClient.safe_commit("#{commit_message} [##{story_id}]")
+  GitClient.safe_commit("#{commit_message}")
 end

@@ -13,16 +13,6 @@ describe Commit do
       obj = described_class.new({"subject"=>"Hi Mom", "body"=>"Rock climbing\nrocks"})
       expect(obj.to_s).to eq "* Hi Mom\n  Rock climbing\n  rocks"
     end
-
-    it 'extracts story from subject' do
-      obj = described_class.new({"subject"=>"Hi Dad [#6789]"})
-      expect(obj.to_s).to eq "* Hi Dad\n  (https://www.pivotaltracker.com/story/show/6789)"
-    end
-
-    it 'extracts story from body' do
-      obj = described_class.new({"subject"=>"Hi Dad", "body"=>"Parachuting is awesome\n[#4321]"})
-      expect(obj.to_s).to eq "* Hi Dad\n  Parachuting is awesome\n  (https://www.pivotaltracker.com/story/show/4321)"
-    end
   end
 
   describe '.recent' do
