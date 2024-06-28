@@ -92,7 +92,7 @@ resources: #####################################################################
     webhook_token: ob0aigh3
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: {{<%= language %>-buildpack-private-key}}
+      private_key: ((cloudfoundry-<%= language %>-buildpack-deploy-key.private_key))
       branch: develop
       ignore_paths:
         - VERSION
@@ -107,7 +107,7 @@ resources: #####################################################################
     type: git
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: {{<%= language %>-buildpack-private-key}}
+      private_key: ((cloudfoundry-<%= language %>-buildpack-deploy-key.private_key))
       branch: develop
       paths:
         - VERSION
@@ -117,7 +117,7 @@ resources: #####################################################################
     type: git
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: {{<%= language %>-buildpack-private-key}}
+      private_key: ((cloudfoundry-<%= language %>-buildpack-deploy-key.private_key))
       branch: master
 
   - name: buildpacks-ci
@@ -143,7 +143,7 @@ resources: #####################################################################
     type: git
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack-release.git
-      private_key: {{<%= language %>-buildpack-bosh-release-private-key}}
+      private_key: ((cloudfoundry-<%= language %>-buildpack-bosh-release-deploy-key))
       branch: master
 <% end %>
   - name: env-repo
@@ -151,7 +151,7 @@ resources: #####################################################################
     source:
       uri: git@github.com:cloudfoundry/buildpacks-envs
       branch: master
-      private_key: {{buildpacks-envs-private-key}}
+      private_key: '((cloudfoundry-buildpacks-envs-deploy-key.private_key))'
 
 
   ## Github Releases ##
@@ -161,7 +161,7 @@ resources: #####################################################################
     source:
       user: {{buildpacks-github-org}}
       repository: <%= language %>-buildpack
-      access_token: {{buildpacks-github-token}}
+      access_token: ((buildpacks-github-token))
 
 <% if language == 'hwc' %>
   - name: buildpack-bosh-release-github-release
@@ -169,7 +169,7 @@ resources: #####################################################################
     source:
       user: {{buildpacks-github-org}}
       repository: <%= language %>-buildpack-release
-      access_token: {{buildpacks-github-token}}
+      access_token: ((buildpacks-github-token))
 <% end %>
 
 <% if buildpacks[language]['compile_extensions'] %>
@@ -178,7 +178,7 @@ resources: #####################################################################
     source:
       user: {{buildpacks-github-org}}
       repository: buildpack-packager
-      access_token: {{buildpacks-github-token}}
+      access_token: ((buildpacks-github-token))
 <% end %>
 
   ## S3 Buckets ##
@@ -440,7 +440,7 @@ jobs: ##########################################################################
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 3
             <% if language == 'php' %>
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            COMPOSER_GITHUB_OAUTH_TOKEN: '((composer-github-oauth-token))'
             <% end %>
             <% if buildpacks[language]['skip_docker_start'] %>
             SKIP_DOCKER_START: true
@@ -564,7 +564,7 @@ jobs: ##########################################################################
           task: github-set-status-success
           file: buildpacks-ci/tasks/set-status-success/task.yml
           params:
-            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+            GITHUB_ACCESS_TOKEN: ((buildpacks-github-token))
             GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-develop'
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge develop spec passed'
@@ -616,7 +616,7 @@ jobs: ##########################################################################
             GINKGO_NODES: <%= low_nodes_lts.include?(language.to_s) ? 2 : 3 %>
             SKIP_WINDOWS_TESTS: true
             <% if language == 'php' %>
-            COMPOSER_GITHUB_OAUTH_TOKEN: {{composer-github-oauth-token}}
+            COMPOSER_GITHUB_OAUTH_TOKEN: '((composer-github-oauth-token))'
             <% end %>
 <% if buildpacks[language]['skip_docker_start'] %>
             SKIP_DOCKER_START: true
@@ -698,7 +698,7 @@ jobs: ##########################################################################
           task: github-set-status-success
           file: buildpacks-ci/tasks/set-status-success/task.yml
           params:
-            GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+            GITHUB_ACCESS_TOKEN: ((buildpacks-github-token))
             GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-develop'
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI lts develop spec passed'
@@ -716,7 +716,7 @@ jobs: ##########################################################################
       - task: merge-to-master
         file: buildpacks-ci/tasks/buildpack-to-master/task.yml
         params:
-          GITHUB_ACCESS_TOKEN: {{buildpacks-github-token}}
+          GITHUB_ACCESS_TOKEN: ((buildpacks-github-token))
           GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
           GITHUB_STATUS_CONTEXT: 'buildpacks-ci/passed-dev-specs'
           GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI develop specs passed'

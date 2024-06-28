@@ -63,15 +63,7 @@ succeeds in packaging successive versions.
 
 ## Running the Test Suite
 
-If you are running the full test suite, some of the integration tests are dependent on the Lastpass CLI and correctly targeting the fly CLI.
-
-To login to the Lastpass CLI:
-
-```sh
-lpass login $USERNAME
-```
-
-You will then be prompted for your Lastpass password and Google Authenticator Code.
+If you are running the full test suite, some of the integration tests are dependent on correctly targeting the fly CLI.
 
 To login to the Fly CLI and target the buildpacks CI:
 
