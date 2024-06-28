@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-echo   This file is here to show that the ShellChecker does not try to inspect dotfiles.
-echo   It should not be used as a script. The shebang line is there to ensure it gets
-echo   picked up if no additional "ignore dotfiles" logic is implemented.
