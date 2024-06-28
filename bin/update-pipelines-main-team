@@ -11,7 +11,7 @@ login() {
 }
 
 check_login_status() {
-  current_team="$(yq r ~/.flyrc targets.buildpacks.team)"
+  current_team="$(yq '.targets.buildpacks.team' ~/.flyrc )"
   if [[ "${current_team}" != "main" ]]; then
     login
   fi
