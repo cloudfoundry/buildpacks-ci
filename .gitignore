@@ -12,7 +12,5 @@ deployments/concourse-gcp/bosh-init/bosh.yml
 deployments/concourse-gcp-terraform/concourse.tf
 deployments/concourse-gcp-terraform/terraform.tfstate
 deployments/concourse-gcp-terraform/terraform.tfstate.backup
-cve-notification-app/actions/**/entrypoint/entrypoint
-cve-notification-app/.bin/
 **cves.json
 .vscode/
