@@ -619,7 +619,6 @@ class Builder
     end
 
     out_data = {
-      tracker_story_id: build_input.tracker_story_id,
       version: source_input.version,
       source: {
         url: source_input.url,
@@ -1112,7 +1111,7 @@ class Builder
 
     unless skip_commit
       build_output.add_output("#{source_input.version}-#{stack}.json", out_data)
-      build_output.commit_outputs("Build #{source_input.name} - #{source_input.version} - #{stack} [##{build_input.tracker_story_id}]")
+      build_output.commit_outputs("Build #{source_input.name} - #{source_input.version} - #{stack}")
     end
 
     dep_metadata_output.write_metadata(out_data[:url], out_data)

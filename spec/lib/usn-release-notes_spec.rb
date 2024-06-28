@@ -30,7 +30,7 @@ describe UsnReleaseNotes do
     context 'using a valid usn_id' do
       subject { described_class.new(usn_id) }
 
-      it 'raises an exception without posting to Tracker' do
+      it 'raises an exception without making HTTP connections' do
         expect(subject.usn_title).not_to be_empty
       end
     end

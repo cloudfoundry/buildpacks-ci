@@ -26,12 +26,3 @@ This directory contains a number of other files as well:
 
 * PHP extension yamls: each version line of PHP has it's own list of related
   extensions that we compile
-
-* create-new-version-line-story: task for creating Tracker stories when new
-  version lines are released
-
-* create: task for creating Tracker stories when new patches of already tracked
-  versions come out
-
-* accept: task for auto-accepting Tracker stories that get created
-

@@ -71,7 +71,6 @@ describe 'Builder' do
           expect(dep_metadata_output).to receive(:write_metadata)
             .with('fake-url', any_args)
 
-          allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
           expect(build_input).to receive(:copy_to_build_output)
 
           allow(Sha).to receive(:get_sha_from_text_file)
@@ -86,7 +85,6 @@ describe 'Builder' do
           expect(build_output).to receive(:add_output)
             .with("#{input.version}-cflinuxfs2.json",
               {
-                tracker_story_id: 'fake-story-id',
                 version:          input.version,
                 source:           { url: 'https://fake.com', md5: 'fake-md5', sha256: 'some-bogus-sha256' },
                 sha256:           'fake-sha256',
@@ -152,7 +150,6 @@ describe 'Builder' do
         allow(binary_builder).to receive(:build)
 
         allow(build_input).to receive(:copy_to_build_output)
-        allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
 
         allow(build_output).to receive(:add_output)
         allow(build_output).to receive(:commit_outputs)
@@ -174,7 +171,6 @@ describe 'Builder' do
 
         expect(build_output).to have_received(:add_output)
           .with('7.3.0-cflinuxfs3.json',
-                tracker_story_id: 'fake-story-id',
                 version:          '7.3.0',
                 source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
                 sha256:           'fake-sha256',
@@ -197,7 +193,6 @@ describe 'Builder' do
     before do
       allow(binary_builder).to receive(:base_dir).and_return '/fake-binary-builder'
 
-      allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
       expect(build_input).to receive(:copy_to_build_output)
 
       expect(dep_metadata_output).to receive(:write_metadata)
@@ -209,7 +204,6 @@ describe 'Builder' do
         expect(build_output).to receive(:add_output)
           .with("1.0.2-cflinuxfs2.json",
             {
-              tracker_story_id: 'fake-story-id',
               version:          '1.0.2',
               source:           { url: 'fake-url', md5: nil, sha256: 'fake-sha256' },
               sha256:           'fake-sha256',
@@ -238,7 +232,6 @@ describe 'Builder' do
         expect(build_output).to receive(:add_output)
           .with("1.0.2-cflinuxfs2.json",
             {
-              tracker_story_id: 'fake-story-id',
               version:          '1.0.2',
               source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
               sha256:           'fake-sha256',
@@ -294,7 +287,6 @@ describe 'Builder' do
         expect(build_output).to receive(:add_output)
                                     .with("1.0.2-cflinuxfs3.json",
                                           {
-                                              tracker_story_id: 'fake-story-id',
                                               version:          '1.0.2',
                                               source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
                                               sha256:           'fake-sha256',
@@ -328,7 +320,6 @@ describe 'Builder' do
         expect(build_output).to receive(:add_output)
           .with("1.0.2-cflinuxfs2.json",
             {
-              tracker_story_id: 'fake-story-id',
               version:          '1.0.2',
               source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
               sha256:           'fake-sha256',
@@ -438,7 +429,6 @@ describe 'Builder' do
           expect(build_output).to receive(:add_output)
                                     .with("1.0.2-cflinuxfs2.json",
                                       {
-                                        tracker_story_id: 'fake-story-id',
                                         version:          '1.0.2',
                                         source:           { url: 'https://fake.com', md5: nil, sha256: 'fake-sha256' },
                                         sha256:           'fake-sha256',
@@ -517,7 +507,6 @@ describe 'Builder' do
     let(:source_input) { SourceInput.new('CAAPM', 'fake-url', '1.0.2', nil, 'fake-sha256') }
 
     before do
-      allow(build_input).to receive(:tracker_story_id).and_return 'fake-story-id'
       expect(build_output).not_to receive(:add_output)
       expect(build_output).not_to receive(:commit_outputs)
 
