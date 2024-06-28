@@ -1,14 +1,5 @@
 ---
 resource_types:
-  - name: cf-tracker-resource
-    type: docker-image
-    source:
-      repository: cfbuildpacks/cf-tracker-resource
-      tag: latest
-  - name: email-sender
-    type: docker-image
-    source:
-      repository: pcfseceng/email-resource
   - name: cron
     type: docker-image
     source:

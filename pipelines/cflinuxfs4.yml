@@ -677,25 +677,6 @@ jobs:
         rebase: true
     on_failure: #@ failure_alert()
 
-- name: finalize-security-notices
-  serial: true
-  public: true
-  plan:
-  - in_parallel:
-    - get: buildpacks-ci
-      resource: buildpacks-ci
-    - get: version
-      trigger: true
-      passed: [ upload-to-github ]
-  - do:
-    - task: finalize-security-notices
-      file: buildpacks-ci/tasks/finalize-security-notice-stories/task.yml
-      attempts: 20
-      params:
-        TRACKER_PROJECT_ID: 2537714
-        TRACKER_REQUESTER_ID: 1431988
-        TRACKER_API_TOKEN: ((pivotal-tracker-api-token))
-        STACK: cflinuxfs4
 
 - name: upload-to-docker
   serial: true
