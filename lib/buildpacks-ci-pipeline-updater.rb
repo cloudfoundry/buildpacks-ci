@@ -71,7 +71,6 @@ class BuildpacksCIPipelineUpdater
   end
 
   def run!(args)
-    check_if_lastpass_installed
     options = parse_args(args)
 
     update_standard_pipelines(options) unless options.has_key?(:template)
@@ -116,9 +115,5 @@ class BuildpacksCIPipelineUpdater
       raise 'Your config/bosh-lite/*.yml files must be named in the following manner: edge-1.yml, edge-2.yml, lts-1.yml, lts-2.yml, etc.'
     end
     matches[1]
-  end
-
-  def check_if_lastpass_installed
-    raise '`brew install lastpass-cli` is required' if `which lpass` == ''
   end
 end
