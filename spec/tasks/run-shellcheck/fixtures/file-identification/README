@@ -1,5 +1,0 @@
-This directory is here to support the ShellChecker spec.
-
-It contains a mix of files that will and won't be matched and processed.
-
-For example, this file should not be matched.
