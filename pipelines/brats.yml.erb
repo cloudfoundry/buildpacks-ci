@@ -54,7 +54,7 @@ resources:
     source:
       uri: git@github.com:cloudfoundry/buildpacks-envs
       branch: master
-      private_key: {{buildpacks-envs-private-key}}
+      private_key: '((cloudfoundry-buildpacks-envs-deploy-key.private_key))'
 
   - name: shepherd-tas-<%= tas_version %>-environment
     type: shepherd
@@ -91,7 +91,7 @@ resources:
     webhook_token: ob0aigh3
     source:
       uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
-      private_key: {{<%= language %>-buildpack-private-key}}
+      private_key: ((cloudfoundry-<%= language %>-buildpack-deploy-key))
       branch: master
 <% end %>
 

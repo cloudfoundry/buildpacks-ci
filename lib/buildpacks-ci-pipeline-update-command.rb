@@ -18,14 +18,6 @@ class BuildpacksCIPipelineUpdateCommand
       raise 'Failed to run config generation command'
     end
 
-    secrets_cmd = [
-      buildpacks_configuration.concourse_private_filename,
-      buildpacks_configuration.repos_private_keys_filename,
-      buildpacks_configuration.git_repos_private_keys_filename,
-      buildpacks_configuration.git_repos_private_keys_three_filename,
-      buildpacks_configuration.bosh_release_private_keys_filename,
-    ].map { |name| "lpass show #{name} --notes"}.join(' && ')
-
     pipeline_specific_config = ""
     pipeline_specific_config ="--load-vars-from=#{pipeline_variable_filename}" unless pipeline_variable_filename.empty?
     fly_cmd = %{bash -c "fly \
@@ -33,7 +25,6 @@ class BuildpacksCIPipelineUpdateCommand
       set-pipeline \
       --pipeline=#{pipeline_prefix}#{pipeline_name} \
       --config=<(#{config_generation_command}) \
-      --load-vars-from=<(#{secrets_cmd}) \
       --load-vars-from=public-config.yml \
     #{pipeline_specific_config}
     "}

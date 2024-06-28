@@ -24,3 +24,4 @@ oracle-client-libs-s3-bucket: buildpacks-oracle-client-libs
 public-buildpacks-ci-robots-git-uri-public: https://github.com/cloudfoundry/public-buildpacks-ci-robots
 run-oracle-php-tests: true
 builder_release_marker_story_number: 170428386
+rubygem-mirror: https://rubygems.org
