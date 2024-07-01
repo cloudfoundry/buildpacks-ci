@@ -16,11 +16,6 @@ resource_types:
   source:
     repository: cfbuildpacks/cron-resource
 
-- name: slack-notification
-  type: docker-image
-  source:
-    repository: cfcommunity/slack-notification-resource
-
 - name: bosh-deployment
   type: docker-image
   source:
@@ -237,11 +232,6 @@ resources:
   source:
     expression: "32 09 * * *"
     location: America/New_York
-
-- name: failure-alert
-  type: slack-notification
-  source:
-    url: ((concourse-job-failure-notifications-slack-webhook))
 
 jobs:
 - name: new-rootfs-cves
