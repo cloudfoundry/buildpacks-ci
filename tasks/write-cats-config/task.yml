@@ -11,10 +11,7 @@ inputs:
 outputs:
   - name: integration-config
 run:
-  path: bash
-  args:
-    - "-cl"
-    - "buildpacks-ci/tasks/write-cats-config/run.rb"
+  path: "buildpacks-ci/tasks/write-cats-config/run.rb"
 params:
   APPS_DOMAIN:
   DIEGO_DOCKER_ON:
