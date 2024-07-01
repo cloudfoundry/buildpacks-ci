@@ -19,7 +19,3 @@ run:
       rsync -a new-cves/ output-new-cves
 
       cd buildpacks-ci && bundle exec ./tasks/check-for-new-rootfs-cves-cflinuxfs4/run.rb
-
-params:
-  SLACK_CHANNEL:
-  SLACK_WEBHOOK:
