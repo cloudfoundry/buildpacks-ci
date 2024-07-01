@@ -59,25 +59,6 @@ e.g. https://pivotal-buildpacks.s3.amazonaws.com/dependencies/ruby/ruby-2.2.2-li
 Note that the array is a stack, which will be emptied as the build
 succeeds in packaging successive versions.
 
-
-## Running the Test Suite
-
-If you are running the full test suite, some of the integration tests are dependent on correctly targeting the fly CLI.
-
-To login to the Fly CLI and target the buildpacks CI:
-
-```sh
-fly -t buildpacks login
-```
-
-You will be prompted to select either the Github or Basic Auth authentication methods.
-
-After these are set up, you will be able to run the test suite via:
-
-```sh
-rspec
-```
-
 ## Making Changes to Build Scripts
 
 When you want to change how a binary gets built, there are two places you may need to make changes. All binaries are built by the `dependency-builds` pipeline, and you may need to change the task that builds them. For many binaries, the `dependency-builds` pipeline runs recipes from the `binary-builder` repo; for those binaries, you will usually need to change the recipe rather than the concourse task.
