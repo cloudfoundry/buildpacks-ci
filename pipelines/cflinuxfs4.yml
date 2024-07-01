@@ -1,14 +1,5 @@
 #@ buildpacks = ["binary", "dotnet-core", "go", "java", "nodejs", "php", "python", "ruby", "staticfile"]
 
-#@ def failure_alert():
-put: failure-alert
-params:
-  text: "$BUILD_PIPELINE_NAME $BUILD_JOB_NAME job on Concourse failed! \n Check: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME"
-  channel: "#buildpacks-firehose"
-  username: concourse
-  icon_url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-#@ end
-
 ---
 resource_types:
 - name: cron
@@ -330,7 +321,6 @@ jobs:
         tag: git-tags/TAG
     - put: version
       params: { file: version/number }
-    on_failure: #@ failure_alert()
 
 - name: bbl-up
   serial: true
@@ -472,7 +462,6 @@ jobs:
         - capi-release-artifacts/use-dev-release-opsfile.yml
         vars:
           system_domain: cflinuxfs4.buildpacks-gcp.ci.cf-app.com
-    on_failure: #@ failure_alert()
 
 - name: cats
   serial: true
@@ -519,7 +508,6 @@ jobs:
         CONFIG_FILE_PATH: integration_config.json
         SKIP_REGEXP: "Specifying a specific Stack"
         FLAKE_ATTEMPTS: 3
-    on_failure: #@ failure_alert()
 
 - name: check-for-race-condition
   serial: true
@@ -651,7 +639,6 @@ jobs:
         to: /rootfs/
     - put: version
       params: { file: version/number }
-    on_failure: #@ failure_alert()
 
 - name: reset-minor-version-to-rc
   serial: true
@@ -699,7 +686,6 @@ jobs:
       params:
         repository: new-cves-artifacts
         rebase: true
-    on_failure: #@ failure_alert()
 
 
 - name: upload-to-docker
@@ -725,7 +711,6 @@ jobs:
           import_file: docker-s3/cflinuxfs4.tar.gz
           tag: version/number
           tag_as_latest: true
-    on_failure: #@ failure_alert()
 
 - name: create-cflinuxfs4-release
   serial: true
@@ -768,4 +753,3 @@ jobs:
         body: release-body/body
         globs:
           - release-artifacts/releases/cflinuxfs4/*.tgz
-    on_failure: #@ failure_alert()
