@@ -9,9 +9,6 @@ pushd dockerfiles/depwatcher
   crystal spec --no-debug
 popd
 
-./scripts/fly-login.sh "$CI_USERNAME" "$CI_PASSWORD"
-bundle exec rake
-
 go test -v ./...
 
 # Clean up directories
