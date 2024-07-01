@@ -66,6 +66,7 @@ if windows_stack != '' && windows_stack != nil
 end
 
 if diego_docker_on == 'true'
+  puts "Diego Docker is enabled. Ensuring we can log in to the CF API."
   exit 1 unless system "cf api api.#{apps_domain} --skip-ssl-validation"
   exit 1 unless system "echo \"\" | cf login -u #{admin_user} -p #{admin_password}"
 end
