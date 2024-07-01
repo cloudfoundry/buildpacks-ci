@@ -10,7 +10,6 @@ This contains the configuration for the Cloud Foundry Buildpacks team [Concourse
 * [buildpack-verification](pipelines/buildpack-verification.yml.erb): generate static site for buildpack verification
 * [buildpacks-ci](pipelines/buildpacks-ci.yml): testing tasks for correct usage, rebuild CI docker images
 * [cf-release](pipelines/cf-release.yml.erb): deployment of latest buildpacks to cf-release develop
-* [notifications](pipelines/notifications.yml): monitor upstream sources for changes and notify on Slack
 
 # Concourse State
 
