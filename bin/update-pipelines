@@ -1,6 +1,48 @@
-#!/usr/bin/env ruby
-# encoding: utf-8
+#!/usr/bin/env bash
 
-require_relative '../lib/buildpacks-ci-pipeline-updater'
+set -euo pipefail
 
-BuildpacksCIPipelineUpdater.new.run!(ARGV)
+MY_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "${MY_DIR}/.." && pwd)"
+target="buildpacks"
+team="main"
+filter=
+
+login() {
+  fly -t "$target" login -n "${team}" -b
+}
+
+check_login_status() {
+  current_team="$(yq e .targets.buildpacks.team ~/.flyrc)"
+  if [[ "${current_team}" != "${team}" ]]; then
+    login
+  fi
+
+  fly -t "$target" status >/dev/null 2>&1 || login
+}
+
+set_pipelines() {
+  for pipeline_dir in "$REPO_ROOT"/pipelines/*; do
+    pipeline_name="$(basename "${pipeline_dir%.yml}")"
+    if [[ $filter != "" ]] && [[ ! $pipeline_name =~ $filter ]]; then
+      continue
+    fi
+
+    echo "Setting $pipeline_name"
+    pipeline_config="$(ytt -f "$pipeline_dir")"
+    fly -t "$target" set-pipeline -p "$pipeline_name" -c <(echo "$pipeline_config")
+  done
+}
+
+main() {
+  if [ "$#" -eq 1 ]; then
+    filter="$1"
+  fi
+
+  check_login_status
+  set_pipelines
+
+  "${MY_DIR}/update-pipelines-erb"
+}
+
+main "$@"
