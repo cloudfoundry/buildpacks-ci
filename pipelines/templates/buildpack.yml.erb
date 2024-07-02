@@ -139,7 +139,7 @@ resources: #####################################################################
     type: git
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack-release.git
-      private_key: ((cloudfoundry-<%= language %>-buildpack-bosh-release-deploy-key))
+      private_key: ((cloudfoundry-<%= language %>-buildpack-bosh-release-deploy-key.private_key))
       branch: master
 <% end %>
   - name: env-repo
