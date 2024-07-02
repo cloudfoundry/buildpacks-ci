@@ -29,13 +29,6 @@ resources:
     uri: #@ "https://github.com/cloudfoundry/{}-buildpack-release.git".format(buildpack)
 #@ end
 
-- name: cf-deployment-concourse-tasks
-  type: git
-  source:
-    branch: main
-    uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-    tag_filter: v8.*
-
 - name: cf-deployment-concourse-tasks-latest
   type: git
   source:
@@ -410,6 +403,7 @@ jobs:
       - get: cf-deployment
       - get: gcp-stemcell
       - get: cf-deployment-concourse-tasks
+        resource: cf-deployment-concourse-tasks-latest
       - get: bosh-deployment
 #@ for buildpack in buildpacks:
       - get: #@ buildpack + "-buildpack-release"
