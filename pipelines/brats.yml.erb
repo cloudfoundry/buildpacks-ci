@@ -91,7 +91,7 @@ resources:
     webhook_token: ob0aigh3
     source:
       uri: git@github.com:cloudfoundry/<%= language %>-buildpack.git
-      private_key: ((cloudfoundry-<%= language %>-buildpack-deploy-key))
+      private_key: ((cloudfoundry-<%= language %>-buildpack-deploy-key.private_key))
       branch: master
 <% end %>
 
