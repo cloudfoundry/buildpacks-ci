@@ -51,7 +51,11 @@ class RootfsReleaseNotesCreator
     diffy = Diffy::Diff.new(@old_receipt_file, @new_receipt_file, source: 'files', diff: '-b') or raise 'Could not create Diffy::Diff'
     receipt_diff_array = parse_diffy_output(diffy)
     receipt_diff = format_diff(receipt_diff_array) unless receipt_diff_array.empty?
-    "```\n#{receipt_diff}```\n" if receipt_diff
+    if receipt_diff
+      "```\n#{receipt_diff}```\n"
+    else
+      ""
+    end
   end
 
   def new_packages?
