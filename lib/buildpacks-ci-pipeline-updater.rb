@@ -17,6 +17,8 @@ class BuildpacksCIPipelineUpdater
     Dir['pipelines/*.{erb,yml}'].each do |filename|
       pipeline_name = File.basename(filename).split('.')[0]
 
+      next if pipeline_name.include?('cflinuxfs4')
+
       BuildpacksCIPipelineUpdateCommand.new.run!(
         concourse_target_name: concourse_target_name,
         pipeline_name: pipeline_name,
@@ -48,34 +50,11 @@ class BuildpacksCIPipelineUpdater
     end
   end
 
-  def update_rootfs_pipelines(options)
-    header('For rootfs pipelines')
-
-    buildpacks_configuration = BuildpacksCIConfiguration.new
-    concourse_target_name = buildpacks_configuration.concourse_target_name
-    organization = buildpacks_configuration.organization
-
-    Dir['config/rootfs/*.yml'].each do |pipeline_variables_filename|
-      next if options.has_key?(:template) && !pipeline_variables_filename.include?(options[:template])
-
-      rootfs_name = File.basename(pipeline_variables_filename, '.yml')
-
-      BuildpacksCIPipelineUpdateCommand.new.run!(
-        concourse_target_name: concourse_target_name,
-        pipeline_name: rootfs_name,
-        config_generation_command: "erb rootfs_name=#{rootfs_name} cve_notification_file=ubuntu18.04.yml pipelines/templates/cflinuxfsn.yml.erb",
-        pipeline_variable_filename: pipeline_variables_filename,
-        options: options
-      )
-    end
-  end
-
   def run!(args)
     options = parse_args(args)
 
     update_standard_pipelines(options) unless options.has_key?(:template)
     update_buildpack_pipelines(options)
-    update_rootfs_pipelines(options)
 
     puts 'Thanks, The Buildpacks Team'
   end
