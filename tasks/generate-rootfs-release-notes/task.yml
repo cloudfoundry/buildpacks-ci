@@ -14,10 +14,7 @@ outputs:
   - name: release-body
   - name: new-cves-artifacts
 run:
-  path: bash
-  args:
-    - "-cl"
-    - "buildpacks-ci/tasks/generate-rootfs-release-notes/run.rb"
+  path: buildpacks-ci/tasks/generate-rootfs-release-notes/run.rb
 params:
   STACK:
   STACK_REPO:

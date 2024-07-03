@@ -13,9 +13,6 @@ outputs:
   - name: public-robots-artifacts
   - name: git-tags
 run:
-  path: bash
-  args:
-    - "-cl"
-    - "buildpacks-ci/tasks/generate-rootfs-receipt-diff/run.rb"
+  path: buildpacks-ci/tasks/generate-rootfs-receipt-diff/run.rb
 params:
   STACK:
