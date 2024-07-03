@@ -30,24 +30,17 @@ module Depwatcher
       retries = 0
 
       while retries < max_retries
-        begin
-          sha_response = HTTP::Client.get("https://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2.sha256")
-          if sha_response.status_code != 200
-            puts "Attempt #{retries + 1}: Received status #{sha_response.status_code}, retrying..."
-            retries += 1
-            sleep(5)
-          else
-            puts "Success: Received status 200"
-            break
-          end
-        rescue ex
-          puts "Failed with error: #{ex.message}, retrying..."
+        sha_response = HTTP::Client.get("https://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2.sha256")
+        if sha_response.status_code != 200
+          retries += 1
+          sleep(5)
+        else
+          break
         end
       end
 
       unless sha_response.nil?
         sha256 = sha_response.body.split(" ")[0]
-        puts sha256
         Release.new(ref, "https://dlcdn.apache.org/httpd/httpd-#{ref}.tar.bz2", sha256)
       else
         raise "Could not retreive the page after #{max_retries} attempts"
