@@ -3,12 +3,6 @@
 
 ---
 resource_types:
-- name: pivnet
-  type: docker-image
-  source:
-    repository: pivotalcf/pivnet-resource
-    tag: latest-final
-
 - name: shepherd
   type: registry-image
   source:
@@ -52,11 +46,12 @@ resources:
         name: cfd
     compatibility-mode: environments-app
 
-- name: java-pivnet-production
-  type: pivnet
+- name: java-buildpack
+  type: github-release
   source:
-    api_token: ((pivnet-refresh-token))
-    product_slug: java-buildpack
+    user: cloudfoundry
+    repository: java-buildpack
+    access_token: ((buildpacks-github-token))
 
 #@ for language in data.values.supported_languages_without_java:
   #@ for stack in language.stacks:
@@ -162,7 +157,7 @@ jobs:
       resource: #@ language.name + "-buildpack-release"
   #@ if language.name == "java":
     - get: buildpack-stack0
-      resource: java-pivnet-production
+      resource: java-buildpack
       params:
         globs:
         - java-buildpack-v*.zip
