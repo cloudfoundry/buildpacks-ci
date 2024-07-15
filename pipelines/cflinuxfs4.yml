@@ -148,16 +148,16 @@ resources:
   source:
     bucket: buildpacks.cloudfoundry.org
     regexp: rootfs/cflinuxfs4-(.*).tar.gz
-    access_key_id: ((buildpacks.cloudfoundry.org-aws-access-key-id))
-    secret_access_key: ((buildpacks.cloudfoundry.org-aws-secret-access-key))
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
 - name: receipt-s3
   type: s3
   source:
     bucket: buildpacks.cloudfoundry.org
     regexp: rootfs/receipt.cflinuxfs4.x86_64-(.*)
-    access_key_id: ((buildpacks.cloudfoundry.org-aws-access-key-id))
-    secret_access_key: ((buildpacks.cloudfoundry.org-aws-secret-access-key))
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
 - name: cflinuxfs4-cf-deployment
   type: bosh-deployment
@@ -205,8 +205,8 @@ resources:
   source:
     bucket: buildpacks.cloudfoundry.org
     key: versions/stack-cflinuxfs4
-    access_key_id: ((buildpacks.cloudfoundry.org-aws-access-key-id))
-    secret_access_key: ((buildpacks.cloudfoundry.org-aws-secret-access-key))
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
 - name: check-interval
   type: cron
