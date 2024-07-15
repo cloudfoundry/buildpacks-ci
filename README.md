@@ -52,9 +52,9 @@ fly intercept -c $RESOURCE_NAME rm -rf /tmp/git-resource-repo-cache
 
 Build should automatically kick off at
 https://buildpacks.ci.cf-app.com/pipelines/binary-builder and silently
-upload a binary to the `pivotal-buildpacks` bucket under
+upload a binary to the `buildpacks.cloudfoundry.org` bucket under
 `dependencies/`,
-e.g. https://pivotal-buildpacks.s3.amazonaws.com/dependencies/ruby/ruby-2.2.2-linux-x64.tgz
+e.g. https://buildpacks.cloudfoundry.org.s3.amazonaws.com/dependencies/ruby/ruby-2.2.2-linux-x64.tgz
 
 Note that the array is a stack, which will be emptied as the build
 succeeds in packaging successive versions.
