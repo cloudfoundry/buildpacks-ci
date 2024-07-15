@@ -7,14 +7,14 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: buildpack
-  - name: pivotal-buildpacks-stack0
-  - name: pivotal-buildpacks-stack1
+  - name: uncached-buildpack-for-stack0
+  - name: uncached-buildpack-for-stack1
     optional: true
-  - name: pivotal-buildpacks-stack2
+  - name: uncached-buildpack-for-stack2
     optional: true
-  - name: pivotal-buildpacks-stack3
+  - name: uncached-buildpack-for-stack3
     optional: true
-  - name: pivotal-buildpacks-stack4
+  - name: uncached-buildpack-for-stack4
     optional: true
 caches:
   - path: buildpack/vendor
