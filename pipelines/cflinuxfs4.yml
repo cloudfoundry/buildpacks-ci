@@ -146,20 +146,18 @@ resources:
 - name: stack-s3
   type: s3
   source:
-    bucket: pivotal-buildpacks
+    bucket: buildpacks.cloudfoundry.org
     regexp: rootfs/cflinuxfs4-(.*).tar.gz
-    access_key_id: ((svc-buildpacks-aws-team-access-key))
-    secret_access_key: ((svc-buildpacks-aws-team-secret-key))
-    aws_role_arn: ((svc-buildpacks-aws-team-assume-role-arn))
+    access_key_id: ((buildpacks.cloudfoundry.org-aws-access-key-id))
+    secret_access_key: ((buildpacks.cloudfoundry.org-aws-secret-access-key))
 
 - name: receipt-s3
   type: s3
   source:
-    bucket: pivotal-buildpacks
+    bucket: buildpacks.cloudfoundry.org
     regexp: rootfs/receipt.cflinuxfs4.x86_64-(.*)
-    access_key_id: ((svc-buildpacks-aws-team-access-key))
-    secret_access_key: ((svc-buildpacks-aws-team-secret-key))
-    aws_role_arn: ((svc-buildpacks-aws-team-assume-role-arn))
+    access_key_id: ((buildpacks.cloudfoundry.org-aws-access-key-id))
+    secret_access_key: ((buildpacks.cloudfoundry.org-aws-secret-access-key))
 
 - name: cflinuxfs4-cf-deployment
   type: bosh-deployment
@@ -205,11 +203,10 @@ resources:
 - name: version
   type: semver-latest
   source:
-    bucket: pivotal-buildpacks
+    bucket: buildpacks.cloudfoundry.org
     key: versions/stack-cflinuxfs4
-    access_key_id: ((svc-buildpacks-aws-team-access-key))
-    secret_access_key: ((svc-buildpacks-aws-team-secret-key))
-    assume_role_arn: ((svc-buildpacks-aws-team-assume-role-arn))
+    access_key_id: ((buildpacks.cloudfoundry.org-aws-access-key-id))
+    secret_access_key: ((buildpacks.cloudfoundry.org-aws-secret-access-key))
 
 - name: check-interval
   type: cron

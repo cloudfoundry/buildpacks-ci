@@ -6,7 +6,7 @@ artifact_dir = File.join(Dir.pwd, 'buildpack-artifacts')
 version = File.read('buildpack/VERSION').strip
 
 buildpack_repo_dir = 'buildpack'
-uncached_buildpack_dirs = Dir.glob('pivotal-buildpacks*')
+uncached_buildpack_dirs = Dir.glob('uncached-buildpack-for-stack*')
 
 ENV['GOBIN']="#{File.expand_path(buildpack_repo_dir)}/.bin"
 ENV['PATH']="#{ENV['GOBIN']}:#{ENV['PATH']}"

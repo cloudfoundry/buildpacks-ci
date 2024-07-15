@@ -360,7 +360,7 @@ jobs: ##########################################################################
       - in_parallel:
         - get: buildpacks-ci
         <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
-        - get: pivotal-buildpacks-stack<%= ndx.to_s %>
+        - get: uncached-buildpack-for-stack<%= ndx.to_s %>
           resource: pivotal-buildpack-<%= stack %>
           passed: [ ship-it ]
         <% end %>
