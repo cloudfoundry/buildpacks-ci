@@ -207,8 +207,8 @@ private_key = '((cf-buildpacks-eng-github-ssh-key.private_key))'
   type: s3
   source:
     bucket: buildpacks.cloudfoundry.org
-    access_key_id: ((buildpacks.cloudfoundry.org-aws-access-key-id))
-    secret_access_key: ((buildpacks.cloudfoundry.org-aws-secret-access-key))
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
     # pip, go and libgdiplus have some versions of the form 'v1.2'; everyone else uses 'v1.2.3'
     regexp: dependencies/<%=dep_name%>/<%=dep_name == 'nginx-static' ? 'nginx' : dep_name %>.*?<%= (dep_name == 'pip' || dep_name == 'go' || dep_name == 'libgdiplus') ? '(\d+\.\d+(?:\.\d+)?)' : '(\d+\.\d+\.\d+)' %>(.*)
 <% end %>
