@@ -428,7 +428,7 @@ jobs: ##########################################################################
           params:
             DOMAIN: 'cf-app.com'
             ORG: pivotal
-        - task: ginkgo-<%= stack %>
+        - task: integration-test-<%= stack %>
           file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
           input_mapping: {cf-space: space}
           params:
@@ -443,63 +443,9 @@ jobs: ##########################################################################
             <% else %>
           privileged: true
             <% end %>
-    on_success:
-      put: environment
-      resource: shepherd-cf-environment
-      params:
-        action: release
-        resource: environment
-<% end %>
-
-<% unless buildpacks[language]['skip_brats'] %>
-  - name: specs-edge-brats-develop
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - put: environment
-          resource: shepherd-cf-environment
-          params:
-            action: create
-            duration: 6h
-            resource: shepherd-cf-environment
-            description: |
-              Running <%= language %>-buildpack specs-edge-brats-develop job.
-          timeout: 6h
-        - get: buildpacks-ci
-        - get: env-repo
-        - get: buildpack
-          resource: buildpack-develop
-          trigger: true
-          passed:
-          - specs-unit-develop
-        - get: cf-deployment
-      - task: redeploy
-        file: buildpacks-ci/tasks/cf/redeploy/task.yml
-        input_mapping:
-          ci: buildpacks-ci
-          lock: environment
-        params:
-<% if buildpacks[language]['stacks'].include?('cflinuxfs3')%>
-          ADD_CFLINUXFS3_STACK: true
-<% end %>
-<% if buildpacks[language]['stacks'].include?('windows')%>
-          DEPLOY_WINDOWS_CELL: true
-<% end %>
-<% relevant_stacks = buildpacks[language]['stacks'] %>
-<% relevant_stacks.each do |stack| %>
-      - do:
-        - task: create-cf-space
-          attempts: 5
-          file: buildpacks-ci/tasks/cf/create-space/task.yml
-          params:
-            DOMAIN: 'cf-app.com'
-            ORG: pivotal
-          input_mapping:
-            ci: buildpacks-ci
-            lock: environment
-<% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
-        - task: configure-test
+  <% unless buildpacks[language]['skip_brats'] %>
+    <% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
+        - task: configure-brats-test-config
           config:
             platform: linux
             image_resource:
@@ -522,7 +468,7 @@ jobs: ##########################################################################
                 contents="$(jq '.stack = "<%= stack %>"' config.json)"
                 echo -E "${contents}" > config.json
                 echo -e "config.json modified to:\n $(cat config.json)"
-<% end %>
+  <% end %>
         - task: brats-<%= stack %>
           file: buildpacks-ci/tasks/<%= language.to_s == 'php' ? 'run-bp-brats-jammy' : 'run-bp-brats' %>/task.yml
           input_mapping: {cf-space: space}
@@ -530,7 +476,7 @@ jobs: ##########################################################################
             CF_STACK: <%= stack %>
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 3
-<% end %>
+  <% end %>
     on_success:
       put: environment
       resource: shepherd-cf-environment
@@ -549,9 +495,6 @@ jobs: ##########################################################################
           resource: buildpack-develop
           trigger: true
           passed:
-<% unless buildpacks[language]['skip_brats'] %>
-          - specs-edge-brats-develop
-<% end %>
 <% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
           - specs-edge-integration-develop-<%= stack %>
@@ -619,6 +562,14 @@ jobs: ##########################################################################
 <% else %>
           privileged: true
 <% end %>
+<% unless buildpacks[language]['skip_brats'] %>
+        - task: brats-cflinuxfs3
+          file: buildpacks-ci/tasks/<%= language.to_s == 'php' ? 'run-bp-brats-jammy' : 'run-bp-brats' %>/task.yml
+          params:
+            CF_STACK: cflinuxfs3
+            GINKGO_ATTEMPTS: <%= language.to_s == 'php' ? 10 : 4 %>
+            GINKGO_NODES: 3
+<% end %>
         ensure:
           task: delete-cf-space
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
@@ -628,54 +579,7 @@ jobs: ##########################################################################
       params:
         action: release
         resource: environment
-<% unless buildpacks[language]['skip_brats'] %>
-  - name: specs-lts-brats-develop
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - put: environment
-          resource: shepherd-tas-<%= tas_version %>-environment
-          params:
-            action: create
-            duration: 6h
-            resource: shepherd-tas-<%= tas_version %>-environment
-            description: |
-              Running <%= language %>-buildpack specs-lts-brats-develop job.
-          timeout: 6h
-        - get: buildpacks-ci
-        - get: buildpack
-          resource: buildpack-develop
-          trigger: true
-          passed:
-          - specs-unit-develop
-      - task: configure-pas
-        file: buildpacks-ci/tasks/configure-pas/task.yml
-      <% if buildpacks[language]['compute_instance_count'] %>
-        params:
-          COMPUTE_INSTANCE_COUNT: <%= buildpacks[language]['compute_instance_count'] %>
-      <% end %>
-      - do:
-        - task: create-cf-space
-          file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
-          params:
-            ORG: pivotal
-        - task: brats-cflinuxfs3
-          file: buildpacks-ci/tasks/<%= language.to_s == 'php' ? 'run-bp-brats-jammy' : 'run-bp-brats' %>/task.yml
-          params:
-            CF_STACK: cflinuxfs3
-            GINKGO_ATTEMPTS: <%= language.to_s == 'php' ? 10 : 4 %>
-            GINKGO_NODES: 3
-        ensure:
-          task: delete-cf-space-cflinuxfs3
-          file: buildpacks-ci/tasks/delete-cf-space/task.yml
-    ensure:
-      put: environment
-      resource: shepherd-tas-<%= tas_version %>-environment
-      params:
-        action: release
-        resource: environment
-<% end %>
+
   - name: specs-lts-gcp-develop
     serial: true
     public: true
@@ -686,9 +590,6 @@ jobs: ##########################################################################
           resource: buildpack-develop
           trigger: true
           passed:
-<% unless buildpacks[language]['skip_brats'] %>
-          - specs-lts-brats-develop
-<% end %>
           - specs-lts-integration-develop
         on_success:
           task: github-set-status-success
