@@ -6,9 +6,6 @@ buildpack-packager-git-uri-public: https://github.com/cloudfoundry/buildpack-pac
 buildpack-packager-git-uri: git@github.com:cloudfoundry/buildpack-packager.git
 buildpack-release-candidates-bucket: buildpack-release-candidates
 buildpackapplifecycle-git-branch: develop
-buildpacks-ci-git-uri-public-branch: master
-buildpacks-ci-git-uri-public-develop-branch: develop
-buildpacks-ci-git-uri-public: https://github.com/cloudfoundry/buildpacks-ci
 buildpacks-ci-git-uri: git@github.com:cloudfoundry/buildpacks-ci.git
 buildpacks-ci-pipeline-uri: https://buildpacks.ci.cf-app.com/teams/main/pipelines/buildpacks-ci
 buildpacks-docker-ci-repo: cfbuildpacks/ci
