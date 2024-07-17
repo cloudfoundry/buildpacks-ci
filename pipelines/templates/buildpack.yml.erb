@@ -481,6 +481,7 @@ jobs: ##########################################################################
         ensure:
           task: delete-cf-space
           file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: space}
     on_success:
       put: environment
       resource: shepherd-cf-environment
