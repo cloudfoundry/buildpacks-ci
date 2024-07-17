@@ -472,6 +472,7 @@ jobs: ##########################################################################
         - task: brats-<%= stack %>
           file: buildpacks-ci/tasks/<%= language.to_s == 'php' ? 'run-bp-brats-jammy' : 'run-bp-brats' %>/task.yml
           input_mapping: {cf-space: space}
+          attempts: 5
           params:
             CF_STACK: <%= stack %>
             GINKGO_ATTEMPTS: 4
@@ -564,6 +565,7 @@ jobs: ##########################################################################
 <% end %>
 <% unless buildpacks[language]['skip_brats'] %>
         - task: brats-cflinuxfs3
+          attempts: 5
           file: buildpacks-ci/tasks/<%= language.to_s == 'php' ? 'run-bp-brats-jammy' : 'run-bp-brats' %>/task.yml
           params:
             CF_STACK: cflinuxfs3
