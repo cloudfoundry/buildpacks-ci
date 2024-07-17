@@ -428,22 +428,7 @@ jobs: ##########################################################################
           params:
             DOMAIN: 'cf-app.com'
             ORG: pivotal
-        - task: integration-test-<%= stack %>
-          file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
-          input_mapping: {cf-space: space}
-          params:
-            CF_STACK: <%= stack %>
-            GINKGO_ATTEMPTS: 4
-            GINKGO_NODES: 3
-            <% if language == 'php' %>
-            COMPOSER_GITHUB_OAUTH_TOKEN: '((composer-github-oauth-token))'
-            <% end %>
-            <% if buildpacks[language]['skip_docker_start'] %>
-            SKIP_DOCKER_START: true
-            <% else %>
-          privileged: true
-            <% end %>
-  <% unless buildpacks[language]['skip_brats'] %>
+    <% unless buildpacks[language]['skip_brats'] %>
     <% if buildpacks[language]['stacks'].include?('cflinuxfs4')%>
         - task: configure-brats-test-config
           config:
@@ -468,7 +453,7 @@ jobs: ##########################################################################
                 contents="$(jq '.stack = "<%= stack %>"' config.json)"
                 echo -E "${contents}" > config.json
                 echo -e "config.json modified to:\n $(cat config.json)"
-  <% end %>
+      <% end %>
         - task: brats-<%= stack %>
           file: buildpacks-ci/tasks/<%= language.to_s == 'php' ? 'run-bp-brats-jammy' : 'run-bp-brats' %>/task.yml
           input_mapping: {cf-space: space}
@@ -477,7 +462,25 @@ jobs: ##########################################################################
             CF_STACK: <%= stack %>
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 3
-  <% end %>
+          <% end %>
+        - task: integration-test-<%= stack %>
+          file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+          input_mapping: {cf-space: space}
+          params:
+            CF_STACK: <%= stack %>
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 3
+            <% if language == 'php' %>
+            COMPOSER_GITHUB_OAUTH_TOKEN: '((composer-github-oauth-token))'
+            <% end %>
+            <% if buildpacks[language]['skip_docker_start'] %>
+            SKIP_DOCKER_START: true
+            <% else %>
+          privileged: true
+            <% end %>
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
     on_success:
       put: environment
       resource: shepherd-cf-environment
