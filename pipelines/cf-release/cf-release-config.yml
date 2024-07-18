@@ -4,7 +4,7 @@
 
 supported_languages:
 - name: binary
-  stacks: #@ default_stacks + ["cflinuxfs4", "windows2016", "windows"]
+  stacks: #@ default_stacks + ["cflinuxfs4", "windows"]
 - name: dotnet-core
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: go
@@ -27,7 +27,7 @@ supported_languages:
   stacks: #@ default_stacks + ["cflinuxfs4"]
 supported_languages_without_java:
 - name: binary
-  stacks: #@ default_stacks + ["cflinuxfs4", "windows2016", "windows"]
+  stacks: #@ default_stacks + ["cflinuxfs4", "windows"]
 - name: dotnet-core
   stacks: #@ default_stacks + ["cflinuxfs4"]
 - name: go

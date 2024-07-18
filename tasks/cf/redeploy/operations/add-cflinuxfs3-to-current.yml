@@ -17,16 +17,12 @@
     cflinuxfs4: /home/vcap
     cflinuxfs3: /home/vcap
     windows: /Users/vcap
-    windows2012R2: /
-    windows2016: /Users/vcap
 - type: replace
   path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/diego/lifecycle_bundles
   value:
     buildpack/cflinuxfs4: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
     buildpack/cflinuxfs3: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
     buildpack/windows: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
-    buildpack/windows2012R2: windows_app_lifecycle/windows_app_lifecycle.tgz
-    buildpack/windows2016: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
     docker: docker_app_lifecycle/docker_app_lifecycle.tgz
 - type: replace
   path: /instance_groups/name=diego-cell/jobs/name=rep/properties/diego/rep/preloaded_rootfses
