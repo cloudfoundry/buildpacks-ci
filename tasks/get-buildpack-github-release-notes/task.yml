@@ -4,6 +4,8 @@ image_resource:
   type: registry-image
   source:
     repository: cfbuildpacks/ci
+    username: ((coredeps-dockerhub-user.username))
+    password: ((coredeps-dockerhub-user.password))
 inputs:
   - name: buildpacks-ci
   - name: buildpack
