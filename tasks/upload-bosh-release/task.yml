@@ -5,6 +5,8 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
     tag: bbl-6 # TODO cut this back after all pipelines migrate to bbl 6
+    username: ((coredeps-dockerhub-user.username))
+    password: ((coredeps-dockerhub-user.password))
 inputs:
   - name: buildpacks-ci
   - name: bosh-release
