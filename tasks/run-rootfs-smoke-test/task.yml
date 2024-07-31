@@ -4,6 +4,8 @@ image_resource:
   type: docker-image
   source:
     repository: cloudfoundry/cf-deployment-concourse-tasks
+    username: ((coredeps-dockerhub-user.username))
+    password: ((coredeps-dockerhub-user.password))
 inputs:
   - name: buildpacks-ci
   - name: bbl-state

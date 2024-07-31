@@ -4,6 +4,8 @@ image_resource:
   type: docker-image
   source:
     repository: cfbuildpacks/ci
+    username: ((coredeps-dockerhub-user.username))
+    password: ((coredeps-dockerhub-user.password))
 inputs:
   - name: java-buildpack-release
   - name: go-buildpack-release

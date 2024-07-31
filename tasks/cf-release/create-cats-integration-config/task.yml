@@ -5,6 +5,8 @@ image_resource:
   source:
     repository: cfbuildpacks/ci
     tag: latest
+    username: ((coredeps-dockerhub-user.username))
+    password: ((coredeps-dockerhub-user.password))
 inputs:
   - name: buildpacks-ci
   - name: cf-deployment-concourse-tasks
