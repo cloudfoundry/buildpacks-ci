@@ -23,3 +23,6 @@ outputs:
 run:
   path: buildpacks-ci/tasks/use-new-buildpack-bosh-releases/run.sh
 params:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  AWS_ASSUME_ROLE_ARN:
