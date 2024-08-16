@@ -170,9 +170,8 @@ jobs:
   - task: create-buildpack-dev-release
     file: buildpacks-ci/tasks/cf-release/create-buildpack-dev-release/task.yml
     params:
-      AWS_ACCESS_KEY_ID: ((svc-buildpacks-aws-team-access-key))
-      AWS_SECRET_ACCESS_KEY: ((svc-buildpacks-aws-team-secret-key))
-      AWS_ASSUME_ROLE_ARN: ((svc-buildpacks-aws-team-assume-role-arn))
+      AWS_ACCESS_KEY_ID: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      AWS_SECRET_ACCESS_KEY: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
   - put: #@ language.name + "-buildpack-release"
     params:
       repository: release
@@ -411,9 +410,8 @@ jobs:
   - task: finalize-release
     file: buildpacks-ci/tasks/cf-release/finalize-buildpack-release/task.yml
     params:
-      AWS_ACCESS_KEY_ID: ((svc-buildpacks-aws-team-access-key))
-      AWS_SECRET_ACCESS_KEY: ((svc-buildpacks-aws-team-secret-key))
-      AWS_ASSUME_ROLE_ARN: ((svc-buildpacks-aws-team-assume-role-arn))
+      AWS_ACCESS_KEY_ID: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      AWS_SECRET_ACCESS_KEY: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
   - put: #@ language.name + "-buildpack-release"
     params:
       repository: release
