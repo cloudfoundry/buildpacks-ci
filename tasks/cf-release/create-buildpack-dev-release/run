@@ -29,6 +29,7 @@ get_version() {
 }
 
 buildpack_blob_is_latest() {
+  return 1
   local new_version=$1
 
   local existing_version
