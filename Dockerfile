@@ -13,10 +13,6 @@ RUN apt-get -qqy update \
 
 RUN curl -q https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
 
-COPY config/google-chrome-apt-key.pub /tmp/
-RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
-  && apt-key add /tmp/google-chrome-apt-key.pub
-
 RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
   && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 
@@ -31,7 +27,6 @@ RUN apt-get -qqy update \
     default-libmysqlclient-dev \
     expect \
     git \
-    google-chrome-stable \
     google-cloud-sdk \
     iptables \
     jq \
@@ -77,12 +72,6 @@ RUN wget -O /usr/local/bin/om 'https://github.com/pivotal-cf/om/releases/downloa
   && [ 68d2cbff67e699168ba16c84dc75e0ff40fcb6024f53f53579b7227b793df158 = $(shasum -a 256 /usr/local/bin/om | cut -d' ' -f1) ] \
   && chmod +x /usr/local/bin/om
 
-# download and install chromedriver
-RUN wget -O chromedriver.zip 'https://chromedriver.storage.googleapis.com/2.34/chromedriver_linux64.zip' \
-  && [ e42a55f9e28c3b545ef7c7727a2b4218c37489b4282e88903e4470e92bc1d967 = $(shasum -a 256 chromedriver.zip | cut -d' ' -f1) ] \
-  && unzip chromedriver.zip -d /usr/local/bin/ \
-  && rm chromedriver.zip
-
 # composer is a package manager for PHP apps
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
@@ -119,9 +108,6 @@ RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/d
 
 # AWS CLI
 RUN pip install awscli
-
-# when docker container starts, ensure login scripts run
-COPY build/*.sh /etc/profile.d/
 
 # Ensure that Concourse filtering is on for non-interactive shells
 ENV BASH_ENV /etc/profile.d/filter.sh
