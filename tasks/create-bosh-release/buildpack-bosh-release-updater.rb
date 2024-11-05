@@ -5,8 +5,9 @@ require_relative '../../lib/git-client'
 
 
 class BuildpackBOSHReleaseUpdater
-  def initialize(version, access_key_id, secret_access_key, assume_role_arn, language, release_name, release_tarball_dir)
+  def initialize(version, gcs_json_key, access_key_id, secret_access_key, assume_role_arn, language, release_name, release_tarball_dir)
     @version = version
+    @gcs_json_key = gcs_json_key
     @access_key_id = access_key_id
     @secret_access_key = secret_access_key
     @assume_role_arn = assume_role_arn
@@ -16,15 +17,34 @@ class BuildpackBOSHReleaseUpdater
   end
 
   def run!
-    write_private_yml if @access_key_id
+    if @access_key_id
+      write_private_yml_aws
+    elsif @gcs_json_key
+      write_private_yml_gcs
+    else
+      puts "Neither AWS nor GCP creds passed. exiting."
+      exit 1
+    end
     delete_old_blobs
     add_new_blobs
     create_release
     write_version
   end
 
-  def write_private_yml
-    puts "creating private.yml"
+  def write_private_yml_gcs
+    puts "creating private.yml (GCS bucket)"
+    private_yml = <<~YAML
+                     ---
+                     blobstore:
+                       options:
+                         credentials_source: static
+                         json_key: #{@gcs_json_key}
+                     YAML
+    File.write('config/private.yml', private_yml)
+  end
+
+  def write_private_yml_aws
+    puts "creating private.yml (AWS S3 bucket)"
 
     if @assume_role_arn && !@assume_role_arn.empty?
     private_yml = <<~YAML

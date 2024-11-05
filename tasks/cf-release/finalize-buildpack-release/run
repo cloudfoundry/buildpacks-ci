@@ -22,7 +22,17 @@ release_version_exists() {
   return 1
 }
 
-write_private_yml() {
+write_private_yml_gcs() {
+  cat >release/config/private.yml <<-EOF
+---
+blobstore:
+  options:
+    credentials_source: static
+    json_key: ${GCS_JSON_KEY}
+EOF
+}
+
+write_private_yml_aws() {
   cat >release/config/private.yml <<-EOF
 ---
 blobstore:
@@ -69,7 +79,12 @@ main() {
   local version
   name="$(get_name)"
   version="$(get_version)"
-  write_private_yml
+
+  if [ -n "${GCS_JSON_KEY:-}" ]; then
+    write_private_yml_gcs
+  else
+    write_private_yml_aws
+  fi
 
   if release_version_exists "${version}"; then
     echo "Version ${version} is already released"
