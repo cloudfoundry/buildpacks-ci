@@ -270,9 +270,6 @@ dependencies:
       python:
         lines: #! python 3 minor version EOLs are 5 years after their first final release
           #! https://devguide.python.org/#status-of-python-branches
-          - line: 3.8.X
-            deprecation_date: 2024-10-14
-            link: https://www.python.org/dev/peps/pep-0569/
           - line: 3.9.X
             deprecation_date: 2025-10-05
             link: https://www.python.org/dev/peps/pep-0596/
@@ -285,6 +282,9 @@ dependencies:
           - line: 3.12.X
             deprecation_date: 2028-10-02
             link: https://www.python.org/dev/peps/pep-0693/
+          - line: 3.13.X
+            deprecation_date: 2029-10-07
+            link: https://peps.python.org/pep-0719/
       nodejs:
         lines:
           - line: 3.11.X
