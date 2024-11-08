@@ -12,6 +12,7 @@ if versions.size != 1
 end
 
 version = versions.first
+gcs_json_key = ENV.fetch('GCS_JSON_KEY', false)
 access_key_id = ENV.fetch('ACCESS_KEY_ID', false)
 secret_access_key = ENV.fetch('SECRET_ACCESS_KEY', false)
 assume_role_arn = ENV.fetch('AWS_ASSUME_ROLE_ARN', false)
@@ -30,6 +31,7 @@ Dir.chdir(ENV.fetch('RELEASE_DIR')) do
 
   updater = BuildpackBOSHReleaseUpdater.new(
     version,
+    gcs_json_key,
     access_key_id,
     secret_access_key,
     assume_role_arn,

@@ -15,6 +15,7 @@ outputs:
 - name: release-tarball
 - name: version
 params:
+  GCS_JSON_KEY:
   AWS_ACCESS_KEY_ID:
   AWS_SECRET_ACCESS_KEY:
   AWS_ASSUME_ROLE_ARN:

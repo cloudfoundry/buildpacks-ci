@@ -60,7 +60,17 @@ add_new_blobs() {
   done
 }
 
-write_private_yml() {
+write_private_yml_gcs() {
+  cat >release/config/private.yml <<-EOF
+---
+blobstore:
+  options:
+    credentials_source: static
+    json_key: ${GCS_JSON_KEY}
+EOF
+}
+
+write_private_yml_aws() {
   cat >release/config/private.yml <<-EOF
 ---
 blobstore:
@@ -107,7 +117,11 @@ main() {
   local version
   version="$(get_version)"
 
-  write_private_yml
+  if [ -n "${GCS_JSON_KEY:-}" ]; then
+    write_private_yml_gcs
+  else
+    write_private_yml_aws
+  fi
 
   if ! buildpack_blob_is_latest "${version}"; then
     remove_old_blobs
