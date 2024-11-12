@@ -298,10 +298,10 @@ module DependencyBuild
             end
 
             # replace openssl if needed
-            major, minor, _ = source_input.version.split('.')
-            if stack == 'cflinuxfs3' && major == '3' && minor.to_i < 10
-              DependencyBuild.replace_openssl
-            end
+            # major, minor, _ = source_input.version.split('.')
+            # if stack == 'cflinuxfs3' && major == '3' && minor.to_i < 10
+            #   DependencyBuild.replace_openssl
+            # end
 
             Runner.run("make")
             Runner.run("make install")
