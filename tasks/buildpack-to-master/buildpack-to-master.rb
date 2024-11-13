@@ -50,15 +50,11 @@ class BuildpackToMaster
       @prev_sha
     )
 
-    check_statuses = ['buildpacks-ci/edge-develop', 'buildpacks-ci/lts-develop']
     status_strings = statuses.map { |s| s[:context] }
-    missing_statuses = check_statuses - status_strings
-    if @github_repo =~ /(hwc|apt|credhub|r)-buildpack/ && status_strings.include?('buildpacks-ci/edge-develop')
-      return true
-    elsif missing_statuses.empty?
+    if status_strings.include?('buildpacks-ci/edge-develop')
       return true
     end
-    puts "Missing statuses. Statuses present are #{status_strings.inspect}. Statuses absent are #{missing_statuses.inspect}."
+    puts "Missing status 'buildpacks-ci/edge-develop'"
     return false
   end
 
