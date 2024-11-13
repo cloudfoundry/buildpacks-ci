@@ -1,7 +1,6 @@
 <% buildpacks = {
   'apt' => {
-    'stacks' => %w(cflinuxfs3 cflinuxfs4),
-    'non_lts' => true,
+    'stacks' => %w(cflinuxfs3 cflinuxfs4)
   },
   'binary' => {
     'stacks' => %w(cflinuxfs3 cflinuxfs4 windows),
@@ -21,8 +20,7 @@
   'hwc' => {
     'stacks' => %w(windows),
     'skip_brats' => true,
-    'product_slug' => 'hwc-buildpack',
-    'non_lts' => true,
+    'product_slug' => 'hwc-buildpack'
   },
   'nginx' => {
     'stacks' => %w(cflinuxfs3 cflinuxfs4),
@@ -45,7 +43,6 @@
     'stacks' => %w(cflinuxfs3 cflinuxfs4),
     'product_slug' => 'r-buildpack',
     'skip_brats' => true,
-    'non_lts' => true,
     'skip_docker_start' => true,
   },
   'ruby' => {
@@ -58,9 +55,6 @@
     'product_slug' => 'staticfile-buildpack',
   }
 } %>
-<% tas_version =  '4.0' %>
-<% tas_pool_name = 'tas_4' %>
-<% low_nodes_lts = ['ruby', 'python', 'dotnet-core', 'php'] %>
 ---
 resource_types:
   - name: cron
@@ -232,20 +226,6 @@ resources: #####################################################################
           namespace: official
           name: cfd
       compatibility-mode: environments-app
-
-<% unless buildpacks[language]['non_lts'] %>
-  - name: shepherd-tas-<%= tas_version %>-environment
-    type: shepherd
-    source:
-      url: https://v2.shepherd.run
-      service-account-key: ((shepherd-buildpacks-service-account-key))
-      lease:
-        namespace: buildpacks
-        pool:
-          namespace: buildpacks
-          name: <%= tas_pool_name %>
-      compatibility-mode: environments-app
-<% end %>
 
 jobs: ################################################################################################################
 <% if language == "php" %>
@@ -514,99 +494,6 @@ jobs: ##########################################################################
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge develop spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
-<% unless buildpacks[language]['non_lts'] %>
-  - name: specs-lts-integration-develop
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - put: environment
-          resource: shepherd-tas-<%= tas_version %>-environment
-          params:
-            action: create
-            duration: 6h
-            resource: shepherd-tas-<%= tas_version %>-environment
-            description: |
-              Running <%= language %>-buildpack specs-lts-integration-develop job.
-          timeout: 6h
-        - get: buildpacks-ci
-        - get: buildpack
-          resource: buildpack-develop
-          trigger: true
-          passed:
-          - specs-unit-develop
-        - get: repo
-          resource: buildpack-develop
-      - task: configure-pas
-        file: buildpacks-ci/tasks/configure-pas/task.yml
-      <% if buildpacks[language]['compute_instance_count'] %>
-        params:
-          COMPUTE_INSTANCE_COUNT: <%= buildpacks[language]['compute_instance_count'] %>
-      <% end %>
-      - do:
-        - task: create-cf-space
-          file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
-          params:
-            ORG: pivotal
-        - task: ginkgo-cflinuxfs3
-          file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
-          # python tests on lts are flaky for yet-to-be-determined reasons.
-          <% if language == 'python' %>
-          attempts: 5
-          <% end %>
-          params:
-            CF_STACK: cflinuxfs3
-            GINKGO_ATTEMPTS: <%= language.to_s == 'php' ? 10 : 4 %>
-            GINKGO_NODES: <%= low_nodes_lts.include?(language.to_s) ? 2 : 3 %>
-            SKIP_WINDOWS_TESTS: true
-            <% if language == 'php' %>
-            COMPOSER_GITHUB_OAUTH_TOKEN: '((composer-github-oauth-token))'
-            <% end %>
-<% if buildpacks[language]['skip_docker_start'] %>
-            SKIP_DOCKER_START: true
-<% else %>
-          privileged: true
-<% end %>
-<% unless buildpacks[language]['skip_brats'] %>
-        - task: brats-cflinuxfs3
-          attempts: 5
-          file: buildpacks-ci/tasks/<%= language.to_s == 'php' ? 'run-bp-brats-jammy' : 'run-bp-brats' %>/task.yml
-          params:
-            CF_STACK: cflinuxfs3
-            GINKGO_ATTEMPTS: <%= language.to_s == 'php' ? 10 : 4 %>
-            GINKGO_NODES: 3
-<% end %>
-        ensure:
-          task: delete-cf-space
-          file: buildpacks-ci/tasks/delete-cf-space/task.yml
-    ensure:
-      put: environment
-      resource: shepherd-tas-<%= tas_version %>-environment
-      params:
-        action: release
-        resource: environment
-
-  - name: specs-lts-gcp-develop
-    serial: true
-    public: true
-    plan:
-      - do:
-        - get: buildpacks-ci
-        - get: repo
-          resource: buildpack-develop
-          trigger: true
-          passed:
-          - specs-lts-integration-develop
-        on_success:
-          task: github-set-status-success
-          file: buildpacks-ci/tasks/set-status-success/task.yml
-          params:
-            GITHUB_ACCESS_TOKEN: ((buildpacks-github-token))
-            GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
-            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/lts-develop'
-            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI lts develop spec passed'
-            PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
-<% end %>
   - name: buildpack-to-master
     serial: true
     public: true
