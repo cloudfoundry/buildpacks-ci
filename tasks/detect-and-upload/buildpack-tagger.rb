@@ -19,8 +19,10 @@ class BuildpackTagger
 
       if ENV['GITHUB_TOKEN']
         client = Octokit::Client.new(access_token: ENV['GITHUB_TOKEN'])
+        puts "Using provided GITHUB_TOKEN"
         existing_tags = client.tags(git_repo).map(&:name)
       else
+        puts "Github call without a token"
         existing_tags = Octokit.tags(git_repo).map(&:name)
       end
       puts "Existing tags: #{existing_tags}"
