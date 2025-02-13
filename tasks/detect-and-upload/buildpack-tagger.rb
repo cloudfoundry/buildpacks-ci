@@ -15,7 +15,14 @@ class BuildpackTagger
       tag_to_add = "v#{File.read('VERSION')}".strip
       puts "Tag to add: #{tag_to_add}"
 
-      existing_tags = Octokit.tags("#{git_repo_org}/#{buildpack_name}").map(&:name)
+      git_repo = "#{git_repo_org}/#{buildpack_name}"
+
+      if ENV['GITHUB_TOKEN']
+        client = Octokit::Client.new(access_token: ENV['GITHUB_TOKEN'])
+        existing_tags = client.tags(git_repo).map(&:name)
+      else
+        existing_tags = Octokit.tags(git_repo).map(&:name)
+      end
       puts "Existing tags: #{existing_tags}"
 
       Dir.mkdir("../buildpack-artifacts/uncached")
