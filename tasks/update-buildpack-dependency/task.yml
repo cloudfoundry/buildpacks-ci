@@ -4,8 +4,8 @@ image_resource:
   type: docker-image
   source:
     repository: cfbuildpacks/ci
-    username: ((coredeps-dockerhub-user.username))
-    password: ((coredeps-dockerhub-user.password))
+    username: cfbuildpacks
+    password: ((buildpacks/dockerhub/cfbuildpacks.token))
 inputs:
   - name: buildpack
   - name: buildpack-latest-released
