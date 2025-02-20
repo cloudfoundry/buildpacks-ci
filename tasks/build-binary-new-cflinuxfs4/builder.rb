@@ -130,6 +130,23 @@ end
 
 module DependencyBuildHelper
   class << self
+    def setup_ruby
+      puts "Updating ruby because bundler 2.6.2+ requires newer ruby than what comes from the default jammy ubuntu repo."
+      Runner.run('mkdir', '/opt/ruby')
+      # From https://github.com/cloudfoundry/ruby-buildpack/blob/v1.10.21/manifest.yml#L165
+      Runner.run('curl', '-L', '-o', '/opt/ruby/ruby3.3.6.tgz', 'https://buildpacks.cloudfoundry.org/dependencies/ruby/ruby_3.3.6_linux_x64_cflinuxfs4_e4311262.tgz')
+      Runner.run('tar' ,'-xzf', '/opt/ruby/ruby3.3.6.tgz', '-C', '/opt/ruby')
+      ENV["PATH"] = "/opt/ruby/bin:" + ENV["PATH"]
+      Runner.run('ruby', '--version')
+      # update Gemfile{,.lock} to the same ruby version
+      Dir.chdir("binary-builder/cflinuxfs4") do
+        Runner.run("sed", "-i", "s/^ruby .*/ruby '3.3.6'/", "Gemfile")
+        puts("[DEBUG] running bundle install")
+        Runner.run("bundle", "install")
+        puts("[DEBUG] finished bundle install")
+      end
+    end
+
     def build_nginx_helper(source_input, custom_options, static = false)
       public_gpg_key_urls = [
         "http://nginx.org/keys/maxim.key", # Maxim Konovalov’s PGP public key
@@ -339,6 +356,7 @@ class DependencyBuild
   end
 
   def build_bundler
+    DependencyBuildHelper.setup_ruby
     @binary_builder.build(@source_input)
 
     old_filepath = "#{@binary_builder.base_dir}/#{@source_input.name}-#{@source_input.version}.tgz"
