@@ -15,7 +15,7 @@ module Depwatcher
     def check() : Array(Internal)
       response = client.get("https://rubygems.org/pages/download").body
       doc = XML.parse_html(response)
-      links = doc.xpath("//a[contains(@class,'download__format')][text()='tgz']")
+      links = doc.xpath("//div[@id='formats']//a[text()='tgz']")
       raise "Could not parse rubygems download website" unless links.is_a?(XML::NodeSet)
       links.map do |a|
         v = a["href"].gsub(/.*\/rubygems\-(.*)\.tgz$/, "\\1")
