@@ -22,7 +22,7 @@ Spec2.describe Depwatcher::NodeLTS do
     end
 
     it "returns real releases sorted" do
-      expect(subject.check.map(&.ref)).to eq  ["20.0.0", "20.8.0", "20.9.0"]
+      expect(subject.check.map(&.ref)).to eq  ["22.0.0", "22.1.0", "22.2.0"]
     end
   end
 
