@@ -17,7 +17,7 @@ Spec2.describe Depwatcher::Node do
     end
 
     it "returns real releases sorted" do
-      expect(subject.check.map(&.ref)).to eq ["12.0.0", "12.5.0", "12.9.0", "14.0.0", "14.5.0", "16.0.0", "16.5.0", "16.9.0", "18.0.0", "18.5.0", "18.9.0", "20.0.0", "20.8.0", "20.9.0"]
+      expect(subject.check.map(&.ref)).to eq ["14.0.0", "14.5.0", "16.0.0", "16.5.0", "16.9.0", "18.0.0", "18.5.0", "18.9.0", "20.0.0", "20.8.0", "20.9.0", "22.0.0", "22.1.0", "22.2.0"]
     end
 
     it "returns only non-LTS versions" do
