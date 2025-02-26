@@ -7,6 +7,11 @@ STDERR.puts data.to_json
 source = data["source"]
 version = data["version"]
 
+if source.as_h.has_key?("github_token")
+  token = source["github_token"].to_s
+  ENV["OAUTH_AUTHORIZATION_TOKEN"] = token
+end
+
 case type = source["type"].to_s
 when "github_releases"
   version = if source["fetch_source"]? == JSON.parse("true")
