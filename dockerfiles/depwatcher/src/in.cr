@@ -3,14 +3,16 @@ require "json"
 
 dir = ARGV[0]
 data = JSON.parse(STDIN)
-STDERR.puts data.to_json
 source = data["source"]
 version = data["version"]
 
 if source.as_h.has_key?("github_token")
   token = source["github_token"].to_s
   ENV["OAUTH_AUTHORIZATION_TOKEN"] = token
+  # To avoid leaking the credential, immediately remove it from the data struct
+  source.as_h.delete("github_token")
 end
+STDERR.puts data.to_json
 
 case type = source["type"].to_s
 when "github_releases"
