@@ -90,7 +90,8 @@ module Depwatcher
       end
 
       channel_version = version.split('.')[0..1].join('.')
-      releases_url = "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/#{channel_version}/releases.json"
+      # mirror for "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/#{channel_version}/releases.json"
+      releases_url = "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/#{channel_version}/releases.json"
       releases = DotnetReleasesJSON.from_json(client.get(releases_url).body).releases
       get_versions(releases, version).select do |v|
         Semver.new(v).is_final_release?
@@ -99,7 +100,8 @@ module Depwatcher
 
     def in(ref : String, output_dir : String) : DotnetRelease | Nil
       channel_version = ref.split('.')[0..1].join('.')
-      releases_url = "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/#{channel_version}/releases.json"
+      # mirror for "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/#{channel_version}/releases.json"
+      releases_url = "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/#{channel_version}/releases.json"
       releases = DotnetReleasesJSON.from_json(client.get(releases_url).body).releases
       file = get_newest_file(releases, ref)
       if file
@@ -112,7 +114,10 @@ module Depwatcher
     end
 
     private def get_latest_version() : String
-      releases_url = "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json"
+      # mirror for
+      # "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json"
+      # as we seem to have issues downloading from here in TPE concourse
+      releases_url = "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/releases-index.json"
       releases = DotnetReleasesIndex.from_json(client.get(releases_url).body).releases_index
       releases.reject { |r| r.support_phase == "preview" }.[0].channel_version
     end
