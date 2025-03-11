@@ -10,7 +10,7 @@
          "product":".NET",
          "support-phase":"preview",
          "eol-date":null,
-         "releases.json":"https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/5.0/releases.json"
+         "releases.json":"https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/5.0/releases.json"
       },
       {
          "channel-version":"3.1",
@@ -22,7 +22,7 @@
          "product":".NET Core",
          "support-phase":"lts",
          "eol-date":"2022-12-03",
-         "releases.json":"https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/3.1/releases.json"
+         "releases.json":"https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/3.1/releases.json"
       },
       {
          "channel-version":"3.0",
@@ -34,7 +34,7 @@
          "product":".NET Core",
          "support-phase":"eol",
          "eol-date":"2020-03-03",
-         "releases.json":"https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/3.0/releases.json"
+         "releases.json":"https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/3.0/releases.json"
       },
       {
          "channel-version":"2.1",
@@ -46,7 +46,7 @@
          "product":".NET Core",
          "support-phase":"lts",
          "eol-date":"2021-08-21",
-         "releases.json":"https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/2.1/releases.json"
+         "releases.json":"https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/2.1/releases.json"
       },
       {
          "channel-version":"2.2",
@@ -58,7 +58,7 @@
          "product":".NET Core",
          "support-phase":"eol",
          "eol-date":"2019-12-23",
-         "releases.json":"https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/2.2/releases.json"
+         "releases.json":"https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/2.2/releases.json"
       },
       {
          "channel-version":"2.0",
@@ -70,7 +70,7 @@
          "product":".NET Core",
          "support-phase":"eol",
          "eol-date":"2018-10-01",
-         "releases.json":"https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/2.0/releases.json"
+         "releases.json":"https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/2.0/releases.json"
       },
       {
          "channel-version":"1.1",
@@ -82,7 +82,7 @@
          "product":".NET Core",
          "support-phase":"eol",
          "eol-date":"2019-06-27",
-         "releases.json":"https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/1.1/releases.json"
+         "releases.json":"https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/1.1/releases.json"
       },
       {
          "channel-version":"1.0",
@@ -94,7 +94,7 @@
          "product":".NET Core",
          "support-phase":"eol",
          "eol-date":"2019-06-27",
-         "releases.json":"https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/1.0/releases.json"
+         "releases.json":"https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/1.0/releases.json"
       }
    ]
 }
