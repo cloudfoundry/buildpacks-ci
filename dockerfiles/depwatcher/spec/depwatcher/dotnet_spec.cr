@@ -9,7 +9,7 @@ Spec2.describe Depwatcher::DotnetBase do
   before do
     Dir.mkdir dirname
     client.stub_get(
-      "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/2.1/releases.json",
+      "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/2.1/releases.json",
       nil,
       HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet-2.1_releases.json"))
     )
@@ -31,12 +31,12 @@ Spec2.describe Depwatcher::DotnetBase do
       context "when the version is latest" do
         before do
           client.stub_get(
-            "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json",
+            "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/releases-index.json",
             nil,
             HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet-releases-index.json"))
           )
           client.stub_get(
-            "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/3.0/releases.json",
+            "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/3.0/releases.json",
             nil,
             HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet-3.0_releases.json"))
           )
@@ -51,12 +51,12 @@ Spec2.describe Depwatcher::DotnetBase do
       context "when the version is latest and the latest version is a preview" do
         before do
           client.stub_get(
-            "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json",
+            "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/releases-index.json",
             nil,
             HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet-releases-index-with-preview.json"))
           )
           client.stub_get(
-            "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/3.1/releases.json",
+            "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/3.1/releases.json",
             nil,
             HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet-3.1_releases.json"))
           )
