@@ -22,7 +22,7 @@ native_modules:
   klass: LibRdKafkaRecipe
 - name: libsodium
   version: 1.0.20
-  md5: 597f2c7811f84e63e45e2277dfb5da46
+  md5: 8e75cadf6ba1879b63f5ff460bd0eaf5
   klass: LibSodiumRecipe
 extensions:
 - name: apcu
