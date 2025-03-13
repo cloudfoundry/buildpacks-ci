@@ -6,15 +6,14 @@ Spec2.describe Depwatcher::R do
   let(client) { HTTPClientMock.new }
   subject { described_class.new.tap { |s| s.client = client } }
   before do
-    client.stub_get("https://svn.r-project.org/R/tags/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/rlang.html")))
+    client.stub_get("https://cran.r-project.org/src/base/R-4/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/rlang.html")))
     client.stub_get("https://cran.r-project.org/src/base/R-3/R-3.3.2.tar.gz", nil, HTTP::Client::Response.new(200, "hello"))
   end
 
   describe "#check" do
     it "returns real releases sorted" do
       expect(subject.check.map(&.ref)).to eq [
-        "3.2.4", "3.2.5", "3.3.0", "3.3.1", "3.3.2", "3.3.3", "3.4.0", "3.4.1",
-        "3.4.2", "3.4.3"
+        "4.0.0", "4.0.1", "4.0.2", "4.0.3", "4.0.4", "4.0.5", "4.1.0"
       ]
     end
   end
