@@ -15,15 +15,15 @@ module Depwatcher
     end
 
     def check() : Array(Internal)
-      response = client.get("https://svn.r-project.org/R/tags/").body
+      response = client.get("https://cran.r-project.org/src/base/R-4/").body
       doc = XML.parse_html(response)
-      lis = doc.xpath("//li/a")
+      lis = doc.xpath("//td/a")
       raise "Could not parse r svn website" unless lis.is_a?(XML::NodeSet)
 
       lis.map do |a|
         href = a["href"].to_s
-        m = href.match(/^R\-([\d\-]+)\//)
-        version = m[1].gsub("-", ".") if m
+        m = href.match(/^R\-([\d\.]+)\.tar.gz/)
+        version = m[1] if m
         Internal.new(version) if version
       end.compact.sort_by { |i| Semver.new(i.ref) }.last(10)
     end
