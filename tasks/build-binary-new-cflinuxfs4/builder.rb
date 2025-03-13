@@ -232,7 +232,6 @@ module DependencyBuildHelper
             Runner.run('make')
             Runner.run('make install')
 
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "install.packages('devtools', repos='https://cran.r-project.org')")
             Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "install.packages('remotes', repos='https://cran.r-project.org')")
 
             rserve_version = rserve_input.split(".")[0..1].join(".") + "-" + rserve_input.split(".")[2..-1].join(".")
@@ -242,7 +241,6 @@ module DependencyBuildHelper
             Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('remotes'); remotes::install_version('shiny', '#{shiny_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
             Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('remotes'); remotes::install_version('plumber', '#{plumber_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
 
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'remove.packages("devtools")')
             Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'remove.packages("remotes")')
 
             Dir.chdir('/usr/local/lib/R') do
