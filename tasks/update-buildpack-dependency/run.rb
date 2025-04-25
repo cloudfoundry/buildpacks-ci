@@ -194,7 +194,7 @@ end
 # Updates default versions for PHP dependencies
 # manifest_name will be the name of the dependency, not PHP
 if !rebuilt && manifest_name != 'php' && buildpack_name == 'php' && manifest['default_versions']
-  manifest['default_versions'] = PHPManifest.update_defaults(manifest, source_name, resource_version)
+  manifest['default_versions'] = PHPManifest.update_defaults(manifest, manifest_name, resource_version)
 end
 
 #
