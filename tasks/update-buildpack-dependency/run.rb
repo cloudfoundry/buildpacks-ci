@@ -199,28 +199,6 @@ end
 
 #
 # Special PHP stuff
-# * The defaults/options.json file contains default version numbers to use for each PHP line.
-#   Update the default version for the relevant line to this version of PHP (if !rebuilt)
-php_defaults = nil
-if !rebuilt && manifest_name == 'php' && buildpack_name == 'php'
-  case resource_version
-  when /^8.1/
-    varname = 'PHP_81_LATEST'
-  when /^8.2/
-    varname = 'PHP_82_LATEST'
-  when /^8.3/
-    varname = 'PHP_83_LATEST'
-  else
-    puts "Unexpected version #{resource_version} is not in known version lines."
-    exit 1
-  end
-
-  php_defaults = JSON.parse(open('buildpack/defaults/options.json').read)
-  php_defaults[varname] = resource_version
-end
-
-#
-# Special PHP stuff
 # * Each php version in the manifest lists the modules and versions it was built with.
 #   Get that list for this version of php.
 if manifest_name == 'php' && buildpack_name == 'php'
@@ -331,11 +309,6 @@ Dir.chdir('artifacts') do
 
   File.write('manifest.yml', manifest.to_yaml)
   GitClient.add_file('manifest.yml')
-
-  unless php_defaults.nil?
-    File.write('defaults/options.json', php_defaults.to_json)
-    GitClient.add_file('defaults/options.json')
-  end
 
   ruby_files_to_edit.each do |path, content|
     if content
