@@ -300,6 +300,10 @@ if buildpack_name == 'r'
   end
 end
 
+if buildpack_name == 'hwc'
+  manifest['default_versions'] = resource_version
+end
+
 Dir.chdir('artifacts') do
   GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
   GitClient.set_global_config('user.name', 'CF Buildpacks Team CI Server')
