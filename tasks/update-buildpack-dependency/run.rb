@@ -301,7 +301,7 @@ if buildpack_name == 'r'
 end
 
 if buildpack_name == 'hwc'
-  manifest['default_versions'] = resource_version
+  manifest['default_versions'] = [{ 'name' => 'hwc', 'version' => resource_version }]
 end
 
 Dir.chdir('artifacts') do
