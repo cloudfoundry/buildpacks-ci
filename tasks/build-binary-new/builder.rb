@@ -36,15 +36,6 @@ module DependencyBuild
       Runner.run('rm', '-f', 'get-pip.py')
     end
 
-    def setup_python10
-      Runner.run('mkdir', '/opt/python')
-      # From https://github.com/cloudfoundry/python-buildpack/blob/v1.8.37/manifest.yml
-      Runner.run('curl', '-L', '-o', '/opt/python/python3.10.17.tgz', 'https://buildpacks.cloudfoundry.org/dependencies/python/python_3.10.17_linux_x64_cflinuxfs4_12a761c6.tgz')
-      Runner.run('tar' ,'-xzf', '/opt/python/python3.10.17.tgz', '-C', '/opt/python')
-      ENV["PATH"] = "/opt/python/bin:" + ENV["PATH"]
-      Runner.run('python', '--version')
-    end
-
     def setup_gcc
       Runner.run('apt', 'update')
       Runner.run('apt', 'install', '-y', 'software-properties-common')
@@ -687,8 +678,6 @@ class Builder
 
     when 'node', 'httpd'
       DependencyBuild.setup_gcc
-
-      DependencyBuild.setup_python10 if source_input.name == 'node'
 
       source_input.version = source_input.version.delete_prefix('v') if source_input.name == 'node'
       binary_builder.build(source_input)
