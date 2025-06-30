@@ -539,7 +539,10 @@ class DependencyBuild
   end
 
   def build_node
+    # See https://github.com/nodejs/node/blob/main/BUILDING.md
+    # for python and gcc needs for node versions.
     Utils.setup_python_and_pip
+    Utils.setup_gcc
 
     @source_input.version = @source_input.version.delete_prefix('v')
     @binary_builder.build(@source_input)
@@ -846,6 +849,15 @@ class DependencyBuild
       Runner.run('apt', 'update')
       Runner.run('apt', 'install', '-y', 'python3', 'python3-pip')
       Runner.run('pip3', 'install', '--upgrade', 'pip', 'setuptools')
+    end
+
+    def setup_gcc
+      Runner.run('apt', 'update')
+      Runner.run('apt', 'install', '-y', 'software-properties-common')
+      Runner.run('add-apt-repository', '-y', 'ppa:ubuntu-toolchain-r/test')
+      Runner.run('apt', 'update')
+      Runner.run('apt', 'install', '-y', 'gcc-12', 'g++-12')
+      Runner.run('update-alternatives', '--install', '/usr/bin/gcc', 'gcc', '/usr/bin/gcc-12', '60', '--slave', '/usr/bin/g++', 'g++', '/usr/bin/g++-12')
     end
 
     def self.prune_dotnet_files(source_input, files_to_exclude, write_runtime = false)
