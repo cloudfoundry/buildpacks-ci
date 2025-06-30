@@ -539,6 +539,8 @@ class DependencyBuild
   end
 
   def build_node
+    Utils.setup_python_and_pip
+
     @source_input.version = @source_input.version.delete_prefix('v')
     @binary_builder.build(@source_input)
 
