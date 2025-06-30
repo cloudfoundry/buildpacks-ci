@@ -851,7 +851,7 @@ class DependencyBuild
       Runner.run('pip3', 'install', '--upgrade', 'pip', 'setuptools')
     end
 
-    def setup_gcc
+    def self.setup_gcc
       Runner.run('apt', 'update')
       Runner.run('apt', 'install', '-y', 'software-properties-common')
       Runner.run('add-apt-repository', '-y', 'ppa:ubuntu-toolchain-r/test')
