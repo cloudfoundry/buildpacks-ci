@@ -688,7 +688,7 @@ class Builder
     when 'node', 'httpd'
       DependencyBuild.setup_gcc
 
-      setup_python10 if source_input.name == 'node'
+      DependencyBuild.setup_python10 if source_input.name == 'node'
 
       source_input.version = source_input.version.delete_prefix('v') if source_input.name == 'node'
       binary_builder.build(source_input)
