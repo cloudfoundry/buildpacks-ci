@@ -36,6 +36,7 @@ module DependencyBuild
       Runner.run('rm', '-f', 'get-pip.py')
     end
 
+    # Sets up gcc8 - ubuntu:bionic comes with gcc7
     def setup_gcc
       Runner.run('apt', 'update')
       Runner.run('apt', 'install', '-y', 'software-properties-common')
@@ -43,6 +44,16 @@ module DependencyBuild
       Runner.run('apt', 'update')
       Runner.run('apt', 'install', '-y', 'gcc-8', 'g++-8')
       Runner.run('update-alternatives', '--install', '/usr/bin/gcc', 'gcc', '/usr/bin/gcc-8', '60', '--slave', '/usr/bin/g++', 'g++', '/usr/bin/g++-8')
+    end
+
+    # Sets up gcc9 - ubuntu:bionic comes with gcc7
+    def setup_gcc9
+      Runner.run('apt', 'update')
+      Runner.run('apt', 'install', '-y', 'software-properties-common')
+      Runner.run('add-apt-repository', '-y', 'ppa:ubuntu-toolchain-r/test')
+      Runner.run('apt', 'update')
+      Runner.run('apt', 'install', '-y', 'gcc-9', 'g++-9')
+      Runner.run('update-alternatives', '--install', '/usr/bin/gcc', 'gcc', '/usr/bin/gcc-9', '60', '--slave', '/usr/bin/g++', 'g++', '/usr/bin/g++-9')
     end
 
     def bundle_pip_dependencies(source_input)
@@ -189,6 +200,9 @@ module DependencyBuild
       source_sha = ''
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
+          # Building R needs C++17 support which needs GCC9
+          DependencyBuild.setup_gcc9
+
           Runner.run('mkdir', '-p', '/usr/share/man/man1')
 
           Runner.run('apt', 'update')
@@ -206,16 +220,16 @@ module DependencyBuild
             Runner.run('make')
             Runner.run('make install')
 
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "install.packages('remotes', repos='https://cran.r-project.org')")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "install.packages('devtools', repos='https://cran.r-project.org')")
 
             rserve_version = rserve_input.split(".")[0..1].join(".") + "-" + rserve_input.split(".")[2..-1].join(".")
 
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('remotes'); remotes::install_version('Rserve', '#{rserve_version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('remotes'); remotes::install_version('forecast', '#{forecast_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('remotes'); remotes::install_version('shiny', '#{shiny_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('remotes'); remotes::install_version('plumber', '#{plumber_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); devtools::install_version('Rserve', '#{rserve_version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); devtools::install_version('forecast', '#{forecast_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); devtools::install_version('shiny', '#{shiny_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); devtools::install_version('plumber', '#{plumber_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
 
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'remove.packages("remotes")')
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'remove.packages("devtools")')
 
             Dir.chdir('/usr/local/lib/R') do
               case stack
