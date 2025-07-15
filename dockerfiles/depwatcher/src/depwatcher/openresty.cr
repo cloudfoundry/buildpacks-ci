@@ -18,8 +18,8 @@ module Depwatcher
     def check() : Array(Internal)
       name = "openresty/openresty"
       regexp = "\\d+\.\\d+\.\\d+\.\\d+$"
-      GithubReleases.new(client).matched_releases(name, regexp).map do |r|
-        Internal.new(r.ref.gsub(/^v/, ""))
+      GithubTags.new(client).matched_tags(name, regexp).map do |r|
+        Internal.new(r.name.gsub(/^v/, ""))
       end.sort_by { |i| Semver.new(i.ref) }
     end
 
