@@ -896,6 +896,7 @@ class Builder
       )
 
     when 'php'
+      DependencyBuild.setup_gcc9
       base_extension_file = ''
       if source_input.version.start_with?('8')
         base_extension_file = File.join(php_extensions_dir, 'php8-base-extensions.yml')
