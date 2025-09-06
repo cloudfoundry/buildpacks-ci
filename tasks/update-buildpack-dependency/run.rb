@@ -252,9 +252,9 @@ end
 
 #
 # Special JRuby Stuff
-# * There are two Gemfiles in fixtures which depend on the latest JRuby in the 9.2.X.X line.
+# * There are Gemfile(s) in fixtures which depend on the latest JRuby
 #   Replace their jruby engine version with the one in the manifest.
-ruby_files_to_edit = { 'fixtures/sinatra_jruby/Gemfile' => nil, 'fixtures/jruby_start_command/Gemfile' => nil }
+ruby_files_to_edit = { 'fixtures/default/sinatra_jruby/Gemfile' => nil }
 if !rebuilt && manifest_name == 'jruby' && manifest['language'] == 'ruby'
   version_number = /(9.4.\d+.\d+)/.match(version)
   if version_number
