@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<title>PHP 8.1 Release Updates - PHP Watch</title>
+<link>https://php.watch/versions/8.1/releases</link>
+<description>Latest PHP 8.1 release updates and security patches</description>
+<language>en-us</language>
+
+<item>
+<title>PHP 8.1.30</title>
+<link>https://php.watch/versions/8.1/8.1.30</link>
+<description>PHP 8.1.30 release with security fixes</description>
+<pubDate>Mon, 11 Dec 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.29</title>
+<link>https://php.watch/versions/8.1/8.1.29</link>
+<description>PHP 8.1.29 release with bug fixes</description>
+<pubDate>Thu, 23 Nov 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.28</title>
+<link>https://php.watch/versions/8.1/8.1.28</link>
+<description>PHP 8.1.28 release with security updates</description>
+<pubDate>Thu, 26 Oct 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.27</title>
+<link>https://php.watch/versions/8.1/8.1.27</link>
+<description>PHP 8.1.27 release</description>
+<pubDate>Thu, 14 Sep 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.26</title>
+<link>https://php.watch/versions/8.1/8.1.26</link>
+<description>PHP 8.1.26 release with bug fixes</description>
+<pubDate>Thu, 17 Aug 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.25</title>
+<link>https://php.watch/versions/8.1/8.1.25</link>
+<description>PHP 8.1.25 release</description>
+<pubDate>Thu, 06 Jul 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.24</title>
+<link>https://php.watch/versions/8.1/8.1.24</link>
+<description>PHP 8.1.24 release</description>
+<pubDate>Thu, 08 Jun 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.23</title>
+<link>https://php.watch/versions/8.1/8.1.23</link>
+<description>PHP 8.1.23 release with security updates</description>
+<pubDate>Thu, 11 May 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.22</title>
+<link>https://php.watch/versions/8.1/8.1.22</link>
+<description>PHP 8.1.22 release</description>
+<pubDate>Thu, 13 Apr 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.21</title>
+<link>https://php.watch/versions/8.1/8.1.21</link>
+<description>PHP 8.1.21 release</description>
+<pubDate>Thu, 16 Mar 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.20</title>
+<link>https://php.watch/versions/8.1/8.1.20</link>
+<description>PHP 8.1.20 release</description>
+<pubDate>Thu, 16 Feb 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.19</title>
+<link>https://php.watch/versions/8.1/8.1.19</link>
+<description>PHP 8.1.19 release</description>
+<pubDate>Thu, 19 Jan 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.18</title>
+<link>https://php.watch/versions/8.1/8.1.18</link>
+<description>PHP 8.1.18 release</description>
+<pubDate>Thu, 15 Dec 2022 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.17</title>
+<link>https://php.watch/versions/8.1/8.1.17</link>
+<description>PHP 8.1.17 release</description>
+<pubDate>Thu, 24 Nov 2022 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.16</title>
+<link>https://php.watch/versions/8.1/8.1.16</link>
+<description>PHP 8.1.16 release</description>
+<pubDate>Thu, 27 Oct 2022 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.15</title>
+<link>https://php.watch/versions/8.1/8.1.15</link>
+<description>PHP 8.1.15 release</description>
+<pubDate>Thu, 29 Sep 2022 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.14</title>
+<link>https://php.watch/versions/8.1/8.1.14</link>
+<description>PHP 8.1.14 release</description>
+<pubDate>Thu, 01 Sep 2022 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.13</title>
+<link>https://php.watch/versions/8.1/8.1.13</link>
+<description>PHP 8.1.13 release</description>
+<pubDate>Thu, 04 Aug 2022 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.12</title>
+<link>https://php.watch/versions/8.1/8.1.12</link>
+<description>PHP 8.1.12 release</description>
+<pubDate>Thu, 07 Jul 2022 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.11</title>
+<link>https://php.watch/versions/8.1/8.1.11</link>
+<description>PHP 8.1.11 release</description>
+<pubDate>Thu, 09 Jun 2022 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.10</title>
+<link>https://php.watch/versions/8.1/8.1.10</link>
+<description>PHP 8.1.10 release</description>
+<pubDate>Thu, 12 May 2022 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.2</title>
+<link>https://php.watch/versions/8.1/8.1.2</link>
+<description>PHP 8.1.2 release</description>
+<pubDate>Thu, 20 Jan 2022 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.1</title>
+<link>https://php.watch/versions/8.1/8.1.1</link>
+<description>PHP 8.1.1 release</description>
+<pubDate>Thu, 16 Dec 2021 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.1.0</title>
+<link>https://php.watch/versions/8.1/8.1.0</link>
+<description>PHP 8.1.0 major release</description>
+<pubDate>Thu, 25 Nov 2021 00:00:00 GMT</pubDate>
+</item>
+
+</channel>
+</rss>

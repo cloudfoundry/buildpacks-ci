@@ -48,9 +48,10 @@ module Depwatcher
 
   class Base
     class Internal
-      JSON.mapping(
-        ref: String,
-      )
+      include JSON::Serializable
+      
+      property ref : String
+      
       def initialize(@ref : String)
       end
     end
