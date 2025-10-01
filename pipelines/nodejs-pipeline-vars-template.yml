@@ -48,3 +48,15 @@ cf-buildpacks-eng-gpg-key: |
 # Binary builder repository URI
 # Can be HTTPS or SSH format
 binary-builder-git-uri: "https://github.com/cloudfoundry/binary-builder"
+
+##############################################################################
+# DEPLOYMENT INSTRUCTIONS
+##############################################################################
+
+# 1. Fill in all the credential values above
+# 2. Save this file as 'nodejs-pipeline-vars.yml' 
+# 3. Ensure file permissions are restricted (chmod 600 on Unix)
+# 4. Deploy the pipeline:
+
+# Method Using fly CLI directly
+# fly -t <target> set-pipeline -p nodejs-dependency-builds -c nodejs-dependency-builds.yml -l nodejs-pipeline-vars.yml
