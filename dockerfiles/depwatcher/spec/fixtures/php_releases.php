@@ -199,7 +199,151 @@
  <em>older releases are listed for archival purposes only, and
  they are no longer supported</em>.
 </p>
-<a id="v8"></a><a id="8.1.1"></a>
+<a id="v8"></a><a id="8.3.2"></a>
+<h2>8.3.2</h2>
+<ul>
+ <li>Released: 18 Jan 2024</li>
+ <li>Announcement: <a href="/releases/8_3_2.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.3.2">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.3.2.tar.gz">PHP 8.3.2 (tar.gz)</a><br>
+<span class="sha256sum">sha256: b934ca7e8c82945fc78195f6f30ab8245b5d3073e90e36f1d142e3cb4c2b6aaa</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.3.1"></a>
+<h2>8.3.1</h2>
+<ul>
+ <li>Released: 21 Dec 2023</li>
+ <li>Announcement: <a href="/releases/8_3_1.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.3.1">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.3.1.tar.gz">PHP 8.3.1 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 1db84eb1ac604ad8959c4c5ecc6e3e3e0dc8e1c22b5e0c7b8e4c4c6e0d3c5d2f</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.3.0"></a>
+<h2>8.3.0</h2>
+<ul>
+ <li>Released: 23 Nov 2023</li>
+ <li>Announcement: <a href="/releases/8_3_0.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.3.0">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.3.0.tar.gz">PHP 8.3.0 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 7e43dc0820a97ec4ca4ba9bbc48e9e1ff7c244ba45e6c2b9a7e2c05f14dd4b2d</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.2.15"></a>
+<h2>8.2.15</h2>
+<ul>
+ <li>Released: 18 Jan 2024</li>
+ <li>Announcement: <a href="/releases/8_2_15.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.2.15">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.2.15.tar.gz">PHP 8.2.15 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 98b8b5c6e4e4c6f4c1b5c6f4c1b5c6f4c1b5c6f4c1b5c6f4c1b5c6f4c1b5c6f4</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.2.14"></a>
+<h2>8.2.14</h2>
+<ul>
+ <li>Released: 21 Dec 2023</li>
+ <li>Announcement: <a href="/releases/8_2_14.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.2.14">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.2.14.tar.gz">PHP 8.2.14 (tar.gz)</a><br>
+<span class="sha256sum">sha256: a9c7a1b5c6f4c1b5c6f4c1b5c6f4c1b5c6f4c1b5c6f4c1b5c6f4c1b5c6f4c1b5</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.2.0"></a>
+<h2>8.2.0</h2>
+<ul>
+ <li>Released: 08 Dec 2022</li>
+ <li>Announcement: <a href="/releases/8_2_0.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.2.0">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.2.0.tar.gz">PHP 8.2.0 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 5d8f8c9cad6cd124edc111f7db0a109745e2f638770a101b3c22a2953f7a9b40e</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.1.30"></a>
+<h2>8.1.30</h2>
+<ul>
+ <li>Released: 11 Dec 2023</li>
+ <li>Announcement: <a href="/releases/8_1_30.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.1.30">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.1.30.tar.gz">PHP 8.1.30 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 6f9c7e43dc0820a97ec4ca4ba9bbc48e9e1ff7c244ba45e6c2b9a7e2c05f14dd</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.1.25"></a>
+<h2>8.1.25</h2>
+<ul>
+ <li>Released: 06 Jul 2023</li>
+ <li>Announcement: <a href="/releases/8_1_25.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.1.25">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.1.25.tar.gz">PHP 8.1.25 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 7f9c7e43dc0820a97ec4ca4ba9bbc48e9e1ff7c244ba45e6c2b9a7e2c05f14dd</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.1.2"></a>
+<h2>8.1.2</h2>
+<ul>
+ <li>Released: 20 Jan 2022</li>
+ <li>Announcement: <a href="/releases/8_1_2.php">English</a> </li>
+ <li><a href="/ChangeLog-8.php#8.1.2">ChangeLog</a></li>
+ <li>
+  Download:
+<ul>
+ <li>
+<a href="/distributions/php-8.1.2.tar.gz">PHP 8.1.2 (tar.gz)</a><br>
+<span class="sha256sum">sha256: 2f9c7e43dc0820a97ec4ca4ba9bbc48e9e1ff7c244ba45e6c2b9a7e2c05f14dd</span>
+ </li>
+</ul>
+</li>
+</ul>
+<a id="8.1.1"></a>
 <h2>8.1.1</h2>
 <ul>
  <li>Released: 16 Dec 2021</li>

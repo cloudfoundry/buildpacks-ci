@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<title>PHP 8.3 Release Updates - PHP Watch</title>
+<link>https://php.watch/versions/8.3/releases</link>
+<description>Latest PHP 8.3 release updates including development versions</description>
+<language>en-us</language>
+
+<item>
+<title>PHP 8.3.2</title>
+<link>https://php.watch/versions/8.3/8.3.2</link>
+<description>PHP 8.3.2 stable release</description>
+<pubDate>Thu, 18 Jan 2024 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.1</title>
+<link>https://php.watch/versions/8.3/8.3.1</link>
+<description>PHP 8.3.1 stable release</description>
+<pubDate>Thu, 21 Dec 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.0</title>
+<link>https://php.watch/versions/8.3/8.3.0</link>
+<description>PHP 8.3.0 major stable release</description>
+<pubDate>Thu, 23 Nov 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.0RC6</title>
+<link>https://php.watch/versions/8.3/8.3.0RC6</link>
+<description>PHP 8.3.0 Release Candidate 6</description>
+<pubDate>Thu, 09 Nov 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.0RC5</title>
+<link>https://php.watch/versions/8.3/8.3.0RC5</link>
+<description>PHP 8.3.0 Release Candidate 5</description>
+<pubDate>Thu, 26 Oct 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.0RC4</title>
+<link>https://php.watch/versions/8.3/8.3.0RC4</link>
+<description>PHP 8.3.0 Release Candidate 4</description>
+<pubDate>Thu, 12 Oct 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.0RC3</title>
+<link>https://php.watch/versions/8.3/8.3.0RC3</link>
+<description>PHP 8.3.0 Release Candidate 3</description>
+<pubDate>Thu, 28 Sep 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.0RC2</title>
+<link>https://php.watch/versions/8.3/8.3.0RC2</link>
+<description>PHP 8.3.0 Release Candidate 2</description>
+<pubDate>Thu, 14 Sep 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.0RC1</title>
+<link>https://php.watch/versions/8.3/8.3.0RC1</link>
+<description>PHP 8.3.0 Release Candidate 1</description>
+<pubDate>Thu, 31 Aug 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.0beta3</title>
+<link>https://php.watch/versions/8.3/8.3.0beta3</link>
+<description>PHP 8.3.0 Beta 3</description>
+<pubDate>Thu, 17 Aug 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.0beta2</title>
+<link>https://php.watch/versions/8.3/8.3.0beta2</link>
+<description>PHP 8.3.0 Beta 2</description>
+<pubDate>Thu, 03 Aug 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.0beta1</title>
+<link>https://php.watch/versions/8.3/8.3.0beta1</link>
+<description>PHP 8.3.0 Beta 1</description>
+<pubDate>Thu, 20 Jul 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.0alpha3</title>
+<link>https://php.watch/versions/8.3/8.3.0alpha3</link>
+<description>PHP 8.3.0 Alpha 3</description>
+<pubDate>Thu, 06 Jul 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.0alpha2</title>
+<link>https://php.watch/versions/8.3/8.3.0alpha2</link>
+<description>PHP 8.3.0 Alpha 2</description>
+<pubDate>Thu, 22 Jun 2023 00:00:00 GMT</pubDate>
+</item>
+
+<item>
+<title>PHP 8.3.0alpha1</title>
+<link>https://php.watch/versions/8.3/8.3.0alpha1</link>
+<description>PHP 8.3.0 Alpha 1</description>
+<pubDate>Thu, 08 Jun 2023 00:00:00 GMT</pubDate>
+</item>
+
+</channel>
+</rss>
