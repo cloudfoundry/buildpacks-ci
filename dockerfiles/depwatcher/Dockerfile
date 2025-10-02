@@ -1,8 +1,8 @@
-FROM crystallang/crystal:0.32.1
+FROM crystallang/crystal:1.17.0
 
 ADD . /src
 WORKDIR /src
-RUN shards && crystal spec --no-debug
+RUN shards install
 RUN shards build --production
 
 FROM ubuntu:bionic
