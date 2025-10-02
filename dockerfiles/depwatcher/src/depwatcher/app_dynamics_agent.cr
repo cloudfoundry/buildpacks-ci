@@ -38,7 +38,7 @@ module Depwatcher
         version = splitArray[0].sub("_", "-")
         url = splitArray[1]
         File.write("#{version}", client.get(url).body)
-        sha256 = OpenSSL::Digest.new("sha256").file("#{version}").hexdigest
+        sha256 = OpenSSL::Digest.new("sha256").file("#{version}").final.hexstring
         File.delete("#{version}")
         allReleases.push(Release.new(version, url, sha256))
       end

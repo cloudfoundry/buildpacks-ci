@@ -132,7 +132,7 @@ module Depwatcher
       hash.update(IO::Memory.new(resp.body))
 
       File.write(File.join(dest_dir, File.basename(download_url)), resp.body)
-      got_hash = hash.hexdigest
+      got_hash = hash.final.hexstring
       raise "Expected hash: #{expected_hash} : Got hash: #{got_hash}" unless got_hash == expected_hash
     end
   end
