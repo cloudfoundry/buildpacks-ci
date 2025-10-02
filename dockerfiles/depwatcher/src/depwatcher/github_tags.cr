@@ -4,12 +4,12 @@ require "./semver"
 module Depwatcher
   class GithubTags < Base
     class Tag
-      JSON.mapping(
-        ref: String,
-        url: String,
-        git_commit_sha: String,
-        sha256: String
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property git_commit_sha : String
+      property sha256 : String
 
       def initialize(
         @ref : String,
@@ -21,16 +21,16 @@ module Depwatcher
     end
 
     class External
-      JSON.mapping(
-        name: String,
-        commit: Commit
-      )
+      include JSON::Serializable
+
+      property name : String
+      property commit : Commit
     end
 
     class Commit
-      JSON.mapping(
-        sha: String
-      )
+      include JSON::Serializable
+
+      property sha : String
     end
 
     def check(repo : String, tag_regex : String) : Array(Internal)

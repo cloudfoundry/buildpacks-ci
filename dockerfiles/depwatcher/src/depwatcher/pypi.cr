@@ -4,29 +4,29 @@ require "./semver"
 module Depwatcher
   class Pypi < Base
     class External
-      JSON.mapping(
-        releases: Hash(String, Array(ExternalRelease)),
-      )
+      include JSON::Serializable
+
+      property releases : Hash(String, Array(ExternalRelease))
     end
 
     class ExternalRelease
-      JSON.mapping(
-        ref: String?,
-        url: String,
-        digests: Hash(String, String),
-        md5_digest: String,
-        packagetype: String,
-        size: Int64,
-      )
+      include JSON::Serializable
+
+      property ref : String?
+      property url : String
+      property digests : Hash(String, String)
+      property md5_digest : String
+      property packagetype : String
+      property size : Int64
     end
 
     class Release
-      JSON.mapping(
-        ref: String?,
-        url: String,
-        md5_digest: String,
-        sha256: String
-      )
+      include JSON::Serializable
+
+      property ref : String?
+      property url : String
+      property md5_digest : String
+      property sha256 : String
       def initialize(@ref : String, @url : String, @md5_digest : String, @sha256 : String)
       end
     end

@@ -6,30 +6,30 @@ require "./semver"
 module Depwatcher
   class GithubReleases < Base
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-        sha256: String,
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property sha256 : String
 
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
 
     class GithubAsset
-      JSON.mapping(
-        name: String,
-        browser_download_url: String
-      )
+      include JSON::Serializable
+
+      property name : String
+      property browser_download_url : String
     end
 
     class GithubRelease
-      JSON.mapping(
-        tag_name: String,
-        draft: Bool,
-        prerelease: Bool,
-        assets: Array(GithubAsset),
-      )
+      include JSON::Serializable
+
+      property tag_name : String
+      property draft : Bool
+      property prerelease : Bool
+      property assets : Array(GithubAsset)
 
       def ref
         tag_name.gsub(/^v/, "")
