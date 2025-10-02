@@ -10,11 +10,12 @@ module Depwatcher
       property url : String
       property md5_digest : String
       property sha256 : String
+
       def initialize(@ref : String, @url : String, @md5_digest : String, @sha256 : String)
       end
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       response = client.get("https://www.python.org/downloads/").body
       doc = XML.parse_html(response)
       lis = doc.xpath("//*[contains(@class,'release-number')]/a")
@@ -26,7 +27,7 @@ module Depwatcher
     end
 
     def in(ref : String) : Release
-      response = client.get("https://www.python.org/downloads/release/python-#{ref.gsub(/\D/,"")}/").body
+      response = client.get("https://www.python.org/downloads/release/python-#{ref.gsub(/\D/, "")}/").body
       doc = XML.parse_html(response)
       a = doc.xpath("//a[contains(text(),'Gzipped source tarball')]")
       raise "Could not parse python release (a) website" unless a.is_a?(XML::NodeSet)

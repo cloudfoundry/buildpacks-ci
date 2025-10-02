@@ -10,6 +10,7 @@ module Depwatcher
       property ref : String
       property url : String
       property sha256 : String
+
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
@@ -17,7 +18,7 @@ module Depwatcher
     def initialize(@client = HTTPClientInsecure.new)
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       releases.map do |r|
         Internal.new(r.ref)
       end.sort_by { |i| Semver.new(i.ref) }
@@ -31,12 +32,12 @@ module Depwatcher
       r
     end
 
-    private def releases() : Array(Release)
+    private def releases : Array(Release)
       response = client.get("https://go.dev/dl/").body
       doc = XML.parse_html(response)
       trs = doc.xpath("//tr[td[contains(text(),'Source')]]")
       raise "Could not parse golang release (td) website" unless trs.is_a?(XML::NodeSet)
-      trs.map do |tr|  
+      trs.map do |tr|
         release_name = tr.xpath("./td[1]/a/text()").to_s
         version = release_name.match(/go([\d\.]*)\.src/)
         url = "https://dl.google.com/go/#{release_name}"

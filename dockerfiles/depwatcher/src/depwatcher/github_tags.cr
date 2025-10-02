@@ -15,7 +15,7 @@ module Depwatcher
         @ref : String,
         @url : String,
         @git_commit_sha : String,
-        @sha256 : String
+        @sha256 : String,
       )
       end
     end
@@ -35,8 +35,8 @@ module Depwatcher
 
     def check(repo : String, tag_regex : String) : Array(Internal)
       matched_tags(repo, tag_regex)
-      .map { |t| Internal.new(t.name) }
-      .sort_by { |i| Semver.new(i.ref) }
+        .map { |t| Internal.new(t.name) }
+        .sort_by { |i| Semver.new(i.ref) }
     end
 
     def in(repo : String, ref : String) : Tag

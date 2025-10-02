@@ -11,11 +11,12 @@ module Depwatcher
       property ref : String
       property url : String
       property sha256 : String
+
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
 
-    private def get_versions() : Array(String)
+    private def get_versions : Array(String)
       response = client.get("https://www.jruby.org/download").body
       doc = XML.parse_html(response)
       elements = doc.xpath_nodes("//a[starts-with(@href,'https://repo1.maven.org/maven2/org/jruby/jruby-dist/')]")
@@ -27,7 +28,7 @@ module Depwatcher
       }.compact.uniq
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       get_versions.map { |v|
         Internal.new(v)
       }.sort_by { |i| Semver.new(i.ref) }

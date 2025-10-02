@@ -11,6 +11,7 @@ module Depwatcher
       property ref : String
       property url : String
       property sha256 : String
+
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
