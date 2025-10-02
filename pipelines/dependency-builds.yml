@@ -24,6 +24,7 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
     branch: main
     paths: [ binary-builds-new/ ]
 
