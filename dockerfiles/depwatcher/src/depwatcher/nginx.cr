@@ -5,12 +5,12 @@ require "xml"
 module Depwatcher
   class Nginx < Base
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-        pgp: String,
-        sha256: String
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property pgp : String
+      property sha256 : String
       def initialize(@ref : String, @url : String, @pgp : String, @sha256 : String)
       end
     end

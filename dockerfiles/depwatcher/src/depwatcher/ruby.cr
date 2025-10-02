@@ -6,19 +6,19 @@ require "yaml"
 module Depwatcher
   class Ruby < Base
     class GithubRelease
-      YAML.mapping(
-        version: String,
-        url: Hash(String, String)?,
-        sha256: Hash(String, String)?,
-      )
+      include YAML::Serializable
+
+      property version : String
+      property url : Hash(String, String)?
+      property sha256 : Hash(String, String)?
     end
 
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-        sha256: String,
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property sha256 : String
 
       def initialize(@ref : String, @url : String, @sha256 : String)
       end

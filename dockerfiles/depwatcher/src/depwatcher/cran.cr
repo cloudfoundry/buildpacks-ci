@@ -5,10 +5,10 @@ require "xml"
 module Depwatcher
   class CRAN < Base
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
 
       def initialize(@ref : String, @url : String)
       end

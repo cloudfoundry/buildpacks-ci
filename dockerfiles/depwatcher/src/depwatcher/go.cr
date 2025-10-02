@@ -1,14 +1,15 @@
 require "./base"
+require "./semver"
 require "xml"
 
 module Depwatcher
   class Go < Base
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-        sha256: String,
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property sha256 : String
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end

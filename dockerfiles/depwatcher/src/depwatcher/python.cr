@@ -4,12 +4,12 @@ require "xml"
 module Depwatcher
   class Python < Base
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-        md5_digest: String,
-        sha256: String
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property md5_digest : String
+      property sha256 : String
       def initialize(@ref : String, @url : String, @md5_digest : String, @sha256 : String)
       end
     end

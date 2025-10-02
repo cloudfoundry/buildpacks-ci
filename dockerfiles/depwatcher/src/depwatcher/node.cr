@@ -1,32 +1,33 @@
 require "./base"
 require "./semver"
+require "xml"
 
 module Depwatcher
   class Node < Base
     class Dist
-      JSON.mapping(
-        shasum: String,
-        tarball: String,
-      )
+      include JSON::Serializable
+
+      property shasum : String
+      property tarball : String
     end
     class Version
-      JSON.mapping(
-        name: String,
-        version: String,
-        dist: Dist,
-      )
+      include JSON::Serializable
+
+      property name : String
+      property version : String
+      property dist : Dist
     end
     class External
-      JSON.mapping(
-        versions: Hash(String, Version),
-      )
+      include JSON::Serializable
+
+      property versions : Hash(String, Version)
     end
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-        sha256: String,
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property sha256 : String
       def initialize(@ref, @url, @sha256)
       end
     end

@@ -6,67 +6,71 @@ require "./github_tags"
 module Depwatcher
   class DotnetBase < Base
     class DotnetReleasesIndex
-      JSON.mapping(
-        releases_index: { type: Array(DotnetReleases), key: "releases-index" },
-      )
+      include JSON::Serializable
+
+      @[JSON::Field(key: "releases-index")]
+      property releases_index : Array(DotnetReleases)
 
       class DotnetReleases
-        JSON.mapping(
-          channel_version: { type: String, key: "channel-version" },
-          support_phase: { type: String, key: "support-phase" },
-        )
+        include JSON::Serializable
+
+        @[JSON::Field(key: "channel-version")]
+        property channel_version : String
+        @[JSON::Field(key: "support-phase")]
+        property support_phase : String
       end
     end
 
     class DotnetReleasesJSON
-      JSON.mapping(
-        releases: Array(Release),
-      )
+      include JSON::Serializable
+
+      property releases : Array(Release)
 
       class Release
-        JSON.mapping(
-          sdk: { type: Sdk, nilable: true },
-          runtime: { type: Runtime, nilable: true },
-          aspnetcore_runtime: { type: Aspnetcore, nilable: true, key: "aspnetcore-runtime" },
-        )
+        include JSON::Serializable
+
+        property sdk : Sdk?
+        property runtime : Runtime?
+        @[JSON::Field(key: "aspnetcore-runtime")]
+        property aspnetcore_runtime : Aspnetcore?
       end
 
       class Sdk
-        JSON.mapping(
-          files: Array(File),
-          version: String,
-        )
+        include JSON::Serializable
+
+        property files : Array(File)
+        property version : String
       end
 
       class Runtime
-        JSON.mapping(
-          files: Array(File),
-          version: String,
-        )
+        include JSON::Serializable
+
+        property files : Array(File)
+        property version : String
       end
 
       class Aspnetcore
-        JSON.mapping(
-          files: Array(File),
-          version: String,
-        )
+        include JSON::Serializable
+
+        property files : Array(File)
+        property version : String
       end
 
       class File
-        JSON.mapping(
-          name: String,
-          url: String,
-          hash: String,
-        )
+        include JSON::Serializable
+
+        property name : String
+        property url : String
+        property hash : String
       end
     end
 
     class DotnetRelease
-      JSON.mapping(
-        ref: String,
-        url: String,
-        sha512: String,
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property sha512 : String
 
       def initialize(
         @ref : String,
