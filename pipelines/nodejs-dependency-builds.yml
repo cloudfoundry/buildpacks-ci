@@ -1,0 +1,834 @@
+
+resource_types:
+- name: depwatcher
+  type: docker-image
+  source:
+    repository: coredeps/depwatcher
+- name: create-pull-request-resource
+  type: docker-image
+  source:
+    repository: cfbuildpacks/create-pull-request-resource
+
+resources:
+- name: binary-builder
+  type: git
+  source:
+    uri: {{binary-builder-git-uri}}
+- name: buildpacks-ci
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/buildpacks-ci
+    branch: master
+- name: builds
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
+    branch: main
+    paths: [ binary-builds-new/ ]
+- name: cflinuxfs4-image
+  type: docker-image
+  source: {repository: cloudfoundry/cflinuxfs4}
+- name: cflinuxfs3-image
+  type: docker-image
+  source: {repository: cloudfoundry/cflinuxfs3}
+- name: nodejs-buildpack
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/nodejs-buildpack
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+    branch: develop
+- name: nodejs-buildpack-latest-released
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/nodejs-buildpack
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+    branch: master
+- name: nodejs-pull-request
+  type: create-pull-request-resource
+  source:
+    remote_repository: cloudfoundry/nodejs-buildpack
+    github_token: ((buildpacks-github-token))
+- name: source-appdynamics-latest
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: appd_agent
+    name: appdynamics   
+- name: source-bower-latest
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: npm
+    name: bower 
+- name: buildpacks-bucket-bower
+  type: s3
+  source:
+    bucket: buildpacks.cloudfoundry.org
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+    # pip, go and libgdiplus have some versions of the form 'v1.2'; everyone else uses 'v1.2.3'
+    regexp: dependencies/bower/bower.*?(\d+\.\d+\.\d+)(.*)
+- name: source-bundler-2.x.x
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: rubygems
+    name: bundler    
+    version_filter: 2.X.X 
+- name: source-bundler-latest
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: rubygems
+    name: bundler 
+- name: buildpacks-bucket-bundler
+  type: s3
+  source:
+    bucket: buildpacks.cloudfoundry.org
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+    # pip, go and libgdiplus have some versions of the form 'v1.2'; everyone else uses 'v1.2.3'
+    regexp: dependencies/bundler/bundler.*?(\d+\.\d+\.\d+)(.*)
+- name: source-caapm-latest
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: ca_apm_agent
+    name: CAAPM
+- name: source-composer-latest
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: github_releases
+    name: composer  
+    repo: composer/composer
+    extension: .phar
+- name: buildpacks-bucket-composer
+  type: s3
+  source:
+    bucket: buildpacks.cloudfoundry.org
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+    # pip, go and libgdiplus have some versions of the form 'v1.2'; everyone else uses 'v1.2.3'
+    regexp: dependencies/composer/composer.*?(\d+\.\d+\.\d+)(.*)
+- name: source-node-18.x.x
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: node
+    name: node    
+    version_filter: 18.X.X
+- name: source-node-20.x.x
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: node
+    name: node    
+    version_filter: 20.X.X
+- name: source-node-22.x.x
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: node
+    name: node    
+    version_filter: 22.X.X
+- name: source-node-node-lts
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: node
+    name: node    
+    version_filter: node-lts
+- name: source-node-latest
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: node
+    name: node
+- name: buildpacks-bucket-node
+  type: s3
+  source:
+    bucket: buildpacks.cloudfoundry.org
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+    # pip, go and libgdiplus have some versions of the form 'v1.2'; everyone else uses 'v1.2.3'
+    regexp: dependencies/node/node.*?(\d+\.\d+\.\d+)(.*)
+- name: source-setuptools-latest
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: pypi
+    name: setuptools
+- name: buildpacks-bucket-setuptools
+  type: s3
+  source:
+    bucket: buildpacks.cloudfoundry.org
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+    # pip, go and libgdiplus have some versions of the form 'v1.2'; everyone else uses 'v1.2.3'
+    regexp: dependencies/setuptools/setuptools.*?(\d+\.\d+\.\d+)(.*)
+- name: source-yarn-latest
+  type: depwatcher
+  check_every: 1h
+  source:
+    type: github_releases
+    name: yarn  
+    repo: yarnpkg/yarn    
+    extension: .tar.gz
+- name: buildpacks-bucket-yarn
+  type: s3
+  source:
+    bucket: buildpacks.cloudfoundry.org
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+    # pip, go and libgdiplus have some versions of the form 'v1.2'; everyone else uses 'v1.2.3'
+    regexp: dependencies/yarn/yarn.*?(\d+\.\d+\.\d+)(.*)
+
+  ## Alerts ##
+jobs:  
+- name: build-appdynamics-latest
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: source
+      resource: source-appdynamics-latest
+      trigger: true
+      version: every  
+    - get: cflinuxfs3-image  
+    - get: builds
+  - in_parallel:  
+    - do:
+      - task: build-binary-any-stack
+        image: cflinuxfs3-image
+        file: buildpacks-ci/tasks/build-binary-new/build.yml
+        output_mapping: {artifacts: any-stack-artifacts, builds-artifacts: any-stack-builds-metadata}
+        params:
+          STACK: any-stack
+      - in_parallel:    
+        - put: builds-metadata-any-stack
+          resource: builds
+          params:
+            repository: any-stack-builds-metadata
+            rebase: true
+- name: build-bower-latest
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: source
+      resource: source-bower-latest
+      trigger: true
+      version: every  
+    - get: cflinuxfs3-image  
+    - get: builds
+  - in_parallel:  
+    - do:
+      - task: build-binary-any-stack
+        image: cflinuxfs3-image
+        file: buildpacks-ci/tasks/build-binary-new/build.yml
+        output_mapping: {artifacts: any-stack-artifacts, builds-artifacts: any-stack-builds-metadata}
+        params:
+          STACK: any-stack
+      - in_parallel:    
+        - put: buildpacks-bucket-bower-any-stack
+          resource: buildpacks-bucket-bower
+          params:
+            file: any-stack-artifacts/bower*    
+        - put: builds-metadata-any-stack
+          resource: builds
+          params:
+            repository: any-stack-builds-metadata
+            rebase: true
+- name: create-bundler-new-line-story
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: source
+      resource: source-bundler-latest
+      trigger: true
+      version: every
+  - do:
+    - task: create-new-version-line-story
+      file: buildpacks-ci/tasks/create-new-version-line-story/create-new-version-line-story.yml
+      params:
+        BUILDPACKS: ruby
+        EXISTING_VERSION_LINES: 2.X.X
+        GITHUB_TOKEN: ((buildpacks-github-token))  
+- name: build-bundler-2.x.x
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: source
+      resource: source-bundler-2.x.x
+      trigger: true
+      version: every  
+    - get: cflinuxfs4-image  
+    - get: builds
+  - in_parallel:
+    - do:
+      - task: build-binary-any-stack
+        image: cflinuxfs4-image
+        file: buildpacks-ci/tasks/build-binary-new-cflinuxfs4/build.yml
+        output_mapping: {artifacts: any-stack-artifacts, builds-artifacts: any-stack-builds-metadata}
+        params:
+          STACK: any-stack
+      - in_parallel:
+        - put: buildpacks-bucket-bundler-any-stack
+          resource: buildpacks-bucket-bundler
+          params:
+            file: any-stack-artifacts/bundler*
+        - put: builds-metadata-any-stack
+          resource: builds
+          params:
+            repository: any-stack-builds-metadata
+            rebase: true
+- name: build-caapm-latest
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: source
+      resource: source-caapm-latest
+      trigger: true
+      version: every
+    - get: cflinuxfs3-image
+    - get: builds
+  - in_parallel:
+    - do:
+      - task: build-binary-any-stack
+        image: cflinuxfs3-image
+        file: buildpacks-ci/tasks/build-binary-new/build.yml
+        output_mapping: {artifacts: any-stack-artifacts, builds-artifacts: any-stack-builds-metadata}
+        params:
+          STACK: any-stack
+      - in_parallel:
+        - put: builds-metadata-any-stack
+          resource: builds
+          params:
+            repository: any-stack-builds-metadata
+            rebase: true
+- name: build-composer-latest
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: source
+      resource: source-composer-latest
+      trigger: true
+      version: every
+    - get: cflinuxfs3-image
+    - get: builds
+  - in_parallel:
+    - do:
+      - task: build-binary-any-stack
+        image: cflinuxfs3-image
+        file: buildpacks-ci/tasks/build-binary-new/build.yml
+        output_mapping: {artifacts: any-stack-artifacts, builds-artifacts: any-stack-builds-metadata}
+        params:
+          STACK: any-stack
+      - in_parallel:
+        - put: buildpacks-bucket-composer-any-stack
+          resource: buildpacks-bucket-composer
+          params:
+            file: any-stack-artifacts/composer*    
+        - put: builds-metadata-any-stack
+          resource: builds
+          params:
+            repository: any-stack-builds-metadata
+            rebase: true
+- name: create-node-new-line-story
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: source
+      resource: source-node-latest
+      trigger: true
+      version: every
+  - do:
+    - task: create-new-version-line-story
+      file: buildpacks-ci/tasks/create-new-version-line-story/create-new-version-line-story.yml
+      params:
+        BUILDPACKS: nodejs ruby dotnet-core
+        EXISTING_VERSION_LINES: 18.X.X 20.X.X 22.X.X node-lts
+        GITHUB_TOKEN: ((buildpacks-github-token))  
+- name: build-node-18.x.x
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: source
+      resource: source-node-18.x.x
+      trigger: true
+      version: every  
+    - get: cflinuxfs4-image  
+    - get: cflinuxfs3-image  
+    - get: builds
+  - in_parallel:  
+    - do:
+      - task: build-binary-cflinuxfs4
+        image: cflinuxfs4-image
+        file: buildpacks-ci/tasks/build-binary-new-cflinuxfs4/build.yml
+        output_mapping: {artifacts: cflinuxfs4-artifacts, builds-artifacts: cflinuxfs4-builds-metadata}
+        params:
+          STACK: cflinuxfs4
+      - in_parallel:    
+        - put: buildpacks-bucket-node-cflinuxfs4
+          resource: buildpacks-bucket-node
+          params:
+            file: cflinuxfs4-artifacts/node*    
+        - put: builds-metadata-cflinuxfs4
+          resource: builds
+          params:
+            repository: cflinuxfs4-builds-metadata
+            rebase: true  
+    - do:
+      - task: build-binary-cflinuxfs3
+        image: cflinuxfs3-image
+        file: buildpacks-ci/tasks/build-binary-new/build.yml
+        output_mapping: {artifacts: cflinuxfs3-artifacts, builds-artifacts: cflinuxfs3-builds-metadata}
+        params:
+          STACK: cflinuxfs3
+      - in_parallel:    
+        - put: buildpacks-bucket-node-cflinuxfs3
+          resource: buildpacks-bucket-node
+          params:
+            file: cflinuxfs3-artifacts/node*    
+        - put: builds-metadata-cflinuxfs3
+          resource: builds
+          params:
+            repository: cflinuxfs3-builds-metadata
+            rebase: true
+- name: build-node-20.x.x
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: source
+      resource: source-node-20.x.x
+      trigger: true
+      version: every
+    - get: cflinuxfs4-image
+    - get: cflinuxfs3-image
+    - get: builds
+  - in_parallel:
+    - do:
+      - task: build-binary-cflinuxfs4
+        image: cflinuxfs4-image
+        file: buildpacks-ci/tasks/build-binary-new-cflinuxfs4/build.yml
+        output_mapping: {artifacts: cflinuxfs4-artifacts, builds-artifacts: cflinuxfs4-builds-metadata}
+        params:
+          STACK: cflinuxfs4
+      - in_parallel:
+        - put: buildpacks-bucket-node-cflinuxfs4
+          resource: buildpacks-bucket-node
+          params:
+            file: cflinuxfs4-artifacts/node*
+        - put: builds-metadata-cflinuxfs4
+          resource: builds
+          params:
+            repository: cflinuxfs4-builds-metadata
+            rebase: true
+    - do:
+      - task: build-binary-cflinuxfs3
+        image: cflinuxfs3-image
+        file: buildpacks-ci/tasks/build-binary-new/build.yml
+        output_mapping: {artifacts: cflinuxfs3-artifacts, builds-artifacts: cflinuxfs3-builds-metadata}
+        params:
+          STACK: cflinuxfs3
+      - in_parallel:
+        - put: buildpacks-bucket-node-cflinuxfs3
+          resource: buildpacks-bucket-node
+          params:
+            file: cflinuxfs3-artifacts/node*
+        - put: builds-metadata-cflinuxfs3
+          resource: builds
+          params:
+            repository: cflinuxfs3-builds-metadata
+            rebase: true
+- name: build-node-22.x.x
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: source
+      resource: source-node-22.x.x
+      trigger: true
+      version: every
+    - get: cflinuxfs4-image
+    - get: cflinuxfs3-image
+    - get: builds
+  - in_parallel:
+    - do:
+      - task: build-binary-cflinuxfs4
+        image: cflinuxfs4-image
+        file: buildpacks-ci/tasks/build-binary-new-cflinuxfs4/build.yml
+        output_mapping: {artifacts: cflinuxfs4-artifacts, builds-artifacts: cflinuxfs4-builds-metadata}
+        params:
+          STACK: cflinuxfs4
+      - in_parallel:
+        - put: buildpacks-bucket-node-cflinuxfs4
+          resource: buildpacks-bucket-node
+          params:
+            file: cflinuxfs4-artifacts/node*
+        - put: builds-metadata-cflinuxfs4
+          resource: builds
+          params:
+            repository: cflinuxfs4-builds-metadata
+            rebase: true
+- name: create-node-node-lts-story
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: source
+      resource: source-node-node-lts
+      trigger: true
+      version: every
+    - get: builds
+  - do:
+    - task: create-new-version-line-story-node
+      file: buildpacks-ci/tasks/create-new-version-line-story/create_node_lts.yml
+      params:
+        BUILDPACKS: ruby dotnet-core
+        GITHUB_TOKEN: ((buildpacks-github-token))
+- name: build-node-node-lts
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: source
+      resource: source-node-node-lts
+      trigger: true
+      version: every
+    - get: cflinuxfs4-image
+    - get: cflinuxfs3-image
+    - get: builds
+  - in_parallel:
+    - do:
+      - task: build-binary-cflinuxfs4
+        image: cflinuxfs4-image
+        file: buildpacks-ci/tasks/build-binary-new-cflinuxfs4/build.yml
+        output_mapping: {artifacts: cflinuxfs4-artifacts, builds-artifacts: cflinuxfs4-builds-metadata}
+        params:
+          STACK: cflinuxfs4
+      - in_parallel:
+        - put: buildpacks-bucket-node-cflinuxfs4
+          resource: buildpacks-bucket-node
+          params:
+            file: cflinuxfs4-artifacts/node*
+        - put: builds-metadata-cflinuxfs4
+          resource: builds
+          params:
+            repository: cflinuxfs4-builds-metadata
+            rebase: true
+    - do:
+      - task: build-binary-cflinuxfs3
+        image: cflinuxfs3-image
+        file: buildpacks-ci/tasks/build-binary-new/build.yml
+        output_mapping: {artifacts: cflinuxfs3-artifacts, builds-artifacts: cflinuxfs3-builds-metadata}
+        params:
+          STACK: cflinuxfs3
+      - in_parallel:
+        - put: buildpacks-bucket-node-cflinuxfs3
+          resource: buildpacks-bucket-node
+          params:
+            file: cflinuxfs3-artifacts/node*
+        - put: builds-metadata-cflinuxfs3
+          resource: builds
+          params:
+            repository: cflinuxfs3-builds-metadata
+            rebase: true
+- name: update-node-18.x.x-nodejs
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpack
+      resource: nodejs-buildpack
+    - get: buildpack-latest-released
+      resource: nodejs-buildpack-latest-released
+    - get: buildpacks-ci
+    - get: source
+      resource: source-node-18.x.x
+      passed:
+      - build-node-18.x.x
+      version: every
+      trigger: true
+    - get: builds
+  - task: update-buildpack-dependency
+    file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
+    params:
+      GPG_SIGNING_KEY_ID: ((cf-buildpacks-eng-gpg-key-id))
+      GPG_SIGNING_KEY: ((cf-buildpacks-eng-gpg-key))
+      VERSION_LINE: 18.X.X
+      VERSION_LINE_TYPE: major
+      REMOVAL_STRATEGY: keep_latest_released
+      DEPRECATION_DATE: 2025-04-30
+      DEPRECATION_LINK: https://github.com/nodejs/Release
+      DEPRECATION_MATCH: 
+    output_mapping:
+      artifacts: buildpack
+  - put: nodejs-pull-request
+    params:
+      repo_location: buildpack
+      title: Updating version for node for 18.X.X 
+      branch_prefix: "pr-by-releng-bot"
+      auto_merge: false
+      base: develop
+- name: update-node-20.x.x-nodejs
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpack
+      resource: nodejs-buildpack
+    - get: buildpack-latest-released
+      resource: nodejs-buildpack-latest-released
+    - get: buildpacks-ci
+    - get: source
+      resource: source-node-20.x.x
+      passed:
+      - build-node-20.x.x
+      version: every
+      trigger: true
+    - get: builds
+  - task: update-buildpack-dependency
+    file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
+    params:
+      GPG_SIGNING_KEY_ID: ((cf-buildpacks-eng-gpg-key-id))
+      GPG_SIGNING_KEY: ((cf-buildpacks-eng-gpg-key))
+      VERSION_LINE: 20.X.X
+      VERSION_LINE_TYPE: major
+      REMOVAL_STRATEGY: keep_latest_released
+      DEPRECATION_DATE: 2026-04-30
+      DEPRECATION_LINK: https://github.com/nodejs/Release
+      DEPRECATION_MATCH: 
+    output_mapping:
+      artifacts: buildpack
+  - put: nodejs-pull-request
+    params:
+      repo_location: buildpack
+      title: Updating version for node for 20.X.X 
+      branch_prefix: "pr-by-releng-bot"
+      auto_merge: false
+      base: develop
+- name: update-node-22.x.x-nodejs
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpack
+      resource: nodejs-buildpack
+    - get: buildpack-latest-released
+      resource: nodejs-buildpack-latest-released
+    - get: buildpacks-ci
+    - get: source
+      resource: source-node-22.x.x
+      passed:
+      - build-node-22.x.x
+      version: every
+      trigger: true
+    - get: builds
+  - task: update-buildpack-dependency
+    file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
+    params:
+      GPG_SIGNING_KEY_ID: ((cf-buildpacks-eng-gpg-key-id))
+      GPG_SIGNING_KEY: ((cf-buildpacks-eng-gpg-key))
+      VERSION_LINE: 22.X.X
+      VERSION_LINE_TYPE: major
+      REMOVAL_STRATEGY: keep_latest_released
+      DEPRECATION_DATE: 2027-04-30
+      DEPRECATION_LINK: https://github.com/nodejs/Release
+      DEPRECATION_MATCH: 
+    output_mapping:
+      artifacts: buildpack
+  - put: nodejs-pull-request
+    params:
+      repo_location: buildpack
+      title: Updating version for node for 22.X.X 
+      branch_prefix: "pr-by-releng-bot"
+      auto_merge: false
+      base: develop
+- name: build-setuptools-latest
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: source
+      resource: source-setuptools-latest
+      trigger: true
+      version: every
+    - get: cflinuxfs3-image
+    - get: builds
+  - in_parallel:
+    - do:
+      - task: build-binary-any-stack
+        image: cflinuxfs3-image
+        file: buildpacks-ci/tasks/build-binary-new/build.yml
+        output_mapping: {artifacts: any-stack-artifacts, builds-artifacts: any-stack-builds-metadata}
+        params:
+          STACK: any-stack
+      - in_parallel:
+        - put: buildpacks-bucket-setuptools-any-stack
+          resource: buildpacks-bucket-setuptools
+          params:
+            file: any-stack-artifacts/setuptools*
+        - put: builds-metadata-any-stack
+          resource: builds
+          params:
+            repository: any-stack-builds-metadata
+            rebase: true
+- name: build-yarn-latest
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpacks-ci
+    - get: binary-builder
+    - get: source
+      resource: source-yarn-latest
+      trigger: true
+      version: every 
+    - get: cflinuxfs3-image
+    - get: builds
+  - in_parallel:
+    - do:
+      - task: build-binary-any-stack
+        image: cflinuxfs3-image
+        file: buildpacks-ci/tasks/build-binary-new/build.yml
+        output_mapping: {artifacts: any-stack-artifacts, builds-artifacts: any-stack-builds-metadata}
+        params:
+          STACK: any-stack
+      - in_parallel:    
+        - put: buildpacks-bucket-yarn-any-stack
+          resource: buildpacks-bucket-yarn
+          params:
+            file: any-stack-artifacts/yarn*    
+        - put: builds-metadata-any-stack
+          resource: builds
+          params:
+            repository: any-stack-builds-metadata
+            rebase: true   
+- name: update-yarn-latest-nodejs
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: buildpack
+      resource: nodejs-buildpack
+    - get: buildpack-latest-released
+      resource: nodejs-buildpack-latest-released
+    - get: buildpacks-ci
+    - get: source
+      resource: source-yarn-latest
+      passed:    
+      - build-yarn-latest    
+      version: every
+      trigger: true    
+    - get: builds
+  - task: update-buildpack-dependency
+    file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
+    params:
+      GPG_SIGNING_KEY_ID: ((cf-buildpacks-eng-gpg-key-id))
+      GPG_SIGNING_KEY: ((cf-buildpacks-eng-gpg-key))
+      VERSION_LINE: latest
+      VERSION_LINE_TYPE: 
+      REMOVAL_STRATEGY: remove_all
+      DEPRECATION_DATE: 
+      DEPRECATION_LINK: 
+      DEPRECATION_MATCH: 
+    output_mapping:
+      artifacts: buildpack
+  - put: nodejs-pull-request
+    params:
+      repo_location: buildpack
+      title: Updating version for yarn for latest 
+      branch_prefix: "pr-by-releng-bot"
+      auto_merge: false
+      base: develop
+groups:
+  - name: all
+    jobs:
+    - build-appdynamics-latest
+    - build-bower-latest
+    - create-bundler-new-line-story
+    - build-bundler-2.x.x
+    - build-caapm-latest
+    - build-composer-latest  
+    - create-node-new-line-story
+    - build-node-18.x.x
+    - build-node-20.x.x
+    - build-node-22.x.x
+    - create-node-node-lts-story
+    - build-node-node-lts
+    - update-node-18.x.x-nodejs
+    - update-node-20.x.x-nodejs
+    - update-node-22.x.x-nodejs
+    #- update-node-node-lts-ruby
+    #- update-node-node-lts-dotnet-core
+    - build-setuptools-latest
+    - build-yarn-latest
+    - update-yarn-latest-nodejs
+  - name: appdynamics
+    jobs:
+    - build-appdynamics-latest
+  - name: bower
+    jobs:
+    - build-bower-latest
+  - name: bundler
+    jobs:
+    - create-bundler-new-line-story
+    - build-bundler-2.x.x
+  - name: caapm
+    jobs:
+    - build-caapm-latest
+  - name: composer
+    jobs:
+    - build-composer-latest
+  - name: node
+    jobs:
+    - create-node-new-line-story
+    - build-node-18.x.x
+    - build-node-20.x.x
+    - build-node-22.x.x
+    - create-node-node-lts-story
+    - build-node-node-lts
+    - update-node-18.x.x-nodejs
+    - update-node-20.x.x-nodejs
+    - update-node-22.x.x-nodejs
+    # - update-node-node-lts-ruby
+    #- update-node-node-lts-dotnet-core   
+  - name: setuptools
+    jobs:
+    - build-setuptools-latest
+  - name: yarn
+    jobs:
+    - build-yarn-latest
+    - update-yarn-latest-nodejs

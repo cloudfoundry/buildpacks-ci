@@ -232,16 +232,16 @@ module DependencyBuildHelper
             Runner.run('make')
             Runner.run('make install')
 
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "install.packages('remotes', repos='https://cran.r-project.org')")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "install.packages('devtools', repos='https://cran.r-project.org')")
 
             rserve_version = rserve_input.split(".")[0..1].join(".") + "-" + rserve_input.split(".")[2..-1].join(".")
 
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('remotes'); remotes::install_version('Rserve', '#{rserve_version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('remotes'); remotes::install_version('forecast', '#{forecast_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('remotes'); remotes::install_version('shiny', '#{shiny_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('remotes'); remotes::install_version('plumber', '#{plumber_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); devtools::install_version('Rserve', '#{rserve_version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); devtools::install_version('forecast', '#{forecast_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); devtools::install_version('shiny', '#{shiny_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('devtools'); devtools::install_version('plumber', '#{plumber_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
 
-            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'remove.packages("remotes")')
+            Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'remove.packages("devtools")')
 
             Dir.chdir('/usr/local/lib/R') do
               Runner.run('cp', '-L', '/usr/bin/x86_64-linux-gnu-gfortran-11', './bin/gfortran')
@@ -539,6 +539,11 @@ class DependencyBuild
   end
 
   def build_node
+    # See https://github.com/nodejs/node/blob/main/BUILDING.md
+    # for python and gcc needs for node versions.
+    Utils.setup_python_and_pip
+    Utils.setup_gcc
+
     @source_input.version = @source_input.version.delete_prefix('v')
     @binary_builder.build(@source_input)
 
@@ -580,7 +585,7 @@ class DependencyBuild
 
         Archive.strip_top_level_directory_from_tar("pip-#{@source_input.version}.tar.gz")
         Runner.run('tar', 'zxf', "pip-#{@source_input.version}.tar.gz")
-        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools==62.1.0')
+        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools')
         Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
         Runner.run('tar', 'zcvf', old_filepath, '.')
       end
@@ -844,6 +849,15 @@ class DependencyBuild
       Runner.run('apt', 'update')
       Runner.run('apt', 'install', '-y', 'python3', 'python3-pip')
       Runner.run('pip3', 'install', '--upgrade', 'pip', 'setuptools')
+    end
+
+    def self.setup_gcc
+      Runner.run('apt', 'update')
+      Runner.run('apt', 'install', '-y', 'software-properties-common')
+      Runner.run('add-apt-repository', '-y', 'ppa:ubuntu-toolchain-r/test')
+      Runner.run('apt', 'update')
+      Runner.run('apt', 'install', '-y', 'gcc-12', 'g++-12')
+      Runner.run('update-alternatives', '--install', '/usr/bin/gcc', 'gcc', '/usr/bin/gcc-12', '60', '--slave', '/usr/bin/g++', 'g++', '/usr/bin/g++-12')
     end
 
     def self.prune_dotnet_files(source_input, files_to_exclude, write_runtime = false)

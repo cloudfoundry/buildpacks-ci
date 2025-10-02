@@ -1,0 +1,62 @@
+# Nodejs Dependency Builds Pipeline Configuration
+# 
+# This file contains all the required credentials and configuration
+# for the nodejs-dependency-builds.yml pipeline
+
+## GitHub Configuration
+# SSH Key for accessing CloudFoundry buildpack repositories
+cf-buildpacks-eng-github-ssh-key.private_key: |
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    # REPLACE WITH YOUR ACTUAL SSH PRIVATE KEY
+    # This key needs read/write access to:
+    # - cloudfoundry/nodejs-buildpack
+    # - cloudfoundry/buildpacks-ci  
+    # - cloudfoundry/public-buildpacks-ci-robots
+    -----END OPENSSH PRIVATE KEY-----
+
+# GitHub Personal Access Token or App Token
+# Required permissions: repo, workflow, read:org
+buildpacks-github-token: "ghp_REPLACE_WITH_YOUR_TOKEN"
+
+## Docker Hub Configuration
+# Docker Hub credentials for coredeps organization
+# Required for accessing private Docker images and pushing built images
+coredeps-dockerhub-user.username: "YOUR_DOCKERHUB_USERNAME"
+coredeps-dockerhub-user.password: "YOUR_DOCKERHUB_PASSWORD_OR_TOKEN"
+
+## AWS S3 Configuration
+# AWS Access Key ID for buildpacks bucket access
+# IAM permissions needed: s3:GetObject, s3:PutObject, s3:ListBucket
+buildpacks-cloudfoundry-org-aws-access-key-id: "YOUR_AWS_ACCESS_KEY_ID"
+
+# AWS Secret Access Key 
+# SECURITY: Replace the hardcoded value with your actual secret
+buildpacks-cloudfoundry-org-aws-secret-access-key: "YOUR_AWS_SECRET_ACCESS_KEY"
+
+## GPG Signing Configuration  
+# GPG Key ID for signing buildpack dependencies
+cf-buildpacks-eng-gpg-key-id: "YOUR_GPG_KEY_ID"
+
+# GPG Private Key for signing
+cf-buildpacks-eng-gpg-key: |
+  -----BEGIN PGP PRIVATE KEY BLOCK-----
+  # REPLACE WITH YOUR ACTUAL GPG PRIVATE KEY
+  # This key is used to sign dependency packages
+  -----END PGP PRIVATE KEY BLOCK-----
+
+## Repository Configuration
+# Binary builder repository URI
+# Can be HTTPS or SSH format
+binary-builder-git-uri: "https://github.com/cloudfoundry/binary-builder"
+
+##############################################################################
+# DEPLOYMENT INSTRUCTIONS
+##############################################################################
+
+# 1. Fill in all the credential values above
+# 2. Save this file as 'nodejs-pipeline-vars.yml' 
+# 3. Ensure file permissions are restricted (chmod 600 on Unix)
+# 4. Deploy the pipeline:
+
+# Method Using fly CLI directly
+# fly -t <target> set-pipeline -p nodejs-dependency-builds -c nodejs-dependency-builds.yml -l nodejs-pipeline-vars.yml

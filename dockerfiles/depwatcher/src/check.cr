@@ -35,7 +35,7 @@ when "pypi"
 when "ruby"
   versions = Depwatcher::Ruby.new.check
 when "php"
-  versions = Depwatcher::Php.new.check
+  versions = Depwatcher::Php.new.check(source.as_h.fetch("version_filter", "THIS_DEFAULT_CASE_SHOULD_NOT_HAPPEN").to_s)
 when "python"
   versions = Depwatcher::Python.new.check
 when "go"

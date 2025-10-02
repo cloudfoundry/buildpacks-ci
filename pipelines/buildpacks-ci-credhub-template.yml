@@ -1,0 +1,47 @@
+credentials:
+- name: /concourse/buildpacks-team/cf-buildpacks-eng-github-ssh-key
+  type: ssh
+  value:
+    private_key: |
+      -----BEGIN OPENSSH PRIVATE KEY-----
+      # REPLACE WITH YOUR ACTUAL SSH PRIVATE KEY
+      # This key needs read/write access to:
+      # - cloudfoundry/nodejs-buildpack
+      # - cloudfoundry/buildpacks-ci  
+      # - cloudfoundry/public-buildpacks-ci-robots
+      -----END OPENSSH PRIVATE KEY-----
+
+- name: /concourse/buildpacks-team/buildpacks-github-token
+  type: password
+  value: "ghp_REPLACE_WITH_YOUR_TOKEN"
+
+- name: /concourse/buildpacks-team/coredeps-dockerhub-user
+  type: user
+  value:
+    password: YOUR_DOCKERHUB_PASSWORD_OR_TOKEN    
+    username: YOUR_DOCKERHUB_USERNAME
+
+- name: /concourse/buildpacks-team/buildpacks-cloudfoundry-org-aws-access-key-id
+  type: value
+  value: "YOUR_AWS_ACCESS_KEY_ID"
+
+- name: /concourse/buildpacks-team/buildpacks-cloudfoundry-org-aws-secret-access-key
+  type: password
+  value: "YOUR_AWS_SECRET_ACCESS_KEY"
+
+- name: /concourse/buildpacks-team/cf-buildpacks-eng-gpg-key-id
+  type: value
+  value: "YOUR_GPG_KEY_ID"    
+
+- name: /concourse/buildpacks-team/cf-buildpacks-eng-gpg-key
+  type: ssh
+  value:
+    private_key: |
+      -----BEGIN PGP PRIVATE KEY BLOCK-----
+      # REPLACE WITH YOUR ACTUAL GPG PRIVATE KEY    
+
+      -----END PGP PRIVATE KEY BLOCK-----
+
+- name: /concourse/buildpacks-team/binary-builder-git-uri
+  type: value
+  value: https://github.com/cloudfoundry/binary-builder
