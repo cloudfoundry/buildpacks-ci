@@ -4,16 +4,14 @@ require "http/client"
 module Depwatcher
   abstract class HTTPClient
     abstract def get(url : String) : HTTP::Client::Response
+
     def injectOauthAuthorizationTokenIntoHeader(headers : HTTP::Headers? = nil)
       # read token from env variable e.g. github authorization token
-      apiKey = ENV["OAUTH_AUTHORIZATION_TOKEN"]?
-      if headers == nil
-        headers = HTTP::Headers.new
+      headers ||= HTTP::Headers.new
+      if api_key = ENV["OAUTH_AUTHORIZATION_TOKEN"]?
+        headers["Authorization"] = "token #{api_key}"
       end
-      if apiKey != nil
-        headers.not_nil!["Authorization"] = "token " + apiKey.not_nil!
-      end
-      return headers
+      headers
     end
   end
 
@@ -49,14 +47,15 @@ module Depwatcher
   class Base
     class Internal
       include JSON::Serializable
-      
+
       property ref : String
-      
+
       def initialize(@ref : String)
       end
     end
 
     property client : HTTPClient
+
     def initialize(@client = HTTPClientImpl.new)
     end
 

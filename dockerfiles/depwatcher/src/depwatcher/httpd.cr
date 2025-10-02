@@ -12,13 +12,14 @@ module Depwatcher
       property ref : String
       property url : String
       property sha256 : String
+
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       repo = "apache/httpd"
-      regexp = "^\\d+\.\\d+\.\\d+$"
+      regexp = "^\\d+\\.\\d+\\.\\d+$"
       GithubTags.new(client).matched_tags(repo, regexp).map do |r|
         Internal.new(r.name)
       end.sort_by { |i| Semver.new(i.ref) }

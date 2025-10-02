@@ -10,6 +10,7 @@ module Depwatcher
       property shasum : String
       property tarball : String
     end
+
     class Version
       include JSON::Serializable
 
@@ -17,22 +18,25 @@ module Depwatcher
       property version : String
       property dist : Dist
     end
+
     class External
       include JSON::Serializable
 
       property versions : Hash(String, Version)
     end
+
     class Release
       include JSON::Serializable
 
       property ref : String
       property url : String
       property sha256 : String
+
       def initialize(@ref, @url, @sha256)
       end
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       version_numbers().map do |v|
         Internal.new(v)
       end.sort_by { |i| Semver.new(i.ref) }
@@ -47,24 +51,23 @@ module Depwatcher
     end
 
     private def shasum256(version : String) : String
-     response = client.get("https://nodejs.org/dist/v#{version}/SHASUMS256.txt").body
-     response.lines.select() { |line|
-       line.ends_with?("node-v#{version}.tar.gz")
-     }.first.split(2).first()
+      response = client.get("https://nodejs.org/dist/v#{version}/SHASUMS256.txt").body
+      response.lines.select() { |line|
+        line.ends_with?("node-v#{version}.tar.gz")
+      }.first.split(2).first
     end
 
-    private def version_numbers() : Array(String)
-     response = client.get("https://nodejs.org/dist/").body
-     html = XML.parse_html(response).children[1].children[3].children[3]
-     return html.children.select() { |child|
-        child.type().element_node?
-       }.map() { |c| c["href"] }.select() { |link|
+    private def version_numbers : Array(String)
+      response = client.get("https://nodejs.org/dist/").body
+      html = XML.parse_html(response).children[1].children[3].children[3]
+      return html.children.select() { |child|
+        child.type.element_node?
+      }.map() { |c| c["href"] }.select() { |link|
         link.starts_with?("v") && link.ends_with?("/")
-       }.map() { |link| link.[1...-1] 
-       }.select() { |v|
-       semver = Semver.new(v)
-       # Filter out non LTS versions and old versions (older than 12)
-       semver.major %2 == 0 && semver.major >= 12
+      }.map() { |link| link.[1...-1] }.select() { |v|
+        semver = Semver.new(v)
+        # Filter out non LTS versions and old versions (older than 12)
+        semver.major % 2 == 0 && semver.major >= 12
       }
     end
   end

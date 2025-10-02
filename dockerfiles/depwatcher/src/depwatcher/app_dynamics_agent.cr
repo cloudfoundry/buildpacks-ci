@@ -16,7 +16,7 @@ module Depwatcher
       end
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       releases.map do |r|
         Internal.new(r.ref)
       end
@@ -30,7 +30,7 @@ module Depwatcher
       r
     end
 
-    private def releases()
+    private def releases
       allReleases = Array(Release).new
       response = client.get("https://download.run.pivotal.io/appdynamics-php/index.yml").body
       response.each_line do |appdVersion|

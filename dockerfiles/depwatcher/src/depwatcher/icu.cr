@@ -19,12 +19,11 @@ module Depwatcher
       end
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       repo = "unicode-org/icu"
       allow_prerelease = false
       super(repo, allow_prerelease)
     end
-
 
     def in(ref : String, dir : String) : Release
       repo = "unicode-org/icu"

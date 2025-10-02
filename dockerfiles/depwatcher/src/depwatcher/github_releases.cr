@@ -84,7 +84,7 @@ module Depwatcher
       resp = client.get(download_url, HTTP::Headers{"Accept" => "application/octet-stream"})
       hash.update(IO::Memory.new(resp.body))
 
-      File.write(File.join(dest_dir, File.basename(download_url)),resp.body)
+      File.write(File.join(dest_dir, File.basename(download_url)), resp.body)
 
       return hash.final.hexstring
     end

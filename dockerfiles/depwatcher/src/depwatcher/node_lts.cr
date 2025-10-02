@@ -76,10 +76,10 @@ module Depwatcher
           lts_month = lts_date.split("-")[1].to_i
           lts_day = lts_date.split("-")[2].to_i
           if lts_year < actual_year || (lts_year == actual_year && lts_month < actual_month) || (lts_year == actual_year && lts_month == actual_month && lts_day <= actual_day)
-            latest_lts = version[0].as(String).sub("v","")
+            latest_lts = version[0].as(String).sub("v", "")
           end
         end
-        end
+      end
       return latest_lts
     end
 

@@ -27,10 +27,10 @@ module Depwatcher
       property url : String
       property md5_digest : String
       property sha256 : String
+
       def initialize(@ref : String, @url : String, @md5_digest : String, @sha256 : String)
       end
     end
-
 
     def check(name : String) : Array(Internal)
       releases(name).map do |version, _|

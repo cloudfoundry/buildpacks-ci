@@ -75,7 +75,7 @@ module Depwatcher
       def initialize(
         @ref : String,
         @url : String,
-        @sha512 : String
+        @sha512 : String,
       )
       end
     end
@@ -117,7 +117,7 @@ module Depwatcher
       end
     end
 
-    private def get_latest_version() : String
+    private def get_latest_version : String
       # mirror for
       # "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json"
       # as we seem to have issues downloading from here in TPE concourse

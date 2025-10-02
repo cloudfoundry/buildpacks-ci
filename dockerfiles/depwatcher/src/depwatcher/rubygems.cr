@@ -8,6 +8,7 @@ module Depwatcher
       property number : String
       property prerelease : Bool
     end
+
     class External
       include JSON::Serializable
 
@@ -16,12 +17,14 @@ module Depwatcher
       property prerelease : Bool
       property source_code_uri : String
     end
+
     class Release
       include JSON::Serializable
 
       property ref : String
       property sha256 : String
       property url : String
+
       def initialize(external : External)
         @ref = external.number
         @sha256 = external.sha
