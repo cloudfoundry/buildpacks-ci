@@ -14,7 +14,7 @@ resources:
 - name: binary-builder
   type: git
   source:
-    uri: {{binary-builder-git-uri}}
+    uri: https://github.com/cloudfoundry/binary-builder
 - name: buildpacks-ci
   type: git
   source:
