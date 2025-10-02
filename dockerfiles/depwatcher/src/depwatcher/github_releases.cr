@@ -86,7 +86,7 @@ module Depwatcher
 
       File.write(File.join(dest_dir, File.basename(download_url)),resp.body)
 
-      return hash.hexdigest
+      return hash.final.hexstring
     end
   end
 end

@@ -33,7 +33,7 @@ module Depwatcher
         sha_response = HTTP::Client.get("https://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2.sha256")
         if sha_response.status_code != 200
           retries += 1
-          sleep(5)
+          sleep(5.seconds)
         else
           break
         end

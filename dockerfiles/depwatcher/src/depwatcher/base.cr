@@ -64,7 +64,7 @@ module Depwatcher
       data = client.get(url).body
       hash = OpenSSL::Digest.new("SHA256")
       hash.update(data)
-      return hash.hexdigest
+      return hash.final.hexstring
     end
   end
 end
