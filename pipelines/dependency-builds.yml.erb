@@ -1,7 +1,8 @@
 <%
 require 'yaml'
 require 'set'
-config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds.yml'))
+require 'date'
+config = YAML.load_file(File.join(__dir__, 'config', 'dependency-builds.yml'), permitted_classes: [Date, Time])
 
 dependencies = config['dependencies']
 cflinuxfs4_build_dependencies = config['cflinuxfs4_build_dependencies']
