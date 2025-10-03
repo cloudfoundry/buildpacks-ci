@@ -6,17 +6,17 @@ require "http/request"
 module Depwatcher
   class AppDynamicsAgent < Base
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-        sha256: String
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property sha256 : String
 
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       releases.map do |r|
         Internal.new(r.ref)
       end
@@ -30,7 +30,7 @@ module Depwatcher
       r
     end
 
-    private def releases()
+    private def releases
       allReleases = Array(Release).new
       response = client.get("https://download.run.pivotal.io/appdynamics-php/index.yml").body
       response.each_line do |appdVersion|
@@ -38,7 +38,7 @@ module Depwatcher
         version = splitArray[0].sub("_", "-")
         url = splitArray[1]
         File.write("#{version}", client.get(url).body)
-        sha256 = OpenSSL::Digest.new("sha256").file("#{version}").hexdigest
+        sha256 = OpenSSL::Digest.new("sha256").file("#{version}").final.hexstring
         File.delete("#{version}")
         allReleases.push(Release.new(version, url, sha256))
       end
@@ -47,15 +47,15 @@ module Depwatcher
   end
 
   class Entry
-    JSON.mapping(
-      filetype: String,
-      os: String,
-      bit: {type: String, nilable: true},
-      extension: String,
-      is_beta: Bool,
-      version: String,
-      sha256_checksum: {type: String, nilable: true}
-    )
+    include JSON::Serializable
+
+    property filetype : String
+    property os : String
+    property bit : String?
+    property extension : String
+    property is_beta : Bool
+    property version : String
+    property sha256_checksum : String?
   end
 
   class Version

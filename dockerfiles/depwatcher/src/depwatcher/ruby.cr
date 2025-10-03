@@ -6,19 +6,19 @@ require "yaml"
 module Depwatcher
   class Ruby < Base
     class GithubRelease
-      YAML.mapping(
-        version: String,
-        url: Hash(String, String)?,
-        sha256: Hash(String, String)?,
-      )
+      include YAML::Serializable
+
+      property version : String
+      property url : Hash(String, String)?
+      property sha256 : Hash(String, String)?
     end
 
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-        sha256: String,
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property sha256 : String
 
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
@@ -47,8 +47,8 @@ module Depwatcher
 
       versions.each do |v|
         version = v.version
-        url = !v.url.nil? ? v.url.not_nil!["gz"] : ""
-        sha = !v.sha256.nil? ? v.sha256.not_nil!["gz"] : ""
+        url = v.url.try(&.["gz"]) || ""
+        sha = v.sha256.try(&.["gz"]) || ""
         newRelease = Release.new(version, url, sha)
 
         if ref == version
@@ -62,13 +62,13 @@ module Depwatcher
     end
 
     private def releaseFromIndex(ref : String) : Release | Nil
-      result = Release.new("","","")
+      result = Release.new("", "", "")
       allReleases = [] of Release
       response = client.get("https://cache.ruby-lang.org/pub/ruby/index.txt").body
 
       response.each_line do |line|
         releaseArray = [] of String
-        line.split { |s| releaseArray << s}
+        line.split { |s| releaseArray << s }
         raise "Could not parse ruby website" unless !releaseArray.empty?
         version = releaseArray[0].lchop("ruby-")
         url = releaseArray[1]
@@ -79,7 +79,7 @@ module Depwatcher
           result = newRelease
         end
       end
-      raise ("No release with ref:" + ref + "found") unless !result.url.empty?
+      raise("No release with ref:" + ref + "found") unless !result.url.empty?
       result
     end
   end

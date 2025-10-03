@@ -7,18 +7,19 @@ require "http/request"
 module Depwatcher
   class Httpd < Base
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-        sha256: String,
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property sha256 : String
+
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       repo = "apache/httpd"
-      regexp = "^\\d+\.\\d+\.\\d+$"
+      regexp = "^\\d+\\.\\d+\\.\\d+$"
       GithubTags.new(client).matched_tags(repo, regexp).map do |r|
         Internal.new(r.name)
       end.sort_by { |i| Semver.new(i.ref) }
@@ -33,7 +34,7 @@ module Depwatcher
         sha_response = HTTP::Client.get("https://archive.apache.org/dist/httpd/httpd-#{ref}.tar.bz2.sha256")
         if sha_response.status_code != 200
           retries += 1
-          sleep(5)
+          sleep(5.seconds)
         else
           break
         end

@@ -1,45 +1,46 @@
 require "./base"
 require "./semver"
+require "xml"
 
 module Depwatcher
   class NodeLTS < Base
     class Dist
-      JSON.mapping(
-        shasum: String,
-        tarball: String,
-      )
+      include JSON::Serializable
+
+      property shasum : String
+      property tarball : String
     end
 
     class Version
-      JSON.mapping(
-        name: String,
-        version: String,
-        dist: Dist,
-      )
+      include JSON::Serializable
+
+      property name : String
+      property version : String
+      property dist : Dist
     end
 
     class NodeVersionInfo
-      JSON.mapping(
-        start: String,
-        lts: {type: String, nilable: true},
-        maintenance: {type: String, nilable: true},
-        end: String,
-        codename: {type: String, nilable: true},
-      )
+      include JSON::Serializable
+
+      property start : String
+      property lts : String?
+      property maintenance : String?
+      property end : String
+      property codename : String?
     end
 
     class External
-      JSON.mapping(
-        versions: Hash(String, Version),
-      )
+      include JSON::Serializable
+
+      property versions : Hash(String, Version)
     end
 
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-        sha256: String,
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property sha256 : String
 
       def initialize(@ref, @url, @sha256)
       end
@@ -75,10 +76,10 @@ module Depwatcher
           lts_month = lts_date.split("-")[1].to_i
           lts_day = lts_date.split("-")[2].to_i
           if lts_year < actual_year || (lts_year == actual_year && lts_month < actual_month) || (lts_year == actual_year && lts_month == actual_month && lts_day <= actual_day)
-            latest_lts = version[0].as(String).sub("v","")
+            latest_lts = version[0].as(String).sub("v", "")
           end
         end
-        end
+      end
       return latest_lts
     end
 

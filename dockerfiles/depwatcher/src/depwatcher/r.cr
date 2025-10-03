@@ -5,16 +5,17 @@ require "xml"
 module Depwatcher
   class R < Base
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-        sha256: String
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property sha256 : String
+
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       response = client.get("https://cran.r-project.org/src/base/R-4/").body
       doc = XML.parse_html(response)
       lis = doc.xpath("//td/a")

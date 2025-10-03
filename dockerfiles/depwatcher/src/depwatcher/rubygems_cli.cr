@@ -4,15 +4,16 @@ require "xml"
 module Depwatcher
   class RubygemsCli < Base
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+
       def initialize(@ref : String, @url : String)
       end
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       response = client.get("https://rubygems.org/pages/download").body
       doc = XML.parse_html(response)
       links = doc.xpath("//div[@id='formats']//a[text()='tgz']")

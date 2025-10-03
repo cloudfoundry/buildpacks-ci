@@ -3,12 +3,12 @@ require "./github_releases.cr"
 module Depwatcher
   class Icu < GithubReleases
     class GithubRelease
-      JSON.mapping(
-        tag_name: String,
-        draft: Bool,
-        prerelease: Bool,
-        assets: Array(GithubAsset),
-      )
+      include JSON::Serializable
+
+      property tag_name : String
+      property draft : Bool
+      property prerelease : Bool
+      property assets : Array(GithubAsset)
 
       def ref
         version = tag_name.gsub(/^release-/, "").gsub(/-/, ".")
@@ -19,12 +19,11 @@ module Depwatcher
       end
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       repo = "unicode-org/icu"
       allow_prerelease = false
       super(repo, allow_prerelease)
     end
-
 
     def in(ref : String, dir : String) : Release
       repo = "unicode-org/icu"
