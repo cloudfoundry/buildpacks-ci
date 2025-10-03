@@ -13,7 +13,7 @@ def is_null(value)
   value.nil? || value.empty? || value.downcase == 'null'
 end
 
-config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/config/dependency-builds.yml'))
+config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/config/dependency-builds.yml'), permitted_classes: [Date, Time])
 
 BUILD_STACKS = config['build_stacks']
 WINDOWS_STACKS = config['windows_stacks']
