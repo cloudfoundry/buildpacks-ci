@@ -305,7 +305,8 @@ if buildpack_name == 'hwc'
 end
 
 Dir.chdir('artifacts') do
-  GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
+  user_email = ENV['GIT_USER_EMAIL'] || 'app-runtime-interfaces@cloudfoundry.org'
+  GitClient.set_global_config('user.email', user_email)
   GitClient.set_global_config('user.name', 'CF Buildpacks Team CI Server')
 
   # Set GPG config

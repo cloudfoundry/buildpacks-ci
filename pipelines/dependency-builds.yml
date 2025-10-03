@@ -1,4 +1,4 @@
-
+﻿
 
 resource_types:
 - name: depwatcher
@@ -1221,6 +1221,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: php-pull-request
@@ -1289,6 +1290,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: dotnet-core-pull-request
@@ -1374,6 +1376,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: ruby-pull-request
@@ -1438,6 +1441,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: php-pull-request
@@ -1507,6 +1511,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: php-pull-request
@@ -1623,6 +1628,7 @@ jobs:
       DEPRECATION_DATE: 2026-11-10
       DEPRECATION_LINK: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: dotnet-core-pull-request
@@ -1660,6 +1666,7 @@ jobs:
       DEPRECATION_DATE: 2026-05-12
       DEPRECATION_LINK: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: dotnet-core-pull-request
@@ -1776,6 +1783,7 @@ jobs:
       DEPRECATION_DATE: 2026-11-10
       DEPRECATION_LINK: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: dotnet-core-pull-request
@@ -1814,6 +1822,7 @@ jobs:
       DEPRECATION_DATE: 2026-05-12
       DEPRECATION_LINK: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: dotnet-core-pull-request
@@ -1931,6 +1940,7 @@ jobs:
       DEPRECATION_DATE: 2026-11-10
       DEPRECATION_LINK: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: dotnet-core-pull-request
@@ -1969,6 +1979,7 @@ jobs:
       DEPRECATION_DATE: 2026-05-12
       DEPRECATION_LINK: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: dotnet-core-pull-request
@@ -2131,6 +2142,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: https://golang.org/doc/devel/release.html
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: go-pull-request
@@ -2172,6 +2184,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: https://golang.org/doc/devel/release.html
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: go-pull-request
@@ -2263,6 +2276,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: php-pull-request
@@ -2336,6 +2350,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: hwc-pull-request
@@ -2455,6 +2470,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: ruby-pull-request
@@ -2574,6 +2590,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: dotnet-core-pull-request
@@ -2693,6 +2710,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: dotnet-core-pull-request
@@ -2785,6 +2803,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: python-pull-request
@@ -2991,6 +3010,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: https://nginx.org/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: nginx-pull-request
@@ -3032,6 +3052,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: https://nginx.org/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: nginx-pull-request
@@ -3238,6 +3259,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: nginx-pull-request
@@ -3279,6 +3301,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: nginx-pull-request
@@ -3485,6 +3508,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: https://nginx.org/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: php-pull-request
@@ -3526,6 +3550,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: https://nginx.org/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: php-pull-request
@@ -3569,6 +3594,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: https://nginx.org/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: staticfile-pull-request
@@ -3610,6 +3636,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: https://nginx.org/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: staticfile-pull-request
@@ -3867,6 +3894,7 @@ jobs:
       DEPRECATION_DATE: 2025-04-30
       DEPRECATION_LINK: https://github.com/nodejs/Release
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: nodejs-pull-request
@@ -3904,6 +3932,7 @@ jobs:
       DEPRECATION_DATE: 2026-04-30
       DEPRECATION_LINK: https://github.com/nodejs/Release
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: nodejs-pull-request
@@ -3941,6 +3970,7 @@ jobs:
       DEPRECATION_DATE: 2027-04-30
       DEPRECATION_LINK: https://github.com/nodejs/Release
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: nodejs-pull-request
@@ -3978,6 +4008,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: https://github.com/nodejs/Release
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: ruby-pull-request
@@ -4015,6 +4046,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: https://github.com/nodejs/Release
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: dotnet-core-pull-request
@@ -4290,6 +4322,7 @@ jobs:
       DEPRECATION_DATE: 2024-11-25
       DEPRECATION_LINK: http://php.net/supported-versions.php
       DEPRECATION_MATCH: 8.1.\d+
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: php-pull-request
@@ -4331,6 +4364,7 @@ jobs:
       DEPRECATION_DATE: 2025-12-08
       DEPRECATION_LINK: http://php.net/supported-versions.php
       DEPRECATION_MATCH: 8.2.\d+
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: php-pull-request
@@ -4372,6 +4406,7 @@ jobs:
       DEPRECATION_DATE: 2026-11-23
       DEPRECATION_LINK: http://php.net/supported-versions.php
       DEPRECATION_MATCH: 8.3.\d+
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: php-pull-request
@@ -4469,6 +4504,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: python-pull-request
@@ -4588,6 +4624,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: python-pull-request
@@ -5001,6 +5038,7 @@ jobs:
       DEPRECATION_DATE: 2025-10-05
       DEPRECATION_LINK: https://www.python.org/dev/peps/pep-0596/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: python-pull-request
@@ -5042,6 +5080,7 @@ jobs:
       DEPRECATION_DATE: 2026-10-04
       DEPRECATION_LINK: https://www.python.org/dev/peps/pep-0619/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: python-pull-request
@@ -5083,6 +5122,7 @@ jobs:
       DEPRECATION_DATE: 2027-10-24
       DEPRECATION_LINK: https://www.python.org/dev/peps/pep-0664/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: python-pull-request
@@ -5124,6 +5164,7 @@ jobs:
       DEPRECATION_DATE: 2028-10-02
       DEPRECATION_LINK: https://www.python.org/dev/peps/pep-0693/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: python-pull-request
@@ -5165,6 +5206,7 @@ jobs:
       DEPRECATION_DATE: 2029-10-07
       DEPRECATION_LINK: https://peps.python.org/pep-0719/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: python-pull-request
@@ -5208,6 +5250,7 @@ jobs:
       DEPRECATION_DATE: 2027-10-24
       DEPRECATION_LINK: https://www.python.org/dev/peps/pep-0664/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: nodejs-pull-request
@@ -5616,6 +5659,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: r-pull-request
@@ -5677,6 +5721,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: r-pull-request
@@ -5738,6 +5783,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: r-pull-request
@@ -5799,6 +5845,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: r-pull-request
@@ -6123,6 +6170,7 @@ jobs:
       DEPRECATION_DATE: 2024-03-31
       DEPRECATION_LINK: https://www.ruby-lang.org/en/news/2020/12/25/ruby-3-0-0-released/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: ruby-pull-request
@@ -6164,6 +6212,7 @@ jobs:
       DEPRECATION_DATE: 2025-03-31
       DEPRECATION_LINK: https://www.ruby-lang.org/en/news/2021/12/25/ruby-3-1-0-released/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: ruby-pull-request
@@ -6205,6 +6254,7 @@ jobs:
       DEPRECATION_DATE: 2026-03-31
       DEPRECATION_LINK: https://www.ruby-lang.org/en/news/2022/12/25/ruby-3-2-0-released/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: ruby-pull-request
@@ -6246,6 +6296,7 @@ jobs:
       DEPRECATION_DATE: 2027-03-31
       DEPRECATION_LINK: https://www.ruby-lang.org/en/news/2023/12/25/ruby-3-3-0-released/
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: ruby-pull-request
@@ -6343,6 +6394,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: ruby-pull-request
@@ -6433,6 +6485,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: python-pull-request
@@ -6530,6 +6583,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: nodejs-pull-request
@@ -6573,6 +6627,7 @@ jobs:
       DEPRECATION_DATE: 
       DEPRECATION_LINK: 
       DEPRECATION_MATCH: 
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
     output_mapping:
       artifacts: buildpack
   - put: ruby-pull-request

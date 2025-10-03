@@ -42,6 +42,22 @@ credentials:
 
       -----END PGP PRIVATE KEY BLOCK-----
 
+- name: /concourse/buildpacks-team/cfbuildpacks-dockerhub-user
+  type: json
+  value:
+    password: "cfbuildpacks-dockerhub-user-password"
+    username: "cfbuildpacks-dockerhub-user-username"
+
+- name: /concourse/buildpacks-team/coredeps-dockerhub-user
+  type: json
+  value:
+    password: "coredeps-dockerhub-user-password"
+    username: "coredeps-dockerhub-user-username"
+
+- name: /concourse/buildpacks-team/cf-buildpacks-app-runtime-interfaces-email
+  type: value
+  value: app-runtime-interfaces@cloudfoundry.org
+
 - name: /concourse/buildpacks-team/binary-builder-git-uri
   type: value
   value: https://github.com/cloudfoundry/binary-builder
