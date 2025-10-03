@@ -2,7 +2,7 @@ FROM crystallang/crystal:1.17.0
 
 ADD . /src
 WORKDIR /src
-RUN shards install
+RUN shards install && crystal spec --no-debug
 RUN crystal spec --no-debug
 RUN shards build --production
 
