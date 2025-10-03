@@ -49,7 +49,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/php-buildpack.git
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: develop
+    branch: master
 - name: php-buildpack-latest-released
   type: git
   source:
@@ -67,7 +67,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/dotnet-core-buildpack.git
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: develop
+    branch: master
 - name: dotnet-core-buildpack-latest-released
   type: git
   source:
@@ -85,7 +85,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/ruby-buildpack.git
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: develop
+    branch: master
 - name: ruby-buildpack-latest-released
   type: git
   source:
@@ -103,7 +103,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/go-buildpack.git
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: develop
+    branch: master
 - name: go-buildpack-latest-released
   type: git
   source:
@@ -121,7 +121,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/hwc-buildpack.git
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: develop
+    branch: master
 - name: hwc-buildpack-latest-released
   type: git
   source:
@@ -139,7 +139,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/python-buildpack.git
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: develop
+    branch: master
 - name: python-buildpack-latest-released
   type: git
   source:
@@ -157,7 +157,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/nginx-buildpack.git
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: develop
+    branch: master
 - name: nginx-buildpack-latest-released
   type: git
   source:
@@ -175,7 +175,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/staticfile-buildpack.git
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: develop
+    branch: master
 - name: staticfile-buildpack-latest-released
   type: git
   source:
@@ -193,7 +193,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/nodejs-buildpack.git
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: develop
+    branch: master
 - name: nodejs-buildpack-latest-released
   type: git
   source:
@@ -211,7 +211,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/r-buildpack.git
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: develop
+    branch: master
 - name: r-buildpack-latest-released
   type: git
   source:
@@ -1229,7 +1229,7 @@ jobs:
       title: Updating version for appdynamics for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop  
+      base: master  
 - name: build-bower-latest
   serial: true
   public: true
@@ -1297,7 +1297,7 @@ jobs:
       title: Updating version for bower for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: create-bundler-new-line-story
   serial: true
   public: true
@@ -1382,7 +1382,7 @@ jobs:
       title: Updating version for bundler for 2.X.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: build-caapm-latest
   serial: true
   public: true
@@ -1446,7 +1446,7 @@ jobs:
       title: Updating version for CAAPM for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: build-composer-latest
   serial: true
   public: true
@@ -1515,7 +1515,7 @@ jobs:
       title: Updating version for composer for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: create-dotnet-sdk-new-line-story
   serial: true
   public: true
@@ -1631,7 +1631,7 @@ jobs:
       title: Updating version for dotnet-sdk for 8.0.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: update-dotnet-sdk-9.0.x-dotnet-core
   serial: true
   public: true
@@ -1668,7 +1668,7 @@ jobs:
       title: Updating version for dotnet-sdk for 9.0.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: create-dotnet-runtime-new-line-story
   serial: true
   public: true
@@ -1784,7 +1784,7 @@ jobs:
       title: Updating version for dotnet-runtime for 8.0.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: update-dotnet-runtime-9.0.x-dotnet-core
   serial: true
   public: true
@@ -1822,7 +1822,7 @@ jobs:
       title: Updating version for dotnet-runtime for 9.0.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: create-dotnet-aspnetcore-new-line-story
   serial: true
@@ -1939,7 +1939,7 @@ jobs:
       title: Updating version for dotnet-aspnetcore for 8.0.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: update-dotnet-aspnetcore-9.0.x-dotnet-core
   serial: true
   public: true
@@ -1977,7 +1977,7 @@ jobs:
       title: Updating version for dotnet-aspnetcore for 9.0.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: create-go-new-line-story
   serial: true
   public: true
@@ -2139,7 +2139,7 @@ jobs:
       title: Updating version for go for 1.22.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-go-1.23.x-go
   serial: true
@@ -2180,7 +2180,7 @@ jobs:
       title: Updating version for go for 1.23.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: build-httpd-latest
   serial: true
@@ -2271,7 +2271,7 @@ jobs:
       title: Updating version for httpd for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: build-hwc-latest
   serial: true
   public: true
@@ -2344,7 +2344,7 @@ jobs:
       title: Updating version for hwc for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -2463,7 +2463,7 @@ jobs:
       title: Updating version for jruby for 9.4.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -2582,7 +2582,7 @@ jobs:
       title: Updating version for libunwind for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -2701,7 +2701,7 @@ jobs:
       title: Updating version for libgdiplus for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -2793,7 +2793,7 @@ jobs:
       title: Updating version for miniconda3-py39 for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -2999,7 +2999,7 @@ jobs:
       title: Updating version for nginx for 1.26.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-nginx-1.27.x-nginx
   serial: true
@@ -3040,7 +3040,7 @@ jobs:
       title: Updating version for nginx for 1.27.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -3246,7 +3246,7 @@ jobs:
       title: Updating version for openresty for 1.21.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-openresty-1.25.x-nginx
   serial: true
@@ -3287,7 +3287,7 @@ jobs:
       title: Updating version for openresty for 1.25.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -3493,7 +3493,7 @@ jobs:
       title: Updating version for nginx-static for 1.26.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-nginx-static-1.27.x-php
   serial: true
@@ -3534,7 +3534,7 @@ jobs:
       title: Updating version for nginx-static for 1.27.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
   
@@ -3577,7 +3577,7 @@ jobs:
       title: Updating version for nginx-static for 1.26.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-nginx-static-1.27.x-staticfile
   serial: true
@@ -3618,7 +3618,7 @@ jobs:
       title: Updating version for nginx-static for 1.27.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -3875,7 +3875,7 @@ jobs:
       title: Updating version for node for 18.X.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: update-node-20.x.x-nodejs
   serial: true
   public: true
@@ -3912,7 +3912,7 @@ jobs:
       title: Updating version for node for 20.X.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: update-node-22.x.x-nodejs
   serial: true
   public: true
@@ -3949,7 +3949,7 @@ jobs:
       title: Updating version for node for 22.X.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: update-node-node-lts-ruby
   serial: true
   public: true
@@ -3986,7 +3986,7 @@ jobs:
       title: Updating version for node for node-lts 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
 - name: update-node-node-lts-dotnet-core
   serial: true
   public: true
@@ -4023,7 +4023,7 @@ jobs:
       title: Updating version for node for node-lts 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -4298,7 +4298,7 @@ jobs:
       title: Updating version for php for 8.1.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-php-8.2.x-php
   serial: true
@@ -4339,7 +4339,7 @@ jobs:
       title: Updating version for php for 8.2.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-php-8.3.x-php
   serial: true
@@ -4380,7 +4380,7 @@ jobs:
       title: Updating version for php for 8.3.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -4477,7 +4477,7 @@ jobs:
       title: Updating version for pip for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -4596,7 +4596,7 @@ jobs:
       title: Updating version for pipenv for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -5009,7 +5009,7 @@ jobs:
       title: Updating version for python for 3.9.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-python-3.10.x-python
   serial: true
@@ -5050,7 +5050,7 @@ jobs:
       title: Updating version for python for 3.10.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-python-3.11.x-python
   serial: true
@@ -5091,7 +5091,7 @@ jobs:
       title: Updating version for python for 3.11.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-python-3.12.x-python
   serial: true
@@ -5132,7 +5132,7 @@ jobs:
       title: Updating version for python for 3.12.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-python-3.13.x-python
   serial: true
@@ -5173,7 +5173,7 @@ jobs:
       title: Updating version for python for 3.13.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
   
@@ -5216,7 +5216,7 @@ jobs:
       title: Updating version for python for 3.11.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -5624,7 +5624,7 @@ jobs:
       title: Updating version for r for 3.6.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-r-4.2.x-r
   serial: true
@@ -5685,7 +5685,7 @@ jobs:
       title: Updating version for r for 4.2.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-r-4.3.x-r
   serial: true
@@ -5746,7 +5746,7 @@ jobs:
       title: Updating version for r for 4.3.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-r-4.4.x-r
   serial: true
@@ -5807,7 +5807,7 @@ jobs:
       title: Updating version for r for 4.4.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -6131,7 +6131,7 @@ jobs:
       title: Updating version for ruby for 3.0.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-ruby-3.1.x-ruby
   serial: true
@@ -6172,7 +6172,7 @@ jobs:
       title: Updating version for ruby for 3.1.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-ruby-3.2.x-ruby
   serial: true
@@ -6213,7 +6213,7 @@ jobs:
       title: Updating version for ruby for 3.2.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 - name: update-ruby-3.3.x-ruby
   serial: true
@@ -6254,7 +6254,7 @@ jobs:
       title: Updating version for ruby for 3.3.X 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -6351,7 +6351,7 @@ jobs:
       title: Updating version for rubygems for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -6441,7 +6441,7 @@ jobs:
       title: Updating version for setuptools for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 
@@ -6538,7 +6538,7 @@ jobs:
       title: Updating version for yarn for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
   
@@ -6581,7 +6581,7 @@ jobs:
       title: Updating version for yarn for latest 
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   
 
 

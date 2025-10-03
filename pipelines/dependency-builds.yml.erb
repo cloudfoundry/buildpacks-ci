@@ -150,7 +150,7 @@ resources:
     repository: cfbuildpacks/cflinuxfs3-dev
 
 <% dependencies.values.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack|
-branch = 'develop'
+branch = 'master'
 private_key = '((cf-buildpacks-eng-github-ssh-key.private_key))'
 %>
 - name: <%= buildpack %>-buildpack
@@ -395,7 +395,7 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
       title: <%= "Updating version for #{dep_name} for #{line_hash['line']} " %>
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   <% end %>
 <% end %>
 <% end %>
