@@ -67,6 +67,7 @@ describe Depwatcher::Php do
       client = HTTPClientMock.new
       subject = Depwatcher::Php.new.tap { |s| s.client = client }
       client.stub_get("https://secure.php.net/releases/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/php_releases.php")))
+      client.stub_get("https://php.net/distributions/php-8.0.1.tar.gz", nil, HTTP::Client::Response.new(200, "mock-tarball-content-for-sha256"))
       
       obj = subject.in("8.0.1")
       obj.ref.should eq "8.0.1"
@@ -78,6 +79,7 @@ describe Depwatcher::Php do
       client = HTTPClientMock.new
       subject = Depwatcher::Php.new.tap { |s| s.client = client }
       client.stub_get("https://secure.php.net/releases/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/php_releases.php")))
+      client.stub_get("https://php.net/distributions/php-7.4.0.tar.gz", nil, HTTP::Client::Response.new(200, "mock-tarball-content-for-sha256"))
       
       obj = subject.in("7.4.0")
       obj.ref.should eq "7.4.0"
