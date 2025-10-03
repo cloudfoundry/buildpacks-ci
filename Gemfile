@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-ruby '~> 2.3'
+ruby '~> 3.4'
 
 gem 'bump', '= 0.5.3'
 gem 'diffy'
