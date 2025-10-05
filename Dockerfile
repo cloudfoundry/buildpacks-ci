@@ -7,16 +7,12 @@ RUN apt-get -qqy update \
   && apt-get -qqy install \
     curl \
     gnupg \
-    apt-transport-https \
   && apt-get -qqy clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN curl -q https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
 
-RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
-  && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-
-RUN curl -fsSL https://crystal-lang.org/install.sh | bash
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
 
 # Reevaluate if all of these are needed
 RUN apt-get -qqy update \
@@ -24,14 +20,20 @@ RUN apt-get -qqy update \
     ca-certificates \
     build-essential \
     btrfs-progs \
-    crystal \
     default-libmysqlclient-dev \
     expect \
     git \
     google-cloud-sdk \
     iptables \
     jq \
-    libgconf-2-4 \
+    libssl-dev \
+    zlib1g-dev \
+    libreadline-dev \
+    libncurses5-dev \
+    libgdbm-dev \
+    libdb-dev \
+    libffi-dev \
+    libyaml-dev \
     libpq-dev \
     libsqlite3-dev \
     libxml2-dev \
@@ -39,8 +41,6 @@ RUN apt-get -qqy update \
     binutils-multiarch \
     php \
     pkgconf \
-    python3 \
-    python3-pip \
     rsync \
     runit \
     shellcheck \
@@ -60,7 +60,9 @@ ENV PATH="/mise/shims:$PATH"
 
 RUN curl https://mise.run | sh
 RUN mise use -g ruby@3.4
-RUN mise use -g go@1.25
+RUN mise use -g go@latest
+RUN mise use -g crystal@latest
+RUN mise use -g python@3.10
 
 # Import the CloudFoundry APT repo GPG key
 RUN wget -q -O - https://raw.githubusercontent.com/cloudfoundry/bosh-apt-resources/master/public.key | apt-key add -
@@ -71,11 +73,6 @@ RUN apt-get -qqy update && apt-get -qqy install \
     cf-cli \
     credhub-cli \
     om-cli
-
-
-# ENV GEM_HOME=$HOME/.gem
-# ENV GEM_PATH=$HOME/.gem
-# ENV PATH=/opt/rubies/latest/bin:$GEM_PATH/bin:$PATH
 
 RUN curl -sSL https://get.docker.com/ | sh
 
