@@ -76,8 +76,8 @@ RUN apt-get -qqy update && apt-get -qqy install \
 
 RUN curl -sSL https://get.docker.com/ | sh
 
-RUN git config --global user.email "cf-buildpacks-eng@pivotal.io"
-RUN git config --global user.name "CF Buildpacks Team CI Server"
+RUN git config --global user.email "app-runtime-interfaces@cloudfoundry.org"
+RUN git config --global user.name "app-runtime-interfaces@cloudfoundry.org"
 RUN git config --global core.pager cat
 
 # composer is a package manager for PHP apps
