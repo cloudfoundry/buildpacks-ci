@@ -307,7 +307,7 @@ end
 Dir.chdir('artifacts') do
   user_email = ENV['GIT_USER_EMAIL'] || 'app-runtime-interfaces@cloudfoundry.org'
   GitClient.set_global_config('user.email', user_email)
-  GitClient.set_global_config('user.name', 'CF Buildpacks Team CI Server')
+  GitClient.set_global_config('user.name', '')
 
   # Set GPG config
   GitClient.set_gpg_config
@@ -324,6 +324,13 @@ Dir.chdir('artifacts') do
   if ENV['GPG_SIGNING_KEY_ID']
     puts "GPG_SIGNING_KEY_ID configured: Yes"
     puts "GPG_SIGNING_KEY provided: #{!ENV['GPG_SIGNING_KEY'].nil? && !ENV['GPG_SIGNING_KEY'].empty?}"
+    
+    if ENV['GPG_SIGNING_KEY']
+      key_length = ENV['GPG_SIGNING_KEY'].strip.length
+      puts "GPG key length: #{key_length} characters"
+      puts "GPG key starts with: #{ENV['GPG_SIGNING_KEY'].strip[0..20]}..."
+      puts "GPG key ends with: ...#{ENV['GPG_SIGNING_KEY'].strip[-20..-1]}"
+    end
     
     # Check if GPG is working and can find the key (without exposing details)
     gpg_key_check = system("gpg --list-keys #{ENV['GPG_SIGNING_KEY_ID']} > /dev/null 2>&1")
