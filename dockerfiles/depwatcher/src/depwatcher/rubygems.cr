@@ -3,25 +3,28 @@ require "./base"
 module Depwatcher
   class Rubygems < Base
     class MultiExternal
-      JSON.mapping(
-        number: String,
-        prerelease: Bool,
-      )
+      include JSON::Serializable
+
+      property number : String
+      property prerelease : Bool
     end
+
     class External
-      JSON.mapping(
-        number: String,
-        sha: String,
-        prerelease: Bool,
-        source_code_uri: String,
-      )
+      include JSON::Serializable
+
+      property number : String
+      property sha : String
+      property prerelease : Bool
+      property source_code_uri : String
     end
+
     class Release
-      JSON.mapping(
-        ref: String,
-        sha256: String,
-        url: String,
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property sha256 : String
+      property url : String
+
       def initialize(external : External)
         @ref = external.number
         @sha256 = external.sha

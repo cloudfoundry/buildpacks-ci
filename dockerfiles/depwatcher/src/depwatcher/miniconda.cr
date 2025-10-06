@@ -6,11 +6,12 @@ require "http/request"
 module Depwatcher
   class Miniconda < Base
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-        sha256: String
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property sha256 : String
+
       def initialize(@ref : String, @url : String, @sha256 : String)
       end
     end

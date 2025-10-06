@@ -5,19 +5,20 @@ require "xml"
 module Depwatcher
   class Nginx < Base
     class Release
-      JSON.mapping(
-        ref: String,
-        url: String,
-        pgp: String,
-        sha256: String
-      )
+      include JSON::Serializable
+
+      property ref : String
+      property url : String
+      property pgp : String
+      property sha256 : String
+
       def initialize(@ref : String, @url : String, @pgp : String, @sha256 : String)
       end
     end
 
-    def check() : Array(Internal)
+    def check : Array(Internal)
       name = "nginx/nginx"
-      regexp = "^release\-\\d+\.\\d+\.\\d+$"
+      regexp = "^release-\\d+\\.\\d+\\.\\d+$"
       GithubTags.new(client).matched_tags(name, regexp).map do |r|
         Internal.new(r.name.gsub(/^release\-/, ""))
       end.sort_by { |i| Semver.new(i.ref) }

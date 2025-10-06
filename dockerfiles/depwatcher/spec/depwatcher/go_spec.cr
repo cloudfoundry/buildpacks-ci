@@ -1,17 +1,15 @@
-require "spec2"
+require "spec"
 require "./httpclient_mock"
 require "../../src/depwatcher/go"
 
-Spec2.describe Depwatcher::Go do
-  let(client) { HTTPClientMock.new }
-  subject { described_class.new.tap { |s| s.client = client } }
-  before do
-    client.stub_get("https://go.dev/dl/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/golang.html")))
-  end
-
+describe Depwatcher::Go do
   describe "#check" do
     it "returns real releases sorted" do
-      expect(subject.check.map(&.ref)).to eq [
+      client = HTTPClientMock.new
+      subject = Depwatcher::Go.new.tap { |s| s.client = client }
+      client.stub_get("https://go.dev/dl/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/golang.html")))
+      
+      subject.check.map(&.ref).should eq [
         "1.2.2", "1.3", "1.3.1", "1.3.2", "1.3.3", "1.4", "1.4.1", "1.4.2",
         "1.4.3", "1.5", "1.5.1", "1.5.2", "1.5.3", "1.5.4", "1.6", "1.6.1",
         "1.6.2", "1.6.3", "1.6.4", "1.7", "1.7.1", "1.7.3", "1.7.4", "1.7.5",
@@ -39,10 +37,14 @@ Spec2.describe Depwatcher::Go do
 
   describe "#in" do
     it "returns real releases sorted" do
+      client = HTTPClientMock.new
+      subject = Depwatcher::Go.new.tap { |s| s.client = client }
+      client.stub_get("https://go.dev/dl/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/golang.html")))
+      
       obj = subject.in("1.8.4")
-      expect(obj.ref).to eq "1.8.4"
-      expect(obj.url).to eq "https://dl.google.com/go/go1.8.4.src.tar.gz"
-      expect(obj.sha256).to eq "abf1b2e5ae2a4845f3d2eac00c7382ff209e2c132dc35b7ce753da9b4f52e59f"
+      obj.ref.should eq "1.8.4"
+      obj.url.should eq "https://dl.google.com/go/go1.8.4.src.tar.gz"
+      obj.sha256.should eq "abf1b2e5ae2a4845f3d2eac00c7382ff209e2c132dc35b7ce753da9b4f52e59f"
     end
   end
 end

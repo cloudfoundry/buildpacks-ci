@@ -1,15 +1,16 @@
-FROM crystallang/crystal:0.32.1
+FROM crystallang/crystal:1.17.0
 
 ADD . /src
 WORKDIR /src
-RUN shards && crystal spec --no-debug
+RUN shards install && crystal spec --no-debug
+RUN crystal spec --no-debug
 RUN shards build --production
 
-FROM ubuntu:bionic
+FROM ubuntu:noble
 
 RUN \
   apt-get update && \
-  apt-get install -y apt-transport-https libxml2-dev libevent-2.1-6 libyaml-dev ca-certificates curl jq && \
+  apt-get install -y apt-transport-https libxml2-dev libevent-2.1-7 libyaml-dev ca-certificates curl jq && \
   apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --from=0 /src/bin/check /opt/resource/check
