@@ -1,128 +1,114 @@
-FROM ubuntu:bionic
+FROM ubuntu:jammy
 
 ENV LANG="C.UTF-8"
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -qqy update \
   && apt-get -qqy install \
     curl \
     gnupg \
-    apt-transport-https \
   && apt-get -qqy clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN curl -q https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
 
-RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
-  && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
 
-RUN curl -sL "https://keybase.io/crystal/pgp_keys.asc" | apt-key add - \
-    && echo "deb https://dist.crystal-lang.org/apt crystal main" | tee /etc/apt/sources.list.d/crystal.list
-
+# Reevaluate if all of these are needed
 RUN apt-get -qqy update \
   && apt-get -qqy install \
-    aufs-tools \
+    ca-certificates \
+    build-essential \
     btrfs-progs \
-    crystal \
     default-libmysqlclient-dev \
     expect \
     git \
     google-cloud-sdk \
     iptables \
     jq \
-    libgconf-2-4 \
+    libssl-dev \
+    zlib1g-dev \
+    libreadline-dev \
+    libncurses5-dev \
+    libgdbm-dev \
+    libdb-dev \
+    libffi-dev \
+    libyaml-dev \
     libpq-dev \
     libsqlite3-dev \
     libxml2-dev \
     lsb-release \
-    multiarch-support \
-    php7.0 \
+    binutils-multiarch \
+    php \
     pkgconf \
-    python-dev \
-    python-pip \
     rsync \
     runit \
     shellcheck \
     vim \
     wget \
+    curl \
     zip \
   && apt-get -qqy clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN apt update \
-    && apt install -y software-properties-common \
-    &&  apt-add-repository -y ppa:brightbox/ruby-ng \
-    &&  apt update \
-    &&  apt install -y ruby2.7 ruby2.7-dev \
-    &&  apt-get -qqy clean \
-    &&  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV MISE_DATA_DIR="/mise"
+ENV MISE_CONFIG_DIR="/mise"
+ENV MISE_CACHE_DIR="/mise/cache"
+ENV MISE_INSTALL_PATH="/usr/local/bin/mise"
+ENV PATH="/mise/shims:$PATH"
 
-ENV GEM_HOME $HOME/.gem
-ENV GEM_PATH $HOME/.gem
-ENV PATH /opt/rubies/latest/bin:$GEM_PATH/bin:$PATH
+RUN curl https://mise.run | sh
+RUN mise use -g ruby@3.4
+RUN mise use -g go@latest
+RUN mise use -g crystal@latest
+RUN mise use -g python@3.10
+
+# Import the CloudFoundry APT repo GPG key
+RUN wget -q -O - https://raw.githubusercontent.com/cloudfoundry/bosh-apt-resources/master/public.key | apt-key add -
+RUN echo "deb http://apt.ci.cloudfoundry.org stable main" | tee /etc/apt/sources.list.d/bosh-cloudfoundry.list
+RUN apt-get -qqy update && apt-get -qqy install \
+    bosh-cli \
+    bosh-bootloader \
+    cf-cli \
+    credhub-cli \
+    om-cli
 
 RUN curl -sSL https://get.docker.com/ | sh
 
-RUN git config --global user.email "cf-buildpacks-eng@pivotal.io"
-RUN git config --global user.name "CF Buildpacks Team CI Server"
+RUN git config --global user.email "app-runtime-interfaces@cloudfoundry.org"
+RUN git config --global user.name "app-runtime-interfaces@cloudfoundry.org"
 RUN git config --global core.pager cat
-
-# download om from pivotal-cf/om
-RUN wget -O /usr/local/bin/om 'https://github.com/pivotal-cf/om/releases/download/7.8.2/om-linux-amd64-7.8.2' \
-  && [ 68d2cbff67e699168ba16c84dc75e0ff40fcb6024f53f53579b7227b793df158 = $(shasum -a 256 /usr/local/bin/om | cut -d' ' -f1) ] \
-  && chmod +x /usr/local/bin/om
 
 # composer is a package manager for PHP apps
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 RUN mv /usr/bin/composer.phar /usr/bin/composer
 
-# download the bosh2 CLI
-RUN curl -L https://github.com/cloudfoundry/bosh-cli/releases/download/v7.4.0/bosh-cli-7.4.0-linux-amd64 -o /usr/local/bin/bosh2 \
-  && [ 98705c704beedb08621db48ab2f4cad42704b85aba36cc99f3a9dc2738ebc226 = $(shasum -a 256 /usr/local/bin/bosh2 | cut -d' ' -f1) ] \
-  && chmod +x /usr/local/bin/bosh2 \
-  && ln -s /usr/local/bin/bosh2 /usr/local/bin/bosh
-
-# download bbl
-RUN wget -O /usr/local/bin/bbl 'https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.4.111/bbl-v8.4.111_linux_x86-64' \
-  && [ 5e8e87c2ae5562b9b592122661c0c4a1fe3066facdb9783a07229926845227bb = $(shasum -a 256 /usr/local/bin/bbl | cut -d' ' -f1) ] \
-  && chmod +x /usr/local/bin/bbl
-
-# download credhub cli
-RUN curl -L https://github.com/cloudfoundry/credhub-cli/releases/download/2.9.10/credhub-linux-2.9.10.tgz -o credhub.tgz \
-  && [ e1719d406f947f29b150b73db508c96afffb3b95f01f5031140c705b885b8a38 = $(shasum -a 256 credhub.tgz | cut -d' ' -f1) ] \
-  && tar -zxf credhub.tgz --to-stdout > /usr/local/bin/credhub \
-  && rm credhub.tgz \
-  && chmod +x /usr/local/bin/credhub
-
-# download CF cli
-RUN curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github&version=v6" -o cf.tgz \
-  && tar -zxf cf.tgz cf --to-stdout > /usr/local/bin/cf \
-  && rm cf.tgz \
-  && chmod +x /usr/local/bin/cf
-
+# NOTICE: this project is archived and not maintained since 2020
 # Ensure Concourse Filter binary is present
 RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/download/v0.1.2/concourse-filter' \
   && [ d0282138e9da80cc1e528dfaf1f95963908b9334ef1d27e461fc8cbbedc4c601 = $(shasum -a 256 concourse-filter | cut -d' ' -f1) ] \
   && mv concourse-filter /usr/local/bin \
   && chmod +x /usr/local/bin/concourse-filter
 
+# Ensure that Concourse filtering is on for non-interactive shells
+ENV BASH_ENV=/etc/profile.d/filter.sh
+
 # AWS CLI
 RUN pip install awscli
-
-# Ensure that Concourse filtering is on for non-interactive shells
-ENV BASH_ENV /etc/profile.d/filter.sh
 
 # install buildpacks-ci Gemfile
 COPY Gemfile /tmp/Gemfile
 COPY Gemfile.lock /tmp/Gemfile.lock
-RUN /bin/bash -l -c "gem update --system 3.4.22 --no-document \
-  && gem install bundler -v 2.4.22 \
+RUN /bin/bash -l -c "gem update --no-document \
+  && gem install bundler \
   && cd /tmp && bundle install && bundle binstub bundler --force"
 
 #install fly-cli
-RUN curl "https://buildpacks.ci.cf-app.com/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly \
+RUN curl "https://concourse.app-runtime-interfaces.ci.cloudfoundry.org/api/v1/cli?arch=amd64&platform=linux" -sfL -o /usr/local/bin/fly \
   && chmod +x /usr/local/bin/fly
 
+# NOTICE: the following release used is old and not maintained
 # git-hooks and git-secrets
 RUN curl -L https://github.com/git-hooks/git-hooks/releases/download/v1.1.4/git-hooks_linux_amd64.tar.gz -o githooks.tgz \
   && [ 3f21c856064f8f08f8c25494ac784882a2b8811eea3bfb721a6c595b55577c48 = $(shasum -a 256 githooks.tgz | cut -d' ' -f1) ] \
@@ -131,14 +117,6 @@ RUN curl -L https://github.com/git-hooks/git-hooks/releases/download/v1.1.4/git-
   && chmod 755 /usr/local/bin/git-hooks
 
 RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make install
-
-RUN export GO_VERSION=$(wget -qO- https://golang.org/dl/\?mode\=json | jq -r '.[0].version' | sed 's/go//') && \
-    wget -q https://golang.org/dl/go$GO_VERSION.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
-
-ENV GOROOT=/usr/local/go
-ENV GOPATH=/go
-ENV PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 # Add git known host
 RUN mkdir -p /root/.ssh/ && echo github.com,192.30.252.131 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ== > /root/.ssh/known_hosts
