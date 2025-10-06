@@ -22,8 +22,8 @@ all_stacks = BUILD_STACKS + WINDOWS_STACKS + ["any-stack"]
 cflinuxfs4_dependencies = config['cflinuxfs4_dependencies']
 cflinuxfs4_buildpacks = config['cflinuxfs4_buildpacks']
 
-manifest = YAML.load_file('buildpack/manifest.yml')
-manifest_latest_released = YAML.load_file('buildpack-latest-released/manifest.yml') # rescue { 'dependencies' => [] }
+manifest = YAML.load_file('buildpack/manifest.yml', permitted_classes: [Date, Time])
+manifest_latest_released = YAML.load_file('buildpack-latest-released/manifest.yml', permitted_classes: [Date, Time]) # rescue { 'dependencies' => [] }
 
 data = JSON.parse(open('source/data.json').read)
 source_name = data.dig('source', 'name')

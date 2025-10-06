@@ -6,7 +6,7 @@ class PHPExtensionsHelper
   def initialize(path)
     yml_validate(path)
     @base_path = path
-    @base_yml = YAML.load_file(path)
+    @base_yml = YAML.load_file(path, permitted_classes: [Date, Time])
   end
 
   def yml_validate(path)
@@ -24,7 +24,7 @@ class PHPExtensionsHelper
 
   def patch!(patch_file)
     yml_validate(patch_file)
-    patch_yml = YAML.load_file(patch_file)
+    patch_yml = YAML.load_file(patch_file, permitted_classes: [Date, Time])
     return false unless patch_yml
 
     %w[extensions native_modules].each do |category|

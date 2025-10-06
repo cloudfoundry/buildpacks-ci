@@ -125,7 +125,7 @@ resources:
 - name: binary-builder
   type: git
   source:
-    uri: {{binary-builder-git-uri}}
+    uri: https://github.com/cloudfoundry/binary-builder
 - name: buildpacks-ci
   type: git
   source:
@@ -137,7 +137,7 @@ resources:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
     branch: main
     paths: [ binary-builds-new/ ]
-    private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
 
 <% stacks.each do |stack| %>
 - name: <%= stack %>-image

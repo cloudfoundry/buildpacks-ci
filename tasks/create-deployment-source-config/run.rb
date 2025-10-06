@@ -13,7 +13,7 @@ Dir.chdir("bbl-state/#{ENV['ENV_NAME']}") do
     "client_secret"=> `bbl director-password`.strip,
     "ca_cert"=> `bbl director-ca-cert`.strip,
     "jumpbox_url"=> `bbl jumpbox-address`.strip + ':22',
-    "jumpbox_ssh_key"=>YAML.load(open('vars/jumpbox-vars-store.yml').read).dig('jumpbox_ssh','private_key')
+    "jumpbox_ssh_key"=>YAML.load(open('vars/jumpbox-vars-store.yml').read, permitted_classes: [Date, Time]).dig('jumpbox_ssh','private_key')
   }
 end
 

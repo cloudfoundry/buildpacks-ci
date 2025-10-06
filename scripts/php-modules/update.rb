@@ -14,7 +14,7 @@ def update_modules(&f)
     path = File.expand_path("../../tasks/build-binary-new/#{ext_file}")
 
     puts "==> Processing: #{path}"
-    data = YAML.load_file(path)
+    data = YAML.load_file(path, permitted_classes: [Date, Time])
 
     extensions = ['extensions']
     native_modules = ['native_modules']

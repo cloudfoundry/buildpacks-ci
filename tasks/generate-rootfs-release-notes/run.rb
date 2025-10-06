@@ -49,7 +49,7 @@ body_file = 'release-body/body'
 File.write(body_file, notes)
 old_receipt.unlink
 
-cves = YAML.load_file(cve_yaml_file)
+cves = YAML.load_file(cve_yaml_file, permitted_classes: [Date, Time])
 
 updated_cves = cves.map do |cve|
   cve['stack_release'] = new_version if cve['stack_release'] == 'unreleased'
