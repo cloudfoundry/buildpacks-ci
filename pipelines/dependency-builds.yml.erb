@@ -130,7 +130,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/buildpacks-ci
-    branch: master
+    branch: pipelines-setup
 - name: builds
   type: git
   source:
@@ -381,7 +381,7 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
     file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
     params:
       GPG_SIGNING_KEY_ID: ((cf-buildpacks-eng-gpg-key-id))
-      GPG_SIGNING_KEY: ((cf-buildpacks-eng-gpg-key))
+      GPG_SIGNING_KEY: ((cf-buildpacks-eng-gpg-key.private_key))
       VERSION_LINE: <%= line_hash['line'] %>
       VERSION_LINE_TYPE: <%= if dep_name == 'nginx' && bp_name == 'nginx' then 'nginx' else get_version_line_type(bp['lines']) end %>
       REMOVAL_STRATEGY: <%= bp.fetch('removal_strategy', 'remove_all') %>

@@ -10,6 +10,9 @@ credentials:
       # - cloudfoundry/buildpacks-ci  
       # - cloudfoundry/public-buildpacks-ci-robots
       -----END OPENSSH PRIVATE KEY-----
+    public_key: |
+      ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAA...
+      # REPLACE WITH YOUR ACTUAL SSH PUBLIC KEY
 
 - name: /concourse/buildpacks-team/buildpacks-github-token
   type: password
@@ -38,9 +41,12 @@ credentials:
   value:
     private_key: |
       -----BEGIN PGP PRIVATE KEY BLOCK-----
-      # REPLACE WITH YOUR ACTUAL GPG PRIVATE KEY    
-
+      # REPLACE WITH YOUR ACTUAL GPG PRIVATE KEY      
       -----END PGP PRIVATE KEY BLOCK-----
+    public_key: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      # REPLACE WITH YOUR ACTUAL GPG PUBLIC KEY
+      -----END PGP PUBLIC KEY BLOCK-----
 
 - name: /concourse/buildpacks-team/cfbuildpacks-dockerhub-user
   type: json
