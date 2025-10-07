@@ -49,7 +49,7 @@ class BuildpackBOSHReleaseUpdater
   end
 
   def delete_old_blobs
-    blobs = YAML.load_file('config/blobs.yml') || {}
+    blobs = YAML.load_file('config/blobs.yml', permitted_classes: [Date, Time]) || {}
 
     blobs.keys.each do |key|
       blobs.delete(key) if key.include?('buildpack')

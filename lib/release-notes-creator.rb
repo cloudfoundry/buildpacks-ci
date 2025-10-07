@@ -10,7 +10,7 @@ class RootfsReleaseNotesCreator
   end
 
   def cves
-    @cves ||= YAML.load_file(@cves_yaml_file)
+    @cves ||= YAML.load_file(@cves_yaml_file, permitted_classes: [Date, Time])
   end
 
   def release_notes
