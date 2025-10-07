@@ -93,6 +93,14 @@ if version_filter && source["version_filter"].to_s != "node-lts"
   versions.select! do |v|
     filter.match(Semver.new(v.ref))
   end
+
+# Special case: when node is invoked as a type github_releases and not explicit type node
+elsif type == "github_releases" && version_filter && source["version_filter"].to_s == "node-lts"
+  nodeLts = Depwatcher::NodeLTS.new.getLTSLine
+  filter = SemverFilter.new("#{nodeLts}.X.X")
+  versions.select! do |v|
+    filter.match(Semver.new(v.ref))
+  end
 end
 
 # Filter out versions concourse already knows about

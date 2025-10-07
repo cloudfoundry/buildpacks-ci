@@ -56,7 +56,7 @@ module Depwatcher
       Release.new(ref, url(ref), shasum256(ref))
     end
 
-    private def getLTSLine : String
+    def getLTSLine : String
       # Get JSON from github https://raw.githubusercontent.com/nodejs/Release/main/schedule.json
 
       response = HTTP::Client.get("https://raw.githubusercontent.com/nodejs/Release/main/schedule.json")
