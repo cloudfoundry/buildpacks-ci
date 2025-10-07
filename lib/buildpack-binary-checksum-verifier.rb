@@ -6,7 +6,7 @@ require 'digest/md5'
 
 class BuildpackBinaryChecksumVerifier
   def self.run!(buildpack_dir, whitelist_file)
-    uris_to_ignore = YAML.load_file(whitelist_file)
+    uris_to_ignore = YAML.load_file(whitelist_file, permitted_classes: [Date, Time])
     uri_to_sha256_mapping = get_checksums_by_uri(buildpack_dir, uris_to_ignore)
     show_mismatches(uri_to_sha256_mapping)
   end
@@ -19,7 +19,7 @@ class BuildpackBinaryChecksumVerifier
     release_tag_shas.each do |release_sha|
       begin
         manifest_contents = GitClient.get_file_contents_at_sha(buildpack_dir, release_sha, 'manifest.yml')
-        manifest = YAML.load(manifest_contents)
+        manifest = YAML.load(manifest_contents, permitted_classes: [Date, Time])
 
         manifest["dependencies"].each do |dependency|
           uri = dependency["uri"]

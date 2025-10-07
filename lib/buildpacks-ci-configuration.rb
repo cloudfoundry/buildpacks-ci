@@ -1,10 +1,10 @@
 class BuildpacksCIConfiguration
   def organization
-    YAML.load_file('public-config.yml')['buildpacks-github-org']
+    YAML.load_file('public-config.yml', permitted_classes: [Date, Time])['buildpacks-github-org']
   end
 
   def run_oracle_php_tests?
-    YAML.load_file('public-config.yml')['run-oracle-php-tests']
+    YAML.load_file('public-config.yml', permitted_classes: [Date, Time])['run-oracle-php-tests']
   end
 
   def concourse_target_name
