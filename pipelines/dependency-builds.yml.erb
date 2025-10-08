@@ -389,6 +389,7 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
       DEPRECATION_LINK: <%= line_hash['link'] %>
       DEPRECATION_MATCH: <%= line_hash['match'] %>
       GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
+      GIT_USER_NAME: ((cf-buildpacks-app-runtime-interfaces-name))
     output_mapping:
       artifacts: buildpack
   - put: <%= bp_name %>-pull-request
