@@ -306,7 +306,7 @@ end
 
 Dir.chdir('artifacts') do
   user_email = ENV['GIT_USER_EMAIL'] || 'app-runtime-interfaces@cloudfoundry.org'
-  user_name = ENV['GIT_USER_NAME'] || 'CF Buildpacks Team CI Server'
+  user_name = 'ARI WG Git Bot'
   
   GitClient.set_global_config('user.email', user_email)
   GitClient.set_global_config('user.name', user_name)
@@ -325,6 +325,7 @@ Dir.chdir('artifacts') do
   puts "=== GPG CONFIGURATION DEBUG ==="
   if ENV['GPG_SIGNING_KEY_ID']
     puts "GPG_SIGNING_KEY_ID configured: Yes"
+    puts ENV['GPG_SIGNING_KEY_ID']
     puts "GPG_SIGNING_KEY provided: #{!ENV['GPG_SIGNING_KEY'].nil? && !ENV['GPG_SIGNING_KEY'].empty?}"
     
     if ENV['GPG_SIGNING_KEY']
@@ -337,6 +338,10 @@ Dir.chdir('artifacts') do
     # Check if GPG is working and can find the key (without exposing details)
     gpg_key_check = system("gpg --list-keys #{ENV['GPG_SIGNING_KEY_ID']} > /dev/null 2>&1")
     puts "GPG key found in keyring: #{gpg_key_check}"
+    
+    # Show GPG key details for debugging
+    puts "GPG key details:"
+    system("gpg --list-keys #{ENV['GPG_SIGNING_KEY_ID']}")
     
     # Test GPG signing capability (without exposing key details)
     test_sign = system("echo 'test' | gpg --batch --sign --armor --local-user #{ENV['GPG_SIGNING_KEY_ID']} > /dev/null 2>&1")
