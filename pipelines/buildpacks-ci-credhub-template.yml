@@ -64,6 +64,10 @@ credentials:
   type: value
   value: app-runtime-interfaces@cloudfoundry.org
 
+- name: /concourse/buildpacks-team/cf-buildpacks-app-runtime-interfaces-name
+  type: value
+  value: ARI WG Git Bot
+
 - name: /concourse/buildpacks-team/binary-builder-git-uri
   type: value
   value: https://github.com/cloudfoundry/binary-builder

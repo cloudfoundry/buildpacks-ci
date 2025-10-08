@@ -306,8 +306,8 @@ end
 
 Dir.chdir('artifacts') do
   user_email = ENV['GIT_USER_EMAIL'] || 'app-runtime-interfaces@cloudfoundry.org'
-  user_name = 'ARI WG Git Bot'
-  
+  user_name = ENV['GIT_USER_NAME'] || 'ARI WG Git Bot'
+
   GitClient.set_global_config('user.email', user_email)
   GitClient.set_global_config('user.name', user_name)
 
