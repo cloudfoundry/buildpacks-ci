@@ -313,6 +313,7 @@ Dir.chdir('artifacts') do
 
   # Set GPG config
   GitClient.set_gpg_config
+  
   File.write('manifest.yml', manifest.to_yaml)
   GitClient.add_file('manifest.yml')
 
