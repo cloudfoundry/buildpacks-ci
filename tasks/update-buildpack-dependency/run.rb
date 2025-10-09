@@ -313,44 +313,6 @@ Dir.chdir('artifacts') do
 
   # Set GPG config
   GitClient.set_gpg_config
-
-  # Debug: Check Git configuration (secure)
-  puts "=== GIT CONFIGURATION DEBUG ==="
-  puts "Git user.name: #{`git config user.name`.strip}"
-  puts "Git user.email: #{`git config user.email`.strip}"
-  puts "Git commit.gpgsign: #{`git config commit.gpgsign`.strip}"
-  puts "Git user.signingkey configured: #{!`git config user.signingkey`.strip.empty?}"
-  
-  # Debug: Check GPG configuration (secure)
-  puts "=== GPG CONFIGURATION DEBUG ==="
-  if ENV['GPG_SIGNING_KEY_ID']
-    puts "GPG_SIGNING_KEY_ID configured: Yes"
-    puts ENV['GPG_SIGNING_KEY_ID']
-    puts "GPG_SIGNING_KEY provided: #{!ENV['GPG_SIGNING_KEY'].nil? && !ENV['GPG_SIGNING_KEY'].empty?}"
-    
-    if ENV['GPG_SIGNING_KEY']
-      key_length = ENV['GPG_SIGNING_KEY'].strip.length
-      puts "GPG key length: #{key_length} characters"
-      puts "GPG key starts with: #{ENV['GPG_SIGNING_KEY'].strip[0..20]}..."
-      puts "GPG key ends with: ...#{ENV['GPG_SIGNING_KEY'].strip[-20..-1]}"
-    end
-    
-    # Check if GPG is working and can find the key (without exposing details)
-    gpg_key_check = system("gpg --list-keys #{ENV['GPG_SIGNING_KEY_ID']} > /dev/null 2>&1")
-    puts "GPG key found in keyring: #{gpg_key_check}"
-    
-    # Show GPG key details for debugging
-    puts "GPG key details:"
-    system("gpg --list-keys #{ENV['GPG_SIGNING_KEY_ID']}")
-    
-    # Test GPG signing capability (without exposing key details)
-    test_sign = system("echo 'test' | gpg --batch --sign --armor --local-user #{ENV['GPG_SIGNING_KEY_ID']} > /dev/null 2>&1")
-    puts "GPG signing test: #{test_sign ? 'SUCCESS' : 'FAILED'}"
-  else
-    puts "GPG_SIGNING_KEY_ID configured: No"
-  end
-  puts "================================"
-
   File.write('manifest.yml', manifest.to_yaml)
   GitClient.add_file('manifest.yml')
 
