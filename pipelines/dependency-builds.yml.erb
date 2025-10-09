@@ -125,7 +125,7 @@ resources:
 - name: binary-builder
   type: git
   source:
-    uri: {{binary-builder-git-uri}}
+    uri: https://github.com/cloudfoundry/binary-builder
 - name: buildpacks-ci
   type: git
   source:
@@ -137,7 +137,7 @@ resources:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
     branch: main
     paths: [ binary-builds-new/ ]
-    private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
 
 <% stacks.each do |stack| %>
 - name: <%= stack %>-image
@@ -151,7 +151,7 @@ resources:
     repository: cfbuildpacks/cflinuxfs3-dev
 
 <% dependencies.values.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack|
-branch = 'develop'
+branch = 'master'
 private_key = '((cf-buildpacks-eng-github-ssh-key.private_key))'
 %>
 - name: <%= buildpack %>-buildpack
@@ -381,13 +381,15 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
     file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
     params:
       GPG_SIGNING_KEY_ID: ((cf-buildpacks-eng-gpg-key-id))
-      GPG_SIGNING_KEY: ((cf-buildpacks-eng-gpg-key))
+      GPG_SIGNING_KEY: ((cf-buildpacks-eng-gpg-key.private_key))
       VERSION_LINE: <%= line_hash['line'] %>
       VERSION_LINE_TYPE: <%= if dep_name == 'nginx' && bp_name == 'nginx' then 'nginx' else get_version_line_type(bp['lines']) end %>
       REMOVAL_STRATEGY: <%= bp.fetch('removal_strategy', 'remove_all') %>
       DEPRECATION_DATE: <%= line_hash['deprecation_date'] %>
       DEPRECATION_LINK: <%= line_hash['link'] %>
       DEPRECATION_MATCH: <%= line_hash['match'] %>
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
+      GIT_USER_NAME: ((cf-buildpacks-app-runtime-interfaces-name))
     output_mapping:
       artifacts: buildpack
   - put: <%= bp_name %>-pull-request
@@ -396,7 +398,7 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
       title: <%= "Updating version for #{dep_name} for #{line_hash['line']} " %>
       branch_prefix: "pr-by-releng-bot"
       auto_merge: false
-      base: develop
+      base: master
   <% end %>
 <% end %>
 <% end %>
