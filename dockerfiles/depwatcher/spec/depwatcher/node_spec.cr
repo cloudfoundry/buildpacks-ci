@@ -7,9 +7,9 @@ describe Depwatcher::Node do
     it "returns the right number of releases" do
       client = HTTPClientMock.new
       subject = Depwatcher::Node.new.tap { |s| s.client = client }
-      client.stub_get("https://nodejs.org/dist/",
+      client.stub_get("https://nodejs.org/dist/index.json",
         nil,
-        HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_dist.html"))
+        HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_dist.json"))
       )
       
       subject.check.size.should eq 14
@@ -18,9 +18,9 @@ describe Depwatcher::Node do
     it "returns real releases sorted" do
       client = HTTPClientMock.new
       subject = Depwatcher::Node.new.tap { |s| s.client = client }
-      client.stub_get("https://nodejs.org/dist/",
+      client.stub_get("https://nodejs.org/dist/index.json",
         nil,
-        HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_dist.html"))
+        HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_dist.json"))
       )
       
       subject.check.map(&.ref).should eq ["14.0.0", "14.5.0", "16.0.0", "16.5.0", "16.9.0", "18.0.0", "18.5.0", "18.9.0", "20.0.0", "20.8.0", "20.9.0", "22.0.0", "22.1.0", "22.2.0"]
@@ -29,9 +29,9 @@ describe Depwatcher::Node do
     it "returns only non-LTS versions" do
       client = HTTPClientMock.new
       subject = Depwatcher::Node.new.tap { |s| s.client = client }
-      client.stub_get("https://nodejs.org/dist/",
+      client.stub_get("https://nodejs.org/dist/index.json",
         nil,
-        HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_dist.html"))
+        HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_dist.json"))
       )
       
       subject.check.map(&.ref).select { |v|

@@ -1,22 +1,25 @@
 require "./base"
 require "./semver"
-require "xml"
 
 module Depwatcher
   class NodeLTS < Base
-    class Dist
+    class NodeRelease
       include JSON::Serializable
 
-      property shasum : String
-      property tarball : String
-    end
-
-    class Version
-      include JSON::Serializable
-
-      property name : String
       property version : String
-      property dist : Dist
+      property date : String
+      property files : Array(String)
+      property npm : String?
+      property v8 : String?
+      property uv : String?
+      property zlib : String?
+      property openssl : String?
+      property modules : String?
+      property lts : String | Bool
+      property security : Bool
+
+      def initialize(@version, @date, @files, @npm = nil, @v8 = nil, @uv = nil, @zlib = nil, @openssl = nil, @modules = nil, @lts = false, @security = false)
+      end
     end
 
     class NodeVersionInfo
@@ -27,12 +30,6 @@ module Depwatcher
       property maintenance : String?
       property end : String
       property codename : String?
-    end
-
-    class External
-      include JSON::Serializable
-
-      property versions : Hash(String, Version)
     end
 
     class Release
@@ -96,15 +93,15 @@ module Depwatcher
 
     private def version_numbers : Array(String)
       latest_lts = getLTSLine()
-      response = client.get("https://nodejs.org/dist/").body
-      html = XML.parse_html(response).children[1].children[3].children[3]
-      return html.children.select() { |child|
-        child.type.element_node?
-      }.map() { |c| c["href"] }.select() { |link|
-        link.starts_with?("v") && link.ends_with?("/")
-      }.map() { |link| link.[1...-1] }.select() { |v|
-        semver = Semver.new(v)
+      response = client.get("https://nodejs.org/dist/index.json").body
+      releases = Array(NodeRelease).from_json(response)
+      
+      return releases.select { |release|
+        version = release.version.lchop('v')
+        semver = Semver.new(version)
         semver.major == latest_lts.to_i
+      }.map { |release|
+        release.version.lchop('v')
       }
     end
   end

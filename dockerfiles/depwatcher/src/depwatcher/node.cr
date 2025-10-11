@@ -1,28 +1,25 @@
 require "./base"
 require "./semver"
-require "xml"
 
 module Depwatcher
   class Node < Base
-    class Dist
+    class NodeRelease
       include JSON::Serializable
 
-      property shasum : String
-      property tarball : String
-    end
-
-    class Version
-      include JSON::Serializable
-
-      property name : String
       property version : String
-      property dist : Dist
-    end
+      property date : String
+      property files : Array(String)
+      property npm : String?
+      property v8 : String?
+      property uv : String?
+      property zlib : String?
+      property openssl : String?
+      property modules : String?
+      property lts : String | Bool
+      property security : Bool
 
-    class External
-      include JSON::Serializable
-
-      property versions : Hash(String, Version)
+      def initialize(@version, @date, @files, @npm = nil, @v8 = nil, @uv = nil, @zlib = nil, @openssl = nil, @modules = nil, @lts = false, @security = false)
+      end
     end
 
     class Release
@@ -58,16 +55,16 @@ module Depwatcher
     end
 
     private def version_numbers : Array(String)
-      response = client.get("https://nodejs.org/dist/").body
-      html = XML.parse_html(response).children[1].children[3].children[3]
-      return html.children.select() { |child|
-        child.type.element_node?
-      }.map() { |c| c["href"] }.select() { |link|
-        link.starts_with?("v") && link.ends_with?("/")
-      }.map() { |link| link.[1...-1] }.select() { |v|
-        semver = Semver.new(v)
+      response = client.get("https://nodejs.org/dist/index.json").body
+      releases = Array(NodeRelease).from_json(response)
+      
+      return releases.select { |release|
+        version = release.version.lchop('v')
+        semver = Semver.new(version)
         # Filter out non LTS versions and old versions (older than 12)
         semver.major % 2 == 0 && semver.major >= 12
+      }.map { |release|
+        release.version.lchop('v')
       }
     end
   end
