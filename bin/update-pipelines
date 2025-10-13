@@ -5,8 +5,9 @@ set -euo pipefail
 MY_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "${MY_DIR}/.." && pwd)"
 target="buildpacks"
-team="main"
-filter=
+team="buildpacks-team"
+pipeline_filter=""
+list_mode=false
 
 login() {
   fly -t "$target" login -n "${team}" -b
@@ -21,28 +22,107 @@ check_login_status() {
   fly -t "$target" status >/dev/null 2>&1 || login
 }
 
-set_pipelines() {
-  for pipeline_dir in "$REPO_ROOT"/pipelines/*; do
-    pipeline_name="$(basename "${pipeline_dir%.yml}")"
-    if [[ $filter != "" ]] && [[ ! $pipeline_name =~ $filter ]]; then
-      continue
+list_ytt_pipelines() {
+  echo "ytt-based pipelines:"
+  for pipeline_path in "$REPO_ROOT"/pipelines/*; do
+    if [[ -d "$pipeline_path" ]]; then
+      pipeline_name="$(basename "$pipeline_path")"
+      if [[ "$pipeline_name" != "config" && "$pipeline_name" != "templates" ]]; then
+        echo "  - $pipeline_name"
+      fi
+    elif [[ -f "$pipeline_path" ]]; then
+      pipeline_name="$(basename "${pipeline_path%.yml}")"
+      if [[ "$pipeline_name" == "cflinuxfs4" ]]; then
+        echo "  - $pipeline_name"
+      fi
     fi
+  done
+  echo ""
+}
 
-    echo "Setting $pipeline_name"
-    pipeline_config="$(ytt -f "$pipeline_dir")"
-    fly -t "$target" set-pipeline -p "$pipeline_name" -c <(echo "$pipeline_config")
+list_all_pipelines() {
+  list_ytt_pipelines
+  "${MY_DIR}/update-erb-pipelines" --list
+  echo ""
+  echo "Usage: ./bin/update-pipelines [--pipeline=PIPELINE_NAME | -p PIPELINE_NAME | --list | -l]"
+}
+
+process_ytt_pipelines() {
+  local filter="$1"
+  
+  for pipeline_path in "$REPO_ROOT"/pipelines/*; do
+    if [[ -d "$pipeline_path" ]]; then
+      pipeline_name="$(basename "$pipeline_path")"
+      if [[ "$pipeline_name" == "config" || "$pipeline_name" == "templates" ]]; then
+        continue
+      fi
+      
+      if [[ -n "$filter" && "$pipeline_name" != "$filter" ]]; then
+        continue
+      fi
+
+      echo "Setting $pipeline_name (ytt)"
+      pipeline_config="$(ytt -f "$pipeline_path")"
+      fly -t "$target" set-pipeline -p "$pipeline_name" -c <(echo "$pipeline_config")
+      
+    elif [[ -f "$pipeline_path" ]]; then
+      pipeline_name="$(basename "${pipeline_path%.yml}")"
+      if [[ "$pipeline_name" != "cflinuxfs4" ]]; then
+        continue
+      fi
+      
+      if [[ -n "$filter" && "$pipeline_name" != "$filter" ]]; then
+        continue
+      fi
+
+      echo "Setting $pipeline_name (ytt)"
+      pipeline_config="$(ytt -f "$pipeline_path")"
+      fly -t "$target" set-pipeline -p "$pipeline_name" -c <(echo "$pipeline_config")
+    fi
+  done
+}
+
+process_erb_pipelines() {
+  "${MY_DIR}/update-erb-pipelines" "$@"
+}
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      --pipeline=*)
+        pipeline_filter="${1#*=}"
+        shift
+        ;;
+      --pipeline|-p)
+        pipeline_filter="$2"
+        shift 2
+        ;;
+      --list|-l)
+        list_mode=true
+        shift
+        ;;
+      *)
+        shift
+        ;;
+    esac
   done
 }
 
 main() {
-  if [ "$#" -eq 1 ]; then
-    filter="$1"
+  parse_args "$@"
+
+  if [[ "$list_mode" == true ]]; then
+    list_all_pipelines
+    return
   fi
 
   check_login_status
-  set_pipelines
-
-  "${MY_DIR}/update-pipelines-erb"
+  
+  process_ytt_pipelines "$pipeline_filter"
+  process_erb_pipelines "$@"
+  
+  echo ""
+  echo "Thanks, The Buildpacks Team"
 }
 
 main "$@"

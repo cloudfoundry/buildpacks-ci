@@ -18,6 +18,7 @@ class BuildpacksCIPipelineUpdater
       pipeline_name = File.basename(filename).split('.')[0]
 
       next if pipeline_name.include?('cflinuxfs4')
+      next if options.has_key?(:pipeline) && pipeline_name != options[:pipeline]
 
       BuildpacksCIPipelineUpdateCommand.new.run!(
         concourse_target_name: concourse_target_name,
@@ -39,10 +40,13 @@ class BuildpacksCIPipelineUpdater
       next if options.has_key?(:template) && !pipeline_variables_filename.include?(options[:template])
 
       language = File.basename(pipeline_variables_filename, '.yml')
+      pipeline_name = "#{language}-buildpack"
+
+      next if options.has_key?(:pipeline) && pipeline_name != options[:pipeline]
 
       BuildpacksCIPipelineUpdateCommand.new.run!(
         concourse_target_name: concourse_target_name,
-        pipeline_name: "#{language}-buildpack",
+        pipeline_name: pipeline_name,
         config_generation_command: "erb language=#{language} organization=#{organization} pipelines/templates/buildpack.yml.erb",
         pipeline_variable_filename: pipeline_variables_filename,
         options: options
@@ -53,28 +57,55 @@ class BuildpacksCIPipelineUpdater
   def run!(args)
     options = parse_args(args)
 
+    if options.has_key?(:list)
+      list_available_pipelines
+      return
+    end
+
     update_standard_pipelines(options) unless options.has_key?(:template)
     update_buildpack_pipelines(options)
+  end
 
-    puts 'Thanks, The Buildpacks Team'
+  def list_available_pipelines
+    puts "ERB-based pipelines:\n\n"
+
+    puts "Standard pipelines:"
+    Dir['pipelines/*.{erb,yml}'].sort.each do |filename|
+      pipeline_name = File.basename(filename).split('.')[0]
+      next if pipeline_name.include?('cflinuxfs4')
+      puts "  - #{pipeline_name}"
+    end
+
+    puts "\nBuildpack pipelines:"
+    Dir['config/buildpack/*.yml'].sort.each do |pipeline_variables_filename|
+      language = File.basename(pipeline_variables_filename, '.yml')
+      puts "  - #{language}-buildpack"
+    end
   end
 
   def parse_args(args)
-    # Argument parsing
     specified_options = {}
     opt_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: ./bin/update-pipelines [options]"
+      opts.banner = "Usage: ./bin/update-erb-pipelines [options]"
 
-      opts.on("--include=INCLUDE", "-iINCLUDE", "Update pipelines if their names include this string") do |include_string|
+      opts.on("--include=INCLUDE", "-i INCLUDE", "Update pipelines if their names include this string") do |include_string|
         specified_options[:include] = include_string
       end
 
-      opts.on("--exclude=EXCLUDE", "-eEXCLUDE", "Skip pipelines if their names include this string") do |exclude_string|
+      opts.on("--exclude=EXCLUDE", "-e EXCLUDE", "Skip pipelines if their names include this string") do |exclude_string|
         specified_options[:exclude] = exclude_string
       end
 
-      opts.on("--template=TEMPLATE", "-tTEMPLATE", "Only update pipelines from the specified template") do |template_string|
+      opts.on("--template=TEMPLATE", "-t TEMPLATE", "Only update pipelines from the specified template") do |template_string|
         specified_options[:template] = template_string
+      end
+
+      opts.on("--pipeline=PIPELINE", "-p PIPELINE", "Update only the specified pipeline") do |pipeline_string|
+        specified_options[:pipeline] = pipeline_string
+      end
+
+      opts.on("--list", "-l", "List ERB-based pipelines") do
+        specified_options[:list] = true
       end
     end
     opt_parser.parse!(args)
