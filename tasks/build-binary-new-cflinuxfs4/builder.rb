@@ -504,7 +504,7 @@ class DependencyBuild
 
   def build_libgdiplus
     Runner.run('apt', 'update')
-    Runner.run('apt-get', 'install', '-y', 'automake', 'libtool')
+    Runner.run('apt-get', 'install', '-y', 'automake', 'libtool', 'libglib2.0-dev', 'libcairo2-dev')
 
     built_path = File.join(Dir.pwd, 'built')
     Dir.mkdir(built_path)
