@@ -11,9 +11,9 @@ describe Depwatcher::NodeLTS do
         nil,
         HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_lts_releases.json"))
       )
-      client.stub_get("https://nodejs.org/dist/",
+      client.stub_get("https://nodejs.org/dist/index.json",
         nil,
-        HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_dist.html"))
+        HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_dist.json"))
       )
       
       subject.check.size.should eq 3
@@ -26,9 +26,9 @@ describe Depwatcher::NodeLTS do
         nil,
         HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_lts_releases.json"))
       )
-      client.stub_get("https://nodejs.org/dist/",
+      client.stub_get("https://nodejs.org/dist/index.json",
         nil,
-        HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_dist.html"))
+        HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/node_dist.json"))
       )
       
       subject.check.map(&.ref).should eq ["22.0.0", "22.1.0", "22.2.0"]
