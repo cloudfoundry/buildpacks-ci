@@ -22,8 +22,8 @@ all_stacks = BUILD_STACKS + WINDOWS_STACKS + ["any-stack"]
 cflinuxfs4_dependencies = config['cflinuxfs4_dependencies']
 cflinuxfs4_buildpacks = config['cflinuxfs4_buildpacks']
 
-manifest = YAML.load_file('buildpack/manifest.yml')
-manifest_latest_released = YAML.load_file('buildpack-latest-released/manifest.yml') # rescue { 'dependencies' => [] }
+manifest = YAML.load_file('buildpack/manifest.yml', permitted_classes: [Date, Time])
+manifest_latest_released = YAML.load_file('buildpack-latest-released/manifest.yml', permitted_classes: [Date, Time]) # rescue { 'dependencies' => [] }
 
 data = JSON.parse(open('source/data.json').read)
 source_name = data.dig('source', 'name')
@@ -305,12 +305,15 @@ if buildpack_name == 'hwc'
 end
 
 Dir.chdir('artifacts') do
-  GitClient.set_global_config('user.email', 'cf-buildpacks-eng@pivotal.io')
-  GitClient.set_global_config('user.name', 'CF Buildpacks Team CI Server')
+  user_email = ENV['GIT_USER_EMAIL'] || 'app-runtime-interfaces@cloudfoundry.org'
+  user_name = ENV['GIT_USER_NAME'] || 'ARI WG Git Bot'
+
+  GitClient.set_global_config('user.email', user_email)
+  GitClient.set_global_config('user.name', user_name)
 
   # Set GPG config
   GitClient.set_gpg_config
-
+  
   File.write('manifest.yml', manifest.to_yaml)
   GitClient.add_file('manifest.yml')
 

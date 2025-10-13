@@ -17,7 +17,7 @@ class BuildpackDependency
 
   def self.buildpack_manifests
     @buildpack_manifests ||= BUILDPACKS.map do |name|
-      [name, YAML.load(open("https://raw.githubusercontent.com/cloudfoundry/#{name}-buildpack/develop/manifest.yml"))]
+      [name, YAML.load(open("https://raw.githubusercontent.com/cloudfoundry/#{name}-buildpack/develop/manifest.yml"), permitted_classes: [Date, Time])]
     end
   end
 end
