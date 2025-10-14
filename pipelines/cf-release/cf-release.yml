@@ -14,7 +14,7 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/buildpacks-ci.git
-    private_key: ((buildpacks-ci-deploy-key.private_key))
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
 
 - name: cf-deployment-concourse-tasks
   type: git
