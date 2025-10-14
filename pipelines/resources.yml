@@ -3,16 +3,9 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/buildpacks-ci.git
-    private_key: ((buildpacks-ci-deploy-key.private_key))
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
     branch: master
     paths: [ dockerfiles/depwatcher/ ]
-
-- name: create-pull-request-resource
-  type: git
-  source:
-    uri: git@github.com:pivotal/create-pull-request-resource.git
-    private_key: ((create-pull-request-resource-deploy-key.private_key))
-    branch: master
 
 - name: depwatcher-image
   type: docker-image
@@ -20,14 +13,6 @@ resources:
     repository: coredeps/depwatcher
     username: ((coredeps-dockerhub-user.username))
     password: ((coredeps-dockerhub-user.password))
-
-- name: create-pull-request-resource-image
-  type: docker-image
-  source:
-    repository: coredeps/create-pull-request-resource
-    username: ((coredeps-dockerhub-user.username))
-    password: ((coredeps-dockerhub-user.password))
-
 
 jobs:
 - name: build-and-push-depwatcher
@@ -39,11 +24,3 @@ jobs:
     params:
       build: depwatcher/dockerfiles/depwatcher
 
-- name: build-and-push-create-pull-request-resource
-  plan:
-  - in_parallel:
-     - get: create-pull-request-resource
-       trigger: true
-  - put: create-pull-request-resource-image
-    params:
-     build: create-pull-request-resource
