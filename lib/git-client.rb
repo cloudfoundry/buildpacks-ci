@@ -155,12 +155,73 @@ class GitClient
 
   def self.set_gpg_config
     if ENV['GPG_SIGNING_KEY_ID'] != nil && ENV['GPG_SIGNING_KEY'] != nil
+      # Create GPG directory with proper permissions
       system("mkdir -p ~/.gnupg")
-      system("printf \"quiet\" > ~/.gnupg/options")
-      system("printf \"%s\" \"#{ENV['GPG_SIGNING_KEY']}\" | base64 -d > ~/.gnupg/private.key")
-      system("gpg --options ~/.gnupg/options --import ~/.gnupg/private.key")
-      self.set_global_config('user.signingkey', ENV['GPG_SIGNING_KEY_ID'])
-      self.set_global_config('commit.gpgsign', 'true')
+      system("chmod 700 ~/.gnupg")
+      
+      # Create GPG configuration file
+      system("echo 'use-agent' > ~/.gnupg/gpg.conf")
+      system("echo 'pinentry-mode loopback' >> ~/.gnupg/gpg.conf")
+      system("echo 'batch' >> ~/.gnupg/gpg.conf")
+      system("echo 'no-tty' >> ~/.gnupg/gpg.conf")
+      system("echo 'quiet' >> ~/.gnupg/gpg.conf")
+      
+      # Handle base64 decoding more robustly
+      puts "Decoding GPG key..."
+      gpg_key_content = ENV['GPG_SIGNING_KEY'].strip
+
+      # The private key should now be in PEM format, write it directly
+      if gpg_key_content.include?('-----BEGIN PGP PRIVATE KEY BLOCK-----')
+        puts "Writing PGP private key directly..."
+        File.write(File.expand_path('~/.gnupg/private.key'), gpg_key_content)
+        decode_success = true
+      else
+        puts "Attempting base64 decode..."
+        # Try to decode the GPG key with error handling
+        decode_success = system("echo '#{gpg_key_content}' | base64 -d > ~/.gnupg/private.key 2>/dev/null")
+        
+        if !decode_success
+          puts "Base64 decode failed, trying without newlines..."
+          # Remove any whitespace/newlines and try again
+          gpg_key_clean = gpg_key_content.gsub(/\s+/, '')
+          decode_success = system("echo '#{gpg_key_clean}' | base64 -d > ~/.gnupg/private.key 2>/dev/null")
+        end
+      end
+      
+      if !decode_success
+        puts "ERROR: Failed to process GPG key."
+        return
+      end
+      
+      system("chmod 600 ~/.gnupg/private.key")
+      
+      # Import the key with detailed error output
+      puts "Importing GPG key..."
+      puts "Key file size: #{File.size(File.expand_path('~/.gnupg/private.key'))} bytes"
+      
+      # Try import with verbose output to see what's happening
+      import_success = system("gpg --batch --import ~/.gnupg/private.key")
+      
+      if !import_success
+        puts "Import failed, trying with different options..."
+        import_success = system("gpg --batch --allow-secret-key-import --import ~/.gnupg/private.key")
+      end
+      
+      if import_success
+        puts "GPG key imported successfully"
+        
+        # Set ultimate trust for the imported key
+        system("echo '#{ENV['GPG_SIGNING_KEY_ID']}:6:' | gpg --batch --import-ownertrust 2>/dev/null")
+        
+        self.set_global_config('user.signingkey', ENV['GPG_SIGNING_KEY_ID'])
+        self.set_global_config('commit.gpgsign', 'true')
+        self.set_global_config('gpg.program', 'gpg')
+      else
+        puts "ERROR: Failed to import GPG key"
+      end
+      
+      # Clean up the private key file
+      system("rm -f ~/.gnupg/private.key")
     end
   end
 end
