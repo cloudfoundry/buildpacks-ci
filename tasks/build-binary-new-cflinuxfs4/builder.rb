@@ -221,7 +221,7 @@ module DependencyBuildHelper
           Runner.run('apt', 'update')
 
           stack = ENV.fetch('STACK')
-          Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libpcre2-dev', 'libcurl4-openssl-dev', 'libsodium-dev', 'libharfbuzz-dev', 'libfribidi-dev', 'default-jre', 'libgfortran-12-dev')
+          Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libpcre2-dev', 'libcurl4-openssl-dev', 'libsodium-dev', 'libharfbuzz-dev', 'libfribidi-dev', 'default-jre', 'libgfortran-12-dev', 'libfreetype6-dev', 'libpng-dev', 'libtiff5-dev', 'libjpeg-dev', 'libwebp-dev')
 
           Runner.run('wget', source_input.url)
           source_sha = Digest::SHA256.hexdigest(open("R-#{source_input.version}.tar.gz").read)
