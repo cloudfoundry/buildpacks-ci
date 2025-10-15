@@ -267,7 +267,7 @@ jobs: ##########################################################################
       - in_parallel:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-develop
+          resource: buildpack-master
           trigger: true
 <% bucket_stacks = buildpacks[language]['stacks']
    bucket_stacks = bucket_stacks + ['any'] if language.to_s == 'hwc' || language.to_s == 'binary'
@@ -320,7 +320,7 @@ jobs: ##########################################################################
         <% end %>
         - get: buildpack
           passed:
-            - buildpack-to-master
+            - detect-new-version-and-upload-artifacts
           resource: buildpack-master
       - task: check-tag-not-already-added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
@@ -507,9 +507,6 @@ jobs: ##########################################################################
           GITHUB_STATUS_CONTEXT: 'buildpacks-ci/passed-dev-specs'
           GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI develop specs passed'
           PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
-      - put: buildpack-master
-        params:
-          repository: repo
 
   - name: update-libbuildpack
     serial: true
