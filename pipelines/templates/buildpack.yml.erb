@@ -82,7 +82,7 @@ resources: #####################################################################
     webhook_token: ob0aigh3
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: ((cloudfoundry-<%= language %>-buildpack-deploy-key.private_key))
+      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
       branch: develop
       ignore_paths:
         - VERSION
@@ -97,7 +97,7 @@ resources: #####################################################################
     type: git
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: ((cloudfoundry-<%= language %>-buildpack-deploy-key.private_key))
+      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
       branch: develop
       paths:
         - VERSION
@@ -107,7 +107,7 @@ resources: #####################################################################
     type: git
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: ((cloudfoundry-<%= language %>-buildpack-deploy-key.private_key))
+      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
       branch: master
 
   - name: buildpacks-ci
@@ -133,7 +133,7 @@ resources: #####################################################################
     type: git
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack-release.git
-      private_key: ((cloudfoundry-<%= language %>-buildpack-bosh-release-deploy-key.private_key))
+      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
       branch: master
 <% end %>
   - name: env-repo
@@ -141,7 +141,7 @@ resources: #####################################################################
     source:
       uri: git@github.com:cloudfoundry/buildpacks-envs
       branch: master
-      private_key: '((cloudfoundry-buildpacks-envs-deploy-key.private_key))'
+      private_key: '((cf-buildpacks-eng-github-ssh-key.private_key))'
 
 
   ## Github Releases ##
@@ -179,18 +179,16 @@ resources: #####################################################################
     source:
       bucket: {{buildpack-release-candidates-bucket}}
       regexp: <%= language%>/<%= language %>_buildpack-<%= stack %>-v(.*).zip
-      access_key_id: ((svc-buildpacks-aws-bp-ci-access-key))
-      secret_access_key: ((svc-buildpacks-aws-bp-ci-secret-key))
-      aws_role_arn: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
+      access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
   - name: pivotal-buildpack-cached-<%= stack %>
     type: s3
     source:
       bucket: {{buildpack-release-candidates-bucket}}
       regexp: <%= language%>/<%= language %>_buildpack-cached-<%= stack %>-v(.*).zip
-      access_key_id: ((svc-buildpacks-aws-bp-ci-access-key))
-      secret_access_key: ((svc-buildpacks-aws-bp-ci-secret-key))
-      aws_role_arn: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
+      access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 <% end %>
 
 <% if language.to_s == 'hwc' || language.to_s == 'binary' %>
@@ -199,18 +197,16 @@ resources: #####################################################################
     source:
       bucket: {{buildpack-release-candidates-bucket}}
       regexp: <%= language%>/<%= language %>_buildpack-cached-v(.*).zip
-      access_key_id: ((svc-buildpacks-aws-bp-ci-access-key))
-      secret_access_key: ((svc-buildpacks-aws-bp-ci-secret-key))
-      aws_role_arn: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
+      access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
   - name: pivotal-buildpack-any
     type: s3
     source:
       bucket: {{buildpack-release-candidates-bucket}}
       regexp: <%= language%>/<%= language %>_buildpack-v(.*).zip
-      access_key_id: ((svc-buildpacks-aws-bp-ci-access-key))
-      secret_access_key: ((svc-buildpacks-aws-bp-ci-secret-key))
-      aws_role_arn: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
+      access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 <% end %>
 
   ## Resource Pools ##
