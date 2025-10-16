@@ -9,17 +9,6 @@ set -o pipefail
 LOG_FILE=${LOG_FILE:-/tmp/docker.log}
 SKIP_PRIVILEGED=${SKIP_PRIVILEGED:-false}
 
-function util::docker::cgroups::sanitize() {
-  if [ -e /sys/fs/cgroup/cgroup.controllers ]; then
-    echo "cgroup v2 detected"
-    return 0
-  fi
-
-  echo "ERROR: cgroup v1 detected but no longer supported"
-  echo "This infrastructure requires cgroup v2 (Ubuntu 22.04+/Kubernetes 1.25+)"
-  exit 1
-}
-
 function util::docker::start() {
   echo "starting docker..."
   if docker info >/dev/null 2>&1; then
@@ -27,12 +16,16 @@ function util::docker::start() {
     exit 0
   fi
 
+  if [ ! -e /sys/fs/cgroup/cgroup.controllers ]; then
+    echo "ERROR: cgroup v1 detected but no longer supported"
+    echo "This infrastructure requires cgroup v2 (Ubuntu 22.04+/Kubernetes 1.25+)"
+    exit 1
+  fi
+
   mkdir -p /var/log
   mkdir -p /var/run
 
   if [ "$SKIP_PRIVILEGED" = "false" ]; then
-    util::docker::cgroups::sanitize
-
     if grep '/proc/sys\s\+\w\+\s\+ro,' /proc/mounts >/dev/null; then
       mount -o remount,rw /proc/sys
     fi
