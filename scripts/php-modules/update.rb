@@ -1,4 +1,6 @@
 require 'yaml'
+require 'date'
+require 'time'
 
 def process_extension_file(cache, data, ext_file, dependency_type, f)
   (data.dig(*dependency_type) || []).each do |dependency|

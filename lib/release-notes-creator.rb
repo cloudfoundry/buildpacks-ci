@@ -1,4 +1,6 @@
 require 'yaml'
+require 'date'
+require 'time'
 require 'diffy'
 require_relative 'usn-release-notes'
 

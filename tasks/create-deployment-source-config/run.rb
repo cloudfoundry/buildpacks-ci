@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 
 require 'yaml'
+require 'date'
+require 'time'
 
 # See https://github.com/cloudfoundry/bosh-deployment-resource#dynamic-source-configuration
 

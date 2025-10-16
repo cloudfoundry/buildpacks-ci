@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 
 require 'yaml'
+require 'date'
+require 'time'
 require_relative '../../lib/git-client'
 
 class BuildpackBOSHReleaseUpdater

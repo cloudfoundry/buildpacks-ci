@@ -1,4 +1,6 @@
 require 'yaml'
+require 'date'
+require 'time'
 
 class PHPExtensionsHelper
   attr_accessor :base_path, :base_yml

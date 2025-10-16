@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 
+require 'yaml'
+require 'date'
+require 'time'
 require 'octokit'
 require 'open-uri'
 require_relative '../../lib/release-notes-creator'

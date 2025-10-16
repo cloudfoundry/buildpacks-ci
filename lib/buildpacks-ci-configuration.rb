@@ -1,3 +1,7 @@
+require 'yaml'
+require 'date'
+require 'time'
+
 class BuildpacksCIConfiguration
   def organization
     YAML.load_file('public-config.yml', permitted_classes: [Date, Time])['buildpacks-github-org']
