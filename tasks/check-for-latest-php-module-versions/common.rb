@@ -50,12 +50,20 @@ end
 # Get the latest version of a PECL module
 def current_pecl_version(name)
   rss_url = "https://pecl.php.net/feeds/pkg_#{name}.rss"
-  doc = Nokogiri::XML(URI.open(rss_url)) rescue nil
+  doc = begin
+    Nokogiri::XML(URI.open(rss_url))
+  rescue StandardError
+    nil
+  end
   return 'Unknown' unless doc
 
   doc.remove_namespaces!
   versions = doc.xpath('//item/title').map { |li| li.text.gsub(/^#{name} /i, '') }
-  versions.reject! { |v| Gem::Version.new(v).prerelease? rescue false }
+  versions.reject! do |v|
+    Gem::Version.new(v).prerelease?
+  rescue StandardError
+    false
+  end
   versions.sort_by! { |v| Gem::Version.new(v) }
   versions.last
 end
@@ -68,9 +76,9 @@ def current_github_version(url, type = 'release', token = nil)
 
   if type == 'release'
     items = releases_or_tags.reject { |d| d['prerelease'] || d['draft'] }
-    versions = items.map { |d| d['tag_name'].gsub(/^\D*[v\-]/, '').gsub(/^version\s*/i, '').gsub(/\s*stable$/i, '').gsub(/\s*-RELEASE$/i, '') }
+    versions = items.map { |d| d['tag_name'].gsub(/^\D*[v-]/, '').gsub(/^version\s*/i, '').gsub(/\s*stable$/i, '').gsub(/\s*-RELEASE$/i, '') }
   elsif type == 'tag'
-    versions = releases_or_tags.map { |d| d['name'].gsub(/^\D*[v\-]/, '').gsub(/^version\s*/i, '').gsub(/\s*stable$/i, '').gsub(/\s*-RELEASE$/i, '') }
+    versions = releases_or_tags.map { |d| d['name'].gsub(/^\D*[v-]/, '').gsub(/^version\s*/i, '').gsub(/\s*stable$/i, '').gsub(/\s*-RELEASE$/i, '') }
   else
     raise ArgumentError, "Invalid 'type' parameter. Supported values are 'release' and 'tag'."
   end

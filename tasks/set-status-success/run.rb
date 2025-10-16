@@ -31,4 +31,3 @@ Octokit.create_status(
   description: GITHUB_STATUS_DESCRIPTION,
   target_url: PIPELINE_URI
 )
-

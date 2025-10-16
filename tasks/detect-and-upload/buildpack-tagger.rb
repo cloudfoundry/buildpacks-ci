@@ -25,13 +25,13 @@ class BuildpackTagger
       end
       puts "Existing tags: #{existing_tags}"
 
-      Dir.mkdir("../buildpack-artifacts/uncached")
-      Dir.mkdir("../buildpack-artifacts/cached")
+      Dir.mkdir('../buildpack-artifacts/uncached')
+      Dir.mkdir('../buildpack-artifacts/cached')
 
       if existing_tags.include? tag_to_add
         puts "Tag #{tag_to_add} already exists"
-        uncached_buildpack = Dir["../pivotal-buildpack/*.zip"].first
-        cached_buildpack = Dir["../pivotal-buildpack-cached/*.zip"].first
+        uncached_buildpack = Dir['../pivotal-buildpack/*.zip'].first
+        cached_buildpack = Dir['../pivotal-buildpack-cached/*.zip'].first
 
         output_uncached = File.join('..', 'buildpack-artifacts', 'uncached', File.basename(uncached_buildpack))
         output_cached = File.join('..', 'buildpack-artifacts', 'cached', File.basename(cached_buildpack))
@@ -42,7 +42,7 @@ class BuildpackTagger
         stack = ENV.fetch('CF_STACK')
         stack_flag = stack == 'any' ? '--any-stack' : "--stack=#{stack}"
         puts `git tag #{tag_to_add}`
-        if File.exists?('compile-extensions')
+        if File.exist?('compile-extensions')
           system(<<~EOF)
             export BUNDLE_GEMFILE=cf.Gemfile
             if [ ! -z "$RUBYGEM_MIRROR" ]; then
@@ -62,8 +62,8 @@ class BuildpackTagger
             bundle exec buildpack-packager --uncached #{stack_flag}
             bundle exec buildpack-packager --cached #{stack_flag}
           EOF
-        elsif File.exists?('./scripts/.util/tools.sh')
-          system("bash", "-c", <<~EOF)
+        elsif File.exist?('./scripts/.util/tools.sh')
+          system('bash', '-c', <<~EOF)
             . ./scripts/.util/tools.sh
             util::tools::buildpack-packager::install --directory "${PWD}/.bin"
             ./.bin/buildpack-packager build --cached=false #{stack_flag}
@@ -79,12 +79,12 @@ class BuildpackTagger
 
         timestamp = `date +%s`.strip
 
-        Dir["*.zip"].map do |filename|
+        Dir['*.zip'].map do |filename|
           filename.match(/(.*)_buildpack(-cached)?.*-v(.*).zip/) do |match|
             language = match[1]
             cached = match[2]
             version = match[3]
-            stack_string = stack != 'any' ? "-#{stack}" : ''
+            stack_string = stack == 'any' ? '' : "-#{stack}"
             dir = cached ? 'cached' : 'uncached'
 
             output_file = "../buildpack-artifacts/#{dir}/#{language}_buildpack#{cached}#{stack_string}-v#{version}+#{timestamp}.zip"
@@ -94,7 +94,7 @@ class BuildpackTagger
         end
 
         Dir.chdir('../buildpack-artifacts') do
-          Dir["*/*.zip"].each do |buildpack|
+          Dir['*/*.zip'].each do |buildpack|
             md5sum = `md5sum #{buildpack}`
             sha256sum = `sha256sum #{buildpack}`
             puts "md5: #{md5sum}"

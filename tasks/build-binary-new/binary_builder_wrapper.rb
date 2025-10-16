@@ -13,7 +13,7 @@ class BinaryBuilderWrapper
                    "--sha256=#{source_input.sha256}"
                  end
 
-    version_prefix = (%w[dep glide godep].include? source_input.name) ? 'v' : ''
+    version_prefix = %w[dep glide godep].include?(source_input.name) ? 'v' : ''
 
     Dir.chdir(@base_dir) do
       if extension_file && extension_file != ''

@@ -53,6 +53,6 @@ class PHPExtensionsHelper
   end
 
   def write_yml(extension_file)
-    File.open(extension_file, 'w') { |f| f.write @base_yml.to_yaml }
+    File.write(extension_file, @base_yml.to_yaml)
   end
 end

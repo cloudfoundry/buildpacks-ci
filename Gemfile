@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 source 'https://rubygems.org'
 
 ruby '~> 3.4'
@@ -17,9 +15,9 @@ gem 'rake'
 gem 'rspec'
 gem 'rspec-rerun'
 gem 'rss'
+gem 'rubyzip', require: 'zip'
 gem 'toml'
 gem 'tomlrb'
-gem 'rubyzip', require: 'zip'
 
 group :development do
   gem 'rubocop'

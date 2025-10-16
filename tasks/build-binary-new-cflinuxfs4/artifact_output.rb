@@ -8,7 +8,7 @@ class ArtifactOutput
   end
 
   def move_dependency(name, old_file_path, filename_prefix)
-    content = File.open(old_file_path).read
+    content = File.read(old_file_path)
     sha      = Digest::SHA2.new(256).hexdigest(content)
     filename = "#{filename_prefix}_#{sha[0..7]}.#{ext(old_file_path)}"
     FileUtils.mv(old_file_path, File.join(@base_dir, filename))

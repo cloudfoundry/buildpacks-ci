@@ -1,6 +1,4 @@
 #!/usr/bin/env ruby
-# encoding: utf-8
-
 require 'fileutils'
 require 'open4'
 require 'yaml'
@@ -13,11 +11,9 @@ Dir.glob('*-bosh-release').each do |bosh_release_dir|
 
   ## Bump blobs in bosh release
   Dir.chdir(bosh_release_dir) do
-      ## Clean out existing blobs
+    ## Clean out existing blobs
     system(%(rm -rf blobs) || raise("can't remove blobs"))
-    if File.exist?('config/blobs.yml')
-      File.open('config/blobs.yml', 'w') { |file| file.write("---\n{}") }
-    end
+    File.write('config/blobs.yml', "---\n{}") if File.exist?('config/blobs.yml')
 
     pid, stdin, stdout, stderr = Open4.popen4 "bosh2 blobs | grep -- '-buildpack/.*buildpack' | awk '{print $1}'"
     stdin.close
@@ -38,14 +34,14 @@ Dir.glob('*-bosh-release').each do |bosh_release_dir|
   end
 
   release_replacement = {
-    "path" => "/releases/name=#{release_name}",
-    "type" => "replace",
-    "value" => {
-      "name" => release_name,
-      "version" => version
+    'path' => "/releases/name=#{release_name}",
+    'type' => 'replace',
+    'value' => {
+      'name' => release_name,
+      'version' => version
     }
   }
   replacements << release_replacement
 end
 
-File.open("bump-buildpacks-opsfile/opsfile.yml", 'w') {|f| f.write replacements.to_yaml }
+File.write('bump-buildpacks-opsfile/opsfile.yml', replacements.to_yaml)

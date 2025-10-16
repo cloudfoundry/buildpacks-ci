@@ -6,9 +6,9 @@ require 'json'
 
 def send_dispatch(name, version, jsonData, token)
   jsonStr = JSON.generate(jsonData).gsub('"', '\"')
-  uri = URI.parse("https://api.github.com/repos/cloudfoundry/buildpacks-github-config/dispatches")
+  uri = URI.parse('https://api.github.com/repos/cloudfoundry/buildpacks-github-config/dispatches')
   request = Net::HTTP::Post.new(uri)
-  request["Authorization"] = "token #{token}"
+  request['Authorization'] = "token #{token}"
   request.body = "{
                 \"event_type\": \"new-version-line\",
                 \"client_payload\":{
@@ -18,11 +18,11 @@ def send_dispatch(name, version, jsonData, token)
                 }
               }"
   req_options = {
-    use_ssl: uri.scheme == "https",
+    use_ssl: uri.scheme == 'https'
   }
 
   response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
     http.request(request)
   end
-  response.value()
+  response.value
 end

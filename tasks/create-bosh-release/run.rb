@@ -2,8 +2,8 @@
 
 require_relative 'buildpack-bosh-release-updater'
 
-versions = Dir["buildpack-zip*/version"].map do |buildpack_version_file|
-  File.read(buildpack_version_file).gsub(/[\+#].*$/, '').gsub('Java Buildpack ', '')
+versions = Dir['buildpack-zip*/version'].map do |buildpack_version_file|
+  File.read(buildpack_version_file).gsub(/[+#].*$/, '').gsub('Java Buildpack ', '')
 end.uniq
 
 if versions.size != 1
@@ -24,7 +24,7 @@ Dir.chdir(ENV.fetch('RELEASE_DIR')) do
 
   if release_tags.include?(version)
     puts "BOSH release version #{version} already exists"
-    puts "exiting"
+    puts 'exiting'
     exit 1
   end
 
@@ -35,9 +35,10 @@ Dir.chdir(ENV.fetch('RELEASE_DIR')) do
     assume_role_arn,
     language,
     release_name,
-    release_tarball_dir)
+    release_tarball_dir
+  )
 
   updater.run!
 end
 
-system "rsync -a release/ release-artifacts" or exit 1
+system 'rsync -a release/ release-artifacts' or exit 1

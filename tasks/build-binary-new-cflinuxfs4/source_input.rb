@@ -18,7 +18,7 @@ class SourceInput
   end
 
   def self.from_file(source_file)
-    data = JSON.parse(File.open(source_file).read)
+    data = JSON.parse(File.read(source_file))
     if data['name']
       SourceInput.new(
         data['name'] || '',

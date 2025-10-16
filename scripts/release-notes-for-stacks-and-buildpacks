@@ -1,5 +1,5 @@
 #! /usr/bin/env ruby
-# encoding: utf-8
+
 #
 # This script is intended to be used to generate `cf-release` release notes for the buildpacks.
 #
@@ -13,7 +13,8 @@ require 'getoptlong'
 require 'json'
 require 'version_sorter'
 
-module Enumerable # reopening
+# reopening
+module Enumerable
   def version_sort
     VersionSorter.sort self
   end
@@ -74,6 +75,7 @@ class ReleaseNoteGenerator
     headers = ("-H 'Authorization: token #{token}'" if token)
     result = `curl -s #{headers} https://api.github.com#{path}`
     raise result if result =~ /API rate limit exceeded/
+
     JSON.parse result
   end
 
@@ -98,15 +100,15 @@ class ReleaseNoteGenerator
   end
 
   def print_release_notes_for(thing, v1, v2)
-    releases_path = sprintf RELEASES_API_FMT, thing
+    releases_path = format RELEASES_API_FMT, thing
 
     releases_data = curl_github_api releases_path
 
     releases = releases_data.map do |release|
       release['tag_name']
     end.version_sort.reverse
-    raise "couldn't find #{thing} #{v1} in release notes" unless v1_index = releases.index(v1)
-    raise "couldn't find #{thing} #{v2} in release notes" unless v2_index = releases.index(v2)
+    raise "couldn't find #{thing} #{v1} in release notes" unless (v1_index = releases.index(v1))
+    raise "couldn't find #{thing} #{v2} in release notes" unless (v2_index = releases.index(v2))
 
     puts
     puts "### #{thing}"
@@ -117,7 +119,7 @@ class ReleaseNoteGenerator
     (v2_index...v1_index).each do |v_index|
       release = releases_data[v_index]
       release_tag = release['tag_name']
-      release_url = sprintf RELEASE_FMT, thing, release_tag
+      release_url = format RELEASE_FMT, thing, release_tag
 
       puts
       puts "#### [#{release_tag}](#{release_url})"
@@ -131,7 +133,7 @@ class ReleaseNoteGenerator
 
   def all_keys(hash_of_hashes)
     keys = []
-    hash_of_hashes.keys.each do |key|
+    hash_of_hashes.each_key do |key|
       keys += hash_of_hashes[key].keys
     end
     keys.sort.uniq
@@ -153,19 +155,16 @@ class ReleaseNoteGenerator
     end
   end
 
-  def examine_blobs_for_tags_and_filter(tag1, tag2, regex, &_block)
+  def examine_blobs_for_tags_and_filter(tag1, tag2, regex, &)
     Dir.chdir path do
       outputs = { tag1 => get_blobs(tag1, regex), tag2 => get_blobs(tag2, regex) }
 
-      versions = outputs.inject({}) do |versions, tag_output|
+      outputs.each_with_object({}) do |tag_output, versions|
         tag, output = *tag_output
 
-        versions[tag] = output.inject({}) do |versions, line|
+        versions[tag] = output.each_with_object({}) do |line, versions|
           yield versions, line
-          versions
         end
-
-        versions
       end
     end
   end

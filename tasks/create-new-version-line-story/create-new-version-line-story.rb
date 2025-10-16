@@ -2,24 +2,20 @@
 require 'fileutils'
 require 'json'
 require 'yaml'
-require_relative './dispatch.rb'
+require_relative 'dispatch'
 
 class SemanticVersion
-  attr_reader :major
-  attr_reader :minor
-  attr_reader :patch
+  attr_reader :major, :minor, :patch
 
   def initialize(original)
     @original = original
-    m = @original.match /^v?(\d+)\.(\d+)(\.(\d+))?(.+)?/
-    if m
-      @major = m[1].to_i
-      @minor = m[2].to_i
-      @patch = m[4] ? m[4].to_i : 0
-      @metadata = m[5] ? m[5] : nil
-    else
-      raise ArgumentError.new("Not a semantic version: #{@original.inspect}")
-    end
+    m = @original.match(/^v?(\d+)\.(\d+)(\.(\d+))?(.+)?/)
+    raise ArgumentError, "Not a semantic version: #{@original.inspect}" unless m
+
+    @major = m[1].to_i
+    @minor = m[2].to_i
+    @patch = m[4] ? m[4].to_i : 0
+    @metadata = m[5] || nil
   end
 end
 
@@ -42,18 +38,18 @@ class SemanticVersionFilter
 end
 
 BUILDPACKS = ENV['BUILDPACKS']
-                 .split(' ')
-                 .compact
-                 .map {|bp| "#{bp}-buildpack" }
+             .split
+             .compact
+             .map { |bp| "#{bp}-buildpack" }
 
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
-data = JSON.parse(open('source/data.json').read)
+data = JSON.parse(File.read('source/data.json'))
 name = data.dig('source', 'name')
 version = data.dig('version', 'ref')
 
-ENV['EXISTING_VERSION_LINES'].split(' ').each do |line|
+ENV['EXISTING_VERSION_LINES'].split.each do |line|
   semantic_version = SemanticVersion.new(version)
   filter = SemanticVersionFilter.new(line)
   if filter.match(semantic_version)
@@ -62,8 +58,8 @@ ENV['EXISTING_VERSION_LINES'].split(' ').each do |line|
   end
 end
 
-puts "Sending dispatch to create github issue..."
-send_dispatch(name, version, data, ENV['GITHUB_TOKEN'])
+puts 'Sending dispatch to create github issue...'
+send_dispatch(name, version, data, ENV.fetch('GITHUB_TOKEN', nil))
 
 # Notes on depen version line additions:
 # General stucture of dependencies is `dep.buildpacks.[].lines[].`
@@ -76,4 +72,3 @@ send_dispatch(name, version, data, ENV['GITHUB_TOKEN'])
 # ```
 # php:
 # - Deprecations occur 3 years after the date the dep is released
-

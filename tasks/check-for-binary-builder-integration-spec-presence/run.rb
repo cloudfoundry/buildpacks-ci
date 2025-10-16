@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 Dir.chdir('binary-builder') do
-  specs_on_filesystem = Dir['spec/integration/*_spec.rb'].map{|file| File.basename(file) }
+  specs_on_filesystem = Dir['spec/integration/*_spec.rb'].map { |file| File.basename(file) }
   specs_in_pipeline_yaml = ENV.fetch('SPEC_NAMES').split(',').map { |name| "#{name}_spec.rb" }
 
   difference_between_lists = specs_on_filesystem - specs_in_pipeline_yaml
@@ -16,9 +16,8 @@ Dir.chdir('binary-builder') do
     puts 'the pipeline before this task will pass'
     puts
     puts 'The missing specs are:'
-    puts '    ' + difference_between_lists.join(", ")
+    puts "    #{difference_between_lists.join(', ')}"
 
     exit 1
   end
 end
-

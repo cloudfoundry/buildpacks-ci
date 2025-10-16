@@ -1,9 +1,7 @@
-# encoding: utf-8
 require 'digest'
 require 'fileutils'
 
 class BuildpackFinalizer
-
   def initialize(artifact_dir, version, buildpack_repo_dir, uncached_buildpack_dirs)
     @artifact_dir = artifact_dir
     @version = version
@@ -27,8 +25,8 @@ class BuildpackFinalizer
 
   def add_changelog
     Dir.chdir(@buildpack_repo_dir) do
-      changes       = File.read('CHANGELOG')
-      recent_changes = changes.split(/^v[0-9\.]+.*?=+$/m)[1].strip
+      changes = File.read('CHANGELOG')
+      recent_changes = changes.split(/^v[0-9.]+.*?=+$/m)[1].strip
 
       File.write(@recent_changes_file, "#{recent_changes}\n")
     end
@@ -36,9 +34,9 @@ class BuildpackFinalizer
 
   def add_dependencies
     Dir.chdir(@buildpack_repo_dir) do
-      go_mod_file = File.file?("go.mod")
+      go_mod_file = File.file?('go.mod')
       if go_mod_file
-        Dir.chdir("/tmp") do
+        Dir.chdir('/tmp') do
           `go install github.com/cloudfoundry/libbuildpack/packager/buildpack-packager@latest`
         end
         File.write(@recent_changes_file, `buildpack-packager summary`, mode: 'a')
@@ -62,7 +60,7 @@ class BuildpackFinalizer
       Dir.chdir(uncached_buildpack_dir) do
         Dir.glob('*.zip').map do |filename|
           filename.match(/(.*)_buildpack(-.*)?-v#{@version}\+.*.zip/) do |match|
-            _, language, stack_string  = match.to_a
+            _, language, stack_string = match.to_a
             new_filename = "#{language}-buildpack#{stack_string}-v#{@version}.zip"
             new_path     = File.join(@artifact_dir, new_filename)
 
