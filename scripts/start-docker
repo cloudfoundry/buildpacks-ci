@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-## Copied from https://github.com/concourse/docker-image-resource/blob/656e99184ed2dd78c7a615cd6d00db20e29405e2/assets/common.sh#L44
+## Based on https://github.com/concourse/docker-image-resource/blob/master/assets/common.sh
+## Simplified for cgroup v2 environments
 
 set -o errexit
 set -o nounset
@@ -9,89 +10,14 @@ LOG_FILE=${LOG_FILE:-/tmp/docker.log}
 SKIP_PRIVILEGED=${SKIP_PRIVILEGED:-false}
 
 function util::docker::cgroups::sanitize() {
-  mkdir -p /sys/fs/cgroup
-  mountpoint -q /sys/fs/cgroup || \
-    mount -t tmpfs -o uid=0,gid=0,mode=0755 cgroup /sys/fs/cgroup
-
-  mount -o remount,rw /sys/fs/cgroup
-
-  # shellcheck disable=SC2162,SC2034
-  sed -e 1d /proc/cgroups | while read sys hierarchy num enabled; do
-    if [ "$enabled" != "1" ]; then
-      # subsystem disabled; skip
-      continue
-    fi
-
-    # shellcheck disable=SC2002
-    grouping="$(cat /proc/self/cgroup | cut -d: -f2 | grep "\\<$sys\\>")"
-    if [ -z "$grouping" ]; then
-      # subsystem not mounted anywhere; mount it on its own
-      grouping="$sys"
-    fi
-
-    mountpoint="/sys/fs/cgroup/$grouping"
-
-    mkdir -p "$mountpoint"
-
-    # clear out existing mount to make sure new one is read-write
-    if mountpoint -q "$mountpoint"; then
-      umount "$mountpoint"
-    fi
-
-    mount -n -t cgroup -o "$grouping" cgroup "$mountpoint"
-
-    if [ "$grouping" != "$sys" ]; then
-      if [ -L "/sys/fs/cgroup/$sys" ]; then
-        rm "/sys/fs/cgroup/$sys"
-      fi
-
-      ln -s "$mountpoint" "/sys/fs/cgroup/$sys"
-    fi
-  done
-
-  if ! test -e /sys/fs/cgroup/systemd; then
-    mkdir -p /sys/fs/cgroup/systemd
-    mount -t cgroup -o none,name=systemd cgroup /sys/fs/cgroup/systemd
-  fi
-}
-
-function util::docker::devicecontrol::permit() {
-  local devices_mount_info
-  devices_mount_info="$(grep devices < /proc/self/cgroup)"
-
-  if [ -z "$devices_mount_info" ]; then
-    # cgroups not set up; must not be in a container
-    return
+  if [ -e /sys/fs/cgroup/cgroup.controllers ]; then
+    echo "cgroup v2 detected"
+    return 0
   fi
 
-  local devices_subsystems
-  devices_subsystems="$(echo "$devices_mount_info" | cut -d: -f2)"
-
-  local devices_subdir
-  devices_subdir="$(echo "$devices_mount_info" | cut -d: -f3)"
-
-  if [ "$devices_subdir" = "/" ]; then
-    # we're in the root devices cgroup; must not be in a container
-    return
-  fi
-
-  cgroup_dir=/tmp/devices-cgroup
-
-  if [ ! -e ${cgroup_dir} ]; then
-    # mount our container's devices subsystem somewhere
-    mkdir ${cgroup_dir}
-  fi
-
-  if ! mountpoint -q ${cgroup_dir}; then
-    if ! mount -t cgroup -o "$devices_subsystems" none ${cgroup_dir}; then
-      return 1
-    fi
-  fi
-
-  # permit our cgroup to do everything with all devices
-  # ignore failure in case something has already done this; echo appears to
-  # return EINVAL, possibly because devices this affects are already in use
-  echo a > "${cgroup_dir}${devices_subdir}/devices.allow" || true
+  echo "ERROR: cgroup v1 detected but no longer supported"
+  echo "This infrastructure requires cgroup v2 (Ubuntu 22.04+/Kubernetes 1.25+)"
+  exit 1
 }
 
 function util::docker::start() {
@@ -107,7 +33,6 @@ function util::docker::start() {
   if [ "$SKIP_PRIVILEGED" = "false" ]; then
     util::docker::cgroups::sanitize
 
-    # check for /proc/sys being mounted readonly, as systemd does
     if grep '/proc/sys\s\+\w\+\s\+ro,' /proc/mounts >/dev/null; then
       mount -o remount,rw /proc/sys
     fi
@@ -117,29 +42,6 @@ function util::docker::start() {
   local server_args="--mtu 1200"
 
   mkdir -p /scratch/docker
-
-  if command -v mkfs.btrfs > /dev/null; then
-    util::docker::devicecontrol::permit
-
-    local loopdevice dockerroot
-    rand="${RANDOM}"
-    loopdevice="/dev/loop${rand}"
-    dockerroot="/tmp/docker-root-${rand}"
-
-    if [[ ! -e "${loopdevice}" ]]; then
-      echo "Allocating 25GB scratch filesystem for the docker daemon"
-      dd if=/dev/zero of="${dockerroot}" bs=1024 count=26214400
-      mknod "${loopdevice}" b 7 "${rand}"
-      losetup "${loopdevice}" "${dockerroot}"
-    fi
-
-    mkfs.btrfs "${dockerroot}"
-    mount "${dockerroot}" /scratch/docker
-    echo "Scratch filesystem mounted at /scratch/docker"
-
-    mkdir -p /etc/docker
-    echo '{ "storage-driver": "btrfs" }' > /etc/docker/daemon.json
-  fi
 
   # shellcheck disable=SC2086
   dockerd --data-root /scratch/docker ${server_args} >$LOG_FILE 2>&1 &
@@ -156,20 +58,5 @@ function util::docker::start() {
 
 function util::docker::stop() {
   echo "stopping docker..."
-  kill "$(cat /tmp/docker.pid)"
-
-  while [[ "$(grep /scratch/docker < /proc/mounts)" != "" ]]; do
-    set +e
-    umount -A /scratch/docker
-    sleep 1
-    set -e
-  done
-
-  shopt -s nullglob
-    for device in /dev/loop*; do
-      echo "${device}" | grep "loop[[:digit:]]" | xargs -n1 rm
-    done
-  shopt -u nullglob
-
-  find /tmp -type f -name 'docker-root-*' -delete
+  kill "$(cat /tmp/docker.pid)" 2>/dev/null || true
 }
