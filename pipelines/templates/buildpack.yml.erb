@@ -1,19 +1,19 @@
 <% buildpacks = {
   'apt' => {
-    'stacks' => %w(cflinuxfs3 cflinuxfs4)
+    'stacks' => %w(cflinuxfs4)
   },
   'binary' => {
-    'stacks' => %w(cflinuxfs3 cflinuxfs4 windows),
+    'stacks' => %w(cflinuxfs4 windows),
     'product_slug' => 'binary-buildpack',
     'skip_docker_start' => true,
   },
   'dotnet-core' => {
-    'stacks' => %w(cflinuxfs3 cflinuxfs4),
+    'stacks' => %w(cflinuxfs4),
     'product_slug' => 'dotnet-core-buildpack',
     'compute_instance_count' => 3
   },
   'go' => {
-    'stacks' => %w(cflinuxfs3 cflinuxfs4),
+    'stacks' => %w(cflinuxfs4),
     'product_slug' => 'go-buildpack',
     'compute_instance_count' => 3
   },
@@ -23,35 +23,35 @@
     'product_slug' => 'hwc-buildpack'
   },
   'nginx' => {
-    'stacks' => %w(cflinuxfs3 cflinuxfs4),
+    'stacks' => %w(cflinuxfs4),
     'product_slug' => 'nginx-buildpack',
   },
   'nodejs' => {
-    'stacks' => %w(cflinuxfs3 cflinuxfs4),
+    'stacks' => %w(cflinuxfs4),
     'product_slug' => 'nodejs-buildpack',
   },
   'php' => {
-    'stacks' => %w(cflinuxfs3 cflinuxfs4),
+    'stacks' => %w(cflinuxfs4),
     'product_slug' => 'php-buildpack',
     'compile_extensions' => true,
   },
   'python' => {
-    'stacks' => %w(cflinuxfs3 cflinuxfs4),
+    'stacks' => %w(cflinuxfs4),
     'product_slug' => 'python-buildpack',
   },
   'r' => {
-    'stacks' => %w(cflinuxfs3 cflinuxfs4),
+    'stacks' => %w(cflinuxfs4),
     'product_slug' => 'r-buildpack',
     'skip_brats' => true,
     'skip_docker_start' => true,
   },
   'ruby' => {
-    'stacks' => %w(cflinuxfs3 cflinuxfs4),
+    'stacks' => %w(cflinuxfs4),
     'product_slug' => 'ruby-buildpack',
     'compute_instance_count' => 3
   },
   'staticfile' => {
-    'stacks' => %w(cflinuxfs3 cflinuxfs4),
+    'stacks' => %w(cflinuxfs4),
     'product_slug' => 'staticfile-buildpack',
   }
 } %>
@@ -77,17 +77,6 @@ resource_types:
 resources: ############################################################################################################
 ## Git ##
 
-  - name: buildpack-develop
-    type: git
-    webhook_token: ob0aigh3
-    source:
-      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-      branch: develop
-      ignore_paths:
-        - VERSION
-        - CHANGELOG
-
   - name: cf-deployment
     type: git
     source:
@@ -98,7 +87,7 @@ resources: #####################################################################
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
       private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-      branch: develop
+      branch: master
       paths:
         - VERSION
         - CHANGELOG
@@ -232,13 +221,13 @@ jobs: ##########################################################################
       - in_parallel:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-develop
+          resource: buildpack-master
           trigger: true
       - do:
         - task: check-modules
           file: buildpacks-ci/tasks/check-php-modules-in-manifest/task.yml
 <% end %>
-  - name: specs-unit-develop
+  - name: specs-unit-master
     serial: true
     public: true
     plan:
@@ -246,7 +235,7 @@ jobs: ##########################################################################
         - in_parallel:
           - get: buildpacks-ci
           - get: buildpack
-            resource: buildpack-develop
+            resource: buildpack-master
 <% if language == "php" %>
             passed: [ ensure-manifest-has-modules ]
 <% end %>
@@ -374,12 +363,12 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: env-repo
         - get: buildpack
-          resource: buildpack-develop
+          resource: buildpack-master
           trigger: true
           passed:
-          - specs-unit-develop
+          - specs-unit-master
         - get: repo
-          resource: buildpack-develop
+          resource: buildpack-master
         - get: cf-deployment
       - task: redeploy
         file: buildpacks-ci/tasks/cf/redeploy/task.yml
@@ -473,7 +462,7 @@ jobs: ##########################################################################
       - do:
         - get: buildpacks-ci
         - get: repo
-          resource: buildpack-develop
+          resource: buildpack-master
           trigger: true
           passed:
 <% relevant_stacks = buildpacks[language]['stacks'] %>
@@ -505,7 +494,7 @@ jobs: ##########################################################################
           GITHUB_ACCESS_TOKEN: ((buildpacks-github-token))
           GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
           GITHUB_STATUS_CONTEXT: 'buildpacks-ci/passed-dev-specs'
-          GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI develop specs passed'
+          GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI master specs passed'
           PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
   - name: update-libbuildpack
@@ -517,7 +506,7 @@ jobs: ##########################################################################
         - get: libbuildpack
           trigger: true
         - get: buildpack
-          resource: buildpack-develop
+          resource: buildpack-master
       - task: update-libbuildpack
         file: buildpacks-ci/tasks/update-libbuildpack/task.yml
         <% if language == "php" %>
@@ -528,7 +517,7 @@ jobs: ##########################################################################
           DOCKER_START: true
           <% end %>
           LANGUAGE: <%= language %>
-      - put: buildpack-develop
+      - put: buildpack-master
         params:
           repository: buildpack
           rebase: true
@@ -542,11 +531,11 @@ jobs: ##########################################################################
         - get: compile-extensions
           trigger: true
         - get: buildpack
-          resource: buildpack-develop
+          resource: buildpack-master
       - task: update-compile-extensions
         file: buildpacks-ci/tasks/update-compile-extensions/task.yml
         params: { RUBYGEM_MIRROR: {{rubygem-mirror}}  }
-      - put: buildpack-develop
+      - put: buildpack-master
         params:
           repository: buildpack-artifacts
           rebase: true
@@ -560,7 +549,7 @@ jobs: ##########################################################################
           resource: buildpack-packager
           trigger: true
         - get: repo-with-gemfile
-          resource: buildpack-develop
+          resource: buildpack-master
       - task: update-buildpack-packager
         file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
         params:
@@ -568,7 +557,7 @@ jobs: ##########################################################################
           GEM_NAME: buildpack-packager
           GEM_GIT_REPOSITORY: {{buildpack-packager-git-uri-public}}
           GEMFILE_NAME: cf.Gemfile
-      - put: buildpack-develop
+      - put: buildpack-master
         params:
           repository: repo-with-gemfile-artifacts
           rebase: true

@@ -145,11 +145,6 @@ resources:
   source: {repository: cloudfoundry/<%= stack %>}
 <% end %>
 
-- name: cflinuxfs3-dev-image
-  type: docker-image
-  source:
-    repository: cfbuildpacks/cflinuxfs3-dev
-
 <% dependencies.values.map{|dep| dep['buildpacks'].keys}.flatten.uniq.each do |buildpack|
 branch = 'master'
 private_key = '((cf-buildpacks-eng-github-ssh-key.private_key))'
@@ -220,7 +215,6 @@ jobs:
 <% dependencies.each do |dep_name, dep| %>
 <%
 skipped_version_lines_fs4 = dep['skip_lines_cflinuxfs4'] ? dep['skip_lines_cflinuxfs4'] : []
-skipped_version_lines_fs3 = dep['skip_lines_cflinuxfs3'] ? dep['skip_lines_cflinuxfs3'] : []
 version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version_lines(bp['lines'], ['latest'])}
 %>
 <% if is_multiline?(dep) %>
@@ -291,11 +285,6 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
 
   <%
   specific_stack = cflinuxfs4_build_dependencies.include?(dep_name.downcase) ? stacks : [stacks.last]
-  if dep_name.downcase == 'php'
-    specific_stack = specific_stack - ['cflinuxfs3'] + ['cflinuxfs3-dev']
-  elsif dep_name.downcase == 'bundler'
-    specific_stack = ['cflinuxfs4']
-  end
   %>
 - name: build-<%= dep_name.downcase %>-<%= line.downcase %>
   serial: true
@@ -317,12 +306,12 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
     - get: <%= stack %>-image
   <% end %>
     - get: builds
-  - in_parallel:
   <%
   build_stacks = dep['any_stack'] ? ['any-stack'] : specific_stack
   build_stacks = build_stacks - ['cflinuxfs4'] if skipped_version_lines_fs4.map(&:downcase).include?(line.downcase)
-  build_stacks = build_stacks - ['cflinuxfs3'] if skipped_version_lines_fs3.map(&:downcase).include?(line.downcase)
   %>
+  <% if build_stacks.any? %>
+  - in_parallel:
   <% build_stacks.each do |stack| %>
     - do:
       - task: build-binary-<%= stack %>
@@ -331,18 +320,25 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
         output_mapping: {artifacts: <%= stack %>-artifacts, builds-artifacts: <%= stack %>-builds-metadata}
         params:
           STACK: <%= stack %>
+    <% if dep['third_party_hosted'] %>
+      - put: builds-metadata-<%= stack %>
+        resource: builds
+        params:
+          repository: <%= stack %>-builds-metadata
+          rebase: true
+    <% else %>
       - in_parallel:
-    <% unless dep['third_party_hosted'] %>
         - put: buildpacks-bucket-<%= dep_name %>-<%= stack %>
           resource: buildpacks-bucket-<%= dep_name %>
           params:
             file: <%= stack %>-artifacts/<%= dep_name == "nginx-static" ? "nginx" : dep_name %>*
-    <% end %>
         - put: builds-metadata-<%= stack %>
           resource: builds
           params:
             repository: <%= stack %>-builds-metadata
             rebase: true
+    <% end %>
+  <% end %>
   <% end %>
 <% end %>
 
