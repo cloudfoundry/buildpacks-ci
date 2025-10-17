@@ -317,12 +317,13 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
     - get: <%= stack %>-image
   <% end %>
     - get: builds
-  - in_parallel:
   <%
   build_stacks = dep['any_stack'] ? ['any-stack'] : specific_stack
   build_stacks = build_stacks - ['cflinuxfs4'] if skipped_version_lines_fs4.map(&:downcase).include?(line.downcase)
   build_stacks = build_stacks - ['cflinuxfs3'] if skipped_version_lines_fs3.map(&:downcase).include?(line.downcase)
   %>
+  <% if build_stacks.any? %>
+  - in_parallel:
   <% build_stacks.each do |stack| %>
     - do:
       - task: build-binary-<%= stack %>
@@ -331,18 +332,25 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
         output_mapping: {artifacts: <%= stack %>-artifacts, builds-artifacts: <%= stack %>-builds-metadata}
         params:
           STACK: <%= stack %>
+    <% if dep['third_party_hosted'] %>
+      - put: builds-metadata-<%= stack %>
+        resource: builds
+        params:
+          repository: <%= stack %>-builds-metadata
+          rebase: true
+    <% else %>
       - in_parallel:
-    <% unless dep['third_party_hosted'] %>
         - put: buildpacks-bucket-<%= dep_name %>-<%= stack %>
           resource: buildpacks-bucket-<%= dep_name %>
           params:
             file: <%= stack %>-artifacts/<%= dep_name == "nginx-static" ? "nginx" : dep_name %>*
-    <% end %>
         - put: builds-metadata-<%= stack %>
           resource: builds
           params:
             repository: <%= stack %>-builds-metadata
             rebase: true
+    <% end %>
+  <% end %>
   <% end %>
 <% end %>
 
