@@ -10,18 +10,18 @@ release_dir=rootfs-release
 version="212.0.$(date +"%s")"
 
 pushd $release_dir
-  for name in $( bosh2 blobs | grep -- "rootfs/$STACK-*" | awk '{print $1}' ); do
-    bosh2 remove-blob "$name"
+  for name in $( bosh blobs | grep -- "rootfs/$STACK-*" | awk '{print $1}' ); do
+    bosh remove-blob "$name"
   done
 
   blob="../stack-s3/*.tar.gz"
 
   # shellcheck disable=SC2086
-  bosh2 -n add-blob $blob "rootfs/$(basename $blob)"
+  bosh -n add-blob $blob "rootfs/$(basename $blob)"
 
   echo "Running 'bosh create release' in $release_dir"
 
-  bosh2 create-release --force --tarball "dev_releases/$STACK/$STACK-$version.tgz" --name "$STACK" --version "${version}"
+  bosh create-release --force --tarball "dev_releases/$STACK/$STACK-$version.tgz" --name "$STACK" --version "${version}"
 popd
 
 cat <<EOF > ${release_dir}/use-dev-release-opsfile.yml
