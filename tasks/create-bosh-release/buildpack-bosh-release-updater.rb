@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
 
 require 'yaml'
+require 'date'
+require 'time'
 require_relative '../../lib/git-client'
-
 
 class BuildpackBOSHReleaseUpdater
   def initialize(version, access_key_id, secret_access_key, assume_role_arn, language, release_name, release_tarball_dir)
@@ -24,26 +25,26 @@ class BuildpackBOSHReleaseUpdater
   end
 
   def write_private_yml
-    puts "creating private.yml"
+    puts 'creating private.yml'
 
-    if @assume_role_arn && !@assume_role_arn.empty?
-    private_yml = <<~YAML
-                     ---
-                     blobstore:
-                       options:
-                         access_key_id: #{@access_key_id}
-                         secret_access_key: #{@secret_access_key}
-                         assume_role_arn: #{@assume_role_arn}
-                     YAML
-    else
-    private_yml = <<~YAML
-                     ---
-                     blobstore:
-                       options:
-                         access_key_id: #{@access_key_id}
-                         secret_access_key: #{@secret_access_key}
-                     YAML
-    end
+    private_yml = if @assume_role_arn && !@assume_role_arn.empty?
+                    <<~YAML
+                      ---
+                      blobstore:
+                        options:
+                          access_key_id: #{@access_key_id}
+                          secret_access_key: #{@secret_access_key}
+                          assume_role_arn: #{@assume_role_arn}
+                    YAML
+                  else
+                    <<~YAML
+                      ---
+                      blobstore:
+                        options:
+                          access_key_id: #{@access_key_id}
+                          secret_access_key: #{@secret_access_key}
+                    YAML
+                  end
 
     File.write('config/private.yml', private_yml)
   end
@@ -51,7 +52,7 @@ class BuildpackBOSHReleaseUpdater
   def delete_old_blobs
     blobs = YAML.load_file('config/blobs.yml', permitted_classes: [Date, Time]) || {}
 
-    blobs.keys.each do |key|
+    blobs.each_key do |key|
       blobs.delete(key) if key.include?('buildpack')
     end
 
@@ -64,7 +65,7 @@ class BuildpackBOSHReleaseUpdater
       system "bosh2 -n add-blob #{buildpack_file} #{blob_name}/#{File.basename(buildpack_file.gsub(/\+.*\.zip/, '.zip'))}" or exit 1
     end
 
-    system "bosh2 -n upload-blobs" or exit 1
+    system 'bosh2 -n upload-blobs' or exit 1
 
     GitClient.add_file('config/blobs.yml')
     GitClient.safe_commit("Updating blobs for #{@release_name} at #{@version}")
@@ -74,9 +75,9 @@ class BuildpackBOSHReleaseUpdater
     system "bosh2 -n create-release --final --version #{@version} --name #{@release_name} --tarball #{File.join(@release_tarball_dir, 'release.tgz')} --force" or exit 1
 
     GitClient.add_file("releases/**/*-#{@version}.yml")
-    GitClient.add_file("releases/**/index.yml")
-    GitClient.add_file(".final_builds/**/index.yml")
-    GitClient.add_file(".final_builds/**/**/index.yml")
+    GitClient.add_file('releases/**/index.yml')
+    GitClient.add_file('.final_builds/**/index.yml')
+    GitClient.add_file('.final_builds/**/**/index.yml')
     GitClient.safe_commit("Final release for #{@release_name} at #{@version}")
   end
 

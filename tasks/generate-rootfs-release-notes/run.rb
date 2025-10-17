@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 
+require 'yaml'
+require 'date'
+require 'time'
 require 'octokit'
 require 'open-uri'
 require_relative '../../lib/release-notes-creator'
@@ -10,22 +13,22 @@ new_version = File.read('version/number').strip
 stack = ENV.fetch('STACK')
 ubuntu_version = {
   'cflinuxfs3' => '18.04',
-  'cflinuxfs4' => '22.04',
+  'cflinuxfs4' => '22.04'
 }.fetch(stack) { raise "Unsupported stack: #{stack}" }
 
-stack_repo = ENV['STACK_REPO']
-stack_repo = stack_repo.nil? || stack_repo.empty? ? "cloudfoundry/#{stack}" : stack_repo
+stack_repo = ENV.fetch('STACK_REPO', nil)
+stack_repo = "cloudfoundry/#{stack}" if stack_repo.nil? || stack_repo.empty?
 
 puts "Generating release notes for repo: #{stack_repo}"
 
 receipt_file_name = "receipt.#{stack}.x86_64"
-gh_token = ENV['GITHUB_ACCESS_TOKEN']
+gh_token = ENV.fetch('GITHUB_ACCESS_TOKEN', nil)
 
 if gh_token.nil? || gh_token.empty?
   old_receipt_uri = "https://raw.githubusercontent.com/#{stack_repo}/#{previous_version}/#{receipt_file_name}"
   old_receipt_contents = URI.open(old_receipt_uri).read
 else
-  puts "Using GitHub token to fetch receipt..."
+  puts 'Using GitHub token to fetch receipt...'
   begin
     client = Octokit::Client.new(access_token: gh_token)
     encoded_contents = client.contents(stack_repo, path: receipt_file_name, ref: previous_version)
@@ -65,4 +68,4 @@ Dir.chdir(robots_cve_dir) do
   GitClient.safe_commit(commit_message)
 end
 
-system "rsync -a new-cves/ new-cves-artifacts"
+system 'rsync -a new-cves/ new-cves-artifacts'

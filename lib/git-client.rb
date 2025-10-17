@@ -18,7 +18,7 @@ class GitClient
       command = "git rev-parse HEAD~#{number_commits_before_head}"
       stdout_str, stderr_str, status = Open3.capture3(command)
 
-      raise GitError.new("Could not get commit SHA for HEAD~#{number_commits_before_head}. STDERR was: #{stderr_str}") unless status.success?
+      raise GitError, "Could not get commit SHA for HEAD~#{number_commits_before_head}. STDERR was: #{stderr_str}" unless status.success?
 
       stdout_str
     end
@@ -31,7 +31,7 @@ class GitClient
 
       stdout_str, stderr_str, status = Open3.capture3(command)
 
-      raise GitError.new("Could not get commit message for HEAD~#{previous}. STDERR was: #{stderr_str}") unless status.success?
+      raise GitError, "Could not get commit message for HEAD~#{previous}. STDERR was: #{stderr_str}" unless status.success?
 
       stdout_str
     end
@@ -42,46 +42,46 @@ class GitClient
       command = "git log -n 1 HEAD~#{previous}"
       stdout_str, stderr_str, status = Open3.capture3(command)
 
-      raise GitError.new("Could not get author of commit HEAD~#{previous}. STDERR was: #{stderr_str}") unless status.success?
+      raise GitError, "Could not get author of commit HEAD~#{previous}. STDERR was: #{stderr_str}" unless status.success?
 
-      stdout_str.match /Author: (.*) </
-      $1
+      stdout_str.match(/Author: (.*) </)
+      ::Regexp.last_match(1)
     end
   end
 
   def self.last_commit_files(dir)
     Dir.chdir(dir) do
-      command = "git log --pretty=\"format:\" --name-only -n 1 HEAD~0"
+      command = 'git log --pretty="format:" --name-only -n 1 HEAD~0'
 
       stdout_str, stderr_str, status = Open3.capture3(command)
 
-      raise GitError.new("Could not get commit files for HEAD~0. STDERR was: #{stderr_str}") unless status.success?
+      raise GitError, "Could not get commit files for HEAD~0. STDERR was: #{stderr_str}" unless status.success?
 
       stdout_str
     end
   end
 
   def self.set_global_config(option, value)
-    raise GitError.new("Could not set global config #{option} to #{value}") unless system("git config --global #{option} \"#{value}\"")
+    raise GitError, "Could not set global config #{option} to #{value}" unless system("git config --global #{option} \"#{value}\"")
   end
 
   def self.add_everything
-    raise GitError.new('Could not add files') unless system('git add -A')
+    raise GitError, 'Could not add files' unless system('git add -A')
   end
 
   def self.add_file(filename)
-    raise GitError.new("Could not add file: #{filename}") unless system("git add #{filename}")
+    raise GitError, "Could not add file: #{filename}" unless system("git add #{filename}")
   end
 
   def self.tag_commit(tag, commit_sha)
-    raise GitError.new("Could not tag #{commit_sha} with #{tag}") unless system("git tag -a #{tag} #{commit_sha}")
+    raise GitError, "Could not tag #{commit_sha} with #{tag}" unless system("git tag -a #{tag} #{commit_sha}")
   end
 
   def self.safe_commit(message)
     changes_staged_for_commit = !system('git diff --cached --exit-code')
 
     if changes_staged_for_commit
-      raise GitError.new('Commit failed') unless system("git commit -m '#{message}'")
+      raise GitError, 'Commit failed' unless system("git commit -m '#{message}'")
     else
       puts 'No staged changes were available to commit, doing nothing.'
     end
@@ -92,7 +92,7 @@ class GitClient
       command = 'git ls-remote --tags'
       stdout_str, stderr_str, status = Open3.capture3(command)
 
-      raise GitError.new("Could not get git tag shas. STDERR was: #{stderr_str}") unless status.success?
+      raise GitError, "Could not get git tag shas. STDERR was: #{stderr_str}" unless status.success?
 
       stdout_str.split("\n").map(&:split).map(&:first)
     end
@@ -103,7 +103,7 @@ class GitClient
       command = "git show #{sha}:#{file}"
       stdout_str, stderr_str, status = Open3.capture3(command)
 
-      raise GitError.new("Could not show #{file} at #{sha}. STDERR was: #{stderr_str}") unless status.success?
+      raise GitError, "Could not show #{file} at #{sha}. STDERR was: #{stderr_str}" unless status.success?
 
       stdout_str
     end
@@ -114,7 +114,7 @@ class GitClient
       command = "git log --oneline -#{number}"
       stdout_str, stderr_str, status = Open3.capture3(command)
 
-      raise GitError.new("Could not get last #{number} commits. STDERR was: #{stderr_str}") unless status.success?
+      raise GitError, "Could not get last #{number} commits. STDERR was: #{stderr_str}" unless status.success?
 
       stdout_str.split("\n")
     end
@@ -125,103 +125,103 @@ class GitClient
       command = 'git rev-parse --abbrev-ref HEAD'
       stdout_str, stderr_str, status = Open3.capture3(command)
 
-      raise GitError.new("Could not get current branch. STDERR was: #{stderr_str}") unless status.success?
+      raise GitError, "Could not get current branch. STDERR was: #{stderr_str}" unless status.success?
 
       stdout_str.strip
     end
   end
 
   def self.checkout(branch)
-    raise GitError.new("Could not checkout branch: #{branch}") unless system("git checkout #{branch}")
+    raise GitError, "Could not checkout branch: #{branch}" unless system("git checkout #{branch}")
   end
 
   def self.cherry_pick(commit)
-    raise GitError.new("Could not cherry_pick commit: #{commit}") unless system("git cherry-pick --no-commit #{commit}")
+    raise GitError, "Could not cherry_pick commit: #{commit}" unless system("git cherry-pick --no-commit #{commit}")
   end
 
   def self.pull_current_branch
-    raise GitError.new('Could not pull branch') unless system('git pull -r')
+    raise GitError, 'Could not pull branch' unless system('git pull -r')
   end
 
   def self.clone_repo(url, dir)
-    raise GitError.new('Could not clone') unless system("git clone #{url} #{dir}")
+    raise GitError, 'Could not clone' unless system("git clone #{url} #{dir}")
   end
 
   def self.fetch(dir)
     Dir.chdir(dir) do
-      raise GitError.new('Could not fetch') unless system('git fetch')
+      raise GitError, 'Could not fetch' unless system('git fetch')
     end
   end
 
   def self.set_gpg_config
-    if ENV['GPG_SIGNING_KEY_ID'] != nil && ENV['GPG_SIGNING_KEY'] != nil
-      # Create GPG directory with proper permissions
-      system("mkdir -p ~/.gnupg")
-      system("chmod 700 ~/.gnupg")
-      
-      # Create GPG configuration file
-      system("echo 'use-agent' > ~/.gnupg/gpg.conf")
-      system("echo 'pinentry-mode loopback' >> ~/.gnupg/gpg.conf")
-      system("echo 'batch' >> ~/.gnupg/gpg.conf")
-      system("echo 'no-tty' >> ~/.gnupg/gpg.conf")
-      system("echo 'quiet' >> ~/.gnupg/gpg.conf")
-      
-      # Handle base64 decoding more robustly
-      puts "Decoding GPG key..."
-      gpg_key_content = ENV['GPG_SIGNING_KEY'].strip
+    return unless !ENV['GPG_SIGNING_KEY_ID'].nil? && !ENV['GPG_SIGNING_KEY'].nil?
 
-      # The private key should now be in PEM format, write it directly
-      if gpg_key_content.include?('-----BEGIN PGP PRIVATE KEY BLOCK-----')
-        puts "Writing PGP private key directly..."
-        File.write(File.expand_path('~/.gnupg/private.key'), gpg_key_content)
-        decode_success = true
-      else
-        puts "Attempting base64 decode..."
-        # Try to decode the GPG key with error handling
-        decode_success = system("echo '#{gpg_key_content}' | base64 -d > ~/.gnupg/private.key 2>/dev/null")
-        
-        if !decode_success
-          puts "Base64 decode failed, trying without newlines..."
-          # Remove any whitespace/newlines and try again
-          gpg_key_clean = gpg_key_content.gsub(/\s+/, '')
-          decode_success = system("echo '#{gpg_key_clean}' | base64 -d > ~/.gnupg/private.key 2>/dev/null")
-        end
+    # Create GPG directory with proper permissions
+    system('mkdir -p ~/.gnupg')
+    system('chmod 700 ~/.gnupg')
+
+    # Create GPG configuration file
+    system("echo 'use-agent' > ~/.gnupg/gpg.conf")
+    system("echo 'pinentry-mode loopback' >> ~/.gnupg/gpg.conf")
+    system("echo 'batch' >> ~/.gnupg/gpg.conf")
+    system("echo 'no-tty' >> ~/.gnupg/gpg.conf")
+    system("echo 'quiet' >> ~/.gnupg/gpg.conf")
+
+    # Handle base64 decoding more robustly
+    puts 'Decoding GPG key...'
+    gpg_key_content = ENV['GPG_SIGNING_KEY'].strip
+
+    # The private key should now be in PEM format, write it directly
+    if gpg_key_content.include?('-----BEGIN PGP PRIVATE KEY BLOCK-----')
+      puts 'Writing PGP private key directly...'
+      File.write(File.expand_path('~/.gnupg/private.key'), gpg_key_content)
+      decode_success = true
+    else
+      puts 'Attempting base64 decode...'
+      # Try to decode the GPG key with error handling
+      decode_success = system("echo '#{gpg_key_content}' | base64 -d > ~/.gnupg/private.key 2>/dev/null")
+
+      unless decode_success
+        puts 'Base64 decode failed, trying without newlines...'
+        # Remove any whitespace/newlines and try again
+        gpg_key_clean = gpg_key_content.gsub(/\s+/, '')
+        decode_success = system("echo '#{gpg_key_clean}' | base64 -d > ~/.gnupg/private.key 2>/dev/null")
       end
-      
-      if !decode_success
-        puts "ERROR: Failed to process GPG key."
-        return
-      end
-      
-      system("chmod 600 ~/.gnupg/private.key")
-      
-      # Import the key with detailed error output
-      puts "Importing GPG key..."
-      puts "Key file size: #{File.size(File.expand_path('~/.gnupg/private.key'))} bytes"
-      
-      # Try import with verbose output to see what's happening
-      import_success = system("gpg --batch --import ~/.gnupg/private.key")
-      
-      if !import_success
-        puts "Import failed, trying with different options..."
-        import_success = system("gpg --batch --allow-secret-key-import --import ~/.gnupg/private.key")
-      end
-      
-      if import_success
-        puts "GPG key imported successfully"
-        
-        # Set ultimate trust for the imported key
-        system("echo '#{ENV['GPG_SIGNING_KEY_ID']}:6:' | gpg --batch --import-ownertrust 2>/dev/null")
-        
-        self.set_global_config('user.signingkey', ENV['GPG_SIGNING_KEY_ID'])
-        self.set_global_config('commit.gpgsign', 'true')
-        self.set_global_config('gpg.program', 'gpg')
-      else
-        puts "ERROR: Failed to import GPG key"
-      end
-      
-      # Clean up the private key file
-      system("rm -f ~/.gnupg/private.key")
     end
+
+    unless decode_success
+      puts 'ERROR: Failed to process GPG key.'
+      return
+    end
+
+    system('chmod 600 ~/.gnupg/private.key')
+
+    # Import the key with detailed error output
+    puts 'Importing GPG key...'
+    puts "Key file size: #{File.size(File.expand_path('~/.gnupg/private.key'))} bytes"
+
+    # Try import with verbose output to see what's happening
+    import_success = system('gpg --batch --import ~/.gnupg/private.key')
+
+    unless import_success
+      puts 'Import failed, trying with different options...'
+      import_success = system('gpg --batch --allow-secret-key-import --import ~/.gnupg/private.key')
+    end
+
+    if import_success
+      puts 'GPG key imported successfully'
+
+      # Set ultimate trust for the imported key
+      system("echo '#{ENV.fetch('GPG_SIGNING_KEY_ID', nil)}:6:' | gpg --batch --import-ownertrust 2>/dev/null")
+
+      set_global_config('user.signingkey', ENV.fetch('GPG_SIGNING_KEY_ID', nil))
+      set_global_config('commit.gpgsign', 'true')
+      set_global_config('gpg.program', 'gpg')
+    else
+      puts 'ERROR: Failed to import GPG key'
+    end
+
+    # Clean up the private key file
+    system('rm -f ~/.gnupg/private.key')
   end
 end

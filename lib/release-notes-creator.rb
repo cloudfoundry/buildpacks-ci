@@ -1,4 +1,6 @@
 require 'yaml'
+require 'date'
+require 'time'
 require 'diffy'
 require_relative 'usn-release-notes'
 
@@ -14,22 +16,20 @@ class RootfsReleaseNotesCreator
   end
 
   def release_notes
-    text = ""
-    text += usn_release_notes_section + "\n" unless unreleased_usns.empty?
+    text = ''
+    text += "#{usn_release_notes_section}\n" unless unreleased_usns.empty?
     text += receipt_diff_section
     text
   end
 
   def usn_release_notes_section
-    text = ""
+    text = ''
     text += "Notably, this release addresses:\n\n" unless unreleased_usns.empty?
     unreleased_usns.each do |usn|
-      begin
-        text += detailed_cve_information(usn) + "\n\n"
-      rescue Exception => e
-        puts "Error fetching USN detailed information #{usn}: #{e.message}"
-        text += simple_cve_information(usn) + "\n\n"
-      end
+      text += "#{detailed_cve_information(usn)}\n\n"
+    rescue Exception => e
+      puts "Error fetching USN detailed information #{usn}: #{e.message}"
+      text += "#{simple_cve_information(usn)}\n\n"
     end
     text
   end
@@ -54,7 +54,7 @@ class RootfsReleaseNotesCreator
     if receipt_diff
       "```\n#{receipt_diff}```\n"
     else
-      ""
+      ''
     end
   end
 
@@ -68,7 +68,11 @@ class RootfsReleaseNotesCreator
     diffy.map { |line| line.split(/\s+/, 6).map(&:strip) }
          .select { |arr| arr.length == 6 }
          .map do |arr|
-      arr[0] == "<" ? arr[1] = "-#{arr[1]}" : arr[0] == ">" ? arr[1] = "+#{arr[1]}" : nil
+      if arr[0] == '<'
+        arr[1] = "-#{arr[1]}"
+      else
+        arr[0] == '>' ? arr[1] = "+#{arr[1]}" : nil
+      end
       arr.shift
       arr
     end

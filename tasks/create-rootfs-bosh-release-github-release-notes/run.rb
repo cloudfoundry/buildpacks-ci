@@ -1,8 +1,7 @@
 #!/usr/bin/env ruby
 
-stack = ENV['STACK']
+stack = ENV.fetch('STACK', nil)
 org =  ENV['ORG'].empty? ? 'cloudfoundry' : ENV['ORG']
-
 
 repo = "#{org}/#{stack}"
 

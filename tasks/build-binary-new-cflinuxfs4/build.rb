@@ -15,9 +15,9 @@ include HTTPHelper
 def main
   binary_builder  = BinaryBuilderWrapper.new(Runner)
   source_input    = SourceInput.from_file('source/data.json')
-  stack           = ENV['STACK']
+  stack           = ENV.fetch('STACK', nil)
   skip_commit     = ENV['SKIP_COMMIT'] == 'true'
-  build_input     = skip_commit ? BuildInput.new(nil, nil) : BuildInput.from_file("source/data.json")
+  build_input     = skip_commit ? BuildInput.new(nil, nil) : BuildInput.from_file('source/data.json')
   build_output    = BuildOutput.new(source_input.name)
   artifact_output = ArtifactOutput.new(File.join(Dir.pwd, 'artifacts'))
   dep_metadata_output = DepMetadataOutput.new(File.join(Dir.pwd, 'dep-metadata'))

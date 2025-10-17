@@ -1,9 +1,9 @@
 require 'digest/md5'
 require 'open-uri'
 
-require_relative('update.rb')
-require_relative('../../../binary-builder/recipe/php_common_recipes.rb')
-require_relative('../../../binary-builder/recipe/php_recipe.rb')
+require_relative('update')
+require_relative('../../../binary-builder/recipe/php_common_recipes')
+require_relative('../../../binary-builder/recipe/php_recipe')
 
 def cache_key(name, version, klass)
   [name, version, klass]
@@ -12,8 +12,8 @@ end
 def get_hash(name, version, klass, cache)
   key = cache_key(name, version, klass)
 
-  if !cache[key]
-    recipe = Object::const_get(klass).new(name, version)
+  unless cache[key]
+    recipe = Object.const_get(klass).new(name, version)
     file = URI.open(recipe.url)
     cache[key] = Digest::MD5.hexdigest(file.read)
   end
@@ -27,15 +27,13 @@ def update_hash(dependency, cache)
   klass = dependency['klass']
   md5 = dependency['md5']
 
-  if !version || version == 'nil'
-    return
-  end
+  return if !version || version == 'nil'
 
-  if !md5 || md5 == 'nil'
-    puts "    > Computing hash for #{name} @ #{version}..."
-    dependency['md5'] = get_hash(name, version, klass, cache)
-    puts "      Updated #{name} md5 to #{dependency['md5']}"
-  end
+  return unless !md5 || md5 == 'nil'
+
+  puts "    > Computing hash for #{name} @ #{version}..."
+  dependency['md5'] = get_hash(name, version, klass, cache)
+  puts "      Updated #{name} md5 to #{dependency['md5']}"
 end
 
 puts 'Updating module hashes...'

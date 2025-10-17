@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 require 'octokit'
-require_relative '../../lib/git-client.rb'
+require_relative '../../lib/git-client'
 
 class BuildpackToMaster
   def initialize(github_access_token, github_repo, github_status_context, github_status_description, pipeline_uri)
@@ -21,25 +21,23 @@ class BuildpackToMaster
 
     puts "SHA: #{@sha} :: PrevSHA: #{@prev_sha}"
 
-    if has_statuses? && no_other_changes?
-      Octokit.create_status(
-        @github_repo,
-        @sha,
-        'success',
-        context: @github_status_context,
-        description: @github_status_description,
-        target_url: @pipeline_uri
-      )
+    raise 'Unsafe file changes' unless has_statuses? && no_other_changes?
 
-      Octokit.update_branch(
-        @github_repo,
-        'master',
-        @sha,
-        false
-      )
-    else
-      raise "Unsafe file changes"
-    end
+    Octokit.create_status(
+      @github_repo,
+      @sha,
+      'success',
+      context: @github_status_context,
+      description: @github_status_description,
+      target_url: @pipeline_uri
+    )
+
+    Octokit.update_branch(
+      @github_repo,
+      'master',
+      @sha,
+      false
+    )
   end
 
   private
@@ -51,20 +49,15 @@ class BuildpackToMaster
     )
 
     status_strings = statuses.map { |s| s[:context] }
-    if status_strings.include?('buildpacks-ci/edge-develop')
-      return true
-    end
+    return true if status_strings.include?('buildpacks-ci/edge-develop')
+
     puts "Missing status 'buildpacks-ci/edge-develop'"
-    return false
+    false
   end
 
   def no_other_changes?
     files = GitClient.last_commit_files('repo').split("\n").sort
     puts "Files changes in commit are #{files.inspect}."
-    return files == ["CHANGELOG", "VERSION"]
+    files == %w[CHANGELOG VERSION]
   end
 end
-
-
-
-

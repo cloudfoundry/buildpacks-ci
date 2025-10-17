@@ -1,27 +1,28 @@
 # This is the configuration used to check the rubocop source code.
 
 AllCops:
+  TargetRubyVersion: 3.4
+  NewCops: enable
+  SuggestExtensions: false
   Exclude:
     - 'vendor/**/*'
     - 'spec/fixtures/**/*'
     - 'bin/**/*'
 
+plugins:
+  - rubocop-rspec
+
 Style/Encoding:
   Enabled: true
 
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: false
 
-require: rubocop-rspec
-
-RSpec/FilePath:
+RSpec/SpecFilePathFormat:
   Enabled: false
 
-Performance/RedundantMatch:
+RSpec/SpecFilePathSuffix:
   Enabled: false
 
 Style/FrozenStringLiteralComment:
   Enabled: false
-
-AllCops:
-  TargetRubyVersion: 2.3

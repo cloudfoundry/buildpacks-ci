@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-repo = "cloudfoundry/#{ENV['STACK']}"
+repo = "cloudfoundry/#{ENV.fetch('STACK', nil)}"
 
 body_file = 'release-body/body'
 version = `cat version/number`

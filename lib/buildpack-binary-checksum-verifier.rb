@@ -1,6 +1,7 @@
-# encoding: utf-8
 require_relative 'git-client'
 require 'yaml'
+require 'date'
+require 'time'
 require 'tmpdir'
 require 'digest/md5'
 
@@ -17,25 +18,21 @@ class BuildpackBinaryChecksumVerifier
 
     release_tag_shas = GitClient.git_tag_shas(buildpack_dir)
     release_tag_shas.each do |release_sha|
-      begin
-        manifest_contents = GitClient.get_file_contents_at_sha(buildpack_dir, release_sha, 'manifest.yml')
-        manifest = YAML.load(manifest_contents, permitted_classes: [Date, Time])
+      manifest_contents = GitClient.get_file_contents_at_sha(buildpack_dir, release_sha, 'manifest.yml')
+      manifest = YAML.load(manifest_contents, permitted_classes: [Date, Time])
 
-        manifest["dependencies"].each do |dependency|
-          uri = dependency["uri"]
-          next if uri.nil?
-          next if data[uri]
-          next if uris_to_ignore.include?(uri)
+      manifest['dependencies'].each do |dependency|
+        uri = dependency['uri']
+        next if uri.nil?
+        next if data[uri]
+        next if uris_to_ignore.include?(uri)
 
-          if dependency.key?( "sha256")
-            data[uri] = { "sha256" => dependency["sha256"], "sha" => release_sha }
-          end
-        end
-      rescue GitClient::GitError => e
-        # No manifest present at that release sha
-      rescue Exception => e
-        puts "failed to parse manifest at #{release_sha}: #{e}"
+        data[uri] = { 'sha256' => dependency['sha256'], 'sha' => release_sha } if dependency.key?('sha256')
       end
+    rescue GitClient::GitError
+      # No manifest present at that release sha
+    rescue Exception => e
+      puts "failed to parse manifest at #{release_sha}: #{e}"
     end
     data
   end
@@ -51,7 +48,7 @@ class BuildpackBinaryChecksumVerifier
           max_attempts = 3
           sha256_match = false
 
-          while !sha256_match && attempts < max_attempts do
+          while !sha256_match && attempts < max_attempts
             desired_sha256 = metadata_hash['sha256']
             release_tag_sha = metadata_hash['sha']
 
@@ -74,7 +71,7 @@ class BuildpackBinaryChecksumVerifier
       end
     end
 
-    puts ""
+    puts ''
     puts mismatches.join("\n")
     mismatches.empty?
   end

@@ -7,7 +7,7 @@ require_relative '../../lib/git-client'
 
 stack = ENV.fetch('STACK')
 
-previous_version = File.read("previous-rootfs-release/.git/ref").strip
+previous_version = File.read('previous-rootfs-release/.git/ref').strip
 
 receipt_file_name = "receipt.#{stack}.x86_64"
 old_receipt_uri = "https://raw.githubusercontent.com/cloudfoundry/#{stack}/#{previous_version}/#{receipt_file_name}"
@@ -16,7 +16,7 @@ receipt_diff_file = File.join('receipt-diffs', "#{stack}-diff")
 
 new_receipt_file = Dir["receipt-artifacts/receipt.#{stack}.x86_64*"].first
 old_receipt = Tempfile.new('old-receipt')
-File.write(old_receipt.path, open(old_receipt_uri).read)
+File.write(old_receipt.path, URI.open(old_receipt_uri).read)
 
 creator = RootfsReleaseNotesCreator.new(nil, old_receipt.path, new_receipt_file)
 notes = creator.receipt_diff_section
@@ -27,14 +27,14 @@ old_receipt.unlink
 
 commit_message = "Updating receipt diff for #{stack}\n"
 tag_file = File.join('git-tags', 'TAG')
-tag_name = ""
+tag_name = ''
 
-if !new_packages
-  tag_name = "empty_#{Time.now.to_i}"
-  commit_message += "No new packages\n"
-else
+if new_packages
   tag_name = "newpackages_#{stack}_#{Time.now.to_i}"
   commit_message += "New packages added\n"
+else
+  tag_name = "empty_#{Time.now.to_i}"
+  commit_message += "No new packages\n"
 end
 
 File.write(tag_file, tag_name)
@@ -45,4 +45,4 @@ Dir.chdir('public-robots') do
   GitClient.safe_commit(commit_message)
 end
 
-system "rsync -a public-robots/ public-robots-artifacts"
+system 'rsync -a public-robots/ public-robots-artifacts'

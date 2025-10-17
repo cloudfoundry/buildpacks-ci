@@ -14,12 +14,14 @@ def generate_release_notes
 
   Dir.chdir(temp_dir) do
     if current_version.split('.')[1] == '0'
-      puts "This is the first minor version, no previous version to compare"
+      puts 'This is the first minor version, no previous version to compare'
       exit
     end
 
-    previous_version = current_version.sub(/(\d+)\.(\d+)\.(\d+)/) do |match|
-      major, minor, patch = $1.to_i, $2.to_i, $3.to_i
+    previous_version = current_version.sub(/(\d+)\.(\d+)\.(\d+)/) do |_match|
+      major = Regexp.last_match(1).to_i
+      minor = Regexp.last_match(2).to_i
+      patch = Regexp.last_match(3).to_i
       "#{major}.#{minor - 1}.#{patch}"
     end
 
@@ -29,12 +31,12 @@ def generate_release_notes
 
     client = Octokit::Client.new(access_token: gh_token)
 
-    old_receipt_encoded_contents = client.contents("#{stack_repo}", path: "#{receipt_file_name}", query: { ref: "#{previous_version}" })
+    old_receipt_encoded_contents = client.contents(stack_repo.to_s, path: receipt_file_name.to_s, query: { ref: previous_version.to_s })
     old_receipt_contents = Base64.decode64(old_receipt_encoded_contents.content)
     old_receipt = File.open('old-receipt', 'w')
     File.write(old_receipt.path, old_receipt_contents)
 
-    new_receipt_encoded_contents = client.contents("#{stack_repo}", path: "#{receipt_file_name}", query: { ref: "#{current_version}" })
+    new_receipt_encoded_contents = client.contents(stack_repo.to_s, path: receipt_file_name.to_s, query: { ref: current_version.to_s })
     new_receipt_contents = Base64.decode64(new_receipt_encoded_contents.content)
     new_receipt = File.open('new-receipt', 'w')
     File.write(new_receipt.path, new_receipt_contents)

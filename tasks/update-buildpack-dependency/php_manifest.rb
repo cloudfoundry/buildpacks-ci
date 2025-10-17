@@ -5,9 +5,7 @@ class PHPManifest
         if default['name'] == 'nginx'
           # For nginx, we update defaults only when a mainline version updates.
           # Mainline versions are identified by having an odd number as the minor (e.g. 1.27.2)
-          if Gem::Version.new(resource_version).segments[1].odd?
-            default['version'] = resource_version
-          end
+          default['version'] = resource_version if Gem::Version.new(resource_version).segments[1].odd?
         else
           default['version'] = resource_version
         end

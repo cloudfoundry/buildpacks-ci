@@ -1,3 +1,4 @@
+require 'English'
 require 'json'
 require 'yaml'
 require 'open-uri'
@@ -11,14 +12,13 @@ module Runner
   class << self
     def run(*args)
       system({ 'DEBIAN_FRONTEND' => 'noninteractive' }, *args)
-      raise "Could not run #{args}" unless $?.success?
+      raise "Could not run #{args}" unless $CHILD_STATUS.success?
     end
   end
 end
 
 module DependencyBuild
   class << self
-
     def setup_ruby
       Runner.run('apt', 'update')
       Runner.run('apt', 'install', '-y', 'software-properties-common')
@@ -69,13 +69,9 @@ module DependencyBuild
         Dir.chdir(dir) do
           Runner.run('/usr/local/bin/pip3', 'download', '--no-binary', ':all:', "pip==#{source_input.version}")
           if source_input.md5?
-            if Digest::MD5.hexdigest(open("pip-#{source_input.version}.tar.gz").read) != source_input.md5
-              raise 'MD5 digest does not match version digest'
-            end
+            raise 'MD5 digest does not match version digest' if Digest::MD5.hexdigest(File.read("pip-#{source_input.version}.tar.gz")) != source_input.md5
           elsif source_input.sha256?
-            if Digest::SHA256.hexdigest(open("pip-#{source_input.version}.tar.gz").read) != source_input.sha256
-              raise 'SHA256 digest does not match version digest'
-            end
+            raise 'SHA256 digest does not match version digest' if Digest::SHA256.hexdigest(File.read("pip-#{source_input.version}.tar.gz")) != source_input.sha256
           else
             raise 'No digest specified for source'
           end
@@ -100,13 +96,9 @@ module DependencyBuild
         Dir.chdir(dir) do
           Runner.run('/usr/local/bin/pip3', 'download', '--no-cache-dir', '--no-binary', ':all:', "pipenv==#{source_input.version}")
           if source_input.md5?
-            if Digest::MD5.hexdigest(open("pipenv-#{source_input.version}.tar.gz").read) != source_input.md5
-              raise 'MD5 digest does not match version digest'
-            end
+            raise 'MD5 digest does not match version digest' if Digest::MD5.hexdigest(File.read("pipenv-#{source_input.version}.tar.gz")) != source_input.md5
           elsif source_input.sha256?
-            if Digest::SHA256.hexdigest(open("pipenv-#{source_input.version}.tar.gz").read) != source_input.sha256
-              raise 'SHA256 digest does not match version digest'
-            end
+            raise 'SHA256 digest does not match version digest' if Digest::SHA256.hexdigest(File.read("pipenv-#{source_input.version}.tar.gz")) != source_input.sha256
           else
             raise 'No digest specified for source'
           end
@@ -133,13 +125,9 @@ module DependencyBuild
         Dir.chdir(dir) do
           Runner.run('pip3', 'download', '--no-binary', ':all:', "poetry==#{source_input.version}")
           if source_input.md5?
-            if Digest::MD5.hexdigest(open("poetry-#{source_input.version}.tar.gz").read) != source_input.md5
-              raise 'MD5 digest does not match version digest'
-            end
+            raise 'MD5 digest does not match version digest' if Digest::MD5.hexdigest(File.read("poetry-#{source_input.version}.tar.gz")) != source_input.md5
           elsif source_input.sha256?
-            if Digest::SHA256.hexdigest(open("poetry-#{source_input.version}.tar.gz").read) != source_input.sha256
-              raise 'SHA256 digest does not match version digest'
-            end
+            raise 'SHA256 digest does not match version digest' if Digest::SHA256.hexdigest(File.read("poetry-#{source_input.version}.tar.gz")) != source_input.sha256
           else
             raise 'No digest specified for source'
           end
@@ -153,14 +141,14 @@ module DependencyBuild
       built_path = File.join(Dir.pwd, 'built')
       Dir.mkdir(built_path)
 
-      url = "#{source_input.url}"
+      url = source_input.url.to_s
       file_path = url.slice((url.rindex('/') + 1)..(url.length))
-      dir = file_path.delete_suffix(".tar.gz")
+      dir = file_path.delete_suffix('.tar.gz')
 
       Dir.chdir('source') do
         # github-releases depwatcher has already downloaded .tar.gz
-        Runner.run('tar', 'zxf', "#{file_path}")
-        Dir.chdir("#{dir}") do
+        Runner.run('tar', 'zxf', file_path.to_s)
+        Dir.chdir(dir.to_s) do
           Runner.run('./configure', "--prefix=#{built_path}")
           Runner.run('make')
           Runner.run('make install')
@@ -180,7 +168,7 @@ module DependencyBuild
       built_path = File.join(Dir.pwd, 'built')
       Dir.mkdir(built_path)
 
-      Runner.run('git', 'clone', '--single-branch', '--branch', "#{source_input.version}", "https://github.com/#{source_input.repo}",
+      Runner.run('git', 'clone', '--single-branch', '--branch', source_input.version.to_s, "https://github.com/#{source_input.repo}",
                  "#{source_input.name}-#{source_input.version}")
       Dir.chdir("#{source_input.name}-#{source_input.version}") do
         Runner.run('./autogen.sh', "--prefix=#{built_path}")
@@ -212,7 +200,7 @@ module DependencyBuild
           Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libpcre2-dev', 'libcurl4-openssl-dev', 'libsodium-dev', 'libharfbuzz-dev', 'libfribidi-dev', 'default-jre', *fs_specific_packages)
 
           Runner.run('wget', source_input.url)
-          source_sha = Digest::SHA256.hexdigest(open("R-#{source_input.version}.tar.gz").read)
+          source_sha = Digest::SHA256.hexdigest(File.read("R-#{source_input.version}.tar.gz"))
           Runner.run('tar', 'xf', "R-#{source_input.version}.tar.gz")
 
           Dir.chdir("R-#{source_input.version}") do
@@ -226,7 +214,7 @@ module DependencyBuild
             # stringr was a "freebie module" that devtools provided but remotes doesn't
             Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "install.packages(c('cli', 'curl', 'lifecycle', 'R6', 'rlang', 'withr', 'processx', 'callr', 'stringr'), repos='https://cran.r-project.org')")
 
-            rserve_version = rserve_input.split(".")[0..1].join(".") + "-" + rserve_input.split(".")[2..-1].join(".")
+            rserve_version = "#{rserve_input.split('.')[0..1].join('.')}-#{rserve_input.split('.')[2..].join('.')}"
 
             Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('remotes'); remotes::install_version('Rserve', '#{rserve_version}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
             Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', "require('remotes'); remotes::install_version('forecast', '#{forecast_input}', repos='https://cran.r-project.org', type='source', dependencies=TRUE)")
@@ -254,26 +242,26 @@ module DependencyBuild
       source_sha
     end
 
-    def replace_openssl()
+    def replace_openssl
       filebase = 'OpenSSL_1_1_0g'
       filename = "#{filebase}.tar.gz"
       openssltar = "https://github.com/openssl/openssl/archive/#{filename}"
 
-      Dir.mktmpdir do |dir|
+      Dir.mktmpdir do |_dir|
         Runner.run('wget', openssltar)
         Runner.run('tar', 'xf', filename)
         Dir.chdir("openssl-#{filebase}") do
-          Runner.run("./config",
-                     "--prefix=/usr",
-                     "--libdir=/lib/x86_64-linux-gnu",
-                     "--openssldir=/include/x86_64-linux-gnu/openssl")
+          Runner.run('./config',
+                     '--prefix=/usr',
+                     '--libdir=/lib/x86_64-linux-gnu',
+                     '--openssldir=/include/x86_64-linux-gnu/openssl')
           Runner.run('make')
           Runner.run('make', 'install_sw')
         end
       end
     end
 
-    def build_python(source_input, stack)
+    def build_python(source_input, _stack)
       artifacts = "#{Dir.pwd}/artifacts"
       tar_path = "#{Dir.pwd}/source/Python-#{source_input.version}.tgz"
       destdir = Dir.mktmpdir
@@ -282,14 +270,13 @@ module DependencyBuild
           unless File.exist?(tar_path)
             Runner.run('wget', source_input.url)
             tar_path = "Python-#{source_input.version}.tgz"
-            # TODO validate pgp
+            # TODO: validate pgp
           end
 
           Runner.run('tar', 'xf', tar_path)
 
           # Python specific configuration here
           Dir.chdir("Python-#{source_input.version}") do
-
             options = [
               './configure',
               '--enable-shared',
@@ -304,24 +291,23 @@ module DependencyBuild
             Runner.run(*options)
             packages = %w[libdb-dev libgdbm-dev tk8.6-dev]
             # install apt packages
-            STDOUT.print "Running 'install dependencies' for #{@name} #{@version}... "
-            Runner.run("sudo apt-get update && sudo apt-get -y install " + packages.join(' '))
+            $stdout.print "Running 'install dependencies' for #{@name} #{@version}... "
+            Runner.run("sudo apt-get update && sudo apt-get -y install #{packages.join(' ')}")
 
             Runner.run('apt-get -y --force-yes -d install --reinstall libtcl8.6 libtk8.6 libxss1')
 
             FileUtils.mkdir_p destdir
             Dir.glob('/var/cache/apt/archives/lib{tcl8.6,tk8.6,xss1}_*.deb').each do |path|
-              STDOUT.puts("dpkg -x #{path} #{destdir}")
+              $stdout.puts("dpkg -x #{path} #{destdir}")
               Runner.run("dpkg -x #{path} #{destdir}")
             end
 
-            Runner.run("make")
-            Runner.run("make install")
+            Runner.run('make')
+            Runner.run('make install')
             # create python symlink
-            unless File.exist?("#{destdir}/bin/python")
-              File.symlink('./python3', "#{destdir}/bin/python")
-            end
-            raise 'Could not run make install' unless $?.success?
+            File.symlink('./python3', "#{destdir}/bin/python") unless File.exist?("#{destdir}/bin/python")
+            raise 'Could not run make install' unless $CHILD_STATUS.success?
+
             Dir.chdir(destdir) do
               Runner.run('tar', 'zcvf', "#{artifacts}/python-#{source_input.version}.tgz", '.', '--hard-dereference')
             end
@@ -332,12 +318,11 @@ module DependencyBuild
 
     def build_nginx(source_input, stack, static = false)
       artifacts = "#{Dir.pwd}/artifacts"
-      source_pgp = 'not yet implemented'
       destdir = Dir.mktmpdir
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
           Runner.run('wget', source_input.url)
-          # TODO validate pgp
+          # TODO: validate pgp
           Runner.run('tar', 'xf', "nginx-#{source_input.version}.tar.gz")
           base_nginx_options = [
             '--prefix=/',
@@ -355,12 +340,12 @@ module DependencyBuild
             '--without-http_scgi_module',
             '--with-pcre',
             '--with-pcre-jit',
-            '--with-debug',
+            '--with-debug'
           ]
 
           nginx_static_options = [
             '--with-cc-opt=-fPIE -pie',
-            '--with-ld-opt=-fPIE -pie -z now',
+            '--with-ld-opt=-fPIE -pie -z now'
           ]
 
           nginx_options = [
@@ -370,7 +355,7 @@ module DependencyBuild
             '--with-mail=dynamic',
             '--with-mail_ssl_module',
             '--with-stream=dynamic',
-            '--with-http_sub_module',
+            '--with-http_sub_module'
           ]
 
           DependencyBuild.replace_openssl if stack == 'cflinuxfs3'
@@ -380,7 +365,7 @@ module DependencyBuild
             Runner.run(*options)
             Runner.run('make')
             system({ 'DEBIAN_FRONTEND' => 'noninteractive', 'DESTDIR' => "#{destdir}/nginx" }, 'make install')
-            raise 'Could not run make install' unless $?.success?
+            raise 'Could not run make install' unless $CHILD_STATUS.success?
 
             Dir.chdir(destdir) do
               Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
@@ -397,21 +382,21 @@ module DependencyBuild
     end
 
     def build_dotnet_sdk(source_input)
-      prune_dotnet_files(source_input, ["./shared/*"], true)
+      prune_dotnet_files(source_input, ['./shared/*'], true)
     end
 
     def build_dotnet_runtime(source_input)
-      prune_dotnet_files(source_input, ["./dotnet"])
+      prune_dotnet_files(source_input, ['./dotnet'])
     end
 
     def build_dotnet_aspnetcore(source_input)
-      prune_dotnet_files(source_input, ["./dotnet", "./shared/Microsoft.NETCore.App"])
+      prune_dotnet_files(source_input, ['./dotnet', './shared/Microsoft.NETCore.App'])
     end
 
     def prune_dotnet_files(source_input, files_to_exclude, write_runtime = false)
       source_file = File.expand_path(Dir.glob('source/*.tar.gz').first)
       adjusted_file = "/tmp/#{source_input.name}.#{source_input.version}.linux-amd64.tar.xz"
-      exclude_list = files_to_exclude.map { |file| "--exclude=#{file}" }.join(" ")
+      exclude_list = files_to_exclude.map { |file| "--exclude=#{file}" }.join(' ')
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
           `tar -xf #{source_file} #{exclude_list}`
@@ -430,9 +415,7 @@ module DependencyBuild
         files = output.split("\n").select { |line| line.end_with? '/' }
         version = Pathname.new(files.last).basename.to_s
 
-        File.open('RuntimeVersion.txt', 'w') do |f|
-          f.write(version)
-        end
+        File.write('RuntimeVersion.txt', version)
       end
     end
 
@@ -443,7 +426,7 @@ module DependencyBuild
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) do
           Runner.run('wget', source_input.url)
-          # TODO validate pgp
+          # TODO: validate pgp
           Runner.run('tar', 'xf', "#{source_input.name}-#{source_input.version}.tar.gz")
           Dir.chdir("#{source_input.name}-#{source_input.version}") do
             Runner.run(
@@ -469,11 +452,11 @@ module DependencyBuild
               '--with-compat',
               '--with-mail=dynamic',
               '--with-mail_ssl_module',
-              '--with-stream=dynamic',
+              '--with-stream=dynamic'
             )
             Runner.run('make', '-j2')
             system({ 'DEBIAN_FRONTEND' => 'noninteractive' }, 'make install')
-            raise 'Could not run make install' unless $?.success?
+            raise 'Could not run make install' unless $CHILD_STATUS.success?
 
             Dir.chdir("#{destdir}/openresty") do
               Runner.run('rm', '-Rf', './nginx/html', './nginx/conf')
@@ -513,7 +496,7 @@ module DependencyBuild
       Dir.chdir('source') do
         Runner.run('tar', 'zxf', "curl-#{source_input.version}.tar.gz")
         Dir.chdir("curl-#{source_input.version}") do
-          Runner.run('./configure', "--prefix=#{built_path}", "--with-openssl")
+          Runner.run('./configure', "--prefix=#{built_path}", '--with-openssl')
           Runner.run('make')
           Runner.run('make install')
         end
@@ -529,7 +512,7 @@ module DependencyBuild
       Dir.mkdir(File.join(built_path, 'bin'))
 
       Dir.chdir('source') do
-        Runner.run('tar', 'zxf', "#{source_input.version}")
+        Runner.run('tar', 'zxf', source_input.version.to_s)
         Dir.chdir(Dir.glob('krallin-tini-*').first) do
           Runner.run('cmake .')
           Runner.run('make')
@@ -573,17 +556,18 @@ end
 module Sha
   class << self
     def get_sha(url)
-      Digest::SHA256.hexdigest(open(url).read)
+      Digest::SHA256.hexdigest(URI.open(url).read)
     end
 
     def check_sha(source_input)
-      res = open(source_input.url).read
+      res = URI.open(source_input.url).read
       sha = get_sha(source_input.url)
       if source_input.md5? && Digest::MD5.hexdigest(res) != source_input.md5
         raise 'MD5 digest does not match version digest'
       elsif source_input.sha256? && sha != source_input.sha256
         raise 'SHA256 digest does not match version digest'
       end
+
       [res, sha]
     end
   end
@@ -603,7 +587,7 @@ module Archive
         Runner.run('tar', '-C', dir, '-xf', filename)
         Runner.run('find', dir, '-type', 'f', '-name', 'incorrect_words.yaml', '-delete')
         # Add recursive search and destroy in all jar files"
-        search_delete_command = 'find ' + dir + ' -name "*.jar" -exec grep -l incorrect_words.yaml {} \; | xargs -I {} zip -q -d {} "*incorrect_words.yaml"'
+        search_delete_command = "find #{dir} -name \"*.jar\" -exec grep -l incorrect_words.yaml {} \\; | xargs -I {} zip -q -d {} \"*incorrect_words.yaml\""
         Runner.run('bash', '-c', search_delete_command)
         Runner.run('tar', '-C', dir, '-czf', filename, '.')
       end
@@ -626,10 +610,7 @@ end
 
 class Builder
   def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, php_extensions_dir = __dir__, skip_commit = false)
-
-    unless skip_commit
-      build_input.copy_to_build_output
-    end
+    build_input.copy_to_build_output unless skip_commit
 
     out_data = {
       version: source_input.version,
@@ -640,9 +621,7 @@ class Builder
       }
     }
 
-    unless out_data[:source][:sha256]
-      out_data[:source][:sha256] = Sha::get_sha(source_input.url)
-    end
+    out_data[:source][:sha256] = Sha.get_sha(source_input.url) unless out_data[:source][:sha256]
 
     filename_prefix = "#{source_input.name}_#{source_input.version}"
 
@@ -655,7 +634,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           "#{binary_builder.base_dir}/#{source_input.name}-#{source_input.version}.tgz",
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
 
@@ -665,7 +644,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           "#{binary_builder.base_dir}/hwc-#{source_input.version}-windows-x86-64.zip",
-          "#{filename_prefix}_windows_x86-64_any-stack",
+          "#{filename_prefix}_windows_x86-64_any-stack"
         )
       )
 
@@ -675,7 +654,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           "#{binary_builder.base_dir}/#{source_input.name}-v#{source_input.version}-linux-x64.tgz",
-          "#{filename_prefix}_linux_x64_#{stack}",
+          "#{filename_prefix}_linux_x64_#{stack}"
         )
       )
 
@@ -690,7 +669,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           filename,
-          "#{filename_prefix}_linux_x64_#{stack}",
+          "#{filename_prefix}_linux_x64_#{stack}"
         )
       )
 
@@ -707,7 +686,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           filename,
-          "#{filename_prefix}_linux_x64_#{stack}",
+          "#{filename_prefix}_linux_x64_#{stack}"
         )
       )
 
@@ -722,7 +701,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           filename,
-          "#{filename_prefix}_linux_x64_#{stack}",
+          "#{filename_prefix}_linux_x64_#{stack}"
         )
       )
       out_data[:source_pgp] = source_pgp
@@ -761,17 +740,17 @@ class Builder
         out_data[:url] = source_input.url
       end
 
-    when -> (elem) { elem.start_with?('miniconda') }
+    when ->(elem) { elem.start_with?('miniconda') }
       results = Sha.check_sha(source_input)
       out_data[:url] = source_input.url
       out_data[:sha256] = results[1]
 
     when 'setuptools'
       results = Sha.check_sha(source_input)
-      filename = 'artifacts/temp_' + "#{source_input.url}".split('/').last
+      filename = "artifacts/temp_#{source_input.url.to_s.split('/').last}"
       File.write(filename, results[0])
 
-      if "#{source_input.url}".end_with?(".tar.gz", ".tgz")
+      if source_input.url.to_s.end_with?('.tar.gz', '.tgz')
         Archive.strip_top_level_directory_from_tar(filename)
       else
         Archive.strip_top_level_directory_from_zip(filename, Dir.pwd)
@@ -781,7 +760,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           filename,
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
 
@@ -797,7 +776,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           filename,
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
 
@@ -807,7 +786,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           old_file_path,
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
 
@@ -820,18 +799,18 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           filename,
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
 
     when 'composer'
-      filename = "source/composer.phar"
+      filename = 'source/composer.phar'
       if File.exist?(filename)
         out_data.merge!(
           artifact_output.move_dependency(
             source_input.name,
             filename,
-            "#{filename_prefix}_linux_noarch_any-stack",
+            "#{filename_prefix}_linux_noarch_any-stack"
           )
         )
       else
@@ -841,8 +820,8 @@ class Builder
       end
 
     when 'ruby'
-      major, minor, _ = source_input.version.split('.')
-      if major == '2' && stack == 'cflinuxfs3' && (minor == '3' || minor == '2')
+      major, minor, = source_input.version.split('.')
+      if major == '2' && stack == 'cflinuxfs3' && %w[3 2].include?(minor)
         Runner.run('apt', 'update')
         Runner.run('apt-get', 'install', '-y', 'libssl1.0-dev')
       end
@@ -856,18 +835,19 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           filename,
-          "#{filename_prefix}_linux_x64_#{stack}",
+          "#{filename_prefix}_linux_x64_#{stack}"
         )
       )
 
     when 'jruby'
-      if /9.2.*/ =~ source_input.version
+      case source_input.version
+      when /9.2.*/
         # jruby 9.2.X.X will implement ruby 2.5.X
         ruby_version = '2.5'
-      elsif /9.3.*/ =~ source_input.version
+      when /9.3.*/
         # jruby 9.3.X.X will implement ruby 2.6.X
         ruby_version = '2.6'
-      elsif /9.4.*/ =~ source_input.version
+      when /9.4.*/
         # jruby 9.4.X.X will implement ruby 3.1.X
         ruby_version = '3.1'
       else
@@ -895,17 +875,14 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           filename,
-          "#{source_input.name}_#{full_version}_linux_x64_#{stack}",
+          "#{source_input.name}_#{full_version}_linux_x64_#{stack}"
         )
       )
 
     when 'php'
-      base_extension_file = ''
-      if source_input.version.start_with?('8')
-        base_extension_file = File.join(php_extensions_dir, 'php8-base-extensions.yml')
-      else
-        raise "Unexpected PHP version #{source_input.version}. Expected 8.X"
-      end
+      raise "Unexpected PHP version #{source_input.version}. Expected 8.X" unless source_input.version.start_with?('8')
+
+      base_extension_file = File.join(php_extensions_dir, 'php8-base-extensions.yml')
 
       php_extensions = BaseExtensions.new(base_extension_file)
 
@@ -931,7 +908,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           filename,
-          "php_#{source_input.version}_linux_x64_#{stack}",
+          "php_#{source_input.version}_linux_x64_#{stack}"
         )
       )
 
@@ -947,7 +924,7 @@ class Builder
         artifact_output.move_dependency(
           'python',
           "artifacts/python-#{source_input.version}.tgz",
-          "#{filename_prefix}_linux_x64_#{stack}",
+          "#{filename_prefix}_linux_x64_#{stack}"
         )
       )
 
@@ -957,7 +934,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           old_file_path,
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
 
@@ -967,7 +944,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           old_file_path,
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
 
@@ -977,7 +954,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           old_file_path,
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
 
@@ -987,7 +964,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           old_file_path,
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
 
@@ -997,7 +974,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           old_file_path,
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
 
@@ -1013,14 +990,14 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           "artifacts/#{source_input.name}-v#{source_input.version}.tgz",
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
       out_data[:git_commit_sha] = source_sha
 
       out_data[:sub_dependencies] = {}
       [forecast_input, plumber_input, rserve_input, shiny_input].each do |sub_dep|
-        out_data[:sub_dependencies][sub_dep.name.to_sym] = { source: { url: sub_dep.url, sha256: sub_dep.sha_from_url() }, version: sub_dep.version }
+        out_data[:sub_dependencies][sub_dep.name.to_sym] = { source: { url: sub_dep.url, sha256: sub_dep.sha_from_url }, version: sub_dep.version }
       end
 
     when 'nginx'
@@ -1034,7 +1011,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           filename,
-          "#{filename_prefix}_linux_x64_#{stack}",
+          "#{filename_prefix}_linux_x64_#{stack}"
         )
       )
       out_data[:source_pgp] = source_pgp
@@ -1045,7 +1022,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           old_file_path,
-          "#{filename_prefix}_linux_x64_#{stack}",
+          "#{filename_prefix}_linux_x64_#{stack}"
         )
       )
 
@@ -1055,7 +1032,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           old_file_path,
-          "#{filename_prefix}_linux_x64_#{stack}",
+          "#{filename_prefix}_linux_x64_#{stack}"
         )
       )
 
@@ -1065,7 +1042,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           old_file_path,
-          "#{filename_prefix}_linux_x64_#{stack}",
+          "#{filename_prefix}_linux_x64_#{stack}"
         )
       )
 
@@ -1076,7 +1053,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           "artifacts/#{source_input.name}-#{source_input.version}.tgz",
-          "#{filename_prefix}_linux_x64_#{stack}",
+          "#{filename_prefix}_linux_x64_#{stack}"
         )
       )
       out_data[:source_pgp] = source_pgp
@@ -1086,7 +1063,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           old_file_path,
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
     when 'tini'
@@ -1095,7 +1072,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           old_file_path,
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
 
@@ -1114,7 +1091,7 @@ class Builder
         artifact_output.move_dependency(
           source_input.name,
           old_file_path,
-          "#{filename_prefix}_linux_noarch_#{stack}",
+          "#{filename_prefix}_linux_noarch_#{stack}"
         )
       )
 

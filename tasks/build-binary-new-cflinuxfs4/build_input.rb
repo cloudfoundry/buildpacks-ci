@@ -6,7 +6,7 @@ class BuildInput
   end
 
   def self.from_file(build_file)
-    data = JSON.parse(File.open(build_file).read)
+    data = JSON.parse(File.read(build_file))
     BuildInput.new(
       data['url']
     )

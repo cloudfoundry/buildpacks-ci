@@ -1,7 +1,6 @@
-# encoding: utf-8
 source 'https://rubygems.org'
 
 gem 'mini_portile', git: 'https://github.com/cf-buildpacks-eng/mini_portile'
-gem 'open-uri'
 gem 'nokogiri'
+gem 'open-uri'
 gem 'pry'

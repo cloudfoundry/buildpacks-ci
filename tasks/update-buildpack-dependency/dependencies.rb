@@ -13,7 +13,7 @@ class Dependencies
   def switch
     # if we're rebuilding, replace matching version
     if @matching_deps.map { |d| d['version'] }.include?(@dep['version'])
-      out = ((@dependencies.reject { |d| same_dependency_line?(d['cf_stacks'], d['version'], d['name']) && d['version'] == @dep['version'] }) + [@dep])
+      out = (@dependencies.reject { |d| same_dependency_line?(d['cf_stacks'], d['version'], d['name']) && d['version'] == @dep['version'] } + [@dep])
     # adding a new one, but keep everything
     elsif @removal_strategy == 'keep_all'
       out = @dependencies + [@dep]
@@ -27,8 +27,12 @@ class Dependencies
     end
     out.sort_by do |d|
       version = d['version']
-      version = version[1..-1] if !version.nil? && version.start_with?('v')
-      version = Gem::Version.new(version) rescue version
+      version = version[1..] if !version.nil? && version.start_with?('v')
+      version = begin
+        Gem::Version.new(version)
+      rescue StandardError
+        version
+      end
       [d['name'], version, d['cf_stacks']]
     end
   end
@@ -55,7 +59,7 @@ class Dependencies
 
     version = begin
       Gem::Version.new(version)
-    rescue
+    rescue StandardError
       return false
     end
 
@@ -79,9 +83,14 @@ class Dependencies
 
   def dependencies_latest_released
     return [] unless @removal_strategy == 'keep_latest_released'
+
     dep = @dependencies_latest_released.select do |d|
       same_dependency_line?(d['cf_stacks'], d['version'], d['name'])
-    end.sort_by {|d| Gem::Version.new(d['version']) rescue d['version']}.last
+    end.max_by do |d|
+      Gem::Version.new(d['version'])
+    rescue StandardError
+      d['version']
+    end
     dep ? [dep] : []
   end
 end

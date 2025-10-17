@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require_relative './buildpack-to-master.rb'
+require_relative 'buildpack-to-master'
 
 GITHUB_ACCESS_TOKEN = ENV.fetch('GITHUB_ACCESS_TOKEN') or raise 'Must supply env GITHUB_ACCESS_TOKEN'
 GITHUB_REPO = ENV.fetch('GITHUB_REPO') or raise 'Must supply env GITHUB_REPO'

@@ -4,7 +4,7 @@ require 'parse-cron'
 require 'json'
 require 'active_support/core_ext/time/zones'
 
-payload = JSON.parse(STDIN.read)
+payload = JSON.parse($stdin.read)
 
 expression = payload.dig('source', 'expression')
 location = payload.dig('source', 'location') || 'UTC'
@@ -14,4 +14,4 @@ zone = ActiveSupport::TimeZone.find_tzinfo(location)
 cron_parser = CronParser.new(expression)
 ref = cron_parser.last(zone.now)
 
-puts [ { ref: ref } ].to_json
+puts [{ ref: ref }].to_json

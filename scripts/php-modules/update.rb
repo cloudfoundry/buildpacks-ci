@@ -1,10 +1,10 @@
 require 'yaml'
+require 'date'
+require 'time'
 
 def process_extension_file(cache, data, ext_file, dependency_type, f)
   (data.dig(*dependency_type) || []).each do |dependency|
-    unless (dependency['name'] == 'oci8' && ext_file.include?('php8-base-extensions.yml')) || dependency['name'] == 'rabbitmq'
-      f.call(dependency, cache)
-    end
+    f.call(dependency, cache) unless (dependency['name'] == 'oci8' && ext_file.include?('php8-base-extensions.yml')) || dependency['name'] == 'rabbitmq'
   end
 end
 
@@ -20,8 +20,8 @@ def update_modules(&f)
     native_modules = ['native_modules']
 
     if File.basename(path).include? 'patch'
-      extensions = extensions.append('additions')
-      native_modules = native_modules.append('additions')
+      extensions.append('additions')
+      native_modules.append('additions')
     end
 
     process_extension_file(cache, data, ext_file, extensions, f)

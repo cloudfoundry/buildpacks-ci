@@ -27,7 +27,7 @@ class UsnReleaseNotes
     cves = @usn_data['cves'] || []
     lps = @usn_data['lps'] || []
 
-    raise "Could not find CVE or LP references for release notes (usn url: #{@usn_url})" if (cves.empty? && lps.empty?)
+    raise "Could not find CVE or LP references for release notes (usn url: #{@usn_url})" if cves.empty? && lps.empty?
 
     notes = "[#{@usn_id}](#{@usn_url}) #{@usn_title}:\n"
 

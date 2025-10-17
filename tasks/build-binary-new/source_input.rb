@@ -16,14 +16,14 @@ class SourceInput
   end
 
   def self.from_file(source_file)
-    data = JSON.parse(open(source_file).read)
-    if data.dig('name')
+    data = JSON.parse(File.read(source_file))
+    if data['name']
       SourceInput.new(
-        data.dig('name') || '',
-        data.dig('source_uri') || '',
-        data.dig('version') || '',
+        data['name'] || '',
+        data['source_uri'] || '',
+        data['version'] || '',
         nil,
-        data.dig('source_sha') || '',
+        data['source_sha'] || ''
       )
     else
       SourceInput.new(
@@ -34,12 +34,12 @@ class SourceInput
         data.dig('version', 'sha256'),
         data.dig('version', 'git_commit_sha'),
         data.dig('source', 'repo') || '',
-        data.dig('source', 'type') || '',
+        data.dig('source', 'type') || ''
       )
     end
   end
 
-  def sha_from_url()
+  def sha_from_url
     response = Net::HTTP.get_response(URI(@url))
     Digest::SHA256.hexdigest(response.body)
   end
