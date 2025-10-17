@@ -346,7 +346,7 @@ jobs: ##########################################################################
 
 <% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
-  - name: specs-edge-integration-master-<%= stack %>
+  - name: specs-edge-integration-develop-<%= stack %>
     serial: true
     public: true
     plan:
@@ -358,7 +358,7 @@ jobs: ##########################################################################
             duration: 6h
             resource: shepherd-cf-environment
             description: |
-              Running <%= language %>-buildpack specs-edge-integration-master-<%= stack %> job.
+              Running <%= language %>-buildpack specs-edge-integration-develop-<%= stack %> job.
           timeout: 6h
         - get: buildpacks-ci
         - get: env-repo
@@ -455,7 +455,7 @@ jobs: ##########################################################################
         resource: environment
 <% end %>
 
-  - name: specs-edge-shared-master
+  - name: specs-edge-shared-develop
     serial: true
     public: true
     plan:
@@ -467,7 +467,7 @@ jobs: ##########################################################################
           passed:
 <% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
-          - specs-edge-integration-master-<%= stack %>
+          - specs-edge-integration-develop-<%= stack %>
 <% end %>
         on_success:
           task: github-set-status-success
@@ -475,8 +475,8 @@ jobs: ##########################################################################
           params:
             GITHUB_ACCESS_TOKEN: ((buildpacks-github-token))
             GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
-            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-master'
-            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge master spec passed'
+            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-develop'
+            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge develop spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
   - name: buildpack-to-master
