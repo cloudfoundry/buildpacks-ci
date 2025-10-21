@@ -351,6 +351,44 @@ jobs: ##########################################################################
 
 <% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
+  - name: specs-edge-integration-only-master-<%= stack %>
+    serial: true
+    public: true
+    plan:
+      - in_parallel:  
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-master
+          trigger: true
+          passed:
+          - specs-unit-master
+      - task: integration-test-<%= stack %>
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
+          inputs:
+          - name: buildpack
+          run:
+            path: bash
+            args:
+            - -c  
+            - |
+              cd buildpack
+              ./scripts/integration.sh --platform docker --github-token "${GITHUB_TOKEN}" --cached false --parallel true
+              ./scripts/integration.sh --platform docker --github-token "${GITHUB_TOKEN}" --cached true --parallel true
+        params:
+          CF_STACK: <%= stack %>
+          GITHUB_TOKEN: ((buildpacks-github-token))
+        <% if buildpacks[language]['skip_docker_start'] %>
+        # Docker is required for Docker-based integration tests
+        <% else %>
+        privileged: true
+        <% end %>
+
+
   - name: specs-edge-integration-master-<%= stack %>
     serial: true
     public: true
