@@ -74,6 +74,11 @@ resource_types:
       repository: concourse/pool-resource
       tag: 1.1.3
 
+  - name: create-pull-request-resource
+    type: docker-image
+    source:
+      repository: cfbuildpacks/create-pull-request-resource
+
 resources: ############################################################################################################
 ## Git ##
 
@@ -98,6 +103,12 @@ resources: #####################################################################
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
       branch: master
+
+  - name: buildpack-pull-request
+    type: create-pull-request-resource
+    source:
+      remote_repository: <%= organization %>/<%= language %>-buildpack
+      github_token: ((buildpacks-github-token))
 
   - name: libbuildpack
     type: git
@@ -491,10 +502,13 @@ jobs: ##########################################################################
           DOCKER_START: true
           <% end %>
           LANGUAGE: <%= language %>
-      - put: buildpack-master
+      - put: buildpack-pull-request
         params:
-          repository: buildpack
-          rebase: true
+          repo_location: buildpack
+          title: Update libbuildpack
+          branch_prefix: "update-libbuildpack"
+          auto_merge: false
+          base: master
 <% if buildpacks[language]['compile_extensions'] %>
   - name: update-compile-extensions
     serial: true
@@ -509,10 +523,13 @@ jobs: ##########################################################################
       - task: update-compile-extensions
         file: buildpacks-ci/tasks/update-compile-extensions/task.yml
         params: { RUBYGEM_MIRROR: {{rubygem-mirror}}  }
-      - put: buildpack-master
+      - put: buildpack-pull-request
         params:
-          repository: buildpack-artifacts
-          rebase: true
+          repo_location: buildpack-artifacts
+          title: Update compile-extensions
+          branch_prefix: "update-compile-extensions"
+          auto_merge: false
+          base: master
   - name: update-buildpack-packager
     serial: true
     public: true
@@ -531,10 +548,13 @@ jobs: ##########################################################################
           GEM_NAME: buildpack-packager
           GEM_GIT_REPOSITORY: {{buildpack-packager-git-uri-public}}
           GEMFILE_NAME: cf.Gemfile
-      - put: buildpack-master
+      - put: buildpack-pull-request
         params:
-          repository: repo-with-gemfile-artifacts
-          rebase: true
+          repo_location: repo-with-gemfile-artifacts
+          title: Update buildpack-packager
+          branch_prefix: "update-buildpack-packager"
+          auto_merge: false
+          base: master
 <% end %>
 
 <% if language == 'hwc' %>
