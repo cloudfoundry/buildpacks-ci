@@ -31,4 +31,14 @@ if [[ -z ${SKIP_DOCKER_START:-} ]]; then
   trap util::docker::stop EXIT
 fi
 
-./scripts/integration.sh
+INTEGRATION_ARGS=()
+
+if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+  INTEGRATION_ARGS+=("--github-token" "${GITHUB_TOKEN}")
+fi
+
+if [[ -n "${SWITCHBLADE_PLATFORM:-}" ]]; then
+  INTEGRATION_ARGS+=("--platform" "${SWITCHBLADE_PLATFORM}")
+fi
+
+./scripts/integration.sh "${INTEGRATION_ARGS[@]}"

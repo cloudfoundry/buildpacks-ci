@@ -254,6 +254,32 @@ jobs: ##########################################################################
               DOCKER_START: true
 <% end %>
 
+<% relevant_stacks = buildpacks[language]['stacks'] %>
+<% relevant_stacks.each do |stack| %>
+  - name: specs-switchblade-docker-master-<%= stack %>
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-master
+          trigger: true
+          passed:
+          - specs-unit-master
+      - task: switchblade-docker-test-<%= stack %>
+        file: buildpacks-ci/tasks/run-buildpack-switchblade-docker/task.yml
+        privileged: true
+        params:
+          CF_STACK: <%= stack %>
+          GITHUB_TOKEN: ((buildpacks-github-token))
+          GINKGO_ATTEMPTS: 3
+          GINKGO_NODES: 2
+          <% if language == 'php' %>
+          COMPOSER_GITHUB_OAUTH_TOKEN: '((composer-github-oauth-token))'
+          <% end %>
+<% end %>
+
   - name: detect-new-version-and-upload-artifacts
     serial: true
     public: true
@@ -371,7 +397,7 @@ jobs: ##########################################################################
           resource: buildpack-master
           trigger: true
           passed:
-          - specs-unit-master
+          - specs-switchblade-docker-master-<%= stack %>
         - get: repo
           resource: buildpack-master
         - get: cf-deployment
@@ -440,6 +466,8 @@ jobs: ##########################################################################
             CF_STACK: <%= stack %>
             GINKGO_ATTEMPTS: 4
             GINKGO_NODES: 3
+            GITHUB_TOKEN: ((buildpacks-github-token))
+            SWITCHBLADE_PLATFORM: cf
             <% if language == 'php' %>
             COMPOSER_GITHUB_OAUTH_TOKEN: '((composer-github-oauth-token))'
             <% end %>
