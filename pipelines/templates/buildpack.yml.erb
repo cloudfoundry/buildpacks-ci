@@ -77,13 +77,13 @@ resource_types:
 resources: ############################################################################################################
 ## Git ##
 
-  - name: buildpack-develop
+  - name: buildpack-master
     type: git
     webhook_token: ob0aigh3
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
       private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-      branch: develop
+      branch: master
       ignore_paths:
         - VERSION
         - CHANGELOG
@@ -92,23 +92,6 @@ resources: #####################################################################
     type: git
     source:
       uri: https://github.com/cloudfoundry/cf-deployment
-
-  - name: buildpack-new-version
-    type: git
-    source:
-      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-      branch: develop
-      paths:
-        - VERSION
-        - CHANGELOG
-
-  - name: buildpack-master
-    type: git
-    source:
-      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
-      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-      branch: master
 
   - name: buildpacks-ci
     type: git
@@ -232,13 +215,13 @@ jobs: ##########################################################################
       - in_parallel:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-develop
+          resource: buildpack-master
           trigger: true
       - do:
         - task: check-modules
           file: buildpacks-ci/tasks/check-php-modules-in-manifest/task.yml
 <% end %>
-  - name: specs-unit-develop
+  - name: specs-unit-master
     serial: true
     public: true
     plan:
@@ -246,7 +229,7 @@ jobs: ##########################################################################
         - in_parallel:
           - get: buildpacks-ci
           - get: buildpack
-            resource: buildpack-develop
+            resource: buildpack-master
 <% if language == "php" %>
             passed: [ ensure-manifest-has-modules ]
 <% end %>
@@ -357,7 +340,7 @@ jobs: ##########################################################################
 
 <% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
-  - name: specs-edge-integration-develop-<%= stack %>
+  - name: specs-edge-integration-master-<%= stack %>
     serial: true
     public: true
     plan:
@@ -369,17 +352,17 @@ jobs: ##########################################################################
             duration: 6h
             resource: shepherd-cf-environment
             description: |
-              Running <%= language %>-buildpack specs-edge-integration-develop-<%= stack %> job.
+              Running <%= language %>-buildpack specs-edge-integration-master-<%= stack %> job.
           timeout: 6h
         - get: buildpacks-ci
         - get: env-repo
         - get: buildpack
-          resource: buildpack-develop
+          resource: buildpack-master
           trigger: true
           passed:
-          - specs-unit-develop
+          - specs-unit-master
         - get: repo
-          resource: buildpack-develop
+          resource: buildpack-master
         - get: cf-deployment
       - task: redeploy
         file: buildpacks-ci/tasks/cf/redeploy/task.yml
@@ -466,19 +449,17 @@ jobs: ##########################################################################
         resource: environment
 <% end %>
 
-  - name: specs-edge-shared-develop
+  - name: specs-edge-shared-master
     serial: true
     public: true
     plan:
-      - do:
+      - in_parallel:
         - get: buildpacks-ci
-        - get: repo
-          resource: buildpack-develop
+        - get: buildpack
+          resource: buildpack-master
           trigger: true
           passed:
-<% relevant_stacks = buildpacks[language]['stacks'] %>
-<% relevant_stacks.each do |stack| %>
-          - specs-edge-integration-develop-<%= stack %>
+          - specs-edge-integration-master-<%= stack %>
 <% end %>
         on_success:
           task: github-set-status-success
@@ -486,27 +467,9 @@ jobs: ##########################################################################
           params:
             GITHUB_ACCESS_TOKEN: ((buildpacks-github-token))
             GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
-            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-develop'
-            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge develop spec passed'
+            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-master'
+            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge master spec passed'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
-
-  - name: buildpack-to-master
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: repo
-          trigger: true
-          resource: buildpack-new-version
-      - task: merge-to-master
-        file: buildpacks-ci/tasks/buildpack-to-master/task.yml
-        params:
-          GITHUB_ACCESS_TOKEN: ((buildpacks-github-token))
-          GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
-          GITHUB_STATUS_CONTEXT: 'buildpacks-ci/passed-dev-specs'
-          GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI develop specs passed'
-          PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
   - name: update-libbuildpack
     serial: true
@@ -517,7 +480,7 @@ jobs: ##########################################################################
         - get: libbuildpack
           trigger: true
         - get: buildpack
-          resource: buildpack-develop
+          resource: buildpack-master
       - task: update-libbuildpack
         file: buildpacks-ci/tasks/update-libbuildpack/task.yml
         <% if language == "php" %>
@@ -528,7 +491,7 @@ jobs: ##########################################################################
           DOCKER_START: true
           <% end %>
           LANGUAGE: <%= language %>
-      - put: buildpack-develop
+      - put: buildpack-master
         params:
           repository: buildpack
           rebase: true
@@ -542,11 +505,11 @@ jobs: ##########################################################################
         - get: compile-extensions
           trigger: true
         - get: buildpack
-          resource: buildpack-develop
+          resource: buildpack-master
       - task: update-compile-extensions
         file: buildpacks-ci/tasks/update-compile-extensions/task.yml
         params: { RUBYGEM_MIRROR: {{rubygem-mirror}}  }
-      - put: buildpack-develop
+      - put: buildpack-master
         params:
           repository: buildpack-artifacts
           rebase: true
@@ -560,7 +523,7 @@ jobs: ##########################################################################
           resource: buildpack-packager
           trigger: true
         - get: repo-with-gemfile
-          resource: buildpack-develop
+          resource: buildpack-master
       - task: update-buildpack-packager
         file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
         params:
@@ -568,7 +531,7 @@ jobs: ##########################################################################
           GEM_NAME: buildpack-packager
           GEM_GIT_REPOSITORY: {{buildpack-packager-git-uri-public}}
           GEMFILE_NAME: cf.Gemfile
-      - put: buildpack-develop
+      - put: buildpack-master
         params:
           repository: repo-with-gemfile-artifacts
           rebase: true
