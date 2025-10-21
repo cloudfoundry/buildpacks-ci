@@ -470,6 +470,7 @@ jobs: ##########################################################################
           resource: buildpack-master
           trigger: true
           passed:
+<% relevant_stacks.each do |stack| %>
           - specs-edge-integration-master-<%= stack %>
 <% end %>
         on_success:
