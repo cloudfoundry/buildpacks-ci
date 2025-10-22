@@ -74,6 +74,9 @@ RUN apt-get -qqy update && apt-get -qqy install \
     credhub-cli \
     om-cli
 
+# Create symlink for the cloudfoundry cli cf8 as cf
+RUN ln -s /usr/bin/cf8 /usr/bin/cf
+
 RUN curl -sSL https://get.docker.com/ | sh
 
 RUN git config --global user.email "app-runtime-interfaces@cloudfoundry.org"
