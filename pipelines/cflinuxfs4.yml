@@ -39,14 +39,14 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/cf-acceptance-tests.git
-    branch: develop #! TODO switch to main when https://github.com/cloudfoundry/cf-acceptance-tests/pull/819 is merged and available on main
+    branch: main
 
 - name: bbl-state
   type: git
   source:
     uri: git@github.com:cloudfoundry/buildpacks-envs
     branch: master
-    private_key: ((buildpacks-envs-deploy-key.private_key))
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
 
 - name: bosh-deployment
   type: git
@@ -64,27 +64,33 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/buildpacks-ci
-    branch: master
+    branch: cflinux4-ci
+
+- name: runtime-ci
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/runtime-ci
+    branch: main
 
 - name: cflinuxfs4
   type: git
   source:
     branch: main
     uri: git@github.com:cloudfoundry/cflinuxfs4.git
-    private_key: ((cflinuxfs4-deploy-key.private_key))
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
 
 - name: cflinuxfs4-github-tags
   type: git
   source:
     uri: git@github.com:cloudfoundry/cflinuxfs4.git
-    private_key: ((cflinuxfs4-deploy-key.private_key))
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
     tag_filter: "*"
 
 - name: cflinuxfs4-build-trigger
   type: git
   source:
     uri: git@github.com:cloudfoundry/cflinuxfs4.git
-    private_key: ((cflinuxfs4-deploy-key.private_key))
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
     ignore_paths:
     - receipt.cflinuxfs4.x86_64
     - README.md
@@ -95,22 +101,24 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
     branch: main
-    paths: [ new-cve-notifications/ubuntu22.04.yml ]
-    private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
+    paths:
+      - new-cve-notifications/ubuntu22.04.yml
+      - new-cve-notifications/ubuntu22.04-unrelated.yml
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
 
 - name: receipt-diff
   type: git
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
     paths: [ receipt.cflinuxfs4.x86_64 ]
-    private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
     tag_filter: "newpackages_cflinuxfs4_*"
 
 - name: public-robots
   type: git
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-    private_key: ((public-buildpacks-ci-robots-deploy-key.private_key))
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
     branch: main
 
 - name: cflinuxfs4-release
@@ -118,14 +126,14 @@ resources:
   source:
     branch: main
     uri: git@github.com:cloudfoundry/cflinuxfs4-release.git
-    private_key: ((cflinuxfs4-release-deploy-key.private_key))
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
 
 - name: cflinuxfs4-release-golang-update-trigger
   type: git
   source:
     branch: main
     uri: git@github.com:cloudfoundry/cflinuxfs4-release.git
-    private_key: ((cflinuxfs4-release-deploy-key.private_key))
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
     paths:
       - packages/golang-1-linux/spec.lock
 
@@ -260,8 +268,8 @@ jobs:
           ---
           blobstore:
             options:
-              access_key_id: ((cloudfoundry-s3-access-key))
-              secret_access_key: ((cloudfoundry-s3-secret-key))
+              access_key_id: ((rootfs-bucket.access_key))
+              secret_access_key: ((rootfs-bucket.secret_key))
     - put: cflinuxfs4-release
       params:
         repository: golang-bumped-cflinuxfs4-release
@@ -328,6 +336,7 @@ jobs:
       resource: bbl-state
     - get: bosh-deployment
     - get: buildpacks-ci
+    - get: runtime-ci
     - get: receipt-diff
       trigger: true
     - get: new-cves
@@ -346,16 +355,15 @@ jobs:
     params:
       BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
       BBL_GCP_PROJECT_ID: cf-buildpacks
-      BBL_GCP_ZONE: us-east1-c
-      BBL_GCP_REGION: us-east1
+      BBL_GCP_REGION: europe-north2
       BBL_IAAS: gcp
       BBL_LB_CERT: ((cflinuxfs4-lb-cert.certificate))
       BBL_LB_KEY: ((cflinuxfs4-lb-cert.private_key))
-      LB_DOMAIN: cflinuxfs4.buildpacks-gcp.ci.cf-app.com
+      LB_DOMAIN: cflinuxfs4.buildpacks.ci.cloudfoundry.org
       BBL_ENV_NAME: cflinuxfs4
       BBL_STATE_DIR: cflinuxfs4
       GIT_COMMIT_EMAIL: "tanzu-buildpacks.pdl@broadcom.com"
-      GIT_COMMIT_USERNAME: "CF Buildapcks Eng Bot"
+      GIT_COMMIT_USERNAME: "CF Buildpacks Eng Bot"
       GIT_COMMIT_MESSAGE: "Update bbl state dir"
     input_mapping:
       ops-files: bosh-deployment
@@ -364,11 +372,29 @@ jobs:
       params:
         repository: updated-bbl-state
         rebase: true
-  - task: add-gcp-parent-dns-record
-    file: buildpacks-ci/tasks/add-gcp-parent-dns-record/task.yml
+  - task: add-to-gcp-dns
+    file: runtime-ci/tasks/manage-gcp-dns/task.yml
     params:
-      ENV_NAME: cflinuxfs4
-      GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+      BBL_STATE_DIR: cflinuxfs4
+      GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key)
+      GCP_DNS_ZONE_NAME: cflinuxfs4-zone
+      GCP_DNS_RECORD_SET_NAME: cflinuxfs4.buildpacks.ci.cloudfoundry.org
+      ACTION: add
+    input_mapping:
+      bbl-state: updated-bbl-state
+    on_failure:
+      task: destroy-infrastructure
+      file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+      input_mapping:
+        bbl-state: updated-bbl-state
+      params:
+        BBL_STATE_DIR: cflinuxfs4
+        BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+    ensure:
+      put: bbl-state
+      params:
+        repository: updated-bbl-state
+        rebase: true
 
 - name: deploy
   serial: true
@@ -452,7 +478,7 @@ jobs:
         - rootfs-release-artifacts/use-dev-release-opsfile.yml
         - capi-release-artifacts/use-dev-release-opsfile.yml
         vars:
-          system_domain: cflinuxfs4.buildpacks-gcp.ci.cf-app.com
+          system_domain: cflinuxfs4.buildpacks.ci.cloudfoundry.org
 
 - name: cats
   serial: true
@@ -488,7 +514,7 @@ jobs:
     - task: write-cats-config
       file: buildpacks-ci/tasks/write-cats-config/task.yml
       params:
-        APPS_DOMAIN: cflinuxfs4.buildpacks-gcp.ci.cf-app.com
+        APPS_DOMAIN: cflinuxfs4.buildpacks.ci.cloudfoundry.org
         DIEGO_DOCKER_ON: true
         STACKS: cflinuxfs4
     - task: cats
@@ -565,14 +591,20 @@ jobs:
       resource: cf-deployment-concourse-tasks-latest
     - get: bbl-state
     - get: buildpacks-ci
+    - get: runtime-ci
     - get: version
       passed: [ delete-deployment ]
       trigger: true
-  - task: remove-gcp-parent-dns-record
-    file: buildpacks-ci/tasks/remove-gcp-parent-dns-record/task.yml
-    params:
-      GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-      ENV_NAME: cflinuxfs4
+    - task: remove-from-gcp-dns
+      file: runtime-ci/tasks/manage-gcp-dns/task.yml
+      params:
+        BBL_STATE_DIR: bump-deployments/bbl-gcp-cf
+        GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+        GCP_DNS_ZONE_NAME: buildpacks-ci
+        GCP_DNS_RECORD_SET_NAME: cflinuxfs4.buildpacks.ci.cloudfoundry.org
+        ACTION: remove
+      input_mapping:
+        bbl-state: updated-bbl-state
   - task: bbl-destroy
     file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
     params:
