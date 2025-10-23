@@ -341,6 +341,27 @@ class DependencyBuild
     end
   end
 
+  def build_CAAPM
+    old_filepath = "source/CA-APM-PHPAgent-#{@source_input.version}_linux.tar.gz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
+      @out_data[:url] = @source_input.url
+    end
+  end
+
+  def build_hwc
+    @binary_builder.build(@source_input)
+    merge_out_data(
+      "#{@binary_builder.base_dir}/hwc-#{@source_input.version}-windows-x86-64.zip",
+      "#{@filename_prefix}_windows_x86-64_any-stack"
+    )
+  end
+
   def build_bower
     old_filepath = 'artifacts/temp_file.tgz'
     filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
