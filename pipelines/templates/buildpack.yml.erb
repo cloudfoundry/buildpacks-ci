@@ -377,9 +377,12 @@ jobs: ##########################################################################
 
 <% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
+  # NOTE: CF Integration job - manually triggerable, not part of main pipeline flow
+  # Requires Shepherd CF environment access. Can be enabled when CF environment is available.
   - name: specs-edge-integration-master-<%= stack %>
     serial: true
-    public: true
+    public: false
+    disable_manual_trigger: false
     plan:
       - in_parallel:
         - put: environment
@@ -395,7 +398,7 @@ jobs: ##########################################################################
         - get: env-repo
         - get: buildpack
           resource: buildpack-master
-          trigger: true
+          trigger: false
           passed:
           - specs-switchblade-docker-master-<%= stack %>
         - get: repo
@@ -499,16 +502,18 @@ jobs: ##########################################################################
           trigger: true
           passed:
 <% relevant_stacks.each do |stack| %>
-          - specs-edge-integration-master-<%= stack %>
+          - specs-switchblade-docker-master-<%= stack %>
 <% end %>
         on_success:
           task: github-set-status-success
           file: buildpacks-ci/tasks/set-status-success/task.yml
+          input_mapping:
+            repo: buildpack
           params:
             GITHUB_ACCESS_TOKEN: ((buildpacks-github-token))
             GITHUB_REPO: <%= organization %>/<%= language %>-buildpack
             GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-master'
-            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge master spec passed'
+            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge master spec passed (Docker-based)'
             PIPELINE_URI: {{buildpacks-ci-pipeline-uri}}
 
   - name: update-libbuildpack
