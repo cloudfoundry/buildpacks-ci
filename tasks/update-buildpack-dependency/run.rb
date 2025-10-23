@@ -86,11 +86,11 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   # TODO: This should be removed when all the dependencies are built using cflinuxfs4. Right now it only uses the dependencies included in buildpacks-ci/pipelines/config/dependency-builds.yml --> cflinuxfs4_dependencies:
   # TODO: This also includes logic to skip certain version lines based on the skip_lines_cflinuxfs4 array in the config file.
-  skip_lines_cflinuxfs4 = config['dependencies'][source_name].key?('skip_lines_cflinuxfs4') ? config['dependencies'][source_name]['skip_lines_cflinuxfs4'].map(&:downcase) : []
+  skip_lines_cflinuxfs4 = config['dependencies'][source_name]&.key?('skip_lines_cflinuxfs4') ? config['dependencies'][source_name]['skip_lines_cflinuxfs4'].map(&:downcase) : []
   stacks -= ['cflinuxfs4'] if !cflinuxfs4_dependencies.include?(source_name) || skip_lines_cflinuxfs4.include?(version_line.downcase)
 
   # Logic to skip certain version lines that are not supported in cflinuxfs3
-  skip_lines_cflinuxfs3 = config['dependencies'][source_name].key?('skip_lines_cflinuxfs3') ? config['dependencies'][source_name]['skip_lines_cflinuxfs3'].map(&:downcase) : []
+  skip_lines_cflinuxfs3 = config['dependencies'][source_name]&.key?('skip_lines_cflinuxfs3') ? config['dependencies'][source_name]['skip_lines_cflinuxfs3'].map(&:downcase) : []
   stacks -= ['cflinuxfs3'] if skip_lines_cflinuxfs3.include?(version_line.downcase)
 
   stacks = WINDOWS_STACKS if source_name == 'hwc'
