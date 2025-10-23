@@ -8,14 +8,14 @@ if ! command -v ruby &> /dev/null || ! ruby --version | grep -q "3.4"; then
   apt update
   apt install -y wget build-essential zlib1g-dev libssl-dev libreadline-dev libyaml-dev libffi-dev
   
-  cd /tmp
+  pushd /tmp
   wget -q https://cache.ruby-lang.org/pub/ruby/3.4/ruby-${RUBY_VERSION}.tar.gz
   tar -xzf ruby-${RUBY_VERSION}.tar.gz
   cd ruby-${RUBY_VERSION}
   ./configure --disable-install-doc
   make -j$(nproc)
   make install
-  cd /
+  popd
   rm -rf /tmp/ruby-${RUBY_VERSION}*
 fi
 
