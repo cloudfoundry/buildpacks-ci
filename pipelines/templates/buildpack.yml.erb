@@ -137,6 +137,15 @@ resources: #####################################################################
       branch: master
       private_key: '((cf-buildpacks-eng-github-ssh-key.private_key))'
 
+  - name: version
+    type: semver
+    source:
+      driver: git
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
+      branch: master
+      file: VERSION
+      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+
 
   ## Github Releases ##
 
@@ -263,12 +272,16 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-master
           trigger: true
+        - get: version
+          params: { bump: patch }
 <% bucket_stacks = buildpacks[language]['stacks']
    bucket_stacks = bucket_stacks + ['any'] if language.to_s == 'hwc' || language.to_s == 'binary'
    bucket_stacks.each do |stack| %> #change bucket_stacks to buildpacks[language]['stacks'] when removing any_stack
         - get: pivotal-buildpack-cached-<%= stack %>
         - get: pivotal-buildpack-<%= stack %>
 <% end %>
+      - put: version
+        params: { file: version/number }
       - do:
         - in_parallel:
 <% bucket_stacks = buildpacks[language]['stacks']
@@ -300,6 +313,9 @@ jobs: ##########################################################################
     plan:
       - in_parallel:
         - get: buildpacks-ci
+        - get: version
+          passed:
+            - detect-new-version-and-upload-artifacts
         <%
         all_stacks = buildpacks[language]['stacks']
         all_stacks = all_stacks + ['any'] if language.to_s == 'hwc' || language.to_s == 'binary'
@@ -321,7 +337,7 @@ jobs: ##########################################################################
       - put: buildpack-master
         params:
           repository: buildpack
-          tag: buildpack/VERSION
+          tag: version/number
           tag_prefix: v
   - name: buildpack-to-github
     serial: true
@@ -345,6 +361,7 @@ jobs: ##########################################################################
           name: buildpack-artifacts/tag
           tag: buildpack-artifacts/tag
           body: buildpack-artifacts/RECENT_CHANGES
+          generate_release_notes: true
           globs:
             - buildpack-artifacts/*-buildpack*-v*.zip
             - buildpack-artifacts/*-buildpack*-v*.zip.SHA256SUM.txt
