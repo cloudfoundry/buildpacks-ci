@@ -280,6 +280,7 @@ jobs: ##########################################################################
           <% end %>
 <% end %>
 
+
   - name: detect-new-version-and-upload-artifacts
     serial: true
     public: true
@@ -297,7 +298,11 @@ jobs: ##########################################################################
    bucket_stacks = bucket_stacks + ['any'] if language.to_s == 'hwc' || language.to_s == 'binary'
    bucket_stacks.each do |stack| %> #change bucket_stacks to buildpacks[language]['stacks'] when removing any_stack
         - get: pivotal-buildpack-cached-<%= stack %>
+          version: every
+          trigger: false
         - get: pivotal-buildpack-<%= stack %>
+          version: every
+          trigger: false
 <% end %>
       - do:
         - in_parallel:
@@ -312,6 +317,7 @@ jobs: ##########################################################################
                 BUILDPACK_NAME: <%= language %>-buildpack
                 RUBYGEM_MIRROR: {{rubygem-mirror}}
                 CF_STACK: <%= stack %>
+                GITHUB_TOKEN: ((buildpacks-github-token))
               input_mapping:
                 pivotal-buildpack: pivotal-buildpack-<%= stack %>
                 pivotal-buildpack-cached: pivotal-buildpack-cached-<%= stack %>
