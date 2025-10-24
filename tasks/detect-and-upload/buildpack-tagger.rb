@@ -28,6 +28,7 @@ class BuildpackTagger
       Dir.mkdir('../buildpack-artifacts/uncached')
       Dir.mkdir('../buildpack-artifacts/cached')
 
+      # Skip tag check for bootstrap - always create artifacts
       # if existing_tags.include? tag_to_add
       #   puts "Tag #{tag_to_add} already exists"
       #   uncached_buildpack = Dir['../pivotal-buildpack/*.zip'].first
@@ -101,7 +102,6 @@ class BuildpackTagger
             puts "sha256: #{sha256sum}"
           end
         end
-      end
     end
   end
 end
