@@ -172,7 +172,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpack-release-candidates-bucket}}
-      regexp: <%= language%>/<%= language %>_buildpack-<%= stack %>-v(.*).zip
+      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-<%= stack %>-v(.*).zip
       access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
       secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
@@ -180,7 +180,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpack-release-candidates-bucket}}
-      regexp: <%= language%>/<%= language %>_buildpack-cached-<%= stack %>-v(.*).zip
+      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached-<%= stack %>-v(.*).zip
       access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
       secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 <% end %>
@@ -190,7 +190,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpack-release-candidates-bucket}}
-      regexp: <%= language%>/<%= language %>_buildpack-cached-v(.*).zip
+      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-cached-v(.*).zip
       access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
       secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
@@ -198,7 +198,7 @@ resources: #####################################################################
     type: s3
     source:
       bucket: {{buildpack-release-candidates-bucket}}
-      regexp: <%= language%>/<%= language %>_buildpack-v(.*).zip
+      regexp: buildpack-release-candidates/<%= language%>/<%= language %>_buildpack-v(.*).zip
       access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
       secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 <% end %>
@@ -289,6 +289,10 @@ jobs: ##########################################################################
         - get: buildpack
           resource: buildpack-master
           trigger: true
+          passed:
+<% relevant_stacks.each do |stack| %>
+          - specs-switchblade-docker-master-<%= stack %>
+<% end %>
 <% bucket_stacks = buildpacks[language]['stacks']
    bucket_stacks = bucket_stacks + ['any'] if language.to_s == 'hwc' || language.to_s == 'binary'
    bucket_stacks.each do |stack| %> #change bucket_stacks to buildpacks[language]['stacks'] when removing any_stack
