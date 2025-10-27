@@ -9,6 +9,7 @@ image_resource:
 inputs:
   - name: buildpacks-ci
   - name: buildpack
+  - name: version
   - name: uncached-buildpack-for-stack0
   - name: uncached-buildpack-for-stack1
     optional: true

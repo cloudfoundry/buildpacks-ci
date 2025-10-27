@@ -102,7 +102,7 @@ resources: #####################################################################
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
-      branch: master
+      branch: switchblade
 
   - name: buildpack-pull-request
     type: create-pull-request-resource
@@ -375,12 +375,15 @@ jobs: ##########################################################################
           repository: buildpack
           tag: version/number
           tag_prefix: v
+          only_tag: true
   - name: buildpack-to-github
     serial: true
     public: true
     plan:
       - in_parallel:
         - get: buildpacks-ci
+        - get: version
+          passed: [ ship-it ]
         <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
         - get: uncached-buildpack-for-stack<%= ndx.to_s %>
           resource: pivotal-buildpack-<%= stack %>
