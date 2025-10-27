@@ -10,10 +10,7 @@ inputs:
   - name: buildpacks-ci
   - name: buildpack
   - name: version
-<<<<<<< HEAD
-=======
     optional: true
->>>>>>> origin/update-version-changelog
   - name: uncached-buildpack-for-stack0
   - name: uncached-buildpack-for-stack1
     optional: true
