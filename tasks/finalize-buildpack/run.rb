@@ -17,4 +17,12 @@ uncached_buildpack_dirs = Dir.glob('uncached-buildpack-for-stack*')
 ENV['GOBIN'] = "#{File.expand_path(buildpack_repo_dir)}/.bin"
 ENV['PATH'] = "#{ENV.fetch('GOBIN', nil)}:#{ENV.fetch('PATH', nil)}"
 
+puts "DEBUG: Using version: #{version}"
+puts "DEBUG: Uncached buildpack directories found: #{uncached_buildpack_dirs}"
+
 BuildpackFinalizer.new(artifact_dir, version, buildpack_repo_dir, uncached_buildpack_dirs).run
+
+puts "DEBUG: Files created in #{artifact_dir}:"
+Dir.glob("#{artifact_dir}/*").each do |file|
+  puts "  - #{File.basename(file)}"
+end
