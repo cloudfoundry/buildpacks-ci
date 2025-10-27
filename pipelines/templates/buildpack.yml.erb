@@ -304,7 +304,6 @@ jobs: ##########################################################################
           - specs-switchblade-docker-master-<%= stack %>
 <% end %>
         - get: version
-          params: { bump: patch }
 <% bucket_stacks = buildpacks[language]['stacks']
    bucket_stacks = bucket_stacks + ['any'] if language.to_s == 'hwc' || language.to_s == 'binary'
    bucket_stacks.each do |stack| %> #change bucket_stacks to buildpacks[language]['stacks'] when removing any_stack
@@ -362,8 +361,6 @@ jobs: ##########################################################################
           resource: buildpack-master
       - task: check-tag-not-already-added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
-      - put: version
-        params: { file: version/number }
       - get: buildpack-master
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
@@ -404,6 +401,8 @@ jobs: ##########################################################################
             - buildpack-artifacts/<%= language %>-buildpack*-v*.zip
             - buildpack-artifacts/<%= language %>-buildpack*-v*.zip.SHA256SUM.txt
           commitish: buildpack-master/.git/ref
+      - put: version
+        params: { bump: patch }
 
 <% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
