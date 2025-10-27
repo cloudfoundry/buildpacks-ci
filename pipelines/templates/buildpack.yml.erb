@@ -334,28 +334,12 @@ jobs: ##########################################################################
           resource: buildpack-master
       - task: check-tag-not-already-added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
-      - put: buildpack-master
-        params:
-          repository: buildpack
-          tag: version/number
-          tag_prefix: v
-  - name: buildpack-to-github
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
-        - get: uncached-buildpack-for-stack<%= ndx.to_s %>
-          resource: pivotal-buildpack-<%= stack %>
-          passed: [ ship-it ]
-        <% end %>
-        - get: buildpack
-          resource: buildpack-master
-          passed: [ ship-it ]
-          trigger: true
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
+        input_mapping:
+          <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
+          uncached-buildpack-for-stack<%= ndx.to_s %>: pivotal-buildpack-<%= stack %>
+          <% end %>
       - put: buildpack-github-release
         params:
           name: buildpack-artifacts/tag

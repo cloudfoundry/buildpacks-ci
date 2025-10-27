@@ -3,7 +3,13 @@
 require_relative 'buildpack-finalizer'
 
 artifact_dir = File.join(Dir.pwd, 'buildpack-artifacts')
-version = File.read('buildpack/VERSION').strip
+
+# Read version from semver resource if available, otherwise from buildpack/VERSION
+version = if File.directory?('version') && File.file?('version/number')
+            File.read('version/number').strip
+          else
+            File.read('buildpack/VERSION').strip
+          end
 
 buildpack_repo_dir = 'buildpack'
 uncached_buildpack_dirs = Dir.glob('uncached-buildpack-for-stack*')
