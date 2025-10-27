@@ -280,8 +280,6 @@ jobs: ##########################################################################
         - get: pivotal-buildpack-cached-<%= stack %>
         - get: pivotal-buildpack-<%= stack %>
 <% end %>
-      - put: version
-        params: { file: version/number }
       - do:
         - in_parallel:
 <% bucket_stacks = buildpacks[language]['stacks']
@@ -316,14 +314,7 @@ jobs: ##########################################################################
         - get: version
           passed:
             - detect-new-version-and-upload-artifacts
-        <%
-        all_stacks = buildpacks[language]['stacks']
-        all_stacks = all_stacks + ['any'] if language.to_s == 'hwc' || language.to_s == 'binary'
-        all_stacks.each_with_index do |stack, ndx|
-        %>
-        - get: pivotal-buildpack-cached-<%= stack %>
-          passed:
-            - detect-new-version-and-upload-artifacts
+        <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
         - get: pivotal-buildpack-<%= stack %>
           passed:
             - detect-new-version-and-upload-artifacts
@@ -334,9 +325,13 @@ jobs: ##########################################################################
           resource: buildpack-master
       - task: check-tag-not-already-added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
+      - put: version
+        params: { file: version/number }
+      - get: buildpack-master
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
         input_mapping:
+          buildpack: buildpack-master
           <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
           uncached-buildpack-for-stack<%= ndx.to_s %>: pivotal-buildpack-<%= stack %>
           <% end %>
