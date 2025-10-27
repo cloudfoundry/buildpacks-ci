@@ -344,6 +344,7 @@ jobs: ##########################################################################
           globs:
             - buildpack-artifacts/*-buildpack*-v*.zip
             - buildpack-artifacts/*-buildpack*-v*.zip.SHA256SUM.txt
+          commitish: buildpack-master/.git/ref
 
 <% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
