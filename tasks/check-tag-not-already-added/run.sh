@@ -6,7 +6,11 @@ set -o pipefail
 
 VERSION=""
 if [[ -d "version" ]]; then
-    VERSION=$(cat version/version)
+    if [[ -f "version/number" ]]; then
+        VERSION=$(cat version/number)
+    elif [[ -f "version/version" ]]; then
+        VERSION=$(cat version/version)
+    fi
 else
     VERSION=$(cat buildpack/VERSION)
 fi

@@ -250,6 +250,14 @@ dependencies:
         - libonig4
         - libxml2
         - libyaml-0-2
+  pip:
+    buildpacks:
+      python:
+        lines:
+          - line: latest
+    source_type: pypi
+    any_stack: true
+    versions_to_keep: 2
   pipenv:
     buildpacks:
       python:
@@ -352,7 +360,7 @@ dependencies:
       - 'extension: .tar.gz'
     any_stack: true
     versions_to_keep: 2
-cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty', 'r' , 'httpd', 'php' ]
+cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pip', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty', 'r' , 'httpd', 'php' ]
 cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems', 'nginx', 'nginx-static', 'openresty', 'r', 'appdynamics', 'composer', 'httpd', 'php' ]
 cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go', 'ruby', 'nginx', 'r', 'php', 'staticfile' ]
 build_stacks: [ 'cflinuxfs4' ]

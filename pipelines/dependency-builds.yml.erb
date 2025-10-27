@@ -315,8 +315,8 @@ version_lines = dep['buildpacks'].values.reduce([]) {|sum, bp| sum | get_version
   <% build_stacks.each do |stack| %>
     - do:
       - task: build-binary-<%= stack %>
-        image: <%= stack == 'any-stack' ? (dep_name == 'bundler' ? 'cflinuxfs4' : 'cflinuxfs3') : stack %>-image
-        file: buildpacks-ci/tasks/build-binary-new<%= (stack == 'cflinuxfs4' || (stack == 'any-stack' && dep_name == 'bundler')) ? '-cflinuxfs4' : '' %>/build.yml
+        image: <%= stack == 'any-stack' ? 'cflinuxfs4' : stack %>-image
+        file: buildpacks-ci/tasks/build-binary-new<%= (stack == 'cflinuxfs4' || stack == 'any-stack') ? '-cflinuxfs4' : '' %>/build.yml
         output_mapping: {artifacts: <%= stack %>-artifacts, builds-artifacts: <%= stack %>-builds-metadata}
         params:
           STACK: <%= stack %>

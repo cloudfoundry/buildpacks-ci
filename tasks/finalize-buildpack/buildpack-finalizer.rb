@@ -25,10 +25,12 @@ class BuildpackFinalizer
 
   def add_changelog
     Dir.chdir(@buildpack_repo_dir) do
-      changes = File.read('CHANGELOG')
-      recent_changes = changes.split(/^v[0-9.]+.*?=+$/m)[1].strip
+      return unless File.exist?('CHANGELOG')
 
-      File.write(@recent_changes_file, "#{recent_changes}\n")
+      changes = File.read('CHANGELOG')
+      recent_changes = changes.split(/^v[0-9.]+.*?=+$/m)[1]&.strip
+
+      File.write(@recent_changes_file, "#{recent_changes}\n") if recent_changes
     end
   end
 
