@@ -351,7 +351,8 @@ jobs: ##########################################################################
           passed:
             - detect-new-version-and-upload-artifacts
         <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
-        - get: pivotal-buildpack-<%= stack %>
+        - get: uncached-buildpack-for-stack<%= ndx.to_s %>
+          resource: pivotal-buildpack-<%= stack %>
           passed:
             - detect-new-version-and-upload-artifacts
         <% end %>
@@ -368,9 +369,6 @@ jobs: ##########################################################################
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
         input_mapping:
           buildpack: buildpack-master
-          <% buildpacks[language]['stacks'].each_with_index do |stack, ndx| %>
-          uncached-buildpack-for-stack<%= ndx.to_s %>: pivotal-buildpack-<%= stack %>
-          <% end %>
       - put: buildpack-github-release
         params:
           name: buildpack-artifacts/tag
@@ -381,6 +379,7 @@ jobs: ##########################################################################
           globs:
             - buildpack-artifacts/*-buildpack*-v*.zip
             - buildpack-artifacts/*-buildpack*-v*.zip.SHA256SUM.txt
+          commitish: buildpack-master/.git/ref
 
 <% relevant_stacks = buildpacks[language]['stacks'] %>
 <% relevant_stacks.each do |stack| %>
