@@ -3,13 +3,9 @@
 require_relative 'buildpack-finalizer'
 
 artifact_dir = File.join(Dir.pwd, 'buildpack-artifacts')
-<<<<<<< HEAD
-version = if File.exist?('version/number')
-=======
 
 # Read version from semver resource if available, otherwise from buildpack/VERSION
 version = if File.directory?('version') && File.file?('version/number')
->>>>>>> origin/update-version-changelog
             File.read('version/number').strip
           else
             File.read('buildpack/VERSION').strip
