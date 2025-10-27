@@ -376,6 +376,7 @@ jobs: ##########################################################################
           name: buildpack-artifacts/tag
           tag: buildpack-artifacts/tag
           body: buildpack-artifacts/RECENT_CHANGES
+          commitish: buildpack/.git/ref
           generate_release_notes: true
           globs:
             - buildpack-artifacts/*-buildpack*-v*.zip
