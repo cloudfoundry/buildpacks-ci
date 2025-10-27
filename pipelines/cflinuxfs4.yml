@@ -155,7 +155,7 @@ resources:
   type: s3
   source:
     bucket: buildpacks.cloudfoundry.org
-    regexp: rootfs/cflinuxfs4-(.*).tar.gz
+    regexp: cflinuxfs4-release/cflinuxfs4-(.*).tar.gz
     access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
     secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
@@ -163,7 +163,7 @@ resources:
   type: s3
   source:
     bucket: buildpacks.cloudfoundry.org
-    regexp: rootfs/receipt.cflinuxfs4.x86_64-(.*)
+    regexp: cflinuxfs4-release/receipt.cflinuxfs4.x86_64-(.*)
     access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
     secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
@@ -268,12 +268,12 @@ jobs:
           ---
           blobstore:
             options:
-              access_key_id: ((rootfs-bucket.access_key))
-              secret_access_key: ((rootfs-bucket.secret_key))
-    - put: cflinuxfs4-release
-      params:
-        repository: golang-bumped-cflinuxfs4-release
-        rebase: true
+              access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+              secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+#!    - put: cflinuxfs4-release
+#!      params:
+#!        repository: golang-bumped-cflinuxfs4-release
+#!        rebase: true
 
 - name: build-rootfs
   serial: true
@@ -376,9 +376,10 @@ jobs:
     file: runtime-ci/tasks/manage-gcp-dns/task.yml
     params:
       BBL_STATE_DIR: cflinuxfs4
-      GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key)
-      GCP_DNS_ZONE_NAME: cflinuxfs4-zone
+      GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-cloudfoundry-admin-account-key))
+      GCP_DNS_ZONE_NAME: buildpacks-ci
       GCP_DNS_RECORD_SET_NAME: cflinuxfs4.buildpacks.ci.cloudfoundry.org
+      GCP_DNS_RECORD_TTL: 300
       ACTION: add
     input_mapping:
       bbl-state: updated-bbl-state
@@ -595,16 +596,17 @@ jobs:
     - get: version
       passed: [ delete-deployment ]
       trigger: true
-    - task: remove-from-gcp-dns
-      file: runtime-ci/tasks/manage-gcp-dns/task.yml
-      params:
-        BBL_STATE_DIR: bump-deployments/bbl-gcp-cf
-        GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-        GCP_DNS_ZONE_NAME: buildpacks-ci
-        GCP_DNS_RECORD_SET_NAME: cflinuxfs4.buildpacks.ci.cloudfoundry.org
-        ACTION: remove
-      input_mapping:
-        bbl-state: updated-bbl-state
+  - task: remove-from-gcp-dns
+    file: runtime-ci/tasks/manage-gcp-dns/task.yml
+    params:
+      BBL_STATE_DIR: cflinuxfs4
+      GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-cloudfoundry-admin-account-key))
+      GCP_DNS_ZONE_NAME: buildpacks-ci
+      GCP_DNS_RECORD_SET_NAME: cflinuxfs4.buildpacks.ci.cloudfoundry.org
+      GCP_DNS_RECORD_TTL: 300
+      ACTION: remove
+    input_mapping:
+      bbl-state: bbl-state
   - task: bbl-destroy
     file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
     params:
