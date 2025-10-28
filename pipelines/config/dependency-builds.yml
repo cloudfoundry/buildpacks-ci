@@ -296,8 +296,6 @@ dependencies:
     buildpacks:
       r:
         lines: #! final release for each minor version is every spring ( just before next minor version release )
-          - line: 3.6.X
-          - line: 4.2.X
           - line: 4.3.X
           - line: 4.4.X
         removal_strategy: keep_latest_released
@@ -307,8 +305,7 @@ dependencies:
       - shiny
       - plumber
     versions_to_keep: 1
-    #! R doesn't publish EOL dates but 3.6 hasn’t made a release in 3 years and community feedback suggests 3.x contains known security issues
-    skip_lines_cflinuxfs4: [ '3.6.X' ]
+    skip_lines_cflinuxfs4: []
   ruby:
     buildpacks:
       ruby:
