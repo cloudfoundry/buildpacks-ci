@@ -58,17 +58,12 @@ class BuildpackFinalizer
   end
 
   def move_uncached_buildpack
-    puts "DEBUG: Processing uncached buildpack directories: #{@uncached_buildpack_dirs}"
     @uncached_buildpack_dirs.each do |uncached_buildpack_dir|
-      puts "DEBUG: Processing directory: #{uncached_buildpack_dir}"
       Dir.chdir(uncached_buildpack_dir) do
         zip_files = Dir.glob('*.zip')
         puts "DEBUG: Found zip files in #{uncached_buildpack_dir}: #{zip_files}"
         zip_files.map do |filename|
-          puts "DEBUG: Processing file: #{filename}"
-          puts "DEBUG: Looking for pattern: /(.*)_buildpack(-.*)?-v#{@version}\\+.*.zip/"
           filename.match(/(.*)_buildpack(-.*)?-v#{@version}\+.*.zip/) do |match|
-            puts "DEBUG: Pattern matched! #{match.to_a}"
             _, language, stack_string = match.to_a
             new_filename = "#{language}-buildpack#{stack_string}-v#{@version}.zip"
             new_path     = File.join(@artifact_dir, new_filename)

@@ -18,7 +18,6 @@ ENV['GOBIN'] = "#{File.expand_path(buildpack_repo_dir)}/.bin"
 ENV['PATH'] = "#{ENV.fetch('GOBIN', nil)}:#{ENV.fetch('PATH', nil)}"
 
 puts "DEBUG: Using version: #{version}"
-puts "DEBUG: Uncached buildpack directories found: #{uncached_buildpack_dirs}"
 
 BuildpackFinalizer.new(artifact_dir, version, buildpack_repo_dir, uncached_buildpack_dirs).run
 

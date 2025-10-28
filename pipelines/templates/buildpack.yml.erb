@@ -366,30 +366,6 @@ jobs: ##########################################################################
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
         input_mapping:
           buildpack: buildpack-master
-      - task: debug-list-artifacts
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-              username: ((coredeps-dockerhub-user.username))
-              password: ((coredeps-dockerhub-user.password))
-          inputs:
-            - name: buildpack-artifacts
-          run:
-            path: bash
-            args:
-              - -c
-              - |
-                echo "DEBUG: Contents of buildpack-artifacts directory:"
-                ls -la buildpack-artifacts/
-                echo ""
-                echo "DEBUG: Looking for files matching pattern: <%= language %>-buildpack*-v*.zip"
-                find buildpack-artifacts/ -name "<%= language %>-buildpack*-v*.zip" || echo "No files found matching pattern"
-                echo ""
-                echo "DEBUG: Looking for any zip files:"
-                find buildpack-artifacts/ -name "*.zip" || echo "No zip files found"
       - put: buildpack-github-release
         params:
           name: buildpack-artifacts/tag
