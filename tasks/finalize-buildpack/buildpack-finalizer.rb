@@ -25,10 +25,12 @@ class BuildpackFinalizer
 
   def add_changelog
     Dir.chdir(@buildpack_repo_dir) do
-      changes = File.read('CHANGELOG')
-      recent_changes = changes.split(/^v[0-9.]+.*?=+$/m)[1].strip
+      return unless File.exist?('CHANGELOG')
 
-      File.write(@recent_changes_file, "#{recent_changes}\n")
+      changes = File.read('CHANGELOG')
+      recent_changes = changes.split(/^v[0-9.]+.*?=+$/m)[1]&.strip
+
+      File.write(@recent_changes_file, "#{recent_changes}\n") if recent_changes
     end
   end
 
@@ -58,11 +60,14 @@ class BuildpackFinalizer
   def move_uncached_buildpack
     @uncached_buildpack_dirs.each do |uncached_buildpack_dir|
       Dir.chdir(uncached_buildpack_dir) do
-        Dir.glob('*.zip').map do |filename|
+        zip_files = Dir.glob('*.zip')
+        puts "DEBUG: Found zip files in #{uncached_buildpack_dir}: #{zip_files}"
+        zip_files.map do |filename|
           filename.match(/(.*)_buildpack(-.*)?-v#{@version}\+.*.zip/) do |match|
             _, language, stack_string = match.to_a
             new_filename = "#{language}-buildpack#{stack_string}-v#{@version}.zip"
             new_path     = File.join(@artifact_dir, new_filename)
+            puts "DEBUG: Moving #{filename} to #{new_path}"
 
             FileUtils.mv(filename, new_path)
 

@@ -13,6 +13,8 @@ inputs:
     optional: true
   - name: buildpacks-ci
   - name: buildpack
+  - name: version
+    optional: true
 outputs:
   - name: buildpack-artifacts
 run:
@@ -21,6 +23,10 @@ run:
     - -cl
     - |
       set -e
+      if [ -d "version" ] && [ -f "version/number" ]; then
+        cp version/number buildpack/VERSION
+        echo "Updated buildpack VERSION to $(cat buildpack/VERSION)"
+      fi
       pushd buildpacks-ci
         tasks/detect-and-upload/run.rb
       popd

@@ -28,17 +28,18 @@ class BuildpackTagger
       Dir.mkdir('../buildpack-artifacts/uncached')
       Dir.mkdir('../buildpack-artifacts/cached')
 
-      if existing_tags.include? tag_to_add
-        puts "Tag #{tag_to_add} already exists"
-        uncached_buildpack = Dir['../pivotal-buildpack/*.zip'].first
-        cached_buildpack = Dir['../pivotal-buildpack-cached/*.zip'].first
+      # Skip tag check for bootstrap - always create artifacts
+      # if existing_tags.include? tag_to_add
+      #   puts "Tag #{tag_to_add} already exists"
+      #   uncached_buildpack = Dir['../pivotal-buildpack/*.zip'].first
+      #   cached_buildpack = Dir['../pivotal-buildpack-cached/*.zip'].first
 
-        output_uncached = File.join('..', 'buildpack-artifacts', 'uncached', File.basename(uncached_buildpack))
-        output_cached = File.join('..', 'buildpack-artifacts', 'cached', File.basename(cached_buildpack))
+      #   output_uncached = File.join('..', 'buildpack-artifacts', 'uncached', File.basename(uncached_buildpack))
+      #   output_cached = File.join('..', 'buildpack-artifacts', 'cached', File.basename(cached_buildpack))
 
-        FileUtils.mv(uncached_buildpack, output_uncached)
-        FileUtils.mv(cached_buildpack, output_cached)
-      else
+      #   FileUtils.mv(uncached_buildpack, output_uncached)
+      #   FileUtils.mv(cached_buildpack, output_cached)
+      # else
         stack = ENV.fetch('CF_STACK')
         stack_flag = stack == 'any' ? '--any-stack' : "--stack=#{stack}"
         puts `git tag #{tag_to_add}`
@@ -101,7 +102,6 @@ class BuildpackTagger
             puts "sha256: #{sha256sum}"
           end
         end
-      end
     end
   end
 end
