@@ -154,16 +154,16 @@ resources:
 - name: stack-s3
   type: s3
   source:
-    bucket: buildpacks.cloudfoundry.org
-    regexp: cflinuxfs4-release/cflinuxfs4-(.*).tar.gz
+    bucket: cflinuxfs4-release
+    regexp: rootfs/cflinuxfs4-(.*).tar.gz
     access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
     secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
 - name: receipt-s3
   type: s3
   source:
-    bucket: buildpacks.cloudfoundry.org
-    regexp: cflinuxfs4-release/receipt.cflinuxfs4.x86_64-(.*)
+    bucket: cflinuxfs4-release
+    regexp: rootfs/receipt.cflinuxfs4.x86_64-(.*)
     access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
     secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
@@ -211,7 +211,7 @@ resources:
 - name: version
   type: semver-latest
   source:
-    bucket: buildpacks.cloudfoundry.org
+    bucket: cflinuxfs4-release
     key: versions/stack-cflinuxfs4
     access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
     secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
@@ -270,10 +270,10 @@ jobs:
             options:
               access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
               secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
-#!    - put: cflinuxfs4-release
-#!      params:
-#!        repository: golang-bumped-cflinuxfs4-release
-#!        rebase: true
+    - put: cflinuxfs4-release
+      params:
+        repository: golang-bumped-cflinuxfs4-release
+        rebase: true
 
 - name: build-rootfs
   serial: true
@@ -758,8 +758,8 @@ jobs:
         BLOB_NAME: rootfs
         BLOB_GLOB: blob/cflinuxfs4-*.tar.gz
         RELEASE_NAME: cflinuxfs4
-        ACCESS_KEY_ID: ((cloudfoundry-s3-access-key))
-        SECRET_ACCESS_KEY: ((cloudfoundry-s3-secret-key))
+        ACCESS_KEY_ID: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+        SECRET_ACCESS_KEY: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
     - task: create-release-body
       file: buildpacks-ci/tasks/create-rootfs-bosh-release-github-release-notes/task.yml
       params:
