@@ -106,6 +106,13 @@ resources:
       - new-cve-notifications/ubuntu22.04-unrelated.yml
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
 
+- name: new-cves-write
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
+    branch: main
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+
 - name: receipt-diff
   type: git
   source:
@@ -229,7 +236,7 @@ jobs:
   plan:
     - in_parallel:
         - get: buildpacks-ci
-        - get: new-cves
+        - get: new-cves-write
         - get: cflinuxfs4
         - get: check-interval
           trigger: true
@@ -240,7 +247,7 @@ jobs:
               output_mapping:
                 output-new-cves: output-new-cves-cflinuxfs4
             - put: new-cves-cflinuxfs4
-              resource: new-cves
+              resource: new-cves-write
               params:
                 repository: output-new-cves-cflinuxfs4
                 rebase: true
@@ -286,7 +293,6 @@ jobs:
     - get: buildpacks-ci
     - get: new-cves
       trigger: true
-      passed: [ new-rootfs-cves ]
     - get: rootfs
       resource: cflinuxfs4
     - get: cflinuxfs4-build-trigger
