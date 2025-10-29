@@ -119,6 +119,4 @@ class BuildpackTagger
       end
     end
   end
-    end
-  end
 end
