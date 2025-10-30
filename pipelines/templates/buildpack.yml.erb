@@ -304,16 +304,16 @@ jobs: ##########################################################################
           - specs-switchblade-docker-master-<%= stack %>
 <% end %>
         - get: version
-<% bucket_stacks = buildpacks[language]['stacks']
-   bucket_stacks = bucket_stacks + ['any'] if language.to_s == 'hwc' || language.to_s == 'binary'
-   bucket_stacks.each do |stack| %> #change bucket_stacks to buildpacks[language]['stacks'] when removing any_stack
-        - get: pivotal-buildpack-cached-<%= stack %>
-          version: every
-          trigger: false
-        - get: pivotal-buildpack-<%= stack %>
-          version: every
-          trigger: false
-<% end %>
+# <% bucket_stacks = buildpacks[language]['stacks']
+#    bucket_stacks = bucket_stacks + ['any'] if language.to_s == 'hwc' || language.to_s == 'binary'
+#    bucket_stacks.each do |stack| %> #change bucket_stacks to buildpacks[language]['stacks'] when removing any_stack
+#         - get: pivotal-buildpack-cached-<%= stack %>
+#           version: every
+#           trigger: false
+#         - get: pivotal-buildpack-<%= stack %>
+#           version: every
+#           trigger: false
+# <% end %>
       - do:
         - in_parallel:
 <% bucket_stacks = buildpacks[language]['stacks']
