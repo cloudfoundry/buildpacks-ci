@@ -64,7 +64,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/buildpacks-ci
-    branch: cflinux4-ci
+    branch: master
 
 - name: runtime-ci
   type: git
