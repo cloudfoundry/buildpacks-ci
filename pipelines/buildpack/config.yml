@@ -1,0 +1,21 @@
+#@data/values
+---
+#! Buildpack configuration data values
+language: go
+organization: cloudfoundry
+
+#! Public configuration (from public-config.yml)
+buildpacks_github_org: cloudfoundry
+buildpack_release_candidates_bucket: buildpacks.cloudfoundry.org
+rubygem_mirror: https://rubygems.org
+buildpacks_ci_pipeline_uri: https://buildpacks.ci.cf-app.com/teams/main/pipelines/buildpacks-ci
+buildpack_packager_git_uri_public: https://github.com/cloudfoundry/buildpack-packager
+
+#! Buildpack-specific settings
+buildpack:
+  stacks: []
+  product_slug: ""
+  skip_docker_start: false
+  skip_brats: false
+  compile_extensions: false
+  compute_instance_count: 1

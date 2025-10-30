@@ -1,0 +1,581 @@
+#@ load("@ytt:data", "data")
+
+#@ def buildpack_name():
+#@   return data.values.language + "-buildpack"
+#@ end
+
+#@ def has_any_stack():
+#@   return data.values.language == "hwc" or data.values.language == "binary"
+#@ end
+
+#@ def bucket_stacks():
+#@   stacks = data.values.buildpack.stacks[:]
+#@   if has_any_stack():
+#@     stacks.append("any")
+#@   end
+#@   return stacks
+#@ end
+
+---
+resource_types:
+  - name: cron
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cron-resource
+
+  - name: shepherd
+    type: registry-image
+    source:
+      repository: us-west2-docker.pkg.dev/shepherd-268822/shepherd2/concourse-resource
+      tag: v1
+
+  - name: pool
+    type: registry-image
+    source:
+      repository: concourse/pool-resource
+      tag: 1.1.3
+
+  - name: create-pull-request-resource
+    type: docker-image
+    source:
+      repository: cfbuildpacks/create-pull-request-resource
+
+resources:
+  #! Git Resources
+  - name: buildpack-master
+    type: git
+    webhook_token: ob0aigh3
+    source:
+      uri: #@ "git@github.com:" + data.values.organization + "/" + buildpack_name() + ".git"
+      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+      branch: master
+      ignore_paths:
+        - VERSION
+        - CHANGELOG
+
+  - name: cf-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-deployment
+
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/buildpacks-ci
+      branch: master
+
+  - name: buildpack-pull-request
+    type: create-pull-request-resource
+    source:
+      remote_repository: #@ data.values.organization + "/" + buildpack_name()
+      github_token: ((buildpacks-github-token))
+
+  - name: libbuildpack
+    type: git
+    webhook_token: ob0aigh3
+    source:
+      uri: https://github.com/cloudfoundry/libbuildpack.git
+
+  #@ if data.values.buildpack.compile_extensions:
+  - name: compile-extensions
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/compile-extensions.git
+  #@ end
+
+  #@ if data.values.language == "hwc":
+  - name: buildpack-bosh-release
+    type: git
+    source:
+      uri: #@ "git@github.com:" + data.values.organization + "/" + buildpack_name() + "-release.git"
+      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+      branch: master
+  #@ end
+
+  - name: env-repo
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: '((cf-buildpacks-eng-github-ssh-key.private_key))'
+
+  - name: version
+    type: semver
+    source:
+      driver: git
+      uri: #@ "git@github.com:" + data.values.organization + "/" + buildpack_name() + ".git"
+      branch: master
+      file: VERSION
+      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+
+  #! GitHub Releases
+  - name: buildpack-github-release
+    type: github-release
+    source:
+      user: #@ data.values.buildpacks_github_org
+      repository: #@ data.values.language + "-buildpack"
+      access_token: ((buildpacks-github-token))
+
+  #@ if data.values.language == "hwc":
+  - name: buildpack-bosh-release-github-release
+    type: github-release
+    source:
+      user: #@ data.values.buildpacks_github_org
+      repository: #@ data.values.language + "-buildpack-release"
+      access_token: ((buildpacks-github-token))
+  #@ end
+
+  #@ if data.values.buildpack.compile_extensions:
+  - name: buildpack-packager
+    type: github-release
+    source:
+      user: #@ data.values.buildpacks_github_org
+      repository: buildpack-packager
+      access_token: ((buildpacks-github-token))
+  #@ end
+
+  #! S3 Buckets
+  #@ for stack in data.values.buildpack.stacks:
+  - name: #@ "pivotal-buildpack-" + stack
+    type: s3
+    source:
+      bucket: #@ data.values.buildpack_release_candidates_bucket
+      regexp: #@ "buildpack-release-candidates/" + data.values.language + "/" + data.values.language + "_buildpack-" + stack + "-v(.*).zip"
+      access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+
+  - name: #@ "pivotal-buildpack-cached-" + stack
+    type: s3
+    source:
+      bucket: #@ data.values.buildpack_release_candidates_bucket
+      regexp: #@ "buildpack-release-candidates/" + data.values.language + "/" + data.values.language + "_buildpack-cached-" + stack + "-v(.*).zip"
+      access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+  #@ end
+
+  #@ if has_any_stack():
+  - name: pivotal-buildpack-cached-any
+    type: s3
+    source:
+      bucket: #@ data.values.buildpack_release_candidates_bucket
+      regexp: #@ "buildpack-release-candidates/" + data.values.language + "/" + data.values.language + "_buildpack-cached-v(.*).zip"
+      access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+
+  - name: pivotal-buildpack-any
+    type: s3
+    source:
+      bucket: #@ data.values.buildpack_release_candidates_bucket
+      regexp: #@ "buildpack-release-candidates/" + data.values.language + "/" + data.values.language + "_buildpack-v(.*).zip"
+      access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+  #@ end
+
+  #! Resource Pools
+  - name: shepherd-cf-environment
+    type: shepherd
+    source:
+      url: https://v2.shepherd.run
+      service-account-key: ((shepherd-buildpacks-service-account-key))
+      lease:
+        namespace: buildpacks
+        pool:
+          namespace: official
+          name: cfd
+      compatibility-mode: environments-app
+
+jobs:
+  #@ if data.values.language == "php":
+  - name: ensure-manifest-has-modules
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-master
+          trigger: true
+      - do:
+        - task: check-modules
+          file: buildpacks-ci/tasks/check-php-modules-in-manifest/task.yml
+  #@ end
+
+  - name: specs-unit-master
+    serial: true
+    public: true
+    plan:
+      - do:
+        - in_parallel:
+          - get: buildpacks-ci
+          - get: buildpack
+            resource: buildpack-master
+            #@ if data.values.language == "php":
+            passed: [ ensure-manifest-has-modules ]
+            #@ end
+            trigger: true
+        - do:
+          - task: ginkgo
+            file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
+            #@ if data.values.language == "php":
+            privileged: true
+            params:
+              DOCKER_START: true
+            #@ end
+
+  #@ for stack in data.values.buildpack.stacks:
+  - name: #@ "specs-switchblade-docker-master-" + stack
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-master
+          trigger: true
+          passed:
+          - specs-unit-master
+      - task: #@ "switchblade-docker-test-" + stack
+        file: buildpacks-ci/tasks/run-buildpack-switchblade-docker/task.yml
+        privileged: true
+        params:
+          CF_STACK: #@ stack
+          GITHUB_TOKEN: ((buildpacks-github-token))
+          GINKGO_ATTEMPTS: 3
+          GINKGO_NODES: 2
+          #@ if data.values.language == "php":
+          COMPOSER_GITHUB_OAUTH_TOKEN: '((composer-github-oauth-token))'
+          #@ end
+  #@ end
+
+  - name: detect-new-version-and-upload-artifacts
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-master
+          trigger: true
+          passed:
+          #@ for stack in data.values.buildpack.stacks:
+          - #@ "specs-switchblade-docker-master-" + stack
+          #@ end
+        - get: version
+        #! Commented out to support bootstrap scenarios where S3 artifacts don't exist yet
+        #! See commit 8104b4b53 - "Add toggle for S3 buildpack artifacts to enable bootstrap scenarios"
+        #! Uncomment these when artifacts exist in S3:
+        #! #@ for stack in bucket_stacks():
+        #! - get: #@ "pivotal-buildpack-cached-" + stack
+        #!   version: every
+        #!   trigger: false
+        #! - get: #@ "pivotal-buildpack-" + stack
+        #!   version: every
+        #!   trigger: false
+        #! #@ end
+      - do:
+        - in_parallel:
+          #@ for stack in bucket_stacks():
+          - do:
+            - task: #@ "detect-and-upload-" + stack
+              file: buildpacks-ci/tasks/detect-and-upload/task.yml
+              params:
+                GIT_REPO_ORG: #@ data.values.organization
+                BUILDPACK_NAME: #@ buildpack_name()
+                RUBYGEM_MIRROR: #@ data.values.rubygem_mirror
+                CF_STACK: #@ stack
+                GITHUB_TOKEN: ((buildpacks-github-token))
+              input_mapping:
+                pivotal-buildpack: #@ "pivotal-buildpack-" + stack
+                pivotal-buildpack-cached: #@ "pivotal-buildpack-cached-" + stack
+              output_mapping:
+                buildpack-artifacts: #@ "buildpack-artifacts-" + stack
+            - put: #@ "pivotal-buildpack-" + stack
+              params:
+                file: #@ "buildpack-artifacts-" + stack + "/uncached/*_buildpack*-v*.zip"
+            - put: #@ "pivotal-buildpack-cached-" + stack
+              params:
+                file: #@ "buildpack-artifacts-" + stack + "/cached/*_buildpack-cached*-v*.zip"
+          #@ end
+
+  - name: ship-it
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: version
+          passed:
+            - detect-new-version-and-upload-artifacts
+        #@ for i, stack in enumerate(data.values.buildpack.stacks):
+        - get: #@ "uncached-buildpack-for-stack" + str(i)
+          resource: #@ "pivotal-buildpack-" + stack
+          passed:
+            - detect-new-version-and-upload-artifacts
+        #@ end
+        - get: buildpack
+          passed:
+            - detect-new-version-and-upload-artifacts
+          resource: buildpack-master
+      - task: check-tag-not-already-added
+        file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
+      - get: buildpack-master
+      - task: finalize-buildpack
+        file: buildpacks-ci/tasks/finalize-buildpack/task.yml
+        input_mapping:
+          buildpack: buildpack-master
+      - put: buildpack-github-release
+        params:
+          name: buildpack-artifacts/tag
+          tag: buildpack-artifacts/tag
+          body: buildpack-artifacts/RECENT_CHANGES
+          commitish: buildpack-master/.git/ref
+          generate_release_notes: true
+          globs:
+            - #@ "buildpack-artifacts/" + data.values.language + "-buildpack*-v*.zip"
+            - #@ "buildpack-artifacts/" + data.values.language + "-buildpack*-v*.zip.SHA256SUM.txt"
+      - put: version
+        params: { bump: patch }
+
+  #@ for stack in data.values.buildpack.stacks:
+  - name: #@ "specs-edge-integration-master-" + stack
+    serial: true
+    public: false
+    disable_manual_trigger: false
+    plan:
+      - in_parallel:
+        - put: environment
+          resource: shepherd-cf-environment
+          params:
+            action: create
+            duration: 6h
+            resource: shepherd-cf-environment
+            description: #@ "Running " + buildpack_name() + " specs-edge-integration-master-" + stack + " job.\n"
+          timeout: 6h
+        - get: buildpacks-ci
+        - get: env-repo
+        - get: buildpack
+          resource: buildpack-master
+          trigger: false
+          passed:
+          - #@ "specs-switchblade-docker-master-" + stack
+        - get: repo
+          resource: buildpack-master
+        - get: cf-deployment
+      - task: redeploy
+        file: buildpacks-ci/tasks/cf/redeploy/task.yml
+        input_mapping:
+          ci: buildpacks-ci
+          lock: environment
+        params:
+          SCALE_DIEGO_CELLS: true
+          #@ if stack == "cflinuxfs3":
+          ADD_CFLINUXFS3_STACK: true
+          #@ end
+          #@ if "windows" in data.values.buildpack.stacks:
+          DEPLOY_WINDOWS_CELL: true
+          #@ end
+      - do:
+        - task: create-cf-space
+          attempts: 5
+          file: buildpacks-ci/tasks/cf/create-space/task.yml
+          input_mapping:
+            ci: buildpacks-ci
+            lock: environment
+          params:
+            DOMAIN: 'cf-app.com'
+            ORG: pivotal
+        #@ if not data.values.buildpack.skip_brats:
+        #@ if "cflinuxfs4" in data.values.buildpack.stacks:
+        - task: configure-brats-test-config
+          config:
+            platform: linux
+            image_resource:
+              type: docker-image
+              source:
+                repository: cfbuildpacks/ci
+            inputs:
+            - name: buildpack
+            outputs:
+            - name: buildpack
+            run:
+              dir: ""
+              path: bash
+              args:
+              - -c
+              - #@ "#!/bin/bash\nset -e\ncd buildpack\ncontents=\"$(jq '.stack = \"" + stack + "\"' config.json)\"\necho -E \"${contents}\" > config.json\necho -e \"config.json modified to:\\n $(cat config.json)\"\n"
+        #@ end
+        - task: #@ "brats-" + stack
+          file: #@ "buildpacks-ci/tasks/" + ("run-bp-brats-jammy" if data.values.language == "php" else "run-bp-brats") + "/task.yml"
+          input_mapping: {cf-space: space}
+          attempts: 5
+          params:
+            CF_STACK: #@ stack
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 3
+        #@ end
+        - task: #@ "integration-test-" + stack
+          file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+          input_mapping: {cf-space: space}
+          params:
+            CF_STACK: #@ stack
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 3
+            GITHUB_TOKEN: ((buildpacks-github-token))
+            SWITCHBLADE_PLATFORM: cf
+            #@ if data.values.language == "php":
+            COMPOSER_GITHUB_OAUTH_TOKEN: '((composer-github-oauth-token))'
+            #@ end
+            #@ if data.values.buildpack.skip_docker_start:
+            SKIP_DOCKER_START: true
+            #@ else:
+          privileged: true
+            #@ end
+        ensure:
+          task: delete-cf-space
+          file: buildpacks-ci/tasks/delete-cf-space/task.yml
+          input_mapping: {cf-space: space}
+    on_success:
+      put: environment
+      resource: shepherd-cf-environment
+      params:
+        action: release
+        resource: environment
+  #@ end
+
+  - name: specs-edge-shared-master
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: buildpack-master
+          trigger: true
+          passed:
+          #@ for stack in data.values.buildpack.stacks:
+          - #@ "specs-switchblade-docker-master-" + stack
+          #@ end
+        on_success:
+          task: github-set-status-success
+          file: buildpacks-ci/tasks/set-status-success/task.yml
+          input_mapping:
+            repo: buildpack
+          params:
+            GITHUB_ACCESS_TOKEN: ((buildpacks-github-token))
+            GITHUB_REPO: #@ data.values.organization + "/" + buildpack_name()
+            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-master'
+            GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge master spec passed (Docker-based)'
+            PIPELINE_URI: #@ data.values.buildpacks_ci_pipeline_uri
+
+  - name: update-libbuildpack
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: libbuildpack
+          trigger: true
+        - get: buildpack
+          resource: buildpack-master
+      - task: update-libbuildpack
+        file: buildpacks-ci/tasks/update-libbuildpack/task.yml
+        #@ if data.values.language == "php":
+        privileged: true
+        #@ end
+        params:
+          #@ if data.values.language == "php":
+          DOCKER_START: true
+          #@ end
+          LANGUAGE: #@ data.values.language
+      - put: buildpack-pull-request
+        params:
+          repo_location: buildpack
+          title: Update libbuildpack
+          branch_prefix: "update-libbuildpack"
+          auto_merge: false
+          base: master
+
+  #@ if data.values.buildpack.compile_extensions:
+  - name: update-compile-extensions
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: compile-extensions
+          trigger: true
+        - get: buildpack
+          resource: buildpack-master
+      - task: update-compile-extensions
+        file: buildpacks-ci/tasks/update-compile-extensions/task.yml
+        params:
+          RUBYGEM_MIRROR: #@ data.values.rubygem_mirror
+      - put: buildpack-pull-request
+        params:
+          repo_location: buildpack-artifacts
+          title: Update compile-extensions
+          branch_prefix: "update-compile-extensions"
+          auto_merge: false
+          base: master
+
+  - name: update-buildpack-packager
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: gem
+          resource: buildpack-packager
+          trigger: true
+        - get: repo-with-gemfile
+          resource: buildpack-master
+      - task: update-buildpack-packager
+        file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
+        params:
+          RUBYGEM_MIRROR: #@ data.values.rubygem_mirror
+          GEM_NAME: buildpack-packager
+          GEM_GIT_REPOSITORY: #@ data.values.buildpack_packager_git_uri_public
+          GEMFILE_NAME: cf.Gemfile
+      - put: buildpack-pull-request
+        params:
+          repo_location: repo-with-gemfile-artifacts
+          title: Update buildpack-packager
+          branch_prefix: "update-buildpack-packager"
+          auto_merge: false
+          base: master
+  #@ end
+
+  #@ if data.values.language == "hwc":
+  - name: update-buildpack-bosh-release
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: release
+          resource: buildpack-bosh-release
+        #@ for i, stack in enumerate(data.values.buildpack.stacks):
+        - get: #@ "buildpack-zip-stack" + str(i)
+          resource: #@ "pivotal-buildpack-" + stack
+          trigger: true
+          passed: [ ship-it ]
+        #@ end
+      - do:
+        - task: create-bosh-release
+          file: buildpacks-ci/tasks/create-bosh-release/task.yml
+          params:
+            ACCESS_KEY_ID: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+            SECRET_ACCESS_KEY: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+            LANGUAGE: "hwc"
+            RELEASE_NAME: hwc-buildpack
+            RELEASE_DIR: release
+        - put: buildpack-bosh-release
+          params:
+            repository: release-artifacts
+            rebase: true
+            tag: version/version
+        - put: buildpack-bosh-release-github-release
+          params:
+            name: version/version
+            tag: version/version
+  #@ end
