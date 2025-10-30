@@ -34,13 +34,13 @@ EOF
     exit 1
   fi
 
-  bosh2 -n add-blob "$BLOB" "$BLOB_NAME/$(basename "$BLOB")"
-  bosh2 -n upload-blobs
+  bosh -n add-blob "$BLOB" "$BLOB_NAME/$(basename "$BLOB")"
+  bosh -n upload-blobs
 
   git add config/blobs.yml
   git commit -m "Updating blobs for $RELEASE_NAME bosh release version $bosh_release_version"
 
-  bosh2 -n create-release --final --version "$bosh_release_version" --name "$RELEASE_NAME" --tarball "releases/$RELEASE_NAME/$RELEASE_NAME-$bosh_release_version.tgz"
+  bosh -n create-release --final --version "$bosh_release_version" --name "$RELEASE_NAME" --tarball "releases/$RELEASE_NAME/$RELEASE_NAME-$bosh_release_version.tgz"
   git add .final_builds "releases/**/*-$bosh_release_version.yml" releases/**/index.yml
   git commit -m "Final $RELEASE_NAME bosh release version $bosh_release_version, containing $STACK version $stacks_version"
 popd

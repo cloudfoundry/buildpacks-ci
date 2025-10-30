@@ -62,17 +62,17 @@ class BuildpackBOSHReleaseUpdater
   def add_new_blobs
     blob_name = "#{@language}-buildpack"
     Dir["../buildpack-zip*/#{@language}*.zip"].each do |buildpack_file|
-      system "bosh2 -n add-blob #{buildpack_file} #{blob_name}/#{File.basename(buildpack_file.gsub(/\+.*\.zip/, '.zip'))}" or exit 1
+      system "bosh -n add-blob #{buildpack_file} #{blob_name}/#{File.basename(buildpack_file.gsub(/\+.*\.zip/, '.zip'))}" or exit 1
     end
 
-    system 'bosh2 -n upload-blobs' or exit 1
+    system 'bosh -n upload-blobs' or exit 1
 
     GitClient.add_file('config/blobs.yml')
     GitClient.safe_commit("Updating blobs for #{@release_name} at #{@version}")
   end
 
   def create_release
-    system "bosh2 -n create-release --final --version #{@version} --name #{@release_name} --tarball #{File.join(@release_tarball_dir, 'release.tgz')} --force" or exit 1
+    system "bosh -n create-release --final --version #{@version} --name #{@release_name} --tarball #{File.join(@release_tarball_dir, 'release.tgz')} --force" or exit 1
 
     GitClient.add_file("releases/**/*-#{@version}.yml")
     GitClient.add_file('releases/**/index.yml')

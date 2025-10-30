@@ -27,7 +27,7 @@ puts "Running 'bosh create release' in capi-release"
 Dir.chdir('../capi-release-artifacts') do
   puts `gem install bundler`
   Bundler.with_unbundled_env do
-    puts `bosh2 create-release --force --tarball "dev_releases/capi/capi-#{version}.tgz" --name capi --version "#{version}"`
+    puts `bosh create-release --force --tarball "dev_releases/capi/capi-#{version}.tgz" --name capi --version "#{version}"`
   end
 
   File.write('use-dev-release-opsfile.yml', "---
