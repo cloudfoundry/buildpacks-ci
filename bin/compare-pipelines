@@ -13,21 +13,24 @@ Usage: ./bin/compare-pipelines [OPTIONS]
 Generate and compare YTT vs ERB pipeline outputs without deploying.
 
 Options:
-  --pipeline=NAME, -p NAME    Compare specific buildpack pipeline
+  --pipeline=NAME, -p NAME    Compare specific pipeline
   --all                       Compare all buildpack pipelines
+  --all-pipelines             Compare all pipelines (buildpacks + standard)
   --clean                     Remove comparison output directory
   --help, -h                  Show this help message
 
 Examples:
   ./bin/compare-pipelines --pipeline=go-buildpack
+  ./bin/compare-pipelines --pipeline=buildpack-verification
   ./bin/compare-pipelines --all
+  ./bin/compare-pipelines --all-pipelines
   ./bin/compare-pipelines --clean
 
 Output: ${OUTPUT_DIR}/
-  Each buildpack will have:
-    - <buildpack>-ytt.yml     (YTT generated)
-    - <buildpack>-erb.yml     (ERB generated)
-    - <buildpack>-diff.txt    (Differences)
+  Each pipeline will have:
+    - <pipeline>-ytt.yml     (YTT generated)
+    - <pipeline>-erb.yml     (ERB generated)
+    - <pipeline>-diff.txt    (Differences)
 EOF
 }
 
@@ -43,40 +46,81 @@ get_ytt_buildpack_names() {
   fi
 }
 
+get_ytt_standard_pipeline_names() {
+  # Returns standard pipelines that have both YTT and ERB versions
+  local pipelines=()
+  
+  # Check for directory-based pipelines (excluding buildpack)
+  for pipeline_path in "$REPO_ROOT"/pipelines/*; do
+    if [[ ! -d "$pipeline_path" ]]; then
+      continue
+    fi
+    
+    local pipeline_name="$(basename "$pipeline_path")"
+    
+    # Skip special directories
+    if [[ "$pipeline_name" == "config" || "$pipeline_name" == "templates" || "$pipeline_name" == "buildpack" ]]; then
+      continue
+    fi
+    
+    # Check if corresponding ERB template exists
+    if [[ -f "$REPO_ROOT/pipelines/${pipeline_name}.yml.erb" ]]; then
+      echo "$pipeline_name"
+    fi
+  done
+}
+
 generate_ytt_pipeline() {
-  local buildpack_name="$1"
-  local language="${buildpack_name%-buildpack}"
-  local values_file="$REPO_ROOT/pipelines/buildpack/${language}-values.yml"
+  local pipeline_name="$1"
   
-  if [[ ! -f "$values_file" ]]; then
-    echo "ERROR: YTT values file not found: $values_file" >&2
-    return 1
+  # Check if this is a buildpack pipeline
+  if [[ "$pipeline_name" == *-buildpack ]]; then
+    local language="${pipeline_name%-buildpack}"
+    local values_file="$REPO_ROOT/pipelines/buildpack/${language}-values.yml"
+    
+    if [[ ! -f "$values_file" ]]; then
+      echo "ERROR: YTT values file not found: $values_file" >&2
+      return 1
+    fi
+    
+    ytt -f "$REPO_ROOT/pipelines/buildpack/pipeline.yml" \
+        -f "$REPO_ROOT/pipelines/buildpack/config.yml" \
+        -f "$values_file"
+  else
+    # Standard pipeline in its own directory
+    local pipeline_dir="$REPO_ROOT/pipelines/$pipeline_name"
+    
+    if [[ ! -d "$pipeline_dir" ]]; then
+      echo "ERROR: YTT pipeline directory not found: $pipeline_dir" >&2
+      return 1
+    fi
+    
+    ytt -f "$pipeline_dir"
   fi
-  
-  ytt -f "$REPO_ROOT/pipelines/buildpack/pipeline.yml" \
-      -f "$REPO_ROOT/pipelines/buildpack/config.yml" \
-      -f "$values_file"
 }
 
 generate_erb_pipeline() {
-  local buildpack_name="$1"
-  local language="${buildpack_name%-buildpack}"
-  local config_file="$REPO_ROOT/config/buildpack/${language}.yml"
-  local template_file="$REPO_ROOT/pipelines/templates/buildpack.yml.erb"
+  local pipeline_name="$1"
   
-  if [[ ! -f "$config_file" ]]; then
-    echo "ERROR: ERB config file not found: $config_file" >&2
-    return 1
-  fi
-  
-  if [[ ! -f "$template_file" ]]; then
-    echo "ERROR: ERB template file not found: $template_file" >&2
-    return 1
-  fi
-  
-  # Use ERB to generate the pipeline (mimics update-erb-pipelines logic)
-  LANGUAGE="$language" CONFIG_FILE="$config_file" TEMPLATE_FILE="$template_file" \
-    ruby -I"$REPO_ROOT/lib" -e '
+  # Check if this is a buildpack pipeline
+  if [[ "$pipeline_name" == *-buildpack ]]; then
+    local language="${pipeline_name%-buildpack}"
+    local config_file="$REPO_ROOT/config/buildpack/${language}.yml"
+    local template_file="$REPO_ROOT/pipelines/templates/buildpack.yml.erb"
+    
+    if [[ ! -f "$config_file" ]]; then
+      echo "ERROR: ERB config file not found: $config_file" >&2
+      return 1
+    fi
+    
+    if [[ ! -f "$template_file" ]]; then
+      echo "ERROR: ERB template file not found: $template_file" >&2
+      return 1
+    fi
+    
+    # Use ERB to generate the pipeline (mimics update-erb-pipelines logic)
+    LANGUAGE="$language" CONFIG_FILE="$config_file" TEMPLATE_FILE="$template_file" \
+      ruby -I"$REPO_ROOT/lib" -e '
 require "yaml"
 require "erb"
 require "buildpacks-ci-configuration"
@@ -92,6 +136,32 @@ organization = config.organization
 # Run ERB with language and organization variables
 system("erb", "language=#{language}", "organization=#{organization}", template_file)
 ' 2>&1
+  else
+    # Standard pipeline ERB template
+    local template_file="$REPO_ROOT/pipelines/${pipeline_name}.yml.erb"
+    
+    if [[ ! -f "$template_file" ]]; then
+      echo "ERROR: ERB template file not found: $template_file" >&2
+      return 1
+    fi
+    
+    # Generate using ERB with organization variable
+    TEMPLATE_FILE="$template_file" \
+      ruby -I"$REPO_ROOT/lib" -e '
+require "yaml"
+require "erb"
+require "buildpacks-ci-configuration"
+
+template_file = ENV["TEMPLATE_FILE"]
+
+# Get organization from configuration
+config = BuildpacksCIConfiguration.new
+organization = config.organization
+
+# Run ERB with organization variable
+system("erb", "organization=#{organization}", template_file)
+' 2>&1
+  fi
 }
 
 compare_pipeline() {
@@ -151,6 +221,7 @@ compare_pipeline() {
 main() {
   local pipeline_filter=""
   local compare_all=false
+  local compare_all_pipelines=false
   local clean_mode=false
   
   # Parse arguments
@@ -166,6 +237,10 @@ main() {
         ;;
       --all)
         compare_all=true
+        shift
+        ;;
+      --all-pipelines)
+        compare_all_pipelines=true
         shift
         ;;
       --clean)
@@ -199,42 +274,45 @@ main() {
   # Ensure output directory exists
   mkdir -p "$OUTPUT_DIR"
   
-  # Get list of YTT buildpacks
-  local ytt_buildpacks=($(get_ytt_buildpack_names))
-  
-  if [[ "${#ytt_buildpacks[@]}" -eq 0 ]]; then
-    echo "ERROR: No YTT buildpack pipelines found"
-    exit 1
-  fi
-  
-  # Compare specific or all pipelines
-  local success_count=0
-  local failure_count=0
+  # Get list of pipelines to compare
+  local pipelines_to_compare=()
   
   if [[ -n "$pipeline_filter" ]]; then
     # Compare specific pipeline
-    if compare_pipeline "$pipeline_filter"; then
-      success_count=1
-    else
-      failure_count=1
-    fi
+    pipelines_to_compare=("$pipeline_filter")
   elif [[ "$compare_all" == true ]]; then
-    # Compare all pipelines
-    echo "Comparing all ${#ytt_buildpacks[@]} buildpack pipelines..."
-    echo ""
-    
-    for buildpack in "${ytt_buildpacks[@]}"; do
-      if compare_pipeline "$buildpack"; then
-        ((success_count++))
-      else
-        ((failure_count++))
-      fi
-    done
+    # Compare all buildpack pipelines
+    pipelines_to_compare=($(get_ytt_buildpack_names))
+  elif [[ "$compare_all_pipelines" == true ]]; then
+    # Compare all pipelines (buildpacks + standard)
+    pipelines_to_compare=($(get_ytt_buildpack_names) $(get_ytt_standard_pipeline_names))
   else
-    echo "ERROR: Must specify --pipeline=NAME or --all"
+    echo "ERROR: Must specify --pipeline=NAME, --all, or --all-pipelines"
     usage
     exit 1
   fi
+  
+  if [[ "${#pipelines_to_compare[@]}" -eq 0 ]]; then
+    echo "ERROR: No pipelines found to compare"
+    exit 1
+  fi
+  
+  # Compare pipelines
+  local success_count=0
+  local failure_count=0
+  
+  if [[ "${#pipelines_to_compare[@]}" -gt 1 ]]; then
+    echo "Comparing ${#pipelines_to_compare[@]} pipelines..."
+    echo ""
+  fi
+  
+  for pipeline in "${pipelines_to_compare[@]}"; do
+    if compare_pipeline "$pipeline"; then
+      ((success_count++))
+    else
+      ((failure_count++))
+    fi
+  done
   
   # Summary
   echo ""
