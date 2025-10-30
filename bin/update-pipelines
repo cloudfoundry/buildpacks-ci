@@ -8,6 +8,9 @@ target="buildpacks"
 team="buildpacks-team"
 pipeline_filter=""
 list_mode=false
+dry_run_flag=""
+use_ytt=true
+use_erb=false
 
 login() {
   fly -t "$target" login -n "${team}" -b
@@ -22,12 +25,37 @@ check_login_status() {
   fly -t "$target" status >/dev/null 2>&1 || login
 }
 
+get_ytt_buildpack_names() {
+  # Returns a list of buildpack pipeline names that have YTT versions
+  local buildpack_dir="$REPO_ROOT/pipelines/buildpack"
+  if [[ -d "$buildpack_dir" ]]; then
+    for values_file in "$buildpack_dir"/*-values.yml; do
+      if [[ -f "$values_file" ]]; then
+        language="$(basename "${values_file%-values.yml}")"
+        echo "${language}-buildpack"
+      fi
+    done
+  fi
+}
+
 list_ytt_pipelines() {
   echo "ytt-based pipelines:"
   for pipeline_path in "$REPO_ROOT"/pipelines/*; do
     if [[ -d "$pipeline_path" ]]; then
       pipeline_name="$(basename "$pipeline_path")"
-      if [[ "$pipeline_name" != "config" && "$pipeline_name" != "templates" ]]; then
+      if [[ "$pipeline_name" == "config" || "$pipeline_name" == "templates" ]]; then
+        continue
+      fi
+      
+      # Special handling for buildpack directory with multiple value files
+      if [[ "$pipeline_name" == "buildpack" ]]; then
+        for values_file in "$pipeline_path"/*-values.yml; do
+          if [[ -f "$values_file" ]]; then
+            language="$(basename "${values_file%-values.yml}")"
+            echo "  - ${language}-buildpack"
+          fi
+        done
+      else
         echo "  - $pipeline_name"
       fi
     elif [[ -f "$pipeline_path" ]]; then
@@ -40,11 +68,74 @@ list_ytt_pipelines() {
   echo ""
 }
 
+list_erb_pipelines_excluding_ytt() {
+  local ytt_buildpacks=($(get_ytt_buildpack_names))
+  
+  echo "ERB-based pipelines:"
+  echo ""
+  echo "Standard pipelines:"
+  
+  # List standard ERB pipelines
+  for pipeline_path in "$REPO_ROOT"/pipelines/*.{erb,yml}; do
+    if [[ ! -f "$pipeline_path" ]]; then
+      continue
+    fi
+    
+    pipeline_name="$(basename "${pipeline_path}" | sed 's/\.erb$//' | sed 's/\.yml$//')"
+    
+    # Skip cflinuxfs4 (it's YTT)
+    if [[ "$pipeline_name" == "cflinuxfs4" ]]; then
+      continue
+    fi
+    
+    echo "  - $pipeline_name"
+  done
+  
+  # List buildpack pipelines that don't have YTT versions
+  echo ""
+  echo "Buildpack pipelines:"
+  
+  for config_file in "$REPO_ROOT"/config/buildpack/*.yml; do
+    if [[ ! -f "$config_file" ]]; then
+      continue
+    fi
+    
+    language="$(basename "${config_file%.yml}")"
+    buildpack_name="${language}-buildpack"
+    
+    # Check if this buildpack has a YTT version
+    local has_ytt=false
+    for ytt_bp in "${ytt_buildpacks[@]}"; do
+      if [[ "$ytt_bp" == "$buildpack_name" ]]; then
+        has_ytt=true
+        break
+      fi
+    done
+    
+    # Only list if no YTT version exists
+    if [[ "$has_ytt" == false ]]; then
+      echo "  - $buildpack_name"
+    fi
+  done
+  
+  echo ""
+}
+
 list_all_pipelines() {
   list_ytt_pipelines
-  "${MY_DIR}/update-erb-pipelines" --list
+  list_erb_pipelines_excluding_ytt
+  echo "Usage: ./bin/update-pipelines [OPTIONS]"
   echo ""
-  echo "Usage: ./bin/update-pipelines [--pipeline=PIPELINE_NAME | -p PIPELINE_NAME | --list | -l]"
+  echo "Options:"
+  echo "  --pipeline=NAME, -p NAME    Update specific pipeline"
+  echo "  --list, -l                  List all available pipelines"
+  echo "  --dry-run, -d               Validate pipeline without applying changes"
+  echo "  --ytt-only                  Deploy only YTT pipelines (default)"
+  echo "  --erb-only                  Deploy only ERB pipelines"
+  echo "  --both                      Deploy both YTT and ERB pipelines"
+  echo ""
+  echo "Note: Buildpack pipelines have been migrated to YTT."
+  echo "      Use --both to compare YTT vs ERB output before removing ERB templates."
 }
 
 process_ytt_pipelines() {
@@ -57,13 +148,33 @@ process_ytt_pipelines() {
         continue
       fi
       
-      if [[ -n "$filter" && "$pipeline_name" != "$filter" ]]; then
-        continue
-      fi
+      # Special handling for buildpack directory with multiple value files
+      if [[ "$pipeline_name" == "buildpack" ]]; then
+        for values_file in "$pipeline_path"/*-values.yml; do
+          if [[ ! -f "$values_file" ]]; then
+            continue
+          fi
+          
+          language="$(basename "${values_file%-values.yml}")"
+          buildpack_pipeline_name="${language}-buildpack"
+          
+          if [[ -n "$filter" && "$buildpack_pipeline_name" != "$filter" ]]; then
+            continue
+          fi
 
-      echo "Setting $pipeline_name (ytt)"
-      pipeline_config="$(ytt -f "$pipeline_path")"
-      fly -t "$target" set-pipeline -p "$pipeline_name" -c <(echo "$pipeline_config")
+          echo "Setting $buildpack_pipeline_name (ytt)"
+          pipeline_config="$(ytt -f "$pipeline_path/pipeline.yml" -f "$pipeline_path/config.yml" -f "$values_file")"
+          fly -t "$target" set-pipeline -p "$buildpack_pipeline_name" $dry_run_flag -c <(echo "$pipeline_config")
+        done
+      else
+        if [[ -n "$filter" && "$pipeline_name" != "$filter" ]]; then
+          continue
+        fi
+
+        echo "Setting $pipeline_name (ytt)"
+        pipeline_config="$(ytt -f "$pipeline_path")"
+        fly -t "$target" set-pipeline -p "$pipeline_name" $dry_run_flag -c <(echo "$pipeline_config")
+      fi
       
     elif [[ -f "$pipeline_path" ]]; then
       pipeline_name="$(basename "${pipeline_path%.yml}")"
@@ -77,13 +188,31 @@ process_ytt_pipelines() {
 
       echo "Setting $pipeline_name (ytt)"
       pipeline_config="$(ytt -f "$pipeline_path")"
-      fly -t "$target" set-pipeline -p "$pipeline_name" -c <(echo "$pipeline_config")
+      fly -t "$target" set-pipeline -p "$pipeline_name" $dry_run_flag -c <(echo "$pipeline_config")
     fi
   done
 }
 
 process_erb_pipelines() {
-  "${MY_DIR}/update-erb-pipelines" "$@"
+  # Filter out YTT-specific flags that update-erb-pipelines doesn't understand
+  local erb_args=()
+  for arg in "$@"; do
+    case "$arg" in
+      --ytt-only|--erb-only|--both|--dry-run|-d)
+        # Skip these flags
+        ;;
+      *)
+        erb_args+=("$arg")
+        ;;
+    esac
+  done
+  
+  # Call update-erb-pipelines with filtered args
+  if [[ ${#erb_args[@]} -gt 0 ]]; then
+    "${MY_DIR}/update-erb-pipelines" "${erb_args[@]}"
+  else
+    "${MY_DIR}/update-erb-pipelines"
+  fi
 }
 
 parse_args() {
@@ -101,6 +230,25 @@ parse_args() {
         list_mode=true
         shift
         ;;
+      --dry-run|-d)
+        dry_run_flag="--dry-run"
+        shift
+        ;;
+      --ytt-only)
+        use_ytt=true
+        use_erb=false
+        shift
+        ;;
+      --erb-only)
+        use_ytt=false
+        use_erb=true
+        shift
+        ;;
+      --both)
+        use_ytt=true
+        use_erb=true
+        shift
+        ;;
       *)
         shift
         ;;
@@ -116,10 +264,17 @@ main() {
     return
   fi
 
-  check_login_status
+  if [[ -z "$dry_run_flag" ]]; then
+    check_login_status
+  fi
   
-  process_ytt_pipelines "$pipeline_filter"
-  process_erb_pipelines "$@"
+  if [[ "$use_ytt" == true ]]; then
+    process_ytt_pipelines "$pipeline_filter"
+  fi
+  
+  if [[ "$use_erb" == true ]]; then
+    process_erb_pipelines "$@"
+  fi
   
   echo ""
   echo "Thanks, The Buildpacks Team"

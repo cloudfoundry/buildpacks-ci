@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+require 'yaml'
+
+input = ARGF.read
+vars = YAML.load_file('public-config.yml')
+
+# Replace {{variable-name}} with actual values
+vars.each do |key, value|
+  input.gsub!("{{#{key}}}", value.to_s)
+end
+
+puts input

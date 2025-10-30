@@ -1,0 +1,254 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+MY_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "${MY_DIR}/.." && pwd)"
+OUTPUT_DIR="${REPO_ROOT}/tmp/pipeline-comparison"
+
+usage() {
+  cat <<EOF
+Usage: ./bin/compare-pipelines [OPTIONS]
+
+Generate and compare YTT vs ERB pipeline outputs without deploying.
+
+Options:
+  --pipeline=NAME, -p NAME    Compare specific buildpack pipeline
+  --all                       Compare all buildpack pipelines
+  --clean                     Remove comparison output directory
+  --help, -h                  Show this help message
+
+Examples:
+  ./bin/compare-pipelines --pipeline=go-buildpack
+  ./bin/compare-pipelines --all
+  ./bin/compare-pipelines --clean
+
+Output: ${OUTPUT_DIR}/
+  Each buildpack will have:
+    - <buildpack>-ytt.yml     (YTT generated)
+    - <buildpack>-erb.yml     (ERB generated)
+    - <buildpack>-diff.txt    (Differences)
+EOF
+}
+
+get_ytt_buildpack_names() {
+  local buildpack_dir="$REPO_ROOT/pipelines/buildpack"
+  if [[ -d "$buildpack_dir" ]]; then
+    for values_file in "$buildpack_dir"/*-values.yml; do
+      if [[ -f "$values_file" ]]; then
+        language="$(basename "${values_file%-values.yml}")"
+        echo "${language}-buildpack"
+      fi
+    done
+  fi
+}
+
+generate_ytt_pipeline() {
+  local buildpack_name="$1"
+  local language="${buildpack_name%-buildpack}"
+  local values_file="$REPO_ROOT/pipelines/buildpack/${language}-values.yml"
+  
+  if [[ ! -f "$values_file" ]]; then
+    echo "ERROR: YTT values file not found: $values_file" >&2
+    return 1
+  fi
+  
+  ytt -f "$REPO_ROOT/pipelines/buildpack/pipeline.yml" \
+      -f "$REPO_ROOT/pipelines/buildpack/config.yml" \
+      -f "$values_file"
+}
+
+generate_erb_pipeline() {
+  local buildpack_name="$1"
+  local language="${buildpack_name%-buildpack}"
+  local config_file="$REPO_ROOT/config/buildpack/${language}.yml"
+  local template_file="$REPO_ROOT/pipelines/templates/buildpack.yml.erb"
+  
+  if [[ ! -f "$config_file" ]]; then
+    echo "ERROR: ERB config file not found: $config_file" >&2
+    return 1
+  fi
+  
+  if [[ ! -f "$template_file" ]]; then
+    echo "ERROR: ERB template file not found: $template_file" >&2
+    return 1
+  fi
+  
+  # Use ERB to generate the pipeline (mimics update-erb-pipelines logic)
+  LANGUAGE="$language" CONFIG_FILE="$config_file" TEMPLATE_FILE="$template_file" \
+    ruby -I"$REPO_ROOT/lib" -e '
+require "yaml"
+require "erb"
+require "buildpacks-ci-configuration"
+
+language = ENV["LANGUAGE"]
+config_file = ENV["CONFIG_FILE"]
+template_file = ENV["TEMPLATE_FILE"]
+
+# Get organization from configuration
+config = BuildpacksCIConfiguration.new
+organization = config.organization
+
+# Run ERB with language and organization variables
+system("erb", "language=#{language}", "organization=#{organization}", template_file)
+' 2>&1
+}
+
+compare_pipeline() {
+  local buildpack_name="$1"
+  local ytt_file="$OUTPUT_DIR/${buildpack_name}-ytt.yml"
+  local erb_file="$OUTPUT_DIR/${buildpack_name}-erb.yml"
+  local ytt_normalized="$OUTPUT_DIR/${buildpack_name}-ytt-normalized.yml"
+  local erb_normalized="$OUTPUT_DIR/${buildpack_name}-erb-normalized.yml"
+  local diff_file="$OUTPUT_DIR/${buildpack_name}-diff.txt"
+  local diff_normalized_file="$OUTPUT_DIR/${buildpack_name}-diff-normalized.txt"
+  
+  echo "Comparing $buildpack_name..."
+  
+  # Generate YTT version
+  if ! generate_ytt_pipeline "$buildpack_name" > "$ytt_file" 2>&1; then
+    echo "  ERROR: Failed to generate YTT pipeline"
+    cat "$ytt_file"
+    return 1
+  fi
+  
+  # Generate ERB version
+  if ! generate_erb_pipeline "$buildpack_name" > "$erb_file" 2>&1; then
+    echo "  ERROR: Failed to generate ERB pipeline"
+    cat "$erb_file"
+    return 1
+  fi
+  
+  # Interpolate Concourse variables in ERB output (mimics what fly --load-vars-from does)
+  local erb_interpolated="$OUTPUT_DIR/${buildpack_name}-erb-interpolated.yml"
+  "$MY_DIR/interpolate-concourse-vars" < "$erb_file" > "$erb_interpolated"
+  
+  # Normalize both files for semantic comparison
+  "$MY_DIR/normalize-yaml" < "$ytt_file" > "$ytt_normalized" 2>&1
+  "$MY_DIR/normalize-yaml" < "$erb_interpolated" > "$erb_normalized" 2>&1
+  
+  # Compare raw files first (use interpolated ERB)
+  if diff -u "$erb_interpolated" "$ytt_file" > "$diff_file" 2>&1; then
+    echo "  ✓ IDENTICAL (raw) - No differences found"
+    rm "$diff_file" "$ytt_normalized" "$erb_normalized"
+    return 0
+  fi
+  
+  # Compare normalized files for semantic differences
+  if diff -u "$erb_normalized" "$ytt_normalized" > "$diff_normalized_file" 2>&1; then
+    echo "  ✓ IDENTICAL (semantic) - Only formatting differences"
+    echo "    Raw diff lines: $(wc -l < "$diff_file")"
+    rm "$diff_normalized_file"
+    return 0
+  else
+    echo "  ✗ SEMANTIC DIFFERENCES FOUND"
+    echo "    Raw diff: $diff_file ($(wc -l < "$diff_file") lines)"
+    echo "    Semantic diff: $diff_normalized_file ($(wc -l < "$diff_normalized_file") lines)"
+    return 1
+  fi
+}
+
+main() {
+  local pipeline_filter=""
+  local compare_all=false
+  local clean_mode=false
+  
+  # Parse arguments
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      --pipeline=*)
+        pipeline_filter="${1#*=}"
+        shift
+        ;;
+      --pipeline|-p)
+        pipeline_filter="$2"
+        shift 2
+        ;;
+      --all)
+        compare_all=true
+        shift
+        ;;
+      --clean)
+        clean_mode=true
+        shift
+        ;;
+      --help|-h)
+        usage
+        exit 0
+        ;;
+      *)
+        echo "Unknown option: $1"
+        usage
+        exit 1
+        ;;
+    esac
+  done
+  
+  # Clean mode
+  if [[ "$clean_mode" == true ]]; then
+    if [[ -d "$OUTPUT_DIR" ]]; then
+      echo "Removing $OUTPUT_DIR"
+      rm -rf "$OUTPUT_DIR"
+      echo "Done."
+    else
+      echo "Nothing to clean - $OUTPUT_DIR does not exist"
+    fi
+    exit 0
+  fi
+  
+  # Ensure output directory exists
+  mkdir -p "$OUTPUT_DIR"
+  
+  # Get list of YTT buildpacks
+  local ytt_buildpacks=($(get_ytt_buildpack_names))
+  
+  if [[ "${#ytt_buildpacks[@]}" -eq 0 ]]; then
+    echo "ERROR: No YTT buildpack pipelines found"
+    exit 1
+  fi
+  
+  # Compare specific or all pipelines
+  local success_count=0
+  local failure_count=0
+  
+  if [[ -n "$pipeline_filter" ]]; then
+    # Compare specific pipeline
+    if compare_pipeline "$pipeline_filter"; then
+      success_count=1
+    else
+      failure_count=1
+    fi
+  elif [[ "$compare_all" == true ]]; then
+    # Compare all pipelines
+    echo "Comparing all ${#ytt_buildpacks[@]} buildpack pipelines..."
+    echo ""
+    
+    for buildpack in "${ytt_buildpacks[@]}"; do
+      if compare_pipeline "$buildpack"; then
+        ((success_count++))
+      else
+        ((failure_count++))
+      fi
+    done
+  else
+    echo "ERROR: Must specify --pipeline=NAME or --all"
+    usage
+    exit 1
+  fi
+  
+  # Summary
+  echo ""
+  echo "=========================================="
+  echo "Comparison Summary"
+  echo "=========================================="
+  echo "Identical:   $success_count"
+  echo "Differences: $failure_count"
+  echo ""
+  echo "Output directory: $OUTPUT_DIR"
+  
+  if [[ $failure_count -gt 0 ]]; then
+    exit 1
+  fi
+}
+
+main "$@"
