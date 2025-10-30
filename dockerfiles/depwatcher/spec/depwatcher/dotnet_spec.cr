@@ -76,6 +76,28 @@ describe Depwatcher::DotnetBase do
         
         FileUtils.rm_rf dirname
       end
+
+      it "uses the latest version when latest is go-live" do
+        dirname = File.join(Dir.tempdir, "github_releases_spec-" + Random.new.urlsafe_base64)
+        client = HTTPClientMock.new
+        Dir.mkdir dirname
+        client.stub_get(
+          "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/releases-index.json",
+          nil,
+          HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet-releases-index-with-golive.json"))
+        )
+        client.stub_get(
+          "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/3.1/releases.json",
+          nil,
+          HTTP::Client::Response.new(200, File.read(__DIR__ + "/../fixtures/dotnet-3.1_releases.json"))
+        )
+        subject = Depwatcher::DotnetSdk.new.tap { |s| s.client = client }
+
+        checked_deps = subject.check("latest")
+        checked_deps.map(&.ref).should eq ["3.1.100", "3.1.101", "3.1.200", "3.1.201"]
+        
+        FileUtils.rm_rf dirname
+      end
     end
 
     describe "#in" do

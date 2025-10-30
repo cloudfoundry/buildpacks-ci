@@ -123,7 +123,8 @@ module Depwatcher
       # as we seem to have issues downloading from here in TPE concourse
       releases_url = "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/release-notes/releases-index.json"
       releases = DotnetReleasesIndex.from_json(client.get(releases_url).body).releases_index
-      releases.reject { |r| r.support_phase == "preview" }.[0].channel_version
+      # Filter out pre-release versions: "preview" (historical) and "go-live" (current RC/pre-release phase)
+      releases.reject { |r| r.support_phase == "preview" || r.support_phase == "go-live" }.[0].channel_version
     end
 
     private def download_file(download_url : String, dest_dir : String, expected_hash : String) : Nil
