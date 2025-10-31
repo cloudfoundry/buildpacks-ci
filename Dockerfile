@@ -122,7 +122,7 @@ RUN curl -L https://github.com/git-hooks/git-hooks/releases/download/v1.1.4/git-
 RUN git clone https://github.com/awslabs/git-secrets && cd git-secrets && make install
 
 # Add git known host
-RUN mkdir -p /root/.ssh/ && echo github.com,192.30.252.131 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ== > /root/.ssh/known_hosts
+RUN mkdir -p /root/.ssh/ && ssh-keyscan github.com >> /root/.ssh/known_hosts
 
 # Create testuser
 RUN mkdir -p /home/testuser && \
