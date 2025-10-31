@@ -1,0 +1,13 @@
+#@data/values
+---
+language: r
+organization: cloudfoundry
+
+buildpack:
+  stacks:
+  - cflinuxfs4
+  product_slug: r-buildpack
+  skip_docker_start: true
+  skip_brats: true
+  compile_extensions: false
+  compute_instance_count: 1

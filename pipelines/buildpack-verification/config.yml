@@ -1,0 +1,20 @@
+#@data/values
+---
+#! Buildpack verification pipeline configuration
+organization: cloudfoundry
+
+#! List of buildpacks to verify (in the loop)
+#! Note: hwc-buildpack is defined separately (not in the loop)
+#! Order matches the ERB template's resource loop
+buildpacks:
+  - go
+  - nodejs
+  - ruby
+  - python
+  - php
+  - staticfile
+  - binary
+  - dotnet-core
+
+#! Note: current-timezone is a Concourse runtime variable ((current-timezone))
+#! and does not need to be defined as a YTT data value

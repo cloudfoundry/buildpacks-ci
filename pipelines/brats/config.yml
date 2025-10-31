@@ -1,0 +1,40 @@
+#@data/values
+---
+languages:
+- apt
+- binary
+- dotnet-core
+- go
+- nodejs
+- python
+- ruby
+- staticfile
+- php
+- nginx
+
+stacks:
+  apt:
+  - cflinuxfs4
+  binary:
+  - cflinuxfs4
+  - windows
+  dotnet-core:
+  - cflinuxfs4
+  go:
+  - cflinuxfs4
+  nginx:
+  - cflinuxfs4
+  nodejs:
+  - cflinuxfs4
+  php:
+  - cflinuxfs4
+  python:
+  - cflinuxfs4
+  ruby:
+  - cflinuxfs4
+  staticfile:
+  - cflinuxfs4
+
+tas_version: "4.0"
+tas_pool_name: tas_four
+current_timezone: America/New_York

@@ -1,0 +1,13 @@
+#@data/values
+---
+language: dotnet-core
+organization: cloudfoundry
+
+buildpack:
+  stacks:
+  - cflinuxfs4
+  product_slug: dotnet-core-buildpack
+  skip_docker_start: false
+  skip_brats: false
+  compile_extensions: false
+  compute_instance_count: 3

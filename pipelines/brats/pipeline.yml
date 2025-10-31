@@ -1,0 +1,174 @@
+#@ load("@ytt:data", "data")
+
+---
+resource_types:
+  - name: cron
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cron-resource
+
+  - name: cf-space-resource
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cf-space-resource
+
+  - name: shepherd
+    type: registry-image
+    source:
+      repository: us-west2-docker.pkg.dev/shepherd-268822/shepherd2/concourse-resource
+      tag: v1
+
+resources:
+  - name: nightly-trigger
+    type: cron
+    source:
+      expression: 0 6 * * *
+      location: #@ data.values.current_timezone
+
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/buildpacks-ci
+      branch: master
+
+  - name: env-repo
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: '((cloudfoundry-buildpacks-envs-deploy-key.private_key))'
+
+  - name: #@ "shepherd-tas-{}-environment".format(data.values.tas_version)
+    type: shepherd
+    source:
+      url: https://v2.shepherd.run
+      service-account-key: ((shepherd-buildpacks-service-account-key))
+      lease:
+        namespace: buildpacks
+        pool:
+          namespace: official
+          name: #@ data.values.tas_pool_name
+      compatibility-mode: environments-app
+
+  - name: shepherd-cf-environment
+    type: shepherd
+    source:
+      url: https://v2.shepherd.run
+      service-account-key: ((shepherd-buildpacks-service-account-key))
+      lease:
+        namespace: buildpacks
+        pool:
+          namespace: official
+          name: cfd
+      compatibility-mode: environments-app
+
+  - name: cf-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-deployment
+
+  #@ for language in data.values.languages:
+  - name: #@ "buildpack-{}".format(language)
+    type: git
+    webhook_token: ob0aigh3
+    source:
+      uri: #@ "git@github.com:cloudfoundry/{}-buildpack.git".format(language)
+      private_key: #@ "((cloudfoundry-{}-buildpack-deploy-key.private_key))".format(language)
+      branch: master
+  #@ end
+
+jobs:
+  #@ for language in data.values.languages:
+  - name: #@ "brats-{}-lts".format(language)
+    serial: true
+    public: true
+    plan:
+      - in_parallel:
+        - get: buildpacks-ci
+        - get: buildpack
+          resource: #@ "buildpack-{}".format(language)
+        - get: nightly-trigger
+          trigger: true
+      - do:
+        - put: #@ "shepherd-tas-{}-environment".format(data.values.tas_version)
+          params:
+            action: create
+            duration: 6h
+            resource: #@ "shepherd-tas-{}-environment".format(data.values.tas_version)
+            description: #@ "Running {}-buildpack brats-lts job.\n".format(language)
+        - task: create-cf-space
+          attempts: 5
+          file: buildpacks-ci/tasks/create-cf-space-toolsmiths/task.yml
+          input_mapping:
+            environment: #@ "shepherd-tas-{}-environment".format(data.values.tas_version)
+          params:
+            ORG: pivotal
+
+        - task: run-brats-cflinuxfs4
+          file: #@ "buildpacks-ci/tasks/{}/task.yml".format("run-bp-brats-jammy" if language == "php" else "run-bp-brats")
+          attempts: #@ 3 if language == "ruby" else 1
+          params:
+            CF_STACK: cflinuxfs4
+            GINKGO_ATTEMPTS: 4
+            GINKGO_NODES: 6
+        ensure:
+          in_parallel:
+          - put: #@ "shepherd-tas-{}-environment".format(data.values.tas_version)
+            params:
+              action: release
+              resource: #@ "shepherd-tas-{}-environment".format(data.values.tas_version)
+  - name: #@ "brats-{}-edge".format(language)
+    serial: true
+    public: true
+    plan:
+      - do:
+        - put: shepherd-cf-environment
+          params:
+            action: create
+            duration: 6h
+            resource: shepherd-cf-environment
+            description: #@ "Running {}-buildpack brats-edge job.\n".format(language)
+          timeout: 6h
+        - in_parallel:
+          - get: buildpacks-ci
+          - get: env-repo
+          - get: buildpack
+            resource: #@ "buildpack-{}".format(language)
+          - get: nightly-trigger
+            trigger: true
+#@ if "windows" in getattr(data.values.stacks, language, []):
+          - get: cf-deployment
+        - task: redeploy
+          file: buildpacks-ci/tasks/cf/redeploy/task.yml
+          input_mapping:
+            ci: buildpacks-ci
+            lock: shepherd-cf-environment
+          params:
+            DEPLOY_WINDOWS_CELL: true
+#@ end
+        - in_parallel:
+#@ for stack in getattr(data.values.stacks, language, []):
+          - do:
+            - task: create-cf-space
+              attempts: 5
+              file: buildpacks-ci/tasks/cf/create-space/task.yml
+              params:
+                DOMAIN: cf-app.com
+                ORG: pivotal
+              input_mapping:
+                ci: buildpacks-ci
+                lock: shepherd-cf-environment
+            - task: #@ "run-brats-{}".format(stack)
+              file: #@ "buildpacks-ci/tasks/{}/task.yml".format("run-bp-brats-jammy" if language == "php" else "run-bp-brats")
+              input_mapping: {cf-space: space}
+              params:
+                CF_STACK: #@ stack
+                GINKGO_ATTEMPTS: 4
+                GINKGO_NODES: 6
+#@ end
+        ensure:
+          put: shepherd-cf-environment
+          params:
+            action: release
+            resource: shepherd-cf-environment
+  #@ end

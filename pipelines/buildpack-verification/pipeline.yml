@@ -1,0 +1,59 @@
+#@ load("@ytt:data", "data")
+
+---
+resource_types:
+  - name: cron
+    type: docker-image
+    source:
+      repository: cfbuildpacks/cron-resource
+
+resources:
+  - name: verification-interval
+    type: cron
+    source:
+      expression: "0 6 * * *"
+      location: ((current-timezone))
+  
+  - name: buildpacks-ci
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/buildpacks-ci
+      branch: master
+  
+  - name: verification-whitelist
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/public-buildpacks-ci-robots
+      paths: [ binary-verification-whitelist/* ]
+  
+  - name: hwc-buildpack
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/hwc-buildpack
+      branch: master
+  
+  #@ for buildpack in data.values.buildpacks:
+  - name: #@ buildpack + "-buildpack"
+    type: git
+    source:
+      uri: #@ "https://github.com/" + data.values.organization + "/" + buildpack + "-buildpack"
+      branch: master
+  #@ end
+
+jobs:
+  - name: verify-buildpack-binaries
+    public: true
+    plan:
+      - do:
+        - in_parallel:
+          - get: buildpacks-ci
+          - get: verification-whitelist
+          - get: verification-interval
+            trigger: true
+          #@ for buildpack in data.values.buildpacks:
+          - get: #@ buildpack + "-buildpack"
+          #@ end
+          - get: hwc-buildpack
+        - task: verify-buildpack-binaries
+          file: buildpacks-ci/tasks/verify-buildpack-binaries/task.yml
+          timeout: 1h30m
