@@ -84,6 +84,13 @@ resources: #####################################################################
 
   - name: buildpack-master
     type: git
+    source:
+      uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
+      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+      branch: master
+
+  - name: buildpack-trigger
+    type: git
     webhook_token: ob0aigh3
     source:
       uri: git@github.com:<%= organization %>/<%= language %>-buildpack.git
@@ -253,6 +260,7 @@ jobs: ##########################################################################
 <% if language == "php" %>
             passed: [ ensure-manifest-has-modules ]
 <% end %>
+          - get: buildpack-trigger
             trigger: true
         - do:
           - task: ginkgo
@@ -273,6 +281,9 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-master
+          passed:
+          - specs-unit-master
+        - get: buildpack-trigger
           trigger: true
           passed:
           - specs-unit-master
@@ -298,22 +309,17 @@ jobs: ##########################################################################
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-master
+          passed:
+<% relevant_stacks.each do |stack| %>
+          - specs-switchblade-docker-master-<%= stack %>
+<% end %>
+        - get: buildpack-trigger
           trigger: true
           passed:
 <% relevant_stacks.each do |stack| %>
           - specs-switchblade-docker-master-<%= stack %>
 <% end %>
         - get: version
-# <% bucket_stacks = buildpacks[language]['stacks']
-#    bucket_stacks = bucket_stacks + ['any'] if language.to_s == 'hwc' || language.to_s == 'binary'
-#    bucket_stacks.each do |stack| %> #change bucket_stacks to buildpacks[language]['stacks'] when removing any_stack
-#         - get: pivotal-buildpack-cached-<%= stack %>
-#           version: every
-#           trigger: false
-#         - get: pivotal-buildpack-<%= stack %>
-#           version: every
-#           trigger: false
-# <% end %>
       - do:
         - in_parallel:
 <% bucket_stacks = buildpacks[language]['stacks']
@@ -342,6 +348,7 @@ jobs: ##########################################################################
 <% end %>
   - name: ship-it
     serial: true
+    max_in_flight: 1
     public: true
     plan:
       - in_parallel:
@@ -361,11 +368,8 @@ jobs: ##########################################################################
           resource: buildpack-master
       - task: check-tag-not-already-added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
-      - get: buildpack-master
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
-        input_mapping:
-          buildpack: buildpack-master
       - put: buildpack-github-release
         params:
           name: buildpack-artifacts/tag
@@ -376,7 +380,6 @@ jobs: ##########################################################################
           globs:
             - buildpack-artifacts/<%= language %>-buildpack*-v*.zip
             - buildpack-artifacts/<%= language %>-buildpack*-v*.zip.SHA256SUM.txt
-          commitish: buildpack-master/.git/ref
       - put: version
         params: { bump: patch }
 
