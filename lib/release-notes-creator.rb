@@ -59,7 +59,7 @@ class RootfsReleaseNotesCreator
   end
 
   def new_packages?
-    !receipt_diff_section.nil?
+    !receipt_diff_section.empty?
   end
 
   private
