@@ -342,6 +342,7 @@ jobs: ##########################################################################
 <% end %>
   - name: ship-it
     serial: true
+    max_in_flight: 1
     public: true
     plan:
       - in_parallel:
@@ -376,7 +377,6 @@ jobs: ##########################################################################
           globs:
             - buildpack-artifacts/<%= language %>-buildpack*-v*.zip
             - buildpack-artifacts/<%= language %>-buildpack*-v*.zip.SHA256SUM.txt
-          commitish: buildpack-master/.git/ref
       - put: version
         params: { bump: patch }
 
