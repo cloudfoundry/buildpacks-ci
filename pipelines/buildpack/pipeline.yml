@@ -44,6 +44,13 @@ resources:
   #! Git Resources
   - name: buildpack-master
     type: git
+    source:
+      uri: #@ "git@github.com:" + data.values.organization + "/" + buildpack_name() + ".git"
+      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+      branch: master
+
+  - name: buildpack-trigger
+    type: git
     webhook_token: ob0aigh3
     source:
       uri: #@ "git@github.com:" + data.values.organization + "/" + buildpack_name() + ".git"
@@ -212,6 +219,7 @@ jobs:
             #@ if data.values.language == "php":
             passed: [ ensure-manifest-has-modules ]
             #@ end
+          - get: buildpack-trigger
             trigger: true
         - do:
           - task: ginkgo
@@ -231,6 +239,9 @@ jobs:
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-master
+          passed:
+          - specs-unit-master
+        - get: buildpack-trigger
           trigger: true
           passed:
           - specs-unit-master
@@ -255,6 +266,11 @@ jobs:
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack-master
+          passed:
+          #@ for stack in data.values.buildpack.stacks:
+          - #@ "specs-switchblade-docker-master-" + stack
+          #@ end
+        - get: buildpack-trigger
           trigger: true
           passed:
           #@ for stack in data.values.buildpack.stacks:
@@ -299,6 +315,7 @@ jobs:
 
   - name: ship-it
     serial: true
+    max_in_flight: 1
     public: true
     plan:
       - in_parallel:
@@ -318,17 +335,14 @@ jobs:
           resource: buildpack-master
       - task: check-tag-not-already-added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
-      - get: buildpack-master
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
-        input_mapping:
-          buildpack: buildpack-master
       - put: buildpack-github-release
         params:
           name: buildpack-artifacts/tag
           tag: buildpack-artifacts/tag
           body: buildpack-artifacts/RECENT_CHANGES
-          commitish: buildpack-master/.git/ref
+          commitish: buildpack/.git/ref
           generate_release_notes: true
           globs:
             - #@ "buildpack-artifacts/" + data.values.language + "-buildpack*-v*.zip"

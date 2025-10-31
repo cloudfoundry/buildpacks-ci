@@ -308,9 +308,9 @@ main() {
   
   for pipeline in "${pipelines_to_compare[@]}"; do
     if compare_pipeline "$pipeline"; then
-      ((success_count++))
+      ((success_count++)) || true
     else
-      ((failure_count++))
+      ((failure_count++)) || true
     fi
   done
   
