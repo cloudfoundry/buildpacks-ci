@@ -13,3 +13,5 @@ inputs:
     optional: true
 run:
   path: buildpacks-ci/tasks/check-tag-not-already-added/run.sh
+params:
+  REPO_PRIVATE_KEY:
