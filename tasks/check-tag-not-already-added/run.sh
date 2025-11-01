@@ -4,6 +4,15 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+if [ -z "${REPO_PRIVATE_KEY:-}" ]; then
+  echo "task error: REPO_PRIVATE_KEY not set" >&2
+  exit 1
+fi
+
+# Set up SSH key for git operations
+eval "$(ssh-agent -s)"
+ssh-add - <<< "$REPO_PRIVATE_KEY"
+
 VERSION=""
 if [[ -d "version" ]]; then
     if [[ -f "version/number" ]]; then

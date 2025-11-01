@@ -368,6 +368,8 @@ jobs: ##########################################################################
           resource: buildpack-master
       - task: check-tag-not-already-added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
+        params:
+          REPO_PRIVATE_KEY: ((cf-buildpacks-eng-github-ssh-key.private_key))
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
       - put: buildpack-github-release
