@@ -1,0 +1,13 @@
+#@data/values
+---
+language: nginx
+organization: cloudfoundry
+
+buildpack:
+  stacks:
+  - cflinuxfs4
+  product_slug: nginx-buildpack
+  skip_docker_start: false
+  skip_brats: false
+  compile_extensions: false
+  compute_instance_count: 1
