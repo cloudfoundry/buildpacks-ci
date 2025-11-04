@@ -56,28 +56,32 @@ module Depwatcher
     def getLTSLine : String
       # Get JSON from github https://raw.githubusercontent.com/nodejs/Release/main/schedule.json
 
-      response = HTTP::Client.get("https://raw.githubusercontent.com/nodejs/Release/main/schedule.json")
+      response = client.get("https://raw.githubusercontent.com/nodejs/Release/main/schedule.json")
       if response.status_code != 200
         raise "Failed to get nodejs LTS schedule"
       end
 
-      latest_lts = ""
       actual_date = Time.local
       actual_year = actual_date.year
       actual_month = actual_date.month
       actual_day = actual_date.day
-      Hash(String, NodeVersionInfo).from_json(response.body).map do |version|
-        if version[1].lts != nil && version[1].lts != ""
-          lts_date = version[1].lts.as(String)
+      
+      # Find all LTS versions that have passed their LTS date
+      lts_versions = Hash(String, NodeVersionInfo).from_json(response.body).select do |version, info|
+        if info.lts != nil && info.lts != ""
+          lts_date = info.lts.as(String)
           lts_year = lts_date.split("-")[0].to_i
           lts_month = lts_date.split("-")[1].to_i
           lts_day = lts_date.split("-")[2].to_i
-          if lts_year < actual_year || (lts_year == actual_year && lts_month < actual_month) || (lts_year == actual_year && lts_month == actual_month && lts_day <= actual_day)
-            latest_lts = version[0].as(String).sub("v", "")
-          end
+          lts_year < actual_year || (lts_year == actual_year && lts_month < actual_month) || (lts_year == actual_year && lts_month == actual_month && lts_day <= actual_day)
+        else
+          false
         end
       end
-      return latest_lts
+      
+      # Return the highest version number among LTS versions
+      latest = lts_versions.keys.map { |v| v.sub("v", "").to_i }.max?
+      return latest ? latest.to_s : ""
     end
 
     private def url(version : String) : String
