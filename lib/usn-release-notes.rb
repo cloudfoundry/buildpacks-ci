@@ -33,10 +33,14 @@ class UsnReleaseNotes
 
     cves.each do |cve|
       cve_id = cve['id']
-      cve_description = cve['description'] || 'Nothing found in description'
+      cve_url_api = "https://ubuntu.com/security/cves/#{cve_id}.json"
+
+      cve_info = JSON.parse(URI.open(cve_url_api).read)
+      cve_description = cve_info['description'] || 'Nothing found in description'
+      clean_description = cve_description.gsub(/\s+/, ' ').strip
       cve_url = "https://ubuntu.com/security/#{cve_id}"
 
-      notes += "* [#{cve_id}](#{cve_url}): #{cve_description}\n"
+      notes += "* [#{cve_id}](#{cve_url}): #{clean_description}\n"
     end
 
     lps.each do |lp|
