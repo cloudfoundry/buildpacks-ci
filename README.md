@@ -4,12 +4,13 @@ This contains the configuration for the Cloud Foundry Buildpacks team [Concourse
 
 # Pipelines
 
-* [dependency-builds](pipelines/dependency-builds.yml.erb): build binaries for Cloud Foundry buildpacks
-* [buildpacks](pipelines/templates/buildpack.yml.erb): test and release all of the buildpacks
-* [brats](pipelines/brats.yml.erb): run [BRATS](https://github.com/cloudfoundry/brats) against the master branch of buildpacks
-* [buildpack-verification](pipelines/buildpack-verification.yml.erb): generate static site for buildpack verification
-* [buildpacks-ci](pipelines/buildpacks-ci.yml): testing tasks for correct usage, rebuild CI docker images
-* [cf-release](pipelines/cf-release.yml.erb): deployment of latest buildpacks to cf-release develop
+All pipelines are now generated using [ytt](https://carvel.dev/ytt/) templating.
+
+* [dependency-builds](pipelines/dependency-builds): build binaries for Cloud Foundry buildpacks
+* [buildpacks](pipelines/buildpack): test and release all of the buildpacks
+* [brats](pipelines/brats): run [BRATS](https://github.com/cloudfoundry/brats) against the master branch of buildpacks
+* [buildpack-verification](pipelines/buildpack-verification): generate static site for buildpack verification
+* [cflinuxfs4](pipelines/cflinuxfs4.yml): cflinuxfs4 rootfs pipeline
 
 # Concourse State
 

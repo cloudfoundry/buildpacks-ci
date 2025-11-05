@@ -1,6 +1,0 @@
-#!/usr/bin/env ruby
-# encoding: utf-8
-
-require_relative '../lib/buildpacks-ci-pipeline-updater'
-
-BuildpacksCIPipelineUpdater.new.run!(ARGV)
