@@ -9,5 +9,4 @@ buildpack:
   product_slug: php-buildpack
   skip_docker_start: false
   skip_brats: false
-  compile_extensions: true
   compute_instance_count: 1
