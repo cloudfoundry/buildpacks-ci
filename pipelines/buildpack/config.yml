@@ -17,5 +17,4 @@ buildpack:
   product_slug: ""
   skip_docker_start: false
   skip_brats: false
-  compile_extensions: false
   compute_instance_count: 1

@@ -34,18 +34,18 @@ class BuildpackTagger
         cached_buildpack = Dir['../pivotal-buildpack-cached/*.zip'].first
 
         if uncached_buildpack && cached_buildpack
-          puts "Using existing artifacts - no rebuild needed"
+          puts 'Using existing artifacts - no rebuild needed'
           output_uncached = File.join('..', 'buildpack-artifacts', 'uncached', File.basename(uncached_buildpack))
           output_cached = File.join('..', 'buildpack-artifacts', 'cached', File.basename(cached_buildpack))
 
           FileUtils.mv(uncached_buildpack, output_uncached)
           FileUtils.mv(cached_buildpack, output_cached)
         else
-          puts "Tag exists but no artifacts found - building from scratch"
+          puts 'Tag exists but no artifacts found - building from scratch'
           build_artifacts
         end
       else
-        puts "New version detected - building artifacts"
+        puts 'New version detected - building artifacts'
         build_artifacts
       end
     end
@@ -57,27 +57,7 @@ class BuildpackTagger
     stack = ENV.fetch('CF_STACK')
     stack_flag = stack == 'any' ? '--any-stack' : "--stack=#{stack}"
 
-    if File.exist?('compile-extensions')
-      system(<<~EOF)
-        export BUNDLE_GEMFILE=cf.Gemfile
-        if [ ! -z "$RUBYGEM_MIRROR" ]; then
-          bundle config mirror.https://rubygems.org "${RUBYGEM_MIRROR}"
-        fi
-        # Write a new Gemfile and Gemfile.lock to the buildpack directory
-        # so that the buildpack-packager can use the correct versions of
-        # the buildpack dependencies
-
-        rm -rf cf.Gemfile
-        rm -rf cf.Gemfile.lock
-
-        wget https://github.com/cloudfoundry/php-buildpack/raw/v4.5.3/cf.Gemfile
-        wget https://github.com/cloudfoundry/php-buildpack/raw/v4.5.3/cf.Gemfile.lock
-        bundle install --deployment
-        bundle cache
-        bundle exec buildpack-packager --uncached #{stack_flag}
-        bundle exec buildpack-packager --cached #{stack_flag}
-      EOF
-    elsif File.exist?('./scripts/.util/tools.sh')
+    if File.exist?('./scripts/.util/tools.sh')
       system('bash', '-c', <<~EOF)
         . ./scripts/.util/tools.sh
         util::tools::buildpack-packager::install --directory "${PWD}/.bin"

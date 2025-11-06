@@ -83,13 +83,6 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/libbuildpack.git
 
-  #@ if data.values.buildpack.compile_extensions:
-  - name: compile-extensions
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/compile-extensions.git
-  #@ end
-
   #@ if data.values.language == "hwc":
   - name: buildpack-bosh-release
     type: git
@@ -129,15 +122,6 @@ resources:
     source:
       user: #@ data.values.buildpacks_github_org
       repository: #@ data.values.language + "-buildpack-release"
-      access_token: ((buildpacks-github-token))
-  #@ end
-
-  #@ if data.values.buildpack.compile_extensions:
-  - name: buildpack-packager
-    type: github-release
-    source:
-      user: #@ data.values.buildpacks_github_org
-      repository: buildpack-packager
       access_token: ((buildpacks-github-token))
   #@ end
 
@@ -529,56 +513,6 @@ jobs:
           branch_prefix: "update-libbuildpack"
           auto_merge: false
           base: master
-
-  #@ if data.values.buildpack.compile_extensions:
-  - name: update-compile-extensions
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: compile-extensions
-          trigger: true
-        - get: buildpack
-          resource: buildpack-master
-      - task: update-compile-extensions
-        file: buildpacks-ci/tasks/update-compile-extensions/task.yml
-        params:
-          RUBYGEM_MIRROR: #@ data.values.rubygem_mirror
-      - put: buildpack-pull-request
-        params:
-          repo_location: buildpack-artifacts
-          title: Update compile-extensions
-          branch_prefix: "update-compile-extensions"
-          auto_merge: false
-          base: master
-
-  - name: update-buildpack-packager
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: gem
-          resource: buildpack-packager
-          trigger: true
-        - get: repo-with-gemfile
-          resource: buildpack-master
-      - task: update-buildpack-packager
-        file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
-        params:
-          RUBYGEM_MIRROR: #@ data.values.rubygem_mirror
-          GEM_NAME: buildpack-packager
-          GEM_GIT_REPOSITORY: #@ data.values.buildpack_packager_git_uri_public
-          GEMFILE_NAME: cf.Gemfile
-      - put: buildpack-pull-request
-        params:
-          repo_location: repo-with-gemfile-artifacts
-          title: Update buildpack-packager
-          branch_prefix: "update-buildpack-packager"
-          auto_merge: false
-          base: master
-  #@ end
 
   #@ if data.values.language == "hwc":
   - name: update-buildpack-bosh-release
