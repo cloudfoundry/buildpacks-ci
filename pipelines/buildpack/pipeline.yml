@@ -288,8 +288,7 @@ jobs:
         #!   version: every
         #!   trigger: false
         #! #@ end
-      - do:
-        - in_parallel:
+      - in_parallel:
           #@ for stack in bucket_stacks():
           - do:
             - task: #@ "detect-and-upload-" + stack
@@ -333,6 +332,26 @@ jobs:
           passed:
             - detect-new-version-and-upload-artifacts
           resource: buildpack-master
+      - task: write-version-file
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source:
+              repository: cfbuildpacks/ci
+          inputs:
+            - name: buildpack
+            - name: version
+          outputs:
+            - name: buildpack
+          run:
+            path: bash
+            args:
+              - -c
+              - |
+                set -e
+                cp version/number buildpack/VERSION
+                echo "Updated VERSION file with: $(cat buildpack/VERSION)"
       - task: check-tag-not-already-added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
         params:

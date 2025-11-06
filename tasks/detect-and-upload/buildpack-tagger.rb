@@ -54,11 +54,9 @@ class BuildpackTagger
   private
 
   def build_artifacts
-    tag_to_add = "v#{File.read('VERSION')}".strip
     stack = ENV.fetch('CF_STACK')
     stack_flag = stack == 'any' ? '--any-stack' : "--stack=#{stack}"
-    puts `git tag #{tag_to_add}`
-    
+
     if File.exist?('compile-extensions')
       system(<<~EOF)
         export BUNDLE_GEMFILE=cf.Gemfile
