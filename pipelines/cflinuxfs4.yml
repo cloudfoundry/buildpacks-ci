@@ -268,8 +268,8 @@ jobs:
       output_mapping:
         output_repo: golang-bumped-cflinuxfs4-release
       params:
-        GIT_USER_NAME: cf-buildpacks-eng
-        GIT_USER_EMAIL: cf-buildpacks-eng@pivotal.io
+        GIT_USER_NAME: ari-wg-gitbot
+        GIT_USER_EMAIL: app-runtime-interfaces@cloudfoundry.org
         PACKAGES: [golang-1-linux]
         PRIVATE_YML: |
           ---
@@ -371,8 +371,8 @@ jobs:
       LB_DOMAIN: cflinuxfs4.buildpacks.ci.cloudfoundry.org
       BBL_ENV_NAME: cflinuxfs4
       BBL_STATE_DIR: cflinuxfs4
-      GIT_COMMIT_EMAIL: "tanzu-buildpacks.pdl@broadcom.com"
-      GIT_COMMIT_USERNAME: "CF Buildpacks Eng Bot"
+      GIT_COMMIT_EMAIL: app-runtime-interfaces@cloudfoundry.org
+      GIT_COMMIT_USERNAME: ari-wg-gitbot
       GIT_COMMIT_MESSAGE: "Update bbl state dir"
     input_mapping:
       ops-files: bosh-deployment
@@ -385,7 +385,7 @@ jobs:
     file: runtime-ci/tasks/manage-gcp-dns/task.yml
     params:
       BBL_STATE_DIR: cflinuxfs4
-      GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-cloudfoundry-admin-account-key))
+      GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
       GCP_DNS_ZONE_NAME: buildpacks-ci
       GCP_DNS_RECORD_SET_NAME: cflinuxfs4.buildpacks.ci.cloudfoundry.org
       GCP_DNS_RECORD_TTL: 300
@@ -609,7 +609,7 @@ jobs:
     file: runtime-ci/tasks/manage-gcp-dns/task.yml
     params:
       BBL_STATE_DIR: cflinuxfs4
-      GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-cloudfoundry-admin-account-key))
+      GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
       GCP_DNS_ZONE_NAME: buildpacks-ci
       GCP_DNS_RECORD_SET_NAME: cflinuxfs4.buildpacks.ci.cloudfoundry.org
       GCP_DNS_RECORD_TTL: 300
@@ -622,8 +622,8 @@ jobs:
       BBL_STATE_DIR: cflinuxfs4
       BBL_GCP_PROJECT_ID: cf-buildpacks
       BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-      GIT_COMMIT_EMAIL: "tanzu-buildpacks.pdl@broadcom.com"
-      GIT_COMMIT_USERNAME: "CF Buildapcks Eng Bot"
+      GIT_COMMIT_EMAIL: app-runtime-interfaces@cloudfoundry.org
+      GIT_COMMIT_USERNAME: ari-wg-gitbot
     ensure:
       put: bbl-state
       params:

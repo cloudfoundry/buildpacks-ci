@@ -52,7 +52,7 @@ class RootfsReleaseNotesCreator
     receipt_diff_array = parse_diffy_output(diffy)
     receipt_diff = format_diff(receipt_diff_array) unless receipt_diff_array.empty?
     if receipt_diff
-      "```\n#{receipt_diff}```\n"
+      "```\n#{receipt_diff}\n```\n"
     else
       ''
     end
