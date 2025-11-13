@@ -522,8 +522,8 @@ jobs:
         LB_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
         BBL_ENV_NAME: #@ data.values.language + "-bbl-env"
         BBL_STATE_DIR: #@ data.values.language
-        GIT_COMMIT_EMAIL: "buildpacks-eng@pivotal.io"
-        GIT_COMMIT_USERNAME: "Buildpacks CI Bot"
+        GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
+        GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
         GIT_COMMIT_MESSAGE: "Update BBL state"
       input_mapping:
         ops-files: bosh-deployment
@@ -536,7 +536,7 @@ jobs:
       file: runtime-ci/tasks/manage-gcp-dns/task.yml
       params:
         BBL_STATE_DIR: #@ data.values.language
-        GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-cloudfoundry-admin-account-key))
+        GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
         GCP_DNS_ZONE_NAME: buildpacks-ci
         GCP_DNS_RECORD_SET_NAME: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
         GCP_DNS_RECORD_TTL: 300
@@ -551,6 +551,68 @@ jobs:
         params:
           BBL_STATE_DIR: #@ data.values.language
           BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+      ensure:
+        put: bbl-state
+        params:
+          repository: updated-bbl-state
+          rebase: true
+
+  - name: delete-deployment
+    serial: true
+    public: true
+    plan:
+    - in_parallel:
+      - get: bbl-state
+      - get: buildpacks-ci
+    - task: create-deployment-source-config
+      file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+      params:
+        BBL_ENV_NAME: #@ data.values.language + "-bbl-env"
+    - put: bbl-deployment-source-config
+      params:
+        source_file: deployment-source-config/source_file.yml
+        delete:
+          enabled: true
+          force: true
+    - put: cflinuxfs4-cf-deployment
+      params:
+        source_file: deployment-source-config/source_file.yml
+        delete:
+          enabled: true
+          force: true
+
+  - name: bbl-destroy
+    serial: true
+    public: true
+    plan:
+    - in_parallel:
+      - get: cf-deployment-concourse-tasks
+        resource: cf-deployment-concourse-tasks-latest
+      - get: bbl-state
+      - get: buildpacks-ci
+      - get: runtime-ci
+      - get: version
+        passed: [ delete-deployment ]
+        trigger: true
+    - task: remove-from-gcp-dns
+      file: runtime-ci/tasks/manage-gcp-dns/task.yml
+      params:
+        BBL_STATE_DIR: #@ data.values.language
+        GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+        GCP_DNS_ZONE_NAME: buildpacks-ci
+        GCP_DNS_RECORD_SET_NAME: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
+        GCP_DNS_RECORD_TTL: 300
+        ACTION: remove
+      input_mapping:
+        bbl-state: bbl-state
+    - task: bbl-destroy
+      file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+      params:
+        BBL_STATE_DIR: #@ data.values.language
+        BBL_GCP_PROJECT_ID: cf-buildpacks
+        BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+        GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
+        GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
       ensure:
         put: bbl-state
         params:
