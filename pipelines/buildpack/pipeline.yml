@@ -60,6 +60,13 @@ resources:
         - VERSION
         - CHANGELOG
 
+  - name: bbl-state
+    type: git
+    source:
+      uri: git@github.com:cloudfoundry/buildpacks-envs
+      branch: master
+      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+
   - name: cf-deployment
     type: git
     source:
@@ -475,6 +482,40 @@ jobs:
       params:
         action: release
         resource: environment
+  #@ end
+
+  #@ for buildpack in buildpacks:
+  - name: bbl-up-#@ buildpack
+    serial: true
+    public: true
+    plan:
+    - in_parallel:
+      - get: bbl-state
+      - get: buildpacks-ci
+      - get: bosh-deployment
+      - get: cf-deployment
+    - task: bbl-up
+      file: buildpacks-ci/tasks/bbl-up/task.yml
+      params:
+        BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+        BBL_GCP_PROJECT_ID: cf-buildpacks
+        BBL_GCP_REGION: europe-north1
+        BBL_IAAS: gcp
+        BBL_LB_CERT: ((buildpacks-lb-cert.certificate))
+        BBL_LB_KEY: ((buildpacks-lb-cert.private_key))
+        LB_DOMAIN: #@ "{}.buildpacks.ci.cloudfoundry.org".format(buildpack)
+        BBL_ENV_NAME: #@ "{}-bbl-env".format(buildpack)
+        BBL_STATE_DIR: #@ buildpack
+        GIT_COMMIT_EMAIL: "buildpacks-eng@pivotal.io"
+        GIT_COMMIT_USERNAME: "Buildpacks CI Bot"
+        GIT_COMMIT_MESSAGE: "Update BBL state"
+      input_mapping:
+        ops-files: bosh-deployment
+      ensure:
+        put: bbl-state
+        params:
+          repository: updated-bbl-state
+          rebase: true
   #@ end
 
   - name: specs-edge-shared-master
