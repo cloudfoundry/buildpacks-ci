@@ -87,6 +87,24 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/runtime-ci
 
+  - name: bbl-deployment-source-config
+    type: bosh-deployment
+    source:
+      deployment: #@ data.values.language + "-bbl-env-cf"
+      client: ((bosh-client))
+      client_secret: ((bosh-client-secret))
+      ca_cert: ((bosh-ca-cert))
+      target: ((bosh-target))
+
+  - name: cflinuxfs4-cf-deployment
+    type: bosh-deployment
+    source:
+      deployment: cflinuxfs4-cf
+      client: ((bosh-client))
+      client_secret: ((bosh-client-secret))
+      ca_cert: ((bosh-ca-cert))
+      target: ((bosh-target))
+
   - name: buildpacks-ci
     type: git
     source:
@@ -567,7 +585,7 @@ jobs:
     - task: create-deployment-source-config
       file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
       params:
-        BBL_ENV_NAME: #@ data.values.language + "-bbl-env"
+        ENV_NAME: #@ data.values.language + "-bbl-env"
     - put: bbl-deployment-source-config
       params:
         source_file: deployment-source-config/source_file.yml
@@ -587,7 +605,6 @@ jobs:
     plan:
     - in_parallel:
       - get: cf-deployment-concourse-tasks
-        resource: cf-deployment-concourse-tasks-latest
       - get: bbl-state
       - get: buildpacks-ci
       - get: runtime-ci
