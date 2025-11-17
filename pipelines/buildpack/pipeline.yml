@@ -431,6 +431,11 @@ jobs:
         - get: repo
           resource: buildpack-master
         - get: cf-deployment
+        - get: cf-deployment-concourse-tasks
+        - get: bbl-state
+        - get: runtime-ci
+        - get: version-stack-cflinuxfs4
+          trigger: true
       
       - task: redeploy
         file: buildpacks-ci/tasks/cf/redeploy/task.yml
@@ -501,10 +506,45 @@ jobs:
             #@ else:
           privileged: true
             #@ end
-        ensure:
-          task: delete-cf-space
-          file: buildpacks-ci/tasks/delete-cf-space/task.yml
-          input_mapping: {cf-space: space}
+        - task: create-deployment-source-config
+          file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+          params:
+            ENV_NAME: cflinuxfs4
+        - put: cflinuxfs4-cf-deployment
+          params:
+            source_file: deployment-source-config/source_file.yml
+            delete:
+              enabled: true
+              force: true
+        - task: remove-from-gcp-dns
+          file: runtime-ci/tasks/manage-gcp-dns/task.yml
+          params:
+            BBL_STATE_DIR: #@ data.values.language
+            GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+            GCP_DNS_ZONE_NAME: buildpacks-ci
+            GCP_DNS_RECORD_SET_NAME: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
+            GCP_DNS_RECORD_TTL: 300
+            ACTION: remove
+          input_mapping:
+            bbl-state: bbl-state
+        - task: bbl-destroy
+          file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+          params:
+            BBL_STATE_DIR: #@ data.values.language
+            BBL_GCP_PROJECT_ID: cf-buildpacks
+            BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+            GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
+            GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
+          ensure:
+            #! put: bbl-state
+            #! params:
+            #!   repository: updated-bbl-state
+            #!   rebase: true
+            task: delete-cf-space
+            file: buildpacks-ci/tasks/delete-cf-space/task.yml
+            input_mapping: {cf-space: space}
+            
+        
     on_success:
       put: environment
       resource: shepherd-cf-environment
@@ -513,73 +553,8 @@ jobs:
         resource: environment
   #@ end
 
-  - name: deploy-cf
-    serial: true
-    public: false
-    disable_manual_trigger: false
-    plan:
-      - in_parallel:
-        - get: cf-deployment-concourse-tasks
-        - get: runtime-ci
-      - task: deploy-cf
-        file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
-        image: cf-deployment-concourse-tasks-bbl-dev
-        input_mapping:
-          bbl-state: updated-bbl-state
-        params:
-          BBL_STATE_DIR: #@ data.values.language
-          BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-          SYSTEM_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
-          VARS_STORE_FILE: bump-deployments/bbl-gcp-cf/deployment-vars.yml
-          OPS_FILES: operations/use-compiled-releases.yml operations/experimental/fast-deploy-with-downtime-and-danger.yml
-        on_failure:
-          do:
-          - task: remove-from-gcp-dns
-            file: runtime-ci/tasks/manage-gcp-dns/task.yml
-            image: cf-deployment-concourse-tasks-bbl-dev
-            params:
-              BBL_STATE_DIR: #@ data.values.language
-              GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key-to-be-added-as-environment!))
-              GCP_DNS_ZONE_NAME: bootloader-ci
-              GCP_DNS_RECORD_SET_NAME: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
-              ACTION: remove
-            input_mapping:
-              bbl-state: updated-bbl-state
-
-          - task: delete-cf-deployment
-            file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
-            image: cf-deployment-concourse-tasks-bbl-dev
-            input_mapping:
-              bbl-state: updated-bbl-state
-            params:
-              BBL_STATE_DIR: #@ data.values.language
-              BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-
-          - task: bosh-cleanup
-            file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
-            image: cf-deployment-concourse-tasks-bbl-dev
-            input_mapping:
-              bbl-state: updated-bbl-state
-            params:
-              CLEAN_ALL: true
-              BBL_STATE_DIR: #@ data.values.language
-              BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-
-          - task: destroy-infrastructure
-            file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
-            image: cf-deployment-concourse-tasks-bbl-dev
-            input_mapping:
-              bbl-state: updated-bbl-state
-            params:
-              BBL_STATE_DIR: #@ data.values.language
-              BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-            ensure:
-              put: relint-envs
-              params:
-                rebase: true
-                repository: updated-bbl-state
-
-  - name: #@ "bbl-up-" + data.values.language
+  #! - name: #@ "bbl-up-" + data.values.language
+  - name: #@ "create-bbl-and-cf-infrastructure-for-" + data.values.language
     serial: true
     public: true
     plan:
@@ -636,70 +611,63 @@ jobs:
         params:
           repository: updated-bbl-state
           rebase: true
-
-  - name: delete-deployment
-    serial: true
-    public: true
-    plan:
-    - in_parallel:
-      - get: bbl-state
-      - get: buildpacks-ci
-    - task: create-deployment-source-config
-      file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
-      params:
-        ENV_NAME: #@ data.values.language + "-bbl-env"
-
-    #!         originally coming from cflinuxfs4-rootfs-smoke-test-deployment job
-    #! - put: bbl-deployment-source-config   
-    #!   params:
-    #!     source_file: deployment-source-config/source_file.yml
-    #!     delete:
-    #!       enabled: true
-    #!       force: true
-    
-    - put: cflinuxfs4-cf-deployment
-      params:
-        source_file: deployment-source-config/source_file.yml
-        delete:
-          enabled: true
-          force: true
-
-  - name: bbl-destroy
-    serial: true
-    public: true
-    plan:
-    - in_parallel:
-      - get: cf-deployment-concourse-tasks
-      - get: bbl-state
-      - get: buildpacks-ci
-      - get: runtime-ci
-      - get: version-stack-cflinuxfs4
-        #! passed: [ delete-deployment ]
-        trigger: true
-    - task: remove-from-gcp-dns
-      file: runtime-ci/tasks/manage-gcp-dns/task.yml
-      params:
-        BBL_STATE_DIR: #@ data.values.language
-        GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-        GCP_DNS_ZONE_NAME: buildpacks-ci
-        GCP_DNS_RECORD_SET_NAME: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
-        GCP_DNS_RECORD_TTL: 300
-        ACTION: remove
+    - task: deploy-cf
+      file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+      image: cf-deployment-concourse-tasks-bbl-dev
       input_mapping:
-        bbl-state: bbl-state
-    - task: bbl-destroy
-      file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+        bbl-state: updated-bbl-state
       params:
         BBL_STATE_DIR: #@ data.values.language
-        BBL_GCP_PROJECT_ID: cf-buildpacks
         BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-        GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
-        GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
-      ensure:
-        put: bbl-state
-        params:
-          repository: updated-bbl-state
-          rebase: true
+        SYSTEM_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
+        VARS_STORE_FILE: bump-deployments/bbl-gcp-cf/deployment-vars.yml
+        OPS_FILES: operations/use-compiled-releases.yml operations/experimental/fast-deploy-with-downtime-and-danger.yml
+      on_failure:
+        do:
+        - task: remove-from-gcp-dns
+          file: runtime-ci/tasks/manage-gcp-dns/task.yml
+          image: cf-deployment-concourse-tasks-bbl-dev
+          params:
+            BBL_STATE_DIR: #@ data.values.language
+            GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key-to-be-added-as-environment!))
+            GCP_DNS_ZONE_NAME: bootloader-ci
+            GCP_DNS_RECORD_SET_NAME: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
+            ACTION: remove
+          input_mapping:
+            bbl-state: updated-bbl-state
+
+        - task: delete-cf-deployment
+          file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+          image: cf-deployment-concourse-tasks-bbl-dev
+          input_mapping:
+            bbl-state: updated-bbl-state
+          params:
+            BBL_STATE_DIR: #@ data.values.language
+            BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+
+        - task: bosh-cleanup
+          file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+          image: cf-deployment-concourse-tasks-bbl-dev
+          input_mapping:
+            bbl-state: updated-bbl-state
+          params:
+            CLEAN_ALL: true
+            BBL_STATE_DIR: #@ data.values.language
+            BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+
+        - task: destroy-infrastructure
+          file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+          image: cf-deployment-concourse-tasks-bbl-dev
+          input_mapping:
+            bbl-state: updated-bbl-state
+          params:
+            BBL_STATE_DIR: #@ data.values.language
+            BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+          ensure:
+            put: relint-envs
+            params:
+              rebase: true
+              repository: updated-bbl-state
 
   - name: specs-edge-shared-master
     serial: true
