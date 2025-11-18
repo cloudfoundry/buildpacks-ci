@@ -433,6 +433,8 @@ jobs:
         - get: cf-deployment
         - get: cf-deployment-concourse-tasks
         - get: bbl-state
+          passed:
+          - #@ "create-bbl-and-cf-infrastructure-for-" + data.values.language
         - get: runtime-ci
         - get: version-stack-cflinuxfs4
           trigger: true
