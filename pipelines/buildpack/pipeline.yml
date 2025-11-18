@@ -574,8 +574,8 @@ jobs:
         BBL_GCP_PROJECT_ID: cf-buildpacks
         BBL_GCP_REGION: europe-north1
         BBL_IAAS: gcp
-        BBL_LB_CERT: ((buildpacks-lb-cert.certificate-???))
-        BBL_LB_KEY: ((buildpacks-lb-cert.private_key-???))
+        BBL_LB_CERT: ((shared-cf-cert.certificate))
+        BBL_LB_KEY: ((shared-cf-cert.private_key))
         LB_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
         BBL_ENV_NAME: #@ data.values.language + "-bbl-env"
         BBL_STATE_DIR: #@ data.values.language
@@ -583,7 +583,8 @@ jobs:
         GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
         GIT_COMMIT_MESSAGE: "Update BBL state"
       input_mapping:
-        ops-files: bosh-deployment
+        bbl-state: bbl-state
+        bbl-config: bbl-state
       ensure:
         put: bbl-state
         params:
