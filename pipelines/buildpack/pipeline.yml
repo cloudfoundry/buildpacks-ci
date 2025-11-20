@@ -40,12 +40,6 @@ resource_types:
     source:
       repository: cfbuildpacks/create-pull-request-resource
 
-  - name: semver-latest
-    type: docker-image
-    source:
-      repository: concourse/semver-resource
-      tag: latest
-
 resources:
   #! Git Resources
   - name: buildpack-master
@@ -150,7 +144,7 @@ resources:
       private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
 
   - name: version-stack-cflinuxfs4
-    type: semver-latest
+    type: semver
     source:
       bucket: cflinuxfs4-release
       key: versions/stack-cflinuxfs4
