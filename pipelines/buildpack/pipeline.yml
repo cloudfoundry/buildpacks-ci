@@ -436,12 +436,12 @@ jobs:
       #! - do:
       - task: create-cf-space
         attempts: 5
-        file: buildpacks-ci/tasks/cf/create-space/task.yml
+        file: buildpacks-ci/tasks/cf/create-space-bbl/task.yml
         input_mapping:
           ci: buildpacks-ci
-          lock: environment
         params:
-          DOMAIN: 'cf-app.com'
+          SYSTEM_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
+          BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
           ORG: pivotal
       #@ if not data.values.buildpack.skip_brats:
       #@ if "cflinuxfs4" in data.values.buildpack.stacks:
