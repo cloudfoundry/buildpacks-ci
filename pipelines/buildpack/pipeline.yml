@@ -40,6 +40,12 @@ resource_types:
     source:
       repository: cfbuildpacks/create-pull-request-resource
 
+  - name: semver-latest
+    type: docker-image
+    source:
+      repository: concourse/semver-resource
+      tag: latest
+
 resources:
   #! Git Resources
   - name: buildpack-master
@@ -213,26 +219,6 @@ resources:
       access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
       secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
   #@ end
-
-  #! Resource Pools
-  - name: shepherd-cf-environment
-    type: shepherd
-    source:
-      url: https://v2.shepherd.run
-      service-account-key: ((shepherd-buildpacks-service-account-key))
-      lease:
-        namespace: buildpacks
-        pool:
-          namespace: official
-          name: cfd
-      compatibility-mode: environments-app
-
-  - name: relint-envs
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/bosh-bootloader-ci-envs.git
-      branch: main
-      private_key: ((github_deploy_key_bosh-bootloader-ci-envs.private_key))
 
 jobs:
   #@ if data.values.language == "php":
@@ -433,6 +419,7 @@ jobs:
         - get: cf-deployment
         - get: cf-deployment-concourse-tasks
         - get: bbl-state
+          trigger: true
           passed:
           - #@ "create-bbl-and-cf-infrastructure-for-" + data.values.language
         - get: runtime-ci
@@ -548,14 +535,6 @@ jobs:
             #! task: delete-cf-space
             #! file: buildpacks-ci/tasks/delete-cf-space/task.yml
             #! input_mapping: {cf-space: space}
-            
-        
-    on_success:
-      put: environment
-      resource: shepherd-cf-environment
-      params:
-        action: release
-        resource: environment
   #@ end
 
   #! - name: #@ "bbl-up-" + data.values.language
@@ -629,12 +608,13 @@ jobs:
       file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
       input_mapping:
         bbl-state: updated-bbl-state
+        ops-files: cf-deployment
       params:
         BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
         BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
         SYSTEM_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
         VARS_STORE_FILE: bump-deployments/bbl-gcp-cf/deployment-vars.yml
-        OPS_FILES: cf-deployment/operations/use-compiled-releases.yml cf-deployment/operations/experimental/fast-deploy-with-downtime-and-danger.yml
+        OPS_FILES: operations/use-compiled-releases.yml operations/experimental/fast-deploy-with-downtime-and-danger.yml operations/scale-to-one-az.yml
       on_failure:
         do:
         - task: remove-from-gcp-dns
@@ -642,7 +622,7 @@ jobs:
           params:
             BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
             GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-            GCP_DNS_ZONE_NAME: bootloader-ci
+            GCP_DNS_ZONE_NAME: buildpacks-ci
             GCP_DNS_RECORD_SET_NAME: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
             ACTION: remove
           input_mapping:
@@ -673,7 +653,7 @@ jobs:
             BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
             BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
           ensure:
-            put: relint-envs
+            put: bbl-state
             params:
               rebase: true
               repository: updated-bbl-state
