@@ -23,12 +23,6 @@ resource_types:
     source:
       repository: cfbuildpacks/cron-resource
 
-  - name: shepherd
-    type: registry-image
-    source:
-      repository: us-west2-docker.pkg.dev/shepherd-268822/shepherd2/concourse-resource
-      tag: v1
-
   - name: pool
     type: registry-image
     source:
@@ -420,20 +414,6 @@ jobs:
         - get: version-stack-cflinuxfs4
           trigger: true
       
-      #! - task: redeploy
-      #!   file: buildpacks-ci/tasks/cf/redeploy/task.yml
-      #!   input_mapping:
-      #!     ci: buildpacks-ci
-      #!     lock: environment
-      #!   params:
-      #!     SCALE_DIEGO_CELLS: true
-      #!    #@ if stack == "cflinuxfs3":
-      #!     ADD_CFLINUXFS3_STACK: true
-      #!     #@ end
-      #!     #@ if "windows" in data.values.buildpack.stacks:
-      #!     DEPLOY_WINDOWS_CELL: true
-      #!     #@ end
-      #! - do:
       - task: create-cf-space
         attempts: 5
         file: buildpacks-ci/tasks/cf/create-space/task.yml
