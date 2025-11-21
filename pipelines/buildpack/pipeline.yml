@@ -436,9 +436,10 @@ jobs:
       #! - do:
       - task: create-cf-space
         attempts: 5
-        file: buildpacks-ci/tasks/cf/create-space-bbl/task.yml
+        file: buildpacks-ci/tasks/cf/create-space/task.yml
         input_mapping:
           ci: buildpacks-ci
+          bbl-state: bbl-state
         params:
           SYSTEM_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
           BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
