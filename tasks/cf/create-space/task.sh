@@ -50,12 +50,11 @@ function cf::authenticate() {
   api_url="https://api.${SYSTEM_DOMAIN}"
 
   cf api "$api_url" --skip-ssl-validation
-
-  echo "cf api \"${api_url}\" --skip-ssl-validation" >> "${SPACE_DIR}/login"
-
   cf auth admin "${password}"
 
-  echo "echo \"Logging in to ${api_url}\"" >> "${SPACE_DIR}/login"
+  echo "#!/usr/bin/env bash" > "${SPACE_DIR}/login"
+  echo "set -e" >> "${SPACE_DIR}/login"
+  echo "cf api \"${api_url}\" --skip-ssl-validation" >> "${SPACE_DIR}/login"
   echo "cf auth admin \"${password}\"" >> "${SPACE_DIR}/login"
 }
 
@@ -68,7 +67,6 @@ function cf::space::create() {
   cf create-org "${ORG}"
   cf create-space "${space}" -o "${ORG}"
 
-  echo "echo \"Targetting ${ORG} org and ${space} space\"" >> "${SPACE_DIR}/login"
   echo "cf target -o \"${ORG}\" -s \"${space}\"" >> "${SPACE_DIR}/login"
 
   echo "${space}" > "${SPACE_DIR}/name"

@@ -453,6 +453,7 @@ jobs:
           GINKGO_ATTEMPTS: 4
           GINKGO_NODES: 3
       #@ end
+
       - task: #@ "integration-test-" + stack
         file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
         input_mapping: {cf-space: space}
@@ -474,7 +475,7 @@ jobs:
       - task: create-deployment-source-config
         file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
         params:
-          ENV_NAME: cflinuxfs4
+          ENV_NAME: #@ data.values.language + "-buildpack-state"
       - task: delete-cf-space
         file: buildpacks-ci/tasks/delete-cf-space/task.yml
         input_mapping: {cf-space: space}

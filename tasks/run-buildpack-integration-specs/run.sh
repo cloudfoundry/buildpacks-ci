@@ -3,11 +3,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-if [[ -e "${PWD}/buildpack/scripts/.util/tools.sh" ]]; then
-  # shellcheck disable=SC1091
-  source "${PWD}/buildpack/scripts/.util/tools.sh"
-  util::tools::cf::install --directory "${PWD}/buildpack/.bin"
-fi
+# Note: Using system CF CLI v8 from Docker image (not installing CF v6 from buildpack tools.sh)
+# CF v8 is more compatible with modern CF deployments
 
 "./cf-space/login"
 
