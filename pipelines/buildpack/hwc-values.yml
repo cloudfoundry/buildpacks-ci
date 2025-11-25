@@ -9,5 +9,4 @@ buildpack:
   product_slug: hwc-buildpack
   skip_docker_start: false
   skip_brats: true
-  compile_extensions: false
   compute_instance_count: 1
