@@ -22,15 +22,8 @@ pushd buildpack
     go install github.com/golang/mock/mockgen@latest
   popd
   go mod tidy
-  if [[ "$LANGUAGE" != "php" || "$SHIM" == "true" ]]; then
+  if [[ "$SHIM" == "true" ]]; then
     go mod vendor
-  fi
-
-  # for the PHP buildpack
-  if [ -e run_tests.sh ]; then
-    TMPDIR=$(mktemp -d)
-    export TMPDIR
-    pip install -r requirements.txt
   fi
 
   if [[ -d "$update_dir" ]]; then
@@ -43,7 +36,7 @@ pushd buildpack
       [ -d finalize ] && (cd finalize && (go generate || true))
 
       export CF_STACK=${CF_STACK:-cflinuxfs3}
-      if [[ "$LANGUAGE" != "php" || "$SHIM" == "true" ]]; then
+      if [[ "$SHIM" == "true" ]]; then
             ginkgo -r -mod=vendor -skipPackage=integration,brats
       else
             ginkgo -r -skipPackage=integration,brats
