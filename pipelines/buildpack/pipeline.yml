@@ -105,7 +105,6 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/libbuildpack.git
 
-
   #@ if data.values.language == "hwc":
   - name: buildpack-bosh-release
     type: git

@@ -9,5 +9,4 @@ buildpack:
   product_slug: nodejs-buildpack
   skip_docker_start: false
   skip_brats: false
-  compile_extensions: false
   compute_instance_count: 1
