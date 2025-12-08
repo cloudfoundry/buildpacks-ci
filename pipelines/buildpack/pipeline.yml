@@ -105,12 +105,6 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/libbuildpack.git
 
-  #@ if data.values.buildpack.compile_extensions:
-  - name: compile-extensions
-    type: git
-    source:
-      uri: https://github.com/cloudfoundry/compile-extensions.git
-  #@ end
 
   #@ if data.values.language == "hwc":
   - name: buildpack-bosh-release
@@ -162,15 +156,6 @@ resources:
       access_token: ((buildpacks-github-token))
   #@ end
 
-  #@ if data.values.buildpack.compile_extensions:
-  - name: buildpack-packager
-    type: github-release
-    source:
-      user: #@ data.values.buildpacks_github_org
-      repository: buildpack-packager
-      access_token: ((buildpacks-github-token))
-  #@ end
-
   #! S3 Buckets
   #@ for stack in data.values.buildpack.stacks:
   - name: #@ "pivotal-buildpack-" + stack
@@ -209,21 +194,6 @@ resources:
   #@ end
 
 jobs:
-  #@ if data.values.language == "php":
-  - name: ensure-manifest-has-modules
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: buildpack
-          resource: buildpack-master
-          trigger: true
-      - do:
-        - task: check-modules
-          file: buildpacks-ci/tasks/check-php-modules-in-manifest/task.yml
-  #@ end
-
   - name: specs-unit-master
     serial: true
     public: true
@@ -233,19 +203,11 @@ jobs:
           - get: buildpacks-ci
           - get: buildpack
             resource: buildpack-master
-            #@ if data.values.language == "php":
-            passed: [ ensure-manifest-has-modules ]
-            #@ end
           - get: buildpack-trigger
             trigger: true
         - do:
           - task: ginkgo
             file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
-            #@ if data.values.language == "php":
-            privileged: true
-            params:
-              DOCKER_START: true
-            #@ end
 
   #@ for stack in data.values.buildpack.stacks:
   - name: #@ "specs-switchblade-docker-master-" + stack
@@ -270,9 +232,6 @@ jobs:
           GITHUB_TOKEN: ((buildpacks-github-token))
           GINKGO_ATTEMPTS: 3
           GINKGO_NODES: 2
-          #@ if data.values.language == "php":
-          COMPOSER_GITHUB_OAUTH_TOKEN: '((composer-github-oauth-token))'
-          #@ end
   #@ end
 
   - name: detect-new-version-and-upload-artifacts
@@ -445,7 +404,7 @@ jobs:
             - #@ "#!/bin/bash\nset -e\ncd buildpack\ncontents=\"$(jq '.stack = \"" + stack + "\"' config.json)\"\necho -E \"${contents}\" > config.json\necho -e \"config.json modified to:\\n $(cat config.json)\"\n"
       #@ end
       - task: #@ "brats-" + stack
-        file: #@ "buildpacks-ci/tasks/" + ("run-bp-brats-jammy" if data.values.language == "php" else "run-bp-brats") + "/task.yml"
+        file: buildpacks-ci/tasks/run-bp-brats/task.yml
         input_mapping: {cf-space: space}
         attempts: 5
         params:
@@ -463,9 +422,6 @@ jobs:
           GINKGO_NODES: 3
           GITHUB_TOKEN: ((buildpacks-github-token))
           SWITCHBLADE_PLATFORM: cf
-          #@ if data.values.language == "php":
-          COMPOSER_GITHUB_OAUTH_TOKEN: '((composer-github-oauth-token))'
-          #@ end
           #@ if data.values.buildpack.skip_docker_start:
           SKIP_DOCKER_START: true
           #@ else:
@@ -672,13 +628,7 @@ jobs:
           resource: buildpack-master
       - task: update-libbuildpack
         file: buildpacks-ci/tasks/update-libbuildpack/task.yml
-        #@ if data.values.language == "php":
-        privileged: true
-        #@ end
         params:
-          #@ if data.values.language == "php":
-          DOCKER_START: true
-          #@ end
           LANGUAGE: #@ data.values.language
       - put: buildpack-pull-request
         params:
@@ -687,56 +637,6 @@ jobs:
           branch_prefix: "update-libbuildpack"
           auto_merge: false
           base: master
-
-  #@ if data.values.buildpack.compile_extensions:
-  - name: update-compile-extensions
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: compile-extensions
-          trigger: true
-        - get: buildpack
-          resource: buildpack-master
-      - task: update-compile-extensions
-        file: buildpacks-ci/tasks/update-compile-extensions/task.yml
-        params:
-          RUBYGEM_MIRROR: #@ data.values.rubygem_mirror
-      - put: buildpack-pull-request
-        params:
-          repo_location: buildpack-artifacts
-          title: Update compile-extensions
-          branch_prefix: "update-compile-extensions"
-          auto_merge: false
-          base: master
-
-  - name: update-buildpack-packager
-    serial: true
-    public: true
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: gem
-          resource: buildpack-packager
-          trigger: true
-        - get: repo-with-gemfile
-          resource: buildpack-master
-      - task: update-buildpack-packager
-        file: buildpacks-ci/tasks/update-gem-in-gemfile/task.yml
-        params:
-          RUBYGEM_MIRROR: #@ data.values.rubygem_mirror
-          GEM_NAME: buildpack-packager
-          GEM_GIT_REPOSITORY: #@ data.values.buildpack_packager_git_uri_public
-          GEMFILE_NAME: cf.Gemfile
-      - put: buildpack-pull-request
-        params:
-          repo_location: repo-with-gemfile-artifacts
-          title: Update buildpack-packager
-          branch_prefix: "update-buildpack-packager"
-          auto_merge: false
-          base: master
-  #@ end
 
   #@ if data.values.language == "hwc":
   - name: update-buildpack-bosh-release
