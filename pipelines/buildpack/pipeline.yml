@@ -91,7 +91,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
-      branch: setup_bbl
+      branch: master
 
   - name: buildpack-pull-request
     type: create-pull-request-resource
@@ -507,6 +507,8 @@ jobs:
         params:
           BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
           BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+          GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
+          GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
       ensure:
         put: bbl-state
         params:
@@ -531,6 +533,8 @@ jobs:
         params:
           BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
           BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+          GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
+          GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
       ensure:
         put: bbl-state
         params:
@@ -584,6 +588,8 @@ jobs:
           params:
             BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
             BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+            GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
+            GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
           ensure:
             put: bbl-state
             params:
