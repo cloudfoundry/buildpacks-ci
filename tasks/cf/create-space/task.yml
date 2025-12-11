@@ -11,7 +11,7 @@ image_resource:
 
 inputs:
 - name: ci
-- name: lock
+- name: bbl-state
 
 outputs:
 - name: space
@@ -20,5 +20,6 @@ run:
   path: ci/tasks/cf/create-space/task.sh
 
 params:
-  DOMAIN:
+  SYSTEM_DOMAIN:
+  BBL_STATE_DIR:
   ORG:
