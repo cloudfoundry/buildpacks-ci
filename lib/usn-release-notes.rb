@@ -38,6 +38,7 @@ class UsnReleaseNotes
       cve_info = JSON.parse(URI.open(cve_url_api).read)
       cve_description = cve_info['description'] || 'Nothing found in description'
       clean_description = cve_description.gsub(/\s+/, ' ').strip
+      clean_description = clean_description.length > 50 ? clean_description[0..46] + '...' : clean_description
       cve_url = "https://ubuntu.com/security/#{cve_id}"
 
       notes += "* [#{cve_id}](#{cve_url}): #{clean_description}\n"
