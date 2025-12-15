@@ -108,13 +108,6 @@ resources:
       branch: master
   #@ end
 
-  - name: env-repo
-    type: git
-    source:
-      uri: git@github.com:cloudfoundry/buildpacks-envs
-      branch: master
-      private_key: '((cf-buildpacks-eng-github-ssh-key.private_key))'
-
   - name: version
     type: semver
     source:
@@ -348,7 +341,6 @@ jobs:
     plan:
       - in_parallel:
         - get: buildpacks-ci
-        - get: env-repo
         - get: buildpack
           resource: buildpack-master
           trigger: false
