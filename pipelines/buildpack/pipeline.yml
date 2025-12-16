@@ -589,11 +589,11 @@ jobs:
         - #@ delete_bosh_deployment()
         - #@ bosh_cleanup()
         - #@ destroy_bbl_infrastructure()
-          ensure:
-            put: bbl-state
-            params:
-              rebase: true
-              repository: updated-bbl-state    
+        ensure:
+          put: bbl-state
+          params:
+            rebase: true
+            repository: updated-bbl-state    
     #! === END INFRASTRUCTURE SETUP ===
 
     #! === INTEGRATION TESTS ON CF ENVIRONMENT ===
@@ -668,9 +668,9 @@ jobs:
       - #@ remove_gcp_dns()
       - #@ delete_bosh_deployment()
       - #@ destroy_bbl_infrastructure()
-        ensure:
-          put: bbl-state
-          params:
-            repository: updated-bbl-state
-            rebase: true
+      ensure:
+        put: bbl-state
+        params:
+          repository: updated-bbl-state
+          rebase: true
   #@ end
