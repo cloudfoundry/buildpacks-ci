@@ -7,6 +7,6 @@ buildpack:
   stacks:
   - cflinuxfs4
   product_slug: staticfile-buildpack
-  skip_docker_start: false
-  skip_brats: false
+  skip_docker_start: true
+  skip_brats: true
   compute_instance_count: 1
