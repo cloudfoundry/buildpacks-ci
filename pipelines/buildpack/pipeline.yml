@@ -638,7 +638,7 @@ jobs:
       on_failure: #@ test_failure_diagnostics()
     #@ end
 
-    - task: #@ "integration-test-" + stack
+    - task: #@ "integration-test-" + stack + "-uncached"
       file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
       input_mapping: {cf-space: space}
       params:
@@ -647,6 +647,25 @@ jobs:
         GINKGO_NODES: 3
         GITHUB_TOKEN: ((buildpacks-github-token))
         SWITCHBLADE_PLATFORM: cf
+        CACHED: "false"
+        #@ if data.values.buildpack.skip_docker_start:
+        SKIP_DOCKER_START: true
+        #@ else:
+      privileged: true
+        #@ end
+      attempts: 5
+      on_failure: #@ test_failure_diagnostics()
+
+    - task: #@ "integration-test-" + stack + "-cached"
+      file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+      input_mapping: {cf-space: space}
+      params:
+        CF_STACK: #@ stack
+        GINKGO_ATTEMPTS: 4
+        GINKGO_NODES: 3
+        GITHUB_TOKEN: ((buildpacks-github-token))
+        SWITCHBLADE_PLATFORM: cf
+        CACHED: "true"
         #@ if data.values.buildpack.skip_docker_start:
         SKIP_DOCKER_START: true
         #@ else:
