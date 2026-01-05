@@ -174,7 +174,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
-      branch: combined-infra-tests
+      branch: master
 
   - name: buildpack-pull-request
     type: create-pull-request-resource
