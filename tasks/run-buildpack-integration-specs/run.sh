@@ -38,4 +38,9 @@ if [[ -n "${SWITCHBLADE_PLATFORM:-}" ]]; then
   INTEGRATION_ARGS+=("--platform" "${SWITCHBLADE_PLATFORM}")
 fi
 
+if [[ -n "${CACHED:-}" ]]; then
+  INTEGRATION_ARGS+=("--cached" "${CACHED}")
+  INTEGRATION_ARGS+=("--parallel" "true")
+fi
+
 ./scripts/integration.sh "${INTEGRATION_ARGS[@]}"

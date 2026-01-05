@@ -16,6 +16,95 @@
 #@   return stacks
 #@ end
 
+#@ def test_failure_diagnostics():
+task: capture-test-failure-logs
+config:
+  platform: linux
+  image_resource:
+    type: docker-image
+    source:
+      repository: cfbuildpacks/ci
+  inputs:
+  - name: space
+  run:
+    path: bash
+    args:
+    - -c
+    - |
+      set +e
+      echo "========================================"
+      echo "TEST FAILED - Capturing diagnostics"
+      echo "========================================"
+      source space/login
+      echo "--- Recent CF Events ---"
+      cf events --max=50 || true
+      echo ""
+      echo "--- CF Apps ---"
+      cf apps || true
+      echo ""
+      echo "--- Recent Logs from Apps ---"
+      for app in $(cf apps | tail -n +5 | awk '{print $1}'); do
+        if [ -n "$app" ]; then
+          echo "=== Logs for app: $app ==="
+          cf logs "$app" --recent || true
+          echo ""
+        fi
+      done
+      echo "--- CF Buildpacks ---"
+      cf buildpacks || true
+      echo ""
+      echo "--- CF Service Status ---"
+      cf curl /v3/info || true
+      echo "========================================"
+#@ end
+
+#@ def destroy_bbl_infrastructure():
+task: destroy-infrastructure
+file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+input_mapping:
+  bbl-state: updated-bbl-state
+params:
+  BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
+  BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+  GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
+  GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
+#@ end
+
+#@ def remove_gcp_dns():
+task: remove-from-gcp-dns
+file: runtime-ci/tasks/manage-gcp-dns/task.yml
+params:
+  BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
+  GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+  GCP_DNS_ZONE_NAME: buildpacks-ci
+  GCP_DNS_RECORD_SET_NAME: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
+  GCP_DNS_RECORD_TTL: 300
+  ACTION: remove
+input_mapping:
+  bbl-state: updated-bbl-state
+#@ end
+
+#@ def delete_bosh_deployment():
+task: delete-bosh-deployments
+file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+input_mapping:
+  bbl-state: updated-bbl-state
+params:
+  BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
+  BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+#@ end
+
+#@ def bosh_cleanup():
+task: bosh-cleanup
+file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+input_mapping:
+  bbl-state: updated-bbl-state
+params:
+  CLEAN_ALL: true
+  BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
+  BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+#@ end
+
 ---
 resource_types:
   - name: cron
@@ -332,257 +421,7 @@ jobs:
             - #@ "buildpack-artifacts/" + data.values.language + "-buildpack*-v*.zip.SHA256SUM.txt"
       - put: version
         params: { bump: patch }
-
-  #@ for stack in data.values.buildpack.stacks:
-  - name: #@ "specs-edge-integration-master-" + stack
-    serial: true
-    public: false
-    disable_manual_trigger: false
-    plan:
-      - in_parallel:
-        - get: buildpacks-ci
-        - get: buildpack
-          resource: buildpack-master
-          trigger: false
-          passed:
-          - #@ "specs-switchblade-docker-master-" + stack
-        - get: repo
-          resource: buildpack-master
-        - get: cf-deployment
-        - get: cf-deployment-concourse-tasks
-        - get: bbl-state
-          trigger: true
-          passed:
-          - #@ "create-bbl-and-cf-infrastructure-for-" + data.values.language
-        - get: runtime-ci
-        - get: version-stack-cflinuxfs4
-          trigger: true
-      
-      - task: create-cf-space
-        attempts: 5
-        file: buildpacks-ci/tasks/cf/create-space/task.yml
-        input_mapping:
-          ci: buildpacks-ci
-          bbl-state: bbl-state
-        params:
-          SYSTEM_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
-          BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-          ORG: pivotal
-      #@ if not data.values.buildpack.skip_brats:
-      #@ if "cflinuxfs4" in data.values.buildpack.stacks:
-      - task: configure-brats-test-config
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-          - name: buildpack
-          outputs:
-          - name: buildpack
-          run:
-            dir: ""
-            path: bash
-            args:
-            - -c
-            - #@ "#!/bin/bash\nset -e\ncd buildpack\ncontents=\"$(jq '.stack = \"" + stack + "\"' config.json)\"\necho -E \"${contents}\" > config.json\necho -e \"config.json modified to:\\n $(cat config.json)\"\n"
-      #@ end
-      - task: #@ "brats-" + stack
-        file: buildpacks-ci/tasks/run-bp-brats/task.yml
-        input_mapping: {cf-space: space}
-        attempts: 5
-        params:
-          CF_STACK: #@ stack
-          GINKGO_ATTEMPTS: 4
-          GINKGO_NODES: 3
-      #@ end
-
-      - task: #@ "integration-test-" + stack
-        file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
-        input_mapping: {cf-space: space}
-        params:
-          CF_STACK: #@ stack
-          GINKGO_ATTEMPTS: 4
-          GINKGO_NODES: 3
-          GITHUB_TOKEN: ((buildpacks-github-token))
-          SWITCHBLADE_PLATFORM: cf
-          #@ if data.values.buildpack.skip_docker_start:
-          SKIP_DOCKER_START: true
-          #@ else:
-        privileged: true
-          #@ end
-        attempts: 5
-
-      - task: create-deployment-source-config
-        file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
-        params:
-          ENV_NAME: #@ data.values.language + "-buildpack-state"
-      - task: delete-cf-space
-        file: buildpacks-ci/tasks/delete-cf-space/task.yml
-        input_mapping: {cf-space: space}
-      - task: remove-from-gcp-dns
-        file: runtime-ci/tasks/manage-gcp-dns/task.yml
-        params:
-          BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-          GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-          GCP_DNS_ZONE_NAME: buildpacks-ci
-          GCP_DNS_RECORD_SET_NAME: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
-          GCP_DNS_RECORD_TTL: 300
-          ACTION: remove
-        input_mapping:
-          bbl-state: bbl-state
-      - task: delete-bosh-deployments
-        file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
-        input_mapping:
-          bbl-state: bbl-state
-        params:
-          BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-          BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-      - task: bbl-destroy
-        file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
-        params:
-          BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-          BBL_GCP_PROJECT_ID: cf-buildpacks
-          BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-          GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
-          GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
-        ensure:
-          put: bbl-state
-          params:
-            repository: updated-bbl-state
-            rebase: true
-          #! task: delete-cf-space
-          #! file: buildpacks-ci/tasks/delete-cf-space/task.yml
-          #! input_mapping: {cf-space: space}
-  #@ end
-
-  #! - name: #@ "bbl-up-" + data.values.language
-  - name: #@ "create-bbl-and-cf-infrastructure-for-" + data.values.language
-    serial: true
-    public: true
-    plan:
-    - in_parallel:
-      - get: bbl-state
-      - get: buildpacks-ci
-      - get: bosh-deployment
-      - get: cf-deployment
-      - get: cf-deployment-concourse-tasks
-      - get: runtime-ci
-    - task: bbl-up
-      file: cf-deployment-concourse-tasks/bbl-up/task.yml
-      params:
-        BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-        BBL_GCP_PROJECT_ID: cf-buildpacks
-        BBL_GCP_REGION: europe-north1
-        BBL_IAAS: gcp
-        BBL_LB_CERT: ((shared-cf-cert.certificate))
-        BBL_LB_KEY: ((shared-cf-cert.private_key))
-        LB_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
-        BBL_ENV_NAME: #@ data.values.language + "-buildpack-bbl-env"
-        BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-        GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
-        GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
-        GIT_COMMIT_MESSAGE: "Update BBL state"
-      input_mapping:
-        bbl-state: bbl-state
-        bbl-config: bbl-state
-      on_failure:
-        task: destroy-infrastructure
-        file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
-        input_mapping:
-          bbl-state: updated-bbl-state
-        params:
-          BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-          BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-          GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
-          GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
-      ensure:
-        put: bbl-state
-        params:
-          repository: updated-bbl-state
-          rebase: true
-    - task: add-to-gcp-dns
-      file: runtime-ci/tasks/manage-gcp-dns/task.yml
-      params:
-        BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-        GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-        GCP_DNS_ZONE_NAME: buildpacks-ci
-        GCP_DNS_RECORD_SET_NAME: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
-        GCP_DNS_RECORD_TTL: 300
-        ACTION: add
-      input_mapping:
-        bbl-state: updated-bbl-state
-      on_failure:
-        task: destroy-infrastructure
-        file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
-        input_mapping:
-          bbl-state: updated-bbl-state
-        params:
-          BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-          BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-          GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
-          GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
-      ensure:
-        put: bbl-state
-        params:
-          repository: updated-bbl-state
-          rebase: true
-    - task: deploy-cf
-      file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
-      input_mapping:
-        bbl-state: updated-bbl-state
-        ops-files: cf-deployment
-      params:
-        BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-        BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-        SYSTEM_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
-        VARS_STORE_FILE: bump-deployments/bbl-gcp-cf/deployment-vars.yml
-        OPS_FILES: operations/use-compiled-releases.yml operations/experimental/fast-deploy-with-downtime-and-danger.yml operations/scale-to-one-az.yml
-      on_failure:
-        do:
-        - task: remove-from-gcp-dns
-          file: runtime-ci/tasks/manage-gcp-dns/task.yml
-          params:
-            BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-            GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-            GCP_DNS_ZONE_NAME: buildpacks-ci
-            GCP_DNS_RECORD_SET_NAME: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
-            ACTION: remove
-          input_mapping:
-            bbl-state: updated-bbl-state
-
-        - task: delete-cf-deployment
-          file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
-          input_mapping:
-            bbl-state: updated-bbl-state
-          params:
-            BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-            BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-
-        - task: bosh-cleanup
-          file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
-          input_mapping:
-            bbl-state: updated-bbl-state
-          params:
-            CLEAN_ALL: true
-            BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-            BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-
-        - task: destroy-infrastructure
-          file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
-          input_mapping:
-            bbl-state: updated-bbl-state
-          params:
-            BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-            BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-            GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
-            GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
-          ensure:
-            put: bbl-state
-            params:
-              rebase: true
-              repository: updated-bbl-state
+  
 
   - name: specs-edge-shared-master
     serial: true
@@ -664,4 +503,193 @@ jobs:
           params:
             name: version/version
             tag: version/version
+  #@ end
+
+  #@ for stack in data.values.buildpack.stacks:
+  - name: #@ "create-cf-infrastructure-and-execute-integration-test-for-" + data.values.language + "-" + stack
+    serial: true
+    public: false
+    disable_manual_trigger: false
+    plan:
+    - in_parallel:
+      #! Infrastructure resources
+      - get: bbl-state
+      - get: buildpacks-ci
+      - get: bosh-deployment
+      - get: cf-deployment
+      - get: cf-deployment-concourse-tasks
+      - get: runtime-ci
+      #! Test resources
+      - get: buildpack
+        resource: buildpack-master
+        trigger: false
+        passed:
+        - #@ "specs-switchblade-docker-master-" + stack
+      - get: repo
+        resource: buildpack-master
+      - get: version-stack-cflinuxfs4
+        trigger: true
+
+    #! === INFRASTRUCTURE SETUP ===
+    - task: bbl-up
+      file: cf-deployment-concourse-tasks/bbl-up/task.yml
+      params:
+        BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+        BBL_GCP_PROJECT_ID: cf-buildpacks
+        BBL_GCP_REGION: europe-north1
+        BBL_IAAS: gcp
+        BBL_LB_CERT: ((shared-cf-cert.certificate))
+        BBL_LB_KEY: ((shared-cf-cert.private_key))
+        LB_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
+        BBL_ENV_NAME: #@ data.values.language + "-buildpack-bbl-env"
+        BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
+        GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
+        GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
+        GIT_COMMIT_MESSAGE: "Update BBL state"
+      input_mapping:
+        bbl-state: bbl-state
+        bbl-config: bbl-state
+      on_failure: #@ destroy_bbl_infrastructure()
+      ensure:
+        put: bbl-state
+        params:
+          repository: updated-bbl-state
+          rebase: true
+    - task: add-to-gcp-dns
+      file: runtime-ci/tasks/manage-gcp-dns/task.yml
+      params:
+        BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
+        GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+        GCP_DNS_ZONE_NAME: buildpacks-ci
+        GCP_DNS_RECORD_SET_NAME: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
+        GCP_DNS_RECORD_TTL: 300
+        ACTION: add
+      input_mapping:
+        bbl-state: updated-bbl-state
+      on_failure: #@ destroy_bbl_infrastructure()
+      ensure:
+        put: bbl-state
+        params:
+          repository: updated-bbl-state
+          rebase: true
+    - task: deploy-cf
+      file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+      input_mapping:
+        bbl-state: updated-bbl-state
+        ops-files: cf-deployment
+      params:
+        BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
+        BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+        SYSTEM_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
+        VARS_STORE_FILE: bump-deployments/bbl-gcp-cf/deployment-vars.yml
+        OPS_FILES: operations/use-compiled-releases.yml operations/experimental/fast-deploy-with-downtime-and-danger.yml operations/scale-to-one-az.yml
+      on_failure:
+        do:
+        - #@ remove_gcp_dns()
+        - #@ delete_bosh_deployment()
+        - #@ bosh_cleanup()
+        - #@ destroy_bbl_infrastructure()
+        ensure:
+          put: bbl-state
+          params:
+            rebase: true
+            repository: updated-bbl-state    
+    #! === END INFRASTRUCTURE SETUP ===
+
+    #! === INTEGRATION TESTS ON CF ENVIRONMENT ===
+    - task: create-cf-space
+      attempts: 5
+      file: buildpacks-ci/tasks/cf/create-space/task.yml
+      input_mapping:
+        ci: buildpacks-ci
+        bbl-state: updated-bbl-state
+      params:
+        SYSTEM_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
+        BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
+        ORG: pivotal
+    #@ if not data.values.buildpack.skip_brats:
+    #@ if "cflinuxfs4" in data.values.buildpack.stacks:
+    - task: configure-brats-test-config
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cfbuildpacks/ci
+        inputs:
+        - name: buildpack
+        outputs:
+        - name: buildpack
+        run:
+          dir: ""
+          path: bash
+          args:
+          - -c
+          - #@ "#!/bin/bash\nset -e\ncd buildpack\ncontents=\"$(jq '.stack = \"" + stack + "\"' config.json)\"\necho -E \"${contents}\" > config.json\necho -e \"config.json modified to:\\n $(cat config.json)\"\n"
+    #@ end
+    - task: #@ "brats-" + stack
+      file: buildpacks-ci/tasks/run-bp-brats/task.yml
+      input_mapping: {cf-space: space}
+      attempts: 5
+      params:
+        CF_STACK: #@ stack
+        GINKGO_ATTEMPTS: 4
+        GINKGO_NODES: 3
+      on_failure: #@ test_failure_diagnostics()
+    #@ end
+
+    - task: #@ "integration-test-" + stack + "-uncached"
+      file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+      input_mapping: {cf-space: space}
+      params:
+        CF_STACK: #@ stack
+        GINKGO_ATTEMPTS: 4
+        GINKGO_NODES: 3
+        GITHUB_TOKEN: ((buildpacks-github-token))
+        SWITCHBLADE_PLATFORM: cf
+        CACHED: "false"
+        #@ if data.values.buildpack.skip_docker_start:
+        SKIP_DOCKER_START: true
+        #@ else:
+      privileged: true
+        #@ end
+      attempts: 5
+      on_failure: #@ test_failure_diagnostics()
+
+    - task: #@ "integration-test-" + stack + "-cached"
+      file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
+      input_mapping: {cf-space: space}
+      params:
+        CF_STACK: #@ stack
+        GINKGO_ATTEMPTS: 4
+        GINKGO_NODES: 3
+        GITHUB_TOKEN: ((buildpacks-github-token))
+        SWITCHBLADE_PLATFORM: cf
+        CACHED: "true"
+        #@ if data.values.buildpack.skip_docker_start:
+        SKIP_DOCKER_START: true
+        #@ else:
+      privileged: true
+        #@ end
+      attempts: 5
+      on_failure: #@ test_failure_diagnostics()
+    #! === END INTEGRATION TESTS ON CF ENVIRONMENT ===
+
+    ensure:
+      do:
+      - task: create-deployment-source-config
+        file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+        params:
+          ENV_NAME: #@ data.values.language + "-buildpack-state"
+      - task: delete-cf-space
+        file: buildpacks-ci/tasks/delete-cf-space/task.yml
+        input_mapping: {cf-space: space}
+      - #@ remove_gcp_dns()
+      - #@ delete_bosh_deployment()
+      - #@ destroy_bbl_infrastructure()
+      ensure:
+        put: bbl-state
+        params:
+          repository: updated-bbl-state
+          rebase: true
   #@ end
