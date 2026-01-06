@@ -130,7 +130,7 @@ resources:
     source:
       uri: #@ "git@github.com:" + data.values.organization + "/" + buildpack_name() + ".git"
       private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-      branch: master
+      branch: #@ data.values.buildpack.branch
 
   - name: buildpack-trigger
     type: git
@@ -138,7 +138,7 @@ resources:
     source:
       uri: #@ "git@github.com:" + data.values.organization + "/" + buildpack_name() + ".git"
       private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-      branch: master
+      branch: #@ data.values.buildpack.branch
       ignore_paths:
         - VERSION
         - CHANGELOG

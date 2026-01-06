@@ -1,0 +1,13 @@
+#@data/values
+---
+language: ruby
+organization: cloudfoundry
+
+buildpack:
+  stacks:
+  - cflinuxfs4
+  product_slug: ruby-buildpack
+  branch: feature/go-migration
+  skip_docker_start: true
+  skip_brats: true
+  compute_instance_count: 3
