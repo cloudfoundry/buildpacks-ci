@@ -202,8 +202,8 @@ resources:
     source:
       driver: git
       uri: #@ "git@github.com:" + data.values.organization + "/" + buildpack_name() + ".git"
-      branch: master
-      file: #@ data.values.buildpack.branch
+      branch: #@ data.values.buildpack.branch
+      file: VERSION
       private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
 
   - name: version-stack-cflinuxfs4
