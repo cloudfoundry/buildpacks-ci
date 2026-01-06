@@ -125,7 +125,7 @@ resource_types:
 
 resources:
   #! Git Resources
-  - name: buildpack-master
+  - name: buildpack
     type: git
     source:
       uri: #@ "git@github.com:" + data.values.organization + "/" + buildpack_name() + ".git"
@@ -269,7 +269,7 @@ resources:
   #@ end
 
 jobs:
-  - name: specs-unit-master
+  - name: specs-unit
     serial: true
     public: true
     plan:
@@ -277,7 +277,7 @@ jobs:
         - in_parallel:
           - get: buildpacks-ci
           - get: buildpack
-            resource: buildpack-master
+            resource: buildpack
           - get: buildpack-trigger
             trigger: true
         - do:
@@ -285,20 +285,20 @@ jobs:
             file: buildpacks-ci/tasks/run-buildpack-unit-specs/task.yml
 
   #@ for stack in data.values.buildpack.stacks:
-  - name: #@ "specs-switchblade-docker-master-" + stack
+  - name: #@ "specs-switchblade-docker-" + stack
     serial: true
     public: true
     plan:
       - in_parallel:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-master
+          resource: buildpack
           passed:
-          - specs-unit-master
+          - specs-unit
         - get: buildpack-trigger
           trigger: true
           passed:
-          - specs-unit-master
+          - specs-unit
       - task: #@ "switchblade-docker-test-" + stack
         file: buildpacks-ci/tasks/run-buildpack-switchblade-docker/task.yml
         privileged: true
@@ -316,16 +316,16 @@ jobs:
       - in_parallel:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-master
+          resource: buildpack
           passed:
           #@ for stack in data.values.buildpack.stacks:
-          - #@ "specs-switchblade-docker-master-" + stack
+          - #@ "specs-switchblade-docker-" + stack
           #@ end
         - get: buildpack-trigger
           trigger: true
           passed:
           #@ for stack in data.values.buildpack.stacks:
-          - #@ "specs-switchblade-docker-master-" + stack
+          - #@ "specs-switchblade-docker-" + stack
           #@ end
         - get: version
         #! Commented out to support bootstrap scenarios where S3 artifacts don't exist yet
@@ -382,7 +382,7 @@ jobs:
         - get: buildpack
           passed:
             - detect-new-version-and-upload-artifacts
-          resource: buildpack-master
+          resource: buildpack
       - task: write-version-file
         config:
           platform: linux
@@ -423,18 +423,18 @@ jobs:
         params: { bump: patch }
   
 
-  - name: specs-edge-shared-master
+  - name: specs-edge-shared
     serial: true
     public: true
     plan:
       - in_parallel:
         - get: buildpacks-ci
         - get: buildpack
-          resource: buildpack-master
+          resource: buildpack
           trigger: true
           passed:
           #@ for stack in data.values.buildpack.stacks:
-          - #@ "specs-switchblade-docker-master-" + stack
+          - #@ "specs-switchblade-docker-" + stack
           #@ end
         on_success:
           task: github-set-status-success
@@ -444,7 +444,7 @@ jobs:
           params:
             GITHUB_ACCESS_TOKEN: ((buildpacks-github-token))
             GITHUB_REPO: #@ data.values.organization + "/" + buildpack_name()
-            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge-master'
+            GITHUB_STATUS_CONTEXT: 'buildpacks-ci/edge'
             GITHUB_STATUS_DESCRIPTION: 'Buildpacks CI edge master spec passed (Docker-based)'
             PIPELINE_URI: #@ data.values.buildpacks_ci_pipeline_uri
 
@@ -457,7 +457,7 @@ jobs:
         - get: libbuildpack
           trigger: true
         - get: buildpack
-          resource: buildpack-master
+          resource: buildpack
       - task: update-libbuildpack
         file: buildpacks-ci/tasks/update-libbuildpack/task.yml
         params:
@@ -521,12 +521,12 @@ jobs:
       - get: runtime-ci
       #! Test resources
       - get: buildpack
-        resource: buildpack-master
+        resource: buildpack
         trigger: false
         passed:
-        - #@ "specs-switchblade-docker-master-" + stack
+        - #@ "specs-switchblade-docker-" + stack
       - get: repo
-        resource: buildpack-master
+        resource: buildpack
       - get: version-stack-cflinuxfs4
         trigger: true
 
