@@ -15,6 +15,7 @@ buildpack_packager_git_uri_public: https://github.com/cloudfoundry/buildpack-pac
 buildpack:
   stacks: []
   product_slug: ""
+  branch: "master"
   skip_docker_start: true
   skip_brats: true
   compute_instance_count: 1
