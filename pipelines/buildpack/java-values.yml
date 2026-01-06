@@ -1,12 +1,12 @@
 #@data/values
 ---
-language: ruby
+language: java
 organization: cloudfoundry
 
 buildpack:
   stacks:
   - cflinuxfs4
-  product_slug: ruby-buildpack
+  product_slug: java-buildpack
   branch: feature/go-migration
   skip_docker_start: true
   skip_brats: true
