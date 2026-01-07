@@ -1,14 +1,54 @@
 #@ load("@ytt:data", "data")
 #@yaml/text-templated-strings
 
----
-resource_types:
-- name: shepherd
-  type: registry-image
-  source:
-    repository: us-west2-docker.pkg.dev/shepherd-268822/shepherd2/concourse-resource
-    tag: v1
+#@ def destroy_bbl_infrastructure():
+task: destroy-infrastructure
+file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+input_mapping:
+  bbl-state: updated-bbl-state
+params:
+  BBL_STATE_DIR: releases-buildpack-state
+  BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+  GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
+  GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
+#@ end
 
+#@ def remove_gcp_dns():
+task: remove-from-gcp-dns
+file: runtime-ci/tasks/manage-gcp-dns/task.yml
+params:
+  BBL_STATE_DIR: releases-buildpack-state
+  GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+  GCP_DNS_ZONE_NAME: buildpacks-ci
+  GCP_DNS_RECORD_SET_NAME: releases.buildpacks.ci.cloudfoundry.org
+  GCP_DNS_RECORD_TTL: 300
+  ACTION: remove
+input_mapping:
+  bbl-state: updated-bbl-state
+#@ end
+
+#@ def delete_bosh_deployment():
+task: delete-bosh-deployments
+file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+input_mapping:
+  bbl-state: updated-bbl-state
+params:
+  BBL_STATE_DIR: releases-buildpack-state
+  BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+#@ end
+
+#@ def bosh_cleanup():
+task: bosh-cleanup
+file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+input_mapping:
+  bbl-state: updated-bbl-state
+params:
+  CLEAN_ALL: true
+  BBL_STATE_DIR: releases-buildpack-state
+  BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+#@ end
+
+---
 resources:
 - name: buildpacks-ci
   type: git
@@ -34,18 +74,6 @@ resources:
     uri: https://github.com/cloudfoundry/cf-acceptance-tests
     branch: main
 
-- name: cf-deployment-env
-  type: shepherd
-  source:
-    url: https://v2.shepherd.run
-    service-account-key: ((shepherd-buildpacks-service-account-key))
-    lease:
-      namespace: buildpacks
-      pool:
-        namespace: official
-        name: cfd
-    compatibility-mode: environments-app
-
 - name: java-buildpack
   type: github-release
   source:
@@ -58,11 +86,10 @@ resources:
 - name: #@ language.name + "-buildpack-" + stack
   type: s3
   source:
-    bucket: buildpack-release-candidates
-    regexp: #@  "{}/{}_buildpack-{}-v(.*).zip".format(language.name, language.name, stack)
-    access_key_id: ((svc-buildpacks-aws-bp-ci-access-key))
-    secret_access_key: ((svc-buildpacks-aws-bp-ci-secret-key))
-    aws_role_arn: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
+    bucket: buildpacks.cloudfoundry.org
+    regexp: #@ "buildpack-release-candidates/" + language.name + "/" + language.name + "_buildpack-" + stack + "-v(.*).zip"
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
   #@ end
 #@ end
 
@@ -71,7 +98,7 @@ resources:
   type: git
   source:
     uri: #@ "git@github.com:cloudfoundry/" + language.name + "-buildpack-release.git"
-    private_key: #@ "((" + language.name + "-buildpack-release-deploy-key.private_key))"
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
     branch: master
 
 - name: #@ language.name + "-buildpack-release-github-release"
@@ -100,14 +127,6 @@ resources:
     aws_role_arn: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
 #@ end
 
-- name: weekday-mornings
-  type: time
-  source:
-    start: 3AM
-    stop: 4AM
-    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
-    location: America/New_York
-
 - name: shared-buildpack-release-trigger
   type: s3
   source:
@@ -126,20 +145,29 @@ resources:
     secret_access_key: ((svc-buildpacks-aws-bp-ci-secret-key))
     aws_role_arn: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
 
+- name: bbl-state
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/buildpacks-envs
+    branch: master
+    private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+
+- name: weekly-trigger
+  type: time
+  source:
+    interval: 168h
+    location: America/New_York
 
 jobs:
-- name: claim-cf-deployment-env
+- name: trigger-buildpack-pipeline
   public: true
   serial: true
   plan:
-  - get: weekday-mornings
-    trigger: true
-  - put: cf-deployment-env
-    params:
-      action: create
-      duration: 1h
-      resource: cf-deployment-env
-    timeout: 2h
+  - in_parallel:
+    - get: weekly-trigger
+      trigger: true
+    - get: cf-deployment
+    - get: cf-acceptance-tests
 
 #@ for language in data.values.supported_languages:
 - name: #@ "create-" + language.name + "-buildpack-dev-release"
@@ -148,11 +176,9 @@ jobs:
   plan:
   - in_parallel:
     - get: buildpacks-ci
-    - get: cf-deployment-env
-      params:
-        resource: cf-deployment-env
+    - get: cf-deployment
       trigger: true
-      passed: [claim-cf-deployment-env]
+      passed: [trigger-buildpack-pipeline]
     - get: release
       resource: #@ language.name + "-buildpack-release"
   #@ if language.name == "java":
@@ -186,17 +212,16 @@ jobs:
   serial: true
   plan:
   - in_parallel:
+    - get: bbl-state
     - get: buildpacks-ci
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
-    - get: cf-deployment-env
-      params:
-        resource: cf-deployment-env
       trigger: true
       passed:
 #@ for language in data.values.supported_languages:
       - #@ "create-" + language.name + "-buildpack-dev-release"
 #@ end
+    - get: cf-acceptance-tests
 #@ for language in data.values.supported_languages:
     - get: #@ language.name + "-buildpack-release-rc"
       passed:
@@ -214,33 +239,8 @@ jobs:
       file: buildpacks-ci/tasks/cf-release/upload-bosh-release/task.yml
       input_mapping:
         release-tarball: #@ language.name + "-buildpack-release-rc"
-        toolsmiths-env: cf-deployment-env
+        bbl-state: updated-bbl-state
 #@ end
-  - task: checkout-same-cf-deployment-as-env
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: coredeps/core-deps-ci
-      inputs:
-      - name: cf-deployment
-      - name: cf-deployment-env
-      outputs:
-      - name: cf-deployment
-      run:
-        dir: ""
-        path: bash
-        args:
-        - -c
-        - |
-          #!/bin/bash
-          version="$(jq -r '.["cf-deployment_version"]' < cf-deployment-env/metadata)"
-          echo "Toolsmith env is on cf-deployment version ${version}"
-          pushd cf-deployment
-            echo "Checking out cf-deployment version ${version}"
-            git checkout "${version}"
-          popd
   - task: get-cf-deployment-ops-files
     file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
     input_mapping:
@@ -262,10 +262,52 @@ jobs:
 #@ for language in data.values.supported_languages:
 #@   buildpack_ops_file_paths.append("operations/bump-" + language.name + "-buildpack.yml")
 #@ end
+
+  - task: bbl-up
+    file: cf-deployment-concourse-tasks/bbl-up/task.yml
+    params:
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+      BBL_GCP_PROJECT_ID: cf-buildpacks
+      BBL_GCP_REGION: europe-north1
+      BBL_IAAS: gcp
+      BBL_LB_CERT: ((shared-cf-cert.certificate))
+      BBL_LB_KEY: ((shared-cf-cert.private_key))
+      LB_DOMAIN: releases.buildpacks.ci.cloudfoundry.org
+      BBL_ENV_NAME: releases-buildpack-bbl-env
+      BBL_STATE_DIR: releases-buildpack-state
+      GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
+      GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
+      GIT_COMMIT_MESSAGE: "Update BBL state"
+    input_mapping:
+      bbl-state: bbl-state
+      bbl-config: bbl-state
+    on_failure: #@ destroy_bbl_infrastructure()
+    ensure:
+      put: bbl-state
+      params:
+        repository: updated-bbl-state
+        rebase: true
+  - task: add-to-gcp-dns
+    file: runtime-ci/tasks/manage-gcp-dns/task.yml
+    params:
+      BBL_STATE_DIR: releases-buildpack-state
+      GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+      GCP_DNS_ZONE_NAME: buildpacks-ci
+      GCP_DNS_RECORD_SET_NAME: releases.buildpacks.ci.cloudfoundry.org
+      GCP_DNS_RECORD_TTL: 300
+      ACTION: add
+    input_mapping:
+      bbl-state: updated-bbl-state
+    on_failure: #@ destroy_bbl_infrastructure()
+    ensure:
+      put: bbl-state
+      params:
+        repository: updated-bbl-state
+        rebase: true
   - task: bosh-deploy
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
-      toolsmiths-env: cf-deployment-env
+      bbl-state: updated-bbl-state
       ops-files: collected-ops-files
     params:
       OPS_FILES: |
@@ -274,25 +316,31 @@ jobs:
         operations/scale-to-one-az.yml
         operations/test/scale-to-one-az-addon-parallel-cats.yml
         (@= "\n".join(buildpack_ops_file_paths) @)
+    on_failure:
+      do:
+      - #@ remove_gcp_dns()
+      - #@ delete_bosh_deployment()
+      - #@ bosh_cleanup()
+      - #@ destroy_bbl_infrastructure()
   - task: open-asgs-for-credhub
     file: cf-deployment-concourse-tasks/open-asgs-for-bosh-instance-group/task.yml
     attempts: 10
     input_mapping:
-      toolsmiths-env: cf-deployment-env
+      bbl-state: updated-bbl-state
     params:
       INSTANCE_GROUP_NAME: credhub
       SECURITY_GROUP_NAME: credhub
   - task: open-asgs-for-uaa
     file: cf-deployment-concourse-tasks/open-asgs-for-bosh-instance-group/task.yml
     input_mapping:
-      toolsmiths-env: cf-deployment-env
+      bbl-state: updated-bbl-state
     params:
       INSTANCE_GROUP_NAME: uaa
       SECURITY_GROUP_NAME: uaa
   - task: enable-docker-and-tasks
     file: cf-deployment-concourse-tasks/set-feature-flags/task.yml
     input_mapping:
-      toolsmiths-env: cf-deployment-env
+      bbl-state: updated-bbl-state
     params:
       ENABLED_FEATURE_FLAGS: |
         diego_docker
@@ -304,12 +352,11 @@ jobs:
   serial: true
   plan:
   - in_parallel:
+    - get: bbl-state
+      passed: [deploy]
     - get: buildpacks-ci
     - get: cf-deployment-concourse-tasks
     - get: cf-acceptance-tests
-    - get: cf-deployment-env
-      params:
-        resource: cf-deployment-env
       passed: [deploy]
       trigger: true
 #@ for language in data.values.supported_languages:
@@ -319,13 +366,13 @@ jobs:
   - task: create-cats-integration-config
     file: buildpacks-ci/tasks/cf-release/create-cats-integration-config/task.yml
     input_mapping:
-      toolsmiths-env: cf-deployment-env
+      bbl-state: updated-bbl-state
   - task: run-cats
     file: cf-deployment-concourse-tasks/run-cats/task.yml
     attempts: 3
     input_mapping:
       integration-config: cats-integration-config
-      toolsmiths-env: cf-deployment-env
+      bbl-state: updated-bbl-state
     params:
       CONFIG_FILE_PATH: integration-config.json
 
@@ -333,15 +380,12 @@ jobs:
   public: true
   serial: true
   plan:
-  - get: cf-deployment-env
-    params:
-      resource: cf-deployment-env
-    passed: [cats]
-    trigger: true
-  - put: cf-deployment-env
-    params:
-      action: release
-      resource: cf-deployment-env
+    - get: bbl-state
+      passed: [cats]
+    - #@ remove_gcp_dns()
+    - #@ delete_bosh_deployment()
+    - #@ bosh_cleanup()
+    - #@ destroy_bbl_infrastructure()
 
 - name: ship-it
   public: true
@@ -427,7 +471,7 @@ jobs:
 groups:
 - name: test
   jobs:
-  - claim-cf-deployment-env
+  - trigger-buildpack-pipeline
 #@ for language in data.values.supported_languages:
   - #@ "create-" + language.name + "-buildpack-dev-release"
 #@ end
