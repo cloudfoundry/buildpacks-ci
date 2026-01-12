@@ -1,48 +1,48 @@
 #@data/values
 ---
-#@ default_stacks = ['cflinuxfs3']
+#@ default_stacks = ['cflinuxfs4']
 
 supported_languages:
 - name: binary
-  stacks: #@ default_stacks + ["cflinuxfs4", "windows"]
+  stacks: #@ default_stacks + ["windows"]
 - name: dotnet-core
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: go
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: java
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: nginx
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: nodejs
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: php
-  stacks: #@ default_stacks + ["cflinuxfs4"] 
+  stacks: #@ default_stacks
 - name: python
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: r
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: ruby
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: staticfile
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 supported_languages_without_java:
 - name: binary
-  stacks: #@ default_stacks + ["cflinuxfs4", "windows"]
+  stacks: #@ default_stacks  + ["windows"]
 - name: dotnet-core
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: go
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: nginx
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: nodejs
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: php
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: python
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: r
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: ruby
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
 - name: staticfile
-  stacks: #@ default_stacks + ["cflinuxfs4"]
+  stacks: #@ default_stacks
