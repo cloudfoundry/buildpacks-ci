@@ -1,6 +1,6 @@
 #@data/values
 ---
-#@ default_stacks = ['cflinuxfs3']
+#@ default_stacks = ['cflinuxfs4']
 
 supported_languages:
 - name: binary

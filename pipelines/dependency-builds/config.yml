@@ -221,7 +221,6 @@ dependencies:
             link: https://github.com/nodejs/Release
     source_type: node
     versions_to_keep: 2
-    skip_lines_cflinuxfs3: [ '22.X.X' ]
   php:
     buildpacks:
       php:
