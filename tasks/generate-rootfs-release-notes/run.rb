@@ -12,7 +12,6 @@ previous_version = File.read('previous-rootfs-release/.git/ref').strip
 new_version = File.read('version/number').strip
 stack = ENV.fetch('STACK')
 ubuntu_version = {
-  'cflinuxfs3' => '18.04',
   'cflinuxfs4' => '22.04'
 }.fetch(stack) { raise "Unsupported stack: #{stack}" }
 

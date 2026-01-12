@@ -52,8 +52,6 @@ builds = {}
 version = ''
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
-  # See github.com/cloudfoundry/buildpacks-ci/pull/300 - we don't want to process the *cflinuxfs3.json files (they are replaced by *cflinuxfs3-dev.json files)
-  next if source_name == 'php' && stack_dependency_build.include?('cflinuxfs3.json')
 
   if !is_null(deprecation_date) && !is_null(deprecation_link) && version_line != 'latest'
     dependency_deprecation_date = {
@@ -75,7 +73,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   stack = /#{resource_version}-(.*)\.json$/.match(stack_dependency_build)[1]
 
-  # See github.com/cloudfoundry/buildpacks-ci/pull/300 - the build process may create temp stacks like cflinuxfs3-dev
+  # The build process may create temp stacks like cflinuxfs4-dev
   stack = stack.chomp('-dev') if stack.end_with?('-dev')
   next unless all_stacks.include?(stack) # make sure we not pulling something that's not a stack eg 'preview
 
@@ -88,10 +86,6 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   # TODO: This also includes logic to skip certain version lines based on the skip_lines_cflinuxfs4 array in the config file.
   skip_lines_cflinuxfs4 = config['dependencies'][source_name]&.key?('skip_lines_cflinuxfs4') ? config['dependencies'][source_name]['skip_lines_cflinuxfs4'].map(&:downcase) : []
   stacks -= ['cflinuxfs4'] if !cflinuxfs4_dependencies.include?(source_name) || skip_lines_cflinuxfs4.include?(version_line.downcase)
-
-  # Logic to skip certain version lines that are not supported in cflinuxfs3
-  skip_lines_cflinuxfs3 = config['dependencies'][source_name]&.key?('skip_lines_cflinuxfs3') ? config['dependencies'][source_name]['skip_lines_cflinuxfs3'].map(&:downcase) : []
-  stacks -= ['cflinuxfs3'] if skip_lines_cflinuxfs3.include?(version_line.downcase)
 
   stacks = WINDOWS_STACKS if source_name == 'hwc'
   total_stacks |= stacks
