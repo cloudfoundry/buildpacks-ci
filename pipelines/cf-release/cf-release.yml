@@ -119,7 +119,7 @@ resources:
 - name: #@ language.name + "-buildpack-release-trigger"
   type: s3
   source:
-    bucket: buildpacks.cloudfoundry.org
+    bucket: buildpack-release-triggers-shared
     versioned_file: #@ "bosh-release-triggers/" + language.name + "-buildpack"
     access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
     secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
@@ -128,7 +128,7 @@ resources:
 - name: shared-buildpack-release-trigger
   type: s3
   source:
-    bucket: buildpacks.cloudfoundry.org
+    bucket: buildpack-release-triggers-shared
     versioned_file: bosh-release-triggers/non-java
     access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
     secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
@@ -136,7 +136,7 @@ resources:
 - name: shared-java-buildpack-release-trigger
   type: s3
   source:
-    bucket: buildpacks.cloudfoundry.org
+    bucket: buildpack-release-triggers-shared
     versioned_file: bosh-release-triggers/java
     access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
     secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
