@@ -11,6 +11,9 @@ inputs:
   - name: buildpacks-ci
   - name: cf-deployment-concourse-tasks
   - name: toolsmiths-env
+    optional: true
+  - name: bbl-state
+    optional: true
 outputs:
   - name: cats-integration-config
 run:
