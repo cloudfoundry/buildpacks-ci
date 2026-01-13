@@ -74,6 +74,11 @@ resources:
     uri: https://github.com/cloudfoundry/cf-acceptance-tests
     branch: main
 
+- name: runtime-ci
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/runtime-ci
+
 - name: java-buildpack
   type: github-release
   source:
@@ -210,6 +215,7 @@ jobs:
   - in_parallel:
     - get: bbl-state
     - get: buildpacks-ci
+    - get: runtime-ci
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
       trigger: true
@@ -223,42 +229,6 @@ jobs:
       passed:
       - #@ "create-" + language.name + "-buildpack-dev-release"
 #@ end
-  - in_parallel:
-#@ for language in data.values.supported_languages:
-    - task: #@ "create-" + language.name + "-buildpack-release-ops-file"
-      file: buildpacks-ci/tasks/cf-release/create-buildpack-release-ops-file/task.yml
-      input_mapping:
-        buildpack-release-tarball: #@ language.name + "-buildpack-release-rc"
-      output_mapping:
-        ops-file: #@ language.name + "-buildpack-ops-file"
-    - task: #@ "upload-" + language.name + "-buildpack-release"
-      file: buildpacks-ci/tasks/cf-release/upload-bosh-release/task.yml
-      input_mapping:
-        release-tarball: #@ language.name + "-buildpack-release-rc"
-        bbl-state: updated-bbl-state
-#@ end
-  - task: get-cf-deployment-ops-files
-    file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
-    input_mapping:
-      base-ops-files: cf-deployment
-      new-ops-files: cf-deployment
-    params:
-      BASE_OPS_FILE_DIR: operations
-#@ for language in data.values.supported_languages:
-  - task: #@ "add-" + language.name + "-buildpack-release-ops-file"
-    file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
-    input_mapping:
-      base-ops-files: collected-ops-files
-      new-ops-files: #@ language.name + "-buildpack-ops-file"
-    params:
-      BASE_OPS_FILE_DIR: operations
-      NEW_OPS_FILES: #@ "bump-" + language.name + "-buildpack.yml"
-#@ end
-#@ buildpack_ops_file_paths = []
-#@ for language in data.values.supported_languages:
-#@   buildpack_ops_file_paths.append("operations/bump-" + language.name + "-buildpack.yml")
-#@ end
-
   - task: bbl-up
     file: cf-deployment-concourse-tasks/bbl-up/task.yml
     params:
@@ -300,30 +270,82 @@ jobs:
       params:
         repository: updated-bbl-state
         rebase: true
-  - task: bosh-deploy
+  - in_parallel:
+#@ for language in data.values.supported_languages:
+    - task: #@ "create-" + language.name + "-buildpack-release-ops-file"
+      file: buildpacks-ci/tasks/cf-release/create-buildpack-release-ops-file/task.yml
+      input_mapping:
+        buildpack-release-tarball: #@ language.name + "-buildpack-release-rc"
+      output_mapping:
+        ops-file: #@ language.name + "-buildpack-ops-file"
+    - task: #@ "upload-" + language.name + "-buildpack-release"
+      file: buildpacks-ci/tasks/cf-release/upload-bosh-release/task.yml
+      input_mapping:
+        release-tarball: #@ language.name + "-buildpack-release-rc"
+        bbl-state: updated-bbl-state
+      params:
+        BBL_STATE_DIR: releases-buildpack-state
+#@ end
+  - task: get-cf-deployment-ops-files
+    file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
+    input_mapping:
+      base-ops-files: cf-deployment
+      new-ops-files: cf-deployment
+    params:
+      BASE_OPS_FILE_DIR: operations
+#@ for language in data.values.supported_languages:
+  - task: #@ "add-" + language.name + "-buildpack-release-ops-file"
+    file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
+    input_mapping:
+      base-ops-files: collected-ops-files
+      new-ops-files: #@ language.name + "-buildpack-ops-file"
+    params:
+      BASE_OPS_FILE_DIR: operations
+      NEW_OPS_FILES: #@ "bump-" + language.name + "-buildpack.yml"
+#@ end
+
+#@ base_ops_files = [
+#@   "operations/experimental/fast-deploy-with-downtime-and-danger.yml",
+#@   "operations/use-compiled-releases.yml",
+#@   "operations/scale-to-one-az.yml",
+#@   "operations/test/scale-to-one-az-addon-parallel-cats.yml",
+#@ ]
+#@ buildpack_ops_file_paths = []
+#@ for language in data.values.supported_languages:
+#@   buildpack_ops_file_paths.append("operations/bump-" + language.name + "-buildpack.yml")
+#@ end
+#@ all_ops_files = base_ops_files + buildpack_ops_file_paths
+
+  - task: cf-deploy
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
       bbl-state: updated-bbl-state
       ops-files: collected-ops-files
     params:
-      OPS_FILES: |
-        operations/experimental/fast-deploy-with-downtime-and-danger.yml
-        operations/use-compiled-releases.yml
-        operations/scale-to-one-az.yml
-        operations/test/scale-to-one-az-addon-parallel-cats.yml
-        (@= "\n".join(buildpack_ops_file_paths) @)
+      BBL_STATE_DIR: releases-buildpack-state
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+      SYSTEM_DOMAIN: releases.buildpacks.ci.cloudfoundry.org
+      OPS_FILES: #@ "\n".join(all_ops_files)
     on_failure:
       do:
       - #@ remove_gcp_dns()
       - #@ delete_bosh_deployment()
       - #@ bosh_cleanup()
       - #@ destroy_bbl_infrastructure()
+    ensure:
+      put: bbl-state
+      params:
+        repository: updated-bbl-state
+        rebase: true
+
   - task: open-asgs-for-credhub
     file: cf-deployment-concourse-tasks/open-asgs-for-bosh-instance-group/task.yml
     attempts: 10
     input_mapping:
       bbl-state: updated-bbl-state
     params:
+      BBL_STATE_DIR: releases-buildpack-state
+      SYSTEM_DOMAIN: releases.buildpacks.ci.cloudfoundry.org
       INSTANCE_GROUP_NAME: credhub
       SECURITY_GROUP_NAME: credhub
   - task: open-asgs-for-uaa
@@ -331,6 +353,8 @@ jobs:
     input_mapping:
       bbl-state: updated-bbl-state
     params:
+      BBL_STATE_DIR: releases-buildpack-state
+      SYSTEM_DOMAIN: releases.buildpacks.ci.cloudfoundry.org
       INSTANCE_GROUP_NAME: uaa
       SECURITY_GROUP_NAME: uaa
   - task: enable-docker-and-tasks
@@ -338,6 +362,8 @@ jobs:
     input_mapping:
       bbl-state: updated-bbl-state
     params:
+      BBL_STATE_DIR: releases-buildpack-state
+      SYSTEM_DOMAIN: releases.buildpacks.ci.cloudfoundry.org
       ENABLED_FEATURE_FLAGS: |
         diego_docker
         task_creation
@@ -361,18 +387,18 @@ jobs:
 #@ end
   - task: create-cats-integration-config
     file: buildpacks-ci/tasks/cf-release/create-cats-integration-config/task.yml
-    input_mapping:
-      bbl-state: updated-bbl-state
+    params:
+      BBL_STATE_DIR: releases-buildpack-state
+      SYSTEM_DOMAIN: releases.buildpacks.ci.cloudfoundry.org
   - task: run-cats
     file: cf-deployment-concourse-tasks/run-cats/task.yml
     attempts: 3
     input_mapping:
       integration-config: cats-integration-config
-      bbl-state: updated-bbl-state
     params:
       CONFIG_FILE_PATH: integration-config.json
 
-- name: unclaim-cf-deployment-env
+- name: destroy-cf-deployment-env
   public: true
   serial: true
   plan:
@@ -473,7 +499,7 @@ groups:
 #@ end
   - deploy
   - cats
-  - unclaim-cf-deployment-env
+  - destroy-cf-deployment-env
 
 - name: ship-it
   jobs:
