@@ -404,6 +404,7 @@ jobs:
   plan:
     - get: bbl-state
       passed: [cats]
+      trigger: true
     - #@ remove_gcp_dns()
     - #@ delete_bosh_deployment()
     - #@ bosh_cleanup()
