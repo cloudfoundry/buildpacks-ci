@@ -8,7 +8,10 @@ target="buildpacks"
 team="buildpacks-team"
 pipeline_filter=""
 list_mode=false
+buildpacks_only_mode=false
+all_mode=false
 dry_run_flag=""
+non_interactive_flag=""
 
 login() {
   fly -t "$target" login -n "${team}" -b
@@ -71,9 +74,12 @@ show_help() {
   echo "Usage: ./bin/update-pipelines [OPTIONS]"
   echo ""
   echo "Options:"
+  echo "  --all, -a                   Update all pipelines"
   echo "  --pipeline=NAME, -p NAME    Update specific pipeline"
+  echo "  --buildpacks-only, -b       Update all buildpack pipelines only"
   echo "  --list, -l                  List all available pipelines"
   echo "  --dry-run, -d               Validate pipeline without applying changes"
+  echo "  --non-interactive, -n       Skip all confirmation prompts"
   echo ""
 }
 
@@ -97,25 +103,37 @@ process_pipelines() {
           language="$(basename "${values_file%-values.yml}")"
           buildpack_pipeline_name="${language}-buildpack"
           
-          if [[ -n "$filter" && "$buildpack_pipeline_name" != "$filter" ]]; then
+          # Skip if buildpacks-only mode is active (process all buildpacks)
+          # or if filter is set and doesn't match
+          if [[ "$buildpacks_only_mode" == false && -n "$filter" && "$buildpack_pipeline_name" != "$filter" ]]; then
             continue
           fi
 
           echo "Setting $buildpack_pipeline_name"
           pipeline_config="$(ytt -f "$pipeline_path/pipeline.yml" -f "$pipeline_path/config.yml" -f "$values_file")"
-          fly -t "$target" set-pipeline -p "$buildpack_pipeline_name" $dry_run_flag -c <(echo "$pipeline_config")
+          fly -t "$target" set-pipeline -p "$buildpack_pipeline_name" $dry_run_flag $non_interactive_flag -c <(echo "$pipeline_config")
         done
       else
+        # Skip non-buildpack pipelines if buildpacks-only mode is active
+        if [[ "$buildpacks_only_mode" == true ]]; then
+          continue
+        fi
+        
         if [[ -n "$filter" && "$pipeline_name" != "$filter" ]]; then
           continue
         fi
 
         echo "Setting $pipeline_name"
         pipeline_config="$(ytt -f "$pipeline_path")"
-        fly -t "$target" set-pipeline -p "$pipeline_name" $dry_run_flag -c <(echo "$pipeline_config")
+        fly -t "$target" set-pipeline -p "$pipeline_name" $dry_run_flag $non_interactive_flag -c <(echo "$pipeline_config")
       fi
       
     elif [[ -f "$pipeline_path" ]]; then
+      # Skip file-based pipelines if buildpacks-only mode is active
+      if [[ "$buildpacks_only_mode" == true ]]; then
+        continue
+      fi
+      
       pipeline_name="$(basename "${pipeline_path%.yml}")"
       if [[ "$pipeline_name" != "cflinuxfs4" ]]; then
         continue
@@ -127,7 +145,7 @@ process_pipelines() {
 
       echo "Setting $pipeline_name"
       pipeline_config="$(ytt -f "$pipeline_path")"
-      fly -t "$target" set-pipeline -p "$pipeline_name" $dry_run_flag -c <(echo "$pipeline_config")
+      fly -t "$target" set-pipeline -p "$pipeline_name" $dry_run_flag $non_interactive_flag -c <(echo "$pipeline_config")
     fi
   done
 }
@@ -147,8 +165,20 @@ parse_args() {
         list_mode=true
         shift
         ;;
+      --buildpacks-only|-b)
+        buildpacks_only_mode=true
+        shift
+        ;;
+      --all|-a)
+        all_mode=true
+        shift
+        ;;
       --dry-run|-d)
         dry_run_flag="--dry-run"
+        shift
+        ;;
+      --non-interactive|-n)
+        non_interactive_flag="--non-interactive"
         shift
         ;;
       *)
@@ -162,6 +192,12 @@ main() {
   parse_args "$@"
 
   if [[ "$list_mode" == true ]]; then
+    show_help
+    return
+  fi
+
+  # Show help if no action flags are provided
+  if [[ "$all_mode" == false && "$buildpacks_only_mode" == false && -z "$pipeline_filter" ]]; then
     show_help
     return
   fi
