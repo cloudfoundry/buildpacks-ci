@@ -407,15 +407,16 @@ jobs:
     - get: bbl-state
       passed: [cats]
       trigger: true
-    - #@ remove_gcp_dns("bbl-state")
-    - #@ delete_bosh_deployment("bbl-state")
-    - #@ bosh_cleanup("bbl-state")
-    - #@ destroy_bbl_infrastructure("bbl-state")
+    - do:
+      - #@ remove_gcp_dns("bbl-state")
+      - #@ delete_bosh_deployment("bbl-state")
+      - #@ bosh_cleanup("bbl-state")
+      - #@ destroy_bbl_infrastructure("bbl-state")
       ensure:
-      put: bbl-state
-      params:
-        repository: bbl-state
-        rebase: true
+        put: bbl-state
+        params:
+          repository: bbl-state
+          rebase: true
 
 - name: ship-it
   public: true
