@@ -58,11 +58,10 @@ resources:
 - name: #@ language.name + "-buildpack-" + stack
   type: s3
   source:
-    bucket: buildpack-release-candidates
-    regexp: #@  "{}/{}_buildpack-{}-v(.*).zip".format(language.name, language.name, stack)
-    access_key_id: ((svc-buildpacks-aws-bp-ci-access-key))
-    secret_access_key: ((svc-buildpacks-aws-bp-ci-secret-key))
-    aws_role_arn: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
+    bucket: buildpacks.cloudfoundry.org
+    regexp: #@ "buildpack-release-candidates/" + language.name + "/" + language.name + "_buildpack-" + stack + "-v(.*).zip"
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
   #@ end
 #@ end
 
@@ -84,20 +83,18 @@ resources:
 - name: #@ language.name + "-buildpack-release-rc"
   type: s3
   source:
-    bucket: buildpack-release-rcs
-    regexp: #@  "{}/{}-buildpack-release-(.*).tgz".format(language.name, language.name)
-    access_key_id: ((svc-buildpacks-aws-bp-ci-access-key))
-    secret_access_key: ((svc-buildpacks-aws-bp-ci-secret-key))
-    aws_role_arn: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
+    bucket: buildpacks.cloudfoundry.org
+    regexp: #@ "bosh-release-candidates/{}/{}-buildpack-release-(.*).tgz".format(language.name, language.name)
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
 - name: #@ language.name + "-buildpack-release-trigger"
   type: s3
   source:
-    bucket: buildpack-release-triggers
-    versioned_file: #@ language.name + "-buildpack"
-    access_key_id: ((svc-buildpacks-aws-bp-ci-access-key))
-    secret_access_key: ((svc-buildpacks-aws-bp-ci-secret-key))
-    aws_role_arn: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
+    bucket: buildpack-release-triggers-shared
+    versioned_file: #@ "bosh-release-triggers/" + language.name + "-buildpack"
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 #@ end
 
 - name: weekday-mornings
@@ -111,21 +108,18 @@ resources:
 - name: shared-buildpack-release-trigger
   type: s3
   source:
-    bucket: shared-buildpack-release-triggers
-    versioned_file: non-java
-    access_key_id: ((svc-buildpacks-aws-bp-ci-access-key))
-    secret_access_key: ((svc-buildpacks-aws-bp-ci-secret-key))
-    aws_role_arn: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
+    bucket: buildpack-release-triggers-shared
+    versioned_file: bosh-release-triggers/non-java
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
 - name: shared-java-buildpack-release-trigger
   type: s3
   source:
-    bucket: shared-buildpack-release-triggers
-    versioned_file: java
-    access_key_id: ((svc-buildpacks-aws-bp-ci-access-key))
-    secret_access_key: ((svc-buildpacks-aws-bp-ci-secret-key))
-    aws_role_arn: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
-
+    bucket: buildpack-release-triggers-shared
+    versioned_file: bosh-release-triggers/java
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
 jobs:
 - name: claim-cf-deployment-env
