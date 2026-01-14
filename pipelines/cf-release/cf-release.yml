@@ -411,6 +411,11 @@ jobs:
     - #@ delete_bosh_deployment("bbl-state")
     - #@ bosh_cleanup("bbl-state")
     - #@ destroy_bbl_infrastructure("bbl-state")
+      ensure:
+      put: bbl-state
+      params:
+        repository: bbl-state
+        rebase: true
 
 - name: ship-it
   public: true
