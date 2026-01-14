@@ -5,8 +5,8 @@ set -euo pipefail
 source cf-deployment-concourse-tasks/shared-functions
 setup_bosh_env_vars
 
-api="$(jq -r .cf.api_url toolsmiths-env/metadata)"
-apps_domain="${api#api.}"
+api="api.${SYSTEM_DOMAIN}"
+apps_domain="${SYSTEM_DOMAIN}"
 admin_password="$(get_password_from_credhub cf_admin_password)"
 credhub_secret="$(get_password_from_credhub credhub_admin_client_secret)"
 

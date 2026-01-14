@@ -11,7 +11,13 @@ inputs:
   - name: buildpacks-ci
   - name: cf-deployment-concourse-tasks
   - name: toolsmiths-env
+    optional: true
+  - name: bbl-state
+    optional: true
 outputs:
   - name: cats-integration-config
 run:
   path: buildpacks-ci/tasks/cf-release/create-cats-integration-config/run
+params:
+  BBL_STATE_DIR:
+  SYSTEM_DOMAIN:
