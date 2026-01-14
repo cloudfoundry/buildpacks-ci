@@ -522,13 +522,13 @@ jobs:
       #! Test resources
       - get: buildpack
         resource: buildpack
-        trigger: false
+      - get: buildpack-trigger
+        trigger: true
         passed:
         - #@ "specs-switchblade-docker-" + stack
       - get: repo
         resource: buildpack
       - get: version-stack-cflinuxfs4
-        trigger: true
 
     #! === INFRASTRUCTURE SETUP ===
     - task: bbl-up
