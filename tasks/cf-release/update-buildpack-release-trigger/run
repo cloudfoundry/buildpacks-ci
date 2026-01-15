@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-source buildpacks-ci/lib/aws_assume_role.sh
-
 buildpack_name="$(tar -xf buildpack-release-tarball/*.tgz -O release.MF | yj -yj | jq -r .name)"
 old_version="$(cat "buildpack-release-trigger/${buildpack_name}")"
 new_version="$(tar -xf buildpack-release-tarball/*.tgz -O release.MF | yj -yj | jq -r .version | cut -d'-' -f1)"
