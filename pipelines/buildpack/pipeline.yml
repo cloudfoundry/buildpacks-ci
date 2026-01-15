@@ -132,17 +132,6 @@ resources:
       private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
       branch: #@ data.values.buildpack.branch
 
-  - name: buildpack-trigger
-    type: git
-    webhook_token: ob0aigh3
-    source:
-      uri: #@ "git@github.com:" + data.values.organization + "/" + buildpack_name() + ".git"
-      private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-      branch: #@ data.values.buildpack.branch
-      ignore_paths:
-        - VERSION
-        - CHANGELOG
-
   - name: bbl-state
     type: git
     source:
@@ -205,6 +194,7 @@ resources:
       branch: #@ data.values.buildpack.branch
       file: VERSION
       private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
+      commit_message: "[ci skip] bump to %version%"
 
   - name: version-stack-cflinuxfs4
     type: semver
@@ -278,7 +268,6 @@ jobs:
           - get: buildpacks-ci
           - get: buildpack
             resource: buildpack
-          - get: buildpack-trigger
             trigger: true
         - do:
           - task: ginkgo
@@ -293,9 +282,6 @@ jobs:
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack
-          passed:
-          - specs-unit
-        - get: buildpack-trigger
           trigger: true
           passed:
           - specs-unit
@@ -317,11 +303,6 @@ jobs:
         - get: buildpacks-ci
         - get: buildpack
           resource: buildpack
-          passed:
-          #@ for stack in data.values.buildpack.stacks:
-          - #@ "specs-switchblade-docker-" + stack
-          #@ end
-        - get: buildpack-trigger
           trigger: true
           passed:
           #@ for stack in data.values.buildpack.stacks:
@@ -519,7 +500,6 @@ jobs:
       #! Test resources
       - get: buildpack
         resource: buildpack
-      - get: buildpack-trigger
         trigger: true
         passed:
         - #@ "specs-switchblade-docker-" + stack
