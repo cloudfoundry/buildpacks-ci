@@ -328,17 +328,14 @@ jobs:
           - #@ "specs-switchblade-docker-" + stack
           #@ end
         - get: version
-        #! Commented out to support bootstrap scenarios where S3 artifacts don't exist yet
-        #! See commit 8104b4b53 - "Add toggle for S3 buildpack artifacts to enable bootstrap scenarios"
-        #! Uncomment these when artifacts exist in S3:
-        #! #@ for stack in bucket_stacks():
-        #! - get: #@ "pivotal-buildpack-cached-" + stack
-        #!   version: every
-        #!   trigger: false
-        #! - get: #@ "pivotal-buildpack-" + stack
-        #!   version: every
-        #!   trigger: false
-        #! #@ end
+        #@ for stack in bucket_stacks():
+        - get: #@ "pivotal-buildpack-cached-" + stack
+          version: every
+          trigger: false
+        - get: #@ "pivotal-buildpack-" + stack
+          version: every
+          trigger: false
+        #@ end
       - in_parallel:
           #@ for stack in bucket_stacks():
           - do:
