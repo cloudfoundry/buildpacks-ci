@@ -177,8 +177,10 @@ jobs:
   plan:
   - in_parallel:
     - get: buildpacks-ci
-    - get: cf-deployment
+    - get: weekly-trigger
       trigger: true
+      passed: [trigger-buildpack-pipeline]
+    - get: cf-deployment
       passed: [trigger-buildpack-pipeline]
     - get: release
       resource: #@ language.name + "-buildpack-release"
@@ -217,8 +219,13 @@ jobs:
     - get: buildpacks-ci
     - get: runtime-ci
     - get: cf-deployment-concourse-tasks
-    - get: cf-deployment
+    - get: weekly-trigger
       trigger: true
+      passed:
+#@ for language in data.values.supported_languages:
+      - #@ "create-" + language.name + "-buildpack-dev-release"
+#@ end
+    - get: cf-deployment
       passed:
 #@ for language in data.values.supported_languages:
       - #@ "create-" + language.name + "-buildpack-dev-release"
@@ -378,9 +385,11 @@ jobs:
       passed: [deploy]
     - get: buildpacks-ci
     - get: cf-deployment-concourse-tasks
+    - get: weekly-trigger
+      trigger: true
+      passed: [deploy]
     - get: cf-acceptance-tests
       passed: [deploy]
-      trigger: true
 #@ for language in data.values.supported_languages:
     - get: #@ language.name + "-buildpack-release-rc"
       passed: [deploy]
@@ -404,9 +413,11 @@ jobs:
   plan:
     - get: runtime-ci
     - get: cf-deployment-concourse-tasks
+    - get: weekly-trigger
+      trigger: true
+      passed: [cats]
     - get: bbl-state
       passed: [cats]
-      trigger: true
     - do:
       - #@ remove_gcp_dns("bbl-state")
       - #@ delete_bosh_deployment("bbl-state")
