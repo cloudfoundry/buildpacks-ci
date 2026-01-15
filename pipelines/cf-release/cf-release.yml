@@ -128,6 +128,7 @@ resources:
     versioned_file: #@ "bosh-release-triggers/" + language.name + "-buildpack"
     access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
     secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+    initial_version: "0.0.0"
 #@ end
 
 - name: shared-buildpack-release-trigger
@@ -473,9 +474,8 @@ jobs:
   - task: update-buildpack-release-trigger
     file: buildpacks-ci/tasks/cf-release/update-buildpack-release-trigger/task.yml
     params:
-      AWS_ACCESS_KEY_ID: ((svc-buildpacks-aws-bp-ci-access-key))
-      AWS_SECRET_ACCESS_KEY: ((svc-buildpacks-aws-bp-ci-secret-key))
-      AWS_ASSUME_ROLE_ARN: ((svc-buildpacks-aws-bp-ci-assume-role-arn))
+      AWS_ACCESS_KEY_ID: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      AWS_SECRET_ACCESS_KEY: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
       BUCKET: buildpacks.cloudfoundry.org
 
 - name: #@ "publish-" + language.name + "-buildpack-release"
