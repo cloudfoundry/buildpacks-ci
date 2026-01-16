@@ -215,21 +215,8 @@ end
 
 #
 # Special PHP stuff
-# * The appdynamics extension for PHP has a python file with its version number in it.
-#   Replace the old version number with the new version we're adding. (if !rebuilt)
-path_to_extensions = 'extensions/appdynamics/extension.py'
-write_extensions = ''
-if !rebuilt && manifest_name == 'appdynamics' && buildpack_name == 'php'
-  # TODO: does this change with multiple stacks?
-  if removed.length == 1 && added.length == 1
-    text = File.read("buildpack/#{path_to_extensions}")
-    write_extensions = text.gsub(/#{Regexp.quote(removed.first)}/, added.first)
-  else
-    puts 'Expected to have one added version and one removed version for appdynamics in the PHP buildpack.'
-    puts "Got added (#{added}) and removed (#{removed})."
-    exit 1
-  end
-end
+# * AppDynamics extension is now handled via manifest.yml in the Go-based buildpack
+#   No additional file updates needed - version comes from manifest only
 
 #
 # Special JRuby Stuff
@@ -298,11 +285,6 @@ Dir.chdir('artifacts') do
       File.write(path, content)
       GitClient.add_file(path)
     end
-  end
-
-  if write_extensions != ''
-    File.write(path_to_extensions, write_extensions)
-    GitClient.add_file(path_to_extensions)
   end
 
   GitClient.safe_commit(commit_message.to_s)
