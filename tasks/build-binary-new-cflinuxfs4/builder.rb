@@ -60,12 +60,13 @@ module Sha
       sha1 = Digest::SHA1.hexdigest(content)
       sha256 = Digest::SHA2.new(256).hexdigest(content)
       md5 = Digest::MD5.hexdigest(content)
-      if source_input.md5? && md5 != source_input.md5
-        raise 'MD5 digest does not match version digest'
-      elsif source_input.sha256? && sha256 != source_input.sha256
+      # Prioritize SHA256 over MD5 for security and reliability
+      if source_input.sha256? && sha256 != source_input.sha256
         raise 'SHA256 digest does not match version digest'
       elsif source_input.sha1? && sha1 != source_input.sha1
         raise 'SHA1 digest does not match version digest'
+      elsif source_input.md5? && md5 != source_input.md5
+        raise 'MD5 digest does not match version digest'
       end
     end
 
