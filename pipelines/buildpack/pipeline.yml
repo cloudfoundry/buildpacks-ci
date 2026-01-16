@@ -652,21 +652,21 @@ jobs:
       on_failure: #@ test_failure_diagnostics()
     #! === END INTEGRATION TESTS ON CF ENVIRONMENT ===
 
-    #! ensure:
-    #!   do:
-    #!   - task: create-deployment-source-config
-    #!     file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
-    #!     params:
-    #!       ENV_NAME: #@ data.values.language + "-buildpack-state"
-    #!   - task: delete-cf-space
-    #!     file: buildpacks-ci/tasks/delete-cf-space/task.yml
-    #!     input_mapping: {cf-space: space}
-    #!   - #@ remove_gcp_dns()
-    #!   - #@ delete_bosh_deployment()
-    #!   - #@ destroy_bbl_infrastructure()
-    #!   ensure:
-    #!     put: bbl-state
-    #!     params:
-    #!       repository: updated-bbl-state
-    #!       rebase: true
+     ensure:
+       do:
+       - task: create-deployment-source-config
+         file: buildpacks-ci/tasks/create-deployment-source-config/task.yml
+         params:
+           ENV_NAME: #@ data.values.language + "-buildpack-state"
+       - task: delete-cf-space
+         file: buildpacks-ci/tasks/delete-cf-space/task.yml
+         input_mapping: {cf-space: space}
+       - #@ remove_gcp_dns()
+       - #@ delete_bosh_deployment()
+       - #@ destroy_bbl_infrastructure()
+       ensure:
+         put: bbl-state
+         params:
+           repository: updated-bbl-state
+           rebase: true
   #@ end
