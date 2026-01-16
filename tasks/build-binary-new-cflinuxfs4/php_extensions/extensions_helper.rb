@@ -47,11 +47,10 @@ class PHPExtensionsHelper
     true
   end
 
-  # return a new BaseExtensions object that has been patched
   def patch(patch_file)
-    new_base_extensions = BaseExtensions.new(@base_path)
-    new_base_extensions.patch!(patch_file)
-    new_base_extensions
+    new_php_extensions = PHPExtensionsHelper.new(@base_path)
+    new_php_extensions.patch!(patch_file)
+    new_php_extensions
   end
 
   def write_yml(extension_file)

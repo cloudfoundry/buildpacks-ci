@@ -6,7 +6,6 @@ require 'pathname'
 require 'digest'
 require 'net/http'
 require 'tmpdir'
-require_relative 'merge-extensions'
 
 module Runner
   class << self
@@ -609,7 +608,7 @@ module Archive
 end
 
 class Builder
-  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, php_extensions_dir = __dir__, skip_commit = false)
+  def execute(binary_builder, stack, source_input, build_input, build_output, artifact_output, dep_metadata_output, _php_extensions_dir = __dir__, skip_commit = false)
     build_input.copy_to_build_output unless skip_commit
 
     out_data = {
@@ -706,23 +705,6 @@ class Builder
       )
       out_data[:source_pgp] = source_pgp
 
-    when 'appdynamics'
-      filename = "source/appdynamics-php-agent-linux_x64-#{source_input.version}.tar.bz2"
-
-      if File.exist?(filename)
-        out_data.merge!(
-          artifact_output.move_dependency(
-            source_input.name,
-            filename,
-            "#{filename_prefix}_linux_x64_#{stack}"
-          )
-        )
-      else
-        results = Sha.check_sha(source_input)
-        out_data[:sha256] = results[1]
-        out_data[:url] = source_input.url
-      end
-
     when ->(elem) { elem.start_with?('miniconda') }
       results = Sha.check_sha(source_input)
       out_data[:url] = source_input.url
@@ -786,22 +768,6 @@ class Builder
         )
       )
 
-    when 'composer'
-      filename = 'source/composer.phar'
-      if File.exist?(filename)
-        out_data.merge!(
-          artifact_output.move_dependency(
-            source_input.name,
-            filename,
-            "#{filename_prefix}_linux_noarch_any-stack"
-          )
-        )
-      else
-        results = Sha.check_sha(source_input)
-        out_data[:sha256] = results[1]
-        out_data[:url] = source_input.url
-      end
-
     when 'ruby'
       major, minor, = source_input.version.split('.')
       if major == '2' && stack == 'cflinuxfs3' && %w[3 2].include?(minor)
@@ -861,45 +827,6 @@ class Builder
           "#{source_input.name}_#{full_version}_linux_x64_#{stack}"
         )
       )
-
-    when 'php'
-      raise "Unexpected PHP version #{source_input.version}. Expected 8.X" unless source_input.version.start_with?('8')
-
-      base_extension_file = File.join(php_extensions_dir, 'php8-base-extensions.yml')
-
-      php_extensions = BaseExtensions.new(base_extension_file)
-
-      patch_file = nil
-      if source_input.version.start_with?('8.1.')
-        patch_file = File.join(php_extensions_dir, 'php81-extensions-patch.yml')
-      elsif source_input.version.start_with?('8.2.')
-        patch_file = File.join(php_extensions_dir, 'php82-extensions-patch.yml')
-      elsif source_input.version.start_with?('8.3.')
-        patch_file = File.join(php_extensions_dir, 'php83-extensions-patch.yml')
-      end
-
-      php_extensions.patch!(patch_file) if patch_file
-      output_yml = File.join(php_extensions_dir, 'php-final-extensions.yml')
-      php_extensions.write_yml(output_yml)
-
-      binary_builder.build(source_input, "--php-extensions-file=#{output_yml}")
-
-      filename = "#{binary_builder.base_dir}/php-#{source_input.version}-linux-x64.tgz"
-      Archive.strip_top_level_directory_from_tar(filename)
-
-      out_data.merge!(
-        artifact_output.move_dependency(
-          source_input.name,
-          filename,
-          "php_#{source_input.version}_linux_x64_#{stack}"
-        )
-      )
-
-      out_data[:sub_dependencies] = {}
-      extensions = [php_extensions.base_yml['native_modules'], php_extensions.base_yml['extensions']].flatten
-      extensions.sort_by { |e| e['name'].downcase }.each do |extension|
-        out_data[:sub_dependencies][extension['name'].to_sym] = { version: extension['version'] }
-      end
 
     when 'python'
       DependencyBuild.build_python(source_input, stack)
