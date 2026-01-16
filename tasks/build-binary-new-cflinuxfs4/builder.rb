@@ -629,12 +629,13 @@ class DependencyBuild
 
   def build_python
     # Python release manager GPG keys
-    # See https://www.python.org/downloads/ for current release managers
+    # Keys are fetched from Python's keyserver: keys.python.org
+    # See https://www.python.org/downloads/ for release managers
+    # We use keys.openpgp.org as a reliable keyserver
     python_gpg_keys = [
       'https://keybase.io/pablogsal/pgp_keys.asc',  # Pablo Galindo Salgado (3.10, 3.11)
       'https://keybase.io/ambv/pgp_keys.asc',       # Łukasz Langa (3.8, 3.9)
-      'https://keybase.io/nad/pgp_keys.asc',        # Ned Deily (3.7)
-      'https://keybase.io/stevendaprano/pgp_keys.asc', # Thomas Wouters (3.12, 3.13)
+      'https://keybase.io/nad/pgp_keys.asc',        # Ned Deily (3.7, 3.6)
     ]
     
     artifacts = "#{Dir.pwd}/artifacts"
