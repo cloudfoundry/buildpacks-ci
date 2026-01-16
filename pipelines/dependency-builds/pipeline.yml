@@ -134,7 +134,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/buildpacks-ci
-    branch: master
+    branch: use-sha256-sum
 - name: builds
   type: git
   source:

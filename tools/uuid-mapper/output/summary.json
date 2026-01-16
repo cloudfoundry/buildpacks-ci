@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-01-14T11:17:04.253200Z",
+  "bucket": "buildpacks.cloudfoundry.org",
+  "summary": {
+    "total_blob_history_entries": 5351,
+    "unique_uuids_in_history": 5166,
+    "current_active_uuids": 5166,
+    "uuids_in_s3": 4362,
+    "orphaned_uuids": 732,
+    "orphaned_size_bytes": 290077080128,
+    "orphaned_size_gb": 270.1553331017494,
+    "repositories_analyzed": 15
+  }
+}

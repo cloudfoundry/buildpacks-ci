@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BOSH Blob UUID → Release Mapping</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 { color: #333; border-bottom: 3px solid #007bff; padding-bottom: 10px; margin-bottom: 5px; }
+    .subtitle { color: #666; font-size: 18px; margin-bottom: 20px; }
+    h2 { color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 8px; }
+    
+    .search-box {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin: 20px 0;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+    }
+    .search-box input:focus { outline: none; border-color: #007bff; }
+    
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .card h3 { margin: 0 0 10px 0; color: #666; font-size: 14px; }
+    .card .value { font-size: 32px; font-weight: bold; color: #007bff; }
+    .card .unit { font-size: 14px; color: #999; }
+    
+    table {
+      width: 100%;
+      background: white;
+      border-collapse: collapse;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin: 20px 0;
+    }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; }
+    th { background: #007bff; color: white; font-weight: 600; position: sticky; top: 0; }
+    th.sortable { cursor: pointer; user-select: none; position: relative; padding-right: 25px; }
+    th.sortable:hover { background: #0056b3; }
+    th.sortable::after { 
+      content: '⇅'; 
+      position: absolute; 
+      right: 8px; 
+      opacity: 0.5; 
+      font-size: 12px; 
+    }
+    th.sortable.asc::after { content: '▲'; opacity: 1; }
+    th.sortable.desc::after { content: '▼'; opacity: 1; }
+    tr:hover { background: #f8f9fa; }
+    .uuid { font-family: 'Courier New', monospace; font-size: 12px; color: #666; }
+    .filename { font-family: 'Courier New', monospace; font-size: 12px; color: #333; }
+    .release { font-weight: 600; color: #007bff; }
+    .tags { font-size: 11px; color: #28a745; }
+    .orphaned { background: #fff3cd !important; }
+    .timestamp { font-size: 12px; color: #999; }
+    
+    .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
+    .info { background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 20px 0; }
+    .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #999; text-align: center; }
+    
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      border-bottom: 2px solid #ddd;
+    }
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      background: white;
+      border: 2px solid #ddd;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      font-weight: 600;
+      color: #666;
+    }
+    .tab.active {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .size-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      background: #e9ecef;
+      color: #495057;
+    }
+    
+    .release-group {
+      background: white;
+      margin: 15px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .release-header {
+      background: #007bff;
+      color: white;
+      padding: 15px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    .release-header:hover {
+      background: #0056b3;
+    }
+    .release-name {
+      font-weight: 600;
+      font-size: 16px;
+    }
+    .release-meta {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+    .release-toggle {
+      font-size: 20px;
+      transition: transform 0.3s;
+    }
+    .release-group.collapsed .release-toggle {
+      transform: rotate(-90deg);
+    }
+    .release-body {
+      max-height: 2000px;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    .release-group.collapsed .release-body {
+      max-height: 0;
+    }
+    .release-body table {
+      margin: 0;
+      box-shadow: none;
+    }
+    .release-body th {
+      background: #6c757d;
+    }
+  </style>
+</head>
+<body>
+  <h1>🗂️ BOSH Blob UUID → Release Mapping</h1>
+  <div class="subtitle">Understand which UUIDs belong to which BOSH releases</div>
+  <p><strong>Bucket:</strong> s3://buildpacks.cloudfoundry.org/ | <strong>Generated:</strong> <span id="timestamp"></span></p>
+  
+  <div class="info">
+    <strong>💡 Use Case:</strong> Search for any UUID or filename to find which buildpack releases use it. 
+    Identify if orphaned blobs are from old releases that can be safely deleted.
+  </div>
+  
+  <div class="search-box">
+    <input type="text" id="search" placeholder="Search UUID, filename, or release name..." />
+  </div>
+  
+  <div class="summary" id="summary"></div>
+  
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('releases')">📦 By Release</div>
+    <div class="tab" onclick="switchTab('uuids')">🔍 By UUID</div>
+    <div class="tab" onclick="switchTab('orphaned')">🗑️ Orphaned</div>
+  </div>
+  
+  <div id="releases-tab" class="tab-content active">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h2 style="margin: 0;">Blobs Grouped by BOSH Release</h2>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <label style="font-size: 14px; color: #666;">Sort by:</label>
+        <select id="sort-select" style="padding: 8px 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px; cursor: pointer;">
+          <option value="name">Name (A-Z)</option>
+          <option value="size">Size (Largest)</option>
+          <option value="blobs">Blob Count (Most)</option>
+          <option value="releases">Release Count (Most)</option>
+        </select>
+      </div>
+    </div>
+    <div id="release-groups"></div>
+  </div>
+  
+  <div id="uuids-tab" class="tab-content">
+    <h2>Current UUID Mappings</h2>
+    <table id="uuid-table">
+      <thead>
+        <tr>
+          <th>UUID</th>
+          <th>Filename</th>
+          <th>Repository</th>
+          <th>Releases</th>
+          <th>Size</th>
+        </tr>
+      </thead>
+      <tbody id="uuid-tbody"></tbody>
+    </table>
+  </div>
+  
+  <div id="orphaned-tab" class="tab-content">
+    <div class="warning">
+      <strong>⚠️ Warning:</strong> <span id="orphaned-count"></span> orphaned blobs detected totaling <span id="orphaned-size"></span> GB. 
+      These UUIDs are in S3 but not referenced in any current blobs.yml.
+    </div>
+    <h2>Orphaned Blobs</h2>
+    <table id="orphaned-table">
+      <thead>
+        <tr>
+          <th>UUID</th>
+          <th class="sortable" onclick="sortOrphaned('size')" id="sort-size">Size</th>
+          <th class="sortable" onclick="sortOrphaned('date')" id="sort-date">Last Modified</th>
+          <th>Historical Info</th>
+        </tr>
+      </thead>
+      <tbody id="orphaned-tbody"></tbody>
+    </table>
+  </div>
+  
+  <div class="footer">
+    <p>Generated by UUID Mapper Tool | Cloud Foundry Buildpacks CI</p>
+  </div>
+  
+  <script>
+    let allReleases = [];
+    let allUUIDs = [];
+    let allOrphaned = [];
+    let allOrphanedParsed = [];
+    let historicalData = {};
+    let orphanedSortBy = 'size';
+    let orphanedSortDir = 'desc';
+    
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tab + '-tab').classList.add('active');
+    }
+    
+    function formatSize(bytes) {
+      if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(2) + ' GB';
+      if (bytes >= 1048576) return (bytes / 1048576).toFixed(2) + ' MB';
+      if (bytes >= 1024) return (bytes / 1024).toFixed(2) + ' KB';
+      return bytes + ' B';
+    }
+    
+    function sortOrphaned(column) {
+      if (orphanedSortBy === column) {
+        orphanedSortDir = orphanedSortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        orphanedSortBy = column;
+        orphanedSortDir = 'desc';
+      }
+      
+      document.querySelectorAll('#orphaned-table th.sortable').forEach(th => {
+        th.classList.remove('asc', 'desc');
+      });
+      
+      const header = document.getElementById('sort-' + column);
+      if (header) {
+        header.classList.add(orphanedSortDir);
+      }
+      
+      const sorted = [...allOrphanedParsed].sort((a, b) => {
+        let aVal, bVal;
+        if (column === 'size') {
+          aVal = a.sizeBytes;
+          bVal = b.sizeBytes;
+        } else if (column === 'date') {
+          aVal = new Date(a.date);
+          bVal = new Date(b.date);
+        }
+        
+        if (orphanedSortDir === 'asc') {
+          return aVal - bVal;
+        } else {
+          return bVal - aVal;
+        }
+      });
+      
+      renderOrphanedData(sorted);
+    }
+    
+    function renderOrphanedData(data) {
+      const tbody = document.getElementById('orphaned-tbody');
+      tbody.innerHTML = '';
+      
+      data.slice(0, 500).forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'orphaned';
+        tr.innerHTML = `
+          <td class="uuid">${item.uuid}</td>
+          <td><span class="size-badge">${formatSize(item.sizeBytes)}</span></td>
+          <td class="timestamp">${item.date}</td>
+          <td>${item.historical ? `<div class="filename">${item.historical.filename}</div><div class="tags">Last in: ${item.historical.tags || item.historical.repo}</div>` : 'No history found'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      
+      if (data.length > 500) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="4" style="text-align: center; color: #999;">Showing first 500 results. Use search to filter.</td>';
+        tbody.appendChild(tr);
+      }
+    }
+    
+    Promise.all([
+      fetch('summary.json').then(r => r.json()),
+      fetch('blobs_by_release.csv').then(r => r.text()),
+      fetch('uuid_mapping_current.csv').then(r => r.text()),
+      fetch('orphaned_blobs.csv').then(r => r.text()),
+      fetch('all_blob_history.csv').then(r => r.text())
+    ]).then(([summary, releaseCsv, uuidCsv, orphanedCsv, historyCsv]) => {
+      
+      document.getElementById('timestamp').textContent = summary.generated_at;
+      
+      const s = summary.summary;
+      const summaryDiv = document.getElementById('summary');
+      [
+        { title: 'Repositories', value: s.repositories_analyzed, unit: 'repos' },
+        { title: 'Total UUIDs', value: s.unique_uuids_in_history.toLocaleString(), unit: 'historical' },
+        { title: 'Active UUIDs', value: s.current_active_uuids.toLocaleString(), unit: 'in use' },
+        { title: 'Orphaned', value: s.orphaned_uuids.toLocaleString(), unit: 'blobs' },
+        { title: 'Orphaned Size', value: s.orphaned_size_gb.toFixed(2), unit: 'GB' },
+      ].forEach(card => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `<h3>${card.title}</h3><div class="value">${card.value}</div><div class="unit">${card.unit}</div>`;
+        summaryDiv.appendChild(div);
+      });
+      
+      if (s.orphaned_uuids > 0) {
+        document.getElementById('orphaned-count').textContent = s.orphaned_uuids.toLocaleString();
+        document.getElementById('orphaned-size').textContent = s.orphaned_size_gb.toFixed(2);
+      }
+      
+      historyCsv.split('\n').slice(1).forEach(row => {
+        const [uuid, filename, size, sha, repo, commit, date, author, tags] = row.split(',');
+        if (uuid && !historicalData[uuid]) {
+          historicalData[uuid] = { filename, repo, tags, date };
+        }
+      });
+      
+      allReleases = releaseCsv.split('\n').slice(1).filter(r => r.trim());
+      allUUIDs = uuidCsv.split('\n').slice(1).filter(r => r.trim());
+      allOrphaned = orphanedCsv.split('\n').slice(1).filter(r => r.trim());
+      
+      allOrphanedParsed = allOrphaned.map(row => {
+        const [uuid, size, date] = row.split(',');
+        return {
+          uuid,
+          sizeBytes: parseInt(size) || 0,
+          date,
+          historical: historicalData[uuid]
+        };
+      }).filter(item => item.uuid);
+      
+      renderReleases(allReleases);
+      renderUUIDs(allUUIDs);
+      sortOrphaned('size');
+      
+      document.getElementById('search').addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        renderReleases(allReleases.filter(r => r.toLowerCase().includes(query)));
+        renderUUIDs(allUUIDs.filter(r => r.toLowerCase().includes(query)));
+        
+        const filtered = allOrphanedParsed.filter(item => 
+          item.uuid.toLowerCase().includes(query) ||
+          (item.historical && item.historical.filename && item.historical.filename.toLowerCase().includes(query))
+        );
+        renderOrphanedData(filtered);
+      });
+    }).catch(err => {
+      document.body.innerHTML = '<div style="padding: 40px; text-align: center; color: #721c24; background: #f8d7da; margin: 20px; border-radius: 8px;"><h2>Error Loading Data</h2><p>' + err.message + '</p></div>';
+    });
+    
+    function toggleRelease(releaseId) {
+      const group = document.getElementById('group-' + releaseId);
+      if (group) {
+        group.classList.toggle('collapsed');
+      }
+    }
+    
+    function renderReleases(rows) {
+      const container = document.getElementById('release-groups');
+      container.innerHTML = '';
+      
+      const buildpackMap = {};
+      rows.forEach(row => {
+        const [release, uuid, filename, size, sha, commit, date] = row.split(',');
+        if (!release) return;
+        
+        const buildpack = release.split('/')[0];
+        
+        if (!buildpackMap[buildpack]) {
+          buildpackMap[buildpack] = [];
+        }
+        buildpackMap[buildpack].push({ release, uuid, filename, size, date });
+      });
+      
+      const buildpacks = Object.keys(buildpackMap).sort();
+      
+      buildpacks.forEach((buildpack, idx) => {
+        const entries = buildpackMap[buildpack];
+        const totalSize = entries.reduce((sum, e) => sum + parseInt(e.size || 0), 0);
+        const uniqueReleases = new Set(entries.map(e => e.release)).size;
+        
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'release-group';
+        groupDiv.id = 'group-' + idx;
+        
+        groupDiv.innerHTML = `
+          <div class="release-header" onclick="toggleRelease(${idx})">
+            <div>
+              <div class="release-name">${buildpack}</div>
+              <div class="release-meta">${entries.length} blobs across ${uniqueReleases} releases • ${formatSize(totalSize)}</div>
+            </div>
+            <div class="release-toggle">▼</div>
+          </div>
+          <div class="release-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Release</th>
+                  <th>UUID</th>
+                  <th>Filename</th>
+                  <th>Size</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${entries.map(e => `
+                  <tr>
+                    <td class="release">${e.release}</td>
+                    <td class="uuid">${e.uuid}</td>
+                    <td class="filename">${e.filename}</td>
+                    <td><span class="size-badge">${formatSize(parseInt(e.size))}</span></td>
+                    <td class="timestamp">${e.date}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+        
+        container.appendChild(groupDiv);
+      });
+      
+      if (buildpacks.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #999; padding: 40px; background: white; border-radius: 8px;">No results found. Try a different search.</div>';
+      }
+    }
+    
+    function renderUUIDs(rows) {
+      const tbody = document.getElementById('uuid-tbody');
+      tbody.innerHTML = '';
+      rows.slice(0, 500).forEach(row => {
+        const [uuid, filename, size, sha, repo, commit, date, author, tags] = row.split(',');
+        if (!uuid) return;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="uuid">${uuid}</td>
+          <td class="filename">${filename}</td>
+          <td>${repo}</td>
+          <td class="tags">${tags || 'none'}</td>
+          <td><span class="size-badge">${formatSize(parseInt(size))}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      if (rows.length > 500) {
+        tbody.innerHTML += '<tr><td colspan="5" style="text-align: center; color: #999;">Showing first 500 results. Refine your search.</td></tr>';
+      }
+    }
+  </script>
+</body>
+</html>

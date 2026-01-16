@@ -278,10 +278,29 @@ module GPGHelper
             end
           else
             Runner.run('wget', public_key_url)
+            Runner.run('gpg', '--import', File.basename(public_key_url))
           end
           Runner.run('wget', file_url)
           Runner.run('wget', signature_url)
-          Runner.run('gpg', '--verify', File.basename(signature_url), File.basename(file_url))
+          
+          # Try verification, if key is missing, fetch from keyserver
+          verify_output = `gpg --verify #{File.basename(signature_url)} #{File.basename(file_url)} 2>&1`
+          if verify_output.include?("Can't check signature: No public key")
+            # Extract key ID and fetch from keyserver
+            key_id = verify_output[/key (\w+)/, 1]
+            if key_id
+              puts "Fetching missing key #{key_id} from keyserver..."
+              Runner.run('gpg', '--keyserver', 'keyserver.ubuntu.com', '--recv-keys', key_id)
+              # Verify again
+              Runner.run('gpg', '--verify', File.basename(signature_url), File.basename(file_url))
+            else
+              raise "GPG verification failed and could not extract key ID"
+            end
+          elsif !$?.success?
+            raise "GPG verification failed: #{verify_output}"
+          else
+            puts verify_output
+          end
         end
       end
     end
