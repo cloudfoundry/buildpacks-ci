@@ -24,12 +24,12 @@ module HTTPHelper
       end
     end
 
-    def download(source_input, filename, skip_digest_errors: false)
+    def download(source_input, filename)
       uri = URI.parse(source_input.url)
       puts "Downloading #{uri} to #{filename}"
       response = download_with_follow_redirects(uri)
       if response.code == '200'
-        Sha.verify_digest(response.body, source_input, skip_on_error: skip_digest_errors)
+        Sha.verify_digest(response.body, source_input)
         File.write(filename, response.body)
       else
         str = "Failed to download #{uri} with code #{response.code} error: \n#{response.body}"
@@ -56,21 +56,18 @@ end
 
 module Sha
   class << self
-    def verify_digest(content, source_input, skip_on_error: false)
+    def verify_digest(content, source_input)
       sha1 = Digest::SHA1.hexdigest(content)
       sha256 = Digest::SHA2.new(256).hexdigest(content)
       md5 = Digest::MD5.hexdigest(content)
       
       # Prioritize SHA256 > SHA1 > MD5 for security
       if source_input.sha256? && sha256 != source_input.sha256
-        error_msg = "SHA256 digest does not match: expected #{source_input.sha256}, got #{sha256}"
-        skip_on_error ? puts("WARNING: #{error_msg}") : raise(error_msg)
+        raise "SHA256 digest does not match: expected #{source_input.sha256}, got #{sha256}"
       elsif source_input.sha1? && sha1 != source_input.sha1
-        error_msg = "SHA1 digest does not match: expected #{source_input.sha1}, got #{sha1}"
-        skip_on_error ? puts("WARNING: #{error_msg}") : raise(error_msg)
+        raise "SHA1 digest does not match: expected #{source_input.sha1}, got #{sha1}"
       elsif source_input.md5? && md5 != source_input.md5
-        error_msg = "MD5 digest does not match: expected #{source_input.md5}, got #{md5}"
-        skip_on_error ? puts("WARNING: #{error_msg} (GPG verification passed, skipping)") : raise(error_msg)
+        raise "MD5 digest does not match: expected #{source_input.md5}, got #{md5}"
       end
     end
 
@@ -650,8 +647,7 @@ class DependencyBuild
           # Verify GPG signature before downloading/using the file
           GPGHelper.verify_gpg_signature(@source_input.url, "#{@source_input.url}.asc", python_gpg_keys)
           download_path = "#{Dir.pwd}/Python-#{@source_input.version}.tgz"
-          # Skip digest errors since GPG verification passed (source data has incorrect checksums)
-          HTTPHelper.download(@source_input, download_path, skip_digest_errors: true)
+          HTTPHelper.download(@source_input, download_path)
           tar_path = "Python-#{@source_input.version}.tgz"
         end
 
