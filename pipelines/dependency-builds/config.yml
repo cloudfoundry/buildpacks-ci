@@ -196,6 +196,9 @@ dependencies:
           - line: 22.X.X
             deprecation_date: 2027-04-30
             link: https://github.com/nodejs/Release
+          - line: node-lts
+            deprecation_date: ""
+            link: https://github.com/nodejs/Release
         removal_strategy: keep_latest_released
       ruby:
         lines:
