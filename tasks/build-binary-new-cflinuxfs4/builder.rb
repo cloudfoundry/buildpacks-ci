@@ -62,11 +62,11 @@ module Sha
       md5 = Digest::MD5.hexdigest(content)
       # Prioritize SHA256 over MD5 for security and reliability
       if source_input.sha256? && sha256 != source_input.sha256
-        raise 'SHA256 digest does not match version digest'
+        raise "SHA256 digest does not match: expected #{source_input.sha256}, got #{sha256}"
       elsif source_input.sha1? && sha1 != source_input.sha1
-        raise 'SHA1 digest does not match version digest'
+        raise "SHA1 digest does not match: expected #{source_input.sha1}, got #{sha1}"
       elsif source_input.md5? && md5 != source_input.md5
-        raise 'MD5 digest does not match version digest'
+        raise "MD5 digest does not match: expected #{source_input.md5}, got #{md5}"
       end
     end
 
