@@ -8,8 +8,8 @@ describe Depwatcher::Python do
       client = HTTPClientMock.new
       subject = Depwatcher::Python.new.tap { |s| s.client = client }
       client.stub_get("https://www.python.org/downloads/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/python.html")))
-      client.stub_get("https://www.python.org/downloads/release/python-355/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/python-355.html")))
-      client.stub_get("https://www.python.org/ftp/python/3.5.5/Python-3.5.5.tgz", nil, HTTP::Client::Response.new(200, "hello"))
+      client.stub_get("https://www.python.org/downloads/release/python-31212/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/python-31212.html")))
+      client.stub_get("https://www.python.org/ftp/python/3.12.12/Python-3.12.12.tgz", nil, HTTP::Client::Response.new(200, "hello"))
       
       subject.check.map(&.ref).should eq [
         "2.7.2", "3.2.1", "3.2.2", "3.1.5", "2.7.3", "2.6.8", "3.2.3", "3.3.0",
@@ -28,13 +28,13 @@ describe Depwatcher::Python do
       client = HTTPClientMock.new
       subject = Depwatcher::Python.new.tap { |s| s.client = client }
       client.stub_get("https://www.python.org/downloads/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/python.html")))
-      client.stub_get("https://www.python.org/downloads/release/python-355/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/python-355.html")))
-      client.stub_get("https://www.python.org/ftp/python/3.5.5/Python-3.5.5.tgz", nil, HTTP::Client::Response.new(200, "hello"))
+      client.stub_get("https://www.python.org/downloads/release/python-31212/", nil, HTTP::Client::Response.new(200, File.read(__DIR__+"/../fixtures/python-31212.html")))
+      client.stub_get("https://www.python.org/ftp/python/3.12.12/Python-3.12.12.tgz", nil, HTTP::Client::Response.new(200, "hello"))
       
-      obj = subject.in("3.5.5")
-      obj.ref.should eq "3.5.5"
-      obj.url.should eq "https://www.python.org/ftp/python/3.5.5/Python-3.5.5.tgz"
-      obj.md5_digest.should eq "7c825b747d25c11e669e99b912398585"
+      obj = subject.in("3.12.12")
+      obj.ref.should eq "3.12.12"
+      obj.url.should eq "https://www.python.org/ftp/python/3.12.12/Python-3.12.12.tgz"
+      obj.md5_digest.should eq "4fcf63eed7dd8dd3f0d00cfd5921a681"
       obj.sha256.should eq "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
     end
   end

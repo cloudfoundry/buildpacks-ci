@@ -35,10 +35,12 @@ module Depwatcher
       tr = a.xpath("./ancestor::tr")
       raise "Could not parse python release (tr) website" unless tr.is_a?(XML::NodeSet)
       tr = tr.first
-      # Try column 7 first (new format), fallback to column 4 (old format)
-      md5_digest = tr.xpath("./td[position()=7]")
+      # Try column 8 first (Python 3.12.12+ with Sigstore+SBOM), fallback to column 7 (Python 3.9-3.11)
+      # Python 3.12.12+: 8 columns including Sigstore (colspan=2 counts as 1 td) and SBOM, MD5 in column 8
+      # Python 3.9-3.11: 7 columns, MD5 in column 7
+      md5_digest = tr.xpath("./td[position()=8]")
       if md5_digest.is_a?(XML::NodeSet) && md5_digest.size == 0
-        md5_digest = tr.xpath("./td[position()=4]")
+        md5_digest = tr.xpath("./td[position()=7]")
       end
       raise "Could not parse python release (md5_digest) website" unless md5_digest.is_a?(XML::NodeSet) && md5_digest.size > 0
 
