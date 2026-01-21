@@ -49,6 +49,65 @@ else
     COMMIT_RANGE="HEAD"
 fi
 
+should_skip_commit() {
+    local subject="$1"
+    local body="$2"
+    
+    # Skip merge commits
+    if [[ "${subject}" =~ ^Merge\ (pull\ request|branch) ]]; then
+        return 0
+    fi
+    
+    # Skip version bump commits
+    if [[ "${subject}" =~ ^[Bb]ump(s)?\ (to\ )?[0-9] ]] || \
+       [[ "${subject}" =~ ^[Bb]ump\ version ]] || \
+       [[ "${subject}" =~ ^Bump\ from\ .*\ to\ .* ]]; then
+        return 0
+    fi
+    
+    # Skip CI/config/meta commits
+    if [[ "${subject}" =~ ^Updating\ github-config ]] || \
+       [[ "${subject}" =~ ^\[ci\ skip\] ]] || \
+       [[ "${subject}" =~ ^Update\ \.github/ ]] || \
+       [[ "${subject}" =~ ^[Dd]elete.*\.yml$ ]] || \
+       [[ "${subject}" =~ ^[Ff]ix.*template ]] || \
+       [[ "${subject}" =~ ^[Dd]elete\ release ]] || \
+       [[ "${subject}" =~ ^consolidate.*branch ]]; then
+        return 0
+    fi
+    
+    # Skip test framework updates (switchblade, brats, etc.)
+    if [[ "${subject}" =~ ^[Aa]dopt.*switchblade ]] || \
+       [[ "${subject}" =~ ^[Uu]pgrade.*[Ss]witchblade ]] || \
+       [[ "${subject}" =~ ^[Bb]ump\ switchblade ]] || \
+       [[ "${subject}" =~ ^[Uu]pdate.*brats ]]; then
+        return 0
+    fi
+    
+    # Skip test-only commits (unless they're dependency updates)
+    if [[ "${subject}" =~ [Rr]emove.*test ]] || \
+       [[ "${subject}" =~ ^[Uu]pdate.*test ]] || \
+       [[ "${subject}" =~ [Dd]elete.*test ]]; then
+        if [[ ! "${body}" =~ for\ stack\(s\) ]]; then
+            return 0
+        fi
+    fi
+    
+    # Skip internal tooling updates
+    if [[ "${subject}" =~ ^[Cc]heck\ for\ CF\ CLI ]] || \
+       [[ "${subject}" =~ ^[Aa]dd\ check\ for ]]; then
+        return 0
+    fi
+    
+    # Skip empty commits or commits with only whitespace subject
+    if [[ -z "${subject// }" ]]; then
+        return 0
+    fi
+    
+    # Keep this commit
+    return 1
+}
+
 COMMIT_HASHES=$(git log --pretty=format:'%H' ${COMMIT_RANGE})
 
 if [[ -z "${COMMIT_HASHES}" ]]; then
@@ -56,9 +115,24 @@ if [[ -z "${COMMIT_HASHES}" ]]; then
     COMMIT_ENTRIES=""
 else
     COMMIT_ENTRIES=""
+    declare -A SEEN_SUBJECTS
+    
     while IFS= read -r hash; do
         SUBJECT=$(git log --pretty=format:'%s' -n 1 "${hash}")
         BODY=$(git log --pretty=format:'%b' -n 1 "${hash}")
+        
+        # Skip filtered commits
+        if should_skip_commit "${SUBJECT}" "${BODY}"; then
+            echo "  Skipping: ${SUBJECT}"
+            continue
+        fi
+        
+        # Skip duplicate subjects (keeps first occurrence)
+        if [[ -n "${SEEN_SUBJECTS[${SUBJECT}]:-}" ]]; then
+            echo "  Skipping duplicate: ${SUBJECT}"
+            continue
+        fi
+        SEEN_SUBJECTS["${SUBJECT}"]=1
         
         FILTERED_BODY=""
         while IFS= read -r line; do
@@ -74,6 +148,8 @@ else
             INDENTED_BODY=$(echo "${FILTERED_BODY}" | sed 's/^/  /')
             ENTRY="${ENTRY}"$'\n'"${INDENTED_BODY}"
         fi
+        
+        echo "  Including: ${SUBJECT}"
         
         if [[ -n "${COMMIT_ENTRIES}" ]]; then
             COMMIT_ENTRIES="${COMMIT_ENTRIES}"$'\n\n'"${ENTRY}"
