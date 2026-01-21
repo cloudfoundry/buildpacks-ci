@@ -82,10 +82,13 @@ dependencies:
         lines:
           #! go version lines lose support the day that the version line 2 minor bumps ahead is released
           #! for example, 1.17.X reaches EOS whenever 1.19 releases. This gap is roughly 12 months.
-          - line: 1.22.X
+          - line: 1.23.X
             deprecation_date: ""
             link: https://golang.org/doc/devel/release.html
-          - line: 1.23.X
+          - line: 1.24.X
+            deprecation_date: ""
+            link: https://golang.org/doc/devel/release.html
+          - line: 1.25.X
             deprecation_date: ""
             link: https://golang.org/doc/devel/release.html
         removal_strategy: remove_all
