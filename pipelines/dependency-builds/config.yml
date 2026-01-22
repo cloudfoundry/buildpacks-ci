@@ -342,9 +342,116 @@ dependencies:
       - 'extension: .tar.gz'
     any_stack: true
     versions_to_keep: 2
-cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pip', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty', 'r' , 'httpd', 'php' ]
-cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems', 'nginx', 'nginx-static', 'openresty', 'r', 'appdynamics', 'composer', 'httpd', 'php' ]
-cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go', 'ruby', 'nginx', 'r', 'php', 'staticfile' ]
+  gradle:
+    buildpacks:
+      java:
+        lines:
+          - line: latest
+    source_type: gradle
+    any_stack: true
+    versions_to_keep: 2
+  maven:
+    buildpacks:
+      java:
+        lines:
+          - line: latest
+    source_type: maven
+    any_stack: true
+    versions_to_keep: 2
+  tomcat:
+    buildpacks:
+      java:
+        lines:
+          - line: 10.1.X
+          - line: 11.0.X
+    source_type: tomcat
+    any_stack: true
+    versions_to_keep: 2
+  wildfly:
+    buildpacks:
+      java:
+        lines:
+          - line: latest
+    source_type: wildfly
+    any_stack: true
+    versions_to_keep: 2
+  skywalking:
+    buildpacks:
+      java:
+        lines:
+          - line: latest
+    source_type: skywalking
+    any_stack: true
+    versions_to_keep: 2
+  jprofiler:
+    buildpacks:
+      java:
+        lines:
+          - line: latest
+    source_type: jprofiler
+    any_stack: false
+    versions_to_keep: 2
+  yourkit:
+    buildpacks:
+      java:
+        lines:
+          - line: latest
+    source_type: yourkit
+    any_stack: false
+    versions_to_keep: 2
+  bellsoft-liberica:
+    buildpacks:
+      java:
+        lines:
+          - line: 8.X.X
+          - line: 11.X.X
+          - line: 17.X.X
+          - line: 21.X.X
+    source_type: liberica
+    source_params:
+      - 'product: jre'
+      - 'bundle_type: jre'
+    any_stack: false
+    versions_to_keep: 2
+  zulu:
+    buildpacks:
+      java:
+        lines:
+          - line: 8.X.X
+          - line: 11.X.X
+          - line: 17.X.X
+    source_type: zulu
+    source_params:
+      - 'bundle_type: jre'
+    any_stack: false
+    versions_to_keep: 2
+  sapmachine:
+    buildpacks:
+      java:
+        lines:
+          - line: 17.X.X
+          - line: 21.X.X
+          - line: 25.X.X
+    source_type: github_tags
+    source_params:
+      - 'repo: SAP/SapMachine'
+      - 'tag_regex: ^sapmachine-(\d+\.\d+\.\d+)$'
+    any_stack: false
+    versions_to_keep: 2
+  appdynamics-java:
+    buildpacks:
+      java:
+        lines:
+          - line: latest
+    source_type: appdynamics
+    source_params:
+      - 'agent_type: java'
+    third_party_hosted: true
+    any_stack: true
+    versions_to_keep: 2
+cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pip', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty', 'r' , 'httpd', 'php', 'jprofiler', 'yourkit', 'bellsoft-liberica', 'zulu', 'sapmachine' ]
+cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems', 'nginx', 'nginx-static', 'openresty', 'r', 'appdynamics', 'composer', 'httpd', 'php', 'gradle', 'maven', 'tomcat', 'wildfly', 'skywalking', 'jprofiler', 'yourkit', 'bellsoft-liberica', 'zulu', 'sapmachine', 'appdynamics-java' ]
+cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go', 'ruby', 'nginx', 'r', 'php', 'staticfile', 'java' ]
 build_stacks: [ 'cflinuxfs4' ]
 windows_stacks: [ 'windows' ]
 
@@ -360,3 +467,14 @@ skip_deprecation_check:
   - php  #! complicated
   - ruby  #! doesn't publish EOL schedule
   - r  #! doesn't publish EOL schedule
+  - gradle  #! doesn't publish EOL schedule
+  - maven  #! doesn't publish EOL schedule
+  - tomcat  #! doesn't publish EOL schedule
+  - wildfly  #! doesn't publish EOL schedule
+  - skywalking  #! doesn't publish EOL schedule
+  - jprofiler  #! doesn't publish EOL schedule
+  - yourkit  #! doesn't publish EOL schedule
+  - bellsoft-liberica  #! JRE versions tied to BellSoft Liberica schedule
+  - zulu  #! JRE versions tied to Azul release schedule
+  - sapmachine  #! JRE versions tied to SAP release schedule
+  - appdynamics-java  #! doesn't publish EOL schedule
