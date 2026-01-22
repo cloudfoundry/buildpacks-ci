@@ -21,6 +21,25 @@ type Source struct {
 	VersionFilter string `json:"version_filter,omitempty"`
 	GithubToken   string `json:"github_token,omitempty"`
 	PythonVersion string `json:"python_version,omitempty"`
+
+	URI             string `json:"uri,omitempty"`
+	GroupID         string `json:"group_id,omitempty"`
+	ArtifactID      string `json:"artifact_id,omitempty"`
+	Classifier      string `json:"classifier,omitempty"`
+	Packaging       string `json:"packaging,omitempty"`
+	ArtifactPattern string `json:"artifact_pattern,omitempty"`
+	Username        string `json:"username,omitempty"`
+	Password        string `json:"password,omitempty"`
+
+	Version        string `json:"version,omitempty"`
+	Implementation string `json:"implementation,omitempty"`
+	JDKType        string `json:"jdk_type,omitempty"`
+	Owner          string `json:"owner,omitempty"`
+	Repository     string `json:"repository,omitempty"`
+	Product        string `json:"product,omitempty"`
+	BundleType     string `json:"bundle_type,omitempty"`
+	Token          string `json:"token,omitempty"`
+	AgentType      string `json:"agent_type,omitempty"`
 }
 
 type CheckRequest struct {
@@ -184,6 +203,79 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 		watcher := watchers.NewAppdAgentWatcher(client)
 		versions, err = watcher.Check()
 
+	case "appdynamics":
+		watcher := watchers.NewAppDynamicsWatcher(client, source.AgentType, source.Username, source.Password)
+		versions, err = watcher.Check()
+
+	case "gradle":
+		watcher := watchers.NewGradleWatcher(client)
+		versions, err = watcher.Check()
+
+	case "maven":
+		watcher := watchers.NewMavenWatcher(
+			client,
+			source.URI,
+			source.GroupID,
+			source.ArtifactID,
+			source.Classifier,
+			source.Packaging,
+			source.Username,
+			source.Password,
+		)
+		versions, err = watcher.Check()
+
+	case "tomcat":
+		watcher := watchers.NewTomcatWatcher(client, source.URI)
+		versions, err = watcher.Check()
+
+	case "adoptopenjdk":
+		watcher := watchers.NewAdoptOpenJDKWatcher(client, source.Version, source.Implementation, source.JDKType)
+		versions, err = watcher.Check()
+
+	case "corretto":
+		watcher := watchers.NewCorrettoWatcher(client, source.Owner, source.Repository)
+		versions, err = watcher.Check()
+
+	case "liberica":
+		watcher := watchers.NewLibericaWatcher(client, source.Version, source.Product, source.BundleType, source.Token)
+		versions, err = watcher.Check()
+
+	case "zulu":
+		watcher := watchers.NewZuluWatcher(client, source.Version, source.BundleType)
+		versions, err = watcher.Check()
+
+	case "artifactory":
+		watcher, err := watchers.NewArtifactoryWatcher(
+			client,
+			source.URI,
+			source.GroupID,
+			source.ArtifactID,
+			source.Repository,
+			source.ArtifactPattern,
+			source.Username,
+			source.Password,
+		)
+		if err != nil {
+			return nil, err
+		}
+		versions, err = watcher.Check()
+
+	case "wildfly":
+		watcher := watchers.NewWildflyWatcher(client)
+		versions, err = watcher.Check()
+
+	case "jprofiler":
+		watcher := watchers.NewJProfilerWatcher(client)
+		versions, err = watcher.Check()
+
+	case "yourkit":
+		watcher := watchers.NewYourKitWatcher(client)
+		versions, err = watcher.Check()
+
+	case "skywalking":
+		watcher := watchers.NewSkyWalkingWatcher(client)
+		versions, err = watcher.Check()
+
 	default:
 		return nil, fmt.Errorf("unknown type: %s", source.Type)
 	}
@@ -343,6 +435,79 @@ func InWithClient(source Source, version base.Internal, client base.HTTPClient) 
 
 	case "appd_agent":
 		watcher := watchers.NewAppdAgentWatcher(client)
+		return watcher.In(version.Ref)
+
+	case "appdynamics":
+		watcher := watchers.NewAppDynamicsWatcher(client, source.AgentType, source.Username, source.Password)
+		return watcher.In(version.Ref)
+
+	case "gradle":
+		watcher := watchers.NewGradleWatcher(client)
+		return watcher.In(version.Ref)
+
+	case "maven":
+		watcher := watchers.NewMavenWatcher(
+			client,
+			source.URI,
+			source.GroupID,
+			source.ArtifactID,
+			source.Classifier,
+			source.Packaging,
+			source.Username,
+			source.Password,
+		)
+		return watcher.In(version.Ref)
+
+	case "tomcat":
+		watcher := watchers.NewTomcatWatcher(client, source.URI)
+		return watcher.In(version.Ref)
+
+	case "adoptopenjdk":
+		watcher := watchers.NewAdoptOpenJDKWatcher(client, source.Version, source.Implementation, source.JDKType)
+		return watcher.In(version.Ref)
+
+	case "corretto":
+		watcher := watchers.NewCorrettoWatcher(client, source.Owner, source.Repository)
+		return watcher.In(version.Ref)
+
+	case "liberica":
+		watcher := watchers.NewLibericaWatcher(client, source.Version, source.Product, source.BundleType, source.Token)
+		return watcher.In(version.Ref)
+
+	case "zulu":
+		watcher := watchers.NewZuluWatcher(client, source.Version, source.BundleType)
+		return watcher.In(version.Ref)
+
+	case "artifactory":
+		watcher, err := watchers.NewArtifactoryWatcher(
+			client,
+			source.URI,
+			source.GroupID,
+			source.ArtifactID,
+			source.Repository,
+			source.ArtifactPattern,
+			source.Username,
+			source.Password,
+		)
+		if err != nil {
+			return nil, err
+		}
+		return watcher.In(version.Ref)
+
+	case "wildfly":
+		watcher := watchers.NewWildflyWatcher(client)
+		return watcher.In(version.Ref)
+
+	case "jprofiler":
+		watcher := watchers.NewJProfilerWatcher(client)
+		return watcher.In(version.Ref)
+
+	case "yourkit":
+		watcher := watchers.NewYourKitWatcher(client)
+		return watcher.In(version.Ref)
+
+	case "skywalking":
+		watcher := watchers.NewSkyWalkingWatcher(client)
 		return watcher.In(version.Ref)
 
 	default:
