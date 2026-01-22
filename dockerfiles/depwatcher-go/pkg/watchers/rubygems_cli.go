@@ -1,11 +1,11 @@
 package watchers
 
 import (
+	"encoding/json"
 	"fmt"
-	"regexp"
+	"io"
 	"sort"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
@@ -14,40 +14,42 @@ type RubygemsCLIWatcher struct {
 	client base.HTTPClient
 }
 
+type rubygemsAPIVersion struct {
+	Number     string `json:"number"`
+	Prerelease bool   `json:"prerelease"`
+}
+
 func NewRubygemsCLIWatcher(client base.HTTPClient) *RubygemsCLIWatcher {
 	return &RubygemsCLIWatcher{client: client}
 }
 
-// Check scrapes the RubyGems download page and extracts all available versions.
 func (w *RubygemsCLIWatcher) Check() ([]base.Internal, error) {
-	resp, err := w.client.Get("https://rubygems.org/pages/download")
+	resp, err := w.client.Get("https://rubygems.org/api/v1/versions/rubygems-update.json")
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch rubygems download page: %w", err)
+		return nil, fmt.Errorf("fetching rubygems API: %w", err)
 	}
 	defer resp.Body.Close()
 
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse HTML: %w", err)
+		return nil, fmt.Errorf("reading response body: %w", err)
 	}
 
-	versionRegex := regexp.MustCompile(`/rubygems-(.*)\.tgz$`)
+	var releases []rubygemsAPIVersion
+	if err := json.Unmarshal(body, &releases); err != nil {
+		return nil, fmt.Errorf("parsing JSON: %w", err)
+	}
+
 	var versions []base.Internal
-
-	doc.Find("div#formats a:contains('tgz')").Each(func(i int, s *goquery.Selection) {
-		href, exists := s.Attr("href")
-		if !exists {
-			return
+	for _, release := range releases {
+		if release.Prerelease {
+			continue
 		}
-
-		matches := versionRegex.FindStringSubmatch(href)
-		if len(matches) == 2 {
-			versions = append(versions, base.Internal{Ref: matches[1]})
-		}
-	})
+		versions = append(versions, base.Internal{Ref: release.Number})
+	}
 
 	if len(versions) == 0 {
-		return nil, fmt.Errorf("could not parse rubygems download website")
+		return nil, fmt.Errorf("no versions found in API response")
 	}
 
 	sort.Slice(versions, func(i, j int) bool {
@@ -58,6 +60,11 @@ func (w *RubygemsCLIWatcher) Check() ([]base.Internal, error) {
 		}
 		return vi.LessThan(vj)
 	})
+
+	// Return only the last 10 versions (most recent)
+	if len(versions) > 10 {
+		versions = versions[len(versions)-10:]
+	}
 
 	return versions, nil
 }

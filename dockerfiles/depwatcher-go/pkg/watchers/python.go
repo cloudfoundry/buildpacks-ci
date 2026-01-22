@@ -1,7 +1,9 @@
 package watchers
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"regexp"
 	"strings"
 
@@ -13,42 +15,53 @@ type PythonWatcher struct {
 	client base.HTTPClient
 }
 
+type pythonAPIRelease struct {
+	Name        string `json:"name"`
+	IsPublished bool   `json:"is_published"`
+	PreRelease  bool   `json:"pre_release"`
+}
+
 func NewPythonWatcher(client base.HTTPClient) *PythonWatcher {
 	return &PythonWatcher{client: client}
 }
 
 func (w *PythonWatcher) Check() ([]base.Internal, error) {
-	resp, err := w.client.Get("https://www.python.org/downloads/")
+	resp, err := w.client.Get("https://www.python.org/api/v2/downloads/release/?is_published=true")
 	if err != nil {
-		return nil, fmt.Errorf("fetching python downloads page: %w", err)
+		return nil, fmt.Errorf("fetching python API: %w", err)
 	}
 	defer resp.Body.Close()
 
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("parsing HTML: %w", err)
+		return nil, fmt.Errorf("reading response body: %w", err)
+	}
+
+	var releases []pythonAPIRelease
+	if err := json.Unmarshal(body, &releases); err != nil {
+		return nil, fmt.Errorf("parsing JSON: %w", err)
 	}
 
 	var versions []base.Internal
-	doc.Find(".release-number a").Each(func(i int, s *goquery.Selection) {
-		text := s.Text()
-		text = regexp.MustCompile(`^\s*Python\s*`).ReplaceAllString(text, "")
-		text = strings.TrimSpace(text)
-		if text != "" {
-			versions = append(versions, base.Internal{Ref: text})
+	versionRegex := regexp.MustCompile(`Python\s+(\d+\.\d+\.\d+)`)
+
+	for _, release := range releases {
+		if release.PreRelease {
+			continue
 		}
-	})
+
+		matches := versionRegex.FindStringSubmatch(release.Name)
+		if len(matches) > 1 {
+			versions = append(versions, base.Internal{Ref: matches[1]})
+		}
+	}
 
 	if len(versions) == 0 {
-		return nil, fmt.Errorf("could not parse python website: no versions found")
+		return nil, fmt.Errorf("no versions found in API response")
 	}
 
 	if len(versions) > 50 {
 		versions = versions[:50]
-	}
-
-	for i, j := 0, len(versions)-1; i < j; i, j = i+1, j-1 {
-		versions[i], versions[j] = versions[j], versions[i]
 	}
 
 	return versions, nil

@@ -1,6 +1,7 @@
 package watchers_test
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -12,13 +13,18 @@ import (
 )
 
 type mockRubygemsCLIClient struct {
-	htmlResponse string
+	responses map[string]mockResponse
 }
 
 func (m *mockRubygemsCLIClient) Get(url string) (*http.Response, error) {
+	resp, exists := m.responses[url]
+	if !exists {
+		return nil, fmt.Errorf("unexpected URL: %s", url)
+	}
+
 	return &http.Response{
-		StatusCode: 200,
-		Body:       io.NopCloser(strings.NewReader(m.htmlResponse)),
+		StatusCode: resp.status,
+		Body:       io.NopCloser(strings.NewReader(resp.body)),
 	}, nil
 }
 
@@ -33,21 +39,22 @@ var _ = Describe("RubygemsCLIWatcher", func() {
 	)
 
 	BeforeEach(func() {
-		client = &mockRubygemsCLIClient{}
+		client = &mockRubygemsCLIClient{responses: make(map[string]mockResponse)}
 		watcher = watchers.NewRubygemsCLIWatcher(client)
 	})
 
 	Context("Check", func() {
-		It("extracts versions from download page", func() {
-			client.htmlResponse = `
-				<html>
-					<div id="formats">
-						<a href="https://rubygems.org/rubygems/rubygems-3.4.0.tgz">tgz</a>
-						<a href="https://rubygems.org/rubygems/rubygems-3.4.1.tgz">tgz</a>
-						<a href="https://rubygems.org/rubygems/rubygems-3.5.0.tgz">tgz</a>
-					</div>
-				</html>
-			`
+		It("returns sorted versions from RubyGems API", func() {
+			apiJSON := `[
+				{"number": "3.4.0"},
+				{"number": "3.4.1"},
+				{"number": "3.5.0"}
+			]`
+
+			client.responses["https://rubygems.org/api/v1/versions/rubygems-update.json"] = mockResponse{
+				body:   apiJSON,
+				status: 200,
+			}
 
 			versions, err := watcher.Check()
 
@@ -59,15 +66,16 @@ var _ = Describe("RubygemsCLIWatcher", func() {
 		})
 
 		It("sorts versions by semver", func() {
-			client.htmlResponse = `
-				<html>
-					<div id="formats">
-						<a href="https://rubygems.org/rubygems/rubygems-3.10.0.tgz">tgz</a>
-						<a href="https://rubygems.org/rubygems/rubygems-3.2.0.tgz">tgz</a>
-						<a href="https://rubygems.org/rubygems/rubygems-3.9.0.tgz">tgz</a>
-					</div>
-				</html>
-			`
+			apiJSON := `[
+				{"number": "3.10.0"},
+				{"number": "3.2.0"},
+				{"number": "3.9.0"}
+			]`
+
+			client.responses["https://rubygems.org/api/v1/versions/rubygems-update.json"] = mockResponse{
+				body:   apiJSON,
+				status: 200,
+			}
 
 			versions, err := watcher.Check()
 
@@ -78,69 +86,17 @@ var _ = Describe("RubygemsCLIWatcher", func() {
 			Expect(versions[2].Ref).To(Equal("3.10.0"))
 		})
 
-		It("handles multiple links with same version", func() {
-			client.htmlResponse = `
-				<html>
-					<div id="formats">
-						<a href="https://rubygems.org/rubygems/rubygems-3.4.0.tgz">tgz</a>
-						<a href="https://rubygems.org/rubygems/rubygems-3.4.0.zip">zip</a>
-						<a href="https://rubygems.org/rubygems/rubygems-3.4.1.tgz">tgz</a>
-					</div>
-				</html>
-			`
+		It("handles pre-release versions", func() {
+			apiJSON := `[
+				{"number": "3.4.0.rc1"},
+				{"number": "3.4.0"},
+				{"number": "3.4.1.beta"}
+			]`
 
-			versions, err := watcher.Check()
-
-			Expect(err).NotTo(HaveOccurred())
-			Expect(versions).To(HaveLen(2))
-			Expect(versions[0].Ref).To(Equal("3.4.0"))
-			Expect(versions[1].Ref).To(Equal("3.4.1"))
-		})
-
-		It("only matches links with text 'tgz'", func() {
-			client.htmlResponse = `
-				<html>
-					<div id="formats">
-						<a href="https://rubygems.org/rubygems/rubygems-3.4.0.tgz">tgz</a>
-						<a href="https://rubygems.org/rubygems/rubygems-3.4.1.tgz">zip</a>
-						<a href="https://rubygems.org/rubygems/rubygems-3.4.2.tgz">tgz</a>
-					</div>
-				</html>
-			`
-
-			versions, err := watcher.Check()
-
-			Expect(err).NotTo(HaveOccurred())
-			Expect(versions).To(HaveLen(2))
-			Expect(versions[0].Ref).To(Equal("3.4.0"))
-			Expect(versions[1].Ref).To(Equal("3.4.2"))
-		})
-
-		It("returns error when no versions found", func() {
-			client.htmlResponse = `
-				<html>
-					<div id="formats">
-						<p>No downloads available</p>
-					</div>
-				</html>
-			`
-
-			_, err := watcher.Check()
-
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("could not parse rubygems download website"))
-		})
-
-		It("handles complex version numbers", func() {
-			client.htmlResponse = `
-				<html>
-					<div id="formats">
-						<a href="https://rubygems.org/rubygems/rubygems-3.4.0.rc1.tgz">tgz</a>
-						<a href="https://rubygems.org/rubygems/rubygems-3.4.0.tgz">tgz</a>
-						<a href="https://rubygems.org/rubygems/rubygems-3.4.1.beta.tgz">tgz</a>
-					</div>
-				</html>
-			`
+			client.responses["https://rubygems.org/api/v1/versions/rubygems-update.json"] = mockResponse{
+				body:   apiJSON,
+				status: 200,
+			}
 
 			versions, err := watcher.Check()
 
@@ -148,23 +104,58 @@ var _ = Describe("RubygemsCLIWatcher", func() {
 			Expect(versions).To(HaveLen(3))
 		})
 
-		It("extracts from div with id 'formats'", func() {
-			client.htmlResponse = `
-				<html>
-					<div id="other">
-						<a href="https://rubygems.org/rubygems/rubygems-1.0.0.tgz">tgz</a>
-					</div>
-					<div id="formats">
-						<a href="https://rubygems.org/rubygems/rubygems-3.4.0.tgz">tgz</a>
-					</div>
-				</html>
-			`
+		Context("when the API request fails", func() {
+			It("returns an error", func() {
+				client.responses = make(map[string]mockResponse)
 
-			versions, err := watcher.Check()
+				_, err := watcher.Check()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("fetching rubygems API"))
+			})
+		})
 
-			Expect(err).NotTo(HaveOccurred())
-			Expect(versions).To(HaveLen(1))
-			Expect(versions[0].Ref).To(Equal("3.4.0"))
+		Context("when the API returns no versions", func() {
+			It("returns an error", func() {
+				client.responses["https://rubygems.org/api/v1/versions/rubygems-update.json"] = mockResponse{
+					body:   "[]",
+					status: 200,
+				}
+
+				_, err := watcher.Check()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("no versions found"))
+			})
+		})
+
+		Context("when there are more than 10 versions", func() {
+			It("returns only the last 10 versions", func() {
+				apiJSON := `[
+					{"number": "3.0.0"},
+					{"number": "3.1.0"},
+					{"number": "3.2.0"},
+					{"number": "3.3.0"},
+					{"number": "3.4.0"},
+					{"number": "3.5.0"},
+					{"number": "3.6.0"},
+					{"number": "3.7.0"},
+					{"number": "3.8.0"},
+					{"number": "3.9.0"},
+					{"number": "4.0.0"},
+					{"number": "4.1.0"}
+				]`
+
+				client.responses["https://rubygems.org/api/v1/versions/rubygems-update.json"] = mockResponse{
+					body:   apiJSON,
+					status: 200,
+				}
+
+				versions, err := watcher.Check()
+
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(10))
+				Expect(versions[0].Ref).To(Equal("3.2.0"))
+				Expect(versions[9].Ref).To(Equal("4.1.0"))
+			})
 		})
 	})
 

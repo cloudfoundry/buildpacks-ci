@@ -48,23 +48,16 @@ var _ = Describe("JRubyWatcher", func() {
 	)
 
 	Describe("Check", func() {
-		Context("when JRuby download page has multiple versions", func() {
+		Context("when GitHub API returns releases successfully", func() {
 			BeforeEach(func() {
-				html := `
-				<html>
-					<body>
-						<h2>JRuby Downloads</h2>
-						<ul>
-							<li><a href="https://repo1.maven.org/maven2/org/jruby/jruby-dist/9.3.0.0/jruby-dist-9.3.0.0-src.zip">JRuby 9.3.0.0 Source</a></li>
-							<li><a href="https://repo1.maven.org/maven2/org/jruby/jruby-dist/9.4.0.0/jruby-dist-9.4.0.0-src.zip">JRuby 9.4.0.0 Source</a></li>
-							<li><a href="https://repo1.maven.org/maven2/org/jruby/jruby-dist/9.3.10.0/jruby-dist-9.3.10.0-src.zip">JRuby 9.3.10.0 Source</a></li>
-							<li><a href="https://repo1.maven.org/maven2/org/jruby/jruby-dist/9.2.20.0/jruby-dist-9.2.20.0-src.zip">JRuby 9.2.20.0 Source</a></li>
-						</ul>
-					</body>
-				</html>
-				`
+				apiJSON := `[
+					{"tag_name":"9.4.0.0","prerelease":false,"assets":[]},
+					{"tag_name":"9.3.10.0","prerelease":false,"assets":[]},
+					{"tag_name":"9.3.0.0","prerelease":false,"assets":[]},
+					{"tag_name":"9.2.20.0","prerelease":false,"assets":[]}
+				]`
 				mockClient = newMockJRubyClient()
-				mockClient.responses["https://www.jruby.org/download"] = html
+				mockClient.responses["https://api.github.com/repos/jruby/jruby/releases?per_page=100"] = apiJSON
 				watcher = watchers.NewJRubyWatcher(mockClient)
 			})
 
@@ -78,7 +71,7 @@ var _ = Describe("JRubyWatcher", func() {
 				Expect(versions[3].Ref).To(Equal("9.4.0.0"))
 			})
 
-			It("extracts version from Maven URLs", func() {
+			It("extracts version from tag names", func() {
 				versions, err := watcher.Check()
 				Expect(err).NotTo(HaveOccurred())
 				for _, v := range versions {
@@ -87,44 +80,44 @@ var _ = Describe("JRubyWatcher", func() {
 			})
 		})
 
-		Context("when there are duplicate versions", func() {
+		Context("when GitHub API returns pre-releases", func() {
 			BeforeEach(func() {
-				html := `
-				<html>
-					<body>
-						<ul>
-							<li><a href="https://repo1.maven.org/maven2/org/jruby/jruby-dist/9.3.0.0/jruby-dist-9.3.0.0-src.zip">Source</a></li>
-							<li><a href="https://repo1.maven.org/maven2/org/jruby/jruby-dist/9.3.0.0/jruby-dist-9.3.0.0-src.zip">Source Again</a></li>
-							<li><a href="https://repo1.maven.org/maven2/org/jruby/jruby-dist/9.4.0.0/jruby-dist-9.4.0.0-src.zip">Source</a></li>
-						</ul>
-					</body>
-				</html>
-				`
+				apiJSON := `[
+					{"tag_name":"10.0.0","prerelease":false,"assets":[]},
+					{"tag_name":"10.0.0-rc1","prerelease":true,"assets":[]},
+					{"tag_name":"9.4.0.0","prerelease":false,"assets":[]}
+				]`
 				mockClient = newMockJRubyClient()
-				mockClient.responses["https://www.jruby.org/download"] = html
+				mockClient.responses["https://api.github.com/repos/jruby/jruby/releases?per_page=100"] = apiJSON
 				watcher = watchers.NewJRubyWatcher(mockClient)
 			})
 
-			It("deduplicates versions", func() {
+			It("filters out pre-releases", func() {
 				versions, err := watcher.Check()
 				Expect(err).NotTo(HaveOccurred())
 				Expect(versions).To(HaveLen(2))
-				Expect(versions[0].Ref).To(Equal("9.3.0.0"))
-				Expect(versions[1].Ref).To(Equal("9.4.0.0"))
+				Expect(versions[0].Ref).To(Equal("9.4.0.0"))
+				Expect(versions[1].Ref).To(Equal("10.0.0"))
 			})
 		})
 
-		Context("when download page has no valid Maven URLs", func() {
+		Context("when GitHub API request fails", func() {
 			BeforeEach(func() {
-				html := `
-				<html>
-					<body>
-						<p>No downloads available</p>
-					</body>
-				</html>
-				`
 				mockClient = newMockJRubyClient()
-				mockClient.responses["https://www.jruby.org/download"] = html
+				watcher = watchers.NewJRubyWatcher(mockClient)
+			})
+
+			It("returns an error", func() {
+				_, err := watcher.Check()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("fetching GitHub releases"))
+			})
+		})
+
+		Context("when GitHub API returns no versions", func() {
+			BeforeEach(func() {
+				mockClient = newMockJRubyClient()
+				mockClient.responses["https://api.github.com/repos/jruby/jruby/releases?per_page=100"] = "[]"
 				watcher = watchers.NewJRubyWatcher(mockClient)
 			})
 
@@ -134,33 +127,28 @@ var _ = Describe("JRubyWatcher", func() {
 				Expect(err.Error()).To(ContainSubstring("no versions found"))
 			})
 		})
-
-		Context("when download page cannot be fetched", func() {
-			BeforeEach(func() {
-				mockClient = newMockJRubyClient()
-				watcher = watchers.NewJRubyWatcher(mockClient)
-			})
-
-			It("returns an error", func() {
-				_, err := watcher.Check()
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fetching jruby download page"))
-			})
-		})
 	})
 
 	Describe("In", func() {
-		Context("when fetching a specific JRuby version", func() {
+		Context("when fetching a specific JRuby version from GitHub", func() {
 			BeforeEach(func() {
+				releaseJSON := `{
+					"tag_name":"9.4.0.0",
+					"prerelease":false,
+					"assets":[
+						{"name":"jruby-src-9.4.0.0.zip","browser_download_url":"https://github.com/jruby/jruby/releases/download/9.4.0.0/jruby-src-9.4.0.0.zip"}
+					]
+				}`
 				mockClient = newMockJRubyClient()
-				mockClient.responses["https://repo1.maven.org/maven2/org/jruby/jruby-dist/9.4.0.0/jruby-dist-9.4.0.0-src.zip.sha256"] = "abc123def456"
+				mockClient.responses["https://api.github.com/repos/jruby/jruby/releases/tags/9.4.0.0"] = releaseJSON
+				mockClient.responses["https://github.com/jruby/jruby/releases/download/9.4.0.0/jruby-src-9.4.0.0.zip"] = "fake-zip-content"
 				watcher = watchers.NewJRubyWatcher(mockClient)
 			})
 
-			It("returns the correct download URL", func() {
+			It("returns the correct GitHub download URL", func() {
 				release, err := watcher.In("9.4.0.0")
 				Expect(err).NotTo(HaveOccurred())
-				Expect(release.URL).To(Equal("https://repo1.maven.org/maven2/org/jruby/jruby-dist/9.4.0.0/jruby-dist-9.4.0.0-src.zip"))
+				Expect(release.URL).To(Equal("https://github.com/jruby/jruby/releases/download/9.4.0.0/jruby-src-9.4.0.0.zip"))
 			})
 
 			It("returns the version ref", func() {
@@ -169,51 +157,30 @@ var _ = Describe("JRubyWatcher", func() {
 				Expect(release.Ref).To(Equal("9.4.0.0"))
 			})
 
-			It("fetches and returns SHA256", func() {
+			It("calculates SHA256", func() {
 				release, err := watcher.In("9.4.0.0")
 				Expect(err).NotTo(HaveOccurred())
-				Expect(release.SHA256).To(Equal("abc123def456"))
+				Expect(release.SHA256).To(MatchRegexp(`^[a-f0-9]{64}$`))
 			})
 		})
 
-		Context("when SHA256 has whitespace", func() {
+		Context("when GitHub release is not found (fallback to Maven)", func() {
 			BeforeEach(func() {
 				mockClient = newMockJRubyClient()
-				mockClient.responses["https://repo1.maven.org/maven2/org/jruby/jruby-dist/9.3.0.0/jruby-dist-9.3.0.0-src.zip.sha256"] = "  abc123\n"
+				mockClient.responses["https://repo1.maven.org/maven2/org/jruby/jruby-dist/9.3.0.0/jruby-dist-9.3.0.0-src.zip"] = "fake-zip-content"
 				watcher = watchers.NewJRubyWatcher(mockClient)
 			})
 
-			It("trims whitespace from SHA256", func() {
+			It("falls back to Maven URL", func() {
 				release, err := watcher.In("9.3.0.0")
 				Expect(err).NotTo(HaveOccurred())
-				Expect(release.SHA256).To(Equal("abc123"))
-			})
-		})
-
-		Context("when SHA256 cannot be fetched", func() {
-			BeforeEach(func() {
-				mockClient = newMockJRubyClient()
-				watcher = watchers.NewJRubyWatcher(mockClient)
+				Expect(release.URL).To(Equal("https://repo1.maven.org/maven2/org/jruby/jruby-dist/9.3.0.0/jruby-dist-9.3.0.0-src.zip"))
 			})
 
-			It("returns an error", func() {
-				_, err := watcher.In("9.4.0.0")
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("fetching SHA256"))
-			})
-		})
-
-		Context("when SHA256 is empty", func() {
-			BeforeEach(func() {
-				mockClient = newMockJRubyClient()
-				mockClient.responses["https://repo1.maven.org/maven2/org/jruby/jruby-dist/9.4.0.0/jruby-dist-9.4.0.0-src.zip.sha256"] = "   \n  "
-				watcher = watchers.NewJRubyWatcher(mockClient)
-			})
-
-			It("returns an error", func() {
-				_, err := watcher.In("9.4.0.0")
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("empty SHA256"))
+			It("calculates SHA256 from Maven source", func() {
+				release, err := watcher.In("9.3.0.0")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.SHA256).To(MatchRegexp(`^[a-f0-9]{64}$`))
 			})
 		})
 	})

@@ -1,13 +1,12 @@
 package watchers
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
-	"regexp"
 	"sort"
 	"strings"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
@@ -20,43 +19,35 @@ func NewJRubyWatcher(client base.HTTPClient) *JRubyWatcher {
 	return &JRubyWatcher{client: client}
 }
 
-// Check fetches all available JRuby versions from jruby.org download page
 func (w *JRubyWatcher) Check() ([]base.Internal, error) {
-	resp, err := w.client.Get("https://www.jruby.org/download")
+	resp, err := w.client.Get("https://api.github.com/repos/jruby/jruby/releases?per_page=100")
 	if err != nil {
-		return nil, fmt.Errorf("fetching jruby download page: %w", err)
+		return nil, fmt.Errorf("fetching GitHub releases: %w", err)
 	}
 	defer resp.Body.Close()
 
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("parsing HTML: %w", err)
+		return nil, fmt.Errorf("reading response body: %w", err)
 	}
 
-	// Pattern: https://repo1.maven.org/maven2/org/jruby/jruby-dist/X.Y.Z/jruby-dist-X.Y.Z-src.zip
-	versionRe := regexp.MustCompile(`https://repo1\.maven\.org/maven2/org/jruby/jruby-dist/([\d.]+)/jruby-dist-([\d.]+)-src\.zip`)
+	var releases []githubRelease
+	if err := json.Unmarshal(body, &releases); err != nil {
+		return nil, fmt.Errorf("parsing JSON: %w", err)
+	}
 
-	versionMap := make(map[string]bool)
 	var versions []base.Internal
-
-	doc.Find("a").Each(func(i int, s *goquery.Selection) {
-		href, exists := s.Attr("href")
-		if !exists {
-			return
+	for _, release := range releases {
+		if release.Prerelease {
+			continue
 		}
 
-		matches := versionRe.FindStringSubmatch(href)
-		if len(matches) > 1 {
-			version := matches[1]
-			if !versionMap[version] {
-				versionMap[version] = true
-				versions = append(versions, base.Internal{Ref: version})
-			}
-		}
-	})
+		tag := strings.TrimPrefix(release.TagName, "v")
+		versions = append(versions, base.Internal{Ref: tag})
+	}
 
 	if len(versions) == 0 {
-		return nil, fmt.Errorf("could not parse jruby website: no versions found")
+		return nil, fmt.Errorf("no versions found in GitHub releases")
 	}
 
 	sort.Slice(versions, func(i, j int) bool {
@@ -71,31 +62,38 @@ func (w *JRubyWatcher) Check() ([]base.Internal, error) {
 	return versions, nil
 }
 
-// In fetches detailed information about a specific JRuby version
 func (w *JRubyWatcher) In(ref string) (base.Release, error) {
-	shaURL := fmt.Sprintf("https://repo1.maven.org/maven2/org/jruby/jruby-dist/%s/jruby-dist-%s-src.zip.sha256", ref, ref)
-
-	resp, err := w.client.Get(shaURL)
+	downloadURL, err := w.getDownloadURL(ref)
 	if err != nil {
-		return base.Release{}, fmt.Errorf("fetching SHA256 for JRuby %s: %w", ref, err)
+		return base.Release{}, err
 	}
-	defer resp.Body.Close()
 
-	shaBytes, err := io.ReadAll(resp.Body)
+	sha256, err := base.GetSHA256(w.client, downloadURL)
 	if err != nil {
-		return base.Release{}, fmt.Errorf("reading SHA256 response: %w", err)
+		return base.Release{}, fmt.Errorf("calculating SHA256: %w", err)
 	}
-
-	sha256 := strings.TrimSpace(string(shaBytes))
-	if sha256 == "" {
-		return base.Release{}, fmt.Errorf("empty SHA256 for JRuby %s", ref)
-	}
-
-	downloadURL := fmt.Sprintf("https://repo1.maven.org/maven2/org/jruby/jruby-dist/%s/jruby-dist-%s-src.zip", ref, ref)
 
 	return base.Release{
 		Ref:    ref,
 		URL:    downloadURL,
 		SHA256: sha256,
 	}, nil
+}
+
+func (w *JRubyWatcher) getDownloadURL(ref string) (string, error) {
+	resp, err := w.client.Get(fmt.Sprintf("https://api.github.com/repos/jruby/jruby/releases/tags/%s", ref))
+	if err == nil {
+		defer resp.Body.Close()
+		body, _ := io.ReadAll(resp.Body)
+		var release githubRelease
+		if json.Unmarshal(body, &release) == nil {
+			for _, asset := range release.Assets {
+				if strings.Contains(asset.Name, "-src") && strings.HasSuffix(asset.Name, ".zip") {
+					return asset.BrowserDownloadURL, nil
+				}
+			}
+		}
+	}
+
+	return fmt.Sprintf("https://repo1.maven.org/maven2/org/jruby/jruby-dist/%s/jruby-dist-%s-src.zip", ref, ref), nil
 }

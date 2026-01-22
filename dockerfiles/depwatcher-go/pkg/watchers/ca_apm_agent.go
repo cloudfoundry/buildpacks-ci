@@ -2,12 +2,12 @@ package watchers
 
 import (
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"io"
 	"regexp"
 	"sort"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
@@ -16,41 +16,47 @@ type CaApmAgentWatcher struct {
 	client base.HTTPClient
 }
 
+type artifactoryChild struct {
+	URI    string `json:"uri"`
+	Folder bool   `json:"folder"`
+}
+
+type artifactoryResponse struct {
+	Children []artifactoryChild `json:"children"`
+}
+
 func NewCaApmAgentWatcher(client base.HTTPClient) *CaApmAgentWatcher {
 	return &CaApmAgentWatcher{client: client}
 }
 
-// Check retrieves CA APM PHP agent versions from Broadcom artifactory.
-// Returns the last 10 versions sorted by semver.
 func (w *CaApmAgentWatcher) Check() ([]base.Internal, error) {
-	resp, err := w.client.Get("https://packages.broadcom.com/artifactory/apm-agents/")
+	resp, err := w.client.Get("https://packages.broadcom.com/artifactory/api/storage/apm-agents/")
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch CA APM agents page: %w", err)
+		return nil, fmt.Errorf("failed to fetch Artifactory API: %w", err)
 	}
 	defer resp.Body.Close()
 
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse HTML: %w", err)
+	var apiResp artifactoryResponse
+	if err := json.NewDecoder(resp.Body).Decode(&apiResp); err != nil {
+		return nil, fmt.Errorf("failed to parse Artifactory JSON: %w", err)
 	}
 
-	pattern := regexp.MustCompile(`^CA-APM-PHPAgent-([\d\.]+)_linux\.tar\.gz$`)
+	pattern := regexp.MustCompile(`^/CA-APM-PHPAgent-([\d\.]+)_linux\.tar\.gz$`)
 	var versions []string
 
-	doc.Find("a[href]").Each(func(_ int, s *goquery.Selection) {
-		href, exists := s.Attr("href")
-		if !exists {
-			return
+	for _, child := range apiResp.Children {
+		if child.Folder {
+			continue
 		}
 
-		matches := pattern.FindStringSubmatch(href)
+		matches := pattern.FindStringSubmatch(child.URI)
 		if len(matches) > 1 {
 			versions = append(versions, matches[1])
 		}
-	})
+	}
 
 	if len(versions) == 0 {
-		return nil, fmt.Errorf("could not parse CA APM agents website: no versions found")
+		return nil, fmt.Errorf("no CA APM PHP agent versions found in API response")
 	}
 
 	result := make([]base.Internal, len(versions))
@@ -74,7 +80,6 @@ func (w *CaApmAgentWatcher) Check() ([]base.Internal, error) {
 	return result, nil
 }
 
-// In retrieves details for a specific CA APM PHP agent version.
 func (w *CaApmAgentWatcher) In(ref string) (base.Release, error) {
 	url := fmt.Sprintf("https://packages.broadcom.com/artifactory/apm-agents/CA-APM-PHPAgent-%s_linux.tar.gz", ref)
 

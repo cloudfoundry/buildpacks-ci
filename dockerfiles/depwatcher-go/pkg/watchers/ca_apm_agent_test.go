@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -45,13 +44,19 @@ var _ = Describe("CaApmAgentWatcher", func() {
 	})
 
 	Describe("Check", func() {
-		Context("when the artifactory page returns valid HTML", func() {
-			It("returns sorted versions", func() {
-				fixtureData, err := os.ReadFile("../../../depwatcher/spec/fixtures/apm_agents.html")
-				Expect(err).NotTo(HaveOccurred())
+		Context("when the Artifactory API returns releases successfully", func() {
+			It("returns sorted versions from API", func() {
+				apiJSON := `{
+					"children": [
+						{"uri": "/.index", "folder": true},
+						{"uri": "/CA-APM-PHPAgent-10.6.0_linux.tar.gz", "folder": false},
+						{"uri": "/CA-APM-PHPAgent-10.7.0_linux.tar.gz", "folder": false},
+						{"uri": "/25.4.1.14", "folder": true}
+					]
+				}`
 
-				client.responses["https://packages.broadcom.com/artifactory/apm-agents/"] = mockResponse{
-					body:   string(fixtureData),
+				client.responses["https://packages.broadcom.com/artifactory/api/storage/apm-agents/"] = mockResponse{
+					body:   apiJSON,
 					status: 200,
 				}
 
@@ -61,27 +66,71 @@ var _ = Describe("CaApmAgentWatcher", func() {
 				Expect(versions[0].Ref).To(Equal("10.6.0"))
 				Expect(versions[1].Ref).To(Equal("10.7.0"))
 			})
+
+			It("filters out non-PHP-agent files", func() {
+				apiJSON := `{
+					"children": [
+						{"uri": "/CA-APM-PHPAgent-10.6.0_linux.tar.gz", "folder": false},
+						{"uri": "/IntroscopeAgentFiles-NoInstaller10.0.0.tar", "folder": false},
+						{"uri": "/CA-APM-PHPAgent-10.7.0_linux.tar.gz", "folder": false},
+						{"uri": "/AXAAndriodBindings.2023.7.1.nupkg", "folder": false}
+					]
+				}`
+
+				client.responses["https://packages.broadcom.com/artifactory/api/storage/apm-agents/"] = mockResponse{
+					body:   apiJSON,
+					status: 200,
+				}
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(2))
+				Expect(versions[0].Ref).To(Equal("10.6.0"))
+				Expect(versions[1].Ref).To(Equal("10.7.0"))
+			})
+
+			It("filters out folders", func() {
+				apiJSON := `{
+					"children": [
+						{"uri": "/25.4.1.14", "folder": true},
+						{"uri": "/CA-APM-PHPAgent-10.6.0_linux.tar.gz", "folder": false},
+						{"uri": "/node-agents", "folder": true}
+					]
+				}`
+
+				client.responses["https://packages.broadcom.com/artifactory/api/storage/apm-agents/"] = mockResponse{
+					body:   apiJSON,
+					status: 200,
+				}
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(1))
+				Expect(versions[0].Ref).To(Equal("10.6.0"))
+			})
 		})
 
-		Context("when there are more than 10 versions", func() {
-			It("returns only the last 10 versions", func() {
-				html := `<html><body>
-<pre><a href="CA-APM-PHPAgent-10.0.0_linux.tar.gz">CA-APM-PHPAgent-10.0.0_linux.tar.gz</a></pre>
-<pre><a href="CA-APM-PHPAgent-10.1.0_linux.tar.gz">CA-APM-PHPAgent-10.1.0_linux.tar.gz</a></pre>
-<pre><a href="CA-APM-PHPAgent-10.2.0_linux.tar.gz">CA-APM-PHPAgent-10.2.0_linux.tar.gz</a></pre>
-<pre><a href="CA-APM-PHPAgent-10.3.0_linux.tar.gz">CA-APM-PHPAgent-10.3.0_linux.tar.gz</a></pre>
-<pre><a href="CA-APM-PHPAgent-10.4.0_linux.tar.gz">CA-APM-PHPAgent-10.4.0_linux.tar.gz</a></pre>
-<pre><a href="CA-APM-PHPAgent-10.5.0_linux.tar.gz">CA-APM-PHPAgent-10.5.0_linux.tar.gz</a></pre>
-<pre><a href="CA-APM-PHPAgent-10.6.0_linux.tar.gz">CA-APM-PHPAgent-10.6.0_linux.tar.gz</a></pre>
-<pre><a href="CA-APM-PHPAgent-10.7.0_linux.tar.gz">CA-APM-PHPAgent-10.7.0_linux.tar.gz</a></pre>
-<pre><a href="CA-APM-PHPAgent-10.8.0_linux.tar.gz">CA-APM-PHPAgent-10.8.0_linux.tar.gz</a></pre>
-<pre><a href="CA-APM-PHPAgent-10.9.0_linux.tar.gz">CA-APM-PHPAgent-10.9.0_linux.tar.gz</a></pre>
-<pre><a href="CA-APM-PHPAgent-11.0.0_linux.tar.gz">CA-APM-PHPAgent-11.0.0_linux.tar.gz</a></pre>
-<pre><a href="CA-APM-PHPAgent-11.1.0_linux.tar.gz">CA-APM-PHPAgent-11.1.0_linux.tar.gz</a></pre>
-</body></html>`
+		Context("when the API returns more than 10 versions", func() {
+			It("returns only the last 10 versions (API)", func() {
+				apiJSON := `{
+					"children": [
+						{"uri": "/CA-APM-PHPAgent-10.0.0_linux.tar.gz", "folder": false},
+						{"uri": "/CA-APM-PHPAgent-10.1.0_linux.tar.gz", "folder": false},
+						{"uri": "/CA-APM-PHPAgent-10.2.0_linux.tar.gz", "folder": false},
+						{"uri": "/CA-APM-PHPAgent-10.3.0_linux.tar.gz", "folder": false},
+						{"uri": "/CA-APM-PHPAgent-10.4.0_linux.tar.gz", "folder": false},
+						{"uri": "/CA-APM-PHPAgent-10.5.0_linux.tar.gz", "folder": false},
+						{"uri": "/CA-APM-PHPAgent-10.6.0_linux.tar.gz", "folder": false},
+						{"uri": "/CA-APM-PHPAgent-10.7.0_linux.tar.gz", "folder": false},
+						{"uri": "/CA-APM-PHPAgent-10.8.0_linux.tar.gz", "folder": false},
+						{"uri": "/CA-APM-PHPAgent-10.9.0_linux.tar.gz", "folder": false},
+						{"uri": "/CA-APM-PHPAgent-11.0.0_linux.tar.gz", "folder": false},
+						{"uri": "/CA-APM-PHPAgent-11.1.0_linux.tar.gz", "folder": false}
+					]
+				}`
 
-				client.responses["https://packages.broadcom.com/artifactory/apm-agents/"] = mockResponse{
-					body:   html,
+				client.responses["https://packages.broadcom.com/artifactory/api/storage/apm-agents/"] = mockResponse{
+					body:   apiJSON,
 					status: 200,
 				}
 
@@ -93,42 +142,28 @@ var _ = Describe("CaApmAgentWatcher", func() {
 			})
 		})
 
-		Context("when no CA-APM-PHPAgent packages are found", func() {
-			It("returns an error", func() {
-				html := `<html><body>
-<pre><a href="IntroscopeAgentFiles-NoInstaller10.0.0_16default.unix.tar">IntroscopeAgentFiles-NoInstaller10.0.0_16default.unix.tar</a></pre>
-</body></html>`
-
-				client.responses["https://packages.broadcom.com/artifactory/apm-agents/"] = mockResponse{
-					body:   html,
-					status: 200,
-				}
-
-				_, err := watcher.Check()
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("could not parse CA APM agents website"))
-			})
-		})
-
-		Context("when the HTML cannot be parsed", func() {
-			It("returns an error", func() {
-				client.responses["https://packages.broadcom.com/artifactory/apm-agents/"] = mockResponse{
-					body:   "invalid html",
-					status: 200,
-				}
-
-				_, err := watcher.Check()
-				Expect(err).To(HaveOccurred())
-			})
-		})
-
-		Context("when the HTTP request fails", func() {
+		Context("when the API request fails", func() {
 			It("returns an error", func() {
 				client.responses = make(map[string]mockResponse)
 
 				_, err := watcher.Check()
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("failed to fetch CA APM agents page"))
+				Expect(err.Error()).To(ContainSubstring("failed to fetch Artifactory API"))
+			})
+		})
+
+		Context("when the API returns no versions", func() {
+			It("returns an error", func() {
+				apiJSON := `{"children": []}`
+
+				client.responses["https://packages.broadcom.com/artifactory/api/storage/apm-agents/"] = mockResponse{
+					body:   apiJSON,
+					status: 200,
+				}
+
+				_, err := watcher.Check()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("no CA APM PHP agent versions found"))
 			})
 		})
 	})

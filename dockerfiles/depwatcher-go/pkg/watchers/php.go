@@ -47,11 +47,19 @@ func (w *PHPWatcher) Check(versionFilter string) ([]base.Internal, error) {
 
 	major, minor := parts[0], parts[1]
 
+	// Try php.watch first (most reliable and up-to-date)
+	phpwatchVersions, err := w.getReleasesFromPHPWatch(major, minor)
+	if err == nil && len(phpwatchVersions) > 0 {
+		return w.sortAndDedupe(phpwatchVersions), nil
+	}
+
+	// Fallback to php.net JSON API
 	versions, err := w.getReleasesFromJSON(major, minor)
 	if err == nil && len(versions) > 0 {
 		return w.sortAndDedupe(versions), nil
 	}
 
+	// Final fallback to php.net HTML scraping
 	versions, err = w.getReleasesFromHTML()
 	if err != nil {
 		return nil, err
@@ -96,6 +104,36 @@ func (w *PHPWatcher) In(ref string) (base.Release, error) {
 		URL:    url,
 		SHA256: sha256,
 	}, nil
+}
+
+func (w *PHPWatcher) getReleasesFromPHPWatch(major, minor string) ([]base.Internal, error) {
+	url := fmt.Sprintf("https://php.watch/versions/%s.%s/releases.xml", major, minor)
+	resp, err := w.client.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	body := string(bodyBytes)
+	titleRegex := regexp.MustCompile(`<title>PHP (\d+\.\d+\.\d+)</title>`)
+	matches := titleRegex.FindAllStringSubmatch(body, -1)
+
+	var versions []base.Internal
+	for _, match := range matches {
+		if len(match) > 1 {
+			version := match[1]
+			if !strings.Contains(version, "alpha") && !strings.Contains(version, "beta") && !strings.Contains(version, "RC") {
+				versions = append(versions, base.Internal{Ref: version})
+			}
+		}
+	}
+
+	return versions, nil
 }
 
 func (w *PHPWatcher) getLatestSupportedVersion() (string, error) {

@@ -1,12 +1,11 @@
 package watchers
 
 import (
+	"encoding/json"
 	"fmt"
-	"regexp"
+	"io"
 	"sort"
 	"strings"
-
-	"github.com/PuerkitoBio/goquery"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
@@ -20,6 +19,22 @@ type GoRelease struct {
 	Ref    string
 	URL    string
 	SHA256 string
+}
+
+type goVersionJSON struct {
+	Version string       `json:"version"`
+	Stable  bool         `json:"stable"`
+	Files   []goFileJSON `json:"files"`
+}
+
+type goFileJSON struct {
+	Filename string `json:"filename"`
+	OS       string `json:"os"`
+	Arch     string `json:"arch"`
+	Version  string `json:"version"`
+	SHA256   string `json:"sha256"`
+	Size     int64  `json:"size"`
+	Kind     string `json:"kind"`
 }
 
 func NewGoWatcher(client base.HTTPClient) *GoWatcher {
@@ -65,60 +80,50 @@ func (w *GoWatcher) In(ref string) (GoRelease, error) {
 }
 
 func (w *GoWatcher) getReleases() ([]GoRelease, error) {
-	resp, err := w.client.Get("https://go.dev/dl/")
+	resp, err := w.client.Get("https://go.dev/dl/?mode=json&include=all")
 	if err != nil {
-		return nil, fmt.Errorf("fetching go.dev/dl: %w", err)
+		return nil, fmt.Errorf("fetching go.dev/dl JSON: %w", err)
 	}
 	defer resp.Body.Close()
 
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("parsing HTML: %w", err)
+		return nil, fmt.Errorf("reading response: %w", err)
 	}
 
-	versionRegex := regexp.MustCompile(`go([\d\.]+)\.src`)
+	var versions []goVersionJSON
+	if err := json.Unmarshal(body, &versions); err != nil {
+		return nil, fmt.Errorf("parsing JSON: %w", err)
+	}
+
 	var releases []GoRelease
-
-	doc.Find("tr").Each(func(i int, tr *goquery.Selection) {
-		tds := tr.Find("td")
-		if tds.Length() < 6 {
-			return
+	for _, v := range versions {
+		if !v.Stable {
+			continue
 		}
 
-		firstTd := tds.Eq(0)
-		if !strings.Contains(firstTd.Text(), "Source") {
-			return
+		version := strings.TrimPrefix(v.Version, "go")
+
+		var sourceFile *goFileJSON
+		for _, f := range v.Files {
+			if f.Kind == "source" && strings.HasSuffix(f.Filename, ".src.tar.gz") {
+				sourceFile = &f
+				break
+			}
 		}
 
-		link := firstTd.Find("a")
-		href, exists := link.Attr("href")
-		if !exists {
-			return
+		if sourceFile == nil {
+			continue
 		}
 
-		parts := strings.Split(href, "/")
-		if len(parts) == 0 {
-			return
-		}
-		releaseName := parts[len(parts)-1]
-
-		matches := versionRegex.FindStringSubmatch(releaseName)
-		if len(matches) < 2 {
-			return
-		}
-
-		version := matches[1]
-		url := fmt.Sprintf("https://dl.google.com/go/%s", releaseName)
-
-		sixthTd := tds.Eq(5)
-		sha256 := strings.TrimSpace(sixthTd.Find("tt").Text())
+		url := fmt.Sprintf("https://dl.google.com/go/%s", sourceFile.Filename)
 
 		releases = append(releases, GoRelease{
 			Ref:    version,
 			URL:    url,
-			SHA256: sha256,
+			SHA256: strings.TrimSpace(sourceFile.SHA256),
 		})
-	})
+	}
 
 	return releases, nil
 }
