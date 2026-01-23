@@ -292,12 +292,6 @@ dependencies:
     buildpacks:
       ruby:
         lines:
-          - line: 3.0.X
-            deprecation_date: 2024-03-31
-            link: https://www.ruby-lang.org/en/news/2020/12/25/ruby-3-0-0-released/
-          - line: 3.1.X
-            deprecation_date: 2025-03-31
-            link: https://www.ruby-lang.org/en/news/2021/12/25/ruby-3-1-0-released/
           - line: 3.2.X
             deprecation_date: 2026-03-31
             link: https://www.ruby-lang.org/en/news/2022/12/25/ruby-3-2-0-released/
