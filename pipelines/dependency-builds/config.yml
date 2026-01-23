@@ -47,6 +47,9 @@ dependencies:
           - line: 9.0.X
             deprecation_date: 2026-05-12
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+          - line: 10.0.X
+            deprecation_date: 2028-11-14
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
@@ -60,6 +63,9 @@ dependencies:
           - line: 9.0.X
             deprecation_date: 2026-05-12
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+          - line: 10.0.X
+            deprecation_date: 2028-11-14
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: remove_all
     versions_to_keep: 1
     any_stack: true
@@ -72,6 +78,9 @@ dependencies:
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
           - line: 9.0.X
             deprecation_date: 2026-05-12
+            link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
+          - line: 10.0.X
+            deprecation_date: 2028-11-14
             link: https://dotnet.microsoft.com/platform/support/policy/dotnet-core
         removal_strategy: remove_all
     versions_to_keep: 1
