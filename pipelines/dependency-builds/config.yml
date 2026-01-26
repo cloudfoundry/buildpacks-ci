@@ -157,17 +157,17 @@ dependencies:
           #! each odd version line (ex. 1.19) is the "mainline"
           #! the even numbered version line that precedes the mainline is the associated stable version line.
           #! See explanation of release cadence: https://www.nginx.com/blog/nginx-1-18-1-19-released/
-          - line: 1.28.X
+          - line: 1.26.X
             link: https://nginx.org/
-          - line: 1.29.X
+          - line: 1.27.X
             link: https://nginx.org/
     versions_to_keep: 2
   openresty:
     buildpacks:
       nginx:
         lines:
-          - line: 1.27.X
-          - line: 1.29.X
+          - line: 1.21.X
+          - line: 1.25.X
     versions_to_keep: 2
   nginx-static:
     buildpacks:
@@ -276,6 +276,9 @@ dependencies:
           - line: 3.13.X
             deprecation_date: 2029-10-07
             link: https://peps.python.org/pep-0719/
+          - line: 3.14.X
+            deprecation_date: 2030-10-07
+            link: https://peps.python.org/pep-0745/
       nodejs:
         lines:
           - line: 3.11.X
