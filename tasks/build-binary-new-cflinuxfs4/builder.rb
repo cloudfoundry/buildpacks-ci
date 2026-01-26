@@ -589,7 +589,7 @@ class DependencyBuild
         Archive.strip_top_level_directory_from_tar("pip-#{@source_input.version}.tar.gz")
         Runner.run('tar', 'zxf', "pip-#{@source_input.version}.tar.gz")
         Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools')
-        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
+        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'wheel>=0.46.2')  # CVE-2026-24049
         Runner.run('tar', 'zcvf', old_filepath, '.')
       end
     end
@@ -614,7 +614,7 @@ class DependencyBuild
         Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'pytest-runner')
         Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'setuptools_scm')
         Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'parver')
-        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'wheel')
+        Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'wheel>=0.46.2')  # CVE-2026-24049
         Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'invoke')
         Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'flit_core')
         Runner.run('/usr/bin/pip3', 'download', '--no-binary', ':all:', 'hatch-vcs')
