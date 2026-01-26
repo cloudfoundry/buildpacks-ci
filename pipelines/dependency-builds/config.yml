@@ -276,6 +276,9 @@ dependencies:
           - line: 3.13.X
             deprecation_date: 2029-10-07
             link: https://peps.python.org/pep-0719/
+          - line: 3.14.X
+            deprecation_date: 2030-10-07
+            link: https://peps.python.org/pep-0745/
       nodejs:
         lines:
           - line: 3.11.X
