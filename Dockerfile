@@ -97,8 +97,8 @@ RUN wget 'https://github.com/pivotal-cf-experimental/concourse-filter/releases/d
 # Ensure that Concourse filtering is on for non-interactive shells
 ENV BASH_ENV=/etc/profile.d/filter.sh
 
-# AWS CLI
-RUN pip install awscli
+# AWS CLI - Pin urllib3 >= 2.6.0 to fix CVE-2025-66418
+RUN pip install 'urllib3>=2.6.0' awscli
 
 # install buildpacks-ci Gemfile
 COPY Gemfile /tmp/Gemfile
