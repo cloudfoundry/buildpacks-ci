@@ -157,17 +157,17 @@ dependencies:
           #! each odd version line (ex. 1.19) is the "mainline"
           #! the even numbered version line that precedes the mainline is the associated stable version line.
           #! See explanation of release cadence: https://www.nginx.com/blog/nginx-1-18-1-19-released/
-          - line: 1.26.X
+          - line: 1.28.X
             link: https://nginx.org/
-          - line: 1.27.X
+          - line: 1.29.X
             link: https://nginx.org/
     versions_to_keep: 2
   openresty:
     buildpacks:
       nginx:
         lines:
-          - line: 1.21.X
-          - line: 1.25.X
+          - line: 1.27.X
+          - line: 1.29.X
     versions_to_keep: 2
   nginx-static:
     buildpacks:
