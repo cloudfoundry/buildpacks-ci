@@ -5,7 +5,7 @@ resources:
     uri: git@github.com:cloudfoundry/buildpacks-ci.git
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
     branch: master
-    paths: [ dockerfiles/depwatcher/ ]
+    paths: [ dockerfiles/depwatcher-go/ ]
 
 - name: depwatcher-image
   type: docker-image
@@ -22,5 +22,5 @@ jobs:
       trigger: true
   - put: depwatcher-image
     params:
-      build: depwatcher/dockerfiles/depwatcher
+      build: depwatcher/dockerfiles/depwatcher-go
 
