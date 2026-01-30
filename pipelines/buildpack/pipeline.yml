@@ -446,7 +446,7 @@ jobs:
           title: Update libbuildpack
           branch_prefix: "update-libbuildpack"
           auto_merge: false
-          base: master
+          base: #@ data.values.buildpack.branch
 
   #@ if data.values.language == "hwc":
   - name: update-buildpack-bosh-release
