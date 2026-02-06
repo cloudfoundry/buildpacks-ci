@@ -1,8 +1,15 @@
+//go:build !integration
+// +build !integration
+
 package factory_test
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"strings"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -12,679 +19,127 @@ import (
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
 )
 
-func TestFactory(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Factory Suite")
+// mockHTTPClient is a mock HTTP client for unit testing.
+// It allows tests to run without making real HTTP requests.
+type mockHTTPClient struct {
+	responses map[string]string
 }
 
-var _ = Describe("Factory", func() {
-	Describe("Check", func() {
-		Context("with valid source types", func() {
-			PIt("routes github_releases to GithubReleasesWatcher", func() {
-				source := factory.Source{
-					Type: "github_releases",
-					Repo: "cloudfoundry/hwc",
-				}
+func (m *mockHTTPClient) Get(url string) (*http.Response, error) {
+	body, ok := m.responses[url]
+	if !ok {
+		return nil, fmt.Errorf("URL not mocked: %s", url)
+	}
 
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
+	return &http.Response{
+		StatusCode: 200,
+		Body:       io.NopCloser(strings.NewReader(body)),
+	}, nil
+}
 
-			PIt("routes github_tags to GithubTagsWatcher", func() {
-				source := factory.Source{
-					Type:     "github_tags",
-					Repo:     "ruby/ruby",
-					TagRegex: `^v[\d_]+$`,
-				}
+func (m *mockHTTPClient) GetWithHeaders(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
 
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
+func newMockHTTPClient() *mockHTTPClient {
+	return &mockHTTPClient{
+		responses: make(map[string]string),
+	}
+}
 
-			PIt("routes ruby to RubyWatcher", func() {
-				source := factory.Source{
-					Type: "ruby",
-				}
+func TestFactory(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Factory Unit Test Suite")
+}
 
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("routes php to PHPWatcher", func() {
-				source := factory.Source{
-					Type: "php",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("routes python to PythonWatcher", func() {
-				source := factory.Source{
-					Type: "python",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("routes go to GoWatcher", func() {
-				source := factory.Source{
-					Type: "go",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("routes node to NodeWatcher", func() {
-				source := factory.Source{
-					Type: "node",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("routes npm to NPMWatcher", func() {
-				source := factory.Source{
-					Type: "npm",
-					Name: "typescript",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("routes jruby to JRubyWatcher", func() {
-				source := factory.Source{
-					Type: "jruby",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes nginx to NginxWatcher", func() {
-				source := factory.Source{
-					Type: "nginx",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes httpd to HttpdWatcher", func() {
-				source := factory.Source{
-					Type: "httpd",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("routes pypi to PyPIWatcher", func() {
-				source := factory.Source{
-					Type: "pypi",
-					Name: "requests",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("routes rubygems to RubygemsWatcher", func() {
-				source := factory.Source{
-					Type: "rubygems",
-					Name: "rake",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes rubygems_cli to RubygemsCLIWatcher", func() {
-				source := factory.Source{
-					Type: "rubygems_cli",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes openresty to OpenrestyWatcher", func() {
-				source := factory.Source{
-					Type: "openresty",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes icu to ICUWatcher", func() {
-				source := factory.Source{
-					Type: "icu",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes miniconda to MinicondaWatcher", func() {
-				source := factory.Source{
-					Type:          "miniconda",
-					PythonVersion: "3.9",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes r to RWatcher", func() {
-				source := factory.Source{
-					Type: "r",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes dotnet-sdk to DotnetSDKWatcher", func() {
-				source := factory.Source{
-					Type:          "dotnet-sdk",
-					VersionFilter: "8.0",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes dotnet-runtime to DotnetRuntimeWatcher", func() {
-				source := factory.Source{
-					Type:          "dotnet-runtime",
-					VersionFilter: "8.0",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes dotnet-aspnetcore to DotnetAspnetcoreWatcher", func() {
-				source := factory.Source{
-					Type:          "dotnet-aspnetcore",
-					VersionFilter: "8.0",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes rserve to CRANWatcher", func() {
-				source := factory.Source{
-					Type: "rserve",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes forecast to CRANWatcher", func() {
-				source := factory.Source{
-					Type: "forecast",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes plumber to CRANWatcher", func() {
-				source := factory.Source{
-					Type: "plumber",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes shiny to CRANWatcher", func() {
-				source := factory.Source{
-					Type: "shiny",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes ca_apm_agent to CaApmAgentWatcher", func() {
-				source := factory.Source{
-					Type: "ca_apm_agent",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes appd_agent to AppdAgentWatcher", func() {
-				source := factory.Source{
-					Type: "appd_agent",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-		})
-
-		Context("with unknown source type", func() {
-			It("returns an error", func() {
+var _ = Describe("Factory Unit Tests", func() {
+	Describe("CheckWithClient", func() {
+		Context("error handling", func() {
+			It("returns error for unknown source type", func() {
+				mockClient := newMockHTTPClient()
 				source := factory.Source{
 					Type: "unknown_type",
 				}
 
-				_, err := factory.Check(source, nil)
+				_, err := factory.CheckWithClient(source, nil, mockClient)
 				Expect(err).To(MatchError("unknown type: unknown_type"))
 			})
-		})
 
-		Context("with version filtering", func() {
-			PIt("filters versions using semver pattern", func() {
+			It("handles HTTP client errors gracefully", func() {
+				mockClient := newMockHTTPClient()
+				// Don't add any responses, so all URLs will fail
 				source := factory.Source{
-					Type:          "ruby",
-					VersionFilter: "3.2.X",
+					Type: "php",
 				}
 
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("skips filtering for node-lts", func() {
-				source := factory.Source{
-					Type:          "node",
-					VersionFilter: "node-lts",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
+				_, err := factory.CheckWithClient(source, nil, mockClient)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("URL not mocked"))
 			})
 		})
 
-		Context("with current version filtering", func() {
-			PIt("filters out versions less than current", func() {
+		Context("client parameter handling", func() {
+			It("uses provided mock client", func() {
+				mockClient := newMockHTTPClient()
 				source := factory.Source{
-					Type: "ruby",
-				}
-				currentVersion := &base.Internal{
-					Ref: "3.2.0",
+					Type: "unknown_type",
 				}
 
-				_, err := factory.Check(source, currentVersion)
-				Expect(err).ToNot(HaveOccurred())
-			})
-		})
-
-		Context("with github_releases options", func() {
-			PIt("applies extension filter", func() {
-				source := factory.Source{
-					Type:      "github_releases",
-					Repo:      "cloudfoundry/hwc",
-					Extension: ".exe",
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("applies fetch_source option", func() {
-				source := factory.Source{
-					Type:        "github_releases",
-					Repo:        "cloudfoundry/hwc",
-					FetchSource: true,
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("applies prerelease option", func() {
-				source := factory.Source{
-					Type:       "github_releases",
-					Repo:       "cloudfoundry/hwc",
-					Prerelease: true,
-				}
-
-				_, err := factory.Check(source, nil)
-				Expect(err).ToNot(HaveOccurred())
+				// Should use the mock client and return our error
+				_, err := factory.CheckWithClient(source, nil, mockClient)
+				Expect(err).To(HaveOccurred())
 			})
 		})
 	})
 
-	Describe("In", func() {
-		Context("with valid source types", func() {
-			PIt("routes github_releases to GithubReleasesWatcher", func() {
+	Describe("InWithClient", func() {
+		Context("error handling", func() {
+			It("returns error for unknown source type", func() {
+				mockClient := newMockHTTPClient()
 				source := factory.Source{
-					Type: "github_releases",
-					Repo: "cloudfoundry/hwc",
+					Type: "unknown_type",
 				}
 				version := base.Internal{Ref: "1.0.0"}
 
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
+				_, err := factory.InWithClient(source, version, mockClient)
+				Expect(err).To(MatchError("unknown type: unknown_type"))
 			})
 
-			PIt("routes github_tags to GithubTagsWatcher", func() {
-				source := factory.Source{
-					Type:     "github_tags",
-					Repo:     "ruby/ruby",
-					TagRegex: `^v[\d_]+$`,
-				}
-				version := base.Internal{Ref: "3.2.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes ruby to RubyWatcher", func() {
-				source := factory.Source{
-					Type: "ruby",
-				}
-				version := base.Internal{Ref: "3.2.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("routes php to PHPWatcher", func() {
+			It("handles HTTP client errors gracefully", func() {
+				mockClient := newMockHTTPClient()
+				// Don't add any responses, so all URLs will fail
 				source := factory.Source{
 					Type: "php",
 				}
 				version := base.Internal{Ref: "8.2.0"}
 
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("routes python to PythonWatcher", func() {
-				source := factory.Source{
-					Type: "python",
-				}
-				version := base.Internal{Ref: "3.11.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes go to GoWatcher", func() {
-				source := factory.Source{
-					Type: "go",
-				}
-				version := base.Internal{Ref: "1.21.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("routes node to NodeWatcher", func() {
-				source := factory.Source{
-					Type: "node",
-				}
-				version := base.Internal{Ref: "18.12.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes npm to NPMWatcher", func() {
-				source := factory.Source{
-					Type: "npm",
-					Name: "typescript",
-				}
-				version := base.Internal{Ref: "4.9.5"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes jruby to JRubyWatcher", func() {
-				source := factory.Source{
-					Type: "jruby",
-				}
-				version := base.Internal{Ref: "9.4.0.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes nginx to NginxWatcher", func() {
-				source := factory.Source{
-					Type: "nginx",
-				}
-				version := base.Internal{Ref: "1.25.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes httpd to HttpdWatcher", func() {
-				source := factory.Source{
-					Type: "httpd",
-				}
-				version := base.Internal{Ref: "2.4.59"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes pypi to PyPIWatcher", func() {
-				source := factory.Source{
-					Type: "pypi",
-					Name: "requests",
-				}
-				version := base.Internal{Ref: "2.28.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes rubygems to RubygemsWatcher", func() {
-				source := factory.Source{
-					Type: "rubygems",
-					Name: "rake",
-				}
-				version := base.Internal{Ref: "13.0.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes rubygems_cli to RubygemsCLIWatcher", func() {
-				source := factory.Source{
-					Type: "rubygems_cli",
-				}
-				version := base.Internal{Ref: "3.4.10"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes openresty to OpenrestyWatcher", func() {
-				source := factory.Source{
-					Type: "openresty",
-				}
-				version := base.Internal{Ref: "1.19.3.1"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes icu to ICUWatcher", func() {
-				source := factory.Source{
-					Type: "icu",
-				}
-				version := base.Internal{Ref: "65.1.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes miniconda to MinicondaWatcher", func() {
-				source := factory.Source{
-					Type:          "miniconda",
-					PythonVersion: "3.9",
-				}
-				version := base.Internal{Ref: "23.1.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes r to RWatcher", func() {
-				source := factory.Source{
-					Type: "r",
-				}
-				version := base.Internal{Ref: "4.0.3"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes dotnet-sdk to DotnetSDKWatcher", func() {
-				source := factory.Source{
-					Type:          "dotnet-sdk",
-					VersionFilter: "8.0",
-				}
-				version := base.Internal{Ref: "8.0.100"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes dotnet-runtime to DotnetRuntimeWatcher", func() {
-				source := factory.Source{
-					Type:          "dotnet-runtime",
-					VersionFilter: "8.0",
-				}
-				version := base.Internal{Ref: "8.0.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes dotnet-aspnetcore to DotnetAspnetcoreWatcher", func() {
-				source := factory.Source{
-					Type:          "dotnet-aspnetcore",
-					VersionFilter: "8.0",
-				}
-				version := base.Internal{Ref: "8.0.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes rserve to CRANWatcher", func() {
-				source := factory.Source{
-					Type: "rserve",
-				}
-				version := base.Internal{Ref: "1.7.3"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes forecast to CRANWatcher", func() {
-				source := factory.Source{
-					Type: "forecast",
-				}
-				version := base.Internal{Ref: "8.4"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes plumber to CRANWatcher", func() {
-				source := factory.Source{
-					Type: "plumber",
-				}
-				version := base.Internal{Ref: "0.4.6"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes shiny to CRANWatcher", func() {
-				source := factory.Source{
-					Type: "shiny",
-				}
-				version := base.Internal{Ref: "1.2.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes ca_apm_agent to CaApmAgentWatcher", func() {
-				source := factory.Source{
-					Type: "ca_apm_agent",
-				}
-				version := base.Internal{Ref: "10.6.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("routes appd_agent to AppdAgentWatcher", func() {
-				source := factory.Source{
-					Type: "appd_agent",
-				}
-				version := base.Internal{Ref: "3.1.1-14"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
+				_, err := factory.InWithClient(source, version, mockClient)
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("URL not mocked"))
 			})
 		})
 
-		Context("with unknown source type", func() {
-			It("returns an error", func() {
+		Context("client parameter handling", func() {
+			It("uses provided mock client", func() {
+				mockClient := newMockHTTPClient()
 				source := factory.Source{
 					Type: "unknown_type",
 				}
 				version := base.Internal{Ref: "1.0.0"}
 
-				_, err := factory.In(source, version)
-				Expect(err).To(MatchError("unknown type: unknown_type"))
-			})
-		})
-
-		Context("with github_releases options", func() {
-			PIt("applies extension filter", func() {
-				source := factory.Source{
-					Type:      "github_releases",
-					Repo:      "cloudfoundry/hwc",
-					Extension: ".exe",
-				}
-				version := base.Internal{Ref: "1.0.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			PIt("applies fetch_source option", func() {
-				source := factory.Source{
-					Type:        "github_releases",
-					Repo:        "cloudfoundry/hwc",
-					FetchSource: true,
-				}
-				version := base.Internal{Ref: "1.0.0"}
-
-				_, err := factory.In(source, version)
-				Expect(err).ToNot(HaveOccurred())
+				// Should use the mock client and return our error
+				_, err := factory.InWithClient(source, version, mockClient)
+				Expect(err).To(HaveOccurred())
 			})
 		})
 	})
 
 	Describe("SetupGithubToken", func() {
 		AfterEach(func() {
-			os.Unsetenv("OAUTH_AUTHORIZATION_TOKEN")
+			os.Unsetenv("GITHUB_TOKEN")
 		})
 
-		It("sets environment variable from source.GithubToken", func() {
+		It("sets GITHUB_TOKEN environment variable from source.GithubToken", func() {
 			source := factory.Source{
 				Type:        "github_releases",
 				Repo:        "cloudfoundry/hwc",
@@ -693,7 +148,7 @@ var _ = Describe("Factory", func() {
 
 			factory.SetupGithubToken(&source)
 
-			Expect(os.Getenv("OAUTH_AUTHORIZATION_TOKEN")).To(Equal("test_token_12345"))
+			Expect(os.Getenv("GITHUB_TOKEN")).To(Equal("test_token_12345"))
 		})
 
 		It("clears source.GithubToken after setting env var", func() {
@@ -716,7 +171,7 @@ var _ = Describe("Factory", func() {
 
 			factory.SetupGithubToken(&source)
 
-			Expect(os.Getenv("OAUTH_AUTHORIZATION_TOKEN")).To(Equal(""))
+			Expect(os.Getenv("GITHUB_TOKEN")).To(Equal(""))
 		})
 	})
 

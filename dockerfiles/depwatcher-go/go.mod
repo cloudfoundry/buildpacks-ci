@@ -1,6 +1,6 @@
 module github.com/cloudfoundry/buildpacks-ci/depwatcher-go
 
-go 1.23
+go 1.24.0
 
 require (
 	github.com/PuerkitoBio/goquery v1.11.0

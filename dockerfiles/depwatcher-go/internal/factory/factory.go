@@ -53,7 +53,13 @@ func SetupGithubToken(source *Source) {
 }
 
 func Check(source Source, currentVersion *base.Internal) ([]base.Internal, error) {
-	client := base.NewHTTPClient(false)
+	return CheckWithClient(source, currentVersion, nil)
+}
+
+func CheckWithClient(source Source, currentVersion *base.Internal, client base.HTTPClient) ([]base.Internal, error) {
+	if client == nil {
+		client = base.NewHTTPClient(false)
+	}
 
 	var versions []base.Internal
 	var err error
@@ -216,7 +222,13 @@ func Check(source Source, currentVersion *base.Internal) ([]base.Internal, error
 }
 
 func In(source Source, version base.Internal) (interface{}, error) {
-	client := base.NewHTTPClient(false)
+	return InWithClient(source, version, nil)
+}
+
+func InWithClient(source Source, version base.Internal, client base.HTTPClient) (interface{}, error) {
+	if client == nil {
+		client = base.NewHTTPClient(false)
+	}
 
 	switch source.Type {
 	case "github_releases":
