@@ -49,8 +49,8 @@ func (c *HTTPClientImpl) GetWithHeaders(url string, headers http.Header) (*http.
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
 
-	// Inject OAuth token from environment if present
-	if token := os.Getenv("OAUTH_AUTHORIZATION_TOKEN"); token != "" {
+	// Inject GitHub token from environment if present
+	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
 		req.Header.Set("Authorization", fmt.Sprintf("token %s", token))
 	}
 

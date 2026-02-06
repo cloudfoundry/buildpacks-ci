@@ -70,9 +70,9 @@ var _ = Describe("HTTPClientImpl", func() {
 			})
 		})
 
-		Context("when OAuth token is set", func() {
+		Context("when GITHUB_TOKEN is set", func() {
 			BeforeEach(func() {
-				os.Setenv("OAUTH_AUTHORIZATION_TOKEN", "test-token-123")
+				os.Setenv("GITHUB_TOKEN", "test-token-123")
 
 				server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					auth := r.Header.Get("Authorization")
@@ -86,10 +86,10 @@ var _ = Describe("HTTPClientImpl", func() {
 			})
 
 			AfterEach(func() {
-				os.Unsetenv("OAUTH_AUTHORIZATION_TOKEN")
+				os.Unsetenv("GITHUB_TOKEN")
 			})
 
-			It("includes the OAuth token in the Authorization header", func() {
+			It("includes the GitHub token in the Authorization header", func() {
 				resp, err := client.Get(server.URL)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(http.StatusOK))

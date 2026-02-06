@@ -47,7 +47,7 @@ type MetadataField struct {
 
 func SetupGithubToken(source *Source) {
 	if source.GithubToken != "" {
-		os.Setenv("OAUTH_AUTHORIZATION_TOKEN", source.GithubToken)
+		os.Setenv("GITHUB_TOKEN", source.GithubToken)
 		source.GithubToken = ""
 	}
 }
