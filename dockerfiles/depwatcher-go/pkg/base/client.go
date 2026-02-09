@@ -8,11 +8,22 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 )
 
 // HTTPClientImpl implements HTTPClient with OAuth token injection and redirect handling
 type HTTPClientImpl struct {
 	client *http.Client
+}
+
+// isGitHubURL checks if a URL is for GitHub or GitHub-related domains
+// This is necessary because all watchers share the same HTTP client, but only
+// GitHub-related watchers need authentication. Some watchers (ruby, nginx, openresty)
+// internally delegate to GithubTagsWatcher, so we can't use separate clients.
+func isGitHubURL(url string) bool {
+	return strings.Contains(url, "api.github.com") ||
+		strings.Contains(url, "raw.githubusercontent.com") ||
+		strings.Contains(url, "github.com/")
 }
 
 // NewHTTPClient creates a new HTTP client
@@ -49,9 +60,11 @@ func (c *HTTPClientImpl) GetWithHeaders(url string, headers http.Header) (*http.
 		return nil, fmt.Errorf("creating request: %w", err)
 	}
 
-	// Inject GitHub token from environment if present
+	// Inject GitHub token from environment if present, but only for GitHub domains
 	if token := os.Getenv("GITHUB_TOKEN"); token != "" {
-		req.Header.Set("Authorization", fmt.Sprintf("token %s", token))
+		if isGitHubURL(url) {
+			req.Header.Set("Authorization", fmt.Sprintf("token %s", token))
+		}
 	}
 
 	// Add custom headers

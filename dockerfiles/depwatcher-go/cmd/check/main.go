@@ -29,7 +29,12 @@ func run() error {
 
 	factory.SetupGithubToken(&req.Source)
 
-	fmt.Fprintf(os.Stderr, "%s\n", input)
+	// Log sanitized request (after token has been moved to environment)
+	sanitized, err := json.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("marshaling sanitized request: %w", err)
+	}
+	fmt.Fprintf(os.Stderr, "%s\n", sanitized)
 
 	versions, err := factory.Check(req.Source, req.Version)
 	if err != nil {

@@ -24,6 +24,11 @@ func run() error {
 
 	destDir := os.Args[1]
 
+	// Ensure destination directory exists and is writable
+	if err := os.MkdirAll(destDir, 0755); err != nil {
+		return fmt.Errorf("creating destination directory: %w", err)
+	}
+
 	input, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		return fmt.Errorf("reading stdin: %w", err)
@@ -36,7 +41,12 @@ func run() error {
 
 	factory.SetupGithubToken(&req.Source)
 
-	fmt.Fprintf(os.Stderr, "%s\n", input)
+	// Log sanitized request (after token has been moved to environment)
+	sanitized, err := json.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("marshaling sanitized request: %w", err)
+	}
+	fmt.Fprintf(os.Stderr, "%s\n", sanitized)
 
 	versionData, err := factory.In(req.Source, req.Version)
 	if err != nil {

@@ -151,11 +151,12 @@ var _ = Describe("NPMWatcher", func() {
 			It("sorts prereleases correctly", func() {
 				versions, err := watcher.Check("test-package")
 				Expect(err).NotTo(HaveOccurred())
+				// Pre-release versions should come before release versions per semver spec
 				Expect(versions[0].Ref).To(Equal("1.0.0"))
-				Expect(versions[1].Ref).To(Equal("1.0.1"))
-				Expect(versions[2].Ref).To(Equal("1.0.1-beta.1"))
-				Expect(versions[3].Ref).To(Equal("2.0.0"))
-				Expect(versions[4].Ref).To(Equal("2.0.0-alpha"))
+				Expect(versions[1].Ref).To(Equal("1.0.1-beta.1"))
+				Expect(versions[2].Ref).To(Equal("1.0.1"))
+				Expect(versions[3].Ref).To(Equal("2.0.0-alpha"))
+				Expect(versions[4].Ref).To(Equal("2.0.0"))
 			})
 		})
 

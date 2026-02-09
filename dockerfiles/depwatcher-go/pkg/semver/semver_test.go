@@ -107,6 +107,63 @@ var _ = Describe("Semver", func() {
 			v2, _ := semver.Parse("3.2.1")
 			Expect(v1.LessThan(v2)).To(BeFalse())
 		})
+
+		Context("pre-release version comparison", func() {
+			It("considers pre-release versions less than release versions", func() {
+				preRelease, _ := semver.Parse("1.0.0-alpha")
+				release, _ := semver.Parse("1.0.0")
+				Expect(preRelease.LessThan(release)).To(BeTrue())
+				Expect(release.LessThan(preRelease)).To(BeFalse())
+			})
+
+			It("compares pre-release versions lexicographically", func() {
+				alpha, _ := semver.Parse("1.0.0-alpha")
+				beta, _ := semver.Parse("1.0.0-beta")
+				rc, _ := semver.Parse("1.0.0-rc")
+				Expect(alpha.LessThan(beta)).To(BeTrue())
+				Expect(beta.LessThan(rc)).To(BeTrue())
+				Expect(alpha.LessThan(rc)).To(BeTrue())
+			})
+
+			It("handles complex pre-release identifiers", func() {
+				v1, _ := semver.Parse("1.0.0-alpha.1")
+				v2, _ := semver.Parse("1.0.0-alpha.2")
+				Expect(v1.LessThan(v2)).To(BeTrue())
+			})
+
+			It("compares numeric pre-release identifiers numerically, not lexicographically", func() {
+				// This is the key test for semver 2.0.0 spec compliance
+				v1, _ := semver.Parse("1.0.0-alpha.2")
+				v2, _ := semver.Parse("1.0.0-alpha.10")
+				Expect(v1.LessThan(v2)).To(BeTrue())
+				Expect(v2.LessThan(v1)).To(BeFalse())
+
+				v3, _ := semver.Parse("1.0.0-2")
+				v4, _ := semver.Parse("1.0.0-10")
+				Expect(v3.LessThan(v4)).To(BeTrue())
+				Expect(v4.LessThan(v3)).To(BeFalse())
+			})
+
+			It("considers numeric identifiers less than non-numeric identifiers", func() {
+				numeric, _ := semver.Parse("1.0.0-1")
+				alpha, _ := semver.Parse("1.0.0-alpha")
+				Expect(numeric.LessThan(alpha)).To(BeTrue())
+				Expect(alpha.LessThan(numeric)).To(BeFalse())
+			})
+
+			It("handles mixed numeric and non-numeric identifiers", func() {
+				v1, _ := semver.Parse("1.0.0-alpha.1")
+				v2, _ := semver.Parse("1.0.0-alpha.beta")
+				Expect(v1.LessThan(v2)).To(BeTrue())
+			})
+
+			It("considers shorter pre-release versions less than longer ones when all identifiers match", func() {
+				v1, _ := semver.Parse("1.0.0-alpha")
+				v2, _ := semver.Parse("1.0.0-alpha.1")
+				Expect(v1.LessThan(v2)).To(BeTrue())
+				Expect(v2.LessThan(v1)).To(BeFalse())
+			})
+		})
 	})
 
 	Describe("IsFinalRelease", func() {

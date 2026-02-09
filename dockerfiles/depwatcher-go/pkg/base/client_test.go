@@ -73,29 +73,102 @@ var _ = Describe("HTTPClientImpl", func() {
 		Context("when GITHUB_TOKEN is set", func() {
 			BeforeEach(func() {
 				os.Setenv("GITHUB_TOKEN", "test-token-123")
-
-				server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					auth := r.Header.Get("Authorization")
-					if auth == "token test-token-123" {
-						w.WriteHeader(http.StatusOK)
-						w.Write([]byte(`authorized`))
-					} else {
-						w.WriteHeader(http.StatusUnauthorized)
-					}
-				}))
 			})
 
 			AfterEach(func() {
 				os.Unsetenv("GITHUB_TOKEN")
 			})
 
-			It("includes the GitHub token in the Authorization header", func() {
-				resp, err := client.Get(server.URL)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(resp.StatusCode).To(Equal(http.StatusOK))
+			Context("and the URL is a GitHub domain", func() {
+				BeforeEach(func() {
+					server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						auth := r.Header.Get("Authorization")
+						if auth == "token test-token-123" {
+							w.WriteHeader(http.StatusOK)
+							w.Write([]byte(`authorized`))
+						} else {
+							w.WriteHeader(http.StatusUnauthorized)
+						}
+					}))
+				})
 
-				body, _ := io.ReadAll(resp.Body)
-				Expect(string(body)).To(Equal(`authorized`))
+				It("includes the GitHub token for api.github.com URLs", func() {
+					// Simulate an api.github.com URL
+					githubURL := server.URL + "?api.github.com/repos/test/repo"
+					resp, err := client.Get(githubURL)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(resp.StatusCode).To(Equal(http.StatusOK))
+
+					body, _ := io.ReadAll(resp.Body)
+					Expect(string(body)).To(Equal(`authorized`))
+				})
+
+				It("includes the GitHub token for raw.githubusercontent.com URLs", func() {
+					// Simulate a raw.githubusercontent.com URL
+					githubURL := server.URL + "?raw.githubusercontent.com/test/repo"
+					resp, err := client.Get(githubURL)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(resp.StatusCode).To(Equal(http.StatusOK))
+
+					body, _ := io.ReadAll(resp.Body)
+					Expect(string(body)).To(Equal(`authorized`))
+				})
+
+				It("includes the GitHub token for github.com/ URLs", func() {
+					// Simulate a github.com/ URL (with trailing slash to be more specific)
+					githubURL := server.URL + "?github.com/test/repo"
+					resp, err := client.Get(githubURL)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(resp.StatusCode).To(Equal(http.StatusOK))
+
+					body, _ := io.ReadAll(resp.Body)
+					Expect(string(body)).To(Equal(`authorized`))
+				})
+			})
+
+			Context("and the URL is NOT a GitHub domain", func() {
+				BeforeEach(func() {
+					server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						auth := r.Header.Get("Authorization")
+						if auth == "" {
+							w.WriteHeader(http.StatusOK)
+							w.Write([]byte(`no auth header`))
+						} else {
+							w.WriteHeader(http.StatusBadRequest)
+							w.Write([]byte(`unexpected auth header`))
+						}
+					}))
+				})
+
+				It("does NOT include the GitHub token for python.org", func() {
+					pythonURL := server.URL + "?host=python.org"
+					resp, err := client.Get(pythonURL)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(resp.StatusCode).To(Equal(http.StatusOK))
+
+					body, _ := io.ReadAll(resp.Body)
+					Expect(string(body)).To(Equal(`no auth header`))
+				})
+
+				It("does NOT include the GitHub token for npmjs.org", func() {
+					npmURL := server.URL + "?host=npmjs.org"
+					resp, err := client.Get(npmURL)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(resp.StatusCode).To(Equal(http.StatusOK))
+
+					body, _ := io.ReadAll(resp.Body)
+					Expect(string(body)).To(Equal(`no auth header`))
+				})
+
+				It("does NOT include the GitHub token for rubygems.org", func() {
+					rubyURL := server.URL + "?host=rubygems.org"
+					resp, err := client.Get(rubyURL)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(resp.StatusCode).To(Equal(http.StatusOK))
+
+					body, _ := io.ReadAll(resp.Body)
+					Expect(string(body)).To(Equal(`no auth header`))
+				})
 			})
 		})
 
