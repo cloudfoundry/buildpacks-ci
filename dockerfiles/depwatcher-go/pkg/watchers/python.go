@@ -83,33 +83,18 @@ func (w *PythonWatcher) In(ref string) (base.Release, error) {
 	}
 
 	var downloadURL string
-	var md5Digest string
 
 	doc.Find("a").Each(func(i int, s *goquery.Selection) {
 		if strings.Contains(s.Text(), "Gzipped source tarball") {
 			href, exists := s.Attr("href")
 			if exists {
 				downloadURL = href
-
-				tr := s.ParentsFiltered("tr")
-				if tr.Length() > 0 {
-					tds := tr.Find("td")
-					if tds.Length() >= 8 {
-						md5Digest = strings.TrimSpace(tds.Eq(7).Text())
-					} else if tds.Length() >= 7 {
-						md5Digest = strings.TrimSpace(tds.Eq(6).Text())
-					}
-				}
 			}
 		}
 	})
 
 	if downloadURL == "" {
 		return base.Release{}, fmt.Errorf("could not find download URL for Python %s", ref)
-	}
-
-	if md5Digest == "" {
-		return base.Release{}, fmt.Errorf("could not find MD5 digest for Python %s", ref)
 	}
 
 	sha256, err := base.GetSHA256(w.client, downloadURL)

@@ -128,6 +128,26 @@ var _ = Describe("MinicondaWatcher", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("no releases found for Python version 3.9"))
 		})
+
+		It("returns error when pythonVersion is empty", func() {
+			client.htmlResponse = `<html><table></table></html>`
+
+			watcher = watchers.NewMinicondaWatcher(client, "")
+			_, err := watcher.Check()
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("python_version is required"))
+		})
+
+		It("returns error when pythonVersion is invalid format", func() {
+			client.htmlResponse = `<html><table></table></html>`
+
+			watcher = watchers.NewMinicondaWatcher(client, "3")
+			_, err := watcher.Check()
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("python_version must be in format 'X.Y'"))
+		})
 	})
 
 	Context("In", func() {

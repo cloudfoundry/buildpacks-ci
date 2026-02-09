@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/internal/factory"
+	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
 )
 
 func main() {
@@ -28,6 +29,7 @@ func run() error {
 	}
 
 	factory.SetupGithubToken(&req.Source)
+	defer os.Unsetenv("GITHUB_TOKEN") // Clean up token on exit
 
 	// Log sanitized request (after token has been moved to environment)
 	sanitized, err := json.Marshal(req)
@@ -39,6 +41,11 @@ func run() error {
 	versions, err := factory.Check(req.Source, req.Version)
 	if err != nil {
 		return fmt.Errorf("checking versions: %w", err)
+	}
+
+	// Ensure we always return an array, never null (Concourse resource protocol requirement)
+	if versions == nil {
+		versions = []base.Internal{}
 	}
 
 	output, err := json.Marshal(versions)

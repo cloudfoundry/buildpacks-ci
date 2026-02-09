@@ -90,6 +90,16 @@ type minicondaRelease struct {
 }
 
 func (w *MinicondaWatcher) fetchReleases() ([]minicondaRelease, error) {
+	// Validate pythonVersion is provided and in correct format
+	if w.pythonVersion == "" {
+		return nil, fmt.Errorf("python_version is required for miniconda watcher")
+	}
+
+	parts := strings.Split(w.pythonVersion, ".")
+	if len(parts) < 2 {
+		return nil, fmt.Errorf("python_version must be in format 'X.Y' (e.g., '3.9'), got: %q", w.pythonVersion)
+	}
+
 	resp, err := w.client.Get(minicondaURL)
 	if err != nil {
 		return nil, fmt.Errorf("fetching miniconda HTML: %w", err)
@@ -101,7 +111,7 @@ func (w *MinicondaWatcher) fetchReleases() ([]minicondaRelease, error) {
 		return nil, fmt.Errorf("parsing HTML: %w", err)
 	}
 
-	generation := strings.Split(w.pythonVersion, ".")[0]
+	generation := parts[0]
 	pythonVersionNoDots := strings.ReplaceAll(w.pythonVersion, ".", "")
 
 	// Pattern: Miniconda3-py39_23.1.0-1-Linux-x86_64.sh

@@ -40,6 +40,7 @@ func run() error {
 	}
 
 	factory.SetupGithubToken(&req.Source)
+	defer os.Unsetenv("GITHUB_TOKEN") // Clean up token on exit
 
 	// Log sanitized request (after token has been moved to environment)
 	sanitized, err := json.Marshal(req)
