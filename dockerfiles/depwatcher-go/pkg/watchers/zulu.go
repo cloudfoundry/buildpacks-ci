@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
@@ -16,9 +17,12 @@ type ZuluWatcher struct {
 	typ     string
 }
 
-type zuluRelease struct {
-	JDKVersion []int  `json:"jdk_version"`
-	URL        string `json:"url"`
+type zuluPackage struct {
+	JavaVersion   []int  `json:"java_version"`
+	DownloadURL   string `json:"download_url"`
+	Name          string `json:"name"`
+	Latest        bool   `json:"latest"`
+	DistroVersion []int  `json:"distro_version"`
 }
 
 func NewZuluWatcher(client base.HTTPClient, version, typ string) *ZuluWatcher {
@@ -30,12 +34,12 @@ func NewZuluWatcher(client base.HTTPClient, version, typ string) *ZuluWatcher {
 }
 
 func (w *ZuluWatcher) Check() ([]base.Internal, error) {
-	release, err := w.fetchRelease()
+	pkg, err := w.fetchLatestPackage()
 	if err != nil {
 		return nil, err
 	}
 
-	version, err := w.parseVersion(release.JDKVersion)
+	version, err := w.parseVersion(pkg.JavaVersion)
 	if err != nil {
 		return nil, err
 	}
@@ -44,12 +48,12 @@ func (w *ZuluWatcher) Check() ([]base.Internal, error) {
 }
 
 func (w *ZuluWatcher) In(ref string) (base.Release, error) {
-	release, err := w.fetchRelease()
+	pkg, err := w.fetchLatestPackage()
 	if err != nil {
 		return base.Release{}, err
 	}
 
-	version, err := w.parseVersion(release.JDKVersion)
+	version, err := w.parseVersion(pkg.JavaVersion)
 	if err != nil {
 		return base.Release{}, err
 	}
@@ -60,11 +64,11 @@ func (w *ZuluWatcher) In(ref string) (base.Release, error) {
 
 	return base.Release{
 		Ref: ref,
-		URL: release.URL,
+		URL: pkg.DownloadURL,
 	}, nil
 }
 
-func (w *ZuluWatcher) fetchRelease() (*zuluRelease, error) {
+func (w *ZuluWatcher) fetchLatestPackage() (*zuluPackage, error) {
 	if w.version == "" {
 		return nil, fmt.Errorf("version must be specified")
 	}
@@ -72,12 +76,17 @@ func (w *ZuluWatcher) fetchRelease() (*zuluRelease, error) {
 		return nil, fmt.Errorf("type must be specified")
 	}
 
-	url := fmt.Sprintf("https://api.azul.com/zulu/download/azure-only/v1.0/bundles/latest/?arch=x86&ext=tar.gz&features=%s&hw_bitness=64&jdk_version=%s&os=linux",
-		w.typ, w.version)
+	// Map bundle_type to java_package_type
+	// bundle_type can be: jdk, jre
+	packageType := w.typ
+
+	// Use the new Azul metadata API
+	url := fmt.Sprintf("https://api.azul.com/metadata/v1/zulu/packages/?java_version=%s&os=linux&arch=x86&archive_type=tar.gz&java_package_type=%s&latest=true&release_status=ga&availability_types=CA",
+		w.version, packageType)
 
 	resp, err := w.client.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("fetching release: %w", err)
+		return nil, fmt.Errorf("fetching packages: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -85,12 +94,30 @@ func (w *ZuluWatcher) fetchRelease() (*zuluRelease, error) {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	var release zuluRelease
-	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
-		return nil, fmt.Errorf("decoding release: %w", err)
+	var packages []zuluPackage
+	if err := json.NewDecoder(resp.Body).Decode(&packages); err != nil {
+		return nil, fmt.Errorf("decoding packages: %w", err)
 	}
 
-	return &release, nil
+	if len(packages) == 0 {
+		return nil, fmt.Errorf("no packages found for java_version=%s, package_type=%s", w.version, packageType)
+	}
+
+	// Return the first package (should be the latest for x64 architecture)
+	// Filter for x64 architecture in the name
+	for _, pkg := range packages {
+		if pkg.Name != "" && strings.HasSuffix(pkg.Name, ".tar.gz") {
+			// Prefer x64 over i686 or musl
+			name := pkg.Name
+			// Check if it's the standard x64 build (not musl or i686)
+			if !strings.Contains(name, "musl") && !strings.Contains(name, "i686") {
+				return &pkg, nil
+			}
+		}
+	}
+
+	// Fallback to first package if no x64 found
+	return &packages[0], nil
 }
 
 func (w *ZuluWatcher) parseVersion(versionParts []int) (string, error) {
