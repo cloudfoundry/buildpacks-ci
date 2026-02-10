@@ -92,7 +92,7 @@ resources:
   type: s3
   source:
     bucket: buildpacks.cloudfoundry.org
-    regexp: #@ "buildpack-release-candidates/" + language.name + "/" + language.name + "_buildpack-" + stack + "-v(.*).zip"
+    regexp: #@ "buildpack-release-published/" + language.name + "/" + language.name + "_buildpack-" + stack + "-v(.*).zip"
     access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
     secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
   #@ end

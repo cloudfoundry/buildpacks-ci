@@ -238,6 +238,14 @@ resources:
       regexp: #@ "buildpack-release-candidates/" + data.values.language + "/" + data.values.language + "_buildpack-cached-" + stack + "-v(.*).zip"
       access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
       secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+
+  - name: #@ "pivotal-buildpack-published-" + stack
+    type: s3
+    source:
+      bucket: #@ data.values.buildpack_release_candidates_bucket
+      regexp: #@ "buildpack-release-published/" + data.values.language + "/" + data.values.language + "_buildpack-" + stack + "-v(.*).zip"
+      access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
   #@ end
 
   #@ if has_any_stack():
@@ -387,16 +395,22 @@ jobs:
           REPO_PRIVATE_KEY: ((cf-buildpacks-eng-github-ssh-key.private_key))
       - task: finalize-buildpack
         file: buildpacks-ci/tasks/finalize-buildpack/task.yml
-      - put: buildpack-github-release
-        params:
-          name: buildpack-artifacts/tag
-          tag: buildpack-artifacts/tag
-          body: buildpack-artifacts/RECENT_CHANGES
-          commitish: buildpack/.git/ref
-          generate_release_notes: true
-          globs:
-            - #@ "buildpack-artifacts/" + data.values.language + "-buildpack*-v*.zip"
-            - #@ "buildpack-artifacts/" + data.values.language + "-buildpack*-v*.zip.SHA256SUM.txt"
+      - in_parallel:
+        - put: buildpack-github-release
+          params:
+            name: buildpack-artifacts/tag
+            tag: buildpack-artifacts/tag
+            body: buildpack-artifacts/RECENT_CHANGES
+            commitish: buildpack/.git/ref
+            generate_release_notes: true
+            globs:
+              - #@ "buildpack-artifacts/" + data.values.language + "-buildpack*-v*.zip"
+              - #@ "buildpack-artifacts/" + data.values.language + "-buildpack*-v*.zip.SHA256SUM.txt"
+        #@ for i, stack in enumerate(data.values.buildpack.stacks):
+        - put: #@ "pivotal-buildpack-published-" + stack
+          params:
+            file: #@ "uncached-buildpack-for-stack" + str(i) + "/*_buildpack*-v*.zip"
+        #@ end
       - put: version
         params: { bump: patch }
   
