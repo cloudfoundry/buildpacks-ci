@@ -1,12 +1,14 @@
-package watchers
+package watchers_test
 
 import (
-	"bytes"
 	"io"
 	"net/http"
-	"testing"
+	"strings"
 
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+
+	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
 
 type mockWildflyClient struct {
@@ -20,7 +22,7 @@ func (m *mockWildflyClient) Get(url string) (*http.Response, error) {
 	}
 	return &http.Response{
 		StatusCode: 200,
-		Body:       io.NopCloser(bytes.NewBufferString(m.response)),
+		Body:       io.NopCloser(strings.NewReader(m.response)),
 	}, nil
 }
 
@@ -28,38 +30,51 @@ func (m *mockWildflyClient) GetWithHeaders(url string, headers http.Header) (*ht
 	return m.Get(url)
 }
 
-func TestWildflyWatcher_Check(t *testing.T) {
-	mockHTML := `<html><body>
-		<div class="version-id">26.1.0.Final</div>
-		<div class="version-id">26.0.1.Final</div>
-		<div class="version-id">25.0.0.Final</div>
-	</body></html>`
+var _ = Describe("WildflyWatcher", func() {
+	var (
+		client  *mockWildflyClient
+		watcher *watchers.WildflyWatcher
+	)
 
-	client := &mockWildflyClient{response: mockHTML}
-	watcher := NewWildflyWatcher(client)
+	BeforeEach(func() {
+		client = &mockWildflyClient{}
+		watcher = watchers.NewWildflyWatcher(client)
+	})
 
-	versions, err := watcher.Check()
-	assert.NoError(t, err)
-	assert.Equal(t, 3, len(versions))
-	assert.Equal(t, "25.0.0-Final", versions[0].Ref)
-	assert.Equal(t, "26.0.1-Final", versions[1].Ref)
-	assert.Equal(t, "26.1.0-Final", versions[2].Ref)
-}
+	Describe("Check", func() {
+		Context("when the HTML contains version IDs", func() {
+			It("returns sorted versions", func() {
+				client.response = `<html><body>
+					<div class="version-id">26.1.0.Final</div>
+					<div class="version-id">26.0.1.Final</div>
+					<div class="version-id">25.0.0.Final</div>
+				</body></html>`
 
-func TestWildflyWatcher_In(t *testing.T) {
-	client := &mockWildflyClient{}
-	watcher := NewWildflyWatcher(client)
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(3))
+				Expect(versions[0].Ref).To(Equal("25.0.0-Final"))
+				Expect(versions[1].Ref).To(Equal("26.0.1-Final"))
+				Expect(versions[2].Ref).To(Equal("26.1.0-Final"))
+			})
+		})
+	})
 
-	release, err := watcher.In("26.1.0-Final")
-	assert.NoError(t, err)
-	assert.Equal(t, "26.1.0-Final", release.Ref)
-	assert.Equal(t, "https://download.jboss.org/wildfly/26.1.0.Final/wildfly-26.1.0.Final.tar.gz", release.URL)
-}
+	Describe("In", func() {
+		Context("when version is valid", func() {
+			It("returns the release details", func() {
+				release, err := watcher.In("26.1.0-Final")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.Ref).To(Equal("26.1.0-Final"))
+				Expect(release.URL).To(Equal("https://download.jboss.org/wildfly/26.1.0.Final/wildfly-26.1.0.Final.tar.gz"))
+			})
+		})
 
-func TestWildflyWatcher_In_InvalidVersion(t *testing.T) {
-	client := &mockWildflyClient{}
-	watcher := NewWildflyWatcher(client)
-
-	_, err := watcher.In("invalid")
-	assert.Error(t, err)
-}
+		Context("when version is invalid", func() {
+			It("returns an error", func() {
+				_, err := watcher.In("invalid")
+				Expect(err).To(HaveOccurred())
+			})
+		})
+	})
+})

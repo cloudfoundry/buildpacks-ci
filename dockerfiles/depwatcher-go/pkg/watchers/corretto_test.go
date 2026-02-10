@@ -1,12 +1,14 @@
-package watchers
+package watchers_test
 
 import (
-	"bytes"
 	"io"
 	"net/http"
-	"testing"
+	"strings"
 
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+
+	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
 
 type mockCorrettoClient struct {
@@ -20,7 +22,7 @@ func (m *mockCorrettoClient) Get(url string) (*http.Response, error) {
 	}
 	return &http.Response{
 		StatusCode: 200,
-		Body:       io.NopCloser(bytes.NewBufferString(m.response)),
+		Body:       io.NopCloser(strings.NewReader(m.response)),
 	}, nil
 }
 
@@ -28,57 +30,74 @@ func (m *mockCorrettoClient) GetWithHeaders(url string, headers http.Header) (*h
 	return m.Get(url)
 }
 
-func TestCorrettoWatcher_Check(t *testing.T) {
-	mockResp := `[
-		{"tag_name": "8.302.08.1", "draft": false, "prerelease": false},
-		{"tag_name": "8.292.10.1", "draft": false, "prerelease": false},
-		{"tag_name": "11.0.12.7.1", "draft": false, "prerelease": false},
-		{"tag_name": "16.0.2.7.1", "draft": false, "prerelease": false},
-		{"tag_name": "draft-version", "draft": true, "prerelease": false},
-		{"tag_name": "prerelease-version", "draft": false, "prerelease": true}
-	]`
+var _ = Describe("CorrettoWatcher", func() {
+	var (
+		client  *mockCorrettoClient
+		watcher *watchers.CorrettoWatcher
+	)
 
-	client := &mockCorrettoClient{response: mockResp}
-	watcher := NewCorrettoWatcher(client, "corretto", "corretto-8")
+	BeforeEach(func() {
+		client = &mockCorrettoClient{}
+	})
 
-	versions, err := watcher.Check()
-	assert.NoError(t, err)
-	assert.NotEmpty(t, versions)
+	Describe("Check", func() {
+		Context("when the API returns valid releases", func() {
+			It("returns sorted versions excluding drafts and prereleases", func() {
+				client.response = `[
+					{"tag_name": "8.302.08.1", "draft": false, "prerelease": false},
+					{"tag_name": "8.292.10.1", "draft": false, "prerelease": false},
+					{"tag_name": "11.0.12.7.1", "draft": false, "prerelease": false},
+					{"tag_name": "16.0.2.7.1", "draft": false, "prerelease": false},
+					{"tag_name": "draft-version", "draft": true, "prerelease": false},
+					{"tag_name": "prerelease-version", "draft": false, "prerelease": true}
+				]`
+				watcher = watchers.NewCorrettoWatcher(client, "corretto", "corretto-8")
 
-	// Should exclude draft and prerelease
-	assert.Equal(t, 4, len(versions))
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).NotTo(BeEmpty())
+				Expect(versions).To(HaveLen(4))
 
-	// Verify version format conversion
-	assert.Equal(t, "8.292.10-1", versions[0].Ref)
-	assert.Equal(t, "8.302.08-1", versions[1].Ref)
-	assert.Equal(t, "11.0.12-7.1", versions[2].Ref)
-	assert.Equal(t, "16.0.2-7.1", versions[3].Ref)
-}
+				// Verify version format conversion
+				Expect(versions[0].Ref).To(Equal("8.292.10-1"))
+				Expect(versions[1].Ref).To(Equal("8.302.08-1"))
+				Expect(versions[2].Ref).To(Equal("11.0.12-7.1"))
+				Expect(versions[3].Ref).To(Equal("16.0.2-7.1"))
+			})
+		})
 
-func TestCorrettoWatcher_Check_InvalidJSON(t *testing.T) {
-	client := &mockCorrettoClient{response: "invalid json"}
-	watcher := NewCorrettoWatcher(client, "corretto", "corretto-8")
+		Context("when the API returns invalid JSON", func() {
+			It("returns an error", func() {
+				client.response = "invalid json"
+				watcher = watchers.NewCorrettoWatcher(client, "corretto", "corretto-8")
 
-	_, err := watcher.Check()
-	assert.Error(t, err)
-}
+				_, err := watcher.Check()
+				Expect(err).To(HaveOccurred())
+			})
+		})
+	})
 
-func TestCorrettoWatcher_In(t *testing.T) {
-	client := &mockCorrettoClient{}
-	watcher := NewCorrettoWatcher(client, "corretto", "corretto-8")
+	Describe("In", func() {
+		Context("when version has standard format", func() {
+			It("returns the release details with converted URL", func() {
+				watcher = watchers.NewCorrettoWatcher(client, "corretto", "corretto-8")
 
-	release, err := watcher.In("8.302.08-1")
-	assert.NoError(t, err)
-	assert.Equal(t, "8.302.08-1", release.Ref)
-	assert.Equal(t, "https://corretto.aws/downloads/resources/8.302.08.1/amazon-corretto-8.302.08.1-linux-x64.tar.gz", release.URL)
-}
+				release, err := watcher.In("8.302.08-1")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.Ref).To(Equal("8.302.08-1"))
+				Expect(release.URL).To(Equal("https://corretto.aws/downloads/resources/8.302.08.1/amazon-corretto-8.302.08.1-linux-x64.tar.gz"))
+			})
+		})
 
-func TestCorrettoWatcher_In_MultiPartBuildVersion(t *testing.T) {
-	client := &mockCorrettoClient{}
-	watcher := NewCorrettoWatcher(client, "corretto", "corretto-11")
+		Context("when version has multi-part build version", func() {
+			It("returns the release details with converted URL", func() {
+				watcher = watchers.NewCorrettoWatcher(client, "corretto", "corretto-11")
 
-	release, err := watcher.In("11.0.12-7.1")
-	assert.NoError(t, err)
-	assert.Equal(t, "11.0.12-7.1", release.Ref)
-	assert.Equal(t, "https://corretto.aws/downloads/resources/11.0.12.7.1/amazon-corretto-11.0.12.7.1-linux-x64.tar.gz", release.URL)
-}
+				release, err := watcher.In("11.0.12-7.1")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.Ref).To(Equal("11.0.12-7.1"))
+				Expect(release.URL).To(Equal("https://corretto.aws/downloads/resources/11.0.12.7.1/amazon-corretto-11.0.12.7.1-linux-x64.tar.gz"))
+			})
+		})
+	})
+})

@@ -1,12 +1,14 @@
-package watchers
+package watchers_test
 
 import (
-	"bytes"
 	"io"
 	"net/http"
-	"testing"
+	"strings"
 
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+
+	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
 
 type mockYourKitClient struct {
@@ -20,7 +22,7 @@ func (m *mockYourKitClient) Get(url string) (*http.Response, error) {
 	}
 	return &http.Response{
 		StatusCode: 200,
-		Body:       io.NopCloser(bytes.NewBufferString(m.response)),
+		Body:       io.NopCloser(strings.NewReader(m.response)),
 	}, nil
 }
 
@@ -28,27 +30,39 @@ func (m *mockYourKitClient) GetWithHeaders(url string, headers http.Header) (*ht
 	return m.Get(url)
 }
 
-func TestYourKitWatcher_Check(t *testing.T) {
-	mockHTML := `<html><body>
-		<a href="/yjp/2022/YourKit-JavaProfiler-2022.9-b238-x64.zip">Download</a>
-		<a href="/yjp/2022/YourKit-JavaProfiler-2022.3-b237-x64.zip">Download</a>
-		<a href="/yjp/2021/YourKit-JavaProfiler-2021.11-b236-x64.zip">Download</a>
-	</body></html>`
+var _ = Describe("YourKitWatcher", func() {
+	var (
+		client  *mockYourKitClient
+		watcher *watchers.YourKitWatcher
+	)
 
-	client := &mockYourKitClient{response: mockHTML}
-	watcher := NewYourKitWatcher(client)
+	BeforeEach(func() {
+		client = &mockYourKitClient{}
+		watcher = watchers.NewYourKitWatcher(client)
+	})
 
-	versions, err := watcher.Check()
-	assert.NoError(t, err)
-	assert.Equal(t, 3, len(versions))
-}
+	Describe("Check", func() {
+		Context("when the HTML contains valid download links", func() {
+			It("returns all versions found", func() {
+				client.response = `<html><body>
+					<a href="/yjp/2022/YourKit-JavaProfiler-2022.9-b238-x64.zip">Download</a>
+					<a href="/yjp/2022/YourKit-JavaProfiler-2022.3-b237-x64.zip">Download</a>
+					<a href="/yjp/2021/YourKit-JavaProfiler-2021.11-b236-x64.zip">Download</a>
+				</body></html>`
 
-func TestYourKitWatcher_In(t *testing.T) {
-	client := &mockYourKitClient{}
-	watcher := NewYourKitWatcher(client)
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(3))
+			})
+		})
+	})
 
-	release, err := watcher.In("2022.9.238")
-	assert.NoError(t, err)
-	assert.Equal(t, "2022.9.238", release.Ref)
-	assert.Equal(t, "https://download.yourkit.com/yjp/2022.9/YourKit-JavaProfiler-2022.9-b238-x64.zip", release.URL)
-}
+	Describe("In", func() {
+		It("returns the release details for a specific version", func() {
+			release, err := watcher.In("2022.9.238")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(release.Ref).To(Equal("2022.9.238"))
+			Expect(release.URL).To(Equal("https://download.yourkit.com/yjp/2022.9/YourKit-JavaProfiler-2022.9-b238-x64.zip"))
+		})
+	})
+})

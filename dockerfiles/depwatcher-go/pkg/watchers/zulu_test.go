@@ -1,12 +1,14 @@
-package watchers
+package watchers_test
 
 import (
-	"bytes"
 	"io"
 	"net/http"
-	"testing"
+	"strings"
 
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+
+	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
 
 type mockZuluClient struct {
@@ -20,7 +22,7 @@ func (m *mockZuluClient) Get(url string) (*http.Response, error) {
 	}
 	return &http.Response{
 		StatusCode: 200,
-		Body:       io.NopCloser(bytes.NewBufferString(m.response)),
+		Body:       io.NopCloser(strings.NewReader(m.response)),
 	}, nil
 }
 
@@ -28,78 +30,95 @@ func (m *mockZuluClient) GetWithHeaders(url string, headers http.Header) (*http.
 	return m.Get(url)
 }
 
-func TestZuluWatcher_Check(t *testing.T) {
-	mockResp := `{
-		"jdk_version": [8, 0, 302],
-		"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
-	}`
+var _ = Describe("ZuluWatcher", func() {
+	var (
+		client  *mockZuluClient
+		watcher *watchers.ZuluWatcher
+	)
 
-	client := &mockZuluClient{response: mockResp}
-	watcher := NewZuluWatcher(client, "8", "jdk")
+	BeforeEach(func() {
+		client = &mockZuluClient{}
+	})
 
-	versions, err := watcher.Check()
-	assert.NoError(t, err)
-	assert.Equal(t, 1, len(versions))
-	assert.Equal(t, "8.0.302", versions[0].Ref)
-}
+	Describe("Check", func() {
+		Context("when the API returns valid release data", func() {
+			It("returns the version", func() {
+				client.response = `{
+					"jdk_version": [8, 0, 302],
+					"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
+				}`
+				watcher = watchers.NewZuluWatcher(client, "8", "jdk")
 
-func TestZuluWatcher_Check_MissingVersion(t *testing.T) {
-	client := &mockZuluClient{}
-	watcher := NewZuluWatcher(client, "", "jdk")
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(1))
+				Expect(versions[0].Ref).To(Equal("8.0.302"))
+			})
+		})
 
-	_, err := watcher.Check()
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "version must be specified")
-}
+		Context("when version is missing", func() {
+			It("returns an error", func() {
+				watcher = watchers.NewZuluWatcher(client, "", "jdk")
 
-func TestZuluWatcher_Check_MissingType(t *testing.T) {
-	client := &mockZuluClient{}
-	watcher := NewZuluWatcher(client, "8", "")
+				_, err := watcher.Check()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("version must be specified"))
+			})
+		})
 
-	_, err := watcher.Check()
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "type must be specified")
-}
+		Context("when type is missing", func() {
+			It("returns an error", func() {
+				watcher = watchers.NewZuluWatcher(client, "8", "")
 
-func TestZuluWatcher_Check_InvalidVersionComponents(t *testing.T) {
-	mockResp := `{
-		"jdk_version": [8, 0],
-		"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
-	}`
+				_, err := watcher.Check()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("type must be specified"))
+			})
+		})
 
-	client := &mockZuluClient{response: mockResp}
-	watcher := NewZuluWatcher(client, "8", "jdk")
+		Context("when version has invalid number of components", func() {
+			It("returns an error", func() {
+				client.response = `{
+					"jdk_version": [8, 0],
+					"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
+				}`
+				watcher = watchers.NewZuluWatcher(client, "8", "jdk")
 
-	_, err := watcher.Check()
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "version must have three components")
-}
+				_, err := watcher.Check()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("version must have three components"))
+			})
+		})
+	})
 
-func TestZuluWatcher_In(t *testing.T) {
-	mockResp := `{
-		"jdk_version": [8, 0, 302],
-		"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
-	}`
+	Describe("In", func() {
+		Context("when version matches", func() {
+			It("returns the release details", func() {
+				client.response = `{
+					"jdk_version": [8, 0, 302],
+					"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
+				}`
+				watcher = watchers.NewZuluWatcher(client, "8", "jdk")
 
-	client := &mockZuluClient{response: mockResp}
-	watcher := NewZuluWatcher(client, "8", "jdk")
+				release, err := watcher.In("8.0.302")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.Ref).To(Equal("8.0.302"))
+				Expect(release.URL).To(Equal("https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"))
+			})
+		})
 
-	release, err := watcher.In("8.0.302")
-	assert.NoError(t, err)
-	assert.Equal(t, "8.0.302", release.Ref)
-	assert.Equal(t, "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz", release.URL)
-}
+		Context("when version does not match", func() {
+			It("returns an error", func() {
+				client.response = `{
+					"jdk_version": [8, 0, 302],
+					"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
+				}`
+				watcher = watchers.NewZuluWatcher(client, "8", "jdk")
 
-func TestZuluWatcher_In_VersionMismatch(t *testing.T) {
-	mockResp := `{
-		"jdk_version": [8, 0, 302],
-		"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
-	}`
-
-	client := &mockZuluClient{response: mockResp}
-	watcher := NewZuluWatcher(client, "8", "jdk")
-
-	_, err := watcher.In("8.0.999")
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "version mismatch")
-}
+				_, err := watcher.In("8.0.999")
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("version mismatch"))
+			})
+		})
+	})
+})

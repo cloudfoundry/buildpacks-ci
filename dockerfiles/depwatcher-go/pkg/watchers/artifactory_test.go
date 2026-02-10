@@ -1,12 +1,14 @@
-package watchers
+package watchers_test
 
 import (
-	"bytes"
 	"io"
 	"net/http"
-	"testing"
+	"strings"
 
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+
+	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
 
 type mockArtifactoryClient struct {
@@ -20,7 +22,7 @@ func (m *mockArtifactoryClient) Get(url string) (*http.Response, error) {
 	}
 	return &http.Response{
 		StatusCode: 200,
-		Body:       io.NopCloser(bytes.NewBufferString(m.response)),
+		Body:       io.NopCloser(strings.NewReader(m.response)),
 	}, nil
 }
 
@@ -28,170 +30,187 @@ func (m *mockArtifactoryClient) GetWithHeaders(url string, headers http.Header) 
 	return m.Get(url)
 }
 
-func TestArtifactoryWatcher_Check(t *testing.T) {
-	mockResp := `{
-		"results": [
-			{
-				"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
-				"path": "com/example/app/1.2.3/app-1.2.3.jar"
-			},
-			{
-				"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.4/app-1.2.4.jar",
-				"path": "com/example/app/1.2.4/app-1.2.4.jar"
-			},
-			{
-				"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.3.0-SNAPSHOT/app-1.3.0-SNAPSHOT.jar",
-				"path": "com/example/app/1.3.0-SNAPSHOT/app-1.3.0-SNAPSHOT.jar"
-			}
-		]
-	}`
+var _ = Describe("ArtifactoryWatcher", func() {
+	var (
+		client *mockArtifactoryClient
+	)
 
-	client := &mockArtifactoryClient{response: mockResp}
-	watcher, err := NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "libs-release", "", "", "")
-	assert.NoError(t, err)
+	BeforeEach(func() {
+		client = &mockArtifactoryClient{}
+	})
 
-	versions, err := watcher.Check()
-	assert.NoError(t, err)
-	assert.Equal(t, 3, len(versions))
-	assert.Equal(t, "1.2.3", versions[0].Ref)
-	assert.Equal(t, "1.2.4", versions[1].Ref)
-	assert.Equal(t, "1.3.0-SNAPSHOT", versions[2].Ref)
-}
+	Describe("Check", func() {
+		Context("when the API returns valid results", func() {
+			It("returns sorted versions", func() {
+				client.response = `{
+					"results": [
+						{
+							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
+							"path": "com/example/app/1.2.3/app-1.2.3.jar"
+						},
+						{
+							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.4/app-1.2.4.jar",
+							"path": "com/example/app/1.2.4/app-1.2.4.jar"
+						},
+						{
+							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.3.0-SNAPSHOT/app-1.3.0-SNAPSHOT.jar",
+							"path": "com/example/app/1.3.0-SNAPSHOT/app-1.3.0-SNAPSHOT.jar"
+						}
+					]
+				}`
+				watcher, err := watchers.NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "libs-release", "", "", "")
+				Expect(err).NotTo(HaveOccurred())
 
-func TestArtifactoryWatcher_Check_WithArtifactPattern(t *testing.T) {
-	mockResp := `{
-		"results": [
-			{
-				"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
-				"path": "com/example/app/1.2.3/app-1.2.3.jar"
-			},
-			{
-				"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3-sources.jar",
-				"path": "com/example/app/1.2.3/app-1.2.3-sources.jar"
-			},
-			{
-				"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.4/app-1.2.4.jar",
-				"path": "com/example/app/1.2.4/app-1.2.4.jar"
-			}
-		]
-	}`
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(3))
+				Expect(versions[0].Ref).To(Equal("1.2.3"))
+				Expect(versions[1].Ref).To(Equal("1.2.4"))
+				Expect(versions[2].Ref).To(Equal("1.3.0-SNAPSHOT"))
+			})
+		})
 
-	client := &mockArtifactoryClient{response: mockResp}
-	// Only match .jar files that are not sources
-	watcher, err := NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "libs-release", ".*\\.jar$", "", "")
-	assert.NoError(t, err)
+		Context("when artifact pattern is specified", func() {
+			It("filters results by pattern", func() {
+				client.response = `{
+					"results": [
+						{
+							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
+							"path": "com/example/app/1.2.3/app-1.2.3.jar"
+						},
+						{
+							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3-sources.jar",
+							"path": "com/example/app/1.2.3/app-1.2.3-sources.jar"
+						},
+						{
+							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.4/app-1.2.4.jar",
+							"path": "com/example/app/1.2.4/app-1.2.4.jar"
+						}
+					]
+				}`
+				watcher, err := watchers.NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "libs-release", ".*\\.jar$", "", "")
+				Expect(err).NotTo(HaveOccurred())
 
-	versions, err := watcher.Check()
-	assert.NoError(t, err)
-	// Should include all .jar files (sources filtering would need more specific pattern)
-	assert.GreaterOrEqual(t, len(versions), 2)
-}
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(len(versions)).To(BeNumerically(">=", 2))
+			})
+		})
 
-func TestArtifactoryWatcher_Check_MissingURI(t *testing.T) {
-	client := &mockArtifactoryClient{}
-	watcher, err := NewArtifactoryWatcher(client, "", "com.example", "app", "libs-release", "", "", "")
-	assert.NoError(t, err)
+		Context("when URI is missing", func() {
+			It("returns an error", func() {
+				watcher, err := watchers.NewArtifactoryWatcher(client, "", "com.example", "app", "libs-release", "", "", "")
+				Expect(err).NotTo(HaveOccurred())
 
-	_, err = watcher.Check()
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "uri must be specified")
-}
+				_, err = watcher.Check()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("uri must be specified"))
+			})
+		})
 
-func TestArtifactoryWatcher_Check_MissingGroupID(t *testing.T) {
-	client := &mockArtifactoryClient{}
-	watcher, err := NewArtifactoryWatcher(client, "https://artifactory.example.com", "", "app", "libs-release", "", "", "")
-	assert.NoError(t, err)
+		Context("when group ID is missing", func() {
+			It("returns an error", func() {
+				watcher, err := watchers.NewArtifactoryWatcher(client, "https://artifactory.example.com", "", "app", "libs-release", "", "", "")
+				Expect(err).NotTo(HaveOccurred())
 
-	_, err = watcher.Check()
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "group_id must be specified")
-}
+				_, err = watcher.Check()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("group_id must be specified"))
+			})
+		})
 
-func TestArtifactoryWatcher_Check_MissingArtifactID(t *testing.T) {
-	client := &mockArtifactoryClient{}
-	watcher, err := NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "", "libs-release", "", "", "")
-	assert.NoError(t, err)
+		Context("when artifact ID is missing", func() {
+			It("returns an error", func() {
+				watcher, err := watchers.NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "", "libs-release", "", "", "")
+				Expect(err).NotTo(HaveOccurred())
 
-	_, err = watcher.Check()
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "artifact_id must be specified")
-}
+				_, err = watcher.Check()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("artifact_id must be specified"))
+			})
+		})
 
-func TestArtifactoryWatcher_Check_MissingRepository(t *testing.T) {
-	client := &mockArtifactoryClient{}
-	watcher, err := NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "", "", "", "")
-	assert.NoError(t, err)
+		Context("when repository is missing", func() {
+			It("returns an error", func() {
+				watcher, err := watchers.NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "", "", "", "")
+				Expect(err).NotTo(HaveOccurred())
 
-	_, err = watcher.Check()
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "repository must be specified")
-}
+				_, err = watcher.Check()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("repository must be specified"))
+			})
+		})
 
-func TestArtifactoryWatcher_Check_InvalidArtifactPattern(t *testing.T) {
-	client := &mockArtifactoryClient{}
-	_, err := NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "libs-release", "[invalid", "", "")
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "invalid artifact pattern")
-}
+		Context("when artifact pattern is invalid", func() {
+			It("returns an error during construction", func() {
+				_, err := watchers.NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "libs-release", "[invalid", "", "")
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("invalid artifact pattern"))
+			})
+		})
+	})
 
-func TestArtifactoryWatcher_In(t *testing.T) {
-	mockResp := `{
-		"results": [
-			{
-				"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
-				"path": "com/example/app/1.2.3/app-1.2.3.jar"
-			},
-			{
-				"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.4/app-1.2.4.jar",
-				"path": "com/example/app/1.2.4/app-1.2.4.jar"
-			}
-		]
-	}`
+	Describe("In", func() {
+		Context("when version is found", func() {
+			It("returns the release details", func() {
+				client.response = `{
+					"results": [
+						{
+							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
+							"path": "com/example/app/1.2.3/app-1.2.3.jar"
+						},
+						{
+							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.4/app-1.2.4.jar",
+							"path": "com/example/app/1.2.4/app-1.2.4.jar"
+						}
+					]
+				}`
+				watcher, err := watchers.NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "libs-release", "", "", "")
+				Expect(err).NotTo(HaveOccurred())
 
-	client := &mockArtifactoryClient{response: mockResp}
-	watcher, err := NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "libs-release", "", "", "")
-	assert.NoError(t, err)
+				release, err := watcher.In("1.2.3")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.Ref).To(Equal("1.2.3"))
+				Expect(release.URL).To(Equal("https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar"))
+			})
+		})
 
-	release, err := watcher.In("1.2.3")
-	assert.NoError(t, err)
-	assert.Equal(t, "1.2.3", release.Ref)
-	assert.Equal(t, "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar", release.URL)
-}
+		Context("when version is not found", func() {
+			It("returns an error", func() {
+				client.response = `{
+					"results": [
+						{
+							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
+							"path": "com/example/app/1.2.3/app-1.2.3.jar"
+						}
+					]
+				}`
+				watcher, err := watchers.NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "libs-release", "", "", "")
+				Expect(err).NotTo(HaveOccurred())
 
-func TestArtifactoryWatcher_In_VersionNotFound(t *testing.T) {
-	mockResp := `{
-		"results": [
-			{
-				"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
-				"path": "com/example/app/1.2.3/app-1.2.3.jar"
-			}
-		]
-	}`
+				_, err = watcher.In("9.9.9")
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("could not find version"))
+			})
+		})
 
-	client := &mockArtifactoryClient{response: mockResp}
-	watcher, err := NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "libs-release", "", "", "")
-	assert.NoError(t, err)
+		Context("when authentication is provided", func() {
+			It("returns the release details", func() {
+				client.response = `{
+					"results": [
+						{
+							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
+							"path": "com/example/app/1.2.3/app-1.2.3.jar"
+						}
+					]
+				}`
+				watcher, err := watchers.NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "libs-release", "", "user", "pass")
+				Expect(err).NotTo(HaveOccurred())
 
-	_, err = watcher.In("9.9.9")
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "could not find version")
-}
-
-func TestArtifactoryWatcher_In_WithAuth(t *testing.T) {
-	mockResp := `{
-		"results": [
-			{
-				"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
-				"path": "com/example/app/1.2.3/app-1.2.3.jar"
-			}
-		]
-	}`
-
-	client := &mockArtifactoryClient{response: mockResp}
-	watcher, err := NewArtifactoryWatcher(client, "https://artifactory.example.com", "com.example", "app", "libs-release", "", "user", "pass")
-	assert.NoError(t, err)
-
-	release, err := watcher.In("1.2.3")
-	assert.NoError(t, err)
-	assert.Equal(t, "1.2.3", release.Ref)
-}
+				release, err := watcher.In("1.2.3")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.Ref).To(Equal("1.2.3"))
+			})
+		})
+	})
+})

@@ -1,12 +1,14 @@
-package watchers
+package watchers_test
 
 import (
-	"bytes"
 	"io"
 	"net/http"
-	"testing"
+	"strings"
 
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+
+	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
 
 type mockJProfilerClient struct {
@@ -20,7 +22,7 @@ func (m *mockJProfilerClient) Get(url string) (*http.Response, error) {
 	}
 	return &http.Response{
 		StatusCode: 200,
-		Body:       io.NopCloser(bytes.NewBufferString(m.response)),
+		Body:       io.NopCloser(strings.NewReader(m.response)),
 	}, nil
 }
 
@@ -28,40 +30,53 @@ func (m *mockJProfilerClient) GetWithHeaders(url string, headers http.Header) (*
 	return m.Get(url)
 }
 
-func TestJProfilerWatcher_Check(t *testing.T) {
-	mockHTML := `<html><body>
-		<div class="release-heading">Release 13.0.3 (Build 13033)</div>
-		<div class="release-heading">Release 13.0.2 (Build 13024)</div>
-		<div class="release-heading">Release 12.0.4 (Build 12048)</div>
-	</body></html>`
+var _ = Describe("JProfilerWatcher", func() {
+	var (
+		client  *mockJProfilerClient
+		watcher *watchers.JProfilerWatcher
+	)
 
-	client := &mockJProfilerClient{response: mockHTML}
-	watcher := NewJProfilerWatcher(client)
+	BeforeEach(func() {
+		client = &mockJProfilerClient{}
+		watcher = watchers.NewJProfilerWatcher(client)
+	})
 
-	versions, err := watcher.Check()
-	assert.NoError(t, err)
-	assert.Equal(t, 3, len(versions))
-	assert.Equal(t, "12.0.4", versions[0].Ref)
-	assert.Equal(t, "13.0.2", versions[1].Ref)
-	assert.Equal(t, "13.0.3", versions[2].Ref)
-}
+	Describe("Check", func() {
+		Context("when the HTML contains release headings", func() {
+			It("returns sorted versions", func() {
+				client.response = `<html><body>
+					<div class="release-heading">Release 13.0.3 (Build 13033)</div>
+					<div class="release-heading">Release 13.0.2 (Build 13024)</div>
+					<div class="release-heading">Release 12.0.4 (Build 12048)</div>
+				</body></html>`
 
-func TestJProfilerWatcher_In(t *testing.T) {
-	client := &mockJProfilerClient{}
-	watcher := NewJProfilerWatcher(client)
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(3))
+				Expect(versions[0].Ref).To(Equal("12.0.4"))
+				Expect(versions[1].Ref).To(Equal("13.0.2"))
+				Expect(versions[2].Ref).To(Equal("13.0.3"))
+			})
+		})
+	})
 
-	release, err := watcher.In("13.0.3")
-	assert.NoError(t, err)
-	assert.Equal(t, "13.0.3", release.Ref)
-	assert.Equal(t, "https://download-gcdn.ej-technologies.com/jprofiler/jprofiler_linux_13_0_3.tar.gz", release.URL)
-}
+	Describe("In", func() {
+		Context("when version has a patch number", func() {
+			It("returns the release details with patch in filename", func() {
+				release, err := watcher.In("13.0.3")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.Ref).To(Equal("13.0.3"))
+				Expect(release.URL).To(Equal("https://download-gcdn.ej-technologies.com/jprofiler/jprofiler_linux_13_0_3.tar.gz"))
+			})
+		})
 
-func TestJProfilerWatcher_In_NoPatch(t *testing.T) {
-	client := &mockJProfilerClient{}
-	watcher := NewJProfilerWatcher(client)
-
-	release, err := watcher.In("13.0.0")
-	assert.NoError(t, err)
-	assert.Equal(t, "13.0.0", release.Ref)
-	assert.Equal(t, "https://download-gcdn.ej-technologies.com/jprofiler/jprofiler_linux_13_0.tar.gz", release.URL)
-}
+		Context("when version has no patch number", func() {
+			It("returns the release details without patch in filename", func() {
+				release, err := watcher.In("13.0.0")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.Ref).To(Equal("13.0.0"))
+				Expect(release.URL).To(Equal("https://download-gcdn.ej-technologies.com/jprofiler/jprofiler_linux_13_0.tar.gz"))
+			})
+		})
+	})
+})
