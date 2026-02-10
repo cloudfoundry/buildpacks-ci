@@ -204,7 +204,7 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 		versions, err = watcher.Check()
 
 	case "appdynamics":
-		watcher := watchers.NewAppDynamicsWatcher(client, source.AgentType, source.Username, source.Password)
+		watcher := watchers.NewAppDynamicsWatcher(client, source.AgentType)
 		versions, err = watcher.Check()
 
 	case "gradle":
@@ -237,7 +237,7 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 		versions, err = watcher.Check()
 
 	case "liberica":
-		watcher := watchers.NewLibericaWatcher(client, source.Version, source.Product, source.BundleType, source.Token)
+		watcher := watchers.NewLibericaWatcher(client, source.Version, source.BundleType, source.Token)
 		versions, err = watcher.Check()
 
 	case "zulu":
@@ -438,7 +438,7 @@ func InWithClient(source Source, version base.Internal, client base.HTTPClient) 
 		return watcher.In(version.Ref)
 
 	case "appdynamics":
-		watcher := watchers.NewAppDynamicsWatcher(client, source.AgentType, source.Username, source.Password)
+		watcher := watchers.NewAppDynamicsWatcher(client, source.AgentType)
 		return watcher.In(version.Ref)
 
 	case "gradle":
@@ -471,7 +471,7 @@ func InWithClient(source Source, version base.Internal, client base.HTTPClient) 
 		return watcher.In(version.Ref)
 
 	case "liberica":
-		watcher := watchers.NewLibericaWatcher(client, source.Version, source.Product, source.BundleType, source.Token)
+		watcher := watchers.NewLibericaWatcher(client, source.Version, source.BundleType, source.Token)
 		return watcher.In(version.Ref)
 
 	case "zulu":

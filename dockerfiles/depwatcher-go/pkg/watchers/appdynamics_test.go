@@ -30,7 +30,7 @@ func TestAppDynamicsWatcher_Check(t *testing.T) {
 			},
 		}
 
-		watcher := watchers.NewAppDynamicsWatcher(mockClient, "java", "user", "pass")
+		watcher := watchers.NewAppDynamicsWatcher(mockClient, "java")
 		versions, err := watcher.Check()
 
 		require.NoError(t, err)
@@ -55,7 +55,7 @@ func TestAppDynamicsWatcher_Check(t *testing.T) {
 			},
 		}
 
-		watcher := watchers.NewAppDynamicsWatcher(mockClient, "machine", "user", "pass")
+		watcher := watchers.NewAppDynamicsWatcher(mockClient, "machine")
 		versions, err := watcher.Check()
 
 		require.NoError(t, err)
@@ -80,7 +80,7 @@ func TestAppDynamicsWatcher_Check(t *testing.T) {
 			},
 		}
 
-		watcher := watchers.NewAppDynamicsWatcher(mockClient, "php-tar", "user", "pass")
+		watcher := watchers.NewAppDynamicsWatcher(mockClient, "php-tar")
 		versions, err := watcher.Check()
 
 		require.NoError(t, err)
@@ -105,7 +105,7 @@ func TestAppDynamicsWatcher_Check(t *testing.T) {
 			},
 		}
 
-		watcher := watchers.NewAppDynamicsWatcher(mockClient, "unknown", "user", "pass")
+		watcher := watchers.NewAppDynamicsWatcher(mockClient, "unknown")
 		_, err := watcher.Check()
 
 		require.Error(t, err)
@@ -134,7 +134,7 @@ func TestAppDynamicsWatcher_In(t *testing.T) {
 			},
 		}
 
-		watcher := watchers.NewAppDynamicsWatcher(mockClient, "java", "user", "pass")
+		watcher := watchers.NewAppDynamicsWatcher(mockClient, "java")
 		release, err := watcher.In("23.11.0-35669")
 
 		require.NoError(t, err)
@@ -163,7 +163,7 @@ func TestAppDynamicsWatcher_In(t *testing.T) {
 			},
 		}
 
-		watcher := watchers.NewAppDynamicsWatcher(mockClient, "php-tar", "user", "pass")
+		watcher := watchers.NewAppDynamicsWatcher(mockClient, "php-tar")
 		release, err := watcher.In("23.10.0-6006")
 
 		require.NoError(t, err)
@@ -177,7 +177,7 @@ func TestAppDynamicsWatcher_In(t *testing.T) {
 			responses: map[string]*http.Response{},
 		}
 
-		watcher := watchers.NewAppDynamicsWatcher(mockClient, "java", "user", "pass")
+		watcher := watchers.NewAppDynamicsWatcher(mockClient, "java")
 		_, err := watcher.In("invalid")
 
 		require.Error(t, err)
@@ -202,7 +202,7 @@ func TestAppDynamicsVersionConversion(t *testing.T) {
 		},
 	}
 
-	watcher := watchers.NewAppDynamicsWatcher(mockClient, "java", "user", "pass")
+	watcher := watchers.NewAppDynamicsWatcher(mockClient, "java")
 	versions, err := watcher.Check()
 
 	require.NoError(t, err)

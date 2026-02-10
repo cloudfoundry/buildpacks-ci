@@ -101,7 +101,7 @@ echo '{"source":{"type":"node"},"version":{"ref":"20.11.0"}}' | ./in /tmp/output
 | `tomcat` | Apache Tomcat | `uri` | `{"type":"tomcat","uri":"https://archive.apache.org/dist/tomcat/tomcat-9"}` |
 | `wildfly` | WildFly application server | None | `{"type":"wildfly"}` |
 | `corretto` | Amazon Corretto JDK | `owner`, `repository` | `{"type":"corretto","owner":"corretto","repository":"corretto-8"}` |
-| `liberica` | Bellsoft Liberica JDK | `version`, `product`, `bundle_type` | `{"type":"liberica","version":"11","product":"jdk","bundle_type":"jdk"}` |
+| `liberica` | Bellsoft Liberica JDK | `version`, `bundle_type` | `{"type":"liberica","version":"11","bundle_type":"jdk"}` |
 | `zulu` | Azul Zulu JDK | `version`, `bundle_type` | `{"type":"zulu","version":"8","bundle_type":"jdk"}` |
 | `adoptopenjdk` | AdoptOpenJDK (EOL) | `version`, `implementation`, `jdk_type` | `{"type":"adoptopenjdk","version":"8","implementation":"hotspot","jdk_type":"jdk"}` |
 | `artifactory` | Artifactory repository | `uri`, `group_id`, `artifact_id` | `{"type":"artifactory","uri":"https://repo.example.com","group_id":"com.example","artifact_id":"myapp"}` |

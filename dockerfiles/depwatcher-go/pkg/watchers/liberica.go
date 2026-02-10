@@ -16,7 +16,6 @@ import (
 type LibericaWatcher struct {
 	client  base.HTTPClient
 	version string
-	product string
 	typ     string
 	token   string
 }
@@ -29,11 +28,10 @@ type libericaRelease struct {
 	DownloadURL    string `json:"downloadUrl"`
 }
 
-func NewLibericaWatcher(client base.HTTPClient, version, product, typ, token string) *LibericaWatcher {
+func NewLibericaWatcher(client base.HTTPClient, version, typ, token string) *LibericaWatcher {
 	return &LibericaWatcher{
 		client:  client,
 		version: version,
-		product: product,
 		typ:     typ,
 		token:   token,
 	}

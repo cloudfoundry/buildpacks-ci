@@ -47,7 +47,7 @@ func TestLibericaWatcher_Check(t *testing.T) {
 	]`
 
 	client := &mockLibericaClient{response: mockResp}
-	watcher := NewLibericaWatcher(client, "8", "jdk", "jdk", "")
+	watcher := NewLibericaWatcher(client, "8", "jdk", "")
 
 	versions, err := watcher.Check()
 	assert.NoError(t, err)
@@ -58,7 +58,7 @@ func TestLibericaWatcher_Check(t *testing.T) {
 
 func TestLibericaWatcher_Check_MissingVersion(t *testing.T) {
 	client := &mockLibericaClient{}
-	watcher := NewLibericaWatcher(client, "", "jdk", "jdk", "")
+	watcher := NewLibericaWatcher(client, "", "jdk", "")
 
 	_, err := watcher.Check()
 	assert.Error(t, err)
@@ -67,7 +67,7 @@ func TestLibericaWatcher_Check_MissingVersion(t *testing.T) {
 
 func TestLibericaWatcher_Check_MissingType(t *testing.T) {
 	client := &mockLibericaClient{}
-	watcher := NewLibericaWatcher(client, "8", "jdk", "", "")
+	watcher := NewLibericaWatcher(client, "8", "", "")
 
 	_, err := watcher.Check()
 	assert.Error(t, err)
@@ -86,7 +86,7 @@ func TestLibericaWatcher_In(t *testing.T) {
 	]`
 
 	client := &mockLibericaClient{response: mockResp}
-	watcher := NewLibericaWatcher(client, "8", "jdk", "jdk", "")
+	watcher := NewLibericaWatcher(client, "8", "jdk", "")
 
 	release, err := watcher.In("8.0.302+8")
 	assert.NoError(t, err)
@@ -106,7 +106,7 @@ func TestLibericaWatcher_In_VersionNotFound(t *testing.T) {
 	]`
 
 	client := &mockLibericaClient{response: mockResp}
-	watcher := NewLibericaWatcher(client, "8", "jdk", "jdk", "")
+	watcher := NewLibericaWatcher(client, "8", "jdk", "")
 
 	_, err := watcher.In("8.0.999+1")
 	assert.Error(t, err)

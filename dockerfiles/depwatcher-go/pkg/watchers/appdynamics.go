@@ -1,7 +1,6 @@
 package watchers
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,14 +15,11 @@ import (
 const (
 	appdynamicsLatestURI = "https://download.appdynamics.com/download/downloadfilelatest/"
 	appdynamicsFetchURI  = "https://download.appdynamics.com/download/downloadfile/"
-	appdynamicsTokenURI  = "https://identity.msrv.saas.appdynamics.com/v2.0/oauth/token"
 )
 
 type AppDynamicsWatcher struct {
 	client    base.HTTPClient
 	agentType string
-	username  string
-	password  string
 }
 
 type appdynamicsAPIResponse struct {
@@ -40,23 +36,14 @@ type appdynamicsAPIPageResponse struct {
 	Results  []appdynamicsAPIResponse `json:"results"`
 }
 
-type appdynamicsTokenResponse struct {
-	TokenType   string `json:"token_type"`
-	ExpiresIn   int    `json:"expires_in"`
-	AccessToken string `json:"access_token"`
-	Scope       string `json:"scope"`
-}
-
 var appdynamicsVersionPattern = regexp.MustCompile(`(\d+)\.(\d+)\.(\d+)\.(\d+)`)
 
 // NewAppDynamicsWatcher creates a new AppDynamics watcher for generic agents (java, machine, php, php-tar).
 // This is distinct from AppdAgentWatcher which only handles PHP agents from Pivotal's download server.
-func NewAppDynamicsWatcher(client base.HTTPClient, agentType, username, password string) *AppDynamicsWatcher {
+func NewAppDynamicsWatcher(client base.HTTPClient, agentType string) *AppDynamicsWatcher {
 	return &AppDynamicsWatcher{
 		client:    client,
 		agentType: agentType,
-		username:  username,
-		password:  password,
 	}
 }
 
@@ -149,38 +136,6 @@ func (w *AppDynamicsWatcher) In(ref string) (base.Release, error) {
 	}
 
 	return base.Release{}, fmt.Errorf("version %s not found for agent type %s", ref, w.agentType)
-}
-
-// fetchAPIToken retrieves an OAuth token from AppDynamics identity service.
-// This token is required for downloading agents.
-func (w *AppDynamicsWatcher) fetchAPIToken() (string, error) {
-	payload := map[string]interface{}{
-		"username": w.username,
-		"password": w.password,
-		"scopes":   []string{"download"},
-	}
-
-	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal token request: %w", err)
-	}
-
-	resp, err := http.Post(appdynamicsTokenURI, "application/json", bytes.NewBuffer(jsonPayload))
-	if err != nil {
-		return "", fmt.Errorf("failed to request token: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unexpected status code %d from token endpoint", resp.StatusCode)
-	}
-
-	var tokenResp appdynamicsTokenResponse
-	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
-		return "", fmt.Errorf("failed to parse token response: %w", err)
-	}
-
-	return fmt.Sprintf("%s %s", tokenResp.TokenType, tokenResp.AccessToken), nil
 }
 
 // convertVersion converts AppDynamics version format from X.Y.Z.W to X.Y.Z-W
