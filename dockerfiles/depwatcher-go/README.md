@@ -4,13 +4,13 @@ A Concourse resource implementation for watching dependency releases. Depwatcher
 
 ## Overview
 
-Depwatcher provides a unified interface to check for new releases across 27 different dependency sources, from programming languages (Ruby, Python, Node.js, Go) to web servers (Nginx, Apache), package managers (NPM, PyPI, RubyGems), and specialized tools (.NET SDKs, R packages, APM agents).
+Depwatcher provides a unified interface to check for new releases across 39 different dependency sources, from programming languages (Ruby, Python, Node.js, Go, Java) to web servers (Nginx, Apache, Tomcat, WildFly), package managers (NPM, PyPI, RubyGems, Maven), and specialized tools (.NET SDKs, R packages, APM agents, JDK distributions, Java profilers).
 
 **Key Features:**
-- **27 supported dependency sources** - Languages, frameworks, tools, and libraries
-- **Flexible version filtering** - Track specific version lines (e.g., Ruby 3.2.x, PHP 8.3.x)
-- **API-first architecture** - Reliable data from official APIs (GitHub, NPM, PyPI, etc.)
-- **Production ready** - 299 passing tests with comprehensive coverage
+- **39 supported dependency sources** - Languages, frameworks, tools, libraries, and JDKs
+- **Flexible version filtering** - Track specific version lines (e.g., Ruby 3.2.x, PHP 8.3.x, Tomcat 9.x)
+- **API-first architecture** - Reliable data from official APIs (GitHub, NPM, PyPI, Maven, etc.)
+- **Production ready** - 273 passing tests with comprehensive coverage
 - **Concourse native** - Standard `check` and `in` operations
 
 ## Quick Start
@@ -92,6 +92,23 @@ echo '{"source":{"type":"node"},"version":{"ref":"20.11.0"}}' | ./in /tmp/output
 | `appd_agent` | AppDynamics PHP Agent | `{"type":"appd_agent"}` |
 | `ca_apm_agent` | CA APM PHP Agent | `{"type":"ca_apm_agent"}` |
 
+### Java Dependencies
+
+| Type | Description | Required Fields | Example |
+|------|-------------|----------------|---------|
+| `gradle` | Gradle build tool | None | `{"type":"gradle"}` |
+| `maven` | Maven artifacts | `uri`, `group_id`, `artifact_id` | `{"type":"maven","uri":"https://repo1.maven.org/maven2","group_id":"org.springframework.boot","artifact_id":"spring-boot"}` |
+| `tomcat` | Apache Tomcat | `uri` | `{"type":"tomcat","uri":"https://archive.apache.org/dist/tomcat/tomcat-9"}` |
+| `wildfly` | WildFly application server | None | `{"type":"wildfly"}` |
+| `corretto` | Amazon Corretto JDK | `owner`, `repository` | `{"type":"corretto","owner":"corretto","repository":"corretto-8"}` |
+| `liberica` | Bellsoft Liberica JDK | `version`, `bundle_type` | `{"type":"liberica","version":"11","bundle_type":"jdk"}` |
+| `zulu` | Azul Zulu JDK | `version`, `bundle_type` | `{"type":"zulu","version":"8","bundle_type":"jdk"}` |
+| `adoptopenjdk` | AdoptOpenJDK (EOL) | `version`, `implementation`, `jdk_type` | `{"type":"adoptopenjdk","version":"8","implementation":"hotspot","jdk_type":"jdk"}` |
+| `artifactory` | Artifactory repository | `uri`, `group_id`, `artifact_id` | `{"type":"artifactory","uri":"https://repo.example.com","group_id":"com.example","artifact_id":"myapp"}` |
+| `jprofiler` | JProfiler profiler | None | `{"type":"jprofiler"}` |
+| `yourkit` | YourKit profiler | None | `{"type":"yourkit"}` |
+| `skywalking` | Apache SkyWalking agent | None | `{"type":"skywalking"}` |
+
 ### GitHub Sources
 
 | Type | Required Fields | Description | Example |
@@ -155,6 +172,91 @@ The token is automatically injected as `OAUTH_AUTHORIZATION_TOKEN` and redacted 
 - `fetch_source`: Fetch source tarball if no matching assets (default: false)
 - `version_filter`: Semver pattern matching
 
+### Java Dependencies Configuration
+
+**Maven Repositories:**
+```json
+{
+  "source": {
+    "type": "maven",
+    "uri": "https://repo1.maven.org/maven2",
+    "group_id": "org.springframework.boot",
+    "artifact_id": "spring-boot",
+    "packaging": "jar",
+    "classifier": "sources",
+    "username": "((maven_user))",
+    "password": "((maven_pass))"
+  }
+}
+```
+
+- `uri`: Maven repository base URL
+- `group_id`: Maven group ID (dots become slashes in path)
+- `artifact_id`: Maven artifact ID
+- `packaging`: Artifact packaging type (default: "jar")
+- `classifier`: Optional classifier (e.g., "sources", "javadoc")
+- `username`/`password`: Optional Basic Auth credentials
+
+**Tomcat Versions:**
+```json
+{
+  "source": {
+    "type": "tomcat",
+    "uri": "https://archive.apache.org/dist/tomcat/tomcat-9"
+  }
+}
+```
+
+**JDK Distributions:**
+```json
+{
+  "source": {
+    "type": "liberica",
+    "version": "11",
+    "product": "jdk",
+    "bundle_type": "jdk",
+    "token": "Authorization: Bearer ((api_token))"
+  }
+}
+```
+
+```json
+{
+  "source": {
+    "type": "corretto",
+    "owner": "corretto",
+    "repository": "corretto-8"
+  }
+}
+```
+
+```json
+{
+  "source": {
+    "type": "zulu",
+    "version": "8",
+    "bundle_type": "jdk"
+  }
+}
+```
+
+**Artifactory:**
+```json
+{
+  "source": {
+    "type": "artifactory",
+    "uri": "https://artifactory.example.com",
+    "group_id": "com.example",
+    "artifact_id": "myapp",
+    "artifact_pattern": ".*\\.jar$",
+    "username": "((artifactory_user))",
+    "password": "((artifactory_pass))"
+  }
+}
+```
+
+- `artifact_pattern`: Regex pattern to filter artifacts (optional)
+
 ## Concourse Resource Type
 
 Use in your Concourse pipeline:
@@ -180,12 +282,43 @@ resources:
       type: ruby
       version_filter: "3.3"
 
+  # Java dependency examples
+  - name: gradle
+    type: depwatcher
+    source:
+      type: gradle
+
+  - name: tomcat-9
+    type: depwatcher
+    source:
+      type: tomcat
+      uri: https://archive.apache.org/dist/tomcat/tomcat-9
+
+  - name: corretto-8
+    type: depwatcher
+    source:
+      type: corretto
+      owner: corretto
+      repository: corretto-8
+
+  - name: spring-boot
+    type: depwatcher
+    source:
+      type: maven
+      uri: https://repo1.maven.org/maven2
+      group_id: org.springframework.boot
+      artifact_id: spring-boot
+
 jobs:
   - name: update-dependencies
     plan:
       - get: node-lts
         trigger: true
       - get: ruby-3-3
+        trigger: true
+      - get: gradle
+        trigger: true
+      - get: tomcat-9
         trigger: true
 ```
 
@@ -209,11 +342,11 @@ jobs:
 
 ### Test Coverage
 
-- **299 passing unit tests** across all components
-- **31 factory tests** - Watcher routing and initialization
-- **8 base tests** - HTTP client and common types
-- **22 semver tests** - Version parsing and filtering
-- **238 watcher tests** - All 27 dependency sources
+- **273 passing unit tests** across all components
+- **Factory tests** - Watcher routing and initialization  
+- **Base tests** - HTTP client and common types
+- **Semver tests** - Version parsing and filtering
+- **Watcher tests** - All 39 dependency sources including 12 Java-specific watchers
 
 ### Project Structure
 
