@@ -65,15 +65,6 @@ func TestLibericaWatcher_Check_MissingVersion(t *testing.T) {
 	assert.Contains(t, err.Error(), "version must be specified")
 }
 
-func TestLibericaWatcher_Check_MissingProduct(t *testing.T) {
-	client := &mockLibericaClient{}
-	watcher := NewLibericaWatcher(client, "8", "", "jdk", "")
-
-	_, err := watcher.Check()
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "product must be specified")
-}
-
 func TestLibericaWatcher_Check_MissingType(t *testing.T) {
 	client := &mockLibericaClient{}
 	watcher := NewLibericaWatcher(client, "8", "jdk", "", "")

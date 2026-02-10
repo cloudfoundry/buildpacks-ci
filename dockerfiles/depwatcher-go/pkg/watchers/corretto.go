@@ -77,6 +77,10 @@ func (w *CorrettoWatcher) fetchReleases() ([]correttoRelease, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected status code %d fetching %s", resp.StatusCode, url)
+	}
+
 	var releases []correttoRelease
 	if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
 		return nil, fmt.Errorf("decoding releases: %w", err)

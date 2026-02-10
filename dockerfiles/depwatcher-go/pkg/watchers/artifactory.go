@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"path"
 	"regexp"
 	"sort"
@@ -137,8 +138,13 @@ func (w *ArtifactoryWatcher) search() (*artifactorySearchResult, error) {
 		return nil, fmt.Errorf("repository must be specified")
 	}
 
-	searchURL := fmt.Sprintf("%s/api/search/gavc?g=%s&a=%s&repos=%s",
-		w.uri, w.groupID, w.artifactID, w.repository)
+	// Build URL with properly escaped query parameters
+	baseURL := fmt.Sprintf("%s/api/search/gavc", w.uri)
+	params := url.Values{}
+	params.Set("g", w.groupID)
+	params.Set("a", w.artifactID)
+	params.Set("repos", w.repository)
+	searchURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 
 	req, err := http.NewRequest("GET", searchURL, nil)
 	if err != nil {

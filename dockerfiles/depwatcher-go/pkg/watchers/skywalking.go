@@ -26,6 +26,10 @@ func (w *SkyWalkingWatcher) Check() ([]base.Internal, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected status code %d fetching https://skywalking.apache.org/downloads", resp.StatusCode)
+	}
+
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("parsing HTML: %w", err)
@@ -60,6 +64,10 @@ func (w *SkyWalkingWatcher) In(ref string) (base.Release, error) {
 		return base.Release{}, fmt.Errorf("fetching mirror page: %w", err)
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return base.Release{}, fmt.Errorf("unexpected status code %d fetching %s", resp.StatusCode, mirrorURL)
+	}
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {

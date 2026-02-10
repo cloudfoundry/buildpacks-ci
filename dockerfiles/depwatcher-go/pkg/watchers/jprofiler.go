@@ -26,6 +26,10 @@ func (w *JProfilerWatcher) Check() ([]base.Internal, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected status code %d fetching https://www.ej-technologies.com/jprofiler/changelog", resp.StatusCode)
+	}
+
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("parsing HTML: %w", err)

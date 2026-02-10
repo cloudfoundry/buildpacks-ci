@@ -77,9 +77,6 @@ func (w *LibericaWatcher) fetchReleases() ([]libericaRelease, error) {
 	if w.version == "" {
 		return nil, fmt.Errorf("version must be specified")
 	}
-	if w.product == "" {
-		return nil, fmt.Errorf("product must be specified")
-	}
 	if w.typ == "" {
 		return nil, fmt.Errorf("type must be specified")
 	}

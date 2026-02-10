@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type AdoptOpenJDKWatcher struct {
@@ -78,9 +77,7 @@ func (w *AdoptOpenJDKWatcher) Check() ([]base.Internal, error) {
 		}
 	}
 
-	internals = w.sortVersions(internals)
-
-	return internals, nil
+	return base.SortVersions(internals), nil
 }
 
 func (w *AdoptOpenJDKWatcher) In(ref string) (base.Release, error) {
@@ -132,27 +129,6 @@ func (w *AdoptOpenJDKWatcher) In(ref string) (base.Release, error) {
 func (w *AdoptOpenJDKWatcher) buildAPIURL() string {
 	return fmt.Sprintf("https://api.adoptopenjdk.net/v3/assets/version/%s?architecture=x64&heap_size=normal&image_type=%s&jvm_impl=%s&os=linux&release_type=ga&vendor=adoptopenjdk",
 		url.PathEscape(w.version), w.jdkType, w.implementation)
-}
-
-func (w *AdoptOpenJDKWatcher) sortVersions(internals []base.Internal) []base.Internal {
-	sorted := make([]base.Internal, len(internals))
-	copy(sorted, internals)
-
-	for i := 0; i < len(sorted)-1; i++ {
-		for j := i + 1; j < len(sorted); j++ {
-			vi, err1 := semver.Parse(sorted[i].Ref)
-			vj, err2 := semver.Parse(sorted[j].Ref)
-			if err1 != nil || err2 != nil {
-				if sorted[i].Ref > sorted[j].Ref {
-					sorted[i], sorted[j] = sorted[j], sorted[i]
-				}
-			} else if vj.LessThan(vi) {
-				sorted[i], sorted[j] = sorted[j], sorted[i]
-			}
-		}
-	}
-
-	return sorted
 }
 
 func GetFilenameFromURL(downloadURL string) string {

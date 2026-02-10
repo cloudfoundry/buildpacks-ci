@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type MavenWatcher struct {
@@ -95,9 +94,7 @@ func (w *MavenWatcher) Check() ([]base.Internal, error) {
 		}
 	}
 
-	internals = w.sortVersions(internals)
-
-	return internals, nil
+	return base.SortVersions(internals), nil
 }
 
 func base64Encode(s string) string {
@@ -154,25 +151,4 @@ func (w *MavenWatcher) normalizeVersion(version string) string {
 	}
 
 	return normalized
-}
-
-func (w *MavenWatcher) sortVersions(internals []base.Internal) []base.Internal {
-	sorted := make([]base.Internal, len(internals))
-	copy(sorted, internals)
-
-	for i := 0; i < len(sorted)-1; i++ {
-		for j := i + 1; j < len(sorted); j++ {
-			vi, err1 := semver.Parse(sorted[i].Ref)
-			vj, err2 := semver.Parse(sorted[j].Ref)
-			if err1 != nil || err2 != nil {
-				if sorted[i].Ref > sorted[j].Ref {
-					sorted[i], sorted[j] = sorted[j], sorted[i]
-				}
-			} else if vj.LessThan(vi) {
-				sorted[i], sorted[j] = sorted[j], sorted[i]
-			}
-		}
-	}
-
-	return sorted
 }

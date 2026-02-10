@@ -25,6 +25,10 @@ func (w *YourKitWatcher) Check() ([]base.Internal, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("unexpected status code %d fetching https://www.yourkit.com/download/", resp.StatusCode)
+	}
+
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("parsing HTML: %w", err)
