@@ -1,15 +1,11 @@
 package watchers_test
 
 import (
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
-
-
-
 
 var _ = Describe("ZuluWatcher", func() {
 	var (
@@ -24,10 +20,12 @@ var _ = Describe("ZuluWatcher", func() {
 	Describe("Check", func() {
 		Context("when the API returns valid release data", func() {
 			It("returns the version", func() {
-				client.Response = `{
-					"jdk_version": [8, 0, 302],
-					"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
-				}`
+				client.Response = `[{
+					"java_version": [8, 0, 302],
+					"download_url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz",
+					"name": "zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz",
+					"latest": true
+				}]`
 				watcher = watchers.NewZuluWatcher(client, "8", "jdk")
 
 				versions, err := watcher.Check()
@@ -59,10 +57,12 @@ var _ = Describe("ZuluWatcher", func() {
 
 		Context("when version has invalid number of components", func() {
 			It("returns an error", func() {
-				client.Response = `{
-					"jdk_version": [8, 0],
-					"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
-				}`
+				client.Response = `[{
+					"java_version": [8, 0],
+					"download_url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz",
+					"name": "zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz",
+					"latest": true
+				}]`
 				watcher = watchers.NewZuluWatcher(client, "8", "jdk")
 
 				_, err := watcher.Check()
@@ -75,10 +75,12 @@ var _ = Describe("ZuluWatcher", func() {
 	Describe("In", func() {
 		Context("when version matches", func() {
 			It("returns the release details", func() {
-				client.Response = `{
-					"jdk_version": [8, 0, 302],
-					"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
-				}`
+				client.Response = `[{
+					"java_version": [8, 0, 302],
+					"download_url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz",
+					"name": "zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz",
+					"latest": true
+				}]`
 				watcher = watchers.NewZuluWatcher(client, "8", "jdk")
 
 				release, err := watcher.In("8.0.302")
@@ -90,10 +92,12 @@ var _ = Describe("ZuluWatcher", func() {
 
 		Context("when version does not match", func() {
 			It("returns an error", func() {
-				client.Response = `{
-					"jdk_version": [8, 0, 302],
-					"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
-				}`
+				client.Response = `[{
+					"java_version": [8, 0, 302],
+					"download_url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz",
+					"name": "zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz",
+					"latest": true
+				}]`
 				watcher = watchers.NewZuluWatcher(client, "8", "jdk")
 
 				_, err := watcher.In("8.0.999")

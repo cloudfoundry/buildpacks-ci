@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
@@ -69,6 +70,33 @@ func SetupGithubToken(source *Source) {
 		os.Setenv("GITHUB_TOKEN", source.GithubToken)
 		source.GithubToken = ""
 	}
+}
+
+// extractMajorVersion extracts the major version from a version_filter pattern like "8.X.X" -> "8"
+func extractMajorVersion(versionFilter string) string {
+	if versionFilter == "" {
+		return ""
+	}
+	// Split by dot and take the first part
+	parts := strings.Split(versionFilter, ".")
+	if len(parts) > 0 {
+		return parts[0]
+	}
+	return ""
+}
+
+// extractMajorMinorVersion extracts major.minor from a version_filter pattern like "10.1.X" -> "10"
+// For Tomcat, we only use the major version for the directory name
+func extractMajorMinorVersion(versionFilter string) string {
+	if versionFilter == "" {
+		return ""
+	}
+	// Split by dot and take the first part (major version only)
+	parts := strings.Split(versionFilter, ".")
+	if len(parts) > 0 {
+		return parts[0]
+	}
+	return ""
 }
 
 func Check(source Source, currentVersion *base.Internal) ([]base.Internal, error) {
@@ -225,7 +253,15 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 		versions, err = watcher.Check()
 
 	case "tomcat":
-		watcher := watchers.NewTomcatWatcher(client, source.URI)
+		uri := source.URI
+		// If version_filter is provided and URI doesn't end with a version, append it
+		if source.VersionFilter != "" && uri != "" {
+			majorMinor := extractMajorMinorVersion(source.VersionFilter)
+			if majorMinor != "" && !strings.Contains(uri, "tomcat-") {
+				uri = strings.TrimRight(uri, "/") + "/tomcat-" + majorMinor
+			}
+		}
+		watcher := watchers.NewTomcatWatcher(client, uri)
 		versions, err = watcher.Check()
 
 	case "adoptopenjdk":
@@ -237,11 +273,19 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 		versions, err = watcher.Check()
 
 	case "liberica":
-		watcher := watchers.NewLibericaWatcher(client, source.Version, source.BundleType, source.Token)
+		version := source.Version
+		if version == "" && source.VersionFilter != "" {
+			version = extractMajorVersion(source.VersionFilter)
+		}
+		watcher := watchers.NewLibericaWatcher(client, version, source.BundleType, source.Token)
 		versions, err = watcher.Check()
 
 	case "zulu":
-		watcher := watchers.NewZuluWatcher(client, source.Version, source.BundleType)
+		version := source.Version
+		if version == "" && source.VersionFilter != "" {
+			version = extractMajorVersion(source.VersionFilter)
+		}
+		watcher := watchers.NewZuluWatcher(client, version, source.BundleType)
 		versions, err = watcher.Check()
 
 	case "artifactory":
@@ -459,7 +503,15 @@ func InWithClient(source Source, version base.Internal, client base.HTTPClient) 
 		return watcher.In(version.Ref)
 
 	case "tomcat":
-		watcher := watchers.NewTomcatWatcher(client, source.URI)
+		uri := source.URI
+		// If version_filter is provided and URI doesn't end with a version, append it
+		if source.VersionFilter != "" && uri != "" {
+			majorMinor := extractMajorMinorVersion(source.VersionFilter)
+			if majorMinor != "" && !strings.Contains(uri, "tomcat-") {
+				uri = strings.TrimRight(uri, "/") + "/tomcat-" + majorMinor
+			}
+		}
+		watcher := watchers.NewTomcatWatcher(client, uri)
 		return watcher.In(version.Ref)
 
 	case "adoptopenjdk":
@@ -471,11 +523,19 @@ func InWithClient(source Source, version base.Internal, client base.HTTPClient) 
 		return watcher.In(version.Ref)
 
 	case "liberica":
-		watcher := watchers.NewLibericaWatcher(client, source.Version, source.BundleType, source.Token)
+		ver := source.Version
+		if ver == "" && source.VersionFilter != "" {
+			ver = extractMajorVersion(source.VersionFilter)
+		}
+		watcher := watchers.NewLibericaWatcher(client, ver, source.BundleType, source.Token)
 		return watcher.In(version.Ref)
 
 	case "zulu":
-		watcher := watchers.NewZuluWatcher(client, source.Version, source.BundleType)
+		ver := source.Version
+		if ver == "" && source.VersionFilter != "" {
+			ver = extractMajorVersion(source.VersionFilter)
+		}
+		watcher := watchers.NewZuluWatcher(client, ver, source.BundleType)
 		return watcher.In(version.Ref)
 
 	case "artifactory":
