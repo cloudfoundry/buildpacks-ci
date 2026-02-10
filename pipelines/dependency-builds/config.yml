@@ -360,6 +360,10 @@ dependencies:
         lines:
           - line: latest
     source_type: maven
+    source_params:
+      - 'uri: https://repo1.maven.org/maven2'
+      - 'group_id: org.apache.maven'
+      - 'artifact_id: maven'
     any_stack: true
     versions_to_keep: 2
   tomcat:
@@ -369,6 +373,8 @@ dependencies:
           - line: 10.1.X
           - line: 11.0.X
     source_type: tomcat
+    source_params:
+      - 'uri: https://archive.apache.org/dist/tomcat'
     any_stack: true
     versions_to_keep: 2
   wildfly:
