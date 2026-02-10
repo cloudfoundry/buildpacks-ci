@@ -38,7 +38,10 @@ type githubRelease struct {
 }
 
 func (r *githubRelease) Ref() string {
-	return strings.TrimPrefix(r.TagName, "v")
+	ref := strings.TrimPrefix(r.TagName, "v")
+	// Also strip sapmachine- prefix for SapMachine releases
+	ref = strings.TrimPrefix(ref, "sapmachine-")
+	return ref
 }
 
 func NewGithubReleasesWatcher(client base.HTTPClient, repo string, allowPrerelease bool) *GithubReleasesWatcher {
