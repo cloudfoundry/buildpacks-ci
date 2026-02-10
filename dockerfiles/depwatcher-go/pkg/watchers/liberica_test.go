@@ -1,9 +1,6 @@
 package watchers_test
 
 import (
-	"io"
-	"net/http"
-	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -11,39 +8,23 @@ import (
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
 
-type mockLibericaClient struct {
-	response string
-	err      error
-}
 
-func (m *mockLibericaClient) Get(url string) (*http.Response, error) {
-	if m.err != nil {
-		return nil, m.err
-	}
-	return &http.Response{
-		StatusCode: 200,
-		Body:       io.NopCloser(strings.NewReader(m.response)),
-	}, nil
-}
 
-func (m *mockLibericaClient) GetWithHeaders(url string, headers http.Header) (*http.Response, error) {
-	return m.Get(url)
-}
 
 var _ = Describe("LibericaWatcher", func() {
 	var (
-		client  *mockLibericaClient
+		client  *MockHTTPClient
 		watcher *watchers.LibericaWatcher
 	)
 
 	BeforeEach(func() {
-		client = &mockLibericaClient{}
+		client = &MockHTTPClient{}
 	})
 
 	Describe("Check", func() {
 		Context("when the API returns valid releases", func() {
 			It("returns sorted versions", func() {
-				client.response = `[
+				client.Response = `[
 					{
 						"featureVersion": 8,
 						"interimVersion": 0,
@@ -93,7 +74,7 @@ var _ = Describe("LibericaWatcher", func() {
 	Describe("In", func() {
 		Context("when version is found", func() {
 			It("returns the release details", func() {
-				client.response = `[
+				client.Response = `[
 					{
 						"featureVersion": 8,
 						"interimVersion": 0,
@@ -113,7 +94,7 @@ var _ = Describe("LibericaWatcher", func() {
 
 		Context("when version is not found", func() {
 			It("returns an error", func() {
-				client.response = `[
+				client.Response = `[
 					{
 						"featureVersion": 8,
 						"interimVersion": 0,

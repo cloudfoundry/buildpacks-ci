@@ -1,11 +1,6 @@
 package watchers_test
 
 import (
-	"io"
-	"net/http"
-	"strings"
-
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -13,26 +8,23 @@ import (
 
 var _ = Describe("AppDynamicsWatcher", func() {
 	var (
-		mockClient *appdMockHTTPClient
+		mockClient *MockHTTPClient
 		watcher    *watchers.AppDynamicsWatcher
 	)
 
 	Describe("Check", func() {
 		Context("when checking for java agent version", func() {
 			BeforeEach(func() {
-				mockClient = &appdMockHTTPClient{
-					responses: map[string]*http.Response{
-						"https://download.appdynamics.com/download/downloadfilelatest/": {
-							StatusCode: http.StatusOK,
-							Body: io.NopCloser(strings.NewReader(`[
-								{
-									"download_path": "https://download.appdynamics.com/download/prox/download-file/sun-jvm/23.11.0.35669/AppServerAgent-23.11.0.35669.zip",
-									"filetype": "java",
-									"version": "23.11.0.35669",
-									"sha256_checksum": "abc123def456"
-								}
-							]`)),
-						},
+				mockClient = &MockHTTPClient{
+					Responses: map[string]string{
+						"https://download.appdynamics.com/download/downloadfilelatest/": `[
+							{
+								"download_path": "https://download.appdynamics.com/download/prox/download-file/sun-jvm/23.11.0.35669/AppServerAgent-23.11.0.35669.zip",
+								"filetype": "java",
+								"version": "23.11.0.35669",
+								"sha256_checksum": "abc123def456"
+							}
+						]`,
 					},
 				}
 				watcher = watchers.NewAppDynamicsWatcher(mockClient, "java")
@@ -49,19 +41,16 @@ var _ = Describe("AppDynamicsWatcher", func() {
 
 		Context("when checking for machine agent version", func() {
 			BeforeEach(func() {
-				mockClient = &appdMockHTTPClient{
-					responses: map[string]*http.Response{
-						"https://download.appdynamics.com/download/downloadfilelatest/": {
-							StatusCode: http.StatusOK,
-							Body: io.NopCloser(strings.NewReader(`[
-								{
-									"download_path": "https://download.appdynamics.com/download/prox/download-file/machine/23.11.0.3826/appdynamics-machine-agent-23.11.0.3826.zip",
-									"filetype": "machine",
-									"version": "23.11.0.3826",
-									"sha256_checksum": "def456ghi789"
-								}
-							]`)),
-						},
+				mockClient = &MockHTTPClient{
+					Responses: map[string]string{
+						"https://download.appdynamics.com/download/downloadfilelatest/": `[
+							{
+								"download_path": "https://download.appdynamics.com/download/prox/download-file/machine/23.11.0.3826/appdynamics-machine-agent-23.11.0.3826.zip",
+								"filetype": "machine",
+								"version": "23.11.0.3826",
+								"sha256_checksum": "def456ghi789"
+							}
+						]`,
 					},
 				}
 				watcher = watchers.NewAppDynamicsWatcher(mockClient, "machine")
@@ -78,19 +67,16 @@ var _ = Describe("AppDynamicsWatcher", func() {
 
 		Context("when checking for php-tar agent version", func() {
 			BeforeEach(func() {
-				mockClient = &appdMockHTTPClient{
-					responses: map[string]*http.Response{
-						"https://download.appdynamics.com/download/downloadfilelatest/": {
-							StatusCode: http.StatusOK,
-							Body: io.NopCloser(strings.NewReader(`[
-								{
-									"download_path": "https://download.appdynamics.com/download/prox/download-file/php-tar/23.10.0.6006/appdynamics-php-agent-x64-linux-23.10.0.6006.tar.bz2",
-									"filetype": "php-tar",
-									"version": "23.10.0.6006",
-									"sha256_checksum": "ghi789jkl012"
-								}
-							]`)),
-						},
+				mockClient = &MockHTTPClient{
+					Responses: map[string]string{
+						"https://download.appdynamics.com/download/downloadfilelatest/": `[
+							{
+								"download_path": "https://download.appdynamics.com/download/prox/download-file/php-tar/23.10.0.6006/appdynamics-php-agent-x64-linux-23.10.0.6006.tar.bz2",
+								"filetype": "php-tar",
+								"version": "23.10.0.6006",
+								"sha256_checksum": "ghi789jkl012"
+							}
+						]`,
 					},
 				}
 				watcher = watchers.NewAppDynamicsWatcher(mockClient, "php-tar")
@@ -107,19 +93,16 @@ var _ = Describe("AppDynamicsWatcher", func() {
 
 		Context("when checking for unknown agent type", func() {
 			BeforeEach(func() {
-				mockClient = &appdMockHTTPClient{
-					responses: map[string]*http.Response{
-						"https://download.appdynamics.com/download/downloadfilelatest/": {
-							StatusCode: http.StatusOK,
-							Body: io.NopCloser(strings.NewReader(`[
-								{
-									"download_path": "https://example.com/agent.zip",
-									"filetype": "java",
-									"version": "23.11.0.35669",
-									"sha256_checksum": "abc123def456"
-								}
-							]`)),
-						},
+				mockClient = &MockHTTPClient{
+					Responses: map[string]string{
+						"https://download.appdynamics.com/download/downloadfilelatest/": `[
+							{
+								"download_path": "https://example.com/agent.zip",
+								"filetype": "java",
+								"version": "23.11.0.35669",
+								"sha256_checksum": "abc123def456"
+							}
+						]`,
 					},
 				}
 				watcher = watchers.NewAppDynamicsWatcher(mockClient, "unknown")
@@ -135,19 +118,16 @@ var _ = Describe("AppDynamicsWatcher", func() {
 
 		Context("when converting version format", func() {
 			BeforeEach(func() {
-				mockClient = &appdMockHTTPClient{
-					responses: map[string]*http.Response{
-						"https://download.appdynamics.com/download/downloadfilelatest/": {
-							StatusCode: http.StatusOK,
-							Body: io.NopCloser(strings.NewReader(`[
-								{
-									"filetype": "java",
-									"version": "24.1.0.1234",
-									"download_path": "https://example.com/agent.zip",
-									"sha256_checksum": "abc123"
-								}
-							]`)),
-						},
+				mockClient = &MockHTTPClient{
+					Responses: map[string]string{
+						"https://download.appdynamics.com/download/downloadfilelatest/": `[
+							{
+								"filetype": "java",
+								"version": "24.1.0.1234",
+								"download_path": "https://example.com/agent.zip",
+								"sha256_checksum": "abc123"
+							}
+						]`,
 					},
 				}
 				watcher = watchers.NewAppDynamicsWatcher(mockClient, "java")
@@ -166,22 +146,19 @@ var _ = Describe("AppDynamicsWatcher", func() {
 	Describe("In", func() {
 		Context("when fetching java agent release details", func() {
 			BeforeEach(func() {
-				mockClient = &appdMockHTTPClient{
-					responses: map[string]*http.Response{
-						"https://download.appdynamics.com/download/downloadfile/?apm_os=linux&version=23.11.0.35669&apm=java": {
-							StatusCode: http.StatusOK,
-							Body: io.NopCloser(strings.NewReader(`{
-								"count": 1,
-								"results": [
-									{
-										"download_path": "https://download.appdynamics.com/download/prox/download-file/sun-jvm/23.11.0.35669/AppServerAgent-23.11.0.35669.zip",
-										"filetype": "java",
-										"version": "23.11.0.35669",
-										"sha256_checksum": "abc123def456"
-									}
-								]
-							}`)),
-						},
+				mockClient = &MockHTTPClient{
+					Responses: map[string]string{
+						"https://download.appdynamics.com/download/downloadfile/?apm_os=linux&version=23.11.0.35669&apm=java": `{
+							"count": 1,
+							"results": [
+								{
+									"download_path": "https://download.appdynamics.com/download/prox/download-file/sun-jvm/23.11.0.35669/AppServerAgent-23.11.0.35669.zip",
+									"filetype": "java",
+									"version": "23.11.0.35669",
+									"sha256_checksum": "abc123def456"
+								}
+							]
+						}`,
 					},
 				}
 				watcher = watchers.NewAppDynamicsWatcher(mockClient, "java")
@@ -199,22 +176,19 @@ var _ = Describe("AppDynamicsWatcher", func() {
 
 		Context("when fetching php-tar agent release details", func() {
 			BeforeEach(func() {
-				mockClient = &appdMockHTTPClient{
-					responses: map[string]*http.Response{
-						"https://download.appdynamics.com/download/downloadfile/?apm_os=linux&version=23.10.0.6006&apm=php&filetype=tar": {
-							StatusCode: http.StatusOK,
-							Body: io.NopCloser(strings.NewReader(`{
-								"count": 1,
-								"results": [
-									{
-										"download_path": "https://download.appdynamics.com/download/prox/download-file/php-tar/23.10.0.6006/appdynamics-php-agent-x64-linux-23.10.0.6006.tar.bz2",
-										"filetype": "php-tar",
-										"version": "23.10.0.6006",
-										"sha256_checksum": "ghi789jkl012"
-									}
-								]
-							}`)),
-						},
+				mockClient = &MockHTTPClient{
+					Responses: map[string]string{
+						"https://download.appdynamics.com/download/downloadfile/?apm_os=linux&version=23.10.0.6006&apm=php&filetype=tar": `{
+							"count": 1,
+							"results": [
+								{
+									"download_path": "https://download.appdynamics.com/download/prox/download-file/php-tar/23.10.0.6006/appdynamics-php-agent-x64-linux-23.10.0.6006.tar.bz2",
+									"filetype": "php-tar",
+									"version": "23.10.0.6006",
+									"sha256_checksum": "ghi789jkl012"
+								}
+							]
+						}`,
 					},
 				}
 				watcher = watchers.NewAppDynamicsWatcher(mockClient, "php-tar")
@@ -232,8 +206,8 @@ var _ = Describe("AppDynamicsWatcher", func() {
 
 		Context("when handling invalid version format", func() {
 			BeforeEach(func() {
-				mockClient = &appdMockHTTPClient{
-					responses: map[string]*http.Response{},
+				mockClient = &MockHTTPClient{
+					Responses: map[string]string{},
 				}
 				watcher = watchers.NewAppDynamicsWatcher(mockClient, "java")
 			})
@@ -247,23 +221,3 @@ var _ = Describe("AppDynamicsWatcher", func() {
 		})
 	})
 })
-
-// appdMockHTTPClient implements base.HTTPClient for testing
-type appdMockHTTPClient struct {
-	responses map[string]*http.Response
-	base.HTTPClient
-}
-
-func (m *appdMockHTTPClient) Get(url string) (*http.Response, error) {
-	if resp, ok := m.responses[url]; ok {
-		return resp, nil
-	}
-	return &http.Response{
-		StatusCode: http.StatusNotFound,
-		Body:       io.NopCloser(strings.NewReader("")),
-	}, nil
-}
-
-func (m *appdMockHTTPClient) GetWithHeaders(url string, headers http.Header) (*http.Response, error) {
-	return m.Get(url)
-}

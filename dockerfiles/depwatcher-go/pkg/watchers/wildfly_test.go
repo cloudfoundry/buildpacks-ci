@@ -1,50 +1,27 @@
 package watchers_test
 
 import (
-	"io"
-	"net/http"
-	"strings"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
 
-type mockWildflyClient struct {
-	response string
-	err      error
-}
-
-func (m *mockWildflyClient) Get(url string) (*http.Response, error) {
-	if m.err != nil {
-		return nil, m.err
-	}
-	return &http.Response{
-		StatusCode: 200,
-		Body:       io.NopCloser(strings.NewReader(m.response)),
-	}, nil
-}
-
-func (m *mockWildflyClient) GetWithHeaders(url string, headers http.Header) (*http.Response, error) {
-	return m.Get(url)
-}
-
 var _ = Describe("WildflyWatcher", func() {
 	var (
-		client  *mockWildflyClient
+		client  *MockHTTPClient
 		watcher *watchers.WildflyWatcher
 	)
 
 	BeforeEach(func() {
-		client = &mockWildflyClient{}
+		client = &MockHTTPClient{}
 		watcher = watchers.NewWildflyWatcher(client)
 	})
 
 	Describe("Check", func() {
 		Context("when the HTML contains version IDs", func() {
 			It("returns sorted versions", func() {
-				client.response = `<html><body>
+				client.Response = `<html><body>
 					<div class="version-id">26.1.0.Final</div>
 					<div class="version-id">26.0.1.Final</div>
 					<div class="version-id">25.0.0.Final</div>

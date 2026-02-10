@@ -1,9 +1,6 @@
 package watchers_test
 
 import (
-	"io"
-	"net/http"
-	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -11,39 +8,23 @@ import (
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
 
-type mockCorrettoClient struct {
-	response string
-	err      error
-}
 
-func (m *mockCorrettoClient) Get(url string) (*http.Response, error) {
-	if m.err != nil {
-		return nil, m.err
-	}
-	return &http.Response{
-		StatusCode: 200,
-		Body:       io.NopCloser(strings.NewReader(m.response)),
-	}, nil
-}
 
-func (m *mockCorrettoClient) GetWithHeaders(url string, headers http.Header) (*http.Response, error) {
-	return m.Get(url)
-}
 
 var _ = Describe("CorrettoWatcher", func() {
 	var (
-		client  *mockCorrettoClient
+		client  *MockHTTPClient
 		watcher *watchers.CorrettoWatcher
 	)
 
 	BeforeEach(func() {
-		client = &mockCorrettoClient{}
+		client = &MockHTTPClient{}
 	})
 
 	Describe("Check", func() {
 		Context("when the API returns valid releases", func() {
 			It("returns sorted versions excluding drafts and prereleases", func() {
-				client.response = `[
+				client.Response = `[
 					{"tag_name": "8.302.08.1", "draft": false, "prerelease": false},
 					{"tag_name": "8.292.10.1", "draft": false, "prerelease": false},
 					{"tag_name": "11.0.12.7.1", "draft": false, "prerelease": false},
@@ -68,7 +49,7 @@ var _ = Describe("CorrettoWatcher", func() {
 
 		Context("when the API returns invalid JSON", func() {
 			It("returns an error", func() {
-				client.response = "invalid json"
+				client.Response = "invalid json"
 				watcher = watchers.NewCorrettoWatcher(client, "corretto", "corretto-8")
 
 				_, err := watcher.Check()

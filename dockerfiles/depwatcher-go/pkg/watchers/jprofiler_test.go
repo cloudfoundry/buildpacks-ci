@@ -1,50 +1,27 @@
 package watchers_test
 
 import (
-	"io"
-	"net/http"
-	"strings"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
 
-type mockJProfilerClient struct {
-	response string
-	err      error
-}
-
-func (m *mockJProfilerClient) Get(url string) (*http.Response, error) {
-	if m.err != nil {
-		return nil, m.err
-	}
-	return &http.Response{
-		StatusCode: 200,
-		Body:       io.NopCloser(strings.NewReader(m.response)),
-	}, nil
-}
-
-func (m *mockJProfilerClient) GetWithHeaders(url string, headers http.Header) (*http.Response, error) {
-	return m.Get(url)
-}
-
 var _ = Describe("JProfilerWatcher", func() {
 	var (
-		client  *mockJProfilerClient
+		client  *MockHTTPClient
 		watcher *watchers.JProfilerWatcher
 	)
 
 	BeforeEach(func() {
-		client = &mockJProfilerClient{}
+		client = &MockHTTPClient{}
 		watcher = watchers.NewJProfilerWatcher(client)
 	})
 
 	Describe("Check", func() {
 		Context("when the HTML contains release headings", func() {
 			It("returns sorted versions", func() {
-				client.response = `<html><body>
+				client.Response = `<html><body>
 					<div class="release-heading">Release 13.0.3 (Build 13033)</div>
 					<div class="release-heading">Release 13.0.2 (Build 13024)</div>
 					<div class="release-heading">Release 12.0.4 (Build 12048)</div>

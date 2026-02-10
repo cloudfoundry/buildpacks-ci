@@ -1,9 +1,6 @@
 package watchers_test
 
 import (
-	"io"
-	"net/http"
-	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -11,39 +8,23 @@ import (
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
 
-type mockZuluClient struct {
-	response string
-	err      error
-}
 
-func (m *mockZuluClient) Get(url string) (*http.Response, error) {
-	if m.err != nil {
-		return nil, m.err
-	}
-	return &http.Response{
-		StatusCode: 200,
-		Body:       io.NopCloser(strings.NewReader(m.response)),
-	}, nil
-}
 
-func (m *mockZuluClient) GetWithHeaders(url string, headers http.Header) (*http.Response, error) {
-	return m.Get(url)
-}
 
 var _ = Describe("ZuluWatcher", func() {
 	var (
-		client  *mockZuluClient
+		client  *MockHTTPClient
 		watcher *watchers.ZuluWatcher
 	)
 
 	BeforeEach(func() {
-		client = &mockZuluClient{}
+		client = &MockHTTPClient{}
 	})
 
 	Describe("Check", func() {
 		Context("when the API returns valid release data", func() {
 			It("returns the version", func() {
-				client.response = `{
+				client.Response = `{
 					"jdk_version": [8, 0, 302],
 					"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
 				}`
@@ -78,7 +59,7 @@ var _ = Describe("ZuluWatcher", func() {
 
 		Context("when version has invalid number of components", func() {
 			It("returns an error", func() {
-				client.response = `{
+				client.Response = `{
 					"jdk_version": [8, 0],
 					"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
 				}`
@@ -94,7 +75,7 @@ var _ = Describe("ZuluWatcher", func() {
 	Describe("In", func() {
 		Context("when version matches", func() {
 			It("returns the release details", func() {
-				client.response = `{
+				client.Response = `{
 					"jdk_version": [8, 0, 302],
 					"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
 				}`
@@ -109,7 +90,7 @@ var _ = Describe("ZuluWatcher", func() {
 
 		Context("when version does not match", func() {
 			It("returns an error", func() {
-				client.response = `{
+				client.Response = `{
 					"jdk_version": [8, 0, 302],
 					"url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"
 				}`

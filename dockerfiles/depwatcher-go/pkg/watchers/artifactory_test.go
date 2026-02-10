@@ -1,9 +1,6 @@
 package watchers_test
 
 import (
-	"io"
-	"net/http"
-	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -11,38 +8,22 @@ import (
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
 
-type mockArtifactoryClient struct {
-	response string
-	err      error
-}
 
-func (m *mockArtifactoryClient) Get(url string) (*http.Response, error) {
-	if m.err != nil {
-		return nil, m.err
-	}
-	return &http.Response{
-		StatusCode: 200,
-		Body:       io.NopCloser(strings.NewReader(m.response)),
-	}, nil
-}
 
-func (m *mockArtifactoryClient) GetWithHeaders(url string, headers http.Header) (*http.Response, error) {
-	return m.Get(url)
-}
 
 var _ = Describe("ArtifactoryWatcher", func() {
 	var (
-		client *mockArtifactoryClient
+		client *MockHTTPClient
 	)
 
 	BeforeEach(func() {
-		client = &mockArtifactoryClient{}
+		client = &MockHTTPClient{}
 	})
 
 	Describe("Check", func() {
 		Context("when the API returns valid results", func() {
 			It("returns sorted versions", func() {
-				client.response = `{
+				client.Response = `{
 					"results": [
 						{
 							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
@@ -72,7 +53,7 @@ var _ = Describe("ArtifactoryWatcher", func() {
 
 		Context("when artifact pattern is specified", func() {
 			It("filters results by pattern", func() {
-				client.response = `{
+				client.Response = `{
 					"results": [
 						{
 							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
@@ -153,7 +134,7 @@ var _ = Describe("ArtifactoryWatcher", func() {
 	Describe("In", func() {
 		Context("when version is found", func() {
 			It("returns the release details", func() {
-				client.response = `{
+				client.Response = `{
 					"results": [
 						{
 							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
@@ -177,7 +158,7 @@ var _ = Describe("ArtifactoryWatcher", func() {
 
 		Context("when version is not found", func() {
 			It("returns an error", func() {
-				client.response = `{
+				client.Response = `{
 					"results": [
 						{
 							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
@@ -196,7 +177,7 @@ var _ = Describe("ArtifactoryWatcher", func() {
 
 		Context("when authentication is provided", func() {
 			It("returns the release details", func() {
-				client.response = `{
+				client.Response = `{
 					"results": [
 						{
 							"downloadUri": "https://artifactory.example.com/repo/com/example/app/1.2.3/app-1.2.3.jar",
