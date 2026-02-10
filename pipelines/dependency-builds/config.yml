@@ -289,6 +289,7 @@ dependencies:
         lines: #! final release for each minor version is every spring ( just before next minor version release )
           - line: 4.3.X
           - line: 4.4.X
+          - line: 4.5.X
         removal_strategy: keep_latest_released
     monitored_deps:
       - rserve
