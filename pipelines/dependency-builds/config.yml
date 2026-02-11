@@ -445,7 +445,7 @@ dependencies:
     source_type: github_releases
     source_params:
       - 'repo: SAP/SapMachine'
-      - 'glob: "*jre-*_linux-x64_bin.tar.gz"'
+      - 'glob: *jre-*_linux-x64_bin.tar.gz'
     any_stack: false
     versions_to_keep: 2
   appdynamics-java:
