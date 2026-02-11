@@ -335,7 +335,7 @@ var _ = Describe("GithubReleasesWatcher", func() {
 			It("returns an error", func() {
 				_, err := watcher.In("1.2.3")
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("expected 1 asset with extension .tar.gz, found 2"))
+				Expect(err.Error()).To(ContainSubstring("expected 1 asset with pattern .tar.gz, found 2"))
 			})
 		})
 
@@ -361,7 +361,7 @@ var _ = Describe("GithubReleasesWatcher", func() {
 			It("returns an error", func() {
 				_, err := watcher.In("1.2.3")
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("expected 1 asset with extension .tar.gz, found 0"))
+				Expect(err.Error()).To(ContainSubstring("expected 1 asset with pattern .tar.gz, found 0"))
 			})
 		})
 
@@ -447,6 +447,118 @@ var _ = Describe("GithubReleasesWatcher", func() {
 			release, err := watcher.In("1.0.0")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(release.SHA256).To(MatchRegexp(`^[a-f0-9]{64}$`))
+		})
+	})
+
+	Describe("Glob Pattern Matching", func() {
+		Context("when using glob pattern to match assets", func() {
+			BeforeEach(func() {
+				releases := `[
+					{
+						"tag_name": "sapmachine-17.0.18",
+						"draft": false,
+						"prerelease": false,
+						"assets": [
+							{
+								"name": "sapmachine-jdk-17.0.18_linux-x64_bin.tar.gz",
+								"browser_download_url": "https://github.com/test/repo/releases/download/sapmachine-17.0.18/sapmachine-jdk-17.0.18_linux-x64_bin.tar.gz"
+							},
+							{
+								"name": "sapmachine-jre-17.0.18_linux-x64_bin.tar.gz",
+								"browser_download_url": "https://github.com/test/repo/releases/download/sapmachine-17.0.18/sapmachine-jre-17.0.18_linux-x64_bin.tar.gz"
+							},
+							{
+								"name": "sapmachine-jre-17.0.18_linux-aarch64_bin.tar.gz",
+								"browser_download_url": "https://github.com/test/repo/releases/download/sapmachine-17.0.18/sapmachine-jre-17.0.18_linux-aarch64_bin.tar.gz"
+							}
+						]
+					}
+				]`
+				mockClient = newMockGithubReleasesClient(releases)
+				mockClient.downloadBodies["https://github.com/test/repo/releases/download/sapmachine-17.0.18/sapmachine-jre-17.0.18_linux-x64_bin.tar.gz"] = "jre-content"
+			})
+
+			It("matches assets using glob pattern", func() {
+				watcher = watchers.NewGithubReleasesWatcher(mockClient, "test/repo", false).WithGlob("*jre-*_linux-x64_bin.tar.gz")
+				release, err := watcher.In("17.0.18")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.Ref).To(Equal("17.0.18"))
+				Expect(release.URL).To(Equal("https://github.com/test/repo/releases/download/sapmachine-17.0.18/sapmachine-jre-17.0.18_linux-x64_bin.tar.gz"))
+				Expect(release.SHA256).NotTo(BeEmpty())
+			})
+
+			It("returns error when glob matches multiple assets", func() {
+				watcher = watchers.NewGithubReleasesWatcher(mockClient, "test/repo", false).WithGlob("*jre-*.tar.gz")
+				_, err := watcher.In("17.0.18")
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("expected 1 asset with pattern *jre-*.tar.gz, found 2"))
+			})
+
+			It("returns error when glob matches no assets", func() {
+				watcher = watchers.NewGithubReleasesWatcher(mockClient, "test/repo", false).WithGlob("*jre-*_windows-x64_bin.tar.gz")
+				_, err := watcher.In("17.0.18")
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("expected 1 asset with pattern *jre-*_windows-x64_bin.tar.gz, found 0"))
+			})
+		})
+
+		Context("when glob pattern is invalid", func() {
+			BeforeEach(func() {
+				releases := `[
+					{
+						"tag_name": "v1.0.0",
+						"draft": false,
+						"prerelease": false,
+						"assets": [
+							{
+								"name": "test.tar.gz",
+								"browser_download_url": "https://github.com/test/repo/releases/download/v1.0.0/test.tar.gz"
+							}
+						]
+					}
+				]`
+				mockClient = newMockGithubReleasesClient(releases)
+				watcher = watchers.NewGithubReleasesWatcher(mockClient, "test/repo", false).WithGlob("[invalid")
+			})
+
+			It("returns an error", func() {
+				_, err := watcher.In("1.0.0")
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("invalid glob pattern"))
+			})
+		})
+
+		Context("when both extension and glob are provided", func() {
+			BeforeEach(func() {
+				releases := `[
+					{
+						"tag_name": "v1.0.0",
+						"draft": false,
+						"prerelease": false,
+						"assets": [
+							{
+								"name": "binary-linux.tar.gz",
+								"browser_download_url": "https://github.com/test/repo/releases/download/v1.0.0/binary-linux.tar.gz"
+							},
+							{
+								"name": "binary-darwin.tar.gz",
+								"browser_download_url": "https://github.com/test/repo/releases/download/v1.0.0/binary-darwin.tar.gz"
+							}
+						]
+					}
+				]`
+				mockClient = newMockGithubReleasesClient(releases)
+				mockClient.downloadBodies["https://github.com/test/repo/releases/download/v1.0.0/binary-linux.tar.gz"] = "linux-content"
+			})
+
+			It("prefers glob over extension", func() {
+				watcher = watchers.NewGithubReleasesWatcher(mockClient, "test/repo", false).
+					WithExtension(".tar.gz").
+					WithGlob("*-linux.tar.gz")
+				release, err := watcher.In("1.0.0")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.URL).To(ContainSubstring("binary-linux.tar.gz"))
+			})
 		})
 	})
 })

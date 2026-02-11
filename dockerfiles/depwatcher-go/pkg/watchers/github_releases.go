@@ -22,6 +22,7 @@ type GithubReleasesWatcher struct {
 	repo            string
 	allowPrerelease bool
 	extension       string
+	glob            string
 	fetchSource     bool
 }
 
@@ -54,6 +55,11 @@ func NewGithubReleasesWatcher(client base.HTTPClient, repo string, allowPrerelea
 
 func (w *GithubReleasesWatcher) WithExtension(ext string) *GithubReleasesWatcher {
 	w.extension = ext
+	return w
+}
+
+func (w *GithubReleasesWatcher) WithGlob(pattern string) *GithubReleasesWatcher {
+	w.glob = pattern
 	return w
 }
 
@@ -146,14 +152,31 @@ func (w *GithubReleasesWatcher) findRelease(ref string) (*githubRelease, error) 
 
 func (w *GithubReleasesWatcher) downloadAsset(release *githubRelease) (base.Release, error) {
 	var matchingAssets []githubAsset
-	for _, asset := range release.Assets {
-		if strings.HasSuffix(asset.Name, w.extension) {
-			matchingAssets = append(matchingAssets, asset)
+	var matchPattern string
+
+	// Determine which matching strategy to use
+	if w.glob != "" {
+		matchPattern = w.glob
+		for _, asset := range release.Assets {
+			matched, err := filepath.Match(w.glob, asset.Name)
+			if err != nil {
+				return base.Release{}, fmt.Errorf("invalid glob pattern %s: %w", w.glob, err)
+			}
+			if matched {
+				matchingAssets = append(matchingAssets, asset)
+			}
+		}
+	} else if w.extension != "" {
+		matchPattern = w.extension
+		for _, asset := range release.Assets {
+			if strings.HasSuffix(asset.Name, w.extension) {
+				matchingAssets = append(matchingAssets, asset)
+			}
 		}
 	}
 
 	if len(matchingAssets) != 1 {
-		return base.Release{}, fmt.Errorf("expected 1 asset with extension %s, found %d", w.extension, len(matchingAssets))
+		return base.Release{}, fmt.Errorf("expected 1 asset with pattern %s, found %d", matchPattern, len(matchingAssets))
 	}
 
 	asset := matchingAssets[0]
