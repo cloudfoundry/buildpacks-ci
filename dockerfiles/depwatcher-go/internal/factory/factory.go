@@ -17,6 +17,7 @@ type Source struct {
 	Name          string `json:"name,omitempty"`
 	TagRegex      string `json:"tag_regex,omitempty"`
 	Extension     string `json:"extension,omitempty"`
+	Glob          string `json:"glob,omitempty"`
 	Prerelease    bool   `json:"prerelease,omitempty"`
 	FetchSource   bool   `json:"fetch_source,omitempty"`
 	VersionFilter string `json:"version_filter,omitempty"`
@@ -116,6 +117,9 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 		watcher := watchers.NewGithubReleasesWatcher(client, source.Repo, source.Prerelease)
 		if source.Extension != "" {
 			watcher = watcher.WithExtension(source.Extension)
+		}
+		if source.Glob != "" {
+			watcher = watcher.WithGlob(source.Glob)
 		}
 		if source.FetchSource {
 			watcher = watcher.WithFetchSource(true)
@@ -371,6 +375,9 @@ func InWithClient(source Source, version base.Internal, client base.HTTPClient) 
 		watcher := watchers.NewGithubReleasesWatcher(client, source.Repo, source.Prerelease)
 		if source.Extension != "" {
 			watcher = watcher.WithExtension(source.Extension)
+		}
+		if source.Glob != "" {
+			watcher = watcher.WithGlob(source.Glob)
 		}
 		if source.FetchSource {
 			watcher = watcher.WithFetchSource(true)
