@@ -212,6 +212,58 @@ var _ = Describe("GithubReleasesWatcher", func() {
 				Expect(versions[1].Ref).To(Equal("2.0.0"))
 			})
 		})
+
+		Context("when handling SapMachine releases", func() {
+			BeforeEach(func() {
+				releases := `[
+					{"tag_name": "sapmachine-17.0.18", "draft": false, "prerelease": false, "assets": []},
+					{"tag_name": "sapmachine-17.0.18+8", "draft": false, "prerelease": true, "assets": []},
+					{"tag_name": "sapmachine-21.0.10", "draft": false, "prerelease": false, "assets": []},
+					{"tag_name": "sapmachine-21.0.10+7", "draft": false, "prerelease": true, "assets": []},
+					{"tag_name": "sapmachine-27+7", "draft": false, "prerelease": true, "assets": []}
+				]`
+				mockClient = newMockGithubReleasesClient(releases)
+			})
+
+			Context("when prerelease is false", func() {
+				BeforeEach(func() {
+					watcher = watchers.NewGithubReleasesWatcher(mockClient, "test/repo", false)
+				})
+
+				It("strips sapmachine- prefix and returns only stable releases", func() {
+					versions, err := watcher.Check()
+					Expect(err).NotTo(HaveOccurred())
+					Expect(versions).To(HaveLen(2))
+					Expect(versions[0].Ref).To(Equal("17.0.18"))
+					Expect(versions[1].Ref).To(Equal("21.0.10"))
+				})
+			})
+
+			Context("when prerelease is true", func() {
+				BeforeEach(func() {
+					watcher = watchers.NewGithubReleasesWatcher(mockClient, "test/repo", true)
+				})
+
+				It("strips sapmachine- prefix and includes prereleases", func() {
+					versions, err := watcher.Check()
+					Expect(err).NotTo(HaveOccurred())
+					Expect(versions).To(HaveLen(5))
+					Expect(versions[0].Ref).To(Equal("17.0.18+8"))
+					Expect(versions[1].Ref).To(Equal("17.0.18"))
+					Expect(versions[2].Ref).To(Equal("21.0.10+7"))
+					Expect(versions[3].Ref).To(Equal("21.0.10"))
+					Expect(versions[4].Ref).To(Equal("27+7"))
+				})
+
+				It("does not contain sapmachine- prefix in refs", func() {
+					versions, err := watcher.Check()
+					Expect(err).NotTo(HaveOccurred())
+					for _, v := range versions {
+						Expect(v.Ref).NotTo(ContainSubstring("sapmachine-"))
+					}
+				})
+			})
+		})
 	})
 
 	Describe("In", func() {

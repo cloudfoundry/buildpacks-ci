@@ -442,10 +442,10 @@ dependencies:
           - line: 17.X.X
           - line: 21.X.X
           - line: 25.X.X
-    source_type: github_tags
+    source_type: github_releases
     source_params:
       - 'repo: SAP/SapMachine'
-      - 'tag_regex: ^sapmachine-(\d+\.\d+\.\d+)$'
+      - 'extension: jre-.*_linux-x64_bin.tar.gz'
     any_stack: false
     versions_to_keep: 2
   appdynamics-java:
