@@ -1,10 +1,13 @@
 package watchers
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"regexp"
 	"sort"
 	"strings"
@@ -15,11 +18,27 @@ import (
 const (
 	appdynamicsLatestURI = "https://download.appdynamics.com/download/downloadfilelatest/"
 	appdynamicsFetchURI  = "https://download.appdynamics.com/download/downloadfile/"
+	appdynamicsOAuthURI  = "https://identity.msrv.saas.appdynamics.com/v2.0/oauth/token"
 )
 
 type AppDynamicsWatcher struct {
 	client    base.HTTPClient
 	agentType string
+	username  string
+	password  string
+}
+
+type appdynamicsOAuthRequest struct {
+	Username string   `json:"username"`
+	Password string   `json:"password"`
+	Scopes   []string `json:"scopes"`
+}
+
+type appdynamicsOAuthResponse struct {
+	TokenType   string `json:"token_type"`
+	ExpiresIn   int    `json:"expires_in"`
+	AccessToken string `json:"access_token"`
+	Scope       string `json:"scope"`
 }
 
 type appdynamicsAPIResponse struct {
@@ -38,12 +57,35 @@ type appdynamicsAPIPageResponse struct {
 
 var appdynamicsVersionPattern = regexp.MustCompile(`(\d+)\.(\d+)\.(\d+)\.(\d+)`)
 
+// mapAgentTypeToFileType maps the agent_type configuration value to the actual filetype used by the AppDynamics API.
+// This provides backward compatibility as the API has changed from "java" to "java-jdk8".
+func mapAgentTypeToFileType(agentType string) string {
+	switch agentType {
+	case "java":
+		return "java-jdk8"
+	default:
+		return agentType
+	}
+}
+
 // NewAppDynamicsWatcher creates a new AppDynamics watcher for generic agents (java, machine, php, php-tar).
 // This is distinct from AppdAgentWatcher which only handles PHP agents from Pivotal's download server.
-func NewAppDynamicsWatcher(client base.HTTPClient, agentType string) *AppDynamicsWatcher {
+// Note: agent_type "java" is automatically mapped to "java-jdk8" for API compatibility.
+// For Java agents, OAuth credentials can be provided via username/password parameters or environment variables.
+func NewAppDynamicsWatcher(client base.HTTPClient, agentType, username, password string) *AppDynamicsWatcher {
+	// Fall back to environment variables if credentials not provided
+	if username == "" {
+		username = os.Getenv("APPDYNAMICS_USERNAME")
+	}
+	if password == "" {
+		password = os.Getenv("APPDYNAMICS_PASSWORD")
+	}
+
 	return &AppDynamicsWatcher{
 		client:    client,
 		agentType: agentType,
+		username:  username,
+		password:  password,
 	}
 }
 
@@ -70,9 +112,12 @@ func (w *AppDynamicsWatcher) Check() ([]base.Internal, error) {
 		return nil, fmt.Errorf("failed to parse API response: %w", err)
 	}
 
+	// Map agent type to the actual filetype used by the API
+	fileType := mapAgentTypeToFileType(w.agentType)
+
 	// Find the response matching our agent type
 	for _, apiResp := range apiResponses {
-		if apiResp.FileType == w.agentType {
+		if apiResp.FileType == fileType {
 			version := w.convertVersion(apiResp.Version)
 			if version == "" {
 				return nil, fmt.Errorf("failed to parse version %s", apiResp.Version)
@@ -81,11 +126,81 @@ func (w *AppDynamicsWatcher) Check() ([]base.Internal, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("no version found for agent type %s", w.agentType)
+	return nil, fmt.Errorf("no version found for agent type %s (filetype: %s)", w.agentType, fileType)
+}
+
+// fetchOAuthToken retrieves an OAuth token from AppDynamics for authenticated downloads.
+func (w *AppDynamicsWatcher) fetchOAuthToken() (string, error) {
+	if w.username == "" || w.password == "" {
+		return "", fmt.Errorf("APPDYNAMICS_USERNAME and APPDYNAMICS_PASSWORD environment variables must be set")
+	}
+
+	reqBody := appdynamicsOAuthRequest{
+		Username: w.username,
+		Password: w.password,
+		Scopes:   []string{"download"},
+	}
+
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal OAuth request: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", appdynamicsOAuthURI, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", fmt.Errorf("failed to create OAuth request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch OAuth token: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("OAuth request failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	var oauthResp appdynamicsOAuthResponse
+	if err := json.NewDecoder(resp.Body).Decode(&oauthResp); err != nil {
+		return "", fmt.Errorf("failed to parse OAuth response: %w", err)
+	}
+
+	return fmt.Sprintf("%s %s", oauthResp.TokenType, oauthResp.AccessToken), nil
+}
+
+// downloadWithAuth downloads a file from AppDynamics with OAuth authentication and returns its content.
+func (w *AppDynamicsWatcher) downloadWithAuth(url string) ([]byte, error) {
+	token, err := w.fetchOAuthToken()
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create download request: %w", err)
+	}
+	req.Header.Set("Authorization", token)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to download file: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("download failed with status %d: %s", resp.StatusCode, string(body))
+	}
+
+	return io.ReadAll(resp.Body)
 }
 
 // In retrieves release details for a specific AppDynamics agent version.
 // The version should be in X.Y.Z-W format (will be converted to X.Y.Z.W for API queries).
+// For Java agents, this downloads the actual file with OAuth to compute the correct SHA256.
 func (w *AppDynamicsWatcher) In(ref string) (base.Release, error) {
 	// Convert version from X.Y.Z-W back to X.Y.Z.W for API query
 	apiVersion := strings.Replace(ref, "-", ".", 1)
@@ -97,11 +212,15 @@ func (w *AppDynamicsWatcher) In(ref string) (base.Release, error) {
 	}
 
 	// Build query parameters
+	// Map agent type to the actual filetype used by the API
+	fileType := mapAgentTypeToFileType(w.agentType)
+
 	var queryURL string
 	if w.agentType == "php-tar" {
 		queryURL = fmt.Sprintf("%s?apm_os=linux&version=%s&apm=php&filetype=tar", appdynamicsFetchURI, apiVersion)
 	} else {
-		queryURL = fmt.Sprintf("%s?apm_os=linux&version=%s&apm=%s", appdynamicsFetchURI, apiVersion, w.agentType)
+		// Use the mapped filetype as the apm parameter
+		queryURL = fmt.Sprintf("%s?apm=%s&version=%s", appdynamicsFetchURI, fileType, apiVersion)
 	}
 
 	resp, err := w.client.Get(queryURL)
@@ -126,7 +245,28 @@ func (w *AppDynamicsWatcher) In(ref string) (base.Release, error) {
 
 	// Find the matching agent type in results
 	for _, result := range pageResp.Results {
-		if result.FileType == w.agentType {
+		if result.FileType == fileType {
+			// For Java agents, download the file with OAuth and compute SHA256
+			// because the API's SHA256 is incorrect (returns HTML login page hash)
+			if w.agentType == "java" && w.username != "" && w.password != "" {
+				content, err := w.downloadWithAuth(result.DownloadPath)
+				if err != nil {
+					return base.Release{}, fmt.Errorf("failed to download Java agent: %w", err)
+				}
+
+				// Compute SHA256 from downloaded content
+				hash := sha256.Sum256(content)
+				computedSHA256 := fmt.Sprintf("%x", hash)
+
+				return base.Release{
+					Ref:    ref,
+					URL:    result.DownloadPath,
+					SHA256: computedSHA256,
+				}, nil
+			}
+
+			// For other agents (php-tar, machine), or Java without credentials, use API-provided SHA256
+			// Note: For Java agents without credentials, the SHA256 will be incorrect
 			return base.Release{
 				Ref:    ref,
 				URL:    result.DownloadPath,
@@ -135,7 +275,7 @@ func (w *AppDynamicsWatcher) In(ref string) (base.Release, error) {
 		}
 	}
 
-	return base.Release{}, fmt.Errorf("version %s not found for agent type %s", ref, w.agentType)
+	return base.Release{}, fmt.Errorf("version %s not found for agent type %s (filetype: %s)", ref, w.agentType, fileType)
 }
 
 // convertVersion converts AppDynamics version format from X.Y.Z.W to X.Y.Z-W

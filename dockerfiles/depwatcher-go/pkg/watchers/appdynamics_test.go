@@ -13,24 +13,24 @@ var _ = Describe("AppDynamicsWatcher", func() {
 	)
 
 	Describe("Check", func() {
-		Context("when checking for java agent version", func() {
+		Context("when checking for java agent version with new API format", func() {
 			BeforeEach(func() {
 				mockClient = &MockHTTPClient{
 					Responses: map[string]string{
 						"https://download.appdynamics.com/download/downloadfilelatest/": `[
 							{
 								"download_path": "https://download.appdynamics.com/download/prox/download-file/sun-jvm/23.11.0.35669/AppServerAgent-23.11.0.35669.zip",
-								"filetype": "java",
+								"filetype": "java-jdk8",
 								"version": "23.11.0.35669",
 								"sha256_checksum": "abc123def456"
 							}
 						]`,
 					},
 				}
-				watcher = watchers.NewAppDynamicsWatcher(mockClient, "java")
+				watcher = watchers.NewAppDynamicsWatcher(mockClient, "java", "", "")
 			})
 
-			It("returns latest java agent version", func() {
+			It("returns latest java agent version by mapping java to java-jdk8", func() {
 				versions, err := watcher.Check()
 
 				Expect(err).NotTo(HaveOccurred())
@@ -53,7 +53,7 @@ var _ = Describe("AppDynamicsWatcher", func() {
 						]`,
 					},
 				}
-				watcher = watchers.NewAppDynamicsWatcher(mockClient, "machine")
+				watcher = watchers.NewAppDynamicsWatcher(mockClient, "machine", "", "")
 			})
 
 			It("returns latest machine agent version", func() {
@@ -79,7 +79,7 @@ var _ = Describe("AppDynamicsWatcher", func() {
 						]`,
 					},
 				}
-				watcher = watchers.NewAppDynamicsWatcher(mockClient, "php-tar")
+				watcher = watchers.NewAppDynamicsWatcher(mockClient, "php-tar", "", "")
 			})
 
 			It("returns latest php-tar agent version", func() {
@@ -98,14 +98,14 @@ var _ = Describe("AppDynamicsWatcher", func() {
 						"https://download.appdynamics.com/download/downloadfilelatest/": `[
 							{
 								"download_path": "https://example.com/agent.zip",
-								"filetype": "java",
+								"filetype": "java-jdk8",
 								"version": "23.11.0.35669",
 								"sha256_checksum": "abc123def456"
 							}
 						]`,
 					},
 				}
-				watcher = watchers.NewAppDynamicsWatcher(mockClient, "unknown")
+				watcher = watchers.NewAppDynamicsWatcher(mockClient, "unknown", "", "")
 			})
 
 			It("returns error for unknown agent type", func() {
@@ -122,7 +122,7 @@ var _ = Describe("AppDynamicsWatcher", func() {
 					Responses: map[string]string{
 						"https://download.appdynamics.com/download/downloadfilelatest/": `[
 							{
-								"filetype": "java",
+								"filetype": "java-jdk8",
 								"version": "24.1.0.1234",
 								"download_path": "https://example.com/agent.zip",
 								"sha256_checksum": "abc123"
@@ -130,7 +130,7 @@ var _ = Describe("AppDynamicsWatcher", func() {
 						]`,
 					},
 				}
-				watcher = watchers.NewAppDynamicsWatcher(mockClient, "java")
+				watcher = watchers.NewAppDynamicsWatcher(mockClient, "java", "", "")
 			})
 
 			It("converts version from X.Y.Z.W to X.Y.Z-W format", func() {
@@ -148,12 +148,12 @@ var _ = Describe("AppDynamicsWatcher", func() {
 			BeforeEach(func() {
 				mockClient = &MockHTTPClient{
 					Responses: map[string]string{
-						"https://download.appdynamics.com/download/downloadfile/?apm_os=linux&version=23.11.0.35669&apm=java": `{
+						"https://download.appdynamics.com/download/downloadfile/?apm=java-jdk8&version=23.11.0.35669": `{
 							"count": 1,
 							"results": [
 								{
-									"download_path": "https://download.appdynamics.com/download/prox/download-file/sun-jvm/23.11.0.35669/AppServerAgent-23.11.0.35669.zip",
-									"filetype": "java",
+									"download_path": "https://download.appdynamics.com/download/prox/download-file/java-jdk8/23.11.0.35669/AppServerAgent-1.8-23.11.0.35669.zip",
+									"filetype": "java-jdk8",
 									"version": "23.11.0.35669",
 									"sha256_checksum": "abc123def456"
 								}
@@ -161,15 +161,15 @@ var _ = Describe("AppDynamicsWatcher", func() {
 						}`,
 					},
 				}
-				watcher = watchers.NewAppDynamicsWatcher(mockClient, "java")
+				watcher = watchers.NewAppDynamicsWatcher(mockClient, "java", "", "")
 			})
 
-			It("returns java agent release details", func() {
+			It("returns java agent release details using java-jdk8 apm parameter", func() {
 				release, err := watcher.In("23.11.0-35669")
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(release.Ref).To(Equal("23.11.0-35669"))
-				Expect(release.URL).To(Equal("https://download.appdynamics.com/download/prox/download-file/sun-jvm/23.11.0.35669/AppServerAgent-23.11.0.35669.zip"))
+				Expect(release.URL).To(Equal("https://download.appdynamics.com/download/prox/download-file/java-jdk8/23.11.0.35669/AppServerAgent-1.8-23.11.0.35669.zip"))
 				Expect(release.SHA256).To(Equal("abc123def456"))
 			})
 		})
@@ -191,7 +191,7 @@ var _ = Describe("AppDynamicsWatcher", func() {
 						}`,
 					},
 				}
-				watcher = watchers.NewAppDynamicsWatcher(mockClient, "php-tar")
+				watcher = watchers.NewAppDynamicsWatcher(mockClient, "php-tar", "", "")
 			})
 
 			It("returns php-tar agent release details", func() {
@@ -209,7 +209,7 @@ var _ = Describe("AppDynamicsWatcher", func() {
 				mockClient = &MockHTTPClient{
 					Responses: map[string]string{},
 				}
-				watcher = watchers.NewAppDynamicsWatcher(mockClient, "java")
+				watcher = watchers.NewAppDynamicsWatcher(mockClient, "java", "", "")
 			})
 
 			It("returns error for invalid version format", func() {

@@ -456,6 +456,8 @@ dependencies:
     source_type: appdynamics
     source_params:
       - 'agent_type: java'
+      - 'username: ((appdynamics-credentials.username))'
+      - 'password: ((appdynamics-credentials.password))'
     third_party_hosted: true
     any_stack: true
     versions_to_keep: 2
