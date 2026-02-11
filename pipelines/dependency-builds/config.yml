@@ -6,7 +6,6 @@ dependencies:
       php:
         lines:
           - line: latest
-    third_party_hosted: true
     source_type: appd_agent
     any_stack: true
     versions_to_keep: 2
@@ -458,7 +457,6 @@ dependencies:
       - 'agent_type: java'
       - 'username: ((appdynamics-credentials.username))'
       - 'password: ((appdynamics-credentials.password))'
-    third_party_hosted: true
     any_stack: true
     versions_to_keep: 2
 cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pip', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty', 'r' , 'httpd', 'php', 'jprofiler', 'yourkit', 'bellsoft-liberica', 'zulu', 'sapmachine' ]
