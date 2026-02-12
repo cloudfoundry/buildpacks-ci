@@ -3,14 +3,15 @@ require 'digest'
 
 class SourceInput
   attr_reader :url, :md5, :git_commit_sha, :type
-  attr_accessor :name, :repo, :version, :sha256, :sha1
+  attr_accessor :name, :repo, :version, :sha512, :sha256, :sha1
 
-  def initialize(name, url, version, md5, sha256, sha1, git_commit_sha = nil, repo = '', type = '')
+  def initialize(name, url, version, md5, sha512 = nil, sha256 = nil, sha1 = nil, git_commit_sha = nil, repo = '', type = '')
     @name = name
     @repo = repo
     @url = url
     @version = version
     @md5 = md5
+    @sha512 = sha512
     @sha256 = sha256
     @sha1 = sha1
     @git_commit_sha = git_commit_sha
@@ -25,6 +26,7 @@ class SourceInput
         data['source_uri'] || '',
         data['version'] || '',
         nil,
+        nil,
         data['source_sha'] || '',
         nil
       )
@@ -34,6 +36,7 @@ class SourceInput
         data.dig('version', 'url') || '',
         data.dig('version', 'ref') || '',
         data.dig('version', 'md5_digest'),
+        data.dig('version', 'sha512'),
         data.dig('version', 'sha256'),
         data.dig('version', 'sha1'),
         data.dig('version', 'git_commit_sha'),
@@ -49,14 +52,18 @@ class SourceInput
   end
 
   def md5?
-    !@md5.nil?
+    !@md5.nil? && !@md5.empty?
   end
 
   def sha256?
-    !@sha256.nil?
+    !@sha256.nil? && !@sha256.empty?
   end
 
   def sha1?
-    !@sha1.nil?
+    !@sha1.nil? && !@sha1.empty?
+  end
+
+  def sha512?
+    !@sha512.nil? && !@sha512.empty?
   end
 end

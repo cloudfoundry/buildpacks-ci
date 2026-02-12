@@ -59,9 +59,12 @@ module Sha
     def verify_digest(content, source_input)
       sha1 = Digest::SHA1.hexdigest(content)
       sha256 = Digest::SHA2.new(256).hexdigest(content)
+      sha512 = Digest::SHA2.new(512).hexdigest(content)
       md5 = Digest::MD5.hexdigest(content)
-      # Prioritize SHA256 over MD5 for security and reliability
-      if source_input.sha256? && sha256 != source_input.sha256
+      # Prioritize SHA512 > SHA256 > SHA1 > MD5 for security and reliability
+      if source_input.sha512? && sha512 != source_input.sha512
+        raise "SHA512 digest does not match: expected #{source_input.sha512}, got #{sha512}"
+      elsif source_input.sha256? && sha256 != source_input.sha256
         raise "SHA256 digest does not match: expected #{source_input.sha256}, got #{sha256}"
       elsif source_input.sha1? && sha1 != source_input.sha1
         raise "SHA1 digest does not match: expected #{source_input.sha1}, got #{sha1}"
@@ -72,6 +75,8 @@ module Sha
 
     def get_digest(content, algorithm)
       case algorithm
+      when 'sha512'
+        Digest::SHA2.new(512).hexdigest(content)
       when 'sha256'
         Digest::SHA2.new(256).hexdigest(content)
       when 'md5'
@@ -337,8 +342,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -376,8 +380,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -853,8 +856,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -866,8 +868,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -879,8 +880,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -892,8 +892,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -905,8 +904,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -918,8 +916,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -931,8 +928,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -944,8 +940,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -957,8 +952,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -970,8 +964,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -983,8 +976,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
