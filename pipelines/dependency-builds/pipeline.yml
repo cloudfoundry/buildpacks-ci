@@ -114,6 +114,15 @@
 #@   return result
 #@ end
 
+#@ def get_buildpack_branch(buildpack):
+#@   buildpacks_config = getattr(data.values, "buildpacks", {})
+#@   if hasattr(buildpacks_config, buildpack):
+#@     bp_config = getattr(buildpacks_config, buildpack)
+#@     return getattr(bp_config, "branch", "master")
+#@   end
+#@   return "master"
+#@ end
+
 ---
 resource_types:
 - name: depwatcher
@@ -156,13 +165,13 @@ resources:
   source:
     uri: #@ "git@github.com:cloudfoundry/{}-buildpack.git".format(buildpack)
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: master
+    branch: #@ get_buildpack_branch(buildpack)
 - name: #@ "{}-buildpack-latest-released".format(buildpack)
   type: git
   source:
     uri: #@ "git@github.com:cloudfoundry/{}-buildpack.git".format(buildpack)
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
-    branch: master
+    branch: #@ get_buildpack_branch(buildpack)
 - name: #@ "{}-pull-request".format(buildpack)
   type: create-pull-request-resource
   source:

@@ -1,5 +1,15 @@
 #@data/values
 ---
+buildpacks:
+  java:
+    branch: feature/go-migration
+  #! Add other buildpacks with non-master branches here
+  #! php:
+  #!   branch: main
+  #! ruby:
+  #!   branch: master
+  #! Default branch is 'master' if not specified
+
 dependencies:
   appdynamics:
     buildpacks:
