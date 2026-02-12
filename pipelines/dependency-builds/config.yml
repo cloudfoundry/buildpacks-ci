@@ -372,7 +372,9 @@ dependencies:
     source_params:
       - 'uri: https://repo1.maven.org/maven2'
       - 'group_id: org.apache.maven'
-      - 'artifact_id: maven'
+      - 'artifact_id: apache-maven'
+      - 'classifier: bin'
+      - 'packaging: tar.gz'
     any_stack: true
     versions_to_keep: 2
   tomcat:
