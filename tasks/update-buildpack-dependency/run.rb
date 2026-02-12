@@ -74,7 +74,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
     manifest['dependency_deprecation_dates'] = deprecation_dates
   end
 
-  stack = /#{resource_version}-(.*)\.json$/.match(stack_dependency_build)[1]
+  stack = /#{Regexp.escape(resource_version)}-(.*)\.json$/.match(stack_dependency_build)[1]
 
   # See github.com/cloudfoundry/buildpacks-ci/pull/300 - the build process may create temp stacks like cflinuxfs3-dev
   stack = stack.chomp('-dev') if stack.end_with?('-dev')

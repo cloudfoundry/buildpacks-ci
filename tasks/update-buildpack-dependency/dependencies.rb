@@ -27,6 +27,8 @@ class Dependencies
     end
     out.sort_by do |d|
       version = d['version']
+      # Ensure version is a string (YAML may parse numbers like 11.0 as Float)
+      version = version.to_s unless version.nil?
       version = version[1..] if !version.nil? && version.start_with?('v')
       version = begin
         SemVer.parse(version)
