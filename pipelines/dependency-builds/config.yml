@@ -428,6 +428,7 @@ dependencies:
           - line: 11.X.X
           - line: 17.X.X
           - line: 21.X.X
+          - line: 25.X.X
     source_type: liberica
     source_params:
       - 'product: jre'
