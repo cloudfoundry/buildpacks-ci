@@ -1033,13 +1033,20 @@ class Builder
       source: {
         url: source_input.url,
         md5: source_input.md5,
-        sha256: source_input.sha256
+        sha512: source_input.sha512,
+        sha256: source_input.sha256,
+        sha1: source_input.sha1
       }
     }
 
-    unless out_data[:source][:sha256]
+    # Only try to compute SHA256 if we have no checksums at all
+    unless out_data[:source][:sha512] || out_data[:source][:sha256] || out_data[:source][:sha1] || out_data[:source][:md5]
       content = HTTPHelper.read_file(source_input.url)
-      out_data[:source][:sha256] = Sha.get_digest(content, 'sha256')
+      if content
+        out_data[:source][:sha256] = Sha.get_digest(content, 'sha256')
+      else
+        puts 'Warning: Could not fetch file to compute SHA256, will be computed during build'
+      end
     end
 
     DependencyBuild.new(source_input, out_data, binary_builder, artifact_output, stack, php_extensions_dir).build
