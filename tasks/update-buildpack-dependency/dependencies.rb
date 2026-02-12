@@ -29,7 +29,7 @@ class Dependencies
       version = d['version']
       version = version[1..] if !version.nil? && version.start_with?('v')
       version = begin
-        Gem::Version.new(version)
+        SemVer.parse(version)
       rescue StandardError
         version
       end
@@ -41,7 +41,11 @@ class Dependencies
 
   def latest?
     @matching_deps.all? do |d|
-      Gem::Version.new(@dep['version']) > Gem::Version.new(d['version'])
+      new_ver = SemVer.parse(@dep['version'])
+      old_ver = SemVer.parse(d['version'])
+      next false if new_ver.nil? || old_ver.nil?
+
+      new_ver > old_ver
     end
   end
 
@@ -57,23 +61,22 @@ class Dependencies
     return false if dep_name != @dep['name']
     return false unless dep_includes_at_least_these_stacks?(stacks)
 
-    version = begin
-      Gem::Version.new(version)
-    rescue StandardError
-      return false
-    end
+    parsed_version = SemVer.parse(version)
+    return false if parsed_version.nil?
+
+    dep_version = SemVer.parse(@dep['version'])
+    return false if dep_version.nil?
 
     case @line
     when 'major'
-      version.segments[0] == Gem::Version.new(@dep['version']).segments[0]
+      parsed_version.major == dep_version.major
     when 'minor'
-      version.segments[0, 2] == Gem::Version.new(@dep['version']).segments[0, 2]
+      [parsed_version.major, parsed_version.minor] == [dep_version.major, dep_version.minor]
     when 'nginx'
       # 1.13.X and 1.15.X are the same version line
       # 1.12.X and 1.14.X are the same version line
-      dep_version = Gem::Version.new(@dep['version'])
-      version.segments[0] == dep_version.segments[0] &&
-        version.segments[1].even? == dep_version.segments[1].even?
+      parsed_version.major == dep_version.major &&
+        parsed_version.minor.even? == dep_version.minor.even?
     when nil, '', 'null'
       true
     else
@@ -87,7 +90,7 @@ class Dependencies
     dep = @dependencies_latest_released.select do |d|
       same_dependency_line?(d['cf_stacks'], d['version'], d['name'])
     end.max_by do |d|
-      Gem::Version.new(d['version'])
+      SemVer.parse(d['version'])
     rescue StandardError
       d['version']
     end

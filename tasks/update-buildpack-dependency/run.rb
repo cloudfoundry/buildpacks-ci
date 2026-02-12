@@ -4,6 +4,7 @@ require 'json'
 require 'yaml'
 require 'tmpdir'
 require 'date'
+require 'semver'
 
 require_relative 'dependencies'
 require_relative 'php_manifest'
@@ -162,10 +163,11 @@ commit_message += "\n\nfor stack(s) #{total_stacks.join(', ')}"
 # * There are two version lines, stable & mainline
 #   when we add a new minor line, we should update the version line regex
 if !rebuilt && manifest_name == 'nginx' && buildpack_name == 'nginx'
-  v = Gem::Version.new(resource_version)
+  v = SemVer.parse(resource_version)
+  raise "Invalid version format: #{resource_version}" if v.nil?
   raise "When setting nginx's version_line, expected to find data['source']['version_filter'], but did not" unless data.dig('source', 'version_filter')
 
-  if v.segments[1].even? # 1.12.X is stable
+  if v.minor.even? # 1.12.X is stable
     manifest['version_lines']['stable'] = data['source']['version_filter'].downcase
   else
     # 1.13.X is mainline
