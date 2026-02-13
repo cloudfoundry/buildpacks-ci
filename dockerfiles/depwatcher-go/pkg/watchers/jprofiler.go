@@ -1,7 +1,10 @@
 package watchers
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
+	"io"
 	"regexp"
 	"sort"
 	"strings"
@@ -66,9 +69,29 @@ func (w *JProfilerWatcher) In(ref string) (base.Release, error) {
 
 	url := fmt.Sprintf("https://download-gcdn.ej-technologies.com/jprofiler/%s", filename)
 
+	// JProfiler doesn't provide checksums, so we compute SHA256 ourselves
+	resp, err := w.client.Get(url)
+	if err != nil {
+		return base.Release{}, fmt.Errorf("failed to download file: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return base.Release{}, fmt.Errorf("unexpected status code %d downloading file", resp.StatusCode)
+	}
+
+	// Compute SHA256 while downloading
+	hash := sha256.New()
+	if _, err := io.Copy(hash, resp.Body); err != nil {
+		return base.Release{}, fmt.Errorf("failed to compute SHA256: %w", err)
+	}
+
+	sha256Hash := hex.EncodeToString(hash.Sum(nil))
+
 	return base.Release{
-		Ref: ref,
-		URL: url,
+		Ref:    ref,
+		URL:    url,
+		SHA256: sha256Hash,
 	}, nil
 }
 

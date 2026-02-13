@@ -3,7 +3,9 @@ package watchers
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"sort"
+	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
@@ -61,8 +63,29 @@ func (w *GradleWatcher) In(ref string) (base.Release, error) {
 	filename := fmt.Sprintf("gradle-%s-bin.zip", ref)
 	url := fmt.Sprintf("https://downloads.gradle.org/distributions/%s", filename)
 
+	// Fetch SHA256 from Gradle's checksums
+	sha256URL := fmt.Sprintf("%s.sha256", url)
+	resp, err := w.client.Get(sha256URL)
+	if err != nil {
+		return base.Release{}, fmt.Errorf("failed to fetch SHA256: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return base.Release{}, fmt.Errorf("unexpected status code %d fetching SHA256", resp.StatusCode)
+	}
+
+	sha256Bytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return base.Release{}, fmt.Errorf("failed to read SHA256: %w", err)
+	}
+
+	// Trim whitespace/newlines from the hash
+	sha256Hash := strings.TrimSpace(string(sha256Bytes))
+
 	return base.Release{
-		Ref: ref,
-		URL: url,
+		Ref:    ref,
+		URL:    url,
+		SHA256: sha256Hash,
 	}, nil
 }

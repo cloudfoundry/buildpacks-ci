@@ -2,6 +2,7 @@ package watchers
 
 import (
 	"fmt"
+	"io"
 	"regexp"
 	"sort"
 	"strings"
@@ -60,11 +61,34 @@ func (w *WildflyWatcher) In(ref string) (base.Release, error) {
 
 	urlVersion := fmt.Sprintf("%s.%s", parts[0], parts[1])
 	filename := fmt.Sprintf("wildfly-%s.tar.gz", urlVersion)
-	url := fmt.Sprintf("https://download.jboss.org/wildfly/%s/%s", urlVersion, filename)
+
+	// Wildfly releases are on GitHub
+	url := fmt.Sprintf("https://github.com/wildfly/wildfly/releases/download/%s/%s", urlVersion, filename)
+
+	// Fetch SHA1 checksum (only checksum Wildfly provides)
+	sha1URL := fmt.Sprintf("%s.sha1", url)
+	resp, err := w.client.Get(sha1URL)
+	if err != nil {
+		return base.Release{}, fmt.Errorf("failed to fetch SHA1: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return base.Release{}, fmt.Errorf("unexpected status code %d fetching SHA1", resp.StatusCode)
+	}
+
+	sha1Bytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return base.Release{}, fmt.Errorf("failed to read SHA1: %w", err)
+	}
+
+	// SHA1 files may contain just the hash or "hash filename" format
+	sha1Hash := strings.TrimSpace(strings.Fields(string(sha1Bytes))[0])
 
 	return base.Release{
-		Ref: ref,
-		URL: url,
+		Ref:  ref,
+		URL:  url,
+		SHA1: sha1Hash,
 	}, nil
 }
 
