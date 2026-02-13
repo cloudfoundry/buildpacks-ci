@@ -366,7 +366,6 @@ dependencies:
       - 'uri: https://archive.apache.org/dist/tomcat'
     any_stack: true
     versions_to_keep: 2
-
   skywalking-agent:
     buildpacks:
       java:
