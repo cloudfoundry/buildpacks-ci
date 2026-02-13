@@ -72,15 +72,19 @@ func (w *LibericaWatcher) In(ref string) (base.Release, error) {
 }
 
 func (w *LibericaWatcher) fetchReleases() ([]libericaRelease, error) {
-	if w.version == "" {
-		return nil, fmt.Errorf("version must be specified")
-	}
 	if w.typ == "" {
 		return nil, fmt.Errorf("type must be specified")
 	}
 
-	apiURL := fmt.Sprintf("https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=linux&package-type=tar.gz&version-modifier=latest&bundle-type=%s&version-feature=%s",
-		w.typ, url.QueryEscape(w.version))
+	var apiURL string
+	if w.version == "" {
+		// No version specified - get all releases and we'll filter to latest per major version
+		apiURL = fmt.Sprintf("https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=linux&package-type=tar.gz&bundle-type=%s",
+			w.typ)
+	} else {
+		apiURL = fmt.Sprintf("https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=linux&package-type=tar.gz&version-modifier=latest&bundle-type=%s&version-feature=%s",
+			w.typ, url.QueryEscape(w.version))
+	}
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -112,7 +116,47 @@ func (w *LibericaWatcher) fetchReleases() ([]libericaRelease, error) {
 		return nil, fmt.Errorf("decoding releases: %w", err)
 	}
 
+	if w.version == "" {
+		// When no version is specified, filter to get only the latest for each major version
+		return w.filterLatestPerMajorVersion(releases), nil
+	}
+
 	return releases, nil
+}
+
+func (w *LibericaWatcher) filterLatestPerMajorVersion(releases []libericaRelease) []libericaRelease {
+	// Group by major version (featureVersion)
+	versionMap := make(map[int]libericaRelease)
+
+	for _, release := range releases {
+		existing, exists := versionMap[release.FeatureVersion]
+		if !exists {
+			versionMap[release.FeatureVersion] = release
+		} else {
+			// Keep the latest version for each major version
+			if w.isNewerRelease(release, existing) {
+				versionMap[release.FeatureVersion] = release
+			}
+		}
+	}
+
+	// Convert map back to slice
+	var filtered []libericaRelease
+	for _, release := range versionMap {
+		filtered = append(filtered, release)
+	}
+
+	return filtered
+}
+
+func (w *LibericaWatcher) isNewerRelease(r1, r2 libericaRelease) bool {
+	if r1.InterimVersion != r2.InterimVersion {
+		return r1.InterimVersion > r2.InterimVersion
+	}
+	if r1.UpdateVersion != r2.UpdateVersion {
+		return r1.UpdateVersion > r2.UpdateVersion
+	}
+	return r1.BuildVersion > r2.BuildVersion
 }
 
 func (w *LibericaWatcher) sortVersions(internals []base.Internal) []base.Internal {

@@ -1,12 +1,21 @@
 #@data/values
 ---
+buildpacks:
+  java:
+    branch: feature/go-migration
+  #! Add other buildpacks with non-master branches here
+  #! php:
+  #!   branch: main
+  #! ruby:
+  #!   branch: master
+  #! Default branch is 'master' if not specified
+
 dependencies:
   appdynamics:
     buildpacks:
       php:
         lines:
           - line: latest
-    third_party_hosted: true
     source_type: appd_agent
     any_stack: true
     versions_to_keep: 2
@@ -346,26 +355,6 @@ dependencies:
       - 'extension: .tar.gz'
     any_stack: true
     versions_to_keep: 2
-  gradle:
-    buildpacks:
-      java:
-        lines:
-          - line: latest
-    source_type: gradle
-    any_stack: true
-    versions_to_keep: 2
-  maven:
-    buildpacks:
-      java:
-        lines:
-          - line: latest
-    source_type: maven
-    source_params:
-      - 'uri: https://repo1.maven.org/maven2'
-      - 'group_id: org.apache.maven'
-      - 'artifact_id: maven'
-    any_stack: true
-    versions_to_keep: 2
   tomcat:
     buildpacks:
       java:
@@ -377,15 +366,7 @@ dependencies:
       - 'uri: https://archive.apache.org/dist/tomcat'
     any_stack: true
     versions_to_keep: 2
-  wildfly:
-    buildpacks:
-      java:
-        lines:
-          - line: latest
-    source_type: wildfly
-    any_stack: true
-    versions_to_keep: 2
-  skywalking:
+  skywalking-agent:
     buildpacks:
       java:
         lines:
@@ -393,7 +374,7 @@ dependencies:
     source_type: skywalking
     any_stack: true
     versions_to_keep: 2
-  jprofiler:
+  jprofiler-profiler:
     buildpacks:
       java:
         lines:
@@ -401,7 +382,7 @@ dependencies:
     source_type: jprofiler
     any_stack: false
     versions_to_keep: 2
-  yourkit:
+  your-kit-profiler:
     buildpacks:
       java:
         lines:
@@ -409,7 +390,7 @@ dependencies:
     source_type: yourkit
     any_stack: false
     versions_to_keep: 2
-  bellsoft-liberica:
+  openjdk:
     buildpacks:
       java:
         lines:
@@ -417,6 +398,7 @@ dependencies:
           - line: 11.X.X
           - line: 17.X.X
           - line: 21.X.X
+          - line: 25.X.X
     source_type: liberica
     source_params:
       - 'product: jre'
@@ -456,11 +438,12 @@ dependencies:
     source_type: appdynamics
     source_params:
       - 'agent_type: java'
-    third_party_hosted: true
+      - 'username: ((appdynamics-credentials.username))'
+      - 'password: ((appdynamics-credentials.password))'
     any_stack: true
     versions_to_keep: 2
-cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pip', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty', 'r' , 'httpd', 'php', 'jprofiler', 'yourkit', 'bellsoft-liberica', 'zulu', 'sapmachine' ]
-cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems', 'nginx', 'nginx-static', 'openresty', 'r', 'appdynamics', 'composer', 'httpd', 'php', 'gradle', 'maven', 'tomcat', 'wildfly', 'skywalking', 'jprofiler', 'yourkit', 'bellsoft-liberica', 'zulu', 'sapmachine', 'appdynamics-java' ]
+cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pip', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty', 'r' , 'httpd', 'php', 'jprofiler-profiler', 'your-kit-profiler', 'openjdk', 'zulu', 'sapmachine' ]
+cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems', 'nginx', 'nginx-static', 'openresty', 'r', 'appdynamics', 'composer', 'httpd', 'php', 'tomcat', 'skywalking-agent', 'jprofiler-profiler', 'your-kit-profiler', 'openjdk', 'zulu', 'sapmachine', 'appdynamics-java' ]
 cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go', 'ruby', 'nginx', 'r', 'php', 'staticfile', 'java' ]
 build_stacks: [ 'cflinuxfs4' ]
 windows_stacks: [ 'windows' ]
@@ -477,14 +460,11 @@ skip_deprecation_check:
   - php  #! complicated
   - ruby  #! doesn't publish EOL schedule
   - r  #! doesn't publish EOL schedule
-  - gradle  #! doesn't publish EOL schedule
-  - maven  #! doesn't publish EOL schedule
   - tomcat  #! doesn't publish EOL schedule
-  - wildfly  #! doesn't publish EOL schedule
-  - skywalking  #! doesn't publish EOL schedule
-  - jprofiler  #! doesn't publish EOL schedule
-  - yourkit  #! doesn't publish EOL schedule
-  - bellsoft-liberica  #! JRE versions tied to BellSoft Liberica schedule
+  - skywalking-agent  #! doesn't publish EOL schedule
+  - jprofiler-profiler  #! doesn't publish EOL schedule
+  - your-kit-profiler  #! doesn't publish EOL schedule
+  - openjdk  #! JRE versions tied to BellSoft Liberica schedule
   - zulu  #! JRE versions tied to Azul release schedule
   - sapmachine  #! JRE versions tied to SAP release schedule
   - appdynamics-java  #! doesn't publish EOL schedule

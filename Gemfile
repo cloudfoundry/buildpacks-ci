@@ -16,6 +16,7 @@ gem 'rspec'
 gem 'rspec-rerun'
 gem 'rss'
 gem 'rubyzip', require: 'zip'
+gem 'semver2', '~> 3.4'
 gem 'toml'
 gem 'tomlrb'
 

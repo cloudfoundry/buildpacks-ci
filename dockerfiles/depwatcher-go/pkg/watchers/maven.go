@@ -30,6 +30,7 @@ type mavenMetadata struct {
 }
 
 var mavenVersionPattern = regexp.MustCompile(`^([\d]+)\.([\d]+)\.([\d]+)[.-]?(.*)`)
+var prereleasePattern = regexp.MustCompile(`(?i)(alpha|beta|rc|milestone|M\d+|snapshot)`)
 
 func NewMavenWatcher(client base.HTTPClient, uri, groupId, artifactId, classifier, packaging, username, password string) *MavenWatcher {
 	if packaging == "" {
@@ -88,6 +89,10 @@ func (w *MavenWatcher) Check() ([]base.Internal, error) {
 
 	var internals []base.Internal
 	for _, version := range metadata.Versioning.Versions {
+		// Skip pre-release versions (alpha, beta, RC, milestone, snapshot)
+		if prereleasePattern.MatchString(version) {
+			continue
+		}
 		normalizedVersion := w.normalizeVersion(version)
 		if normalizedVersion != "" {
 			internals = append(internals, base.Internal{Ref: normalizedVersion})
@@ -114,9 +119,36 @@ func (w *MavenWatcher) In(ref string) (base.Release, error) {
 
 	artifactURL := w.buildArtifactURL(ref)
 
+	headers := http.Header{}
+	if w.username != "" && w.password != "" {
+		auth := w.username + ":" + w.password
+		headers.Set("Authorization", "Basic "+base64Encode(auth))
+	}
+
+	// Fetch SHA512 checksum (available in Maven 3.9.9+)
+	sha512URL := fmt.Sprintf("%s.sha512", artifactURL)
+	resp, err := w.client.GetWithHeaders(sha512URL, headers)
+	if err != nil {
+		return base.Release{}, fmt.Errorf("failed to fetch SHA512: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return base.Release{}, fmt.Errorf("unexpected status code %d fetching SHA512", resp.StatusCode)
+	}
+
+	sha512Bytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return base.Release{}, fmt.Errorf("failed to read SHA512: %w", err)
+	}
+
+	// SHA512 files may contain just the hash or "hash filename" format
+	sha512Hash := strings.TrimSpace(strings.Fields(string(sha512Bytes))[0])
+
 	return base.Release{
-		Ref: ref,
-		URL: artifactURL,
+		Ref:    ref,
+		URL:    artifactURL,
+		SHA512: sha512Hash,
 	}, nil
 }
 

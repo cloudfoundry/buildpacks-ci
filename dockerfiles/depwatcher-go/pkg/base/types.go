@@ -16,7 +16,9 @@ type Internal struct {
 type Release struct {
 	Ref    string `json:"ref"`
 	URL    string `json:"url"`
-	SHA256 string `json:"sha256"`
+	SHA512 string `json:"sha512,omitempty"`
+	SHA256 string `json:"sha256,omitempty"`
+	SHA1   string `json:"sha1,omitempty"`
 	MD5    string `json:"md5_digest,omitempty"`
 	PGP    string `json:"pgp,omitempty"`
 }

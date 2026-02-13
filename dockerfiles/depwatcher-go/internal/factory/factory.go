@@ -236,7 +236,7 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 		versions, err = watcher.Check()
 
 	case "appdynamics":
-		watcher := watchers.NewAppDynamicsWatcher(client, source.AgentType)
+		watcher := watchers.NewAppDynamicsWatcher(client, source.AgentType, source.Username, source.Password)
 		versions, err = watcher.Check()
 
 	case "gradle":
@@ -489,7 +489,7 @@ func InWithClient(source Source, version base.Internal, client base.HTTPClient) 
 		return watcher.In(version.Ref)
 
 	case "appdynamics":
-		watcher := watchers.NewAppDynamicsWatcher(client, source.AgentType)
+		watcher := watchers.NewAppDynamicsWatcher(client, source.AgentType, source.Username, source.Password)
 		return watcher.In(version.Ref)
 
 	case "gradle":

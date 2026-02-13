@@ -59,9 +59,12 @@ module Sha
     def verify_digest(content, source_input)
       sha1 = Digest::SHA1.hexdigest(content)
       sha256 = Digest::SHA2.new(256).hexdigest(content)
+      sha512 = Digest::SHA2.new(512).hexdigest(content)
       md5 = Digest::MD5.hexdigest(content)
-      # Prioritize SHA256 over MD5 for security and reliability
-      if source_input.sha256? && sha256 != source_input.sha256
+      # Prioritize SHA512 > SHA256 > SHA1 > MD5 for security and reliability
+      if source_input.sha512? && sha512 != source_input.sha512
+        raise "SHA512 digest does not match: expected #{source_input.sha512}, got #{sha512}"
+      elsif source_input.sha256? && sha256 != source_input.sha256
         raise "SHA256 digest does not match: expected #{source_input.sha256}, got #{sha256}"
       elsif source_input.sha1? && sha1 != source_input.sha1
         raise "SHA1 digest does not match: expected #{source_input.sha1}, got #{sha1}"
@@ -72,6 +75,8 @@ module Sha
 
     def get_digest(content, algorithm)
       case algorithm
+      when 'sha512'
+        Digest::SHA2.new(512).hexdigest(content)
       when 'sha256'
         Digest::SHA2.new(256).hexdigest(content)
       when 'md5'
@@ -337,8 +342,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -376,8 +380,7 @@ class DependencyBuild
       merge_out_data(old_filepath, filename_prefix)
     else
       HTTPHelper.download(@source_input, old_filepath)
-      @out_data[:sha256] = Sha.get_digest(old_filepath, 'sha256')
-      @out_data[:url] = @source_input.url
+      merge_out_data(old_filepath, filename_prefix)
     end
   end
 
@@ -841,6 +844,142 @@ class DependencyBuild
     merge_out_data(old_filepath, filename_prefix)
   end
 
+  #########################
+  ## Java dependencies   ##
+  #########################
+
+  def build_gradle
+    old_filepath = "source/gradle-#{@source_input.version}-bin.zip"
+    filename_prefix = "#{@filename_prefix}_linux_noarch_any-stack"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    end
+  end
+
+  def build_maven
+    old_filepath = "source/apache-maven-#{@source_input.version}-bin.tar.gz"
+    filename_prefix = "#{@filename_prefix}_linux_noarch_any-stack"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    end
+  end
+
+  def build_tomcat
+    old_filepath = "source/apache-tomcat-#{@source_input.version}.tar.gz"
+    filename_prefix = "#{@filename_prefix}_linux_noarch_any-stack"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    end
+  end
+
+  def build_wildfly
+    old_filepath = "source/wildfly-#{@source_input.version}.tar.gz"
+    filename_prefix = "#{@filename_prefix}_linux_noarch_any-stack"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    end
+  end
+
+  def build_skywalking_agent
+    old_filepath = "source/apache-skywalking-java-agent-#{@source_input.version}.tgz"
+    filename_prefix = "#{@filename_prefix}_linux_noarch_any-stack"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    end
+  end
+
+  def build_jprofiler_profiler
+    old_filepath = "source/jprofiler_linux_#{@source_input.version.gsub('.', '_')}.tar.gz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    end
+  end
+
+  def build_your_kit_profiler
+    old_filepath = "source/YourKit-JavaProfiler-#{@source_input.version}.zip"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    end
+  end
+
+  def build_openjdk
+    old_filepath = "source/bellsoft-jre#{@source_input.version}-linux-amd64.tar.gz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    end
+  end
+
+  def build_zulu
+    old_filepath = "source/zulu#{@source_input.version}-jre-linux_x64.tar.gz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    end
+  end
+
+  def build_sapmachine
+    old_filepath = "source/sapmachine-jre-#{@source_input.version}_linux-x64_bin.tar.gz"
+    filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    end
+  end
+
+  def build_appdynamics_java
+    old_filepath = "source/appdynamics-java-agent-#{@source_input.version}.zip"
+    filename_prefix = "#{@filename_prefix}_linux_noarch_any-stack"
+
+    if File.exist?(old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    else
+      HTTPHelper.download(@source_input, old_filepath)
+      merge_out_data(old_filepath, filename_prefix)
+    end
+  end
+
   class Utils
     def self.setup_python_and_pip
       Runner.run('apt', 'update')
@@ -894,13 +1033,20 @@ class Builder
       source: {
         url: source_input.url,
         md5: source_input.md5,
-        sha256: source_input.sha256
+        sha512: source_input.sha512,
+        sha256: source_input.sha256,
+        sha1: source_input.sha1
       }
     }
 
-    unless out_data[:source][:sha256]
+    # Only try to compute SHA256 if we have no checksums at all
+    unless out_data[:source][:sha512] || out_data[:source][:sha256] || out_data[:source][:sha1] || out_data[:source][:md5]
       content = HTTPHelper.read_file(source_input.url)
-      out_data[:source][:sha256] = Sha.get_digest(content, 'sha256')
+      if content
+        out_data[:source][:sha256] = Sha.get_digest(content, 'sha256')
+      else
+        puts 'Warning: Could not fetch file to compute SHA256, will be computed during build'
+      end
     end
 
     DependencyBuild.new(source_input, out_data, binary_builder, artifact_output, stack, php_extensions_dir).build
