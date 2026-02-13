@@ -896,7 +896,7 @@ class DependencyBuild
     end
   end
 
-  def build_skywalking
+  def build_skywalking_agent
     old_filepath = "source/apache-skywalking-java-agent-#{@source_input.version}.tgz"
     filename_prefix = "#{@filename_prefix}_linux_noarch_any-stack"
 
@@ -908,7 +908,7 @@ class DependencyBuild
     end
   end
 
-  def build_jprofiler
+  def build_jprofiler_profiler
     old_filepath = "source/jprofiler_linux_#{@source_input.version.gsub('.', '_')}.tar.gz"
     filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
 
@@ -920,7 +920,7 @@ class DependencyBuild
     end
   end
 
-  def build_yourkit
+  def build_your_kit_profiler
     old_filepath = "source/YourKit-JavaProfiler-#{@source_input.version}.zip"
     filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
 
@@ -932,7 +932,7 @@ class DependencyBuild
     end
   end
 
-  def build_bellsoft_liberica
+  def build_openjdk
     old_filepath = "source/bellsoft-jre#{@source_input.version}-linux-amd64.tar.gz"
     filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
 
