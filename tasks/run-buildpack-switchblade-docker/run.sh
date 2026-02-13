@@ -27,6 +27,7 @@ INTEGRATION_ARGS=(
 
 if [[ -n "${CF_STACK:-}" ]]; then
   echo "Running Switchblade Docker tests for stack: ${CF_STACK}"
+  export CF_STACK
 else
   echo "Running Switchblade Docker tests (no stack specified, using buildpack default)"
 fi
