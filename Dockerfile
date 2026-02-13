@@ -60,7 +60,7 @@ ENV PATH="/mise/shims:$PATH"
 
 RUN curl https://mise.run | sh
 RUN mise use -g ruby@3.4
-RUN mise use -g go@latest
+RUN mise use -g go@1.24
 RUN mise use -g crystal@latest
 RUN mise use -g python@3.10
 
@@ -74,8 +74,8 @@ RUN apt-get -qqy update && apt-get -qqy install \
     credhub-cli \
     om-cli
 
-# Create symlink for the cloudfoundry cli cf8 as cf
-RUN ln -s /usr/bin/cf8 /usr/bin/cf
+# # Create symlink for the cloudfoundry cli cf8 as cf
+# RUN ln -s /usr/bin/cf8 /usr/bin/cf
 
 RUN curl -sSL https://get.docker.com/ | sh
 
