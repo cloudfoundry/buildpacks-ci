@@ -476,7 +476,7 @@ jobs:
     params:
       AWS_ACCESS_KEY_ID: ((buildpacks-cloudfoundry-org-aws-access-key-id))
       AWS_SECRET_ACCESS_KEY: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
-      BUCKET: buildpacks.cloudfoundry.org
+      BUCKET: buildpack-release-triggers-shared
 
 - name: #@ "publish-" + language.name + "-buildpack-release"
   old_name: #@ "update-" + language.name + "-buildpack-bosh-release"

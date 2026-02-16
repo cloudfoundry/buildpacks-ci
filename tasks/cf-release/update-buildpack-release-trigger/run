@@ -8,7 +8,7 @@ new_version="$(tar -xf buildpack-release-tarball/*.tgz -O release.MF | yj -yj | 
 
 if [[ "${old_version}" != "${new_version}" ]]; then
   echo "Updating trigger to ${new_version}"
-  echo -n "${new_version}" | aws s3 cp - "s3://${BUCKET}/${buildpack_name}"
+  echo -n "${new_version}" | aws s3 cp - "s3://${BUCKET}/bosh-release-triggers/${buildpack_name}"
 else
   echo "Version ${new_version} is already released"
 fi
