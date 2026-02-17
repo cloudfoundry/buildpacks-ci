@@ -92,11 +92,11 @@ function color_bold() {
 function check_dependencies() {
     local mode="${1:-check}"
     local missing_deps=()
-    local required_tools=("gcloud" "fly" "gh" "jq")
+    local required_tools=("gcloud" "fly" "jq" "git")
     
     # Additional tools required for cleanup mode
     if [[ "${mode}" == "cleanup" ]]; then
-        required_tools+=("bbl" "bosh" "git" "leftovers")
+        required_tools+=("bbl" "bosh" "leftovers")
     fi
     
     for tool in "${required_tools[@]}"; do
@@ -128,12 +128,6 @@ function check_authentication() {
     # Check fly authentication
     if ! fly -t "${CONCOURSE_TARGET}" status &> /dev/null; then
         echo "ERROR: fly not authenticated for target '${CONCOURSE_TARGET}'. Run: fly -t ${CONCOURSE_TARGET} login -c ${CONCOURSE_URL} -n ${CONCOURSE_TEAM}" >&2
-        auth_failed=true
-    fi
-    
-    # Check gh authentication
-    if ! gh auth status &> /dev/null; then
-        echo "ERROR: gh not authenticated. Run: gh auth login" >&2
         auth_failed=true
     fi
     
@@ -206,29 +200,25 @@ function is_concourse_job_running() {
 # Returns: 0 if empty/non-existent, 1 if has meaningful content
 function is_state_directory_empty() {
     local identifier="$1"
-    local state_dir="${identifier}-buildpack-state"
-    
-    # Get directory contents using GitHub API
-    local contents
-    contents=$(gh api "repos/${GITHUB_REPO}/contents/${state_dir}" 2>/dev/null || echo "[]")
+    local state_dir="${BUILDPACKS_ENVS_DIR}/${identifier}-buildpack-state"
     
     # If directory doesn't exist, consider it empty
-    if [[ "${contents}" == "[]" ]] || [[ "${contents}" == "" ]]; then
+    if [[ ! -d "${state_dir}" ]]; then
         return 0
     fi
     
-    # Parse JSON to check contents
-    local file_count
-    file_count=$(echo "${contents}" | jq 'length')
+    # Count files and directories (excluding . and ..)
+    local item_count
+    item_count=$(find "${state_dir}" -mindepth 1 -maxdepth 1 | wc -l)
     
     # Directory is truly empty
-    if [[ "${file_count}" -eq 0 ]]; then
+    if [[ "${item_count}" -eq 0 ]]; then
         return 0
     fi
     
     # Check if only terraform directory exists (considered empty if it only has lock file)
     local non_terraform_items
-    non_terraform_items=$(echo "${contents}" | jq '[.[] | select(.name != "terraform")] | length')
+    non_terraform_items=$(find "${state_dir}" -mindepth 1 -maxdepth 1 ! -name "terraform" | wc -l)
     
     # If there are files/dirs other than terraform, it's not empty
     if [[ "${non_terraform_items}" -gt 0 ]]; then
@@ -236,17 +226,24 @@ function is_state_directory_empty() {
     fi
     
     # Only terraform dir exists, check its contents
-    local terraform_contents
-    terraform_contents=$(gh api "repos/${GITHUB_REPO}/contents/${state_dir}/terraform" 2>/dev/null || echo "[]")
+    local terraform_dir="${state_dir}/terraform"
+    if [[ ! -d "${terraform_dir}" ]]; then
+        # terraform dir doesn't exist but state_dir has something - not empty
+        return 1
+    fi
     
-    if [[ "${terraform_contents}" == "[]" ]] || [[ "${terraform_contents}" == "" ]]; then
+    # Count files in terraform directory (excluding . and ..)
+    local terraform_item_count
+    terraform_item_count=$(find "${terraform_dir}" -mindepth 1 -maxdepth 1 | wc -l)
+    
+    if [[ "${terraform_item_count}" -eq 0 ]]; then
         # terraform dir exists but is empty - consider state empty
         return 0
     fi
     
     # Check if terraform dir only contains .terraform.lock.hcl
     local non_lock_files
-    non_lock_files=$(echo "${terraform_contents}" | jq '[.[] | select(.name != ".terraform.lock.hcl")] | length')
+    non_lock_files=$(find "${terraform_dir}" -mindepth 1 -maxdepth 1 ! -name ".terraform.lock.hcl" | wc -l)
     
     if [[ "${non_lock_files}" -eq 0 ]]; then
         # Only .terraform.lock.hcl exists - consider state empty
@@ -257,14 +254,27 @@ function is_state_directory_empty() {
     return 1
 }
 
-# List all buildpack state directories from GitHub
+# List all buildpack state directories from local repository
 # Returns: JSON array of identifiers with state directories
 function list_buildpack_state_directories() {
-    local contents
-    contents=$(gh api "repos/${GITHUB_REPO}/contents/" 2>/dev/null || echo "[]")
+    local identifiers="[]"
     
-    # Filter for directories matching *-buildpack-state pattern
-    echo "${contents}" | jq -r '[.[] | select(.type == "dir" and (.name | test("-buildpack-state$"))) | .name | sub("-buildpack-state$"; "")]'
+    # Check if buildpacks-envs directory exists
+    if [[ ! -d "${BUILDPACKS_ENVS_DIR}" ]]; then
+        echo "[]"
+        return 0
+    fi
+    
+    # Find all directories matching *-buildpack-state pattern
+    while IFS= read -r dir; do
+        if [[ -n "${dir}" ]]; then
+            local identifier
+            identifier=$(basename "${dir}" | sed 's/-buildpack-state$//')
+            identifiers=$(echo "${identifiers}" | jq --arg id "${identifier}" '. + [$id]')
+        fi
+    done < <(find "${BUILDPACKS_ENVS_DIR}" -mindepth 1 -maxdepth 1 -type d -name "*-buildpack-state")
+    
+    echo "${identifiers}"
 }
 
 # Analyze a single buildpack environment
@@ -804,12 +814,6 @@ function interactive_cleanup() {
         return 0
     fi
     
-    # Setup buildpacks-envs repository
-    if ! setup_buildpacks_envs_repo; then
-        echo "ERROR: Failed to setup buildpacks-envs repository" >&2
-        return 1
-    fi
-    
     # Execute cleanup for each selected environment
     local cleanup_failed=false
     while IFS= read -r env; do
@@ -869,6 +873,16 @@ EXAMPLES:
     # JSON output
     OUTPUT_FORMAT=json ./check.sh
 
+DEPENDENCIES:
+    Check mode requires: gcloud, fly, jq, git
+    Cleanup mode requires additional tools: bbl, bosh, leftovers
+
+REPOSITORY CLONING:
+    The script clones the buildpacks-envs repository to a local cache at:
+    scripts/gcp-env-checkup/.cache/buildpacks-envs/
+    
+    On subsequent runs, it will pull the latest changes from the repository.
+
 CLEANUP MODE:
     Cleanup mode requires additional tools: bbl, bosh, git, leftovers
     
@@ -910,6 +924,13 @@ function main() {
     
     echo "Verifying authentication..." >&2
     check_authentication || exit 1
+    
+    # Setup buildpacks-envs repository (needed for both check and cleanup modes)
+    echo "Setting up buildpacks-envs repository..." >&2
+    if ! setup_buildpacks_envs_repo; then
+        echo "ERROR: Failed to setup buildpacks-envs repository" >&2
+        exit 1
+    fi
     
     echo "Discovering buildpack VPC networks..." >&2
     local networks
