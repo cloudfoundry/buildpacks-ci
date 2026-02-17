@@ -48,6 +48,38 @@ params:
   BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
 #@ end
 
+#@ def cleanup_cf_release_dir(bbl_state_input):
+task: cleanup-cf-release-directory
+config:
+  platform: linux
+  image_resource:
+    type: registry-image
+    source:
+      repository: cloudfoundry/cf-deployment-concourse-tasks
+  inputs:
+  - name: #@ bbl_state_input
+  outputs:
+  - name: #@ bbl_state_input
+  #@yaml/text-templated-strings
+  run:
+    path: bash
+    args:
+    - -c
+    - |
+      set -euo pipefail
+      
+      # Copy input to output
+      cp -r (@= bbl_state_input @)/. (@= bbl_state_input @)/
+      
+      # Remove all files in cf-release directory but keep the directory
+      if [ -d "(@= bbl_state_input @)/cf-release" ]; then
+        echo "Cleaning up cf-release directory..."
+        rm -rf (@= bbl_state_input @)/cf-release/*
+        rm -rf (@= bbl_state_input @)/cf-release/.[!.]*
+        echo "cf-release directory cleaned successfully"
+      fi
+#@ end
+
 ---
 resources:
 - name: buildpacks-ci
@@ -160,6 +192,16 @@ resources:
     interval: 168h
     location: America/New_York
 
+- name: pipeline-trigger
+  type: semver
+  source:
+    driver: s3
+    bucket: buildpack-release-triggers-shared
+    key: cf-release/pipeline-trigger-version
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+    initial_version: 1.0.0
+
 jobs:
 - name: trigger-buildpack-pipeline
   public: true
@@ -170,6 +212,8 @@ jobs:
       trigger: true
     - get: cf-deployment
     - get: cf-acceptance-tests
+  - put: pipeline-trigger
+    params: {bump: patch}
 
 #@ for language in data.values.supported_languages:
 - name: #@ "create-" + language.name + "-buildpack-dev-release"
@@ -178,7 +222,7 @@ jobs:
   plan:
   - in_parallel:
     - get: buildpacks-ci
-    - get: weekly-trigger
+    - get: pipeline-trigger
       trigger: true
       passed: [trigger-buildpack-pipeline]
     - get: cf-deployment
@@ -220,7 +264,7 @@ jobs:
     - get: buildpacks-ci
     - get: runtime-ci
     - get: cf-deployment-concourse-tasks
-    - get: weekly-trigger
+    - get: pipeline-trigger
       trigger: true
       passed:
 #@ for language in data.values.supported_languages:
@@ -386,7 +430,7 @@ jobs:
       passed: [deploy]
     - get: buildpacks-ci
     - get: cf-deployment-concourse-tasks
-    - get: weekly-trigger
+    - get: pipeline-trigger
       trigger: true
       passed: [deploy]
     - get: cf-acceptance-tests
@@ -414,7 +458,7 @@ jobs:
   plan:
     - get: runtime-ci
     - get: cf-deployment-concourse-tasks
-    - get: weekly-trigger
+    - get: pipeline-trigger
       trigger: true
       passed: [cats]
     - get: bbl-state
@@ -424,6 +468,7 @@ jobs:
       - #@ delete_bosh_deployment("bbl-state")
       - #@ bosh_cleanup("bbl-state")
       - #@ destroy_bbl_infrastructure("bbl-state")
+      - #@ cleanup_cf_release_dir("bbl-state")
       ensure:
         put: bbl-state
         params:
