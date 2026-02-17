@@ -160,6 +160,16 @@ resources:
     interval: 168h
     location: America/New_York
 
+- name: pipeline-trigger
+  type: semver
+  source:
+    driver: s3
+    bucket: buildpack-release-triggers-shared
+    key: cf-release/pipeline-trigger-version
+    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+    initial_version: 1.0.0
+
 jobs:
 - name: trigger-buildpack-pipeline
   public: true
@@ -170,6 +180,8 @@ jobs:
       trigger: true
     - get: cf-deployment
     - get: cf-acceptance-tests
+  - put: pipeline-trigger
+    params: {bump: patch}
 
 #@ for language in data.values.supported_languages:
 - name: #@ "create-" + language.name + "-buildpack-dev-release"
@@ -178,7 +190,7 @@ jobs:
   plan:
   - in_parallel:
     - get: buildpacks-ci
-    - get: weekly-trigger
+    - get: pipeline-trigger
       trigger: true
       passed: [trigger-buildpack-pipeline]
     - get: cf-deployment
@@ -220,7 +232,7 @@ jobs:
     - get: buildpacks-ci
     - get: runtime-ci
     - get: cf-deployment-concourse-tasks
-    - get: weekly-trigger
+    - get: pipeline-trigger
       trigger: true
       passed:
 #@ for language in data.values.supported_languages:
@@ -386,7 +398,7 @@ jobs:
       passed: [deploy]
     - get: buildpacks-ci
     - get: cf-deployment-concourse-tasks
-    - get: weekly-trigger
+    - get: pipeline-trigger
       trigger: true
       passed: [deploy]
     - get: cf-acceptance-tests
@@ -414,7 +426,7 @@ jobs:
   plan:
     - get: runtime-ci
     - get: cf-deployment-concourse-tasks
-    - get: weekly-trigger
+    - get: pipeline-trigger
       trigger: true
       passed: [cats]
     - get: bbl-state
