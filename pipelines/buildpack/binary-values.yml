@@ -6,7 +6,7 @@ organization: cloudfoundry
 buildpack:
   stacks:
   - cflinuxfs4
-  #!- windows
+  - windows
   product_slug: binary-buildpack
   skip_docker_start: true
   skip_brats: true
