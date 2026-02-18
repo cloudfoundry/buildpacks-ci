@@ -151,17 +151,58 @@ function extract_identifier_from_network() {
 function list_buildpack_networks() {
     local networks
     
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "[DEBUG] GCP_PROJECT: ${GCP_PROJECT}" >&2
+        echo "[DEBUG] Running: gcloud compute networks list --project=${GCP_PROJECT} --filter=\"name~'-buildpack-bbl-env-network\$'\" --format=json" >&2
+    fi
+    
     networks=$(gcloud compute networks list \
         --project="${GCP_PROJECT}" \
         --filter="name~'-buildpack-bbl-env-network$'" \
         --format="json" 2>/dev/null)
+    local gcloud_exit_code=$?
+    
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "[DEBUG] gcloud exit code: ${gcloud_exit_code}" >&2
+        echo "[DEBUG] Raw gcloud output length: ${#networks} chars" >&2
+        echo "[DEBUG] Raw gcloud output (first 500 chars): ${networks:0:500}" >&2
+    fi
     
     if [[ -z "${networks}" ]] || [[ "${networks}" == "[]" ]]; then
+        if [[ "${DEBUG}" == "true" ]]; then
+            echo "[DEBUG] No networks found matching filter (empty or [])" >&2
+        fi
         echo "[]"
         return 0
     fi
     
-    echo "${networks}" | jq -r '[.[].name]'
+    local result
+    if [[ "${DEBUG}" == "true" ]]; then
+        # Write to temp file to debug pipe issues
+        local tmpfile="/tmp/gcp_networks_debug.json"
+        echo "${networks}" > "${tmpfile}"
+        echo "[DEBUG] Wrote networks to ${tmpfile}" >&2
+        echo "[DEBUG] File content (head -5):" >&2
+        head -5 "${tmpfile}" >&2
+        echo "[DEBUG] Testing jq on file directly:" >&2
+        local file_result
+        file_result=$(jq -r '[.[].name]' "${tmpfile}" 2>&1)
+        echo "[DEBUG] jq on file result: '${file_result}'" >&2
+    fi
+    result=$(echo "${networks}" | jq -r '[.[].name]' 2>&1)
+    local jq_exit_code=$?
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "[DEBUG] jq exit code: ${jq_exit_code}" >&2
+        echo "[DEBUG] Extracted network names: '${result}'" >&2
+    fi
+    
+    if [[ ${jq_exit_code} -ne 0 ]]; then
+        echo "[DEBUG] jq failed with: ${result}" >&2
+        echo "[]"
+        return 0
+    fi
+    
+    echo "${result}"
 }
 
 # Check if Concourse job is currently running
@@ -259,10 +300,24 @@ function is_state_directory_empty() {
 function list_buildpack_state_directories() {
     local identifiers="[]"
     
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "[DEBUG] BUILDPACKS_ENVS_DIR: ${BUILDPACKS_ENVS_DIR}" >&2
+        echo "[DEBUG] Directory exists: $(test -d "${BUILDPACKS_ENVS_DIR}" && echo 'yes' || echo 'no')" >&2
+    fi
+    
     # Check if buildpacks-envs directory exists
     if [[ ! -d "${BUILDPACKS_ENVS_DIR}" ]]; then
+        if [[ "${DEBUG}" == "true" ]]; then
+            echo "[DEBUG] buildpacks-envs directory does not exist" >&2
+        fi
         echo "[]"
         return 0
+    fi
+    
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "[DEBUG] Contents of ${BUILDPACKS_ENVS_DIR}:" >&2
+        ls -la "${BUILDPACKS_ENVS_DIR}" >&2
+        echo "[DEBUG] Looking for directories matching *-buildpack-state" >&2
     fi
     
     # Find all directories matching *-buildpack-state pattern
@@ -270,9 +325,24 @@ function list_buildpack_state_directories() {
         if [[ -n "${dir}" ]]; then
             local identifier
             identifier=$(basename "${dir}" | sed 's/-buildpack-state$//')
-            identifiers=$(echo "${identifiers}" | jq --arg id "${identifier}" '. + [$id]')
+            if [[ "${DEBUG}" == "true" ]]; then
+                echo "[DEBUG] Found state directory: ${dir} -> identifier: ${identifier}" >&2
+                echo "[DEBUG] identifiers before jq: '${identifiers}'" >&2
+            fi
+            local jq_result
+            jq_result=$(echo "${identifiers}" | jq --arg id "${identifier}" '. + [$id]' 2>&1)
+            local jq_exit=$?
+            if [[ "${DEBUG}" == "true" ]]; then
+                echo "[DEBUG] jq command: echo '${identifiers}' | jq --arg id '${identifier}' '. + [\$id]'" >&2
+                echo "[DEBUG] jq exit code: ${jq_exit}, result: '${jq_result}'" >&2
+            fi
+            identifiers="${jq_result}"
         fi
     done < <(find "${BUILDPACKS_ENVS_DIR}" -mindepth 1 -maxdepth 1 -type d -name "*-buildpack-state")
+    
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "[DEBUG] Final identifiers: ${identifiers}" >&2
+    fi
     
     echo "${identifiers}"
 }
@@ -467,19 +537,38 @@ function generate_text_report() {
 # Clone or update buildpacks-envs repository
 # Returns: 0 on success, 1 on failure
 function setup_buildpacks_envs_repo() {
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "[DEBUG] CACHE_DIR: ${CACHE_DIR}" >&2
+        echo "[DEBUG] BUILDPACKS_ENVS_DIR: ${BUILDPACKS_ENVS_DIR}" >&2
+        echo "[DEBUG] GITHUB_REPO: ${GITHUB_REPO}" >&2
+    fi
+    
     if [[ -d "${BUILDPACKS_ENVS_DIR}" ]]; then
         echo "Updating buildpacks-envs repository..." >&2
         cd "${BUILDPACKS_ENVS_DIR}"
+        if [[ "${DEBUG}" == "true" ]]; then
+            echo "[DEBUG] Current directory: $(pwd)" >&2
+            echo "[DEBUG] Git remote: $(git remote -v 2>/dev/null || echo 'failed to get remote')" >&2
+        fi
         if ! git pull --quiet origin master; then
             echo "ERROR: Failed to pull buildpacks-envs repository" >&2
             return 1
         fi
+        if [[ "${DEBUG}" == "true" ]]; then
+            echo "[DEBUG] Git pull successful" >&2
+        fi
     else
         echo "Cloning buildpacks-envs repository..." >&2
         mkdir -p "${CACHE_DIR}"
+        if [[ "${DEBUG}" == "true" ]]; then
+            echo "[DEBUG] Cloning from: https://github.com/${GITHUB_REPO}.git" >&2
+        fi
         if ! git clone --quiet "https://github.com/${GITHUB_REPO}.git" "${BUILDPACKS_ENVS_DIR}"; then
             echo "ERROR: Failed to clone buildpacks-envs repository" >&2
             return 1
+        fi
+        if [[ "${DEBUG}" == "true" ]]; then
+            echo "[DEBUG] Clone successful to: ${BUILDPACKS_ENVS_DIR}" >&2
         fi
     fi
     return 0
@@ -925,6 +1014,18 @@ function main() {
     echo "Verifying authentication..." >&2
     check_authentication || exit 1
     
+    # Debug: Test jq functionality
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "[DEBUG] Testing jq sanity..." >&2
+        local jq_test
+        jq_test=$(echo '["test1","test2"]' | jq 'length' 2>&1)
+        echo "[DEBUG] jq sanity test (should be 2): '${jq_test}'" >&2
+        jq_test=$(echo '[]' | jq --arg id "foo" '. + [$id]' 2>&1)
+        echo "[DEBUG] jq append test (should be [\"foo\"]): '${jq_test}'" >&2
+        jq_test=$(echo '[{"name":"a"},{"name":"b"}]' | jq -r '[.[].name]' 2>&1)
+        echo "[DEBUG] jq extract test (should be [\"a\",\"b\"]): '${jq_test}'" >&2
+    fi
+    
     # Setup buildpacks-envs repository (needed for both check and cleanup modes)
     echo "Setting up buildpacks-envs repository..." >&2
     if ! setup_buildpacks_envs_repo; then
@@ -932,19 +1033,46 @@ function main() {
         exit 1
     fi
     
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "[DEBUG] After setup_buildpacks_envs_repo, pwd=$(pwd)" >&2
+    fi
+    
     echo "Discovering buildpack VPC networks..." >&2
     local networks
     networks=$(list_buildpack_networks)
     
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "[DEBUG] list_buildpack_networks returned: '${networks}'" >&2
+        echo "[DEBUG] Return value length: ${#networks} chars" >&2
+    fi
+    
     local network_count
-    network_count=$(echo "${networks}" | jq 'length')
+    network_count=$(echo "${networks}" | jq 'length' 2>&1)
+    local jq_net_exit=$?
+    
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "[DEBUG] jq length for networks exit code: ${jq_net_exit}" >&2
+        echo "[DEBUG] Network count raw: '${network_count}'" >&2
+    fi
     
     echo "Discovering buildpack state directories..." >&2
     local state_dirs
     state_dirs=$(list_buildpack_state_directories)
     
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "[DEBUG] list_buildpack_state_directories returned: '${state_dirs}'" >&2
+        echo "[DEBUG] Return value length: ${#state_dirs} chars" >&2
+    fi
+    
     local state_count
-    state_count=$(echo "${state_dirs}" | jq 'length')
+    state_count=$(echo "${state_dirs}" | jq 'length' 2>&1)
+    local jq_state_exit=$?
+    
+    if [[ "${DEBUG}" == "true" ]]; then
+        echo "[DEBUG] jq length for state exit code: ${jq_state_exit}" >&2
+        echo "[DEBUG] State count raw: '${state_count}'" >&2
+        echo "[DEBUG] Comparing: network_count='${network_count}' == 0 AND state_count='${state_count}' == 0" >&2
+    fi
     
     if [[ "${network_count}" -eq 0 ]] && [[ "${state_count}" -eq 0 ]]; then
         echo "No buildpack networks or state directories found" >&2
