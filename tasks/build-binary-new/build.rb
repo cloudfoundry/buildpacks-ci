@@ -12,9 +12,9 @@ include Sha
 include DependencyBuild
 
 def main
-  binary_builder  = BinaryBuilderWrapper.new(Runner)
-  source_input    = SourceInput.from_file('source/data.json')
   stack           = ENV.fetch('STACK', nil)
+  binary_builder  = BinaryBuilderWrapper.new(Runner, stack)
+  source_input    = SourceInput.from_file('source/data.json')
   skip_commit     = ENV['SKIP_COMMIT'] == 'true'
   build_input     = skip_commit ? BuildInput.new(nil, nil) : BuildInput.from_file('source/data.json')
   build_output    = BuildOutput.new(source_input.name)

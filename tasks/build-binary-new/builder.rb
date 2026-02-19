@@ -19,11 +19,22 @@ end
 module DependencyBuild
   class << self
     def setup_ruby
-      Runner.run('apt', 'update')
-      Runner.run('apt', 'install', '-y', 'software-properties-common')
-      Runner.run('apt-add-repository', '-y', 'ppa:brightbox/ruby-ng')
-      Runner.run('apt', 'update')
-      Runner.run('apt', 'install', '-y', 'ruby2.7', 'ruby2.7-dev')
+      stack = ENV.fetch('STACK')
+      puts "Updating ruby for stack: #{stack}"
+      Runner.run('mkdir', '-p', '/opt/ruby')
+      
+      ruby_url = "https://buildpacks.cloudfoundry.org/dependencies/ruby/ruby_3.3.6_linux_x64_#{stack}_e4311262.tgz"
+      Runner.run('curl', '-L', '-o', '/opt/ruby/ruby3.3.6.tgz', ruby_url)
+      Runner.run('tar', '-xzf', '/opt/ruby/ruby3.3.6.tgz', '-C', '/opt/ruby')
+      ENV['PATH'] = "/opt/ruby/bin:#{ENV.fetch('PATH', nil)}"
+      Runner.run('ruby', '--version')
+      
+      Dir.chdir("binary-builder/#{stack}") do
+        Runner.run('sed', '-i', "s/^ruby .*/ruby '3.3.6'/", 'Gemfile')
+        puts('[DEBUG] running bundle install')
+        Runner.run('bundle', 'install')
+        puts('[DEBUG] finished bundle install')
+      end
     end
 
     def setup_python

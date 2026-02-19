@@ -13,7 +13,8 @@ new_version = File.read('version/number').strip
 stack = ENV.fetch('STACK')
 ubuntu_version = {
   'cflinuxfs3' => '18.04',
-  'cflinuxfs4' => '22.04'
+  'cflinuxfs4' => '22.04',
+  'cflinuxfs5' => '24.04'
 }.fetch(stack) { raise "Unsupported stack: #{stack}" }
 
 stack_repo = ENV.fetch('STACK_REPO', nil)

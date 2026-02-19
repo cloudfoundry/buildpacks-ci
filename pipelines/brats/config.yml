@@ -15,25 +15,35 @@ languages:
 stacks:
   apt:
   - cflinuxfs4
+  - cflinuxfs5
   binary:
   - cflinuxfs4
+  - cflinuxfs5
   - windows
   dotnet-core:
   - cflinuxfs4
+  - cflinuxfs5
   go:
   - cflinuxfs4
+  - cflinuxfs5
   nginx:
   - cflinuxfs4
+  - cflinuxfs5
   nodejs:
   - cflinuxfs4
+  - cflinuxfs5
   php:
   - cflinuxfs4
+  - cflinuxfs5
   python:
   - cflinuxfs4
+  - cflinuxfs5
   ruby:
   - cflinuxfs4
+  - cflinuxfs5
   staticfile:
   - cflinuxfs4
+  - cflinuxfs5
 
 tas_version: "4.0"
 tas_pool_name: tas_four
