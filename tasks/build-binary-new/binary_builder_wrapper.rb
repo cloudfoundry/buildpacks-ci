@@ -1,9 +1,10 @@
 class BinaryBuilderWrapper
   attr_reader :base_dir
 
-  def initialize(runner, base_dir = 'binary-builder')
+  def initialize(runner, stack)
     @runner = runner
-    @base_dir = base_dir
+    @stack = stack
+    @base_dir = File.join('binary-builder', stack)
   end
 
   def build(source_input, extension_file = nil)

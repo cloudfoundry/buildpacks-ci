@@ -1,11 +1,7 @@
 ---
 platform: linux
-image_resource:
-  type: docker-image
-  source:
-    repository: cloudfoundry/cflinuxfs3
-    username: ((coredeps-dockerhub-user.username))
-    password: ((coredeps-dockerhub-user.password))
+# NOTE: image_resource is NOT defined here - it's passed from the pipeline
+# The pipeline provides the stack-specific image using: image: #@ "{}-image".format(stack)
 inputs:
   - name: binary-builder
   - name: buildpacks-ci
@@ -25,10 +21,7 @@ outputs:
   - name: builds-artifacts
   - name: dep-metadata
 run:
-  path: bash
-  args:
-    - -cl
-    - buildpacks-ci/tasks/build-binary-new/build.rb
+  path: buildpacks-ci/tasks/build-binary-new/build.sh
 params:
   STACK:
   SKIP_COMMIT:

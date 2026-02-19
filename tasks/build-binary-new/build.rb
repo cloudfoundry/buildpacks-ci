@@ -9,12 +9,13 @@ require_relative 'dep_metadata_output'
 
 include Runner
 include Sha
-include DependencyBuild
+include Archive
+include HTTPHelper
 
 def main
-  binary_builder  = BinaryBuilderWrapper.new(Runner)
+  stack           = ENV.fetch('STACK')
+  binary_builder  = BinaryBuilderWrapper.new(Runner, stack)
   source_input    = SourceInput.from_file('source/data.json')
-  stack           = ENV.fetch('STACK', nil)
   skip_commit     = ENV['SKIP_COMMIT'] == 'true'
   build_input     = skip_commit ? BuildInput.new(nil, nil) : BuildInput.from_file('source/data.json')
   build_output    = BuildOutput.new(source_input.name)
@@ -28,7 +29,7 @@ def main
     build_output,
     artifact_output,
     dep_metadata_output,
-    __dir__,
+    "#{__dir__}/php_extensions",
     skip_commit
   )
   p out_data

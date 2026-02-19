@@ -243,7 +243,13 @@ jobs:
     - in_parallel:
         - do:
             - task: check-for-new-cflinuxfs4-cves
-              file: buildpacks-ci/tasks/check-for-new-rootfs-cves-cflinuxfs4/task.yml
+              file: buildpacks-ci/tasks/check-for-new-rootfs-cves/task.yml
+              input_mapping:
+                rootfs: cflinuxfs4
+              params:
+                STACK: cflinuxfs4
+                UBUNTU_VERSION: "Ubuntu 22.04"
+                UBUNTU_CODENAME: ubuntu22.04
               output_mapping:
                 output-new-cves: output-new-cves-cflinuxfs4
             - put: new-cves-cflinuxfs4

@@ -26,4 +26,3 @@ This directory contains a number of other files as well:
 
 * PHP extension yamls: each version line of PHP has it's own list of related
   extensions that we compile
-
