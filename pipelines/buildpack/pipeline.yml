@@ -204,6 +204,14 @@ resources:
       access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
       secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
+  - name: version-stack-cflinuxfs5
+    type: semver
+    source:
+      bucket: cflinuxfs5-release
+      key: versions/stack-cflinuxfs5
+      access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+
   #! GitHub Releases
   - name: buildpack-github-release
     type: github-release
@@ -520,6 +528,9 @@ jobs:
       - get: repo
         resource: buildpack
       - get: version-stack-cflinuxfs4
+      #@ if "cflinuxfs5" in data.values.buildpack.stacks:
+      - get: version-stack-cflinuxfs5
+      #@ end
 
     #! === INFRASTRUCTURE SETUP ===
     - task: bbl-up
