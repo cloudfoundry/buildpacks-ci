@@ -325,6 +325,8 @@ dependencies:
     #! Older ruby versions aren't compatible with openssl 3 of jammy
     #! There may be workarounds but decided not to support these versions.
     skip_lines_cflinuxfs4: [ '2.7.X', '3.0.X' ]
+    #! Same OpenSSL 3 compatibility issues apply to Noble (24.04)
+    skip_lines_cflinuxfs5: [ '2.7.X', '3.0.X', '3.1.X' ]
   rubygems:
     buildpacks:
       ruby:
@@ -445,7 +447,12 @@ dependencies:
 cflinuxfs4_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pip', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty', 'r' , 'httpd', 'php', 'jprofiler-profiler', 'your-kit-profiler', 'openjdk', 'zulu', 'sapmachine' ]
 cflinuxfs4_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems', 'nginx', 'nginx-static', 'openresty', 'r', 'appdynamics', 'composer', 'httpd', 'php', 'tomcat', 'skywalking-agent', 'jprofiler-profiler', 'your-kit-profiler', 'openjdk', 'zulu', 'sapmachine', 'appdynamics-java' ]
 cflinuxfs4_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go', 'ruby', 'nginx', 'r', 'php', 'staticfile', 'java' ]
-build_stacks: [ 'cflinuxfs4' ]
+
+cflinuxfs5_build_dependencies: [ 'libunwind', 'libgdiplus', 'node', 'pip', 'pipenv', 'python', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'nginx', 'nginx-static', 'openresty', 'r' , 'httpd', 'php', 'jprofiler-profiler', 'your-kit-profiler', 'openjdk', 'zulu', 'sapmachine' ]
+cflinuxfs5_dependencies: [ 'bower', 'libunwind', 'libgdiplus', 'node', 'dotnet-sdk', 'dotnet-runtime', 'dotnet-aspnetcore', 'pipenv', 'python', 'yarn', 'setuptools', 'miniconda3-py39', 'go', 'godep', 'glide', 'dep', 'ruby', 'jruby', 'bundler', 'rubygems', 'nginx', 'nginx-static', 'openresty', 'r', 'appdynamics', 'composer', 'httpd', 'php', 'tomcat', 'skywalking-agent', 'jprofiler-profiler', 'your-kit-profiler', 'openjdk', 'zulu', 'sapmachine', 'appdynamics-java' ]
+cflinuxfs5_buildpacks: [ 'dotnet-core' , 'nodejs', 'python', 'go', 'ruby', 'nginx', 'r', 'php', 'staticfile', 'java' ]
+
+build_stacks: [ 'cflinuxfs4', 'cflinuxfs5' ]
 windows_stacks: [ 'windows' ]
 
 #! only check deprecation dates for dotnet-runtime as they are redundant for sdk and aspnetcore

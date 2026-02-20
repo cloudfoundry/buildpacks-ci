@@ -6,6 +6,7 @@ organization: cloudfoundry
 buildpack:
   stacks:
   - cflinuxfs4
+  - cflinuxfs5
   product_slug: java-buildpack
   branch: feature/go-migration
   skip_docker_start: true

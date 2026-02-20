@@ -6,6 +6,7 @@ organization: cloudfoundry
 buildpack:
   stacks:
   - cflinuxfs4
+  - cflinuxfs5
   product_slug: dotnet-core-buildpack
   skip_docker_start: true
   skip_brats: true

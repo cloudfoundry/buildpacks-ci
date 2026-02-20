@@ -222,6 +222,7 @@ jobs:
 #@ for dep_name in data.values.dependencies:
 #@   dep = data.values.dependencies[dep_name]
 #@   skipped_version_lines_fs4 = getattr(dep, "skip_lines_cflinuxfs4", [])
+#@   skipped_version_lines_fs5 = getattr(dep, "skip_lines_cflinuxfs5", [])
 #@   version_lines = []
 #@   for bp_name in dep["buildpacks"]:
 #@     bp = dep["buildpacks"][bp_name]
@@ -302,6 +303,9 @@ jobs:
 #@     if line.lower() in [sl.lower() for sl in skipped_version_lines_fs4]:
 #@       build_stacks = [s for s in build_stacks if s != "cflinuxfs4"]
 #@     end
+#@     if line.lower() in [sl.lower() for sl in skipped_version_lines_fs5]:
+#@       build_stacks = [s for s in build_stacks if s != "cflinuxfs5"]
+#@     end
 - name: #@ "build-{}-{}".format(dep_name.lower(), line.lower())
   serial: true
   public: true
@@ -328,7 +332,7 @@ jobs:
     - do:
       - task: #@ "build-binary-{}".format(stack)
         image: #@ "{}-image".format("cflinuxfs4" if stack == "any-stack" else stack)
-        file: #@ "buildpacks-ci/tasks/build-binary-new{}/build.yml".format("-cflinuxfs4" if stack == "cflinuxfs4" or stack == "any-stack" else "")
+        file: buildpacks-ci/tasks/build-binary-stack/build.yml
         output_mapping:
           artifacts: #@ "{}-artifacts".format(stack)
           builds-artifacts: #@ "{}-builds-metadata".format(stack)
