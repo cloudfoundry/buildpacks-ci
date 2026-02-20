@@ -20,7 +20,10 @@ class SourceInput
 
   def self.from_file(source_file)
     data = JSON.parse(File.read(source_file, encoding: 'UTF-8'))
+    puts "[DEBUG] source_input.rb: Raw data.json contents:"
+    puts JSON.pretty_generate(data)
     if data['name']
+      puts "[DEBUG] Using data['name'] branch: name=#{data['name']}, url=#{data['source_uri']}"
       SourceInput.new(
         data['name'] || '',
         data['source_uri'] || '',
@@ -31,9 +34,11 @@ class SourceInput
         nil
       )
     else
+      url = data.dig('version', 'url') || ''
+      puts "[DEBUG] Using else branch: name=#{data.dig('source', 'name')}, url=#{url}"
       SourceInput.new(
         data.dig('source', 'name') || '',
-        data.dig('version', 'url') || '',
+        url,
         data.dig('version', 'ref') || '',
         data.dig('version', 'md5_digest'),
         data.dig('version', 'sha512'),
