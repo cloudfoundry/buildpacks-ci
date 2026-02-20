@@ -1,0 +1,27 @@
+---
+platform: linux
+# NOTE: image_resource is NOT defined here - it's passed from the pipeline
+# The pipeline uses: image: #@ "{}-image".format(stack)
+inputs:
+  - name: binary-builder
+  - name: buildpacks-ci
+  - name: source
+  - name: builds
+    optional: true
+  - name: source-forecast-latest
+    optional: true
+  - name: source-rserve-latest
+    optional: true
+  - name: source-plumber-latest
+    optional: true
+  - name: source-shiny-latest
+    optional: true
+outputs:
+  - name: artifacts
+  - name: builds-artifacts
+  - name: dep-metadata
+run:
+  path: buildpacks-ci/tasks/build-binary-stack/build.sh
+params:
+  STACK:
+  SKIP_COMMIT:
