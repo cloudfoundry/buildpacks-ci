@@ -14,13 +14,15 @@ type Internal struct {
 
 // Release represents full version details returned by In
 type Release struct {
-	Ref    string `json:"ref"`
-	URL    string `json:"url"`
-	SHA512 string `json:"sha512,omitempty"`
-	SHA256 string `json:"sha256,omitempty"`
-	SHA1   string `json:"sha1,omitempty"`
-	MD5    string `json:"md5_digest,omitempty"`
-	PGP    string `json:"pgp,omitempty"`
+	Ref            string `json:"ref"`
+	URL            string `json:"url"`
+	SHA512         string `json:"sha512,omitempty"`
+	SHA256         string `json:"sha256,omitempty"`
+	SHA1           string `json:"sha1,omitempty"`
+	MD5            string `json:"md5_digest,omitempty"`
+	PGP            string `json:"pgp,omitempty"`
+	GitCommitSHA   string `json:"git_commit_sha,omitempty"`
+	RuntimeVersion string `json:"runtime_version,omitempty"`
 }
 
 // HTTPClient abstracts HTTP operations for testing

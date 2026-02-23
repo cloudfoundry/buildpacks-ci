@@ -54,13 +54,6 @@ type DotnetFile struct {
 	Hash string `json:"hash"`
 }
 
-type DotnetReleaseInfo struct {
-	Ref            string
-	URL            string
-	SHA512         string
-	RuntimeVersion string
-}
-
 type DotnetWatcher struct {
 	client     base.HTTPClient
 	targetType string
@@ -119,7 +112,7 @@ func (w *DotnetWatcher) Check(versionFilter string) ([]base.Internal, error) {
 	return w.reverseVersions(w.uniqueVersions(result)), nil
 }
 
-func (w *DotnetWatcher) In(ref string) (*DotnetReleaseInfo, error) {
+func (w *DotnetWatcher) In(ref string) (*base.Release, error) {
 	channelVersion := w.getChannelVersion(ref)
 	releases, err := w.getReleases(channelVersion)
 	if err != nil {
@@ -131,7 +124,7 @@ func (w *DotnetWatcher) In(ref string) (*DotnetReleaseInfo, error) {
 		return nil, err
 	}
 
-	return &DotnetReleaseInfo{
+	return &base.Release{
 		Ref:            ref,
 		URL:            file.URL,
 		SHA512:         strings.ToLower(file.Hash),
