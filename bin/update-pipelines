@@ -61,9 +61,7 @@ list_pipelines() {
       fi
     elif [[ -f "$pipeline_path" ]]; then
       pipeline_name="$(basename "${pipeline_path%.yml}")"
-      if [[ "$pipeline_name" == "cflinuxfs4" ]]; then
-        echo "  - $pipeline_name"
-      fi
+      echo "  - $pipeline_name"
     fi
   done
   echo ""
@@ -135,9 +133,6 @@ process_pipelines() {
       fi
       
       pipeline_name="$(basename "${pipeline_path%.yml}")"
-      if [[ "$pipeline_name" != "cflinuxfs4" ]]; then
-        continue
-      fi
       
       if [[ -n "$filter" && "$pipeline_name" != "$filter" ]]; then
         continue
