@@ -29,12 +29,6 @@ type npmRegistry struct {
 	Versions map[string]npmVersion `json:"versions"`
 }
 
-type NPMRelease struct {
-	Ref  string
-	URL  string
-	SHA1 string
-}
-
 func NewNPMWatcher(client base.HTTPClient) *NPMWatcher {
 	return &NPMWatcher{client: client}
 }
@@ -66,18 +60,18 @@ func (w *NPMWatcher) Check(packageName string) ([]base.Internal, error) {
 	return internals, nil
 }
 
-func (w *NPMWatcher) In(packageName, ref string) (NPMRelease, error) {
+func (w *NPMWatcher) In(packageName, ref string) (base.Release, error) {
 	versions, err := w.getVersions(packageName)
 	if err != nil {
-		return NPMRelease{}, err
+		return base.Release{}, err
 	}
 
 	version, ok := versions[ref]
 	if !ok {
-		return NPMRelease{}, fmt.Errorf("version %s not found for package %s", ref, packageName)
+		return base.Release{}, fmt.Errorf("version %s not found for package %s", ref, packageName)
 	}
 
-	return NPMRelease{
+	return base.Release{
 		Ref:  ref,
 		URL:  version.Dist.Tarball,
 		SHA1: version.Dist.Shasum,

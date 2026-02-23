@@ -15,12 +15,6 @@ type GoWatcher struct {
 	client base.HTTPClient
 }
 
-type GoRelease struct {
-	Ref    string
-	URL    string
-	SHA256 string
-}
-
 type goVersionJSON struct {
 	Version string       `json:"version"`
 	Stable  bool         `json:"stable"`
@@ -64,10 +58,10 @@ func (w *GoWatcher) Check() ([]base.Internal, error) {
 	return internals, nil
 }
 
-func (w *GoWatcher) In(ref string) (GoRelease, error) {
+func (w *GoWatcher) In(ref string) (base.Release, error) {
 	releases, err := w.getReleases()
 	if err != nil {
-		return GoRelease{}, err
+		return base.Release{}, err
 	}
 
 	for _, r := range releases {
@@ -76,10 +70,10 @@ func (w *GoWatcher) In(ref string) (GoRelease, error) {
 		}
 	}
 
-	return GoRelease{}, fmt.Errorf("could not find data for version %s", ref)
+	return base.Release{}, fmt.Errorf("could not find data for version %s", ref)
 }
 
-func (w *GoWatcher) getReleases() ([]GoRelease, error) {
+func (w *GoWatcher) getReleases() ([]base.Release, error) {
 	resp, err := w.client.Get("https://go.dev/dl/?mode=json&include=all")
 	if err != nil {
 		return nil, fmt.Errorf("fetching go.dev/dl JSON: %w", err)
@@ -96,7 +90,7 @@ func (w *GoWatcher) getReleases() ([]GoRelease, error) {
 		return nil, fmt.Errorf("parsing JSON: %w", err)
 	}
 
-	var releases []GoRelease
+	var releases []base.Release
 	for _, v := range versions {
 		if !v.Stable {
 			continue
@@ -118,7 +112,7 @@ func (w *GoWatcher) getReleases() ([]GoRelease, error) {
 
 		url := fmt.Sprintf("https://dl.google.com/go/%s", sourceFile.Filename)
 
-		releases = append(releases, GoRelease{
+		releases = append(releases, base.Release{
 			Ref:    version,
 			URL:    url,
 			SHA256: strings.TrimSpace(sourceFile.SHA256),

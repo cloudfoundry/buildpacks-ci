@@ -24,13 +24,6 @@ type githubCommit struct {
 	SHA string `json:"sha"`
 }
 
-type GithubTag struct {
-	Ref          string
-	URL          string
-	GitCommitSHA string
-	SHA256       string
-}
-
 func NewGithubTagsWatcher(client base.HTTPClient, repo string) *GithubTagsWatcher {
 	return &GithubTagsWatcher{
 		client: client,
@@ -61,10 +54,10 @@ func (w *GithubTagsWatcher) Check(tagRegex string) ([]base.Internal, error) {
 	return internals, nil
 }
 
-func (w *GithubTagsWatcher) In(ref string) (GithubTag, error) {
+func (w *GithubTagsWatcher) In(ref string) (base.Release, error) {
 	tags, err := w.tags()
 	if err != nil {
-		return GithubTag{}, err
+		return base.Release{}, err
 	}
 
 	for _, tag := range tags {
@@ -72,10 +65,10 @@ func (w *GithubTagsWatcher) In(ref string) (GithubTag, error) {
 			url := fmt.Sprintf("https://github.com/%s/archive/%s.tar.gz", w.repo, tag.Commit.SHA)
 			sha256, err := base.GetSHA256(w.client, url)
 			if err != nil {
-				return GithubTag{}, fmt.Errorf("calculating SHA256: %w", err)
+				return base.Release{}, fmt.Errorf("calculating SHA256: %w", err)
 			}
 
-			return GithubTag{
+			return base.Release{
 				Ref:          tag.Name,
 				URL:          url,
 				GitCommitSHA: tag.Commit.SHA,
@@ -84,7 +77,7 @@ func (w *GithubTagsWatcher) In(ref string) (GithubTag, error) {
 		}
 	}
 
-	return GithubTag{}, fmt.Errorf("could not find data for version %s", ref)
+	return base.Release{}, fmt.Errorf("could not find data for version %s", ref)
 }
 
 func (w *GithubTagsWatcher) MatchedTags(tagRegex string) ([]githubTag, error) {
