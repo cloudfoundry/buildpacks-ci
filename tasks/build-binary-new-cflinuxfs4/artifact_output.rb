@@ -14,7 +14,7 @@ class ArtifactOutput
     FileUtils.mv(old_file_path, File.join(@base_dir, filename))
     {
       sha256: sha,
-      url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename}"
+      url: "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{filename.gsub('+', '%2B')}"
     }
   end
 
