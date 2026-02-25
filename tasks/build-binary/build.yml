@@ -1,0 +1,39 @@
+---
+platform: linux
+
+# The Docker image is the CF stack container for the target stack.
+# STACK param must be set by the pipeline job.
+image_resource:
+  type: docker-image
+  source:
+    repository: cloudfoundry/((stack))
+    username: ((coredeps-dockerhub-user.username))
+    password: ((coredeps-dockerhub-user.password))
+
+inputs:
+  - name: binary-builder
+  - name: buildpacks-ci
+  - name: source
+  - name: builds
+    optional: true
+  # R sub-dependency sources (optional; only present for r builds)
+  - name: source-forecast-latest
+    optional: true
+  - name: source-rserve-latest
+    optional: true
+  - name: source-plumber-latest
+    optional: true
+  - name: source-shiny-latest
+    optional: true
+
+outputs:
+  - name: artifacts
+  - name: builds-artifacts
+  - name: dep-metadata
+
+params:
+  STACK:
+  SKIP_COMMIT:
+
+run:
+  path: buildpacks-ci/tasks/build-binary/run.sh

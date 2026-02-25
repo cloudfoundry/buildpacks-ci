@@ -462,14 +462,17 @@ class DependencyBuild
     end
 
     full_version = "#{@source_input.version}-ruby-#{ruby_version}"
+    # NOTE: SourceInput constructor is (name, url, version, md5, sha512=nil, sha256=nil, ...).
+    # sha256 must go in the sha256 slot (arg6), not the sha512 slot (arg5).
+    # The inner binary-builder.rb only understands --sha256, so sha512 must be nil here.
     @binary_builder.build(
       SourceInput.new(
         @source_input.name,
         @source_input.url,
         full_version,
         @source_input.md5,
-        @source_input.sha256,
-        @source_input.git_commit_sha
+        nil,
+        @source_input.sha256
       )
     )
 

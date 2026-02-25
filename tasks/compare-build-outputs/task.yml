@@ -1,0 +1,15 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: alpine
+    tag: latest
+
+inputs:
+  - name: buildpacks-ci
+  - name: ruby-dep-metadata
+  - name: go-dep-metadata
+
+run:
+  path: buildpacks-ci/tasks/compare-build-outputs/run.sh
