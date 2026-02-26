@@ -389,6 +389,10 @@ jobs:
                 set -e
                 cp version/number buildpack/VERSION
                 echo "Updated VERSION file with: $(cat buildpack/VERSION)"
+      - task: update-changelog-for-release
+        file: buildpacks-ci/tasks/update-changelog-for-release/task.yml
+        params:
+          REPO_PRIVATE_KEY: ((cf-buildpacks-eng-github-ssh-key.private_key))
       - task: check-tag-not-already-added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
         params:
