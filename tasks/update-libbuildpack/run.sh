@@ -22,9 +22,7 @@ pushd buildpack
     go install github.com/golang/mock/mockgen@latest
   popd
   go mod tidy
-  if [[ "$SHIM" == "true" ]]; then
-    go mod vendor
-  fi
+  go mod vendor
 
   if [[ -d "$update_dir" ]]; then
     pushd "$update_dir"
