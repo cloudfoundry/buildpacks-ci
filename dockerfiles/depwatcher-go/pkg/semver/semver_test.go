@@ -216,6 +216,19 @@ var _ = Describe("Filter", func() {
 				Expect(filter.Match(sv3)).To(BeTrue())
 			})
 
+			It("matches 3.2.x pattern (lowercase)", func() {
+				filter := semver.NewFilter("3.2.x")
+
+				sv1, _ := semver.Parse("3.2.0")
+				Expect(filter.Match(sv1)).To(BeTrue())
+
+				sv2, _ := semver.Parse("3.2.1")
+				Expect(filter.Match(sv2)).To(BeTrue())
+
+				sv3, _ := semver.Parse("3.2.99")
+				Expect(filter.Match(sv3)).To(BeTrue())
+			})
+
 			It("does not match different minor version", func() {
 				filter := semver.NewFilter("3.2.X")
 				sv, _ := semver.Parse("3.3.0")
