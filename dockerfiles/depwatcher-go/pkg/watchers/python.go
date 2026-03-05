@@ -25,8 +25,26 @@ func NewPythonWatcher(client base.HTTPClient) *PythonWatcher {
 	return &PythonWatcher{client: client}
 }
 
-func (w *PythonWatcher) Check() ([]base.Internal, error) {
-	resp, err := w.client.Get("https://www.python.org/api/v2/downloads/release/?is_published=true")
+// extractMajorVersion returns the major version from a version filter like "3.10.x" -> "3"
+func extractMajorVersion(versionFilter string) string {
+	if versionFilter == "" {
+		return ""
+	}
+	parts := strings.Split(versionFilter, ".")
+	if len(parts) > 0 {
+		return parts[0]
+	}
+	return ""
+}
+
+func (w *PythonWatcher) Check(versionFilter string) ([]base.Internal, error) {
+	// Build API URL with server-side filtering
+	apiURL := "https://www.python.org/api/v2/downloads/release/?pre_release=false"
+	if major := extractMajorVersion(versionFilter); major != "" {
+		apiURL += "&version=" + major
+	}
+
+	resp, err := w.client.Get(apiURL)
 	if err != nil {
 		return nil, fmt.Errorf("fetching python API: %w", err)
 	}
@@ -46,10 +64,6 @@ func (w *PythonWatcher) Check() ([]base.Internal, error) {
 	versionRegex := regexp.MustCompile(`Python\s+(\d+\.\d+\.\d+)`)
 
 	for _, release := range releases {
-		if release.PreRelease {
-			continue
-		}
-
 		matches := versionRegex.FindStringSubmatch(release.Name)
 		if len(matches) > 1 {
 			versions = append(versions, base.Internal{Ref: matches[1]})
@@ -58,10 +72,6 @@ func (w *PythonWatcher) Check() ([]base.Internal, error) {
 
 	if len(versions) == 0 {
 		return nil, fmt.Errorf("no versions found in API response")
-	}
-
-	if len(versions) > 50 {
-		versions = versions[:50]
 	}
 
 	return versions, nil
