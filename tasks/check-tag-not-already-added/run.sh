@@ -14,14 +14,17 @@ eval "$(ssh-agent -s)"
 ssh-add - <<< "$REPO_PRIVATE_KEY"
 
 VERSION=""
-if [[ -d "version" ]]; then
+if [[ -f "buildpack/VERSION" ]]; then
+    VERSION=$(cat buildpack/VERSION)
+elif [[ -d "version" ]]; then
     if [[ -f "version/number" ]]; then
         VERSION=$(cat version/number)
     elif [[ -f "version/version" ]]; then
         VERSION=$(cat version/version)
     fi
 else
-    VERSION=$(cat buildpack/VERSION)
+    echo "ERROR: VERSION file not found" >&2
+    exit 1
 fi
 
 cd buildpack
