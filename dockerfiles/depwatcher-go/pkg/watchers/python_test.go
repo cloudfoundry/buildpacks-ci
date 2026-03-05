@@ -60,12 +60,12 @@ var _ = Describe("PythonWatcher", func() {
 					{"name": "Python 3.10.15", "is_published": true, "pre_release": false},
 					{"name": "Python 3.9.7", "is_published": true, "pre_release": false}
 				]`
-				mockClient.responses["https://www.python.org/api/v2/downloads/release/?is_published=true"] = apiJSON
+				mockClient.responses["https://www.python.org/api/v2/downloads/release/?pre_release=false&version=3"] = apiJSON
 				watcher = watchers.NewPythonWatcher(mockClient)
 			})
 
 			It("returns Python versions from the API", func() {
-				versions, err := watcher.Check()
+				versions, err := watcher.Check("3.10.x")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(versions).To(HaveLen(4))
 				Expect(versions[0].Ref).To(Equal("3.12.20"))
@@ -75,7 +75,7 @@ var _ = Describe("PythonWatcher", func() {
 			})
 
 			It("extracts version numbers from release names", func() {
-				versions, err := watcher.Check()
+				versions, err := watcher.Check("3.10.x")
 				Expect(err).NotTo(HaveOccurred())
 
 				for _, v := range versions {
@@ -85,47 +85,45 @@ var _ = Describe("PythonWatcher", func() {
 			})
 		})
 
-		Context("when the API returns pre-releases", func() {
+		Context("when the API is called without version filter", func() {
 			BeforeEach(func() {
 				apiJSON := `[
 					{"name": "Python 3.13.0", "is_published": true, "pre_release": false},
-					{"name": "Python 3.13.0rc2", "is_published": true, "pre_release": true},
-					{"name": "Python 3.13.0rc1", "is_published": true, "pre_release": true},
+					{"name": "Python 2.7.18", "is_published": true, "pre_release": false},
 					{"name": "Python 3.12.5", "is_published": true, "pre_release": false}
 				]`
-				mockClient.responses["https://www.python.org/api/v2/downloads/release/?is_published=true"] = apiJSON
+				mockClient.responses["https://www.python.org/api/v2/downloads/release/?pre_release=false"] = apiJSON
 				watcher = watchers.NewPythonWatcher(mockClient)
 			})
 
-			It("filters out pre-releases", func() {
-				versions, err := watcher.Check()
+			It("returns all non-pre-release versions from API", func() {
+				versions, err := watcher.Check("")
 				Expect(err).NotTo(HaveOccurred())
-				Expect(versions).To(HaveLen(2))
+				Expect(versions).To(HaveLen(3))
 				Expect(versions[0].Ref).To(Equal("3.13.0"))
-				Expect(versions[1].Ref).To(Equal("3.12.5"))
+				Expect(versions[1].Ref).To(Equal("2.7.18"))
+				Expect(versions[2].Ref).To(Equal("3.12.5"))
 			})
 		})
 
-		Context("when there are more than 50 versions (API)", func() {
+		Context("when version filter specifies Python 2", func() {
 			BeforeEach(func() {
-				var releases strings.Builder
-				releases.WriteString("[")
-				for i := 0; i < 60; i++ {
-					if i > 0 {
-						releases.WriteString(",")
-					}
-					releases.WriteString(fmt.Sprintf(`{"name":"Python 3.%d.0","is_published":true,"pre_release":false}`, i))
-				}
-				releases.WriteString("]")
-
-				mockClient.responses["https://www.python.org/api/v2/downloads/release/?is_published=true"] = releases.String()
+				apiJSON := `[
+					{"name": "Python 2.7.18", "is_published": true, "pre_release": false},
+					{"name": "Python 2.7.17", "is_published": true, "pre_release": false},
+					{"name": "Python 2.6.9", "is_published": true, "pre_release": false}
+				]`
+				mockClient.responses["https://www.python.org/api/v2/downloads/release/?pre_release=false&version=2"] = apiJSON
 				watcher = watchers.NewPythonWatcher(mockClient)
 			})
 
-			It("limits results to the first 50 versions", func() {
-				versions, err := watcher.Check()
+			It("uses version=2 query parameter", func() {
+				versions, err := watcher.Check("2.7.x")
 				Expect(err).NotTo(HaveOccurred())
-				Expect(versions).To(HaveLen(50))
+				Expect(versions).To(HaveLen(3))
+				Expect(versions[0].Ref).To(Equal("2.7.18"))
+				Expect(versions[1].Ref).To(Equal("2.7.17"))
+				Expect(versions[2].Ref).To(Equal("2.6.9"))
 			})
 		})
 
@@ -135,7 +133,7 @@ var _ = Describe("PythonWatcher", func() {
 			})
 
 			It("returns an error", func() {
-				_, err := watcher.Check()
+				_, err := watcher.Check("3.10.x")
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("fetching python API"))
 			})
@@ -143,12 +141,12 @@ var _ = Describe("PythonWatcher", func() {
 
 		Context("when the API returns no versions", func() {
 			BeforeEach(func() {
-				mockClient.responses["https://www.python.org/api/v2/downloads/release/?is_published=true"] = "[]"
+				mockClient.responses["https://www.python.org/api/v2/downloads/release/?pre_release=false&version=3"] = "[]"
 				watcher = watchers.NewPythonWatcher(mockClient)
 			})
 
 			It("returns an error", func() {
-				_, err := watcher.Check()
+				_, err := watcher.Check("3.10.x")
 				Expect(err).To(HaveOccurred())
 				Expect(err.Error()).To(ContainSubstring("no versions found"))
 			})
