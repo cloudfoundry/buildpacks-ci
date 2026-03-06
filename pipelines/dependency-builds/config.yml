@@ -389,7 +389,7 @@ dependencies:
         lines:
           - line: latest
     source_type: jprofiler
-    any_stack: false
+    any_stack: true
     versions_to_keep: 2
   your-kit-profiler:
     buildpacks:
@@ -397,7 +397,7 @@ dependencies:
         lines:
           - line: latest
     source_type: yourkit
-    any_stack: false
+    any_stack: true
     versions_to_keep: 2
   openjdk:
     buildpacks:
@@ -412,7 +412,7 @@ dependencies:
     source_params:
       - 'product: jre'
       - 'bundle_type: jre'
-    any_stack: false
+    any_stack: true
     versions_to_keep: 2
   zulu:
     buildpacks:
@@ -424,7 +424,7 @@ dependencies:
     source_type: zulu
     source_params:
       - 'bundle_type: jre'
-    any_stack: false
+    any_stack: true
     versions_to_keep: 2
   sapmachine:
     buildpacks:
@@ -437,7 +437,7 @@ dependencies:
     source_params:
       - 'repo: SAP/SapMachine'
       - 'glob: *jre-*_linux-x64_bin.tar.gz'
-    any_stack: false
+    any_stack: true
     versions_to_keep: 2
   appdynamics-java:
     buildpacks:
