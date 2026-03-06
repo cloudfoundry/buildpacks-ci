@@ -17,7 +17,7 @@ pushd buildpack
 
   go get -u github.com/cloudfoundry/libbuildpack
   go get github.com/golang/mock/gomock
-  go install github.com/onsi/ginkgo/ginkgo@latest
+  go install github.com/onsi/ginkgo/v2/ginkgo@latest
   pushd /tmp
     go install github.com/golang/mock/mockgen@latest
   popd
@@ -35,9 +35,9 @@ pushd buildpack
 
       export CF_STACK=${CF_STACK:-cflinuxfs3}
       if [[ "$SHIM" == "true" ]]; then
-            ginkgo -r -mod=vendor -skipPackage=integration,brats
+            ginkgo -r -mod=vendor -skip-package=integration,brats
       else
-            ginkgo -r -skipPackage=integration,brats
+            ginkgo -r -skip-package=integration,brats
       fi
     popd
   fi
