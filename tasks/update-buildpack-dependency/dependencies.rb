@@ -30,11 +30,9 @@ class Dependencies
       # Ensure version is a string (YAML may parse numbers like 11.0 as Float)
       version = version.to_s unless version.nil?
       version = version[1..] if !version.nil? && version.start_with?('v')
-      version = begin
-        SemVer.parse(version)
-      rescue StandardError
-        version
-      end
+      # SemVer.parse returns nil (not an exception) for unparseable versions.
+      # Try padding 2-part versions like "25.2" to "25.2.0" for SemVer compatibility.
+      version = SemVer.parse(version) || SemVer.parse("#{version}.0") || version
       [d['name'], version, d['cf_stacks']]
     end
   end

@@ -24,4 +24,4 @@ if ! command -v ruby &> /dev/null || ! ruby --version | grep -q "3.4"; then
 fi
 
 echo "[task] Running builder.rb..."
-ruby buildpacks-ci/tasks/build-binary-new-cflinuxfs4/build.rb
+ruby buildpacks-ci/tasks/build-binary-new-cflinuxfs5/build.rb

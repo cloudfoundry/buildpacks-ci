@@ -255,12 +255,35 @@ module DependencyBuildHelper
             Runner.run('/usr/local/lib/R/bin/R', '--vanilla', '-e', 'remove.packages("devtools")')
 
             Dir.chdir('/usr/local/lib/R') do
-              Runner.run('cp', '-L', '/usr/bin/x86_64-linux-gnu-gfortran-11', './bin/gfortran')
-              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/11/f951', './bin/f951')
+              # Use generic gfortran symlink
+              Runner.run('cp', '-L', '/usr/bin/gfortran', './bin/gfortran')
+              
+              # Discover gfortran version by looking for available paths
+              gcc_dirs = Dir.glob('/usr/lib/gcc/x86_64-linux-gnu/*/').map { |path| File.basename(path) }
+              if gcc_dirs.empty?
+                raise "Could not find gfortran version directory in /usr/lib/gcc/x86_64-linux-gnu/"
+              end
+              gcc_version = gcc_dirs.sort_by { |v| v.to_i }.last
+              gcc_lib_dir = "/usr/lib/gcc/x86_64-linux-gnu/#{gcc_version}"
+              
+              # Copy f951 only if it exists
+              f951_path = "#{gcc_lib_dir}/f951"
+              Runner.run('cp', '-L', f951_path, './bin/f951') if File.exist?(f951_path)
+              
               Runner.run('ln', '-s', './gfortran', './bin/f95')
-              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/11/libcaf_single.a', './lib')
-              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/11/libgfortran.a', './lib')
-              Runner.run('cp', '-L', '/usr/lib/gcc/x86_64-linux-gnu/11/libgfortran.so', './lib')
+              
+              # Copy fortran libraries, handling missing files gracefully
+              ['libcaf_single.a', 'libgfortran.a', 'libgfortran.so'].each do |lib|
+                lib_path = "#{gcc_lib_dir}/#{lib}"
+                if File.exist?(lib_path)
+                  Runner.run('cp', '-L', lib_path, './lib')
+                elsif lib == 'libgfortran.so'
+                  # Try to find libgfortran.so in standard library path as fallback
+                  fallback = `find /usr -name 'libgfortran.so*' 2>/dev/null | head -1`.strip
+                  Runner.run('cp', '-L', fallback, './lib') if File.exist?(fallback)
+                end
+              end
+              
               Runner.run('cp', '-L', '/usr/lib/x86_64-linux-gnu/libpcre2-8.so.0', './lib')
               Runner.run('tar', 'zcvf', "#{artifacts}/r-v#{source_input.version}.tgz", '.')
             end
