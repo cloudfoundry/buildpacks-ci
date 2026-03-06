@@ -33,7 +33,7 @@ pushd buildpack
       [ -d supply ] && (cd supply && (go generate || true))
       [ -d finalize ] && (cd finalize && (go generate || true))
 
-      export CF_STACK=${CF_STACK:-cflinuxfs3}
+      export CF_STACK=${CF_STACK:-cflinuxfs4}
       if [[ "$SHIM" == "true" ]]; then
             ginkgo -r -mod=vendor -skip-package=integration,brats
       else
