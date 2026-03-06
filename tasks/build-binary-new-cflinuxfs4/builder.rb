@@ -317,7 +317,7 @@ class DependencyBuild
     if @source_input.name.include?('miniconda')
       build_miniconda
     else
-      method_name = "build_#{@source_input.name.sub('-', '_')}"
+      method_name = "build_#{@source_input.name.gsub('-', '_')}"
       puts "Running #{method_name}"
       raise "No build method for #{@source_input.name}" unless respond_to?(method_name)
 
