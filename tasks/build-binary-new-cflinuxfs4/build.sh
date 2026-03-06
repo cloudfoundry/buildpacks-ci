@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Prevent apt from waiting for user input
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
+
 RUBY_VERSION="3.4.6"
 
 if ! command -v ruby &> /dev/null || ! ruby --version | grep -q "3.4"; then
