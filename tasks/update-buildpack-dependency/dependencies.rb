@@ -61,10 +61,10 @@ class Dependencies
     return false if dep_name != @dep['name']
     return false unless dep_includes_at_least_these_stacks?(stacks)
 
-    parsed_version = SemVer.parse(version)
+    parsed_version = SemVer.parse(version.to_s)
     return false if parsed_version.nil?
 
-    dep_version = SemVer.parse(@dep['version'])
+    dep_version = SemVer.parse(@dep['version'].to_s)
     return false if dep_version.nil?
 
     case @line
