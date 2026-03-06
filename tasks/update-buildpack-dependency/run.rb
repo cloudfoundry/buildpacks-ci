@@ -52,9 +52,15 @@ builds = {}
 
 version = ''
 
+any_stack_build_exists = Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-any-stack.json"].any?
+
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
   # See github.com/cloudfoundry/buildpacks-ci/pull/300 - we don't want to process the *cflinuxfs3.json files (they are replaced by *cflinuxfs3-dev.json files)
   next if source_name == 'php' && stack_dependency_build.include?('cflinuxfs3.json')
+
+  # Skip stack-specific builds when an any-stack build exists - the any-stack build covers all stacks
+  # and will replace all existing stack-specific entries in one pass
+  next if any_stack_build_exists && !stack_dependency_build.include?('any-stack.json')
 
   if !is_null(deprecation_date) && !is_null(deprecation_link) && version_line != 'latest'
     dependency_deprecation_date = {
