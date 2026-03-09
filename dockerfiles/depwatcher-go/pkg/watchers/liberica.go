@@ -72,6 +72,9 @@ func (w *LibericaWatcher) In(ref string) (base.Release, error) {
 }
 
 func (w *LibericaWatcher) fetchReleases() ([]libericaRelease, error) {
+	if w.version == "" {
+		return nil, fmt.Errorf("version must be specified")
+	}
 	if w.typ == "" {
 		return nil, fmt.Errorf("type must be specified")
 	}
