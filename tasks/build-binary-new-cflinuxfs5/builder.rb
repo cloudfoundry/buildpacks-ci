@@ -47,8 +47,7 @@ module HTTPHelper
     end
 
     def read_file(url)
-      uri = URI.parse(url)
-      response = Net::HTTP.get_response(uri)
+      response = download_with_follow_redirects(URI.parse(url))
       response.body if response.code == '200'
     end
   end

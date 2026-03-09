@@ -111,7 +111,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   source_type = 'source'
   source_url = builds[stack]['source']['url']
-  source_sha256 = builds[stack]['source'].fetch('sha256', '')
+  source_sha256 = builds[stack]['source'].fetch('sha256', nil).to_s
 
   if source_name == 'appdynamics'
     source_type = 'osl'
