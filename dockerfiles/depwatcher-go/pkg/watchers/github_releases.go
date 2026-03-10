@@ -126,7 +126,13 @@ func (w *GithubReleasesWatcher) fetchReleases() ([]githubRelease, error) {
 		url := fmt.Sprintf("https://api.github.com/repos/%s/releases?per_page=100&page=%d", w.repo, page)
 		resp, err := w.client.Get(url)
 		if err != nil {
-			return nil, fmt.Errorf("fetching releases page %d: %w", page, err)
+			// GitHub returns 422 when the requested page is beyond the last page
+			// of results (offset > 1000). Treat any HTTP error on page 2+ as
+			// end-of-pagination rather than a hard failure.
+			if page > 1 {
+				break
+			}
+			return nil, fmt.Errorf("fetching releases: %w", err)
 		}
 
 		var releases []githubRelease
