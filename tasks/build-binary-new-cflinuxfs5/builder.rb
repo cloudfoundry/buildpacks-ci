@@ -232,7 +232,7 @@ module DependencyBuildHelper
 
           ENV.fetch('STACK')
           # Note: libpcre++-dev removed - not available in Ubuntu 24.04 and R 4.x uses PCRE2 (libpcre2-dev)
-          Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre2-dev', 'libcurl4-openssl-dev', 'libsodium-dev', 'libharfbuzz-dev', 'libfribidi-dev', 'default-jre', 'libgfortran-12-dev', 'libfreetype6-dev', 'libpng-dev', 'libtiff5-dev', 'libjpeg-dev', 'libwebp-dev')
+          Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre2-dev', 'libcurl4-openssl-dev', 'libsodium-dev', 'libharfbuzz-dev', 'libfribidi-dev', 'default-jre', 'libgfortran-14-dev', 'libfreetype6-dev', 'libpng-dev', 'libtiff-dev', 'libjpeg-dev', 'libwebp-dev')
 
           Runner.run('wget', source_input.url)
           source_sha = Digest::SHA256.hexdigest(File.read("R-#{source_input.version}.tar.gz"))

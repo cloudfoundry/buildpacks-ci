@@ -23,6 +23,8 @@ WINDOWS_STACKS = config['windows_stacks']
 all_stacks = BUILD_STACKS + WINDOWS_STACKS + ['any-stack']
 cflinuxfs4_dependencies = config['cflinuxfs4_dependencies']
 cflinuxfs4_buildpacks = config['cflinuxfs4_buildpacks']
+cflinuxfs5_dependencies = config['cflinuxfs5_dependencies']
+cflinuxfs5_buildpacks = config['cflinuxfs5_buildpacks']
 
 manifest = YAML.load_file('buildpack/manifest.yml', permitted_classes: [Date, Time])
 manifest_latest_released = YAML.load_file('buildpack-latest-released/manifest.yml', permitted_classes: [Date, Time]) # rescue { 'dependencies' => [] }
@@ -83,12 +85,20 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   ## TODO: This should be removed when all the buildpacks are built using cflinuxfs4. Right now it only uses the buildpacks included in buildpacks-ci/pipelines/dependency-builds/config.yml --> cflinuxfs4_buildpacks:
   next if !cflinuxfs4_buildpacks.include?(buildpack_name) && stack == 'cflinuxfs4'
 
+  ## TODO: This should be removed when all the buildpacks are built using cflinuxfs5. Right now it only uses the buildpacks included in buildpacks-ci/pipelines/dependency-builds/config.yml --> cflinuxfs5_buildpacks:
+  next if !cflinuxfs5_buildpacks.include?(buildpack_name) && stack == 'cflinuxfs5'
+
   stacks = stack == 'any-stack' ? BUILD_STACKS : [stack]
 
   # TODO: This should be removed when all the dependencies are built using cflinuxfs4. Right now it only uses the dependencies included in buildpacks-ci/pipelines/dependency-builds/config.yml --> cflinuxfs4_dependencies:
   # TODO: This also includes logic to skip certain version lines based on the skip_lines_cflinuxfs4 array in the config file.
   skip_lines_cflinuxfs4 = config['dependencies'][source_name]&.key?('skip_lines_cflinuxfs4') ? config['dependencies'][source_name]['skip_lines_cflinuxfs4'].map(&:downcase) : []
   stacks -= ['cflinuxfs4'] if !cflinuxfs4_dependencies.include?(source_name) || skip_lines_cflinuxfs4.include?(version_line.downcase)
+
+  # TODO: This should be removed when all the dependencies are built using cflinuxfs5. Right now it only uses the dependencies included in buildpacks-ci/pipelines/dependency-builds/config.yml --> cflinuxfs5_dependencies:
+  # TODO: This also includes logic to skip certain version lines based on the skip_lines_cflinuxfs5 array in the config file.
+  skip_lines_cflinuxfs5 = config['dependencies'][source_name]&.key?('skip_lines_cflinuxfs5') ? config['dependencies'][source_name]['skip_lines_cflinuxfs5'].map(&:downcase) : []
+  stacks -= ['cflinuxfs5'] if !cflinuxfs5_dependencies.include?(source_name) || skip_lines_cflinuxfs5.include?(version_line.downcase)
 
   # Logic to skip certain version lines that are not supported in cflinuxfs3
   skip_lines_cflinuxfs3 = config['dependencies'][source_name]&.key?('skip_lines_cflinuxfs3') ? config['dependencies'][source_name]['skip_lines_cflinuxfs3'].map(&:downcase) : []

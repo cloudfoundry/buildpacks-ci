@@ -310,6 +310,7 @@ dependencies:
       - plumber
     versions_to_keep: 1
     skip_lines_cflinuxfs4: []
+    skip_lines_cflinuxfs5: []
   ruby:
     buildpacks:
       ruby:
@@ -325,6 +326,7 @@ dependencies:
     #! Older ruby versions aren't compatible with openssl 3 of jammy
     #! There may be workarounds but decided not to support these versions.
     skip_lines_cflinuxfs4: [ '2.7.X', '3.0.X' ]
+    skip_lines_cflinuxfs5: [ '2.7.X', '3.0.X' ]
   rubygems:
     buildpacks:
       ruby:
