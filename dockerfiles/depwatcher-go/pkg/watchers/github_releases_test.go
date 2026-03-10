@@ -54,7 +54,8 @@ func (m *mockGithubReleasesClient) GetWithHeaders(url string, headers http.Heade
 func newMockGithubReleasesClient(releases string) *mockGithubReleasesClient {
 	return &mockGithubReleasesClient{
 		responses: map[string]string{
-			"https://api.github.com/repos/test/repo/releases": releases,
+			"https://api.github.com/repos/test/repo/releases?per_page=100&page=1": releases,
+			"https://api.github.com/repos/test/repo/releases?per_page=100&page=2": "[]",
 		},
 		headers:        make(map[string]http.Header),
 		downloadBodies: make(map[string]string),
@@ -210,6 +211,55 @@ var _ = Describe("GithubReleasesWatcher", func() {
 				Expect(versions).To(HaveLen(2))
 				Expect(versions[0].Ref).To(Equal("1.0.0"))
 				Expect(versions[1].Ref).To(Equal("2.0.0"))
+			})
+		})
+
+		Context("when releases span multiple pages", func() {
+			BeforeEach(func() {
+				// page 1 returns exactly 100 releases to trigger page 2 fetch
+				page1Releases := make([]string, 0)
+				for i := 0; i < 98; i++ {
+					page1Releases = append(page1Releases, fmt.Sprintf(`{"tag_name": "sapmachine-21.0.%d", "draft": false, "prerelease": true, "assets": []}`, i))
+				}
+				page1Releases = append(page1Releases, `{"tag_name": "sapmachine-21.0.10", "draft": false, "prerelease": false, "assets": []}`)
+				page1Releases = append(page1Releases, `{"tag_name": "sapmachine-25.0.2", "draft": false, "prerelease": false, "assets": []}`)
+				page1JSON := "[" + strings.Join(page1Releases, ",") + "]"
+
+				page2Releases := `[
+					{"tag_name": "sapmachine-17.0.18", "draft": false, "prerelease": false, "assets": []},
+					{"tag_name": "sapmachine-17.0.17", "draft": false, "prerelease": false, "assets": []}
+				]`
+
+				mockClient = &mockGithubReleasesClient{
+					responses: map[string]string{
+						"https://api.github.com/repos/test/repo/releases?per_page=100&page=1": page1JSON,
+						"https://api.github.com/repos/test/repo/releases?per_page=100&page=2": page2Releases,
+					},
+					headers:        make(map[string]http.Header),
+					downloadBodies: make(map[string]string),
+				}
+				watcher = watchers.NewGithubReleasesWatcher(mockClient, "test/repo", false)
+			})
+
+			It("fetches releases from all pages including page 2 onwards", func() {
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				refs := make([]string, len(versions))
+				for i, v := range versions {
+					refs[i] = v.Ref
+				}
+				Expect(refs).To(ContainElements("17.0.18", "17.0.17", "21.0.10", "25.0.2"))
+			})
+
+			It("does not miss sapmachine 17 versions on page 2", func() {
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				refs := make([]string, len(versions))
+				for i, v := range versions {
+					refs[i] = v.Ref
+				}
+				Expect(refs).To(ContainElement("17.0.18"))
+				Expect(refs).To(ContainElement("17.0.17"))
 			})
 		})
 

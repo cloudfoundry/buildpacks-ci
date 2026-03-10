@@ -39,11 +39,16 @@ var _ = Describe("WildflyWatcher", func() {
 
 	Describe("In", func() {
 		Context("when version is valid", func() {
+			BeforeEach(func() {
+				// Mock SHA1 response for the checksum fetch in In()
+				client.Response = "abc123sha1hash"
+			})
+
 			It("returns the release details", func() {
 				release, err := watcher.In("26.1.0-Final")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(release.Ref).To(Equal("26.1.0-Final"))
-				Expect(release.URL).To(Equal("https://download.jboss.org/wildfly/26.1.0.Final/wildfly-26.1.0.Final.tar.gz"))
+				Expect(release.URL).To(Equal("https://github.com/wildfly/wildfly/releases/download/26.1.0.Final/wildfly-26.1.0.Final.tar.gz"))
 			})
 		})
 

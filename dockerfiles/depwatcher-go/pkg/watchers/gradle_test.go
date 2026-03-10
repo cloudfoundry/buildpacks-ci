@@ -128,6 +128,14 @@ var _ = Describe("GradleWatcher", func() {
 	})
 
 	Describe("In", func() {
+		BeforeEach(func() {
+			// SHA256 response for the checksum fetch in In()
+			mockClient.response = &http.Response{
+				StatusCode: 200,
+				Body:       io.NopCloser(strings.NewReader("abc123sha256hash")),
+			}
+		})
+
 		It("returns the correct download URL", func() {
 			release, err := watcher.In("8.5")
 			Expect(err).NotTo(HaveOccurred())
