@@ -57,9 +57,22 @@ class Dependencies
     manifest_stacks.nil? or (manifest_stacks - @dep['cf_stacks']).empty?
   end
 
+  # Returns true when the incoming dep is an any-stack build (covers multiple stacks).
+  # Any-stack deps produce a single manifest entry per version regardless of which
+  # stacks are listed — the set of stacks can change across builds as new stacks are
+  # introduced (e.g. cflinuxfs3+cflinuxfs4 → cflinuxfs4+cflinuxfs5).
+  # URI pattern for any-stack deps contains "any-stack" in the filename.
+  def any_stack_dep?
+    @dep['uri']&.include?('any-stack')
+  end
+
   def same_dependency_line?(stacks, version, dep_name)
     return false if dep_name != @dep['name']
-    return false unless dep_includes_at_least_these_stacks?(stacks)
+    # For any-stack deps, match solely on name+version — the stack set is irrelevant.
+    # This prevents duplicate entries when the supported stacks change between builds.
+    # Stack-specific deps legitimately have one entry per stack for the same version,
+    # so they still require the stack subset check.
+    return false unless any_stack_dep? || dep_includes_at_least_these_stacks?(stacks)
 
     parsed_version = SemVer.parse(version.to_s)
     return false if parsed_version.nil?
