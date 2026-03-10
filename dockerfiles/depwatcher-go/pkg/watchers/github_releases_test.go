@@ -263,6 +263,33 @@ var _ = Describe("GithubReleasesWatcher", func() {
 			})
 		})
 
+		Context("when GitHub returns 422 on a page beyond the last", func() {
+			BeforeEach(func() {
+				// page 1 has exactly 100 items to trigger a page 2 request
+				page1Releases := make([]string, 100)
+				for i := 0; i < 100; i++ {
+					page1Releases[i] = fmt.Sprintf(`{"tag_name": "v1.0.%d", "draft": false, "prerelease": false, "assets": []}`, i)
+				}
+				page1JSON := "[" + strings.Join(page1Releases, ",") + "]"
+
+				// page 2 is not mocked — mock returns an error simulating GitHub 422
+				mockClient = &mockGithubReleasesClient{
+					responses: map[string]string{
+						"https://api.github.com/repos/test/repo/releases?per_page=100&page=1": page1JSON,
+					},
+					headers:        make(map[string]http.Header),
+					downloadBodies: make(map[string]string),
+				}
+				watcher = watchers.NewGithubReleasesWatcher(mockClient, "test/repo", false)
+			})
+
+			It("returns all releases from page 1 without error", func() {
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(100))
+			})
+		})
+
 		Context("when handling SapMachine releases", func() {
 			BeforeEach(func() {
 				releases := `[
