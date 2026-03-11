@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"sort"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type NPMWatcher struct {
@@ -44,14 +42,7 @@ func (w *NPMWatcher) Check(packageName string) ([]base.Internal, error) {
 		internals = append(internals, base.Internal{Ref: version})
 	}
 
-	sort.Slice(internals, func(i, j int) bool {
-		vi, err1 := semver.Parse(internals[i].Ref)
-		vj, err2 := semver.Parse(internals[j].Ref)
-		if err1 != nil || err2 != nil {
-			return internals[i].Ref < internals[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
+	internals = base.SortVersions(internals)
 
 	if len(internals) > 10 {
 		return internals[len(internals)-10:], nil

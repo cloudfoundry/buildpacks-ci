@@ -3,12 +3,10 @@ package watchers
 import (
 	"fmt"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 const minicondaURL = "https://repo.anaconda.com/miniconda/"
@@ -34,30 +32,17 @@ func (w *MinicondaWatcher) Check() ([]base.Internal, error) {
 		return nil, err
 	}
 
-	var versions []*semver.Semver
-	versionMap := make(map[string]bool)
+	seen := make(map[string]bool)
+	var versions []base.Internal
 
 	for _, rel := range releases {
-		version, err := semver.Parse(rel.Version)
-		if err != nil {
-			continue
-		}
-		if !versionMap[rel.Version] {
-			versionMap[rel.Version] = true
-			versions = append(versions, version)
+		if !seen[rel.Version] {
+			seen[rel.Version] = true
+			versions = append(versions, base.Internal{Ref: rel.Version})
 		}
 	}
 
-	sort.Slice(versions, func(i, j int) bool {
-		return versions[i].LessThan(versions[j])
-	})
-
-	var result []base.Internal
-	for _, v := range versions {
-		result = append(result, base.Internal{Ref: v.String()})
-	}
-
-	return result, nil
+	return base.SortVersions(versions), nil
 }
 
 // In returns the release details for a specific Miniconda version.

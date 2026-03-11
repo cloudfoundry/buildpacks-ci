@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type WildflyWatcher struct {
@@ -48,7 +46,7 @@ func (w *WildflyWatcher) Check() ([]base.Internal, error) {
 		}
 	})
 
-	return w.sortVersions(versions), nil
+	return base.SortVersions(versions), nil
 }
 
 func (w *WildflyWatcher) In(ref string) (base.Release, error) {
@@ -90,16 +88,4 @@ func (w *WildflyWatcher) In(ref string) (base.Release, error) {
 		URL:  url,
 		SHA1: sha1Hash,
 	}, nil
-}
-
-func (w *WildflyWatcher) sortVersions(internals []base.Internal) []base.Internal {
-	sort.Slice(internals, func(i, j int) bool {
-		vi, erri := semver.Parse(internals[i].Ref)
-		vj, errj := semver.Parse(internals[j].Ref)
-		if erri == nil && errj == nil {
-			return vi.LessThan(vj)
-		}
-		return internals[i].Ref < internals[j].Ref
-	})
-	return internals
 }

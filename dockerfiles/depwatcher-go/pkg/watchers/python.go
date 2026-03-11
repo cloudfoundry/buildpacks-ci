@@ -74,7 +74,7 @@ func (w *PythonWatcher) Check(versionFilter string) ([]base.Internal, error) {
 		return nil, fmt.Errorf("no versions found in API response")
 	}
 
-	return versions, nil
+	return base.SortVersions(versions), nil
 }
 
 func (w *PythonWatcher) In(ref string) (base.Release, error) {

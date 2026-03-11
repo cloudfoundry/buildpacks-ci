@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type PHPWatcher struct {
@@ -255,14 +253,5 @@ func (w *PHPWatcher) sortAndDedupe(versions []base.Internal) []base.Internal {
 		}
 	}
 
-	sort.Slice(unique, func(i, j int) bool {
-		vi, err1 := semver.Parse(unique[i].Ref)
-		vj, err2 := semver.Parse(unique[j].Ref)
-		if err1 != nil || err2 != nil {
-			return unique[i].Ref < unique[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
-
-	return unique
+	return base.SortVersions(unique)
 }

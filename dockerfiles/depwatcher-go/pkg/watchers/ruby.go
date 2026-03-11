@@ -3,13 +3,11 @@ package watchers
 import (
 	"fmt"
 	"io"
-	"sort"
 	"strings"
 
 	"gopkg.in/yaml.v3"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type RubyWatcher struct {
@@ -40,16 +38,7 @@ func (w *RubyWatcher) Check() ([]base.Internal, error) {
 		internals = append(internals, base.Internal{Ref: ref})
 	}
 
-	sort.Slice(internals, func(i, j int) bool {
-		vi, err1 := semver.Parse(internals[i].Ref)
-		vj, err2 := semver.Parse(internals[j].Ref)
-		if err1 != nil || err2 != nil {
-			return internals[i].Ref < internals[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
-
-	return internals, nil
+	return base.SortVersions(internals), nil
 }
 
 func (w *RubyWatcher) In(ref string) (base.Release, error) {
