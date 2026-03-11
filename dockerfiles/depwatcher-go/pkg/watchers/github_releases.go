@@ -10,11 +10,9 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type GithubReleasesWatcher struct {
@@ -94,16 +92,7 @@ func (w *GithubReleasesWatcher) Check() ([]base.Internal, error) {
 		versions = append(versions, base.Internal{Ref: ref})
 	}
 
-	sort.Slice(versions, func(i, j int) bool {
-		vi, err1 := semver.Parse(versions[i].Ref)
-		vj, err2 := semver.Parse(versions[j].Ref)
-		if err1 != nil || err2 != nil {
-			return versions[i].Ref < versions[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
-
-	return versions, nil
+	return base.SortVersions(versions), nil
 }
 
 func (w *GithubReleasesWatcher) In(ref string) (base.Release, error) {

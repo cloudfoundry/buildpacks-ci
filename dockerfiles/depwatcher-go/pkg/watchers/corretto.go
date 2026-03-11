@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type CorrettoWatcher struct {
@@ -54,7 +52,7 @@ func (w *CorrettoWatcher) Check() ([]base.Internal, error) {
 		versions = append(versions, base.Internal{Ref: version})
 	}
 
-	return w.sortVersions(versions), nil
+	return base.SortVersions(versions), nil
 }
 
 func (w *CorrettoWatcher) In(ref string) (base.Release, error) {
@@ -87,18 +85,4 @@ func (w *CorrettoWatcher) fetchReleases() ([]correttoRelease, error) {
 	}
 
 	return releases, nil
-}
-
-func (w *CorrettoWatcher) sortVersions(internals []base.Internal) []base.Internal {
-	sort.Slice(internals, func(i, j int) bool {
-		// Try semver comparison first
-		vi, erri := semver.Parse(internals[i].Ref)
-		vj, errj := semver.Parse(internals[j].Ref)
-		if erri == nil && errj == nil {
-			return vi.LessThan(vj)
-		}
-		// Fallback to string comparison
-		return internals[i].Ref < internals[j].Ref
-	})
-	return internals
 }

@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"sort"
 	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type GradleWatcher struct {
@@ -46,17 +44,7 @@ func (w *GradleWatcher) Check() ([]base.Internal, error) {
 		internals = append(internals, base.Internal{Ref: release.Version})
 	}
 
-	// Sort versions
-	sort.Slice(internals, func(i, j int) bool {
-		vi, err1 := semver.Parse(internals[i].Ref)
-		vj, err2 := semver.Parse(internals[j].Ref)
-		if err1 != nil || err2 != nil {
-			return internals[i].Ref < internals[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
-
-	return internals, nil
+	return base.SortVersions(internals), nil
 }
 
 func (w *GradleWatcher) In(ref string) (base.Release, error) {

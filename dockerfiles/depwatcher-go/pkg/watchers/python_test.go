@@ -64,14 +64,14 @@ var _ = Describe("PythonWatcher", func() {
 				watcher = watchers.NewPythonWatcher(mockClient)
 			})
 
-			It("returns Python versions from the API", func() {
+			It("returns Python versions in ascending semver order", func() {
 				versions, err := watcher.Check("3.10.x")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(versions).To(HaveLen(4))
-				Expect(versions[0].Ref).To(Equal("3.12.20"))
-				Expect(versions[1].Ref).To(Equal("3.11.7"))
-				Expect(versions[2].Ref).To(Equal("3.10.15"))
-				Expect(versions[3].Ref).To(Equal("3.9.7"))
+				Expect(versions[0].Ref).To(Equal("3.9.7"))
+				Expect(versions[1].Ref).To(Equal("3.10.15"))
+				Expect(versions[2].Ref).To(Equal("3.11.7"))
+				Expect(versions[3].Ref).To(Equal("3.12.20"))
 			})
 
 			It("extracts version numbers from release names", func() {
@@ -96,13 +96,13 @@ var _ = Describe("PythonWatcher", func() {
 				watcher = watchers.NewPythonWatcher(mockClient)
 			})
 
-			It("returns all non-pre-release versions from API", func() {
+			It("returns all non-pre-release versions in ascending semver order", func() {
 				versions, err := watcher.Check("")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(versions).To(HaveLen(3))
-				Expect(versions[0].Ref).To(Equal("3.13.0"))
-				Expect(versions[1].Ref).To(Equal("2.7.18"))
-				Expect(versions[2].Ref).To(Equal("3.12.5"))
+				Expect(versions[0].Ref).To(Equal("2.7.18"))
+				Expect(versions[1].Ref).To(Equal("3.12.5"))
+				Expect(versions[2].Ref).To(Equal("3.13.0"))
 			})
 		})
 
@@ -117,13 +117,13 @@ var _ = Describe("PythonWatcher", func() {
 				watcher = watchers.NewPythonWatcher(mockClient)
 			})
 
-			It("uses version=2 query parameter", func() {
+			It("uses version=2 query parameter and returns versions in ascending order", func() {
 				versions, err := watcher.Check("2.7.x")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(versions).To(HaveLen(3))
-				Expect(versions[0].Ref).To(Equal("2.7.18"))
+				Expect(versions[0].Ref).To(Equal("2.6.9"))
 				Expect(versions[1].Ref).To(Equal("2.7.17"))
-				Expect(versions[2].Ref).To(Equal("2.6.9"))
+				Expect(versions[2].Ref).To(Equal("2.7.18"))
 			})
 		})
 

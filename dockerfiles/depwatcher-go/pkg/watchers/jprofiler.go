@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -50,7 +49,7 @@ func (w *JProfilerWatcher) Check() ([]base.Internal, error) {
 		}
 	})
 
-	return w.sortVersions(versions), nil
+	return base.SortVersions(versions), nil
 }
 
 func (w *JProfilerWatcher) In(ref string) (base.Release, error) {
@@ -93,16 +92,4 @@ func (w *JProfilerWatcher) In(ref string) (base.Release, error) {
 		URL:    url,
 		SHA256: sha256Hash,
 	}, nil
-}
-
-func (w *JProfilerWatcher) sortVersions(internals []base.Internal) []base.Internal {
-	sort.Slice(internals, func(i, j int) bool {
-		vi, erri := semver.Parse(internals[i].Ref)
-		vj, errj := semver.Parse(internals[j].Ref)
-		if erri == nil && errj == nil {
-			return vi.LessThan(vj)
-		}
-		return internals[i].Ref < internals[j].Ref
-	})
-	return internals
 }
