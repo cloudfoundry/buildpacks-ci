@@ -340,7 +340,7 @@ jobs:
     - do:
       - task: #@ "build-binary-{}".format(stack)
         image: #@ "{}-image".format("cflinuxfs4" if stack == "any-stack" else stack)
-        file: #@ "buildpacks-ci/tasks/build-binary-new{}/build.yml".format("-cflinuxfs4" if stack == "cflinuxfs4" or stack == "any-stack" else ("-cflinuxfs5" if stack == "cflinuxfs5" else ""))
+        file: buildpacks-ci/tasks/build-binary/build.yml
         timeout: 3h
         attempts: 2
         output_mapping:
