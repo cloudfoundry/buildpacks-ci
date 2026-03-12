@@ -21,8 +21,6 @@ BUILD_STACKS = config['build_stacks']
 WINDOWS_STACKS = config['windows_stacks']
 
 all_stacks = BUILD_STACKS + WINDOWS_STACKS + ['any-stack']
-cflinuxfs4_dependencies = config['cflinuxfs4_dependencies']
-cflinuxfs4_buildpacks = config['cflinuxfs4_buildpacks']
 
 manifest = YAML.load_file('buildpack/manifest.yml', permitted_classes: [Date, Time])
 manifest_latest_released = YAML.load_file('buildpack-latest-released/manifest.yml', permitted_classes: [Date, Time]) # rescue { 'dependencies' => [] }
@@ -55,9 +53,6 @@ version = ''
 any_stack_build_exists = Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-any-stack.json"].any?
 
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
-  # See github.com/cloudfoundry/buildpacks-ci/pull/300 - we don't want to process the *cflinuxfs3.json files (they are replaced by *cflinuxfs3-dev.json files)
-  next if source_name == 'php' && stack_dependency_build.include?('cflinuxfs3.json')
-
   # Skip stack-specific builds when an any-stack build exists - the any-stack build covers all stacks
   # and will replace all existing stack-specific entries in one pass
   next if any_stack_build_exists && !stack_dependency_build.include?('any-stack.json')
@@ -81,24 +76,14 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   end
 
   stack = /#{Regexp.escape(resource_version)}-(.*)\.json$/.match(stack_dependency_build)[1]
-
-  # See github.com/cloudfoundry/buildpacks-ci/pull/300 - the build process may create temp stacks like cflinuxfs3-dev
-  stack = stack.chomp('-dev') if stack.end_with?('-dev')
-  next unless all_stacks.include?(stack) # make sure we not pulling something that's not a stack eg 'preview
-
-  ## TODO: This should be removed when all the buildpacks are built using cflinuxfs4. Right now it only uses the buildpacks included in buildpacks-ci/pipelines/dependency-builds/config.yml --> cflinuxfs4_buildpacks:
-  next if !cflinuxfs4_buildpacks.include?(buildpack_name) && stack == 'cflinuxfs4'
+  next unless all_stacks.include?(stack)
 
   stacks = stack == 'any-stack' ? BUILD_STACKS : [stack]
 
-  # TODO: This should be removed when all the dependencies are built using cflinuxfs4. Right now it only uses the dependencies included in buildpacks-ci/pipelines/dependency-builds/config.yml --> cflinuxfs4_dependencies:
-  # TODO: This also includes logic to skip certain version lines based on the skip_lines_cflinuxfs4 array in the config file.
-  skip_lines_cflinuxfs4 = config['dependencies'][source_name]&.key?('skip_lines_cflinuxfs4') ? config['dependencies'][source_name]['skip_lines_cflinuxfs4'].map(&:downcase) : []
-  stacks -= ['cflinuxfs4'] if !cflinuxfs4_dependencies.include?(source_name) || skip_lines_cflinuxfs4.include?(version_line.downcase)
-
-  # Logic to skip certain version lines that are not supported in cflinuxfs3
-  skip_lines_cflinuxfs3 = config['dependencies'][source_name]&.key?('skip_lines_cflinuxfs3') ? config['dependencies'][source_name]['skip_lines_cflinuxfs3'].map(&:downcase) : []
-  stacks -= ['cflinuxfs3'] if skip_lines_cflinuxfs3.include?(version_line.downcase)
+  skip_lines_per_stack = config.dig('dependencies', source_name, 'skip_lines') || {}
+  skip_lines_per_stack.each do |stack_name, lines|
+    stacks -= [stack_name] if lines.map(&:downcase).include?(version_line.downcase)
+  end
 
   stacks = WINDOWS_STACKS if source_name == 'hwc'
   total_stacks |= stacks
