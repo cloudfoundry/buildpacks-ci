@@ -1,0 +1,28 @@
+---
+# Stack-agnostic task for building a single CF dependency using the Go binary-builder.
+# The image_resource is intentionally omitted — the image is passed in by the pipeline
+# via the `image:` key on the task step (e.g. cflinuxfs4-image or cflinuxfs5-image).
+platform: linux
+inputs:
+  - name: binary-builder
+  - name: buildpacks-ci
+  - name: source
+  - name: builds
+    optional: true
+  - name: source-forecast-latest
+    optional: true
+  - name: source-rserve-latest
+    optional: true
+  - name: source-plumber-latest
+    optional: true
+  - name: source-shiny-latest
+    optional: true
+outputs:
+  - name: artifacts
+  - name: builds-artifacts
+  - name: dep-metadata
+run:
+  path: buildpacks-ci/tasks/build-binary/build.sh
+params:
+  STACK:
+  SKIP_COMMIT:
