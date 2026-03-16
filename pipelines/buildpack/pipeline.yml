@@ -114,7 +114,7 @@ config:
 #@       "bbl-state": "updated-bbl-state",
 #@     },
 #@     "params": {
-#@       "CLEAN_ALL": true,
+#@       "CLEAN_ALL": True,
 #@       "BBL_STATE_DIR": data.values.language + "-buildpack-state",
 #@       "BBL_GCP_SERVICE_ACCOUNT_KEY": "((gcp-service-account-key))",
 #@     },
@@ -490,8 +490,7 @@ jobs:
             tag: version/version
   #@ end
 
-  #@ for stack in data.values.buildpack.stacks:
-  - name: #@ "create-cf-infrastructure-and-execute-integration-test-for-" + data.values.language + "-" + stack
+  - name: #@ "create-cf-infrastructure-and-execute-integration-test-for-" + data.values.language
     serial: true
     public: false
     disable_manual_trigger: false
@@ -504,17 +503,24 @@ jobs:
       - get: cf-deployment
       - get: cf-deployment-concourse-tasks
       - get: runtime-ci
-      #! Test resources
+      #! Test resources - trigger when ALL stacks pass specs
       - get: buildpack
         resource: buildpack
         trigger: true
         passed:
+        #@ for stack in data.values.buildpack.stacks:
         - #@ "specs-switchblade-docker-" + stack
+        #@ end
       - get: repo
         resource: buildpack
+      #@ if "cflinuxfs4" in data.values.buildpack.stacks:
       - get: version-stack-cflinuxfs4
+      #@ end
+      #@ if "cflinuxfs5" in data.values.buildpack.stacks:
+      - get: version-stack-cflinuxfs5
+      #@ end
 
-    #! === INFRASTRUCTURE SETUP ===
+    #! === INFRASTRUCTURE SETUP (ONCE FOR ALL STACKS) ===
     - task: bbl-up
       file: cf-deployment-concourse-tasks/bbl-up/task.yml
       params:
@@ -580,7 +586,7 @@ jobs:
             repository: updated-bbl-state    
     #! === END INFRASTRUCTURE SETUP ===
 
-    #! === INTEGRATION TESTS ON CF ENVIRONMENT ===
+    #! === INTEGRATION TESTS ON CF ENVIRONMENT (SEQUENTIAL PER STACK) ===
     - task: create-cf-space
       attempts: 5
       file: buildpacks-ci/tasks/cf/create-space/task.yml
@@ -591,26 +597,10 @@ jobs:
         SYSTEM_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
         BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
         ORG: pivotal
+    
+    #! Run tests for all stacks sequentially to avoid resource contention
+    #@ for stack in data.values.buildpack.stacks:
     #@ if not data.values.buildpack.skip_brats:
-    #@ if "cflinuxfs4" in data.values.buildpack.stacks:
-    - task: configure-brats-test-config
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: cfbuildpacks/ci
-        inputs:
-        - name: buildpack
-        outputs:
-        - name: buildpack
-        run:
-          dir: ""
-          path: bash
-          args:
-          - -c
-          - #@ "#!/bin/bash\nset -e\ncd buildpack\ncontents=\"$(jq '.stack = \"" + stack + "\"' config.json)\"\necho -E \"${contents}\" > config.json\necho -e \"config.json modified to:\\n $(cat config.json)\"\n"
-    #@ end
     - task: #@ "brats-" + stack
       file: buildpacks-ci/tasks/run-bp-brats/task.yml
       input_mapping: {cf-space: space}
@@ -621,7 +611,6 @@ jobs:
         GINKGO_NODES: 3
       on_failure: #@ test_failure_diagnostics()
     #@ end
-
     - task: #@ "integration-test-" + stack + "-uncached"
       file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
       input_mapping: {cf-space: space}
@@ -634,12 +623,12 @@ jobs:
         CACHED: "false"
         #@ if data.values.buildpack.skip_docker_start:
         SKIP_DOCKER_START: true
-        #@ else:
-      privileged: true
         #@ end
+      #@ if not data.values.buildpack.skip_docker_start:
+      privileged: true
+      #@ end
       attempts: 5
       on_failure: #@ test_failure_diagnostics()
-
     - task: #@ "integration-test-" + stack + "-cached"
       file: buildpacks-ci/tasks/run-buildpack-integration-specs/task.yml
       input_mapping: {cf-space: space}
@@ -652,11 +641,13 @@ jobs:
         CACHED: "true"
         #@ if data.values.buildpack.skip_docker_start:
         SKIP_DOCKER_START: true
-        #@ else:
-      privileged: true
         #@ end
+      #@ if not data.values.buildpack.skip_docker_start:
+      privileged: true
+      #@ end
       attempts: 5
       on_failure: #@ test_failure_diagnostics()
+    #@ end
     #! === END INTEGRATION TESTS ON CF ENVIRONMENT ===
 
     ensure:
@@ -676,4 +667,3 @@ jobs:
         params:
           repository: updated-bbl-state
           rebase: true
-  #@ end
