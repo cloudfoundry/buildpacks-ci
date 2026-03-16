@@ -3,10 +3,11 @@
 # Targets are ordered to reflect the recommended migration workflow:
 #   1. plan             → review what will be migrated (no S3 changes)
 #   2. migrate          → copy blobs into namespaced folders
-#   3. verify           → confirm all active blobs are at their namespaced paths
-#   4. orphans          → move unreferenced blobs to orphaned/ folder
-#   5. cleanup          → delete original root-level blobs after grace period
-#   6. cleanup-orphans  → manually delete blobs from orphaned/ folder
+#   3. backfill-metadata → backfill original-last-modified on already-copied blobs
+#   4. verify           → confirm all active blobs are at their namespaced paths
+#   5. orphans          → move unreferenced blobs to orphaned/ folder
+#   6. cleanup          → delete original root-level blobs after grace period
+#   7. cleanup-orphans  → manually delete blobs from orphaned/ folder
 #
 # All scripts honour the BUCKET, INPUT_DIR, and RELEASES_DIR variables so
 # you can override defaults at the command line, e.g.:
@@ -25,10 +26,12 @@ ORPHAN_SCRIPT         := ./migrate-orphans.sh
 VERIFY_SCRIPT         := ./verify-migration.sh
 CLEANUP_SCRIPT        := ./cleanup-blobs.sh
 CLEANUP_ORPHAN_SCRIPT := ./cleanup-orphans.sh
+BACKFILL_SCRIPT       := ./backfill-metadata.sh
 
 _filter_flag = $(if $(BUILDPACK),--buildpack $(BUILDPACK),)
 
 .PHONY: help plan plan-csv plan-json migrate migrate-dry-run verify verify-sha \
+        backfill-metadata backfill-metadata-dry-run \
         orphans orphans-dry-run \
         cleanup cleanup-dry-run cleanup-force \
         cleanup-orphans cleanup-orphans-dry-run \
@@ -71,6 +74,14 @@ migrate-dry-run: check-prereqs ## Dry-run: print copy commands without touching 
 
 migrate: check-prereqs ## Copy blobs from bucket root into namespaced folders (writes output.json)
 	$(MIGRATE_SCRIPT) --bucket $(BUCKET) --input-dir $(INPUT_DIR) $(_filter_flag)
+
+##@ Metadata backfill (for blobs copied before metadata preservation was added)
+
+backfill-metadata-dry-run: check-prereqs ## Dry-run: print backfill commands without touching S3
+	$(BACKFILL_SCRIPT) --bucket $(BUCKET) --input-dir $(INPUT_DIR) --dry-run $(_filter_flag)
+
+backfill-metadata: check-prereqs ## Backfill original-last-modified metadata on already-copied namespaced blobs
+	$(BACKFILL_SCRIPT) --bucket $(BUCKET) --input-dir $(INPUT_DIR) $(_filter_flag)
 
 ##@ Verification
 

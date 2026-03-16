@@ -367,7 +367,7 @@ class UUIDMapper:
         with open(output_file, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(['uuid', 'filename', 'size', 'sha', 'repo', 'commit', 'date', 'author', 'tags'])
-            for entry in self.all_blob_entries:
+            for entry in [e for e in self.all_blob_entries if e.uuid in self.s3_blobs]:
                 writer.writerow(entry.to_csv_row())
         
         self.log('SUCCESS', f"Saved complete history to {output_file}")
@@ -375,7 +375,7 @@ class UUIDMapper:
     def create_current_mapping(self):
         """Create current UUID mapping (latest entry per UUID)"""
         sorted_entries = sorted(
-            self.all_blob_entries,
+            [e for e in self.all_blob_entries if e.uuid in self.s3_blobs],
             key=lambda e: (e.uuid, e.date),
             reverse=True
         )
@@ -1130,10 +1130,10 @@ class UUIDMapper:
         print("╚════════════════════════════════════════════════════════════╝\n")
         
         self.process_all_repos()
+        self.fetch_s3_contents(use_cache=not self.refresh_s3)
         self.save_all_history()
         self.create_current_mapping()
         self.create_release_mapping()
-        self.fetch_s3_contents(use_cache=not self.refresh_s3)
         orphaned = self.identify_orphaned_blobs()
         summary = self.generate_summary(orphaned)
         self.generate_html_report()
