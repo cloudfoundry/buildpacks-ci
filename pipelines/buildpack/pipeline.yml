@@ -556,6 +556,28 @@ jobs:
         params:
           repository: updated-bbl-state
           rebase: true
+    #@ if stack == "cflinuxfs5":
+    - task: inject-cflinuxfs5-ops-files
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: cfbuildpacks/ci
+        inputs:
+        - name: cf-deployment
+        - name: buildpacks-ci
+        outputs:
+        - name: cf-deployment
+        run:
+          path: bash
+          args:
+          - -c
+          - |
+            cp buildpacks-ci/tasks/cf/redeploy/operations/add-cflinuxfs5-to-current.yml cf-deployment/operations/
+            cp buildpacks-ci/tasks/cf/redeploy/operations/cflinuxfs5-rootfs-certs.yml cf-deployment/operations/
+      on_failure: #@ destroy_bbl_infrastructure()
+    #@ end
     - task: deploy-cf
       file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
       input_mapping:
@@ -566,7 +588,11 @@ jobs:
         BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
         SYSTEM_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
         VARS_STORE_FILE: bump-deployments/bbl-gcp-cf/deployment-vars.yml
+        #@ if stack == "cflinuxfs5":
+        OPS_FILES: operations/use-compiled-releases.yml operations/experimental/fast-deploy-with-downtime-and-danger.yml operations/scale-to-one-az.yml operations/add-cflinuxfs5-to-current.yml operations/cflinuxfs5-rootfs-certs.yml
+        #@ else:
         OPS_FILES: operations/use-compiled-releases.yml operations/experimental/fast-deploy-with-downtime-and-danger.yml operations/scale-to-one-az.yml
+        #@ end
       on_failure:
         do:
         - #@ remove_gcp_dns()
