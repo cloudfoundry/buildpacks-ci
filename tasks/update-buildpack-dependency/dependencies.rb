@@ -30,11 +30,9 @@ class Dependencies
       # Ensure version is a string (YAML may parse numbers like 11.0 as Float)
       version = version.to_s unless version.nil?
       version = version[1..] if !version.nil? && version.start_with?('v')
-      version = begin
-        SemVer.parse(version)
-      rescue StandardError
-        version
-      end
+      # SemVer.parse returns nil (not an exception) for unparseable versions.
+      # Try padding 2-part versions like "25.2" to "25.2.0" for SemVer compatibility.
+      version = SemVer.parse(version) || SemVer.parse("#{version}.0") || version
       [d['name'], version, d['cf_stacks']]
     end
   end
@@ -59,14 +57,27 @@ class Dependencies
     manifest_stacks.nil? or (manifest_stacks - @dep['cf_stacks']).empty?
   end
 
+  # Returns true when the incoming dep is an any-stack build (covers multiple stacks).
+  # Any-stack deps produce a single manifest entry per version regardless of which
+  # stacks are listed — the set of stacks can change across builds as new stacks are
+  # introduced (e.g. cflinuxfs3+cflinuxfs4 → cflinuxfs4+cflinuxfs5).
+  # URI pattern for any-stack deps contains "any-stack" in the filename.
+  def any_stack_dep?
+    @dep['uri']&.include?('any-stack')
+  end
+
   def same_dependency_line?(stacks, version, dep_name)
     return false if dep_name != @dep['name']
-    return false unless dep_includes_at_least_these_stacks?(stacks)
+    # For any-stack deps, match solely on name+version — the stack set is irrelevant.
+    # This prevents duplicate entries when the supported stacks change between builds.
+    # Stack-specific deps legitimately have one entry per stack for the same version,
+    # so they still require the stack subset check.
+    return false unless any_stack_dep? || dep_includes_at_least_these_stacks?(stacks)
 
-    parsed_version = SemVer.parse(version)
+    parsed_version = SemVer.parse(version.to_s)
     return false if parsed_version.nil?
 
-    dep_version = SemVer.parse(@dep['version'])
+    dep_version = SemVer.parse(@dep['version'].to_s)
     return false if dep_version.nil?
 
     case @line

@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"sort"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type RubygemsCLIWatcher struct {
@@ -52,14 +50,7 @@ func (w *RubygemsCLIWatcher) Check() ([]base.Internal, error) {
 		return nil, fmt.Errorf("no versions found in API response")
 	}
 
-	sort.Slice(versions, func(i, j int) bool {
-		vi, err1 := semver.Parse(versions[i].Ref)
-		vj, err2 := semver.Parse(versions[j].Ref)
-		if err1 != nil || err2 != nil {
-			return versions[i].Ref < versions[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
+	versions = base.SortVersions(versions)
 
 	// Return only the last 10 versions (most recent)
 	if len(versions) > 10 {

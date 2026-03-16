@@ -35,8 +35,7 @@ func NewZuluWatcher(client base.HTTPClient, version, typ string) *ZuluWatcher {
 
 func (w *ZuluWatcher) Check() ([]base.Internal, error) {
 	if w.version == "" {
-		// No version specified - return all latest versions for all major versions
-		return w.fetchAllLatestVersions()
+		return nil, fmt.Errorf("version must be specified")
 	}
 
 	pkg, err := w.fetchLatestPackage()

@@ -47,8 +47,7 @@ module HTTPHelper
     end
 
     def read_file(url)
-      uri = URI.parse(url)
-      response = Net::HTTP.get_response(uri)
+      response = download_with_follow_redirects(URI.parse(url))
       response.body if response.code == '200'
     end
   end
@@ -93,8 +92,16 @@ end
 module Runner
   class << self
     def run(*args)
-      system({ 'DEBIAN_FRONTEND' => 'noninteractive' }, *args)
-      raise "Could not run #{args}" unless $CHILD_STATUS.success?
+      $stdout.puts "[DEBUG #{Time.now}] Running: #{args.join(' ')}"
+      $stdout.flush
+      # NEEDRESTART_MODE=a prevents needrestart from waiting for input on Ubuntu 24.04+
+      env = { 'DEBIAN_FRONTEND' => 'noninteractive', 'NEEDRESTART_MODE' => 'a' }
+      # Redirect stdin from /dev/null to prevent any process from waiting for input
+      system(env, *args, in: '/dev/null')
+      exit_status = $CHILD_STATUS
+      $stdout.puts "[DEBUG #{Time.now}] Exit code: #{exit_status.exitstatus}"
+      $stdout.flush
+      raise "Could not run #{args}" unless exit_status.success?
     end
   end
 end
@@ -223,7 +230,8 @@ module DependencyBuildHelper
           Runner.run('apt', 'update')
 
           ENV.fetch('STACK')
-          Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre++-dev', 'libpcre2-dev', 'libcurl4-openssl-dev', 'libsodium-dev', 'libharfbuzz-dev', 'libfribidi-dev', 'default-jre', 'libgfortran-12-dev', 'libfreetype6-dev', 'libpng-dev', 'libtiff5-dev', 'libjpeg-dev', 'libwebp-dev')
+          # Note: libpcre++-dev removed - not available in Ubuntu 24.04 and R 4.x uses PCRE2 (libpcre2-dev)
+          Runner.run('apt-get', 'install', '-y', 'gfortran', 'libbz2-dev', 'liblzma-dev', 'libpcre2-dev', 'libcurl4-openssl-dev', 'libsodium-dev', 'libharfbuzz-dev', 'libfribidi-dev', 'default-jre', 'libgfortran-12-dev', 'libfreetype6-dev', 'libpng-dev', 'libtiff5-dev', 'libjpeg-dev', 'libwebp-dev')
 
           Runner.run('wget', source_input.url)
           source_sha = Digest::SHA256.hexdigest(File.read("R-#{source_input.version}.tar.gz"))
@@ -308,7 +316,7 @@ class DependencyBuild
     if @source_input.name.include?('miniconda')
       build_miniconda
     else
-      method_name = "build_#{@source_input.name.sub('-', '_')}"
+      method_name = "build_#{@source_input.name.gsub('-', '_')}"
       puts "Running #{method_name}"
       raise "No build method for #{@source_input.name}" unless respond_to?(method_name)
 
@@ -330,6 +338,14 @@ class DependencyBuild
   #########################
   ## Dependency builders ##
   #########################
+
+  def download_dotnet_source
+    # Download the dotnet tar.gz to source/ directory for prune_dotnet_files
+    target_file = "source/#{@source_input.name}-#{@source_input.version}.tar.gz"
+    unless File.exist?(target_file)
+      HTTPHelper.download(@source_input, target_file)
+    end
+  end
 
   # this code is doing nothing except generating a buildpacks-ci-robot metadata
   # entry so our buildpacks get auto-updated.
@@ -394,18 +410,21 @@ class DependencyBuild
   end
 
   def build_dotnet_sdk
+    download_dotnet_source
     old_filepath = Utils.prune_dotnet_files(@source_input, ['./shared/*'], true)
     filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
     merge_out_data(old_filepath, filename_prefix)
   end
 
   def build_dotnet_runtime
+    download_dotnet_source
     old_filepath = Utils.prune_dotnet_files(@source_input, ['./dotnet'])
     filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
     merge_out_data(old_filepath, filename_prefix)
   end
 
   def build_dotnet_aspnetcore
+    download_dotnet_source
     old_filepath = Utils.prune_dotnet_files(@source_input, %w[./dotnet ./shared/Microsoft.NETCore.App])
     filename_prefix = "#{@filename_prefix}_linux_x64_#{@stack}"
     merge_out_data(old_filepath, filename_prefix)
@@ -468,7 +487,9 @@ class DependencyBuild
         @source_input.url,
         full_version,
         @source_input.md5,
+        nil,
         @source_input.sha256,
+        nil,
         @source_input.git_commit_sha
       )
     )
@@ -484,20 +505,22 @@ class DependencyBuild
     built_path = File.join(Dir.pwd, 'built')
     Dir.mkdir(built_path)
 
-    url = @source_input.url.to_s
-    file_path = url.slice((url.rindex('/') + 1)..(url.length))
-    dir = file_path.delete_suffix('.tar.gz')
+    file_path = "libunwind-#{@source_input.version}.tar.gz"
+    dir = "libunwind-#{@source_input.version}"
 
-    Dir.chdir('source') do
-      # github-releases depwatcher has already downloaded .tar.gz
-      Runner.run('tar', 'zxf', file_path.to_s)
-      Dir.chdir(dir.to_s) do
-        Runner.run('./configure', "--prefix=#{built_path}")
-        Runner.run('make')
-        Runner.run('make install')
-      end
+    # Download the release asset tarball (contains pre-built configure)
+    source_tar = File.join(Dir.pwd, file_path)
+    HTTPHelper.download(@source_input, source_tar)
+
+    Runner.run('tar', 'zxf', source_tar)
+
+    Dir.chdir(dir) do
+      Runner.run('./configure', "--prefix=#{built_path}")
+      Runner.run('make')
+      Runner.run('make install')
     end
-    old_filename = "#{dir}.tgz"
+
+    old_filename = "libunwind-#{@source_input.version}.tgz"
     Dir.chdir(built_path) do
       Runner.run('tar', 'czf', old_filename, 'include', 'lib')
     end
@@ -982,18 +1005,55 @@ class DependencyBuild
 
   class Utils
     def self.setup_python_and_pip
-      Runner.run('apt', 'update')
-      Runner.run('apt', 'install', '-y', 'python3', 'python3-pip')
-      Runner.run('pip3', 'install', '--upgrade', 'pip', 'setuptools')
+      $stdout.puts "[DEBUG] setup_python_and_pip starting, STACK=#{ENV.fetch('STACK', 'unset')}"
+      $stdout.flush
+      
+      # Disable needrestart which can hang waiting for input on Ubuntu 24.04
+      if File.exist?('/etc/needrestart/needrestart.conf')
+        $stdout.puts "[DEBUG] Disabling needrestart"
+        File.write('/etc/needrestart/needrestart.conf', "\$nrconf{restart} = 'a';\n", mode: 'a')
+      end
+      
+      Runner.run('apt-get', 'update')
+      # Use apt-get with dpkg options to force non-interactive behavior
+      Runner.run('apt-get', 'install', '-y', 
+                 '-o', 'Dpkg::Options::=--force-confdef',
+                 '-o', 'Dpkg::Options::=--force-confold',
+                 'python3', 'python3-pip')
+      $stdout.puts "[DEBUG] python3 installed, now upgrading pip"
+      $stdout.flush
+      # --break-system-packages required for Python 3.12+ (PEP 668) on Ubuntu 24.04+
+      # (only supported in pip 23.0.1+, cflinuxfs4/Jammy ships pip 22.x)
+      # --ignore-installed avoids 'Cannot uninstall pip, RECORD file not found' error
+      # when pip was installed by debian package (no RECORD file present)
+      stack = ENV.fetch('STACK', '')
+      if stack == 'cflinuxfs5'
+        Runner.run('pip3', 'install', '--break-system-packages', '--ignore-installed', '--upgrade', 'pip', 'setuptools')
+      else
+        Runner.run('pip3', 'install', '--ignore-installed', '--upgrade', 'pip', 'setuptools')
+      end
+      $stdout.puts "[DEBUG] setup_python_and_pip completed"
+      $stdout.flush
     end
 
     def self.setup_gcc
-      Runner.run('apt', 'update')
-      Runner.run('apt', 'install', '-y', 'software-properties-common')
-      Runner.run('add-apt-repository', '-y', 'ppa:ubuntu-toolchain-r/test')
-      Runner.run('apt', 'update')
-      Runner.run('apt', 'install', '-y', 'gcc-12', 'g++-12')
+      $stdout.puts "[DEBUG] setup_gcc starting, STACK=#{ENV.fetch('STACK', 'unset')}"
+      $stdout.flush
+      stack = ENV.fetch('STACK', '')
+      
+      # Ubuntu 24.04 (cflinuxfs5) has gcc-14 by default, which is sufficient
+      if stack == 'cflinuxfs5'
+        $stdout.puts "[DEBUG] cflinuxfs5 has modern GCC, skipping setup"
+        $stdout.flush
+        return
+      end
+      
+      # Ubuntu 22.04 (cflinuxfs4) - gcc-12 is available in main repos, no PPA needed
+      Runner.run('apt-get', 'update')
+      Runner.run('apt-get', 'install', '-y', 'gcc-12', 'g++-12')
       Runner.run('update-alternatives', '--install', '/usr/bin/gcc', 'gcc', '/usr/bin/gcc-12', '60', '--slave', '/usr/bin/g++', 'g++', '/usr/bin/g++-12')
+      $stdout.puts "[DEBUG] setup_gcc completed"
+      $stdout.flush
     end
 
     def self.prune_dotnet_files(source_input, files_to_exclude, write_runtime = false)

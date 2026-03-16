@@ -4,11 +4,13 @@ require_relative 'buildpack-finalizer'
 
 artifact_dir = File.join(Dir.pwd, 'buildpack-artifacts')
 
-# Read version from semver resource if available, otherwise from buildpack/VERSION
-version = if File.directory?('version') && File.file?('version/number')
+# Read version from buildpack/VERSION; fall back to semver if needed
+version = if File.file?('buildpack/VERSION')
+            File.read('buildpack/VERSION').strip
+          elsif File.directory?('version') && File.file?('version/number')
             File.read('version/number').strip
           else
-            File.read('buildpack/VERSION').strip
+            raise 'VERSION not found in buildpack or semver resource'
           end
 
 buildpack_repo_dir = 'buildpack'

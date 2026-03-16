@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"sort"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type NPMWatcher struct {
@@ -29,12 +27,6 @@ type npmRegistry struct {
 	Versions map[string]npmVersion `json:"versions"`
 }
 
-type NPMRelease struct {
-	Ref  string
-	URL  string
-	SHA1 string
-}
-
 func NewNPMWatcher(client base.HTTPClient) *NPMWatcher {
 	return &NPMWatcher{client: client}
 }
@@ -50,14 +42,7 @@ func (w *NPMWatcher) Check(packageName string) ([]base.Internal, error) {
 		internals = append(internals, base.Internal{Ref: version})
 	}
 
-	sort.Slice(internals, func(i, j int) bool {
-		vi, err1 := semver.Parse(internals[i].Ref)
-		vj, err2 := semver.Parse(internals[j].Ref)
-		if err1 != nil || err2 != nil {
-			return internals[i].Ref < internals[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
+	internals = base.SortVersions(internals)
 
 	if len(internals) > 10 {
 		return internals[len(internals)-10:], nil
@@ -66,18 +51,18 @@ func (w *NPMWatcher) Check(packageName string) ([]base.Internal, error) {
 	return internals, nil
 }
 
-func (w *NPMWatcher) In(packageName, ref string) (NPMRelease, error) {
+func (w *NPMWatcher) In(packageName, ref string) (base.Release, error) {
 	versions, err := w.getVersions(packageName)
 	if err != nil {
-		return NPMRelease{}, err
+		return base.Release{}, err
 	}
 
 	version, ok := versions[ref]
 	if !ok {
-		return NPMRelease{}, fmt.Errorf("version %s not found for package %s", ref, packageName)
+		return base.Release{}, fmt.Errorf("version %s not found for package %s", ref, packageName)
 	}
 
-	return NPMRelease{
+	return base.Release{
 		Ref:  ref,
 		URL:  version.Dist.Tarball,
 		SHA1: version.Dist.Shasum,

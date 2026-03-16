@@ -140,7 +140,7 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 
 	case "python":
 		watcher := watchers.NewPythonWatcher(client)
-		versions, err = watcher.Check()
+		versions, err = watcher.Check(source.VersionFilter)
 
 	case "go":
 		watcher := watchers.NewGoWatcher(client)

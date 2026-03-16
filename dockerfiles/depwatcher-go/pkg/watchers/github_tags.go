@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"sort"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type GithubTagsWatcher struct {
@@ -22,13 +20,6 @@ type githubTag struct {
 
 type githubCommit struct {
 	SHA string `json:"sha"`
-}
-
-type GithubTag struct {
-	Ref          string
-	URL          string
-	GitCommitSHA string
-	SHA256       string
 }
 
 func NewGithubTagsWatcher(client base.HTTPClient, repo string) *GithubTagsWatcher {
@@ -49,22 +40,13 @@ func (w *GithubTagsWatcher) Check(tagRegex string) ([]base.Internal, error) {
 		internals = append(internals, base.Internal{Ref: tag.Name})
 	}
 
-	sort.Slice(internals, func(i, j int) bool {
-		vi, err1 := semver.Parse(internals[i].Ref)
-		vj, err2 := semver.Parse(internals[j].Ref)
-		if err1 != nil || err2 != nil {
-			return internals[i].Ref < internals[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
-
-	return internals, nil
+	return base.SortVersions(internals), nil
 }
 
-func (w *GithubTagsWatcher) In(ref string) (GithubTag, error) {
+func (w *GithubTagsWatcher) In(ref string) (base.Release, error) {
 	tags, err := w.tags()
 	if err != nil {
-		return GithubTag{}, err
+		return base.Release{}, err
 	}
 
 	for _, tag := range tags {
@@ -72,10 +54,10 @@ func (w *GithubTagsWatcher) In(ref string) (GithubTag, error) {
 			url := fmt.Sprintf("https://github.com/%s/archive/%s.tar.gz", w.repo, tag.Commit.SHA)
 			sha256, err := base.GetSHA256(w.client, url)
 			if err != nil {
-				return GithubTag{}, fmt.Errorf("calculating SHA256: %w", err)
+				return base.Release{}, fmt.Errorf("calculating SHA256: %w", err)
 			}
 
-			return GithubTag{
+			return base.Release{
 				Ref:          tag.Name,
 				URL:          url,
 				GitCommitSHA: tag.Commit.SHA,
@@ -84,7 +66,7 @@ func (w *GithubTagsWatcher) In(ref string) (GithubTag, error) {
 		}
 	}
 
-	return GithubTag{}, fmt.Errorf("could not find data for version %s", ref)
+	return base.Release{}, fmt.Errorf("could not find data for version %s", ref)
 }
 
 func (w *GithubTagsWatcher) MatchedTags(tagRegex string) ([]githubTag, error) {

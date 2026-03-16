@@ -1,6 +1,8 @@
 .idea/
 .bundle/
 .binstubs/
+.tmp/
+.vscode/
 private.yml
 .vagrant/
 .rspec
@@ -13,4 +15,6 @@ deployments/concourse-gcp-terraform/concourse.tf
 deployments/concourse-gcp-terraform/terraform.tfstate
 deployments/concourse-gcp-terraform/terraform.tfstate.backup
 **cves.json
-.vscode/
+
+scripts/gcp-env-checkup/.cache/
+

@@ -4,21 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"sort"
 	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type GoWatcher struct {
 	client base.HTTPClient
-}
-
-type GoRelease struct {
-	Ref    string
-	URL    string
-	SHA256 string
 }
 
 type goVersionJSON struct {
@@ -52,22 +44,13 @@ func (w *GoWatcher) Check() ([]base.Internal, error) {
 		internals = append(internals, base.Internal{Ref: r.Ref})
 	}
 
-	sort.Slice(internals, func(i, j int) bool {
-		vi, err1 := semver.Parse(internals[i].Ref)
-		vj, err2 := semver.Parse(internals[j].Ref)
-		if err1 != nil || err2 != nil {
-			return internals[i].Ref < internals[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
-
-	return internals, nil
+	return base.SortVersions(internals), nil
 }
 
-func (w *GoWatcher) In(ref string) (GoRelease, error) {
+func (w *GoWatcher) In(ref string) (base.Release, error) {
 	releases, err := w.getReleases()
 	if err != nil {
-		return GoRelease{}, err
+		return base.Release{}, err
 	}
 
 	for _, r := range releases {
@@ -76,10 +59,10 @@ func (w *GoWatcher) In(ref string) (GoRelease, error) {
 		}
 	}
 
-	return GoRelease{}, fmt.Errorf("could not find data for version %s", ref)
+	return base.Release{}, fmt.Errorf("could not find data for version %s", ref)
 }
 
-func (w *GoWatcher) getReleases() ([]GoRelease, error) {
+func (w *GoWatcher) getReleases() ([]base.Release, error) {
 	resp, err := w.client.Get("https://go.dev/dl/?mode=json&include=all")
 	if err != nil {
 		return nil, fmt.Errorf("fetching go.dev/dl JSON: %w", err)
@@ -96,7 +79,7 @@ func (w *GoWatcher) getReleases() ([]GoRelease, error) {
 		return nil, fmt.Errorf("parsing JSON: %w", err)
 	}
 
-	var releases []GoRelease
+	var releases []base.Release
 	for _, v := range versions {
 		if !v.Stable {
 			continue
@@ -118,7 +101,7 @@ func (w *GoWatcher) getReleases() ([]GoRelease, error) {
 
 		url := fmt.Sprintf("https://dl.google.com/go/%s", sourceFile.Filename)
 
-		releases = append(releases, GoRelease{
+		releases = append(releases, base.Release{
 			Ref:    version,
 			URL:    url,
 			SHA256: strings.TrimSpace(sourceFile.SHA256),

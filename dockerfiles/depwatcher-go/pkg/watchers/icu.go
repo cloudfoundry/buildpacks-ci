@@ -6,11 +6,9 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type ICUWatcher struct {
@@ -56,14 +54,7 @@ func (w *ICUWatcher) Check() ([]base.Internal, error) {
 		versions = append(versions, base.Internal{Ref: version})
 	}
 
-	sort.Slice(versions, func(i, j int) bool {
-		vi, err1 := semver.Parse(versions[i].Ref)
-		vj, err2 := semver.Parse(versions[j].Ref)
-		if err1 != nil || err2 != nil {
-			return versions[i].Ref < versions[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
+	versions = base.SortVersions(versions)
 
 	if len(versions) > 10 {
 		versions = versions[len(versions)-10:]

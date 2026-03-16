@@ -30,7 +30,7 @@ type mavenMetadata struct {
 }
 
 var mavenVersionPattern = regexp.MustCompile(`^([\d]+)\.([\d]+)\.([\d]+)[.-]?(.*)`)
-var prereleasePattern = regexp.MustCompile(`(?i)(alpha|beta|rc|milestone|M\d+|snapshot)`)
+var prereleasePattern = regexp.MustCompile(`(?i)(alpha|beta|rc|milestone|snapshot)`)
 
 func NewMavenWatcher(client base.HTTPClient, uri, groupId, artifactId, classifier, packaging, username, password string) *MavenWatcher {
 	if packaging == "" {

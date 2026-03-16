@@ -3,7 +3,6 @@ package watchers
 import (
 	"fmt"
 	"regexp"
-	"sort"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
@@ -55,7 +54,7 @@ func (w *YourKitWatcher) Check() ([]base.Internal, error) {
 		versions = append(versions, base.Internal{Ref: v})
 	}
 
-	return w.sortVersions(versions), nil
+	return base.SortVersions(versions), nil
 }
 
 func (w *YourKitWatcher) In(ref string) (base.Release, error) {
@@ -73,16 +72,4 @@ func (w *YourKitWatcher) In(ref string) (base.Release, error) {
 		Ref: ref,
 		URL: url,
 	}, nil
-}
-
-func (w *YourKitWatcher) sortVersions(internals []base.Internal) []base.Internal {
-	sort.Slice(internals, func(i, j int) bool {
-		vi, erri := semver.Parse(internals[i].Ref)
-		vj, errj := semver.Parse(internals[j].Ref)
-		if erri == nil && errj == nil {
-			return vi.LessThan(vj)
-		}
-		return internals[i].Ref < internals[j].Ref
-	})
-	return internals
 }

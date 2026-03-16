@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"sort"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type OpenrestyWatcher struct {
@@ -37,16 +35,7 @@ func (w *OpenrestyWatcher) Check() ([]base.Internal, error) {
 		}
 	}
 
-	sort.Slice(versions, func(i, j int) bool {
-		vi, err1 := semver.Parse(versions[i].Ref)
-		vj, err2 := semver.Parse(versions[j].Ref)
-		if err1 != nil || err2 != nil {
-			return versions[i].Ref < versions[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
-
-	return versions, nil
+	return base.SortVersions(versions), nil
 }
 
 // In returns download URL, PGP signature, and SHA256 for a specific OpenResty version.

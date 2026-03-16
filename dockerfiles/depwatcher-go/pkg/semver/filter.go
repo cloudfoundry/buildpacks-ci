@@ -13,7 +13,8 @@ func NewFilter(filterString string) *Filter {
 func (f *Filter) Match(semver *Semver) bool {
 	semverString := semver.String()
 
-	firstXIdx := strings.Index(f.filterString, "X")
+	// Support both uppercase X and lowercase x for wildcard
+	firstXIdx := strings.IndexAny(f.filterString, "Xx")
 	if firstXIdx == -1 {
 		return semverString == f.filterString
 	}

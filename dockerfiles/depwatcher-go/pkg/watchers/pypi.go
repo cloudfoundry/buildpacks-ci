@@ -55,14 +55,7 @@ func (w *PyPIWatcher) Check(packageName string) ([]base.Internal, error) {
 		}
 	}
 
-	sort.Slice(versions, func(i, j int) bool {
-		vi, err1 := semver.Parse(versions[i].Ref)
-		vj, err2 := semver.Parse(versions[j].Ref)
-		if err1 != nil || err2 != nil {
-			return versions[i].Ref < versions[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
+	versions = base.SortVersions(versions)
 
 	if len(versions) > 10 {
 		versions = versions[len(versions)-10:]

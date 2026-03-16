@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"sort"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type CaApmAgentWatcher struct {
@@ -64,14 +62,7 @@ func (w *CaApmAgentWatcher) Check() ([]base.Internal, error) {
 		result[i] = base.Internal{Ref: version}
 	}
 
-	sort.Slice(result, func(i, j int) bool {
-		vi, err1 := semver.Parse(result[i].Ref)
-		vj, err2 := semver.Parse(result[j].Ref)
-		if err1 != nil || err2 != nil {
-			return result[i].Ref < result[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
+	result = base.SortVersions(result)
 
 	if len(result) > 10 {
 		result = result[len(result)-10:]

@@ -3,12 +3,10 @@ package watchers
 import (
 	"fmt"
 	"io"
-	"sort"
 	"strings"
 	"time"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type HttpdWatcher struct {
@@ -41,16 +39,7 @@ func (w *HttpdWatcher) Check() ([]base.Internal, error) {
 		return nil, fmt.Errorf("fetching httpd tags: %w", err)
 	}
 
-	sort.Slice(tags, func(i, j int) bool {
-		vi, err1 := semver.Parse(tags[i].Ref)
-		vj, err2 := semver.Parse(tags[j].Ref)
-		if err1 != nil || err2 != nil {
-			return tags[i].Ref < tags[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
-
-	return tags, nil
+	return base.SortVersions(tags), nil
 }
 
 // In fetches detailed information about a specific Apache httpd version

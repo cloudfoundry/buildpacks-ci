@@ -6,11 +6,9 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type LibericaWatcher struct {
@@ -49,7 +47,7 @@ func (w *LibericaWatcher) Check() ([]base.Internal, error) {
 		versions = append(versions, base.Internal{Ref: version})
 	}
 
-	return w.sortVersions(versions), nil
+	return base.SortVersions(versions), nil
 }
 
 func (w *LibericaWatcher) In(ref string) (base.Release, error) {
@@ -72,6 +70,9 @@ func (w *LibericaWatcher) In(ref string) (base.Release, error) {
 }
 
 func (w *LibericaWatcher) fetchReleases() ([]libericaRelease, error) {
+	if w.version == "" {
+		return nil, fmt.Errorf("version must be specified")
+	}
 	if w.typ == "" {
 		return nil, fmt.Errorf("type must be specified")
 	}
@@ -157,19 +158,6 @@ func (w *LibericaWatcher) isNewerRelease(r1, r2 libericaRelease) bool {
 		return r1.UpdateVersion > r2.UpdateVersion
 	}
 	return r1.BuildVersion > r2.BuildVersion
-}
-
-func (w *LibericaWatcher) sortVersions(internals []base.Internal) []base.Internal {
-	sort.Slice(internals, func(i, j int) bool {
-		// Liberica versions use '+' separator which semver handles
-		vi, erri := semver.Parse(internals[i].Ref)
-		vj, errj := semver.Parse(internals[j].Ref)
-		if erri == nil && errj == nil {
-			return vi.LessThan(vj)
-		}
-		return internals[i].Ref < internals[j].Ref
-	})
-	return internals
 }
 
 func (w *LibericaWatcher) name(uri string) string {

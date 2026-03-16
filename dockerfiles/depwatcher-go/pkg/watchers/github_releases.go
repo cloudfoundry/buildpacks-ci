@@ -10,11 +10,9 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type GithubReleasesWatcher struct {
@@ -94,16 +92,7 @@ func (w *GithubReleasesWatcher) Check() ([]base.Internal, error) {
 		versions = append(versions, base.Internal{Ref: ref})
 	}
 
-	sort.Slice(versions, func(i, j int) bool {
-		vi, err1 := semver.Parse(versions[i].Ref)
-		vj, err2 := semver.Parse(versions[j].Ref)
-		if err1 != nil || err2 != nil {
-			return versions[i].Ref < versions[j].Ref
-		}
-		return vi.LessThan(vj)
-	})
-
-	return versions, nil
+	return base.SortVersions(versions), nil
 }
 
 func (w *GithubReleasesWatcher) In(ref string) (base.Release, error) {
@@ -120,19 +109,36 @@ func (w *GithubReleasesWatcher) In(ref string) (base.Release, error) {
 }
 
 func (w *GithubReleasesWatcher) fetchReleases() ([]githubRelease, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/%s/releases", w.repo)
-	resp, err := w.client.Get(url)
-	if err != nil {
-		return nil, fmt.Errorf("fetching releases: %w", err)
-	}
-	defer resp.Body.Close()
+	var allReleases []githubRelease
 
-	var releases []githubRelease
-	if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
-		return nil, fmt.Errorf("decoding releases: %w", err)
+	for page := 1; ; page++ {
+		url := fmt.Sprintf("https://api.github.com/repos/%s/releases?per_page=100&page=%d", w.repo, page)
+		resp, err := w.client.Get(url)
+		if err != nil {
+			// GitHub returns 422 when the requested page is beyond the last page
+			// of results (offset > 1000). Treat any HTTP error on page 2+ as
+			// end-of-pagination rather than a hard failure.
+			if page > 1 {
+				break
+			}
+			return nil, fmt.Errorf("fetching releases: %w", err)
+		}
+
+		var releases []githubRelease
+		if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
+			resp.Body.Close()
+			return nil, fmt.Errorf("decoding releases page %d: %w", page, err)
+		}
+		resp.Body.Close()
+
+		allReleases = append(allReleases, releases...)
+
+		if len(releases) < 100 {
+			break
+		}
 	}
 
-	return releases, nil
+	return allReleases, nil
 }
 
 func (w *GithubReleasesWatcher) findRelease(ref string) (*githubRelease, error) {

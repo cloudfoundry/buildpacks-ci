@@ -163,6 +163,10 @@ var _ = Describe("MavenWatcher", func() {
 	Describe("In", func() {
 		Context("with basic Maven coordinates", func() {
 			BeforeEach(func() {
+				mockClient.response = &http.Response{
+					StatusCode: 200,
+					Body:       io.NopCloser(strings.NewReader("abc123def456")),
+				}
 				watcher = watchers.NewMavenWatcher(
 					mockClient,
 					"https://repo1.maven.org/maven2",
@@ -185,6 +189,10 @@ var _ = Describe("MavenWatcher", func() {
 
 		Context("with classifier", func() {
 			BeforeEach(func() {
+				mockClient.response = &http.Response{
+					StatusCode: 200,
+					Body:       io.NopCloser(strings.NewReader("abc123def456")),
+				}
 				watcher = watchers.NewMavenWatcher(
 					mockClient,
 					"https://repo1.maven.org/maven2",
@@ -206,6 +214,10 @@ var _ = Describe("MavenWatcher", func() {
 
 		Context("with custom packaging", func() {
 			BeforeEach(func() {
+				mockClient.response = &http.Response{
+					StatusCode: 200,
+					Body:       io.NopCloser(strings.NewReader("abc123def456")),
+				}
 				watcher = watchers.NewMavenWatcher(
 					mockClient,
 					"https://repo1.maven.org/maven2",

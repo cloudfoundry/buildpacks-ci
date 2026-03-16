@@ -59,50 +59,66 @@ config:
 #@ end
 
 #@ def destroy_bbl_infrastructure():
-task: destroy-infrastructure
-file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
-input_mapping:
-  bbl-state: updated-bbl-state
-params:
-  BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-  BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-  GIT_COMMIT_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
-  GIT_COMMIT_USERNAME: ((cf-buildpacks-app-runtime-interfaces-name))
+#@   return {
+#@     "task": "destroy-infrastructure",
+#@     "file": "cf-deployment-concourse-tasks/bbl-destroy/task.yml",
+#@     "input_mapping": {
+#@       "bbl-state": "updated-bbl-state",
+#@     },
+#@     "params": {
+#@       "BBL_STATE_DIR": data.values.language + "-buildpack-state",
+#@       "BBL_GCP_SERVICE_ACCOUNT_KEY": "((gcp-service-account-key))",
+#@       "GIT_COMMIT_EMAIL": "((cf-buildpacks-app-runtime-interfaces-email))",
+#@       "GIT_COMMIT_USERNAME": "((cf-buildpacks-app-runtime-interfaces-name))",
+#@     },
+#@   }
 #@ end
 
 #@ def remove_gcp_dns():
-task: remove-from-gcp-dns
-file: runtime-ci/tasks/manage-gcp-dns/task.yml
-params:
-  BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-  GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
-  GCP_DNS_ZONE_NAME: buildpacks-ci
-  GCP_DNS_RECORD_SET_NAME: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
-  GCP_DNS_RECORD_TTL: 300
-  ACTION: remove
-input_mapping:
-  bbl-state: updated-bbl-state
+#@   return {
+#@     "task": "remove-from-gcp-dns",
+#@     "file": "runtime-ci/tasks/manage-gcp-dns/task.yml",
+#@     "params": {
+#@       "BBL_STATE_DIR": data.values.language + "-buildpack-state",
+#@       "GCP_DNS_SERVICE_ACCOUNT_KEY": "((gcp-service-account-key))",
+#@       "GCP_DNS_ZONE_NAME": "buildpacks-ci",
+#@       "GCP_DNS_RECORD_SET_NAME": data.values.language + ".buildpacks.ci.cloudfoundry.org",
+#@       "GCP_DNS_RECORD_TTL": 300,
+#@       "ACTION": "remove",
+#@     },
+#@     "input_mapping": {
+#@       "bbl-state": "updated-bbl-state",
+#@     },
+#@   }
 #@ end
 
 #@ def delete_bosh_deployment():
-task: delete-bosh-deployments
-file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
-input_mapping:
-  bbl-state: updated-bbl-state
-params:
-  BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-  BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+#@   return {
+#@     "task": "delete-bosh-deployments",
+#@     "file": "cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml",
+#@     "input_mapping": {
+#@       "bbl-state": "updated-bbl-state",
+#@     },
+#@     "params": {
+#@       "BBL_STATE_DIR": data.values.language + "-buildpack-state",
+#@       "BBL_GCP_SERVICE_ACCOUNT_KEY": "((gcp-service-account-key))",
+#@     },
+#@   }
 #@ end
 
 #@ def bosh_cleanup():
-task: bosh-cleanup
-file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
-input_mapping:
-  bbl-state: updated-bbl-state
-params:
-  CLEAN_ALL: true
-  BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
-  BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
+#@   return {
+#@     "task": "bosh-cleanup",
+#@     "file": "cf-deployment-concourse-tasks/bosh-cleanup/task.yml",
+#@     "input_mapping": {
+#@       "bbl-state": "updated-bbl-state",
+#@     },
+#@     "params": {
+#@       "CLEAN_ALL": true,
+#@       "BBL_STATE_DIR": data.values.language + "-buildpack-state",
+#@       "BBL_GCP_SERVICE_ACCOUNT_KEY": "((gcp-service-account-key))",
+#@     },
+#@   }
 #@ end
 
 ---
@@ -364,9 +380,6 @@ jobs:
     plan:
       - in_parallel:
         - get: buildpacks-ci
-        - get: version
-          passed:
-            - detect-new-version-and-upload-artifacts
         #@ for i, stack in enumerate(data.values.buildpack.stacks):
         - get: #@ "uncached-buildpack-for-stack" + str(i)
           resource: #@ "pivotal-buildpack-" + stack
@@ -377,26 +390,6 @@ jobs:
           passed:
             - detect-new-version-and-upload-artifacts
           resource: buildpack
-      - task: write-version-file
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: cfbuildpacks/ci
-          inputs:
-            - name: buildpack
-            - name: version
-          outputs:
-            - name: buildpack
-          run:
-            path: bash
-            args:
-              - -c
-              - |
-                set -e
-                cp version/number buildpack/VERSION
-                echo "Updated VERSION file with: $(cat buildpack/VERSION)"
       - task: check-tag-not-already-added
         file: buildpacks-ci/tasks/check-tag-not-already-added/task.yml
         params:
