@@ -767,6 +767,21 @@ class DependencyBuild
     merge_out_data(old_filepath, filename_prefix)
   end
 
+  def build_flit_core
+    old_filepath = "artifacts/temp_#{@source_input.url.to_s.split('/').last}"
+    HTTPHelper.download(@source_input, old_filepath)
+
+    if @source_input.url.to_s.end_with?('.tar.gz', '.tgz')
+      Archive.strip_top_level_directory_from_tar(old_filepath)
+    else
+      Archive.strip_top_level_directory_from_zip(old_filepath, Dir.pwd)
+    end
+
+    filename_prefix = "#{@filename_prefix}_linux_noarch_#{@stack}"
+
+    merge_out_data(old_filepath, filename_prefix)
+  end
+
   def build_yarn
     @source_input.version = @source_input.version.delete_prefix('v')
 
