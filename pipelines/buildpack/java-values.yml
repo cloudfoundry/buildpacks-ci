@@ -8,7 +8,7 @@ buildpack:
   - cflinuxfs4
   # - cflinuxfs5  # TODO: re-enable when cf-runtime cflinuxfs5 support is ready
   product_slug: java-buildpack
-  branch: feature/go-migration
+  branch: main
   skip_docker_start: true
   skip_brats: true
   compute_instance_count: 3
