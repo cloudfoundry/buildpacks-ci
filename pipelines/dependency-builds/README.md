@@ -19,7 +19,7 @@ a buildpack repository.
 ```yaml
 buildpacks:
   java:
-    branch: feature/go-migration
+    branch: main
 ```
 
 If a buildpack is not listed here, the pipeline defaults to `master`.

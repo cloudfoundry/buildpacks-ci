@@ -79,14 +79,7 @@ resources:
   source:
     uri: https://github.com/cloudfoundry/runtime-ci
 
-- name: java-buildpack
-  type: github-release
-  source:
-    user: cloudfoundry
-    repository: java-buildpack
-    access_token: ((buildpacks-github-token))
-
-#@ for language in data.values.supported_languages_without_java:
+#@ for language in data.values.supported_languages:
   #@ for stack in language.stacks:
 - name: #@ language.name + "-buildpack-" + stack
   type: s3
@@ -135,15 +128,7 @@ resources:
   type: s3
   source:
     bucket: buildpack-release-triggers-shared
-    versioned_file: bosh-release-triggers/non-java
-    access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
-    secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
-
-- name: shared-java-buildpack-release-trigger
-  type: s3
-  source:
-    bucket: buildpack-release-triggers-shared
-    versioned_file: bosh-release-triggers/java
+    versioned_file: bosh-release-triggers/all
     access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
     secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
@@ -197,17 +182,9 @@ jobs:
       passed: [trigger-buildpack-pipeline]
     - get: release
       resource: #@ language.name + "-buildpack-release"
-  #@ if language.name == "java":
-    - get: buildpack-stack0
-      resource: java-buildpack
-      params:
-        globs:
-        - java-buildpack-v*.zip
-  #@ else:
-    #@ for stack in language.stacks:
+  #@ for stack in language.stacks:
     - get: #@ "buildpack-stack" + str(language.stacks.index(stack))
       resource: #@ language.name + "-buildpack-" + stack
-    #@ end
   #@ end
   - task: create-buildpack-dev-release
     file: buildpacks-ci/tasks/cf-release/create-buildpack-dev-release/task.yml
@@ -453,17 +430,6 @@ jobs:
     params:
       file: buildpack-release-trigger-file/file
 
-- name: ship-it-java
-  public: true
-  serial: true
-  plan:
-  - get: buildpacks-ci
-  - task: write-buildpack-release-trigger-file
-    file: buildpacks-ci/tasks/cf-release/write-buildpack-release-trigger-file/task.yml
-  - put: shared-java-buildpack-release-trigger
-    params:
-      file: buildpack-release-trigger-file/file
-
 #@ for language in data.values.supported_languages:
 - name: #@ "update-" + language.name + "-buildpack-release-trigger"
   public: true
@@ -476,13 +442,8 @@ jobs:
       passed: [cats]
     - get: buildpack-release-trigger
       resource: #@ language.name + "-buildpack-release-trigger"
-  #@ if language.name == "java":
-    - get: shared-java-buildpack-release-trigger
-      trigger: true
-  #@ else:
     - get: shared-buildpack-release-trigger
       trigger: true
-  #@ end
   - task: update-buildpack-release-trigger
     file: buildpacks-ci/tasks/cf-release/update-buildpack-release-trigger/task.yml
     params:
@@ -536,7 +497,6 @@ groups:
 - name: ship-it
   jobs:
   - ship-it
-  - ship-it-java
 
 - name: publish
   jobs:

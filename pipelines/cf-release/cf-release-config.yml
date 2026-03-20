@@ -23,22 +23,4 @@ supported_languages:
   stacks: #@ default_stacks
 - name: staticfile
   stacks: #@ default_stacks
-supported_languages_without_java:
-- name: dotnet-core
-  stacks: #@ default_stacks
-- name: go
-  stacks: #@ default_stacks
-- name: nginx
-  stacks: #@ default_stacks
-- name: nodejs
-  stacks: #@ default_stacks
-- name: php
-  stacks: #@ default_stacks
-- name: python
-  stacks: #@ default_stacks
-- name: r
-  stacks: #@ default_stacks
-- name: ruby
-  stacks: #@ default_stacks
-- name: staticfile
-  stacks: #@ default_stacks
+

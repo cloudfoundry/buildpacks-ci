@@ -2,7 +2,7 @@
 ---
 buildpacks:
   java:
-    branch: feature/go-migration
+    branch: main
   #! Add other buildpacks with non-master branches here
   #! php:
   #!   branch: main
