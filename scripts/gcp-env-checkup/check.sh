@@ -114,8 +114,8 @@ function check_dependencies() {
     return 0
 }
 
-# Check CLI authentication status
-# Returns: 0 if all CLIs are authenticated, 1 otherwise
+# Check CLI authentication status and validate GCP credentials.
+# Returns: 0 if all checks pass, 1 otherwise
 function check_authentication() {
     local auth_failed=false
     
@@ -128,6 +128,16 @@ function check_authentication() {
     # Check fly authentication
     if ! fly -t "${CONCOURSE_TARGET}" status &> /dev/null; then
         echo "ERROR: fly not authenticated for target '${CONCOURSE_TARGET}'. Run: fly -t ${CONCOURSE_TARGET} login -c ${CONCOURSE_URL} -n ${CONCOURSE_TEAM}" >&2
+        auth_failed=true
+    fi
+    
+    # Check GCP service account key (always required)
+    if [[ -z "${GCP_SERVICE_ACCOUNT_KEY}" ]]; then
+        echo "ERROR: GCP_SERVICE_ACCOUNT_KEY environment variable not set" >&2
+        echo "       Please set it to the path of your GCP service account key file" >&2
+        auth_failed=true
+    elif [[ ! -f "${GCP_SERVICE_ACCOUNT_KEY}" ]]; then
+        echo "ERROR: GCP service account key file not found: ${GCP_SERVICE_ACCOUNT_KEY}" >&2
         auth_failed=true
     fi
     
@@ -576,8 +586,147 @@ function select_environments_for_cleanup() {
     echo "${selected_envs}"
 }
 
-# Cleanup a single environment
-# Input: environment JSON object
+# Run leftovers to force-delete all GCP resources for a BBL environment.
+# This is always a last resort — used when no BBL state exists or BBL destroy fails.
+# Derives the environment prefix from the network name (strips trailing "-network")
+# so that all BBL-created resources (router, subnet, firewall rules, network) are
+# matched and deleted in dependency order.
+# Input: $1 = network name (e.g. "nodejs-buildpack-bbl-env-network")
+# Returns: 0 on success, 1 on failure
+function run_leftovers_cleanup() {
+    local network="$1"
+    
+    if [[ "${network}" == "null" ]] || [[ -z "${network}" ]]; then
+        color_yellow "⚠ No network name available for leftovers, skipping..." >&2
+        return 1
+    fi
+    
+    # Strip "-network" suffix to get the BBL environment prefix, which matches
+    # all resources BBL created (router, subnet, firewall rules, network)
+    local env_prefix="${network%-network}"
+    
+    echo "→ Running leftovers with filter: ${env_prefix}..." >&2
+    if ! leftovers --iaas gcp --gcp-service-account-key "${GCP_SERVICE_ACCOUNT_KEY}" --no-confirm --filter "${env_prefix}"; then
+        echo "ERROR: leftovers failed. Manual cleanup may be required." >&2
+        return 1
+    fi
+    
+    color_green "✓ GCP resources cleaned up via leftovers" >&2
+    return 0
+}
+
+# Delete all BOSH deployments and run bosh clean-up.
+# Requires BBL environment to already be loaded in the calling shell.
+# Best-effort throughout — failures are warned but not fatal.
+# Returns: 0 always (best-effort)
+function cleanup_bosh_deployments() {
+    echo "→ Listing BOSH deployments..." >&2
+    local deployments
+    local bosh_available=true
+    if ! deployments=$(bosh deployments --json 2>/dev/null | jq -r '.Tables[0].Rows[].name' 2>/dev/null); then
+        color_yellow "⚠ Cannot connect to BOSH director (may already be destroyed)" >&2
+        bosh_available=false
+        deployments=""
+    fi
+    
+    if [[ "${bosh_available}" == "true" ]] && [[ -n "${deployments}" ]]; then
+        while IFS= read -r deployment; do
+            if [[ -n "${deployment}" ]]; then
+                echo "→ Deleting BOSH deployment: ${deployment}..." >&2
+                if ! bosh delete-deployment -d "${deployment}" -n; then
+                    color_yellow "⚠ Failed to delete BOSH deployment: ${deployment}, continuing..." >&2
+                fi
+            fi
+        done <<< "${deployments}"
+    elif [[ "${bosh_available}" == "true" ]]; then
+        echo "  No BOSH deployments to delete" >&2
+    fi
+    
+    if [[ "${bosh_available}" == "true" ]]; then
+        echo "→ Running BOSH cleanup..." >&2
+        if ! bosh clean-up --all -n 2>/dev/null; then
+            color_yellow "⚠ BOSH cleanup failed, continuing to BBL destroy..." >&2
+        fi
+    else
+        echo "  Skipping BOSH cleanup (director unavailable)" >&2
+    fi
+    
+    return 0
+}
+
+# Destroy a BBL-managed GCP environment.
+# Falls back to leftovers if BBL destroy fails.
+# Input: $1 = state directory path, $2 = network name (for leftovers fallback)
+# Returns: 0 on success, 1 on failure
+function destroy_bbl_environment() {
+    local state_dir="$1"
+    local network="$2"
+    
+    cd "${state_dir}" || {
+        echo "ERROR: Failed to enter state directory: ${state_dir}" >&2
+        return 1
+    }
+    
+    echo "→ Loading BBL environment..." >&2
+    if ! eval "$(bbl print-env)" 2>/dev/null; then
+        color_yellow "⚠ Failed to load BBL environment (may be corrupted), falling back to leftovers..." >&2
+        run_leftovers_cleanup "${network}"
+        return $?
+    fi
+    
+    cleanup_bosh_deployments
+    
+    echo "→ Destroying BBL environment..." >&2
+    if ! bbl destroy --iaas gcp --gcp-service-account-key "${GCP_SERVICE_ACCOUNT_KEY}" -n; then
+        color_yellow "⚠ BBL destroy failed, falling back to leftovers..." >&2
+        run_leftovers_cleanup "${network}"
+        return $?
+    fi
+    
+    return 0
+}
+
+# Wipe all files from a BBL state directory and commit the change to buildpacks-envs.
+# Input: $1 = identifier (e.g. "nodejs"), $2 = state directory path
+# Returns: 0 on success, 1 on failure
+function commit_state_cleanup() {
+    local identifier="$1"
+    local state_dir="$2"
+    
+    echo "→ Cleaning up state directory..." >&2
+    rm -rf "${state_dir:?}/"*
+    
+    cd "${BUILDPACKS_ENVS_DIR}" || {
+        echo "ERROR: Failed to cd to buildpacks-envs directory" >&2
+        return 1
+    }
+    
+    git add "${identifier}-buildpack-state/" || {
+        color_yellow "⚠ Failed to stage changes (continuing anyway)" >&2
+    }
+    
+    if git diff --cached --quiet; then
+        color_yellow "⚠ No changes to commit (directory was already empty)" >&2
+        return 0
+    fi
+    
+    if git commit -m "cleanup ${identifier} environment"; then
+        echo "→ Committed cleanup to buildpacks-envs repository" >&2
+        if git push origin master; then
+            echo "→ Pushed changes to remote repository" >&2
+        else
+            color_yellow "⚠ Failed to push changes (you may need to push manually)" >&2
+        fi
+    else
+        color_yellow "⚠ Commit failed unexpectedly" >&2
+    fi
+    
+    return 0
+}
+
+# Orchestrate cleanup of a single orphaned environment.
+# Delegates to run_leftovers_cleanup, destroy_bbl_environment, and commit_state_cleanup.
+# Input: $1 = environment JSON object
 # Returns: 0 on success, 1 on failure
 function cleanup_environment() {
     local env="$1"
@@ -587,6 +736,9 @@ function cleanup_environment() {
     local env_type
     env_type=$(echo "$env" | jq -r '.type')
     
+    local network
+    network=$(echo "$env" | jq -r '.network')
+    
     local state_dir="${BUILDPACKS_ENVS_DIR}/${identifier}-buildpack-state"
     
     color_bold "======================================" >&2
@@ -594,142 +746,32 @@ function cleanup_environment() {
     color_bold "======================================" >&2
     echo "" >&2
     
-    # Check if state directory exists
+    # No state directory: for vpc environments use leftovers as last resort,
+    # otherwise there is nothing we can do
     if [[ ! -d "${state_dir}" ]]; then
         color_yellow "⚠ State directory not found: ${state_dir}" >&2
+        if [[ "${env_type}" == "vpc" ]]; then
+            color_yellow "  No state directory — falling back to leftovers..." >&2
+            run_leftovers_cleanup "${network}" || return 1
+            color_green "✓ Successfully cleaned up ${identifier}" >&2
+            echo "" >&2
+            return 0
+        fi
         color_yellow "  Cannot cleanup without state directory" >&2
         return 1
     fi
     
-    # For state-only orphans, skip infrastructure cleanup entirely
-    # (no VPC exists, so there's nothing to destroy with BBL/BOSH/leftovers)
+    # State-only orphan: no VPC, nothing to destroy in GCP
     if [[ "${env_type}" == "state-only" ]]; then
-        color_yellow "→ State-only orphan detected (no VPC found), skipping infrastructure cleanup..." >&2
+        color_yellow "→ State-only orphan (no VPC found), skipping infrastructure cleanup..." >&2
     else
-        # Change to state directory
-        echo "→ Entering state directory..." >&2
-        cd "${state_dir}" || {
-            echo "ERROR: Failed to enter state directory: ${state_dir}" >&2
-            return 1
-        }
-        
-        # Load BBL environment
-        echo "→ Loading BBL environment..." >&2
-        if ! eval "$(bbl print-env)" 2>/dev/null; then
-            color_yellow "⚠ Failed to load BBL environment (may be corrupted), skipping to state cleanup..." >&2
-        else
-            # Get BOSH deployments (best-effort, may fail if BOSH director is down)
-            echo "→ Listing BOSH deployments..." >&2
-            local deployments
-            local bosh_available=true
-            if ! deployments=$(bosh deployments --json 2>/dev/null | jq -r '.Tables[0].Rows[].name' 2>/dev/null); then
-                color_yellow "⚠ Cannot connect to BOSH director (may already be destroyed)" >&2
-                bosh_available=false
-                deployments=""
-            fi
-            
-            # Delete each deployment (only if BOSH is available)
-            if [[ "${bosh_available}" == "true" ]] && [[ -n "${deployments}" ]]; then
-                while IFS= read -r deployment; do
-                    if [[ -n "${deployment}" ]]; then
-                        echo "→ Deleting BOSH deployment: ${deployment}..." >&2
-                        if ! bosh delete-deployment -d "${deployment}" -n; then
-                            color_yellow "⚠ Failed to delete BOSH deployment: ${deployment}, continuing..." >&2
-                        fi
-                    fi
-                done <<< "${deployments}"
-            elif [[ "${bosh_available}" == "true" ]]; then
-                echo "  No BOSH deployments to delete" >&2
-            fi
-            
-            # Clean up BOSH (only if BOSH is available)
-            if [[ "${bosh_available}" == "true" ]]; then
-                echo "→ Running BOSH cleanup..." >&2
-                if ! bosh clean-up --all -n 2>/dev/null; then
-                    color_yellow "⚠ BOSH cleanup failed, continuing to BBL destroy..." >&2
-                fi
-            else
-                echo "  Skipping BOSH cleanup (director unavailable)" >&2
-            fi
-            
-            # Destroy BBL environment
-            echo "→ Destroying BBL environment..." >&2
-            if [[ -z "${GCP_SERVICE_ACCOUNT_KEY}" ]]; then
-                echo "ERROR: GCP_SERVICE_ACCOUNT_KEY environment variable not set" >&2
-                echo "       Please set it to the path of your GCP service account key file" >&2
-                return 1
-            fi
-            
-            if [[ ! -f "${GCP_SERVICE_ACCOUNT_KEY}" ]]; then
-                echo "ERROR: GCP service account key file not found: ${GCP_SERVICE_ACCOUNT_KEY}" >&2
-                return 1
-            fi
-            
-            if ! bbl destroy --iaas gcp --gcp-service-account-key "${GCP_SERVICE_ACCOUNT_KEY}" -n; then
-                color_yellow "⚠ BBL destroy failed, attempting nuclear cleanup with leftovers..." >&2
-                
-                # Nuclear option: use leftovers to clean up all resources
-                local network
-                network=$(echo "$env" | jq -r '.network')
-                
-                if [[ "${network}" != "null" ]] && [[ -n "${network}" ]]; then
-                    echo "→ Running leftovers with filter: ${network}..." >&2
-                    if ! leftovers --iaas gcp --gcp-service-account-key "${GCP_SERVICE_ACCOUNT_KEY}" --no-confirm --filter "${network}"; then
-                        echo "ERROR: leftovers also failed. Manual cleanup may be required." >&2
-                        return 1
-                    fi
-                    
-                    color_yellow "✓ Nuclear cleanup with leftovers completed" >&2
-                else
-                    color_yellow "⚠ No network name available for leftovers, skipping..." >&2
-                fi
-            fi
-        fi
+        destroy_bbl_environment "${state_dir}" "${network}" || return 1
     fi
     
-    # Clean up state directory and commit changes
-    echo "→ Cleaning up state directory..." >&2
-    
-    if [[ -d "${state_dir}" ]]; then
-        # Remove all files in state directory (keeps the directory itself)
-        rm -rf "${state_dir:?}/"*
-        
-        # Git operations
-        cd "${BUILDPACKS_ENVS_DIR}" || {
-            echo "ERROR: Failed to cd to buildpacks-envs directory" >&2
-            return 1
-        }
-        
-        # Stage changes
-        git add "${identifier}-buildpack-state/" || {
-            color_yellow "⚠ Failed to stage changes (continuing anyway)" >&2
-        }
-        
-        # Check if there are changes to commit
-        if git diff --cached --quiet; then
-            color_yellow "⚠ No changes to commit (directory was already empty)" >&2
-        else
-            # Commit changes
-            if git commit -m "cleanup ${identifier} environment"; then
-                echo "→ Committed cleanup to buildpacks-envs repository" >&2
-                
-                # Push changes
-                if git push origin master; then
-                    echo "→ Pushed changes to remote repository" >&2
-                else
-                    color_yellow "⚠ Failed to push changes (you may need to push manually)" >&2
-                fi
-            else
-                color_yellow "⚠ Commit failed unexpectedly" >&2
-            fi
-        fi
-    else
-        color_yellow "⚠ State directory not found, skipping git commit" >&2
-    fi
+    commit_state_cleanup "${identifier}" "${state_dir}" || return 1
     
     color_green "✓ Successfully cleaned up ${identifier}" >&2
     echo "" >&2
-    
     return 0
 }
 
