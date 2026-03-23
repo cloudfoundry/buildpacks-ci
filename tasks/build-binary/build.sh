@@ -123,6 +123,13 @@ if [[ "${SKIP_COMMIT:-}" == "true" ]]; then
   exit 0
 fi
 
+# Seed builds-artifacts with the builds git repo so that git commands work.
+# The Ruby builder did: rsync -a builds/ builds-artifacts/ (build_input.rb:16).
+# builds-artifacts is a plain task output dir; it must be a git clone before
+# we can run git config / git add / git commit inside it.
+echo "[task] Seeding builds-artifacts from builds git repo..."
+rsync -a builds/ builds-artifacts/
+
 echo "[task] Committing builds-artifacts..."
 pushd builds-artifacts >/dev/null
 git config user.email "cf-buildpacks-eng@pivotal.io"
