@@ -2,7 +2,8 @@
 # Stack-agnostic build script for the Go binary-builder.
 #
 # Responsibilities:
-#   1. Compile binary-builder from source (Go must be available in the container image).
+#   0. Bootstrap Go toolchain (cflinuxfs* images are rootfs images — no Go or Python present).
+#   1. Compile binary-builder from source.
 #   2. Run: binary-builder build --stack $STACK --source-file source/data.json --stacks-dir binary-builder/stacks
 #   3. Read the JSON summary from the output file.
 #   4. Move the artifact from CWD to artifacts/.
@@ -13,6 +14,32 @@ set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
+
+# ── 0. Bootstrap Go toolchain ─────────────────────────────────────────────────
+# cflinuxfs4/cflinuxfs5 are minimal rootfs images: no Go, no Python.
+# Extract the pinned Go URL and SHA256 from the stack YAML using awk,
+# then download, verify, and install into /usr/local/go.
+if ! command -v go &>/dev/null; then
+  STACK_YAML="binary-builder/stacks/${STACK}.yaml"
+
+  # Parse the bootstrap.go block: match the 'go:' key under 'bootstrap:',
+  # then grab the next 'url:' and 'sha256:' values.
+  GO_URL=$(awk '/^bootstrap:/{found=1} found && /^  go:/{goblock=1} goblock && /url:/{print $2; exit}' "${STACK_YAML}")
+  GO_SHA=$(awk '/^bootstrap:/{found=1} found && /^  go:/{goblock=1} goblock && /sha256:/{print $2; exit}' "${STACK_YAML}")
+
+  if [[ -z "${GO_URL}" || -z "${GO_SHA}" ]]; then
+    echo "[task] ERROR: could not parse bootstrap.go url/sha256 from ${STACK_YAML}" >&2
+    exit 1
+  fi
+
+  echo "[task] Bootstrapping Go toolchain from ${GO_URL}..."
+  curl -fsSL "${GO_URL}" -o /tmp/go-bootstrap.tar.gz
+  echo "${GO_SHA}  /tmp/go-bootstrap.tar.gz" | sha256sum -c -
+  tar -C /usr/local -xzf /tmp/go-bootstrap.tar.gz
+  rm -f /tmp/go-bootstrap.tar.gz
+  export PATH="/usr/local/go/bin:${PATH}"
+  echo "[task] $(go version) ready"
+fi
 
 # ── 1. Compile binary-builder ─────────────────────────────────────────────────
 echo "[task] Compiling binary-builder..."
