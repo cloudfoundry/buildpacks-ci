@@ -139,7 +139,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/binary-builder
-    branch: go-binary-builder-cflinuxfs4-parity/cflinuxfs4
+    branch: go-binary-builder-cflinuxfs4-parity
 - name: buildpacks-ci
   type: git
   source:
