@@ -114,24 +114,14 @@ function check_dependencies() {
     return 0
 }
 
-# Check CLI authentication status and validate GCP credentials.
+# Check CLI authentication status and activate GCP service account.
+# Uses GCP_SERVICE_ACCOUNT_KEY to authenticate gcloud directly, so
+# interactive `gcloud auth login` is never required.
 # Returns: 0 if all checks pass, 1 otherwise
 function check_authentication() {
     local auth_failed=false
     
-    # Check gcloud authentication
-    if ! gcloud auth list --filter=status:ACTIVE --format="value(account)" &> /dev/null; then
-        echo "ERROR: gcloud not authenticated. Run: gcloud auth login" >&2
-        auth_failed=true
-    fi
-    
-    # Check fly authentication
-    if ! fly -t "${CONCOURSE_TARGET}" status &> /dev/null; then
-        echo "ERROR: fly not authenticated for target '${CONCOURSE_TARGET}'. Run: fly -t ${CONCOURSE_TARGET} login -c ${CONCOURSE_URL} -n ${CONCOURSE_TEAM}" >&2
-        auth_failed=true
-    fi
-    
-    # Check GCP service account key (always required)
+    # Validate GCP service account key
     if [[ -z "${GCP_SERVICE_ACCOUNT_KEY}" ]]; then
         echo "ERROR: GCP_SERVICE_ACCOUNT_KEY environment variable not set" >&2
         echo "       Please set it to the path of your GCP service account key file" >&2
@@ -141,7 +131,24 @@ function check_authentication() {
         auth_failed=true
     fi
     
+    # Check fly authentication
+    if ! fly -t "${CONCOURSE_TARGET}" status &> /dev/null; then
+        echo "ERROR: fly not authenticated for target '${CONCOURSE_TARGET}'. Run: fly -t ${CONCOURSE_TARGET} login -c ${CONCOURSE_URL} -n ${CONCOURSE_TEAM}" >&2
+        auth_failed=true
+    fi
+    
     if [[ "${auth_failed}" == "true" ]]; then
+        return 1
+    fi
+    
+    # Activate GCP service account (replaces gcloud auth login requirement)
+    echo "Activating GCP service account..." >&2
+    local gcloud_err
+    if ! gcloud_err=$(gcloud auth activate-service-account \
+        --key-file="${GCP_SERVICE_ACCOUNT_KEY}" \
+        --project="${GCP_PROJECT}" 2>&1); then
+        echo "ERROR: Failed to activate GCP service account:" >&2
+        echo "       ${gcloud_err}" >&2
         return 1
     fi
     
@@ -157,14 +164,22 @@ function extract_identifier_from_network() {
 }
 
 # List GCP VPC networks matching buildpack pattern
-# Returns: JSON array of network names
+# Returns: JSON array of network names (exits non-zero on gcloud failure)
 function list_buildpack_networks() {
     local networks
+    local gcloud_err
     
-    networks=$(gcloud compute networks list \
+    gcloud_err=$(mktemp)
+    trap "rm -f '${gcloud_err}'" RETURN
+    
+    if ! networks=$(gcloud compute networks list \
         --project="${GCP_PROJECT}" \
         --filter="name~'-buildpack-bbl-env-network$'" \
-        --format="json" 2>/dev/null)
+        --format="json" 2>"${gcloud_err}"); then
+        echo "ERROR: Failed to list GCP networks:" >&2
+        cat "${gcloud_err}" >&2
+        return 1
+    fi
     
     if [[ -z "${networks}" ]] || [[ "${networks}" == "[]" ]]; then
         echo "[]"
@@ -899,13 +914,14 @@ ENVIRONMENT VARIABLES:
     CONCOURSE_TEAM          Concourse team (default: buildpacks-team)
     CONCOURSE_TARGET        Concourse target (default: buildpacks)
     GITHUB_REPO             GitHub repo for state (default: cloudfoundry/buildpacks-envs)
-    GCP_SERVICE_ACCOUNT_KEY Path to GCP service account key (required for cleanup)
+    GCP_SERVICE_ACCOUNT_KEY Path to GCP service account key (required)
     OUTPUT_FORMAT           Output format: text or json (default: text)
     NO_COLOR                Disable colored output (default: false)
     DEBUG                   Enable debug mode (default: false)
 
 EXAMPLES:
     # Check for orphaned environments
+    export GCP_SERVICE_ACCOUNT_KEY="/path/to/service-account-key.json"
     ./check.sh
 
     # Interactive cleanup mode (requires bbl, bosh, git, leftovers)
@@ -913,7 +929,7 @@ EXAMPLES:
     ./check.sh --cleanup
 
     # JSON output
-    OUTPUT_FORMAT=json ./check.sh
+    GCP_SERVICE_ACCOUNT_KEY="/path/to/key.json" OUTPUT_FORMAT=json ./check.sh
 
 DEPENDENCIES:
     Check mode requires: gcloud, fly, jq, git
@@ -976,7 +992,10 @@ function main() {
     
     echo "Discovering buildpack VPC networks..." >&2
     local networks
-    networks=$(list_buildpack_networks)
+    if ! networks=$(list_buildpack_networks); then
+        echo "ERROR: Failed to discover buildpack VPC networks" >&2
+        exit 1
+    fi
     
     local network_count
     network_count=$(echo "${networks}" | jq 'length')
