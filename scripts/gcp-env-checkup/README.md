@@ -76,20 +76,17 @@ The script will validate all dependencies before execution and report any missin
 
 ### Authentication
 
-You must be authenticated with all three services before running the tool:
+You must be authenticated with the required services before running the tool:
 
 #### 1. GCP Authentication
 
+The script authenticates to GCP automatically using a service account key file. Set the `GCP_SERVICE_ACCOUNT_KEY` environment variable to the path of your key file:
+
 ```bash
-# Standard user authentication
-gcloud auth login
-
-# Or service account authentication
-gcloud auth activate-service-account --key-file=KEY_FILE.json
-
-# Set active project
-gcloud config set project app-runtime-interfaces-wg
+export GCP_SERVICE_ACCOUNT_KEY="/path/to/service-account-key.json"
 ```
+
+The script runs `gcloud auth activate-service-account` internally — no manual `gcloud auth login` is needed.
 
 #### 2. Concourse Authentication
 
@@ -144,6 +141,7 @@ gh auth status
 
 ```bash
 # Run check with default settings
+export GCP_SERVICE_ACCOUNT_KEY="/path/to/service-account-key.json"
 ./scripts/gcp-env-checkup/check.sh
 ```
 
@@ -190,7 +188,7 @@ The tool can be configured using environment variables:
 | `CONCOURSE_TEAM` | Concourse team name | `buildpacks-team` | All modes |
 | `CONCOURSE_TARGET` | Fly target name | `buildpacks` | All modes |
 | `GITHUB_REPO` | GitHub repository | `cloudfoundry/buildpacks-envs` | All modes |
-| `GCP_SERVICE_ACCOUNT_KEY` | Path to GCP service account key file | (none) | **Cleanup mode only** |
+| `GCP_SERVICE_ACCOUNT_KEY` | Path to GCP service account key file | (none) | **All modes** |
 | `OUTPUT_FORMAT` | Output format (`text` or `json`) | `text` | All modes |
 | `DEBUG` | Enable debug mode (`true` or `false`) | `false` | All modes |
 | `NO_COLOR` | Disable colored output (`true` or `false`) | `false` | All modes |
@@ -553,9 +551,8 @@ Validates that all required CLI tools are installed:
 #### 2. Authentication Verification
 
 Checks that you're authenticated with:
-- GCP (gcloud)
+- GCP (service account key activated via `gcloud auth activate-service-account`)
 - Concourse (fly)
-- GitHub (gh)
 
 #### 3. VPC Network Discovery
 
@@ -668,14 +665,18 @@ If BBL destroy fails (corrupted state, partial deletion, etc.):
 - gh: https://cli.github.com/
 - jq: `brew install jq` (macOS) or `apt-get install jq` (Linux)
 
-### "gcloud not authenticated"
+### "Failed to activate GCP service account"
 
-**Problem**: Not logged in to GCP.
+**Problem**: The service account key file is invalid or lacks permissions.
 
 **Solution**:
 ```bash
-gcloud auth login
-gcloud config set project app-runtime-interfaces-wg
+# Verify the key file is valid JSON
+cat "$GCP_SERVICE_ACCOUNT_KEY" | jq .client_email
+
+# Verify the service account has compute.networks.list permission
+gcloud auth activate-service-account --key-file="$GCP_SERVICE_ACCOUNT_KEY"
+gcloud compute networks list --project=app-runtime-interfaces-wg --limit=1
 ```
 
 ### "fly not authenticated"
