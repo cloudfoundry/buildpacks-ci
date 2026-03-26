@@ -1,0 +1,44 @@
+# Temporary ops file to add cflinuxfs5 support until bosh.io release is available
+# See: https://github.com/cloudfoundry/bosh-io-releases/pull/123
+# Remove this file once cflinuxfs5 is available on bosh.io and cf-deployment has official ops file
+
+- type: replace
+  path: /releases/-
+  value:
+    name: cflinuxfs5
+    url: https://github.com/cloudfoundry/cflinuxfs5-release/releases/download/0.7.0-beta/cflinuxfs5-release-0.7.0-beta.tgz
+    version: 0.7.0-beta
+
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/-
+  value:
+    name: cflinuxfs5-rootfs-setup
+    release: cflinuxfs5
+    properties:
+      cflinuxfs5-rootfs:
+        trusted_certs:
+          - ((diego_instance_identity_ca.ca))
+          - ((credhub_tls.ca))
+          - ((uaa_ssl.ca))
+
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/stacks/-
+  value:
+    name: cflinuxfs5
+    description: "Cloud Foundry Linux FS 5 (Ubuntu Noble)"
+
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/default_stack?
+  value: cflinuxfs5
+
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/diego/lifecycle_bundles/buildpack~1cflinuxfs5?
+  value: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/diego/lifecycle_bundles/cnb~1cflinuxfs5?
+  value: cnb_app_lifecycle/cnb_app_lifecycle.tgz
+
+- type: replace
+  path: /instance_groups/name=diego-cell/jobs/name=rep/properties/diego/rep/preloaded_rootfses/-
+  value: cflinuxfs5:/var/vcap/packages/cflinuxfs5/rootfs.tar
