@@ -21,7 +21,7 @@ task: capture-test-failure-logs
 config:
   platform: linux
   image_resource:
-    type: docker-image
+    type: registry-image
     source:
       repository: cfbuildpacks/ci
   inputs:
@@ -124,7 +124,7 @@ config:
 ---
 resource_types:
   - name: cron
-    type: docker-image
+    type: registry-image
     source:
       repository: cfbuildpacks/cron-resource
 
@@ -135,7 +135,7 @@ resource_types:
       tag: 1.1.3
 
   - name: create-pull-request-resource
-    type: docker-image
+    type: registry-image
     source:
       repository: cfbuildpacks/create-pull-request-resource
 
