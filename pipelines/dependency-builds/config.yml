@@ -459,6 +459,9 @@ dependencies:
     any_stack: true
     versions_to_keep: 2
 build_stacks: [ 'cflinuxfs4', 'cflinuxfs5' ]
+# Stack used to build any_stack: true dependencies (stack-neutral binaries).
+# When a new stack becomes the default, update this one value.
+any_stack_build_stack: cflinuxfs4
 windows_stacks: [ 'windows' ]
 
 #! only check deprecation dates for dotnet-runtime as they are redundant for sdk and aspnetcore

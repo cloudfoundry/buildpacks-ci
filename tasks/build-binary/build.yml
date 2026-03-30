@@ -25,4 +25,5 @@ run:
   path: buildpacks-ci/tasks/build-binary/build.sh
 params:
   STACK:
+  ANY_STACK_BUILD_STACK:
   SKIP_COMMIT:
