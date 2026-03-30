@@ -3,19 +3,19 @@
 ---
 resource_types:
 - name: cron
-  type: docker-image
+  type: registry-image
   source:
     repository: cfbuildpacks/cron-resource
 
 - name: bosh-deployment
-  type: docker-image
+  type: registry-image
   source:
     repository: cloudfoundry/bosh-deployment-resource
 
 #!# Overriding the default resource-type because default (older) version
 #!# of this resource do not have the ability to assume an AWS role.
 - name: semver-latest
-  type: docker-image
+  type: registry-image
   source:
     repository: concourse/semver-resource
     tag: latest
@@ -192,7 +192,7 @@ resources:
     name: bosh-google-kvm-ubuntu-jammy-go_agent
 
 - name: cflinuxfs4-image
-  type: docker-image
+  type: registry-image
   source:
     repository: cloudfoundry/cflinuxfs4
     username: ((cfbuildpacks-dockerhub-user.username))

@@ -3,12 +3,12 @@
 ---
 resource_types:
   - name: cron
-    type: docker-image
+    type: registry-image
     source:
       repository: cfbuildpacks/cron-resource
 
   - name: cf-space-resource
-    type: docker-image
+    type: registry-image
     source:
       repository: cfbuildpacks/cf-space-resource
 

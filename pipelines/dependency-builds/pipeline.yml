@@ -126,11 +126,11 @@
 ---
 resource_types:
 - name: depwatcher
-  type: docker-image
+  type: registry-image
   source:
     repository: coredeps/depwatcher
 - name: create-pull-request-resource
-  type: docker-image
+  type: registry-image
   source:
     repository: cfbuildpacks/create-pull-request-resource
 
@@ -155,7 +155,7 @@ resources:
 
 #@ for stack in data.values.build_stacks:
 - name: #@ "{}-image".format(stack)
-  type: docker-image
+  type: registry-image
   source:
     repository: #@ "cloudfoundry/{}".format(stack)
 #@ end

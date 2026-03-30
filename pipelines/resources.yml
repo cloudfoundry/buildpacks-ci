@@ -8,7 +8,7 @@ resources:
     paths: [ dockerfiles/depwatcher-go/ ]
 
 - name: depwatcher-image
-  type: docker-image
+  type: registry-image
   source:
     repository: coredeps/depwatcher
     username: ((coredeps-dockerhub-user.username))
