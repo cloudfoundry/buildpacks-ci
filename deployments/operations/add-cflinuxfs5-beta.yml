@@ -5,7 +5,7 @@
 - type: replace
   path: /releases/-
   value:
-    name: cflinuxfs5
+    name: cflinuxfs5-release
     url: https://github.com/cloudfoundry/cflinuxfs5-release/releases/download/0.7.0-beta/cflinuxfs5-release-0.7.0-beta.tgz
     version: 0.7.0-beta
     sha1: 5a7f6724344b9d657ac97941cbd7d3d27bbb2697
