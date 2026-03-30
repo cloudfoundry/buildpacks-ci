@@ -516,9 +516,6 @@ jobs:
       #@ if "cflinuxfs4" in data.values.buildpack.stacks:
       - get: version-stack-cflinuxfs4
       #@ end
-      #@ if "cflinuxfs5" in data.values.buildpack.stacks:
-      - get: version-stack-cflinuxfs5
-      #@ end
 
     #! === INFRASTRUCTURE SETUP (ONCE FOR ALL STACKS) ===
     - task: bbl-up
