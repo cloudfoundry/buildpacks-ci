@@ -243,7 +243,7 @@ jobs:
     - get: source
       resource: #@ "source-{}-latest".format(dep_name.lower())
       trigger: true
-      version: every
+      version: latest
   - do:
     - task: create-new-version-line-story
       file: buildpacks-ci/tasks/create-new-version-line-story/create-new-version-line-story.yml
@@ -264,7 +264,7 @@ jobs:
     - get: source
       resource: source-node-node-lts
       trigger: true
-      version: every
+      version: latest
     - get: builds
   - do:
     - task: create-new-version-line-story-node
@@ -282,7 +282,7 @@ jobs:
     - get: source
       resource: #@ "source-{}-{}".format(dep_name.lower(), line.lower())
       trigger: true
-      version: every
+      version: latest
       passed: 
       - #@ "build-{}-{}".format(dep_name.lower(), line.lower())
     - get: builds
@@ -315,11 +315,11 @@ jobs:
     - get: source
       resource: #@ "source-{}-{}".format(dep_name.lower(), line.lower())
       trigger: true
-      version: every
+      version: latest
     #@ for monitored_dep_name in getattr(dep, "monitored_deps", []):
     - get: #@ "source-{}-latest".format(monitored_dep_name.lower())
       trigger: true
-      version: every
+      version: latest
     #@ end
     #@ images_to_get = []
     #@ for stack in build_stacks:
@@ -391,12 +391,12 @@ jobs:
       #@ else:
       - #@ "build-{}-{}".format(dep_name.lower(), line_hash["line"].lower())
       #@ end
-      version: every
+      version: latest
       trigger: true
     #@ for monitored_dep_name in getattr(dep, "monitored_deps", []):
     - get: #@ "source-{}-latest".format(monitored_dep_name.lower())
       trigger: true
-      version: every
+      version: latest
       passed: 
       - #@ "build-{}-{}".format(dep_name.lower(), line_hash["line"].lower())
     #@ end
