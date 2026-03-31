@@ -6,9 +6,9 @@
   path: /releases/-
   value:
     name: cflinuxfs5
-    url: https://github.com/cloudfoundry/cflinuxfs5-release/releases/download/v0.13.0-beta/cflinuxfs5-release-0.13.0-beta.tgz
+    url: https://github.com/cloudfoundry/cflinuxfs5-release/releases/download/v0.13.0-beta/cflinuxfs5-0.13.0-beta.tgz
     version: 0.13.0-beta
-    sha1: d205cbd6783332a212c5ae92d73c77178c2d2f28
+    sha1: 61634daf71c8d667b9f656dcec7343aa69d670fd
 
 - type: replace
   path: /instance_groups/name=diego-cell/jobs/-
