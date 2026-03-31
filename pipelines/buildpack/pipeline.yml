@@ -185,7 +185,7 @@ resources:
     type: git
     source:
       uri: https://github.com/cloudfoundry/buildpacks-ci
-      branch: add-cflinuxfs5-beta
+      branch: master
 
   - name: buildpack-pull-request
     type: create-pull-request-resource
