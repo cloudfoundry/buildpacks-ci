@@ -5,16 +5,16 @@
 - type: replace
   path: /releases/-
   value:
-    name: cflinuxfs5-release
-    url: https://github.com/cloudfoundry/cflinuxfs5-release/releases/download/0.7.0-beta/cflinuxfs5-release-0.7.0-beta.tgz
-    version: 0.7.0-beta
-    sha1: 5a7f6724344b9d657ac97941cbd7d3d27bbb2697
+    name: cflinuxfs5
+    url: https://github.com/cloudfoundry/cflinuxfs5-release/releases/download/v0.13.0-beta/cflinuxfs5-release-0.13.0-beta.tgz
+    version: 0.13.0-beta
+    sha1: d205cbd6783332a212c5ae92d73c77178c2d2f28
 
 - type: replace
   path: /instance_groups/name=diego-cell/jobs/-
   value:
     name: cflinuxfs5-rootfs-setup
-    release: cflinuxfs5-release
+    release: cflinuxfs5
     properties:
       cflinuxfs5-rootfs:
         trusted_certs:
