@@ -4,7 +4,8 @@
 # Responsibilities:
 #   0. Bootstrap Go toolchain (cflinuxfs* images are rootfs images — no Go or Python present).
 #   1. Compile binary-builder from source.
-#   2. Run: binary-builder build --stack $STACK --source-file source/data.json --stacks-dir binary-builder/stacks
+#   2. Run: binary-builder build --stack $BUILD_STACK --source-file source/data.json --stacks-dir binary-builder/stacks
+#      ($BUILD_STACK equals $STACK unless STACK=any-stack, in which case ANY_STACK_BUILD_STACK is used)
 #   3. Read the JSON summary from the output file.
 #   4. Move the artifact from CWD to artifacts/.
 #   5. Write builds-artifacts/binary-builds-new/<dep>/<dep>-<version>-<stack>.json
@@ -23,12 +24,15 @@ export NEEDRESTART_MODE=a
 # any-stack builds run on the stack named by ANY_STACK_BUILD_STACK (default:
 # cflinuxfs4). Use that stack's YAML for bootstrapping — any-stack.yaml does
 # not exist and should never be created; it is a build-label, not a stack.
+# BUILD_STACK is set here (outside the go-bootstrap block) so it is also
+# available when invoking binary-builder below.
+BUILD_STACK="${STACK}"
+if [[ "${STACK}" == "any-stack" ]]; then
+  BUILD_STACK="${ANY_STACK_BUILD_STACK}"
+  echo "[task] STACK=any-stack — using ${BUILD_STACK} as real build stack"
+fi
+
 if ! command -v go &>/dev/null; then
-  BUILD_STACK="${STACK}"
-  if [[ "${STACK}" == "any-stack" ]]; then
-    BUILD_STACK="${ANY_STACK_BUILD_STACK}"
-    echo "[task] STACK=any-stack — using ${BUILD_STACK} for Go bootstrap"
-  fi
   STACK_YAML="binary-builder/stacks/${BUILD_STACK}.yaml"
 
   # Parse the bootstrap.go block: match the 'go:' key under 'bootstrap:',
@@ -66,7 +70,7 @@ echo "[task] Building ${DEP_NAME} for stack ${STACK}..."
 # visible in the build log without corrupting the structured JSON output file.
 SUMMARY_FILE="/tmp/binary-builder-summary.json"
 binary-builder build \
-  --stack "${STACK}" \
+  --stack "${BUILD_STACK}" \
   --source-file source/data.json \
   --stacks-dir binary-builder/stacks \
   --output-file "${SUMMARY_FILE}"
