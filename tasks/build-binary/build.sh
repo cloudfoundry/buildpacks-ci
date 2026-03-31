@@ -19,8 +19,17 @@ export NEEDRESTART_MODE=a
 # cflinuxfs4/cflinuxfs5 are minimal rootfs images: no Go, no Python.
 # Extract the pinned Go URL and SHA256 from the stack YAML using awk,
 # then download, verify, and install into /usr/local/go.
+#
+# any-stack builds run on the stack named by ANY_STACK_BUILD_STACK (default:
+# cflinuxfs4). Use that stack's YAML for bootstrapping — any-stack.yaml does
+# not exist and should never be created; it is a build-label, not a stack.
 if ! command -v go &>/dev/null; then
-  STACK_YAML="binary-builder/stacks/${STACK}.yaml"
+  BUILD_STACK="${STACK}"
+  if [[ "${STACK}" == "any-stack" ]]; then
+    BUILD_STACK="${ANY_STACK_BUILD_STACK}"
+    echo "[task] STACK=any-stack — using ${BUILD_STACK} for Go bootstrap"
+  fi
+  STACK_YAML="binary-builder/stacks/${BUILD_STACK}.yaml"
 
   # Parse the bootstrap.go block: match the 'go:' key under 'bootstrap:',
   # then grab the next 'url:' and 'sha256:' values.

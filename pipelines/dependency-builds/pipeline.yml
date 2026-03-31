@@ -323,7 +323,7 @@ jobs:
     #@ end
     #@ images_to_get = []
     #@ for stack in build_stacks:
-    #@   img = "cflinuxfs4" if stack == "any-stack" else stack
+    #@   img = data.values.any_stack_build_stack if stack == "any-stack" else stack
     #@   if img not in images_to_get:
     #@     images_to_get.append(img)
     #@   end
@@ -337,7 +337,7 @@ jobs:
     #@ for stack in build_stacks:
     - do:
       - task: #@ "build-binary-{}".format(stack)
-        image: #@ "{}-image".format("cflinuxfs4" if stack == "any-stack" else stack)
+        image: #@ "{}-image".format(data.values.any_stack_build_stack if stack == "any-stack" else stack)
         file: buildpacks-ci/tasks/build-binary/build.yml
         timeout: 3h
         attempts: 2
@@ -346,6 +346,7 @@ jobs:
           builds-artifacts: #@ "{}-builds-metadata".format(stack)
         params:
           STACK: #@ stack
+          ANY_STACK_BUILD_STACK: #@ data.values.any_stack_build_stack
       #@ if getattr(dep, "third_party_hosted", False):
       - put: #@ "builds-metadata-{}".format(stack)
         resource: builds
