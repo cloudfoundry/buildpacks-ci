@@ -78,6 +78,7 @@ config:
 #@   return {
 #@     "task": "remove-from-gcp-dns",
 #@     "file": "runtime-ci/tasks/manage-gcp-dns/task.yml",
+#@     "image": "bbl-deployment-image",
 #@     "params": {
 #@       "BBL_STATE_DIR": data.values.language + "-buildpack-state",
 #@       "GCP_DNS_SERVICE_ACCOUNT_KEY": "((gcp-service-account-key))",
@@ -175,6 +176,11 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/runtime-ci
 
+  - name: bbl-deployment-image
+    type: registry-image
+    source:
+      repository: cloudfoundry/bbl-deployment
+
   - name: buildpacks-ci
     type: git
     source:
@@ -217,6 +223,14 @@ resources:
     source:
       bucket: cflinuxfs4-release
       key: versions/stack-cflinuxfs4
+      access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
+      secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+
+  - name: version-stack-cflinuxfs5
+    type: semver
+    source:
+      bucket: cflinuxfs5-release
+      key: versions/stack-cflinuxfs5
       access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
       secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
@@ -499,6 +513,7 @@ jobs:
       #! Infrastructure resources
       - get: bbl-state
       - get: buildpacks-ci
+      - get: bbl-deployment-image
       - get: bosh-deployment
       - get: cf-deployment
       - get: cf-deployment-concourse-tasks
@@ -547,6 +562,7 @@ jobs:
           rebase: true
     - task: add-to-gcp-dns
       file: runtime-ci/tasks/manage-gcp-dns/task.yml
+      image: bbl-deployment-image
       params:
         BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
         GCP_DNS_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
@@ -562,17 +578,37 @@ jobs:
         params:
           repository: updated-bbl-state
           rebase: true
+    #! Copy cflinuxfs5 ops file to cf-deployment operations directory
+    - task: add-cflinuxfs5-ops-file
+      config:
+        platform: linux
+        image_resource:
+          type: registry-image
+          source:
+            repository: cfbuildpacks/ci
+        inputs:
+        - name: cf-deployment
+        - name: buildpacks-ci
+        outputs:
+        - name: cf-deployment-with-cflinuxfs5
+        run:
+          path: bash
+          args:
+          - -c
+          - |
+            cp -r cf-deployment/* cf-deployment-with-cflinuxfs5/
+            cp buildpacks-ci/deployments/operations/add-cflinuxfs5-beta.yml cf-deployment-with-cflinuxfs5/operations/
     - task: deploy-cf
       file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
       input_mapping:
         bbl-state: updated-bbl-state
-        ops-files: cf-deployment
+        ops-files: cf-deployment-with-cflinuxfs5
       params:
         BBL_STATE_DIR: #@ data.values.language + "-buildpack-state"
         BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
         SYSTEM_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
         VARS_STORE_FILE: bump-deployments/bbl-gcp-cf/deployment-vars.yml
-        OPS_FILES: operations/use-compiled-releases.yml operations/experimental/fast-deploy-with-downtime-and-danger.yml operations/scale-to-one-az.yml
+        OPS_FILES: operations/use-compiled-releases.yml operations/experimental/fast-deploy-with-downtime-and-danger.yml operations/scale-to-one-az.yml operations/add-cflinuxfs5-beta.yml
       on_failure:
         do:
         - #@ remove_gcp_dns()
