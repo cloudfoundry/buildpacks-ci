@@ -6,7 +6,7 @@ organization: cloudfoundry
 buildpack:
   stacks:
   - cflinuxfs4
-  #! - cflinuxfs5  #! TODO: re-enable when cf-runtime cflinuxfs5 support is ready
+  - cflinuxfs5
   product_slug: ""
   skip_docker_start: true
   skip_brats: true
