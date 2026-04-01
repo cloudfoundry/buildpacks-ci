@@ -226,6 +226,7 @@ resources:
       access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
       secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
 
+  #@ if "cflinuxfs5" in data.values.buildpack.stacks:
   - name: version-stack-cflinuxfs5
     type: semver
     source:
@@ -233,6 +234,7 @@ resources:
       key: versions/stack-cflinuxfs5
       access_key_id: ((buildpacks-cloudfoundry-org-aws-access-key-id))
       secret_access_key: ((buildpacks-cloudfoundry-org-aws-secret-access-key))
+  #@ end
 
   #! GitHub Releases
   - name: buildpack-github-release
