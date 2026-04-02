@@ -216,6 +216,38 @@ if !rebuilt && manifest_name == 'nginx' && buildpack_name == 'nginx'
     puts "Warning: nginx test file not found at #{full_test_file_path}"
   end
 
+  # Update nginx override buildpack fixture
+  # The override buildpack test uses a fake nginx version to test error handling
+  # The version needs to match the current mainline version line
+  override_file_path = 'fixtures/util/override_buildpack/override.yml'
+  full_override_file_path = File.join('buildpack', override_file_path)
+  if File.exist?(full_override_file_path)
+    override_content = File.read(full_override_file_path)
+    
+    mainline_version = manifest['version_lines']['mainline']
+    
+    # Extract the major.minor from mainline (e.g., "1.28.x" -> "1.28")
+    if mainline_version && mainline_version.match(/^(\d+\.\d+)/)
+      mainline_major_minor = $1
+      fake_version = "#{mainline_major_minor}.999"  # e.g., "1.28.999"
+      
+      # Update version_lines.mainline
+      override_content.gsub!(/^(\s*mainline:\s+)\d+\.\d+\.\d+/, "\\1#{fake_version}")
+      
+      # Update nginx dependency version
+      override_content.gsub!(/^(\s*version:\s+)\d+\.\d+\.\d+/, "\\1#{fake_version}")
+      
+      # Update URI
+      override_content.gsub!(/nginx-\d+\.\d+\.\d+/, "nginx-#{fake_version}")
+      
+      nginx_files_to_edit[override_file_path] = override_content
+      puts "Prepared override buildpack fixture update for #{override_file_path}"
+      puts "  Fake version: #{fake_version}"
+    end
+  else
+    puts "Warning: override buildpack fixture not found at #{full_override_file_path}"
+  end
+
 end
 
 #
