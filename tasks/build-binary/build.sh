@@ -102,6 +102,7 @@ mkdir -p "${BUILDS_DIR}"
 BUILDS_FILE="${BUILDS_DIR}/${VERSION}-${STACK}.json"
 
 jq '{
+  version:          .version,
   url:              (.url // ""),
   sha256:           (.sha256 // ""),
   source:           (.source // {}),
