@@ -8,9 +8,10 @@
 #      ($BUILD_STACK equals $STACK unless STACK=any-stack, in which case ANY_STACK_BUILD_STACK is used)
 #   3. Read the JSON summary from the output file.
 #   4. Move the artifact from CWD to artifacts/.
-#   5. Write builds-artifacts/binary-builds-new/<dep>/<dep>-<version>-<stack>.json
-#   6. Write dep-metadata/<artifact>_metadata.json
-#   7. Optionally commit the builds-artifacts changes to git (when SKIP_COMMIT != true).
+#   5. Seed builds-artifacts from builds git repo (so it is a valid git clone).
+#   6. Write builds-artifacts/binary-builds-new/<dep>/<version>-<stack>.json
+#   7. Write dep-metadata/<artifact>_metadata.json
+#   8. Optionally commit the builds-artifacts changes to git (when SKIP_COMMIT != true).
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
@@ -96,7 +97,17 @@ else
   echo "[task] No artifact file (URL-passthrough dep), skipping move"
 fi
 
-# ── 5. Write builds-artifacts JSON ───────────────────────────────────────────
+# ── 5. Seed builds-artifacts from builds git repo ────────────────────────────
+# builds-artifacts is a plain task output dir; it must be seeded from the
+# builds git resource so that it is a valid git clone before we can run
+# git config / git add / git commit inside it.
+# IMPORTANT: this MUST happen BEFORE writing the artifact JSON (step 6),
+# otherwise rsync overwrites the newly-written file with the stale copy
+# from the builds resource.
+echo "[task] Seeding builds-artifacts from builds git repo..."
+rsync -a builds/ builds-artifacts/
+
+# ── 6. Write builds-artifacts JSON ───────────────────────────────────────────
 BUILDS_DIR="builds-artifacts/binary-builds-new/${DEP_NAME}"
 mkdir -p "${BUILDS_DIR}"
 BUILDS_FILE="${BUILDS_DIR}/${VERSION}-${STACK}.json"
@@ -113,7 +124,7 @@ jq '{
 
 echo "[task] Wrote builds-artifacts to ${BUILDS_FILE}"
 
-# ── 6. Write dep-metadata JSON ───────────────────────────────────────────────
+# ── 7. Write dep-metadata JSON ───────────────────────────────────────────────
 # Format mirrors the Ruby builder's out_data.to_json output:
 #   version, source, url, sha256 (+ git_commit_sha and sub_dependencies when present).
 # Do NOT add extra fields (name, uri, source_sha256) that Ruby doesn't write.
@@ -131,18 +142,11 @@ jq '{
 
 echo "[task] Wrote dep-metadata to ${DEP_META_FILE}"
 
-# ── 7. Git commit builds-artifacts (unless SKIP_COMMIT=true) ─────────────────
+# ── 8. Git commit builds-artifacts (unless SKIP_COMMIT=true) ─────────────────
 if [[ "${SKIP_COMMIT:-}" == "true" ]]; then
   echo "[task] SKIP_COMMIT=true — skipping git commit"
   exit 0
 fi
-
-# Seed builds-artifacts with the builds git repo so that git commands work.
-# The Ruby builder did: rsync -a builds/ builds-artifacts/ (build_input.rb:16).
-# builds-artifacts is a plain task output dir; it must be a git clone before
-# we can run git config / git add / git commit inside it.
-echo "[task] Seeding builds-artifacts from builds git repo..."
-rsync -a builds/ builds-artifacts/
 
 echo "[task] Committing builds-artifacts..."
 pushd builds-artifacts >/dev/null
