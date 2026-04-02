@@ -99,7 +99,7 @@ fi
 # ── 5. Write builds-artifacts JSON ───────────────────────────────────────────
 BUILDS_DIR="builds-artifacts/binary-builds-new/${DEP_NAME}"
 mkdir -p "${BUILDS_DIR}"
-BUILDS_FILE="${BUILDS_DIR}/${DEP_NAME}-${VERSION}-${STACK}.json"
+BUILDS_FILE="${BUILDS_DIR}/${VERSION}-${STACK}.json"
 
 jq '{
   url:              (.url // ""),
