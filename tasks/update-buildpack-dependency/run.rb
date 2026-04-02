@@ -157,6 +157,7 @@ commit_message += "\n\nfor stack(s) #{total_stacks.join(', ')}"
 # Special Nginx stuff (for Nginx buildpack)
 # * There are two version lines, stable & mainline
 #   when we add a new minor line, we should update the version line regex
+nginx_files_to_edit = {}
 if !rebuilt && manifest_name == 'nginx' && buildpack_name == 'nginx'
   v = SemVer.parse(resource_version)
   raise "Invalid version format: #{resource_version}" if v.nil?
@@ -167,6 +168,52 @@ if !rebuilt && manifest_name == 'nginx' && buildpack_name == 'nginx'
   else
     # 1.13.X is mainline
     manifest['version_lines']['mainline'] = data['source']['version_filter'].downcase
+  end
+
+  # Update nginx integration test expectations
+  # The test file contains hardcoded version strings that need to match the manifest
+  test_file_path = 'src/nginx/integration/default_test.go'
+  full_test_file_path = File.join('buildpack', test_file_path)
+  if File.exist?(full_test_file_path)
+    test_content = File.read(full_test_file_path)
+    
+    # Get mainline and stable major.minor versions from version_lines
+    mainline_version = manifest['version_lines']['mainline']
+    stable_version = manifest['version_lines']['stable']
+    
+    # Extract unique version lines (X.Y.x format) from dependencies
+    version_lines = manifest['dependencies']
+      .select { |dep| dep['name'] == 'nginx' }
+      .map { |dep| dep['version'] }
+      .map { |ver| ver.match(/^(\d+\.\d+)\./) }
+      .compact
+      .map { |m| "#{m[1]}.x" }
+      .uniq
+      .sort_by { |v| Gem::Version.new(v.sub(/\.x$/, '.0')) }
+    
+    # Create the available versions string: "mainline, stable, 1.26.x, 1.28.x, 1.29.x"
+    available_versions = (['mainline', 'stable'] + version_lines).join(', ')
+    
+    # Update test expectations
+    # 1. Update "using mainline => X.Y." pattern
+    test_content.gsub!(/using mainline => \d+\.\d+\./, "using mainline => #{mainline_version.sub(/\.x$/, '.')}") if mainline_version
+    
+    # 2. Update "mainline => X.Y." pattern (for explicit mainline request)
+    test_content.gsub!(/Requested nginx version: mainline => \d+\.\d+\./, "Requested nginx version: mainline => #{mainline_version.sub(/\.x$/, '.')}") if mainline_version
+    
+    # 3. Update "stable => X.Y." pattern
+    test_content.gsub!(/stable => \d+\.\d+\./, "stable => #{stable_version.sub(/\.x$/, '.')}") if stable_version
+    
+    # 4. Update "Available versions: ..." line
+    test_content.gsub!(/Available versions: [^\`]+/, "Available versions: #{available_versions}")
+    
+    nginx_files_to_edit[test_file_path] = test_content
+    puts "Prepared nginx test expectations update for #{test_file_path}"
+    puts "  Mainline: #{mainline_version}"
+    puts "  Stable: #{stable_version}"
+    puts "  Available versions: #{available_versions}"
+  else
+    puts "Warning: nginx test file not found at #{full_test_file_path}"
   end
 
 end
@@ -278,6 +325,13 @@ Dir.chdir('artifacts') do
   GitClient.add_file('manifest.yml')
 
   ruby_files_to_edit.each do |path, content|
+    if content
+      File.write(path, content)
+      GitClient.add_file(path)
+    end
+  end
+
+  nginx_files_to_edit.each do |path, content|
     if content
       File.write(path, content)
       GitClient.add_file(path)
