@@ -402,6 +402,14 @@ jobs:
       - #@ "build-{}-{}".format(dep_name.lower(), line_hash["line"].lower())
     #@ end
     - get: builds
+      passed:
+      #@ if getattr(dep, "copy-stacks", None):
+      #@   for copy_stack in dep["copy-stacks"]:
+      - #@ "copy-{}-{}-{}".format(dep_name.lower(), line_hash["line"].lower(), copy_stack.lower())
+      #@   end
+      #@ else:
+      - #@ "build-{}-{}".format(dep_name.lower(), line_hash["line"].lower())
+      #@ end
   - task: update-buildpack-dependency
     file: buildpacks-ci/tasks/update-buildpack-dependency/task.yml
     params:
