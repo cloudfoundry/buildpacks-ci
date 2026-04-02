@@ -136,6 +136,10 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   rebuilt += [old_versions.include?(resource_version)]
 end
 
+if rebuilt.empty?
+  puts 'SKIP: No build artifacts found for this version.'
+  exit 0
+end
 rebuilt = rebuilt.all?
 puts 'REBUILD: skipping most version updating logic' if rebuilt
 
