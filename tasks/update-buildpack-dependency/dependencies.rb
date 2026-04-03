@@ -53,7 +53,18 @@ class Dependencies
       new_ver = SemVer.parse(@dep['version'])
       old_ver = SemVer.parse(d['version'])
       puts "DEBUG latest?: Comparing #{@dep['version']} (#{new_ver.inspect}) vs #{d['version']} (#{old_ver.inspect}) for stacks #{d['cf_stacks'].inspect}"
-      next false if new_ver.nil? || old_ver.nil?
+      
+      # If SemVer parsing fails or produces equal results for what should be different versions
+      # (e.g., 4-part versions like 1.29.2.3 vs 1.29.2.1 both parse as 1.29.2),
+      # fall back to Gem::Version which handles arbitrary version part counts
+      if new_ver.nil? || old_ver.nil? || (new_ver == old_ver && @dep['version'] != d['version'])
+        puts "DEBUG latest?: SemVer failed or equal, using Gem::Version fallback"
+        new_ver_gem = Gem::Version.new(@dep['version'])
+        old_ver_gem = Gem::Version.new(d['version'])
+        is_greater = new_ver_gem > old_ver_gem
+        puts "DEBUG latest?: Gem::Version: #{new_ver_gem} > #{old_ver_gem} = #{is_greater}"
+        next is_greater
+      end
 
       is_greater = new_ver > old_ver
       puts "DEBUG latest?: #{new_ver} > #{old_ver} = #{is_greater}"
