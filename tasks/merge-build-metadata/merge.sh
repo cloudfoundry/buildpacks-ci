@@ -41,14 +41,11 @@ done
 echo "[merge-task] Verifying merged metadata files..."
 cd builds-merged
 
-# Check if there are any changes to commit
-if ! git diff --cached --quiet 2>/dev/null && git diff --quiet 2>/dev/null; then
-  echo "[merge-task] No changes detected in working tree"
-  # Still need to stage changes from rsync
-  git add binary-builds-new/
-fi
+# Stage all changes from rsync
+echo "[merge-task] Staging changes..."
+git add binary-builds-new/
 
-# Count JSON files added/modified
+# Check if there are any changes to commit
 if git diff --cached --quiet; then
   echo "[merge-task] No changes to commit (builds already up-to-date)"
   exit 0
