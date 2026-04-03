@@ -13,15 +13,22 @@ class Dependencies
   def switch
     # if we're rebuilding, replace matching version
     if @matching_deps.map { |d| d['version'] }.include?(@dep['version'])
+      puts "DEBUG Dependencies.switch: Rebuilding existing version #{@dep['version']}"
       out = (@dependencies.reject { |d| same_dependency_line?(d['cf_stacks'], d['version'], d['name']) && d['version'] == @dep['version'] } + [@dep])
     # adding a new one, but keep everything
     elsif @removal_strategy == 'keep_all'
+      puts "DEBUG Dependencies.switch: Keep all strategy"
       out = @dependencies + [@dep]
     # adding one newer than all existing versions
     elsif latest?
+      puts "DEBUG Dependencies.switch: Latest version, removal_strategy=#{@removal_strategy}"
+      puts "DEBUG Dependencies.switch: @matching_deps count=#{@matching_deps.length}, versions=#{@matching_deps.map { |d| [d['version'], d['cf_stacks']] }.inspect}"
+      puts "DEBUG Dependencies.switch: Adding dep version=#{@dep['version']}, stacks=#{@dep['cf_stacks'].inspect}"
       # keep deps (from latest released buildpack) and add this new one. If removal_strategy is NOT keep_latest_released do not keep any deps from latest released buidpack.
       out = ((@dependencies - @matching_deps) + [@dep] + dependencies_latest_released)
+      puts "DEBUG Dependencies.switch: Result has #{out.select { |d| d['name'] == @dep['name'] && d['version'] == @dep['version'] }.length} entries for #{@dep['name']} #{@dep['version']}"
     else
+      puts "DEBUG Dependencies.switch: Not adding (not latest)"
       # if not newer, don't do anything
       return @dependencies
     end
