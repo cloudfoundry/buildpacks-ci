@@ -52,6 +52,10 @@ version = ''
 
 any_stack_build_exists = Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-any-stack.json"].any?
 
+puts "DEBUG: Looking for JSON files matching pattern: builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"
+matching_files = Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"]
+puts "DEBUG: Found #{matching_files.length} files: #{matching_files.inspect}"
+
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
   # Skip stack-specific builds when an any-stack build exists - the any-stack build covers all stacks
   # and will replace all existing stack-specific entries in one pass
