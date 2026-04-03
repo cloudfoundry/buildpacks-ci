@@ -148,6 +148,14 @@ if [[ "${SKIP_COMMIT:-}" == "true" ]]; then
   exit 0
 fi
 
+# SKIP_INDIVIDUAL_COMMIT is used when building multiple stacks in parallel.
+# Each task writes its JSON file to builds-artifacts but defers the git commit
+# to a subsequent merge-and-commit task that atomically commits all stacks together.
+if [[ "${SKIP_INDIVIDUAL_COMMIT:-}" == "true" ]]; then
+  echo "[task] SKIP_INDIVIDUAL_COMMIT=true — deferring commit to merge task"
+  exit 0
+fi
+
 echo "[task] Committing builds-artifacts..."
 pushd builds-artifacts >/dev/null
 git config user.email "cf-buildpacks-eng@pivotal.io"

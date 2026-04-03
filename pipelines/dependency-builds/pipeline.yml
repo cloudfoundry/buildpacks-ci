@@ -333,39 +333,53 @@ jobs:
     #@ end
     - get: builds
   #@ if len(build_stacks) > 0:
+  #@ # Step 1: Build all stacks in parallel (with SKIP_INDIVIDUAL_COMMIT to defer git commit)
   - in_parallel:
     #@ for stack in build_stacks:
-    - do:
-      - task: #@ "build-binary-{}".format(stack)
-        image: #@ "{}-image".format(data.values.any_stack_build_stack if stack == "any-stack" else stack)
-        file: buildpacks-ci/tasks/build-binary/build.yml
-        timeout: 3h
-        attempts: 2
-        output_mapping:
-          artifacts: #@ "{}-artifacts".format(stack)
-          builds-artifacts: #@ "{}-builds-metadata".format(stack)
-        params:
-          STACK: #@ stack
-          ANY_STACK_BUILD_STACK: #@ data.values.any_stack_build_stack
-      #@ if getattr(dep, "third_party_hosted", False):
-      - put: #@ "builds-metadata-{}".format(stack)
-        resource: builds
-        params:
-          repository: #@ "{}-builds-metadata".format(stack)
-          rebase: true
-      #@ else:
-      - in_parallel:
-        - put: #@ "buildpacks-bucket-{}-{}".format(dep_name, stack)
-          resource: #@ "buildpacks-bucket-{}".format(dep_name)
-          params:
-            file: #@ "{}-artifacts/{}*".format(stack, "nginx" if dep_name == "nginx-static" else dep_name)
-        - put: #@ "builds-metadata-{}".format(stack)
-          resource: builds
-          params:
-            repository: #@ "{}-builds-metadata".format(stack)
-            rebase: true
-      #@ end
+    - task: #@ "build-binary-{}".format(stack)
+      image: #@ "{}-image".format(data.values.any_stack_build_stack if stack == "any-stack" else stack)
+      file: buildpacks-ci/tasks/build-binary/build.yml
+      timeout: 3h
+      attempts: 2
+      output_mapping:
+        artifacts: #@ "{}-artifacts".format(stack)
+        builds-artifacts: #@ "{}-builds-metadata".format(stack)
+      params:
+        STACK: #@ stack
+        ANY_STACK_BUILD_STACK: #@ data.values.any_stack_build_stack
+        #@ if len(build_stacks) > 1 and "any-stack" not in build_stacks:
+        SKIP_INDIVIDUAL_COMMIT: "true"
+        #@ end
     #@ end
+  #@ # Step 2: Upload artifacts to S3 (in parallel, unless third-party hosted)
+  #@ if not getattr(dep, "third_party_hosted", False):
+  - in_parallel:
+    #@ for stack in build_stacks:
+    - put: #@ "buildpacks-bucket-{}-{}".format(dep_name, stack)
+      resource: #@ "buildpacks-bucket-{}".format(dep_name)
+      params:
+        file: #@ "{}-artifacts/{}*".format(stack, "nginx" if dep_name == "nginx-static" else dep_name)
+    #@ end
+  #@ end
+  #@ # Step 3: Merge build metadata and create atomic commit (multi-stack only)
+  #@ if len(build_stacks) > 1 and "any-stack" not in build_stacks:
+  - task: merge-build-metadata
+    image: #@ "{}-image".format(build_stacks[0])
+    file: buildpacks-ci/tasks/merge-build-metadata/task.yml
+    input_mapping:
+      stack1-builds-metadata: #@ "{}-builds-metadata".format(build_stacks[0])
+      stack2-builds-metadata: #@ "{}-builds-metadata".format(build_stacks[1])
+  - put: builds
+    params:
+      repository: builds-merged
+      rebase: true
+  #@ else:
+  #@ # For single-stack or any-stack builds, use the original direct commit
+  - put: builds
+    params:
+      repository: #@ "{}-builds-metadata".format(build_stacks[0])
+      rebase: true
+  #@ end
   #@ end
 #@   end
 
