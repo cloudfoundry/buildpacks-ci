@@ -47,13 +47,20 @@ class Dependencies
   private
 
   def latest?
-    @matching_deps.all? do |d|
+    puts "DEBUG latest?: Checking if #{@dep['version']} (#{@dep['cf_stacks'].inspect}) is latest"
+    puts "DEBUG latest?: @matching_deps: #{@matching_deps.map { |d| [d['version'], d['cf_stacks']] }.inspect}"
+    result = @matching_deps.all? do |d|
       new_ver = SemVer.parse(@dep['version'])
       old_ver = SemVer.parse(d['version'])
+      puts "DEBUG latest?: Comparing #{@dep['version']} (#{new_ver.inspect}) vs #{d['version']} (#{old_ver.inspect}) for stacks #{d['cf_stacks'].inspect}"
       next false if new_ver.nil? || old_ver.nil?
 
-      new_ver > old_ver
+      is_greater = new_ver > old_ver
+      puts "DEBUG latest?: #{new_ver} > #{old_ver} = #{is_greater}"
+      is_greater
     end
+    puts "DEBUG latest?: Result = #{result}"
+    result
   end
 
   # When rebuilding, we don't want to lose supported stacks
