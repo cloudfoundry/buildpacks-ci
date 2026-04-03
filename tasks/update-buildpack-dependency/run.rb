@@ -167,6 +167,7 @@ if !builds.empty? && version
       }
 
       puts "DEBUG: Creating stack-specific dependency for #{stack}: #{dep['uri']}"
+      puts "DEBUG: Before switch, manifest has #{manifest['dependencies'].select { |d| d['name'] == manifest_name && d['version'] == resource_version }.length} entries for #{manifest_name} #{resource_version}"
       
       manifest['dependencies'] = Dependencies.new(
         dep,
@@ -175,6 +176,9 @@ if !builds.empty? && version
         manifest['dependencies'],
         manifest_latest_released['dependencies']
       ).switch
+      
+      puts "DEBUG: After switch, manifest has #{manifest['dependencies'].select { |d| d['name'] == manifest_name && d['version'] == resource_version }.length} entries for #{manifest_name} #{resource_version}"
+      puts "DEBUG: Stacks: #{manifest['dependencies'].select { |d| d['name'] == manifest_name && d['version'] == resource_version }.map { |d| d['cf_stacks'] }.inspect}"
     end
     
     rebuilt += [old_versions.include?(resource_version)]
