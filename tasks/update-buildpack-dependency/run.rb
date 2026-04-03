@@ -56,6 +56,7 @@ puts "DEBUG: Looking for JSON files matching pattern: builds/binary-builds-new/#
 matching_files = Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"]
 puts "DEBUG: Found #{matching_files.length} files: #{matching_files.inspect}"
 
+# First pass: collect all stack builds
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
   # Skip stack-specific builds when an any-stack build exists - the any-stack build covers all stacks
   # and will replace all existing stack-specific entries in one pass
@@ -96,11 +97,27 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   builds[stack] = build
 
   version = builds[stack]['version'] # We assume that the version is the same for all stacks
-  next unless version
+end
 
+# Now process collected builds and create manifest entries
+# For multi-stack builds, we need to create ONE entry with all stacks, not multiple entries
+if !builds.empty? && version
+  # For any-stack builds or when we have multiple stack-specific builds, 
+  # we need to create a single dependency entry with all stacks combined
+  
+  old_versions = manifest['dependencies']
+                 .select { |d| d['name'] == manifest_name }
+                 .map { |d| d['version'] }
+
+  # Determine which stack's build to use for metadata
+  # For any-stack builds, use the any-stack build
+  # For multi-stack builds, use the first stack's build (they should have same source)
+  representative_stack = builds.keys.include?('any-stack') ? 'any-stack' : builds.keys.first
+  representative_build = builds[representative_stack]
+  
   source_type = 'source'
-  source_url = builds[stack]['source']['url']
-  source_sha256 = builds[stack]['source'].fetch('sha256', nil).to_s
+  source_url = representative_build['source']['url']
+  source_sha256 = representative_build['source'].fetch('sha256', nil).to_s
 
   if source_name == 'appdynamics'
     source_type = 'osl'
@@ -109,27 +126,59 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
     source_url = "https://github.com/conda/conda/archive/#{version}.tar.gz"
   end
 
-  dep = {
-    'name' => manifest_name,
-    'version' => resource_version,
-    'uri' => build['url'],
-    'sha256' => build['sha256'],
-    'cf_stacks' => stacks,
-    source_type => source_url,
-    'source_sha256' => source_sha256
-  }
+  # For any-stack builds, create one entry with the any-stack URL
+  # For multi-stack builds, we need to create separate entries per stack (each with its own URL)
+  if any_stack_build_exists
+    # Single entry with any-stack URL covering all stacks
+    dep = {
+      'name' => manifest_name,
+      'version' => resource_version,
+      'uri' => representative_build['url'],
+      'sha256' => representative_build['sha256'],
+      'cf_stacks' => total_stacks.sort,
+      source_type => source_url,
+      'source_sha256' => source_sha256
+    }
 
-  old_versions = manifest['dependencies']
-                 .select { |d| d['name'] == manifest_name }
-                 .map { |d| d['version'] }
+    puts "DEBUG: Creating single any-stack dependency with stacks: #{total_stacks.inspect}"
+    
+    manifest['dependencies'] = Dependencies.new(
+      dep,
+      version_line_type,
+      removal_strategy,
+      manifest['dependencies'],
+      manifest_latest_released['dependencies']
+    ).switch
 
-  manifest['dependencies'] = Dependencies.new(
-    dep,
-    version_line_type,
-    removal_strategy,
-    manifest['dependencies'],
-    manifest_latest_released['dependencies']
-  ).switch
+    rebuilt += [old_versions.include?(resource_version)]
+  else
+    # Multi-stack build: create separate entries for each stack (each with stack-specific URL)
+    builds.each do |stack, build|
+      stacks = [stack]
+      
+      dep = {
+        'name' => manifest_name,
+        'version' => resource_version,
+        'uri' => build['url'],
+        'sha256' => build['sha256'],
+        'cf_stacks' => stacks,
+        source_type => source_url,
+        'source_sha256' => source_sha256
+      }
+
+      puts "DEBUG: Creating stack-specific dependency for #{stack}: #{dep['uri']}"
+      
+      manifest['dependencies'] = Dependencies.new(
+        dep,
+        version_line_type,
+        removal_strategy,
+        manifest['dependencies'],
+        manifest_latest_released['dependencies']
+      ).switch
+    end
+    
+    rebuilt += [old_versions.include?(resource_version)]
+  end
 
   new_versions = manifest['dependencies']
                  .select { |d| d['name'] == manifest_name }
@@ -137,7 +186,6 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   added += (new_versions - old_versions).uniq.sort
   removed += (old_versions - new_versions).uniq.sort
-  rebuilt += [old_versions.include?(resource_version)]
 end
 
 if rebuilt.empty?
