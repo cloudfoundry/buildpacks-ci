@@ -13,22 +13,15 @@ class Dependencies
   def switch
     # if we're rebuilding, replace matching version
     if @matching_deps.map { |d| d['version'] }.include?(@dep['version'])
-      puts "DEBUG Dependencies.switch: Rebuilding existing version #{@dep['version']}"
       out = (@dependencies.reject { |d| same_dependency_line?(d['cf_stacks'], d['version'], d['name']) && d['version'] == @dep['version'] } + [@dep])
     # adding a new one, but keep everything
     elsif @removal_strategy == 'keep_all'
-      puts "DEBUG Dependencies.switch: Keep all strategy"
       out = @dependencies + [@dep]
     # adding one newer than all existing versions
     elsif latest?
-      puts "DEBUG Dependencies.switch: Latest version, removal_strategy=#{@removal_strategy}"
-      puts "DEBUG Dependencies.switch: @matching_deps count=#{@matching_deps.length}, versions=#{@matching_deps.map { |d| [d['version'], d['cf_stacks']] }.inspect}"
-      puts "DEBUG Dependencies.switch: Adding dep version=#{@dep['version']}, stacks=#{@dep['cf_stacks'].inspect}"
       # keep deps (from latest released buildpack) and add this new one. If removal_strategy is NOT keep_latest_released do not keep any deps from latest released buidpack.
       out = ((@dependencies - @matching_deps) + [@dep] + dependencies_latest_released)
-      puts "DEBUG Dependencies.switch: Result has #{out.select { |d| d['name'] == @dep['name'] && d['version'] == @dep['version'] }.length} entries for #{@dep['name']} #{@dep['version']}"
     else
-      puts "DEBUG Dependencies.switch: Not adding (not latest)"
       # if not newer, don't do anything
       return @dependencies
     end
@@ -47,31 +40,21 @@ class Dependencies
   private
 
   def latest?
-    puts "DEBUG latest?: Checking if #{@dep['version']} (#{@dep['cf_stacks'].inspect}) is latest"
-    puts "DEBUG latest?: @matching_deps: #{@matching_deps.map { |d| [d['version'], d['cf_stacks']] }.inspect}"
-    result = @matching_deps.all? do |d|
+    @matching_deps.all? do |d|
       new_ver = SemVer.parse(@dep['version'])
       old_ver = SemVer.parse(d['version'])
-      puts "DEBUG latest?: Comparing #{@dep['version']} (#{new_ver.inspect}) vs #{d['version']} (#{old_ver.inspect}) for stacks #{d['cf_stacks'].inspect}"
       
       # If SemVer parsing fails or produces equal results for what should be different versions
       # (e.g., 4-part versions like 1.29.2.3 vs 1.29.2.1 both parse as 1.29.2),
       # fall back to Gem::Version which handles arbitrary version part counts
       if new_ver.nil? || old_ver.nil? || (new_ver == old_ver && @dep['version'] != d['version'])
-        puts "DEBUG latest?: SemVer failed or equal, using Gem::Version fallback"
         new_ver_gem = Gem::Version.new(@dep['version'])
         old_ver_gem = Gem::Version.new(d['version'])
-        is_greater = new_ver_gem > old_ver_gem
-        puts "DEBUG latest?: Gem::Version: #{new_ver_gem} > #{old_ver_gem} = #{is_greater}"
-        next is_greater
+        next new_ver_gem > old_ver_gem
       end
 
-      is_greater = new_ver > old_ver
-      puts "DEBUG latest?: #{new_ver} > #{old_ver} = #{is_greater}"
-      is_greater
+      new_ver > old_ver
     end
-    puts "DEBUG latest?: Result = #{result}"
-    result
   end
 
   # When rebuilding, we don't want to lose supported stacks

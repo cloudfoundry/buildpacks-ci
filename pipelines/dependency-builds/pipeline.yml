@@ -144,7 +144,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/buildpacks-ci
-    branch: master
+    branch: fix-multi-stack-atomic-commits-clean
 - name: builds
   type: git
   source:

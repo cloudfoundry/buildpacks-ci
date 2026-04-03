@@ -52,10 +52,6 @@ version = ''
 
 any_stack_build_exists = Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-any-stack.json"].any?
 
-puts "DEBUG: Looking for JSON files matching pattern: builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"
-matching_files = Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"]
-puts "DEBUG: Found #{matching_files.length} files: #{matching_files.inspect}"
-
 # First pass: collect all stack builds
 Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each do |stack_dependency_build|
   # Skip stack-specific builds when an any-stack build exists - the any-stack build covers all stacks
@@ -139,8 +135,6 @@ if !builds.empty? && version
       source_type => source_url,
       'source_sha256' => source_sha256
     }
-
-    puts "DEBUG: Creating single any-stack dependency with stacks: #{total_stacks.inspect}"
     
     manifest['dependencies'] = Dependencies.new(
       dep,
@@ -165,9 +159,6 @@ if !builds.empty? && version
         source_type => source_url,
         'source_sha256' => source_sha256
       }
-
-      puts "DEBUG: Creating stack-specific dependency for #{stack}: #{dep['uri']}"
-      puts "DEBUG: Before switch, manifest has #{manifest['dependencies'].select { |d| d['name'] == manifest_name && d['version'] == resource_version }.length} entries for #{manifest_name} #{resource_version}"
       
       manifest['dependencies'] = Dependencies.new(
         dep,
@@ -176,9 +167,6 @@ if !builds.empty? && version
         manifest['dependencies'],
         manifest_latest_released['dependencies']
       ).switch
-      
-      puts "DEBUG: After switch, manifest has #{manifest['dependencies'].select { |d| d['name'] == manifest_name && d['version'] == resource_version }.length} entries for #{manifest_name} #{resource_version}"
-      puts "DEBUG: Stacks: #{manifest['dependencies'].select { |d| d['name'] == manifest_name && d['version'] == resource_version }.map { |d| d['cf_stacks'] }.inspect}"
     end
     
     rebuilt += [old_versions.include?(resource_version)]
