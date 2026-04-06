@@ -160,28 +160,56 @@ var _ = Describe("RubygemsCLIWatcher", func() {
 	})
 
 	Context("In", func() {
-		It("returns download URL for version", func() {
+		It("returns download URL and SHA256 for version", func() {
+			client.responses["https://rubygems.org/rubygems/rubygems-3.4.10.tgz"] = mockResponse{
+				body:   "fake-tarball-content",
+				status: 200,
+			}
+
 			release, err := watcher.In("3.4.10")
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(release.Ref).To(Equal("3.4.10"))
 			Expect(release.URL).To(Equal("https://rubygems.org/rubygems/rubygems-3.4.10.tgz"))
+			Expect(release.SHA256).NotTo(BeEmpty())
+			Expect(release.SHA256).To(HaveLen(64)) // SHA256 hex digest is 64 chars
 		})
 
-		It("constructs URL with version", func() {
+		It("constructs URL with version and computes SHA256", func() {
+			client.responses["https://rubygems.org/rubygems/rubygems-3.5.0.tgz"] = mockResponse{
+				body:   "another-fake-tarball",
+				status: 200,
+			}
+
 			release, err := watcher.In("3.5.0")
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(release.Ref).To(Equal("3.5.0"))
 			Expect(release.URL).To(Equal("https://rubygems.org/rubygems/rubygems-3.5.0.tgz"))
+			Expect(release.SHA256).NotTo(BeEmpty())
 		})
 
 		It("handles pre-release versions", func() {
+			client.responses["https://rubygems.org/rubygems/rubygems-3.4.0.rc1.tgz"] = mockResponse{
+				body:   "prerelease-content",
+				status: 200,
+			}
+
 			release, err := watcher.In("3.4.0.rc1")
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(release.Ref).To(Equal("3.4.0.rc1"))
 			Expect(release.URL).To(Equal("https://rubygems.org/rubygems/rubygems-3.4.0.rc1.tgz"))
+			Expect(release.SHA256).NotTo(BeEmpty())
+		})
+
+		Context("when the download fails", func() {
+			It("returns an error", func() {
+				// No mock response registered for this URL
+				_, err := watcher.In("9.9.9")
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("calculating SHA256"))
+			})
 		})
 	})
 })
