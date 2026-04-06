@@ -60,10 +60,18 @@ func (w *RubygemsCLIWatcher) Check() ([]base.Internal, error) {
 	return versions, nil
 }
 
-// In returns the download URL for a specific RubyGems CLI version.
+// In returns the download URL and source SHA256 for a specific RubyGems CLI version.
 func (w *RubygemsCLIWatcher) In(version string) (base.Release, error) {
+	url := fmt.Sprintf("https://rubygems.org/rubygems/rubygems-%s.tgz", version)
+
+	sha256, err := base.GetSHA256(w.client, url)
+	if err != nil {
+		return base.Release{}, fmt.Errorf("calculating SHA256 for rubygems %s: %w", version, err)
+	}
+
 	return base.Release{
-		Ref: version,
-		URL: fmt.Sprintf("https://rubygems.org/rubygems/rubygems-%s.tgz", version),
+		Ref:    version,
+		URL:    url,
+		SHA256: sha256,
 	}, nil
 }
