@@ -349,14 +349,17 @@ jobs:
           - #@ "specs-switchblade-docker-" + stack
           #@ end
         - get: version
-        #@ for stack in bucket_stacks():
-        - get: #@ "pivotal-buildpack-cached-" + stack
-          version: every
-          trigger: false
-        - get: #@ "pivotal-buildpack-" + stack
-          version: every
-          trigger: false
-        #@ end
+        #! BOOTSTRAP FIX: Comment out to enable initial cflinuxfs5 buildpack creation when S3 artifacts don't exist yet
+        #! Uncomment these lines once initial artifacts are uploaded to S3
+        #! See: https://github.com/cloudfoundry/buildpacks-ci/pull/482
+        #! #@ for stack in bucket_stacks():
+        #! - get: #@ "pivotal-buildpack-cached-" + stack
+        #!   version: every
+        #!   trigger: false
+        #! - get: #@ "pivotal-buildpack-" + stack
+        #!   version: every
+        #!   trigger: false
+        #! #@ end
       - in_parallel:
           #@ for stack in bucket_stacks():
           - do:
