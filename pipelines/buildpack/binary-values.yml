@@ -7,7 +7,6 @@ buildpack:
   stacks:
   - cflinuxfs4
   - cflinuxfs5
-  - windows
   product_slug: binary-buildpack
   skip_docker_start: true
   skip_brats: true
