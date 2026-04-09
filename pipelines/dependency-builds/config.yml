@@ -242,6 +242,8 @@ dependencies:
         removal_strategy: keep_latest_released
     source_type: php
     versions_to_keep: 2
+    skip_lines:
+      cflinuxfs5: [ '8.1.X' ]  #! EOL 2024-11-25, not supported on cflinuxfs5
     mixins:
       'io.buildpacks.stacks.bionic':
         - libargon2-0
