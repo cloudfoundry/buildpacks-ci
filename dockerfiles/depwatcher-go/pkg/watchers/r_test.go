@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -52,11 +51,21 @@ var _ = Describe("RWatcher", func() {
 	Describe("Check", func() {
 		Context("when the CRAN website returns valid HTML", func() {
 			It("returns sorted versions from the R-4 directory", func() {
-				fixtureData, err := os.ReadFile("../../../depwatcher/spec/fixtures/rlang.html")
-				Expect(err).NotTo(HaveOccurred())
+				html := `<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html><body>
+<table>
+<tr><td><a href="R-4.0.0.tar.gz">R-4.0.0.tar.gz</a></td></tr>
+<tr><td><a href="R-4.0.1.tar.gz">R-4.0.1.tar.gz</a></td></tr>
+<tr><td><a href="R-4.0.2.tar.gz">R-4.0.2.tar.gz</a></td></tr>
+<tr><td><a href="R-4.0.3.tar.gz">R-4.0.3.tar.gz</a></td></tr>
+<tr><td><a href="R-4.0.4.tar.gz">R-4.0.4.tar.gz</a></td></tr>
+<tr><td><a href="R-4.0.5.tar.gz">R-4.0.5.tar.gz</a></td></tr>
+<tr><td><a href="R-4.1.0.tar.gz">R-4.1.0.tar.gz</a></td></tr>
+</table>
+</body></html>`
 
 				client.responses["https://cran.r-project.org/src/base/R-4/"] = mockResponse{
-					body:   string(fixtureData),
+					body:   html,
 					status: 200,
 				}
 

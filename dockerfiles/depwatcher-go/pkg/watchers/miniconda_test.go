@@ -3,7 +3,6 @@ package watchers_test
 import (
 	"io"
 	"net/http"
-	"os"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -37,11 +36,88 @@ var _ = Describe("MinicondaWatcher", func() {
 		client = &mockMinicondaClient{}
 	})
 
+	minicondaHTML := `
+		<html>
+			<table>
+				<tr>
+					<td><a href="Miniconda3-py39_22.11.1-1-Linux-x86_64.sh">Linux</a></td>
+					<td class="s">66.7M</td>
+					<td>2022-11-01 00:00:00</td>
+					<td>aaa111</td>
+				</tr>
+				<tr>
+					<td><a href="Miniconda3-py39_23.1.0-1-Linux-x86_64.sh">Linux</a></td>
+					<td class="s">66.7M</td>
+					<td>2023-02-07 21:27:23</td>
+					<td>5dc619babc1d19d6688617966251a38d245cb93d69066ccde9a013e1ebb5bf18</td>
+				</tr>
+				<tr>
+					<td><a href="Miniconda3-py39_23.3.1-1-Linux-x86_64.sh">Linux</a></td>
+					<td class="s">66.7M</td>
+					<td>2023-03-01 00:00:00</td>
+					<td>bbb333</td>
+				</tr>
+				<tr>
+					<td><a href="Miniconda3-py39_23.5.0-3-Linux-x86_64.sh">Linux</a></td>
+					<td class="s">66.7M</td>
+					<td>2023-05-01 00:00:00</td>
+					<td>ccc500</td>
+				</tr>
+				<tr>
+					<td><a href="Miniconda3-py39_23.5.1-0-Linux-x86_64.sh">Linux</a></td>
+					<td class="s">66.7M</td>
+					<td>2023-05-15 00:00:00</td>
+					<td>ddd511</td>
+				</tr>
+				<tr>
+					<td><a href="Miniconda3-py39_23.5.2-0-Linux-x86_64.sh">Linux</a></td>
+					<td class="s">66.7M</td>
+					<td>2023-05-20 00:00:00</td>
+					<td>eee522</td>
+				</tr>
+				<tr>
+					<td><a href="Miniconda3-py38_22.11.1-1-Linux-x86_64.sh">Linux</a></td>
+					<td class="s">64.7M</td>
+					<td>2022-11-01 00:00:00</td>
+					<td>fff111</td>
+				</tr>
+				<tr>
+					<td><a href="Miniconda3-py38_23.1.0-1-Linux-x86_64.sh">Linux</a></td>
+					<td class="s">64.7M</td>
+					<td>2023-02-07 21:27:23</td>
+					<td>640b7dceee6fad10cb7e7b54667b2945c4d6f57625d062b2b0952b7f3a908ab7</td>
+				</tr>
+				<tr>
+					<td><a href="Miniconda3-py38_23.3.1-1-Linux-x86_64.sh">Linux</a></td>
+					<td class="s">64.7M</td>
+					<td>2023-03-01 00:00:00</td>
+					<td>ggg333</td>
+				</tr>
+				<tr>
+					<td><a href="Miniconda3-py38_23.5.0-3-Linux-x86_64.sh">Linux</a></td>
+					<td class="s">64.7M</td>
+					<td>2023-05-01 00:00:00</td>
+					<td>hhh500</td>
+				</tr>
+				<tr>
+					<td><a href="Miniconda3-py38_23.5.1-0-Linux-x86_64.sh">Linux</a></td>
+					<td class="s">64.7M</td>
+					<td>2023-05-15 00:00:00</td>
+					<td>iii511</td>
+				</tr>
+				<tr>
+					<td><a href="Miniconda3-py38_23.5.2-0-Linux-x86_64.sh">Linux</a></td>
+					<td class="s">64.7M</td>
+					<td>2023-05-20 00:00:00</td>
+					<td>jjj522</td>
+				</tr>
+			</table>
+		</html>
+	`
+
 	Context("Check", func() {
 		It("extracts versions for py39 from HTML table sorted", func() {
-			fixtureData, err := os.ReadFile("../../../depwatcher/spec/fixtures/miniconda.html")
-			Expect(err).NotTo(HaveOccurred())
-			client.htmlResponse = string(fixtureData)
+			client.htmlResponse = minicondaHTML
 
 			watcher = watchers.NewMinicondaWatcher(client, "3.9")
 			versions, err := watcher.Check()
@@ -57,9 +133,7 @@ var _ = Describe("MinicondaWatcher", func() {
 		})
 
 		It("extracts versions for py38 from HTML table sorted", func() {
-			fixtureData, err := os.ReadFile("../../../depwatcher/spec/fixtures/miniconda.html")
-			Expect(err).NotTo(HaveOccurred())
-			client.htmlResponse = string(fixtureData)
+			client.htmlResponse = minicondaHTML
 
 			watcher = watchers.NewMinicondaWatcher(client, "3.8")
 			versions, err := watcher.Check()
@@ -152,9 +226,7 @@ var _ = Describe("MinicondaWatcher", func() {
 
 	Context("In", func() {
 		BeforeEach(func() {
-			fixtureData, err := os.ReadFile("../../../depwatcher/spec/fixtures/miniconda.html")
-			Expect(err).NotTo(HaveOccurred())
-			client.htmlResponse = string(fixtureData)
+			client.htmlResponse = minicondaHTML
 		})
 
 		It("returns release details for py39 version 23.1.0", func() {

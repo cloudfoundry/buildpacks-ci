@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -43,11 +42,15 @@ var _ = Describe("CRANWatcher", func() {
 	Describe("Check", func() {
 		Context("when checking Rserve package", func() {
 			It("returns the latest version in semver form", func() {
-				fixtureData, err := os.ReadFile("../../../depwatcher/spec/fixtures/rserve.html")
-				Expect(err).NotTo(HaveOccurred())
+				html := `<!DOCTYPE html>
+<html><body>
+<table>
+<tr><td>Version:</td><td>1.7-3</td></tr>
+</table>
+</body></html>`
 
 				client.responses["https://cran.r-project.org/web/packages/Rserve/index.html"] = mockResponse{
-					body:   string(fixtureData),
+					body:   html,
 					status: 200,
 				}
 
@@ -61,11 +64,15 @@ var _ = Describe("CRANWatcher", func() {
 
 		Context("when checking forecast package", func() {
 			It("returns the latest version", func() {
-				fixtureData, err := os.ReadFile("../../../depwatcher/spec/fixtures/forecast.html")
-				Expect(err).NotTo(HaveOccurred())
+				html := `<!DOCTYPE html>
+<html><body>
+<table>
+<tr><td>Version:</td><td>8.4</td></tr>
+</table>
+</body></html>`
 
 				client.responses["https://cran.r-project.org/web/packages/forecast/index.html"] = mockResponse{
-					body:   string(fixtureData),
+					body:   html,
 					status: 200,
 				}
 
@@ -79,11 +86,15 @@ var _ = Describe("CRANWatcher", func() {
 
 		Context("when checking shiny package", func() {
 			It("returns the latest version", func() {
-				fixtureData, err := os.ReadFile("../../../depwatcher/spec/fixtures/shiny.html")
-				Expect(err).NotTo(HaveOccurred())
+				html := `<!DOCTYPE html>
+<html><body>
+<table>
+<tr><td>Version:</td><td>1.2.0</td></tr>
+</table>
+</body></html>`
 
 				client.responses["https://cran.r-project.org/web/packages/shiny/index.html"] = mockResponse{
-					body:   string(fixtureData),
+					body:   html,
 					status: 200,
 				}
 
@@ -97,11 +108,15 @@ var _ = Describe("CRANWatcher", func() {
 
 		Context("when checking plumber package", func() {
 			It("returns the latest version", func() {
-				fixtureData, err := os.ReadFile("../../../depwatcher/spec/fixtures/plumber.html")
-				Expect(err).NotTo(HaveOccurred())
+				html := `<!DOCTYPE html>
+<html><body>
+<table>
+<tr><td>Version:</td><td>0.4.6</td></tr>
+</table>
+</body></html>`
 
 				client.responses["https://cran.r-project.org/web/packages/plumber/index.html"] = mockResponse{
-					body:   string(fixtureData),
+					body:   html,
 					status: 200,
 				}
 

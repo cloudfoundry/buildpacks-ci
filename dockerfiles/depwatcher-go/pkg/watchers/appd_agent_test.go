@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -48,11 +47,13 @@ var _ = Describe("AppdAgentWatcher", func() {
 	Describe("Check", func() {
 		Context("when the index returns valid YAML", func() {
 			It("returns sorted versions with calendar versioning", func() {
-				fixtureData, err := os.ReadFile("../../../depwatcher/spec/fixtures/appd_agent.yml")
-				Expect(err).NotTo(HaveOccurred())
+				yaml := `1.1.1_2: https://download.run.pivotal.io/appdynamics-php/appdynamics-1.1.1-2.tar.bz2
+1.1.1_3: https://download.run.pivotal.io/appdynamics-php/appdynamics-1.1.1-3.tar.bz2
+2.1.1_1: https://download.run.pivotal.io/appdynamics-php/appdynamics-2.1.1-1.tar.bz2
+3.1.1_14: https://download.run.pivotal.io/appdynamics-php/appdynamics-3.1.1-14.tar.bz2`
 
 				client.responses["https://download.run.pivotal.io/appdynamics-php/index.yml"] = mockResponse{
-					body:   string(fixtureData),
+					body:   yaml,
 					status: 200,
 				}
 

@@ -35,13 +35,29 @@ var _ = Describe("ZuluWatcher", func() {
 			})
 		})
 
-		Context("when version is missing", func() {
-			It("returns an error", func() {
-				watcher = watchers.NewZuluWatcher(client, "", "jdk")
+		Context("when version is not specified (latest-line check)", func() {
+			It("returns all available major-version lines", func() {
+				client.Response = `[
+					{
+						"java_version": [8, 0, 302],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jre8.0.302-linux_x64.tar.gz",
+						"name": "zulu8.56.0.21-ca-jre8.0.302-linux_x64.tar.gz",
+						"latest": true
+					},
+					{
+						"java_version": [11, 0, 12],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu11.50.19-ca-jre11.0.12-linux_x64.tar.gz",
+						"name": "zulu11.50.19-ca-jre11.0.12-linux_x64.tar.gz",
+						"latest": true
+					}
+				]`
+				watcher = watchers.NewZuluWatcher(client, "", "jre")
 
-				_, err := watcher.Check()
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("version must be specified"))
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(2))
+				refs := []string{versions[0].Ref, versions[1].Ref}
+				Expect(refs).To(ContainElements("8.0.302", "11.0.12"))
 			})
 		})
 
