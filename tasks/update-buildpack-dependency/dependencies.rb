@@ -43,7 +43,15 @@ class Dependencies
     @matching_deps.all? do |d|
       new_ver = SemVer.parse(@dep['version'])
       old_ver = SemVer.parse(d['version'])
-      next false if new_ver.nil? || old_ver.nil?
+      
+      # If SemVer parsing fails or produces equal results for what should be different versions
+      # (e.g., 4-part versions like 1.29.2.3 vs 1.29.2.1 both parse as 1.29.2),
+      # fall back to Gem::Version which handles arbitrary version part counts
+      if new_ver.nil? || old_ver.nil? || (new_ver == old_ver && @dep['version'] != d['version'])
+        new_ver_gem = Gem::Version.new(@dep['version'])
+        old_ver_gem = Gem::Version.new(d['version'])
+        next new_ver_gem > old_ver_gem
+      end
 
       new_ver > old_ver
     end

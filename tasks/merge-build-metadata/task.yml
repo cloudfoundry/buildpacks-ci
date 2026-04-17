@@ -1,0 +1,19 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: cloudfoundry/cflinuxfs4
+
+inputs:
+  - name: buildpacks-ci
+  - name: builds
+  - name: stack1-builds-metadata  # First stack's builds-artifacts output
+  - name: stack2-builds-metadata  # Second stack's builds-artifacts output
+
+outputs:
+  - name: builds-merged
+
+run:
+  path: buildpacks-ci/tasks/merge-build-metadata/merge.sh
