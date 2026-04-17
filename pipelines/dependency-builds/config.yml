@@ -227,17 +227,21 @@ dependencies:
     buildpacks:
       php:
         lines:
-          - line: 8.1.X
-            match: 8.1.\d+
-            deprecation_date: 2024-11-25
-            link: http://php.net/supported-versions.php
           - line: 8.2.X
             match: 8.2.\d+
             deprecation_date: 2025-12-08
             link: http://php.net/supported-versions.php
           - line: 8.3.X
             match: 8.3.\d+
-            deprecation_date: 2026-11-23
+            deprecation_date: 2025-12-31
+            link: http://php.net/supported-versions.php
+          - line: 8.4.X
+            match: 8.4.\d+
+            deprecation_date: 2026-12-31
+            link: http://php.net/supported-versions.php
+          - line: 8.5.X
+            match: 8.5.\d+
+            deprecation_date: 2027-12-31
             link: http://php.net/supported-versions.php
         removal_strategy: keep_latest_released
     source_type: php
