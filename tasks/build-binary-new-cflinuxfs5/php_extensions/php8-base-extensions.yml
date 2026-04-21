@@ -26,8 +26,8 @@ native_modules:
   klass: LibSodiumRecipe
 extensions:
 - name: apcu
-  version: 5.1.23
-  md5: c6ed350a587cf2b376c1efeb31f68907
+  version: 5.1.28
+  md5: 69e2063b28725aca0ce6cac087a5d2bc
   klass: PeclRecipe
 - name: igbinary
   version: 3.2.15
