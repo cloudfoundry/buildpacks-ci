@@ -6,6 +6,7 @@
 private.yml
 .vagrant/
 .rspec
+.opencode
 rspec.failures
 tags
 deployments/concourse-gcp/manifest.yml
@@ -17,4 +18,3 @@ deployments/concourse-gcp-terraform/terraform.tfstate.backup
 **cves.json
 
 scripts/gcp-env-checkup/.cache/
-
