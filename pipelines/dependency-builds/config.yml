@@ -376,6 +376,14 @@ dependencies:
     source_type: pypi
     any_stack: true
     versions_to_keep: 2
+  poetry-core:
+    buildpacks:
+      python:
+        lines:
+          - line: latest
+    source_type: pypi
+    any_stack: true
+    versions_to_keep: 2
   yarn:
     buildpacks:
       nodejs:
