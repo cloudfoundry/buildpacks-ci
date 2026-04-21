@@ -109,6 +109,9 @@ dependencies:
           - line: 1.25.X
             deprecation_date: ""
             link: https://golang.org/doc/devel/release.html
+          - line: 1.26.X
+            deprecation_date: ""
+            link: https://golang.org/doc/devel/release.html
         removal_strategy: remove_all
     versions_to_keep: 1
   httpd:
