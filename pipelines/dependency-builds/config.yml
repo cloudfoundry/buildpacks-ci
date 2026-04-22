@@ -213,6 +213,7 @@ dependencies:
     source_type: nginx
     versions_to_keep: 2
   node:
+    build_timeout: 5h
     buildpacks:
       nodejs:
         lines:

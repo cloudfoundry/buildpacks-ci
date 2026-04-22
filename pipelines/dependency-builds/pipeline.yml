@@ -339,7 +339,7 @@ jobs:
       - task: #@ "build-binary-{}".format(stack)
         image: #@ "{}-image".format(data.values.any_stack_build_stack if stack == "any-stack" else stack)
         file: buildpacks-ci/tasks/build-binary/build.yml
-        timeout: 3h
+        timeout: #@ getattr(dep, "build_timeout", "3h")
         attempts: 2
         output_mapping:
           artifacts: #@ "{}-artifacts".format(stack)
