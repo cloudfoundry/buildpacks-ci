@@ -45,7 +45,7 @@ dependencies:
     source_params:
       - 'uri: https://repo1.maven.org/maven2'
       - 'group_id: io.pivotal.cfenv'
-      - 'artifact_id: java-cfenv-boot'
+      - 'artifact_id: java-cfenv'
     any_stack: true
     versions_to_keep: 1
   composer:
