@@ -35,16 +35,17 @@ dependencies:
     source_type: rubygems
     any_stack: true
     versions_to_keep: 2
-  cfenv:
+  java-cfenv:
     buildpacks:
       java:
         lines:
           - line: 3.X.X
           - line: 4.X.X
-    source_type: github_releases
+    source_type: maven
     source_params:
-      - 'repo: pivotal-cf/java-cfenv'
-      - 'fetch_source: true'
+      - 'uri: https://repo1.maven.org/maven2'
+      - 'group_id: io.pivotal.cfenv'
+      - 'artifact_id: java-cfenv-boot'
     any_stack: true
     versions_to_keep: 1
   composer:
