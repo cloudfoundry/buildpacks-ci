@@ -66,13 +66,13 @@ When you want to change how a binary gets built, there are two places you may ne
 
 For the list of currently supported binaries, check out our `dependency-builds` [pipeline](https://buildpacks.ci.cf-app.com/teams/main/pipelines/dependency-builds).
 
-The concourse task that orchestrates the building is `buildpacks-ci/tasks/build-binary-new/builder.rb`; many of the recipes are in [binary-builder](https://github.com/cloudfoundry/binary-builder). 
+The concourse task that orchestrates the building is `buildpacks-ci/tasks/build-binary/build.sh`; many of the recipes are in [binary-builder](https://github.com/cloudfoundry/binary-builder). The task is stack-agnostic — the stack image is passed in by the pipeline via the `image:` key on the task step.
 
 To test these changes locally, you can execute the concourse task for it, but point to local changes. For instance:
 
 ```
 $ cd buildpacks-ci
-$ STACK=cflinuxfs2 fly -t buildpacks e -c tasks/build-binary-new/build.yml -j dependency-builds/build-r-3.4.X -i buildpacks-ci=.
+$ STACK=cflinuxfs4 fly -t buildpacks e -c tasks/build-binary/build.yml -j dependency-builds/build-r-3.4.X -i buildpacks-ci=.
 ```
 
 For binaries that use recipes in `binary-builder`, you can also test in Docker. For instance:
