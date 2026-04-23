@@ -55,6 +55,24 @@ func (c *HTTPClientImpl) Get(url string) (*http.Response, error) {
 
 // GetWithHeaders performs an HTTP GET request with custom headers
 func (c *HTTPClientImpl) GetWithHeaders(url string, headers http.Header) (*http.Response, error) {
+	resp, err := c.GetRaw(url, headers)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check for successful response
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		resp.Body.Close()
+		return nil, fmt.Errorf("request failed with status %d: %s", resp.StatusCode, url)
+	}
+
+	return resp, nil
+}
+
+// GetRaw performs an HTTP GET request with custom headers and returns the response
+// regardless of status code. Unlike GetWithHeaders, it does NOT error on non-2xx responses.
+// Use this when you need to inspect the status code yourself (e.g. for fallback logic).
+func (c *HTTPClientImpl) GetRaw(url string, headers http.Header) (*http.Response, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("creating request: %w", err)
@@ -79,12 +97,6 @@ func (c *HTTPClientImpl) GetWithHeaders(url string, headers http.Header) (*http.
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("executing request: %w", err)
-	}
-
-	// Check for successful response
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		resp.Body.Close()
-		return nil, fmt.Errorf("request failed with status %d: %s", resp.StatusCode, url)
 	}
 
 	return resp, nil

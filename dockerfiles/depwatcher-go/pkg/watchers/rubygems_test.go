@@ -42,6 +42,10 @@ func (m *mockRubygemsClient) GetWithHeaders(url string, headers http.Header) (*h
 	return m.Get(url)
 }
 
+func (m *mockRubygemsClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 var _ = Describe("RubygemsWatcher", func() {
 	var (
 		watcher *watchers.RubygemsWatcher

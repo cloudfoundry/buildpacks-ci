@@ -40,6 +40,10 @@ func (m *mockGithubTagsClient) GetWithHeaders(url string, headers http.Header) (
 	return m.Get(url)
 }
 
+func (m *mockGithubTagsClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 func newMockGithubTagsClient(tags string) *mockGithubTagsClient {
 	return &mockGithubTagsClient{
 		responses: map[string]string{

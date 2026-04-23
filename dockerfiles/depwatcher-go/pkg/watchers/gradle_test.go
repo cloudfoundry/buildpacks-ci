@@ -27,6 +27,10 @@ func (m *gradleMockClient) GetWithHeaders(url string, headers http.Header) (*htt
 	return m.Get(url)
 }
 
+func (m *gradleMockClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 var _ = Describe("GradleWatcher", func() {
 	var (
 		watcher    *watchers.GradleWatcher

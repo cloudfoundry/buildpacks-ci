@@ -26,6 +26,10 @@ func (m *mockMinicondaClient) GetWithHeaders(url string, headers http.Header) (*
 	return m.Get(url)
 }
 
+func (m *mockMinicondaClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 var _ = Describe("MinicondaWatcher", func() {
 	var (
 		watcher *watchers.MinicondaWatcher

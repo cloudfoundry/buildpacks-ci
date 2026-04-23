@@ -32,6 +32,10 @@ func (m *mockCRANClient) GetWithHeaders(url string, headers http.Header) (*http.
 	return m.Get(url)
 }
 
+func (m *mockCRANClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 var _ = Describe("CRANWatcher", func() {
 	var client *mockCRANClient
 

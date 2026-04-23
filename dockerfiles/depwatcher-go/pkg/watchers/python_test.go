@@ -35,6 +35,10 @@ func (m *mockPythonClient) GetWithHeaders(url string, headers http.Header) (*htt
 	return m.Get(url)
 }
 
+func (m *mockPythonClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 func newMockPythonClient() *mockPythonClient {
 	return &mockPythonClient{
 		responses: make(map[string]string),

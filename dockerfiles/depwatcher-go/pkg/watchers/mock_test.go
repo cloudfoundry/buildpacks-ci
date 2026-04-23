@@ -61,3 +61,38 @@ func (m *MockHTTPClient) Get(url string) (*http.Response, error) {
 func (m *MockHTTPClient) GetWithHeaders(url string, headers http.Header) (*http.Response, error) {
 	return m.Get(url)
 }
+
+// GetRaw implements the HTTPClient interface — returns response regardless of status code
+func (m *MockHTTPClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+
+	statusCode := m.StatusCode
+	if statusCode == 0 {
+		statusCode = http.StatusOK
+	}
+
+	// Check URL-mapped responses first
+	if m.Responses != nil {
+		if response, ok := m.Responses[url]; ok {
+			return &http.Response{
+				StatusCode: statusCode,
+				Body:       io.NopCloser(strings.NewReader(response)),
+			}, nil
+		}
+		// Check for default response
+		if response, ok := m.Responses["default"]; ok {
+			return &http.Response{
+				StatusCode: statusCode,
+				Body:       io.NopCloser(strings.NewReader(response)),
+			}, nil
+		}
+	}
+
+	// Fall back to single Response field
+	return &http.Response{
+		StatusCode: statusCode,
+		Body:       io.NopCloser(strings.NewReader(m.Response)),
+	}, nil
+}
