@@ -35,6 +35,10 @@ func (m *mockNPMClient) GetWithHeaders(url string, headers http.Header) (*http.R
 	return m.Get(url)
 }
 
+func (m *mockNPMClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 func newMockNPMClient() *mockNPMClient {
 	return &mockNPMClient{
 		responses: make(map[string]string),

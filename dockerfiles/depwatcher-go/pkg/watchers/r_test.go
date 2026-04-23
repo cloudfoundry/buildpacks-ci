@@ -37,6 +37,10 @@ func (m *mockRClient) GetWithHeaders(url string, headers http.Header) (*http.Res
 	return m.Get(url)
 }
 
+func (m *mockRClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 var _ = Describe("RWatcher", func() {
 	var (
 		client  *mockRClient

@@ -248,3 +248,7 @@ func (m *mockICUClient) Get(url string) (*http.Response, error) {
 func (m *mockICUClient) GetWithHeaders(url string, headers http.Header) (*http.Response, error) {
 	return m.Get(url)
 }
+
+func (m *mockICUClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}

@@ -35,6 +35,10 @@ func (m *mockNginxClient) GetWithHeaders(url string, headers http.Header) (*http
 	return m.Get(url)
 }
 
+func (m *mockNginxClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 func newMockNginxClient() *mockNginxClient {
 	return &mockNginxClient{
 		responses: make(map[string]string),

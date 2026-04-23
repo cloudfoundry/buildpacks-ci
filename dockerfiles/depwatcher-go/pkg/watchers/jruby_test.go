@@ -35,6 +35,10 @@ func (m *mockJRubyClient) GetWithHeaders(url string, headers http.Header) (*http
 	return m.Get(url)
 }
 
+func (m *mockJRubyClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 func newMockJRubyClient() *mockJRubyClient {
 	return &mockJRubyClient{
 		responses: make(map[string]string),

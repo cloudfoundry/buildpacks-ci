@@ -51,6 +51,10 @@ func (m *mockGithubReleasesClient) GetWithHeaders(url string, headers http.Heade
 	}, nil
 }
 
+func (m *mockGithubReleasesClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 func newMockGithubReleasesClient(releases string) *mockGithubReleasesClient {
 	return &mockGithubReleasesClient{
 		responses: map[string]string{

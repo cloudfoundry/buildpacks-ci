@@ -36,6 +36,10 @@ func (m *mavenMockClient) GetWithHeaders(url string, headers http.Header) (*http
 	return m.Get(url)
 }
 
+func (m *mavenMockClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 var _ = Describe("MavenWatcher", func() {
 	var (
 		watcher    *watchers.MavenWatcher

@@ -37,6 +37,10 @@ func (m *mockOpenrestyClient) GetWithHeaders(url string, headers http.Header) (*
 	return m.Get(url)
 }
 
+func (m *mockOpenrestyClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 var _ = Describe("OpenrestyWatcher", func() {
 	var (
 		watcher *watchers.OpenrestyWatcher

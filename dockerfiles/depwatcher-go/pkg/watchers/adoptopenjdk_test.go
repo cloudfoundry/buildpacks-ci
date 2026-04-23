@@ -26,6 +26,10 @@ func (m *adoptOpenJDKMockClient) GetWithHeaders(url string, headers http.Header)
 	return m.Get(url)
 }
 
+func (m *adoptOpenJDKMockClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 var _ = Describe("AdoptOpenJDKWatcher", func() {
 	var (
 		watcher    *watchers.AdoptOpenJDKWatcher

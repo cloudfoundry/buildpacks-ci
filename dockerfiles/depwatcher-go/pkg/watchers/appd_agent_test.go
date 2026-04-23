@@ -33,6 +33,10 @@ func (m *mockAppdAgentClient) GetWithHeaders(url string, headers http.Header) (*
 	return m.Get(url)
 }
 
+func (m *mockAppdAgentClient) GetRaw(url string, headers http.Header) (*http.Response, error) {
+	return m.Get(url)
+}
+
 var _ = Describe("AppdAgentWatcher", func() {
 	var (
 		client  *mockAppdAgentClient

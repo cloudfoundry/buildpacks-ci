@@ -127,7 +127,7 @@ func (w *MavenWatcher) In(ref string) (base.Release, error) {
 
 	// Try SHA512 first, fall back to SHA1 (Maven Central only provides sha1)
 	sha512URL := fmt.Sprintf("%s.sha512", artifactURL)
-	resp, err := w.client.GetWithHeaders(sha512URL, headers)
+	resp, err := w.client.GetRaw(sha512URL, headers)
 	if err != nil {
 		return base.Release{}, fmt.Errorf("failed to fetch SHA512: %w", err)
 	}

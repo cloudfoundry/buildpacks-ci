@@ -29,6 +29,10 @@ type Release struct {
 type HTTPClient interface {
 	Get(url string) (*http.Response, error)
 	GetWithHeaders(url string, headers http.Header) (*http.Response, error)
+	// GetRaw performs a GET request and returns the response regardless of status code.
+	// Unlike GetWithHeaders, it does NOT return an error for non-2xx responses.
+	// Use this when you need to inspect the status code yourself (e.g. for fallback logic).
+	GetRaw(url string, headers http.Header) (*http.Response, error)
 }
 
 // SortVersions sorts a slice of Internal versions using semver comparison
