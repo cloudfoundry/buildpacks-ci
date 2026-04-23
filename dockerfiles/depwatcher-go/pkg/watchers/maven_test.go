@@ -11,15 +11,25 @@ import (
 )
 
 type mavenMockClient struct {
-	response *http.Response
-	err      error
+	responses map[string]*http.Response
+	err       error
+}
+
+func newMavenMockClient(response *http.Response) *mavenMockClient {
+	return &mavenMockClient{responses: map[string]*http.Response{"*": response}}
 }
 
 func (m *mavenMockClient) Get(url string) (*http.Response, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
-	return m.response, nil
+	if resp, ok := m.responses[url]; ok {
+		return resp, nil
+	}
+	if resp, ok := m.responses["*"]; ok {
+		return resp, nil
+	}
+	return &http.Response{StatusCode: http.StatusNotFound, Body: io.NopCloser(strings.NewReader(""))}, nil
 }
 
 func (m *mavenMockClient) GetWithHeaders(url string, headers http.Header) (*http.Response, error) {
@@ -33,13 +43,13 @@ var _ = Describe("MavenWatcher", func() {
 	)
 
 	BeforeEach(func() {
-		mockClient = &mavenMockClient{}
+		mockClient = &mavenMockClient{responses: map[string]*http.Response{}}
 	})
 
 	Describe("Check", func() {
 		Context("when the metadata XML is valid", func() {
 			BeforeEach(func() {
-				mockClient.response = &http.Response{
+				mockClient = newMavenMockClient(&http.Response{
 					StatusCode: 200,
 					Body: io.NopCloser(strings.NewReader(`<?xml version="1.0" encoding="UTF-8"?>
 <metadata>
@@ -53,7 +63,7 @@ var _ = Describe("MavenWatcher", func() {
     </versions>
   </versioning>
 </metadata>`)),
-				}
+				})
 				watcher = watchers.NewMavenWatcher(
 					mockClient,
 					"https://repo1.maven.org/maven2",
@@ -129,10 +139,10 @@ var _ = Describe("MavenWatcher", func() {
 
 		Context("when the server returns non-200 status", func() {
 			BeforeEach(func() {
-				mockClient.response = &http.Response{
+				mockClient = newMavenMockClient(&http.Response{
 					StatusCode: 404,
 					Body:       io.NopCloser(strings.NewReader("")),
-				}
+				})
 				watcher = watchers.NewMavenWatcher(mockClient, "https://repo1.maven.org/maven2", "org.test", "artifact", "", "jar", "", "")
 			})
 
@@ -145,10 +155,10 @@ var _ = Describe("MavenWatcher", func() {
 
 		Context("when the XML is invalid", func() {
 			BeforeEach(func() {
-				mockClient.response = &http.Response{
+				mockClient = newMavenMockClient(&http.Response{
 					StatusCode: 200,
 					Body:       io.NopCloser(strings.NewReader("invalid xml")),
-				}
+				})
 				watcher = watchers.NewMavenWatcher(mockClient, "https://repo1.maven.org/maven2", "org.test", "artifact", "", "jar", "", "")
 			})
 
@@ -161,12 +171,12 @@ var _ = Describe("MavenWatcher", func() {
 	})
 
 	Describe("In", func() {
-		Context("with basic Maven coordinates", func() {
+		Context("when SHA512 is available", func() {
 			BeforeEach(func() {
-				mockClient.response = &http.Response{
+				mockClient = newMavenMockClient(&http.Response{
 					StatusCode: 200,
-					Body:       io.NopCloser(strings.NewReader("abc123def456")),
-				}
+					Body:       io.NopCloser(strings.NewReader("abc123sha512hash")),
+				})
 				watcher = watchers.NewMavenWatcher(
 					mockClient,
 					"https://repo1.maven.org/maven2",
@@ -179,20 +189,79 @@ var _ = Describe("MavenWatcher", func() {
 				)
 			})
 
-			It("returns the correct artifact URL", func() {
+			It("returns the correct artifact URL and SHA512", func() {
 				release, err := watcher.In("5.3.0")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(release.Ref).To(Equal("5.3.0"))
 				Expect(release.URL).To(Equal("https://repo1.maven.org/maven2/org/springframework/spring-core/5.3.0/spring-core-5.3.0.jar"))
+				Expect(release.SHA512).To(Equal("abc123sha512hash"))
+				Expect(release.SHA1).To(BeEmpty())
+			})
+		})
+
+		Context("when SHA512 is not available but SHA1 is (e.g. Maven Central)", func() {
+			BeforeEach(func() {
+				sha512URL := "https://repo1.maven.org/maven2/io/pivotal/cfenv/java-cfenv/3.5.1/java-cfenv-3.5.1.jar.sha512"
+				sha1URL := "https://repo1.maven.org/maven2/io/pivotal/cfenv/java-cfenv/3.5.1/java-cfenv-3.5.1.jar.sha1"
+				mockClient = &mavenMockClient{
+					responses: map[string]*http.Response{
+						sha512URL: {StatusCode: http.StatusNotFound, Body: io.NopCloser(strings.NewReader(""))},
+						sha1URL:   {StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader("deadbeefsha1hash"))},
+					},
+				}
+				watcher = watchers.NewMavenWatcher(
+					mockClient,
+					"https://repo1.maven.org/maven2",
+					"io.pivotal.cfenv",
+					"java-cfenv",
+					"",
+					"jar",
+					"",
+					"",
+				)
+			})
+
+			It("falls back to SHA1 and returns it", func() {
+				release, err := watcher.In("3.5.1")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.Ref).To(Equal("3.5.1"))
+				Expect(release.URL).To(Equal("https://repo1.maven.org/maven2/io/pivotal/cfenv/java-cfenv/3.5.1/java-cfenv-3.5.1.jar"))
+				Expect(release.SHA1).To(Equal("deadbeefsha1hash"))
+				Expect(release.SHA512).To(BeEmpty())
+			})
+		})
+
+		Context("when neither SHA512 nor SHA1 is available", func() {
+			BeforeEach(func() {
+				mockClient = newMavenMockClient(&http.Response{
+					StatusCode: http.StatusNotFound,
+					Body:       io.NopCloser(strings.NewReader("")),
+				})
+				watcher = watchers.NewMavenWatcher(
+					mockClient,
+					"https://repo1.maven.org/maven2",
+					"org.test",
+					"artifact",
+					"",
+					"jar",
+					"",
+					"",
+				)
+			})
+
+			It("returns an error", func() {
+				_, err := watcher.In("1.0.0")
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("failed to fetch SHA1"))
 			})
 		})
 
 		Context("with classifier", func() {
 			BeforeEach(func() {
-				mockClient.response = &http.Response{
+				mockClient = newMavenMockClient(&http.Response{
 					StatusCode: 200,
 					Body:       io.NopCloser(strings.NewReader("abc123def456")),
-				}
+				})
 				watcher = watchers.NewMavenWatcher(
 					mockClient,
 					"https://repo1.maven.org/maven2",
@@ -214,10 +283,10 @@ var _ = Describe("MavenWatcher", func() {
 
 		Context("with custom packaging", func() {
 			BeforeEach(func() {
-				mockClient.response = &http.Response{
+				mockClient = newMavenMockClient(&http.Response{
 					StatusCode: 200,
 					Body:       io.NopCloser(strings.NewReader("abc123def456")),
-				}
+				})
 				watcher = watchers.NewMavenWatcher(
 					mockClient,
 					"https://repo1.maven.org/maven2",

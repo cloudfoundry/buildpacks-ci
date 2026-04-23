@@ -125,7 +125,7 @@ func (w *MavenWatcher) In(ref string) (base.Release, error) {
 		headers.Set("Authorization", "Basic "+base64Encode(auth))
 	}
 
-	// Fetch SHA512 checksum (available in Maven 3.9.9+)
+	// Try SHA512 first, fall back to SHA1 (Maven Central only provides sha1)
 	sha512URL := fmt.Sprintf("%s.sha512", artifactURL)
 	resp, err := w.client.GetWithHeaders(sha512URL, headers)
 	if err != nil {
@@ -133,22 +133,46 @@ func (w *MavenWatcher) In(ref string) (base.Release, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		return base.Release{}, fmt.Errorf("unexpected status code %d fetching SHA512", resp.StatusCode)
+	if resp.StatusCode == http.StatusOK {
+		sha512Bytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return base.Release{}, fmt.Errorf("failed to read SHA512: %w", err)
+		}
+		sha512Hash := strings.TrimSpace(strings.Fields(string(sha512Bytes))[0])
+		return base.Release{
+			Ref:    ref,
+			URL:    artifactURL,
+			SHA512: sha512Hash,
+		}, nil
 	}
 
-	sha512Bytes, err := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusNotFound {
+		return base.Release{}, fmt.Errorf("fetching version data: failed to fetch SHA512: request failed with status %d: %s", resp.StatusCode, sha512URL)
+	}
+
+	// Fall back to SHA1
+	sha1URL := fmt.Sprintf("%s.sha1", artifactURL)
+	resp1, err := w.client.GetWithHeaders(sha1URL, headers)
 	if err != nil {
-		return base.Release{}, fmt.Errorf("failed to read SHA512: %w", err)
+		return base.Release{}, fmt.Errorf("failed to fetch SHA1: %w", err)
+	}
+	defer resp1.Body.Close()
+
+	if resp1.StatusCode != http.StatusOK {
+		return base.Release{}, fmt.Errorf("fetching version data: failed to fetch SHA1: request failed with status %d: %s", resp1.StatusCode, sha1URL)
 	}
 
-	// SHA512 files may contain just the hash or "hash filename" format
-	sha512Hash := strings.TrimSpace(strings.Fields(string(sha512Bytes))[0])
+	sha1Bytes, err := io.ReadAll(resp1.Body)
+	if err != nil {
+		return base.Release{}, fmt.Errorf("failed to read SHA1: %w", err)
+	}
 
+	// SHA1 files may contain just the hash or "hash filename" format
+	sha1Hash := strings.TrimSpace(strings.Fields(string(sha1Bytes))[0])
 	return base.Release{
-		Ref:    ref,
-		URL:    artifactURL,
-		SHA512: sha512Hash,
+		Ref:  ref,
+		URL:  artifactURL,
+		SHA1: sha1Hash,
 	}, nil
 }
 
