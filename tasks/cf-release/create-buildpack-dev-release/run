@@ -43,10 +43,21 @@ buildpack_blob_is_latest() {
 }
 
 remove_old_blobs() {
-  bosh blobs --dir release --json \
-    | jq -r '.Tables[0].Rows[].path' \
-    | grep buildpack \
-    | xargs -I {} bosh remove-blob --dir release {}
+  local buildpack_name
+  buildpack_name="$(get_buildpack_name)"
+  
+  # Only remove blobs for stacks that are being updated
+  for buildpack_file in buildpack-*/*.zip; do
+    local blob_name_pattern
+    blob_name_pattern="$(basename "${buildpack_file}" | sed 's/v[0-9.]*\.zip/v*.zip/' | sed 's/+.*//')"
+    
+    # Find and remove old version of this stack's blob
+    bosh blobs --dir release --json \
+      | jq -r '.Tables[0].Rows[].path' \
+      | grep "${buildpack_name}" \
+      | grep -E "$(echo "${blob_name_pattern}" | sed 's/\*/[^/]*/')" \
+      | xargs -r -I {} bosh remove-blob --dir release {}
+  done
 }
 
 add_new_blobs() {
