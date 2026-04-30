@@ -3,6 +3,8 @@
 #@ default_stacks = ['cflinuxfs4']
 
 supported_languages:
+- name: binary
+  stacks: #@ default_stacks
 - name: dotnet-core
   stacks: #@ default_stacks
 - name: go
