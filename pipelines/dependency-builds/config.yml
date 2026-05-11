@@ -35,6 +35,18 @@ dependencies:
     source_type: rubygems
     any_stack: true
     versions_to_keep: 2
+  client-certificate-mapper:
+    buildpacks:
+      java:
+        lines:
+          - line: 2.X.X
+    source_type: maven
+    source_params:
+      - 'uri: https://repo1.maven.org/maven2'
+      - 'group_id: org.cloudfoundry'
+      - 'artifact_id: client-certificate-mapper'
+    any_stack: true
+    versions_to_keep: 1
   java-cfenv:
     buildpacks:
       java:
@@ -511,3 +523,4 @@ skip_deprecation_check:
   - zulu  #! JRE versions tied to Azul release schedule
   - sapmachine  #! JRE versions tied to SAP release schedule
   - appdynamics-java  #! doesn't publish EOL schedule
+  - client-certificate-mapper  #! doesn't publish EOL schedule
