@@ -2,10 +2,10 @@
 
 Updating PHP modules entails two main steps: determining which modules to update, then updating hashes for bumped modules. The following scripts help with each step.
 
-They operate on extension config files like the following:
+They operate on extension config files in the [binary-builder](https://github.com/cloudfoundry/binary-builder) repo:
 
-- `tasks/build-binary-new[-cflinuxfs4]/php_extensions/php8-base-extensions.yml`
-- `tasks/build-binary-new[-cflinuxfs4]/php_extensions/php81-extensions-patch.yml` (`additions` array)
+- `internal/php/assets/php8-base-extensions.yml`
+- `internal/php/assets/php81-extensions-patch.yml` (`additions` array)
 
 ## Bump Module Versions
 
@@ -33,7 +33,13 @@ To update hashes, run:
 
 ## Important Notes
 
-- These scripts assume that you have cloned [binary-builder](https://github.com/cloudfoundry/binary-builder) into a `binary-builder` directory next to this `buildpacks-ci` repo. It also assumes you have `bundler` installed.
+- These scripts require a clone of [binary-builder](https://github.com/cloudfoundry/binary-builder). By default they look for it as a sibling directory (`../binary-builder`). If your checkout is elsewhere, set `BINARY_BUILDER_DIR` to the absolute path before running:
+
+  ```bash
+  BINARY_BUILDER_DIR=/path/to/binary-builder ./scripts/php-modules/bump-versions.sh
+  ```
+
+  The scripts also assume you have `bundler` installed.
 
 - If you run into rate limits for GitHub, try setting the `GITHUB_TOKEN` environment variable before running the scripts (the token only needs the `public_repo` scope). Authenticated requests have a much higher limit.
 

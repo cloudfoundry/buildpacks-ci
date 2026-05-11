@@ -282,7 +282,8 @@ skip_deprecation_check:
 ## How to add a new stack (e.g. cflinuxfs6)
 
 1. Add the stack to `build_stacks` in `config.yml`
-2. Add a `build-binary-new-cflinuxfs6/` task directory mirroring `build-binary-new-cflinuxfs5/`
+2. The `build-binary` task is stack-agnostic — no new task directory is needed per stack.
+   The pipeline passes the appropriate stack image via the `image:` key on the task step.
 3. The Docker image resource and build jobs are generated automatically from `build_stacks` —
    no manual changes to `pipeline.yml` are needed
 4. If a dependency is not yet validated on the new stack, add it to that dependency's

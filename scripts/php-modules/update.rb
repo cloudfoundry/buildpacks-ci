@@ -8,10 +8,12 @@ def process_extension_file(cache, data, ext_file, dependency_type, f)
   end
 end
 
+BINARY_BUILDER_DIR = ENV.fetch('BINARY_BUILDER_DIR', File.expand_path('../../../binary-builder', __dir__))
+
 def update_modules(&f)
   cache = {}
-  %w[php8-base-extensions.yml php81-extensions-patch.yml php82-extensions-patch.yml php83-extensions-patch.yml].each do |ext_file|
-    path = File.expand_path("../../tasks/build-binary-new/#{ext_file}")
+  %w[php8-base-extensions.yml php81-extensions-patch.yml php82-extensions-patch.yml php83-extensions-patch.yml php84-extensions-patch.yml php85-extensions-patch.yml].each do |ext_file|
+    path = File.join(BINARY_BUILDER_DIR, 'internal/php/assets', ext_file)
 
     puts "==> Processing: #{path}"
     data = YAML.load_file(path, permitted_classes: [Date, Time])
