@@ -431,6 +431,17 @@ dependencies:
     source_type: skywalking
     any_stack: true
     versions_to_keep: 2
+  open-telemetry-javaagent:
+    buildpacks:
+      java:
+        lines:
+          - line: 2.X.X
+    source_type: github_releases
+    source_params:
+      - 'repo: open-telemetry/opentelemetry-java-instrumentation'
+      - 'glob: opentelemetry-javaagent.jar'
+    any_stack: true
+    versions_to_keep: 2
   jprofiler-profiler:
     buildpacks:
       java:
@@ -517,6 +528,7 @@ skip_deprecation_check:
   - r  #! doesn't publish EOL schedule
   - tomcat  #! doesn't publish EOL schedule
   - skywalking-agent  #! doesn't publish EOL schedule
+  - open-telemetry-javaagent  #! doesn't publish EOL schedule
   - jprofiler-profiler  #! doesn't publish EOL schedule
   - your-kit-profiler  #! doesn't publish EOL schedule
   - openjdk  #! JRE versions tied to BellSoft Liberica schedule
