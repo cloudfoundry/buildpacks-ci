@@ -441,7 +441,7 @@ dependencies:
       - 'repo: open-telemetry/opentelemetry-java-instrumentation'
       - 'glob: opentelemetry-javaagent.jar'
     any_stack: true
-    versions_to_keep: 1
+    versions_to_keep: 2
   jprofiler-profiler:
     buildpacks:
       java:
