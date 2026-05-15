@@ -464,6 +464,55 @@ dependencies:
       - 'glob: splunk-otel-javaagent.jar'
     any_stack: true
     versions_to_keep: 2
+  elastic-apm-agent:
+    buildpacks:
+      java:
+        lines:
+          - line: 1.X.X
+    source_type: maven
+    source_params:
+      - 'uri: https://repo1.maven.org/maven2'
+      - 'group_id: co.elastic.apm'
+      - 'artifact_id: elastic-apm-agent'
+    any_stack: true
+    versions_to_keep: 2
+  postgresql-jdbc:
+    buildpacks:
+      java:
+        lines:
+          - line: 42.X.X
+    source_type: maven
+    source_params:
+      - 'uri: https://repo1.maven.org/maven2'
+      - 'group_id: org.postgresql'
+      - 'artifact_id: postgresql'
+    any_stack: true
+    versions_to_keep: 2
+  mariadb-jdbc:
+    buildpacks:
+      java:
+        lines:
+          - line: 3.X.X
+    source_type: maven
+    source_params:
+      - 'uri: https://repo1.maven.org/maven2'
+      - 'group_id: org.mariadb.jdbc'
+      - 'artifact_id: mariadb-java-client'
+    any_stack: true
+    versions_to_keep: 2
+  jacoco:
+    buildpacks:
+      java:
+        lines:
+          - line: 0.8.X
+    source_type: maven
+    source_params:
+      - 'uri: https://repo1.maven.org/maven2'
+      - 'group_id: org.jacoco'
+      - 'artifact_id: jacoco'
+      - 'packaging: zip'
+    any_stack: true
+    versions_to_keep: 2  
   jprofiler-profiler:
     buildpacks:
       java:
@@ -553,6 +602,10 @@ skip_deprecation_check:
   - open-telemetry-javaagent  #! doesn't publish EOL schedule
   - azure-application-insights  #! doesn't publish EOL schedule
   - splunk-otel-javaagent  #! doesn't publish EOL schedule
+  - elastic-apm-agent  #! doesn't publish EOL schedule
+  - postgresql-jdbc  #! doesn't publish EOL schedule
+  - mariadb-jdbc  #! doesn't publish EOL schedule
+  - jacoco  #! doesn't publish EOL schedule
   - jprofiler-profiler  #! doesn't publish EOL schedule
   - your-kit-profiler  #! doesn't publish EOL schedule
   - openjdk  #! JRE versions tied to BellSoft Liberica schedule
