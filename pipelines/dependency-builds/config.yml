@@ -510,6 +510,7 @@ dependencies:
       - 'uri: https://repo1.maven.org/maven2'
       - 'group_id: org.jacoco'
       - 'artifact_id: jacoco'
+      - 'packaging: zip'
     any_stack: true
     versions_to_keep: 2  
   jprofiler-profiler:
