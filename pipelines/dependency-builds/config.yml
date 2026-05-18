@@ -60,6 +60,18 @@ dependencies:
       - 'artifact_id: java-cfenv'
     any_stack: true
     versions_to_keep: 1
+  cf-metrics-exporter:
+    buildpacks:
+      java:
+        lines:
+          - line: 0.7.X
+    source_type: maven
+    source_params:
+      - 'uri: https://repo1.maven.org/maven2'
+      - 'group_id: io.github.rabobank'
+      - 'artifact_id: cf-metrics-exporter'
+    any_stack: true
+    versions_to_keep: 2
   composer:
     buildpacks:
       php:
@@ -631,3 +643,4 @@ skip_deprecation_check:
   - sapmachine  #! JRE versions tied to SAP release schedule
   - appdynamics-java  #! doesn't publish EOL schedule
   - client-certificate-mapper  #! doesn't publish EOL schedule
+  - cf-metrics-exporter  #! doesn't publish EOL schedule
