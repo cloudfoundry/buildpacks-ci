@@ -541,6 +541,14 @@ dependencies:
     source_type: stackdriver_profiler
     any_stack: true
     versions_to_keep: 2
+  groovy:
+    buildpacks:
+      java:
+        lines:
+          - line: 4.0.X
+    source_type: groovy
+    any_stack: true
+    versions_to_keep: 2
   jprofiler-profiler:
     buildpacks:
       java:
@@ -636,6 +644,7 @@ skip_deprecation_check:
   - jacoco  #! doesn't publish EOL schedule
   - newrelic-agent  #! doesn't publish EOL schedule
   - google-stackdriver-profiler  #! doesn't publish EOL schedule
+  - groovy  #! doesn't publish EOL schedule
   - jprofiler-profiler  #! doesn't publish EOL schedule
   - your-kit-profiler  #! doesn't publish EOL schedule
   - openjdk  #! JRE versions tied to BellSoft Liberica schedule
