@@ -520,7 +520,15 @@ dependencies:
           - line: latest
     source_type: newrelic_agent
     any_stack: true
-    versions_to_keep: 2  
+    versions_to_keep: 2
+  google-stackdriver-profiler:
+    buildpacks:
+      java:
+        lines:
+          - line: latest
+    source_type: stackdriver_profiler
+    any_stack: true
+    versions_to_keep: 2
   jprofiler-profiler:
     buildpacks:
       java:
@@ -615,6 +623,7 @@ skip_deprecation_check:
   - mariadb-jdbc  #! doesn't publish EOL schedule
   - jacoco  #! doesn't publish EOL schedule
   - newrelic-agent  #! doesn't publish EOL schedule
+  - google-stackdriver-profiler  #! doesn't publish EOL schedule
   - jprofiler-profiler  #! doesn't publish EOL schedule
   - your-kit-profiler  #! doesn't publish EOL schedule
   - openjdk  #! JRE versions tied to BellSoft Liberica schedule
