@@ -324,6 +324,10 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 		watcher := watchers.NewSkyWalkingWatcher(client)
 		versions, err = watcher.Check()
 
+	case "newrelic_agent":
+		watcher := watchers.NewNewRelicAgentWatcher(client)
+		versions, err = watcher.Check()
+
 	default:
 		return nil, fmt.Errorf("unknown type: %s", source.Type)
 	}
@@ -575,6 +579,10 @@ func InWithClient(source Source, version base.Internal, client base.HTTPClient) 
 
 	case "skywalking":
 		watcher := watchers.NewSkyWalkingWatcher(client)
+		return watcher.In(version.Ref)
+
+	case "newrelic_agent":
+		watcher := watchers.NewNewRelicAgentWatcher(client)
 		return watcher.In(version.Ref)
 
 	default:
