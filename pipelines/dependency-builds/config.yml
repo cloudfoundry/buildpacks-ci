@@ -60,6 +60,32 @@ dependencies:
       - 'artifact_id: java-cfenv'
     any_stack: true
     versions_to_keep: 1
+  cf-metrics-exporter:
+    buildpacks:
+      java:
+        lines:
+          - line: 0.7.X
+    source_type: maven
+    source_params:
+      - 'uri: https://repo1.maven.org/maven2'
+      - 'group_id: io.github.rabobank'
+      - 'artifact_id: cf-metrics-exporter'
+    any_stack: true
+    versions_to_keep: 2
+  spring-boot-cli:
+    buildpacks:
+      java:
+        lines:
+          - line: 2.7.X
+    source_type: maven
+    source_params:
+      - 'uri: https://repo1.maven.org/maven2'
+      - 'group_id: org.springframework.boot'
+      - 'artifact_id: spring-boot-cli'
+      - 'classifier: bin'
+      - 'packaging: tar.gz'
+    any_stack: true
+    versions_to_keep: 2
   composer:
     buildpacks:
       php:
@@ -513,6 +539,30 @@ dependencies:
       - 'packaging: zip'
     any_stack: true
     versions_to_keep: 2  
+  newrelic-agent:
+    buildpacks:
+      java:
+        lines:
+          - line: latest
+    source_type: newrelic_agent
+    any_stack: true
+    versions_to_keep: 2
+  google-stackdriver-profiler:
+    buildpacks:
+      java:
+        lines:
+          - line: latest
+    source_type: stackdriver_profiler
+    any_stack: true
+    versions_to_keep: 2
+  groovy:
+    buildpacks:
+      java:
+        lines:
+          - line: 4.0.X
+    source_type: groovy
+    any_stack: true
+    versions_to_keep: 2
   jprofiler-profiler:
     buildpacks:
       java:
@@ -606,6 +656,9 @@ skip_deprecation_check:
   - postgresql-jdbc  #! doesn't publish EOL schedule
   - mariadb-jdbc  #! doesn't publish EOL schedule
   - jacoco  #! doesn't publish EOL schedule
+  - newrelic-agent  #! doesn't publish EOL schedule
+  - google-stackdriver-profiler  #! doesn't publish EOL schedule
+  - groovy  #! doesn't publish EOL schedule
   - jprofiler-profiler  #! doesn't publish EOL schedule
   - your-kit-profiler  #! doesn't publish EOL schedule
   - openjdk  #! JRE versions tied to BellSoft Liberica schedule
@@ -613,3 +666,5 @@ skip_deprecation_check:
   - sapmachine  #! JRE versions tied to SAP release schedule
   - appdynamics-java  #! doesn't publish EOL schedule
   - client-certificate-mapper  #! doesn't publish EOL schedule
+  - cf-metrics-exporter  #! doesn't publish EOL schedule
+  - spring-boot-cli  #! doesn't publish EOL schedule
