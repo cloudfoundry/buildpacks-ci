@@ -513,6 +513,14 @@ dependencies:
       - 'packaging: zip'
     any_stack: true
     versions_to_keep: 2  
+  newrelic-agent:
+    buildpacks:
+      java:
+        lines:
+          - line: latest
+    source_type: newrelic_agent
+    any_stack: true
+    versions_to_keep: 2  
   jprofiler-profiler:
     buildpacks:
       java:
@@ -606,6 +614,7 @@ skip_deprecation_check:
   - postgresql-jdbc  #! doesn't publish EOL schedule
   - mariadb-jdbc  #! doesn't publish EOL schedule
   - jacoco  #! doesn't publish EOL schedule
+  - newrelic-agent  #! doesn't publish EOL schedule
   - jprofiler-profiler  #! doesn't publish EOL schedule
   - your-kit-profiler  #! doesn't publish EOL schedule
   - openjdk  #! JRE versions tied to BellSoft Liberica schedule
