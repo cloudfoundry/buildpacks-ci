@@ -31,8 +31,8 @@ func (w *NewRelicAgentWatcher) Check() ([]base.Internal, error) {
 		return nil, fmt.Errorf("failed to read New Relic agent index: %w", err)
 	}
 
-	// Apache directory listing links look like: href="8.25.1/"
-	pattern := regexp.MustCompile(`href="(\d+\.\d+\.\d+)/"`)
+	// Apache directory listing links look like: <a href="/newrelic/java-agent/newrelic-agent/9.2.0">9.2.0/</a>"
+	pattern := regexp.MustCompile(`>(\d+\.\d+\.\d+)/<`)
 	var versions []base.Internal
 
 	for _, match := range pattern.FindAllSubmatch(body, -1) {
