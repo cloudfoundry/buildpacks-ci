@@ -112,12 +112,22 @@ BUILDS_DIR="builds-artifacts/binary-builds-new/${DEP_NAME}"
 mkdir -p "${BUILDS_DIR}"
 BUILDS_FILE="${BUILDS_DIR}/${VERSION}-${STACK}.json"
 
-jq '{
+# If the source has no sha256 but the artifact is on disk, compute SHA256 from
+# the local file — mirroring what the old Ruby builder did via Sha.get_sha(url).
+# This covers Maven deps where Maven Central only provides SHA1/SHA512.
+SOURCE_SHA256=$(jq -r '.source.sha256 // ""' "${SUMMARY_FILE}")
+if [[ -z "${SOURCE_SHA256}" && -f "artifacts/${ARTIFACT_FILE}" ]]; then
+  echo "[task] source.sha256 is empty — computing SHA256 from artifacts/${ARTIFACT_FILE}..."
+  SOURCE_SHA256=$(sha256sum "artifacts/${ARTIFACT_FILE}" | awk '{print $1}')
+  echo "[task] Computed source SHA256: ${SOURCE_SHA256}"
+fi
+
+jq --arg source_sha256 "${SOURCE_SHA256}" '{
   version:          .version,
   url:              (.url // ""),
   sha256:           (.sha256 // ""),
   source:           (.source // {}),
-  source_sha256:    (.source.sha256 // ""),
+  source_sha256:    $source_sha256,
   sub_dependencies: (.sub_dependencies // {})
 } + if .git_commit_sha then {git_commit_sha: .git_commit_sha} else {} end' \
   "${SUMMARY_FILE}" > "${BUILDS_FILE}"
