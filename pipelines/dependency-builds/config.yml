@@ -563,6 +563,23 @@ dependencies:
     source_type: groovy
     any_stack: true
     versions_to_keep: 2
+  sealights-agent:
+    buildpacks:
+      java:
+        lines:
+          - line: 4.X.X
+    source_type: sealights_agent
+    any_stack: true
+    versions_to_keep: 2
+  jrebel:
+    buildpacks:
+      java:
+        lines:
+          - line: 2025.X.X
+          - line: 2026.X.X
+    source_type: jrebel
+    any_stack: true
+    versions_to_keep: 2
   jprofiler-profiler:
     buildpacks:
       java:
@@ -659,6 +676,8 @@ skip_deprecation_check:
   - newrelic  #! doesn't publish EOL schedule
   - google-stackdriver-profiler  #! doesn't publish EOL schedule
   - groovy  #! doesn't publish EOL schedule
+  - sealights-agent  #! doesn't publish EOL schedule
+  - jrebel  #! doesn't publish EOL schedule
   - jprofiler-profiler  #! doesn't publish EOL schedule
   - your-kit-profiler  #! doesn't publish EOL schedule
   - openjdk  #! JRE versions tied to BellSoft Liberica schedule
