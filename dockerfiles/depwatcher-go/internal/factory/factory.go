@@ -336,6 +336,14 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 		watcher := watchers.NewGroovyWatcher(client)
 		versions, err = watcher.Check()
 
+	case "sealights_agent":
+		watcher := watchers.NewSealightsAgentWatcher(client)
+		versions, err = watcher.Check()
+
+	case "jrebel":
+		watcher := watchers.NewJRebelWatcher(client)
+		versions, err = watcher.Check()
+
 	default:
 		return nil, fmt.Errorf("unknown type: %s", source.Type)
 	}
@@ -599,6 +607,14 @@ func InWithClient(source Source, version base.Internal, client base.HTTPClient) 
 
 	case "groovy":
 		watcher := watchers.NewGroovyWatcher(client)
+		return watcher.In(version.Ref)
+
+	case "sealights_agent":
+		watcher := watchers.NewSealightsAgentWatcher(client)
+		return watcher.In(version.Ref)
+
+	case "jrebel":
+		watcher := watchers.NewJRebelWatcher(client)
 		return watcher.In(version.Ref)
 
 	default:

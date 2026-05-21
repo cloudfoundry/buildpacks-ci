@@ -442,6 +442,7 @@ dependencies:
     buildpacks:
       java:
         lines:
+          - line: 9.0.X
           - line: 10.1.X
           - line: 11.0.X
     source_type: tomcat
@@ -547,6 +548,18 @@ dependencies:
     source_type: newrelic_agent
     any_stack: true
     versions_to_keep: 2
+  datadog-javaagent:
+    buildpacks:
+      java:
+        lines:
+          - line: 1.X.X
+    source_type: maven
+    source_params:
+      - 'uri: https://repo1.maven.org/maven2'
+      - 'group_id: com.datadoghq'
+      - 'artifact_id: dd-java-agent'
+    any_stack: true
+    versions_to_keep: 2
   google-stackdriver-profiler:
     buildpacks:
       java:
@@ -561,6 +574,23 @@ dependencies:
         lines:
           - line: 4.0.X
     source_type: groovy
+    any_stack: true
+    versions_to_keep: 2
+  sealights-agent:
+    buildpacks:
+      java:
+        lines:
+          - line: 4.X.X
+    source_type: sealights_agent
+    any_stack: true
+    versions_to_keep: 2
+  jrebel:
+    buildpacks:
+      java:
+        lines:
+          - line: 2025.X.X
+          - line: 2026.X.X
+    source_type: jrebel
     any_stack: true
     versions_to_keep: 2
   jprofiler-profiler:
@@ -657,8 +687,11 @@ skip_deprecation_check:
   - mariadb-jdbc  #! doesn't publish EOL schedule
   - jacoco  #! doesn't publish EOL schedule
   - newrelic  #! doesn't publish EOL schedule
+  - datadog-javaagent  #! doesn't publish EOL schedule
   - google-stackdriver-profiler  #! doesn't publish EOL schedule
   - groovy  #! doesn't publish EOL schedule
+  - sealights-agent  #! doesn't publish EOL schedule
+  - jrebel  #! doesn't publish EOL schedule
   - jprofiler-profiler  #! doesn't publish EOL schedule
   - your-kit-profiler  #! doesn't publish EOL schedule
   - openjdk  #! JRE versions tied to BellSoft Liberica schedule
