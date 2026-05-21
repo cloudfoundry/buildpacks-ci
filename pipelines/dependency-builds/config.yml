@@ -442,6 +442,7 @@ dependencies:
     buildpacks:
       java:
         lines:
+          - line: 9.0.X
           - line: 10.1.X
           - line: 11.0.X
     source_type: tomcat
