@@ -44,7 +44,7 @@ dependencies:
     source_params:
       - 'uri: https://repo1.maven.org/maven2'
       - 'group_id: org.cloudfoundry'
-      - 'artifact_id: client-certificate-mapper'
+      - 'artifact_id: java-buildpack-client-certificate-mapper'
     any_stack: true
     versions_to_keep: 1
   java-cfenv:
