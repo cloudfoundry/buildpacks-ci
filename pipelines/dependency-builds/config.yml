@@ -44,7 +44,7 @@ dependencies:
     source_params:
       - 'uri: https://repo1.maven.org/maven2'
       - 'group_id: org.cloudfoundry'
-      - 'artifact_id: client-certificate-mapper'
+      - 'artifact_id: java-buildpack-client-certificate-mapper'
     any_stack: true
     versions_to_keep: 1
   java-cfenv:
@@ -70,6 +70,17 @@ dependencies:
       - 'uri: https://repo1.maven.org/maven2'
       - 'group_id: io.github.rabobank'
       - 'artifact_id: cf-metrics-exporter'
+    any_stack: true
+    versions_to_keep: 2
+  metric-writer:
+    buildpacks:
+      java:
+        lines:
+          - line: 3.X.X
+    source_type: github_tags
+    source_params:
+      - 'repo: cloudfoundry/java-buildpack-metric-writer'
+      - 'tag_regex: ^v(\d+\.\d+\.\d+)\.RELEASE$'
     any_stack: true
     versions_to_keep: 2
   spring-boot-cli:
@@ -560,6 +571,18 @@ dependencies:
       - 'artifact_id: dd-java-agent'
     any_stack: true
     versions_to_keep: 2
+  contrast-security:
+    buildpacks:
+      java:
+        lines:
+          - line: 6.X.X
+    source_type: maven
+    source_params:
+      - 'uri: https://repo1.maven.org/maven2'
+      - 'group_id: com.contrastsecurity'
+      - 'artifact_id: contrast-agent'
+    any_stack: true
+    versions_to_keep: 2
   google-stackdriver-profiler:
     buildpacks:
       java:
@@ -688,6 +711,7 @@ skip_deprecation_check:
   - jacoco  #! doesn't publish EOL schedule
   - newrelic  #! doesn't publish EOL schedule
   - datadog-javaagent  #! doesn't publish EOL schedule
+  - contrast-security  #! doesn't publish EOL schedule
   - google-stackdriver-profiler  #! doesn't publish EOL schedule
   - groovy  #! doesn't publish EOL schedule
   - sealights-agent  #! doesn't publish EOL schedule
@@ -700,4 +724,5 @@ skip_deprecation_check:
   - appdynamics-java  #! doesn't publish EOL schedule
   - client-certificate-mapper  #! doesn't publish EOL schedule
   - cf-metrics-exporter  #! doesn't publish EOL schedule
+  - metric-writer  #! doesn't publish EOL schedule
   - spring-boot-cli  #! doesn't publish EOL schedule
