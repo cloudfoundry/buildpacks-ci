@@ -30,9 +30,10 @@ class Dependencies
       # Ensure version is a string (YAML may parse numbers like 11.0 as Float)
       version = version.to_s unless version.nil?
       version = version[1..] if !version.nil? && version.start_with?('v')
+      # Date-based versions (e.g. 20241028_RC00) sort correctly as strings.
       # SemVer.parse returns nil (not an exception) for unparseable versions.
       # Try padding 2-part versions like "25.2" to "25.2.0" for SemVer compatibility.
-      version = SemVer.parse(version) || SemVer.parse("#{version}.0") || version
+      version = SemVer.parse(version) || SemVer.parse("#{version}.0") || version unless date_version?(version)
       [d['name'], version, d['cf_stacks']]
     end
   end
@@ -41,8 +42,14 @@ class Dependencies
 
   def latest?
     @matching_deps.all? do |d|
-      new_ver = SemVer.parse(@dep['version'])
-      old_ver = SemVer.parse(d['version'])
+      new_v = @dep['version'].to_s
+      old_v = d['version'].to_s
+      if date_version?(new_v) && date_version?(old_v)
+        next new_v > old_v
+      end
+
+      new_ver = SemVer.parse(new_v)
+      old_ver = SemVer.parse(old_v)
       next false if new_ver.nil? || old_ver.nil?
 
       new_ver > old_ver
@@ -74,6 +81,12 @@ class Dependencies
     # so they still require the stack subset check.
     return false unless any_stack_dep? || dep_includes_at_least_these_stacks?(stacks)
 
+    # Date-based versions (e.g. google-stackdriver-profiler: 20241028_RC00) are a
+    # single version line with no major/minor concept — treat them like nil/latest.
+    if date_version?(version.to_s) || date_version?(@dep['version'].to_s)
+      return true
+    end
+
     parsed_version = SemVer.parse(version.to_s)
     return false if parsed_version.nil?
 
@@ -103,10 +116,17 @@ class Dependencies
     dep = @dependencies_latest_released.select do |d|
       same_dependency_line?(d['cf_stacks'], d['version'], d['name'])
     end.max_by do |d|
-      SemVer.parse(d['version'])
+      v = d['version'].to_s
+      date_version?(v) ? v : (SemVer.parse(v) || v)
     rescue StandardError
       d['version']
     end
     dep ? [dep] : []
+  end
+
+  DATE_VERSION_PATTERN = /\A\d{8}_RC\d+\z/
+
+  def date_version?(version)
+    DATE_VERSION_PATTERN.match?(version.to_s)
   end
 end
