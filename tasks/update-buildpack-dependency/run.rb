@@ -31,6 +31,10 @@ def sort_versions(versions)
   end
 end
 
+def is_null(value)
+  value.nil? || value.empty? || value.downcase == 'null'
+end
+
 config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/dependency-builds/config.yml'), permitted_classes: [Date, Time])
 
 BUILD_STACKS = config['build_stacks']
