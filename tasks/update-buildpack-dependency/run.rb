@@ -11,8 +11,24 @@ require_relative 'php_manifest'
 buildpacks_ci_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
 require_relative "#{buildpacks_ci_dir}/lib/git-client"
 
-def is_null(value)
-  value.nil? || value.empty? || value.downcase == 'null'
+DATE_VERSION_PATTERN = /\A\d{8}_RC\d+\z/
+
+def date_version?(version)
+  DATE_VERSION_PATTERN.match?(version.to_s)
+end
+
+# Sort a list of version strings. Date-based versions (e.g. 20241028_RC00) are
+# sorted lexicographically (correct for YYYYMMDD). SemVer versions are parsed
+# and sorted numerically. Mixed lists fall back to string comparison.
+def sort_versions(versions)
+  versions.sort_by do |v|
+    if date_version?(v)
+      v
+    else
+      parsed = SemVer.parse(v.to_s) || SemVer.parse("#{v}.0")
+      parsed ? [parsed.major, parsed.minor, parsed.patch] : v
+    end
+  end
 end
 
 config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/dependency-builds/config.yml'), permitted_classes: [Date, Time])
@@ -131,8 +147,8 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
                  .select { |d| d['name'] == manifest_name }
                  .map { |d| d['version'] }
 
-  added += (new_versions - old_versions).uniq.sort
-  removed += (old_versions - new_versions).uniq.sort
+  added += sort_versions((new_versions - old_versions).uniq)
+  removed += sort_versions((old_versions - new_versions).uniq)
   rebuilt += [old_versions.include?(resource_version)]
 end
 
@@ -158,7 +174,7 @@ commit_message += "\n\nfor stack(s) #{total_stacks.join(', ')}"
 # * There are two version lines, stable & mainline
 #   when we add a new minor line, we should update the version line regex
 if !rebuilt && manifest_name == 'nginx' && buildpack_name == 'nginx'
-  v = SemVer.parse(resource_version)
+  v = date_version?(resource_version) ? nil : SemVer.parse(resource_version)
   raise "Invalid version format: #{resource_version}" if v.nil?
   raise "When setting nginx's version_line, expected to find data['source']['version_filter'], but did not" unless data.dig('source', 'version_filter')
 
