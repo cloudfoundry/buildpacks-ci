@@ -81,6 +81,8 @@
 #@ def get_s3_regexp(dep_name):
 #@   if dep_name == "pip" or dep_name == "go" or dep_name == "libgdiplus":
 #@     version_pattern = '(\\d+\\.\\d+(?:\\.\\d+)?)'
+#@   elif dep_name == "google-stackdriver-profiler":
+#@     version_pattern = '(\\d{8}_RC\\d+)'
 #@   else:
 #@     version_pattern = '(\\d+\\.\\d+\\.\\d+)'
 #@   end
