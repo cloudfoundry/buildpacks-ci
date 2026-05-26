@@ -26,7 +26,7 @@ def sort_versions(versions)
       v
     else
       parsed = SemVer.parse(v.to_s) || SemVer.parse("#{v}.0")
-      parsed ? [parsed.major, parsed.minor, parsed.patch] : v
+      parsed ? [parsed.major, parsed.minor, parsed.patch] : [0, 0, 0, v]
     end
   end
 end
