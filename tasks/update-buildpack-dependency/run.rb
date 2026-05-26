@@ -23,12 +23,16 @@ end
 def sort_versions(versions)
   versions.sort_by do |v|
     if date_version?(v)
-      v
+      [v]
     else
       parsed = SemVer.parse(v.to_s) || SemVer.parse("#{v}.0")
-      parsed ? [parsed.major, parsed.minor, parsed.patch] : v
+      parsed ? [parsed.major, parsed.minor, parsed.patch] : [0, 0, 0, v]
     end
   end
+end
+
+def is_null(value)
+  value.nil? || value.empty? || value.downcase == 'null'
 end
 
 config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/dependency-builds/config.yml'), permitted_classes: [Date, Time])
@@ -48,7 +52,8 @@ manifest_name = source_name == 'nginx-static' ? 'nginx' : source_name
 buildpack_name = manifest['language'].downcase
 
 removal_strategy = ENV.fetch('REMOVAL_STRATEGY', nil)
-version_line = ENV.fetch('VERSION_LINE', nil)
+raw_version_line = ENV.fetch('VERSION_LINE', nil)
+version_line = is_null(raw_version_line) ? nil : raw_version_line.downcase
 version_line_type = ENV.fetch('VERSION_LINE_TYPE', nil)
 deprecation_date = ENV.fetch('DEPRECATION_DATE', nil)
 deprecation_link = ENV.fetch('DEPRECATION_LINK', nil)
@@ -73,9 +78,9 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
   # and will replace all existing stack-specific entries in one pass
   next if any_stack_build_exists && !stack_dependency_build.include?('any-stack.json')
 
-  if !is_null(deprecation_date) && !is_null(deprecation_link) && version_line != 'latest'
+  if !is_null(deprecation_date) && !is_null(deprecation_link) && !version_line.nil? && version_line != 'latest'
     dependency_deprecation_date = {
-      'version_line' => version_line.downcase,
+      'version_line' => version_line,
       'name' => manifest_name,
       'date' => Date.parse(deprecation_date),
       'link' => deprecation_link
@@ -85,7 +90,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
     deprecation_dates = manifest.fetch('dependency_deprecation_dates', [])
     deprecation_dates = deprecation_dates
-                        .reject { |d| d['version_line'] == version_line.downcase and d['name'] == manifest_name }
+                        .reject { |d| d['version_line'] == version_line && d['name'] == manifest_name }
                         .push(dependency_deprecation_date)
                         .sort_by { |d| [d['name'], d['version_line']] }
     manifest['dependency_deprecation_dates'] = deprecation_dates
@@ -98,7 +103,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   skip_lines_per_stack = config.dig('dependencies', source_name, 'skip_lines') || {}
   skip_lines_per_stack.each do |stack_name, lines|
-    stacks -= [stack_name] if lines.map(&:downcase).include?(version_line.downcase)
+    stacks -= [stack_name] if version_line && lines.include?(version_line)
   end
 
   stacks = WINDOWS_STACKS if source_name == 'hwc'
