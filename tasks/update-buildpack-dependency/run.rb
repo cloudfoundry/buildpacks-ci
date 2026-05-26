@@ -102,7 +102,7 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   skip_lines_per_stack = config.dig('dependencies', source_name, 'skip_lines') || {}
   skip_lines_per_stack.each do |stack_name, lines|
-    stacks -= [stack_name] if lines.map(&:downcase).include?(version_line.downcase)
+    stacks -= [stack_name] if !version_line.nil? && lines.map(&:downcase).include?(version_line.downcase)
   end
 
   stacks = WINDOWS_STACKS if source_name == 'hwc'
