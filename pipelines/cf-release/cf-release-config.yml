@@ -1,6 +1,6 @@
 #@data/values
 ---
-#@ default_stacks = ['cflinuxfs4']
+#@ default_stacks = ['cflinuxfs4', 'cflinuxfs5']
 
 supported_languages:
 - name: dotnet-core
