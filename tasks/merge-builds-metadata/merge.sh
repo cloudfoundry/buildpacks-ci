@@ -21,7 +21,9 @@ for stack_dir in *-builds-metadata; do
     "${stack_dir}/binary-builds-new/" \
     "merged-builds-metadata/binary-builds-new/"
 
-  count=$(find "${stack_dir}/binary-builds-new" -name "*.json" | wc -l)
+  count=$(rsync -a --ignore-existing --dry-run \
+    "${stack_dir}/binary-builds-new/" \
+    "merged-builds-metadata/binary-builds-new/" 2>/dev/null | grep -c '\.json$' || true)
   echo "[merge]   → ${count} file(s) copied"
   COPIED=$((COPIED + count))
 done

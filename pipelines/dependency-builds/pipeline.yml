@@ -359,7 +359,24 @@ jobs:
     #@ end
   #@ if len(build_stacks) > 1:
   - task: merge-builds-metadata
-    file: buildpacks-ci/tasks/merge-builds-metadata/task.yml
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: cfbuildpacks/ci
+          username: ((cfbuildpacks-dockerhub-user.username))
+          password: ((cfbuildpacks-dockerhub-user.password))
+      inputs:
+        - name: buildpacks-ci
+        - name: builds
+        #@ for stack in build_stacks:
+        - name: #@ "{}-builds-metadata".format(stack)
+        #@ end
+      outputs:
+        - name: merged-builds-metadata
+      run:
+        path: buildpacks-ci/tasks/merge-builds-metadata/merge.sh
     params:
       GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
       GIT_USER_NAME: ((cf-buildpacks-app-runtime-interfaces-name))
