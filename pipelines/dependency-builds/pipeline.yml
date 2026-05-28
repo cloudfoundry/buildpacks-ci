@@ -349,25 +349,33 @@ jobs:
         params:
           STACK: #@ stack
           ANY_STACK_BUILD_STACK: #@ data.values.any_stack_build_stack
-      #@ if getattr(dep, "third_party_hosted", False):
-      - put: #@ "builds-metadata-{}".format(stack)
-        resource: builds
+          SKIP_COMMIT: #@ "true" if len(build_stacks) > 1 else "false"
+      #@ if not getattr(dep, "third_party_hosted", False):
+      - put: #@ "buildpacks-bucket-{}-{}".format(dep_name, stack)
+        resource: #@ "buildpacks-bucket-{}".format(dep_name)
         params:
-          repository: #@ "{}-builds-metadata".format(stack)
-          rebase: true
-      #@ else:
-      - in_parallel:
-        - put: #@ "buildpacks-bucket-{}-{}".format(dep_name, stack)
-          resource: #@ "buildpacks-bucket-{}".format(dep_name)
-          params:
-            file: #@ "{}-artifacts/{}*".format(stack, "nginx" if dep_name == "nginx-static" else dep_name)
-        - put: #@ "builds-metadata-{}".format(stack)
-          resource: builds
-          params:
-            repository: #@ "{}-builds-metadata".format(stack)
-            rebase: true
+          file: #@ "{}-artifacts/{}*".format(stack, "nginx" if dep_name == "nginx-static" else dep_name)
       #@ end
     #@ end
+  #@ if len(build_stacks) > 1:
+  - task: merge-builds-metadata
+    file: buildpacks-ci/tasks/merge-builds-metadata/task.yml
+    params:
+      GIT_USER_EMAIL: ((cf-buildpacks-app-runtime-interfaces-email))
+      GIT_USER_NAME: ((cf-buildpacks-app-runtime-interfaces-name))
+  - put: builds
+    params:
+      repository: merged-builds-metadata
+      rebase: true
+  #@ else:
+  #@ for stack in build_stacks:
+  - put: #@ "builds-metadata-{}".format(stack)
+    resource: builds
+    params:
+      repository: #@ "{}-builds-metadata".format(stack)
+      rebase: true
+  #@ end
+  #@ end
   #@ end
 #@   end
 
