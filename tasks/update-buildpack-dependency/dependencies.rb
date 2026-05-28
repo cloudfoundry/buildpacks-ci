@@ -14,6 +14,14 @@ class Dependencies
     # if we're rebuilding, replace matching version
     if @matching_deps.map { |d| d['version'] }.include?(@dep['version'])
       out = (@dependencies.reject { |d| same_dependency_line?(d['cf_stacks'], d['version'], d['name']) && d['version'] == @dep['version'] } + [@dep])
+    # stack-specific dep: version exists but under a different stack — add a new per-stack entry.
+    # This handles the race condition where one stack's build lands first and a second stack's
+    # build arrives later: same_dependency_line? returns false for the existing entry (disjoint
+    # stacks), so @matching_deps is empty and latest? would incorrectly remove the first entry.
+    # Instead, detect the "new stack for existing version" case and append without touching
+    # other stack entries.
+    elsif !any_stack_dep? && version_exists_for_different_stack?
+      out = @dependencies + [@dep]
     # adding a new one, but keep everything
     elsif @removal_strategy == 'keep_all'
       out = @dependencies + [@dep]
@@ -44,15 +52,24 @@ class Dependencies
     @matching_deps.all? do |d|
       new_v = @dep['version'].to_s
       old_v = d['version'].to_s
-      if date_version?(new_v) && date_version?(old_v)
-        next new_v > old_v
-      end
+      next new_v > old_v if date_version?(new_v) && date_version?(old_v)
 
       new_ver = SemVer.parse(new_v)
       old_ver = SemVer.parse(old_v)
       next false if new_ver.nil? || old_ver.nil?
 
       new_ver > old_ver
+    end
+  end
+
+  # Returns true when the incoming dep's version already exists in the manifest
+  # under a disjoint stack set. Used to detect the "new stack for existing version"
+  # scenario (e.g. a second stack's build arrives after the first was already added).
+  def version_exists_for_different_stack?
+    @dependencies.any? do |d|
+      d['name'] == @dep['name'] &&
+        d['version'] == @dep['version'] &&
+        (d['cf_stacks'] & @dep['cf_stacks']).empty?
     end
   end
 
@@ -83,9 +100,7 @@ class Dependencies
 
     # Date-based versions (e.g. google-stackdriver-profiler: 20241028_RC00) are a
     # single version line with no major/minor concept — treat them like nil/latest.
-    if date_version?(version.to_s) || date_version?(@dep['version'].to_s)
-      return true
-    end
+    return true if date_version?(version.to_s) || date_version?(@dep['version'].to_s)
 
     parsed_version = SemVer.parse(version.to_s)
     return false if parsed_version.nil?

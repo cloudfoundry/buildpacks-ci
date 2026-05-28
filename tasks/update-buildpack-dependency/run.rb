@@ -140,6 +140,12 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
                  .select { |d| d['name'] == manifest_name }
                  .map { |d| d['version'] }
 
+  # Capture stacks before the update so we can detect a stack-only change
+  # (e.g. a new stack's build arrives for a version already present under a different stack).
+  old_stacks_for_version = manifest['dependencies']
+                           .select { |d| d['name'] == manifest_name && d['version'] == resource_version }
+                           .flat_map { |d| d['cf_stacks'] }.sort
+
   manifest['dependencies'] = Dependencies.new(
     dep,
     version_line_type,
@@ -152,9 +158,18 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
                  .select { |d| d['name'] == manifest_name }
                  .map { |d| d['version'] }
 
+  new_stacks_for_version = manifest['dependencies']
+                           .select { |d| d['name'] == manifest_name && d['version'] == resource_version }
+                           .flat_map { |d| d['cf_stacks'] }.sort
+
   added += sort_versions((new_versions - old_versions).uniq)
   removed += sort_versions((old_versions - new_versions).uniq)
   rebuilt += [old_versions.include?(resource_version)]
+
+  # A stack-only update (new stack added to existing version) produces no entry
+  # in `added`, but the manifest did change and must be committed. Mark as rebuilt
+  # so the early-exit check below does not skip the commit.
+  rebuilt[-1] = true if old_stacks_for_version != new_stacks_for_version && added.empty?
 end
 
 if rebuilt.empty?
