@@ -27,12 +27,12 @@ RSpec.describe Dependencies do
   def make_dep(name:, version:, stacks:, uri_suffix: nil)
     uri_suffix ||= stacks.length > 1 ? 'any-stack' : stacks.first
     {
-      'name'         => name,
-      'version'      => version,
-      'uri'          => "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{name}_#{version}_linux_noarch_#{uri_suffix}_abc12345.tgz",
-      'sha256'       => 'abc12345' * 8,
-      'cf_stacks'    => stacks,
-      'source'       => "https://example.com/#{name}-#{version}.tar.gz",
+      'name' => name,
+      'version' => version,
+      'uri' => "https://buildpacks.cloudfoundry.org/dependencies/#{name}/#{name}_#{version}_linux_noarch_#{uri_suffix}_abc12345.tgz",
+      'sha256' => 'abc12345' * 8,
+      'cf_stacks' => stacks,
+      'source' => "https://example.com/#{name}-#{version}.tar.gz",
       'source_sha256' => 'def67890' * 8
     }
   end
@@ -62,20 +62,20 @@ RSpec.describe Dependencies do
     context 'when stacks evolve: existing entry has cflinuxfs3+cflinuxfs4, new build covers cflinuxfs4+cflinuxfs5 (PR #886 bug)' do
       # Real URIs from the nodejs-buildpack PR #886 — same version, different content
       # hashes because the tarball was rebuilt for the new stack set.
+      subject { switch(new_dep, [existing_entry]) }
+
       let(:existing_entry) do
         make_dep(name: dep_name, version: '1.22.22', stacks: %w[cflinuxfs4 cflinuxfs3]).merge(
-          'uri'    => 'https://buildpacks.cloudfoundry.org/dependencies/yarn/yarn_1.22.22_linux_noarch_any-stack_4911d0a6.tgz',
+          'uri' => 'https://buildpacks.cloudfoundry.org/dependencies/yarn/yarn_1.22.22_linux_noarch_any-stack_4911d0a6.tgz',
           'sha256' => '4911d0a6ccea0b992648fbba16a687917511233552ab87cb8ff4b80259ddfac2'
         )
       end
       let(:new_dep) do
         make_dep(name: dep_name, version: '1.22.22', stacks: %w[cflinuxfs4 cflinuxfs5]).merge(
-          'uri'    => 'https://buildpacks.cloudfoundry.org/dependencies/yarn/yarn_1.22.22_linux_noarch_any-stack_df064301.tgz',
+          'uri' => 'https://buildpacks.cloudfoundry.org/dependencies/yarn/yarn_1.22.22_linux_noarch_any-stack_df064301.tgz',
           'sha256' => 'df064301db0f1c0cac4ecf195103495de55e9b06226a38d867b1839103137916'
         )
       end
-
-      subject { switch(new_dep, [existing_entry]) }
 
       it 'produces exactly one entry for the version' do
         expect(subject.count { |d| d['name'] == dep_name && d['version'] == '1.22.22' }).to eq(1)
@@ -97,10 +97,10 @@ RSpec.describe Dependencies do
     end
 
     context 'when stacks evolve: existing entry has only cflinuxfs4, new build covers cflinuxfs4+cflinuxfs5' do
+      subject { switch(new_dep, [existing_entry]) }
+
       let(:existing_entry) { make_dep(name: dep_name, version: '1.22.22', stacks: %w[cflinuxfs4]) }
       let(:new_dep)        { make_dep(name: dep_name, version: '1.22.22', stacks: %w[cflinuxfs4 cflinuxfs5]) }
-
-      subject { switch(new_dep, [existing_entry]) }
 
       it 'produces exactly one entry for the version' do
         expect(subject.count { |d| d['name'] == dep_name && d['version'] == '1.22.22' }).to eq(1)
@@ -113,6 +113,8 @@ RSpec.describe Dependencies do
     end
 
     context 'when rebuilding the same version with the same stacks (cflinuxfs4+cflinuxfs5)' do
+      subject { switch(new_dep, [existing_entry]) }
+
       let(:existing_entry) { make_dep(name: dep_name, version: '1.22.22', stacks: %w[cflinuxfs4 cflinuxfs5]) }
       let(:new_dep) do
         make_dep(name: dep_name, version: '1.22.22', stacks: %w[cflinuxfs4 cflinuxfs5]).merge(
@@ -120,8 +122,6 @@ RSpec.describe Dependencies do
           'sha256' => 'newsha123' * 8
         )
       end
-
-      subject { switch(new_dep, [existing_entry]) }
 
       it 'produces exactly one entry' do
         expect(subject.count { |d| d['name'] == dep_name }).to eq(1)
@@ -134,10 +134,10 @@ RSpec.describe Dependencies do
     end
 
     context 'when a newer version arrives (latest line)' do
+      subject { switch(new_dep, [old_entry], line: nil, removal_strategy: nil) }
+
       let(:old_entry) { make_dep(name: dep_name, version: '1.22.21', stacks: %w[cflinuxfs4 cflinuxfs3]) }
       let(:new_dep)   { make_dep(name: dep_name, version: '1.22.22', stacks: %w[cflinuxfs4 cflinuxfs5]) }
-
-      subject { switch(new_dep, [old_entry], line: nil, removal_strategy: nil) }
 
       it 'adds the new version' do
         expect(subject.map { |d| d['version'] }).to include('1.22.22')
@@ -153,11 +153,11 @@ RSpec.describe Dependencies do
     end
 
     context 'when multiple versions exist and a newer one arrives (keep_latest_released strategy)' do
+      subject { switch(new_dep, [v1, v2], line: nil, removal_strategy: 'keep_latest_released', latest_released: [v2]) }
+
       let(:v1) { make_dep(name: dep_name, version: '1.22.20', stacks: %w[cflinuxfs4 cflinuxfs3]) }
       let(:v2) { make_dep(name: dep_name, version: '1.22.21', stacks: %w[cflinuxfs4 cflinuxfs3]) }
       let(:new_dep) { make_dep(name: dep_name, version: '1.22.22', stacks: %w[cflinuxfs4 cflinuxfs5]) }
-
-      subject { switch(new_dep, [v1, v2], line: nil, removal_strategy: 'keep_latest_released', latest_released: [v2]) }
 
       it 'adds the new version' do
         expect(subject.map { |d| d['version'] }).to include('1.22.22')
@@ -180,6 +180,8 @@ RSpec.describe Dependencies do
     context 'when the manifest has two same-version entries due to a previous bug' do
       # Simulates the broken state that PR #886 introduced: two yarn 1.22.22 entries
       # both covering cflinuxfs4.  The next pipeline run should heal the manifest.
+      subject { switch(healed_dep, [old_entry, new_entry]) }
+
       let(:old_entry) { make_dep(name: dep_name, version: '1.22.22', stacks: %w[cflinuxfs4 cflinuxfs3]) }
       let(:new_entry) { make_dep(name: dep_name, version: '1.22.22', stacks: %w[cflinuxfs4 cflinuxfs5]) }
       let(:healed_dep) do
@@ -187,8 +189,6 @@ RSpec.describe Dependencies do
           'uri' => 'https://buildpacks.cloudfoundry.org/dependencies/yarn/yarn_1.22.22_linux_noarch_any-stack_healed.tgz'
         )
       end
-
-      subject { switch(healed_dep, [old_entry, new_entry]) }
 
       it 'produces exactly one entry, healing the duplicate' do
         expect(subject.count { |d| d['name'] == dep_name && d['version'] == '1.22.22' }).to eq(1)
@@ -207,11 +207,11 @@ RSpec.describe Dependencies do
     let(:dep_name) { 'node' }
 
     context 'when adding cflinuxfs5 entry for a version that already has cflinuxfs4 and cflinuxfs3 entries' do
+      subject { switch(fs5_dep, [fs3_entry, fs4_entry], line: 'minor') }
+
       let(:fs3_entry) { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs3]) }
       let(:fs4_entry) { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs4]) }
       let(:fs5_dep)   { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs5]) }
-
-      subject { switch(fs5_dep, [fs3_entry, fs4_entry], line: 'minor') }
 
       it 'adds the cflinuxfs5 entry' do
         stacks = subject.select { |d| d['name'] == dep_name && d['version'] == '22.22.0' }
@@ -238,16 +238,16 @@ RSpec.describe Dependencies do
     end
 
     context 'when rebuilding a single-stack entry' do
+      subject { switch(new_fs4_dep, [fs4_entry, fs5_entry], line: 'minor') }
+
       let(:fs4_entry) { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs4]) }
       let(:fs5_entry) { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs5]) }
       let(:new_fs4_dep) do
         make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs4]).merge(
-          'uri'    => 'https://buildpacks.cloudfoundry.org/dependencies/node/node_22.22.0_linux_x64_cflinuxfs4_newsha.tgz',
+          'uri' => 'https://buildpacks.cloudfoundry.org/dependencies/node/node_22.22.0_linux_x64_cflinuxfs4_newsha.tgz',
           'sha256' => 'newsha' * 10
         )
       end
-
-      subject { switch(new_fs4_dep, [fs4_entry, fs5_entry], line: 'minor') }
 
       it 'replaces only the cflinuxfs4 entry' do
         entry = subject.find { |d| d['name'] == dep_name && d['cf_stacks'] == %w[cflinuxfs4] }
@@ -265,15 +265,60 @@ RSpec.describe Dependencies do
       end
     end
 
+    # Race condition fix: cflinuxfs4 was built and added to the manifest first.
+    # cflinuxfs5 build completes later and the update job re-runs. Previously
+    # this would either no-op (SKIP) or incorrectly remove the cflinuxfs4 entry.
+    context 'when cflinuxfs5 build arrives after cflinuxfs4 was already added (race condition)' do
+      subject { switch(fs5_dep, [fs4_entry], line: 'minor') }
+
+      let(:fs4_entry) { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs4]) }
+      let(:fs5_dep)   { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs5]) }
+
+      it 'adds the cflinuxfs5 entry' do
+        entries = subject.select { |d| d['name'] == dep_name && d['version'] == '22.22.0' }
+        stacks = entries.flat_map { |d| d['cf_stacks'] }
+        expect(stacks).to include('cflinuxfs5')
+      end
+
+      it 'keeps the cflinuxfs4 entry intact with its original URI' do
+        entry = subject.find { |d| d['name'] == dep_name && d['cf_stacks'] == %w[cflinuxfs4] }
+        expect(entry).not_to be_nil
+        expect(entry['uri']).to eq(fs4_entry['uri'])
+      end
+
+      it 'results in two separate stack entries for the version' do
+        entries = subject.select { |d| d['name'] == dep_name && d['version'] == '22.22.0' }
+        expect(entries.length).to eq(2)
+      end
+    end
+
+    context 'when cflinuxfs5 build is re-processed and the entry already exists (idempotency)' do
+      subject { switch(fs5_dep, [fs4_entry, fs5_entry], line: 'minor') }
+
+      let(:fs4_entry) { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs4]) }
+      let(:fs5_entry) { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs5]) }
+      let(:fs5_dep)   { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs5]) }
+
+      it 'does not add a duplicate cflinuxfs5 entry' do
+        entries = subject.select { |d| d['name'] == dep_name && d['version'] == '22.22.0' }
+        expect(entries.length).to eq(2)
+      end
+
+      it 'replaces the existing cflinuxfs5 entry (rebuild)' do
+        entry = subject.find { |d| d['name'] == dep_name && d['cf_stacks'] == %w[cflinuxfs5] }
+        expect(entry).not_to be_nil
+      end
+    end
+
     # node uses major version lines (20.X.X, 22.X.X) — a patch update within the
     # same major line (22.21.0 → 22.22.0) replaces the old cflinuxfs4 entry but
     # leaves the cflinuxfs5 entry (which hasn't been rebuilt yet) intact.
     context 'when a patch update arrives for one stack (major version line)' do
+      subject { switch(new_fs4, [old_fs4, old_fs5], line: 'major') }
+
       let(:old_fs4) { make_dep(name: dep_name, version: '22.21.0', stacks: %w[cflinuxfs4]) }
       let(:old_fs5) { make_dep(name: dep_name, version: '22.21.0', stacks: %w[cflinuxfs5]) }
       let(:new_fs4) { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs4]) }
-
-      subject { switch(new_fs4, [old_fs4, old_fs5], line: 'major') }
 
       it 'adds the new cflinuxfs4 entry' do
         expect(subject.map { |d| [d['version'], d['cf_stacks']] })
