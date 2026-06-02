@@ -76,11 +76,12 @@ RSpec.describe 'merge-builds-metadata/merge.sh' do
 
   # Concourse layout:
   #
-  #   builds/                        ← git resource (seed)
+  #   builds/                        ← git resource (seed, has .git/)
   #   <stack>-builds-metadata/       ← task output from build-binary (one per stack)
   #     binary-builds-new/<dep>/
   #       <version>-<stack>.json
-  #   merged-builds-metadata/        ← task output (initially a clone of builds/)
+  #   merged-builds-metadata/        ← Concourse output dir (empty, NO .git/)
+  #                                     merge.sh seeds it via rsync from builds/
 
   def setup_builds_repo(existing_files: [])
     builds = File.join(@tmpdir, 'builds')
@@ -92,10 +93,11 @@ RSpec.describe 'merge-builds-metadata/merge.sh' do
 
   def setup_merged_repo
     merged = File.join(@tmpdir, 'merged-builds-metadata')
-    # Concourse seeds the output dir from the builds resource via rsync —
-    # simulate by cloning builds/ into merged-builds-metadata/.
-    system('git', 'clone', File.join(@tmpdir, 'builds'), merged,
-           out: '/dev/null', err: '/dev/null')
+    # Concourse provides output dirs as empty directories — no .git/.
+    # merge.sh itself seeds it via rsync from builds/, copying .git/ in.
+    # Do NOT pre-initialise as a git repo: that would hide regressions where
+    # --exclude='.git' is re-added and breaks real Concourse runs.
+    FileUtils.mkdir_p(merged)
     merged
   end
 
@@ -123,10 +125,10 @@ RSpec.describe 'merge-builds-metadata/merge.sh' do
     end
 
     it 'produces exactly one new commit in merged-builds-metadata' do
-      before = commit_count(File.join(@tmpdir, 'merged-builds-metadata'))
       run_merge(@tmpdir)
-      after = commit_count(File.join(@tmpdir, 'merged-builds-metadata'))
-      expect(after - before).to eq(1)
+      merged_count = commit_count(File.join(@tmpdir, 'merged-builds-metadata'))
+      builds_count = commit_count(File.join(@tmpdir, 'builds'))
+      expect(merged_count).to eq(builds_count + 1)
     end
 
     it 'commits both stack JSON files in a single commit' do
@@ -168,10 +170,10 @@ RSpec.describe 'merge-builds-metadata/merge.sh' do
     end
 
     it 'makes no new commit' do
-      before = commit_count(File.join(@tmpdir, 'merged-builds-metadata'))
       run_merge(@tmpdir)
-      after = commit_count(File.join(@tmpdir, 'merged-builds-metadata'))
-      expect(after).to eq(before)
+      merged_count = commit_count(File.join(@tmpdir, 'merged-builds-metadata'))
+      builds_count = commit_count(File.join(@tmpdir, 'builds'))
+      expect(merged_count).to eq(builds_count)
     end
   end
 
@@ -194,10 +196,10 @@ RSpec.describe 'merge-builds-metadata/merge.sh' do
     end
 
     it 'produces exactly one new commit' do
-      before = commit_count(File.join(@tmpdir, 'merged-builds-metadata'))
       run_merge(@tmpdir)
-      after = commit_count(File.join(@tmpdir, 'merged-builds-metadata'))
-      expect(after - before).to eq(1)
+      merged_count = commit_count(File.join(@tmpdir, 'merged-builds-metadata'))
+      builds_count = commit_count(File.join(@tmpdir, 'builds'))
+      expect(merged_count).to eq(builds_count + 1)
     end
 
     it 'commits only the new cflinuxfs5 JSON' do
@@ -254,10 +256,10 @@ RSpec.describe 'merge-builds-metadata/merge.sh' do
     end
 
     it 'makes no new commit' do
-      before = commit_count(File.join(@tmpdir, 'merged-builds-metadata'))
       run_merge(@tmpdir)
-      after = commit_count(File.join(@tmpdir, 'merged-builds-metadata'))
-      expect(after).to eq(before)
+      merged_count = commit_count(File.join(@tmpdir, 'merged-builds-metadata'))
+      builds_count = commit_count(File.join(@tmpdir, 'builds'))
+      expect(merged_count).to eq(builds_count)
     end
   end
 
