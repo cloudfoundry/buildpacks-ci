@@ -235,6 +235,8 @@ dependencies:
             link: https://nginx.org/
           - line: 1.29.X
             link: https://nginx.org/
+          - line: 1.30.X
+            link: https://nginx.org/
     versions_to_keep: 2
   openresty:
     buildpacks:
@@ -250,15 +252,15 @@ dependencies:
           #! nginx deprecation dates are 1 year after the mainline release date
           #! each odd version line (ex. 1.19) is the "mainline"
           #! the even numbered version line that precedes the mainline is the associated stable version line.
-          - line: 1.26.X
+          - line: 1.29.X
             link: https://nginx.org/
-          - line: 1.27.X
+          - line: 1.30.X
             link: https://nginx.org/
       staticfile:
         lines:
-          - line: 1.26.X
+          - line: 1.29.X
             link: https://nginx.org/
-          - line: 1.27.X
+          - line: 1.30.X
             link: https://nginx.org/
     source_type: nginx
     versions_to_keep: 2
