@@ -4,12 +4,10 @@ set -euo pipefail
 GIT_USER_EMAIL="${GIT_USER_EMAIL:-cf-buildpacks-eng@pivotal.io}"
 GIT_USER_NAME="${GIT_USER_NAME:-CF Buildpacks Team CI Server}"
 
-# Seed merged-builds-metadata from the builds git resource.
-# --exclude='.git' is critical: builds/ is a Concourse git resource with its
-# own .git/ directory. Without exclusion rsync overwrites the .git/ of
-# merged-builds-metadata, causing git config / git commit to operate on the
-# wrong repo identity and history.
-rsync -a --exclude='.git' builds/ merged-builds-metadata/
+# Seed merged-builds-metadata from the builds git resource (including .git/).
+# merged-builds-metadata is an output dir, so we need .git/ for commits and
+# for the subsequent `put: builds` step to push.
+rsync -a builds/ merged-builds-metadata/
 
 pushd merged-builds-metadata >/dev/null
 git config user.email "${GIT_USER_EMAIL}"
