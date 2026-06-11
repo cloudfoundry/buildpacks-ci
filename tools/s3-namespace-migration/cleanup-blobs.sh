@@ -402,8 +402,12 @@ run_cleanup() {
   local blocked=0
 
   while IFS=$'\t' read -r uuid folder copied_at; do
-    result=$(delete_root_blob "${BUCKET}" "${folder}" "${uuid}" "${copied_at}" 2>&1)
-    local rc=$?
+    local rc
+    if result=$(delete_root_blob "${BUCKET}" "${folder}" "${uuid}" "${copied_at}" 2>&1); then
+      rc=0
+    else
+      rc=$?
+    fi
     echo "${result}"
 
     case "${rc}" in

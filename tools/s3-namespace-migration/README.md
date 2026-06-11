@@ -97,10 +97,13 @@ Each blob is **copied** (not moved) from the bucket root to `<folder>/<uuid>`. A
 ```bash
 make verify                              # fast: checks existence and size
 make verify-sha                          # slow: also downloads and sha256sums each blob
+make verify-root-copies                  # checks every mapped root UUID has a namespaced copy
 make verify BUILDPACK=ruby-buildpack     # single namespace
 ```
 
 The verify script reads `config/blobs.yml` and `config/final.yml` from each local buildpack release repo and confirms every active UUID is present at its expected namespaced path in S3.
+
+The root-copy verifier reads `uuid-mapper` output and confirms every known root-level UUID blob has been copied to its expected `<folder>/<uuid>` destination before cleanup.
 
 ### Step 6 — Handle orphaned blobs
 
@@ -124,6 +127,7 @@ make migrate-dry-run   # dry-run blob copy
 make migrate           # copy blobs to namespaced folders
 make verify            # verify blob existence and size
 make verify-sha        # verify blob checksums (slow)
+make verify-root-copies # verify root UUID blobs have namespaced copies
 make orphans-dry-run   # dry-run orphan move
 make orphans           # move orphaned blobs to orphaned/
 make cleanup-dry-run   # dry-run root-blob deletion
@@ -173,6 +177,14 @@ Verifies all active blobs from `config/blobs.yml` exist at their namespaced S3 p
 
 ```
 ./verify-migration.sh [--bucket BUCKET] [--releases-dir DIR] [--buildpack NAME] [--check-sha]
+```
+
+### `verify-root-copies.sh`
+
+Verifies every mapped root-level UUID from `uuid-mapper` output has been copied to its expected namespaced S3 path. Use this before `cleanup-blobs.sh`.
+
+```
+./verify-root-copies.sh [--bucket BUCKET] [--input-dir DIR] [--buildpack NAME]
 ```
 
 ### `cleanup-blobs.sh`

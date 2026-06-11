@@ -5,9 +5,10 @@
 #   2. migrate          → copy blobs into namespaced folders
 #   3. backfill-metadata → backfill original-last-modified on already-copied blobs
 #   4. verify           → confirm all active blobs are at their namespaced paths
-#   5. orphans          → move unreferenced blobs to orphaned/ folder
-#   6. cleanup          → delete original root-level blobs after grace period
-#   7. cleanup-orphans  → manually delete blobs from orphaned/ folder
+#   5. verify-root-copies → confirm root UUID blobs have namespaced copies
+#   6. orphans          → move unreferenced blobs to orphaned/ folder
+#   7. cleanup          → delete original root-level blobs after grace period
+#   8. cleanup-orphans  → manually delete blobs from orphaned/ folder
 #
 # All scripts honour the BUCKET, INPUT_DIR, and RELEASES_DIR variables so
 # you can override defaults at the command line, e.g.:
@@ -24,13 +25,14 @@ PLAN_SCRIPT           := ./generate-migration-plan.py
 MIGRATE_SCRIPT        := ./migrate-blobs.sh
 ORPHAN_SCRIPT         := ./migrate-orphans.sh
 VERIFY_SCRIPT         := ./verify-migration.sh
+VERIFY_ROOT_SCRIPT    := ./verify-root-copies.sh
 CLEANUP_SCRIPT        := ./cleanup-blobs.sh
 CLEANUP_ORPHAN_SCRIPT := ./cleanup-orphans.sh
 BACKFILL_SCRIPT       := ./backfill-metadata.sh
 
 _filter_flag = $(if $(BUILDPACK),--buildpack $(BUILDPACK),)
 
-.PHONY: help plan plan-csv plan-json migrate migrate-dry-run verify verify-sha \
+.PHONY: help plan plan-csv plan-json migrate migrate-dry-run verify verify-sha verify-root-copies \
         backfill-metadata backfill-metadata-dry-run \
         orphans orphans-dry-run \
         cleanup cleanup-dry-run cleanup-force \
@@ -90,6 +92,9 @@ verify: check-prereqs ## Verify all active blobs exist at their namespaced S3 pa
 
 verify-sha: check-prereqs ## Verify blobs and confirm SHA256 checksums (slow — downloads each blob)
 	$(VERIFY_SCRIPT) --bucket $(BUCKET) --releases-dir $(RELEASES_DIR) --check-sha $(_filter_flag)
+
+verify-root-copies: check-prereqs ## Verify every mapped root UUID has its namespaced copy
+	$(VERIFY_ROOT_SCRIPT) --bucket $(BUCKET) --input-dir $(INPUT_DIR) $(_filter_flag)
 
 ##@ Orphan handling
 
