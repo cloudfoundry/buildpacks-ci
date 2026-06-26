@@ -23,4 +23,6 @@ supported_languages:
   stacks: #@ default_stacks
 - name: staticfile
   stacks: #@ default_stacks
+- name: binary
+  stacks: #@ default_stacks
 

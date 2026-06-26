@@ -31,22 +31,61 @@ get_version() {
 buildpack_blob_is_latest() {
   local new_version=$1
 
-  local existing_version
-  if [[ "$(bosh blobs --dir release --column=path)" =~ v?([0-9\.]+).zip ]]; then
-    existing_version="${BASH_REMATCH[1]}"
-  else
-    echo "Could not determine version of existing buildpack blob"
-    exit 1
-  fi
+  local blob_paths
+  blob_paths="$(bosh blobs --dir release --column=path)"
 
-  [[ "${existing_version}" == "${new_version}" ]] && return 0 || return 1
+  # Check if ALL input stacks are at the new version
+  local all_latest=true
+  for buildpack_file in buildpack-*/*.zip; do
+    local filename
+    filename="$(basename "${buildpack_file}")"
+    if [[ "${filename}" =~ -([a-z0-9]+)-v[0-9] ]]; then
+      local stack="${BASH_REMATCH[1]}"
+      local relevant_blob
+      relevant_blob="$(echo "${blob_paths}" | grep "${stack}" || true)"
+      if [[ -z "${relevant_blob}" ]]; then
+        # No existing blob for this stack (e.g. first time adding cflinuxfs5) - not latest
+        all_latest=false
+        break
+      elif [[ "${relevant_blob}" =~ v?([0-9\.]+).zip ]]; then
+        local existing_version="${BASH_REMATCH[1]}"
+        if [[ "${existing_version}" != "${new_version}" ]]; then
+          all_latest=false
+          break
+        fi
+      fi
+    fi
+  done
+
+  [[ "${all_latest}" == "true" ]] && return 0 || return 1
 }
 
 remove_old_blobs() {
-  bosh blobs --dir release --json \
-    | jq -r '.Tables[0].Rows[].path' \
-    | grep buildpack \
-    | xargs -I {} bosh remove-blob --dir release {}
+  local stacks_to_replace=()
+  for buildpack_file in buildpack-*/*.zip; do
+    local filename
+    filename="$(basename "${buildpack_file}")"
+    # Extract stack from filename pattern: name_buildpack-STACK-vVERSION+TIMESTAMP.zip
+    if [[ "${filename}" =~ -([a-z0-9]+)-v[0-9] ]]; then
+      stacks_to_replace+=("${BASH_REMATCH[1]}")
+    fi
+  done
+
+  local blob_paths
+  blob_paths="$(bosh blobs --dir release --json | jq -r '.Tables[0].Rows[].path' | grep buildpack)"
+
+  for blob_path in ${blob_paths}; do
+    local should_remove=false
+    for stack in "${stacks_to_replace[@]}"; do
+      if [[ "${blob_path}" == *"-${stack}-"* ]]; then
+        should_remove=true
+        break
+      fi
+    done
+    if [[ "${should_remove}" == "true" ]]; then
+      bosh remove-blob --dir release "${blob_path}"
+    fi
+  done
 }
 
 add_new_blobs() {
