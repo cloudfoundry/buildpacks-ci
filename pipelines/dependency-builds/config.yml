@@ -256,11 +256,15 @@ dependencies:
             link: https://nginx.org/
           - line: 1.30.X
             link: https://nginx.org/
+          - line: 1.31.X
+            link: https://nginx.org/
       staticfile:
         lines:
           - line: 1.29.X
             link: https://nginx.org/
           - line: 1.30.X
+            link: https://nginx.org/
+          - line: 1.31.X
             link: https://nginx.org/
     source_type: nginx
     versions_to_keep: 2
