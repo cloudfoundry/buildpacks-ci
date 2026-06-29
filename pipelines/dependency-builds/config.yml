@@ -237,6 +237,8 @@ dependencies:
             link: https://nginx.org/
           - line: 1.30.X
             link: https://nginx.org/
+          - line: 1.31.X
+            link: https://nginx.org/
     versions_to_keep: 2
   openresty:
     buildpacks:
