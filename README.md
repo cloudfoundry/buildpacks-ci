@@ -18,11 +18,47 @@ Jobs and tasks in the `buildpacks-ci` repository store state in [public-buildpac
 
 # Commands and recipes
 
-## Updating all the Pipelines
+## Updating Pipelines
 
+After making changes to pipeline templates (ytt files), regenerate and deploy them to Concourse.
+
+### Update All Buildpack Pipelines
 ```sh
-./bin/update-pipelines
+./bin/update-pipelines --buildpacks-only
 ```
+Updates: python-buildpack, ruby-buildpack, go-buildpack, nodejs-buildpack, php-buildpack, java-buildpack, and all other buildpacks.
+
+### Update a Specific Pipeline
+```sh
+./bin/update-pipelines -p python-buildpack
+```
+
+### Update All Pipelines
+```sh
+./bin/update-pipelines --all
+```
+Updates buildpack pipelines and infrastructure pipelines (dependency-builds, cf-release, cflinuxfs4, etc.)
+
+### Validate Without Deploying (Dry Run)
+```sh
+./bin/update-pipelines -p python-buildpack --dry-run
+```
+
+### List Available Pipelines
+```sh
+./bin/update-pipelines --list
+```
+
+### When to Update Pipelines
+
+✅ **Required after these changes:**
+- Merging changes to pipeline templates (`pipelines/buildpack/pipeline.yml`)
+- Merging changes to ops files or pipeline structure
+- After cf-deployment version changes affecting pipeline configuration
+
+❌ **NOT required for:**
+- Changes to task files (`tasks/*/task.yml`) - these are fetched from git during job execution
+- Changes to scripts or other non-pipeline files
 
 ## Debugging the build
 
