@@ -300,12 +300,21 @@ jobs:
       BASE_OPS_FILE_DIR: operations
       NEW_OPS_FILES: #@ "bump-" + language.name + "-buildpack.yml"
 #@ end
+  - task: add-resource-tags-ops-file
+    file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
+    input_mapping:
+      base-ops-files: collected-ops-files
+      new-ops-files: buildpacks-ci
+    params:
+      BASE_OPS_FILE_DIR: operations
+      NEW_OPS_FILES: deployments/operations/tag-bbl-env.yml
 
 #@ base_ops_files = [
 #@   "operations/experimental/fast-deploy-with-downtime-and-danger.yml",
 #@   "operations/use-compiled-releases.yml",
 #@   "operations/scale-to-one-az.yml",
 #@   "operations/test/scale-to-one-az-addon-parallel-cats.yml",
+#@   "operations/tag-bbl-env.yml",
 #@ ]
 #@ buildpack_ops_file_paths = []
 #@ for language in data.values.supported_languages:
@@ -323,6 +332,7 @@ jobs:
       BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
       SYSTEM_DOMAIN: releases.buildpacks.ci.cloudfoundry.org
       OPS_FILES: #@ "\n".join(all_ops_files)
+      BOSH_DEPLOY_ARGS: "--var bbl_env_name=releases-buildpack-state"
     on_failure:
       do:
       - #@ remove_gcp_dns("updated-bbl-state")
