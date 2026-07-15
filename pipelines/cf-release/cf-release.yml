@@ -300,12 +300,21 @@ jobs:
       BASE_OPS_FILE_DIR: operations
       NEW_OPS_FILES: #@ "bump-" + language.name + "-buildpack.yml"
 #@ end
+  - task: add-resource-tags-ops-file
+    file: cf-deployment-concourse-tasks/collect-ops-files/task.yml
+    input_mapping:
+      base-ops-files: collected-ops-files
+      new-ops-files: buildpacks-ci
+    params:
+      BASE_OPS_FILE_DIR: operations
+      NEW_OPS_FILES: deployments/operations/add-resource-tags.yml
 
 #@ base_ops_files = [
 #@   "operations/experimental/fast-deploy-with-downtime-and-danger.yml",
 #@   "operations/use-compiled-releases.yml",
 #@   "operations/scale-to-one-az.yml",
 #@   "operations/test/scale-to-one-az-addon-parallel-cats.yml",
+#@   "operations/add-resource-tags.yml",
 #@ ]
 #@ buildpack_ops_file_paths = []
 #@ for language in data.values.supported_languages:

@@ -1,0 +1,15 @@
+# add-resource-tags.yml
+# Adds resource tracking tags to all BOSH-managed VMs and disks.
+# These tags help identify resources for cost tracking and prevent accidental deletion.
+#
+# Reference: https://github.com/cloudfoundry/community/issues/1185
+#
+# Tags:
+#   belongs-to:  Identifies the working group that owns these resources
+#   environment: Identifies the BBL environment type
+
+- type: replace
+  path: /tags?
+  value:
+    belongs-to: app-runtime-interfaces
+    environment: buildpacks-bbl-env

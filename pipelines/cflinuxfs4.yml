@@ -487,6 +487,7 @@ jobs:
         - buildpacks-opsfile/use-latest-buildpack-releases.yml
         - rootfs-release-artifacts/use-dev-release-opsfile.yml
         - capi-release-artifacts/use-dev-release-opsfile.yml
+        - buildpacks-ci/deployments/operations/add-resource-tags.yml
         vars:
           system_domain: cflinuxfs4.buildpacks.ci.cloudfoundry.org
 
