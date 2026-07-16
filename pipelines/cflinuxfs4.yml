@@ -194,6 +194,7 @@ resources:
   type: registry-image
   source:
     repository: cloudfoundry/cflinuxfs4
+    tag: latest
     username: ((cfbuildpacks-dockerhub-user.username))
     password: ((cfbuildpacks-dockerhub-user.password))
 
@@ -757,8 +758,7 @@ jobs:
     - put: cflinuxfs4-image
       params:
         image: image/image.tar
-        version: version/number
-        bump_aliases: true
+        additional_tags: version/number
 
 - name: create-cflinuxfs4-release
   serial: true
