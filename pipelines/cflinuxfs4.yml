@@ -62,8 +62,8 @@ resources:
 - name: buildpacks-ci
   type: git
   source:
-    uri: https://github.com/plamen-bardarov/buildpacks-ci
-    branch: noble-stemcell
+    uri: https://github.com/cloudfoundry/buildpacks-ci
+    branch: master
 
 - name: runtime-ci
   type: git
