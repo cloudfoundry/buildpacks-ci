@@ -735,7 +735,7 @@ jobs:
       trigger: true
       passed: [ release-cflinuxfs4 ]
   - do:
-    - task: rename
+    - task: prepare-docker-context
       file: buildpacks-ci/tasks/rename-rootfs-for-docker/task.yml
       params:
         STACK: cflinuxfs4
