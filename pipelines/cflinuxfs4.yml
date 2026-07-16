@@ -58,13 +58,12 @@ resources:
   type: git
   source:
     uri: https://github.com/cloudfoundry/cf-deployment
-    tag: v21.11.0
 
 - name: buildpacks-ci
   type: git
   source:
-    uri: https://github.com/cloudfoundry/buildpacks-ci
-    branch: master
+    uri: https://github.com/plamen-bardarov/buildpacks-ci
+    branch: noble-stemcell
 
 - name: runtime-ci
   type: git
@@ -189,7 +188,7 @@ resources:
 - name: gcp-stemcell
   type: bosh-io-stemcell
   source:
-    name: bosh-google-kvm-ubuntu-jammy-go_agent
+    name: bosh-google-kvm-ubuntu-noble
 
 - name: cflinuxfs4-image
   type: registry-image
@@ -197,7 +196,6 @@ resources:
     repository: cloudfoundry/cflinuxfs4
     username: ((cfbuildpacks-dockerhub-user.username))
     password: ((cfbuildpacks-dockerhub-user.password))
-    email: cf-buildpacks-eng@pivotal.io
 
 - name: cflinuxfs4-github-release
   type: github-release
@@ -464,6 +462,8 @@ jobs:
         - rootfs-release-artifacts/dev_releases/cflinuxfs4/*.tgz
         stemcells:
         - gcp-stemcell/*.tgz
+        ops_files:
+        - buildpacks-ci/deployments/operations/use-noble-stemcell.yml
     - task: run-rootfs-smoke-test
       file: buildpacks-ci/tasks/run-rootfs-smoke-test/task.yml
       params:
