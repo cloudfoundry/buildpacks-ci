@@ -738,13 +738,27 @@ jobs:
       file: buildpacks-ci/tasks/rename-rootfs-for-docker/task.yml
       params:
         STACK: cflinuxfs4
-    - in_parallel:
-      - put: cflinuxfs4-image
+    - task: build-image
+      privileged: true
+      config:
+        platform: linux
+        image_resource:
+          type: registry-image
+          source:
+            repository: concourse/oci-build-task
+        inputs:
+        - name: docker-s3
+        outputs:
+        - name: image
         params:
-          skip_download: true
-          import_file: docker-s3/cflinuxfs4.tar.gz
-          tag: version/number
-          tag_as_latest: true
+          CONTEXT: docker-s3
+        run:
+          path: build
+    - put: cflinuxfs4-image
+      params:
+        image: image/image.tar
+        version: version/number
+        bump_aliases: true
 
 - name: create-cflinuxfs4-release
   serial: true

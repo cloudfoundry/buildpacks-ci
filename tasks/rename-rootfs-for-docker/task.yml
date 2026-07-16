@@ -12,6 +12,14 @@ outputs:
   - name: docker-s3
 run:
   path: bash
-  args: ["-c", "mv stack-s3/$STACK-*.tar.gz docker-s3/$STACK.tar.gz"]
+  args:
+  - -c
+  - |
+    set -euo pipefail
+    mv stack-s3/$STACK-*.tar.gz docker-s3/$STACK.tar.gz
+    cat > docker-s3/Dockerfile <<EOF
+    FROM scratch
+    ADD $STACK.tar.gz /
+    EOF
 params:
   STACK:
