@@ -14,7 +14,7 @@ This document provides a comprehensive overview of the Cloud Foundry Buildpacks 
 | `dependency-builds` | Build binaries from upstream sources | Hourly version checks | Compiled binaries in S3, PRs to buildpacks |
 | `{language}-buildpack` | Test and release buildpacks | Git commits, merged PRs | Buildpack zips, GitHub releases |
 | `cf-release` | Create BOSH releases for all buildpacks | Weekly (or manual) | BOSH release tarballs |
-| `brats` | Nightly buildpack smoke tests | Daily cron | Test results |
+| `brats` | Nightly buildpack smoke tests | Daily cron | ⚠️ Non-functional |
 | `buildpack-verification` | Verify binary integrity | Daily cron | Verification reports |
 | `resources` | Build depwatcher Docker image | Changes to depwatcher code | `coredeps/depwatcher` image |
 
@@ -48,7 +48,7 @@ The buildpacks CI/CD system consists of interconnected pipelines that handle the
     ┌─────────────────────────────────────────────────────────────┐
     │                                                             │
     │  ┌─────────────┐              ┌─────────────────────────┐  │
-    │  │    brats    │              │ buildpack-verification  │  │
+    │  │ brats (⚠️)  │              │ buildpack-verification  │  │
     │  │  (nightly)  │              │       (daily)           │  │
     │  └─────────────┘              └─────────────────────────┘  │
     │                                                             │
@@ -283,17 +283,24 @@ BOSH releases are created for:
 **Location:** `pipelines/brats/`  
 **Concourse:** [brats](https://concourse.app-runtime-interfaces.ci.cloudfoundry.org/teams/buildpacks-team/pipelines/brats)
 
+> ⚠️ **WARNING:** The standalone BRATS pipeline is currently **non-functional** due to missing tasks and incorrect input mappings. BRATS tests have been migrated to run within each buildpack repository via `./scripts/brats.sh`, but are currently disabled (`skip_brats: true`) in all buildpack pipelines. The original [BRATS repository](https://github.com/cloudfoundry/brats) was archived in May 2022.
+
 #### Purpose
 
 Runs Buildpack Runtime Acceptance Tests nightly against the master branch of all buildpacks.
 
-#### How It Works
+#### How It Works (Intended - Currently Non-Functional)
 
 - **Trigger:** Daily cron (6 AM EST)
-- **Tests:** BRATS test suite from each buildpack
+- **Tests:** BRATS test suite from each buildpack's `scripts/brats.sh`
 - **Environments:** 
   - TAS 4.0 LTS (via Shepherd)
   - cf-deployment edge (via Shepherd)
+
+**Known Issues:**
+- Missing `run-bp-brats-jammy` task (required for PHP)
+- Incorrect input mappings in edge jobs (`lock` vs `bbl-state`)
+- Missing required parameters (`SYSTEM_DOMAIN`, `BBL_STATE_DIR`)
 
 > **Note:** [Shepherd](https://v2.shepherd.run) is a Cloud Foundry Foundation service that provisions on-demand test environments for CI pipelines.
 
@@ -532,11 +539,11 @@ Complete end-to-end flow from upstream dependency to BOSH release:
 ┌─────────────────────────────────────────────────────────┐
 │                                                         │
 │   ┌─────────────────┐    ┌──────────────────────────┐  │
-│   │      brats      │    │  buildpack-verification  │  │
+│   │  brats (⚠️)     │    │  buildpack-verification  │  │
 │   │    (nightly)    │    │        (daily)           │  │
 │   │                 │    │                          │  │
-│   │  Run BRATS on   │    │  Verify binary           │  │
-│   │  TAS + CF Edge  │    │  checksums               │  │
+│   │  Non-functional │    │  Verify binary           │  │
+│   │                 │    │  checksums               │  │
 │   └─────────────────┘    └──────────────────────────┘  │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
