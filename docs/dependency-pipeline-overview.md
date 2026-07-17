@@ -345,7 +345,7 @@ A: Basic Concourse knowledge helps, but most work is editing `config.yml`. The d
 ## Next Steps
 
 1. **Read the detailed reference:** `pipelines/dependency-builds/README.md`
-2. **Watch the pipeline:** https://buildpacks.ci.cf-app.com/teams/main/pipelines/dependency-builds
+2. **Watch the pipeline:** https://concourse.app-runtime-interfaces.ci.cloudfoundry.org/teams/buildpacks-team/pipelines/dependency-builds
 3. **Review a few automated PRs** in buildpack repositories
 4. **Try a small config change** (add a version line, update an EOL date)
 5. **Ask questions** in #buildpacks Slack channel
