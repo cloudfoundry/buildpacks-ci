@@ -116,7 +116,7 @@ resources:
   type: git
   source:
     uri: git@github.com:cloudfoundry/public-buildpacks-ci-robots
-    paths: [ receipt.cflinuxfs4.x86_64 ]
+    paths: [ receipt-diffs/cflinuxfs4-diff ]
     private_key: ((cf-buildpacks-eng-github-ssh-key.private_key))
     tag_filter: "newpackages_cflinuxfs4_*"
 
