@@ -16,6 +16,7 @@ This document provides a comprehensive overview of the Cloud Foundry Buildpacks 
 | `cf-release` | Create BOSH releases for all buildpacks | Weekly (or manual) | BOSH release tarballs |
 | `brats` | Nightly buildpack smoke tests | Daily cron | Test results |
 | `buildpack-verification` | Verify binary integrity | Daily cron | Verification reports |
+| `resources` | Build depwatcher Docker image | Changes to depwatcher code | `coredeps/depwatcher` image |
 
 ---
 
@@ -111,7 +112,7 @@ update-python-3.12-python-buildpack job
 
 #### Dependencies Managed
 
-The pipeline manages **60+ dependencies** including:
+The pipeline manages **56 dependencies** including:
 
 | Category | Examples |
 |----------|----------|
@@ -124,9 +125,11 @@ The pipeline manages **60+ dependencies** including:
 
 #### Artifacts Produced
 
-- **Compiled binaries:** `s3://buildpacks.cloudfoundry.org/dependencies/{dependency}/{dependency}-{version}-{stack}.tgz`
+- **Compiled binaries:** `https://buildpacks.cloudfoundry.org/dependencies/{dependency}/{dependency}-{version}-{stack}.tgz`
 - **Build metadata:** Stored in `public-buildpacks-ci-robots` repository
 - **Pull requests:** Against buildpack repositories to update `manifest.yml`
+
+> **Note:** S3 bucket `buildpacks.cloudfoundry.org` is accessible via HTTPS URLs shown above.
 
 #### Configuration
 
@@ -163,11 +166,13 @@ The pipeline manages **60+ dependencies** including:
 | Stage | Job(s) | Description |
 |-------|--------|-------------|
 | **Unit Tests** | `specs-unit` | Run Ginkgo unit tests |
-| **Integration Tests** | `specs-switchblade-docker-{stack}` | Run integration tests in Docker using Switchblade framework |
+| **Integration Tests** | `specs-switchblade-docker-{stack}` | Run integration tests in Docker using [Switchblade](https://github.com/cloudfoundry/switchblade) framework |
 | **Build Artifacts** | `detect-new-version-and-upload-artifacts` | Build cached & uncached buildpack zips, upload to S3 |
 | **Full CF Tests** | `create-cf-infrastructure-and-execute-integration-test` | Deploy full CF environment, run BRATS & integration tests |
 | **Release** | `ship-it` (manual trigger) | Create GitHub release, bump version |
 | **Dependency Updates** | `update-libbuildpack` | Create PR to update libbuildpack when it changes |
+
+> **Note:** [Switchblade](https://github.com/cloudfoundry/switchblade) is a testing framework that allows running buildpack integration tests against both Docker and real CF environments using the same test code.
 
 #### Triggers
 
@@ -290,6 +295,8 @@ Runs Buildpack Runtime Acceptance Tests nightly against the master branch of all
   - TAS 4.0 LTS (via Shepherd)
   - cf-deployment edge (via Shepherd)
 
+> **Note:** [Shepherd](https://v2.shepherd.run) is a Cloud Foundry Foundation service that provisions on-demand test environments for CI pipelines.
+
 #### Buildpacks Tested
 
 apt, binary, dotnet-core, go, nodejs, python, ruby, staticfile, php, nginx
@@ -313,6 +320,23 @@ Daily verification of buildpack binary integrity and checksums.
 
 ---
 
+### 6. Resources Pipeline (Supporting)
+
+**Location:** `pipelines/resources.yml`  
+**Concourse:** [resources](https://concourse.app-runtime-interfaces.ci.cloudfoundry.org/teams/buildpacks-team/pipelines/resources)
+
+#### Purpose
+
+Builds and publishes the `depwatcher` Docker image used by the `dependency-builds` pipeline to monitor upstream dependency versions.
+
+#### How It Works
+
+- **Trigger:** Changes to `dockerfiles/depwatcher-go/` directory
+- **Action:** Builds and pushes `coredeps/depwatcher` image to DockerHub
+- **Used by:** `dependency-builds` pipeline for version detection
+
+---
+
 ## BOSH Deployment Environments Summary
 
 All BOSH deployments use BBL (BOSH Bootloader) on GCP.
@@ -330,11 +354,13 @@ All BOSH deployments use BBL (BOSH Bootloader) on GCP.
 
 | Artifact Type | Storage Location | Naming Convention |
 |---------------|------------------|-------------------|
-| Dependency binaries | `s3://buildpacks.cloudfoundry.org/dependencies/` | `{dep}/{dep}-{version}-{stack}.tgz` |
-| Buildpack zips (RC) | `s3://buildpacks.cloudfoundry.org/buildpack-release-candidates/` | `{lang}_buildpack-{stack}-v{version}.zip` |
-| Buildpack zips (final) | `s3://buildpacks.cloudfoundry.org/buildpack-release-published/` | `{lang}_buildpack-{stack}-v{version}.zip` |
-| BOSH releases | `s3://buildpacks.cloudfoundry.org/bosh-release-candidates/` | `{lang}-buildpack-release-{version}.tgz` |
+| Dependency binaries | `https://buildpacks.cloudfoundry.org/dependencies/` | `{dep}/{dep}-{version}-{stack}.tgz` |
+| Buildpack zips (RC) | `https://buildpacks.cloudfoundry.org/buildpack-release-candidates/` | `{lang}_buildpack-{stack}-v{version}.zip` |
+| Buildpack zips (final) | `https://buildpacks.cloudfoundry.org/buildpack-release-published/` | `{lang}_buildpack-{stack}-v{version}.zip` |
+| BOSH releases | `https://buildpacks.cloudfoundry.org/bosh-release-candidates/` | `{lang}-buildpack-release-{version}.tgz` |
 | GitHub releases | GitHub repositories | Tagged releases with tarballs |
+
+> **Note:** All S3 artifacts are publicly accessible via the HTTPS URLs shown above.
 
 ---
 
@@ -362,7 +388,17 @@ All BOSH deployments use BBL (BOSH Bootloader) on GCP.
 
 | Repository | Description |
 |------------|-------------|
-| [{lang}-buildpack-release](https://github.com/cloudfoundry/) | BOSH release for each buildpack |
+| [go-buildpack-release](https://github.com/cloudfoundry/go-buildpack-release) | Go buildpack BOSH release |
+| [python-buildpack-release](https://github.com/cloudfoundry/python-buildpack-release) | Python buildpack BOSH release |
+| [ruby-buildpack-release](https://github.com/cloudfoundry/ruby-buildpack-release) | Ruby buildpack BOSH release |
+| [nodejs-buildpack-release](https://github.com/cloudfoundry/nodejs-buildpack-release) | Node.js buildpack BOSH release |
+| [php-buildpack-release](https://github.com/cloudfoundry/php-buildpack-release) | PHP buildpack BOSH release |
+| [java-buildpack-release](https://github.com/cloudfoundry/java-buildpack-release) | Java buildpack BOSH release |
+| [dotnet-core-buildpack-release](https://github.com/cloudfoundry/dotnet-core-buildpack-release) | .NET Core buildpack BOSH release |
+| [staticfile-buildpack-release](https://github.com/cloudfoundry/staticfile-buildpack-release) | Static file buildpack BOSH release |
+| [binary-buildpack-release](https://github.com/cloudfoundry/binary-buildpack-release) | Binary buildpack BOSH release |
+| [nginx-buildpack-release](https://github.com/cloudfoundry/nginx-buildpack-release) | Nginx buildpack BOSH release |
+| [r-buildpack-release](https://github.com/cloudfoundry/r-buildpack-release) | R buildpack BOSH release |
 
 ### Infrastructure & Tooling
 
@@ -409,8 +445,9 @@ All BOSH deployments use BBL (BOSH Bootloader) on GCP.
 2. Click on the failed task to view logs
 3. To intercept a running/failed task:
    ```sh
-   fly intercept -j {pipeline}/{job} -t buildpacks -n {task-name}
+   fly intercept -j {pipeline}/{job} -t {your-target} -n {task-name}
    ```
+   > **Note:** Replace `{your-target}` with your configured fly target name (e.g., the name you used with `fly login`).
 4. Check task inputs/outputs and environment
 
 ### Updating Pipeline Configuration
