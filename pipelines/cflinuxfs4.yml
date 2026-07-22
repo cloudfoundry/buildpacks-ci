@@ -488,8 +488,10 @@ jobs:
         - buildpacks-opsfile/use-latest-buildpack-releases.yml
         - rootfs-release-artifacts/use-dev-release-opsfile.yml
         - capi-release-artifacts/use-dev-release-opsfile.yml
+        - buildpacks-ci/deployments/operations/tag-bbl-env.yml
         vars:
           system_domain: cflinuxfs4.buildpacks.ci.cloudfoundry.org
+          bbl_env_name: cflinuxfs4
 
 - name: cats
   serial: true

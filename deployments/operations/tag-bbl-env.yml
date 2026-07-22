@@ -1,0 +1,19 @@
+---
+# CF Deployment GCP Resource Tagging Ops File
+# Adds GCP labels to all CF deployment resources for cost tracking
+#
+# Based on: https://github.com/cloudfoundry/capi-ci/blob/main/cf-deployment-operations/tag-bbl-env.yml
+# Required by: ARI Working Group for cost tracking (https://github.com/cloudfoundry/community/issues/1185)
+#
+# Usage: Pass variable bbl_env_name when deploying
+# Example: bosh deploy ... --var bbl_env_name=python-buildpacks-bbl-env
+#
+# Labels applied:
+#   belongs-to: buildpacks-and-stacks (ARI working group area)
+#   environment: <bbl_env_name> (specific buildpack environment)
+
+- type: replace
+  path: /tags?
+  value:
+    environment: ((bbl_env_name))
+    belongs-to: buildpacks-and-stacks
