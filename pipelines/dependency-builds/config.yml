@@ -325,7 +325,9 @@ dependencies:
         lines:
           - line: latest
     source_type: pypi
-    any_stack: true
+    #! pip contains C extensions (_ssl, etc.) that depend on system OpenSSL libraries
+    #! FIPS mode on cflinuxfs5 requires pip to be compiled against FIPS-compatible OpenSSL
+    #! Building stack-specific binaries ensures compatibility across different Ubuntu versions
     versions_to_keep: 2
   pipenv:
     buildpacks:
@@ -414,7 +416,8 @@ dependencies:
         lines:
           - line: latest
     source_type: pypi
-    any_stack: true
+    #! setuptools includes compiled extensions that may depend on system libraries
+    #! Stack-specific builds ensure compatibility across different Ubuntu versions
     versions_to_keep: 2
   flit-core:
     buildpacks:
@@ -422,7 +425,8 @@ dependencies:
         lines:
           - line: latest
     source_type: pypi
-    any_stack: true
+    #! flit-core is a Python build backend that may have system library dependencies
+    #! Stack-specific builds ensure compatibility across different Ubuntu versions
     versions_to_keep: 2
   poetry-core:
     buildpacks:
@@ -430,7 +434,8 @@ dependencies:
         lines:
           - line: latest
     source_type: pypi
-    any_stack: true
+    #! poetry-core is a Python build backend that may have system library dependencies
+    #! Stack-specific builds ensure compatibility across different Ubuntu versions
     versions_to_keep: 2
   yarn:
     buildpacks:
