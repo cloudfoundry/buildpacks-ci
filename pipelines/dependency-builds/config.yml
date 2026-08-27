@@ -451,6 +451,21 @@ dependencies:
       - 'extension: .tar.gz'
     any_stack: true
     versions_to_keep: 2
+  pnpm:
+    buildpacks:
+      nodejs:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: pnpm/pnpm'
+      #! Exact asset name: the glob must not also match pnpm-linux-x64-musl.tar.gz.
+      #! The npm package is not usable here — since pnpm 12 it is a stub that
+      #! downloads a native binary on install, which staging cannot do offline.
+      - 'glob: pnpm-linux-x64.tar.gz'
+    #! Pre-built upstream binary, glibc linux-x64: one build serves every stack.
+    any_stack: true
+    versions_to_keep: 2
   tomcat:
     buildpacks:
       java:
@@ -698,6 +713,7 @@ skip_deprecation_check:
   - jruby  #! tied to ruby, ruby doesn't publish EOL schedule
   - nginx  #! doesn't publish EOL schedule
   - nginx-static  #! same as nginx
+  - pnpm  #! doesn't publish EOL schedule
   - openresty  #! depends on nginx and lua deprecation
   - php  #! complicated
   - ruby  #! doesn't publish EOL schedule
