@@ -83,20 +83,6 @@ dependencies:
       - 'tag_regex: ^v(\d+\.\d+\.\d+)\.RELEASE$'
     any_stack: true
     versions_to_keep: 2
-  spring-boot-cli:
-    buildpacks:
-      java:
-        lines:
-          - line: 2.7.X
-    source_type: maven
-    source_params:
-      - 'uri: https://repo1.maven.org/maven2'
-      - 'group_id: org.springframework.boot'
-      - 'artifact_id: spring-boot-cli'
-      - 'classifier: bin'
-      - 'packaging: tar.gz'
-    any_stack: true
-    versions_to_keep: 2
   composer:
     buildpacks:
       php:
@@ -727,4 +713,4 @@ skip_deprecation_check:
   - client-certificate-mapper  #! doesn't publish EOL schedule
   - cf-metrics-exporter  #! doesn't publish EOL schedule
   - metric-writer  #! doesn't publish EOL schedule
-  - spring-boot-cli  #! doesn't publish EOL schedule
+
