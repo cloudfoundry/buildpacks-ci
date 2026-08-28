@@ -159,7 +159,6 @@ Dependencies requiring custom download logic, vendor APIs, or further investigat
 |------------|-----------------|-----------------|----------|----------------|
 | **newrelic** | download.newrelic.com | 🟢 Active | 🔴 HIGH | Investigate - very popular APM |
 | **groovy** | Maven Central | 🟢 Active | 🟡 MED | Check Maven: org.apache.groovy |
-| **spring-boot-cli** | Maven Central | 🟢 Active | 🟡 MED | Check Maven: org.springframework.boot |
 | **java-cfenv** | Maven Central | 🟢 Active | 🟡 MED | Check Maven: io.pivotal.cfenv |
 | **cf-metrics-exporter** | Maven Central | 🟡 Maintained | 🟢 LOW | Maven: io.github.rabobank |
 | **sealights-agent** | Maven Central | 🟡 Maintained | 🟢 LOW | Maven: io.sealights.* |
@@ -169,7 +168,7 @@ Dependencies requiring custom download logic, vendor APIs, or further investigat
 
 **Investigation Needed:**
 1. **newrelic**: Check if GitHub releases or custom API watcher is better
-2. **groovy**, **spring-boot-cli**, **java-cfenv**: Verify Maven coordinates
+2. **groovy**, **java-cfenv**: Verify Maven coordinates
 3. **google-stackdriver-profiler**: Check if `latest` URL is stable
 
 ---
@@ -199,7 +198,6 @@ Dependencies requiring custom download logic, vendor APIs, or further investigat
 #### Custom Sources (3)
 13. ✅ newrelic - New Relic APM (needs investigation)
 14. ✅ groovy - Groovy runtime (check Maven)
-15. ✅ spring-boot-cli - Spring Boot CLI (check Maven)
 
 **Estimated Impact:** High - covers popular APM solutions, core Tomcat features, Spring Cloud support, and database drivers.
 
@@ -280,7 +278,6 @@ Dependencies requiring custom download logic, vendor APIs, or further investigat
 | **maven** | cf-metrics-exporter | 🟡 Maintained | MED | ✅ Yes |
 | **maven** | groovy | 🟢 Active | HIGH | ⚠️ Verify coords |
 | **maven** | java-cfenv | 🟢 Active | MED | ⚠️ Verify coords |
-| **maven** | spring-boot-cli | 🟢 Active | HIGH | ⚠️ Verify coords |
 | **custom** | google-stackdriver-profiler | 🟢 Active | LOW | ⚠️ Custom watcher |
 | **custom** | jrebel | 🟢 Active | LOW | ❌ Manual only |
 | **custom** | luna-security-provider | ⚫ Unknown | LOW | ❌ Manual only |
@@ -357,7 +354,7 @@ Dependencies requiring custom download logic, vendor APIs, or further investigat
    - Check if GitHub releases exist
    - Determine best watcher approach
 
-2. **Groovy/Spring Boot CLI:**
+2. **Groovy:**
    - Verify Maven coordinates
    - Check artifact naming/packaging
 
@@ -437,3 +434,4 @@ curl -s "https://search.maven.org/solrsearch/select?q=g:GROUP_ID+AND+a:ARTIFACT_
 **Document maintained by:** buildpacks-ci team  
 **Last updated:** 2026-02-13  
 **Next review:** After Phase 1 implementation
+
