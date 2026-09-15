@@ -17,7 +17,7 @@ Other buildpacks follow the same process; substitute the name throughout.
 A release crosses two pipelines:
 
 1. **`java-buildpack`** builds and ships the buildpack, producing a GitHub
-   release tagged `v5.0.6`.
+   release tagged `v5.0.6` (example, look for actual new version here).
 2. **`cf-release`** wraps it in a BOSH release, deploys a CF environment, runs
    CATS against it, and publishes the finalized BOSH release.
 
