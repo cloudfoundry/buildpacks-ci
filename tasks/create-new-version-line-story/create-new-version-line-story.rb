@@ -5,16 +5,17 @@ require 'yaml'
 require_relative 'dispatch'
 
 class SemanticVersion
-  attr_reader :major, :minor, :patch
+  attr_reader :major, :minor, :patch, :build
 
   def initialize(original)
     @original = original
-    m = @original.match(/^v?(\d+)\.(\d+)(\.(\d+))?(.+)?/)
+    m = @original.match(/^v?(\d+)(?:\.(\d+)(?:\.(\d+)(?:\.(\d+))?)?)?(.+)?$/)
     raise ArgumentError, "Not a semantic version: #{@original.inspect}" unless m
 
     @major = m[1].to_i
-    @minor = m[2].to_i
-    @patch = m[4] ? m[4].to_i : 0
+    @minor = m[2] ? m[2].to_i : 0
+    @patch = m[3] ? m[3].to_i : 0
+    @build = m[4] ? m[4].to_i : 0
     @metadata = m[5] || nil
   end
 end
