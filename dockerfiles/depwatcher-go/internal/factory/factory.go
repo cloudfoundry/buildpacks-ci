@@ -163,6 +163,10 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 		watcher := watchers.NewJRubyWatcher(client)
 		versions, err = watcher.Check()
 
+	case "yarn_berry":
+		watcher := watchers.NewYarnBerryWatcher(client)
+		versions, err = watcher.Check()
+
 	case "nginx":
 		watcher := watchers.NewNginxWatcher(client)
 		versions, err = watcher.Check()
@@ -434,6 +438,10 @@ func InWithClient(source Source, version base.Internal, client base.HTTPClient) 
 
 	case "jruby":
 		watcher := watchers.NewJRubyWatcher(client)
+		return watcher.In(version.Ref)
+
+	case "yarn_berry":
+		watcher := watchers.NewYarnBerryWatcher(client)
 		return watcher.In(version.Ref)
 
 	case "nginx":
