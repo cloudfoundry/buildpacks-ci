@@ -437,6 +437,18 @@ dependencies:
       - 'extension: .tar.gz'
     any_stack: true
     versions_to_keep: 2
+  yarn-berry:
+    buildpacks:
+      nodejs:
+        lines:
+          - line: 4.X.X
+    source_type: yarn_berry
+    #! Yarn Berry (2.x/3.x/4.x) is not distributed via GitHub release assets or
+    #! as a self-contained npm package - it is only published to Yarn's own
+    #! release registry at https://repo.yarnpkg.com, the same source Corepack
+    #! itself uses to resolve and fetch a given Yarn version.
+    any_stack: true
+    versions_to_keep: 2
   tomcat:
     buildpacks:
       java:
