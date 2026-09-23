@@ -40,11 +40,10 @@ dependencies:
       java:
         lines:
           - line: 2.X.X
-    source_type: maven
+    source_type: github_releases
     source_params:
-      - 'uri: https://repo1.maven.org/maven2'
-      - 'group_id: org.cloudfoundry'
-      - 'artifact_id: java-buildpack-client-certificate-mapper'
+      - 'repo: cloudfoundry/java-buildpack-client-certificate-mapper'
+      - 'glob: java-buildpack-client-certificate-mapper-*[0-9].jar'
     any_stack: true
     versions_to_keep: 1
   java-cfenv:
