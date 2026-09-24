@@ -451,6 +451,17 @@ dependencies:
     #! itself uses to resolve and fetch a given Yarn version.
     any_stack: true
     versions_to_keep: 2
+  pnpm:
+    buildpacks:
+      nodejs:
+        lines:
+          - line: latest
+    source_type: github_releases
+    source_params:
+      - 'repo: pnpm/pnpm'
+      - 'extension: .tar.gz'
+    any_stack: true
+    versions_to_keep: 2
   tomcat:
     buildpacks:
       java:
