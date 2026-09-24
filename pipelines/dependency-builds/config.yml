@@ -709,6 +709,7 @@ skip_deprecation_check:
   - jruby  #! tied to ruby, ruby doesn't publish EOL schedule
   - nginx  #! doesn't publish EOL schedule
   - nginx-static  #! same as nginx
+  - pnpm  #! doesn't publish EOL schedule
   - openresty  #! depends on nginx and lua deprecation
   - php  #! complicated
   - ruby  #! doesn't publish EOL schedule
