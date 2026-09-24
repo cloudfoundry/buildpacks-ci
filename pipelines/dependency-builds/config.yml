@@ -441,6 +441,9 @@ dependencies:
       nodejs:
         lines:
           - line: 4.X.X
+      ruby:
+        lines:
+          - line: 4.X.X
     source_type: yarn_berry
     #! Yarn Berry (2.x/3.x/4.x) is not distributed via GitHub release assets or
     #! as a self-contained npm package - it is only published to Yarn's own
