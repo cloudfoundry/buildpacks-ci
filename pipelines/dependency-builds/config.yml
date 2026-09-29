@@ -459,7 +459,7 @@ dependencies:
     source_type: github_releases
     source_params:
       - 'repo: pnpm/pnpm'
-      - 'extension: .tar.gz'
+      - 'glob: pnpm-linux-x64.tar.gz'
     any_stack: true
     versions_to_keep: 2
   tomcat:
