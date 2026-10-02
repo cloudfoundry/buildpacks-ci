@@ -23,3 +23,7 @@ buildpack:
   #! heavy fixtures overload the single-AZ test CF env (resource contention / staging
   #! timeouts). Default preserves prior behavior.
   integration_ginkgo_nodes: 3
+  #! When true, adds operations/increase-staging-timeout.yml to the cf-deployment OPS_FILES
+  #! (raises cc.staging_timeout_in_seconds above the 900s capi default). Enable for
+  #! buildpacks whose heavy fixtures occasionally exceed 15 min staging on the single-AZ env.
+  increase_staging_timeout: false

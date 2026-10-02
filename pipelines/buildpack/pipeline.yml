@@ -604,7 +604,8 @@ jobs:
             set -euo pipefail
             cp -r cf-deployment/* cf-deployment-with-tags/
             cp buildpacks-ci/deployments/operations/tag-bbl-env.yml cf-deployment-with-tags/operations/
-            echo "Added tag-bbl-env.yml ops file"
+            cp buildpacks-ci/deployments/operations/increase-staging-timeout.yml cf-deployment-with-tags/operations/
+            echo "Added tag-bbl-env.yml and increase-staging-timeout.yml ops files"
     - task: deploy-cf
       file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
       input_mapping:
@@ -615,7 +616,7 @@ jobs:
         BBL_GCP_SERVICE_ACCOUNT_KEY: ((gcp-service-account-key))
         SYSTEM_DOMAIN: #@ data.values.language + ".buildpacks.ci.cloudfoundry.org"
         VARS_STORE_FILE: bump-deployments/bbl-gcp-cf/deployment-vars.yml
-        OPS_FILES: operations/use-compiled-releases.yml operations/experimental/fast-deploy-with-downtime-and-danger.yml operations/scale-to-one-az.yml operations/tag-bbl-env.yml
+        OPS_FILES: #@ "operations/use-compiled-releases.yml operations/experimental/fast-deploy-with-downtime-and-danger.yml operations/scale-to-one-az.yml operations/tag-bbl-env.yml" + (" operations/increase-staging-timeout.yml" if data.values.buildpack.increase_staging_timeout else "")
         BOSH_DEPLOY_ARGS: #@ "--var bbl_env_name=" + data.values.language + "-buildpacks-bbl-env"
       on_failure:
         do:

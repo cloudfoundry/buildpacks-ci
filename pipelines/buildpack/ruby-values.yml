@@ -15,3 +15,6 @@ buildpack:
   #! at 3 parallel nodes, causing transient gorouter 404s + 15-min staging timeouts.
   #! Reduced to 2 to lower overlapping concurrent stagings.
   integration_ginkgo_nodes: 2
+  #! Heavy Rails stagings occasionally exceed the 900s capi default on the single-AZ env
+  #! even though the buildpack completes (Exit 0); raise the ceiling to 1800s.
+  increase_staging_timeout: true

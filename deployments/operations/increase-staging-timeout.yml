@@ -1,0 +1,17 @@
+---
+# Increase Cloud Controller staging timeout for buildpack integration-test envs
+#
+# The buildpack test CF is deployed single-AZ (operations/scale-to-one-az.yml) with a
+# single Diego cell. Heavy fixtures (e.g. ruby rails7 / rails72_sprockets) run several
+# parallel stagings that saturate that one cell, so staging occasionally exceeds the
+# capi default of 900s (cc.staging_timeout_in_seconds) and the app is killed mid-stage
+# even though the buildpack itself completes successfully (Exit status 0).
+#
+# Raising the timeout to 1800s gives headroom on the contended env without masking real
+# buildpack failures (a genuinely broken stage still errors well before 30 minutes).
+#
+# Property: capi-release cloud_controller_ng job, cc.staging_timeout_in_seconds (default 900).
+
+- type: replace
+  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/staging_timeout_in_seconds?
+  value: 1800
