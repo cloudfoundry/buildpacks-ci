@@ -357,6 +357,13 @@ dependencies:
             link: https://peps.python.org/pep-0745/
         removal_strategy: remove_all
     versions_to_keep: 1
+  uv:
+    buildpacks:
+      python:
+        lines:
+          - line: latest
+    source_type: pypi
+    versions_to_keep: 2
   r:
     buildpacks:
       r:
