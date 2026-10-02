@@ -19,3 +19,7 @@ buildpack:
   skip_docker_start: true
   skip_brats: true
   compute_instance_count: 1
+  #! Ginkgo parallel nodes for CF integration tests. Lower this for buildpacks whose
+  #! heavy fixtures overload the single-AZ test CF env (resource contention / staging
+  #! timeouts). Default preserves prior behavior.
+  integration_ginkgo_nodes: 3

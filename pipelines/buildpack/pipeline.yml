@@ -652,7 +652,7 @@ jobs:
       params:
         CF_STACK: #@ stack
         GINKGO_ATTEMPTS: 4
-        GINKGO_NODES: 3
+        GINKGO_NODES: #@ data.values.buildpack.integration_ginkgo_nodes
       on_failure: #@ test_failure_diagnostics()
     #@ end
     - task: #@ "integration-test-" + stack + "-uncached"
@@ -661,7 +661,7 @@ jobs:
       params:
         CF_STACK: #@ stack
         GINKGO_ATTEMPTS: 4
-        GINKGO_NODES: 3
+        GINKGO_NODES: #@ data.values.buildpack.integration_ginkgo_nodes
         GITHUB_TOKEN: ((buildpacks-github-token))
         SWITCHBLADE_PLATFORM: cf
         CACHED: "false"
@@ -679,7 +679,7 @@ jobs:
       params:
         CF_STACK: #@ stack
         GINKGO_ATTEMPTS: 4
-        GINKGO_NODES: 3
+        GINKGO_NODES: #@ data.values.buildpack.integration_ginkgo_nodes
         GITHUB_TOKEN: ((buildpacks-github-token))
         SWITCHBLADE_PLATFORM: cf
         CACHED: "true"

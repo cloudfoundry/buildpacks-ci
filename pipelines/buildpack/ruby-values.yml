@@ -11,3 +11,7 @@ buildpack:
   skip_docker_start: true
   skip_brats: true
   compute_instance_count: 3
+  #! Heavy Rails fixtures (rails7, rails72_sprockets) saturate the single-AZ test CF env
+  #! at 3 parallel nodes, causing transient gorouter 404s + 15-min staging timeouts.
+  #! Reduced to 2 to lower overlapping concurrent stagings.
+  integration_ginkgo_nodes: 2
