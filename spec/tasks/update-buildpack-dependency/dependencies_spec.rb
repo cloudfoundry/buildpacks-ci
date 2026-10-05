@@ -338,8 +338,34 @@ RSpec.describe Dependencies do
   end
 
   # ---------------------------------------------------------------------------
-  # General invariants that apply to BOTH types
+  # SapMachine 4-digit version handling (e.g. 17.0.20 then 17.0.20.1)
   # ---------------------------------------------------------------------------
+  describe '4-digit version (SapMachine stability patch)' do
+    # SapMachine publishes both "17.0.20" and "17.0.20.1" as separate stable
+    # releases. The semver2 gem silently drops the 4th segment, so both parse
+    # to {17,0,20}. Without special handling, 17.0.20.1 would be skipped.
+
+    let(:dep_name)     { 'sapmachine' }
+    let(:base_version) { '17.0.20' }
+    let(:patch_version){ '17.0.20.1' }
+
+    let(:existing_entry) { make_dep(name: dep_name, version: base_version, stacks: %w[cflinuxfs4 cflinuxfs5]) }
+    let(:new_dep)        { make_dep(name: dep_name, version: patch_version, stacks: %w[cflinuxfs4 cflinuxfs5]) }
+
+    context 'when the 4-digit version arrives after the 3-digit base (minor line)' do
+      subject { switch(new_dep, [existing_entry], line: 'minor') }
+
+      it 'adds the 4-digit patch version' do
+        versions = subject.map { |d| d['version'] }
+        expect(versions).to include(patch_version)
+      end
+
+      it 'removes the superseded 3-digit base version' do
+        versions = subject.map { |d| d['version'] }
+        expect(versions).not_to include(base_version)
+      end
+    end
+  end
   describe 'general invariants' do
     it 'never produces two entries with the same name, version, and cf_stacks' do
       existing = [
@@ -376,3 +402,4 @@ RSpec.describe Dependencies do
     end
   end
 end
+

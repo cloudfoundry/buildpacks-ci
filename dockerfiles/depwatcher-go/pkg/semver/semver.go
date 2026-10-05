@@ -46,6 +46,20 @@ func Parse(version string) (*Semver, error) {
 	}, nil
 }
 
+// isFourthSegment detects metadata of the form ".\d+" which represents a
+// 4th version digit (e.g. ".1" in "17.0.20.1"). SapMachine uses this as a
+// stable patch suffix, not a pre-release marker.
+func isFourthSegment(metadata string) (int, bool) {
+	if len(metadata) < 2 || metadata[0] != '.' {
+		return 0, false
+	}
+	n, err := strconv.Atoi(metadata[1:])
+	if err != nil {
+		return 0, false
+	}
+	return n, true
+}
+
 func (s *Semver) LessThan(other *Semver) bool {
 	if s.Major != other.Major {
 		return s.Major < other.Major
@@ -55,6 +69,21 @@ func (s *Semver) LessThan(other *Semver) bool {
 	}
 	if s.Patch != other.Patch {
 		return s.Patch < other.Patch
+	}
+
+	// Handle 4th-segment versions (e.g. "17.0.20.1" > "17.0.20").
+	// These are stable patch releases, not pre-releases.
+	sBuild, sIsFourth := isFourthSegment(s.Metadata)
+	oBuild, oIsFourth := isFourthSegment(other.Metadata)
+
+	if sIsFourth && oIsFourth {
+		return sBuild < oBuild
+	}
+	if sIsFourth {
+		return false // s has 4th digit, so s > other
+	}
+	if oIsFourth {
+		return true // other has 4th digit, so s < other
 	}
 
 	// Handle pre-release versions according to semver spec:
@@ -126,9 +155,11 @@ func parseNumeric(s string) (int, bool) {
 }
 
 func (s *Semver) IsFinalRelease() bool {
-	return s.Metadata == ""
+	_, isFourth := isFourthSegment(s.Metadata)
+	return s.Metadata == "" || isFourth
 }
 
 func (s *Semver) String() string {
 	return fmt.Sprintf("%d.%d.%d", s.Major, s.Minor, s.Patch)
 }
+
