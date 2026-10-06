@@ -534,6 +534,18 @@ dependencies:
       - 'artifact_id: elastic-apm-agent'
     any_stack: true
     versions_to_keep: 2
+  elastic-otel-javaagent:
+    buildpacks:
+      java:
+        lines:
+          - line: 1.X.X
+    source_type: maven
+    source_params:
+      - 'uri: https://repo1.maven.org/maven2'
+      - 'group_id: co.elastic.otel'
+      - 'artifact_id: elastic-otel-javaagent'
+    any_stack: true
+    versions_to_keep: 2
   postgresql-jdbc:
     buildpacks:
       java:
@@ -727,6 +739,7 @@ skip_deprecation_check:
   - azure-application-insights  #! doesn't publish EOL schedule
   - splunk-otel-javaagent  #! doesn't publish EOL schedule
   - elastic-apm-agent  #! doesn't publish EOL schedule
+  - elastic-otel-javaagent  #! doesn't publish EOL schedule
   - postgresql-jdbc  #! doesn't publish EOL schedule
   - mariadb-jdbc  #! doesn't publish EOL schedule
   - jacoco  #! doesn't publish EOL schedule
