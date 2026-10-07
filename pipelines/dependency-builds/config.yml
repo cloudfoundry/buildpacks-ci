@@ -46,6 +46,17 @@ dependencies:
       - 'glob: java-buildpack-client-certificate-mapper-*[0-9].jar'
     any_stack: true
     versions_to_keep: 1
+  container-security-provider:
+    buildpacks:
+      java:
+        lines:
+          - line: 1.X.X
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/java-buildpack-security-provider'
+      - 'glob: java-buildpack-container-security-provider-*[0-9].jar'
+    any_stack: true
+    versions_to_keep: 1
   java-cfenv:
     buildpacks:
       java:
@@ -744,6 +755,7 @@ skip_deprecation_check:
   - sapmachine  #! JRE versions tied to SAP release schedule
   - appdynamics-java  #! doesn't publish EOL schedule
   - client-certificate-mapper  #! doesn't publish EOL schedule
+  - container-security-provider  #! doesn't publish EOL schedule
   - cf-metrics-exporter  #! doesn't publish EOL schedule
   - metric-writer  #! doesn't publish EOL schedule
 
