@@ -345,6 +345,51 @@ var _ = Describe("GithubReleasesWatcher", func() {
 				})
 			})
 		})
+
+		Context("when handling SapMachine 4-digit releases", func() {
+			BeforeEach(func() {
+				releases := `[
+					{"tag_name": "sapmachine-17.0.20", "draft": false, "prerelease": false, "assets": []},
+					{"tag_name": "sapmachine-17.0.20.1", "draft": false, "prerelease": false, "assets": []},
+					{"tag_name": "sapmachine-21.0.12", "draft": false, "prerelease": false, "assets": []},
+					{"tag_name": "sapmachine-21.0.12.1", "draft": false, "prerelease": false, "assets": []}
+				]`
+				mockClient = newMockGithubReleasesClient(releases)
+				watcher = watchers.NewGithubReleasesWatcher(mockClient, "test/repo", false)
+			})
+
+			It("returns 4-digit versions after their 3-digit base", func() {
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(4))
+				refs := make([]string, len(versions))
+				for i, v := range versions {
+					refs[i] = v.Ref
+				}
+				// 17.0.20 must come before 17.0.20.1
+				idx17_3 := -1
+				idx17_4 := -1
+				for i, r := range refs {
+					if r == "17.0.20" {
+						idx17_3 = i
+					}
+					if r == "17.0.20.1" {
+						idx17_4 = i
+					}
+				}
+				Expect(idx17_3).To(BeNumerically("<", idx17_4))
+			})
+
+			It("includes both 3-digit and 4-digit variants as separate versions", func() {
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				refs := make([]string, len(versions))
+				for i, v := range versions {
+					refs[i] = v.Ref
+				}
+				Expect(refs).To(ContainElements("17.0.20", "17.0.20.1", "21.0.12", "21.0.12.1"))
+			})
+		})
 	})
 
 	Describe("In", func() {

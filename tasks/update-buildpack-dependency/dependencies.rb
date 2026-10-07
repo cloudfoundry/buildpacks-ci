@@ -58,7 +58,16 @@ class Dependencies
       old_ver = SemVer.parse(old_v)
       next false if new_ver.nil? || old_ver.nil?
 
-      new_ver > old_ver
+      if new_ver == old_ver
+        # Same 3-part semver — the semver2 gem silently drops any 4th segment
+        # (e.g. "17.0.20.1" parses identical to "17.0.20"). Compare the raw
+        # 4th part when present to correctly order stability patches.
+        new_fourth = new_v.split('.').length == 4 ? new_v.split('.')[3].to_i : -1
+        old_fourth = old_v.split('.').length == 4 ? old_v.split('.')[3].to_i : -1
+        new_fourth > old_fourth
+      else
+        new_ver > old_ver
+      end
     end
   end
 
@@ -145,3 +154,4 @@ class Dependencies
     DATE_VERSION_PATTERN.match?(version.to_s)
   end
 end
+

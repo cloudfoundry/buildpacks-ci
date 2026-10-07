@@ -57,6 +57,15 @@ var _ = Describe("Semver", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(sv.Original).To(Equal("v3.2.1-beta.1"))
 			})
+
+			It("parses 4-digit version (SapMachine-style)", func() {
+				sv, err := semver.Parse("17.0.20.1")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(sv.Major).To(Equal(17))
+				Expect(sv.Minor).To(Equal(0))
+				Expect(sv.Patch).To(Equal(20))
+				Expect(sv.Metadata).To(Equal(".1"))
+			})
 		})
 
 		Context("when parsing invalid strings", func() {
@@ -106,6 +115,29 @@ var _ = Describe("Semver", func() {
 			v1, _ := semver.Parse("3.2.1")
 			v2, _ := semver.Parse("3.2.1")
 			Expect(v1.LessThan(v2)).To(BeFalse())
+		})
+
+		Context("4th-segment version comparison (SapMachine-style)", func() {
+			It("considers 4-digit version greater than 3-digit base", func() {
+				base, _ := semver.Parse("17.0.20")
+				patch, _ := semver.Parse("17.0.20.1")
+				Expect(base.LessThan(patch)).To(BeTrue())
+				Expect(patch.LessThan(base)).To(BeFalse())
+			})
+
+			It("compares two 4-digit versions numerically", func() {
+				v1, _ := semver.Parse("17.0.20.1")
+				v2, _ := semver.Parse("17.0.20.2")
+				Expect(v1.LessThan(v2)).To(BeTrue())
+				Expect(v2.LessThan(v1)).To(BeFalse())
+			})
+
+			It("compares 4-digit versions across different patches correctly", func() {
+				v1, _ := semver.Parse("17.0.20.1")
+				v2, _ := semver.Parse("17.0.21")
+				Expect(v1.LessThan(v2)).To(BeTrue())
+				Expect(v2.LessThan(v1)).To(BeFalse())
+			})
 		})
 
 		Context("pre-release version comparison", func() {
