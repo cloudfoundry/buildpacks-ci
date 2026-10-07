@@ -291,12 +291,44 @@ skip_deprecation_check:
 
 ## How to add a new dependency
 
-1. Add an entry under `dependencies:` in `config.yml` with at minimum:
+A dependency needs changes in two repos. For each version line, this pipeline generates:
+
+1. **`source-<dep>-<line>`** resource: the depwatcher (`dockerfiles/depwatcher-go`) polls
+   the upstream source, selected by `source_type` and `source_params` in `config.yml`, for
+   new versions.
+2. **`build-<dep>-<line>`** job: the `build-binary` task runs
+   [`cloudfoundry/binary-builder`](https://github.com/cloudfoundry/binary-builder), which
+   looks up a recipe by dependency name. The recipe downloads or compiles the artifact and
+   the job uploads it to `buildpacks.cloudfoundry.org`, so buildpacks don't depend on
+   upstream hosts at staging time and offline buildpacks can bundle it.
+3. **`update-<dep>-<line>-<buildpack>`** job: opens a PR on the buildpack that adds the new
+   version to `manifest.yml` and removes older ones according to `removal_strategy`.
+
+Steps:
+
+1. **binary-builder recipe** (merge first; without it the build job fails with
+   `no recipe for "<name>"`). For an artifact that only needs downloading, such as a jar,
+   add a `PassthroughRecipe` in `internal/recipe/passthrough.go` and add the name to the
+   lists in `internal/recipe/recipe_test.go`. Example: cloudfoundry/binary-builder#123.
+2. **Watcher** in this repo. Add an entry under `dependencies:` in `config.yml` with at minimum:
    - `buildpacks` with at least one buildpack and version line
+   - `source_type` and `source_params` (e.g. `maven` with group/artifact id, or
+     `github_releases` with `repo` and a `glob` that matches only the release asset)
    - `versions_to_keep`
    - `any_stack: true` if the binary is not OS-native, omit otherwise
-2. Add the dependency name to `skip_deprecation_check` if it has no formal EOL schedule
-3. Run `./bin/update-pipelines -p dependency-builds` to apply
+
+   Add the dependency name to `skip_deprecation_check` if it has no formal EOL schedule.
+   Examples: #683 (`github_releases`), #682 (`maven`).
+3. Run `./bin/update-pipelines -p dependency-builds` to apply.
+4. **Buildpack support**: the update job only edits the `dependencies:` list in
+   `manifest.yml`. For a dependency the buildpack doesn't know yet, it still opens a PR that
+   adds the entry, but nothing installs it: the buildpack also needs the name in
+   `default_versions` / `url_to_dependency_map` and code that uses it. Merging only the
+   pipeline PR is harmless at staging time, but the artifact would be bundled into offline
+   buildpacks without being used. Either land buildpack support first, or keep the pipeline
+   PR open and merge it together with the support PR. If the support PR adds its own manifest
+   entry pointing at an upstream URL, drop that entry in favour of the pipeline's
+   `buildpacks.cloudfoundry.org` one.
 
 ## How to retire a version line
 
