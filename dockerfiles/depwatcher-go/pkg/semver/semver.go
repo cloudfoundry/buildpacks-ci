@@ -161,4 +161,3 @@ func (s *Semver) IsFinalRelease() bool {
 func (s *Semver) String() string {
 	return fmt.Sprintf("%d.%d.%d", s.Major, s.Minor, s.Patch)
 }
-

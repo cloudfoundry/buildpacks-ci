@@ -288,4 +288,3 @@ var _ = Describe("Filter", func() {
 		})
 	})
 })
-
