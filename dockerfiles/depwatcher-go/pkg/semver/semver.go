@@ -155,8 +155,7 @@ func parseNumeric(s string) (int, bool) {
 }
 
 func (s *Semver) IsFinalRelease() bool {
-	_, isFourth := isFourthSegment(s.Metadata)
-	return s.Metadata == "" || isFourth
+	return s.Metadata == ""
 }
 
 func (s *Semver) String() string {

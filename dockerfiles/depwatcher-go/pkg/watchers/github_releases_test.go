@@ -688,4 +688,3 @@ var _ = Describe("GithubReleasesWatcher", func() {
 		})
 	})
 })
-

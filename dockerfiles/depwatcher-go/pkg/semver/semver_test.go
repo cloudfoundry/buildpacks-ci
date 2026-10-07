@@ -208,11 +208,6 @@ var _ = Describe("Semver", func() {
 			sv, _ := semver.Parse("3.2.1-beta")
 			Expect(sv.IsFinalRelease()).To(BeFalse())
 		})
-
-		It("returns true for 4th-segment versions (SapMachine-style stability patch)", func() {
-			sv, _ := semver.Parse("17.0.20.1")
-			Expect(sv.IsFinalRelease()).To(BeTrue())
-		})
 	})
 
 	Describe("String", func() {

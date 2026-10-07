@@ -366,6 +366,10 @@ RSpec.describe Dependencies do
       end
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # General invariants that apply to BOTH types
+  # ---------------------------------------------------------------------------
   describe 'general invariants' do
     it 'never produces two entries with the same name, version, and cf_stacks' do
       existing = [
