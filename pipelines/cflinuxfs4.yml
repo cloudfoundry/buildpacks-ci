@@ -483,7 +483,6 @@ jobs:
         - cf-deployment/operations/experimental/fast-deploy-with-downtime-and-danger.yml
         - cf-deployment/operations/use-latest-stemcell.yml
         - cf-deployment/operations/use-compiled-releases.yml
-        - cf-deployment/operations/experimental/set-cflinuxfs4-default-stack.yml
         - buildpacks-opsfile/use-latest-buildpack-releases.yml
         - rootfs-release-artifacts/use-dev-release-opsfile.yml
         - capi-release-artifacts/use-dev-release-opsfile.yml
