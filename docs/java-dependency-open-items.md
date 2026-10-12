@@ -1,6 +1,6 @@
 # Java Buildpack Dependencies — Open Items
 
-**Date:** 2026-10-07
+**Date:** 2026-10-12
 **Supersedes:** `docs/missing-java-dependencies-analysis.md` (2026-02-13) and the
 open items of the migration plan in #599 (2026-03-31).
 
@@ -12,12 +12,11 @@ except those below.
 
 ## Current state
 
-Of the 47 dependency entries in the java-buildpack `manifest.yml`, 34 are on
-`buildpacks.cloudfoundry.org` with a `config.yml` entry. The remaining 13 are below.
+Of the 47 dependency entries in the java-buildpack `manifest.yml`, 35 are on
+`buildpacks.cloudfoundry.org` with a `config.yml` entry. The remaining 12 are below.
 
 | Dependency | Version | Hosted on | Proposed action |
 |---|---|---|---|
-| `container-security-provider` | 1.20.0 | `java-buildpack.cloudfoundry.org` | Being replaced, see below |
 | `memory-calculator` | 4.2.0 | `java-buildpack.cloudfoundry.org` | Keep (frozen) |
 | `memory-calculator` | 4.1.0 | GitHub releases | Remove (unused) |
 | `tomcat-access-logging-support` | 3.4.0 | `java-buildpack.cloudfoundry.org` | Keep (frozen) |
@@ -31,18 +30,18 @@ Of the 47 dependency entries in the java-buildpack `manifest.yml`, 34 are on
 | `java-memory-assistant` | 0.5.0 | GitHub releases (SAP) | Decide, see below |
 | `java-memory-assistant-cleanup` | 0.1.0 | GitHub releases (SAP) | Decide, see below |
 
-## In progress
-
-- **`container-security-provider`**: the source repo
-  (`cloudfoundry/java-buildpack-security-provider`) now publishes GitHub releases, starting
-  with `v1.21.0`. Watcher (#683) and recipe (cloudfoundry/binary-builder#123) are merged;
-  the pipeline replaces the 1.20.0 entry with 1.21.0.
-
 ## Keep as-is (frozen artifacts)
 
 These have no upstream releases to watch. `java-buildpack.cloudfoundry.org` is a host we
 control, so no migration or `config.yml` entry is needed for now. The CF-owned ones can move
 to the pipeline once their source repos publish GitHub releases (see the todo list below).
+
+`java-buildpack.cloudfoundry.org` is the repository of the Ruby java-buildpack (an
+`index.yml` per dependency, filled by the Concourse `ci/` scripts of each source repo). The
+Go java-buildpack manifest kept these existing URIs. The Go buildpack only uses the
+manifest `uri` and `sha256`, so moving a dependency to `buildpacks.cloudfoundry.org` is a
+manifest change only. Keep the files on `java-buildpack.cloudfoundry.org`: older buildpack
+releases still point at them.
 
 - **`memory-calculator` 4.2.0**: the version the buildpack uses (see below).
   `cloudfoundry/java-buildpack-memory-calculator` has a `v4.2.0` tag, but its latest GitHub
@@ -55,7 +54,7 @@ to the pipeline once their source repos publish GitHub releases (see the todo li
 ## No action needed
 
 - **`google-stackdriver-profiler` 0.4.0**: already has a `config.yml` entry
-  (`stackdriver_profiler`). There has been no new upstream version since, so the entry still
+  (`google-stackdriver-profiler`, source type `stackdriver_profiler`). There has been no new upstream version since, so the entry still
   points at the vendor URL. The next upstream release moves it to our bucket. Upstream is
   superseded by Google Cloud Profiler; consider removal separately.
 
