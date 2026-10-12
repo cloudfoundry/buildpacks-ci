@@ -22,6 +22,7 @@ type libericaRelease struct {
 	FeatureVersion int    `json:"featureVersion"`
 	InterimVersion int    `json:"interimVersion"`
 	UpdateVersion  int    `json:"updateVersion"`
+	PatchVersion   int    `json:"patchVersion"`
 	BuildVersion   int    `json:"buildVersion"`
 	DownloadURL    string `json:"downloadUrl"`
 }
@@ -43,8 +44,7 @@ func (w *LibericaWatcher) Check() ([]base.Internal, error) {
 
 	var versions []base.Internal
 	for _, r := range releases {
-		version := fmt.Sprintf("%d.%d.%d+%d", r.FeatureVersion, r.InterimVersion, r.UpdateVersion, r.BuildVersion)
-		versions = append(versions, base.Internal{Ref: version})
+		versions = append(versions, base.Internal{Ref: r.version()})
 	}
 
 	return base.SortVersions(versions), nil
@@ -57,8 +57,7 @@ func (w *LibericaWatcher) In(ref string) (base.Release, error) {
 	}
 
 	for _, r := range releases {
-		version := fmt.Sprintf("%d.%d.%d+%d", r.FeatureVersion, r.InterimVersion, r.UpdateVersion, r.BuildVersion)
-		if version == ref {
+		if r.version() == ref {
 			return base.Release{
 				Ref: ref,
 				URL: r.DownloadURL,
@@ -157,7 +156,19 @@ func (w *LibericaWatcher) isNewerRelease(r1, r2 libericaRelease) bool {
 	if r1.UpdateVersion != r2.UpdateVersion {
 		return r1.UpdateVersion > r2.UpdateVersion
 	}
+	if r1.PatchVersion != r2.PatchVersion {
+		return r1.PatchVersion > r2.PatchVersion
+	}
 	return r1.BuildVersion > r2.BuildVersion
+}
+
+// version returns the JEP 322 version, including the patch field for monthly
+// patch releases (e.g. "21.0.12+10", "21.0.12.1+1").
+func (r libericaRelease) version() string {
+	if r.PatchVersion > 0 {
+		return fmt.Sprintf("%d.%d.%d.%d+%d", r.FeatureVersion, r.InterimVersion, r.UpdateVersion, r.PatchVersion, r.BuildVersion)
+	}
+	return fmt.Sprintf("%d.%d.%d+%d", r.FeatureVersion, r.InterimVersion, r.UpdateVersion, r.BuildVersion)
 }
 
 func (w *LibericaWatcher) name(uri string) string {

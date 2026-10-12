@@ -46,18 +46,59 @@ func Parse(version string) (*Semver, error) {
 	}, nil
 }
 
-// isFourthSegment detects metadata of the form ".\d+" which represents a
-// 4th version digit (e.g. ".1" in "17.0.20.1"). SapMachine uses this as a
-// stable patch suffix, not a pre-release marker.
-func isFourthSegment(metadata string) (int, bool) {
-	if len(metadata) < 2 || metadata[0] != '.' {
-		return 0, false
+var jep322SuffixRegex = regexp.MustCompile(`^((?:\.\d+)+)(?:\+(\d+))?$`)
+
+// parseExtraFields detects metadata of the form ".N[.N...][+B]" which
+// represents additional JEP 322 version fields (e.g. ".1" in "17.0.20.1" or
+// ".1+2" in "21.0.12.1+2"). SapMachine, Liberica and Zulu use these for
+// monthly patch releases, not as pre-release markers. build is -1
+// when absent.
+func parseExtraFields(metadata string) (fields []int, build int, ok bool) {
+	m := jep322SuffixRegex.FindStringSubmatch(metadata)
+	if m == nil {
+		return nil, 0, false
 	}
-	n, err := strconv.Atoi(metadata[1:])
-	if err != nil {
-		return 0, false
+	for _, f := range strings.Split(m[1][1:], ".") {
+		n, err := strconv.Atoi(f)
+		if err != nil {
+			return nil, 0, false
+		}
+		fields = append(fields, n)
 	}
-	return n, true
+	build = -1
+	if m[2] != "" {
+		var err error
+		if build, err = strconv.Atoi(m[2]); err != nil {
+			return nil, 0, false
+		}
+	}
+	return fields, build, true
+}
+
+// compareExtraFields compares extra version fields, treating missing fields
+// as lower than present ones ("21.0.10" < "21.0.10.0.1"), then build numbers.
+func compareExtraFields(a []int, aBuild int, b []int, bBuild int) int {
+	for i := 0; i < len(a) && i < len(b); i++ {
+		if a[i] != b[i] {
+			if a[i] < b[i] {
+				return -1
+			}
+			return 1
+		}
+	}
+	if len(a) != len(b) {
+		if len(a) < len(b) {
+			return -1
+		}
+		return 1
+	}
+	switch {
+	case aBuild < bBuild:
+		return -1
+	case aBuild > bBuild:
+		return 1
+	}
+	return 0
 }
 
 func (s *Semver) LessThan(other *Semver) bool {
@@ -71,19 +112,20 @@ func (s *Semver) LessThan(other *Semver) bool {
 		return s.Patch < other.Patch
 	}
 
-	// Handle 4th-segment versions (e.g. "17.0.20.1" > "17.0.20").
+	// Handle extra JEP 322 fields (e.g. "17.0.20.1" > "17.0.20",
+	// "21.0.12.1+2" > "21.0.12.1+1" > "21.0.12+10").
 	// These are stable patch releases, not pre-releases.
-	sBuild, sIsFourth := isFourthSegment(s.Metadata)
-	oBuild, oIsFourth := isFourthSegment(other.Metadata)
+	sFields, sBuild, sHasExtra := parseExtraFields(s.Metadata)
+	oFields, oBuild, oHasExtra := parseExtraFields(other.Metadata)
 
-	if sIsFourth && oIsFourth {
-		return sBuild < oBuild
+	if sHasExtra && oHasExtra {
+		return compareExtraFields(sFields, sBuild, oFields, oBuild) < 0
 	}
-	if sIsFourth {
-		return false // s has 4th digit, so s > other
+	if sHasExtra {
+		return false // s has extra fields, so s > other
 	}
-	if oIsFourth {
-		return true // other has 4th digit, so s < other
+	if oHasExtra {
+		return true // other has extra fields, so s < other
 	}
 
 	// Handle pre-release versions according to semver spec:

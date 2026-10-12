@@ -368,6 +368,46 @@ RSpec.describe Dependencies do
   end
 
   # ---------------------------------------------------------------------------
+  # JEP 322 versions with a build number (Liberica: 21.0.12+10 then
+  # 21.0.12.1+1, 21.0.12.1+2) and more than four fields (21.0.10.0.1)
+  # ---------------------------------------------------------------------------
+  describe 'JEP 322 version (monthly patch release)' do
+    def versions_after(new_version, existing_versions, name: 'openjdk')
+      existing = existing_versions.map { |v| make_dep(name: name, version: v, stacks: %w[cflinuxfs4 cflinuxfs5]) }
+      new_dep = make_dep(name: name, version: new_version, stacks: %w[cflinuxfs4 cflinuxfs5])
+      switch(new_dep, existing, line: 'major').map { |d| d['version'] }
+    end
+
+    it 'replaces the quarterly release with the patch release' do
+      expect(versions_after('21.0.12.1+1', ['21.0.12+10'])).to eq(['21.0.12.1+1'])
+    end
+
+    it 'replaces a patch release with a rebuild that has a higher build number' do
+      expect(versions_after('21.0.12.1+2', ['21.0.12.1+1'])).to eq(['21.0.12.1+2'])
+    end
+
+    it 'compares build numbers numerically' do
+      expect(versions_after('21.0.12.1+10', ['21.0.12.1+9'])).to eq(['21.0.12.1+10'])
+    end
+
+    it 'does not add an older build of a patch release' do
+      expect(versions_after('21.0.12.1+1', ['21.0.12.1+2'])).to eq(['21.0.12.1+2'])
+    end
+
+    it 'replaces a version with one that has more than four fields' do
+      expect(versions_after('21.0.10.0.1', ['21.0.10'], name: 'sapmachine')).to eq(['21.0.10.0.1'])
+    end
+
+    it 'replaces a version with more than four fields with a higher patch release' do
+      expect(versions_after('21.0.10.1', ['21.0.10.0.1'], name: 'sapmachine')).to eq(['21.0.10.1'])
+    end
+
+    it 'does not add a version with fewer fields than an existing patch release' do
+      expect(versions_after('21.0.10.0.1', ['21.0.10.1'], name: 'sapmachine')).to eq(['21.0.10.1'])
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # General invariants that apply to BOTH types
   # ---------------------------------------------------------------------------
   describe 'general invariants' do

@@ -140,6 +140,30 @@ var _ = Describe("Semver", func() {
 			})
 		})
 
+		Context("JEP 322 version comparison (X.Y.Z.N+B)", func() {
+			lessThan := func(a, b string) bool {
+				va, err := semver.Parse(a)
+				Expect(err).NotTo(HaveOccurred())
+				vb, err := semver.Parse(b)
+				Expect(err).NotTo(HaveOccurred())
+				return va.LessThan(vb)
+			}
+
+			It("orders versions with extra fields and builds", func() {
+				ordered := []string{"21.0.12+9", "21.0.12+10", "21.0.12.1+1", "21.0.12.1+2", "21.0.12.1+10", "21.0.12.2+1", "21.0.13+1"}
+				for i := 0; i < len(ordered)-1; i++ {
+					Expect(lessThan(ordered[i], ordered[i+1])).To(BeTrue(), "%s < %s", ordered[i], ordered[i+1])
+					Expect(lessThan(ordered[i+1], ordered[i])).To(BeFalse(), "%s > %s", ordered[i+1], ordered[i])
+				}
+			})
+
+			It("orders versions with more than four fields", func() {
+				Expect(lessThan("21.0.10", "21.0.10.0.1")).To(BeTrue())
+				Expect(lessThan("21.0.10.0.1", "21.0.10.1")).To(BeTrue())
+				Expect(lessThan("21.0.10.1", "21.0.10.0.1")).To(BeFalse())
+			})
+		})
+
 		Context("pre-release version comparison", func() {
 			It("considers pre-release versions less than release versions", func() {
 				preRelease, _ := semver.Parse("1.0.0-alpha")

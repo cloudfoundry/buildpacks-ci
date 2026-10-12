@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
@@ -106,6 +108,14 @@ func (w *ZuluWatcher) fetchLatestPackage() (*zuluPackage, error) {
 		return nil, fmt.Errorf("no packages found for java_version=%s, package_type=%s", w.version, packageType)
 	}
 
+	// Prefer the standard package over CRaC, FX, musl and i686 variants.
+	standard := regexp.MustCompile(`^zulu[\d.]+-ca-` + regexp.QuoteMeta(packageType) + `[\d.]+-linux_x64\.tar\.gz$`)
+	for i := range packages {
+		if standard.MatchString(packages[i].Name) {
+			return &packages[i], nil
+		}
+	}
+
 	// Return the first package (should be the latest for x64 architecture)
 	// Filter for x64 architecture in the name
 	for _, pkg := range packages {
@@ -205,10 +215,15 @@ func (w *ZuluWatcher) isNewerVersion(v1, v2 []int) bool {
 }
 
 func (w *ZuluWatcher) parseVersion(versionParts []int) (string, error) {
-	if len(versionParts) != 3 {
-		return "", fmt.Errorf("version must have three components: got %d", len(versionParts))
+	if len(versionParts) < 3 {
+		return "", fmt.Errorf("version must have three components or more: got %d", len(versionParts))
 	}
-	return fmt.Sprintf("%d.%d.%d", versionParts[0], versionParts[1], versionParts[2]), nil
+	// Monthly patch releases have a 4th JEP 322 field (e.g. 17.0.20.1).
+	parts := make([]string, len(versionParts))
+	for i, p := range versionParts {
+		parts[i] = strconv.Itoa(p)
+	}
+	return strings.Join(parts, "."), nil
 }
 
 func (w *ZuluWatcher) sortVersions(internals []base.Internal) []base.Internal {

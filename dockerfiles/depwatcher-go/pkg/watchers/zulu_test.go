@@ -61,6 +61,78 @@ var _ = Describe("ZuluWatcher", func() {
 			})
 		})
 
+		Context("when the latest release is a monthly patch release", func() {
+			It("returns the 4-part version", func() {
+				client.Response = `[
+					{
+						"java_version": [17, 0, 20, 1],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-crac-jre17.0.20.1-linux_x64.tar.gz",
+						"name": "zulu17.68.203-ca-crac-jre17.0.20.1-linux_x64.tar.gz",
+						"latest": true
+					},
+					{
+						"java_version": [17, 0, 20, 1],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-fx-jre17.0.20.1-linux_x64.tar.gz",
+						"name": "zulu17.68.203-ca-fx-jre17.0.20.1-linux_x64.tar.gz",
+						"latest": true
+					},
+					{
+						"java_version": [17, 0, 20, 1],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-jre17.0.20.1-linux_musl_x64.tar.gz",
+						"name": "zulu17.68.203-ca-jre17.0.20.1-linux_musl_x64.tar.gz",
+						"latest": true
+					},
+					{
+						"java_version": [17, 0, 20, 1],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-jre17.0.20.1-linux_x64.tar.gz",
+						"name": "zulu17.68.203-ca-jre17.0.20.1-linux_x64.tar.gz",
+						"latest": true
+					}
+				]`
+				watcher = watchers.NewZuluWatcher(client, "17", "jre")
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(1))
+				Expect(versions[0].Ref).To(Equal("17.0.20.1"))
+			})
+
+			It("includes it in the latest-line check", func() {
+				client.Response = `[
+					{
+						"java_version": [17, 0, 20, 1],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-crac-jre17.0.20.1-linux_x64.tar.gz",
+						"name": "zulu17.68.203-ca-crac-jre17.0.20.1-linux_x64.tar.gz",
+						"latest": true
+					},
+					{
+						"java_version": [17, 0, 20, 1],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-fx-jre17.0.20.1-linux_x64.tar.gz",
+						"name": "zulu17.68.203-ca-fx-jre17.0.20.1-linux_x64.tar.gz",
+						"latest": true
+					},
+					{
+						"java_version": [17, 0, 20, 1],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-jre17.0.20.1-linux_musl_x64.tar.gz",
+						"name": "zulu17.68.203-ca-jre17.0.20.1-linux_musl_x64.tar.gz",
+						"latest": true
+					},
+					{
+						"java_version": [17, 0, 20, 1],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-jre17.0.20.1-linux_x64.tar.gz",
+						"name": "zulu17.68.203-ca-jre17.0.20.1-linux_x64.tar.gz",
+						"latest": true
+					}
+				]`
+				watcher = watchers.NewZuluWatcher(client, "", "jre")
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(1))
+				Expect(versions[0].Ref).To(Equal("17.0.20.1"))
+			})
+		})
+
 		Context("when type is missing", func() {
 			It("returns an error", func() {
 				watcher = watchers.NewZuluWatcher(client, "8", "")
@@ -103,6 +175,43 @@ var _ = Describe("ZuluWatcher", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(release.Ref).To(Equal("8.0.302"))
 				Expect(release.URL).To(Equal("https://cdn.azul.com/zulu/bin/zulu8.56.0.21-ca-jdk8.0.302-linux_x64.tar.gz"))
+			})
+		})
+
+		Context("when the API lists CRaC and FX packages before the standard package", func() {
+			It("returns the standard package", func() {
+				client.Response = `[
+					{
+						"java_version": [17, 0, 20, 1],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-crac-jre17.0.20.1-linux_x64.tar.gz",
+						"name": "zulu17.68.203-ca-crac-jre17.0.20.1-linux_x64.tar.gz",
+						"latest": true
+					},
+					{
+						"java_version": [17, 0, 20, 1],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-fx-jre17.0.20.1-linux_x64.tar.gz",
+						"name": "zulu17.68.203-ca-fx-jre17.0.20.1-linux_x64.tar.gz",
+						"latest": true
+					},
+					{
+						"java_version": [17, 0, 20, 1],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-jre17.0.20.1-linux_musl_x64.tar.gz",
+						"name": "zulu17.68.203-ca-jre17.0.20.1-linux_musl_x64.tar.gz",
+						"latest": true
+					},
+					{
+						"java_version": [17, 0, 20, 1],
+						"download_url": "https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-jre17.0.20.1-linux_x64.tar.gz",
+						"name": "zulu17.68.203-ca-jre17.0.20.1-linux_x64.tar.gz",
+						"latest": true
+					}
+				]`
+				watcher = watchers.NewZuluWatcher(client, "17", "jre")
+
+				release, err := watcher.In("17.0.20.1")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.Ref).To(Equal("17.0.20.1"))
+				Expect(release.URL).To(Equal("https://cdn.azul.com/zulu/bin/zulu17.68.203-ca-jre17.0.20.1-linux_x64.tar.gz"))
 			})
 		})
 
