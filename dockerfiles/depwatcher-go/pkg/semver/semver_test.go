@@ -240,6 +240,23 @@ var _ = Describe("Semver", func() {
 				Expect(v2.LessThan(v1)).To(BeFalse())
 			})
 		})
+
+		Context("backward compatibility", func() {
+			DescribeTable("preserves established ordering",
+				func(olderVersion, newerVersion string) {
+					olderSemver, err := semver.Parse(olderVersion)
+					Expect(err).NotTo(HaveOccurred())
+					newerSemver, err := semver.Parse(newerVersion)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(olderSemver.LessThan(newerSemver)).To(BeTrue())
+					Expect(newerSemver.LessThan(olderSemver)).To(BeFalse())
+				},
+				Entry("JRuby trailing-zero field", "9.4.14", "9.4.14.0"),
+				Entry("OpenResty fourth field", "1.29.2", "1.29.2.3"),
+				Entry("New Relic multi-digit fourth field", "10.21.0", "10.21.0.11"),
+				Entry("AppDynamics dash suffix", "25.5.0-1371", "25.5.0"),
+			)
+		})
 	})
 
 	Describe("IsFinalRelease", func() {
