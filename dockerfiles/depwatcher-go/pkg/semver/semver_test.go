@@ -141,12 +141,12 @@ var _ = Describe("Semver", func() {
 		})
 
 		Context("JEP 322 version comparison (X.Y.Z.N+B)", func() {
-			lessThan := func(a, b string) bool {
-				va, err := semver.Parse(a)
+			lessThan := func(leftVersion, rightVersion string) bool {
+				leftSemver, err := semver.Parse(leftVersion)
 				Expect(err).NotTo(HaveOccurred())
-				vb, err := semver.Parse(b)
+				rightSemver, err := semver.Parse(rightVersion)
 				Expect(err).NotTo(HaveOccurred())
-				return va.LessThan(vb)
+				return leftSemver.LessThan(rightSemver)
 			}
 
 			It("orders versions with extra fields and builds", func() {
@@ -161,6 +161,26 @@ var _ = Describe("Semver", func() {
 				Expect(lessThan("21.0.10", "21.0.10.0.1")).To(BeTrue())
 				Expect(lessThan("21.0.10.0.1", "21.0.10.1")).To(BeTrue())
 				Expect(lessThan("21.0.10.1", "21.0.10.0.1")).To(BeFalse())
+			})
+
+			It("orders an absent build number below build zero", func() {
+				Expect(lessThan("21.0.12.1", "21.0.12.1+0")).To(BeTrue())
+				Expect(lessThan("21.0.12.1+0", "21.0.12.1")).To(BeFalse())
+				Expect(lessThan("21.0.12.1+0", "21.0.12.1+0")).To(BeFalse())
+			})
+
+			It("compares all SapMachine fields and builds numerically", func() {
+				Expect(lessThan("21.0.10.0.9", "21.0.10.0.10")).To(BeTrue())
+				Expect(lessThan("21.0.10.0.10", "21.0.10.0.9")).To(BeFalse())
+				Expect(lessThan("21.0.10.0.1+9", "21.0.10.0.1+10")).To(BeTrue())
+				Expect(lessThan("21.0.10.0.1+10", "21.0.10.0.1+9")).To(BeFalse())
+			})
+
+			It("preserves existing build-only metadata ordering", func() {
+				Expect(lessThan("21.0.12+9", "21.0.12+10")).To(BeTrue())
+				Expect(lessThan("21.0.12+10", "21.0.12+9")).To(BeFalse())
+				Expect(lessThan("21.0.12+0", "21.0.12")).To(BeTrue())
+				Expect(lessThan("21.0.12", "21.0.12+0")).To(BeFalse())
 			})
 		})
 

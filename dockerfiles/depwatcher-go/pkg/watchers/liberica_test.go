@@ -22,6 +22,23 @@ var _ = Describe("LibericaWatcher", func() {
 	})
 
 	Describe("Check", func() {
+		It("preserves the existing zero-build version format", func() {
+			client.Response = `[
+				{"featureVersion": 21, "interimVersion": 0, "updateVersion": 12, "patchVersion": 0, "buildVersion": 0, "downloadUrl": "https://example.com/b0"}
+			]`
+			watcher = watchers.NewLibericaWatcher(client, "21", "jre", "")
+
+			versions, err := watcher.Check()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(versions).To(HaveLen(1))
+			Expect(versions[0].Ref).To(Equal("21.0.12+0"))
+
+			release, err := watcher.In(versions[0].Ref)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(release.Ref).To(Equal(versions[0].Ref))
+			Expect(release.URL).To(Equal("https://example.com/b0"))
+		})
+
 		Context("when the API returns valid releases", func() {
 			It("returns sorted versions", func() {
 				client.Response = `[

@@ -61,8 +61,8 @@ class Dependencies
       if new_ver == old_ver
         # Same 3-part semver — the semver2 gem silently drops extra JEP 322
         # fields and the build (e.g. "21.0.12.1+2" parses identical to
-        # "21.0.12+10"). Compare them to correctly order monthly security
-        # patch releases and their rebuilds.
+        # "21.0.12+10"). Compare them to correctly order monthly patch
+        # releases and Java rebuilds.
         newer_jep322_patch?(new_v, old_v)
       else
         new_ver > old_ver
@@ -147,25 +147,25 @@ class Dependencies
     dep ? [dep] : []
   end
 
-  JEP322_PATCH_PATTERN = /\A\d+\.\d+\.\d+((?:\.\d+)*)(?:\+(\d+))?\z/
+  JEP322_PATCH_PATTERN = /\A\d+\.\d+\.\d+(?:\.((?:\d+\.)*\d+))?(?:\+(\d+))?\z/
 
   # Compares versions with equal major.minor.patch by their extra JEP 322
   # fields ("17.0.20" < "17.0.20.1" < "17.0.20.1.1" < "17.0.20.2"), then by
-  # build ("21.0.12.1+1" < "21.0.12.1+2"). Versions without extra fields keep
-  # the previous behaviour and are never considered newer.
+  # build ("21.0.12.1+1" < "21.0.12.1+2"). Build-only updates also apply to
+  # Java dependencies; other dependencies keep their previous behaviour.
   def newer_jep322_patch?(new_v, old_v)
     new_fields, new_build = jep322_patch(new_v)
     old_fields, old_build = jep322_patch(old_v)
-    return false if new_fields.empty? && old_fields.empty?
+    return false if new_fields.empty? && old_fields.empty? && !%w[openjdk zulu sapmachine].include?(@dep['name'])
 
     ([new_fields, new_build] <=> [old_fields, old_build]) == 1
   end
 
   def jep322_patch(version)
-    m = JEP322_PATCH_PATTERN.match(version)
-    return [[], -1] if m.nil?
+    version_match = JEP322_PATCH_PATTERN.match(version)
+    return [[], -1] if version_match.nil?
 
-    [m[1].split('.').drop(1).map(&:to_i), m[2] ? m[2].to_i : -1]
+    [version_match[1].to_s.split('.').map(&:to_i), version_match[2] ? version_match[2].to_i : -1]
   end
 
   DATE_VERSION_PATTERN = /\A\d{8}_RC\d+\z/
@@ -174,4 +174,3 @@ class Dependencies
     DATE_VERSION_PATTERN.match?(version.to_s)
   end
 end
-
