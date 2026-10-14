@@ -17,12 +17,12 @@ Of the 47 dependency entries in the java-buildpack `manifest.yml`, 35 are on
 
 | Dependency | Version | Hosted on | Proposed action |
 |---|---|---|---|
-| `memory-calculator` | 4.2.0 | `java-buildpack.cloudfoundry.org` | Keep (frozen) |
+| `memory-calculator` | 4.2.0 | `java-buildpack.cloudfoundry.org` | Add watcher (see todo) |
 | `memory-calculator` | 4.1.0 | GitHub releases | Remove (unused) |
-| `tomcat-access-logging-support` | 3.4.0 | `java-buildpack.cloudfoundry.org` | Keep (frozen) |
-| `tomcat-lifecycle-support` | 3.4.0 | `java-buildpack.cloudfoundry.org` | Keep (frozen) |
-| `tomcat-logging-support` | 3.4.0 | `java-buildpack.cloudfoundry.org` | Keep (frozen) |
-| `jvmkill` | 1.17.0 | `java-buildpack.cloudfoundry.org` | Keep (frozen) |
+| `tomcat-access-logging-support` | 3.4.0 | `java-buildpack.cloudfoundry.org` | Add watcher (see todo) |
+| `tomcat-lifecycle-support` | 3.4.0 | `java-buildpack.cloudfoundry.org` | Add watcher (see todo) |
+| `tomcat-logging-support` | 3.4.0 | `java-buildpack.cloudfoundry.org` | Add watcher (see todo) |
+| `jvmkill` | 1.17.0 | `java-buildpack.cloudfoundry.org` | Add watcher (see todo) |
 | `luna-security-provider` | 7.4.0 | `java-buildpack.cloudfoundry.org` | Keep, manual only |
 | `google-stackdriver-profiler` | 0.4.0 | `storage.googleapis.com` | None, has `config.yml` entry |
 | `metric-writer` | 3.5.0 | `java-buildpack.cloudfoundry.org` | Decide: remove |
@@ -30,11 +30,11 @@ Of the 47 dependency entries in the java-buildpack `manifest.yml`, 35 are on
 | `java-memory-assistant` | 0.5.0 | GitHub releases (SAP) | Decide, see below |
 | `java-memory-assistant-cleanup` | 0.1.0 | GitHub releases (SAP) | Decide, see below |
 
-## Keep as-is (frozen artifacts)
+## To be watched (CF-owned) and manual
 
-These have no upstream releases to watch. `java-buildpack.cloudfoundry.org` is a host we
-control, so no migration or `config.yml` entry is needed for now. The CF-owned ones can move
-to the pipeline once their source repos publish GitHub releases (see the todo list below).
+The CF-owned ones should be watched, so new releases reach the buildpack (e.g. a new
+`memory-calculator` release is planned). They have no GitHub releases to watch yet, so their
+source repos need to publish them first (see the todo list below).
 
 `java-buildpack.cloudfoundry.org` is the repository of the Ruby java-buildpack (an
 `index.yml` per dependency, filled by the Concourse `ci/` scripts of each source repo). The
@@ -45,7 +45,7 @@ releases still point at them.
 
 - **`memory-calculator` 4.2.0**: the version the buildpack uses (see below).
   `cloudfoundry/java-buildpack-memory-calculator` has a `v4.2.0` tag, but its latest GitHub
-  release is 4.1.0 (2020).
+  release is 4.1.0 (2020). A new release is planned; first in line.
 - **`tomcat-*-support` 3.4.0**: CF Tomcat support libraries, unchanged for years.
 - **`jvmkill` 1.17.0**: native agent, last release 2022, feature-complete.
 - **`luna-security-provider` 7.4.0**: proprietary Thales Luna HSM client, not publicly
