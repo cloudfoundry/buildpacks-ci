@@ -73,6 +73,30 @@ var _ = Describe("GithubReleasesWatcher", func() {
 	)
 
 	Describe("Check", func() {
+		DescribeTable("uses JRE build ordering only for SapMachine",
+			func(repo string, expectedRefs []string) {
+				releases := `[
+					{"tag_name": "sapmachine-21.0.12", "prerelease": false},
+					{"tag_name": "sapmachine-21.0.12+10", "prerelease": false},
+					{"tag_name": "sapmachine-21.0.12+0", "prerelease": false},
+					{"tag_name": "sapmachine-21.0.12.1+1", "prerelease": false}
+				]`
+				mockClient = newMockGithubReleasesClient(releases)
+				mockClient.responses[fmt.Sprintf("https://api.github.com/repos/%s/releases?per_page=100&page=1", repo)] = releases
+				watcher = watchers.NewGithubReleasesWatcher(mockClient, repo, false)
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				var refs []string
+				for _, version := range versions {
+					refs = append(refs, version.Ref)
+				}
+				Expect(refs).To(Equal(expectedRefs))
+			},
+			Entry("SapMachine source", "SAP/SapMachine", []string{"21.0.12", "21.0.12+0", "21.0.12+10", "21.0.12.1+1"}),
+			Entry("other GitHub source", "test/repo", []string{"21.0.12+0", "21.0.12+10", "21.0.12", "21.0.12.1+1"}),
+		)
+
 		Context("when there are multiple releases", func() {
 			BeforeEach(func() {
 				releases := `[

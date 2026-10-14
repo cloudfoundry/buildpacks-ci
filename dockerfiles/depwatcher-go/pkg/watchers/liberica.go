@@ -47,7 +47,7 @@ func (w *LibericaWatcher) Check() ([]base.Internal, error) {
 		versions = append(versions, base.Internal{Ref: r.version()})
 	}
 
-	return base.SortVersions(versions), nil
+	return base.SortJREVersions(versions), nil
 }
 
 func (w *LibericaWatcher) In(ref string) (base.Release, error) {

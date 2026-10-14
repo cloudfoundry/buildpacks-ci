@@ -101,6 +101,36 @@ func compareExtraFields(leftFields []int, leftBuild int, rightFields []int, righ
 	return 0
 }
 
+// LessThanJRE orders numeric JRE releases after prereleases, comparing extra
+// version fields and then builds (absent < +0 < +1).
+func (s *Semver) LessThanJRE(other *Semver) bool {
+	if s.Major == other.Major && s.Minor == other.Minor && s.Patch == other.Patch {
+		currentFields, currentBuild, currentIsJRE := parseJREMetadata(s.Metadata)
+		otherFields, otherBuild, otherIsJRE := parseJREMetadata(other.Metadata)
+		if currentIsJRE && otherIsJRE {
+			return compareExtraFields(currentFields, currentBuild, otherFields, otherBuild) < 0
+		}
+		if currentIsJRE {
+			return false
+		}
+		if otherIsJRE {
+			return true
+		}
+	}
+	return s.LessThan(other)
+}
+
+func parseJREMetadata(metadata string) ([]int, int, bool) {
+	if metadata == "" {
+		return nil, -1, true
+	}
+	if strings.HasPrefix(metadata, "+") {
+		build, ok := parseNumeric(metadata)
+		return nil, build, ok
+	}
+	return parseExtraFields(metadata)
+}
+
 func (s *Semver) LessThan(other *Semver) bool {
 	if s.Major != other.Major {
 		return s.Major < other.Major

@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
 
 type ZuluWatcher struct {
@@ -198,7 +196,7 @@ func (w *ZuluWatcher) fetchAllLatestVersions() ([]base.Internal, error) {
 		internals = append(internals, base.Internal{Ref: version})
 	}
 
-	return w.sortVersions(internals), nil
+	return base.SortJREVersions(internals), nil
 }
 
 func (w *ZuluWatcher) isNewerVersion(v1, v2 []int) bool {
@@ -224,18 +222,6 @@ func (w *ZuluWatcher) parseVersion(versionParts []int) (string, error) {
 		parts[i] = strconv.Itoa(p)
 	}
 	return strings.Join(parts, "."), nil
-}
-
-func (w *ZuluWatcher) sortVersions(internals []base.Internal) []base.Internal {
-	sort.Slice(internals, func(i, j int) bool {
-		vi, erri := semver.Parse(internals[i].Ref)
-		vj, errj := semver.Parse(internals[j].Ref)
-		if erri == nil && errj == nil {
-			return vi.LessThan(vj)
-		}
-		return internals[i].Ref < internals[j].Ref
-	})
-	return internals
 }
 
 func (w *ZuluWatcher) name(uri string) string {

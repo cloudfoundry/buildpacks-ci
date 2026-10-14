@@ -259,6 +259,29 @@ var _ = Describe("Semver", func() {
 		})
 	})
 
+	Describe("LessThanJRE", func() {
+		DescribeTable("matches JRE buildpack ordering",
+			func(olderVersion, newerVersion string) {
+				olderSemver, err := semver.Parse(olderVersion)
+				Expect(err).NotTo(HaveOccurred())
+				newerSemver, err := semver.Parse(newerVersion)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(olderSemver.LessThanJRE(newerSemver)).To(BeTrue())
+				Expect(newerSemver.LessThanJRE(olderSemver)).To(BeFalse())
+			},
+			Entry("absent build before zero", "21.0.12", "21.0.12+0"),
+			Entry("absent build before positive build", "21.0.12", "21.0.12+10"),
+			Entry("quarterly rebuild", "21.0.12+9", "21.0.12+10"),
+			Entry("Liberica monthly patch", "21.0.12+10", "21.0.12.1+1"),
+			Entry("Liberica monthly rebuild", "21.0.12.1+9", "21.0.12.1+10"),
+			Entry("Zulu monthly patch", "17.0.20", "17.0.20.1"),
+			Entry("SapMachine extra fields", "21.0.10", "21.0.10.0.1"),
+			Entry("different feature versions", "17.0.20+10", "21.0.12"),
+			Entry("prerelease before release", "21.0.12-ea", "21.0.12"),
+			Entry("prerelease before numbered release", "21.0.12-ea", "21.0.12+0"),
+		)
+	})
+
 	Describe("IsFinalRelease", func() {
 		It("returns true when there is no metadata", func() {
 			sv, _ := semver.Parse("3.2.1")

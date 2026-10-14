@@ -38,11 +38,20 @@ type HTTPClient interface {
 // SortVersions sorts a slice of Internal versions using semver comparison
 // Falls back to string comparison if semver parsing fails
 func SortVersions(internals []Internal) []Internal {
+	return sortVersions(internals, (*semver.Semver).LessThan)
+}
+
+// SortJREVersions sorts JRE releases with numeric build precedence.
+func SortJREVersions(internals []Internal) []Internal {
+	return sortVersions(internals, (*semver.Semver).LessThanJRE)
+}
+
+func sortVersions(internals []Internal, lessThan func(*semver.Semver, *semver.Semver) bool) []Internal {
 	sort.Slice(internals, func(i, j int) bool {
 		vi, erri := semver.Parse(internals[i].Ref)
 		vj, errj := semver.Parse(internals[j].Ref)
 		if erri == nil && errj == nil {
-			return vi.LessThan(vj)
+			return lessThan(vi, vj)
 		}
 		return internals[i].Ref < internals[j].Ref
 	})
