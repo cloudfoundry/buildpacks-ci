@@ -8,7 +8,7 @@ Most java-buildpack dependencies are now built by the `dependency-builds` pipeli
 (`pipelines/dependency-builds/config.yml`) and served from `buildpacks.cloudfoundry.org`.
 This document lists only the manifest entries that are not, and what to do with them.
 All dependencies listed as missing in the old analysis now have a `config.yml` entry,
-except those below.
+except those below; of these, only `google-stackdriver-profiler` and `metric-writer` have one.
 
 ## Current state
 
@@ -76,8 +76,8 @@ Options:
 1. **Keep frozen**: leave 0.5.0 in the manifest; works on JVMs where the pool names match.
 2. **Fork to `cloudfoundry`** (Apache-2.0): modernize build and tests for current JDKs, add
    GitHub Actions releases, a watcher and a recipe. Needs an owner.
-3. **New, smaller agent** with the same features: thresholds via the JDK
-   `MemoryPoolMXBean` usage threshold notifications, dumps via `HotSpotDiagnosticMXBean`,
+3. **New, smaller agent** with the same features: thresholds by polling JDK
+   `MemoryPoolMXBean` usage (needed for growth rules like `+20%/2m`), dumps via `HotSpotDiagnosticMXBean`,
    GC-agnostic pool selection and dump rotation built in (no separate cleanup binary). Keeps
    the buildpack configuration (`JBP_CONFIG_JAVA_MEMORY_ASSISTANT`) compatible.
 4. **Remove** from the buildpack and document the alternatives above.
