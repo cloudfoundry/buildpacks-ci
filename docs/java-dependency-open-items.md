@@ -79,7 +79,9 @@ Options:
 3. **New, smaller agent** with the same features: thresholds by polling JDK
    `MemoryPoolMXBean` usage (needed for growth rules like `+20%/2m`), dumps via `HotSpotDiagnosticMXBean`,
    GC-agnostic pool selection and dump rotation built in (no separate cleanup binary). Keeps
-   the buildpack configuration (`JBP_CONFIG_JAVA_MEMORY_ASSISTANT`) compatible.
+   the buildpack configuration (`JBP_CONFIG_JAVA_MEMORY_ASSISTANT`) compatible. Instead of
+   polling, it can subscribe to JFR GC events (e.g. `jdk.GCHeapSummary`, heap used after each
+   GC) via JFR event streaming; that needs JDK 14+, so Java 8 and 11 would still poll.
 4. **Remove** from the buildpack and document the alternatives above.
 
 ## Removal candidates
