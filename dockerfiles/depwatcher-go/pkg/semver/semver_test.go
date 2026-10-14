@@ -279,6 +279,8 @@ var _ = Describe("Semver", func() {
 			Entry("different feature versions", "17.0.20+10", "21.0.12"),
 			Entry("prerelease before release", "21.0.12-ea", "21.0.12"),
 			Entry("prerelease before numbered release", "21.0.12-ea", "21.0.12+0"),
+			Entry("signed suffix is not a build number", "21.0.12+-1", "21.0.12"),
+			Entry("double plus suffix is not a build number", "21.0.12++10", "21.0.12+0"),
 		)
 	})
 

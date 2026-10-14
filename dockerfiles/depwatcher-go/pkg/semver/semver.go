@@ -124,12 +124,14 @@ func parseJREMetadata(metadata string) ([]int, int, bool) {
 	if metadata == "" {
 		return nil, -1, true
 	}
-	if strings.HasPrefix(metadata, "+") {
-		build, ok := parseNumeric(metadata)
-		return nil, build, ok
+	if buildMatch := jreBuildRegex.FindStringSubmatch(metadata); buildMatch != nil {
+		build, err := strconv.Atoi(buildMatch[1])
+		return nil, build, err == nil
 	}
 	return parseExtraFields(metadata)
 }
+
+var jreBuildRegex = regexp.MustCompile(`^\+(\d+)$`)
 
 func (s *Semver) LessThan(other *Semver) bool {
 	if s.Major != other.Major {
