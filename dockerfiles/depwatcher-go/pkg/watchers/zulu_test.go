@@ -131,6 +131,29 @@ var _ = Describe("ZuluWatcher", func() {
 				Expect(versions).To(HaveLen(1))
 				Expect(versions[0].Ref).To(Equal("17.0.20.1"))
 			})
+
+			It("ignores CRaC and FX versions in the latest-line check", func() {
+				client.Response = `[
+					{
+						"java_version": [17, 0, 21],
+						"name": "zulu17.70.1-ca-crac-jre17.0.21-linux_x64.tar.gz"
+					},
+					{
+						"java_version": [17, 0, 21],
+						"name": "zulu17.70.1-ca-fx-jre17.0.21-linux_x64.tar.gz"
+					},
+					{
+						"java_version": [17, 0, 20, 1],
+						"name": "zulu17.68.203-ca-jre17.0.20.1-linux_x64.tar.gz"
+					}
+				]`
+				watcher = watchers.NewZuluWatcher(client, "", "jre")
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(1))
+				Expect(versions[0].Ref).To(Equal("17.0.20.1"))
+			})
 		})
 
 		Context("when type is missing", func() {

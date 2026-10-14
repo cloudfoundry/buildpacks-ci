@@ -11,6 +11,9 @@ import (
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
 )
 
+// Standard x64 package, excluding CRaC, FX, musl and i686 variants.
+var zuluStandardPackageRegex = regexp.MustCompile(`^zulu[\d.]+-ca-(jdk|jre)[\d.]+-linux_x64\.tar\.gz$`)
+
 type ZuluWatcher struct {
 	client  base.HTTPClient
 	version string
@@ -107,9 +110,8 @@ func (w *ZuluWatcher) fetchLatestPackage() (*zuluPackage, error) {
 	}
 
 	// Prefer the standard package over CRaC, FX, musl and i686 variants.
-	standard := regexp.MustCompile(`^zulu[\d.]+-ca-` + regexp.QuoteMeta(packageType) + `[\d.]+-linux_x64\.tar\.gz$`)
 	for i := range packages {
-		if standard.MatchString(packages[i].Name) {
+		if isStandardZuluPackage(packages[i].Name, packageType) {
 			return &packages[i], nil
 		}
 	}
@@ -167,9 +169,7 @@ func (w *ZuluWatcher) fetchAllLatestVersions() ([]base.Internal, error) {
 	versionMap := make(map[int]*zuluPackage)
 	for i := range packages {
 		pkg := &packages[i]
-		// Only consider standard x64 builds (not musl or i686)
-		if pkg.Name != "" && strings.HasSuffix(pkg.Name, ".tar.gz") &&
-			!strings.Contains(pkg.Name, "musl") && !strings.Contains(pkg.Name, "i686") {
+		if isStandardZuluPackage(pkg.Name, packageType) {
 
 			if len(pkg.JavaVersion) >= 3 {
 				majorVersion := pkg.JavaVersion[0]
@@ -197,6 +197,11 @@ func (w *ZuluWatcher) fetchAllLatestVersions() ([]base.Internal, error) {
 	}
 
 	return base.SortJREVersions(internals), nil
+}
+
+func isStandardZuluPackage(name, packageType string) bool {
+	match := zuluStandardPackageRegex.FindStringSubmatch(name)
+	return match != nil && match[1] == packageType
 }
 
 func (w *ZuluWatcher) isNewerVersion(v1, v2 []int) bool {
