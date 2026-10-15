@@ -181,6 +181,30 @@ var _ = Describe("ZuluWatcher", func() {
 				Expect(err.Error()).To(ContainSubstring("version must have three components"))
 			})
 		})
+
+		Context("when the API lists only CRaC, FX and musl packages", func() {
+			It("returns no versions instead of a non-standard package", func() {
+				client.Response = `[
+					{
+						"java_version": [17, 0, 21],
+						"name": "zulu17.70.1-ca-crac-jre17.0.21-linux_x64.tar.gz"
+					},
+					{
+						"java_version": [17, 0, 21],
+						"name": "zulu17.70.1-ca-fx-jre17.0.21-linux_x64.tar.gz"
+					},
+					{
+						"java_version": [17, 0, 21],
+						"name": "zulu17.70.1-ca-jre17.0.21-linux_musl_x64.tar.gz"
+					}
+				]`
+				watcher = watchers.NewZuluWatcher(client, "17", "jre")
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(BeEmpty())
+			})
+		})
 	})
 
 	Describe("In", func() {
@@ -239,7 +263,7 @@ var _ = Describe("ZuluWatcher", func() {
 		})
 
 		Context("when the API lists only CRaC, FX and musl packages", func() {
-			It("returns no versions instead of a non-standard package", func() {
+			It("returns an error instead of a non-standard package", func() {
 				client.Response = `[
 					{
 						"java_version": [17, 0, 21],
@@ -256,9 +280,8 @@ var _ = Describe("ZuluWatcher", func() {
 				]`
 				watcher = watchers.NewZuluWatcher(client, "17", "jre")
 
-				versions, err := watcher.Check()
-				Expect(err).NotTo(HaveOccurred())
-				Expect(versions).To(BeEmpty())
+				_, err := watcher.In("17.0.21")
+				Expect(err).To(MatchError(ContainSubstring("no standard linux_x64 package")))
 			})
 		})
 

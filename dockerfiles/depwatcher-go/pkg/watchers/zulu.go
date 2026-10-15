@@ -163,7 +163,6 @@ func (w *ZuluWatcher) fetchAllLatestVersions() ([]base.Internal, error) {
 	for i := range packages {
 		pkg := &packages[i]
 		if isStandardZuluPackage(pkg.Name, packageType) {
-
 			if len(pkg.JavaVersion) >= 3 {
 				majorVersion := pkg.JavaVersion[0]
 				// Keep the latest version for each major version
