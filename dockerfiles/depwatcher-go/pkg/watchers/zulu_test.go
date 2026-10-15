@@ -239,7 +239,7 @@ var _ = Describe("ZuluWatcher", func() {
 		})
 
 		Context("when the API lists only CRaC, FX and musl packages", func() {
-			It("returns an error instead of a non-standard package", func() {
+			It("returns no versions instead of a non-standard package", func() {
 				client.Response = `[
 					{
 						"java_version": [17, 0, 21],
@@ -256,8 +256,9 @@ var _ = Describe("ZuluWatcher", func() {
 				]`
 				watcher = watchers.NewZuluWatcher(client, "17", "jre")
 
-				_, err := watcher.Check()
-				Expect(err).To(MatchError(ContainSubstring("no standard linux_x64 package")))
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(BeEmpty())
 			})
 		})
 

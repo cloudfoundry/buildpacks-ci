@@ -2,6 +2,7 @@ package watchers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -44,6 +45,10 @@ func (w *ZuluWatcher) Check() ([]base.Internal, error) {
 	}
 
 	pkg, err := w.fetchLatestPackage()
+	if errors.Is(err, errNoStandardZuluPackage) {
+		// Only CRaC/FX/musl builds published (yet): report nothing rather than fail.
+		return []base.Internal{}, nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -76,6 +81,8 @@ func (w *ZuluWatcher) In(ref string) (base.Release, error) {
 		URL: pkg.DownloadURL,
 	}, nil
 }
+
+var errNoStandardZuluPackage = errors.New("no standard linux_x64 package found")
 
 func (w *ZuluWatcher) fetchLatestPackage() (*zuluPackage, error) {
 	if w.typ == "" {
@@ -116,7 +123,7 @@ func (w *ZuluWatcher) fetchLatestPackage() (*zuluPackage, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("no standard linux_x64 package found for java_version=%s, package_type=%s", w.version, packageType)
+	return nil, fmt.Errorf("%w for java_version=%s, package_type=%s", errNoStandardZuluPackage, w.version, packageType)
 }
 
 func (w *ZuluWatcher) fetchAllLatestVersions() ([]base.Internal, error) {
