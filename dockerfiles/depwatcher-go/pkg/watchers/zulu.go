@@ -116,21 +116,7 @@ func (w *ZuluWatcher) fetchLatestPackage() (*zuluPackage, error) {
 		}
 	}
 
-	// Return the first package (should be the latest for x64 architecture)
-	// Filter for x64 architecture in the name
-	for _, pkg := range packages {
-		if pkg.Name != "" && strings.HasSuffix(pkg.Name, ".tar.gz") {
-			// Prefer x64 over i686 or musl
-			name := pkg.Name
-			// Check if it's the standard x64 build (not musl or i686)
-			if !strings.Contains(name, "musl") && !strings.Contains(name, "i686") {
-				return &pkg, nil
-			}
-		}
-	}
-
-	// Fallback to first package if no x64 found
-	return &packages[0], nil
+	return nil, fmt.Errorf("no standard linux_x64 package found for java_version=%s, package_type=%s", w.version, packageType)
 }
 
 func (w *ZuluWatcher) fetchAllLatestVersions() ([]base.Internal, error) {

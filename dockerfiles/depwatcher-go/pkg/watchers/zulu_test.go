@@ -238,6 +238,29 @@ var _ = Describe("ZuluWatcher", func() {
 			})
 		})
 
+		Context("when the API lists only CRaC, FX and musl packages", func() {
+			It("returns an error instead of a non-standard package", func() {
+				client.Response = `[
+					{
+						"java_version": [17, 0, 21],
+						"name": "zulu17.70.1-ca-crac-jre17.0.21-linux_x64.tar.gz"
+					},
+					{
+						"java_version": [17, 0, 21],
+						"name": "zulu17.70.1-ca-fx-jre17.0.21-linux_x64.tar.gz"
+					},
+					{
+						"java_version": [17, 0, 21],
+						"name": "zulu17.70.1-ca-jre17.0.21-linux_musl_x64.tar.gz"
+					}
+				]`
+				watcher = watchers.NewZuluWatcher(client, "17", "jre")
+
+				_, err := watcher.Check()
+				Expect(err).To(MatchError(ContainSubstring("no standard linux_x64 package")))
+			})
+		})
+
 		Context("when version does not match", func() {
 			It("returns an error", func() {
 				client.Response = `[{
