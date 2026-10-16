@@ -94,7 +94,7 @@ var _ = Describe("GithubReleasesWatcher", func() {
 				Expect(refs).To(Equal(expectedRefs))
 			},
 			Entry("SapMachine source", "SAP/SapMachine", []string{"21.0.12", "21.0.12+0", "21.0.12+10", "21.0.12.1+1"}),
-			Entry("other GitHub source", "test/repo", []string{"21.0.12+0", "21.0.12+10", "21.0.12", "21.0.12.1+1"}),
+			Entry("other GitHub source", "test/repo", []string{"21.0.12+0", "21.0.12+10", "21.0.12.1+1", "21.0.12"}),
 		)
 
 		Context("when there are multiple releases", func() {

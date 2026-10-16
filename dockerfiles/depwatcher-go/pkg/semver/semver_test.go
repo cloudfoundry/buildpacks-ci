@@ -117,76 +117,23 @@ var _ = Describe("Semver", func() {
 			Expect(v1.LessThan(v2)).To(BeFalse())
 		})
 
-		Context("4th-segment version comparison (SapMachine-style)", func() {
-			It("considers 4-digit version greater than 3-digit base", func() {
-				base, _ := semver.Parse("17.0.20")
-				patch, _ := semver.Parse("17.0.20.1")
-				Expect(base.LessThan(patch)).To(BeTrue())
-				Expect(patch.LessThan(base)).To(BeFalse())
-			})
-
-			It("compares two 4-digit versions numerically", func() {
-				v1, _ := semver.Parse("17.0.20.1")
-				v2, _ := semver.Parse("17.0.20.2")
-				Expect(v1.LessThan(v2)).To(BeTrue())
-				Expect(v2.LessThan(v1)).To(BeFalse())
-			})
-
-			It("compares 4-digit versions across different patches correctly", func() {
-				v1, _ := semver.Parse("17.0.20.1")
-				v2, _ := semver.Parse("17.0.21")
-				Expect(v1.LessThan(v2)).To(BeTrue())
-				Expect(v2.LessThan(v1)).To(BeFalse())
-			})
-		})
-
-		Context("extra version fields (X.Y.Z.N+B), all dependencies", func() {
-			lessThan := func(leftVersion, rightVersion string) bool {
-				leftSemver, err := semver.Parse(leftVersion)
-				Expect(err).NotTo(HaveOccurred())
-				rightSemver, err := semver.Parse(rightVersion)
-				Expect(err).NotTo(HaveOccurred())
-				return leftSemver.LessThan(rightSemver)
-			}
-
-			It("orders versions with extra fields and builds", func() {
-				ordered := []string{"21.0.12+9", "21.0.12+10", "21.0.12.1+1", "21.0.12.1+2", "21.0.12.1+10", "21.0.12.2+1", "21.0.13+1"}
-				for i := 0; i < len(ordered)-1; i++ {
-					Expect(lessThan(ordered[i], ordered[i+1])).To(BeTrue(), "%s < %s", ordered[i], ordered[i+1])
-					Expect(lessThan(ordered[i+1], ordered[i])).To(BeFalse(), "%s > %s", ordered[i+1], ordered[i])
-				}
-			})
-
-			It("orders versions with more than four fields", func() {
-				Expect(lessThan("21.0.10", "21.0.10.0.1")).To(BeTrue())
-				Expect(lessThan("21.0.10.0.1", "21.0.10.1")).To(BeTrue())
-				Expect(lessThan("21.0.10.1", "21.0.10.0.1")).To(BeFalse())
-			})
-
-			It("orders an absent build number older than build zero", func() {
-				Expect(lessThan("21.0.12.1", "21.0.12.1+0")).To(BeTrue())
-				Expect(lessThan("21.0.12.1+0", "21.0.12.1")).To(BeFalse())
-				Expect(lessThan("21.0.12.1+0", "21.0.12.1+0")).To(BeFalse())
-			})
-
-			It("compares all SapMachine fields and builds numerically", func() {
-				Expect(lessThan("21.0.10.0.9", "21.0.10.0.10")).To(BeTrue())
-				Expect(lessThan("21.0.10.0.10", "21.0.10.0.9")).To(BeFalse())
-				Expect(lessThan("21.0.10.0.1+9", "21.0.10.0.1+10")).To(BeTrue())
-				Expect(lessThan("21.0.10.0.1+10", "21.0.10.0.1+9")).To(BeFalse())
-			})
-
-			It("orders extra fields with a build newer than the base version for non-Java versions", func() {
-				Expect(lessThan("1.2.3", "1.2.3.4+5")).To(BeTrue())
-				Expect(lessThan("1.2.3.4+5", "1.2.3")).To(BeFalse())
-			})
-
-			It("keeps generic build-only ordering (+N older than bare; JRE order is LessThanJRE)", func() {
-				Expect(lessThan("21.0.12+9", "21.0.12+10")).To(BeTrue())
-				Expect(lessThan("21.0.12+10", "21.0.12+9")).To(BeFalse())
-				Expect(lessThan("21.0.12+0", "21.0.12")).To(BeTrue())
-				Expect(lessThan("21.0.12", "21.0.12+0")).To(BeFalse())
-			})
+		Context("extra version fields (generic ordering, unchanged from master)", func() {
+			DescribeTable("orders a single fourth field as a patch, other extras like pre-release metadata",
+				func(leftVersion, rightVersion string, expected bool) {
+					leftSemver, err := semver.Parse(leftVersion)
+					Expect(err).NotTo(HaveOccurred())
+					rightSemver, err := semver.Parse(rightVersion)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(leftSemver.LessThan(rightSemver)).To(Equal(expected))
+				},
+				Entry("fourth field newer than bare", "1.29.2.3", "1.29.2", false),
+				Entry("bare older than fourth field", "1.29.2", "1.29.2.3", true),
+				Entry("fourth fields compared numerically", "1.29.2.3", "1.29.2.10", true),
+				Entry("fourth field across patches", "17.0.20.1", "17.0.21", true),
+				Entry("extra fields with build older than bare", "1.2.3.4+5", "1.2.3", true),
+				Entry("build older than bare", "21.0.12+0", "21.0.12", true),
+				Entry("bare not older than build", "21.0.12", "21.0.12+0", false),
+			)
 		})
 
 		Context("pre-release version comparison", func() {
@@ -256,9 +203,6 @@ var _ = Describe("Semver", func() {
 					Expect(olderSemver.LessThan(newerSemver)).To(BeTrue())
 					Expect(newerSemver.LessThan(olderSemver)).To(BeFalse())
 				},
-				Entry("JRuby trailing-zero field", "9.4.14", "9.4.14.0"),
-				Entry("OpenResty fourth field", "1.29.2", "1.29.2.3"),
-				Entry("New Relic multi-digit fourth field", "10.21.0", "10.21.0.11"),
 				Entry("AppDynamics dash suffix", "25.5.0-1371", "25.5.0"),
 			)
 		})
@@ -282,6 +226,15 @@ var _ = Describe("Semver", func() {
 			Entry("Zulu monthly patch", "17.0.20", "17.0.20.1"),
 			Entry("SapMachine extra fields", "21.0.10", "21.0.10.0.1"),
 			Entry("different feature versions", "17.0.20+10", "21.0.12"),
+			Entry("Zulu monthly patches", "17.0.20.1", "17.0.20.2"),
+			Entry("monthly patch before next patch version", "17.0.20.1", "17.0.21"),
+			Entry("Liberica multi-digit rebuild", "21.0.12.1+2", "21.0.12.1+10"),
+			Entry("Liberica next monthly patch", "21.0.12.1+10", "21.0.12.2+1"),
+			Entry("monthly patch before next quarterly", "21.0.12.2+1", "21.0.13+1"),
+			Entry("absent build before zero with extra fields", "21.0.12.1", "21.0.12.1+0"),
+			Entry("fewer extra fields first", "21.0.10.0.1", "21.0.10.1"),
+			Entry("SapMachine fields numerically", "21.0.10.0.9", "21.0.10.0.10"),
+			Entry("SapMachine builds numerically", "21.0.10.0.1+9", "21.0.10.0.1+10"),
 			Entry("prerelease before release", "21.0.12-ea", "21.0.12"),
 			Entry("prerelease before numbered release", "21.0.12-ea", "21.0.12+0"),
 			Entry("signed suffix is not a build number", "21.0.12+-1", "21.0.12"),

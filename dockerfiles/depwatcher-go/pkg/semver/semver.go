@@ -46,6 +46,20 @@ func Parse(version string) (*Semver, error) {
 	}, nil
 }
 
+// isFourthSegment detects metadata of the form ".\d+" which represents a
+// 4th version digit (e.g. ".1" in "17.0.20.1"). SapMachine uses this as a
+// stable patch suffix, not a pre-release marker.
+func isFourthSegment(metadata string) (int, bool) {
+	if len(metadata) < 2 || metadata[0] != '.' {
+		return 0, false
+	}
+	n, err := strconv.Atoi(metadata[1:])
+	if err != nil {
+		return 0, false
+	}
+	return n, true
+}
+
 var jep322SuffixRegex = regexp.MustCompile(`^((?:\.\d+)+)(?:\+(\d+))?$`)
 
 // parseExtraFields detects metadata of the form ".N[.N...][+B]" which
@@ -144,20 +158,19 @@ func (s *Semver) LessThan(other *Semver) bool {
 		return s.Patch < other.Patch
 	}
 
-	// Handle extra JEP 322 fields (e.g. "17.0.20.1" > "17.0.20",
-	// "21.0.12.1+2" > "21.0.12.1+1" > "21.0.12+10").
+	// Handle 4th-segment versions (e.g. "17.0.20.1" > "17.0.20").
 	// These are stable patch releases, not pre-releases.
-	currentFields, currentBuild, currentHasExtra := parseExtraFields(s.Metadata)
-	otherFields, otherBuild, otherHasExtra := parseExtraFields(other.Metadata)
+	sBuild, sIsFourth := isFourthSegment(s.Metadata)
+	oBuild, oIsFourth := isFourthSegment(other.Metadata)
 
-	if currentHasExtra && otherHasExtra {
-		return compareExtraFields(currentFields, currentBuild, otherFields, otherBuild) < 0
+	if sIsFourth && oIsFourth {
+		return sBuild < oBuild
 	}
-	if currentHasExtra {
-		return false // s has extra fields, so s > other
+	if sIsFourth {
+		return false // s has 4th digit, so s > other
 	}
-	if otherHasExtra {
-		return true // other has extra fields, so s < other
+	if oIsFourth {
+		return true // other has 4th digit, so s < other
 	}
 
 	// Handle pre-release versions according to semver spec:
