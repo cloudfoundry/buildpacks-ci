@@ -92,6 +92,9 @@ func (w *GithubReleasesWatcher) Check() ([]base.Internal, error) {
 		versions = append(versions, base.Internal{Ref: ref})
 	}
 
+	if strings.EqualFold(w.repo, "SAP/SapMachine") {
+		return base.SortJREVersions(versions), nil
+	}
 	return base.SortVersions(versions), nil
 }
 

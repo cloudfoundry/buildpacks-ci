@@ -59,12 +59,11 @@ class Dependencies
       next false if new_ver.nil? || old_ver.nil?
 
       if new_ver == old_ver
-        # Same 3-part semver — the semver2 gem silently drops any 4th segment
-        # (e.g. "17.0.20.1" parses identical to "17.0.20"). Compare the raw
-        # 4th part when present to correctly order stability patches.
-        new_fourth = new_v.split('.').length == 4 ? new_v.split('.')[3].to_i : -1
-        old_fourth = old_v.split('.').length == 4 ? old_v.split('.')[3].to_i : -1
-        new_fourth > old_fourth
+        # Same 3-part semver — the semver2 gem silently drops extra JEP 322
+        # fields and the build (e.g. "21.0.12.1+2" parses identical to
+        # "21.0.12+10"). Compare them to correctly order monthly patch
+        # releases and Java rebuilds.
+        newer_jep322_patch?(new_v, old_v)
       else
         new_ver > old_ver
       end
@@ -148,10 +147,30 @@ class Dependencies
     dep ? [dep] : []
   end
 
+  JEP322_PATCH_PATTERN = /\A\d+\.\d+\.\d+(?:\.((?:\d+\.)*\d+))?(?:\+(\d+))?\z/
+
+  # Compares versions with equal major.minor.patch by their extra JEP 322
+  # fields ("17.0.20" < "17.0.20.1" < "17.0.20.1.1" < "17.0.20.2"), then by
+  # build ("21.0.12.1+1" < "21.0.12.1+2"). Build-only updates also apply to
+  # Java dependencies; other dependencies keep their previous behaviour.
+  def newer_jep322_patch?(new_v, old_v)
+    new_fields, new_build = jep322_patch(new_v)
+    old_fields, old_build = jep322_patch(old_v)
+    return false if new_fields.empty? && old_fields.empty? && !%w[openjdk zulu sapmachine].include?(@dep['name'])
+
+    ([new_fields, new_build] <=> [old_fields, old_build]) == 1
+  end
+
+  def jep322_patch(version)
+    version_match = JEP322_PATCH_PATTERN.match(version)
+    return [[], -1] if version_match.nil?
+
+    [version_match[1].to_s.split('.').map(&:to_i), version_match[2] ? version_match[2].to_i : -1]
+  end
+
   DATE_VERSION_PATTERN = /\A\d{8}_RC\d+\z/
 
   def date_version?(version)
     DATE_VERSION_PATTERN.match?(version.to_s)
   end
 end
-

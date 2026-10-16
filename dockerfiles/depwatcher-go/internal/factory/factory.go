@@ -367,6 +367,11 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 	if currentVersion != nil {
 		current, err := semver.Parse(currentVersion.Ref)
 		if err == nil {
+			lessThan := (*semver.Semver).LessThan
+			if source.Type == "liberica" || source.Type == "zulu" ||
+				(source.Type == "github_releases" && strings.EqualFold(source.Repo, "SAP/SapMachine")) {
+				lessThan = (*semver.Semver).LessThanJRE
+			}
 			var filtered []base.Internal
 			for _, v := range versions {
 				vSemver, err := semver.Parse(v.Ref)
@@ -374,7 +379,7 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 					filtered = append(filtered, v)
 					continue
 				}
-				if !vSemver.LessThan(current) {
+				if !lessThan(vSemver, current) {
 					filtered = append(filtered, v)
 				}
 			}
