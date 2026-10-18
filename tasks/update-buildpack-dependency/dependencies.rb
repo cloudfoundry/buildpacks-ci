@@ -1,4 +1,7 @@
 class Dependencies
+  # Manifest names of the JRE dependencies (keys in pipelines/dependency-builds/config.yml).
+  JRE_DEPENDENCY_NAMES = %w[openjdk zulu sapmachine].freeze
+
   def initialize(dep, line, removal_strategy, dependencies, dependencies_latest_released)
     @dep = dep
     @line = line
@@ -156,16 +159,16 @@ class Dependencies
   def newer_jep322_patch?(new_v, old_v)
     new_fields, new_build = jep322_patch(new_v)
     old_fields, old_build = jep322_patch(old_v)
-    return false if new_fields.empty? && old_fields.empty? && !%w[openjdk zulu sapmachine].include?(@dep['name'])
+    return false if new_fields.empty? && old_fields.empty? && !JRE_DEPENDENCY_NAMES.include?(@dep['name'])
 
     ([new_fields, new_build] <=> [old_fields, old_build]) == 1
   end
 
   def jep322_patch(version)
-    version_match = JEP322_PATCH_PATTERN.match(version)
-    return [[], -1] if version_match.nil?
+    match = JEP322_PATCH_PATTERN.match(version)
+    return [[], -1] if match.nil?
 
-    [version_match[1].to_s.split('.').map(&:to_i), version_match[2] ? version_match[2].to_i : -1]
+    [match[1].to_s.split('.').map(&:to_i), match[2] ? match[2].to_i : -1]
   end
 
   DATE_VERSION_PATTERN = /\A\d{8}_RC\d+\z/

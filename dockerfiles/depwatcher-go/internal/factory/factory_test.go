@@ -92,6 +92,34 @@ var _ = Describe("Factory Unit Tests", func() {
 			Expect(versions).To(Equal([]base.Internal{{Ref: "21.0.12+0"}, {Ref: "21.0.12+10"}}))
 		})
 
+		DescribeTable("filters a Liberica release sequence with rebuilds and monthly patch releases",
+			func(currentRef string, expectedRefs []string) {
+				mockClient := newMockHTTPClient()
+				mockClient.responses["https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=linux&package-type=tar.gz&version-modifier=latest&bundle-type=jre&version-feature=21"] = `[
+					{"featureVersion": 21, "interimVersion": 0, "updateVersion": 11, "buildVersion": 11},
+					{"featureVersion": 21, "interimVersion": 0, "updateVersion": 12, "buildVersion": 10},
+					{"featureVersion": 21, "interimVersion": 0, "updateVersion": 12, "buildVersion": 11},
+					{"featureVersion": 21, "interimVersion": 0, "updateVersion": 12, "patchVersion": 1, "buildVersion": 1},
+					{"featureVersion": 21, "interimVersion": 0, "updateVersion": 12, "buildVersion": 12},
+					{"featureVersion": 21, "interimVersion": 0, "updateVersion": 12, "patchVersion": 1, "buildVersion": 2}
+				]`
+				source := factory.Source{Type: "liberica", VersionFilter: "21.X.X", BundleType: "jre"}
+				versions, err := factory.CheckWithClient(source, &base.Internal{Ref: currentRef}, mockClient)
+				Expect(err).NotTo(HaveOccurred())
+				var refs []string
+				for _, version := range versions {
+					refs = append(refs, version.Ref)
+				}
+				Expect(refs).To(Equal(expectedRefs))
+			},
+			Entry("from the previous quarterly release", "21.0.11+11",
+				[]string{"21.0.11+11", "21.0.12+10", "21.0.12+11", "21.0.12+12", "21.0.12.1+1", "21.0.12.1+2"}),
+			Entry("from the quarterly release", "21.0.12+10",
+				[]string{"21.0.12+10", "21.0.12+11", "21.0.12+12", "21.0.12.1+1", "21.0.12.1+2"}),
+			Entry("from the monthly patch release, skipping a later quarterly rebuild", "21.0.12.1+1",
+				[]string{"21.0.12.1+1", "21.0.12.1+2"}),
+		)
+
 		Context("error handling", func() {
 			It("returns error for unknown source type", func() {
 				mockClient := newMockHTTPClient()

@@ -165,10 +165,11 @@ func (w *LibericaWatcher) isNewerRelease(r1, r2 libericaRelease) bool {
 // version returns the JEP 322 version, including the patch field for monthly
 // patch releases (e.g. "21.0.12+10", "21.0.12.1+1").
 func (r libericaRelease) version() string {
+	v := fmt.Sprintf("%d.%d.%d", r.FeatureVersion, r.InterimVersion, r.UpdateVersion)
 	if r.PatchVersion > 0 {
-		return fmt.Sprintf("%d.%d.%d.%d+%d", r.FeatureVersion, r.InterimVersion, r.UpdateVersion, r.PatchVersion, r.BuildVersion)
+		v += fmt.Sprintf(".%d", r.PatchVersion)
 	}
-	return fmt.Sprintf("%d.%d.%d+%d", r.FeatureVersion, r.InterimVersion, r.UpdateVersion, r.BuildVersion)
+	return fmt.Sprintf("%s+%d", v, r.BuildVersion)
 }
 
 func (w *LibericaWatcher) name(uri string) string {

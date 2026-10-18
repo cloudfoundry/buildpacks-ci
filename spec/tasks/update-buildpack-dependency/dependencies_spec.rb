@@ -465,6 +465,28 @@ RSpec.describe Dependencies do
     it 'does not replace monthly patch build zero with an absent build number' do
       expect(versions_after('21.0.12.1', ['21.0.12.1+0'])).to eq(['21.0.12.1+0'])
     end
+
+    # Replays a Liberica 21 release sequence as the pipeline applies it
+    # (line 21.X.X -> "major", removal_strategy remove_all), one update at a time.
+    it 'follows a real-world release sequence without touching other major lines' do
+      manifest = [
+        make_dep(name: 'openjdk', version: '17.0.20+10', stacks: %w[cflinuxfs4 cflinuxfs5]),
+        make_dep(name: 'openjdk', version: '21.0.11+11', stacks: %w[cflinuxfs4 cflinuxfs5])
+      ]
+      [
+        ['21.0.12+10', '21.0.12+10'],   # quarterly release
+        ['21.0.12+11', '21.0.12+11'],   # quarterly rebuild
+        ['21.0.12.1+1', '21.0.12.1+1'], # monthly patch release
+        ['21.0.12+12', '21.0.12.1+1'],  # late quarterly rebuild stays below the patch release
+        ['21.0.12.1+2', '21.0.12.1+2'], # patch rebuild
+        ['21.0.13+7', '21.0.13+7']      # next quarterly release
+      ].each do |new_version, expected|
+        new_dep = make_dep(name: 'openjdk', version: new_version, stacks: %w[cflinuxfs4 cflinuxfs5])
+        manifest = switch(new_dep, manifest, line: 'major', removal_strategy: 'remove_all')
+        expect(manifest.map { |dependency| dependency['version'] }).to contain_exactly('17.0.20+10', expected),
+                                                                       "after #{new_version}"
+      end
+    end
   end
 
   # ---------------------------------------------------------------------------

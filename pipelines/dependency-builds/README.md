@@ -298,6 +298,15 @@ skip_deprecation_check:
 2. Add the dependency name to `skip_deprecation_check` if it has no formal EOL schedule
 3. Run `./bin/update-pipelines -p dependency-builds` to apply
 
+### JRE dependencies
+
+`openjdk` (Liberica), `zulu` and `sapmachine` use JRE (JEP 322) version ordering, so
+monthly patch releases (`21.0.12.1+1`) and rebuilds (`21.0.12+11`) replace the
+current version in the buildpack manifest. To add another JRE, add its dependency
+name to `JRE_DEPENDENCY_NAMES` in `tasks/update-buildpack-dependency/dependencies.rb`
+and its source to the depwatcher JRE ordering (see
+`dockerfiles/depwatcher-go/README.md`, "Java Dependencies Configuration").
+
 ## How to retire a version line
 
 Remove the `line` entry from the relevant buildpack under `dependencies` in `config.yml` and

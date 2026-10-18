@@ -367,11 +367,7 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 	if currentVersion != nil {
 		current, err := semver.Parse(currentVersion.Ref)
 		if err == nil {
-			lessThan := (*semver.Semver).LessThan
-			if source.Type == "liberica" || source.Type == "zulu" ||
-				(source.Type == "github_releases" && strings.EqualFold(source.Repo, "SAP/SapMachine")) {
-				lessThan = (*semver.Semver).LessThanJRE
-			}
+			jre := isJRESource(source)
 			var filtered []base.Internal
 			for _, v := range versions {
 				vSemver, err := semver.Parse(v.Ref)
@@ -379,7 +375,11 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 					filtered = append(filtered, v)
 					continue
 				}
-				if !lessThan(vSemver, current) {
+				older := vSemver.LessThan(current)
+				if jre {
+					older = vSemver.LessThanJRE(current)
+				}
+				if !older {
 					filtered = append(filtered, v)
 				}
 			}
@@ -388,6 +388,18 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 	}
 
 	return versions, nil
+}
+
+// isJRESource reports whether a source publishes JRE releases, which need
+// JRE (JEP 322) version ordering.
+func isJRESource(source Source) bool {
+	switch source.Type {
+	case "liberica", "zulu":
+		return true
+	case "github_releases":
+		return watchers.IsSapMachineRepo(source.Repo)
+	}
+	return false
 }
 
 func In(source Source, version base.Internal) (interface{}, error) {
