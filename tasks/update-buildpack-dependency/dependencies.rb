@@ -1,5 +1,6 @@
 class Dependencies
-  # Manifest names of the JRE dependencies (keys in pipelines/dependency-builds/config.yml).
+  # Manifest names of the JRE dependencies (keys in pipelines/dependency-builds/config.yml);
+  # openjdk is built from BellSoft Liberica.
   JRE_DEPENDENCY_NAMES = %w[openjdk zulu sapmachine].freeze
 
   def initialize(dep, line, removal_strategy, dependencies, dependencies_latest_released)
