@@ -37,17 +37,7 @@ class Dependencies
       # if not newer, don't do anything
       return @dependencies
     end
-    out.sort_by do |d|
-      version = d['version']
-      # Ensure version is a string (YAML may parse numbers like 11.0 as Float)
-      version = version.to_s unless version.nil?
-      version = version[1..] if !version.nil? && version.start_with?('v')
-      # Date-based versions (e.g. 20241028_RC00) sort correctly as strings.
-      # SemVer.parse returns nil (not an exception) for unparseable versions.
-      # Try padding 2-part versions like "25.2" to "25.2.0" for SemVer compatibility.
-      version = SemVer.parse(version) || SemVer.parse("#{version}.0") || version unless date_version?(version)
-      [d['name'], version, d['cf_stacks']]
-    end
+    out.sort_by { |d| [d['name'], *version_key(d['version']), d['cf_stacks']] }
   end
 
   private
@@ -142,13 +132,19 @@ class Dependencies
 
     dep = @dependencies_latest_released.select do |d|
       same_dependency_line?(d['cf_stacks'], d['version'], d['name'])
-    end.max_by do |d|
-      v = d['version'].to_s
-      date_version?(v) ? v : (SemVer.parse(v) || v)
-    rescue StandardError
-      d['version']
-    end
+    end.max_by { |d| version_key(d['version']) }
     dep ? [dep] : []
+  end
+
+  # Sort key: SemVer, then the JEP 322 fields and build that SemVer.parse drops
+  # ("21.0.12+10" < "21.0.12+11" < "21.0.12.1+1").
+  def version_key(version)
+    # YAML may parse numbers like 11.0 as Float.
+    version = version.to_s.delete_prefix('v')
+    # Date-based versions (e.g. 20241028_RC00) sort correctly as strings.
+    # Pad 2-part versions like "25.2" to "25.2.0" for SemVer.
+    semver = date_version?(version) ? version : SemVer.parse(version) || SemVer.parse("#{version}.0") || version
+    [semver, *jep322_patch(version)]
   end
 
   JEP322_PATCH_PATTERN = /\A\d+\.\d+\.\d+(?:\.((?:\d+\.)*\d+))?(?:\+(\d+))?\z/

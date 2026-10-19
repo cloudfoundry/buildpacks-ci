@@ -487,6 +487,26 @@ RSpec.describe Dependencies do
                                                                        "after #{new_version}"
       end
     end
+
+    it 'sorts kept versions by extra fields and build number' do
+      existing = ['21.0.12.1+1', '21.0.12+11', '21.0.12.1'].map do |version|
+        make_dep(name: 'openjdk', version: version, stacks: %w[cflinuxfs4 cflinuxfs5])
+      end
+      new_dep = make_dep(name: 'openjdk', version: '21.0.12+10', stacks: %w[cflinuxfs4 cflinuxfs5])
+
+      result = switch(new_dep, existing, line: 'major', removal_strategy: 'keep_all')
+      expect(result.map { |dependency| dependency['version'] }).to eq(['21.0.12+10', '21.0.12+11', '21.0.12.1', '21.0.12.1+1'])
+    end
+
+    it 'keeps the newest latest-released version by extra fields and build number' do
+      released = ['21.0.12+10', '21.0.12.1+1', '21.0.12+12'].map do |version|
+        make_dep(name: 'openjdk', version: version, stacks: %w[cflinuxfs4 cflinuxfs5])
+      end
+      new_dep = make_dep(name: 'openjdk', version: '21.0.13+7', stacks: %w[cflinuxfs4 cflinuxfs5])
+
+      result = switch(new_dep, [], line: 'major', removal_strategy: 'keep_latest_released', latest_released: released)
+      expect(result.map { |dependency| dependency['version'] }).to eq(['21.0.12.1+1', '21.0.13+7'])
+    end
   end
 
   # ---------------------------------------------------------------------------
