@@ -412,6 +412,10 @@ RSpec.describe Dependencies do
       expect(versions_after('1.2.3+0', ['1.2.3'], name: 'node')).to eq(['1.2.3'])
     end
 
+    it 'ignores build numbers for non-Java dependencies with a fourth field' do
+      expect(versions_after('1.29.2.3+1', ['1.29.2.3+0'], name: 'openresty')).to eq(['1.29.2.3+0'])
+    end
+
     [
       ['jruby', '9.4.14', '9.4.14.0'],
       ['openresty', '1.29.2', '1.29.2.3'],

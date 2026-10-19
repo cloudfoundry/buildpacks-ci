@@ -151,12 +151,12 @@ class Dependencies
 
   # Compares versions with equal major.minor.patch by their extra JEP 322
   # fields ("17.0.20" < "17.0.20.1" < "17.0.20.1.1" < "17.0.20.2"), then by
-  # build ("21.0.12.1+1" < "21.0.12.1+2"). Build-only updates also apply to
-  # Java dependencies; other dependencies keep their previous behaviour.
+  # build ("21.0.12.1+1" < "21.0.12.1+2"). Only Java dependencies compare
+  # the build; other dependencies keep their previous behaviour.
   def newer_jep322_patch?(new_v, old_v)
     new_fields, new_build = jep322_patch(new_v)
     old_fields, old_build = jep322_patch(old_v)
-    return false if new_fields.empty? && old_fields.empty? && !JRE_DEPENDENCY_NAMES.include?(@dep['name'])
+    new_build = old_build = 0 unless JRE_DEPENDENCY_NAMES.include?(@dep['name'])
 
     ([new_fields, new_build] <=> [old_fields, old_build]) == 1
   end
