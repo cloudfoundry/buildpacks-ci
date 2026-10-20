@@ -1,6 +1,8 @@
 package watchers_test
 
 import (
+	"os"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -215,6 +217,26 @@ var _ = Describe("ZuluWatcher", func() {
 				versions, err := watcher.Check()
 				Expect(err).NotTo(HaveOccurred())
 				Expect(versions).To(BeEmpty())
+			})
+
+			It("logs a warning to stderr", func() {
+				client.Response = `[{
+					"java_version": [17, 0, 21],
+					"name": "zulu17.70.1-ca-crac-jre17.0.21-linux_x64.tar.gz"
+				}]`
+				watcher = watchers.NewZuluWatcher(client, "17", "jre")
+
+				stderr, err := os.CreateTemp("", "stderr")
+				Expect(err).NotTo(HaveOccurred())
+				defer os.Remove(stderr.Name())
+				orig := os.Stderr
+				os.Stderr = stderr
+				defer func() { os.Stderr = orig }()
+
+				_, err = watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(os.ReadFile(stderr.Name())).To(ContainSubstring(
+					"warning: no standard linux_x64 package found for java_version=17, package_type=jre"))
 			})
 		})
 	})

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -47,6 +48,7 @@ func (w *ZuluWatcher) Check() ([]base.Internal, error) {
 	pkg, err := w.fetchLatestPackage()
 	if errors.Is(err, errNoStandardZuluPackage) {
 		// Only CRaC/FX/musl builds published (yet): report nothing rather than fail.
+		fmt.Fprintf(os.Stderr, "warning: %v, skipping\n", err)
 		return []base.Internal{}, nil
 	}
 	if err != nil {
