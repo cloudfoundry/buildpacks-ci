@@ -3,6 +3,7 @@ package semver
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -58,6 +59,56 @@ func isFourthSegment(metadata string) (int, bool) {
 		return 0, false
 	}
 	return n, true
+}
+
+// jreMetadataRegex matches JRE metadata after major.minor.patch: optional
+// extra JEP 322 fields and an optional numeric build (e.g. "", "+10", ".1",
+// ".1+2", ".0.1").
+var jreMetadataRegex = regexp.MustCompile(`^((?:\.\d+)*)(?:\+(\d+))?$`)
+
+// parseJREMetadata returns the extra JEP 322 fields and the build number (-1
+// when absent). SapMachine, Liberica and Zulu use extra fields for monthly
+// patch releases, not as pre-release markers.
+func parseJREMetadata(metadata string) (fields []int, build int, ok bool) {
+	match := jreMetadataRegex.FindStringSubmatch(metadata)
+	if match == nil {
+		return nil, 0, false
+	}
+	for _, field := range strings.Split(match[1], ".")[1:] {
+		n, err := strconv.Atoi(field)
+		if err != nil {
+			return nil, 0, false
+		}
+		fields = append(fields, n)
+	}
+	build = -1
+	if match[2] != "" {
+		var err error
+		if build, err = strconv.Atoi(match[2]); err != nil {
+			return nil, 0, false
+		}
+	}
+	return fields, build, true
+}
+
+// LessThanJRE orders numeric JRE releases after prereleases, comparing extra
+// version fields (missing fields are lower: "21.0.10" < "21.0.10.0.1") and
+// then builds (absent < +0 < +1).
+func (s *Semver) LessThanJRE(other *Semver) bool {
+	if s.Major == other.Major && s.Minor == other.Minor && s.Patch == other.Patch {
+		sFields, sBuild, sIsJRE := parseJREMetadata(s.Metadata)
+		oFields, oBuild, oIsJRE := parseJREMetadata(other.Metadata)
+		switch {
+		case sIsJRE && oIsJRE:
+			if order := slices.Compare(sFields, oFields); order != 0 {
+				return order < 0
+			}
+			return sBuild < oBuild
+		case sIsJRE || oIsJRE:
+			return oIsJRE
+		}
+	}
+	return s.LessThan(other)
 }
 
 func (s *Semver) LessThan(other *Semver) bool {

@@ -1,4 +1,8 @@
 class Dependencies
+  # Manifest names of the JRE dependencies (keys in pipelines/dependency-builds/config.yml);
+  # openjdk is built from BellSoft Liberica.
+  JRE_DEPENDENCY_NAMES = %w[openjdk zulu sapmachine].freeze
+
   def initialize(dep, line, removal_strategy, dependencies, dependencies_latest_released)
     @dep = dep
     @line = line
@@ -33,17 +37,7 @@ class Dependencies
       # if not newer, don't do anything
       return @dependencies
     end
-    out.sort_by do |d|
-      version = d['version']
-      # Ensure version is a string (YAML may parse numbers like 11.0 as Float)
-      version = version.to_s unless version.nil?
-      version = version[1..] if !version.nil? && version.start_with?('v')
-      # Date-based versions (e.g. 20241028_RC00) sort correctly as strings.
-      # SemVer.parse returns nil (not an exception) for unparseable versions.
-      # Try padding 2-part versions like "25.2" to "25.2.0" for SemVer compatibility.
-      version = SemVer.parse(version) || SemVer.parse("#{version}.0") || version unless date_version?(version)
-      [d['name'], version, d['cf_stacks']]
-    end
+    out.sort_by { |d| [d['name'], *version_key(d['version']), d['cf_stacks']] }
   end
 
   private
@@ -59,12 +53,11 @@ class Dependencies
       next false if new_ver.nil? || old_ver.nil?
 
       if new_ver == old_ver
-        # Same 3-part semver — the semver2 gem silently drops any 4th segment
-        # (e.g. "17.0.20.1" parses identical to "17.0.20"). Compare the raw
-        # 4th part when present to correctly order stability patches.
-        new_fourth = new_v.split('.').length == 4 ? new_v.split('.')[3].to_i : -1
-        old_fourth = old_v.split('.').length == 4 ? old_v.split('.')[3].to_i : -1
-        new_fourth > old_fourth
+        # Same 3-part semver — the semver2 gem silently drops extra JEP 322
+        # fields and the build (e.g. "21.0.12.1+2" parses identical to
+        # "21.0.12+10"). Compare them to correctly order monthly patch
+        # releases and Java rebuilds.
+        newer_jep322_patch?(new_v, old_v)
       else
         new_ver > old_ver
       end
@@ -139,13 +132,40 @@ class Dependencies
 
     dep = @dependencies_latest_released.select do |d|
       same_dependency_line?(d['cf_stacks'], d['version'], d['name'])
-    end.max_by do |d|
-      v = d['version'].to_s
-      date_version?(v) ? v : (SemVer.parse(v) || v)
-    rescue StandardError
-      d['version']
-    end
+    end.max_by { |d| version_key(d['version']) }
     dep ? [dep] : []
+  end
+
+  # Sort key: SemVer, then the JEP 322 fields and build that SemVer.parse drops
+  # ("21.0.12+10" < "21.0.12+11" < "21.0.12.1+1").
+  def version_key(version)
+    # YAML may parse numbers like 11.0 as Float.
+    version = version.to_s.delete_prefix('v')
+    # Date-based versions (e.g. 20241028_RC00) sort correctly as strings.
+    # Pad 2-part versions like "25.2" to "25.2.0" for SemVer.
+    semver = date_version?(version) ? version : SemVer.parse(version) || SemVer.parse("#{version}.0") || version
+    [semver, *jep322_patch(version)]
+  end
+
+  JEP322_PATCH_PATTERN = /\A\d+\.\d+\.\d+(?:\.((?:\d+\.)*\d+))?(?:\+(\d+))?\z/
+
+  # Compares versions with equal major.minor.patch by their extra JEP 322
+  # fields ("17.0.20" < "17.0.20.1" < "17.0.20.1.1" < "17.0.20.2"), then by
+  # build ("21.0.12.1+1" < "21.0.12.1+2"). Only Java dependencies compare
+  # the build; other dependencies keep their previous behaviour.
+  def newer_jep322_patch?(new_v, old_v)
+    new_fields, new_build = jep322_patch(new_v)
+    old_fields, old_build = jep322_patch(old_v)
+    new_build = old_build = 0 unless JRE_DEPENDENCY_NAMES.include?(@dep['name'])
+
+    ([new_fields, new_build] <=> [old_fields, old_build]) == 1
+  end
+
+  def jep322_patch(version)
+    match = JEP322_PATCH_PATTERN.match(version)
+    return [[], -1] if match.nil?
+
+    [match[1].to_s.split('.').map(&:to_i), match[2] ? match[2].to_i : -1]
   end
 
   DATE_VERSION_PATTERN = /\A\d{8}_RC\d+\z/
@@ -154,4 +174,3 @@ class Dependencies
     DATE_VERSION_PATTERN.match?(version.to_s)
   end
 end
-

@@ -92,6 +92,9 @@ func (w *GithubReleasesWatcher) Check() ([]base.Internal, error) {
 		versions = append(versions, base.Internal{Ref: ref})
 	}
 
+	if IsSapMachineRepo(w.repo) {
+		return base.SortJREVersions(versions), nil
+	}
 	return base.SortVersions(versions), nil
 }
 
@@ -240,4 +243,10 @@ func (w *GithubReleasesWatcher) downloadAndHash(url string) (string, error) {
 	}
 
 	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
+// IsSapMachineRepo reports whether repo publishes SapMachine, whose JRE
+// versions need JRE ordering (see semver.LessThanJRE).
+func IsSapMachineRepo(repo string) bool {
+	return strings.EqualFold(repo, "SAP/SapMachine")
 }

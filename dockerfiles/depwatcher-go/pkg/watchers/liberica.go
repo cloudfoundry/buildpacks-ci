@@ -22,6 +22,7 @@ type libericaRelease struct {
 	FeatureVersion int    `json:"featureVersion"`
 	InterimVersion int    `json:"interimVersion"`
 	UpdateVersion  int    `json:"updateVersion"`
+	PatchVersion   int    `json:"patchVersion"`
 	BuildVersion   int    `json:"buildVersion"`
 	DownloadURL    string `json:"downloadUrl"`
 }
@@ -43,11 +44,10 @@ func (w *LibericaWatcher) Check() ([]base.Internal, error) {
 
 	var versions []base.Internal
 	for _, r := range releases {
-		version := fmt.Sprintf("%d.%d.%d+%d", r.FeatureVersion, r.InterimVersion, r.UpdateVersion, r.BuildVersion)
-		versions = append(versions, base.Internal{Ref: version})
+		versions = append(versions, base.Internal{Ref: r.version()})
 	}
 
-	return base.SortVersions(versions), nil
+	return base.SortJREVersions(versions), nil
 }
 
 func (w *LibericaWatcher) In(ref string) (base.Release, error) {
@@ -57,8 +57,7 @@ func (w *LibericaWatcher) In(ref string) (base.Release, error) {
 	}
 
 	for _, r := range releases {
-		version := fmt.Sprintf("%d.%d.%d+%d", r.FeatureVersion, r.InterimVersion, r.UpdateVersion, r.BuildVersion)
-		if version == ref {
+		if r.version() == ref {
 			return base.Release{
 				Ref: ref,
 				URL: r.DownloadURL,
@@ -77,15 +76,8 @@ func (w *LibericaWatcher) fetchReleases() ([]libericaRelease, error) {
 		return nil, fmt.Errorf("type must be specified")
 	}
 
-	var apiURL string
-	if w.version == "" {
-		// No version specified - get all releases and we'll filter to latest per major version
-		apiURL = fmt.Sprintf("https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=linux&package-type=tar.gz&bundle-type=%s",
-			w.typ)
-	} else {
-		apiURL = fmt.Sprintf("https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=linux&package-type=tar.gz&version-modifier=latest&bundle-type=%s&version-feature=%s",
-			w.typ, url.QueryEscape(w.version))
-	}
+	apiURL := fmt.Sprintf("https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=linux&package-type=tar.gz&version-modifier=latest&bundle-type=%s&version-feature=%s",
+		w.typ, url.QueryEscape(w.version))
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -117,47 +109,17 @@ func (w *LibericaWatcher) fetchReleases() ([]libericaRelease, error) {
 		return nil, fmt.Errorf("decoding releases: %w", err)
 	}
 
-	if w.version == "" {
-		// When no version is specified, filter to get only the latest for each major version
-		return w.filterLatestPerMajorVersion(releases), nil
-	}
-
 	return releases, nil
 }
 
-func (w *LibericaWatcher) filterLatestPerMajorVersion(releases []libericaRelease) []libericaRelease {
-	// Group by major version (featureVersion)
-	versionMap := make(map[int]libericaRelease)
-
-	for _, release := range releases {
-		existing, exists := versionMap[release.FeatureVersion]
-		if !exists {
-			versionMap[release.FeatureVersion] = release
-		} else {
-			// Keep the latest version for each major version
-			if w.isNewerRelease(release, existing) {
-				versionMap[release.FeatureVersion] = release
-			}
-		}
+// version returns the JEP 322 version, including the patch field for monthly
+// patch releases (e.g. "21.0.12+10", "21.0.12.1+1").
+func (r libericaRelease) version() string {
+	v := fmt.Sprintf("%d.%d.%d", r.FeatureVersion, r.InterimVersion, r.UpdateVersion)
+	if r.PatchVersion > 0 {
+		v += fmt.Sprintf(".%d", r.PatchVersion)
 	}
-
-	// Convert map back to slice
-	var filtered []libericaRelease
-	for _, release := range versionMap {
-		filtered = append(filtered, release)
-	}
-
-	return filtered
-}
-
-func (w *LibericaWatcher) isNewerRelease(r1, r2 libericaRelease) bool {
-	if r1.InterimVersion != r2.InterimVersion {
-		return r1.InterimVersion > r2.InterimVersion
-	}
-	if r1.UpdateVersion != r2.UpdateVersion {
-		return r1.UpdateVersion > r2.UpdateVersion
-	}
-	return r1.BuildVersion > r2.BuildVersion
+	return fmt.Sprintf("%s+%d", v, r.BuildVersion)
 }
 
 func (w *LibericaWatcher) name(uri string) string {

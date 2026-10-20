@@ -368,6 +368,152 @@ RSpec.describe Dependencies do
   end
 
   # ---------------------------------------------------------------------------
+  # JEP 322 versions with a build number (Liberica: 21.0.12+10 then
+  # 21.0.12.1+1, 21.0.12.1+2) and more than four fields (21.0.10.0.1)
+  # ---------------------------------------------------------------------------
+  describe 'JEP 322 version (monthly patch release)' do
+    def versions_after(new_version, existing_versions, name: 'openjdk')
+      existing = existing_versions.map { |version| make_dep(name: name, version: version, stacks: %w[cflinuxfs4 cflinuxfs5]) }
+      new_dep = make_dep(name: name, version: new_version, stacks: %w[cflinuxfs4 cflinuxfs5])
+      switch(new_dep, existing, line: 'major').map { |dependency| dependency['version'] }
+    end
+
+    it 'replaces the quarterly release with the patch release' do
+      expect(versions_after('21.0.12.1+1', ['21.0.12+10'])).to eq(['21.0.12.1+1'])
+    end
+
+    %w[openjdk zulu sapmachine].each do |name|
+      it "replaces a quarterly #{name} release with a higher build number" do
+        expect(versions_after('21.0.12+11', ['21.0.12+10'], name: name)).to eq(['21.0.12+11'])
+      end
+
+      it "compares quarterly #{name} build numbers numerically" do
+        expect(versions_after('21.0.12+10', ['21.0.12+9'], name: name)).to eq(['21.0.12+10'])
+      end
+
+      it "does not replace a quarterly #{name} release with a lower build number" do
+        expect(versions_after('21.0.12+9', ['21.0.12+10'], name: name)).to eq(['21.0.12+10'])
+      end
+
+      it "orders an absent #{name} build number below build zero" do
+        expect(versions_after('21.0.12+0', ['21.0.12'], name: name)).to eq(['21.0.12+0'])
+      end
+
+      it "does not replace #{name} build zero with an absent build number" do
+        expect(versions_after('21.0.12', ['21.0.12+0'], name: name)).to eq(['21.0.12+0'])
+      end
+    end
+
+    it 'preserves build-only metadata behaviour for non-Java dependencies' do
+      expect(versions_after('1.2.3+11', ['1.2.3+10'], name: 'node')).to eq(['1.2.3+10'])
+    end
+
+    it 'does not replace an unsuffixed non-Java dependency with build zero' do
+      expect(versions_after('1.2.3+0', ['1.2.3'], name: 'node')).to eq(['1.2.3'])
+    end
+
+    it 'ignores build numbers for non-Java dependencies with a fourth field' do
+      expect(versions_after('1.29.2.3+1', ['1.29.2.3+0'], name: 'openresty')).to eq(['1.29.2.3+0'])
+    end
+
+    [
+      ['jruby', '9.4.14', '9.4.14.0'],
+      ['openresty', '1.29.2', '1.29.2.3'],
+      ['newrelic', '10.21.0', '10.21.0.11']
+    ].each do |name, base_version, extended_version|
+      it "preserves #{name}'s fourth field after its base version" do
+        expect(versions_after(extended_version, [base_version], name: name)).to eq([extended_version])
+      end
+
+      it "does not replace #{name}'s fourth field with its base version" do
+        expect(versions_after(base_version, [extended_version], name: name)).to eq([extended_version])
+      end
+    end
+
+    it 'ignores nonnumeric build suffixes rather than treating them as numeric JEP 322 builds' do
+      expect(versions_after('21.0.12+10b', ['21.0.12+9'])).to eq(['21.0.12+9'])
+    end
+
+    it 'replaces a patch release with a rebuild that has a higher build number' do
+      expect(versions_after('21.0.12.1+2', ['21.0.12.1+1'])).to eq(['21.0.12.1+2'])
+    end
+
+    it 'compares build numbers numerically' do
+      expect(versions_after('21.0.12.1+10', ['21.0.12.1+9'])).to eq(['21.0.12.1+10'])
+    end
+
+    it 'does not add an older build of a patch release' do
+      expect(versions_after('21.0.12.1+1', ['21.0.12.1+2'])).to eq(['21.0.12.1+2'])
+    end
+
+    it 'replaces a version with one that has more than four fields' do
+      expect(versions_after('21.0.10.0.1', ['21.0.10'], name: 'sapmachine')).to eq(['21.0.10.0.1'])
+    end
+
+    it 'replaces a version with more than four fields with a higher patch release' do
+      expect(versions_after('21.0.10.1', ['21.0.10.0.1'], name: 'sapmachine')).to eq(['21.0.10.1'])
+    end
+
+    it 'does not add a version with fewer fields than an existing patch release' do
+      expect(versions_after('21.0.10.0.1', ['21.0.10.1'], name: 'sapmachine')).to eq(['21.0.10.1'])
+    end
+
+    it 'compares all SapMachine fields numerically without dropping an interior zero' do
+      expect(versions_after('21.0.10.0.10', ['21.0.10.0.9'], name: 'sapmachine')).to eq(['21.0.10.0.10'])
+    end
+
+    it 'orders an absent monthly patch build number below build zero' do
+      expect(versions_after('21.0.12.1+0', ['21.0.12.1'])).to eq(['21.0.12.1+0'])
+    end
+
+    it 'does not replace monthly patch build zero with an absent build number' do
+      expect(versions_after('21.0.12.1', ['21.0.12.1+0'])).to eq(['21.0.12.1+0'])
+    end
+
+    # Replays a Liberica 21 release sequence as the pipeline applies it
+    # (line 21.X.X -> "major", removal_strategy remove_all), one update at a time.
+    it 'follows a real-world release sequence without touching other major lines' do
+      manifest = [
+        make_dep(name: 'openjdk', version: '17.0.20+10', stacks: %w[cflinuxfs4 cflinuxfs5]),
+        make_dep(name: 'openjdk', version: '21.0.11+11', stacks: %w[cflinuxfs4 cflinuxfs5])
+      ]
+      [
+        ['21.0.12+10', '21.0.12+10'],   # quarterly release
+        ['21.0.12+11', '21.0.12+11'],   # quarterly rebuild
+        ['21.0.12.1+1', '21.0.12.1+1'], # monthly patch release
+        ['21.0.12+12', '21.0.12.1+1'],  # late quarterly rebuild stays below the patch release
+        ['21.0.12.1+2', '21.0.12.1+2'], # patch rebuild
+        ['21.0.13+7', '21.0.13+7']      # next quarterly release
+      ].each do |new_version, expected|
+        new_dep = make_dep(name: 'openjdk', version: new_version, stacks: %w[cflinuxfs4 cflinuxfs5])
+        manifest = switch(new_dep, manifest, line: 'major', removal_strategy: 'remove_all')
+        expect(manifest.map { |dependency| dependency['version'] }).to contain_exactly('17.0.20+10', expected),
+                                                                       "after #{new_version}"
+      end
+    end
+
+    it 'sorts kept versions by extra fields and build number' do
+      existing = ['21.0.12.1+1', '21.0.12+11', '21.0.12.1'].map do |version|
+        make_dep(name: 'openjdk', version: version, stacks: %w[cflinuxfs4 cflinuxfs5])
+      end
+      new_dep = make_dep(name: 'openjdk', version: '21.0.12+10', stacks: %w[cflinuxfs4 cflinuxfs5])
+
+      result = switch(new_dep, existing, line: 'major', removal_strategy: 'keep_all')
+      expect(result.map { |dependency| dependency['version'] }).to eq(['21.0.12+10', '21.0.12+11', '21.0.12.1', '21.0.12.1+1'])
+    end
+
+    it 'keeps the newest latest-released version by extra fields and build number' do
+      released = ['21.0.12+10', '21.0.12.1+1', '21.0.12+12'].map do |version|
+        make_dep(name: 'openjdk', version: version, stacks: %w[cflinuxfs4 cflinuxfs5])
+      end
+      new_dep = make_dep(name: 'openjdk', version: '21.0.13+7', stacks: %w[cflinuxfs4 cflinuxfs5])
+
+      result = switch(new_dep, [], line: 'major', removal_strategy: 'keep_latest_released', latest_released: released)
+      expect(result.map { |dependency| dependency['version'] }).to eq(['21.0.12.1+1', '21.0.13+7'])
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # General invariants that apply to BOTH types
   # ---------------------------------------------------------------------------
   describe 'general invariants' do
@@ -406,4 +552,3 @@ RSpec.describe Dependencies do
     end
   end
 end
-

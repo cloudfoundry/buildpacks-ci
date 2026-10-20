@@ -174,6 +174,16 @@ The token is automatically injected as `OAUTH_AUTHORIZATION_TOKEN` and redacted 
 
 ### Java Dependencies Configuration
 
+Liberica, Zulu, and `github_releases` for `SAP/SapMachine` use JRE (JEP 322)
+ordering for both release sorting and current-version filtering. Extra version
+fields are compared first, then the build number; a missing field or build is
+lowest:
+`21.0.12 < 21.0.12+0 < 21.0.12+10 < 21.0.12+11 < 21.0.12.1+1 < 21.0.12.1+2` and
+`21.0.10 < 21.0.10.0.1 < 21.0.10.1`.
+Other sources retain their existing ordering. To add another JRE source, extend
+`isJRESource` in `internal/factory/factory.go` and use `base.SortJREVersions`
+in its watcher.
+
 **Maven Repositories:**
 ```json
 {

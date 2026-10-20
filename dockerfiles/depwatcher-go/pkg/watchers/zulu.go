@@ -2,14 +2,19 @@ package watchers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
-	"sort"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/base"
-	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/semver"
 )
+
+// Standard x64 package, excluding CRaC, FX, musl and i686 variants.
+var zuluStandardPackageRegex = regexp.MustCompile(`^zulu[\d.]+-ca-(jdk|jre)[\d.]+-linux_x64\.tar\.gz$`)
 
 type ZuluWatcher struct {
 	client  base.HTTPClient
@@ -41,6 +46,11 @@ func (w *ZuluWatcher) Check() ([]base.Internal, error) {
 	}
 
 	pkg, err := w.fetchLatestPackage()
+	if errors.Is(err, errNoStandardZuluPackage) {
+		// Only CRaC/FX/musl builds published (yet): report nothing rather than fail.
+		fmt.Fprintf(os.Stderr, "warning: %v, skipping\n", err)
+		return []base.Internal{}, nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -74,6 +84,8 @@ func (w *ZuluWatcher) In(ref string) (base.Release, error) {
 	}, nil
 }
 
+var errNoStandardZuluPackage = errors.New("no standard linux_x64 package found")
+
 func (w *ZuluWatcher) fetchLatestPackage() (*zuluPackage, error) {
 	if w.typ == "" {
 		return nil, fmt.Errorf("type must be specified")
@@ -106,21 +118,14 @@ func (w *ZuluWatcher) fetchLatestPackage() (*zuluPackage, error) {
 		return nil, fmt.Errorf("no packages found for java_version=%s, package_type=%s", w.version, packageType)
 	}
 
-	// Return the first package (should be the latest for x64 architecture)
-	// Filter for x64 architecture in the name
-	for _, pkg := range packages {
-		if pkg.Name != "" && strings.HasSuffix(pkg.Name, ".tar.gz") {
-			// Prefer x64 over i686 or musl
-			name := pkg.Name
-			// Check if it's the standard x64 build (not musl or i686)
-			if !strings.Contains(name, "musl") && !strings.Contains(name, "i686") {
-				return &pkg, nil
-			}
+	// Prefer the standard package over CRaC, FX, musl and i686 variants.
+	for i := range packages {
+		if isStandardZuluPackage(packages[i].Name, packageType) {
+			return &packages[i], nil
 		}
 	}
 
-	// Fallback to first package if no x64 found
-	return &packages[0], nil
+	return nil, fmt.Errorf("%w for java_version=%s, package_type=%s", errNoStandardZuluPackage, w.version, packageType)
 }
 
 func (w *ZuluWatcher) fetchAllLatestVersions() ([]base.Internal, error) {
@@ -159,10 +164,7 @@ func (w *ZuluWatcher) fetchAllLatestVersions() ([]base.Internal, error) {
 	versionMap := make(map[int]*zuluPackage)
 	for i := range packages {
 		pkg := &packages[i]
-		// Only consider standard x64 builds (not musl or i686)
-		if pkg.Name != "" && strings.HasSuffix(pkg.Name, ".tar.gz") &&
-			!strings.Contains(pkg.Name, "musl") && !strings.Contains(pkg.Name, "i686") {
-
+		if isStandardZuluPackage(pkg.Name, packageType) {
 			if len(pkg.JavaVersion) >= 3 {
 				majorVersion := pkg.JavaVersion[0]
 				// Keep the latest version for each major version
@@ -188,7 +190,12 @@ func (w *ZuluWatcher) fetchAllLatestVersions() ([]base.Internal, error) {
 		internals = append(internals, base.Internal{Ref: version})
 	}
 
-	return w.sortVersions(internals), nil
+	return base.SortJREVersions(internals), nil
+}
+
+func isStandardZuluPackage(name, packageType string) bool {
+	match := zuluStandardPackageRegex.FindStringSubmatch(name)
+	return match != nil && match[1] == packageType
 }
 
 func (w *ZuluWatcher) isNewerVersion(v1, v2 []int) bool {
@@ -205,22 +212,19 @@ func (w *ZuluWatcher) isNewerVersion(v1, v2 []int) bool {
 }
 
 func (w *ZuluWatcher) parseVersion(versionParts []int) (string, error) {
-	if len(versionParts) != 3 {
-		return "", fmt.Errorf("version must have three components: got %d", len(versionParts))
+	if len(versionParts) < 3 {
+		return "", fmt.Errorf("version must have three components or more: got %d", len(versionParts))
 	}
-	return fmt.Sprintf("%d.%d.%d", versionParts[0], versionParts[1], versionParts[2]), nil
-}
-
-func (w *ZuluWatcher) sortVersions(internals []base.Internal) []base.Internal {
-	sort.Slice(internals, func(i, j int) bool {
-		vi, erri := semver.Parse(internals[i].Ref)
-		vj, errj := semver.Parse(internals[j].Ref)
-		if erri == nil && errj == nil {
-			return vi.LessThan(vj)
-		}
-		return internals[i].Ref < internals[j].Ref
-	})
-	return internals
+	// Monthly patch releases have a 4th JEP 322 field (e.g. 17.0.20.1).
+	// JEP 322 versions never have trailing zero fields beyond the third.
+	for len(versionParts) > 3 && versionParts[len(versionParts)-1] == 0 {
+		versionParts = versionParts[:len(versionParts)-1]
+	}
+	parts := make([]string, len(versionParts))
+	for i, p := range versionParts {
+		parts[i] = strconv.Itoa(p)
+	}
+	return strings.Join(parts, "."), nil
 }
 
 func (w *ZuluWatcher) name(uri string) string {
