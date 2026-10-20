@@ -33,6 +33,18 @@ var _ = Describe("ZuluWatcher", func() {
 				Expect(versions).To(HaveLen(1))
 				Expect(versions[0].Ref).To(Equal("8.0.302"))
 			})
+
+			It("drops trailing zero fields", func() {
+				client.Response = `[{
+					"java_version": [17, 0, 20, 0],
+					"name": "zulu17.68.17-ca-jre17.0.20-linux_x64.tar.gz"
+				}]`
+				watcher = watchers.NewZuluWatcher(client, "17", "jre")
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions[0].Ref).To(Equal("17.0.20"))
+			})
 		})
 
 		Context("when version is not specified (latest-line check)", func() {

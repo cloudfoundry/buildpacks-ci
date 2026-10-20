@@ -214,6 +214,10 @@ func (w *ZuluWatcher) parseVersion(versionParts []int) (string, error) {
 		return "", fmt.Errorf("version must have three components or more: got %d", len(versionParts))
 	}
 	// Monthly patch releases have a 4th JEP 322 field (e.g. 17.0.20.1).
+	// JEP 322 versions never have trailing zero fields beyond the third.
+	for len(versionParts) > 3 && versionParts[len(versionParts)-1] == 0 {
+		versionParts = versionParts[:len(versionParts)-1]
+	}
 	parts := make([]string, len(versionParts))
 	for i, p := range versionParts {
 		parts[i] = strconv.Itoa(p)
