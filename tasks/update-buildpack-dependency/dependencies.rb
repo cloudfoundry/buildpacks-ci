@@ -24,8 +24,13 @@ class Dependencies
     # stacks), so @matching_deps is empty and latest? would incorrectly remove the first entry.
     # Instead, detect the "new stack for existing version" case and append without touching
     # other stack entries.
+    #
+    # We still remove @matching_deps (old versions for the incoming stack) to handle the
+    # sequential per-stack loop in run.rb: iteration 1 adds the new version for stack A,
+    # then iteration 2 sees it via version_exists_for_different_stack? but must also remove
+    # the old version for stack B. Without this, the old version is retained for stack B.
     elsif !any_stack_dep? && version_exists_for_different_stack?
-      out = @dependencies + [@dep]
+      out = (@dependencies - @matching_deps) + [@dep]
     # adding a new one, but keep everything
     elsif @removal_strategy == 'keep_all'
       out = @dependencies + [@dep]

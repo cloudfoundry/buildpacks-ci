@@ -335,6 +335,137 @@ RSpec.describe Dependencies do
           .to include(['22.21.0', %w[cflinuxfs5]])
       end
     end
+
+    # Reproduces the exact bug from python-buildpack PR #1251 (uv 0.13.3 → 0.13.5).
+    # run.rb iterates per-stack build artifacts sequentially, feeding the result of
+    # one Dependencies#switch call into the next. In iteration 1 (cflinuxfs4), the
+    # latest? branch correctly removes the old cflinuxfs4 entry. In iteration 2
+    # (cflinuxfs5), version_exists_for_different_stack? fires (because cflinuxfs4's
+    # new entry was added in iteration 1) and — before the fix — the append-only
+    # path kept the old cflinuxfs5 entry, leaving stale versions in the manifest.
+    #
+    # This test simulates the full two-iteration loop to catch the cross-iteration
+    # interaction that single-call tests miss. Uses line: nil (the "latest" line
+    # type used by uv, pip, pipenv, setuptools, etc.).
+    context 'two-iteration loop: new version for both stacks removes old version from both stacks (python-buildpack #1251)' do
+      let(:dep_name) { 'uv' }
+
+      let(:old_fs4) { make_dep(name: dep_name, version: '0.13.3', stacks: %w[cflinuxfs4]) }
+      let(:old_fs5) { make_dep(name: dep_name, version: '0.13.3', stacks: %w[cflinuxfs5]) }
+      let(:new_fs4) { make_dep(name: dep_name, version: '0.13.5', stacks: %w[cflinuxfs4]) }
+      let(:new_fs5) { make_dep(name: dep_name, version: '0.13.5', stacks: %w[cflinuxfs5]) }
+
+      it 'removes the old version from both stacks after both iterations' do
+        # Iteration 1: cflinuxfs4 build arrives
+        after_iter1 = switch(new_fs4, [old_fs4, old_fs5], line: nil)
+
+        # Iteration 2: cflinuxfs5 build arrives, using iteration 1's output
+        after_iter2 = switch(new_fs5, after_iter1, line: nil)
+
+        versions_and_stacks = after_iter2
+          .select { |d| d['name'] == dep_name }
+          .map { |d| [d['version'], d['cf_stacks']] }
+
+        expect(versions_and_stacks).to contain_exactly(
+          ['0.13.5', %w[cflinuxfs4]],
+          ['0.13.5', %w[cflinuxfs5]]
+        )
+      end
+
+      it 'does not retain the old version on any stack' do
+        after_iter1 = switch(new_fs4, [old_fs4, old_fs5], line: nil)
+        after_iter2 = switch(new_fs5, after_iter1, line: nil)
+
+        old_entries = after_iter2.select { |d| d['name'] == dep_name && d['version'] == '0.13.3' }
+        expect(old_entries).to be_empty
+      end
+    end
+
+    # Same two-iteration scenario but with a major version line (node-style).
+    context 'two-iteration loop with major version line removes old version from both stacks' do
+      let(:old_fs4) { make_dep(name: dep_name, version: '22.21.0', stacks: %w[cflinuxfs4]) }
+      let(:old_fs5) { make_dep(name: dep_name, version: '22.21.0', stacks: %w[cflinuxfs5]) }
+      let(:new_fs4) { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs4]) }
+      let(:new_fs5) { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs5]) }
+
+      it 'removes old version from both stacks' do
+        after_iter1 = switch(new_fs4, [old_fs4, old_fs5], line: 'major')
+        after_iter2 = switch(new_fs5, after_iter1, line: 'major')
+
+        versions_and_stacks = after_iter2
+          .select { |d| d['name'] == dep_name }
+          .map { |d| [d['version'], d['cf_stacks']] }
+
+        expect(versions_and_stacks).to contain_exactly(
+          ['22.22.0', %w[cflinuxfs4]],
+          ['22.22.0', %w[cflinuxfs5]]
+        )
+      end
+    end
+
+    # Same two-iteration scenario but with a minor version line (python-style:
+    # 3.12.X, 3.13.X). Completes the line-type matrix alongside nil and major.
+    context 'two-iteration loop with minor version line removes old version from both stacks' do
+      let(:dep_name) { 'python' }
+
+      let(:old_fs4) { make_dep(name: dep_name, version: '3.12.8', stacks: %w[cflinuxfs4]) }
+      let(:old_fs5) { make_dep(name: dep_name, version: '3.12.8', stacks: %w[cflinuxfs5]) }
+      let(:new_fs4) { make_dep(name: dep_name, version: '3.12.9', stacks: %w[cflinuxfs4]) }
+      let(:new_fs5) { make_dep(name: dep_name, version: '3.12.9', stacks: %w[cflinuxfs5]) }
+
+      it 'removes old version from both stacks' do
+        after_iter1 = switch(new_fs4, [old_fs4, old_fs5], line: 'minor')
+        after_iter2 = switch(new_fs5, after_iter1, line: 'minor')
+
+        versions_and_stacks = after_iter2
+          .select { |d| d['name'] == dep_name }
+          .map { |d| [d['version'], d['cf_stacks']] }
+
+        expect(versions_and_stacks).to contain_exactly(
+          ['3.12.9', %w[cflinuxfs4]],
+          ['3.12.9', %w[cflinuxfs5]]
+        )
+      end
+    end
+
+    # Regression guard for the race condition the version_exists_for_different_stack?
+    # branch was originally added to handle: one stack's build lands first, then
+    # the other stack's build of the SAME version arrives in a later iteration.
+    # The fix must not regress this — the second stack's entry must be appended
+    # without removing the first stack's entry for that same version.
+    #
+    # Scenario: manifest has old_fs4(22.21.0) and old_fs5(22.21.0).
+    # Iter 1: new_fs4(22.22.0) arrives  → latest? removes old_fs4, adds new_fs4.
+    #         Result: [old_fs5(22.21.0), new_fs4(22.22.0)]
+    # Iter 2: new_fs5(22.22.0) arrives  → version_exists_for_different_stack? fires
+    #         because 22.22.0 already exists under cflinuxfs4.
+    #         Must: append new_fs5(22.22.0) AND remove old_fs5(22.21.0).
+    #         Must NOT: remove new_fs4(22.22.0).
+    context 'two-iteration loop: second stack for same new version is appended without removing first stack entry' do
+      let(:old_fs4) { make_dep(name: dep_name, version: '22.21.0', stacks: %w[cflinuxfs4]) }
+      let(:old_fs5) { make_dep(name: dep_name, version: '22.21.0', stacks: %w[cflinuxfs5]) }
+      let(:new_fs4) { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs4]) }
+      let(:new_fs5) { make_dep(name: dep_name, version: '22.22.0', stacks: %w[cflinuxfs5]) }
+
+      it 'keeps both stacks for the new version and removes old from both' do
+        after_iter1 = switch(new_fs4, [old_fs4, old_fs5], line: 'major')
+        after_iter2 = switch(new_fs5, after_iter1, line: 'major')
+
+        entries = after_iter2.select { |d| d['name'] == dep_name }
+        expect(entries.map { |d| [d['version'], d['cf_stacks']] }).to contain_exactly(
+          ['22.22.0', %w[cflinuxfs4]],
+          ['22.22.0', %w[cflinuxfs5]]
+        )
+      end
+
+      it 'preserves the first stack entry URI (not overwritten by second iteration)' do
+        after_iter1 = switch(new_fs4, [old_fs4, old_fs5], line: 'major')
+        after_iter2 = switch(new_fs5, after_iter1, line: 'major')
+
+        fs4_entry = after_iter2.find { |d| d['name'] == dep_name && d['cf_stacks'] == %w[cflinuxfs4] }
+        expect(fs4_entry['uri']).to eq(new_fs4['uri'])
+      end
+    end
   end
 
   # ---------------------------------------------------------------------------
