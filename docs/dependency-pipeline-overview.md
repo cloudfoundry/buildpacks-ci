@@ -184,41 +184,21 @@ dependencies:
 6. ✅ **Tests run:** Integration tests validate the new version
 7. 👤 **Maintainer reviews:** Checks PR, merges if tests pass
 
-#### ⚠️ Important: PR Review Checklist
+#### PR Review Checklist
 
-**Known Issue - Incomplete Old Version Removal:**
+When reviewing automated dependency PRs, verify:
 
-The automated PRs sometimes have an issue where old versions are **not removed from all stacks**. When reviewing PRs:
+1. New version is added for **all active stacks** (currently cflinuxfs4, cflinuxfs5)
+2. Old versions that should be removed are removed from **all stacks**
+3. SHA256 checksums are present and look valid
 
-✅ **Check that new versions are added for ALL active stacks:**
-```yaml
-# New version should be present for all stacks:
-- name: go
-  version: 1.26.6
-  cf_stacks: [cflinuxfs4]    # ✓ cflinuxfs4
-  
-- name: go
-  version: 1.26.6
-  cf_stacks: [cflinuxfs5]    # ✓ cflinuxfs5
-```
-
-⚠️ **Check that old versions are removed from ALL stacks:**
-```yaml
-# OLD VERSION - Should be removed from BOTH stacks, but PR might only remove one:
-- name: go
-  version: 1.26.5
-  cf_stacks: [cflinuxfs4]    # ❌ Still present - SHOULD BE REMOVED
-  
-# If the old version remains for any stack, manually edit the PR to remove it
-```
-
-**Before merging:**
-1. Verify new version added for **all active stacks** (currently cflinuxfs4, cflinuxfs5)
-2. Verify old version removed from **all active stacks** (not just one)
-3. If old version remains for any stack, edit the PR or add a commit to remove it
-4. Check that SHA256 checksums are present and look valid
-
-This prevents buildpack manifests from accumulating stale versions on some stacks while being clean on others.
+> **Note:** Prior to [PR #693](https://github.com/cloudfoundry/buildpacks-ci/pull/693),
+> a bug in the `version_exists_for_different_stack?` branch of `dependencies.rb`
+> caused automated PRs to sometimes retain old versions on one stack while
+> correctly removing them from the other. This has been fixed — the pipeline
+> now removes old versions from all stacks consistently. If you observe
+> stale versions reappearing, investigate `dependencies.rb` rather than
+> working around it manually.
 
 ### For EOL Version Removal (Manual)
 
