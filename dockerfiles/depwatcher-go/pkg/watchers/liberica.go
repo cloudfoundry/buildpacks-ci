@@ -19,15 +19,15 @@ type LibericaWatcher struct {
 }
 
 type libericaRelease struct {
-	FeatureVersion int    `json:"featureVersion"`
-	InterimVersion int    `json:"interimVersion"`
-	UpdateVersion  int    `json:"updateVersion"`
-	PatchVersion   int    `json:"patchVersion"`
+	FeatureVersion int `json:"featureVersion"`
+	InterimVersion int `json:"interimVersion"`
+	UpdateVersion  int `json:"updateVersion"`
+	PatchVersion   int `json:"patchVersion"`
 	// ExtraVersion is a further numeric segment BellSoft adds for security
 	// respin releases, e.g. the "2" in "21.0.13.0.2+5" (patchVersion is 0
 	// there). It sits between patchVersion and the build number.
-	ExtraVersion int    `json:"extraVersion"`
-	BuildVersion int    `json:"buildVersion"`
+	ExtraVersion int `json:"extraVersion"`
+	BuildVersion int `json:"buildVersion"`
 	// Version is BellSoft's own full dotted version string, e.g.
 	// "21.0.12+10", "21.0.12.1+1" or "21.0.13.0.2+5". It always has every
 	// numeric segment, so version() prefers it over reconstructing one -

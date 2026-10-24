@@ -1,15 +1,11 @@
 package watchers_test
 
 import (
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
-
-
-
 
 var _ = Describe("LibericaWatcher", func() {
 	var (
