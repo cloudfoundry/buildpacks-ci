@@ -23,8 +23,16 @@ type libericaRelease struct {
 	InterimVersion int    `json:"interimVersion"`
 	UpdateVersion  int    `json:"updateVersion"`
 	PatchVersion   int    `json:"patchVersion"`
-	BuildVersion   int    `json:"buildVersion"`
-	DownloadURL    string `json:"downloadUrl"`
+	// ExtraVersion is a further numeric segment BellSoft adds for security
+	// respin releases, e.g. the "2" in "21.0.13.0.2+5" (patchVersion is 0
+	// there). It sits between patchVersion and the build number.
+	ExtraVersion int    `json:"extraVersion"`
+	BuildVersion int    `json:"buildVersion"`
+	// Version is BellSoft's own full dotted version string, e.g.
+	// "21.0.12+10", "21.0.12.1+1" or "21.0.13.0.2+5". It always has every
+	// numeric segment, so version() prefers it over reconstructing one.
+	Version     string `json:"version"`
+	DownloadURL string `json:"downloadUrl"`
 }
 
 func NewLibericaWatcher(client base.HTTPClient, version, typ, token string) *LibericaWatcher {
@@ -112,12 +120,22 @@ func (w *LibericaWatcher) fetchReleases() ([]libericaRelease, error) {
 	return releases, nil
 }
 
-// version returns the JEP 322 version, including the patch field for monthly
-// patch releases (e.g. "21.0.12+10", "21.0.12.1+1").
+// version returns the JEP 322 version, including the patch and extra
+// version fields for monthly patch and security respin releases (e.g.
+// "21.0.12+10", "21.0.12.1+1", "21.0.13.0.2+5"). It prefers the API's own
+// "version" field, which already carries every segment; it falls back to
+// reconstructing one from the numeric fields only if "version" is absent,
+// keeping behaviour for such payloads unchanged.
 func (r libericaRelease) version() string {
+	if r.Version != "" {
+		return r.Version
+	}
 	v := fmt.Sprintf("%d.%d.%d", r.FeatureVersion, r.InterimVersion, r.UpdateVersion)
-	if r.PatchVersion > 0 {
+	if r.PatchVersion > 0 || r.ExtraVersion > 0 {
 		v += fmt.Sprintf(".%d", r.PatchVersion)
+	}
+	if r.ExtraVersion > 0 {
+		v += fmt.Sprintf(".%d", r.ExtraVersion)
 	}
 	return fmt.Sprintf("%s+%d", v, r.BuildVersion)
 }
