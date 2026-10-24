@@ -30,7 +30,10 @@ type libericaRelease struct {
 	BuildVersion int    `json:"buildVersion"`
 	// Version is BellSoft's own full dotted version string, e.g.
 	// "21.0.12+10", "21.0.12.1+1" or "21.0.13.0.2+5". It always has every
-	// numeric segment, so version() prefers it over reconstructing one.
+	// numeric segment, so version() prefers it over reconstructing one -
+	// except for Java 8, where BellSoft uses the legacy "8uNNN+build"
+	// scheme instead of the dotted form; that case falls back to the
+	// numeric-field reconstruction below.
 	Version     string `json:"version"`
 	DownloadURL string `json:"downloadUrl"`
 }
@@ -127,7 +130,7 @@ func (w *LibericaWatcher) fetchReleases() ([]libericaRelease, error) {
 // reconstructing one from the numeric fields only if "version" is absent,
 // keeping behaviour for such payloads unchanged.
 func (r libericaRelease) version() string {
-	if r.Version != "" {
+	if r.Version != "" && !strings.Contains(r.Version, "u") {
 		return r.Version
 	}
 	v := fmt.Sprintf("%d.%d.%d", r.FeatureVersion, r.InterimVersion, r.UpdateVersion)

@@ -158,6 +158,24 @@ var _ = Describe("LibericaWatcher", func() {
 			})
 		})
 
+		Context("when the API returns a Java 8 release (legacy 8uNNN version field)", func() {
+			It("ignores the non-dotted version field and reconstructs from numeric fields instead", func() {
+				// Real BellSoft payload shape for Java 8: "version" uses the
+				// legacy "8uNNN+build" scheme, not the dotted JEP 322 form
+				// used by 9+. Trusting it verbatim would emit "8u504+1"
+				// instead of "8.0.504+1".
+				client.Response = `[
+					{"featureVersion": 8, "interimVersion": 0, "updateVersion": 504, "patchVersion": 0, "extraVersion": 0, "buildVersion": 1, "version": "8u504+1", "downloadUrl": "https://example.com/8u504"}
+				]`
+				watcher = watchers.NewLibericaWatcher(client, "8", "jre", "")
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(1))
+				Expect(versions[0].Ref).To(Equal("8.0.504+1"))
+			})
+		})
+
 		Context("when the API omits the version field (fallback reconstruction)", func() {
 			It("still reconstructs a plain 3-field version", func() {
 				client.Response = `[
