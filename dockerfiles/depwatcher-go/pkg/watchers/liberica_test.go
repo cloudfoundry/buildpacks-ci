@@ -1,15 +1,11 @@
 package watchers_test
 
 import (
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/cloudfoundry/buildpacks-ci/depwatcher-go/pkg/watchers"
 )
-
-
-
 
 var _ = Describe("LibericaWatcher", func() {
 	var (
@@ -108,6 +104,109 @@ var _ = Describe("LibericaWatcher", func() {
 				Expect(versions).To(HaveLen(2))
 				Expect(versions[0].Ref).To(Equal("17.0.20.1+9"))
 				Expect(versions[1].Ref).To(Equal("17.0.20.1+10"))
+			})
+		})
+
+		Context("when the API returns a security respin release (extraVersion)", func() {
+			It("includes the extra version segment, not just patchVersion", func() {
+				// Real BellSoft payload shape for the 2026-10-23 eMudhra
+				// distrust respin: patchVersion is 0, the extra digit lives
+				// in extraVersion, and the API's own "version" field already
+				// has it right ("21.0.13.0.2+5").
+				client.Response = `[
+					{
+						"featureVersion": 21,
+						"interimVersion": 0,
+						"updateVersion": 13,
+						"patchVersion": 0,
+						"extraVersion": 2,
+						"buildVersion": 5,
+						"version": "21.0.13.0.2+5",
+						"downloadUrl": "https://github.com/bell-sw/Liberica/releases/download/21.0.13.0.2+5/bellsoft-jre21.0.13.0.2+5-linux-amd64.tar.gz"
+					},
+					{
+						"featureVersion": 21,
+						"interimVersion": 0,
+						"updateVersion": 13,
+						"patchVersion": 0,
+						"extraVersion": 0,
+						"buildVersion": 11,
+						"version": "21.0.13+11",
+						"downloadUrl": "https://github.com/bell-sw/Liberica/releases/download/21.0.13+11/bellsoft-jre21.0.13+11-linux-amd64.tar.gz"
+					}
+				]`
+				watcher = watchers.NewLibericaWatcher(client, "21", "jre", "")
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(2))
+
+				var refs []string
+				for _, v := range versions {
+					refs = append(refs, v.Ref)
+				}
+				Expect(refs).To(ContainElement("21.0.13+11"))
+				Expect(refs).To(ContainElement("21.0.13.0.2+5"))
+
+				release, err := watcher.In("21.0.13.0.2+5")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.URL).To(Equal("https://github.com/bell-sw/Liberica/releases/download/21.0.13.0.2+5/bellsoft-jre21.0.13.0.2+5-linux-amd64.tar.gz"))
+			})
+		})
+
+		Context("when the API returns a Java 8 release (legacy 8uNNN version field)", func() {
+			It("ignores the non-dotted version field and reconstructs from numeric fields instead", func() {
+				// Real BellSoft payload shape for Java 8: "version" uses the
+				// legacy "8uNNN+build" scheme, not the dotted JEP 322 form
+				// used by 9+. Trusting it verbatim would emit "8u504+1"
+				// instead of "8.0.504+1".
+				client.Response = `[
+					{"featureVersion": 8, "interimVersion": 0, "updateVersion": 504, "patchVersion": 0, "extraVersion": 0, "buildVersion": 1, "version": "8u504+1", "downloadUrl": "https://example.com/8u504"}
+				]`
+				watcher = watchers.NewLibericaWatcher(client, "8", "jre", "")
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(1))
+				Expect(versions[0].Ref).To(Equal("8.0.504+1"))
+			})
+		})
+
+		Context("when the API omits the version field (fallback reconstruction)", func() {
+			It("still reconstructs a plain 3-field version", func() {
+				client.Response = `[
+					{"featureVersion": 17, "interimVersion": 0, "updateVersion": 20, "buildVersion": 10, "downloadUrl": "https://example.com/b"}
+				]`
+				watcher = watchers.NewLibericaWatcher(client, "17", "jre", "")
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(1))
+				Expect(versions[0].Ref).To(Equal("17.0.20+10"))
+			})
+
+			It("still reconstructs an extraVersion respin when version is absent", func() {
+				client.Response = `[
+					{"featureVersion": 21, "interimVersion": 0, "updateVersion": 13, "patchVersion": 0, "extraVersion": 2, "buildVersion": 5, "downloadUrl": "https://example.com/respin"}
+				]`
+				watcher = watchers.NewLibericaWatcher(client, "21", "jre", "")
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(1))
+				Expect(versions[0].Ref).To(Equal("21.0.13.0.2+5"))
+			})
+
+			It("does not insert a spurious zero when both patchVersion and extraVersion are positive", func() {
+				client.Response = `[
+					{"featureVersion": 21, "interimVersion": 0, "updateVersion": 13, "patchVersion": 1, "extraVersion": 2, "buildVersion": 5, "downloadUrl": "https://example.com/both"}
+				]`
+				watcher = watchers.NewLibericaWatcher(client, "21", "jre", "")
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(1))
+				Expect(versions[0].Ref).To(Equal("21.0.13.1.2+5"))
 			})
 		})
 
