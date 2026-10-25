@@ -169,6 +169,21 @@ var _ = Describe("LibericaWatcher", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(versions).To(HaveLen(1))
 				Expect(versions[0].Ref).To(Equal("8.0.504+1"))
+
+				release, err := watcher.In("8.0.504+1")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.URL).To(Equal("https://example.com/8u504"))
+			})
+
+			It("trusts a non-Java-8 version containing a 'u'", func() {
+				client.Response = `[
+					{"featureVersion": 21, "interimVersion": 0, "updateVersion": 14, "buildVersion": 5, "version": "21.0.14-ubuntu+5", "downloadUrl": "https://example.com/u"}
+				]`
+				watcher = watchers.NewLibericaWatcher(client, "21", "jre", "")
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions[0].Ref).To(Equal("21.0.14-ubuntu+5"))
 			})
 		})
 

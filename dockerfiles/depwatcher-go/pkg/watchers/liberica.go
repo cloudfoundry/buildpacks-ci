@@ -130,7 +130,7 @@ func (w *LibericaWatcher) fetchReleases() ([]libericaRelease, error) {
 // reconstructing one from the numeric fields only if "version" is absent,
 // keeping behaviour for such payloads unchanged.
 func (r libericaRelease) version() string {
-	if r.Version != "" && !strings.Contains(r.Version, "u") {
+	if r.Version != "" && !strings.HasPrefix(r.Version, "8u") {
 		return r.Version
 	}
 	v := fmt.Sprintf("%d.%d.%d", r.FeatureVersion, r.InterimVersion, r.UpdateVersion)
