@@ -70,11 +70,23 @@ echo "[task] Building ${DEP_NAME} for stack ${STACK}..."
 # Build subprocess output (compiler, make, etc.) flows to stdout/stderr and is
 # visible in the build log without corrupting the structured JSON output file.
 SUMMARY_FILE="/tmp/binary-builder-summary.json"
+
+# PHP-specific: pass extension config from php-buildpack when available.
+# This allows extension version ownership to live in the php-buildpack repo
+# rather than being embedded in binary-builder. See the migration plan in
+# buildpacks-ci/docs/php-extensions-migration-plan.md.
+EXTRA_ARGS=""
+if [[ "${DEP_NAME}" == "php" && -d "php-buildpack/config/extensions" ]]; then
+  EXTRA_ARGS="--extensions-dir php-buildpack/config/extensions"
+  echo "[task] Using extension config from php-buildpack/config/extensions"
+fi
+
 binary-builder build \
   --stack "${BUILD_STACK}" \
   --source-file source/data.json \
   --stacks-dir binary-builder/stacks \
-  --output-file "${SUMMARY_FILE}"
+  --output-file "${SUMMARY_FILE}" \
+  ${EXTRA_ARGS}
 
 echo "[task] Build complete. Summary:"
 jq . "${SUMMARY_FILE}" >&2

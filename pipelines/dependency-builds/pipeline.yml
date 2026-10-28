@@ -314,6 +314,10 @@ jobs:
   - in_parallel:
     - get: buildpacks-ci
     - get: binary-builder
+    #@ if dep_name == "php":
+    - get: php-buildpack
+      resource: php-buildpack
+    #@ end
     - get: source
       resource: #@ "source-{}-{}".format(dep_name.lower(), line.lower())
       trigger: true
