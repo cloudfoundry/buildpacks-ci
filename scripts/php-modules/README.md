@@ -19,6 +19,25 @@ To bump versions, run:
 
 This will attempt to bump all modules to their latest versions and clear each bumped module's `md5` field to signal that it should be recomputed (see next section).
 
+### Dry-run mode
+
+To check which extensions are outdated **without modifying any files**, use the `--dry-run` flag:
+
+```bash
+bundle exec ruby scripts/php-modules/bump-versions.rb --dry-run
+```
+
+For machine-readable output (used by the automated GitHub Actions check), add `--format=json`:
+
+```bash
+bundle exec ruby scripts/php-modules/bump-versions.rb --dry-run --format=json
+```
+
+The JSON output includes:
+- `outdated` — array of `{name, klass, current, latest}` objects
+- `up_to_date_count` — number of extensions already at their latest version
+- `error_count` / `errors` — any extensions that could not be checked
+
 > **Note:** In some cases, a new module version will support a version of PHP that it didn't previously support. In this case, the module would need to be added manually to the appropriate extensions YAML file (leaving the `md5` field blank).
 
 ## Update Module Hashes
@@ -74,3 +93,13 @@ You can use the following task-list to help this operation:
 * [ ] Check each PHP module for updates and update extension configs
 * [ ] Rebuild PHP versions if any module updates ([pipeline](https://buildpacks.ci.cf-app.com/teams/main/pipelines/dependency-builds?group=php))
 * [ ] Make sure newly built dependency is merged into the buildpack
+
+## Automated Weekly Check
+
+A GitHub Actions workflow in [binary-builder](https://github.com/cloudfoundry/binary-builder)
+runs weekly (Monday 08:00 UTC) and uses `bump-versions.rb --dry-run --format=json` to
+detect outdated PHP extensions. When outdated extensions are found, the workflow
+creates or updates a GitHub issue on the binary-builder repo with a summary table.
+
+The workflow can also be triggered manually from the Actions tab. See
+`.github/workflows/check-php-extensions.yml` in the binary-builder repo.

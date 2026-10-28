@@ -10,7 +10,9 @@ end
 
 BINARY_BUILDER_DIR = ENV.fetch('BINARY_BUILDER_DIR', File.expand_path('../../../binary-builder', __dir__))
 
-def update_modules(&f)
+# update_modules iterates over all extension YAML files and calls the given block
+# for each dependency. When dry_run is true, YAML files are NOT written back to disk.
+def update_modules(dry_run: false, &f)
   cache = {}
   %w[php8-base-extensions.yml php81-extensions-patch.yml php82-extensions-patch.yml php83-extensions-patch.yml php84-extensions-patch.yml php85-extensions-patch.yml].each do |ext_file|
     path = File.join(BINARY_BUILDER_DIR, 'internal/php/assets', ext_file)
@@ -29,6 +31,6 @@ def update_modules(&f)
     process_extension_file(cache, data, ext_file, extensions, f)
     process_extension_file(cache, data, ext_file, native_modules, f)
 
-    File.write(path, data.to_yaml)
+    File.write(path, data.to_yaml) unless dry_run
   end
 end
