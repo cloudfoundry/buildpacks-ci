@@ -26,7 +26,7 @@ func NewRubyWatcher(client base.HTTPClient) *RubyWatcher {
 
 func (w *RubyWatcher) Check() ([]base.Internal, error) {
 	tagsWatcher := NewGithubTagsWatcher(w.client, "ruby/ruby")
-	tags, err := tagsWatcher.MatchedTags(`^v\d+_\d+_\d+$`)
+	tags, err := tagsWatcher.MatchedTags(`^v(\d+_\d+_\d+|\d+\.\d+\.\d+)$`)
 	if err != nil {
 		return nil, err
 	}
