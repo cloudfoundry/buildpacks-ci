@@ -400,10 +400,10 @@ dependencies:
             deprecation_date: 2027-03-31
             link: https://www.ruby-lang.org/en/news/2023/12/25/ruby-3-3-0-released/
           - line: 3.4.X
-            deprecation_date: TBD 
+            deprecation_date: 2028-03-31 
             link: https://www.ruby-lang.org/en/news/2024/12/25/ruby-3-4-0-released/
           - line: 4.0.X
-            deprecation_date: TBD
+            deprecation_date: 2029-03-31
             link: https://www.ruby-lang.org/en/news/2025/12/25/ruby-4-0-0-released/
         removal_strategy: keep_latest_released
     versions_to_keep: 2
