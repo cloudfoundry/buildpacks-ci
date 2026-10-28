@@ -52,6 +52,32 @@ var _ = Describe("RubyWatcher", func() {
 	)
 
 	Describe("Check", func() {
+		Context("when Ruby tags use both underscore and dot formats", func() {
+			BeforeEach(func() {
+				mockClient = newMockRubyClient()
+				mockClient.responses["https://api.github.com/repos/ruby/ruby/tags?per_page=1000"] = `[
+					{"name": "v4.0.10"},
+					{"name": "v3_4_12"},
+					{"name": "v4.0.9"},
+					{"name": "v4.1.0-preview1"},
+					{"name": "v4.1.0-rc1"},
+					{"name": "v3_5_0_preview1"},
+					{"name": "v4_0.0"},
+					{"name": "v4.0_0"}
+				]`
+				watcher = watchers.NewRubyWatcher(mockClient)
+			})
+
+			It("returns only stable releases normalized and sorted by semver", func() {
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(3))
+				Expect(versions[0].Ref).To(Equal("3.4.12"))
+				Expect(versions[1].Ref).To(Equal("4.0.9"))
+				Expect(versions[2].Ref).To(Equal("4.0.10"))
+			})
+		})
+
 		Context("when there are multiple Ruby tags", func() {
 			BeforeEach(func() {
 				tags := `[
