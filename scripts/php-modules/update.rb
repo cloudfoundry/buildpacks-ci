@@ -8,14 +8,42 @@ def process_extension_file(cache, data, ext_file, dependency_type, f)
   end
 end
 
-BINARY_BUILDER_DIR = ENV.fetch('BINARY_BUILDER_DIR', File.expand_path('../../../binary-builder', __dir__))
+# EXTENSIONS_DIR points directly to the directory containing the extension YAML
+# files. This supports multiple layouts:
+#
+#   - php-buildpack:   EXTENSIONS_DIR=php-buildpack/config/extensions
+#   - binary-builder (pre-Phase 5):  EXTENSIONS_DIR=binary-builder/internal/php/assets
+#   - binary-builder (post-Phase 5): EXTENSIONS_DIR=binary-builder/internal/php/testdata
+#
+# For backward compatibility, BINARY_BUILDER_DIR is still supported as a fallback
+# (resolves to BINARY_BUILDER_DIR/internal/php/assets).
+EXTENSIONS_DIR = if ENV.key?('EXTENSIONS_DIR')
+                   ENV['EXTENSIONS_DIR']
+                 else
+                   binary_builder_dir = ENV.fetch('BINARY_BUILDER_DIR', File.expand_path('../../../binary-builder', __dir__))
+                   File.join(binary_builder_dir, 'internal/php/assets')
+                 end
+
+EXTENSION_FILES = %w[
+  php8-base-extensions.yml
+  php81-extensions-patch.yml
+  php82-extensions-patch.yml
+  php83-extensions-patch.yml
+  php84-extensions-patch.yml
+  php85-extensions-patch.yml
+].freeze
 
 # update_modules iterates over all extension YAML files and calls the given block
 # for each dependency. When dry_run is true, YAML files are NOT written back to disk.
 def update_modules(dry_run: false, &f)
   cache = {}
-  %w[php8-base-extensions.yml php81-extensions-patch.yml php82-extensions-patch.yml php83-extensions-patch.yml php84-extensions-patch.yml php85-extensions-patch.yml].each do |ext_file|
-    path = File.join(BINARY_BUILDER_DIR, 'internal/php/assets', ext_file)
+  EXTENSION_FILES.each do |ext_file|
+    path = File.join(EXTENSIONS_DIR, ext_file)
+
+    unless File.exist?(path)
+      $stderr.puts "WARNING: #{path} not found, skipping"
+      next
+    end
 
     puts "==> Processing: #{path}"
     data = YAML.load_file(path, permitted_classes: [Date, Time])

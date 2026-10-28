@@ -52,11 +52,25 @@ To update hashes, run:
 
 ## Important Notes
 
-- These scripts require a clone of [binary-builder](https://github.com/cloudfoundry/binary-builder). By default they look for it as a sibling directory (`../binary-builder`). If your checkout is elsewhere, set `BINARY_BUILDER_DIR` to the absolute path before running:
+- These scripts need access to the extension YAML files. You can point them at the YAML directory in two ways:
+
+  **Option 1 (preferred):** Set `EXTENSIONS_DIR` to point directly at the directory containing the YAML files:
+
+  ```bash
+  # From php-buildpack (authoritative source after Phase 2):
+  EXTENSIONS_DIR=/path/to/php-buildpack/config/extensions ./scripts/php-modules/bump-versions.sh
+
+  # From binary-builder testdata (for local dev):
+  EXTENSIONS_DIR=/path/to/binary-builder/internal/php/testdata ./scripts/php-modules/bump-versions.sh
+  ```
+
+  **Option 2 (legacy):** Set `BINARY_BUILDER_DIR` — the scripts will look for YAML files in `BINARY_BUILDER_DIR/internal/php/assets`:
 
   ```bash
   BINARY_BUILDER_DIR=/path/to/binary-builder ./scripts/php-modules/bump-versions.sh
   ```
+
+  If neither is set, the scripts default to looking for `../binary-builder` as a sibling directory.
 
   The scripts also assume you have `bundler` installed.
 
