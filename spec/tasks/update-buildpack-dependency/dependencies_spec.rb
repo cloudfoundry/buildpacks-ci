@@ -206,6 +206,29 @@ RSpec.describe Dependencies do
   describe 'stack-specific dependency behaviour' do
     let(:dep_name) { 'node' }
 
+    context 'when updating both stacks with keep_latest_released' do
+      let(:released_fs4) { make_dep(name: 'ruby', version: '3.3.10', stacks: %w[cflinuxfs4]) }
+      let(:released_fs5) { make_dep(name: 'ruby', version: '3.3.11', stacks: %w[cflinuxfs5]) }
+      let(:unreleased_fs4) { make_dep(name: 'ruby', version: '3.3.11', stacks: %w[cflinuxfs4]) }
+      let(:latest_released) { [released_fs4, released_fs5] }
+
+      [%w[cflinuxfs4 cflinuxfs5], %w[cflinuxfs5 cflinuxfs4]].each do |stacks|
+        it "retains the released version for each stack when processing #{stacks.join(' then ')}" do
+          dependencies = latest_released + [unreleased_fs4]
+          new_dependencies = stacks.map do |stack|
+            make_dep(name: 'ruby', version: '3.3.12', stacks: [stack])
+          end
+
+          new_dependencies.each do |dependency|
+            dependencies = switch(dependency, dependencies, line: 'minor',
+                                  removal_strategy: 'keep_latest_released', latest_released: latest_released)
+          end
+
+          expect(dependencies).to contain_exactly(*latest_released, *new_dependencies)
+        end
+      end
+    end
+
     context 'when adding cflinuxfs5 entry for a version that already has cflinuxfs4 and cflinuxfs3 entries' do
       subject { switch(fs5_dep, [fs3_entry, fs4_entry], line: 'minor') }
 

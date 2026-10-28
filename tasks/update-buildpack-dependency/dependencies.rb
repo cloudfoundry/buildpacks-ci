@@ -30,7 +30,7 @@ class Dependencies
     # then iteration 2 sees it via version_exists_for_different_stack? but must also remove
     # the old version for stack B. Without this, the old version is retained for stack B.
     elsif !any_stack_dep? && version_exists_for_different_stack?
-      out = (@dependencies - @matching_deps) + [@dep]
+      out = (@dependencies - @matching_deps) + [@dep] + dependencies_latest_released
     # adding a new one, but keep everything
     elsif @removal_strategy == 'keep_all'
       out = @dependencies + [@dep]
