@@ -169,9 +169,9 @@ during PHP builds.
 2. **Update `tasks/build-binary/build.sh`** to pass `--extensions-dir` for PHP builds:
 
    ```bash
-   EXTRA_ARGS=""
+   EXTRA_ARGS=()
    if [[ "${DEP_NAME}" == "php" && -d "php-buildpack/config/extensions" ]]; then
-     EXTRA_ARGS="--extensions-dir php-buildpack/config/extensions"
+     EXTRA_ARGS=(--extensions-dir "php-buildpack/config/extensions")
    fi
 
    binary-builder build \
@@ -179,7 +179,7 @@ during PHP builds.
      --source-file source/data.json \
      --stacks-dir binary-builder/stacks \
      --output-file "${SUMMARY_FILE}" \
-     ${EXTRA_ARGS}
+     "${EXTRA_ARGS[@]}"
    ```
 
 3. **Update `scripts/php-modules/update.rb`** to point at php-buildpack instead of
@@ -192,6 +192,20 @@ during PHP builds.
 **Acceptance criteria:** PHP builds use extension configs from php-buildpack. Changing
 an extension version in php-buildpack (without touching binary-builder) triggers a
 correct PHP rebuild.
+
+**Rollback procedure:**
+
+1. Revert the `build.sh`, `build.yml`, and `pipeline.yml` changes in a commit to
+   `buildpacks-ci`.
+2. **Important:** Pipeline YAML changes in `pipelines/dependency-builds/pipeline.yml`
+   do NOT take effect until the pipeline is regenerated. After the revert commit
+   lands on master, run `./bin/update-pipelines` (or the equivalent `fly set-pipeline`
+   command) to apply the change to the running Concourse pipeline. A revert commit
+   alone will NOT revert the running pipeline — this is a known operational footgun.
+3. The next PHP build will use binary-builder's embedded extension defaults (the
+   `build.sh` fallback path handles this gracefully — when the `php-buildpack`
+   input is absent or lacks `config/extensions/`, no `--extensions-dir` flag is
+   passed and binary-builder falls back to its compiled-in YAML).
 
 ---
 
@@ -276,8 +290,10 @@ Each phase is independently deployable and backward-compatible:
 
 - **Phase 1** adds a new optional flag; no existing behavior changes.
 - **Phase 2** adds files to php-buildpack; no existing behavior changes.
-- **Phase 3** starts using the new flag; revert build.sh to remove `--extensions-dir`
-  to fall back to embedded config.
+- **Phase 3** starts using the new flag; revert `build.sh` and `pipeline.yml` to remove
+  `--extensions-dir` to fall back to embedded config. **Important:** pipeline YAML
+  changes require running `./bin/update-pipelines` after the revert commit — a git
+  revert alone does NOT update the running Concourse pipeline.
 - **Phase 4** is additive automation; disable/remove the cron job to revert.
 - **Phase 5** is the only breaking change — it removes the embedded fallback. If issues
   arise, revert the binary-builder commit to restore embedded assets.
