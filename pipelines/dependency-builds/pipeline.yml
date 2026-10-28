@@ -457,7 +457,7 @@ jobs:
       repo_location: buildpack
       title: #@ "Updating version for {} for {} ".format(dep_name, line_hash["line"])
       description: #@ "Automated update of {} dependency for version line {}.".format(dep_name, line_hash["line"])
-      branch_prefix: "pr-by-releng-bot"
+      branch_prefix: #@ "pr-by-releng-bot-{}-{}-{}".format(dep_name.lower(), line_hash["line"].lower(), bp_name.lower())
       auto_merge: false
       base: #@ get_buildpack_branch(bp_name)
 #@     end
