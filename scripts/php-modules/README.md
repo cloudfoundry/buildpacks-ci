@@ -19,6 +19,25 @@ To bump versions, run:
 
 This will attempt to bump all modules to their latest versions and clear each bumped module's `md5` field to signal that it should be recomputed (see next section).
 
+### Dry-run mode
+
+To check which extensions are outdated **without modifying any files**, use the `--dry-run` flag:
+
+```bash
+bundle exec ruby scripts/php-modules/bump-versions.rb --dry-run
+```
+
+For machine-readable output (used by the automated GitHub Actions check), add `--format=json`:
+
+```bash
+bundle exec ruby scripts/php-modules/bump-versions.rb --dry-run --format=json
+```
+
+The JSON output includes:
+- `outdated` — array of `{name, klass, current, latest}` objects
+- `up_to_date_count` — number of extensions already at their latest version
+- `error_count` / `errors` — any extensions that could not be checked
+
 > **Note:** In some cases, a new module version will support a version of PHP that it didn't previously support. In this case, the module would need to be added manually to the appropriate extensions YAML file (leaving the `md5` field blank).
 
 ## Update Module Hashes
@@ -33,11 +52,25 @@ To update hashes, run:
 
 ## Important Notes
 
-- These scripts require a clone of [binary-builder](https://github.com/cloudfoundry/binary-builder). By default they look for it as a sibling directory (`../binary-builder`). If your checkout is elsewhere, set `BINARY_BUILDER_DIR` to the absolute path before running:
+- These scripts need access to the extension YAML files. You can point them at the YAML directory in two ways:
+
+  **Option 1 (preferred):** Set `EXTENSIONS_DIR` to point directly at the directory containing the YAML files:
+
+  ```bash
+  # From php-buildpack (authoritative source after Phase 2):
+  EXTENSIONS_DIR=/path/to/php-buildpack/config/extensions ./scripts/php-modules/bump-versions.sh
+
+  # From binary-builder testdata (for local dev):
+  EXTENSIONS_DIR=/path/to/binary-builder/internal/php/testdata ./scripts/php-modules/bump-versions.sh
+  ```
+
+  **Option 2 (legacy):** Set `BINARY_BUILDER_DIR` — the scripts will look for YAML files in `BINARY_BUILDER_DIR/internal/php/assets`:
 
   ```bash
   BINARY_BUILDER_DIR=/path/to/binary-builder ./scripts/php-modules/bump-versions.sh
   ```
+
+  If neither is set, the scripts default to looking for `../binary-builder` as a sibling directory.
 
   The scripts also assume you have `bundler` installed.
 
@@ -74,3 +107,13 @@ You can use the following task-list to help this operation:
 * [ ] Check each PHP module for updates and update extension configs
 * [ ] Rebuild PHP versions if any module updates ([pipeline](https://buildpacks.ci.cf-app.com/teams/main/pipelines/dependency-builds?group=php))
 * [ ] Make sure newly built dependency is merged into the buildpack
+
+## Automated Weekly Check
+
+A GitHub Actions workflow in [binary-builder](https://github.com/cloudfoundry/binary-builder)
+runs weekly (Monday 08:00 UTC) and uses `bump-versions.rb --dry-run --format=json` to
+detect outdated PHP extensions. When outdated extensions are found, the workflow
+creates or updates a GitHub issue on the binary-builder repo with a summary table.
+
+The workflow can also be triggered manually from the Actions tab. See
+`.github/workflows/check-php-extensions.yml` in the binary-builder repo.

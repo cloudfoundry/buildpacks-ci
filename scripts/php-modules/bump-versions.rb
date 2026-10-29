@@ -1,5 +1,12 @@
+require 'json'
+require 'time'
+
 require_relative 'update'
 require_relative '../../tasks/check-for-latest-php-module-versions/common'
+
+# Parse command-line flags.
+DRY_RUN = ARGV.include?('--dry-run')
+FORMAT_JSON = ARGV.include?('--format=json')
 
 # Define a method to calculate the cache key
 def cache_key(name, klass)
@@ -36,7 +43,10 @@ def get_latest_version(name, klass, url, cache)
   cache[key]
 end
 
-# Define a method to bump the version of a dependency
+# Collect results when running in dry-run mode.
+$report = { outdated: [], up_to_date_count: 0, error_count: 0, errors: [] }
+
+# Define a method to bump (or check) the version of a dependency
 def bump_dependency_version(dependency, cache)
   name = dependency['name']
   version = dependency['version']
@@ -45,30 +55,71 @@ def bump_dependency_version(dependency, cache)
   # Check if the version is missing or set to 'nil'
   return if !version || version == 'nil'
 
-  puts "    > Getting the latest version of #{name} (#{klass})..."
+  $stderr.puts "    > Getting the latest version of #{name} (#{klass})..." unless FORMAT_JSON
   url = url_for_type(name, klass)
-  latest = get_latest_version(name, klass, url, cache)
+
+  begin
+    latest = get_latest_version(name, klass, url, cache)
+  rescue StandardError => e
+    $report[:error_count] += 1
+    $report[:errors] << { name: name, klass: klass, message: e.message }
+    $stderr.puts "      ERROR: #{e.message}" unless FORMAT_JSON
+    return
+  end
 
   # Check if the latest version could not be determined
   if !latest || latest == 'Unknown'
-    puts "      WARNING! Could not determine the latest version of #{name}. Manual check required (URL: #{url || '<none>'})."
+    $report[:error_count] += 1
+    $report[:errors] << { name: name, klass: klass, message: "Could not determine latest version (URL: #{url || '<none>'})" }
+    $stderr.puts "      WARNING! Could not determine the latest version of #{name}. Manual check required (URL: #{url || '<none>'})." unless FORMAT_JSON
     return
   end
 
   # Check if a version bump is required
   if version == latest
-    puts "      No bump required (current version: #{version})"
+    $report[:up_to_date_count] += 1
+    $stderr.puts "      No bump required (current version: #{version})" unless FORMAT_JSON
   else
-    puts "      Bumped #{name}: #{version} -> #{latest}"
-    dependency['version'] = latest
-    dependency['md5'] = nil
+    $report[:outdated] << { name: name, klass: klass, current: version, latest: latest }
+    if DRY_RUN
+      $stderr.puts "      OUTDATED #{name}: #{version} -> #{latest}" unless FORMAT_JSON
+    else
+      $stderr.puts "      Bumped #{name}: #{version} -> #{latest}" unless FORMAT_JSON
+      dependency['version'] = latest
+      dependency['md5'] = nil
+    end
   end
 end
 
 # Main script
-puts 'Bumping module versions...'
+$stderr.puts "#{DRY_RUN ? 'Checking' : 'Bumping'} module versions..."
 
-# Use the update_modules method to iterate and bump version for each module
-update_modules(&method(:bump_dependency_version))
+update_modules(dry_run: DRY_RUN, &method(:bump_dependency_version))
 
-puts 'Done!'
+if FORMAT_JSON
+  output = {
+    checked_at: Time.now.utc.iso8601,
+    outdated: $report[:outdated],
+    up_to_date_count: $report[:up_to_date_count],
+    error_count: $report[:error_count],
+    errors: $report[:errors]
+  }
+  puts JSON.pretty_generate(output)
+else
+  puts ''
+  if $report[:outdated].any?
+    puts "=== #{$report[:outdated].length} extension(s) outdated ==="
+    $report[:outdated].each do |item|
+      puts "  #{item[:name]} (#{item[:klass]}): #{item[:current]} -> #{item[:latest]}"
+    end
+  else
+    puts '=== All extensions are up to date ==='
+  end
+  if $report[:errors].any?
+    puts "\n=== #{$report[:error_count]} error(s) ==="
+    $report[:errors].each do |err|
+      puts "  #{err[:name]}: #{err[:message]}"
+    end
+  end
+  puts "\nDone!"
+end
