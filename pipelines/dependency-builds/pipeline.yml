@@ -314,6 +314,16 @@ jobs:
   - in_parallel:
     - get: buildpacks-ci
     - get: binary-builder
+    #@ if dep_name == "php":
+    #! php-buildpack is fetched at the default branch (unpinned). This matches
+    #! the pattern used for binary-builder and buildpacks-ci inputs. A bad commit
+    #! to config/extensions/ could break PHP builds. If this becomes a problem,
+    #! consider adding a validation job with a passed: constraint or pinning to
+    #! a tag. The build.sh fallback (no --extensions-dir when the directory is
+    #! absent) provides a safety net if php-buildpack is temporarily broken.
+    - get: php-buildpack
+      resource: php-buildpack
+    #@ end
     - get: source
       resource: #@ "source-{}-{}".format(dep_name.lower(), line.lower())
       trigger: true

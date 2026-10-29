@@ -9,6 +9,8 @@ inputs:
   - name: source
   - name: builds
     optional: true
+  - name: php-buildpack
+    optional: true
   - name: source-forecast-latest
     optional: true
   - name: source-rserve-latest
