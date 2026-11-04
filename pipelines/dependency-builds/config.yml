@@ -263,6 +263,8 @@ dependencies:
     versions_to_keep: 2
   node:
     build_timeout: 5h
+    skip_lines:
+      cflinuxfs4: [ 'node-lts' ]
     buildpacks:
       nodejs:
         lines:
@@ -777,4 +779,3 @@ skip_deprecation_check:
   - container-security-provider  #! doesn't publish EOL schedule
   - cf-metrics-exporter  #! doesn't publish EOL schedule
   - metric-writer  #! doesn't publish EOL schedule
-
