@@ -385,6 +385,7 @@ dependencies:
           - line: 4.3.X
           - line: 4.4.X
           - line: 4.5.X
+          - line: 4.6.X
         removal_strategy: keep_latest_released
     monitored_deps:
       - rserve
