@@ -194,6 +194,8 @@ dependencies:
       ruby:
         lines:
           - line: 9.4.X
+          - line: 10.0.X
+          - line: 10.1.X
     source_type: jruby
     versions_to_keep: 2
   libunwind:
@@ -702,6 +704,10 @@ dependencies:
           - line: 17.X.X
           - line: 21.X.X
           - line: 25.X.X
+      ruby:
+        lines:
+          - line: 17.X.X
+          - line: 21.X.X
     source_type: liberica
     source_params:
       - 'product: jre'
