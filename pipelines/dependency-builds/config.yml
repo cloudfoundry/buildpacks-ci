@@ -270,7 +270,7 @@ dependencies:
             deprecation_date: 2027-04-30
             link: https://github.com/nodejs/Release
           - line: 24.X.X
-            deprecation_date: 2027-11-30
+            deprecation_date: 2028-04-30
             link: https://github.com/nodejs/Release
           - line: node-lts
             deprecation_date: ""
