@@ -65,7 +65,7 @@ RUN mise use -g crystal@latest
 RUN mise use -g python@3.10
 
 # Import the CloudFoundry APT repo GPG key
-RUN wget -q -O - https://raw.githubusercontent.com/cloudfoundry/bosh-apt-resources/master/public.key | apt-key add -
+RUN wget -q -O - https://raw.githubusercontent.com/cloudfoundry/bosh-apt-resources/HEAD/public.key | apt-key add -
 RUN echo "deb http://apt.ci.cloudfoundry.org stable main" | tee /etc/apt/sources.list.d/bosh-cloudfoundry.list
 RUN apt-get -qqy update && apt-get -qqy install \
     bosh-cli \
