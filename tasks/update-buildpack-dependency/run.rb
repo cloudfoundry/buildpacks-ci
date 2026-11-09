@@ -35,6 +35,13 @@ def is_null(value)
   value.nil? || value.empty? || value.downcase == 'null'
 end
 
+# True for manifest entries that only cover skipped stacks. They are frozen: this run
+# builds nothing for them, so their metadata must not be refreshed.
+def frozen_entry?(dependency, skip_stacks)
+  stacks = dependency.fetch('cf_stacks')
+  stacks.any? && stacks.all? { |stack| skip_stacks.include?(stack) }
+end
+
 config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/dependency-builds/config.yml'), permitted_classes: [Date, Time])
 
 BUILD_STACKS = config['build_stacks']
@@ -229,7 +236,7 @@ if manifest_name == 'php' && buildpack_name == 'php'
   manifest['dependencies'].each do |dependency|
     next unless dependency.fetch('name') == 'php' && dependency.fetch('version') == resource_version
     # Entries kept for skipped stacks have no build in this run; their module list stays as is.
-    next if (dependency.fetch('cf_stacks') - skip_stacks).empty?
+    next if frozen_entry?(dependency, skip_stacks)
 
     sub_deps = builds[total_stacks.last]['sub_dependencies'] || []
     modules = []
@@ -292,6 +299,8 @@ if buildpack_name == 'r'
 
     manifest['dependencies'].map do |dep|
       next unless dep['version'] == version
+      # Entries kept for skipped stacks have no build in this run; their sub-dependencies stay as is.
+      next if frozen_entry?(dep, skip_stacks)
 
       dep['dependencies'] = []
       sub_deps = dep['dependencies']

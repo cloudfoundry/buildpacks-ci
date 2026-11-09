@@ -11,7 +11,7 @@ RSpec.describe 'dependency update stack restrictions' do
   let(:root) { File.expand_path('../../..', __dir__) }
   let(:config) { YAML.load_file(File.join(root, 'pipelines/dependency-builds/config.yml'), permitted_classes: [Date, Time]) }
 
-  def update_manifest(buildpack:, source:, version:, line:, entries:, build_stacks:, skip_stacks: [])
+  def update_manifest(buildpack:, source:, version:, line:, entries:, build_stacks:, skip_stacks: [], build_extra: {})
     Dir.mktmpdir do |dir|
       %w[buildpack buildpack-latest-released source artifacts].each { |name| FileUtils.mkdir_p(File.join(dir, name)) }
       build_dir = File.join(dir, 'builds/binary-builds-new', source)
@@ -27,7 +27,7 @@ RSpec.describe 'dependency update stack restrictions' do
           url: "https://example.com/#{source}_#{version}_#{stack}.tgz",
           sha256: 'new-sha',
           source: { url: 'https://example.com/source.tgz', sha256: 'source-sha' }
-        }
+        }.merge(build_extra)
         File.write(File.join(build_dir, "#{version}-#{stack}.json"), build.to_json)
       end
 
@@ -153,6 +153,27 @@ RSpec.describe 'dependency update stack restrictions' do
 
     expect(result['dependencies']).to contain_exactly(
       a_hash_including('version' => '2.7.8', 'cf_stacks' => ['cflinuxfs5'])
+    )
+  end
+
+  it 'keeps sub-dependencies of a skipped-stack R entry when rebuilding the version' do
+    r_dep = lambda do |stack, sub_version|
+      { 'name' => 'r', 'version' => '4.3.1', 'uri' => "https://example.com/r_4.3.1_#{stack}.tgz",
+        'sha256' => 'old-sha', 'cf_stacks' => [stack],
+        'dependencies' => [{ 'name' => 'forecast', 'version' => sub_version }] }
+    end
+    skipped_entry = r_dep.call('cflinuxfs4', '8.20')
+    new_sub_deps = { sub_dependencies: { 'forecast' => { version: '8.21', source: { url: 'https://example.com/forecast.tgz', sha256: 'sub-sha' } } } }
+
+    result = update_manifest(buildpack: 'r', source: 'r', version: '4.3.1', line: '4.3.X',
+                             entries: [skipped_entry, r_dep.call('cflinuxfs5', '8.20')],
+                             build_stacks: %w[cflinuxfs4 cflinuxfs5], skip_stacks: ['cflinuxfs4'],
+                             build_extra: new_sub_deps)
+
+    expect(result['dependencies']).to contain_exactly(
+      skipped_entry,
+      a_hash_including('cf_stacks' => ['cflinuxfs5'], 'sha256' => 'new-sha',
+                       'dependencies' => [a_hash_including('name' => 'forecast', 'version' => '8.21')])
     )
   end
 end
