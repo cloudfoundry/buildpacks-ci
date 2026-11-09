@@ -84,6 +84,10 @@ class Dependencies
   # scenario (e.g. a second stack's build arrives after the first was already added).
   def version_exists_for_different_stack?
     @dependencies.any? do |d|
+      # Entries frozen on skipped stacks are not part of this update, so they must not
+      # trigger the replace-without-version-check path.
+      next false if !@skip_stacks.empty? && d['cf_stacks'] && (d['cf_stacks'] - @skip_stacks).empty?
+
       d['name'] == @dep['name'] &&
         d['version'] == @dep['version'] &&
         (d['cf_stacks'] & @dep['cf_stacks']).empty?

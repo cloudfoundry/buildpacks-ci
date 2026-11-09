@@ -60,6 +60,14 @@ RSpec.describe Dependencies do
         )
       end
 
+      it 'ignores an older incoming version that exists only on the frozen stack' do
+        frozen = shared_old.merge('cf_stacks' => ['cflinuxfs4'])
+        advanced = shared_new
+        existing = [frozen, advanced]
+
+        expect(restricted_switch(shared_old.merge('cf_stacks' => ['cflinuxfs5']), existing, strategy: 'remove_all')).to eq(existing)
+      end
+
       it 'rebuilds the same version without overlapping entries' do
         rebuilt = shared_new.merge('version' => '21.0.1', 'sha256' => 'rebuilt-sha')
         result = restricted_switch(rebuilt, [shared_old], strategy: 'remove_all')
