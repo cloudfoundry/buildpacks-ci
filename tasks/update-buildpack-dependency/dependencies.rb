@@ -112,7 +112,11 @@ class Dependencies
     if !@skip_stacks.empty?
       raise "Cannot skip stacks for #{dep_name}: existing dependency has no cf_stacks" unless stacks
 
-      return false if (stacks - @skip_stacks).empty?
+      # Skipped stacks never receive the incoming dep, so compare only the remaining stacks.
+      # Otherwise a shared entry (e.g. cflinuxfs4+cflinuxfs5) is not recognised against an
+      # incoming cflinuxfs5-only dep whose URI is not "any-stack".
+      stacks -= @skip_stacks
+      return false if stacks.empty?
     end
     # For any-stack deps, match solely on name+version — the stack set is irrelevant.
     # This prevents duplicate entries when the supported stacks change between builds.

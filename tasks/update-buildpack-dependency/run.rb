@@ -228,6 +228,8 @@ manifest['default_versions'] = PHPManifest.update_defaults(manifest, manifest_na
 if manifest_name == 'php' && buildpack_name == 'php'
   manifest['dependencies'].each do |dependency|
     next unless dependency.fetch('name') == 'php' && dependency.fetch('version') == resource_version
+    # Entries kept for skipped stacks have no build in this run; their module list stays as is.
+    next if (dependency.fetch('cf_stacks') - skip_stacks).empty?
 
     sub_deps = builds[total_stacks.last]['sub_dependencies'] || []
     modules = []

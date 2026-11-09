@@ -104,6 +104,40 @@ RSpec.describe 'dependency update stack restrictions' do
     end.to raise_error(/Unknown stacks in SKIP_STACKS: cflinuxfs55/)
   end
 
+  context 'when rebuilding a PHP version that is also present for a skipped stack' do
+    around do |example|
+      Dir.mktmpdir do |bin|
+        %w[wget tar].each do |tool|
+          path = File.join(bin, tool)
+          File.write(path, "#!/bin/sh\nexit 0\n")
+          File.chmod(0o755, path)
+        end
+        original_path = ENV.fetch('PATH')
+        ENV['PATH'] = "#{bin}:#{original_path}"
+        example.run
+      ensure
+        ENV['PATH'] = original_path
+      end
+    end
+
+    def php(stack, modules)
+      { 'name' => 'php', 'version' => '8.3.1', 'uri' => "https://example.com/php_8.3.1_#{stack}.tgz",
+        'sha256' => 'old-sha', 'cf_stacks' => [stack], 'dependencies' => modules }
+    end
+
+    it 'refreshes modules only for built stacks and leaves the skipped entry untouched' do
+      skipped_entry = php('cflinuxfs4', [{ 'name' => 'existing-module' }])
+      result = update_manifest(buildpack: 'php', source: 'php', version: '8.3.1', line: '8.3.X',
+                               entries: [skipped_entry, php('cflinuxfs5', [])],
+                               build_stacks: %w[cflinuxfs4 cflinuxfs5], skip_stacks: ['cflinuxfs4'])
+
+      expect(result['dependencies']).to contain_exactly(
+        skipped_entry,
+        a_hash_including('cf_stacks' => ['cflinuxfs5'], 'sha256' => 'new-sha', 'dependencies' => [])
+      )
+    end
+  end
+
   it 'does not add an empty entry when every stack of a build is skipped' do
     original = [openjdk('21.0.1', ['cflinuxfs4'])]
     result = update_manifest(buildpack: 'ruby', source: 'openjdk', version: '21.0.2',
