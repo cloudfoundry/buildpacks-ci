@@ -52,6 +52,10 @@ manifest_name = source_name == 'nginx-static' ? 'nginx' : source_name
 buildpack_name = manifest['language'].downcase
 
 removal_strategy = ENV.fetch('REMOVAL_STRATEGY', nil)
+skip_stacks = ENV.fetch('SKIP_STACKS', '').to_s.split
+unknown_skip_stacks = skip_stacks - BUILD_STACKS - WINDOWS_STACKS
+raise "Unknown stacks in SKIP_STACKS: #{unknown_skip_stacks.join(', ')}" unless unknown_skip_stacks.empty?
+
 raw_version_line = ENV.fetch('VERSION_LINE', nil)
 version_line = is_null(raw_version_line) ? nil : raw_version_line.downcase
 version_line_type = ENV.fetch('VERSION_LINE_TYPE', nil)
@@ -103,10 +107,13 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   skip_lines_per_stack = config.dig('dependencies', source_name, 'skip_lines') || {}
   skip_lines_per_stack.each do |stack_name, lines|
-    stacks -= [stack_name] if version_line && lines.include?(version_line)
+    stacks -= [stack_name] if version_line && lines.any? { |line| line.downcase == version_line }
   end
 
   stacks = WINDOWS_STACKS if source_name == 'hwc'
+  stacks -= skip_stacks
+  next if stacks.empty?
+
   total_stacks |= stacks
 
   build = JSON.parse(File.read(stack_dependency_build))
@@ -151,7 +158,8 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
     version_line_type,
     removal_strategy,
     manifest['dependencies'],
-    manifest_latest_released['dependencies']
+    manifest_latest_released['dependencies'],
+    skip_stacks: skip_stacks
   ).switch
 
   new_versions = manifest['dependencies']

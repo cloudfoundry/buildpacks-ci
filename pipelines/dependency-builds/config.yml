@@ -707,6 +707,7 @@ dependencies:
       ruby:
         lines:
           - line: 21.X.X
+        skip_stacks: [ 'cflinuxfs4' ]
     source_type: liberica
     source_params:
       - 'product: jre'
