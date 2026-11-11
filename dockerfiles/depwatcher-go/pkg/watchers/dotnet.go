@@ -113,6 +113,22 @@ func (w *DotnetWatcher) Check(versionFilter string) ([]base.Internal, error) {
 }
 
 func (w *DotnetWatcher) In(ref string) (*base.Release, error) {
+	release, err := w.lookup(ref)
+	if err != nil {
+		return nil, err
+	}
+
+	// Microsoft only publishes SHA512; the manifest's source_sha256 needs SHA256.
+	sha256, err := base.GetSHA256(w.client, release.URL)
+	if err != nil {
+		return nil, fmt.Errorf("calculating SHA256: %w", err)
+	}
+	release.SHA256 = sha256
+
+	return release, nil
+}
+
+func (w *DotnetWatcher) lookup(ref string) (*base.Release, error) {
 	channelVersion := w.getChannelVersion(ref)
 	releases, err := w.getReleases(channelVersion)
 	if err != nil {
@@ -133,7 +149,7 @@ func (w *DotnetWatcher) In(ref string) (*base.Release, error) {
 }
 
 func (w *DotnetWatcher) DownloadToDir(ref, outputDir string) error {
-	releaseInfo, err := w.In(ref)
+	releaseInfo, err := w.lookup(ref)
 	if err != nil {
 		return err
 	}
