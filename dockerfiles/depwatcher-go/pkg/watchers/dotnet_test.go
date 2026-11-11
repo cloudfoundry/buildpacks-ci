@@ -1,7 +1,11 @@
 package watchers_test
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"net/http"
+	neturl "net/url"
+	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -11,6 +15,10 @@ import (
 )
 
 var _ = Describe("Dotnet Watchers", func() {
+	const tarballContent = "fake dotnet tarball"
+	tarballSum := sha256.Sum256([]byte(tarballContent))
+	tarballSHA256 := hex.EncodeToString(tarballSum[:])
+
 	var (
 		server *ghttp.Server
 	)
@@ -91,6 +99,12 @@ var _ = Describe("Dotnet Watchers", func() {
 					ghttp.RespondWith(http.StatusOK, releasesJSON),
 				),
 			)
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/sdk.tar.gz"),
+					ghttp.RespondWith(http.StatusOK, tarballContent),
+				),
+			)
 
 			client := &mockHTTPClient{baseURL: server.URL()}
 			watcher := watchers.NewDotnetSDKWatcher(client)
@@ -100,6 +114,7 @@ var _ = Describe("Dotnet Watchers", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(release.Ref).To(Equal("8.0.100"))
 			Expect(release.URL).To(Equal("https://example.com/sdk.tar.gz"))
+			Expect(release.SHA256).To(Equal(tarballSHA256))
 			Expect(release.SHA512).To(Equal("abc123"))
 			Expect(release.RuntimeVersion).To(Equal("8.0.0"))
 		})
@@ -253,6 +268,12 @@ var _ = Describe("Dotnet Watchers", func() {
 					ghttp.RespondWith(http.StatusOK, releasesJSON),
 				),
 			)
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/runtime.tar.gz"),
+					ghttp.RespondWith(http.StatusOK, tarballContent),
+				),
+			)
 
 			client := &mockHTTPClient{baseURL: server.URL()}
 			watcher := watchers.NewDotnetRuntimeWatcher(client)
@@ -262,6 +283,7 @@ var _ = Describe("Dotnet Watchers", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(release.Ref).To(Equal("8.0.0"))
 			Expect(release.URL).To(Equal("https://example.com/runtime.tar.gz"))
+			Expect(release.SHA256).To(Equal(tarballSHA256))
 			Expect(release.SHA512).To(Equal("abc123"))
 			Expect(release.RuntimeVersion).To(Equal("8.0.0"))
 		})
@@ -331,6 +353,12 @@ var _ = Describe("Dotnet Watchers", func() {
 					ghttp.RespondWith(http.StatusOK, releasesJSON),
 				),
 			)
+			server.AppendHandlers(
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("GET", "/aspnet.tar.gz"),
+					ghttp.RespondWith(http.StatusOK, tarballContent),
+				),
+			)
 
 			client := &mockHTTPClient{baseURL: server.URL()}
 			watcher := watchers.NewDotnetAspnetcoreWatcher(client)
@@ -340,6 +368,7 @@ var _ = Describe("Dotnet Watchers", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(release.Ref).To(Equal("8.0.0"))
 			Expect(release.URL).To(Equal("https://example.com/aspnet.tar.gz"))
+			Expect(release.SHA256).To(Equal(tarballSHA256))
 			Expect(release.SHA512).To(Equal("abc123"))
 			Expect(release.RuntimeVersion).To(Equal("8.0.0"))
 		})
@@ -351,8 +380,15 @@ type mockHTTPClient struct {
 }
 
 func (m *mockHTTPClient) Get(url string) (*http.Response, error) {
-	modifiedURL := m.baseURL + "/" + url[len("https://raw.githubusercontent.com/dotnet/core/refs/heads/main/"):]
-	return http.Get(modifiedURL)
+	const releaseNotesPrefix = "https://raw.githubusercontent.com/dotnet/core/refs/heads/main/"
+	if strings.HasPrefix(url, releaseNotesPrefix) {
+		return http.Get(m.baseURL + "/" + url[len(releaseNotesPrefix):])
+	}
+	parsed, err := neturl.Parse(url)
+	if err != nil {
+		return nil, err
+	}
+	return http.Get(m.baseURL + parsed.Path)
 }
 
 func (m *mockHTTPClient) GetWithHeaders(url string, headers http.Header) (*http.Response, error) {
