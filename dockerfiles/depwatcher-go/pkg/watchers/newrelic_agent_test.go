@@ -123,14 +123,14 @@ var _ = Describe("NewRelicAgentWatcher", func() {
 
 	Describe("In", func() {
 		Context("when fetching a specific version", func() {
-			It("returns the release with URL and computed SHA256", func() {
-				jarURL := indexURL + "9.2.0/newrelic-agent-9.2.0.jar"
-				client.responses[jarURL] = mockResponse{body: "hello", status: 200}
+			It("returns the release with the distribution zip URL and computed SHA256", func() {
+				zipURL := indexURL + "9.2.0/newrelic-java-9.2.0.zip"
+				client.responses[zipURL] = mockResponse{body: "hello", status: 200}
 
 				release, err := watcher.In("9.2.0")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(release.Ref).To(Equal("9.2.0"))
-				Expect(release.URL).To(Equal(jarURL))
+				Expect(release.URL).To(Equal(zipURL))
 				Expect(release.SHA256).To(Equal("2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"))
 			})
 		})
