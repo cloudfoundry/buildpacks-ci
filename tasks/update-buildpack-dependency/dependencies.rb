@@ -3,11 +3,12 @@ class Dependencies
   # openjdk is built from BellSoft Liberica.
   JRE_DEPENDENCY_NAMES = %w[openjdk zulu sapmachine].freeze
 
-  def initialize(dep, line, removal_strategy, dependencies, dependencies_latest_released)
+  def initialize(dep, line, removal_strategy, dependencies, dependencies_latest_released, skip_stacks: [])
     @dep = dep
     @line = line
     @removal_strategy = removal_strategy
     @dependencies = dependencies
+    @skip_stacks = skip_stacks
     @matching_deps = dependencies.select do |d|
       same_dependency_line?(d['cf_stacks'], d['version'], d['name'])
     end
@@ -42,6 +43,15 @@ class Dependencies
       # if not newer, don't do anything
       return @dependencies
     end
+
+    unless @skip_stacks.empty?
+      @matching_deps.each do |existing|
+        next if out.include?(existing)
+
+        preserved_stacks = existing['cf_stacks'] & @skip_stacks
+        out << existing.merge('cf_stacks' => preserved_stacks) unless preserved_stacks.empty?
+      end
+    end
     out.sort_by { |d| [d['name'], *version_key(d['version']), d['cf_stacks']] }
   end
 
@@ -74,6 +84,10 @@ class Dependencies
   # scenario (e.g. a second stack's build arrives after the first was already added).
   def version_exists_for_different_stack?
     @dependencies.any? do |d|
+      # Entries frozen on skipped stacks are not part of this update, so they must not
+      # trigger the replace-without-version-check path.
+      next false if !@skip_stacks.empty? && d['cf_stacks'] && (d['cf_stacks'] - @skip_stacks).empty?
+
       d['name'] == @dep['name'] &&
         d['version'] == @dep['version'] &&
         (d['cf_stacks'] & @dep['cf_stacks']).empty?
@@ -99,6 +113,15 @@ class Dependencies
 
   def same_dependency_line?(stacks, version, dep_name)
     return false if dep_name != @dep['name']
+    if !@skip_stacks.empty?
+      raise "Cannot skip stacks for #{dep_name}: existing dependency has no cf_stacks" unless stacks
+
+      # Skipped stacks never receive the incoming dep, so compare only the remaining stacks.
+      # Otherwise a shared entry (e.g. cflinuxfs4+cflinuxfs5) is not recognised against an
+      # incoming cflinuxfs5-only dep whose URI is not "any-stack".
+      stacks -= @skip_stacks
+      return false if stacks.empty?
+    end
     # For any-stack deps, match solely on name+version — the stack set is irrelevant.
     # This prevents duplicate entries when the supported stacks change between builds.
     # Stack-specific deps legitimately have one entry per stack for the same version,
@@ -138,7 +161,11 @@ class Dependencies
     dep = @dependencies_latest_released.select do |d|
       same_dependency_line?(d['cf_stacks'], d['version'], d['name'])
     end.max_by { |d| version_key(d['version']) }
-    dep ? [dep] : []
+    return [] unless dep
+    return [dep] if @skip_stacks.empty?
+
+    stacks = dep['cf_stacks'] - @skip_stacks
+    stacks.empty? ? [] : [dep.merge('cf_stacks' => stacks)]
   end
 
   # Sort key: SemVer, then the JEP 322 fields and build that SemVer.parse drops

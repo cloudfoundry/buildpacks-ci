@@ -35,6 +35,13 @@ def is_null(value)
   value.nil? || value.empty? || value.downcase == 'null'
 end
 
+# True for manifest entries that only cover skipped stacks. They are frozen: this run
+# builds nothing for them, so their metadata must not be refreshed.
+def frozen_entry?(dependency, skip_stacks)
+  stacks = dependency.fetch('cf_stacks')
+  stacks.any? && stacks.all? { |stack| skip_stacks.include?(stack) }
+end
+
 config = YAML.load_file(File.join(buildpacks_ci_dir, 'pipelines/dependency-builds/config.yml'), permitted_classes: [Date, Time])
 
 BUILD_STACKS = config['build_stacks']
@@ -52,6 +59,10 @@ manifest_name = source_name == 'nginx-static' ? 'nginx' : source_name
 buildpack_name = manifest['language'].downcase
 
 removal_strategy = ENV.fetch('REMOVAL_STRATEGY', nil)
+skip_stacks = ENV.fetch('SKIP_STACKS', '').to_s.split
+unknown_skip_stacks = skip_stacks - BUILD_STACKS - WINDOWS_STACKS
+raise "Unknown stacks in SKIP_STACKS: #{unknown_skip_stacks.join(', ')}" unless unknown_skip_stacks.empty?
+
 raw_version_line = ENV.fetch('VERSION_LINE', nil)
 version_line = is_null(raw_version_line) ? nil : raw_version_line.downcase
 version_line_type = ENV.fetch('VERSION_LINE_TYPE', nil)
@@ -103,10 +114,13 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
 
   skip_lines_per_stack = config.dig('dependencies', source_name, 'skip_lines') || {}
   skip_lines_per_stack.each do |stack_name, lines|
-    stacks -= [stack_name] if version_line && lines.include?(version_line)
+    stacks -= [stack_name] if version_line && lines.any? { |line| line.downcase == version_line }
   end
 
   stacks = WINDOWS_STACKS if source_name == 'hwc'
+  stacks -= skip_stacks
+  next if stacks.empty?
+
   total_stacks |= stacks
 
   build = JSON.parse(File.read(stack_dependency_build))
@@ -151,7 +165,8 @@ Dir["builds/binary-builds-new/#{source_name}/#{resource_version}-*.json"].each d
     version_line_type,
     removal_strategy,
     manifest['dependencies'],
-    manifest_latest_released['dependencies']
+    manifest_latest_released['dependencies'],
+    skip_stacks: skip_stacks
   ).switch
 
   new_versions = manifest['dependencies']
@@ -220,6 +235,8 @@ manifest['default_versions'] = PHPManifest.update_defaults(manifest, manifest_na
 if manifest_name == 'php' && buildpack_name == 'php'
   manifest['dependencies'].each do |dependency|
     next unless dependency.fetch('name') == 'php' && dependency.fetch('version') == resource_version
+    # Entries kept for skipped stacks have no build in this run; their module list stays as is.
+    next if frozen_entry?(dependency, skip_stacks)
 
     sub_deps = builds[total_stacks.last]['sub_dependencies'] || []
     modules = []
@@ -282,6 +299,8 @@ if buildpack_name == 'r'
 
     manifest['dependencies'].map do |dep|
       next unless dep['version'] == version
+      # Entries kept for skipped stacks have no build in this run; their sub-dependencies stay as is.
+      next if frozen_entry?(dep, skip_stacks)
 
       dep['dependencies'] = []
       sub_deps = dep['dependencies']
