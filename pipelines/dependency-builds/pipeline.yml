@@ -82,7 +82,8 @@
 #@   if dep_name == "pip" or dep_name == "go" or dep_name == "libgdiplus":
 #@     version_pattern = '(\\d+\\.\\d+(?:\\.\\d+)?)'
 #@   elif dep_name == "google-stackdriver-profiler":
-#@     version_pattern = '(\\d{8}_RC\\d+)'
+#@     # The watcher publishes Google's YYYYMMDD_RCNN as 0.YYYYMMDD.N. The date form is kept so that artifacts built before that stay matched.
+#@     version_pattern = '(\\d{8}_RC\\d+|\\d+\\.\\d+\\.\\d+)'
 #@   else:
 #@     version_pattern = '(\\d+\\.\\d+\\.\\d+)'
 #@   end
