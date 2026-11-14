@@ -80,6 +80,39 @@ var _ = Describe("Factory Unit Tests", func() {
 			Entry("other GitHub source", "test/repo", "21.0.12", []string{"21.0.12"}),
 		)
 
+		Describe("stackdriver_profiler cursors", func() {
+			stackdriverList := `{"items": [
+				{"name": "java/cloud-profiler-java-agent_20241028_RC00.tar.gz", "md5Hash": "old"},
+				{"name": "java/cloud-profiler-java-agent_20261026_RC00.tar.gz", "md5Hash": "newest"},
+				{"name": "java/latest/profiler_java_agent.tar.gz", "md5Hash": "newest"}
+			]}`
+			stackdriverListURL := "https://storage.googleapis.com/storage/v1/b/cloud-profiler/o?prefix=java%2F&maxResults=1000&fields=items(name,md5Hash)"
+
+			refsFor := func(currentRef string) []string {
+				mockClient := newMockHTTPClient()
+				mockClient.responses[stackdriverListURL] = stackdriverList
+				versions, err := factory.CheckWithClient(factory.Source{Type: "stackdriver_profiler"}, &base.Internal{Ref: currentRef}, mockClient)
+				Expect(err).NotTo(HaveOccurred())
+				var refs []string
+				for _, version := range versions {
+					refs = append(refs, version.Ref)
+				}
+				return refs
+			}
+
+			It("still finds newer releases for a cursor stored in the old date form", func() {
+				Expect(refsFor("20241028_RC00")).To(Equal([]string{"0.20241028.0", "0.20261026.0"}))
+			})
+
+			It("does not return releases that are older than an old date form cursor", func() {
+				Expect(refsFor("20261026_RC00")).To(Equal([]string{"0.20261026.0"}))
+			})
+
+			It("works for a cursor in the semver form", func() {
+				Expect(refsFor("0.20241028.0")).To(Equal([]string{"0.20241028.0", "0.20261026.0"}))
+			})
+		})
+
 		It("keeps Liberica builds newer than an unsuffixed current version", func() {
 			mockClient := newMockHTTPClient()
 			mockClient.responses["https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=linux&package-type=tar.gz&version-modifier=latest&bundle-type=jre&version-feature=21"] = `[

@@ -83,6 +83,17 @@ func parseStackdriverProfilerVersion(ref string) (stackdriverProfilerVersion, er
 	return stackdriverProfilerVersion{date: m[1], candidate: candidate}, nil
 }
 
+// NormalizeStackdriverProfilerRef returns the semver form (0.YYYYMMDD.N) of a Cloud Profiler version. Cursors and
+// build metadata that were stored in the date form (YYYYMMDD_RCNN) are converted; anything else is returned as is.
+// Without this, a stored 20261026_RC00 would be read as semver 20261026.0.0 and hide every later release.
+func NormalizeStackdriverProfilerRef(ref string) string {
+	version, err := parseStackdriverProfilerVersion(ref)
+	if err != nil {
+		return ref
+	}
+	return version.semver()
+}
+
 func NewStackdriverProfilerWatcher(client base.HTTPClient) *StackdriverProfilerWatcher {
 	return &StackdriverProfilerWatcher{client: client}
 }
@@ -174,8 +185,9 @@ func (w *StackdriverProfilerWatcher) In(ref string) (base.Release, error) {
 		return base.Release{}, fmt.Errorf("failed to compute SHA256: %w", err)
 	}
 
+	// The requested ref is kept: the metadata of builds made before the semver form existed is named after it.
 	return base.Release{
-		Ref:    version.semver(),
+		Ref:    ref,
 		URL:    url,
 		SHA256: fmt.Sprintf("%x", hash.Sum(nil)),
 	}, nil

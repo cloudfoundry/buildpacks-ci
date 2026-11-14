@@ -365,7 +365,11 @@ func CheckWithClient(source Source, currentVersion *base.Internal, client base.H
 	}
 
 	if currentVersion != nil {
-		current, err := semver.Parse(currentVersion.Ref)
+		currentRef := currentVersion.Ref
+		if source.Type == "stackdriver_profiler" {
+			currentRef = watchers.NormalizeStackdriverProfilerRef(currentRef)
+		}
+		current, err := semver.Parse(currentRef)
 		if err == nil {
 			jre := isJRESource(source)
 			var filtered []base.Internal

@@ -242,7 +242,8 @@ var _ = Describe("StackdriverProfilerWatcher", func() {
 
 				release, err := watcher.In("20241028_RC00")
 				Expect(err).NotTo(HaveOccurred())
-				Expect(release.Ref).To(Equal("0.20241028.0"))
+				// The metadata of builds that were made before is named after the requested ref, so it must be kept.
+				Expect(release.Ref).To(Equal("20241028_RC00"))
 				Expect(release.URL).To(Equal(tarURL))
 			})
 		})
