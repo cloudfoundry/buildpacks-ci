@@ -45,14 +45,13 @@ func (w *PHPWatcher) Check(versionFilter string) ([]base.Internal, error) {
 
 	major, minor := parts[0], parts[1]
 
-	// Try php.watch first (most reliable and up-to-date)
-	phpwatchVersions, err := w.getReleasesFromPHPWatch(major, minor)
-	if err == nil && len(phpwatchVersions) > 0 {
-		return w.sortAndDedupe(phpwatchVersions), nil
+	// Temporarily prefer php.net while the php.watch feed is behind.
+	versions, err := w.getReleasesFromJSON(major, minor)
+	if err == nil && len(versions) > 0 {
+		return w.sortAndDedupe(versions), nil
 	}
 
-	// Fallback to php.net JSON API
-	versions, err := w.getReleasesFromJSON(major, minor)
+	versions, err = w.getReleasesFromPHPWatch(major, minor)
 	if err == nil && len(versions) > 0 {
 		return w.sortAndDedupe(versions), nil
 	}
