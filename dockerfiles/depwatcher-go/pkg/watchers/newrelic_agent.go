@@ -53,7 +53,7 @@ func (w *NewRelicAgentWatcher) Check() ([]base.Internal, error) {
 }
 
 func (w *NewRelicAgentWatcher) In(ref string) (base.Release, error) {
-	url := fmt.Sprintf("%s%s/newrelic-agent-%s.jar", newrelicIndexURL, ref, ref)
+	url := fmt.Sprintf("%s%s/newrelic-java-%s.zip", newrelicIndexURL, ref, ref)
 
 	resp, err := w.client.Get(url)
 	if err != nil {
