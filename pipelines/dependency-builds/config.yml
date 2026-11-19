@@ -246,6 +246,7 @@ dependencies:
         lines:
           - line: 1.27.X
           - line: 1.29.X
+          - line: 1.31.X
     versions_to_keep: 2
   nginx-static:
     buildpacks:
