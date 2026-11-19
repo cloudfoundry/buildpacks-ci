@@ -45,16 +45,20 @@ func (w *PHPWatcher) Check(versionFilter string) ([]base.Internal, error) {
 
 	major, minor := parts[0], parts[1]
 
-	// Try php.watch first (most reliable and up-to-date)
-	phpwatchVersions, err := w.getReleasesFromPHPWatch(major, minor)
-	if err == nil && len(phpwatchVersions) > 0 {
-		return w.sortAndDedupe(phpwatchVersions), nil
-	}
-
-	// Fallback to php.net JSON API
+	// Try php.net JSON API first: it is the authoritative upstream and is
+	// updated at release time. php.watch (tried next) is a third-party
+	// aggregator that lags php.net by hours on release day — and because it
+	// always returns the historical versions, a non-empty-but-stale response
+	// would short-circuit this check and hide a just-published release.
 	versions, err := w.getReleasesFromJSON(major, minor)
 	if err == nil && len(versions) > 0 {
 		return w.sortAndDedupe(versions), nil
+	}
+
+	// Fallback to php.watch.
+	phpwatchVersions, err := w.getReleasesFromPHPWatch(major, minor)
+	if err == nil && len(phpwatchVersions) > 0 {
+		return w.sortAndDedupe(phpwatchVersions), nil
 	}
 
 	// Final fallback to php.net HTML scraping
