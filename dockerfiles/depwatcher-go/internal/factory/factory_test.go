@@ -86,7 +86,7 @@ var _ = Describe("Factory Unit Tests", func() {
 				{"name": "java/cloud-profiler-java-agent_20261026_RC00.tar.gz", "md5Hash": "newest"},
 				{"name": "java/latest/profiler_java_agent.tar.gz", "md5Hash": "newest"}
 			]}`
-			stackdriverListURL := "https://storage.googleapis.com/storage/v1/b/cloud-profiler/o?prefix=java%2F&maxResults=1000&fields=items(name,md5Hash)"
+			stackdriverListURL := "https://storage.googleapis.com/storage/v1/b/cloud-profiler/o?prefix=java%2F&maxResults=1000&fields=items(name,md5Hash),nextPageToken"
 
 			refsFor := func(currentRef string) []string {
 				mockClient := newMockHTTPClient()

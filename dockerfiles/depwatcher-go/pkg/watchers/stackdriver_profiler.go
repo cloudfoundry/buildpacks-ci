@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	neturl "net/url"
 	"regexp"
 	"sort"
 	"strconv"
@@ -29,7 +30,8 @@ var stackdriverProfilerReleaseFilePattern = regexp.MustCompile(`java/cloud-profi
 var stackdriverProfilerAlpineFilePattern = regexp.MustCompile(`java/cloud-profiler-java-agent_\d{8}_RC\d+_alpine\.tar\.gz$`)
 
 type gcsObjectsResponse struct {
-	Items []gcsObject `json:"items"`
+	Items         []gcsObject `json:"items"`
+	NextPageToken string      `json:"nextPageToken"`
 }
 
 type gcsObject struct {
@@ -98,18 +100,43 @@ func NewStackdriverProfilerWatcher(client base.HTTPClient) *StackdriverProfilerW
 	return &StackdriverProfilerWatcher{client: client}
 }
 
-func (w *StackdriverProfilerWatcher) Check() ([]base.Internal, error) {
-	url := stackdriverProfilerBucket + "?prefix=java%2F&maxResults=1000&fields=items(name,md5Hash)"
+// stackdriverProfilerMaxListPages bounds the listing, so that a response that never ends fails instead of looping.
+const stackdriverProfilerMaxListPages = 20
 
-	resp, err := w.client.Get(url)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch Cloud Profiler agent list: %w", err)
+// listObjects returns every object under the java/ prefix. The latest copy guard in Check needs the complete listing:
+// the objects come back in name order, so with more than one page the latest copy can be on a later page.
+func (w *StackdriverProfilerWatcher) listObjects() ([]gcsObject, error) {
+	listURL := stackdriverProfilerBucket + "?prefix=java%2F&maxResults=1000&fields=items(name,md5Hash),nextPageToken"
+	pageURL := listURL
+
+	var objects []gcsObject
+	for page := 0; page < stackdriverProfilerMaxListPages; page++ {
+		resp, err := w.client.Get(pageURL)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch Cloud Profiler agent list: %w", err)
+		}
+
+		var result gcsObjectsResponse
+		err = json.NewDecoder(resp.Body).Decode(&result)
+		resp.Body.Close()
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse Cloud Profiler agent list: %w", err)
+		}
+
+		objects = append(objects, result.Items...)
+		if result.NextPageToken == "" {
+			return objects, nil
+		}
+		pageURL = listURL + "&pageToken=" + neturl.QueryEscape(result.NextPageToken)
 	}
-	defer resp.Body.Close()
 
-	var result gcsObjectsResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("failed to parse Cloud Profiler agent list: %w", err)
+	return nil, fmt.Errorf("failed to fetch Cloud Profiler agent list: more than %d pages", stackdriverProfilerMaxListPages)
+}
+
+func (w *StackdriverProfilerWatcher) Check() ([]base.Internal, error) {
+	objects, err := w.listObjects()
+	if err != nil {
+		return nil, err
 	}
 
 	var versions []stackdriverProfilerVersion
@@ -117,7 +144,7 @@ func (w *StackdriverProfilerWatcher) Check() ([]base.Internal, error) {
 	fileByVersion := map[stackdriverProfilerVersion]string{}
 	latestMD5, latestFound := "", false
 
-	for _, item := range result.Items {
+	for _, item := range objects {
 		if item.Name == stackdriverProfilerLatestObject {
 			latestMD5, latestFound = item.MD5Hash, true
 			continue

@@ -35,7 +35,7 @@ func (m *mockStackdriverProfilerClient) GetRaw(url string, headers http.Header) 
 	return m.Get(url)
 }
 
-const gcsListURL = "https://storage.googleapis.com/storage/v1/b/cloud-profiler/o?prefix=java%2F&maxResults=1000&fields=items(name,md5Hash)"
+const gcsListURL = "https://storage.googleapis.com/storage/v1/b/cloud-profiler/o?prefix=java%2F&maxResults=1000&fields=items(name,md5Hash),nextPageToken"
 const profilerDownloadBase = "https://storage.googleapis.com/cloud-profiler/java/"
 
 const latestObject = "java/latest/profiler_java_agent.tar.gz"
@@ -48,6 +48,12 @@ func gcsList(entries ...string) string {
 		items[i] = fmt.Sprintf(`{"name": %q, "md5Hash": %q}`, name, md5)
 	}
 	return fmt.Sprintf(`{"items": [%s]}`, strings.Join(items, ","))
+}
+
+// gcsListPage builds a bucket listing page that points to the next page.
+func gcsListPage(nextPageToken string, entries ...string) string {
+	page := gcsList(entries...)
+	return strings.TrimSuffix(page, "}") + fmt.Sprintf(`, "nextPageToken": %q}`, nextPageToken)
 }
 
 var _ = Describe("StackdriverProfilerWatcher", func() {
@@ -192,6 +198,48 @@ var _ = Describe("StackdriverProfilerWatcher", func() {
 				Expect(versions).To(HaveLen(10))
 				Expect(versions[0].Ref).To(Equal("0.20240103.0"))
 				Expect(versions[9].Ref).To(Equal("0.20240112.0"))
+			})
+		})
+
+		Context("when the listing has more than one page", func() {
+			const secondPageURL = gcsListURL + "&pageToken=token2"
+
+			It("reads every page before it applies the latest copy guard", func() {
+				client.responses[gcsListURL] = mockResponse{status: 200, body: gcsListPage("token2",
+					"java/cloud-profiler-java-agent_20240215_RC00.tar.gz|old",
+				)}
+				client.responses[secondPageURL] = mockResponse{status: 200, body: gcsList(
+					"java/cloud-profiler-java-agent_20241028_RC00.tar.gz|newest",
+					latestObject+"|newest",
+				)}
+
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+				Expect(versions).To(HaveLen(2))
+				Expect(versions[1].Ref).To(Equal("0.20241028.0"))
+			})
+
+			It("fails when a later page cannot be fetched", func() {
+				client.responses[gcsListURL] = mockResponse{status: 200, body: gcsListPage("token2",
+					"java/cloud-profiler-java-agent_20241028_RC00.tar.gz|newest",
+				)}
+
+				_, err := watcher.Check()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("failed to fetch Cloud Profiler agent list"))
+			})
+
+			It("fails when the listing never ends", func() {
+				client.responses[gcsListURL] = mockResponse{status: 200, body: gcsListPage("token2",
+					"java/cloud-profiler-java-agent_20241028_RC00.tar.gz|newest",
+				)}
+				client.responses[secondPageURL] = mockResponse{status: 200, body: gcsListPage("token2",
+					"java/cloud-profiler-java-agent_20241028_RC00.tar.gz|newest",
+				)}
+
+				_, err := watcher.Check()
+				Expect(err).To(HaveOccurred())
+				Expect(err.Error()).To(ContainSubstring("pages"))
 			})
 		})
 
