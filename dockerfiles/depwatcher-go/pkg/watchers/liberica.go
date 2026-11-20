@@ -36,6 +36,7 @@ type libericaRelease struct {
 	// numeric-field reconstruction below.
 	Version     string `json:"version"`
 	DownloadURL string `json:"downloadUrl"`
+	LTS         bool   `json:"LTS"`
 }
 
 func NewLibericaWatcher(client base.HTTPClient, version, typ, token string) *LibericaWatcher {
@@ -80,15 +81,20 @@ func (w *LibericaWatcher) In(ref string) (base.Release, error) {
 }
 
 func (w *LibericaWatcher) fetchReleases() ([]libericaRelease, error) {
-	if w.version == "" {
-		return nil, fmt.Errorf("version must be specified")
-	}
 	if w.typ == "" {
 		return nil, fmt.Errorf("type must be specified")
 	}
 
-	apiURL := fmt.Sprintf("https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=linux&package-type=tar.gz&version-modifier=latest&bundle-type=%s&version-feature=%s",
-		w.typ, url.QueryEscape(w.version))
+	// Without a version the "latest" resource needs the newest release of every
+	// LTS major version, to notice a new LTS line. The API's version-modifier=latest
+	// does not give that: without version-feature it returns only the newest majors
+	// (checked against the live API: 26 and 27, not 8, 11, 17, 21 or 25), so ask for
+	// all releases and filter.
+	apiURL := fmt.Sprintf("https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=linux&package-type=tar.gz&bundle-type=%s", w.typ)
+	if w.version != "" {
+		apiURL = fmt.Sprintf("https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=linux&package-type=tar.gz&version-modifier=latest&bundle-type=%s&version-feature=%s",
+			w.typ, url.QueryEscape(w.version))
+	}
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -120,7 +126,36 @@ func (w *LibericaWatcher) fetchReleases() ([]libericaRelease, error) {
 		return nil, fmt.Errorf("decoding releases: %w", err)
 	}
 
+	if w.version == "" {
+		return newestReleasePerLTSMajorVersion(releases), nil
+	}
 	return releases, nil
+}
+
+func newestReleasePerLTSMajorVersion(releases []libericaRelease) []libericaRelease {
+	byMajorVersion := map[int][]libericaRelease{}
+	for _, release := range releases {
+		if !release.LTS {
+			continue
+		}
+		byMajorVersion[release.FeatureVersion] = append(byMajorVersion[release.FeatureVersion], release)
+	}
+
+	var newest []libericaRelease
+	for _, sameMajor := range byMajorVersion {
+		versions := make([]base.Internal, 0, len(sameMajor))
+		for _, release := range sameMajor {
+			versions = append(versions, base.Internal{Ref: release.version()})
+		}
+		newestRef := base.SortJREVersions(versions)[len(versions)-1].Ref
+		for _, release := range sameMajor {
+			if release.version() == newestRef {
+				newest = append(newest, release)
+				break
+			}
+		}
+	}
+	return newest
 }
 
 // version returns the JEP 322 version, including the patch and extra

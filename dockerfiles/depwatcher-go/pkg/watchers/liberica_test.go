@@ -226,12 +226,37 @@ var _ = Describe("LibericaWatcher", func() {
 		})
 
 		Context("when version is missing", func() {
-			It("returns an error", func() {
-				watcher = watchers.NewLibericaWatcher(client, "", "jdk", "")
+			const allMajorsURL = "https://api.bell-sw.com/v1/liberica/releases?arch=x86&bitness=64&os=linux&package-type=tar.gz&bundle-type=jre"
 
-				_, err := watcher.Check()
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(ContainSubstring("version must be specified"))
+			BeforeEach(func() {
+				client.Responses = map[string]string{
+					allMajorsURL: `[
+						{"featureVersion": 17, "interimVersion": 0, "LTS": true, "updateVersion": 16, "patchVersion": 0, "buildVersion": 8, "version": "17.0.16+8", "downloadUrl": "https://example.com/17.0.16"},
+						{"featureVersion": 27, "interimVersion": 0, "updateVersion": 1, "patchVersion": 1, "buildVersion": 5, "version": "27.0.1.1+5", "downloadUrl": "https://example.com/27.0.1.1"},
+						{"featureVersion": 17, "interimVersion": 0, "LTS": true, "updateVersion": 17, "patchVersion": 0, "buildVersion": 10, "version": "17.0.17+10", "downloadUrl": "https://example.com/17.0.17"},
+						{"featureVersion": 8, "LTS": true, "interimVersion": 0, "updateVersion": 302, "buildVersion": 8, "downloadUrl": "https://example.com/8u302"},
+						{"featureVersion": 26, "interimVersion": 0, "updateVersion": 2, "patchVersion": 1, "buildVersion": 1, "version": "26.0.2.1+1", "downloadUrl": "https://example.com/26.0.2.1"},
+						{"featureVersion": 8, "LTS": true, "interimVersion": 0, "updateVersion": 292, "buildVersion": 10, "downloadUrl": "https://example.com/8u292"}
+					]`,
+				}
+				watcher = watchers.NewLibericaWatcher(client, "", "jre", "")
+			})
+
+			It("returns the newest release of every LTS major version, newest major last", func() {
+				versions, err := watcher.Check()
+				Expect(err).NotTo(HaveOccurred())
+
+				refs := []string{}
+				for _, version := range versions {
+					refs = append(refs, version.Ref)
+				}
+				Expect(refs).To(Equal([]string{"8.0.302+8", "17.0.17+10"}))
+			})
+
+			It("finds the download of the newest release of a major version", func() {
+				release, err := watcher.In("17.0.17+10")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.URL).To(Equal("https://example.com/17.0.17"))
 			})
 		})
 
