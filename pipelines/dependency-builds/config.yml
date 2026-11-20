@@ -655,7 +655,10 @@ dependencies:
       java:
         lines:
           - line: latest
-    source_type: stackdriver_profiler
+    source_type: github_releases
+    source_params:
+      - 'repo: GoogleCloudPlatform/cloud-profiler-java'
+      - 'glob: profiler_java_agent.tar.gz'
     any_stack: true
     versions_to_keep: 2
   groovy:

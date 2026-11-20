@@ -24,7 +24,7 @@ Of the 47 dependency entries in the java-buildpack `manifest.yml`, 35 are on
 | `tomcat-logging-support` | 3.4.0 | `java-buildpack.cloudfoundry.org` | Add watcher (see todo) |
 | `jvmkill` | 1.17.0 | `java-buildpack.cloudfoundry.org` | Add watcher (see todo) |
 | `luna-security-provider` | 7.4.0 | `java-buildpack.cloudfoundry.org` | Keep, manual only |
-| `google-stackdriver-profiler` | 0.4.0 | `storage.googleapis.com` | None, has `config.yml` entry |
+| `google-stackdriver-profiler` | 0.4.0 | `storage.googleapis.com` | None, has `config.yml` entry (GitHub releases) |
 | `metric-writer` | 3.5.0 | `java-buildpack.cloudfoundry.org` | Decide: remove |
 | `auto-reconfiguration` | 2.12.0 | `java-buildpack.cloudfoundry.org` | Remove |
 | `java-memory-assistant` | 0.5.0 | GitHub releases (SAP) | Decide, see below |
@@ -54,9 +54,9 @@ releases still point at them.
 ## No action needed
 
 - **`google-stackdriver-profiler` 0.4.0**: already has a `config.yml` entry
-  (`google-stackdriver-profiler`, source type `stackdriver_profiler`). There has been no new upstream version since, so the entry still
-  points at the vendor URL. The next upstream release moves it to our bucket. Upstream is
-  superseded by Google Cloud Profiler; consider removal separately.
+  (`google-stackdriver-profiler`, source type `github_releases`, repo `GoogleCloudPlatform/cloud-profiler-java`).
+  Upstream has released `v0.5.0` since, so the manifest entry still points at the vendor URL until the bot bumps it.
+  The next update moves it to our bucket. Upstream is superseded by Google Cloud Profiler; consider removal separately.
 
 ## Decide: `java-memory-assistant`
 
