@@ -53,6 +53,9 @@ func (w *LibericaWatcher) Check() ([]base.Internal, error) {
 	if err != nil {
 		return nil, err
 	}
+	if w.version == "" {
+		releases = newestReleasePerLTSMajorVersion(releases)
+	}
 
 	var versions []base.Internal
 	for _, r := range releases {
@@ -126,9 +129,6 @@ func (w *LibericaWatcher) fetchReleases() ([]libericaRelease, error) {
 		return nil, fmt.Errorf("decoding releases: %w", err)
 	}
 
-	if w.version == "" {
-		return newestReleasePerLTSMajorVersion(releases), nil
-	}
 	return releases, nil
 }
 

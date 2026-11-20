@@ -253,6 +253,12 @@ var _ = Describe("LibericaWatcher", func() {
 				Expect(refs).To(Equal([]string{"8.0.302+8", "17.0.17+10"}))
 			})
 
+			It("still finds the download of an older release of the same major version", func() {
+				release, err := watcher.In("17.0.16+8")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(release.URL).To(Equal("https://example.com/17.0.16"))
+			})
+
 			It("finds the download of the newest release of a major version", func() {
 				release, err := watcher.In("17.0.17+10")
 				Expect(err).NotTo(HaveOccurred())
