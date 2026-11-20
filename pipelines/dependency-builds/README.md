@@ -110,6 +110,19 @@ different retention policies for the same dependency.
 | `keep_latest_released` | Keep one version from the latest released buildpack as a rollback safety net |
 | `keep_all` | Never remove old versions |
 
+**`skip_stacks`** — optional list of stacks that must not receive updates for this dependency
+in this buildpack. Existing entries for those stacks are preserved. Other buildpacks and the
+shared dependency build are unaffected. Each stack must be listed in `build_stacks` or
+`windows_stacks`.
+
+```yaml
+buildpacks:
+  ruby:
+    lines:
+      - line: 21.X.X
+    skip_stacks: [ 'cflinuxfs4' ]
+```
+
 ---
 
 #### `versions_to_keep`
@@ -199,8 +212,10 @@ skip_lines:
   cflinuxfs5: [ '2.7.X' ]
 ```
 
-Version lines listed here are excluded from the build job for that stack and are not added
-to the buildpack manifest for that stack. Lines not listed are unaffected.
+Version lines listed here are excluded from stack-specific builds and are not added
+to the buildpack manifest for that stack. Any-stack builds are still shared. This applies
+to every buildpack using the dependency; use `buildpacks.<name>.skip_stacks` for a
+buildpack-specific restriction. Lines not listed are unaffected.
 
 A version line listed under `skip_lines` that is no longer present in the active `lines:`
 list has no runtime effect but should be kept as documentation explaining why that line was

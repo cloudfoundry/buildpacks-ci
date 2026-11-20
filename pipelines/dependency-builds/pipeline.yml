@@ -455,6 +455,7 @@ jobs:
       VERSION_LINE: #@ line_hash["line"]
       VERSION_LINE_TYPE: #@ "nginx" if dep_name == "nginx" and bp_name == "nginx" else get_version_line_type(getattr(bp, "lines", None))
       REMOVAL_STRATEGY: #@ getattr(bp, "removal_strategy", "remove_all")
+      SKIP_STACKS: #@ " ".join(getattr(bp, "skip_stacks", []))
       DEPRECATION_DATE: #@ getattr(line_hash, "deprecation_date", None)
       DEPRECATION_LINK: #@ getattr(line_hash, "link", None)
       DEPRECATION_MATCH: #@ getattr(line_hash, "match", None)

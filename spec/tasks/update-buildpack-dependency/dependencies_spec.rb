@@ -41,6 +41,74 @@ RSpec.describe Dependencies do
     Dependencies.new(new_dep, line, removal_strategy, existing_deps, latest_released).switch
   end
 
+  describe 'skipped stacks' do
+    let(:old_dep) { make_dep(name: 'openjdk', version: '21.0.1', stacks: %w[cflinuxfs4 cflinuxfs5]) }
+    let(:new_dep) { make_dep(name: 'openjdk', version: '21.0.2', stacks: ['cflinuxfs5'], uri_suffix: 'any-stack') }
+
+    def restricted_switch(incoming, existing, strategy: nil, released: [])
+      Dependencies.new(incoming, 'major', strategy, existing, released, skip_stacks: ['cflinuxfs4']).switch
+    end
+
+    # The shared Java artifact is built on cflinuxfs4, so its URI names that stack, not "any-stack".
+    context 'when the shared artifact URI names cflinuxfs4 instead of any-stack' do
+      let(:shared_old) { make_dep(name: 'openjdk', version: '21.0.1', stacks: %w[cflinuxfs4 cflinuxfs5], uri_suffix: 'cflinuxfs4') }
+      let(:shared_new) { make_dep(name: 'openjdk', version: '21.0.2', stacks: ['cflinuxfs5'], uri_suffix: 'cflinuxfs4') }
+
+      it 'replaces the old cflinuxfs5 version and keeps the old cflinuxfs4 entry' do
+        expect(restricted_switch(shared_new, [shared_old], strategy: 'remove_all')).to contain_exactly(
+          shared_old.merge('cf_stacks' => ['cflinuxfs4']), shared_new
+        )
+      end
+
+      it 'ignores an older incoming version that exists only on the frozen stack' do
+        frozen = shared_old.merge('cf_stacks' => ['cflinuxfs4'])
+        advanced = shared_new
+        existing = [frozen, advanced]
+
+        expect(restricted_switch(shared_old.merge('cf_stacks' => ['cflinuxfs5']), existing, strategy: 'remove_all')).to eq(existing)
+      end
+
+      it 'rebuilds the same version without overlapping entries' do
+        rebuilt = shared_new.merge('version' => '21.0.1', 'sha256' => 'rebuilt-sha')
+        result = restricted_switch(rebuilt, [shared_old], strategy: 'remove_all')
+
+        expect(result).to contain_exactly(shared_old.merge('cf_stacks' => ['cflinuxfs4']), rebuilt)
+        expect(result.flat_map { |d| d['cf_stacks'] }).to contain_exactly('cflinuxfs4', 'cflinuxfs5')
+      end
+    end
+
+    it 'keeps skipped stacks unchanged when rebuilding the same version' do
+      rebuilt = new_dep.merge('version' => '21.0.1')
+      expect(restricted_switch(rebuilt, [old_dep])).to contain_exactly(
+        old_dep.merge('cf_stacks' => ['cflinuxfs4']), rebuilt
+      )
+    end
+
+    it 'does not compare against an entry exclusively for a skipped stack' do
+      skipped = old_dep.merge('version' => '21.0.3', 'cf_stacks' => ['cflinuxfs4'])
+      expect(restricted_switch(new_dep, [skipped])).to contain_exactly(skipped, new_dep)
+    end
+
+    it 'does not restore skipped stacks from a released entry' do
+      result = restricted_switch(new_dep, [old_dep], strategy: 'keep_latest_released', released: [old_dep])
+      expect(result).to contain_exactly(
+        old_dep.merge('cf_stacks' => ['cflinuxfs4']),
+        old_dep.merge('cf_stacks' => ['cflinuxfs5']),
+        new_dep
+      )
+    end
+
+    it 'does not change existing dependencies when the candidate is older' do
+      older = new_dep.merge('version' => '21.0.0')
+      expect(restricted_switch(older, [old_dep])).to eq([old_dep])
+    end
+
+    it 'fails explicitly when existing stack metadata is missing' do
+      expect { restricted_switch(new_dep, [old_dep.merge('cf_stacks' => nil)]) }
+        .to raise_error(/existing dependency has no cf_stacks/)
+    end
+  end
+
   # ---------------------------------------------------------------------------
   # ANY-STACK dependencies (yarn, bundler, rubygems, bower, dotnet-*, …)
   # ---------------------------------------------------------------------------
