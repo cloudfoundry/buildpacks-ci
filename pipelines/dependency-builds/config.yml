@@ -93,6 +93,17 @@ dependencies:
       - 'tag_regex: ^v(\d+\.\d+\.\d+)\.RELEASE$'
     any_stack: true
     versions_to_keep: 2
+  memory-calculator:
+    buildpacks:
+      java:
+        lines:
+          - line: 4.X.X
+    source_type: github_releases
+    source_params:
+      - 'repo: cloudfoundry/java-buildpack-memory-calculator'
+      - 'glob: memory-calculator-*-linux-amd64.tgz'
+    any_stack: true
+    versions_to_keep: 1
   composer:
     buildpacks:
       php:
@@ -801,3 +812,4 @@ skip_deprecation_check:
   - container-security-provider  #! doesn't publish EOL schedule
   - cf-metrics-exporter  #! doesn't publish EOL schedule
   - metric-writer  #! doesn't publish EOL schedule
+  - memory-calculator  #! doesn't publish EOL schedule

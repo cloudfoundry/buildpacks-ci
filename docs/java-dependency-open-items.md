@@ -17,7 +17,7 @@ Of the 47 dependency entries in the java-buildpack `manifest.yml`, 35 are on
 
 | Dependency | Version | Hosted on | Proposed action |
 |---|---|---|---|
-| `memory-calculator` | 4.2.0 | `java-buildpack.cloudfoundry.org` | Add watcher (see todo) |
+| `memory-calculator` | 4.2.0 | `java-buildpack.cloudfoundry.org` | Has a `config.yml` entry (GitHub releases); the next update moves it to our bucket |
 | `memory-calculator` | 4.1.0 | GitHub releases | Remove (unused) |
 | `tomcat-access-logging-support` | 3.4.0 | `java-buildpack.cloudfoundry.org` | Add watcher (see todo) |
 | `tomcat-lifecycle-support` | 3.4.0 | `java-buildpack.cloudfoundry.org` | Add watcher (see todo) |
@@ -32,9 +32,9 @@ Of the 47 dependency entries in the java-buildpack `manifest.yml`, 35 are on
 
 ## To be watched (CF-owned) and manual
 
-The CF-owned ones should be watched, so new releases reach the buildpack (e.g. a new
-`memory-calculator` release is planned). They have no GitHub releases to watch yet, so their
-source repos need to publish them first (see the todo list below).
+The CF-owned ones should be watched, so new releases reach the buildpack. Most have no
+GitHub releases to watch yet, so their source repos need to publish them first (see the todo
+list below).
 
 `java-buildpack.cloudfoundry.org` is the repository of the Ruby java-buildpack (an
 `index.yml` per dependency, filled by the Concourse `ci/` scripts of each source repo). The
@@ -44,8 +44,10 @@ manifest change only. Keep the files on `java-buildpack.cloudfoundry.org`: older
 releases still point at them.
 
 - **`memory-calculator` 4.2.0**: the version the buildpack uses (see below).
-  `cloudfoundry/java-buildpack-memory-calculator` has a `v4.2.0` tag, but its latest GitHub
-  release is 4.1.0 (2020). A new release is planned; first in line.
+  `cloudfoundry/java-buildpack-memory-calculator` publishes GitHub releases again from
+  `v4.3.0` (a `-linux-amd64` and a `-linux-arm64` archive plus `SHA256SUMS`). The `config.yml`
+  entry watches those releases and takes only the amd64 archive; the binary is static, so one
+  build serves both stacks. The next update replaces the 4.2.0 entry.
 - **`tomcat-*-support` 3.4.0**: CF Tomcat support libraries, unchanged for years.
 - **`jvmkill` 1.17.0**: native agent, last release 2022, feature-complete.
 - **`luna-security-provider` 7.4.0**: proprietary Thales Luna HSM client, not publicly
@@ -113,7 +115,7 @@ bucket.
 | `cloudfoundry/java-buildpack-client-certificate-mapper` | `client-certificate-mapper` | 2026 | ✅ Done (v2.1.0) |
 | `cloudfoundry/java-buildpack-security-provider` | `container-security-provider` | 2026 | ✅ Done (v1.21.0) |
 | `cloudfoundry/java-buildpack-support` | `tomcat-access-logging-support`, `tomcat-lifecycle-support`, `tomcat-logging-support` | 2023, no GitHub releases | Todo |
-| `cloudfoundry/java-buildpack-memory-calculator` (Go) | `memory-calculator` | 2024, tag `v4.2.0` without a release | Todo |
+| `cloudfoundry/java-buildpack-memory-calculator` (Go) | `memory-calculator` | 2026 | ✅ Done (v4.3.0) |
 | `cloudfoundry/jvmkill` (Rust, native) | `jvmkill` | 2022 | Todo; needs a native build per stack |
 
 `cloudfoundry/java-buildpack-auto-reconfiguration` and
